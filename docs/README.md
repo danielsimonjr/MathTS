@@ -10,17 +10,18 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ## 1. Getting Started ✅
 
-| Doc                                            | What it covers                               |
-| ---------------------------------------------- | -------------------------------------------- |
-| [getting-started.md](getting-started.md)       | Install, first computations, instance setup. |
-| [advanced.md](advanced.md)                     | Advanced usage patterns.                     |
-| [backends.md](backends.md)                     | JS / WASM / WebGPU backend selection.        |
-| [performance.md](performance.md)               | Current performance guidance and numbers.    |
-| [../README.md](../README.md)                   | Repo top-level overview.                     |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md)       | How to contribute.                           |
-| [../SUPPORT.md](../SUPPORT.md)                 | Getting help.                                |
-| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community standards.                         |
-| [../SECURITY.md](../SECURITY.md)               | Security policy / reporting.                 |
+| Doc                                            | What it covers                                                    |
+| ---------------------------------------------- | ----------------------------------------------------------------- |
+| [getting-started.md](getting-started.md)       | Install, first computations, instance setup.                      |
+| [advanced.md](advanced.md)                     | Advanced usage patterns.                                          |
+| [backends.md](backends.md)                     | JS / WASM / WebGPU backend selection.                             |
+| [performance.md](performance.md)               | Current performance guidance and numbers.                         |
+| [../README.md](../README.md)                   | Repo top-level overview.                                          |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md)       | How to contribute.                                                |
+| [../SUPPORT.md](../SUPPORT.md)                 | Getting help.                                                     |
+| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community standards.                                              |
+| [../SECURITY.md](../SECURITY.md)               | Security policy / reporting.                                      |
+| [../examples/README.md](../examples/README.md) | Runnable examples, including the 2026-11 scientific toolkit tour. |
 
 ## 2. Architecture & Reference (current) ✅
 
@@ -47,13 +48,14 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ### Reference (API symbols)
 
-| Doc                                                      | What it covers                                                |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| [reference/index.md](reference/index.md)                 | Reference landing page.                                       |
-| [reference/functions.md](reference/functions.md)         | Function reference (HTML mirror: `reference/functions.html`). |
-| [reference/classes.md](reference/classes.md)             | Class reference.                                              |
-| [reference/constants.md](reference/constants.md)         | Constants reference.                                          |
-| [reference/scalar-search.md](reference/scalar-search.md) | ScalarNode toolkit, Pareto scoring, search, and non-goals.    |
+| Doc                                                      | What it covers                                                                                                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [reference/index.md](reference/index.md)                 | Reference landing page.                                                                                                                                                        |
+| [reference/functions.md](reference/functions.md)         | Function reference (HTML mirror: `reference/functions.html`).                                                                                                                  |
+| [landing/index.html](landing/index.html)                 | Static function-reference site (`bun run docs:landing` → `docs/landing/`), published at <https://danielsimonjr.com/MathTS/>. One page per function under `landing/functions/`. |
+| [reference/classes.md](reference/classes.md)             | Class reference.                                                                                                                                                               |
+| [reference/constants.md](reference/constants.md)         | Constants reference.                                                                                                                                                           |
+| [reference/scalar-search.md](reference/scalar-search.md) | ScalarNode toolkit, Pareto scoring, search, and non-goals.                                                                                                                     |
 
 ## 3. API (per package) ✅
 
@@ -154,24 +156,27 @@ items they still track.
 
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                                                                    |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                            |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                      |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                             |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                   |
-| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                   |
-| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                        |
-| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                            |
-| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                           |
-| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                |
-| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                          |
-| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                |
-| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                  |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                               |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                   |
-| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues. |
-| [audit/2026-11-04-optimization-completion-audit.md](audit/2026-11-04-optimization-completion-audit.md)   | Optimization and completion audit of every package (2026-11-04), with the implemented fixes.      |
+| Doc                                                                                                      | What it covers                                                                                                  |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                                          |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                                    |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                                           |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                                 |
+| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                                 |
+| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                                      |
+| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                                          |
+| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                                         |
+| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                              |
+| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                                        |
+| [roadmap/GAP_ANALYSIS_2026-11-04.md](roadmap/GAP_ANALYSIS_2026-11-04.md)                                 | 2026-11-04 SciPy/NumPy/SymPy/mathjs/MATLAB gap analysis — all 32 items shipped in `functions@0.72.0` (PR #590). |
+| [roadmap/CLONES_REMAINING.md](roadmap/CLONES_REMAINING.md)                                               | Remaining clone pairs after Sprint 2R.                                                                          |
+| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                              |
+| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                                |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                                             |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                                 |
+| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues.               |
+| [audit/2026-10-22-issues-final.md](audit/2026-10-22-issues-final.md)                                     | Final issue texts for the 2026-10-22 audit (I-1 … I-18).                                                        |
+| [audit/2026-11-04-optimization-completion-audit.md](audit/2026-11-04-optimization-completion-audit.md)   | Optimization and completion audit of every package (2026-11-04), with the implemented fixes.                    |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
@@ -195,6 +200,11 @@ items they still track.
 | Doc                                                                                        | Status                                                                   |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | [plans/DEPENDENCY_REDUCTION_PLAN.md](plans/DEPENDENCY_REDUCTION_PLAN.md)                   | ✅ Active. DR-1…DR-13, third-party dependency reduction. Deletes itself. |
+| [plans/CLONES_PHASE_6_PLAN.md](plans/CLONES_PHASE_6_PLAN.md)                               | Planning contract: Phase 6 clone pairs (merge or keep).                  |
+| [plans/CLONES_REFACTOR_PLAN.md](plans/CLONES_REFACTOR_PLAN.md)                             | Planning contract: remaining clone pairs (merge or keep).                |
+| [plans/COMPLETION_PLAN.md](plans/COMPLETION_PLAN.md)                                       | Planning contract: completion of B9 and the residual units.              |
+| [plans/CORE_SPRINT_PLAN.md](plans/CORE_SPRINT_PLAN.md)                                     | Planning contract: core sprint (speed, stability, security).             |
+| [plans/PHASE_7_PERFORMANCE_PLAN.md](plans/PHASE_7_PERFORMANCE_PLAN.md)                     | Planning contract: Phase 7 runtime performance.                          |
 | [plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md](plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md) | ✅ SR-1…SR-17 merged. The file stays until a later cleanup.              |
 
 Historical snapshots:
@@ -241,7 +251,7 @@ Completed refactoring reports were moved to [`archive/refactoring/`](archive/ref
 Agent-authored execution plans and design specs (2026-06/07). Kept for traceability;
 most work is landed or superseded by `docs/roadmap/` and package changelogs.
 
-### Plans (`superpowers/plans/`, 19 files)
+### Plans (`superpowers/plans/`, 20 files)
 
 | Doc                                                                                                                                                        | Topic                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
@@ -264,25 +274,27 @@ most work is landed or superseded by `docs/roadmap/` and package changelogs.
 | [superpowers/plans/2026-07-20-factorization-layer1-univariate.md](superpowers/plans/2026-07-20-factorization-layer1-univariate.md)                         | Factorization layer 1          |
 | [superpowers/plans/2026-07-20-factorization-layer2-multivariate-kronecker.md](superpowers/plans/2026-07-20-factorization-layer2-multivariate-kronecker.md) | Factorization layer 2          |
 | [superpowers/plans/2026-07-20-risch-layer1-rational-integration.md](superpowers/plans/2026-07-20-risch-layer1-rational-integration.md)                     | Risch layer 1                  |
+| [superpowers/plans/2026-11-05-upt-integration-gaps.md](superpowers/plans/2026-11-05-upt-integration-gaps.md)                                               | UPT integration gaps           |
 
-### Specs (`superpowers/specs/`, 14 files)
+### Specs (`superpowers/specs/`, 15 files)
 
-| Doc                                                                                                                                      | Topic                        |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| [superpowers/specs/2026-06-27-workbook-cell-mutation-design.md](superpowers/specs/2026-06-27-workbook-cell-mutation-design.md)           | Workbook cell mutation       |
-| [superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md](superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md)   | Workbook GUI read contract   |
-| [superpowers/specs/2026-06-27-workbook-headless-v1-design.md](superpowers/specs/2026-06-27-workbook-headless-v1-design.md)               | Workbook headless v1         |
-| [superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md](superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md)           | Workbook CLI round-trip      |
-| [superpowers/specs/2026-06-27-workbook-serve-design.md](superpowers/specs/2026-06-27-workbook-serve-design.md)                           | Workbook serve               |
-| [superpowers/specs/2026-06-28-workbook-render-export-design.md](superpowers/specs/2026-06-28-workbook-render-export-design.md)           | Workbook render / export     |
-| [superpowers/specs/2026-07-07-plotting-design.md](superpowers/specs/2026-07-07-plotting-design.md)                                       | Plotting design              |
-| [superpowers/specs/2026-07-08-latex-output-design.md](superpowers/specs/2026-07-08-latex-output-design.md)                               | LaTeX output                 |
-| [superpowers/specs/2026-07-09-export-formats-expansion-design.md](superpowers/specs/2026-07-09-export-formats-expansion-design.md)       | Export formats design        |
-| [superpowers/specs/2026-07-10-webgpu-acceleration-design.md](superpowers/specs/2026-07-10-webgpu-acceleration-design.md)                 | WebGPU acceleration (phased) |
-| [superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md](superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md)                   | WebGPU Spec 1b flag / matmul |
-| [superpowers/specs/2026-07-20-multivariate-factorization-design.md](superpowers/specs/2026-07-20-multivariate-factorization-design.md)   | Multivariate factorization   |
-| [superpowers/specs/2026-07-20-risch-integration-design.md](superpowers/specs/2026-07-20-risch-integration-design.md)                     | Risch integration            |
-| [superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md](superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md) | Risch layer 2 quadratic surd |
+| Doc                                                                                                                                      | Topic                         |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [superpowers/specs/2026-06-27-workbook-cell-mutation-design.md](superpowers/specs/2026-06-27-workbook-cell-mutation-design.md)           | Workbook cell mutation        |
+| [superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md](superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md)   | Workbook GUI read contract    |
+| [superpowers/specs/2026-06-27-workbook-headless-v1-design.md](superpowers/specs/2026-06-27-workbook-headless-v1-design.md)               | Workbook headless v1          |
+| [superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md](superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md)           | Workbook CLI round-trip       |
+| [superpowers/specs/2026-06-27-workbook-serve-design.md](superpowers/specs/2026-06-27-workbook-serve-design.md)                           | Workbook serve                |
+| [superpowers/specs/2026-06-28-workbook-render-export-design.md](superpowers/specs/2026-06-28-workbook-render-export-design.md)           | Workbook render / export      |
+| [superpowers/specs/2026-07-07-plotting-design.md](superpowers/specs/2026-07-07-plotting-design.md)                                       | Plotting design               |
+| [superpowers/specs/2026-07-08-latex-output-design.md](superpowers/specs/2026-07-08-latex-output-design.md)                               | LaTeX output                  |
+| [superpowers/specs/2026-07-09-export-formats-expansion-design.md](superpowers/specs/2026-07-09-export-formats-expansion-design.md)       | Export formats design         |
+| [superpowers/specs/2026-07-10-webgpu-acceleration-design.md](superpowers/specs/2026-07-10-webgpu-acceleration-design.md)                 | WebGPU acceleration (phased)  |
+| [superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md](superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md)                   | WebGPU Spec 1b flag / matmul  |
+| [superpowers/specs/2026-07-20-multivariate-factorization-design.md](superpowers/specs/2026-07-20-multivariate-factorization-design.md)   | Multivariate factorization    |
+| [superpowers/specs/2026-07-20-risch-integration-design.md](superpowers/specs/2026-07-20-risch-integration-design.md)                     | Risch integration             |
+| [superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md](superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md) | Risch layer 2 quadratic surd  |
+| [superpowers/specs/2026-11-05-upt-integration-gaps-design.md](superpowers/specs/2026-11-05-upt-integration-gaps-design.md)               | UPT integration gaps (design) |
 
 ## 15. Archive (historical) 🗄️
 

@@ -378,9 +378,43 @@ besselJ0(0); // 1.0
 besselJ1(2.4048); // ~0 (first zero of J0 is a zero crossing for J1 derivative)
 ```
 
+Since `functions@0.72.0` the special-function layer also covers inverse and scaled error
+functions, exponential integrals, spherical Bessel/Hankel functions, angular-momentum coupling
+coefficients and the Hurwitz zeta family:
+
+```typescript
+import {
+  erfinv,
+  erfcx,
+  dawson,
+  expIntegralE1,
+  sphericalBesselJ,
+  besselJZeros,
+  besselJ,
+  wigner3j,
+  clebschGordan,
+  sphericalHarmonic,
+  hurwitzZeta,
+  dirichletEta,
+} from '@danielsimonjr/mathts-functions';
+
+erfinv(0.5); // 0.47693628
+erfcx(10); // 0.05614099  (≈ 1/(10·sqrt(pi)); no overflow for large x)
+dawson(1); // 0.53807951
+expIntegralE1(1); // 0.21938393
+sphericalBesselJ(0, Math.PI); // 0  (sin(pi)/pi)
+besselJZeros(0, 3); // [2.404826, 5.520078, 8.653728]
+besselJ(0.5, 1); // 0.67139671  (real order ν: sqrt(2/pi)·sin(1))
+wigner3j(1, 1, 0, 0, 0, 0); // -0.57735027  (= -1/sqrt(3))
+clebschGordan(0.5, 0.5, 0.5, -0.5, 0, 0); // 0.70710678
+sphericalHarmonic(1, 0, 0, 0).toString(); // '0.4886025119029199'  (Complex; = sqrt(3/(4pi)))
+hurwitzZeta(2, 1); // 1.64493407  (= pi^2/6)
+dirichletEta(1); // 0.69314718  (= ln 2)
+```
+
 ## Numerical Integration
 
-For integrating functions that have no closed-form antiderivative, MathTS provides four quadrature methods:
+For integrating functions that have no closed-form antiderivative, MathTS provides the four classic quadrature methods below plus, since `functions@0.72.0`, tanh-sinh, Clenshaw–Curtis, Gauss–Hermite/Laguerre/Jacobi rules and double/triple integrals:
 
 ```typescript
 import { trapz, simpson, gaussQuad, romberg } from '@danielsimonjr/mathts-functions';
@@ -410,6 +444,31 @@ romberg(f, -5, 5, 1e-10); // ~1.7725 with high precision
 | `simpson`   | Smooth analytic functions               | n must be even; faster than trapz for same accuracy |
 | `gaussQuad` | Very smooth functions on fixed interval | Exact for polynomials up to degree 2n-1             |
 | `romberg`   | High-accuracy requirements              | Adaptive; converges until `tol` is met              |
+
+### Added in 0.72.0: tanh-sinh, Clenshaw–Curtis, multiple integrals
+
+```typescript
+import {
+  tanhSinh,
+  clenshawCurtis,
+  dblquad,
+  gaussHermiteIntegrate,
+} from '@danielsimonjr/mathts-functions';
+
+const f = (x: number) => Math.exp(-x * x);
+
+tanhSinh(f, -5, 5).value; // 1.7724538509  (sqrt(pi); `.error` holds the estimate)
+clenshawCurtis(f, -5, 5, 64); // 1.7724538509
+dblquad((y, x) => x * y, 0, 1, 0, 1).value; // 0.25  (inner limits may be functions of x)
+gaussHermiteIntegrate((x) => x * x, 10); // 0.8862269255  (∫ x² e^{-x²} dx = sqrt(pi)/2)
+```
+
+| Method                  | Best For                                          | Notes                                                |
+| ----------------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| `tanhSinh`              | Endpoint singularities, very high accuracy        | Double-exponential rule; returns `{ value, error }`  |
+| `clenshawCurtis`        | Smooth functions, cheap nested refinement         | `n`-point Chebyshev rule                             |
+| `dblquad` / `tplquad`   | Rectangular or variable-limit 2-D / 3-D integrals | Inner limits are numbers or functions                |
+| `gaussHermiteIntegrate` | Integrals against `e^{-x²}` on (−∞, ∞)            | Also `gaussLaguerreIntegrate` for `e^{-x}` on (0, ∞) |
 
 ## Interpolation
 
@@ -510,6 +569,140 @@ solve('x^2 - 5*x + 6', 'x'); // [2, 3]
 
 // Laplace transform
 laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
+```
+
+## Global Optimisation and Scalar Solvers
+
+`differentialEvolution` and `simulatedAnnealing` are seeded, derivative-free global optimisers;
+`minimizeConstrained` is an augmented-Lagrangian wrapper; `ridders` and `fixedPoint` are scalar
+solvers; `finiteDifferenceCoefficients` returns Fornberg stencil weights.
+
+```typescript
+import {
+  differentialEvolution,
+  ridders,
+  fixedPoint,
+  finiteDifferenceCoefficients,
+} from '@danielsimonjr/mathts-functions';
+
+const rosenbrock = ([a, b]: number[]) => (1 - a) ** 2 + 100 * (b - a * a) ** 2;
+const de = differentialEvolution(
+  rosenbrock,
+  [
+    [-5, 5],
+    [-5, 5],
+  ],
+  { seed: 1 }
+);
+de.x; // [1, 1]  (to 4 decimals)
+de.fx; // 0  (to 8 decimals)
+de.converged; // true
+
+ridders((x) => Math.cos(x) - x, 0, 1); // 0.7390851332
+fixedPoint(Math.cos, 1); // 0.7390851332
+finiteDifferenceCoefficients(2, [-1, 0, 1]); // [1, -2, 1]  (central second derivative)
+```
+
+## Number Theory and Integer Matrices
+
+```typescript
+import {
+  modPow,
+  sqrtMod,
+  legendreSymbol,
+  isCarmichael,
+  zeckendorf,
+  pellSolve,
+  linearDiophantine,
+  frobeniusNumber,
+  smithNormalForm,
+  lll,
+  realRoots,
+} from '@danielsimonjr/mathts-functions';
+
+modPow(2, 100, 1_000_000_007); // 976371285n  (always returns bigint)
+sqrtMod(2, 7); // 3  (3² ≡ 2 mod 7); null when no square root exists
+legendreSymbol(3, 7); // -1
+isCarmichael(561); // true
+zeckendorf(100); // [89, 8, 3]  (non-consecutive Fibonacci representation)
+pellSolve(61); // { x: 1766319049n, y: 226153980n }  (fundamental solution of x² − 61y² = 1)
+linearDiophantine(3, 5, 1); // { x: 2, y: -1, stepX: 5, stepY: -3 }
+frobeniusNumber([6, 9, 20]); // 43  (the McNugget number)
+smithNormalForm([
+  [2, 4, 4],
+  [-6, 6, 12],
+  [10, -4, -16],
+]).invariants; // [2n, 6n, 12n]
+lll([
+  [1, 1, 1],
+  [-1, 0, 2],
+  [3, 5, 6],
+]); // [[0, 1, 0], [1, 0, 1], [-1, 0, 2]]
+realRoots([-6, 11, -6, 1]); // ≈ [1, 2, 3]  (ascending coefficients: −6 + 11x − 6x² + x³; Sturm isolation)
+```
+
+## Signal Systems, Special Matrices and Geometry
+
+```typescript
+import {
+  kaiserWindow,
+  tf2ss,
+  dtw,
+  hilbertMatrix,
+  hadamardMatrix,
+  subspaceAngles,
+  orient2D,
+  polygonClip,
+  douglasPeucker,
+  hausdorffDistance,
+} from '@danielsimonjr/mathts-functions';
+
+kaiserWindow(5, 2); // [0.438676, 0.834761, 1, 0.834761, 0.438676]
+tf2ss([1], [1, 3, 2]); // { A: [[-3, -2], [1, 0]], B: [[1], [0]], C: [[0, 1]], D: [[0]] }
+dtw([1, 2, 3], [1, 2, 2, 3]); // { distance: 0, path: [[0,0],[1,1],[1,2],[2,3]] }
+hilbertMatrix(3)[2]; // [0.3333333333333333, 0.25, 0.2]
+hadamardMatrix(4)[1]; // [1, -1, 1, -1]
+subspaceAngles([[1], [0]], [[0], [1]]); // [1.57079633]  (pi/2)
+orient2D([0, 0], [1, 0], [0, 1]); // 1  (counter-clockwise)
+polygonClip(
+  [
+    [0, 0],
+    [2, 0],
+    [2, 2],
+    [0, 2],
+  ],
+  [
+    [1, 1],
+    [3, 1],
+    [3, 3],
+    [1, 3],
+  ]
+); // [[1,1],[2,1],[2,2],[1,2]]
+douglasPeucker(
+  [
+    [0, 0],
+    [1, 0.1],
+    [2, -0.1],
+    [3, 5],
+    [4, 6],
+    [5, 7],
+  ],
+  0.5
+); // [[0,0],[2,-0.1],[3,5],[5,7]]
+hausdorffDistance(
+  [
+    [0, 0],
+    [2, 0],
+    [2, 2],
+    [0, 2],
+  ],
+  [
+    [1, 1],
+    [3, 1],
+    [3, 3],
+    [1, 3],
+  ]
+); // 1.41421356
 ```
 
 ## Graph Theory
@@ -638,6 +831,6 @@ const pca = principalComponentAnalysis(data, 2); // reduce to 2 components
 ## See Also
 
 - [API Reference](./api/README.md) - Complete API documentation
-- [Function Reference](./reference/functions.md) - All ~492 math functions
+- [Function Reference](./reference/functions.md) - All 1,320 exports (browsable at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/))
 - [Getting Started](./getting-started.md) - Basic usage guide
 - [Migration Guide](./migration/guide.md) - Migrating from mathjs

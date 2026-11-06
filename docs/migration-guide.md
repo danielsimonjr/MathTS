@@ -163,6 +163,18 @@ stays on in-process JS: `wasmPolicyAllows` has no bitwise kernels (see
 `functions/src/wasm/policy.ts`), and `ComputePool` bitwise ops are `'never'`.
 The `WASM_BITWISE_THRESHOLD` constant in the bridge is not wired through policy.
 
+### Beyond mathjs: the scientific layer
+
+The typed package is a superset of mathjs. `functions@0.72.0` closed a verified gap analysis
+against SciPy/NumPy/SymPy/MATLAB (`docs/roadmap/GAP_ANALYSIS_2026-11-04.md`): 1,320 exports
+in 27 categories, including weighted/robust statistics and effect sizes, extra distributions and
+nonparametric tests, `erfinv`/`erfcx`/`dawson`, spherical Bessel and Wigner/Clebsch–Gordan
+coefficients, tanh-sinh and Clenshaw–Curtis quadrature, `dblquad`/`tplquad`, differential
+evolution and simulated annealing, modular arithmetic and Diophantine solvers, HNF/SNF/LLL,
+Sturm real roots, Lomb–Scargle, `tf2ss`/`cont2discrete`, DTW, special matrices and
+computational-geometry predicates. None of these exist in mathjs; browse them at
+<https://danielsimonjr.com/MathTS/> or in [`docs/reference/functions.md`](./reference/functions.md).
+
 ---
 
 ## Breaking changes from mathjs v15
@@ -238,13 +250,16 @@ explicitly. Be aware they compute in 32-bit float (WGSL has no f64).
 
 ## Not yet ported
 
-The following mathjs v15 categories have no MathTS typed-function equivalent
-yet. The compat shim covers them via the factory activation chain:
+Everything mathjs v15 exposes now has a typed-function equivalent on
+`@danielsimonjr/mathts-functions`, including the two categories that were
+compat-only in earlier releases:
 
-- **Units** (`math.unit`, `math.to`) — no dedicated typed layer; available
-  through the compat factory scope.
-- **Chaining API** (`math.chain(3).add(4).done()`) — not exposed on the
-  typed layer; available via compat.
+- **Units** — `unit`, `to`, `toBest`, `createUnit`, `splitUnit` are typed exports
+  (`import { unit, to } from '@danielsimonjr/mathts-functions'`); the `Unit` class
+  lives in `@danielsimonjr/mathts-core` (also re-exported by `@danielsimonjr/mathts-units`).
+- **Chaining API** — `chain(3).add(4).done()` is a typed export (`chain`).
+
+The compat shim still covers both through `math.unit` / `math.chain`.
 
 Symbolic differentiation is on the typed surface: `import { derivative } from
 '@danielsimonjr/mathts-functions'` (`derivative('x^2', 'x').toString()` →
@@ -359,3 +374,4 @@ document the full API.
   typed-function export reference with acceleration column
 - [`docs/migration/api-diff.md`](./migration/api-diff.md) — API-level diff
   table (mathjs name vs MathTS equivalent)
+- [Function reference site](https://danielsimonjr.com/MathTS/) — searchable per-function pages generated from `docs/reference/functions.md`

@@ -148,34 +148,37 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides **1,090** exports (see the generated export index in [reference/functions.md](reference/functions.md)) across 17 categories:
+`@danielsimonjr/mathts-functions` provides **1,320** exports (see the generated export index in [reference/functions.md](reference/functions.md), or browse them at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)) across 27 categories. A representative subset:
 
-| Category                      | Examples                                                                                   |
-| ----------------------------- | ------------------------------------------------------------------------------------------ |
-| **Arithmetic**                | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `log`, `mod`, `gcd`                |
-| **Trigonometry**              | `sin`, `cos`, `tan`, `atan2`, `sinh`, `cosh`, `hypot`, `toRadians`                         |
-| **Statistics**                | `parallelStatMean`, `parallelStatStd`, `parallelStatCorr`, `parallelStatQuantile`          |
-| **Signal Processing**         | `parallelFFT`, `parallelIFFT`, `parallelConv`, `crossCorrelation`, `unwrapPhase`, `stft`   |
-| **Special Functions**         | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`, Legendre, Chebyshev, zeta       |
-| **Probability Distributions** | `normalPDF`, `normalCDF`, `poissonPMF`, `binomialPMF`, `entropy`, `jsDivergence`           |
-| **Numerical Integration**     | `trapz`, `simpson`, `gaussQuad`, `romberg`                                                 |
-| **Interpolation**             | `linearInterp`, `cubicSpline`, `pchipInterp`, `lagrangeInterp`, `polyFit`                  |
-| **Combinatorics**             | `fibonacci`, `lucas`, `doubleFactorial`, `subfactorial`, `partition`, Stirling numbers     |
-| **Geometry**                  | `angle2D`, `cross3D`, `convexHull`, `distance2D`, `distanceND`, `intersectLines2D`, Bezier |
-| **Statistics Selection**      | `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`                                    |
-| **Algebra**                   | `polyval`, `polyadd`, `polymul`, `factor`, `expand`, `substitute`, `discriminant`          |
-| **CAS**                       | `integrate`, `limit`, `partialDerivative`, `jacobian`, `laplace`, `taylor`, `solve`        |
-| **Graph Theory**              | `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `topologicalSort`            |
-| **Distribution Objects**      | `normalDist`, `tDist`, `gammaDist`, `poissonDist` (objects with pdf/cdf/sample)            |
-| **Hypothesis Tests**          | `studentTTest`, `chiSquareTest`, `anova`, `mannWhitneyTest`, `shapiroWilkTest`             |
-| **Numerical Methods**         | `findRoot`, `minimize`, `leastSquares`, `rbfInterpolate`, `bezierCurve`, `loess`           |
+| Category                      | Examples                                                                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Arithmetic**                | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `log`, `mod`, `gcd`                                                                                             |
+| **Trigonometry**              | `sin`, `cos`, `tan`, `atan2`, `sinh`, `cosh`, `hypot`, `toRadians`                                                                                                      |
+| **Statistics**                | `mean`, `median`, `weightedMean`, `weightedMedian`, `theilSen`, `cohensD`, `hedgesG`, `parallelStatCorr`                                                                |
+| **Signal Processing**         | `parallelFFT`, `parallelConv`, `stft`, `lombScargle`, `kaiserWindow`, `getWindow`, `chirp`, `tf2ss`, `cont2discrete`, `dtw`                                             |
+| **Special Functions**         | `erfc`, `erfinv`, `erfcx`, `dawson`, `gammainc`, `digamma`, `besselJ` (real order), `sphericalBesselJ`, `wigner3j`, `clebschGordan`, `sphericalHarmonic`, `hurwitzZeta` |
+| **Probability Distributions** | `normalPDF`, `normalCDF`, `poissonPMF`, `skellamPMF`, `zipfPMF`, `owensT`, `entropy`, `jsDivergence`                                                                    |
+| **Numerical Integration**     | `trapz`, `simpson`, `gaussQuad`, `romberg`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `gaussHermiteIntegrate`                                                 |
+| **Interpolation**             | `linearInterp`, `cubicSpline`, `pchipInterp`, `lagrangeInterp`, `polyFit`                                                                                               |
+| **Combinatorics**             | `fibonacci`, `lucas`, `doubleFactorial`, `subfactorial`, `partitions`, Stirling numbers                                                                                 |
+| **Geometry**                  | `convexHull`, `orient2D`, `inCircle`, `polygonClip`, `douglasPeucker`, `hausdorffDistance`, `catmullRom`, `arcLength`                                                   |
+| **Statistics Selection**      | `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`                                                                                                                 |
+| **Algebra**                   | `polyval`, `polyadd`, `polymul`, `factor`, `expand`, `substitute`, `discriminant`                                                                                       |
+| **CAS**                       | `integrate`, `limit`, `partialDerivative`, `jacobian`, `laplace`, `taylor`, `solve`                                                                                     |
+| **Graph Theory**              | `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `topologicalSort`                                                                                         |
+| **Distribution Objects**      | `normalDist`, `tDist`, `gammaDist`, `poissonDist` (objects with pdf/cdf/sample)                                                                                         |
+| **Hypothesis Tests**          | `studentTTest`, `chiSquareTest`, `anova`, `mannWhitneyTest`, `shapiroWilkTest`, `signTest`, `runsTest`, `gTest`                                                         |
+| **Numerical Methods**         | `findRoot`, `ridders`, `fixedPoint`, `minimize`, `minimizeConstrained`, `differentialEvolution`, `simulatedAnnealing`, `finiteDifferenceCoefficients`                   |
+| **Number Theory**             | `modPow`, `sqrtMod`, `legendreSymbol`, `isCarmichael`, `zeckendorf`, `pellSolve`, `frobeniusNumber`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `realRoots`         |
+| **Linear Algebra**            | `det`, `inv`, `eigs`, `qrPivoted`, `lq`, `condest`, `eigvals`, `matrixPinv`, `hilbertMatrix`, `hadamardMatrix`, `subspaceAngles`, `signm`, `choleskyUpdate`             |
+| **Scalar Search**             | `runScalarSearch`, `searchScalars`, `fitScalarParameters`, `paretoFront` (see [reference/scalar-search.md](reference/scalar-search.md))                                 |
 
 ## Package Overview
 
 | Package                            | Purpose                                     |
 | ---------------------------------- | ------------------------------------------- |
 | `@danielsimonjr/mathts-core`       | Core types: Complex, Fraction, BigNumber    |
-| `@danielsimonjr/mathts-functions`  | 500+ math functions with type dispatch      |
+| `@danielsimonjr/mathts-functions`  | 1,320 exports with type dispatch (v0.72.0)  |
 | `@danielsimonjr/mathts-matrix`     | Dense and sparse matrices                   |
 | `@danielsimonjr/mathts-tensor`     | Rank-N dense Tensor (Float64Array-backed)   |
 | `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode autodiff over Tensor |
@@ -187,9 +190,10 @@ main();
 ## Next Steps
 
 - [API Reference](./api/README.md) - Complete API documentation
+- [Function reference site](https://danielsimonjr.com/MathTS/) - Searchable per-function pages (source: [reference/functions.md](./reference/functions.md))
 - [Migration Guide](./migration/guide.md) - Migrating from mathjs
 - [Advanced Usage](./advanced.md) - Backend selection, optimization
-- [Examples](../examples/) - Runnable example projects
+- [Examples](../examples/README.md) - Runnable examples (`bun --tsconfig-override=tsconfig.base.json examples/<file>.ts`), including `scientific-toolkit.ts`
 
 ## TypeScript Support
 
