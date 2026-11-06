@@ -14373,7 +14373,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 152
+      "loc": 157
     },
     {
       "file": "tests/integration/export-index-completeness.test.ts",
