@@ -160,7 +160,7 @@ main();
 | **Probability Distributions** | `normalPDF`, `normalCDF`, `poissonPMF`, `skellamPMF`, `zipfPMF`, `owensT`, `entropy`, `jsDivergence`                                                                    |
 | **Numerical Integration**     | `trapz`, `simpson`, `gaussQuad`, `romberg`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `gaussHermiteIntegrate`                                                 |
 | **Interpolation**             | `linearInterp`, `cubicSpline`, `pchipInterp`, `lagrangeInterp`, `polyFit`                                                                                               |
-| **Combinatorics**             | `fibonacci`, `lucas`, `doubleFactorial`, `subfactorial`, `partition`, Stirling numbers                                                                                  |
+| **Combinatorics**             | `fibonacci`, `lucas`, `doubleFactorial`, `subfactorial`, `partitions`, Stirling numbers                                                                                 |
 | **Geometry**                  | `convexHull`, `orient2D`, `inCircle`, `polygonClip`, `douglasPeucker`, `hausdorffDistance`, `catmullRom`, `arcLength`                                                   |
 | **Statistics Selection**      | `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`                                                                                                                 |
 | **Algebra**                   | `polyval`, `polyadd`, `polymul`, `factor`, `expand`, `substitute`, `discriminant`                                                                                       |
