@@ -1,6 +1,6 @@
 # MathTS Gap Analysis — 2026-11-04
 
-> **Status:** PLAN (nothing in this document is shipped). Planner report for the
+> **Status:** SHIPPED — every item of the §4 work list landed in functions@0.72.0 (PR #590, squash `b8d55ee`; review fixes in the same PR), and the reference docs plus the landing site followed in PR #592 (`f4ab636`). The text below is the original planner report, kept as the record of what was verified missing on 2026-11-04. Planner report for the
 > Planner/Builder/Challenger/Checker/Fixer team. Every "missing" claim below was
 > grep-verified against the live source tree on 2026-11-04 (HEAD `ccb51a6`,
 > `functions@0.71.0`). Estimates are marked as estimates. Oracle values are either

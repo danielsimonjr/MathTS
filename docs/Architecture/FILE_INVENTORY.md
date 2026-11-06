@@ -4,13 +4,13 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-11-05 (by tools/create-dependency-graph)
+**Generated**: 2026-11-06 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2160
+**Total files**: 2161
 
 ## Disposition counts
 
@@ -23,15 +23,15 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `test`        |      827 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
-| `example`     |        6 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2160** |                                                                                                                |
+| `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
+| **Total**     | **2161** |                                                                                                                |
 
 ## Per-area counts
 
 | Area       | Files |
 | ---------- | ----: |
 | `config`   |    29 |
-| `examples` |     6 |
+| `examples` |     7 |
 | `src`      |  1269 |
 | `tests`    |   827 |
 | `tools`    |    29 |
@@ -40,7 +40,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    54 |
+| `(root)`                               |    55 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    26 |
@@ -265,6 +265,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `examples/matrix-operations.ts`                                                   | (root)                               | examples | example     |
 | `examples/parallel-computing.ts`                                                  | (root)                               | examples | example     |
 | `examples/scalar-search.ts`                                                       | (root)                               | examples | example     |
+| `examples/scientific-toolkit.ts`                                                  | (root)                               | examples | example     |
 | `expression/src/compiler/compile.ts`                                              | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/compiler/index.ts`                                                | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/embeddedDocs/constants/e.ts`                                      | @danielsimonjr/mathts-expression     | src      | build-entry |
