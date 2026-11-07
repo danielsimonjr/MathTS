@@ -264,6 +264,8 @@ Implement the splitter below. It is the complete algorithm; do not add rules.
 
 **Rule A — a single unit wins.** If `_findUnit(token)` is not null, the token is that one unit. This holds on both sides of a solidus (ISO 80000-1: a prefix and its unit form one symbol). So `mm` is millimetre, `mol/mL` is mole per millilitre, `m/ms` is metre per millisecond, `W/mK` is watt per millikelvin. Today's behavior for every token that `_findUnit` already finds is unchanged.
 
+**Rule C — a refused prefix is not a product.** Before rule B, a token that starts with a prefix symbol (any prefix set) followed by a unit name throws "not found" (`isPrefixedUnitSpelling`). This keeps `mly`, `mpc` and `dBs` refused and also refuses `mAs` and `mmin`.
+
 **Rule B — otherwise, split.** Only when `_findUnit(token)` is null, call `readings(token)`. The hook point is the `if (res === null)` block in `Unit.parse`: after the `REFUSED_UNIT_SPELLINGS` check and before the `not found` throw. A token that is found never reaches the splitter.
 
 ```ts
@@ -336,7 +338,7 @@ git commit -m "feat(core): parse glued unit products and superscripts"
 
 ### Task MT-3: U7 — ambiguous dimension readings
 
-Depends on the MT-2 splitter. Start it after MT-2 is on `main`.
+Depends on the MT-2 splitter. Start it after MT-2 is on `main`. Rule C refuses `mAs` and `mmin` before the splitter, so the test examples below change: before writing the test, enumerate tokens that still reach two dimension groups (for example with a script over the unit table) and use those; if none exist, the task reduces to the error class and its export, tested through a unit-level call of the grouping step.
 
 **Files:**
 

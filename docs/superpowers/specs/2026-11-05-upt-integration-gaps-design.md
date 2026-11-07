@@ -173,6 +173,7 @@ Enumerate every segmentation of an alphanumeric token into one or more factors (
 
 1. A split that puts a prefix letter’s own unit twice in a row is **not** a reading (`m·m` beside `mm`; `m·m·in` beside `mmin`). A unit that is not a prefix letter still juxtaposes with itself (`NN` → N·N).
 2. **A single unit wins.** A token that `_findUnit` resolves (an exact unit or prefix+unit) is that unit, on either side of a solidus, and products are not considered. `mm` is millimetre, `Hz` is hertz, `pc` is parsec, `mol/mL` is mole per millilitre, `m/ms` is metre per millisecond, `W/mK` is watt per millikelvin. Only a token that `_findUnit` does not resolve is split.
+   2b. **A refused prefix is not a product.** A token that is not one factor and starts with a prefix symbol of any prefix set followed by a unit name is refused with "not found" and is not split. `mly`, `nly` and `mpc` are prefixes that `ly` and `pc` do not accept, and `dBs` is not deci-bel-second. The rule also refuses glued products that start with a prefix letter, such as `mAs`, `mPas` and `mNm`; the caller writes `mA*s`, `mPa*s` or `mN*m`. A refusal is safer than a reading that turns a refused prefix into a unit.
 3. After the filters, **exactly one** reading → that product replaces the token. `Vs` → V·s, `m2K` → m^2·K, `NN` → N·N, `cm^2/Vs` → cm^2/(V·s). Powers and the solidus already around the token apply to the product as a parenthesized group (`m2K/s` → (m^2·K)/s).
 4. **Zero** readings → today’s `UnitParseError` “not found.”
 5. **Two or more** readings → U7 (MT-3). Until MT-3 ships, keep “not found” rather than silently picking one. `mmin` is two products (m·min and mm·in); it is **not** a U5 success.
@@ -189,7 +190,7 @@ class AmbiguousUnitError extends UnitParseError {
 }
 ```
 
-Message names every reading. `mAs` throws: milliampere·second vs metre·ampere·second. `mmin` throws: metre·minute vs millimetre·inch. `mol/mL` does not throw: rule 2 keeps the millilitre. `mm` as a **bare** token still parses (rule 2); `m·m` was never a reading (rule 1).
+Message names every reading. Rule 2b refuses `mAs` and `mmin` before the splitter runs, so they throw "not found", not `AmbiguousUnitError`. `mol/mL` does not throw: rule 2 keeps the millilitre. `mm` as a **bare** token still parses (rule 2); `m·m` was never a reading (rule 1).
 
 When every remaining reading has the same dimension vector, keep a single result. Tie-break: the reading with the fewest cuts; if still tied, the one-factor `_findUnit` hit; if still tied, the lexicographically first canonical spelling. Document the tie-break in the `Unit.parse` JSDoc. Do not pick among different dimensions.
 
