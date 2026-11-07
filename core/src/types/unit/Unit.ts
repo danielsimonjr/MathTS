@@ -539,6 +539,133 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
     }
 
+    function findUnitPair(name: string): { unit: UnitDef; prefix: PrefixDef } | null {
+      return _findUnit(name) as { unit: UnitDef; prefix: PrefixDef } | null;
+    }
+
+    // Every non-empty prefix symbol of every prefix set, built once on first use (rule C).
+    let prefixSymbolCache: readonly string[] | undefined;
+    function prefixSymbols(): readonly string[] {
+      if (prefixSymbolCache === undefined) {
+        const all = new Set<string>();
+        for (const set of Object.values(UNIT_PREFIX_SETS)) {
+          for (const symbol of Object.keys(set)) {
+            if (symbol !== '') all.add(symbol);
+          }
+        }
+        prefixSymbolCache = [...all];
+      }
+      return prefixSymbolCache;
+    }
+
+    // Rule C: a prefix symbol glued to a unit name or alias at the start of a token is a refused prefix, never a product.
+    function isPrefixedUnitSpelling(token: string): boolean {
+      const names = Object.keys(UNIT_ROWS);
+      return prefixSymbols().some(
+        (symbol) =>
+          token.startsWith(symbol) &&
+          names.some((name) => token.slice(symbol.length).startsWith(name))
+      );
+    }
+
+    const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    // A run of an optional '⁻' and one or more superscript digits becomes one '^' power:
+    // 'K²' -> 'K^2', 'm⁻¹' -> 'm^-1', 'm⁻¹²' -> 'm^-12'. A '⁻' with no digit after it is left as it is.
+    function expandSuperscripts(input: string): string {
+      let out = '';
+      let i = 0;
+      while (i < input.length) {
+        let j = i;
+        let sign = '';
+        if (input[j] === '⁻') {
+          sign = '-';
+          j++;
+        }
+        let digits = '';
+        while (j < input.length && SUPERSCRIPT_DIGITS.includes(input[j])) {
+          digits += String(SUPERSCRIPT_DIGITS.indexOf(input[j]));
+          j++;
+        }
+        if (digits !== '') {
+          out += '^' + sign + digits;
+          i = j;
+        } else {
+          out += input[i];
+          i++;
+        }
+      }
+      return out;
+    }
+
+    interface Factor {
+      readonly name: string; // the spelling that _findUnit accepts, for example 'cm' or 'V'
+      readonly power: number; // 1, or the integer of a trailing digit run (m2 -> 2)
+    }
+
+    // Every way to cut `token` into factors. A factor is a substring that _findUnit
+    // accepts, optionally followed by a run of digits that is its integer power.
+    function readings(token: string): Factor[][] {
+      const result: Factor[][] = [];
+      const factors: Factor[] = [];
+      function isDigit(ch: string): boolean {
+        return ch >= '0' && ch <= '9';
+      }
+      function addFactor(name: string, power: number, next: number): void {
+        const prev = factors[factors.length - 1];
+        if (prev !== undefined && prev.name === name && isPrefixRepeat(prev.name, name)) {
+          return;
+        }
+        factors.push({ name, power });
+        if (next === token.length) {
+          if (factors.length >= 2) {
+            result.push(factors.slice());
+          }
+        } else {
+          addFactors(next);
+        }
+        factors.pop();
+      }
+      function addFactors(start: number): void {
+        for (let end = start + 1; end <= token.length; end++) {
+          const name = token.slice(start, end);
+          if (findUnitPair(name) === null) continue;
+          addFactor(name, 1, end);
+          if (end < token.length && isDigit(token[end])) {
+            let digitEnd = end + 1;
+            while (digitEnd < token.length && isDigit(token[digitEnd])) {
+              digitEnd++;
+            }
+            addFactor(name, Number.parseInt(token.slice(end, digitEnd), 10), digitEnd);
+          }
+        }
+      }
+      addFactors(0);
+      return result;
+    }
+
+    function spelling(r: readonly Factor[]): string {
+      return r.map((f) => (f.power === 1 ? f.name : f.name + '^' + f.power)).join('*');
+    }
+
+    function readingDims(r: readonly Factor[]): number[] {
+      const dims = new Array<number>(BASE_DIMENSIONS.length).fill(0);
+      for (const f of r) {
+        const found = findUnitPair(f.name)!;
+        for (let i = 0; i < BASE_DIMENSIONS.length; i++) {
+          dims[i] += (found.unit.dimensions?.[i] || 0) * f.power;
+        }
+      }
+      return dims;
+    }
+
+    // m·m is not a reading, because `mm` is the prefix m on the unit m.
+    // N·N is a reading, because `NN` is not a prefixed unit.
+    function isPrefixRepeat(left: string, right: string): boolean {
+      if (left !== right) return false;
+      const hit = findUnitPair(left + right);
+      return hit !== null && hit.prefix.name === left && hit.unit.name === right;
+    }
+
     /**
      * Parse a string into a unit. The value of the unit is parsed as number,
      * BigNumber, or Fraction depending on the math.js config setting `number`.
@@ -547,6 +674,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * cannot be parsed.
      * @memberof Unit
      * @param str - A string like "5.2 inch", "4e2 cm/s^2"
+     *
+     * Token rules: a token that `_findUnit` resolves is that unit on either side of a
+     * solidus (ISO 80000-1: a prefix and its unit form one symbol). Any other token is cut
+     * into factors; a trailing digit run is an integer power. Readings with one dimension
+     * vector collapse to the fewest factors, then the first spelling. Readings with
+     * different dimensions are refused.
      * @return unit
      */
     Unit.parse = function (str: string, options?: ParseOptions): UnitInstance {
@@ -556,7 +689,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new TypeError('Invalid argument in Unit.parse, string expected');
       }
 
-      text = normalizeUnitSpellings(str);
+      text = expandSuperscripts(normalizeUnitSpellings(str));
       index = -1;
       c = '';
 
@@ -660,6 +793,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
         // Verify the unit exists and get the prefix (if any)
         const res = _findUnit(uStr) as { unit: UnitDef; prefix: PrefixDef } | null;
+        let splitReading: Factor[] | null = null;
         if (res === null) {
           // A refused spelling carries its own reason. `Object.hasOwn` keeps a
           // spelling like `__proto__` or `toString` from reading
@@ -670,8 +804,29 @@ export const createUnitClass = /* #__PURE__ */ factory(
           if (refused !== undefined) {
             throw new UnitParseError('Unit "' + uStr + '" is refused: ' + refused);
           }
-          // Unit not found.
-          throw new UnitParseError('Unit "' + uStr + '" not found.');
+          // Not one unit: cut the token into factors (rule B).
+          const ways = isPrefixedUnitSpelling(uStr) ? [] : readings(uStr);
+          if (ways.length === 0) {
+            // Unit not found.
+            throw new UnitParseError('Unit "' + uStr + '" not found.');
+          }
+          const groups = new Map<string, Factor[]>();
+          for (const r of ways) {
+            const key = JSON.stringify(readingDims(r));
+            const current = groups.get(key);
+            if (
+              current === undefined ||
+              r.length < current.length ||
+              (r.length === current.length && spelling(r) < spelling(current))
+            ) {
+              groups.set(key, r);
+            }
+          }
+          if (groups.size !== 1) {
+            // Readings with different dimensions are refused until MT-3 reports them as ambiguous.
+            throw new UnitParseError('Unit "' + uStr + '" not found.');
+          }
+          splitReading = groups.values().next().value as Factor[];
         }
 
         let power = powerMultiplierCurrent * powerMultiplierStackProduct;
@@ -692,13 +847,23 @@ export const createUnitClass = /* #__PURE__ */ factory(
         }
 
         // Add the unit to the list
-        unit.units.push({
-          unit: res.unit,
-          prefix: res.prefix,
-          power,
-        });
-        for (let i = 0; i < BASE_DIMENSIONS.length; i++) {
-          unit.dimensions[i] += (res.unit.dimensions?.[i] || 0) * power;
+        if (res !== null) {
+          unit.units.push({
+            unit: res.unit,
+            prefix: res.prefix,
+            power,
+          });
+          for (let i = 0; i < BASE_DIMENSIONS.length; i++) {
+            unit.dimensions[i] += (res.unit.dimensions?.[i] || 0) * power;
+          }
+        } else {
+          for (const f of splitReading!) {
+            const r = findUnitPair(f.name)!;
+            unit.units.push({ unit: r.unit, prefix: r.prefix, power: f.power * power });
+            for (let i = 0; i < BASE_DIMENSIONS.length; i++) {
+              unit.dimensions[i] += (r.unit.dimensions?.[i] || 0) * f.power * power;
+            }
+          }
         }
 
         // Check for and consume closing parentheses, popping from the stack.
@@ -734,13 +899,17 @@ export const createUnitClass = /* #__PURE__ */ factory(
           powerMultiplierCurrent = inDenominator ? -1 : 1;
         }
 
-        // Replace the unit into the auto unit system
-        if (res.unit.base) {
-          const baseDim = res.unit.base.key!;
-          UNIT_SYSTEMS.auto[baseDim] = {
-            unit: res.unit,
-            prefix: res.prefix,
-          };
+        // Replace the unit into the auto unit system (each factor of a split token)
+        const parsedUnits: { unit: UnitDef; prefix: PrefixDef }[] =
+          res !== null ? [res] : splitReading!.map((f) => findUnitPair(f.name)!);
+        for (const parsed of parsedUnits) {
+          if (parsed.unit.base) {
+            const baseDim = parsed.unit.base.key!;
+            UNIT_SYSTEMS.auto[baseDim] = {
+              unit: parsed.unit,
+              prefix: parsed.prefix,
+            };
+          }
         }
       }
 

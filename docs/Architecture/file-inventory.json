@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-07",
-  "totalFiles": 2163,
+  "totalFiles": 2164,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 829,
+    "test": 830,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 829,
+    "tests": 830,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 109,
+    "@danielsimonjr/mathts-core": 110,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2929
+      "loc": 3098
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1319,6 +1319,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "core/tests/unit/upt-u5-u6-glued.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
     },
     {
       "file": "core/tests/upt-n4-pairwise-dot.test.ts",
@@ -8465,7 +8472,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1822
+      "loc": 1826
     },
     {
       "file": "functions/src/typed/bitwise.ts",
