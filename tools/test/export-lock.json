@@ -3004,6 +3004,9 @@
       "UncertaintyPropagationResult": {
         "kind": "type"
       },
+      "UnitDimensionOptions": {
+        "kind": "type"
+      },
       "VarNormalization": {
         "kind": "type"
       },
