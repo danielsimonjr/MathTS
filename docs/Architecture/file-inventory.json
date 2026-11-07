@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-06",
-  "totalFiles": 2161,
+  "generated": "2026-11-07",
+  "totalFiles": 2163,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 827,
+    "test": 829,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 827,
+    "tests": 829,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 108,
+    "@danielsimonjr/mathts-core": 109,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 956,
+    "@danielsimonjr/mathts-functions": 957,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -1319,6 +1319,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "core/tests/upt-n4-pairwise-dot.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 12
     },
     {
       "file": "core/tests/version.test.ts",
@@ -8458,7 +8465,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1835
+      "loc": 1822
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -11034,7 +11041,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 30
     },
     {
       "file": "functions/tests/parallel-signal.test.ts",
@@ -11924,6 +11931,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
+    },
+    {
+      "file": "functions/tests/upt-n4-typed-mean.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "functions/tests/utils-factory.test.ts",
