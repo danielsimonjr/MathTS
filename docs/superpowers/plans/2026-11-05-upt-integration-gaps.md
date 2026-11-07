@@ -546,42 +546,9 @@ describe('U9 cycles', () => {
 
 ---
 
-### Task MT-7: U10 — full SI prefixes on `pc`
+### Task MT-7: U10 — not implemented
 
-**Files:**
-
-- Modify: `core/src/types/unit/unit-table.ts` line `pc:` (`prefixes: 'SHORT_UP_ONLY'` → `'SHORT'`)
-- Test: `core/tests/unit/upt-u10-parsec.test.ts` (create)
-
-**Interfaces:**
-
-- Consumes: existing `SHORT` prefix set. Does not add an export. `UNIT_PREFIX_SETS` stays as it is. `ly` stays `SHORT_UP_ONLY`.
-
-- [ ] **Step 1: Failing test**
-
-```ts
-import { describe, it, expect } from 'vitest';
-import { Unit, exactScaleToNumber } from '../../src/index.js';
-
-describe('U10 parsec prefixes', () => {
-  it('mpc is a milliparsec', () => {
-    const mpc = exactScaleToNumber(Unit.parse('mpc').exactScale()!);
-    const pc = exactScaleToNumber(Unit.parse('pc').exactScale()!);
-    expect(mpc).toBeCloseTo(pc / 1000, 6);
-  });
-  it('kpc still parses', () => {
-    expect(Unit.parse('kpc').equalBase(Unit.parse('pc'))).toBe(true);
-  });
-});
-```
-
-- [ ] **Step 2: RED** — `Unit "mpc" not found.`
-
-- [ ] **Step 3: Change the `pc` row’s `prefixes` to `'SHORT'`.
-
-- [ ] **Step 4: GREEN.** `ly` test if one exists must still reject `mly`.
-
-- [ ] **Step 5: Commit** `feat(core): allow sub-kilo SI prefixes on pc`
+Spec §4.8 states the design: `pc` and `ly` keep `SHORT_UP_ONLY`, and `milliparsec` is the spelling for a sub-parsec length. No code change. The existing `mpc` refusal tests stay.
 
 ---
 
