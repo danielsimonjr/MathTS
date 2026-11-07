@@ -361,7 +361,7 @@ The implementation owner of every name `statistics` re-exports is `@danielsimonj
 
 ### In scope (MathTS PRs)
 
-MT-1 N4, MT-2 U5+U6, MT-3 U7, MT-4 U3+U4, MT-5 U8 optional, MT-6 U9, MT-7 U10, MT-8 U2, MT-9 D2, MT-10 N5 optional, plus D1 characterization, D4 optional bigint cells, D5 doc sentence, D6 export lock, D7 owner test. One grammar family or one API surface per PR. Details and commands are in the plan.
+MT-1 N4, MT-2 U5+U6, MT-3 U7, MT-4 U3+U4, MT-5 U8 (not implemented), MT-6 U9, MT-7 U10 (not implemented), MT-8 U2, MT-9 D2, MT-10 N5 optional, plus D1 characterization, D4 optional bigint cells, D5 doc sentence, D6 export lock, D7 owner test. One grammar family or one API surface per PR. Details and commands are in the plan.
 
 ### Non-goals (stay UPT-local; not MathTS work)
 
