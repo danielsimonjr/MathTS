@@ -6,7 +6,7 @@
 
 **Architecture:** Unit grammar changes live in `core/src/types/unit/` (`Unit.ts`, `unit-table.ts`, `errors.ts`). Typed-array means live in `functions/src/typed/arithmetic.ts` and stay on the sync pairwise path. Discovery hooks are optional fields on `ScalarDimensionFilter` and `unitToRationalDimension`. Re-export packages are not edited except `statistics` docs and a binding test. One grammar family or one API surface per pull request.
 
-**Tech Stack:** TypeScript ESM, strict, Vitest, Bun, Turborepo, tsdown. No new dependencies. Packages: `@danielsimonjr/mathts-core@0.21.1`, `@danielsimonjr/mathts-functions@0.72.0` on npm at the time of the spec; implementation lands on `main` after that.
+**Tech Stack:** TypeScript ESM, strict, Vitest, Bun, Turborepo, tsdown. No new dependencies. Packages touched: `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-statistics`.
 
 **Spec:** `docs/superpowers/specs/2026-11-05-upt-integration-gaps-design.md`
 
@@ -18,7 +18,7 @@
 - `bun run typecheck` stays 0 errors on the packages the task touches. `bun run lint` stays clean (`oxlint --deny-warnings`).
 - TDD: failing test, confirm red, minimal implementation, confirm green, changelog, commit.
 - `CHANGELOG.md` `[Unreleased]` bullet per task (`### Fixed` for behavior, `### Added` for new spellings and hooks, `### Documented` for docs-only).
-- Add a changeset for a published-package behavior change (`bunx changeset`, patch unless the return type of `mean(Float64Array)` is treated as breaking — N4 is a behavior fix; `await` of a number still works; record it as a patch fix in the changeset summary and say callers must not branch on `instanceof Promise`).
+- Add a changeset for each published-package behavior change (`bunx changeset`). The packages are pre-1.0, so a breaking change is a **minor** bump and every other change is a patch. Breaking changes in this plan: MT-1 (`mean`/`sum`/`variance`/`std` on `Float64Array` return a number, not a Promise; `.then` on the result fails), MT-4 (`degC/s` and other affine compounds throw by default), MT-8 (bare `ton` throws). The changeset summary names the old and the new behavior.
 - Do not set `RELEASES_ENABLED`. Do not tag. Do not `npm publish`. Do not merge the “chore: release packages” PR.
 - Do not call `Unit.createUnit` from tests except where an existing test already does. New tests use built-in rows.
 - Float32/Float64 copies use `new Float64Array(data)`, never `TypedArray.from`.
@@ -27,10 +27,13 @@
 - Commit footer on every commit:
 
 ```
-Co-Authored-By: Cursor Agent <cursoragent@cursor.com>
+Co-Authored-By: <the model that writes the commit> <noreply@anthropic.com>
 ```
 
-- One PR per task family below (MT-1 through MT-10, then D1, D4, D5, D6, D7). MT-5, MT-10, and D4 may be skipped; the skip is a changelog note in the tracking PR, not a silent drop of the spec section.
+- The repository is public. A commit message or a PR body holds no session URL and no session trailer.
+
+- One task, one PR, in this order: MT-1, MT-2, MT-3, MT-4, MT-6, MT-7, MT-8, MT-9, D1, D5, D6, D7, D4, MT-10. Merge each PR when its checks pass, before the next task starts. MT-3 starts after MT-2 is on `main`.
+- MT-5 (U8, `bit = ln2`) is not implemented: the spec calls it UPT-local policy, and UPT keeps `applyBitScaleOverride`. The skip is recorded in the spec section 4.10, not dropped silently.
 
 ---
 
@@ -170,7 +173,7 @@ git commit -m "fix(functions): return numbers from typed means on typed arrays"
 **Interfaces:**
 
 - Consumes: `_findUnit`, `UnitParseError`.
-- Produces: `Unit.parse` accepts `m2K`, `Vs`, `cm^2/Vs`, `NN`, `K²`, `m²`. `parse('mm')` stays millimetre. `parse('mmin')` stays “not found” until MT-3 (two products). Do not greedy-pick `m·min` or `mm·in`.
+- Produces: `Unit.parse` accepts `m2K`, `Vs`, `cm^2/Vs`, `NN`, `K²`, `m²`. `parse('mm')` stays millimetre. `parse('mmin')` stays “not found” until MT-3 (two readings with different dimensions). `mol/mL`, `m/ms` and `W/mK` keep their single-unit reading (rule A).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -200,6 +203,9 @@ describe('U5 glued products and U6 superscripts', () => {
   it('NN matches N*N', () => {
     expect(scaleOf('NN')).toBeCloseTo(scaleOf('N*N'), 12);
   });
+  it('m⁻¹ matches m^-1', () => {
+    expect(scaleOf('m⁻¹')).toBeCloseTo(scaleOf('m^-1'), 12);
+  });
   it('K² matches K^2', () => {
     expect(scaleOf('K²')).toBeCloseTo(scaleOf('K^2'), 12);
   });
@@ -223,19 +229,30 @@ At the start of `Unit.parse`, after `normalizeUnitSpellings`:
 
 ```ts
 const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+// A run of an optional '⁻' and one or more superscript digits becomes one '^' power:
+// 'K²' -> 'K^2', 'm⁻¹' -> 'm^-1', 'm⁻¹²' -> 'm^-12'. A '⁻' with no digit after it is left as it is.
 function expandSuperscripts(input: string): string {
   let out = '';
-  for (let i = 0; i < input.length; i++) {
-    const d = SUPERSCRIPT_DIGITS.indexOf(input[i]);
-    if (d >= 0) {
-      out += '^' + String(d);
-      continue;
+  let i = 0;
+  while (i < input.length) {
+    let j = i;
+    let sign = '';
+    if (input[j] === '⁻') {
+      sign = '-';
+      j++;
     }
-    if (input[i] === '⁻' && SUPERSCRIPT_DIGITS.includes(input[i + 1] ?? '')) {
-      out += '^-';
-      continue;
+    let digits = '';
+    while (j < input.length && SUPERSCRIPT_DIGITS.includes(input[j])) {
+      digits += String(SUPERSCRIPT_DIGITS.indexOf(input[j]));
+      j++;
     }
-    out += input[i];
+    if (digits !== '') {
+      out += '^' + sign + digits;
+      i = j;
+    } else {
+      out += input[i];
+      i++;
+    }
   }
   return out;
 }
@@ -243,32 +260,63 @@ function expandSuperscripts(input: string): string {
 
 Apply it to `text` before the cursor loop.
 
-Implement the UPT `units.ts` enumerator (spec §4.3), not longest-left:
+Implement the splitter below. It is the complete algorithm; do not add rules.
+
+**Rule A — a single unit wins.** If `_findUnit(token)` is not null, the token is that one unit. This holds on both sides of a solidus (ISO 80000-1: a prefix and its unit form one symbol). So `mm` is millimetre, `mol/mL` is mole per millilitre, `m/ms` is metre per millisecond, `W/mK` is watt per millikelvin. Today's behavior for every token that `_findUnit` already finds is unchanged.
+
+**Rule B — otherwise, split.** Only when `_findUnit(token)` is null, call `readings(token)`. The hook point is the `if (res === null)` block in `Unit.parse`: after the `REFUSED_UNIT_SPELLINGS` check and before the `not found` throw. A token that is found never reaches the splitter.
 
 ```ts
-function prefixRun(leftName: string, rightName: string): boolean {
-  // X·X where XX is X's own prefix spelling (mm beside m·m). Not N·N.
-  return leftName === rightName && _findUnit(leftName + rightName)?.unit.name === leftName;
+interface Factor {
+  readonly name: string; // the spelling that _findUnit accepts, for example 'cm' or 'V'
+  readonly power: number; // 1, or the integer of a trailing digit run (m2 -> 2)
 }
 
-function segmentations(token: string): string[][] {
-  // DP: every way to cover token with _findUnit / prefix+unit / left+digits-as-power.
-  // Drop a step when prefixRun(prev, next). Return unique canonical spelling lists.
+// Every way to cut `token` into factors. A factor is a substring that _findUnit
+// accepts, optionally followed by a run of digits that is its integer power.
+function readings(token: string): Factor[][] {
+  const out: Factor[][] = [];
+  function walk(i: number, acc: Factor[]): void {
+    if (i === token.length) {
+      if (acc.length >= 2) out.push(acc.slice());
+      return;
+    }
+    for (let j = i + 1; j <= token.length; j++) {
+      const name = token.slice(i, j);
+      if (_findUnit(name) === null) continue;
+      let k = j;
+      while (k < token.length && token[k] >= '0' && token[k] <= '9') k++;
+      const power = k > j ? Number(token.slice(j, k)) : 1;
+      const prev = acc[acc.length - 1];
+      if (prev !== undefined && isPrefixRepeat(prev.name, name)) continue;
+      acc.push({ name, power });
+      walk(k, acc);
+      acc.pop();
+    }
+  }
+  walk(0, []);
+  return out;
 }
 
-function tokenWays(token: string, compete: boolean, side: 'numerator' | 'denominator'): string[][] {
-  const single = _findUnit(token);
-  if (single && !compete) return [[token]]; // bare one-factor
-  if (single && side === 'numerator') return [[token]];
-  const products = segmentations(token).filter((w) => w.length > 1);
-  const ways = single ? [[token], ...products] : products;
-  if (ways.length === 1) return ways;
-  if (ways.length === 0) return [];
-  return ways; // MT-3 throws; MT-2 treats length>=2 as "not found"
+// m·m is not a reading, because `mm` is the prefix m on the unit m.
+// N·N is a reading, because `NN` is not a prefixed unit.
+function isPrefixRepeat(left: string, right: string): boolean {
+  if (left !== right) return false;
+  const hit = _findUnit(left + right);
+  return hit !== null && hit.prefix.name === left && hit.unit.name === right;
 }
 ```
 
-`compete` is true when the parse already has a solidus or another factor. Bare `mm` uses `compete=false`. `mL` in `mol/mL` is denominator → products compete. If `ways.length !== 1`, keep today’s “not found” in this task.
+Then:
+
+1. Zero readings: throw today's `UnitParseError` `Unit "<token>" not found.` (keep the refused-spelling check before it).
+2. Group the readings by their dimension vector. For each reading, build `dims` (length `BASE_DIMENSIONS.length`, start at 0): for each factor add `_findUnit(f.name)!.unit.dimensions[i] * f.power` (a missing entry counts as 0). The group key is `JSON.stringify(dims)`. Inside one group keep one reading: the fewest factors, then the lexicographically first spelling `factors.map(f => f.power === 1 ? f.name : f.name + '^' + f.power).join('*')`.
+3. One group left: for each factor of the kept reading, in order, `const r = _findUnit(f.name)!`, push `{ unit: r.unit, prefix: r.prefix, power: f.power * power }` into `unit.units`, and add `(r.unit.dimensions?.[i] || 0) * f.power * power` to `unit.dimensions[i]` for each `i`. `power` is the value the parser already computed for the token (the solidus, the parentheses and any `^p` after the token). Then skip the normal single-unit push for this token. So `m2K/s` is `(m^2*K)/s` and `cm^2/Vs` is `cm^2/(V*s)`.
+4. Two or more groups: MT-2 throws `UnitParseError` `Unit "<token>" not found.`; MT-3 replaces this with `AmbiguousUnitError`.
+
+Superscripts: run `expandSuperscripts` on the text before the cursor loop, after `normalizeUnitSpellings`. The parser then reads `K^2` for `K²` and `m^-1` for `m⁻¹`.
+
+Record rules A and B, and the tie-break of step 2, in the JSDoc of `Unit.parse`.
 
 - [ ] **Step 4: GREEN**
 
@@ -288,7 +336,7 @@ git commit -m "feat(core): parse glued unit products and superscripts"
 
 ### Task MT-3: U7 — ambiguous dimension readings
 
-Depends on MT-2’s segmenter. Ship as its own PR after MT-2 is on `main`.
+Depends on the MT-2 splitter. Start it after MT-2 is on `main`.
 
 **Files:**
 
@@ -315,19 +363,18 @@ import { describe, it, expect } from 'vitest';
 import { AmbiguousUnitError, Unit } from '../../src/index.js';
 
 describe('U7 distinct dimension readings', () => {
-  it('mol/mL names both readings', () => {
-    expect(() => Unit.parse('mol/mL')).toThrow(AmbiguousUnitError);
+  it('mAs names both readings', () => {
     try {
-      Unit.parse('mol/mL');
+      Unit.parse('mAs');
+      throw new Error('mAs parsed');
     } catch (err) {
-      const e = err as AmbiguousUnitError;
-      expect(e.readings.length).toBeGreaterThanOrEqual(2);
-      expect(e.message).toMatch(/mol/);
+      expect(err).toBeInstanceOf(AmbiguousUnitError);
+      expect([...(err as AmbiguousUnitError).readings].sort()).toEqual(['m*A*s', 'mA*s']);
     }
   });
 
-  it('mAs names both readings', () => {
-    expect(() => Unit.parse('mAs')).toThrow(AmbiguousUnitError);
+  it('mol/mL is mole per millilitre (a single unit wins)', () => {
+    expect(Unit.parse('mol/mL').equalBase(Unit.parse('mol/L'))).toBe(true);
   });
 
   it('mmin names metre-minute and millimetre-inch', () => {
@@ -342,11 +389,11 @@ describe('U7 distinct dimension readings', () => {
 
 Confirm `equalBase` exists on the instance (`Unit.ts` uses it). If the public name differs, compare `dimensions` arrays.
 
-- [ ] **Step 2: RED** — `mol/mL` either parses or throws `UnitParseError`, not `AmbiguousUnitError`.
+- [ ] **Step 2: RED** — `mAs` and `mmin` throw `UnitParseError`, not `AmbiguousUnitError`.
 
 - [ ] **Step 3: Implement**
 
-Reuse MT-2 `tokenWays`. When `ways.length >= 2`, map each to its length-10 vector. If two vectors differ by more than `1e-12` in any component, throw `AmbiguousUnitError` whose `readings` are the canonical spellings (`mL` vs `m*L`, `mA*s` vs `m*A*s`, `m*min` vs `mm*in`). Same vector: fewest cuts, then the one-factor hit, then lexicographic spelling. Do not reintroduce `m·m` as a way (bare `mm` must still parse).
+In step 4 of the MT-2 splitter, throw `new AmbiguousUnitError(token, spellings)` instead of the "not found" error. `spellings` is the kept spelling of each group (step 2), sorted. The message is `Unit "<token>" is ambiguous: <spellings joined by " or ">. Write the product with "*" or use a single unit.`
 
 Export the class from the same barrel as `UnitParseError`.
 
@@ -411,7 +458,7 @@ Default: throw `UnitParseError` with the word `affine` in the message. `affine: 
 
 ---
 
-### Task MT-5: U8 — optional `bit = ln2` (skippable)
+### Task MT-5: U8 — optional `bit = ln2` (not implemented; kept for reference)
 
 **Files:**
 
@@ -873,12 +920,11 @@ describe('D6 search linalg exports', () => {
     ] as const) {
       expect(typeof F[name]).toBe('function');
     }
-    expect('eig' in F).toBe(false);
   });
 });
 ```
 
-If `eig` is a value export, the assertion is wrong — check `functions/src/index.ts`. The audit’s claim is “no export named `eig`”. If one exists, change the test to `expect(typeof F.eig).not.toBe('function')` only when the barrel agrees, and note the discrepancy in the spec’s verified table rather than deleting a real export.
+The test checks only that the primitives exist. It does not lock the absence of any name.
 
 - [ ] **Step 2: Expected PASS.** If a name is missing, stop. Do not add a decomposition in this task. File the gap against the spec’s D6 section and leave the primitive unimplemented.
 
@@ -928,24 +974,24 @@ Place the file where those bare package imports already resolve (see `statistics
 
 Coverage against the spec:
 
-| ID                  | Task              | Reopened?         |
-| ------------------- | ----------------- | ----------------- |
-| N4 P0               | MT-1              | no                |
-| U5, U6 P1           | MT-2              | no                |
-| U7 P1               | MT-3              | no                |
-| U3, U4 P1           | MT-4              | no                |
-| U9 P1               | MT-6              | no                |
-| D1 P1               | D1                | no                |
-| D2 P1               | MT-9              | no                |
-| U2 P2               | MT-8              | no                |
-| U10 P2              | MT-7              | no                |
-| N5 P2               | MT-10 optional    | no                |
-| D4 P2               | D4 optional       | no                |
-| D5 P2               | D5 docs           | no                |
-| D6 P2               | D6 lock only      | no                |
-| D7 P2               | D7 docs + binding | no                |
-| U8 policy           | MT-5 optional     | no                |
-| U1, U12, N1, N2, N3 | none              | closed, not tasks |
+| ID                  | Task                 | Reopened?         |
+| ------------------- | -------------------- | ----------------- |
+| N4 P0               | MT-1                 | no                |
+| U5, U6 P1           | MT-2                 | no                |
+| U7 P1               | MT-3                 | no                |
+| U3, U4 P1           | MT-4                 | no                |
+| U9 P1               | MT-6                 | no                |
+| D1 P1               | D1                   | no                |
+| D2 P1               | MT-9                 | no                |
+| U2 P2               | MT-8                 | no                |
+| U10 P2              | MT-7                 | no                |
+| N5 P2               | MT-10 optional       | no                |
+| D4 P2               | D4 optional          | no                |
+| D5 P2               | D5 docs              | no                |
+| D6 P2               | D6 lock only         | no                |
+| D7 P2               | D7 docs + binding    | no                |
+| U8 policy           | MT-5 not implemented | no                |
+| U1, U12, N1, N2, N3 | none                 | closed, not tasks |
 
 Placeholder scan: no TBD. The D1 test contains the full `searchScalars` call. Type names (`AmbiguousUnitError`, `reading: 'difference'`, `mapUnit`, `cycles`, `bit: 'ln2'`) match the spec.
 
