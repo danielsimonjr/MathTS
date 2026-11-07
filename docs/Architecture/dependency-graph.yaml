@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-07'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6898
+  totalExports: 6899
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -10312,6 +10312,7 @@ modules:
             - DimensionInference
             - ParameterDimensionResult
             - RationalDimension
+            - UnitDimensionOptions
           reExport: true
           typeOnly: true
         - file: ./grad-forward.js
@@ -11312,6 +11313,7 @@ modules:
         - DimensionInference
         - ParameterDimensionResult
         - RationalDimension
+        - UnitDimensionOptions
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -12039,6 +12041,7 @@ modules:
         - DimensionInference
         - ParameterDimensionResult
         - RationalDimension
+        - UnitDimensionOptions
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -12595,6 +12598,8 @@ modules:
         - inferScalarDimension
         - solveParameterDimensions
         - unitToRationalDimension
+      interfaces:
+        - UnitDimensionOptions
       functions:
         - rationalDimensionsEqual
         - inferScalarDimension
@@ -42885,15 +42890,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 214040
-  totalExports: 6898
+  totalLinesOfCode: 214075
+  totalExports: 6899
   totalClasses: 61
-  totalInterfaces: 595
+  totalInterfaces: 596
   totalFunctions: 2285
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1636
-  totalReExports: 2989
+  totalReExports: 2990
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
