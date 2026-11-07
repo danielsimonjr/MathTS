@@ -8710,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2274
+      "loc": 2279
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -12007,7 +12007,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 86
+      "loc": 103
     },
     {
       "file": "functions/tests/utils-factory.test.ts",

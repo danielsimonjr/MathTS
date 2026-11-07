@@ -83,3 +83,24 @@ describe('UPT N5 linsolve public limit', () => {
     ).toThrow(/singular/);
   });
 });
+
+describe('N5 leastSquares column norm', () => {
+  it('solves a 200000-row system without a call-stack overflow', () => {
+    const m = 200000;
+    const A = Array.from({ length: m }, (_, k) => [1, k % 2]);
+    const b = A.map((row) => 2 * row[0] + 3 * row[1]);
+    const x = leastSquares(A, b);
+    expect(x[0]).toBeCloseTo(2, 8);
+    expect(x[1]).toBeCloseTo(3, 8);
+  });
+  it('solves entries near 1e-170 (the sum of squares would underflow)', () => {
+    const A = [
+      [1e-170, 0],
+      [0, 1e-170],
+      [1e-170, 1e-170],
+    ];
+    const x = leastSquares(A, [1, 1, 2]);
+    expect(x[0] * 1e-170).toBeCloseTo(1, 10);
+    expect(x[1] * 1e-170).toBeCloseTo(1, 10);
+  });
+});
