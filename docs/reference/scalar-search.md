@@ -134,7 +134,7 @@ The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBA
 
 `loss` is `'l2' | 'l1' | 'huber'` and defaults to `'l2'`. The hall and every parameter refit use that name. `'l2'` with `rowWeights` omitted is today's sum of squares, including `+Infinity` when any row is invalid. `'l1'` and `'huber'` reuse `fitScalarParameters`'s formulas (`namedScalarLossTerm`); there is not a second Huber or L1. `rowWeights`, when set, is a `Float64Array` of length `observed.length` whose entries are finite and `>= 0`. A zero weight drops that row. The comparison that keeps a refit (`fitted.loss < loss`) scores both sides with this loss. Omitted `loss` and omitted `rowWeights` leave the seed-7 pin unchanged.
 
-`loss` (`'l2' | 'l1' | 'huber'`, default `'l2'`) is the objective both the hall and `fitScalarParameters` use. Under `invalidRows: 'penalize'` the ranker adds `INVALID_ROW_PENALTY` times each invalid positive-weight row on top of that loss; the fitter’s reported loss does not include those rows. That penalty is not a second loss name. Callers who need a holdout (UPT discovery) keep it outside this function.
+That one loss is the only objective: the hall and `fitScalarParameters` both use it. Under `invalidRows: 'penalize'` the ranker adds `INVALID_ROW_PENALTY` times each invalid positive-weight row on top of that loss; the fitter’s reported loss does not include those rows. That penalty is not a second loss name. Callers who need a holdout (UPT discovery) keep it outside this function.
 
 ## Hall dedup (SR-8)
 
