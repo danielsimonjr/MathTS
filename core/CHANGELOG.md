@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-core
 
+## 0.22.0
+
+### Minor Changes
+
+- 09b4dde: `ton` is now ambiguous: `Unit.parse` throws `AmbiguousUnitError` for `ton` and `tons`, and the new `shortton` (2000 lb) and `longton` (2240 lb) units name the two tons.
+- ac4212b: `Unit.to()` sets a `cycles` property to the cycle bridge: 1 for Hz to rad/s, -1 for rad/s to Hz, and 0 otherwise.
+- 2a6c91d: `Unit.parse` throws `AmbiguousUnitError` when a glued token has two or more readings with different dimensions. The error names every reading.
+- 0de3d7a: `Unit.parse` accepts glued unit products (`m2K`, `Vs`, `cm^2/Vs`, `NN`) and Unicode superscripts (`K²`, `m⁻¹`). A token that names one unit keeps that reading. A prefix glued to a unit name (`mly`, `mpc`) is refused, and a token with two readings of different dimensions (`mAs`) is still not found.
+- 2fd73e8: Compounds with an affine unit (degC, degF) now throw `UnitParseError` unless parsed with `{ affine: 'difference' }`, and `to(target, { reading: 'difference' })` converts a temperature interval.
+
 ## 0.21.1
 
 ### Patch Changes
