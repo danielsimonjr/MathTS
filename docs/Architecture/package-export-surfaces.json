@@ -501,6 +501,7 @@
       "addScalar",
       "ALL_UNITS",
       "allocAsHeader",
+      "AmbiguousUnitError",
       "arraySize",
       "asinh",
       "assertDependencies",

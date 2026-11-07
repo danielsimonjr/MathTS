@@ -26,7 +26,7 @@ import type {
   UnitSystem,
   UnitSystemEntry,
 } from './unit-types.js';
-import { DimensionMismatchError, UnitParseError } from './errors.js';
+import { AmbiguousUnitError, DimensionMismatchError, UnitParseError } from './errors.js';
 import { isEffectivelyImaginary } from './va-var.js';
 import {
   type ExactScale,
@@ -823,8 +823,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
             }
           }
           if (groups.size !== 1) {
-            // Readings with different dimensions are refused until MT-3 reports them as ambiguous.
-            throw new UnitParseError('Unit "' + uStr + '" not found.');
+            throw new AmbiguousUnitError(uStr, [...groups.values()].map(spelling));
           }
           splitReading = groups.values().next().value as Factor[];
         }

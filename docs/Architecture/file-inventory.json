@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-07",
-  "totalFiles": 2164,
+  "totalFiles": 2165,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 830,
+    "test": 831,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 830,
+    "tests": 831,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 110,
+    "@danielsimonjr/mathts-core": 111,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -681,7 +681,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 265
+      "loc": 266
     },
     {
       "file": "core/src/internal.ts",
@@ -870,7 +870,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 24
+      "loc": 43
     },
     {
       "file": "core/src/types/unit/exact-scale.ts",
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3098
+      "loc": 3097
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1326,6 +1326,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 52
+    },
+    {
+      "file": "core/tests/unit/upt-u7-ambiguous.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 49
     },
     {
       "file": "core/tests/upt-n4-pairwise-dot.test.ts",
