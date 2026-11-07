@@ -4,7 +4,7 @@
 
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-11-06 (by tools/create-dependency-graph)
+**Generated**: 2026-11-07 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 
@@ -13,8 +13,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | Routing (static)            |   Count |
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      40 |
-| Parallel only (worker pool) |      48 |
-| JS-only                     |     131 |
+| Parallel only (worker pool) |      44 |
+| JS-only                     |     135 |
 | **Total**                   | **219** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 40 wasm-routed functions, **38 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
@@ -87,7 +87,6 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `floor`                 | arithmetic   |
 | `leftShift`             | bitwise      |
 | `max`                   | arithmetic   |
-| `mean`                  | arithmetic   |
 | `min`                   | arithmetic   |
 | `multiply`              | arithmetic   |
 | `norm`                  | arithmetic   |
@@ -111,17 +110,14 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `sign`                  | arithmetic   |
 | `sqrt`                  | arithmetic   |
 | `square`                | arithmetic   |
-| `std`                   | arithmetic   |
 | `subtract`              | arithmetic   |
-| `sum`                   | arithmetic   |
 | `unaryMinus`            | arithmetic   |
-| `variance`              | arithmetic   |
 
 ## Per-module counts
 
 | Module        | WASM | Parallel | JS-only |
 | ------------- | ---: | -------: | ------: |
-| arithmetic    |    9 |       23 |      14 |
+| arithmetic    |    9 |       19 |      18 |
 | bitwise       |    0 |        7 |       0 |
 | combinatorics |    0 |        0 |      21 |
 | complex       |    0 |        0 |       4 |

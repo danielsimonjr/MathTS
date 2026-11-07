@@ -1,10 +1,10 @@
 {
-  "generated": "2026-11-06",
+  "generated": "2026-11-07",
   "total": 219,
-  "parallelizedCount": 112,
+  "parallelizedCount": 108,
   "effectiveCount": 81,
-  "disabledCount": 31,
-  "nonParallelCount": 107,
+  "disabledCount": 27,
+  "nonParallelCount": 111,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
@@ -471,13 +471,6 @@
       "effectiveness": "effective"
     },
     {
-      "name": "mean",
-      "file": "arithmetic.ts",
-      "ops": ["mean"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
       "name": "min",
       "file": "arithmetic.ts",
       "ops": ["applyKernel", "min"],
@@ -744,23 +737,9 @@
       "effectiveness": "disabled"
     },
     {
-      "name": "std",
-      "file": "arithmetic.ts",
-      "ops": ["variance"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
       "name": "subtract",
       "file": "arithmetic.ts",
       "ops": ["subtract"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "sum",
-      "file": "arithmetic.ts",
-      "ops": ["sum"],
       "thresholds": ["never"],
       "effectiveness": "disabled"
     },
@@ -782,13 +761,6 @@
       "name": "unaryMinus",
       "file": "arithmetic.ts",
       "ops": ["negate"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "variance",
-      "file": "arithmetic.ts",
-      "ops": ["variance"],
       "thresholds": ["never"],
       "effectiveness": "disabled"
     }
@@ -851,6 +823,7 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
+    "mean",
     "mod",
     "moebiusMu",
     "multinomial",
@@ -891,14 +864,17 @@
     "singularValues",
     "smaller",
     "smallerEq",
+    "std",
     "studentTPDF",
     "subfactorial",
+    "sum",
     "to",
     "toBest",
     "toDegrees",
     "toRadians",
     "unaryPlus",
     "unequal",
+    "variance",
     "xgcd",
     "xor"
   ],
@@ -1163,7 +1139,7 @@
       "op": "mean",
       "threshold": "never",
       "active": false,
-      "functions": ["mean", "parallelStatMAD", "parallelStatMean"]
+      "functions": ["parallelStatMAD", "parallelStatMean"]
     },
     {
       "op": "min",
@@ -1313,7 +1289,7 @@
       "op": "sum",
       "threshold": "never",
       "active": false,
-      "functions": ["parallelStatSum", "sum"]
+      "functions": ["parallelStatSum"]
     },
     {
       "op": "tan",
@@ -1337,14 +1313,14 @@
       "op": "variance",
       "threshold": "never",
       "active": false,
-      "functions": ["parallelStatCorr", "parallelStatVariance", "std", "variance"]
+      "functions": ["parallelStatCorr", "parallelStatVariance"]
     }
   ],
   "byFile": {
     "arithmetic.ts": {
       "effective": 17,
-      "disabled": 15,
-      "none": 14
+      "disabled": 11,
+      "none": 18
     },
     "bitwise.ts": {
       "effective": 0,

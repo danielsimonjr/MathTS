@@ -1,9 +1,9 @@
 {
-  "generated": "2026-11-06",
+  "generated": "2026-11-07",
   "total": 219,
   "acceleratedCount": 40,
-  "parallelOnlyCount": 48,
-  "jsOnlyCount": 131,
+  "parallelOnlyCount": 44,
+  "jsOnlyCount": 135,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -424,13 +424,6 @@
       "effectiveBackend": "unknown"
     },
     {
-      "name": "mean",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "min",
       "file": "arithmetic.ts",
       "routing": "parallel",
@@ -592,13 +585,6 @@
       "effectiveBackend": "unknown"
     },
     {
-      "name": "std",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "subtract",
       "file": "arithmetic.ts",
       "routing": "parallel",
@@ -606,21 +592,7 @@
       "effectiveBackend": "unknown"
     },
     {
-      "name": "sum",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "unaryMinus",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "variance",
       "file": "arithmetic.ts",
       "routing": "parallel",
       "dispatch": [],
@@ -701,6 +673,7 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
+    "mean",
     "mod",
     "moebiusMu",
     "multinomial",
@@ -749,22 +722,25 @@
     "singularValues",
     "smaller",
     "smallerEq",
+    "std",
     "studentTPDF",
     "subfactorial",
+    "sum",
     "to",
     "toBest",
     "toDegrees",
     "toRadians",
     "unaryPlus",
     "unequal",
+    "variance",
     "xgcd",
     "xor"
   ],
   "byFile": {
     "arithmetic.ts": {
       "wasm": 9,
-      "parallel": 23,
-      "jsOnly": 14
+      "parallel": 19,
+      "jsOnly": 18
     },
     "bitwise.ts": {
       "wasm": 0,

@@ -1544,17 +1544,14 @@ export const sum = mathTyped('sum', {
   // annihilate to 0) use `fsum`.
   Array: (arr: f64[]): f64 => pairwiseSum(arr),
 
-  // Float64Array: the pool's sequential branch is pairwise too (see ComputePool.sum), and its
-  // parallel branch sums per-chunk then combines — blocked summation, which is pairwise-like.
-  // Either way the O(n) drift is gone.
-  Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.sum(a);
-    return result.result;
-  },
+  // Synchronous pairwise sum on typed arrays (no worker pool).
+  Float64Array: (a: Float64Array): f64 => pairwiseSum(a),
+  Float32Array: (a: Float32Array): f64 => pairwiseSum(a),
 });
 
 /**
- * Mean with parallel array support
+ * Synchronous pairwise mean. Returns a number for `number[]`, `Float32Array` and `Float64Array`.
+ * The worker-pool mean is `parallelStatMean` and returns a Promise.
  */
 export const mean = mathTyped('mean', {
   Array: (arr: f64[]): f64 => {
@@ -1562,11 +1559,9 @@ export const mean = mathTyped('mean', {
     return pairwiseSum(arr) / arr.length; // pairwise: see the note on `sum`
   },
 
-  // Parallel Float64Array mean
-  Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.mean(a);
-    return result.result;
-  },
+  // Synchronous pairwise mean on typed arrays (no worker pool).
+  Float64Array: (a: Float64Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
+  Float32Array: (a: Float32Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
 });
 
 /**
@@ -1611,16 +1606,15 @@ export const variance = mathTyped('variance', {
   'Array, string': (arr: f64[], norm: string): f64 =>
     varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization),
 
-  // Parallel Float64Array variance. computePool returns POPULATION variance
-  // (sum2/n); recover sum2 = pop·n and renormalize for the requested convention.
-  Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.variance(a);
-    return varianceFromM2(result.result.variance * a.length, a.length, 'unbiased');
-  },
-  'Float64Array, string': async (a: Float64Array, norm: string): Promise<f64> => {
-    const result = await computePool.variance(a);
-    return varianceFromM2(result.result.variance * a.length, a.length, norm as VarNormalization);
-  },
+  // Synchronous typed-array variance (no worker pool).
+  Float64Array: (a: Float64Array): f64 =>
+    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
+  Float32Array: (a: Float32Array): f64 =>
+    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
+  'Float64Array, string': (a: Float64Array, norm: string): f64 =>
+    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
+  'Float32Array, string': (a: Float32Array, norm: string): f64 =>
+    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
 });
 
 /**
@@ -1632,18 +1626,15 @@ export const std = mathTyped('std', {
   'Array, string': (arr: f64[], norm: string): f64 =>
     Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization)),
 
-  // Parallel Float64Array std — derive from the (renormalized) variance so the
-  // convention matches the Array path and parallelStatStd.
-  Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.variance(a);
-    return Math.sqrt(varianceFromM2(result.result.variance * a.length, a.length, 'unbiased'));
-  },
-  'Float64Array, string': async (a: Float64Array, norm: string): Promise<f64> => {
-    const result = await computePool.variance(a);
-    return Math.sqrt(
-      varianceFromM2(result.result.variance * a.length, a.length, norm as VarNormalization)
-    );
-  },
+  // Synchronous typed-array std (no worker pool).
+  Float64Array: (a: Float64Array): f64 =>
+    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
+  Float32Array: (a: Float32Array): f64 =>
+    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
+  'Float64Array, string': (a: Float64Array, norm: string): f64 =>
+    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
+  'Float32Array, string': (a: Float32Array, norm: string): f64 =>
+    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
 });
 
 /**
