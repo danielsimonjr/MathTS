@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-07",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6894
+    "totalExports": 6898
   },
   "entryPoints": [
     {
@@ -897,6 +897,7 @@
               "UNIT_ROWS",
               "UNIT_ROW_ALIASES",
               "REFUSED_UNIT_SPELLINGS",
+              "AMBIGUOUS_UNIT_SPELLINGS",
               "namedExactScale",
               "readUnitScale",
               "getUnitRow",
@@ -1166,6 +1167,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -1358,6 +1360,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -2921,6 +2924,7 @@
               "UNIT_ROW_ALIASES",
               "UNIT_ROWS",
               "REFUSED_UNIT_SPELLINGS",
+              "AMBIGUOUS_UNIT_SPELLINGS",
               "unitPrefixExactScale"
             ]
           }
@@ -3128,6 +3132,7 @@
               "UNIT_ROWS",
               "UNIT_ROW_ALIASES",
               "REFUSED_UNIT_SPELLINGS",
+              "AMBIGUOUS_UNIT_SPELLINGS",
               "namedExactScale",
               "readUnitScale",
               "getUnitRow",
@@ -3218,6 +3223,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -3293,6 +3299,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -3364,6 +3371,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "unitPrefixExactScale",
           "getUnitPrefix",
           "namedExactScale",
@@ -3389,7 +3397,8 @@
           "NAMED_SCALES",
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
-          "REFUSED_UNIT_SPELLINGS"
+          "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS"
         ]
       },
       "core/src/types/unit/unit-types.ts": {
@@ -3529,6 +3538,7 @@
               "UNIT_ROWS",
               "UNIT_ROW_ALIASES",
               "REFUSED_UNIT_SPELLINGS",
+              "AMBIGUOUS_UNIT_SPELLINGS",
               "namedExactScale",
               "readUnitScale",
               "getUnitRow",
@@ -3631,6 +3641,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -3695,6 +3706,7 @@
           "UNIT_ROWS",
           "UNIT_ROW_ALIASES",
           "REFUSED_UNIT_SPELLINGS",
+          "AMBIGUOUS_UNIT_SPELLINGS",
           "namedExactScale",
           "readUnitScale",
           "getUnitRow",
@@ -45311,15 +45323,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 214012,
-    "totalExports": 6894,
+    "totalLinesOfCode": 214040,
+    "totalExports": 6898,
     "totalClasses": 61,
     "totalInterfaces": 595,
     "totalFunctions": 2285,
     "totalTypeGuards": 168,
     "totalEnums": 0,
-    "totalConstants": 1635,
-    "totalReExports": 2986,
+    "totalConstants": 1636,
+    "totalReExports": 2989,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

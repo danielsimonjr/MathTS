@@ -501,6 +501,7 @@
       "addScalar",
       "ALL_UNITS",
       "allocAsHeader",
+      "AMBIGUOUS_UNIT_SPELLINGS",
       "AmbiguousUnitError",
       "arraySize",
       "asinh",

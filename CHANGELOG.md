@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`searchScalars` honors `grammar.admit` on seeds and mutation offspring (SR-1).** When `admit` is set, a seed that fails it is skipped and a mutation that fails it is a failed attempt (the existing 10-attempt budget). `scalarGrammarAccepts` still does not call `admit`. `admit` must be a pure function of the node. When `admit` is omitted the seed-7 pin is unchanged. An always-true `admit` also leaves the seed-7 pin unchanged. Tests: `functions/tests/scalar-search.test.ts`.
 
 ### Changed
+- **(UPT U2) `ton`, `tons`, `kton` and `Mton` no longer parse.** Use `shortton` (US short ton, 2000 lb) or `longton` (UK long ton, 2240 lb) for the two tons, and `t` or `tonne` (1000 kg) for the metric tonne. `ton` and `tons` throw `AmbiguousUnitError`.
 - **OVERVIEW.md `totalLinesOfCode` 390168 -> 390399; `totalExports` 8496 -> 8497.** SR-7 reviewer fixes (row-wise simplify guard, tests, docs) added lines and one internal test export; `repo-tools check` fails on those claims until the values move.
 - **OVERVIEW.md `totalLinesOfCode` 389730 -> 390168.** SR-7 (the `simplify` option, its tests, and its docs) added lines; `repo-tools check` fails on that claim until the value moves.
 - **OVERVIEW.md `totalLinesOfCode` 389530 -> 389730.** SR-6 reviewer fixes (weight snapshot normalization, regression tests, docs) added lines; `repo-tools check` fails on that claim until the value moves.

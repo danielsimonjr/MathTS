@@ -54,6 +54,7 @@ import {
   UNIT_ROW_ALIASES,
   UNIT_ROWS,
   REFUSED_UNIT_SPELLINGS,
+  AMBIGUOUS_UNIT_SPELLINGS,
   unitPrefixExactScale,
 } from './unit-table.js';
 
@@ -800,6 +801,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const res = _findUnit(uStr) as { unit: UnitDef; prefix: PrefixDef } | null;
         let splitReading: Factor[] | null = null;
         if (res === null) {
+          const ambiguous = Object.hasOwn(AMBIGUOUS_UNIT_SPELLINGS, uStr)
+            ? AMBIGUOUS_UNIT_SPELLINGS[uStr]
+            : undefined;
+          if (ambiguous !== undefined) {
+            throw new AmbiguousUnitError(uStr, ambiguous.readings, ambiguous.hint);
+          }
           // A refused spelling carries its own reason. `Object.hasOwn` keeps a
           // spelling like `__proto__` or `toString` from reading
           // `Object.prototype` as a refused reason.

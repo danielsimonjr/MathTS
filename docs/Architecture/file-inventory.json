@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-07",
-  "totalFiles": 2167,
+  "totalFiles": 2168,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 833,
+    "test": 834,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 833,
+    "tests": 834,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 113,
+    "@danielsimonjr/mathts-core": 114,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -681,7 +681,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 266
+      "loc": 267
     },
     {
       "file": "core/src/internal.ts",
@@ -842,7 +842,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 236
+      "loc": 237
     },
     {
       "file": "core/src/types/unit-prefixes.ts",
@@ -856,7 +856,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 101
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -870,7 +870,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 43
+      "loc": 46
     },
     {
       "file": "core/src/types/unit/exact-scale.ts",
@@ -884,14 +884,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 91
+      "loc": 92
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 702
+      "loc": 716
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3120
+      "loc": 3127
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1276,7 +1276,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 632
+      "loc": 633
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -1319,6 +1319,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "core/tests/unit/upt-u2-ton.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
     },
     {
       "file": "core/tests/unit/upt-u3-u4-affine.test.ts",
