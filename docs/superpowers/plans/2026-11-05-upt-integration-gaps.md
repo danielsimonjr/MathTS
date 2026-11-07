@@ -415,7 +415,7 @@ Export the class from the same barrel as `UnitParseError`.
 
 **Interfaces:**
 
-- Produces: `ParseOptions.affine?: 'absolute' | 'difference'`. `to(target, { reading?: 'absolute' | 'difference' })`.
+- Produces: `ParseOptions.affine?: 'difference'`. `to(target, { reading?: 'absolute' | 'difference' })`.
 
 - [ ] **Step 1: Failing test**
 

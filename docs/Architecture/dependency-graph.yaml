@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-07'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6892
+  totalExports: 6894
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1555,6 +1555,7 @@ modules:
             - ConverterFn
             - TypeConverters
             - ParseOptions
+            - ConvertOptions
             - UnitFormatOptions
             - CreateUnitOptions
             - CreateUnitDefObject
@@ -1682,6 +1683,7 @@ modules:
         - ConverterFn
         - TypeConverters
         - ParseOptions
+        - ConvertOptions
         - UnitFormatOptions
         - CreateUnitOptions
         - CreateUnitDefObject
@@ -1791,6 +1793,7 @@ modules:
         - ConverterFn
         - TypeConverters
         - ParseOptions
+        - ConvertOptions
         - UnitFormatOptions
         - CreateUnitOptions
         - CreateUnitDefObject
@@ -2769,6 +2772,7 @@ modules:
             - BigNumberValue
             - ConverterFn
             - CreateUnitDefObject
+            - ConvertOptions
             - CreateUnitOptions
             - FractionValue
             - Numeric
@@ -3039,6 +3043,7 @@ modules:
             - ConverterFn
             - TypeConverters
             - ParseOptions
+            - ConvertOptions
             - UnitFormatOptions
             - CreateUnitOptions
             - CreateUnitDefObject
@@ -3123,6 +3128,7 @@ modules:
         - ConverterFn
         - TypeConverters
         - ParseOptions
+        - ConvertOptions
         - UnitFormatOptions
         - CreateUnitOptions
         - CreateUnitDefObject
@@ -3195,6 +3201,7 @@ modules:
         - ConverterFn
         - TypeConverters
         - ParseOptions
+        - ConvertOptions
         - UnitFormatOptions
         - CreateUnitOptions
         - CreateUnitDefObject
@@ -3285,6 +3292,7 @@ modules:
         - UnitJSON
         - TypeConverters
         - ParseOptions
+        - ConvertOptions
         - UnitFormatOptions
         - CreateUnitOptions
         - CreateUnitDefObject
@@ -42865,15 +42873,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213977
-  totalExports: 6892
+  totalLinesOfCode: 214007
+  totalExports: 6894
   totalClasses: 61
-  totalInterfaces: 594
+  totalInterfaces: 595
   totalFunctions: 2285
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635
-  totalReExports: 2984
+  totalReExports: 2986
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

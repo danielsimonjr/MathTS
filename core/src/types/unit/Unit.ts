@@ -8,6 +8,7 @@ import type {
   BigNumberValue,
   ConverterFn,
   CreateUnitDefObject,
+  ConvertOptions,
   CreateUnitOptions,
   FractionValue,
   Numeric,
@@ -726,6 +727,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // Optional number at the start of the string
       const valueStr = parseNumber();
       let value: Numeric | null = null;
+      // True when `*` joins the leading value to the units (`1*degC`).
+      let valueProduct = false;
       if (valueStr) {
         if (config.number === 'BigNumber') {
           value = new BigNumber(valueStr);
@@ -745,6 +748,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
         // handle multiplication or division right after the value, like '1/s'
         if (parseCharacter('*')) {
+          valueProduct = true;
           powerMultiplierCurrent = 1;
           expectingUnit = true;
         } else if (parseCharacter('/')) {
@@ -931,6 +935,20 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // Are there any units at all?
       if (unit.units.length === 0 && !options.allowNoUnits) {
         throw new UnitParseError('"' + str + '" contains no units');
+      }
+
+      // An affine unit (degC, degF) has an offset. It means a temperature only alone,
+      // so a compound with one is refused unless read as an interval.
+      if (
+        options.affine !== 'difference' &&
+        unit.units.some((u) => u.unit.offset !== 0) &&
+        !(unit.units.length === 1 && unit.units[0].power === 1 && !valueProduct)
+      ) {
+        throw new UnitParseError(
+          'Unit "' +
+            str +
+            "\" uses an affine unit (degC, degF) in a compound. Write a single affine unit, or pass { affine: 'difference' } to read it as a temperature interval."
+        );
       }
 
       unit.value = value !== undefined ? unit._normalize(value) : null;
@@ -1638,7 +1656,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      */
     Unit.prototype.to = function (
       this: UnitInstance,
-      valuelessUnit: string | UnitInstance
+      valuelessUnit: string | UnitInstance,
+      options?: ConvertOptions
     ): UnitInstance {
       const value = this.value === null ? this._normalize(1) : this.value;
       let other: UnitInstance;
@@ -1677,6 +1696,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
 
       if (
+        options?.reading === 'difference' ||
         this.value === null ||
         this._isDerived() ||
         this.units.length === 0 ||

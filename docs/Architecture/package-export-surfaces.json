@@ -547,6 +547,7 @@
       "containsCollections",
       "ConversionDef",
       "ConverterFn",
+      "ConvertOptions",
       "copysign",
       "CoreUnit",
       "cosh",
