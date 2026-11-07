@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-07",
-  "totalFiles": 2173,
+  "totalFiles": 2174,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 839,
+    "test": 840,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 839,
+    "tests": 840,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 961,
+    "@danielsimonjr/mathts-functions": 962,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -7128,7 +7128,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 202
+      "loc": 198
     },
     {
       "file": "functions/src/numeric/solveDAE.ts",
@@ -8710,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2255
+      "loc": 2274
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -11986,7 +11986,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 38
+      "loc": 36
     },
     {
       "file": "functions/tests/upt-d6-search-linalg-exports.test.ts",
@@ -12001,6 +12001,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 30
+    },
+    {
+      "file": "functions/tests/upt-n5-least-squares.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 86
     },
     {
       "file": "functions/tests/utils-factory.test.ts",

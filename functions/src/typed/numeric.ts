@@ -198,6 +198,12 @@ export function linsolve(A: number[][], b: number[]): number[] {
   if (n === 0) throw new Error('linsolve: empty matrix');
   if (A[0].length !== n) throw new Error('linsolve: matrix must be square');
   if (b.length !== n) throw new Error('linsolve: dimension mismatch');
+  return solvePivoted(A, b, 1e-15);
+}
+
+/** Gaussian elimination with partial pivoting; throws when a pivot is below `pivotTol`. */
+function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
+  const n = A.length;
 
   // Augmented matrix
   const M = A.map((row, i) => [...row, b[i]]);
@@ -212,7 +218,7 @@ export function linsolve(A: number[][], b: number[]): number[] {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-15) throw new Error('linsolve: singular matrix');
+    if (maxVal < pivotTol) throw new Error('linsolve: singular matrix');
     if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
 
     for (let row = col + 1; row < n; row++) {
@@ -329,6 +335,12 @@ export function globalMinimize(
 }
 
 /**
+ * Pivot limit for the column-equilibrated normal equations of {@link leastSquares}.
+ * The diagonal of the scaled AᵀA is 1, so the limit is relative to the column scale.
+ */
+const LEAST_SQUARES_PIVOT_TOL = 1e-13;
+
+/**
  * Least squares solution: minimize ||Ax - b||^2 via normal equations.
  *
  * @param A - Matrix (m x n), m >= n
@@ -339,25 +351,32 @@ export function leastSquares(A: number[][], b: number[]): number[] {
   const m = A.length;
   const n = A[0].length;
 
-  // A^T * A
+  // Equilibrate columns so the pivot test is scale-free; the solution is unscaled at the end.
+  const norms: number[] = new Array(n);
+  for (let i = 0; i < n; i++) {
+    norms[i] = Math.hypot(...A.map((row) => row[i]));
+    if (norms[i] === 0) throw new Error('linsolve: singular matrix');
+  }
+
+  // (A D^-1)^T (A D^-1) and (A D^-1)^T b, with D = diag(norms)
   const AtA: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       let s = 0;
-      for (let k = 0; k < m; k++) s += A[k][i] * A[k][j];
+      for (let k = 0; k < m; k++) s += (A[k][i] / norms[i]) * (A[k][j] / norms[j]);
       AtA[i][j] = s;
     }
   }
 
-  // A^T * b
   const Atb: number[] = new Array(n).fill(0);
   for (let i = 0; i < n; i++) {
     let s = 0;
-    for (let k = 0; k < m; k++) s += A[k][i] * b[k];
+    for (let k = 0; k < m; k++) s += (A[k][i] / norms[i]) * b[k];
     Atb[i] = s;
   }
 
-  return linsolve(AtA, Atb);
+  const y = solvePivoted(AtA, Atb, LEAST_SQUARES_PIVOT_TOL);
+  return y.map((v, i) => v / norms[i]);
 }
 
 // =============================================================================
