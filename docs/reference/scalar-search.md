@@ -134,6 +134,8 @@ The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBA
 
 `loss` is `'l2' | 'l1' | 'huber'` and defaults to `'l2'`. The hall and every parameter refit use that name. `'l2'` with `rowWeights` omitted is today's sum of squares, including `+Infinity` when any row is invalid. `'l1'` and `'huber'` reuse `fitScalarParameters`'s formulas (`namedScalarLossTerm`); there is not a second Huber or L1. `rowWeights`, when set, is a `Float64Array` of length `observed.length` whose entries are finite and `>= 0`. A zero weight drops that row. The comparison that keeps a refit (`fitted.loss < loss`) scores both sides with this loss. Omitted `loss` and omitted `rowWeights` leave the seed-7 pin unchanged.
 
+`loss` (`'l2' | 'l1' | 'huber'`, default `'l2'`) is the objective both the hall and `fitScalarParameters` use. Under `invalidRows: 'penalize'` the ranker adds `INVALID_ROW_PENALTY` times each invalid positive-weight row on top of that loss; the fitter’s reported loss does not include those rows. That penalty is not a second loss name. Callers who need a holdout (UPT discovery) keep it outside this function.
+
 ## Hall dedup (SR-8)
 
 The hall keeps one evaluated tree per `scalarCanonicalKey` at add time: smaller loss, then smaller stored complexity, then the one recorded first; a better same-key arrival evicts the older survivor and frees its complexity slot when that slot held only the evicted tree. Elitist truncation in the population (`truncateDistinct`) already keeps one tree per key with the same loss-first order. The reported front is the Pareto set of the best loss per complexity among those stored trees. Complexity weights change reported complexity only, not which duplicate survives.
