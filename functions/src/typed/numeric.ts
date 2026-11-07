@@ -354,7 +354,12 @@ export function leastSquares(A: number[][], b: number[]): number[] {
   // Equilibrate columns so the pivot test is scale-free; the solution is unscaled at the end.
   const norms: number[] = new Array(n);
   for (let i = 0; i < n; i++) {
-    norms[i] = Math.hypot(...A.map((row) => row[i]));
+    // Scaled sum of squares: no overflow, no underflow, no argument spread over m rows.
+    let big = 0;
+    for (let k = 0; k < m; k++) big = Math.max(big, Math.abs(A[k][i]));
+    let s = 0;
+    if (big > 0) for (let k = 0; k < m; k++) s += (A[k][i] / big) ** 2;
+    norms[i] = big * Math.sqrt(s);
     if (norms[i] === 0) throw new Error('linsolve: singular matrix');
   }
 
