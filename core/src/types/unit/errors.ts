@@ -25,16 +25,19 @@ export class DimensionMismatchError extends Error {
 /**
  * Thrown when a unit token has two or more readings with different dimension
  * vectors. `readings` lists every reading, sorted, so the caller can choose.
+ * `hint` is the last sentence of the message.
  */
 export class AmbiguousUnitError extends UnitParseError {
   readonly token: string;
   readonly readings: readonly string[];
 
-  constructor(token: string, readings: readonly string[]) {
+  constructor(
+    token: string,
+    readings: readonly string[],
+    hint = 'Write the product with "*" or use a single unit.'
+  ) {
     const sortedReadings = Object.freeze([...readings].sort());
-    super(
-      `Unit "${token}" is ambiguous: ${sortedReadings.join(' or ')}. Write the product with "*" or use a single unit.`
-    );
+    super(`Unit "${token}" is ambiguous: ${sortedReadings.join(' or ')}. ${hint}`);
     (this as { name: string }).name = 'AmbiguousUnitError';
     this.token = token;
     this.readings = sortedReadings;

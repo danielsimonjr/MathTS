@@ -320,7 +320,8 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   hogshead: { base: 'VOLUME', prefixes: 'NONE', scale: '63*us_gallon' }, // 63 US gal
   g: { base: 'MASS', prefixes: 'SHORT', scale: '1e-3' },
   gram: { base: 'MASS', prefixes: 'LONG', scale: '1e-3' },
-  ton: { base: 'MASS', prefixes: 'SHORT', scale: '2000*pound' }, // US short ton, 2000 lb
+  shortton: { base: 'MASS', prefixes: 'NONE', scale: '2000*pound' }, // US short ton, 2000 lb
+  longton: { base: 'MASS', prefixes: 'NONE', scale: '2240*pound' }, // UK long ton, 2240 lb
   t: { base: 'MASS', prefixes: 'SHORT', scale: '1000' },
   tonne: { base: 'MASS', prefixes: 'LONG', scale: '1000' },
   grain: { base: 'MASS', prefixes: 'NONE', scale: 'pound/7000' }, // 1/7000 lb
@@ -542,7 +543,6 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   gtts: 'gtt',
 
   grams: 'gram',
-  tons: 'ton',
   tonnes: 'tonne',
   grains: 'grain',
   drams: 'dram',
@@ -650,6 +650,20 @@ export const REFUSED_UNIT_SPELLINGS: Readonly<Record<string, string>> = Object.f
   Np: 'Np is a logarithmic unit (the neper); give the quantity in its linear unit, or a reference level',
   Mach: 'Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
   mach: 'mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
+});
+
+const TON_HINT = 'Use shortton (US, 2000 lb), longton (UK, 2240 lb), or t / tonne (1000 kg).';
+
+/**
+ * Spellings with more than one common meaning. `Unit.parse` throws
+ * `AmbiguousUnitError` with these readings and the hint instead of picking one.
+ * A lookup MUST use `Object.hasOwn`.
+ */
+export const AMBIGUOUS_UNIT_SPELLINGS: Readonly<
+  Record<string, { readonly readings: readonly string[]; readonly hint: string }>
+> = Object.freeze({
+  ton: Object.freeze({ readings: Object.freeze(['shortton', 'longton', 't']), hint: TON_HINT }),
+  tons: Object.freeze({ readings: Object.freeze(['shortton', 'longton', 't']), hint: TON_HINT }),
 });
 
 const namedCache = new Map<string, ExactScale>();

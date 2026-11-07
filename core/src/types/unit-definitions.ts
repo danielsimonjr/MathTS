@@ -139,7 +139,8 @@ export const DERIVED_UNITS: Record<string, UnitDef> = {
   lb: tableUnit('lb', dim({ mass: 1 })),
   lbm: tableUnit('lbm', dim({ mass: 1 })),
   oz: tableUnit('oz', dim({ mass: 1 })),
-  ton: tableUnit('ton', dim({ mass: 1 })), // US short ton
+  shortton: tableUnit('shortton', dim({ mass: 1 })), // US short ton
+  longton: tableUnit('longton', dim({ mass: 1 })), // UK long ton
   tonne: tableUnit('tonne', dim({ mass: 1 })), // metric ton
 
   // --- Time -----------------------------------------------------------------
