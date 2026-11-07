@@ -51,7 +51,7 @@ no implementation. Edits go in the package that owns the symbol.
 
 ```
 core/src/types/unit/
-  unit-table.ts     rows and prefix sets (U2 ton, U8 bit scale, U10 pc)
+  unit-table.ts     rows and prefix sets (U2 ton, U8 bit scale)
   Unit.ts           parse loop, glued split, superscripts, affine gate,
                     to(..., { reading }), cycles on the result (U3–U7, U9)
   errors.ts         AmbiguousUnitError next to UnitParseError (U2, U7)
@@ -114,7 +114,7 @@ above matches each `package.json`.
 | `exactScale('Hz') === 1`; `.to('rad/s')` multiplies by 2π                                   | True. `Hz` has `cycles: true` and scale `1`. `cycleAngleBridge` returns the cycle-count delta; `to` multiplies by `(2π)^k` and does not attach `k` to the result.                                                                                                                                                                                                                                                                                           |
 | `mpc` not found; `kpc`/`Mpc`/`Gpc` parse                                                    | True. `pc` uses prefix set `SHORT_UP_ONLY` (`siShort(1, p => p >= 3)`).                                                                                                                                                                                                                                                                                                                                                                                     |
 | `Unit.exactScale('bit')` is 1; information is axis 8                                        | True. Row `b` base `BIT` scale `1`. `BASE_DIMENSIONS` index 8 is `BIT`. `toSiDimensionVector` throws when index 7, 8, or 9 is nonzero unless `ignoreExtra`.                                                                                                                                                                                                                                                                                                 |
-| `UNIT_PREFIX_SETS` is not exported, so UPT must split prefixes itself                       | **Disagree.** `UNIT_PREFIX_SETS` and `unitPrefixExactScale` are already exported from `@danielsimonjr/mathts-core` (`core/src/index.ts`). U10’s remaining work is the `pc` row, not a new export.                                                                                                                                                                                                                                                           |
+| `UNIT_PREFIX_SETS` is not exported, so UPT must split prefixes itself                       | **Disagree.** `UNIT_PREFIX_SETS` and `unitPrefixExactScale` are already exported from `@danielsimonjr/mathts-core` (`core/src/index.ts`). U10 is not implemented (§4.8).                                                                                                                                                                                                                                                                                    |
 | `searchScalars` has `grammar.admit` on 0.72                                                 | **True on npm 0.72.0 and on this tree.** `functions/package.json` is `0.72.0`. `functions/CHANGELOG.md` under `## 0.72.0` records `grammar.admit` on seeds and offspring, plus `loss`, `invalidRows`, `complexityWeights`, and `simplify`. The root `CHANGELOG.md` `[Unreleased]` section still repeats those SR-1–SR-7 bullets; that section is not evidence the package version is behind npm. D1 does not add `admit`. Do not write “0.72.0 lacks SR-1.” |
 | `scalarToTex` exists; no new printable form                                                 | True. Exported from functions.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `dimensions` filter is a 7-vector of `Fraction`s; `unitToRationalDimension` throws on `bit` | True. `RationalDimension` is `SiDimensionVector` (seven `Fraction`s, BIPM `[L, M, T, I, Θ, N, J]`). `unitToRationalDimension` reads `vector[8]` and throws `UnitParseError` for a nonzero BIT exponent. There is no `mapUnit` and no `equal` hook.                                                                                                                                                                                                          |
@@ -243,9 +243,11 @@ readonly cycles: number; // the bridge k; 0 when the ordinary dimension path was
 
 UPT’s acceptance: read `cycles` and apply 2π only for a parameter marked angular. MathTS does not change `convertValue`.
 
-### 4.8 U10 — prefixes on `pc` (P2)
+### 4.8 U10 — prefixes on `pc` (P2, not implemented)
 
-Change the `pc` row from `SHORT_UP_ONLY` to `SHORT`. Then `mpc` is milliparsec (`pc/1000`), and `kpc`, `Mpc`, `Gpc` stay. No new prefix-set export. `UNIT_PREFIX_SETS` remains the way a caller inspects the set. `ly` is unchanged.
+MathTS does not implement U10. `pc` and `ly` keep `SHORT_UP_ONLY`. A lowercase sub-multiple on an astronomical unit (`mpc`, `mly`) is a probable case slip for the mega prefix, and a silent misparse is an error of 10⁹. The parser refuses these symbols.
+
+Use `milliparsec` for a sub-parsec length: the `parsec` row takes `LONG` prefixes, so `1 milliparsec` is 0.001 pc. A later change can add the symbol when a real need exists.
 
 ### 4.9 U2 — `ton` (P2)
 
@@ -402,7 +404,7 @@ Probes that must fail before the fix and pass after:
 | U3  | `parse('degC/s')` and `parse('1*degC')` throw; `parse('25 degC')` still 298.15 K                                                                             |
 | U4  | `parse('25 degC').to('K', { reading: 'difference' }).value === 25`                                                                                           |
 | U9  | `exactScale('Hz')` numeric 1; `to('rad/s').cycles === 1`; value still 2π                                                                                     |
-| U10 | `parse('mpc')` scale is `parse('pc')` / 1000                                                                                                                 |
+| U10 | `parse('mpc')` is refused; `1 milliparsec` is 0.001 pc (§4.8)                                                                                                |
 | U2  | `parse('ton')` throws; `parse('t')` still 1000 kg; `parse('shortton')` is 2000 lb                                                                            |
 | D2  | `unitToRationalDimension('bit', { mapUnit: () => dimensionless })` returns the caller vector and does not throw                                              |
 | N5  | only if MT-10 is attempted: a column pair whose equilibrated pivot is below `1e-13` throws; a well-conditioned 2×2 does not                                  |
@@ -425,7 +427,7 @@ Suggested merge order, one PR each:
 | MT-4  | U3, U4 | `core` affine + difference `to`                    |
 | MT-5  | U8     | `core` optional `bit: 'ln2'`, skippable            |
 | MT-6  | U9     | `core` `cycles` on `to`                            |
-| MT-7  | U10    | `core` `pc` prefix set                             |
+| MT-7  | U10    | not implemented (§4.8)                             |
 | MT-8  | U2     | `core` `ton` plus `shortton` / `longton`           |
 | MT-9  | D2     | `functions` `mapUnit` / `equal`                    |
 | MT-10 | N5     | `functions` `leastSquares`, skippable              |
