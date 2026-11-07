@@ -52,11 +52,12 @@ function lcm(a: bigint, b: bigint): bigint {
   return (a / gcd(a, b)) * b;
 }
 
-function entryToFraction(value: number | Fraction, row: number, col: number): Fraction {
+function entryToFraction(value: number | bigint | Fraction, row: number, col: number): Fraction {
   if (isFraction(value)) return value;
+  if (typeof value === 'bigint') return new Fraction(value, 1n);
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new TypeError(
-      `rationalNullspace: entry [${row}, ${col}] must be a finite number or a Fraction`
+      `rationalNullspace: entry [${row}, ${col}] must be a finite number, a bigint or a Fraction`
     );
   }
   return Number.isInteger(value) ? new Fraction(value, 1) : Fraction.fromNumber(value);
@@ -124,7 +125,7 @@ function rref(matrix: Fraction[][]): number[] {
  *
  * Numbers are converted with {@link Fraction.fromNumber} (continued fraction,
  * denominator at most 10^6). Pass {@link Fraction} entries when the exponent
- * is already an exact ratio, such as `1/3`.
+ * is already an exact ratio, such as `1/3`. A `bigint` entry is exact.
  *
  * The numeric {@link nullspace} is unchanged. This function does not replace it.
  *
@@ -143,7 +144,7 @@ function rref(matrix: Fraction[][]): number[] {
  * ```
  */
 export function rationalNullspace(
-  matrix: ReadonlyArray<ReadonlyArray<number | Fraction>>,
+  matrix: ReadonlyArray<ReadonlyArray<number | bigint | Fraction>>,
   options?: RationalNullspaceOptions
 ): RationalNullspaceResult {
   if (matrix.length === 0) {

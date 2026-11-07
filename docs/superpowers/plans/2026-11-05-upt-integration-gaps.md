@@ -797,7 +797,7 @@ describe('D1 search contract for a later UPT caller', () => {
 
 **Interfaces:**
 
-- Produces: cell type `number | Fraction | bigint`. `bigint` becomes `new Fraction(cell, 1n)`. A non-integer `number` still uses `Fraction.fromNumber`. A mix of `bigint` and a non-integer `number` throws `TypeError`. Integer `number[][]` behavior unchanged.
+- Produces: cell type `number | Fraction | bigint`. `bigint` becomes `new Fraction(cell, 1n)`. A non-integer `number` still uses `Fraction.fromNumber`. Mixed cells are allowed, as with `Fraction`. Integer `number[][]` behavior unchanged.
 
 - [ ] **Step 1: Failing test**
 
