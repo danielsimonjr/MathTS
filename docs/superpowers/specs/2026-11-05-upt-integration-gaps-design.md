@@ -239,7 +239,7 @@ The difference reading sets no flag on the result. A later `to()` on that result
 readonly cycles: number; // the bridge k; 0 when the ordinary dimension path was used
 ```
 
-`parse('1 Hz').to('rad/s').cycles === 1` and the value stays `2π`. `parse('1 Hz').to('1/s').cycles === 0` and the value stays 1. `cycles` is 0 on units that were not produced by `to`.
+`parse('1 Hz').to('rad/s').cycles === 1` and the value stays `2π`. `parse('1 Hz').to('s^-1').cycles === 0` and the value stays 1. `cycles` is 0 on units that were not produced by `to`. (`to('1/s')` is refused: `1/s` parses with the value 1.)
 
 UPT’s acceptance: read `cycles` and apply 2π only for a parameter marked angular. MathTS does not change `convertValue`.
 

@@ -528,8 +528,8 @@ describe('U9 cycles', () => {
     expect(u.value).toBeCloseTo(2 * Math.PI, 12);
     expect(u.cycles).toBe(1);
   });
-  it('Hz to 1/s is 1 and cycles 0', () => {
-    const u = Unit.parse('1 Hz').to('1/s');
+  it('Hz to s^-1 is 1 and cycles 0', () => {
+    const u = Unit.parse('1 Hz').to('s^-1');
     expect(u.value).toBeCloseTo(1, 12);
     expect(u.cycles).toBe(0);
   });
