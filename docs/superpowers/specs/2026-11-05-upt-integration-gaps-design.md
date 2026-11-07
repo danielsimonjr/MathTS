@@ -202,17 +202,17 @@ An affine built-in is a row with a nonzero `offset` (`degC`, `degF`, and any row
 
 `Unit.parse` accepts an affine unit only as the sole unit factor, power `+1`, with an optional leading value (`25 degC`, `degC`). These throw `UnitParseError` unless `options.affine` is set:
 
-- `degC/s`, `degC*m`, `1*degC` (product, not “value then unit”), `degC^2`, `(degC)`.
+- `degC/s`, `degC*m`, `1*degC` (product, not “value then unit”), `degC^2`, `J/degC`.
 
 ```ts
 interface ParseOptions {
-  affine?: 'absolute' | 'difference';
+  affine?: 'difference';
 }
 ```
 
 - Omitted: refuse the compound (the default).
-- `'absolute'`: parse the compound and apply offsets the way a lone `degC` does today (each affine factor shifts). This is an explicit opt-in, not the silent default.
 - `'difference'`: parse the compound and ignore offsets (a temperature interval).
+- `'absolute'` for compounds is not implemented: an offset has no defined meaning for a factor in a denominator or at a power other than 1. A later option can add it.
 
 `1 degC` with a space or with the leading-value production stays absolute. The flag does not change `25 degC` → 298.15 K.
 
@@ -224,6 +224,8 @@ to(target: string | Unit, options?: { reading?: 'absolute' | 'difference' }): Un
 
 - Omitted or `'absolute'`: today’s behavior, including offset (`1 degC` → 274.15 K).
 - `'difference'`: convert the interval. Offset of the source is not added; offset of the target is not added. `parse('25 degC').to('K', { reading: 'difference' })` has numeric value 25. `parse('18 degF').to('K', { reading: 'difference' })` has numeric value 10 (the 5/9 scale only).
+
+The difference reading sets no flag on the result. A later `to()` on that result reads it as absolute.
 
 `equalBase` still applies. A cycle bridge (U9) is orthogonal: difference does not strip the 2π factor.
 

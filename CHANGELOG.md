@@ -1019,6 +1019,7 @@ green.
 
 ### Changed
 
+- **Affine units in compounds are refused; `to()` converts intervals (UPT U3/U4).** `degC/s`, `degC*m`, `1*degC`, `degC^2` and `J/degC` throw `UnitParseError` unless parsed with `{ affine: 'difference' }`; `unit.to(target, { reading: 'difference' })` converts a temperature interval with no offset shift.
 - **TypeScript raised to `^7.0.2` across all 25 manifests.** This monorepo hit both
   TS 7 blockers, in 23 packages at once.
 

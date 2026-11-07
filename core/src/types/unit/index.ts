@@ -31,6 +31,7 @@ export type {
   ConverterFn,
   TypeConverters,
   ParseOptions,
+  ConvertOptions,
   UnitFormatOptions,
   CreateUnitOptions,
   CreateUnitDefObject,

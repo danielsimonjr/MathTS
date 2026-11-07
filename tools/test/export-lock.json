@@ -834,6 +834,9 @@
       "ConfigOptions": {
         "kind": "type"
       },
+      "ConvertOptions": {
+        "kind": "type"
+      },
       "ConverterFn": {
         "kind": "type"
       },

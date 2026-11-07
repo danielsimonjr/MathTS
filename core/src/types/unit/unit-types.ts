@@ -117,6 +117,14 @@ export interface TypeConverters {
 /** Options accepted by `Unit.parse`. */
 export interface ParseOptions {
   allowNoUnits?: boolean;
+  /** Read a compound with an affine unit (degC, degF) as a temperature interval. */
+  affine?: 'difference';
+}
+
+/** Options accepted by `Unit#to`. */
+export interface ConvertOptions {
+  /** `'difference'` converts an interval: no offset is added. Default `'absolute'`. */
+  reading?: 'absolute' | 'difference';
 }
 
 /** Formatting options accepted by `Unit#format` / `Unit#toBest`. */
@@ -240,7 +248,7 @@ export interface UnitInstance {
   divide(other: UnitInstance | Numeric): UnitInstance | Numeric;
   pow(p: number): UnitInstance | Numeric;
   abs(): UnitInstance;
-  to(valuelessUnit: string | UnitInstance): UnitInstance;
+  to(valuelessUnit: string | UnitInstance, options?: ConvertOptions): UnitInstance;
   toNumber(valuelessUnit?: string | UnitInstance): number;
   toNumeric(valuelessUnit?: string | UnitInstance): Numeric | null;
   toString(): string;
