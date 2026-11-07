@@ -225,6 +225,8 @@ export interface UnitInstance {
    * while `value` is still the double this quantity rounds to.
    */
   _exactSI?: ExactScale;
+  /** Cycle bridge k used by the last `to()` (1 for Hz->rad/s, -1 for rad/s->Hz); 0 otherwise. */
+  cycles: number;
   units: UnitComponent[];
   dimensions: number[];
   fixPrefix: boolean;
