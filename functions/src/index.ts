@@ -123,6 +123,7 @@ export type {
   DimensionInference,
   ParameterDimensionResult,
   RationalDimension,
+  UnitDimensionOptions,
 } from './scalar-dimension.js';
 
 // First-order uncertainty propagation. Kept off `typed/index.js` for the same

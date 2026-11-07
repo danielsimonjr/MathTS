@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-07",
-  "totalFiles": 2168,
+  "totalFiles": 2169,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 834,
+    "test": 835,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 834,
+    "tests": 835,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 957,
+    "@danielsimonjr/mathts-functions": 958,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -6449,7 +6449,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 988
+      "loc": 989
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7499,7 +7499,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 624
+      "loc": 644
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -7527,7 +7527,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2117
+      "loc": 2131
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11966,6 +11966,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
+    },
+    {
+      "file": "functions/tests/upt-d2-dimension-hook.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 146
     },
     {
       "file": "functions/tests/upt-n4-typed-mean.test.ts",

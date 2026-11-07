@@ -591,6 +591,12 @@ export function solveParameterDimensions(
   return { solved };
 }
 
+/** Options for {@link unitToRationalDimension}. */
+export interface UnitDimensionOptions {
+  /** Caller map from a unit name to its seven-axis dimension. Set: no `Unit` is built and the information axis is not read. */
+  readonly mapUnit?: (unitName: string) => RationalDimension;
+}
+
 /**
  * The SI dimension of a unit name as a {@link RationalDimension}.
  *
@@ -601,15 +607,29 @@ export function solveParameterDimensions(
  * throw {@link UnitParseError}. An unknown unit name throws the same
  * {@link UnitParseError} `Unit` already throws. `unitName` must be a string.
  *
+ * With `options.mapUnit` the caller's map gives the dimension, so a unit such as `bit` can map to a caller-chosen vector.
+ *
  * @example
  * ```ts
  * import { unitToRationalDimension } from '@danielsimonjr/mathts-functions';
  * unitToRationalDimension('m')[0].toString(); // '1'
  * ```
  */
-export function unitToRationalDimension(unitName: string): RationalDimension {
+export function unitToRationalDimension(
+  unitName: string,
+  options?: UnitDimensionOptions
+): RationalDimension {
   if (typeof unitName !== 'string') {
     throw new TypeError('unitToRationalDimension: unitName must be a string');
+  }
+  const mapUnit = options?.mapUnit;
+  if (mapUnit !== undefined) {
+    if (typeof mapUnit !== 'function') {
+      throw new TypeError('unitToRationalDimension: options.mapUnit must be a function');
+    }
+    const result = mapUnit(unitName);
+    validateDimensionVector(result, 'unitToRationalDimension: mapUnit result');
+    return result;
   }
   const unit = new Unit(1, unitName);
   const vector = unit.dimensions as number[];

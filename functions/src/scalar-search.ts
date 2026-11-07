@@ -95,6 +95,8 @@ export interface ScalarDimensionFilter {
   readonly symbols: Readonly<Record<string, RationalDimension>>;
   readonly target: RationalDimension;
   readonly onUnderdetermined?: 'keep' | 'reject';
+  /** Caller equality for the inferred root dimension and `target` (infer mode only). A `false` result or a throw scores `Infinity`. Omitted: exact per-axis equality. */
+  readonly equal?: (left: RationalDimension, right: RationalDimension) => boolean;
 }
 
 /**
@@ -694,10 +696,17 @@ function normalizeDimensionFilter(raw: ScalarDimensionFilter): Readonly<ScalarDi
       `searchScalars: dimensions.onUnderdetermined must be 'keep' or 'reject', got ${String(onUnderdetermined)}`
     );
   }
+  const equal = record.equal;
+  if (equal !== undefined && typeof equal !== 'function') {
+    throw new RangeError(
+      `searchScalars: dimensions.equal must be a function, got ${String(equal)}`
+    );
+  }
   return Object.freeze({
     symbols,
     target,
     onUnderdetermined: onUnderdetermined === 'reject' ? 'reject' : 'keep',
+    ...(equal === undefined ? {} : { equal: equal as ScalarDimensionFilter['equal'] }),
   });
 }
 
@@ -1040,6 +1049,13 @@ function dimensionAccepts(
   const inferred = inferScalarDimension(node, filter.symbols);
   if (!inferred.ok) {
     return false;
+  }
+  if (filter.equal !== undefined) {
+    try {
+      return filter.equal(inferred.dimension, filter.target) === true;
+    } catch {
+      return false;
+    }
   }
   return rationalDimensionsEqual(inferred.dimension, filter.target);
 }
