@@ -172,11 +172,10 @@ Copy the UPT `units.ts` splitter (audit MT-2 PR shape). Do **not** use greedy lo
 Enumerate every segmentation of an alphanumeric token into one or more factors (`_findUnit` / prefix+unit, plus a trailing digit run as an integer power of the left factor). Then apply these filters:
 
 1. A split that puts a prefix letter’s own unit twice in a row is **not** a reading (`m·m` beside `mm`; `m·m·in` beside `mmin`). A unit that is not a prefix letter still juxtaposes with itself (`NN` → N·N).
-2. **Bare** expression (the whole string is one token): if the token is exactly one factor (exact unit or prefix+unit), that reading wins and products are not considered. `mm` is millimetre, `Hz` is hertz, `pc` is parsec, `mL` as a bare token is millilitre.
-3. **Compound** (a solidus, `*`, or a second factor exists): a token that is one factor stays that factor on both sides of a solidus (ISO 80000-1: a prefix and its unit form one inseparable symbol). `mN/m` is millinewton per metre, `mol/mL` is mole per millilitre, `m/ms` is metre per millisecond, and `W/mK` is watt per millikelvin. A caller who means W/(m·K) writes `W/(m*K)`. Only a token that is not one factor is split.
-4. After the filters, **exactly one** reading → that product replaces the token. `Vs` → V·s, `m2K` → m^2·K, `NN` → N·N, `cm^2/Vs` → cm^2/(V·s). Powers and the solidus already around the token apply to the product as a parenthesized group (`m2K/s` → (m^2·K)/s).
-5. **Zero** readings → today’s `UnitParseError` “not found.”
-6. **Two or more** readings → U7 (MT-3). Until MT-3 ships, keep “not found” rather than silently picking one. `mmin` is two products (m·min and mm·in); it is **not** a U5 success.
+2. **A single unit wins.** A token that `_findUnit` resolves (an exact unit or prefix+unit) is that unit, on either side of a solidus, and products are not considered. `mm` is millimetre, `Hz` is hertz, `pc` is parsec, `mol/mL` is mole per millilitre, `m/ms` is metre per millisecond, `W/mK` is watt per millikelvin. Only a token that `_findUnit` does not resolve is split.
+3. After the filters, **exactly one** reading → that product replaces the token. `Vs` → V·s, `m2K` → m^2·K, `NN` → N·N, `cm^2/Vs` → cm^2/(V·s). Powers and the solidus already around the token apply to the product as a parenthesized group (`m2K/s` → (m^2·K)/s).
+4. **Zero** readings → today’s `UnitParseError` “not found.”
+5. **Two or more** readings → U7 (MT-3). Until MT-3 ships, keep “not found” rather than silently picking one. `mmin` is two products (m·min and mm·in); it is **not** a U5 success.
 
 Exact symbol still wins for `min`, `mol`, `bar`, and `ton` (until U2 refuses `ton`) as one-factor tokens.
 
@@ -190,7 +189,7 @@ class AmbiguousUnitError extends UnitParseError {
 }
 ```
 
-Message names every reading. `mAs` throws: milliampere·second vs metre·ampere·second. `mmin` throws: metre·minute vs millimetre·inch. `mol/mL` does not throw: rule 3 keeps the millilitre. `mm` as a **bare** token still parses (rule 2); `m·m` was never a reading (rule 1).
+Message names every reading. `mAs` throws: milliampere·second vs metre·ampere·second. `mmin` throws: metre·minute vs millimetre·inch. `mol/mL` does not throw: rule 2 keeps the millilitre. `mm` as a **bare** token still parses (rule 2); `m·m` was never a reading (rule 1).
 
 When every remaining reading has the same dimension vector, keep a single result. Tie-break: the reading with the fewest cuts; if still tied, the one-factor `_findUnit` hit; if still tied, the lexicographically first canonical spelling. Document the tie-break in the `Unit.parse` JSDoc. Do not pick among different dimensions.
 
@@ -339,7 +338,7 @@ The implementation owner of every name `statistics` re-exports is `@danielsimonj
 
 ## 5. Algorithms that are easy to get wrong
 
-**Glued split vs prefix.** Use §4.3. Enumerating every cut without dropping `m·m` makes `mm` ambiguous; rule 1 prevents that. Rule 3 has two readings, and the choice between them is recorded here. (a) ISO 80000-1: a token that is one factor stays that factor, so `mol/mL` is mole per millilitre and `W/mK` is watt per millikelvin, a valid unit that a caller who means thermal conductivity did not mean. (b) UPT parity: a prefixed factor in a denominator competes with the products, so `mol/mL`, `W/mK` and `m/ms` throw `AmbiguousUnitError` and the caller writes `W/(m*K)` or `m/(ms)`. A miss-only splitter is reading (a).
+**Glued split vs prefix.** Use §4.3. Enumerating every cut without dropping `m·m` makes `mm` ambiguous; rule 1 prevents that. The design is: a token that `_findUnit` resolves is that unit, on either side of a solidus (SI Brochure §3.1: a prefix symbol attached to a unit symbol forms a new inseparable unit symbol). The splitter runs only on a token that `_findUnit` does not resolve. The rejected alternative lets a prefixed denominator factor compete with products; it refuses `g/mL`, `mg/mL`, `mol/mL` and `m/ms`, which parse today. `W/mK` is watt per millikelvin under this design, as it is today; a caller who means W/(m·K) writes `W/(m*K)`.
 
 **Affine vs value.** The leading-number production (`25 degC`) is a value. A `*` between a number and a unit is a product (`1*degC`) and is the compound U3 refuses. Tests must include both spellings.
 
@@ -438,7 +437,7 @@ UPT can, after a release that contains the PR, flip the matching row in `tests/d
 ### UPT acceptance checklist (consumer, not implemented here)
 
 - N4: `mean` on a length-3 `Float64Array` column is a number; `numberFrom` does not see a Promise. `pairwiseDot` on `Float32Array` stays sync.
-- U5–U7: `m2K`, `Vs`, `cm^2/Vs`, `NN`, and `K²` parse; `mAs` and `mmin` throw `AmbiguousUnitError`; `mol/mL` is mole per millilitre, so a UPT test that expects `mol/mL` to throw changes with the adoption; `mm` is unchanged.
+- U5–U7: `m2K`, `Vs`, `cm^2/Vs`, `NN`, and `K²` parse; `mAs` and `mmin` throw `AmbiguousUnitError`; `mol/mL` is mole per millilitre, so a UPT test that expects `mol/mL` to throw changes with the adoption (UPT may keep a stricter check in its own wrapper; that is UPT-local policy, not MathTS work); `mm` is unchanged.
 - U3–U4: `degC/s` throws; difference `to` of `25 degC` to `K` is 25; absolute `to` of `1 degC` is still 274.15 K.
 - U9: `exactScale('Hz')` is 1; `to('rad/s').cycles === 1`.
 - U10: `mpc` parses as pc/1000.
