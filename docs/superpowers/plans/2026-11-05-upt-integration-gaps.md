@@ -664,50 +664,15 @@ Rebuild `core` first if `Fraction` types fail. The cast is only at the fixture; 
 
 - Produces: `leastSquares` equilibrates columns of `A`, then calls an internal solve whose pivot limit is `1e-13` relative to the equilibrated scale. Still throws `Error('linsolve: singular matrix')`. No `null` return.
 
-- [ ] **Step 1: Failing test** `functions/tests/upt-n5-least-squares.test.ts`
+- [ ] **Step 1: Failing test** `functions/tests/upt-n5-least-squares.test.ts`. The failing case is a well-conditioned system with entries near `1e-9`: the absolute `1e-15` limit refuses it. A column that is a `1e-14` near-copy of another already throws, because the normal equations square the condition number. Add a case with `200000` rows and a case with entries near `1e-170`.
 
-```ts
-import { describe, it, expect } from 'vitest';
-import { leastSquares } from '../src/index.js';
+- [ ] **Step 2: RED** on the `1e-9` case.
 
-describe('N5 leastSquares pivot', () => {
-  it('solves a well-conditioned system', () => {
-    expect(
-      leastSquares(
-        [
-          [1, 0],
-          [0, 1],
-          [1, 1],
-        ],
-        [1, 1, 2]
-      )
-    ).toEqual([1, 1]);
-  });
-  it('throws when a column is a 1e-14 copy of another', () => {
-    const eps = 1e-14;
-    expect(() =>
-      leastSquares(
-        [
-          [1, 1 + eps],
-          [1, 1],
-          [1, 1],
-        ],
-        [1, 1, 1]
-      )
-    ).toThrow(/singular/);
-  });
-});
-```
+- [ ] **Step 3: Equilibrate.** Scale each column of `A` to unit 2-norm. Compute the norm as max-abs times the square root of the scaled sum of squares, so no value overflows or underflows and no argument list spreads over the rows. A zero column throws `linsolve: singular matrix`. The diagonal of the scaled `AᵀA` is then 1, so a fixed pivot limit `1e-13` is relative to the column scale. Solve with a private `solvePivoted(A, b, pivotTol)` and divide each result by its column norm. Public `linsolve(A, b)` calls the same solver with `1e-15`.
 
-Tune `eps` only if a column scaled by `1e-14` is still above the relative cutoff after equilibration; the assertion is “near `1e-13`”, not “the audit’s exact 3×2 matrix”. Record the matrix in the test name.
+- [ ] **Step 4: GREEN** on this file and the existing `leastSquares` and `linsolve` tests.
 
-- [ ] **Step 2: RED or already-green.** If the `1e-14` case already throws, tighten the fixture toward `1e-12` until it does **not** throw, then implement. If a well-conditioned system throws after the change, revert the threshold and leave N5 open. Do not ship a regression.
-
-- [ ] **Step 3: Equilibrate.** Divide each column of `A` by its max-abs (skip a zero column — that is already singular). Build `AᵀA` from the scaled columns. Pass `relativeTol: 1e-13` into a new optional argument of the local solver used only by `leastSquares`. Compare `maxVal < relativeTol * scale` where `scale` is the max-abs of the remaining pivot column. Public `linsolve(A, b)` keeps `1e-15` absolute.
-
-- [ ] **Step 4: GREEN** on this file and any existing `leastSquares` / `linsolve` tests.
-
-- [ ] **Step 5: Commit** `fix(functions): equilibrate leastSquares pivots near 1e-13` or skip with no commit.
+- [ ] **Step 5: Commit** `fix(functions): equilibrate leastSquares pivots`.
 
 ---
 
