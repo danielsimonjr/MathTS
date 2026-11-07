@@ -358,6 +358,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // The justification behind this is that if the constructor is explicitly called,
       // the caller wishes the units to be returned exactly as supplied.
       this.skipAutomaticSimplification = skipAutomaticSimplificationDefault;
+      this.cycles = 0;
 
       if (valuelessUnit === undefined) {
         this.units = [];
@@ -968,6 +969,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
       unit.value = clone(this.value);
       unit._exactSI = this._exactSI;
+      unit.cycles = this.cycles;
       unit.dimensions = this.dimensions.slice(0);
       unit.units = [];
       for (let i = 0; i < this.units.length; i++) {
@@ -1678,6 +1680,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       if (other.value !== null) {
         throw new Error('Cannot convert to a unit with a value');
       }
+      other.cycles = bridge;
 
       if (bridge !== 0) {
         // 1 Hz = 1/s, and 1 Hz = 2π rad/s. The extra angle is one cycle.
