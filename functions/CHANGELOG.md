@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-functions
 
+## 0.73.0
+
+### Minor Changes
+
+- 6e3a978: `sum`, `mean`, `variance` and `std` on `Float64Array` now return a number instead of a Promise, and `Float32Array` is accepted. `await` still works, but calling `.then` on the result does not. `parallelStat*` functions stay async.
+- 2979fc5: `rationalNullspace` accepts `bigint` matrix cells. A `bigint` cell is exact and is read as `new Fraction(cell, 1n)`.
+- c042500: `unitToRationalDimension` accepts `options.mapUnit` so a caller can supply the seven-axis dimension of a unit (such as `bit`), and `searchScalars` accepts `dimensions.equal` to replace the default dimension equality in infer mode.
+
+### Patch Changes
+
+- e53b514: `leastSquares` equilibrates the columns before the normal equations, so a well-conditioned system with entries near 1e-9 no longer throws "singular matrix".
+- Updated dependencies [09b4dde]
+- Updated dependencies [ac4212b]
+- Updated dependencies [2a6c91d]
+- Updated dependencies [0de3d7a]
+- Updated dependencies [2fd73e8]
+  - @danielsimonjr/mathts-core@0.22.0
+  - @danielsimonjr/mathts-expression@0.12.2
+  - @danielsimonjr/mathts-matrix@0.9.1
+  - @danielsimonjr/mathts-parallel@0.8.1
+
 ## 0.72.0
 
 ### Minor Changes

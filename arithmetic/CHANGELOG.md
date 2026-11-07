@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-arithmetic
 
+## 0.1.75
+
+### Patch Changes
+
+- Updated dependencies [6e3a978]
+- Updated dependencies [2979fc5]
+- Updated dependencies [e53b514]
+- Updated dependencies [c042500]
+  - @danielsimonjr/mathts-functions@0.73.0
+
 ## 0.1.74
 
 ### Patch Changes

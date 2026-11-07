@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-compat
 
+## 0.4.37
+
+### Patch Changes
+
+- Updated dependencies [09b4dde]
+- Updated dependencies [ac4212b]
+- Updated dependencies [6e3a978]
+- Updated dependencies [2a6c91d]
+- Updated dependencies [2979fc5]
+- Updated dependencies [e53b514]
+- Updated dependencies [0de3d7a]
+- Updated dependencies [c042500]
+- Updated dependencies [2fd73e8]
+  - @danielsimonjr/mathts-core@0.22.0
+  - @danielsimonjr/mathts-functions@0.73.0
+  - @danielsimonjr/mathts-matrix@0.9.1
+  - @danielsimonjr/mathts-parallel@0.8.1
+
 ## 0.4.36
 
 ### Patch Changes
