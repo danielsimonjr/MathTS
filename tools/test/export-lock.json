@@ -241,6 +241,9 @@
       "ALL_UNITS": {
         "kind": "object"
       },
+      "AmbiguousUnitError": {
+        "kind": "function"
+      },
       "BASE_UNITS": {
         "kind": "object"
       },
