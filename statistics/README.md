@@ -4,6 +4,8 @@
 standalone library covering descriptive statistics, probability distributions, hypothesis tests,
 and combinatorics.
 
+Every name this package exports is implemented in `@danielsimonjr/mathts-functions`. This package does not define a second copy of a distribution.
+
 The implementations live in
 [`@danielsimonjr/mathts-functions`](https://www.npmjs.com/package/@danielsimonjr/mathts-functions)
 and are **re-exported here, not duplicated** — this package is a curated entry point over the
