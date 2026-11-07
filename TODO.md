@@ -9,6 +9,8 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
+- [ ] UPT integration gaps (`docs/superpowers/plans/2026-11-05-upt-integration-gaps.md`): one task per PR in the plan's order (MT-1 … MT-10, D1, D4–D7); MT-5 is not implemented.
+
 - [x] **`turbo run typecheck` races the builds it reads, and a failed run leaves a cleaned `dist/` behind.** `typecheck` depends on `^build` only, but
       `expression`'s `tsc -p tsconfig.test.json` includes `../functions/src/**`, which imports the built `.d.ts` of `matrix`, `functions` and
       `expression` itself. After any source edit that misses the Turbo cache, `matrix#build` cleans `matrix/dist` while `expression#typecheck`
