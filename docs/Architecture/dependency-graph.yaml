@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-07'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6889
+  totalExports: 6892
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -803,6 +803,7 @@ modules:
             - isUnit
             - DimensionMismatchError
             - UnitParseError
+            - AmbiguousUnitError
             - DIMENSIONLESS
             - dim
           reExport: true
@@ -1061,6 +1062,7 @@ modules:
         - isUnitValue
         - DimensionMismatchError
         - UnitParseError
+        - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
         - UNIT_EXACT_SCALE
@@ -1251,6 +1253,7 @@ modules:
         - isUnit
         - DimensionMismatchError
         - UnitParseError
+        - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
         - UNIT_EXACT_SCALE
@@ -2786,6 +2789,7 @@ modules:
           typeOnly: true
         - file: ./errors.js
           imports:
+            - AmbiguousUnitError
             - DimensionMismatchError
             - UnitParseError
         - file: ./va-var.js
@@ -2888,9 +2892,11 @@ modules:
       exports:
         - UnitParseError
         - DimensionMismatchError
+        - AmbiguousUnitError
       classes:
         - UnitParseError
         - DimensionMismatchError
+        - AmbiguousUnitError
     core/src/types/unit/exact-scale.ts:
       description: Exact unit scales.
       externalDependencies: []
@@ -3406,6 +3412,7 @@ modules:
           reExport: true
         - file: ./unit/errors.js
           imports:
+            - AmbiguousUnitError
             - DimensionMismatchError
             - UnitParseError
           reExport: true
@@ -3495,6 +3502,7 @@ modules:
         - UNIT_PREFIX_SETS
         - unitPrefixExactScale
         - getUnitPrefix
+        - AmbiguousUnitError
         - DimensionMismatchError
         - UnitParseError
         - isUnit
@@ -3557,6 +3565,7 @@ modules:
         - UNIT_PREFIX_SETS
         - unitPrefixExactScale
         - getUnitPrefix
+        - AmbiguousUnitError
         - DimensionMismatchError
         - UnitParseError
         - isUnit
@@ -42856,15 +42865,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213958
-  totalExports: 6889
-  totalClasses: 60
+  totalLinesOfCode: 213977
+  totalExports: 6892
+  totalClasses: 61
   totalInterfaces: 594
   totalFunctions: 2285
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635
-  totalReExports: 2982
+  totalReExports: 2984
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

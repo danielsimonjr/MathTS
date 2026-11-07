@@ -98,6 +98,7 @@ export {
   isUnit as isUnitValue,
   DimensionMismatchError,
   UnitParseError,
+  AmbiguousUnitError,
   DIMENSIONLESS,
   dim,
 } from './types/unit.js';

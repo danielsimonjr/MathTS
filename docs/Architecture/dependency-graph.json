@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-07",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6889
+    "totalExports": 6892
   },
   "entryPoints": [
     {
@@ -863,6 +863,7 @@
               "isUnit",
               "DimensionMismatchError",
               "UnitParseError",
+              "AmbiguousUnitError",
               "DIMENSIONLESS",
               "dim"
             ],
@@ -1137,6 +1138,7 @@
           "isUnitValue",
           "DimensionMismatchError",
           "UnitParseError",
+          "AmbiguousUnitError",
           "DIMENSIONLESS",
           "dim",
           "UNIT_EXACT_SCALE",
@@ -1328,6 +1330,7 @@
           "isUnit",
           "DimensionMismatchError",
           "UnitParseError",
+          "AmbiguousUnitError",
           "DIMENSIONLESS",
           "dim",
           "UNIT_EXACT_SCALE",
@@ -2878,7 +2881,7 @@
           },
           {
             "file": "./errors.js",
-            "imports": ["DimensionMismatchError", "UnitParseError"]
+            "imports": ["AmbiguousUnitError", "DimensionMismatchError", "UnitParseError"]
           },
           {
             "file": "./va-var.js",
@@ -2994,8 +2997,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["UnitParseError", "DimensionMismatchError"],
-        "classes": ["UnitParseError", "DimensionMismatchError"]
+        "exports": ["UnitParseError", "DimensionMismatchError", "AmbiguousUnitError"],
+        "classes": ["UnitParseError", "DimensionMismatchError", "AmbiguousUnitError"]
       },
       "core/src/types/unit/exact-scale.ts": {
         "description": "Exact unit scales.",
@@ -3532,7 +3535,7 @@
           },
           {
             "file": "./unit/errors.js",
-            "imports": ["DimensionMismatchError", "UnitParseError"],
+            "imports": ["AmbiguousUnitError", "DimensionMismatchError", "UnitParseError"],
             "reExport": true
           },
           {
@@ -3629,6 +3632,7 @@
           "UNIT_PREFIX_SETS",
           "unitPrefixExactScale",
           "getUnitPrefix",
+          "AmbiguousUnitError",
           "DimensionMismatchError",
           "UnitParseError",
           "isUnit",
@@ -3692,6 +3696,7 @@
           "UNIT_PREFIX_SETS",
           "unitPrefixExactScale",
           "getUnitPrefix",
+          "AmbiguousUnitError",
           "DimensionMismatchError",
           "UnitParseError",
           "isUnit",
@@ -45298,15 +45303,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213958,
-    "totalExports": 6889,
-    "totalClasses": 60,
+    "totalLinesOfCode": 213977,
+    "totalExports": 6892,
+    "totalClasses": 61,
     "totalInterfaces": 594,
     "totalFunctions": 2285,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,
-    "totalReExports": 2982,
+    "totalReExports": 2984,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

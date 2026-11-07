@@ -74,7 +74,7 @@ export type {
 } from './unit/index.js';
 
 // Typed error classes — `catch (e) { e instanceof UnitParseError }` still works.
-export { DimensionMismatchError, UnitParseError } from './unit/errors.js';
+export { AmbiguousUnitError, DimensionMismatchError, UnitParseError } from './unit/errors.js';
 
 // Duck-typed guard (works across module boundaries and on the merged Unit).
 export { isUnit } from '../is.js';

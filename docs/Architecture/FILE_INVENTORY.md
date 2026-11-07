@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2164
+**Total files**: 2165
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1243 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      830 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      831 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2164** |                                                                                                                |
+| **Total**     | **2165** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     7 |
 | `src`      |  1269 |
-| `tests`    |   830 |
+| `tests`    |   831 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    26 |
 | `@danielsimonjr/mathts-compat`         |    16 |
-| `@danielsimonjr/mathts-core`           |   110 |
+| `@danielsimonjr/mathts-core`           |   111 |
 | `@danielsimonjr/mathts-evaluator`      |     4 |
 | `@danielsimonjr/mathts-expression`     |   562 |
 | `@danielsimonjr/mathts-functions`      |   957 |
@@ -253,6 +253,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/unit/core-unit.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/create-unit-pollution.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/unit/upt-u5-u6-glued.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/unit/upt-u7-ambiguous.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/upt-n4-pairwise-dot.test.ts`                                          | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/version.test.ts`                                                      | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tsdown.config.ts`                                                           | @danielsimonjr/mathts-core           | config   | config      |
