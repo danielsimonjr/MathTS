@@ -87,6 +87,8 @@ Options omitted above take the values in the defaults table already on this page
 
 `admit` must be a pure function of the node. The search does not copy it. A predicate that reads a clock or a random stream makes the run unreproducible. When `admit` is omitted, the seed-7 pin is unchanged.
 
+Formula strings are not accepted. `searchScalars` takes a `ScalarNode` tree and a `ScalarGrammar`. The caller supplies the `admit` predicate, for example the UPT `validate` hook. `scalarToTex` is the printable form of a tree. Omitting `dimensions` does not need a symbol newer than `searchScalars` itself.
+
 ## Pareto scores and model selection
 
 Definitions match `functions/src/pareto-front.ts`.
