@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-08", "f": 1269, "e": 6904, "re": 2993 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-08", "f": 1270, "e": 6910, "re": 2996 },
   "s": {
-    "loc": 214229,
+    "loc": 214361,
     "cls": 61,
     "int": 596,
-    "fn": 2285,
+    "fn": 2288,
     "tg": 168,
     "en": 0,
     "co": 1638,
@@ -1034,7 +1034,7 @@
       ]
     },
     "functions/stats": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "wassersteinDistance",
         "energyDistance",
@@ -1895,7 +1895,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 13 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
-    { "p": "src/index.ts", "i": 200, "o": 0 },
+    { "p": "src/index.ts", "i": 201, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },

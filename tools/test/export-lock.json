@@ -3490,6 +3490,9 @@
       "cohensD": {
         "kind": "function"
       },
+      "cohensKappa": {
+        "kind": "function"
+      },
       "coherence": {
         "kind": "function"
       },
@@ -5482,6 +5485,9 @@
       "neutronMass": {
         "kind": "object"
       },
+      "newcombePairedInterval": {
+        "kind": "function"
+      },
       "newton": {
         "kind": "function"
       },
@@ -6899,6 +6905,9 @@
         "kind": "function"
       },
       "wilcoxon": {
+        "kind": "function"
+      },
+      "wilsonInterval": {
         "kind": "function"
       },
       "windowFunction": {

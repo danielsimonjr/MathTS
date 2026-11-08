@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1323 exports).
+> `@danielsimonjr/mathts-functions` (1326 exports).
 
 ### Functions by category
 
@@ -690,7 +690,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-**Hypothesis Tests** (36): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `gTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `moodMedianTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `powerDivergence`, `principalComponentAnalysis`, `proportionZTest`, `runsTest`, `shapiroWilkTest`, `signTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+**Hypothesis Tests** (39): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `cohensKappa`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `gTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `moodMedianTest`, `multipleComparison`, `multipleTest`, `newcombePairedInterval`, `permutationTest`, `powerDivergence`, `principalComponentAnalysis`, `proportionZTest`, `runsTest`, `shapiroWilkTest`, `signTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`, `wilsonInterval`
 
 **Set Operations** (13): `setCartesian`, `setDifference`, `setDisjoint`, `setDistinct`, `setEqual`, `setIntersect`, `setIsSubset`, `setIsSuperset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 
