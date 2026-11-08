@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-compat
 
+## 0.4.39
+
+### Patch Changes
+
+- Updated dependencies [c491a7e]
+- Updated dependencies [c4ba088]
+  - @danielsimonjr/mathts-functions@0.75.0
+
 ## 0.4.38
 
 ### Patch Changes
