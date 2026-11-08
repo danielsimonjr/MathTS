@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.5.8
+
+### Patch Changes
+
+- Updated dependencies [22cb17e]
+  - @danielsimonjr/mathts-functions@0.77.0
+  - @danielsimonjr/mathts-plot@0.4.22
+
 ## 0.5.7
 
 ### Patch Changes
