@@ -2083,7 +2083,10 @@ describe('searchScalars: islands', () => {
     expect(mergeDiverges).toBeLessThanOrEqual(55);
     expect(immediateDiverges).toBeGreaterThanOrEqual(30);
     expect(pinnedMergeMatches).toBe(true);
-  });
+    // 240 searches (80 configs x 3 timings): 7-16 s idle, 30.4 s under a 12-process CPU
+    // hog. The counts are calibrated on all 80 configs, so the test is not shrunk; the
+    // limit is about 7x the idle cost, the full-gate contention ratio in vitest.config.ts.
+  }, 120_000);
 
   it('survives a grammar with fewer trees than islands', async () => {
     const tiny: ScalarGrammar = {
