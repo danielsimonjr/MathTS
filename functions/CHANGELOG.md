@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.76.0
+
+### Minor Changes
+
+- 5fa92f7: Add `wilsonInterval`, `newcombePairedInterval` (Newcombe 1998 method 10) and `cohensKappa`.
+
 ## 0.75.1
 
 ### Patch Changes
