@@ -13,7 +13,7 @@ WebGPU paths (caller opt-in, f32). Each kernel picks JS, workers, WASM, or GPU
 from measured thresholds — not one fixed cascade.
 All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
-The function layer (`@danielsimonjr/mathts-functions` 0.72.0) exposes **1,321 exports** in
+The function layer (`@danielsimonjr/mathts-functions` 0.72.0) exposes **1,323 exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
 Browse them at **[danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)** (searchable
@@ -244,7 +244,7 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 | `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels)                                                      |
 | `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                                                                       |
 | `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                                                                                    |
-| `@danielsimonjr/mathts-functions`      | 1,321 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
+| `@danielsimonjr/mathts-functions`      | 1,323 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
 | `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                                                                        |
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (15 node classes + `Node` base)                                                                                  |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                                                                      |
@@ -426,7 +426,7 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 | [`docs/migration-guide.md`](./docs/migration-guide.md)                                 | Migrating from mathjs v15                                              |
 | [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)                 | ScalarNode toolkit, Pareto selection, and search                       |
 | [`TODO.md`](./TODO.md)                                                                 | Open items and deferred decisions                                      |
-| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,321 exports) with Accel column |
+| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,323 exports) with Accel column |
 | [`docs/README.md`](./docs/README.md)                                                   | Index of every document in `docs/`                                     |
 | [`docs/getting-started.md`](./docs/getting-started.md)                                 | Install, first computations, function categories                       |
 | [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)                          | Searchable function reference site (`bun run docs:landing`)            |

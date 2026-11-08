@@ -8,7 +8,7 @@
  * `noncentralChi2PDF` (`typed/distributions.ts`). No distribution math is
  * duplicated: only the mixture weighting is new.
  */
-import { chiSquaredCDF, fCDF } from '../distribution-functions.js';
+import { chiSquaredCDF, chiSquaredSF, fCDF } from '../distribution-functions.js';
 import { chiSquaredDist, normalDist } from '../typed/dist-objects.js';
 import { besselIScalar } from '../wasm/special/scalars.js';
 
@@ -219,8 +219,8 @@ export interface McNemarResult {
  *   chi2 = (|b − c| − correction)² / (b + c)
  *
  * with the continuity correction (`1`) applied by default, matching
- * `statsmodels.stats.contingency_tables.mcnemar`. `pValue = 1 −
- * chiSquaredCDF(chi2, 1)`.
+ * `statsmodels.stats.contingency_tables.mcnemar`. `pValue =
+ * chiSquaredSF(chi2, 1)`, the upper tail computed directly.
  *
  * @example
  * mcnemar([[10, 5], [3, 12]], { correction: false }); // { chi2: 0.5, pValue: ... }
@@ -238,7 +238,7 @@ export function mcnemar(
   const denom = b + c;
   const diff = Math.max(0, Math.abs(b - c) - (correction ? 1 : 0));
   const chi2 = denom > 0 ? (diff * diff) / denom : 0;
-  const pValue = 1 - chiSquaredCDF(chi2, 1);
+  const pValue = chiSquaredSF(chi2, 1);
   return { chi2, pValue };
 }
 
