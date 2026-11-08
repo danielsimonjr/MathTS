@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.77.0
+
+### Minor Changes
+
+- 22cb17e: Type the `gcd` results: `gcd(number, number)` returns `number`. `gcd(bigint, bigint)` returns `bigint`. `gcd(BigNumber, BigNumber)` returns `BigNumber`. Export the `GcdFunction` type.
+
 ## 0.76.0
 
 ### Minor Changes
