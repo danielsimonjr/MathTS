@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-numbers
 
+## 0.1.25
+
+### Patch Changes
+
+- Updated dependencies [3628d5a]
+  - @danielsimonjr/mathts-core@0.23.0
+
 ## 0.1.24
 
 ### Patch Changes

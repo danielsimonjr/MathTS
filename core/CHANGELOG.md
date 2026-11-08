@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.23.0
+
+### Minor Changes
+
+- 3628d5a: Add `Unit.readings(token)`. The function gives every product reading of one glued unit token (for example `mAs` is `m·A·s` or `mA·s`), before any parse policy.
+
 ## 0.22.0
 
 ### Minor Changes
