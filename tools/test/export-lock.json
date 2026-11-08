@@ -3424,6 +3424,9 @@
       "chiSquaredQuantile": {
         "kind": "function"
       },
+      "chiSquaredSF": {
+        "kind": "function"
+      },
       "chineseRemainder": {
         "kind": "function"
       },
@@ -4097,6 +4100,9 @@
         "kind": "function"
       },
       "fQuantile": {
+        "kind": "function"
+      },
+      "fSF": {
         "kind": "function"
       },
       "fTest": {
