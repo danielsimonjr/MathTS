@@ -210,6 +210,7 @@ export {
   normalQuantile,
   studentTCDF,
   studentTQuantile,
+  studentTTwoSidedP,
   chiSquaredCDF,
   chiSquaredQuantile,
   fCDF,

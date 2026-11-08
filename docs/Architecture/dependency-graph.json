@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-08",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6899
+    "totalExports": 6900
   },
   "entryPoints": [
     {
@@ -10102,6 +10102,7 @@
               "normalQuantile",
               "studentTCDF",
               "studentTQuantile",
+              "studentTTwoSidedP",
               "chiSquaredCDF",
               "chiSquaredQuantile",
               "fCDF",
@@ -11513,6 +11514,7 @@
           "normalQuantile",
           "studentTCDF",
           "studentTQuantile",
+          "studentTTwoSidedP",
           "chiSquaredCDF",
           "chiSquaredQuantile",
           "fCDF",
@@ -12242,6 +12244,7 @@
           "normalQuantile",
           "studentTCDF",
           "studentTQuantile",
+          "studentTTwoSidedP",
           "chiSquaredCDF",
           "chiSquaredQuantile",
           "fCDF",
@@ -45331,15 +45334,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 214119,
-    "totalExports": 6899,
+    "totalLinesOfCode": 214120,
+    "totalExports": 6900,
     "totalClasses": 61,
     "totalInterfaces": 596,
     "totalFunctions": 2285,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1636,
-    "totalReExports": 2990,
+    "totalReExports": 2991,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

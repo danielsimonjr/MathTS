@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-08",
-  "totalFiles": 2176,
+  "totalFiles": 2177,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 842,
+    "test": 843,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 842,
+    "tests": 843,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 964,
+    "@danielsimonjr/mathts-functions": 965,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -6449,7 +6449,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 989
+      "loc": 990
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -11658,6 +11658,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 43
+    },
+    {
+      "file": "functions/tests/student-t-two-sided-p-export.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 21
     },
     {
       "file": "functions/tests/summation-symbolic-bound.test.ts",
