@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`Unit.parse` accepts the middle dot as a product (UPT plan task M7).** The middle dot `·` (U+00B7) is a product sign, the same as `*`. `N·m` is `N*m`, and `m^2/(V·s)` is `m^2/(V*s)`. After a solidus, the dot stays in the denominator, so `W/m·K` is `W/(m*K)`. `core/tests/unit/unit-middle-dot.test.ts` locks the behavior.
+
 ### Documented
 
 - **`searchScalars` admit is the UPT validate hook (UPT D1).** `docs/reference/scalar-search.md` states that formula strings are not accepted and that the caller supplies `admit`. `functions/tests/upt-d1-admit-contract.test.ts` locks the behavior.
