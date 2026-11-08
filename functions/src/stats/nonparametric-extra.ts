@@ -2,14 +2,13 @@
  * Nonparametric and categorical tests plus the jackknife (gap-analysis
  * 2026-11-04, Batch A).
  */
-import { chiSquaredCDF } from '../distribution-functions.js';
+import { chiSquaredSF } from '../distribution-functions.js';
 import { normalCDF as _normalCDF } from '../typed/distributions.js';
 
 type Vec = readonly number[] | Float64Array;
 
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const normalCDF = (z: number): number => _normalCDF(z) as number;
-const chi2Sf = (stat: number, df: number): number => 1 - chiSquaredCDF(stat, df);
 
 function median(a: number[]): number {
   const s = [...a].sort((p, q) => p - q);
@@ -93,7 +92,7 @@ export function moodMedianTest(groups: readonly Vec[]): {
     if (eB > 0) stat += (below[i] - eB) ** 2 / eB;
   }
   const df = gs.length - 1;
-  return { statistic: stat, pValue: chi2Sf(stat, df), grandMedian };
+  return { statistic: stat, pValue: chiSquaredSF(stat, df), grandMedian };
 }
 
 /**
@@ -121,7 +120,7 @@ export function powerDivergence(
     }
     stat = (2 / (lambda * (lambda + 1))) * stat;
   }
-  return { statistic: stat, pValue: chi2Sf(stat, o.length - 1) };
+  return { statistic: stat, pValue: chiSquaredSF(stat, o.length - 1) };
 }
 
 /** Log-likelihood ratio G-test: `powerDivergence(observed, expected, 0)`. */

@@ -257,7 +257,7 @@ export interface CochranQResult {
  *   Q = (k−1)·(k·ΣCⱼ² − N²) / (k·N − ΣRᵢ²)
  *
  * where `Cⱼ` are column sums, `Rᵢ` are row sums, and `N = ΣRᵢ`. `dof = k −
- * 1`; `pValue = 1 − chiSquaredCDF(Q, k−1)`. Matches
+ * 1`; `pValue = chiSquaredSF(Q, k−1)`. Matches
  * `statsmodels.stats.contingency_tables.cochrans_q`.
  *
  * @example
@@ -291,6 +291,6 @@ export function cochranQ(data: readonly (readonly number[])[]): CochranQResult {
   const dof = k - 1;
   const denominator = k * N - sumR2;
   const Q = denominator !== 0 ? (dof * (k * sumC2 - N * N)) / denominator : 0;
-  const pValue = 1 - chiSquaredCDF(Q, dof);
+  const pValue = chiSquaredSF(Q, dof);
   return { Q, pValue, dof };
 }
