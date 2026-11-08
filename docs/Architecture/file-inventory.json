@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-08",
-  "totalFiles": 2175,
+  "totalFiles": 2176,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
-    "test": 841,
+    "test": 842,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1269,
-    "tests": 841,
+    "tests": 842,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 963,
+    "@danielsimonjr/mathts-functions": 964,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -8661,7 +8661,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2096
+      "loc": 2102
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -9250,6 +9250,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 83
+    },
+    {
+      "file": "functions/tests/binomial-test-equal-split.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 22
     },
     {
       "file": "functions/tests/bitwise-as-wasm.test.ts",
@@ -11405,7 +11412,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 44
+      "loc": 39
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",
