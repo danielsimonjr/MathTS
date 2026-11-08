@@ -48,12 +48,15 @@ describe('wilsonInterval (UPT plan task M4)', () => {
 });
 
 describe('newcombePairedInterval, method 10 (UPT plan task M4)', () => {
-  // Newcombe (1998) method 10, values from an independent Python implementation, to 4 decimals.
+  // Newcombe RG, "Improved confidence intervals for the difference between binomial
+  // proportions based on paired data", Statist. Med. 17, 2635-2650 (1998), Table III,
+  // method 10, 95 per cent limits as printed to 4 decimals. The second and third rows
+  // differ from method 8, so they pin the continuity-corrected phi numerator.
   const cases: [number, number, number, number, number, number][] = [
     [36, 12, 2, 0, 0.0569, 0.3404],
-    [263, 15, 3, 22, 0.0117, 0.0704],
-    [2, 1, 1, 8, -0.2745, 0.2745],
-    [4, 9, 1, 3, 0.135, 0.684],
+    [20, 12, 2, 16, 0.0562, 0.3292],
+    [18, 12, 2, 18, 0.0562, 0.329],
+    [36, 14, 0, 0, 0.1528, 0.4167],
   ];
   it.each(cases)('a=%i b=%i c=%i d=%i', (a, b, c, d, lo, hi) => {
     const r = api.newcombePairedInterval({ a, b, c, d });
