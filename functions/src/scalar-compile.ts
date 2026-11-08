@@ -565,6 +565,15 @@ function compileNode(ctx: CompileCtx, node: ScalarNode): number {
         ctx.rootReg = dest;
         return dest;
       }
+      if (op === '-' && args.length === 1) {
+        // One-argument `-` negates, as `(-1) * x` (scalar-eval.ts evalOp).
+        const minusOne = allocReg(ctx);
+        ctx.tape.push({ tag: 'const', dest: minusOne, value: -1 });
+        const src = compileNode(ctx, args[0]);
+        ctx.tape.push({ tag: 'bin', dest, op: '*', left: minusOne, right: src });
+        ctx.rootReg = dest;
+        return dest;
+      }
       if (args.length === 1) {
         const src = compileNode(ctx, args[0]);
         if (src !== dest) {

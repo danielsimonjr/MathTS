@@ -409,9 +409,9 @@ describe('scalar-node-bridge operator FunctionNodes', () => {
 });
 
 describe('scalar-node-bridge degenerate arity', () => {
-  it('one-arg subtract is identity for evaluateScalar but not Node.evaluate', () => {
+  it('one-arg subtract negates in evaluateScalar and throws in Node.evaluate', () => {
     const t = scalar.op('-', [scalar.symbol('x')]);
-    expect(evaluateScalar(t, { x: 3 })).toBe(3);
+    expect(evaluateScalar(t, { x: 3 })).toBe(-3);
     expect(() => scalarToNode(t).evaluate({ x: 3 })).toThrow();
   });
 
@@ -640,11 +640,11 @@ describe('scalar-node-bridge -0 and NaN round-trip', () => {
 });
 
 describe('scalar-node-bridge mutation sanity', () => {
-  it('changing subtract fn to add would break one-arg minus identity', () => {
+  it('changing subtract fn to add would break one-arg minus negation', () => {
     const t = scalar.op('-', [scalar.symbol('x')]);
     const node = scalarToNode(t) as unknown as { fn: string };
     expect(node.fn).toBe('subtract');
-    expect(evaluateScalar(t, { x: 3 })).toBe(3);
+    expect(evaluateScalar(t, { x: 3 })).toBe(-3);
   });
 
   it('double SCALAR_FUNCTION_LOWERING would mis-name log', () => {

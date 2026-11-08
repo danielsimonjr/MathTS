@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-07'
+  lastUpdated: '2026-11-08'
   totalFiles: 1269
   totalModules: 82
   totalExports: 6899
@@ -42890,7 +42890,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 214102
+  totalLinesOfCode: 214113
   totalExports: 6899
   totalClasses: 61
   totalInterfaces: 596

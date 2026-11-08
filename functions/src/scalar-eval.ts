@@ -10,9 +10,8 @@
  * unresolved unless the scope supplies them.
  *
  * `+ - * /` fold left to right. An empty `*` or `/` is 1; an empty `+` or `-`
- * is 0. A single-argument `+ - * /` returns that argument. `^` requires two
- * arguments and calls MathTS `pow`. One-argument `-` does not negate; a
- * unary minus is `(-1) * x`.
+ * is 0. A one-argument `-` negates: it is `(-1) * x`. A one-argument `+ * /`
+ * returns that argument. `^` requires two arguments and calls MathTS `pow`.
  *
  * A non-finite operator or call result throws {@link ScalarEvalError}. That
  * includes `sqrt` of a negative argument (complex-valued in MathTS), and
@@ -150,6 +149,9 @@ function evalOp(op: ScalarOperator, args: readonly ScalarNode[], scope: ScalarSc
     return requireFinite(pow(base, exponent), '^');
   }
   if (args.length === 0) return op === '*' || op === '/' ? 1 : 0;
+  if (op === '-' && args.length === 1) {
+    return requireFinite(multiply(-1, evalNode(args[0], scope)), op);
+  }
   let acc = evalNode(args[0], scope);
   for (let i = 1; i < args.length; i++) {
     const right = evalNode(args[i], scope);
