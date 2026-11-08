@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-functions
 
+## 0.74.0
+
+### Minor Changes
+
+- 3e0e278: `evaluateScalar`, `compileScalar` and `compileScalarGradient` read a one-argument `-` as negation, `(-1) * x`. Before, they returned the argument unchanged, so `-x` at x = 3 gave 3 and a gradient of 1. A one-argument `+ * /` still returns its argument. `scalarToNode` is unchanged: a one-argument `-` still maps to a one-argument `subtract`, which `Node.evaluate` refuses.
+- ed1ab85: `studentTTwoSidedP(t, df)` is exported. It returns the two-sided Student-t p-value, computed directly in the tail with the regularized incomplete beta.
+
+### Patch Changes
+
+- 05ef781: `binomialTest` divides the included probability by the computed total mass of the n + 1 pmf terms. An equal split now gives a p-value of exactly 1 (it was 0.9999999999998926 at 500 of 1000), and an asymmetric count keeps the scipy value.
+
 ## 0.73.0
 
 ### Minor Changes
