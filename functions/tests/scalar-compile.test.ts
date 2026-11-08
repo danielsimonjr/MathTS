@@ -239,7 +239,7 @@ describe('compileScalar', () => {
     expect(compiledOk.evaluate([]).values[0]).toBe(6);
     expect(
       compileScalar(scalar.op('-', [scalar.number(4)]), { variables: [] }).evaluate([]).values[0]
-    ).toBe(4);
+    ).toBe(-4);
     expect(compileScalar(scalar.op('+', []), { variables: [] }).evaluate([]).values[0]).toBe(0);
     expect(compileScalar(scalar.op('*', []), { variables: [] }).evaluate([]).values[0]).toBe(1);
     const plusX = scalar.op('+', [scalar.symbol('x')]);

@@ -51,7 +51,7 @@ describe('evaluateScalar', () => {
     expect(evaluateScalar(scalar.op('^', [scalar.symbol('2'), scalar.symbol('10')]))).toBe(
       asNumber(pow(2, 10))
     );
-    expect(evaluateScalar(scalar.op('-', [scalar.number(4)]))).toBe(4);
+    expect(evaluateScalar(scalar.op('-', [scalar.number(4)]))).toBe(-4);
   });
 
   it('prefers a scope binding over a numeric literal spelling', () => {
