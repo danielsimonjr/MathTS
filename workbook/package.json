@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-workbook",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Scientific workbook runtime for MathTS (.mtsw format)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -36,8 +36,8 @@
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.22.0",
     "@danielsimonjr/mathts-expression": "^0.12.2",
-    "@danielsimonjr/mathts-functions": "^0.74.0",
-    "@danielsimonjr/mathts-plot": "^0.4.19",
+    "@danielsimonjr/mathts-functions": "^0.75.0",
+    "@danielsimonjr/mathts-plot": "^0.4.20",
     "yaml": "^2.3.0"
   },
   "devDependencies": {

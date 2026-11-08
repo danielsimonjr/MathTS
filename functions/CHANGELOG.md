@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-functions
 
+## 0.75.0
+
+### Minor Changes
+
+- c4ba088: Add `chiSquaredSF(x, df)` and `fSF(x, d1, d2)`, survival functions computed directly in the upper tail. `mcnemar` takes its p-value from `chiSquaredSF`, so a far tail is no longer 0.
+
+### Patch Changes
+
+- c491a7e: `kruskalWallis`, `jarqueBera`, `chi2Contingency`, `cochranQ`, `moodMedianTest`, `powerDivergence`, `gTest` and `ljungBox` take their p-value from `chiSquaredSF`, and `fTest` takes its upper tail from `fSF`. A p-value below about 1e-16 was 0 and is now the scipy value.
+
 ## 0.74.0
 
 ### Minor Changes
