@@ -9,6 +9,7 @@
 #     and its wasm-pairing report.
 #   - DGT (docs:deps): only when any package `src/` (or `assembly/`) changed — imports/exports are
 #     what drive the dependency graph. Regenerated reports are staged into the commit.
+#   - LOCK (check-export-lock): same gate; compares the built exports to the lock.
 #   - FNREF (docs:functions): same gate — the generator refuses a missing/stale dist and exits
 #     before rewriting docs/api or docs/reference; `sh -e` aborts the commit. Rebuild that package
 #     and commit again. Still ~8s and build-free when dist is fresh.
@@ -28,6 +29,13 @@ if printf '%s\n' "$staged" | grep -qE '(^|/)src/|^assembly/'; then
   echo "pre-commit: source changed → regenerating function reference (docs:functions)"
   bun run docs:functions
   git add docs/api docs/reference
+  # EXPORT LOCK (check-export-lock): the public export names of every published package must
+  # match tools/test/export-lock.json. CI runs the same check in the Test (22.x) job. It reads
+  # the built dist, which docs:functions above already requires to be fresh, so it runs only
+  # here, where src/ changed. For a deliberate export change, run
+  # `node tools/test/check-export-lock.mjs --write` and stage the lock.
+  echo "pre-commit: source changed → checking the public export-name lock (check-export-lock)"
+  node tools/test/check-export-lock.mjs
 elif printf '%s\n' "$staged" | grep -qE '\.ts$'; then
   # Non-src .ts changed (tests/docs/tools/config). The FILE CENSUS (file-inventory.json) tracks EVERY
   # tracked .ts, so adding/removing a test/doc/tool .ts leaves it stale even though the module graph
