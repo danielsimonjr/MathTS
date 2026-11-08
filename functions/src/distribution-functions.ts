@@ -16,7 +16,7 @@ import {
   gammaDist as gammaD,
   betaDist as betaD,
 } from './typed/dist-objects.js';
-import { betaincScalar } from './wasm/special/scalars.js';
+import { betaincScalar, gammaincpScalar } from './wasm/special/scalars.js';
 
 /** Standard (or general) normal quantile (inverse CDF). */
 export const normalQuantile = (p: number, mu = 0, sigma = 1): number =>
@@ -30,9 +30,31 @@ export const studentTQuantile = (p: number, df: number): number => studentT(df).
 export const chiSquaredCDF = (x: number, df: number): number => chiSquared(df).cdf(x);
 export const chiSquaredQuantile = (p: number, df: number): number => chiSquared(df).quantile(p);
 
+/**
+ * Chi-square survival function P(X > x) with `df` degrees of freedom, computed directly
+ * in the tail as Q(df/2, x/2). `1 - chiSquaredCDF(x, df)` rounds a far tail to 0.
+ */
+export const chiSquaredSF = (x: number, df: number): number => {
+  if (!(df > 0) || Number.isNaN(x)) return NaN;
+  if (x <= 0) return 1;
+  return gammaincpScalar(df / 2, x / 2);
+};
+
 /** F-distribution CDF / quantile with `d1`, `d2` degrees of freedom. */
 export const fCDF = (x: number, d1: number, d2: number): number => fisherF(d1, d2).cdf(x);
 export const fQuantile = (p: number, d1: number, d2: number): number => fisherF(d1, d2).quantile(p);
+
+/**
+ * F survival function P(X > x) with `d1`, `d2` degrees of freedom, computed directly
+ * in the tail as I_{d2/(d2 + d1·x)}(d2/2, d1/2). `1 - fCDF(x, d1, d2)` rounds a far
+ * tail to 0.
+ */
+export const fSF = (x: number, d1: number, d2: number): number => {
+  if (!(d1 > 0) || !(d2 > 0) || Number.isNaN(x)) return NaN;
+  if (x <= 0) return 1;
+  if (x === Number.POSITIVE_INFINITY) return 0;
+  return betaincScalar(d2 / 2, d1 / 2, d2 / (d2 + d1 * x));
+};
 
 /** Gamma CDF / quantile (shape `k`, rate `θ⁻¹`). */
 export const gammaCDF = (x: number, shape: number, rate = 1): number => gammaD(shape, rate).cdf(x);

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-08",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6900
+    "totalExports": 6904
   },
   "entryPoints": [
     {
@@ -9658,7 +9658,7 @@
           },
           {
             "file": "./wasm/special/scalars.js",
-            "imports": ["betaincScalar"]
+            "imports": ["betaincScalar", "gammaincpScalar"]
           }
         ],
         "workspaceDependencies": [],
@@ -9668,8 +9668,10 @@
           "studentTQuantile",
           "chiSquaredCDF",
           "chiSquaredQuantile",
+          "chiSquaredSF",
           "fCDF",
           "fQuantile",
+          "fSF",
           "gammaCDF",
           "gammaQuantile",
           "betaCDF",
@@ -9692,8 +9694,10 @@
           "studentTQuantile",
           "chiSquaredCDF",
           "chiSquaredQuantile",
+          "chiSquaredSF",
           "fCDF",
           "fQuantile",
+          "fSF",
           "gammaCDF",
           "gammaQuantile",
           "betaCDF",
@@ -10105,8 +10109,10 @@
               "studentTTwoSidedP",
               "chiSquaredCDF",
               "chiSquaredQuantile",
+              "chiSquaredSF",
               "fCDF",
               "fQuantile",
+              "fSF",
               "gammaCDF",
               "gammaQuantile",
               "betaCDF",
@@ -11517,8 +11523,10 @@
           "studentTTwoSidedP",
           "chiSquaredCDF",
           "chiSquaredQuantile",
+          "chiSquaredSF",
           "fCDF",
           "fQuantile",
+          "fSF",
           "gammaCDF",
           "gammaQuantile",
           "betaCDF",
@@ -12247,8 +12255,10 @@
           "studentTTwoSidedP",
           "chiSquaredCDF",
           "chiSquaredQuantile",
+          "chiSquaredSF",
           "fCDF",
           "fQuantile",
+          "fSF",
           "gammaCDF",
           "gammaQuantile",
           "betaCDF",
@@ -21796,7 +21806,7 @@
         "internalDependencies": [
           {
             "file": "../distribution-functions.js",
-            "imports": ["chiSquaredCDF", "fCDF"]
+            "imports": ["chiSquaredCDF", "chiSquaredSF", "fCDF"]
           },
           {
             "file": "../typed/dist-objects.js",
@@ -45334,15 +45344,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 214120,
-    "totalExports": 6900,
+    "totalLinesOfCode": 214144,
+    "totalExports": 6904,
     "totalClasses": 61,
     "totalInterfaces": 596,
     "totalFunctions": 2285,
     "totalTypeGuards": 168,
     "totalEnums": 0,
-    "totalConstants": 1636,
-    "totalReExports": 2991,
+    "totalConstants": 1638,
+    "totalReExports": 2993,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

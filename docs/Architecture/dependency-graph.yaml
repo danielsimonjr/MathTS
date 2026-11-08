@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-08'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6900
+  totalExports: 6904
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9076,6 +9076,7 @@ modules:
         - file: ./wasm/special/scalars.js
           imports:
             - betaincScalar
+            - gammaincpScalar
       workspaceDependencies: []
       exports:
         - normalQuantile
@@ -9083,8 +9084,10 @@ modules:
         - studentTQuantile
         - chiSquaredCDF
         - chiSquaredQuantile
+        - chiSquaredSF
         - fCDF
         - fQuantile
+        - fSF
         - gammaCDF
         - gammaQuantile
         - betaCDF
@@ -9107,8 +9110,10 @@ modules:
         - studentTQuantile
         - chiSquaredCDF
         - chiSquaredQuantile
+        - chiSquaredSF
         - fCDF
         - fQuantile
+        - fSF
         - gammaCDF
         - gammaQuantile
         - betaCDF
@@ -9489,8 +9494,10 @@ modules:
             - studentTTwoSidedP
             - chiSquaredCDF
             - chiSquaredQuantile
+            - chiSquaredSF
             - fCDF
             - fQuantile
+            - fSF
             - gammaCDF
             - gammaQuantile
             - betaCDF
@@ -10839,8 +10846,10 @@ modules:
         - studentTTwoSidedP
         - chiSquaredCDF
         - chiSquaredQuantile
+        - chiSquaredSF
         - fCDF
         - fQuantile
+        - fSF
         - gammaCDF
         - gammaQuantile
         - betaCDF
@@ -11568,8 +11577,10 @@ modules:
         - studentTTwoSidedP
         - chiSquaredCDF
         - chiSquaredQuantile
+        - chiSquaredSF
         - fCDF
         - fQuantile
+        - fSF
         - gammaCDF
         - gammaQuantile
         - betaCDF
@@ -20564,6 +20575,7 @@ modules:
         - file: ../distribution-functions.js
           imports:
             - chiSquaredCDF
+            - chiSquaredSF
             - fCDF
         - file: ../typed/dist-objects.js
           imports:
@@ -42893,15 +42905,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 214120
-  totalExports: 6900
+  totalLinesOfCode: 214144
+  totalExports: 6904
   totalClasses: 61
   totalInterfaces: 596
   totalFunctions: 2285
   totalTypeGuards: 168
   totalEnums: 0
-  totalConstants: 1636
-  totalReExports: 2991
+  totalConstants: 1638
+  totalReExports: 2993
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

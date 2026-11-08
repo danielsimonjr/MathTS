@@ -831,6 +831,6 @@ const pca = principalComponentAnalysis(data, 2); // reduce to 2 components
 ## See Also
 
 - [API Reference](./api/README.md) - Complete API documentation
-- [Function Reference](./reference/functions.md) - All 1,321 exports (browsable at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/))
+- [Function Reference](./reference/functions.md) - All 1,323 exports (browsable at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/))
 - [Getting Started](./getting-started.md) - Basic usage guide
 - [Migration Guide](./migration/guide.md) - Migrating from mathjs
