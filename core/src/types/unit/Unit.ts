@@ -542,6 +542,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
     }
 
+    /**
+     * Reads one product sign. The sign is `*` or the middle dot `·` (U+00B7).
+     * ISO 80000-1 uses the middle dot to write a product of units, for example `N·m`.
+     */
+    function parseProduct(): boolean {
+      return parseCharacter('*') !== null || parseCharacter('·') !== null;
+    }
+
     function findUnitPair(name: string): { unit: UnitDef; prefix: PrefixDef } | null {
       return _findUnit(name) as { unit: UnitDef; prefix: PrefixDef } | null;
     }
@@ -749,7 +757,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         skipWhitespace(); // Whitespace is not required here
 
         // handle multiplication or division right after the value, like '1/s'
-        if (parseCharacter('*')) {
+        if (parseProduct()) {
           valueProduct = true;
           powerMultiplierCurrent = 1;
           expectingUnit = true;
@@ -896,7 +904,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // Is there a forward slash? If so, negate powerMultiplierCurrent. The next unit or paren group is in the denominator.
         expectingUnit = false;
 
-        if (parseCharacter('*')) {
+        if (parseProduct()) {
           // Explicit multiplication. Inside a denominator it stays there: W/m*K = W/(m·K).
           powerMultiplierCurrent = inDenominator ? -1 : 1;
           expectingUnit = true;
