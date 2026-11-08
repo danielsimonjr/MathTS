@@ -4503,7 +4503,7 @@ graph LR
 | ----------------------------- | ------------------------------ | ------ |
 | `./typed/arithmetic.js`       | `variance, mean`               | Import |
 | `./descriptive-stats.js`      | `skewness, kurtosis, rankdata` | Import |
-| `./distribution-functions.js` | `fCDF, chiSquaredCDF`          | Import |
+| `./distribution-functions.js` | `chiSquaredSF, fCDF, fSF`      | Import |
 | `./typed/distributions.js`    | `normalCDF, normalPDF`         | Import |
 | `./typed/special.js`          | `lgamma`                       | Import |
 
@@ -9427,9 +9427,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type   |
-| ------------------------------ | --------------- | ------ |
-| `../distribution-functions.js` | `chiSquaredCDF` | Import |
+| File                           | Imports        | Type   |
+| ------------------------------ | -------------- | ------ |
+| `../distribution-functions.js` | `chiSquaredSF` | Import |
 
 **Exports:**
 
@@ -9496,10 +9496,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type   |
-| ------------------------------ | --------------- | ------ |
-| `../distribution-functions.js` | `chiSquaredCDF` | Import |
-| `../typed/distributions.js`    | `normalCDF`     | Import |
+| File                           | Imports        | Type   |
+| ------------------------------ | -------------- | ------ |
+| `../distribution-functions.js` | `chiSquaredSF` | Import |
+| `../typed/distributions.js`    | `normalCDF`    | Import |
 
 **Exports:**
 
@@ -9536,11 +9536,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type   |
-| ------------------------------ | --------------- | ------ |
-| `../timeseries-extra.js`       | `acf`           | Import |
-| `../distribution-functions.js` | `chiSquaredCDF` | Import |
-| `../ml/ols.js`                 | `ols`           | Import |
+| File                           | Imports        | Type   |
+| ------------------------------ | -------------- | ------ |
+| `../timeseries-extra.js`       | `acf`          | Import |
+| `../distribution-functions.js` | `chiSquaredSF` | Import |
+| `../ml/ols.js`                 | `ols`          | Import |
 
 **Exports:**
 

@@ -9,7 +9,7 @@
  * (`typed/hypothesis.ts`) with the same three corrections under the name used
  * by `statsmodels.stats.multitest.multipletests`.
  */
-import { chiSquaredCDF } from '../distribution-functions.js';
+import { chiSquaredSF } from '../distribution-functions.js';
 
 /** Result of {@link chi2Contingency}. */
 export interface Chi2ContingencyResult {
@@ -34,7 +34,7 @@ export interface Chi2ContingencyOptions {
  * `(|O_ij - E_ij| - 0.5)^2 / E_ij` applied on 2x2 tables when
  * `opts.correction !== false` (default true, matching
  * `scipy.stats.chi2_contingency`). `dof = (rows - 1) * (cols - 1)`; `pValue =
- * 1 - chiSquaredCDF(chi2, dof)`. `cramersV = sqrt(chi2 / (total *
+ * chiSquaredSF(chi2, dof)`. `cramersV = sqrt(chi2 / (total *
  * min(rows-1, cols-1)))`.
  *
  * Complementary to (NOT a duplicate of) `chiSquareTest`'s 2D form
@@ -89,7 +89,7 @@ export function chi2Contingency(
   }
 
   const dof = (rows - 1) * (cols - 1);
-  const pValue = 1 - chiSquaredCDF(chi2, dof);
+  const pValue = chiSquaredSF(chi2, dof);
   const cramersV = Math.sqrt(chi2 / (total * Math.min(rows - 1, cols - 1)));
 
   return { chi2, pValue, dof, expected, cramersV };

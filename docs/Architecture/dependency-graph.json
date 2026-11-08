@@ -9873,7 +9873,7 @@
           },
           {
             "file": "./distribution-functions.js",
-            "imports": ["fCDF", "chiSquaredCDF"]
+            "imports": ["chiSquaredSF", "fCDF", "fSF"]
           },
           {
             "file": "./typed/distributions.js",
@@ -21791,7 +21791,7 @@
         "internalDependencies": [
           {
             "file": "../distribution-functions.js",
-            "imports": ["chiSquaredCDF"]
+            "imports": ["chiSquaredSF"]
           }
         ],
         "workspaceDependencies": [],
@@ -21899,7 +21899,7 @@
         "internalDependencies": [
           {
             "file": "../distribution-functions.js",
-            "imports": ["chiSquaredCDF"]
+            "imports": ["chiSquaredSF"]
           },
           {
             "file": "../typed/distributions.js",
@@ -21963,7 +21963,7 @@
           },
           {
             "file": "../distribution-functions.js",
-            "imports": ["chiSquaredCDF"]
+            "imports": ["chiSquaredSF"]
           },
           {
             "file": "../ml/ols.js",

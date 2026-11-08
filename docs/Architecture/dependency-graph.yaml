@@ -9286,8 +9286,9 @@ modules:
             - rankdata
         - file: ./distribution-functions.js
           imports:
+            - chiSquaredSF
             - fCDF
-            - chiSquaredCDF
+            - fSF
         - file: ./typed/distributions.js
           imports:
             - normalCDF
@@ -20556,7 +20557,7 @@ modules:
       internalDependencies:
         - file: ../distribution-functions.js
           imports:
-            - chiSquaredCDF
+            - chiSquaredSF
       workspaceDependencies: []
       exports:
         - chi2Contingency
@@ -20669,7 +20670,7 @@ modules:
       internalDependencies:
         - file: ../distribution-functions.js
           imports:
-            - chiSquaredCDF
+            - chiSquaredSF
         - file: ../typed/distributions.js
           imports:
             - normalCDF
@@ -20736,7 +20737,7 @@ modules:
             - acf
         - file: ../distribution-functions.js
           imports:
-            - chiSquaredCDF
+            - chiSquaredSF
         - file: ../ml/ols.js
           imports:
             - ols

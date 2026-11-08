@@ -8,7 +8,7 @@
  */
 import { variance as _variance, mean as _mean } from './typed/arithmetic.js';
 import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
-import { fCDF, chiSquaredCDF } from './distribution-functions.js';
+import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
 
@@ -69,7 +69,8 @@ export function fTest(x: Vec, y: Vec): FTestResult {
   if (vb === 0) throw new Error('fTest: denominator sample has zero variance');
   const statistic = sampleVar(a) / vb;
   const lower = fCDF(statistic, df1, df2);
-  const pValue = 2 * Math.min(lower, 1 - lower);
+  const upper = fSF(statistic, df1, df2);
+  const pValue = Math.min(1, 2 * Math.min(lower, upper));
   return { statistic, pValue, df1, df2 };
 }
 
@@ -95,7 +96,7 @@ export function jarqueBera(x: Vec): JarqueBeraResult {
   const s = skewness(a); // population (SciPy bias=true); throws on constant input
   const k = kurtosis(a); // excess
   const statistic = (n / 6) * (s * s + (k * k) / 4);
-  const pValue = 1 - chiSquaredCDF(statistic, 2);
+  const pValue = chiSquaredSF(statistic, 2);
   return { statistic, pValue, skewness: s, kurtosis: k };
 }
 
@@ -131,7 +132,7 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
   const correction = 1 - tieTerm(pooled) / (N * N * N - N);
   if (correction !== 0) H /= correction;
   const df = arrs.length - 1;
-  return { statistic: H, pValue: 1 - chiSquaredCDF(H, df), df };
+  return { statistic: H, pValue: chiSquaredSF(H, df), df };
 }
 
 /**

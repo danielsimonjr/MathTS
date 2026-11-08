@@ -21,7 +21,7 @@
  * indicative, not exact.
  */
 import { acf } from '../timeseries-extra.js';
-import { chiSquaredCDF } from '../distribution-functions.js';
+import { chiSquaredSF } from '../distribution-functions.js';
 import { ols } from '../ml/ols.js';
 
 type Vec = readonly number[] | Float64Array;
@@ -76,7 +76,7 @@ export interface LjungBoxResult {
 
 /**
  * Ljung-Box portmanteau test for autocorrelation up to lag `lags`.
- * `Q = n(n+2) * Σ_{k=1}^{lags} ρ_k² / (n-k)`, `pValue = 1 - chiSquaredCDF(Q, lags)`.
+ * `Q = n(n+2) * Σ_{k=1}^{lags} ρ_k² / (n-k)`, `pValue = chiSquaredSF(Q, lags)`.
  * Matches `statsmodels.stats.diagnostic.acorr_ljungbox`.
  */
 export function ljungBox(x: number[], lags: number): LjungBoxResult {
@@ -87,7 +87,7 @@ export function ljungBox(x: number[], lags: number): LjungBoxResult {
   let sum = 0;
   for (let k = 1; k <= lags; k++) sum += (r[k] * r[k]) / (n - k);
   const statistic = n * (n + 2) * sum;
-  const pValue = 1 - chiSquaredCDF(statistic, lags);
+  const pValue = chiSquaredSF(statistic, lags);
   return { statistic, pValue };
 }
 
