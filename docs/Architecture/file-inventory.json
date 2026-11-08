@@ -6449,7 +6449,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 995
+      "loc": 999
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -12140,7 +12140,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 109
+      "loc": 112
     },
     {
       "file": "functions/tests/windowfunction-unknown.test.ts",
