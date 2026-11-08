@@ -1713,6 +1713,7 @@
       "functions/src/stats/inference-extra2.ts",
       "functions/src/stats/nonparametric-extra.ts",
       "functions/src/stats/power-analysis.ts",
+      "functions/src/stats/proportion-intervals.ts",
       "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
     ],
@@ -1920,6 +1921,7 @@
       "functions/src/index.ts",
       "functions/src/stats/power-analysis.ts"
     ],
+    "functions/src/stats/proportion-intervals.ts": ["functions/src/index.ts"],
     "functions/src/special/hypergeometric.ts": [
       "functions/src/index.ts",
       "functions/src/special/wave-functions.ts"

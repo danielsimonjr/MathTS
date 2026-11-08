@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-08",
-    "totalFiles": 1269,
+    "totalFiles": 1270,
     "totalModules": 82,
-    "totalExports": 6904
+    "totalExports": 6910
   },
   "entryPoints": [
     {
@@ -10439,6 +10439,11 @@
             "reExport": true
           },
           {
+            "file": "./stats/proportion-intervals.js",
+            "imports": ["wilsonInterval", "newcombePairedInterval", "cohensKappa"],
+            "reExport": true
+          },
+          {
             "file": "./special/hypergeometric.js",
             "imports": ["hyp0f1", "hyp1f1", "hyp2f1", "pFq"],
             "reExport": true
@@ -11703,6 +11708,9 @@
           "vonMisesPDF",
           "mcnemar",
           "cochranQ",
+          "wilsonInterval",
+          "newcombePairedInterval",
+          "cohensKappa",
           "hyp0f1",
           "hyp1f1",
           "hyp2f1",
@@ -12435,6 +12443,9 @@
           "vonMisesPDF",
           "mcnemar",
           "cochranQ",
+          "wilsonInterval",
+          "newcombePairedInterval",
+          "cohensKappa",
           "hyp0f1",
           "hyp1f1",
           "hyp2f1",
@@ -21942,6 +21953,20 @@
         "exports": ["tTestPower"],
         "interfaces": ["TTestPowerOptions"],
         "functions": ["tTestPower"]
+      },
+      "functions/src/stats/proportion-intervals.ts": {
+        "description": "Proportion intervals and rater agreement.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["normalQuantile"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["wilsonInterval", "newcombePairedInterval", "cohensKappa"],
+        "functions": ["wilsonInterval", "newcombePairedInterval", "cohensKappa"]
       },
       "functions/src/stats/robust-stats.ts": {
         "description": "Generalized means, geometric standard deviation, robust regression slopes",
@@ -44432,6 +44457,7 @@
           "functions/src/stats/mvn.ts",
           "functions/src/stats/nonparametric-extra.ts",
           "functions/src/stats/power-analysis.ts",
+          "functions/src/stats/proportion-intervals.ts",
           "functions/src/stats/robust-stats.ts",
           "functions/src/stats/timeseries.ts",
           "functions/src/stats/weighted-stats.ts"
@@ -45342,17 +45368,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1269,
+    "totalTypeScriptFiles": 1270,
     "totalModules": 82,
-    "totalLinesOfCode": 214229,
-    "totalExports": 6904,
+    "totalLinesOfCode": 214361,
+    "totalExports": 6910,
     "totalClasses": 61,
     "totalInterfaces": 596,
-    "totalFunctions": 2285,
+    "totalFunctions": 2288,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1638,
-    "totalReExports": 2993,
+    "totalReExports": 2996,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
