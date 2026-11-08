@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-functions
 
+## 0.77.2
+
+### Patch Changes
+
+- Updated dependencies [e7a003e]
+  - @danielsimonjr/mathts-core@0.24.0
+  - @danielsimonjr/mathts-expression@0.12.4
+  - @danielsimonjr/mathts-matrix@0.9.3
+  - @danielsimonjr/mathts-parallel@0.8.3
+
 ## 0.77.1
 
 ### Patch Changes

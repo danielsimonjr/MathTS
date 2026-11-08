@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.9.3
+
+### Patch Changes
+
+- Updated dependencies [e7a003e]
+  - @danielsimonjr/mathts-core@0.24.0
+  - @danielsimonjr/mathts-parallel@0.8.3
+
 ## 0.9.2
 
 ### Patch Changes
