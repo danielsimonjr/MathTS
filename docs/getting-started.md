@@ -148,7 +148,7 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides **1,320** exports (see the generated export index in [reference/functions.md](reference/functions.md), or browse them at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)) across 27 categories. A representative subset:
+`@danielsimonjr/mathts-functions` provides **1,321** exports (see the generated export index in [reference/functions.md](reference/functions.md), or browse them at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)) across 27 categories. A representative subset:
 
 | Category                      | Examples                                                                                                                                                                |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,7 +178,7 @@ main();
 | Package                            | Purpose                                     |
 | ---------------------------------- | ------------------------------------------- |
 | `@danielsimonjr/mathts-core`       | Core types: Complex, Fraction, BigNumber    |
-| `@danielsimonjr/mathts-functions`  | 1,320 exports with type dispatch (v0.72.0)  |
+| `@danielsimonjr/mathts-functions`  | 1,321 exports with type dispatch (v0.72.0)  |
 | `@danielsimonjr/mathts-matrix`     | Dense and sparse matrices                   |
 | `@danielsimonjr/mathts-tensor`     | Rank-N dense Tensor (Float64Array-backed)   |
 | `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode autodiff over Tensor |
