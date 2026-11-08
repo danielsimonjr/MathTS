@@ -33,7 +33,7 @@ import {
   equal as coreEqual,
 } from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
-import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
+import type { UnitInstance as Unit, TypedFunction } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
@@ -1079,10 +1079,20 @@ export const mod = mathTyped('mod', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.mod(b),
 });
 
+/** These are the call signatures of `gcd`. Each signature returns the type of its two arguments. */
+interface GcdOverloads {
+  (a: number, b: number): number;
+  (a: bigint, b: bigint): bigint;
+  (a: BigNumber, b: BigNumber): BigNumber;
+}
+
+/** `gcd` with its precise call signatures. `gcd` is still a `TypedFunction`. */
+export type GcdFunction = GcdOverloads & TypedFunction;
+
 /**
  * Greatest common divisor
  */
-export const gcd = mathTyped('gcd', {
+export const gcd: GcdFunction = mathTyped('gcd', {
   'number, number': (a: f64, b: f64): f64 => euclidSnap(a, b, Math.floor),
   'bigint, bigint': (a: i64, b: i64): i64 => {
     a = a < 0n ? -a : a;
@@ -1104,24 +1114,24 @@ export const gcd = mathTyped('gcd', {
     }
     return x;
   },
-});
+}) as GcdFunction;
 
 /**
  * Least common multiple
  */
 export const lcm = mathTyped('lcm', {
   'number, number': (a: f64, b: f64): f64 => {
-    const g = gcd(a, b) as number;
+    const g = gcd(a, b);
     return Math.abs(a * b) / g;
   },
   'bigint, bigint': (a: i64, b: i64): i64 => {
-    const g = gcd(a, b) as bigint;
+    const g = gcd(a, b);
     const absA = a < 0n ? -a : a;
     const absB = b < 0n ? -b : b;
     return (absA * absB) / g;
   },
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
-    const g = gcd(a, b) as BigNumber;
+    const g = gcd(a, b);
     if (g.isZero()) return BigNumber.fromNumber(0);
     return a.abs().multiply(b.abs()).divide(g);
   },

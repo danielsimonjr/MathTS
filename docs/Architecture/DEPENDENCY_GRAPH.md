@@ -10721,7 +10721,7 @@ graph LR
 | `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual`                      |
 | `@danielsimonjr/mathts-core`     | `pairwiseSum, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations` |
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                             |
-| `@danielsimonjr/mathts-core`     | `UnitInstance`                                                       |
+| `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                        |
 | `@danielsimonjr/mathts-matrix`   | `DenseMatrix, backendManager, singularValues`                        |
 | `@danielsimonjr/mathts-parallel` | `computePool, ComputePool`                                           |
 
@@ -10735,7 +10735,7 @@ graph LR
 
 **Exports:**
 
-- Types: `VarNormalization`
+- Types: `GcdFunction`, `VarNormalization`
 - Functions: `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `fsum`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
 
@@ -19991,7 +19991,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1270   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214365 |
+| Total Lines of Code     | 214375 |
 | Total Exports           | 6910   |
 | Total Re-exports        | 2996   |
 | Total Classes           | 61     |

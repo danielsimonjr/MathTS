@@ -22665,6 +22665,7 @@ modules:
           directory: core
           imports:
             - UnitInstance
+            - TypedFunction
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -42936,7 +42937,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1270
   totalModules: 82
-  totalLinesOfCode: 214365
+  totalLinesOfCode: 214375
   totalExports: 6910
   totalClasses: 61
   totalInterfaces: 596
