@@ -1677,12 +1677,18 @@ export function binomialTest(
   }
   const dObs = _binomPmf(successes, n, p);
   const rel = 1 + 1e-7;
-  let pValue = 0;
+  // Each log-gamma pmf term carries a rounding error, so the n + 1 terms do
+  // not sum to exactly 1 (the sum is 0.9999999999998926 at n = 1000). Divide
+  // the included mass by the computed total: the common error cancels, and
+  // when every outcome is included the two sums are the same float, so p = 1.
+  let included = 0;
+  let total = 0;
   for (let k = 0; k <= n; k++) {
     const pk = _binomPmf(k, n, p);
-    if (pk <= dObs * rel) pValue += pk;
+    total += pk;
+    if (pk <= dObs * rel) included += pk;
   }
-  return { statistic: successes / n, pValue: Math.min(1, pValue) };
+  return { statistic: successes / n, pValue: included / total };
 }
 
 // =============================================================================
