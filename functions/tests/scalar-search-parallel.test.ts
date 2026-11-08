@@ -146,7 +146,15 @@ const base = {
   maxEvaluations: 300,
 } as const;
 
-describe('searchScalars with parallel evaluation', () => {
+// Every test here scores SCALAR_PARALLEL_MIN_ROWS (10_000) rows per tree, so each costs
+// 2-10 s on an idle machine. Under load the cost grows: with a 12-process CPU hog beside a
+// Defender scan the slowest test took 31.6 s, and in the full suite one took 56 s (5x).
+// functions/vitest.config.ts records a 6.8x contention ratio for the full gate. 120 s is
+// about 7x the slowest idle cost (16 s measured on a loaded machine), so a load spike does
+// not fail a deterministic test, and a real hang still fails.
+const LOADED_TIMEOUT_MS = 120_000;
+
+describe('searchScalars with parallel evaluation', { timeout: LOADED_TIMEOUT_MS }, () => {
   it('equals the serial run for the same seed, event by event', async () => {
     const problem = problemOf(PARALLEL_ROWS, planted);
     const serial = await drain(problem, { ...base, rng: createSeededRng(7) });
@@ -178,10 +186,12 @@ describe('searchScalars with parallel evaluation', () => {
       ...base,
       grammar: { ...grammar, parameters: ['p'] },
       optimizeProbability: 1,
-      // Still crosses the worker row threshold; a smaller budget keeps CI under vitest's
-      // 30s default under full-suite load: each fit scores PARALLEL_ROWS (10_000) rows.
+      // Still crosses the worker row threshold. Each fit scores PARALLEL_ROWS (10_000)
+      // rows, so the fit budget sets the cost: one start (no restarts) still fits the
+      // linear law p * x exactly.
       populationSize: 8,
       maxEvaluations: 24,
+      fit: { restarts: 0 },
     };
     const serial = await drain(problem, { ...fitting, rng: createSeededRng(3) });
     const before = world.pools.length;
@@ -292,7 +302,14 @@ describe('searchScalars with parallel evaluation', () => {
 
   it('equals the serial run with simplify', async () => {
     const problem = problemOf(PARALLEL_ROWS, planted);
-    const simplified = { ...base, rng: createSeededRng(7), simplify: 'algebraic' as const };
+    // 120 evaluations is ten generations of twelve: enough for simplify to rewrite
+    // offspring, at 40% of the 300-evaluation base cost.
+    const simplified = {
+      ...base,
+      rng: createSeededRng(7),
+      simplify: 'algebraic' as const,
+      maxEvaluations: 120,
+    };
     const serial = await drain(problem, simplified);
     const parallel = await drain(problem, { ...simplified, parallel: {} });
     expectSameRun(parallel.progress, serial.progress);

@@ -11419,7 +11419,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 463
+      "loc": 480
     },
     {
       "file": "functions/tests/scalar-search-run.test.ts",
@@ -11433,7 +11433,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 3571
+      "loc": 3574
     },
     {
       "file": "functions/tests/scalar-unary-minus.test.ts",
