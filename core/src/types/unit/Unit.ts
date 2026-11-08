@@ -1066,6 +1066,28 @@ export const createUnitClass = /* #__PURE__ */ factory(
     };
 
     /**
+     * Gives all product readings of one glued unit token, for example `'mAs'` or `'m2K'`.
+     * The token is one name: letters and trailing digit runs.
+     * The token has no `^`, `*`, `/`, space, or superscript.
+     * Each reading cuts the token into two or more factors.
+     * A factor is a unit spelling that the registry accepts.
+     * A trailing digit run is the integer power of the factor.
+     * When the token is one unit, the list contains no one-factor reading.
+     * The list is raw. The list does not apply the parse policy.
+     * The parse policy includes refused spellings, ambiguous spellings, prefixed unit
+     * spellings, and the choice between readings.
+     * The list excludes a prefix repeat, for example `m·m` for the token `mm`.
+     * @memberof Unit
+     * @param token - The glued unit token.
+     * @return The readings in search order, or an empty list when there are no readings.
+     */
+    Unit.readings = function (
+      token: string
+    ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
+      return readings(token);
+    };
+
+    /**
      * Normalize a value, based on its currently set unit(s)
      * @memberof Unit
      * @param value

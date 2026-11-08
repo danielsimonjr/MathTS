@@ -281,6 +281,13 @@ export interface UnitConstructor {
   createUnit(obj: Record<string, unknown>, options?: CreateUnitOptions): UnitInstance | undefined;
   /** The exact SI scale of a valueless unit text, or null when it has none. */
   exactScale(valuelessUnit: string): ExactScale | null;
+  /**
+   * Every product reading of one glued unit token, before any parse policy
+   * (see {@link Unit.readings}).
+   */
+  readings(
+    token: string
+  ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>>;
   createUnitSingle(name: string, obj?: unknown): UnitInstance;
   deleteUnit(name: string): void;
   _getNumberConverter(type: string): ConverterFn;
