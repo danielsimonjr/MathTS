@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-08",
-  "total": 219,
+  "total": 218,
   "acceleratedCount": 40,
   "parallelOnlyCount": 44,
-  "jsOnlyCount": 135,
+  "jsOnlyCount": 134,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -650,7 +650,6 @@
     "gammaPDF",
     "gammainc",
     "gammaincp",
-    "gcd",
     "geometricPMF",
     "harmonicNumber",
     "hermiteH",
@@ -740,7 +739,7 @@
     "arithmetic.ts": {
       "wasm": 9,
       "parallel": 19,
-      "jsOnly": 18
+      "jsOnly": 17
     },
     "bitwise.ts": {
       "wasm": 0,

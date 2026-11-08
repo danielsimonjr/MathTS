@@ -2488,6 +2488,9 @@
       "GaussianKDEResult": {
         "kind": "type"
       },
+      "GcdFunction": {
+        "kind": "type"
+      },
       "GlmFamily": {
         "kind": "type"
       },

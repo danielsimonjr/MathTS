@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-08",
-  "status": "7 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
-  "total": 219,
+  "status": "7 standalone function(s) route to WebGPU; 2 of 218 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
+  "total": 218,
   "gpuAcceleratedCount": 2,
-  "noneCount": 217,
+  "noneCount": 216,
   "gpuAccelerated": [
     {
       "name": "parallelFFT",
@@ -112,7 +112,6 @@
     "gammaPDF",
     "gammainc",
     "gammaincp",
-    "gcd",
     "geometricPMF",
     "harmonicNumber",
     "hermiteH",
@@ -240,7 +239,7 @@
   "byFile": {
     "arithmetic.ts": {
       "gpu": 0,
-      "none": 46
+      "none": 45
     },
     "bitwise.ts": {
       "gpu": 0,

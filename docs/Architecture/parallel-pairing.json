@@ -1,10 +1,10 @@
 {
   "generated": "2026-11-08",
-  "total": 219,
+  "total": 218,
   "parallelizedCount": 108,
   "effectiveCount": 81,
   "disabledCount": 27,
-  "nonParallelCount": 111,
+  "nonParallelCount": 110,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
@@ -806,7 +806,6 @@
     "format",
     "fsum",
     "gammaPDF",
-    "gcd",
     "harmonicNumber",
     "hex",
     "hypot",
@@ -1320,7 +1319,7 @@
     "arithmetic.ts": {
       "effective": 17,
       "disabled": 11,
-      "none": 18
+      "none": 17
     },
     "bitwise.ts": {
       "effective": 0,
