@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-09",
-  "totalFiles": 2185,
+  "totalFiles": 2186,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1244,
     "test-only": 0,
     "orphan": 0,
-    "test": 850,
+    "test": 851,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1270,
-    "tests": 850,
+    "tests": 851,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 116,
+    "@danielsimonjr/mathts-core": 117,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -884,7 +884,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 92
+      "loc": 93
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
@@ -898,14 +898,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 302
+      "loc": 317
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3224
+      "loc": 3305
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1326,6 +1326,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "core/tests/unit/unit-readings-source.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 58
     },
     {
       "file": "core/tests/unit/unit-readings.test.ts",

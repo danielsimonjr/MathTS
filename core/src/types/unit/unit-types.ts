@@ -267,6 +267,16 @@ export interface UnitInstance {
 }
 
 /** The Unit constructor function together with its static members. */
+/** One factor of a reading of {@link UnitConstructor.readingsWithSource}. */
+export interface UnitReadingFactor {
+  /** The canonical spelling of the factor, for example `um` for the token text `µm`. */
+  readonly name: string;
+  /** The integer power of the factor. */
+  readonly power: number;
+  /** The part of the token that the factor reads, with its power, for example `µm` or `m⁺²`. */
+  readonly source: string;
+}
+
 export interface UnitConstructor {
   new (value?: Numeric | null, valuelessUnit?: string | UnitInstance): UnitInstance;
   prototype: UnitInstance;
@@ -288,6 +298,11 @@ export interface UnitConstructor {
   readings(
     token: string
   ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>>;
+  /**
+   * The readings of {@link Unit.readings} with the source text of each factor
+   * (see {@link Unit.readingsWithSource}).
+   */
+  readingsWithSource(token: string): ReadonlyArray<ReadonlyArray<UnitReadingFactor>>;
   createUnitSingle(name: string, obj?: unknown): UnitInstance;
   deleteUnit(name: string): void;
   _getNumberConverter(type: string): ConverterFn;

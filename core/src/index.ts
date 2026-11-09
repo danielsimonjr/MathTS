@@ -102,7 +102,7 @@ export {
   DIMENSIONLESS,
   dim,
 } from './types/unit.js';
-export type { Dimensions, UnitDef, UnitInstance } from './types/unit.js';
+export type { Dimensions, UnitDef, UnitInstance, UnitReadingFactor } from './types/unit.js';
 export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,

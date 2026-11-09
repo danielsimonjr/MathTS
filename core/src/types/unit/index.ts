@@ -28,6 +28,7 @@ export type {
   UnitSystemEntry,
   UnitSystem,
   UnitJSON,
+  UnitReadingFactor,
   ConverterFn,
   TypeConverters,
   ParseOptions,

@@ -846,6 +846,7 @@
       "UnitPrefix",
       "unitPrefixExactScale",
       "UnitPrefixSetKey",
+      "UnitReadingFactor",
       "UnitRow",
       "unitRowExactOffset",
       "unitRowExactScale",

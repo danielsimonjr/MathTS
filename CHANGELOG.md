@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`Unit.readingsWithSource` gives the source text of each factor.** `Unit.readings` names each factor by its canonical spelling, so `µmK` gives `um` and `ΩK` gives `ohm`. A consumer that prints a reading cannot get the spelling of the user back. The new function gives the same readings, and each factor also has `source`: the part of the token that the factor reads, with its power. Thus, `µmK` gives `{ name: 'um', power: 1, source: 'µm' }`, then `K` with the source `K`. For each reading, the sources in order make the token again, character for character. The new type is `UnitReadingFactor`. `Unit.readings` is unchanged. Test: `core/tests/unit/unit-readings-source.test.ts`.
+
 ### Fixed
 
 - **A glued power of 0 is not a power, and a superscript plus is a caret plus.** Before this fix, `Unit.parse('1 m0K')` gave `1 K`, because the metre became m^0. `Unit.readings` read `m0K` as `m^0·K`, `mK0` as `m·K^0`, `m00K` as `m^0·K`, and `m01K` as `m·K`. Now a glued digit power starts with 1 to 9, as in the UPT grammar. These tokens give no reading, and `Unit.parse` throws an error that tells you to use a caret. The caret form `m^0` is unchanged. Before this fix, `Unit.parse('1 m⁺²K')` and `Unit.parse('1 m⁺²')` threw `Unexpected "⁺"`. Now an optional `⁺` or `⁻` and a run of superscript digits give the same power as the caret form, in `Unit.parse` and `Unit.readings`. Test: `core/tests/unit/unit-readings.test.ts`.

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-09'
   totalFiles: 1270
   totalModules: 82
-  totalExports: 6911
+  totalExports: 6914
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -968,6 +968,7 @@ modules:
             - Dimensions
             - UnitDef
             - UnitInstance
+            - UnitReadingFactor
           reExport: true
           typeOnly: true
         - file: ./types/unit.js
@@ -1179,6 +1180,7 @@ modules:
         - Dimensions
         - UnitDef
         - UnitInstance
+        - UnitReadingFactor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -1369,6 +1371,7 @@ modules:
         - Dimensions
         - UnitDef
         - UnitInstance
+        - UnitReadingFactor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -2791,6 +2794,7 @@ modules:
             - UnitFormatOptions
             - UnitInstance
             - UnitJSON
+            - UnitReadingFactor
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
@@ -3046,6 +3050,7 @@ modules:
             - UnitSystemEntry
             - UnitSystem
             - UnitJSON
+            - UnitReadingFactor
             - ConverterFn
             - TypeConverters
             - ParseOptions
@@ -3132,6 +3137,7 @@ modules:
         - UnitSystemEntry
         - UnitSystem
         - UnitJSON
+        - UnitReadingFactor
         - ConverterFn
         - TypeConverters
         - ParseOptions
@@ -3206,6 +3212,7 @@ modules:
         - UnitSystemEntry
         - UnitSystem
         - UnitJSON
+        - UnitReadingFactor
         - ConverterFn
         - TypeConverters
         - ParseOptions
@@ -3315,6 +3322,7 @@ modules:
         - SubtractScalar
         - UnitDependencies
         - UnitInstance
+        - UnitReadingFactor
         - UnitConstructor
     core/src/types/unit/va-var.ts:
       description: VA / VAR classification for complex-valued units.
@@ -3458,6 +3466,7 @@ modules:
         - file: ./unit/index.js
           imports:
             - UnitInstance
+            - UnitReadingFactor
           reExport: true
           typeOnly: true
         - file: ./unit/index.js
@@ -3537,6 +3546,7 @@ modules:
         - fromSiDimensions
         - fromSiDimensionVector
         - UnitInstance
+        - UnitReadingFactor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -3601,6 +3611,7 @@ modules:
         - fromSiDimensions
         - fromSiDimensionVector
         - UnitInstance
+        - UnitReadingFactor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -42940,15 +42951,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1270
   totalModules: 82
-  totalLinesOfCode: 214487
-  totalExports: 6911
+  totalLinesOfCode: 214584
+  totalExports: 6914
   totalClasses: 61
-  totalInterfaces: 596
+  totalInterfaces: 597
   totalFunctions: 2288
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639
-  totalReExports: 2996
+  totalReExports: 2999
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
