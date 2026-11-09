@@ -891,7 +891,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 723
+      "loc": 724
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3177
+      "loc": 3179
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1332,7 +1332,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 52
+      "loc": 59
     },
     {
       "file": "core/tests/unit/upt-u2-ton.test.ts",

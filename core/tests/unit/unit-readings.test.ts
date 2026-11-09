@@ -43,6 +43,13 @@ describe('Unit.readings (M6)', () => {
     expect(spellings('lmpc')).toContain('l*mpc');
     expect(spellings('Kmly')).toContain('K*mly');
   });
+  it('keeps the parse lookup and the raw lookup apart in the lookup cache', () => {
+    Unit.deleteUnit('readingsCacheProbe'); // Clears the lookup cache.
+    expect(Unit.isValuelessUnit('1:zpc')).toBe(false);
+    expect(Unit.isValuelessUnit('+zpc')).toBe(false);
+    expect(spellings('Hzpc')).toContain('H*zpc');
+    expect(Unit.isValuelessUnit('zpc')).toBe(false);
+  });
   it('keeps the k-and-up rule in parse', () => {
     expect(() => Unit.parse('mpc')).toThrow(/not found/);
     expect(() => Unit.parse('mly')).toThrow(/not found/);
