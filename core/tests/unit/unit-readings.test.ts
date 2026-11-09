@@ -56,3 +56,32 @@ describe('Unit.readings (M6)', () => {
     expect(Unit.parse('Hzpc').toString()).toBe('Hz pc');
   });
 });
+
+// The micro sign is the micro prefix only. It is never the atomic mass unit u.
+describe.each(['µ', 'μ'])('the micro sign %s', (mu) => {
+  it('gives no reading with the unit u as a factor', () => {
+    for (const r of Unit.readings(mu + 'mK')) {
+      expect(r.map((f) => f.name)).not.toContain('u');
+    }
+    expect(spellings(mu + 'mK')).toEqual(['um*K']);
+  });
+  it('keeps the prefix readings', () => {
+    expect(spellings(mu + 'As')).toEqual(['uA*s']);
+    expect(spellings(mu + 'u')).toEqual([]);
+  });
+  it('is not the unit u in parse', () => {
+    expect(() => Unit.parse('5 ' + mu)).toThrow();
+    expect(() => Unit.parse('5 ' + mu + '/s')).toThrow();
+    expect(() => Unit.parse('5 N' + mu)).toThrow();
+    expect(Unit.parse('1 ' + mu + 'm').toString()).toBe('1 um');
+    expect(Unit.parse('1 N' + mu + 'm').toString()).toBe('1 N um');
+    expect(() => Unit.parse(mu + 'As')).toThrow(/not found/);
+  });
+});
+
+describe('the letter u', () => {
+  it('keeps every reading of umK', () => {
+    expect(spellings('umK')).toEqual(['u*m*K', 'u*mK', 'um*K']);
+    expect(Unit.parse('5 u').toString()).toBe('5 u');
+  });
+});

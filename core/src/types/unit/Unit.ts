@@ -135,11 +135,17 @@ const UNIT_LIST_SCALE_CACHE_LIMIT = 1024;
 /** Exact scale per unit list: (definition, prefix, power) per component. */
 const unitListScales = new Map<string, ExactScale | null>();
 
+// The micro sign (U+00B5) and the Greek mu (U+03BC) each show the micro prefix `u`.
+const MICRO_SIGN = /[µμ]/;
+const MICRO_SIGNS = /[µμ]/g;
+
 /**
  * Normalize unit spellings the tokenizer would otherwise reject, before parsing.
  * Degree symbols first (`°C` / `°F` / `°R` before a bare `°`, which is an angle).
- * `µ` and `μ` are the micro prefix (`u`). `Ω` / `Ω` are the ohm, including a
+ * `Ω` / `Ω` are the ohm, including a
  * prefix glued on (`kΩ`). `℃` is degree Celsius and `Å` is the angstrom.
+ * The micro signs stay in the text: `_findUnit` reads them as the micro prefix
+ * only, never as the unit `u`.
  */
 function normalizeUnitSpellings(s: string): string {
   return s
@@ -148,7 +154,6 @@ function normalizeUnitSpellings(s: string): string {
     .replace(/°F/g, 'degF')
     .replace(/°R/g, 'degR')
     .replace(/°/g, 'deg')
-    .replace(/[µμ]/g, 'u')
     .replace(/[ΩΩ]/g, 'ohm')
     .replace(/Å/g, 'angstrom');
 }
@@ -520,14 +525,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
       let unitName = '';
 
       // Alphanumeric, plus `_` after the first character (`Msun_iau`).
-      while (isDigit(c) || Unit.isValidAlpha(c) || (unitName.length > 0 && c === '_')) {
+      // A micro sign is a letter of a unit name: `_findUnit` reads it as the micro prefix.
+      const isUnitLetter = (ch: string): boolean => Unit.isValidAlpha(ch) || MICRO_SIGN.test(ch);
+      while (isDigit(c) || isUnitLetter(c) || (unitName.length > 0 && c === '_')) {
         unitName += c;
         next();
       }
 
-      // Must begin with [a-zA-Z]
+      // The unit name must begin with [a-zA-Z] or a micro sign.
       const firstC = unitName.charAt(0);
-      if (Unit.isValidAlpha(firstC)) {
+      if (isUnitLetter(firstC)) {
         return unitName;
       } else {
         return null;
@@ -576,10 +583,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
     // Rule C: a prefix symbol glued to a unit name or alias at the start of a token is a refused prefix, never a product.
     function isPrefixedUnitSpelling(token: string): boolean {
       const names = Object.keys(UNIT_ROWS);
+      const text = token.replace(MICRO_SIGNS, 'u'); // a micro sign is the prefix symbol u
       return prefixSymbols().some(
         (symbol) =>
-          token.startsWith(symbol) &&
-          names.some((name) => token.slice(symbol.length).startsWith(name))
+          text.startsWith(symbol) &&
+          names.some((name) => text.slice(symbol.length).startsWith(name))
       );
     }
 
@@ -1100,7 +1108,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
     Unit.readings = function (
       token: string
     ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
-      return readings(normalizeUnitSpellings(token), findUnitUnrestricted);
+      // A factor name spells the micro prefix as `u`: `µA` gives the factor `uA`.
+      return readings(normalizeUnitSpellings(token), findUnitUnrestricted).map((r) =>
+        r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
+      );
     };
 
     /**
@@ -1212,7 +1223,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
             if (endsWith(str, name)) {
               const unit = UNITS[name];
               const prefixLen = str.length - name.length;
-              const prefixName = str.substring(0, prefixLen);
+              // A micro sign is only the micro prefix.
+              let prefixName = str.substring(0, prefixLen);
+              if (MICRO_SIGN.test(prefixName)) {
+                if (prefixName.length !== 1) continue;
+                prefixName = 'u';
+              }
               const prefixes = unrestricted ? unrestrictedPrefixes(unit.prefixes) : unit.prefixes;
               const prefix = hasOwnProperty(prefixes, prefixName)
                 ? prefixes![prefixName]
