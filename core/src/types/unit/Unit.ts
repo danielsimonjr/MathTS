@@ -1234,7 +1234,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // a split-based lookup cannot reproduce that order without an insertion-order index that
       // would have to track every UNITS mutation.
       {
-        hasher: (args: unknown[]): string => (args[1] === true ? '+' : '') + (args[0] as string),
+        hasher: (args: unknown[]): string => (args[1] === true ? '1:' : '0:') + (args[0] as string),
         limit: 1000,
       }
     );
