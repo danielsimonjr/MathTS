@@ -1,0 +1,11 @@
+---
+'@danielsimonjr/mathts-functions': minor
+---
+
+The `Float64Array` signatures of the arithmetic functions are now synchronous (#384). `add`, `subtract`, `multiply` (pair, `Float64Array * number`, `number * Float64Array`), `divide`, `unaryMinus`, `abs`, `sign`, `sqrt`, `square`, `cube`, `cbrt`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh` and `tanh` return a `Float64Array` instead of a `Promise<Float64Array>`. `norm`, `min`, `max` and `dot` return a number instead of a `Promise<number>`. `await` on the result still works, but `.then` on the result does not.
+
+The binary ops throw `RangeError: Dimension mismatch (m != n) in element-wise operation` when the lengths differ. Before, the worker pool rejected the Promise. Variadic `add(a, b, c)` on `Float64Array` now works.
+
+Fourteen of these ops (`sign`, `cube`, `cbrt`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh`, `tanh`) sent arrays of 50,000 elements or more to worker threads. Measured with `tools/benchmarks/sync-unary-kernels.mjs` (the shipped synchronous function after `loadWasm()` against `computePool.applyKernel`, medians of 9, at 5e4 / 5e5 / 5e6 elements): workers are slower on 8 of them (`sign`, `cube`, `cbrt`, `log10`, `round`, `floor`, `ceil`, `fix`: 0.23x to 0.93x). With the WASM tier loaded, workers reach only 0.39x to 0.48x of the speed of the shipped `log10`. Workers are faster on `log2` (1.36x to 1.64x), `log1p` (1.73x to 1.81x), `expm1` (1.56x to 1.68x), `cosh` (1.09x to 1.27x), `sinh` (1.03x to 1.68x) and `tanh` (1.89x to 2.17x). For those, call `computePool.applyKernel` or `parallelMap` from `@danielsimonjr/mathts-parallel` on large arrays.
+
+`thresholdByOp` and `thresholdElements` no longer send these typed calls to workers: `dot`, `norm`, `min`, `max` and the 14 unary ops above always run in the calling thread. A length mismatch in `add`, `subtract`, `multiply` or `divide` now throws `RangeError("Dimension mismatch (m != n) in element-wise operation")`, not the worker error `Error("<op>: lengths must match (m vs n)")`; `dot` throws `Error("Vector lengths must match: m vs n")`, as `dot` on plain arrays does. The standalone helpers `matmul`, `transpose`, `matvec` and `outer` in the same file stay async.

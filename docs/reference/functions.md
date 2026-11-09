@@ -11,8 +11,9 @@ This package exposes functions from **two layers**:
 - **Typed layer** — native parallel-first implementations using typed-function
   dispatch. Support `number`, `bigint`, `Complex`, `Fraction`, `BigNumber`,
   `Unit`, `Dual` (forward-mode autodiff), and `Float64Array` where applicable.
-  Some `Float64Array` overloads return a `Promise`; worker dispatch is gated per op in
-  `ComputePool` (many element-wise paths are `'never'` and stay inline JS).
+  The arithmetic `Float64Array` overloads are synchronous. The trigonometry, statistics,
+  signal and bitwise `Float64Array` overloads return a `Promise`; worker dispatch is gated
+  per op in `ComputePool` (many element-wise paths are `'never'` and stay inline JS).
 - **Factory layer** — functions synced from mathjs and activated through the
   factory system (`det`, `inv`, `eigs`, set operations, units, sparse linear
   algebra, expression nodes, etc.). The numeric `det`/`inv` route large matrices
@@ -214,8 +215,9 @@ the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
 - Operators dispatch polymorphically through typed-function; mixed-type
   arguments promote to the widest type (`number + Complex → Complex`,
   `number + Fraction → Fraction`).
-- `Float64Array` overloads may return a `Promise` (or a `ParallelResult` from the
-  lower-level pool API). Per-op thresholds in `ComputePool` are often `'never'`, so
+- `add`, `subtract`, `multiply`, `divide` and the other arithmetic `Float64Array`
+  overloads are synchronous. Other `Float64Array` overloads may return a `Promise` (or a
+  `ParallelResult` from the lower-level pool API). Per-op thresholds in `ComputePool` are often `'never'`, so
   many typed paths still run inline JS even when the return type is async-friendly.
 - `add` and `multiply` on a `DenseMatrix` perform matrix algebra (the matrix
   product, not the element-wise product). Use `dotMultiply` / `dotDivide` /
@@ -3241,10 +3243,11 @@ Runtime probes for the optional acceleration tiers:
 
 ### Details
 
-- Some `Float64Array` overloads return a `Promise`, but many op thresholds are
-  `'never'`, so the synchronous JS path still runs. Await when the overload is
-  async — `Promise<Float64Array>` for element-wise transforms, `Promise<number>`
-  for reductions.
+- The arithmetic functions (`add`, `subtract`, `multiply`, `divide`, the unary ops of
+  `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous on `Float64Array` input. The
+  trigonometry, statistics, signal and bitwise `Float64Array` overloads still
+  return a `Promise` — `Promise<Float64Array>` for element-wise transforms,
+  `Promise<number>` for reductions.
 - The worker pool is created lazily on first use. `initializePool()`,
   `getComputePool()`, and `terminatePool()` give explicit lifecycle control —
   call `terminatePool()` to release worker threads, for example before process
@@ -3274,7 +3277,7 @@ thread-creation costs on every call.
 import { add, initializePool, terminatePool } from '@danielsimonjr/mathts-functions';
 
 await initializePool();
-const sum = await add(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
+const sum = add(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
 // sum → Float64Array([5, 7, 9])
 await terminatePool();
 ```

@@ -13,8 +13,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | Routing (static)            |   Count |
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      40 |
-| Parallel only (worker pool) |      44 |
-| JS-only                     |     134 |
+| Parallel only (worker pool) |      28 |
+| JS-only                     |     150 |
 | **Total**                   | **218** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 40 wasm-routed functions, **38 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
@@ -23,7 +23,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Function              | Routing       | Effective | Bridge dispatch                | Module        |
 | --------------------- | ------------- | --------- | ------------------------------ | ------------- |
-| `abs`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `abs`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `airyAi`              | wasm          | wasm      | `airyAiDispatch`               | special       |
 | `airyBi`              | wasm          | wasm      | `airyBiDispatch`               | special       |
 | `atan`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
@@ -47,22 +47,22 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `ellipticK`           | wasm          | wasm      | `ellipticKDispatch`            | special       |
 | `ellipticPi`          | wasm          | wasm      | `ellipticPiIncompleteDispatch` | special       |
 | `erfc`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | special       |
-| `exp`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `expm1`               | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `exp`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `expm1`               | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `lgamma`              | wasm          | wasm      | `lgammaDispatch`               | special       |
-| `log`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log10`               | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log1p`               | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log2`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log10`               | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log1p`               | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log2`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `noncentralChi2PDF`   | wasm          | wasm      | `lgammaDispatch`               | distributions |
 | `parallelFFT`         | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelIFFT`        | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelStatMedian`  | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
 | `sec`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
 | `sin`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `sinh`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `sinh`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `tan`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `tanh`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `tanh`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 
 ## Parallel-only functions (worker pool, not WASM)
 
@@ -70,25 +70,15 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | ----------------------- | ------------ |
 | `acos`                  | trigonometry |
 | `acosh`                 | trigonometry |
-| `add`                   | arithmetic   |
 | `asin`                  | trigonometry |
 | `asinh`                 | trigonometry |
 | `bitAnd`                | bitwise      |
 | `bitNot`                | bitwise      |
 | `bitOr`                 | bitwise      |
 | `bitXor`                | bitwise      |
-| `cbrt`                  | arithmetic   |
-| `ceil`                  | arithmetic   |
-| `cosh`                  | arithmetic   |
-| `cube`                  | arithmetic   |
-| `divide`                | arithmetic   |
-| `dot`                   | arithmetic   |
-| `fix`                   | arithmetic   |
-| `floor`                 | arithmetic   |
 | `leftShift`             | bitwise      |
 | `max`                   | arithmetic   |
 | `min`                   | arithmetic   |
-| `multiply`              | arithmetic   |
 | `norm`                  | arithmetic   |
 | `parallelConv`          | signal       |
 | `parallelStatCorr`      | statistics   |
@@ -106,18 +96,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `parallelStatVariance`  | statistics   |
 | `rightArithShift`       | bitwise      |
 | `rightLogShift`         | bitwise      |
-| `round`                 | arithmetic   |
-| `sign`                  | arithmetic   |
-| `sqrt`                  | arithmetic   |
-| `square`                | arithmetic   |
-| `subtract`              | arithmetic   |
-| `unaryMinus`            | arithmetic   |
 
 ## Per-module counts
 
 | Module        | WASM | Parallel | JS-only |
 | ------------- | ---: | -------: | ------: |
-| arithmetic    |    9 |       19 |      17 |
+| arithmetic    |    9 |        3 |      33 |
 | bitwise       |    0 |        7 |       0 |
 | combinatorics |    0 |        0 |      21 |
 | complex       |    0 |        0 |       4 |

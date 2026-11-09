@@ -120,7 +120,7 @@ import { add } from '@danielsimonjr/mathts-functions';
 // Typed add on Float64Array stays sequential (ComputePool threshold is 'never' for add)
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([5, 6, 7, 8]);
-const result = await add(a, b); // Float64Array([6, 8, 10, 12])
+const result = add(a, b); // Float64Array([6, 8, 10, 12]), synchronous
 
 // Direct pool access — matmul parallelizes at 4,096+ elements; sum stays sequential
 await computePool.initialize();
