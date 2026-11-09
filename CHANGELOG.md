@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`Unit.readings` reads the degree, micro, ohm and angstrom signs (UPT plan task M6 follow-up).** `Unit.readings` now changes the token in the same way as `Unit.parse` before the cut. Thus, `m°R` gives `m·degR`, and `µAs` gives `uA·s`. Before this fix, a token with `°R` gave no reading. Against the UPT splitter on 25,522 glued tokens (105 table symbols), 538 tokens had fewer readings before the fix (400 with `°R`, 138 with a sub-kilo parsec) and 140 after. All 140 remaining tokens are sub-kilo parsec readings (`H·zpc` in `Hzpc`). `ly` and `pc` keep the k-and-up prefix rule. Test: `core/tests/unit/unit-readings.test.ts`.
+
 ### Added
 
 - **`Unit.parse` accepts the middle dot as a product (UPT plan task M7).** The middle dot `·` (U+00B7) is a product sign, the same as `*`. `N·m` is `N*m`, and `m^2/(V·s)` is `m^2/(V*s)`. After a solidus, the dot stays in the denominator, so `W/m·K` is `W/(m*K)`. `core/tests/unit/unit-middle-dot.test.ts` locks the behavior.

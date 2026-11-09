@@ -30,4 +30,15 @@ describe('Unit.readings (M6)', () => {
   it('returns an empty list for a token with no reading', () => {
     expect(Unit.readings('qqq')).toEqual([]);
   });
+  it('reads the degree spellings that parse reads (°R, °C, °F, µ)', () => {
+    expect(spellings('m°R')).toContain('m*degR');
+    expect(spellings('K°R')).toContain('K*degR');
+    expect(spellings('W°C')).toContain('W*degC');
+    expect(spellings('µAs')).toContain('uA*s');
+  });
+  it('keeps the k-and-up parsec rule: Hzpc has no H*zpc reading', () => {
+    // The units ly and pc take only upward prefixes (core CHANGELOG, astronomical units). Thus, zpc is not a unit.
+    expect(spellings('Hzpc')).toEqual(['Hz*pc']);
+    expect(spellings('lmpc')).not.toContain('l*mpc');
+  });
 });
