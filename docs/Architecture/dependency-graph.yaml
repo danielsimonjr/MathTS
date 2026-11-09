@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-09'
   totalFiles: 1270
   totalModules: 82
-  totalExports: 6910
+  totalExports: 6911
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -2825,6 +2825,7 @@ modules:
             - namedExactScale
             - readUnitScale
             - UNIT_PREFIX_SETS
+            - UNIT_PREFIX_SET_UNRESTRICTED
             - UNIT_ROW_ALIASES
             - UNIT_ROWS
             - REFUSED_UNIT_SPELLINGS
@@ -3243,6 +3244,7 @@ modules:
       workspaceDependencies: []
       exports:
         - UNIT_PREFIX_SETS
+        - UNIT_PREFIX_SET_UNRESTRICTED
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
@@ -3270,6 +3272,7 @@ modules:
         - unitRowExactOffset
       constants:
         - UNIT_PREFIX_SETS
+        - UNIT_PREFIX_SET_UNRESTRICTED
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
@@ -42937,14 +42940,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1270
   totalModules: 82
-  totalLinesOfCode: 214414
-  totalExports: 6910
+  totalLinesOfCode: 214439
+  totalExports: 6911
   totalClasses: 61
   totalInterfaces: 596
   totalFunctions: 2288
   totalTypeGuards: 168
   totalEnums: 0
-  totalConstants: 1638
+  totalConstants: 1639
   totalReExports: 2996
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0

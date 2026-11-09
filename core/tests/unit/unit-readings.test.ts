@@ -36,9 +36,16 @@ describe('Unit.readings (M6)', () => {
     expect(spellings('W°C')).toContain('W*degC');
     expect(spellings('µAs')).toContain('uA*s');
   });
-  it('keeps the k-and-up parsec rule: Hzpc has no H*zpc reading', () => {
-    // The units ly and pc take only upward prefixes (core CHANGELOG, astronomical units). Thus, zpc is not a unit.
-    expect(spellings('Hzpc')).toEqual(['Hz*pc']);
-    expect(spellings('lmpc')).not.toContain('l*mpc');
+  it('is raw for ly and pc: a factor takes every SI prefix, also below kilo', () => {
+    // Unit.parse refuses mpc and zly, because ly and pc accept only k and larger prefixes.
+    // The raw list does not apply this rule.
+    expect(spellings('Hzpc')).toEqual(expect.arrayContaining(['Hz*pc', 'H*zpc']));
+    expect(spellings('lmpc')).toContain('l*mpc');
+    expect(spellings('Kmly')).toContain('K*mly');
+  });
+  it('keeps the k-and-up rule in parse', () => {
+    expect(() => Unit.parse('mpc')).toThrow(/not found/);
+    expect(() => Unit.parse('mly')).toThrow(/not found/);
+    expect(Unit.parse('Hzpc').toString()).toBe('Hz pc');
   });
 });

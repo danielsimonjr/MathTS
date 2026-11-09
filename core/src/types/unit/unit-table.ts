@@ -208,6 +208,14 @@ export const UNIT_PREFIX_SETS: Readonly<Record<UnitPrefixSetKey, PrefixSet>> = O
   SHORT_UP_ONLY: siShort(1, (p) => p >= 3),
 });
 
+/**
+ * The prefix sets that `Unit.parse` restricts. Each set has an unrestricted set.
+ * `Unit.readings` uses the unrestricted set to read a factor. Thus, `lmpc` gives `l·mpc`.
+ */
+export const UNIT_PREFIX_SET_UNRESTRICTED: Readonly<
+  Partial<Record<UnitPrefixSetKey, UnitPrefixSetKey>>
+> = Object.freeze({ SHORT_UP_ONLY: 'SHORT' });
+
 /** The exact factor of a prefix (`radix^power`). */
 export function unitPrefixExactScale(prefix: UnitPrefix): ExactScale {
   return powerExactScale(ratioExactScale(prefix.radix), prefix.power);

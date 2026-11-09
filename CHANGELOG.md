@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`Unit.readings` reads the degree, micro, ohm and angstrom signs (UPT plan task M6 follow-up).** `Unit.readings` now changes the token in the same way as `Unit.parse` before the cut. Thus, `m°R` gives `m·degR`, and `µAs` gives `uA·s`. Before this fix, a token with `°R` gave no reading. Against the UPT splitter on 25,522 glued tokens (105 table symbols), 538 tokens had fewer readings before the fix (400 with `°R`, 138 with a sub-kilo parsec) and 140 after. All 140 remaining tokens are sub-kilo parsec readings (`H·zpc` in `Hzpc`). `ly` and `pc` keep the k-and-up prefix rule. Test: `core/tests/unit/unit-readings.test.ts`.
+- **`Unit.readings` is raw for `ly` and `pc` (UPT plan task M6 follow-up).** `Unit.readings` now reads each factor against the unrestricted prefix set. Thus, `lmpc` gives `l·mpc`, and `Hzpc` gives `H·zpc`. `Unit.parse` keeps the k-and-up prefix rule for `ly` and `pc`: `Unit.parse('mpc')` still throws. The rule has one source: `UNIT_PREFIX_SET_UNRESTRICTED` in `core/src/types/unit/unit-table.ts` maps `SHORT_UP_ONLY` to `SHORT`. Test: `core/tests/unit/unit-readings.test.ts`.
+
+- **`Unit.readings` reads the degree, micro, ohm and angstrom signs (UPT plan task M6 follow-up).** `Unit.readings` now changes the token in the same way as `Unit.parse` before the cut. Thus, `m°R` gives `m·degR`, and `µAs` gives `uA·s`. Before this fix, a token with `°R` gave no reading. Against the UPT splitter on 25,522 glued tokens (105 table symbols), 538 tokens had fewer readings before the fix (400 with `°R`, 138 with a sub-kilo parsec) and 140 after. All 140 remaining tokens are sub-kilo parsec readings (`H·zpc` in `Hzpc`); the entry above removes them. Test: `core/tests/unit/unit-readings.test.ts`.
 
 ### Added
 
