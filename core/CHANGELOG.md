@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.24.1
+
+### Patch Changes
+
+- 48c7474: `Unit.readings` reads the degree, micro, ohm and angstrom signs in the same way as `Unit.parse`. Thus, `m°R` gives `m·degR`.
+
 ## 0.24.0
 
 ### Minor Changes
