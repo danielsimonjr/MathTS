@@ -592,16 +592,17 @@ export const createUnitClass = /* #__PURE__ */ factory(
     }
 
     const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-    // A run of an optional '⁻' and one or more superscript digits becomes one '^' power:
-    // 'K²' -> 'K^2', 'm⁻¹' -> 'm^-1', 'm⁻¹²' -> 'm^-12'. A '⁻' with no digit after it is left as it is.
+    // A run of an optional '⁺' or '⁻' and one or more superscript digits becomes one '^' power.
+    // Examples: 'K²' -> 'K^2', 'm⁻¹' -> 'm^-1', 'm⁺²' -> 'm^+2'. The rule keeps a sign with no
+    // following digit unchanged.
     function expandSuperscripts(input: string): string {
       let out = '';
       let i = 0;
       while (i < input.length) {
         let j = i;
         let sign = '';
-        if (input[j] === '⁻') {
-          sign = '-';
+        if (input[j] === '⁻' || input[j] === '⁺') {
+          sign = input[j] === '⁻' ? '-' : '+';
           j++;
         }
         let digits = '';
@@ -620,6 +621,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return out;
     }
 
+    // The pattern matches a 0 after a letter, for example in 'm0K' or 'm01K'.
+    // The pattern does not match a caret power ('m^0').
+    const GLUED_ZERO_POWER = /[A-Za-z]0/;
+
     interface Factor {
       readonly name: string; // the spelling that _findUnit accepts, for example 'cm' or 'V'
       readonly power: number; // 1, or the integer of a digit run or caret power (m2, m^2 -> 2)
@@ -627,6 +632,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     // Every way to cut `token` into factors. A factor is a substring that _findUnit
     // accepts, optionally followed by a run of digits or a caret power that is its integer power.
+    // A run of digits starts with 1 to 9 (m2, m10). The rule does not read a glued 0 or a leading 0 as a power (m0, m01).
     function readings(token: string, find: FindUnit = findUnitPair): Factor[][] {
       const result: Factor[][] = [];
       const factors: Factor[] = [];
@@ -653,7 +659,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
           const name = token.slice(start, end);
           if (find(name) === null) continue;
           addFactor(name, 1, end);
-          if (end < token.length && isDigit(token[end])) {
+          if (end < token.length && isDigit(token[end]) && token[end] !== '0') {
             let digitEnd = end + 1;
             while (digitEnd < token.length && isDigit(token[digitEnd])) {
               digitEnd++;
@@ -851,6 +857,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
           // Not one unit: cut the token into factors (rule B).
           const ways = isPrefixedUnitSpelling(uStr) ? [] : readings(uStr);
           if (ways.length === 0) {
+            if (GLUED_ZERO_POWER.test(uStr)) {
+              throw new UnitParseError(
+                'Unit "' +
+                  uStr +
+                  '" not found: a glued power starts with 1 to 9. ' +
+                  'Use a caret for a power of 0, for example m^0.'
+              );
+            }
             // Unit not found.
             throw new UnitParseError('Unit "' + uStr + '" not found.');
           }
@@ -1108,9 +1122,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * A factor uses the unrestricted prefix set (`UNIT_PREFIX_SET_UNRESTRICTED`) to read its prefix.
      * Thus, `Hzpc` gives `H·zpc`, but `Unit.parse('zpc')` throws an error.
      * A digit run after a factor is the integer power of the factor.
+     * A digit run starts with 1 to 9. Thus, `m0K` and `m01K` give no reading. `m^0K` gives `m^0·K`.
      * A caret power after a factor is the integer power of the factor: `m^2K` gives `m^2·K`.
      * A caret power has an optional sign: `m^-1K` gives `m^-1·K`.
-     * A superscript power is a caret power: `m²K` gives `m^2·K`, and `m⁻¹K` gives `m^-1·K`.
+     * A superscript power is a caret power: `m²K` gives `m^2·K`, `m⁻¹K` gives `m^-1·K`,
+     * and `m⁺²K` gives `m^2·K`.
      * When the token is one unit, the list contains no one-factor reading.
      * The list is raw. The list does not apply the parse policy.
      * The parse policy includes refused spellings, ambiguous spellings, prefixed unit
