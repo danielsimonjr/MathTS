@@ -12,9 +12,11 @@ and want to move to `@danielsimonjr/mathts-*`.
   long-term surface: explicit TypeScript overloads and direct imports (not the
   `create(all)` / `math.*` style). The package still loads one bundled entry that
   activates the factory graph — do not expect per-symbol tree-shaking from that entry.
-- `Float64Array` inputs to arithmetic functions are async overloads that may use
-  `ComputePool` when `thresholdByOp` allows; most element-wise ops default to `'never'`
-  (in-process). They return `Promise<Float64Array>`.
+- `Float64Array` inputs to the arithmetic functions (`add`, `subtract`, `multiply`,
+  `divide`, the unary ops of `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous: they return a
+  `Float64Array` or a number. Use `ComputePool` or `parallelMap` from
+  `@danielsimonjr/mathts-parallel` for worker threads. The trigonometry, statistics,
+  signal and bitwise `Float64Array` overloads are still async.
 - `Int32Array` bitwise inputs are async, but bitwise WASM kernels are not enabled in
   `functions/src/wasm/policy.ts` and worker bitwise ops are also `'never'` — they run
   in-process after the Promise wrapper.
@@ -132,14 +134,14 @@ add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber('0.3')
 add(1n, 2n); // 3n  (bigint)
 ```
 
-### Float64Array overloads (async, worker pool)
+### Float64Array overloads (synchronous)
 
 ```ts
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([5, 6, 7, 8]);
 
-const result = await add(a, b); // Float64Array([6, 8, 10, 12])
-// routes through ComputePool; threshold controlled by thresholdByOp
+const result = add(a, b); // Float64Array([6, 8, 10, 12])
+// runs in-thread; for worker threads use computePool.add(a, b)
 ```
 
 The `Float64Array` overload is present on all element-wise arithmetic and
@@ -337,7 +339,7 @@ import { add } from '@danielsimonjr/mathts-functions';
 // add(number, number): number
 // add(Complex, Complex): Complex
 // add(BigNumber, BigNumber): BigNumber
-// add(Float64Array, Float64Array): Promise<Float64Array>
+// add(Float64Array, Float64Array): Float64Array
 ```
 
 The compat shim (`@danielsimonjr/mathts-compat`) uses a broader `any`-heavy

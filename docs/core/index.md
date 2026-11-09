@@ -54,7 +54,7 @@ math.chain(3).add(4).multiply(2).done(); // 14
 
 ### Typed arrays and workers
 
-`Float64Array` inputs use async typed-function signatures and return a `Promise`. Element-wise ops such as `add` and `sin` are pinned to **sequential** execution at practical sizes (`ComputePool` thresholds `'never'` for those ops), so small arrays still run on the main thread:
+The arithmetic functions (`add`, `subtract`, `multiply`, `divide`, `abs`, `sqrt`, `exp`, `log`, `round`, `norm`, `min`, `max`, `dot` and the others in `typed/arithmetic.ts`) are synchronous on `Float64Array` input: they return a `Float64Array` or a number. Other typed functions, such as `sin`, still have an async `Float64Array` signature that returns a `Promise`:
 
 ```typescript
 import { add, sin } from '@danielsimonjr/mathts-functions';
@@ -62,7 +62,7 @@ import { add, sin } from '@danielsimonjr/mathts-functions';
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([10, 20, 30, 40]);
 
-const result = await add(a, b); // Float64Array [11, 22, 33, 44]
+const result = add(a, b); // Float64Array [11, 22, 33, 44], synchronous
 const sines = await sin(a); // Float64Array; sequential (ComputePool sin: 'never')
 ```
 
@@ -96,7 +96,7 @@ add(1, 2); // number → number
 add(1n, 2n); // bigint → bigint
 add(new Complex(1, 2), new Complex(0, 0)); // Complex → Complex
 add(new Fraction(1, 2), new Fraction(1, 2)); // Fraction → Fraction
-await add(new Float64Array(1), new Float64Array(1)); // async; Promise<Float64Array>
+add(new Float64Array(1), new Float64Array(1)); // Float64Array, synchronous
 ```
 
 See the [Reference](../reference/index.md) for a full list of classes, constants, and functions.

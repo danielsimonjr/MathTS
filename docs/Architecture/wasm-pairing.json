@@ -2,8 +2,8 @@
   "generated": "2026-11-09",
   "total": 218,
   "acceleratedCount": 40,
-  "parallelOnlyCount": 44,
-  "jsOnlyCount": 134,
+  "parallelOnlyCount": 25,
+  "jsOnlyCount": 153,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -11,7 +11,7 @@
     {
       "name": "abs",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -179,14 +179,14 @@
     {
       "name": "exp",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "expm1",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -200,28 +200,28 @@
     {
       "name": "log",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "log10",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "log1p",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "log2",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -270,7 +270,7 @@
     {
       "name": "sinh",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -284,7 +284,7 @@
     {
       "name": "tanh",
       "file": "arithmetic.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     }
@@ -300,13 +300,6 @@
     {
       "name": "acosh",
       "file": "trigonometry.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "add",
-      "file": "arithmetic.ts",
       "routing": "parallel",
       "dispatch": [],
       "effectiveBackend": "unknown"
@@ -354,92 +347,8 @@
       "effectiveBackend": "unknown"
     },
     {
-      "name": "cbrt",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "ceil",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "cosh",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "cube",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "divide",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "dot",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "fix",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "floor",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "leftShift",
       "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "max",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "min",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "multiply",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "norm",
-      "file": "arithmetic.ts",
       "routing": "parallel",
       "dispatch": [],
       "effectiveBackend": "unknown"
@@ -555,53 +464,12 @@
       "routing": "parallel",
       "dispatch": [],
       "effectiveBackend": "unknown"
-    },
-    {
-      "name": "round",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "sign",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "sqrt",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "square",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "subtract",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "unaryMinus",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
     }
   ],
   "jsOnly": [
     "acot",
     "acsc",
+    "add",
     "and",
     "arg",
     "asec",
@@ -616,6 +484,8 @@
     "bin",
     "binomialPMF",
     "carmichaelLambda",
+    "cbrt",
+    "ceil",
     "chebyshevT",
     "chineseRemainder",
     "combinations",
@@ -627,10 +497,14 @@
     "cond",
     "conj",
     "cosIntegral",
+    "cosh",
+    "cube",
     "deepEqual",
     "digamma",
+    "divide",
     "divisorSigma",
     "divisors",
+    "dot",
     "doubleFactorial",
     "entropy",
     "equal",
@@ -643,6 +517,8 @@
     "exponentialPDF",
     "fallingFactorial",
     "fibonacci",
+    "fix",
+    "floor",
     "format",
     "fresnelC",
     "fresnelS",
@@ -672,11 +548,15 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
+    "max",
     "mean",
+    "min",
     "mod",
     "moebiusMu",
     "multinomial",
+    "multiply",
     "nextPrime",
+    "norm",
     "norm2",
     "normFro",
     "normalCDF",
@@ -707,6 +587,7 @@
     "randomInt",
     "re",
     "risingFactorial",
+    "round",
     "setCartesian",
     "setDifference",
     "setDistinct",
@@ -717,18 +598,23 @@
     "setSize",
     "setSymDifference",
     "setUnion",
+    "sign",
     "sinIntegral",
     "singularValues",
     "smaller",
     "smallerEq",
+    "sqrt",
+    "square",
     "std",
     "studentTPDF",
     "subfactorial",
+    "subtract",
     "sum",
     "to",
     "toBest",
     "toDegrees",
     "toRadians",
+    "unaryMinus",
     "unaryPlus",
     "unequal",
     "variance",
@@ -738,8 +624,8 @@
   "byFile": {
     "arithmetic.ts": {
       "wasm": 9,
-      "parallel": 19,
-      "jsOnly": 17
+      "parallel": 0,
+      "jsOnly": 36
     },
     "bitwise.ts": {
       "wasm": 0,

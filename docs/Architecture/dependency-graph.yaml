@@ -22637,7 +22637,7 @@ modules:
       constants:
         - typedAlgebra
     functions/src/typed/arithmetic.ts:
-      description: Typed Arithmetic Functions (Parallel-First)
+      description: Typed Arithmetic Functions
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -42951,7 +42951,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1270
   totalModules: 82
-  totalLinesOfCode: 214581
+  totalLinesOfCode: 214446
   totalExports: 6914
   totalClasses: 61
   totalInterfaces: 597

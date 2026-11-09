@@ -3241,10 +3241,11 @@ Runtime probes for the optional acceleration tiers:
 
 ### Details
 
-- Some `Float64Array` overloads return a `Promise`, but many op thresholds are
-  `'never'`, so the synchronous JS path still runs. Await when the overload is
-  async — `Promise<Float64Array>` for element-wise transforms, `Promise<number>`
-  for reductions.
+- The arithmetic functions (`add`, `subtract`, `multiply`, `divide`, the unary ops of
+  `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous on `Float64Array` input. The
+  trigonometry, statistics, signal and bitwise `Float64Array` overloads still
+  return a `Promise` — `Promise<Float64Array>` for element-wise transforms,
+  `Promise<number>` for reductions.
 - The worker pool is created lazily on first use. `initializePool()`,
   `getComputePool()`, and `terminatePool()` give explicit lifecycle control —
   call `terminatePool()` to release worker threads, for example before process
@@ -3274,7 +3275,7 @@ thread-creation costs on every call.
 import { add, initializePool, terminatePool } from '@danielsimonjr/mathts-functions';
 
 await initializePool();
-const sum = await add(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
+const sum = add(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
 // sum → Float64Array([5, 7, 9])
 await terminatePool();
 ```

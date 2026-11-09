@@ -10712,7 +10712,7 @@ graph LR
 
 ---
 
-### `functions/src/typed/arithmetic.ts` - Typed Arithmetic Functions (Parallel-First)
+### `functions/src/typed/arithmetic.ts` - Typed Arithmetic Functions
 
 **Workspace Dependencies:**
 
@@ -19991,7 +19991,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1270   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214581 |
+| Total Lines of Code     | 214446 |
 | Total Exports           | 6914   |
 | Total Re-exports        | 2999   |
 | Total Classes           | 61     |
