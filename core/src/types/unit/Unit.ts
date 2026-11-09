@@ -51,6 +51,7 @@ import {
   namedExactScale,
   readUnitScale,
   UNIT_PREFIX_SETS,
+  UNIT_PREFIX_SET_UNRESTRICTED,
   UNIT_ROW_ALIASES,
   UNIT_ROWS,
   REFUSED_UNIT_SPELLINGS,
@@ -550,9 +551,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return parseCharacter('*') !== null || parseCharacter('·') !== null;
     }
 
-    function findUnitPair(name: string): { unit: UnitDef; prefix: PrefixDef } | null {
-      return _findUnit(name) as { unit: UnitDef; prefix: PrefixDef } | null;
-    }
+    type FindUnit = (name: string) => { unit: UnitDef; prefix: PrefixDef } | null;
+    const findUnitPair: FindUnit = (name) =>
+      _findUnit(name) as { unit: UnitDef; prefix: PrefixDef } | null;
+    // The lookup of Unit.readings. It uses the unrestricted set in place of a restricted prefix set.
+    const findUnitUnrestricted: FindUnit = (name) =>
+      _findUnit(name, true) as { unit: UnitDef; prefix: PrefixDef } | null;
 
     // Every non-empty prefix symbol of every prefix set, built once on first use (rule C).
     let prefixSymbolCache: readonly string[] | undefined;
@@ -615,7 +619,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     // Every way to cut `token` into factors. A factor is a substring that _findUnit
     // accepts, optionally followed by a run of digits that is its integer power.
-    function readings(token: string): Factor[][] {
+    function readings(token: string, find: FindUnit = findUnitPair): Factor[][] {
       const result: Factor[][] = [];
       const factors: Factor[] = [];
       function isDigit(ch: string): boolean {
@@ -623,7 +627,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
       function addFactor(name: string, power: number, next: number): void {
         const prev = factors[factors.length - 1];
-        if (prev !== undefined && prev.name === name && isPrefixRepeat(prev.name, name)) {
+        if (prev !== undefined && prev.name === name && isPrefixRepeat(prev.name, name, find)) {
           return;
         }
         factors.push({ name, power });
@@ -639,7 +643,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       function addFactors(start: number): void {
         for (let end = start + 1; end <= token.length; end++) {
           const name = token.slice(start, end);
-          if (findUnitPair(name) === null) continue;
+          if (find(name) === null) continue;
           addFactor(name, 1, end);
           if (end < token.length && isDigit(token[end])) {
             let digitEnd = end + 1;
@@ -671,9 +675,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     // m·m is not a reading, because `mm` is the prefix m on the unit m.
     // N·N is a reading, because `NN` is not a prefixed unit.
-    function isPrefixRepeat(left: string, right: string): boolean {
+    function isPrefixRepeat(left: string, right: string, find: FindUnit): boolean {
       if (left !== right) return false;
-      const hit = findUnitPair(left + right);
+      const hit = find(left + right);
       return hit !== null && hit.prefix.name === left && hit.unit.name === right;
     }
 
@@ -1081,6 +1085,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Thus, `°R` gives the factor `degR`. `µA` gives the factor `uA`.
      * Each reading cuts the token into two or more factors.
      * A factor is a unit spelling that the registry accepts.
+     * A factor uses the unrestricted prefix set (`UNIT_PREFIX_SET_UNRESTRICTED`) to read its prefix.
+     * Thus, `Hzpc` gives `H·zpc`, but `Unit.parse('zpc')` throws an error.
      * A trailing digit run is the integer power of the factor.
      * When the token is one unit, the list contains no one-factor reading.
      * The list is raw. The list does not apply the parse policy.
@@ -1094,7 +1100,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     Unit.readings = function (
       token: string
     ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
-      return readings(normalizeUnitSpellings(token));
+      return readings(normalizeUnitSpellings(token), findUnitUnrestricted);
     };
 
     /**
@@ -1181,9 +1187,19 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *                                  prefix is returned. Else, null is returned.
      * @private
      */
+    // Gives the unrestricted set of a restricted prefix table (UNIT_PREFIX_SET_UNRESTRICTED).
+    // Gives the table itself when the table has no restriction.
+    function unrestrictedPrefixes(table: PrefixTable | undefined): PrefixTable | undefined {
+      for (const [key, wide] of Object.entries(UNIT_PREFIX_SET_UNRESTRICTED)) {
+        if (table === PREFIXES[key]) return PREFIXES[wide!];
+      }
+      return table;
+    }
+
     const _findUnit = memoize(
       (...args: unknown[]): { unit: UnitDef; prefix: PrefixDef } | null => {
         const str = args[0] as string;
+        const unrestricted = args[1] === true;
         // First, match units names exactly. For example, a user could define 'mm' as 10^-4 m, which is silly, but then we would want 'mm' to match the user-defined unit.
         if (hasOwnProperty(UNITS, str)) {
           const unit = UNITS[str];
@@ -1197,8 +1213,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
               const unit = UNITS[name];
               const prefixLen = str.length - name.length;
               const prefixName = str.substring(0, prefixLen);
-              const prefix = hasOwnProperty(unit.prefixes, prefixName)
-                ? unit.prefixes![prefixName]
+              const prefixes = unrestricted ? unrestrictedPrefixes(unit.prefixes) : unit.prefixes;
+              const prefix = hasOwnProperty(prefixes, prefixName)
+                ? prefixes![prefixName]
                 : undefined;
               if (prefix !== undefined) {
                 // store unit, prefix, and value
@@ -1216,7 +1233,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // returns the first name in UNITS insertion order whose suffix and prefix both match, and
       // a split-based lookup cannot reproduce that order without an insertion-order index that
       // would have to track every UNITS mutation.
-      { hasher: (args: unknown[]): string => args[0] as string, limit: 1000 }
+      {
+        hasher: (args: unknown[]): string => (args[1] === true ? '+' : '') + (args[0] as string),
+        limit: 1000,
+      }
     );
 
     /**

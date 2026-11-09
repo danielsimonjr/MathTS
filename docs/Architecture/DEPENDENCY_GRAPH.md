@@ -1055,7 +1055,7 @@ graph LR
 | `./errors.js`      | `AmbiguousUnitError, DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                    | Import             |
 | `./va-var.js`      | `isEffectivelyImaginary`                                                                                                                                                                                                                                                                                                        | Import             |
 | `./exact-scale.js` | `ExactScale, addExactScales, binaryExactScale, divideExactScales, exactScaleOf, irrationalPower, roundExactScale, isRationalScale, multiplyExactScales, powerExactScale, ratioExactScale, readScaleExpression, PI_EXACT_SCALE, UNIT_EXACT_SCALE`                                                                                | Import             |
-| `./unit-table.js`  | `UnitPrefix, UnitPrefixSetKey, namedExactScale, readUnitScale, UNIT_PREFIX_SETS, UNIT_ROW_ALIASES, UNIT_ROWS, REFUSED_UNIT_SPELLINGS, AMBIGUOUS_UNIT_SPELLINGS, unitPrefixExactScale`                                                                                                                                           | Import             |
+| `./unit-table.js`  | `UnitPrefix, UnitPrefixSetKey, namedExactScale, readUnitScale, UNIT_PREFIX_SETS, UNIT_PREFIX_SET_UNRESTRICTED, UNIT_ROW_ALIASES, UNIT_ROWS, REFUSED_UNIT_SPELLINGS, AMBIGUOUS_UNIT_SPELLINGS, unitPrefixExactScale`                                                                                                             | Import             |
 
 **Exports:**
 
@@ -1140,7 +1140,7 @@ graph LR
 - Interfaces: `UnitRow`, `UnitPrefix`
 - Types: `UnitBaseKey`, `UnitPrefixSetKey`
 - Functions: `unitPrefixExactScale`, `getUnitPrefix`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`
-- Constants: `UNIT_PREFIX_SETS`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`
+- Constants: `UNIT_PREFIX_SETS`, `UNIT_PREFIX_SET_UNRESTRICTED`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`
 
 ---
 
@@ -19991,8 +19991,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1270   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214414 |
-| Total Exports           | 6910   |
+| Total Lines of Code     | 214439 |
+| Total Exports           | 6911   |
 | Total Re-exports        | 2996   |
 | Total Classes           | 61     |
 | Total Interfaces        | 596    |
