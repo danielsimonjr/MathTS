@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [42f3c97]
+  - @danielsimonjr/mathts-core@0.25.0
+  - @danielsimonjr/mathts-matrix@0.9.4
+
 ## 0.2.3
 
 ### Patch Changes
