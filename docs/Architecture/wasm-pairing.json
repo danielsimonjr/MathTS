@@ -2,8 +2,8 @@
   "generated": "2026-11-09",
   "total": 218,
   "acceleratedCount": 40,
-  "parallelOnlyCount": 25,
-  "jsOnlyCount": 153,
+  "parallelOnlyCount": 28,
+  "jsOnlyCount": 150,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -354,6 +354,27 @@
       "effectiveBackend": "unknown"
     },
     {
+      "name": "max",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": [],
+      "effectiveBackend": "unknown"
+    },
+    {
+      "name": "min",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": [],
+      "effectiveBackend": "unknown"
+    },
+    {
+      "name": "norm",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": [],
+      "effectiveBackend": "unknown"
+    },
+    {
       "name": "parallelConv",
       "file": "signal.ts",
       "routing": "parallel",
@@ -548,15 +569,12 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
-    "max",
     "mean",
-    "min",
     "mod",
     "moebiusMu",
     "multinomial",
     "multiply",
     "nextPrime",
-    "norm",
     "norm2",
     "normFro",
     "normalCDF",
@@ -624,8 +642,8 @@
   "byFile": {
     "arithmetic.ts": {
       "wasm": 9,
-      "parallel": 0,
-      "jsOnly": 36
+      "parallel": 3,
+      "jsOnly": 33
     },
     "bitwise.ts": {
       "wasm": 0,

@@ -43,7 +43,7 @@ sqrt(9); // 3
 sin(Math.PI / 2); // 1
 ```
 
-Note: scalar calls are synchronous and return plain values. `Float64Array` inputs use async signatures and return `Promise<T>`, but element-wise ops such as `add` and `sin` stay on the main thread at typical sizes (parallel thresholds `'never'` for those ops).
+Note: scalar calls are synchronous and return plain values. `Float64Array` arithmetic (`add`, `multiply`, `sqrt` and the other functions of `typed/arithmetic.ts`) is synchronous too. Trigonometry such as `sin` still returns a `Promise` on `Float64Array` input.
 
 ## Choosing the Right Type
 

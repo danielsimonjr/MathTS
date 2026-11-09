@@ -90,7 +90,7 @@ double(5); // 10
 
 ## Parallel Extension
 
-For array types, follow the parallel-first pattern — return a Promise when accepting `Float64Array`:
+For array types, keep the typed-function signature synchronous, as the arithmetic functions do. Put the worker-pool version in a separate async function:
 
 ```typescript
 import { mathTyped } from '@danielsimonjr/mathts-core';
@@ -99,12 +99,15 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 export const reciprocal = mathTyped('reciprocal', {
   number: (x: number) => 1 / x,
 
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    // Parallel element-wise 1/x via worker pool
-    const result = await computePool.map(a, (x) => 1 / x);
-    return result.result;
-  },
+  // Synchronous element-wise 1/x in the same thread
+  Float64Array: (a: Float64Array): Float64Array => a.map((x) => 1 / x),
 });
+
+// Worker-pool version for large arrays
+export async function parallelReciprocal(a: Float64Array): Promise<Float64Array> {
+  const result = await computePool.applyKernel(a, '(x) => 1 / x');
+  return result.result;
+}
 ```
 
 ## TypeRegistry API

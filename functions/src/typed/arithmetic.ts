@@ -4,8 +4,9 @@
  * Polymorphic arithmetic operations using typed-function for runtime dispatch.
  * Supports Complex, Fraction, BigNumber, and Float64Array types.
  *
- * Every Float64Array signature in this file is synchronous. Each signature returns a
- * Float64Array (element-wise ops) or a number (reductions), not a Promise. Some unary
+ * Every typed-function signature in this file is synchronous. Each Float64Array signature
+ * returns a Float64Array (element-wise ops) or a number (reductions), not a Promise.
+ * The standalone helpers matmul, transpose, matvec and outer stay async. Some unary
  * ops use the WASM tier first after `loadWasm()` loads the tier.
  * For worker threads, use `ComputePool` or
  * `parallelMap` from `@danielsimonjr/mathts-parallel`.
@@ -294,14 +295,13 @@ const unitMul = (a: unknown, b: unknown): unknown => asUnit(a).multiply(b);
 const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
 
 // =============================================================================
-// Addition (Parallel-First)
+// Addition
 // =============================================================================
 
 /**
- * Polymorphic addition function with parallel execution for arrays
+ * Polymorphic addition function. The Float64Array signature is synchronous.
  *
- * For Float64Array inputs, uses worker pool for parallel computation.
- * Falls back to sequential for scalar types.
+ * Float64Array inputs give a new Float64Array in the same thread (no worker pool).
  *
  * @example
  * ```typescript
@@ -386,11 +386,11 @@ export const add = mathTyped('add', {
 addForNumberPath.fn = add;
 
 // =============================================================================
-// Subtraction (Parallel-First)
+// Subtraction
 // =============================================================================
 
 /**
- * Polymorphic subtraction function with parallel execution for arrays
+ * Polymorphic subtraction function. The Float64Array signature is synchronous.
  */
 export const subtract = mathTyped('subtract', {
   'number, number': (a: f64, b: f64): f64 => a - b,
@@ -453,11 +453,11 @@ export const subtract = mathTyped('subtract', {
 subtractForNumberPath.fn = subtract;
 
 // =============================================================================
-// Multiplication (Parallel-First)
+// Multiplication
 // =============================================================================
 
 /**
- * Polymorphic multiplication function with parallel execution for arrays
+ * Polymorphic multiplication function. The Float64Array signature is synchronous.
  */
 export const multiply = mathTyped('multiply', {
   'number, number': (a: f64, b: f64): f64 => a * b,
@@ -557,11 +557,11 @@ export const multiply = mathTyped('multiply', {
 multiplyForNumberPath.fn = multiply;
 
 // =============================================================================
-// Division (Parallel-First)
+// Division
 // =============================================================================
 
 /**
- * Polymorphic division function with parallel execution for arrays
+ * Polymorphic division function. The Float64Array signature is synchronous.
  */
 export const divide = mathTyped('divide', {
   'number, number': (a: f64, b: f64): f64 => a / b,
@@ -598,11 +598,11 @@ export const divide = mathTyped('divide', {
 });
 
 // =============================================================================
-// Unary Operations (Parallel-First)
+// Unary Operations
 // =============================================================================
 
 /**
- * Unary negation with parallel array support
+ * Unary negation. The Float64Array signature is synchronous.
  */
 export const unaryMinus = mathTyped('unaryMinus', {
   number: (a: f64): f64 => -a,
@@ -628,7 +628,7 @@ export const unaryPlus = mathTyped('unaryPlus', {
 });
 
 /**
- * Absolute value with parallel array support
+ * Absolute value. The Float64Array signature is synchronous.
  */
 export const abs = mathTyped('abs', {
   number: (a: f64): f64 => Math.abs(a),
@@ -663,7 +663,7 @@ export const sign = mathTyped('sign', {
 });
 
 // =============================================================================
-// Power and Root Operations (Parallel-First)
+// Power and Root Operations
 // =============================================================================
 
 /**
@@ -725,7 +725,7 @@ export const pow = mathTyped('pow', {
 });
 
 /**
- * Square root with parallel array support
+ * Square root. The Float64Array signature is synchronous.
  */
 export const sqrt = mathTyped('sqrt', {
   number: (a: f64): f64 | Complex => {
@@ -743,7 +743,7 @@ export const sqrt = mathTyped('sqrt', {
 });
 
 /**
- * Square with parallel array support
+ * Square. The Float64Array signature is synchronous.
  */
 export const square = mathTyped('square', {
   number: (a: f64): f64 => a * a,
@@ -818,11 +818,11 @@ export const nthRoot = mathTyped('nthRoot', {
 });
 
 // =============================================================================
-// Exponential and Logarithmic (Parallel-First)
+// Exponential and Logarithmic
 // =============================================================================
 
 /**
- * Exponential function (e^x) with parallel array support
+ * Exponential function (e^x). The Float64Array signature is synchronous.
  */
 export const exp = mathTyped('exp', {
   number: (a: f64): f64 => Math.exp(a),
@@ -836,7 +836,7 @@ export const exp = mathTyped('exp', {
 });
 
 /**
- * Natural logarithm (ln x) with parallel array support
+ * Natural logarithm (ln x). The Float64Array signature is synchronous.
  */
 export const log = mathTyped('log', {
   number: (a: f64): f64 => Math.log(a),
@@ -918,7 +918,7 @@ export const round = mathTyped('round', {
     return Math.round(a * factor) / factor;
   },
 
-  // Float64Array round (synchronous) (round to nearest integer, matching the 'number' overload)
+  // Float64Array round, synchronous (nearest integer, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.round(x)),
 });
 
@@ -959,7 +959,7 @@ export const fix = mathTyped('fix', {
   BigNumber: (a: BigNumber): BigNumber => coreFix(a) as BigNumber,
   Complex: (a: Complex): Complex => coreFix(a) as Complex,
 
-  // Float64Array fix (synchronous) (truncate toward zero, matching the 'number' overload)
+  // Float64Array fix, synchronous (truncate toward zero, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.trunc(x)),
 });
 
@@ -1097,7 +1097,7 @@ export const xgcd = mathTyped('xgcd', {
 });
 
 /**
- * Vector/array norm (Euclidean norm by default) with parallel support
+ * Vector/array norm (Euclidean norm by default). The Float64Array signature is synchronous.
  */
 /** Is `arr` a 2-D (matrix) array rather than a flat vector? */
 function is2DArray(arr: unknown[]): boolean {
@@ -1190,9 +1190,7 @@ export const norm = mathTyped('norm', {
   'SparseMatrix, string': (m: unknown, p: string): f64 =>
     matrixNorm(matrixLike(m as { toArray(): unknown }), p),
 
-  // Float64Array norm (Euclidean) — gated on the (memory-bound ⇒ 'never') threshold.
-  // Previously dispatched to the worker pool unconditionally, ignoring the 'never'
-  // config; now sequential unless the threshold says otherwise.
+  // Float64Array norm (Euclidean), synchronous. The worker version is computePool.norm.
   Float64Array: (a: Float64Array): f64 => {
     // Scaled (LAPACK dnrm2), not `sqrt(sum(x*x))` — squaring before adding overflows to Infinity
     // around 1e200 and flushes to ZERO around 1e-200. See `norm2`.
@@ -1324,11 +1322,11 @@ export const compare = mathTyped('compare', {
 });
 
 // =============================================================================
-// Min/Max Operations (Parallel-First)
+// Min/Max Operations
 // =============================================================================
 
 /**
- * Minimum of values with parallel array support
+ * Minimum of values. The Float64Array signature is synchronous.
  */
 export const min = mathTyped('min', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a < b ? a : b),
@@ -1343,8 +1341,7 @@ export const min = mathTyped('min', {
   'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.min(a, b, ...rest),
 
-  // Float64Array min — gated on the (memory-bound ⇒ 'never') threshold, so it stays
-  // sequential instead of paying worker-dispatch overhead on every call.
+  // Float64Array min, synchronous. The worker versions are parallelStatMin / computePool.min.
   Float64Array: (a: Float64Array): f64 => {
     let m = Infinity;
     for (let i = 0; i < a.length; i++) if (a[i] < m) m = a[i];
@@ -1353,7 +1350,7 @@ export const min = mathTyped('min', {
 });
 
 /**
- * Maximum of values with parallel array support
+ * Maximum of values. The Float64Array signature is synchronous.
  */
 export const max = mathTyped('max', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a > b ? a : b),
@@ -1368,7 +1365,7 @@ export const max = mathTyped('max', {
   'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.max(a, b, ...rest),
 
-  // Float64Array max — gated on the (memory-bound ⇒ 'never') threshold; sequential.
+  // Float64Array max, synchronous. The worker versions are parallelStatMax / computePool.max.
   Float64Array: (a: Float64Array): f64 => {
     let m = -Infinity;
     for (let i = 0; i < a.length; i++) if (a[i] > m) m = a[i];
@@ -1377,11 +1374,11 @@ export const max = mathTyped('max', {
 });
 
 // =============================================================================
-// Statistical Operations (Parallel-First)
+// Statistical Operations
 // =============================================================================
 
 /**
- * Sum with parallel array support
+ * Sum. The Float64Array signature is synchronous.
  */
 /**
  * Exactly-rounded sum — the equivalent of Python's `math.fsum` / NumPy's `math.fsum` idiom.
@@ -1468,7 +1465,7 @@ function m2OfArray(arr: f64[]): f64 {
 }
 
 /**
- * Variance with parallel array support.
+ * Variance. The Float64Array signature is synchronous.
  *
  * Defaults to **unbiased** (sample, ÷(n-1)) to match mathjs and the
  * `parallelStatVariance` variant. An optional normalization argument selects
@@ -1491,7 +1488,7 @@ export const variance = mathTyped('variance', {
 });
 
 /**
- * Standard deviation with parallel array support — sqrt of {@link variance};
+ * Standard deviation. The Float64Array signature is synchronous — sqrt of {@link variance};
  * defaults to **unbiased** and accepts the same normalization argument.
  */
 export const std = mathTyped('std', {
@@ -1511,7 +1508,7 @@ export const std = mathTyped('std', {
 });
 
 /**
- * Dot product with parallel array support
+ * Dot product. The Float64Array signature is synchronous.
  */
 export const dot = mathTyped('dot', {
   'Array, Array': (a: f64[], b: f64[]): f64 => {
