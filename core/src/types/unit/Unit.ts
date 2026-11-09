@@ -142,7 +142,7 @@ const MICRO_SIGNS = /[µμ]/g;
 
 /**
  * Normalize unit spellings the tokenizer would otherwise reject, before parsing.
- * Degree symbols first (`°C` / `°F` / `°R` before a bare `°`, which is an angle).
+ * A degree sign becomes `deg`, so `°C`, `°F` and `°R` become `degC`, `degF` and `degR`. A bare `°` is the angle `deg`.
  * `Ω` / `Ω` are the ohm, including a
  * prefix glued on (`kΩ`). `℃` is degree Celsius and `Å` is the angstrom.
  * The micro signs stay in the text: `_findUnit` reads them as the micro prefix
@@ -158,9 +158,6 @@ function normalizeUnitSpellings(s: string): string {
 // The rewrites of normalizeUnitSpellings, in order. A rewrite earlier in the list wins.
 const SPELLING_REWRITES: ReadonlyArray<readonly [RegExp, string]> = [
   [/℃/g, 'degC'],
-  [/°C/g, 'degC'],
-  [/°F/g, 'degF'],
-  [/°R/g, 'degR'],
   [/°/g, 'deg'],
   [/[ΩΩ]/g, 'ohm'],
   [/Å/g, 'angstrom'],

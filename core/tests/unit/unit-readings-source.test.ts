@@ -40,6 +40,19 @@ describe('Unit.readingsWithSource', () => {
       expect(way.map((f) => f.source).join('')).toBe(token);
     }
   });
+  it('gives the degree sign to deg and the letter to the next factor in °Rm', () => {
+    expect(Unit.readingsWithSource('°Rm')).toContainEqual([
+      { name: 'deg', power: 1, source: '°' },
+      { name: 'Rm', power: 1, source: 'Rm' },
+    ]);
+  });
+  it('gives the full sign ℃ to the next factor when a cut falls inside it', () => {
+    expect(Unit.readingsWithSource('℃m')).toContainEqual([
+      { name: 'deg', power: 1, source: '' },
+      { name: 'C', power: 1, source: '℃' },
+      { name: 'm', power: 1, source: 'm' },
+    ]);
+  });
   it('gives several readings for the ambiguous token umK', () => {
     expect(Unit.readingsWithSource('umK').length).toBeGreaterThan(1);
   });
