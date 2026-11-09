@@ -553,6 +553,9 @@
       "UnitPrefixSetKey": {
         "kind": "type"
       },
+      "UnitReadingFactor": {
+        "kind": "type"
+      },
       "UnitRow": {
         "kind": "type"
       },

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-09",
     "totalFiles": 1270,
     "totalModules": 82,
-    "totalExports": 6911
+    "totalExports": 6914
   },
   "entryPoints": [
     {
@@ -1038,7 +1038,7 @@
           },
           {
             "file": "./types/unit.js",
-            "imports": ["Dimensions", "UnitDef", "UnitInstance"],
+            "imports": ["Dimensions", "UnitDef", "UnitInstance", "UnitReadingFactor"],
             "reExport": true,
             "typeOnly": true
           },
@@ -1255,6 +1255,7 @@
           "Dimensions",
           "UnitDef",
           "UnitInstance",
+          "UnitReadingFactor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -1446,6 +1447,7 @@
           "Dimensions",
           "UnitDef",
           "UnitInstance",
+          "UnitReadingFactor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -2881,6 +2883,7 @@
               "UnitFormatOptions",
               "UnitInstance",
               "UnitJSON",
+              "UnitReadingFactor",
               "UnitSystem",
               "UnitSystemEntry"
             ],
@@ -3164,6 +3167,7 @@
               "UnitSystemEntry",
               "UnitSystem",
               "UnitJSON",
+              "UnitReadingFactor",
               "ConverterFn",
               "TypeConverters",
               "ParseOptions",
@@ -3250,6 +3254,7 @@
           "UnitSystemEntry",
           "UnitSystem",
           "UnitJSON",
+          "UnitReadingFactor",
           "ConverterFn",
           "TypeConverters",
           "ParseOptions",
@@ -3325,6 +3330,7 @@
           "UnitSystemEntry",
           "UnitSystem",
           "UnitJSON",
+          "UnitReadingFactor",
           "ConverterFn",
           "TypeConverters",
           "ParseOptions",
@@ -3444,6 +3450,7 @@
           "SubtractScalar",
           "UnitDependencies",
           "UnitInstance",
+          "UnitReadingFactor",
           "UnitConstructor"
         ]
       },
@@ -3583,7 +3590,7 @@
           },
           {
             "file": "./unit/index.js",
-            "imports": ["UnitInstance"],
+            "imports": ["UnitInstance", "UnitReadingFactor"],
             "reExport": true,
             "typeOnly": true
           },
@@ -3667,6 +3674,7 @@
           "fromSiDimensions",
           "fromSiDimensionVector",
           "UnitInstance",
+          "UnitReadingFactor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -3732,6 +3740,7 @@
           "fromSiDimensions",
           "fromSiDimensionVector",
           "UnitInstance",
+          "UnitReadingFactor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -45373,15 +45382,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1270,
     "totalModules": 82,
-    "totalLinesOfCode": 214487,
-    "totalExports": 6911,
+    "totalLinesOfCode": 214584,
+    "totalExports": 6914,
     "totalClasses": 61,
-    "totalInterfaces": 596,
+    "totalInterfaces": 597,
     "totalFunctions": 2288,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 2996,
+    "totalReExports": 2999,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -24,6 +24,7 @@ import type {
   UnitFormatOptions,
   UnitInstance,
   UnitJSON,
+  UnitReadingFactor,
   UnitSystem,
   UnitSystemEntry,
 } from './unit-types.js';
@@ -148,14 +149,58 @@ const MICRO_SIGNS = /[µμ]/g;
  * only, never as the unit `u`.
  */
 function normalizeUnitSpellings(s: string): string {
-  return s
-    .replace(/℃/g, 'degC')
-    .replace(/°C/g, 'degC')
-    .replace(/°F/g, 'degF')
-    .replace(/°R/g, 'degR')
-    .replace(/°/g, 'deg')
-    .replace(/[ΩΩ]/g, 'ohm')
-    .replace(/Å/g, 'angstrom');
+  return SPELLING_REWRITES.reduce(
+    (text, [pattern, canonical]) => text.replace(pattern, canonical),
+    s
+  );
+}
+
+// The rewrites of normalizeUnitSpellings, in order. A rewrite earlier in the list wins.
+const SPELLING_REWRITES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/℃/g, 'degC'],
+  [/°C/g, 'degC'],
+  [/°F/g, 'degF'],
+  [/°R/g, 'degR'],
+  [/°/g, 'deg'],
+  [/[ΩΩ]/g, 'ohm'],
+  [/Å/g, 'angstrom'],
+];
+
+/**
+ * A text and, for each position of the text, its source position.
+ * `from` has one more entry than the text: the last entry is the length of the source text.
+ */
+interface TrackedText {
+  readonly text: string;
+  readonly from: readonly number[];
+}
+
+// Apply one global rewrite and keep the source position of each character.
+// Each character of a replacement comes from the start of its match.
+function rewriteTracked(input: TrackedText, pattern: RegExp, canonical: string): TrackedText {
+  let text = '';
+  const from: number[] = [];
+  let last = 0;
+  for (const match of input.text.matchAll(pattern)) {
+    const at = match.index;
+    text += input.text.slice(last, at);
+    from.push(...input.from.slice(last, at));
+    text += canonical;
+    for (let k = 0; k < canonical.length; k++) from.push(input.from[at]);
+    last = at + match[0].length;
+  }
+  text += input.text.slice(last);
+  from.push(...input.from.slice(last));
+  return { text, from };
+}
+
+// normalizeUnitSpellings with the source position of each character of the result.
+function normalizeUnitSpellingsTracked(s: string): TrackedText {
+  const start: TrackedText = { text: s, from: Array.from({ length: s.length + 1 }, (_, i) => i) };
+  return SPELLING_REWRITES.reduce(
+    (tracked, [pattern, canonical]) => rewriteTracked(tracked, pattern, canonical),
+    start
+  );
 }
 
 const name = 'Unit';
@@ -596,7 +641,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
     // Examples: 'K²' -> 'K^2', 'm⁻¹' -> 'm^-1', 'm⁺²' -> 'm^+2'. The rule keeps a sign with no
     // following digit unchanged.
     function expandSuperscripts(input: string): string {
+      return expandSuperscriptsTracked({ text: input, from: [] }).text;
+    }
+    // expandSuperscripts with the source position of each character of the result.
+    // Each character of a '^' power comes from the start of its superscript run.
+    // An input with an empty `from` gives an empty `from`.
+    function expandSuperscriptsTracked(tracked: TrackedText): TrackedText {
+      const input = tracked.text;
+      const track = tracked.from.length > 0;
       let out = '';
+      const from: number[] = [];
       let i = 0;
       while (i < input.length) {
         let j = i;
@@ -610,15 +664,13 @@ export const createUnitClass = /* #__PURE__ */ factory(
           digits += String(SUPERSCRIPT_DIGITS.indexOf(input[j]));
           j++;
         }
-        if (digits !== '') {
-          out += '^' + sign + digits;
-          i = j;
-        } else {
-          out += input[i];
-          i++;
-        }
+        const piece = digits !== '' ? '^' + sign + digits : input[i];
+        if (track) for (let k = 0; k < piece.length; k++) from.push(tracked.from[i]);
+        out += piece;
+        i = digits !== '' ? j : i + 1;
       }
-      return out;
+      if (track) from.push(tracked.from[input.length]);
+      return { text: out, from };
     }
 
     // The pattern matches a 0 after a letter, for example in 'm0K' or 'm01K'.
@@ -628,6 +680,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     interface Factor {
       readonly name: string; // the spelling that _findUnit accepts, for example 'cm' or 'V'
       readonly power: number; // 1, or the integer of a digit run or caret power (m2, m^2 -> 2)
+      readonly end: number; // the token position after the factor and its power
     }
 
     // Every way to cut `token` into factors. A factor is a substring that _findUnit
@@ -644,7 +697,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         if (prev !== undefined && prev.name === name && isPrefixRepeat(prev.name, name, find)) {
           return;
         }
-        factors.push({ name, power });
+        factors.push({ name, power, end: next });
         if (next === token.length) {
           if (factors.length >= 2) {
             result.push(factors.slice());
@@ -1143,6 +1196,32 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return readings(expandSuperscripts(normalizeUnitSpellings(token)), findUnitUnrestricted).map(
         (r) => r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
       );
+    };
+
+    /**
+     * This method gives the readings of {@link Unit.readings} and the source text of each factor.
+     * The source text is the part of the token that the factor reads.
+     * For example, `µmK` gives the factor `um` with the source text `µm`, then `K` with the source text `K`.
+     * The names and powers are the same as the names and powers of `Unit.readings`.
+     * For each reading, the source texts in order make the token again, character for character.
+     * A sign spelling, for example `°R`, `Ω` or `℃`, is one part of source text.
+     * When a factor ends inside a sign spelling, the full sign goes to the next factor.
+     * @memberof Unit
+     * @param token - The glued unit token.
+     * @return The readings in search order, or an empty list when there are no readings.
+     */
+    Unit.readingsWithSource = function (
+      token: string
+    ): ReadonlyArray<ReadonlyArray<UnitReadingFactor>> {
+      const tracked = expandSuperscriptsTracked(normalizeUnitSpellingsTracked(token));
+      return readings(tracked.text, findUnitUnrestricted).map((r) => {
+        let at = 0;
+        return r.map((f) => {
+          const source = token.slice(tracked.from[at], tracked.from[f.end]);
+          at = f.end;
+          return { name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power, source };
+        });
+      });
     };
 
     /**
