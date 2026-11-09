@@ -1077,6 +1077,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Gives all product readings of one glued unit token, for example `'mAs'` or `'m2K'`.
      * The token is one name: letters and trailing digit runs.
      * The token has no `^`, `*`, `/`, space, or superscript.
+     * The function changes the degree, micro, ohm, and angstrom signs in the same way as parse.
+     * Thus, `°R` gives the factor `degR`. `µA` gives the factor `uA`.
      * Each reading cuts the token into two or more factors.
      * A factor is a unit spelling that the registry accepts.
      * A trailing digit run is the integer power of the factor.
@@ -1092,7 +1094,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     Unit.readings = function (
       token: string
     ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
-      return readings(token);
+      return readings(normalizeUnitSpellings(token));
     };
 
     /**

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08",
+  "generated": "2026-11-09",
   "totalFiles": 2185,
   "byDisposition": {
     "reachable": 26,
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3157
+      "loc": 3159
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1332,7 +1332,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 34
+      "loc": 45
     },
     {
       "file": "core/tests/unit/upt-u2-ton.test.ts",
