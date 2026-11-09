@@ -622,11 +622,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     interface Factor {
       readonly name: string; // the spelling that _findUnit accepts, for example 'cm' or 'V'
-      readonly power: number; // 1, or the integer of a trailing digit run (m2 -> 2)
+      readonly power: number; // 1, or the integer of a digit run or caret power (m2, m^2 -> 2)
     }
 
     // Every way to cut `token` into factors. A factor is a substring that _findUnit
-    // accepts, optionally followed by a run of digits that is its integer power.
+    // accepts, optionally followed by a run of digits or a caret power that is its integer power.
     function readings(token: string, find: FindUnit = findUnitPair): Factor[][] {
       const result: Factor[][] = [];
       const factors: Factor[] = [];
@@ -659,6 +659,18 @@ export const createUnitClass = /* #__PURE__ */ factory(
               digitEnd++;
             }
             addFactor(name, Number.parseInt(token.slice(end, digitEnd), 10), digitEnd);
+          }
+          // A caret power contains '^', an optional sign, and one or more digits (m^2K, mK^-1).
+          if (token[end] === '^') {
+            let digitEnd = end + 1;
+            if (token[digitEnd] === '+' || token[digitEnd] === '-') digitEnd++;
+            const digitStart = digitEnd;
+            while (digitEnd < token.length && isDigit(token[digitEnd])) {
+              digitEnd++;
+            }
+            if (digitEnd > digitStart) {
+              addFactor(name, Number.parseInt(token.slice(end + 1, digitEnd), 10), digitEnd);
+            }
           }
         }
       }
@@ -1087,15 +1099,18 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * Gives all product readings of one glued unit token, for example `'mAs'` or `'m2K'`.
-     * The token is one name: letters and trailing digit runs.
-     * The token has no `^`, `*`, `/`, space, or superscript.
+     * The token is one name: letters, digit runs, caret powers and superscript powers.
+     * The token has no `*`, `/` or space.
      * The function changes the degree, micro, ohm, and angstrom signs in the same way as parse.
      * Thus, `°R` gives the factor `degR`. `µA` gives the factor `uA`.
      * Each reading cuts the token into two or more factors.
      * A factor is a unit spelling that the registry accepts.
      * A factor uses the unrestricted prefix set (`UNIT_PREFIX_SET_UNRESTRICTED`) to read its prefix.
      * Thus, `Hzpc` gives `H·zpc`, but `Unit.parse('zpc')` throws an error.
-     * A trailing digit run is the integer power of the factor.
+     * A digit run after a factor is the integer power of the factor.
+     * A caret power after a factor is the integer power of the factor: `m^2K` gives `m^2·K`.
+     * A caret power has an optional sign: `m^-1K` gives `m^-1·K`.
+     * A superscript power is a caret power: `m²K` gives `m^2·K`, and `m⁻¹K` gives `m^-1·K`.
      * When the token is one unit, the list contains no one-factor reading.
      * The list is raw. The list does not apply the parse policy.
      * The parse policy includes refused spellings, ambiguous spellings, prefixed unit
@@ -1109,8 +1124,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
       token: string
     ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
       // A factor name spells the micro prefix as `u`: `µA` gives the factor `uA`.
-      return readings(normalizeUnitSpellings(token), findUnitUnrestricted).map((r) =>
-        r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
+      return readings(expandSuperscripts(normalizeUnitSpellings(token)), findUnitUnrestricted).map(
+        (r) => r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
       );
     };
 

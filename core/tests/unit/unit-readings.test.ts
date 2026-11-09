@@ -16,6 +16,20 @@ describe('Unit.readings (M6)', () => {
   it('reads a trailing digit run as an integer power', () => {
     expect(spellings('m2K')).toContain('m^2*K');
   });
+  it('reads a caret power inside a glued token', () => {
+    expect(spellings('m^2K')).toContain('m^2*K');
+    expect(spellings('mK^2')).toContain('m*K^2');
+    expect(spellings('m^-1K')).toContain('m^-1*K');
+    expect(spellings('m^+2K')).toContain('m^2*K');
+    // mK^2 as one factor (millikelvin squared) is not a product, so it is not listed.
+    expect(spellings('mK^2')).not.toContain('mK^2');
+    expect(spellings('m^K')).toEqual([]);
+  });
+  it('reads a superscript power inside a glued token', () => {
+    expect(spellings('m²K')).toContain('m^2*K');
+    expect(spellings('mK²')).toContain('m*K^2');
+    expect(spellings('m⁻¹K')).toContain('m^-1*K');
+  });
   it('is raw: mN keeps the product m*N that parse does not choose', () => {
     expect(spellings('mN')).toContain('m*N');
   });
