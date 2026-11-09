@@ -69,6 +69,31 @@ describe('Unit.readings (M6)', () => {
     expect(() => Unit.parse('mly')).toThrow(/not found/);
     expect(Unit.parse('Hzpc').toString()).toBe('Hz pc');
   });
+  it('reads no glued power that is 0 or starts with 0', () => {
+    expect(spellings('m0K')).toEqual([]);
+    expect(spellings('mK0')).toEqual([]);
+    expect(spellings('m00K')).toEqual([]);
+    expect(spellings('m01K')).toEqual([]);
+    expect(() => Unit.parse('1 m0K')).toThrow(/glued power/);
+    expect(() => Unit.parse('1 mK0')).toThrow(/glued power/);
+    expect(() => Unit.parse('1 m00K')).toThrow(/glued power/);
+    expect(() => Unit.parse('1 m01K')).toThrow(/glued power/);
+    // Controls: a glued power from 1 up and a caret power of 0 stay legal.
+    expect(spellings('m2K')).toContain('m^2*K');
+    expect(spellings('m10K')).toContain('m^10*K');
+    expect(Unit.parse('1 m2K').equalBase(Unit.parse('1 m^2*K'))).toBe(true);
+    expect(Unit.parse('1 m^0').units[0].power).toBe(0);
+    expect(spellings('m^0K')).toEqual(['m^0*K']);
+  });
+  it('reads a superscript plus as a caret plus', () => {
+    expect(spellings('m⁺²K')).toEqual(spellings('m^+2K'));
+    expect(spellings('m⁺²K')).toContain('m^2*K');
+    expect(Unit.parse('1 m⁺²K').equalBase(Unit.parse('1 m^+2K'))).toBe(true);
+    expect(Unit.parse('1 m⁺²').equalBase(Unit.parse('1 m^2'))).toBe(true);
+    // Controls.
+    expect(spellings('m²K')).toContain('m^2*K');
+    expect(Unit.parse('1 m⁻²').equalBase(Unit.parse('1 m^-2'))).toBe(true);
+  });
 });
 
 // The micro sign is the micro prefix only. It is never the atomic mass unit u.
