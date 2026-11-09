@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.25.0
+
+### Minor Changes
+
+- 42f3c97: Add `Unit.readingsWithSource`. It gives the readings of `Unit.readings` and, for each factor, the source text of that factor in the token (`µmK` gives `µm` then `K`). `Unit.readings` is unchanged.
+
 ## 0.24.5
 
 ### Patch Changes
