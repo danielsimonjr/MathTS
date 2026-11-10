@@ -6925,6 +6925,9 @@
       "wishartSample": {
         "kind": "function"
       },
+      "workerKernel": {
+        "kind": "function"
+      },
       "xgcd": {
         "kind": "function"
       },

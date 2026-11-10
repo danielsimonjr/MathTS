@@ -11218,6 +11218,7 @@ graph LR
 | `./set.js`                  | `typedSet`                                                                                                                                                                                                                                                                      | Re-export |
 | `./special.js`              | `typedSpecial`                                                                                                                                                                                                                                                                  | Re-export |
 | `./distributions.js`        | `typedDistributions`                                                                                                                                                                                                                                                            | Re-export |
+| `./worker-kernels.js`       | `workerKernel`                                                                                                                                                                                                                                                                  | Re-export |
 | `./algebra.js`              | `typedAlgebra`                                                                                                                                                                                                                                                                  | Re-export |
 | `../gpu/elementwise-gpu.js` | `elementwiseChainGpuDispatch, elementwiseChainReduceGpuDispatch, GPU_REDUCE_OPS, GpuReduceOp, isGpuChainSupported, resetGpuElementwise, GPU_ELEMENTWISE_OPS, GpuElementwiseOp, GpuChainOptions`                                                                                 | Re-export |
 | `../gpu/fft-gpu.js`         | `fftGpuDispatch, resetGpuFft, GpuFftOptions, GpuFftResult`                                                                                                                                                                                                                      | Re-export |
@@ -11229,7 +11230,7 @@ graph LR
 **Exports:**
 
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `GPU_REDUCE_OPS`, `GpuReduceOp`, `isGpuChainSupported`, `resetGpuElementwise`, `GPU_ELEMENTWISE_OPS`, `GpuElementwiseOp`, `GpuChainOptions`, `fftGpuDispatch`, `resetGpuFft`, `GpuFftOptions`, `GpuFftResult`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `workerKernel`, `typedAlgebra`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `GPU_REDUCE_OPS`, `GpuReduceOp`, `isGpuChainSupported`, `resetGpuElementwise`, `GPU_ELEMENTWISE_OPS`, `GpuElementwiseOp`, `GpuChainOptions`, `fftGpuDispatch`, `resetGpuFft`, `GpuFftOptions`, `GpuFftResult`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
@@ -19136,7 +19137,7 @@ graph LR
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 32 files     | 0 files    |
-| `functions/src/typed/index`                            | 28 files     | 2 files    |
+| `functions/src/typed/index`                            | 29 files     | 2 files    |
 | `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
@@ -20024,9 +20025,9 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214248 |
-| Total Exports           | 6921   |
-| Total Re-exports        | 3001   |
+| Total Lines of Code     | 214375 |
+| Total Exports           | 6922   |
+| Total Re-exports        | 3002   |
 | Total Classes           | 61     |
 | Total Interfaces        | 597    |
 | Total Functions         | 2293   |

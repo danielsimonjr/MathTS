@@ -2556,6 +2556,7 @@
     ],
     "functions/src/typed/worker-kernels.ts": [
       "functions/src/typed/distributions.ts",
+      "functions/src/typed/index.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [

@@ -5,8 +5,9 @@
  * using typed-function for runtime dispatch.
  *
  * Each PDF/PMF/CDF has a `Float64Array` overload that evaluates the
- * distribution across a whole sample array, parallelizing large inputs via
- * the worker pool.
+ * distribution across a whole sample array. Every Float64Array overload is
+ * synchronous and returns a new Float64Array. For worker threads, use `parallelMap`
+ * from `@danielsimonjr/mathts-parallel`.
  *
  * @packageDocumentation
  */
@@ -14,7 +15,9 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS } from '../wasm/special/wasm-bridge.js';
 import { _lgamma, erfcSelfContained, normalCDFScalar } from '../wasm/special/scalars.js';
-import { mapArray, kernelSource } from './parallel-map.js';
+import { f64Unary } from './f64-kernels.js';
+import { kernelSource } from './parallel-map.js';
+import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -142,18 +145,9 @@ function bernoulliPMFScalar(k: i32, p: f64): f64 {
 export const normalPDF = mathTyped('normalPDF', {
   number: (x: f64): f64 => normalPDFScalar(x, 0, 1),
   'number, number, number': (x: f64, mu: f64, sigma: f64): f64 => normalPDFScalar(x, mu, sigma),
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => normalPDFScalar(v, 0, 1),
-      () => kernelSource([normalPDFScalar], '(x) => normalPDFScalar(x, 0, 1)')
-    ),
-  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => normalPDFScalar(v, mu, sigma),
-      () => kernelSource([normalPDFScalar], `(x) => normalPDFScalar(x, ${mu}, ${sigma})`)
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, (v) => normalPDFScalar(v, 0, 1)),
+  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Float64Array =>
+    f64Unary(x, (v) => normalPDFScalar(v, mu, sigma)),
 });
 
 /**
@@ -173,22 +167,9 @@ export const normalPDF = mathTyped('normalPDF', {
 export const normalCDF = mathTyped('normalCDF', {
   number: (x: f64): f64 => normalCDFScalar(x, 0, 1),
   'number, number, number': (x: f64, mu: f64, sigma: f64): f64 => normalCDFScalar(x, mu, sigma),
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => normalCDFScalar(v, 0, 1),
-      () => kernelSource([erfcSelfContained, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
-    ),
-  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => normalCDFScalar(v, mu, sigma),
-      () =>
-        kernelSource(
-          [erfcSelfContained, normalCDFScalar],
-          `(x) => normalCDFScalar(x, ${mu}, ${sigma})`
-        )
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, (v) => normalCDFScalar(v, 0, 1)),
+  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Float64Array =>
+    f64Unary(x, (v) => normalCDFScalar(v, mu, sigma)),
 });
 
 // =============================================================================
@@ -209,12 +190,8 @@ export const normalCDF = mathTyped('normalCDF', {
  */
 export const exponentialPDF = mathTyped('exponentialPDF', {
   'number, number': (x: f64, lambda: f64): f64 => exponentialPDFScalar(x, lambda),
-  'Float64Array, number': (x: Float64Array, lambda: f64): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => exponentialPDFScalar(v, lambda),
-      () => kernelSource([exponentialPDFScalar], `(x) => exponentialPDFScalar(x, ${lambda})`)
-    ),
+  'Float64Array, number': (x: Float64Array, lambda: f64): Float64Array =>
+    f64Unary(x, (v) => exponentialPDFScalar(v, lambda)),
 });
 
 /**
@@ -231,12 +208,8 @@ export const exponentialPDF = mathTyped('exponentialPDF', {
  */
 export const exponentialCDF = mathTyped('exponentialCDF', {
   'number, number': (x: f64, lambda: f64): f64 => exponentialCDFScalar(x, lambda),
-  'Float64Array, number': (x: Float64Array, lambda: f64): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => exponentialCDFScalar(v, lambda),
-      () => kernelSource([exponentialCDFScalar], `(x) => exponentialCDFScalar(x, ${lambda})`)
-    ),
+  'Float64Array, number': (x: Float64Array, lambda: f64): Float64Array =>
+    f64Unary(x, (v) => exponentialCDFScalar(v, lambda)),
 });
 
 // =============================================================================
@@ -259,12 +232,8 @@ export const exponentialCDF = mathTyped('exponentialCDF', {
  */
 export const poissonPMF = mathTyped('poissonPMF', {
   'number, number': (k: i32, lambda: f64): f64 => poissonPMFScalar(k, lambda),
-  'Float64Array, number': (k: Float64Array, lambda: f64): Promise<Float64Array> =>
-    mapArray(
-      k,
-      (v) => poissonPMFScalar(v, lambda),
-      () => kernelSource([_logFactorial, poissonPMFScalar], `(k) => poissonPMFScalar(k, ${lambda})`)
-    ),
+  'Float64Array, number': (k: Float64Array, lambda: f64): Float64Array =>
+    f64Unary(k, (v) => poissonPMFScalar(v, lambda)),
 });
 
 // =============================================================================
@@ -288,16 +257,8 @@ export const poissonPMF = mathTyped('poissonPMF', {
  */
 export const binomialPMF = mathTyped('binomialPMF', {
   'number, number, number': (k: i32, n: i32, p: f64): f64 => binomialPMFScalar(k, n, p),
-  'Float64Array, number, number': (k: Float64Array, n: i32, p: f64): Promise<Float64Array> =>
-    mapArray(
-      k,
-      (v) => binomialPMFScalar(v, n, p),
-      () =>
-        kernelSource(
-          [_logFactorial, _logBinom, binomialPMFScalar],
-          `(k) => binomialPMFScalar(k, ${n}, ${p})`
-        )
-    ),
+  'Float64Array, number, number': (k: Float64Array, n: i32, p: f64): Float64Array =>
+    f64Unary(k, (v) => binomialPMFScalar(v, n, p)),
 });
 
 // =============================================================================
@@ -318,12 +279,8 @@ export const binomialPMF = mathTyped('binomialPMF', {
  */
 export const geometricPMF = mathTyped('geometricPMF', {
   'number, number': (k: i32, p: f64): f64 => geometricPMFScalar(k, p),
-  'Float64Array, number': (k: Float64Array, p: f64): Promise<Float64Array> =>
-    mapArray(
-      k,
-      (v) => geometricPMFScalar(v, p),
-      () => kernelSource([geometricPMFScalar], `(k) => geometricPMFScalar(k, ${p})`)
-    ),
+  'Float64Array, number': (k: Float64Array, p: f64): Float64Array =>
+    f64Unary(k, (v) => geometricPMFScalar(v, p)),
 });
 
 // =============================================================================
@@ -344,12 +301,8 @@ export const geometricPMF = mathTyped('geometricPMF', {
  */
 export const bernoulliPMF = mathTyped('bernoulliPMF', {
   'number, number': (k: i32, p: f64): f64 => bernoulliPMFScalar(k, p),
-  'Float64Array, number': (k: Float64Array, p: f64): Promise<Float64Array> =>
-    mapArray(
-      k,
-      (v) => bernoulliPMFScalar(v, p),
-      () => kernelSource([bernoulliPMFScalar], `(k) => bernoulliPMFScalar(k, ${p})`)
-    ),
+  'Float64Array, number': (k: Float64Array, p: f64): Float64Array =>
+    f64Unary(k, (v) => bernoulliPMFScalar(v, p)),
 });
 
 // =============================================================================
@@ -452,11 +405,7 @@ function betaPDFScalar(x: f64, alpha: f64, beta_: f64): f64 {
  */
 export const betaPDF = mathTyped('betaPDF', {
   'number, number, number': (x: f64, alpha: f64, beta_: f64): f64 => betaPDFScalar(x, alpha, beta_),
-  'Float64Array, number, number': (
-    x: Float64Array,
-    alpha: f64,
-    beta_: f64
-  ): Promise<Float64Array> => {
+  'Float64Array, number, number': (x: Float64Array, alpha: f64, beta_: f64): Float64Array => {
     const out = new Float64Array(x.length);
     // Scalar lgamma values for the shape parameters (computed once)
     const lgAlpha = _lgamma(alpha);
@@ -477,12 +426,12 @@ export const betaPDF = mathTyped('betaPDF', {
           out[i] = Math.exp((alpha - 1) * Math.log(xi) + (beta_ - 1) * Math.log(1 - xi) - logB);
         }
       }
-      return Promise.resolve(out);
+      return out;
     }
     for (let i = 0; i < x.length; i++) {
       out[i] = betaPDFScalar(x[i], alpha, beta_);
     }
-    return Promise.resolve(out);
+    return out;
   },
 });
 
@@ -520,11 +469,7 @@ function gammaPDFScalar(x: f64, shape: f64, scale: f64): f64 {
 export const gammaPDF = mathTyped('gammaPDF', {
   'number, number, number': (x: f64, shape: f64, scale: f64): f64 =>
     gammaPDFScalar(x, shape, scale),
-  'Float64Array, number, number': (
-    x: Float64Array,
-    shape: f64,
-    scale: f64
-  ): Promise<Float64Array> => {
+  'Float64Array, number, number': (x: Float64Array, shape: f64, scale: f64): Float64Array => {
     const out = new Float64Array(x.length);
     // lgamma(shape) is constant — compute once
     const lgShape = _lgamma(shape);
@@ -539,7 +484,7 @@ export const gammaPDF = mathTyped('gammaPDF', {
         out[i] = Math.exp((shape - 1) * Math.log(xi) - xi / scale - logConstant);
       }
     }
-    return Promise.resolve(out);
+    return out;
   },
 });
 
@@ -575,7 +520,7 @@ function studentTPDFScalar(x: f64, df: f64): f64 {
  */
 export const studentTPDF = mathTyped('studentTPDF', {
   'number, number': (x: f64, df: f64): f64 => studentTPDFScalar(x, df),
-  'Float64Array, number': (x: Float64Array, df: f64): Promise<Float64Array> => {
+  'Float64Array, number': (x: Float64Array, df: f64): Float64Array => {
     const out = new Float64Array(x.length);
     // Normalisation constant — computed once
     const logNorm = _lgamma((df + 1) / 2) - _lgamma(df / 2) - 0.5 * Math.log(df * Math.PI);
@@ -584,7 +529,7 @@ export const studentTPDF = mathTyped('studentTPDF', {
     for (let i = 0; i < x.length; i++) {
       out[i] = Math.exp(logNorm - halfDf1 * Math.log(1 + (x[i] * x[i]) / df));
     }
-    return Promise.resolve(out);
+    return out;
   },
 });
 
@@ -645,7 +590,7 @@ function noncentralChi2PDFScalar(x: f64, df: f64, ncp: f64): f64 {
  */
 export const noncentralChi2PDF = mathTyped('noncentralChi2PDF', {
   'number, number, number': (x: f64, df: f64, ncp: f64): f64 => noncentralChi2PDFScalar(x, df, ncp),
-  'Float64Array, number, number': (x: Float64Array, df: f64, ncp: f64): Promise<Float64Array> => {
+  'Float64Array, number, number': (x: Float64Array, df: f64, ncp: f64): Float64Array => {
     const out = new Float64Array(x.length);
     // Pre-compute lgamma for the Poisson-mixture terms (up to maxJ terms).
     // lgamma(df/2 + j) for j = 0..maxJ — vectorise if array is large enough.
@@ -685,13 +630,76 @@ export const noncentralChi2PDF = mathTyped('noncentralChi2PDF', {
       }
       out[i] = sum;
     }
-    return Promise.resolve(out);
+    return out;
   },
 });
 
 // =============================================================================
 // Named Export Collection
 // =============================================================================
+
+// Worker kernel sources for `workerKernel` (see worker-kernels.ts). Each source holds the
+// scalar that the synchronous function runs. The worker result is equal bit for bit.
+registerWorkerKernels({
+  normalPDF: [
+    2,
+    (mu = 0, sigma = 1) =>
+      kernelSource(
+        [normalPDFScalar],
+        `(x) => normalPDFScalar(x, ${numberLiteral(mu)}, ${numberLiteral(sigma)})`
+      ),
+  ],
+  normalCDF: [
+    2,
+    (mu = 0, sigma = 1) =>
+      kernelSource(
+        [erfcSelfContained, normalCDFScalar],
+        `(x) => normalCDFScalar(x, ${numberLiteral(mu)}, ${numberLiteral(sigma)})`
+      ),
+  ],
+  exponentialPDF: [
+    1,
+    (lambda: number) =>
+      kernelSource(
+        [exponentialPDFScalar],
+        `(x) => exponentialPDFScalar(x, ${numberLiteral(lambda)})`
+      ),
+  ],
+  exponentialCDF: [
+    1,
+    (lambda: number) =>
+      kernelSource(
+        [exponentialCDFScalar],
+        `(x) => exponentialCDFScalar(x, ${numberLiteral(lambda)})`
+      ),
+  ],
+  poissonPMF: [
+    1,
+    (lambda: number) =>
+      kernelSource(
+        [_logFactorial, poissonPMFScalar],
+        `(k) => poissonPMFScalar(k, ${numberLiteral(lambda)})`
+      ),
+  ],
+  binomialPMF: [
+    2,
+    (n: number, p: number) =>
+      kernelSource(
+        [_logFactorial, _logBinom, binomialPMFScalar],
+        `(k) => binomialPMFScalar(k, ${numberLiteral(n)}, ${numberLiteral(p)})`
+      ),
+  ],
+  geometricPMF: [
+    1,
+    (p: number) =>
+      kernelSource([geometricPMFScalar], `(k) => geometricPMFScalar(k, ${numberLiteral(p)})`),
+  ],
+  bernoulliPMF: [
+    1,
+    (p: number) =>
+      kernelSource([bernoulliPMFScalar], `(k) => bernoulliPMFScalar(k, ${numberLiteral(p)})`),
+  ],
+});
 
 /**
  * All typed probability distribution functions.

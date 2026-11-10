@@ -8703,7 +8703,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 224
+      "loc": 225
     },
     {
       "file": "functions/src/typed/integration.ts",
@@ -8794,7 +8794,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1381
+      "loc": 1507
     },
     {
       "file": "functions/src/typed/statistics.ts",

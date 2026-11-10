@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-10",
     "totalFiles": 1273,
     "totalModules": 82,
-    "totalExports": 6921
+    "totalExports": 6922
   },
   "entryPoints": [
     {
@@ -25690,6 +25690,11 @@
             "reExport": true
           },
           {
+            "file": "./worker-kernels.js",
+            "imports": ["workerKernel"],
+            "reExport": true
+          },
+          {
             "file": "./algebra.js",
             "imports": ["typedAlgebra"],
             "reExport": true
@@ -25753,6 +25758,7 @@
           "typedSet",
           "typedSpecial",
           "typedDistributions",
+          "workerKernel",
           "typedAlgebra",
           "enableGpu",
           "disableGpu",
@@ -25814,6 +25820,7 @@
           "typedSet",
           "typedSpecial",
           "typedDistributions",
+          "workerKernel",
           "typedAlgebra",
           "enableGpu",
           "disableGpu",
@@ -45462,15 +45469,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1273,
     "totalModules": 82,
-    "totalLinesOfCode": 214248,
-    "totalExports": 6921,
+    "totalLinesOfCode": 214375,
+    "totalExports": 6922,
     "totalClasses": 61,
     "totalInterfaces": 597,
     "totalFunctions": 2293,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 3001,
+    "totalReExports": 3002,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
