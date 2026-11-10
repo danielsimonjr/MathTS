@@ -112,3 +112,8 @@ tools/benchmark/gpu/bench-3way.bundle.js
 # build left in src/ was committable. NOT *.d.ts - those are real ambient decls.
 *.d.ts.map
 *.js.map
+
+# Output of the external `repo-tools map`. No generator, consumer or gate of this repository uses
+# them, and the pre-commit hook stages everything in docs/Architecture.
+docs/Architecture/dependency-layers.json
+docs/Architecture/unused-analysis.json
