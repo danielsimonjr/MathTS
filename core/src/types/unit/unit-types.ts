@@ -306,6 +306,11 @@ export interface UnitConstructor {
   createUnitSingle(name: string, obj?: unknown): UnitInstance;
   deleteUnit(name: string): void;
   _getNumberConverter(type: string): ConverterFn;
+  /**
+   * Internal. The function finds the unit and the prefix of one unit spelling, or gives null.
+   * Set `unrestricted` to use the unrestricted prefix sets of {@link Unit.readings}.
+   */
+  _findUnit(name: string, unrestricted?: boolean): { unit: UnitDef; prefix: PrefixDef } | null;
 
   typeConverters: TypeConverters;
   PREFIXES: Record<string, PrefixTable>;
