@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-10",
     "totalFiles": 1273,
     "totalModules": 82,
-    "totalExports": 6928
+    "totalExports": 6929
   },
   "entryPoints": [
     {
@@ -2959,7 +2959,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createUnitClass"],
+        "exports": ["createUnitClass", "unitReadingSearchSteps"],
+        "functions": ["unitReadingSearchSteps"],
         "constants": ["createUnitClass"]
       },
       "core/src/types/unit/dependencies.ts": {
@@ -45485,11 +45486,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1273,
     "totalModules": 82,
-    "totalLinesOfCode": 214762,
-    "totalExports": 6928,
+    "totalLinesOfCode": 214851,
+    "totalExports": 6929,
     "totalClasses": 61,
     "totalInterfaces": 598,
-    "totalFunctions": 2297,
+    "totalFunctions": 2298,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,

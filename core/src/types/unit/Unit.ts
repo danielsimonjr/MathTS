@@ -140,6 +140,17 @@ const unitListScales = new Map<string, ExactScale | null>();
 const MICRO_SIGN = /[µμ]/;
 const MICRO_SIGNS = /[µμ]/g;
 
+// The count of search steps of the reading search. A step is one substring test or one visit of a factor.
+let readingSearchSteps = 0;
+
+/**
+ * How many steps the reading search of `Unit.readings` and `Unit.parse` has done (tests / diagnostics).
+ * The count starts at module load and only goes up.
+ */
+export function unitReadingSearchSteps(): number {
+  return readingSearchSteps;
+}
+
 /**
  * Normalize unit spellings the tokenizer would otherwise reject, before parsing.
  * A degree sign becomes `deg`, so `°C`, `°F` and `°R` become `degC`, `degF` and `degR`. A bare `°` is the angle `deg`.
@@ -603,9 +614,6 @@ export const createUnitClass = /* #__PURE__ */ factory(
     type FindUnit = (name: string) => { unit: UnitDef; prefix: PrefixDef } | null;
     const findUnitPair: FindUnit = (name) =>
       _findUnit(name) as { unit: UnitDef; prefix: PrefixDef } | null;
-    // The lookup of Unit.readings. It uses the unrestricted set in place of a restricted prefix set.
-    const findUnitUnrestricted: FindUnit = (name) =>
-      _findUnit(name, true) as { unit: UnitDef; prefix: PrefixDef } | null;
 
     // Every non-empty prefix symbol of every prefix set, built once on first use (rule C).
     let prefixSymbolCache: readonly string[] | undefined;
@@ -680,57 +688,92 @@ export const createUnitClass = /* #__PURE__ */ factory(
       readonly end: number; // the token position after the factor and its power
     }
 
-    // Every way to cut `token` into factors. A factor is a substring that _findUnit
-    // accepts, optionally followed by a run of digits or a caret power that is its integer power.
+    // Every way to cut `token` into factors. A factor is a substring that is a unit (unitSpans),
+    // optionally followed by a run of digits or a caret power that is its integer power.
     // A run of digits starts with 1 to 9 (m2, m10). The rule does not read a glued 0 or a leading 0 as a power (m0, m01).
-    function readings(token: string, find: FindUnit = findUnitPair): Factor[][] {
+    // The readings are in ascending order of the cut positions.
+    function readings(token: string, unrestricted = false): Factor[][] {
+      const length = token.length;
+      const spans = unitSpans(token, unrestricted);
       const result: Factor[][] = [];
       const factors: Factor[] = [];
+      // The factors that can start at each position. The search fills an entry on the first visit.
+      const choices: (Factor[] | undefined)[] = new Array(length);
+      // dead[start] is 1 when no sequence of factors goes from `start` to the end of the token.
+      const dead = new Uint8Array(length);
       function isDigit(ch: string): boolean {
         return ch >= '0' && ch <= '9';
       }
-      function addFactor(name: string, power: number, next: number): void {
-        const prev = factors[factors.length - 1];
-        if (prev !== undefined && prev.name === name && isPrefixRepeat(prev.name, name, find)) {
-          return;
-        }
-        factors.push({ name, power, end: next });
-        if (next === token.length) {
-          if (factors.length >= 2) {
-            result.push(factors.slice());
-          }
-        } else {
-          addFactors(next);
-        }
-        factors.pop();
-      }
-      function addFactors(start: number): void {
-        for (let end = start + 1; end <= token.length; end++) {
+      function choicesAt(start: number): Factor[] {
+        const list: Factor[] = [];
+        for (let end = start + 1; end <= length; end++) {
+          if (spans[start * (length + 1) + end] === 0) continue;
           const name = token.slice(start, end);
-          if (find(name) === null) continue;
-          addFactor(name, 1, end);
-          if (end < token.length && isDigit(token[end]) && token[end] !== '0') {
+          list.push({ name, power: 1, end });
+          if (end < length && isDigit(token[end]) && token[end] !== '0') {
             let digitEnd = end + 1;
-            while (digitEnd < token.length && isDigit(token[digitEnd])) {
+            while (digitEnd < length && isDigit(token[digitEnd])) {
               digitEnd++;
             }
-            addFactor(name, Number.parseInt(token.slice(end, digitEnd), 10), digitEnd);
+            list.push({
+              name,
+              power: Number.parseInt(token.slice(end, digitEnd), 10),
+              end: digitEnd,
+            });
           }
           // A caret power contains '^', an optional sign, and one or more digits (m^2K, mK^-1).
           if (token[end] === '^') {
             let digitEnd = end + 1;
             if (token[digitEnd] === '+' || token[digitEnd] === '-') digitEnd++;
             const digitStart = digitEnd;
-            while (digitEnd < token.length && isDigit(token[digitEnd])) {
+            while (digitEnd < length && isDigit(token[digitEnd])) {
               digitEnd++;
             }
             if (digitEnd > digitStart) {
-              addFactor(name, Number.parseInt(token.slice(end + 1, digitEnd), 10), digitEnd);
+              list.push({
+                name,
+                power: Number.parseInt(token.slice(end + 1, digitEnd), 10),
+                end: digitEnd,
+              });
             }
           }
         }
+        return list;
       }
-      addFactors(0);
+      // Adds each reading that continues `factors` from `start`. Returns true when it adds a reading.
+      function addFactors(start: number): boolean {
+        if (dead[start] === 1) return false;
+        const list = (choices[start] ??= choicesAt(start));
+        let added = false;
+        // The prefix-repeat rule reads the previous factor. A skip is not a property of `start`.
+        let skipped = false;
+        for (const factor of list) {
+          readingSearchSteps++;
+          const prev = factors[factors.length - 1];
+          if (
+            prev !== undefined &&
+            prev.name === factor.name &&
+            isPrefixRepeat(prev.name, factor.name, unrestricted)
+          ) {
+            skipped = true;
+            continue;
+          }
+          factors.push(factor);
+          if (factor.end === length) {
+            if (factors.length >= 2) {
+              result.push(factors.slice());
+              added = true;
+            }
+          } else if (addFactors(factor.end)) {
+            added = true;
+          }
+          factors.pop();
+        }
+        // A token that is one unit adds no reading at position 0. Position 0 has one visit only.
+        if (!added && !skipped && start > 0) dead[start] = 1;
+        return added;
+      }
+      if (length > 0) addFactors(0);
       return result;
     }
 
@@ -751,9 +794,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     // m·m is not a reading, because `mm` is the prefix m on the unit m.
     // N·N is a reading, because `NN` is not a prefixed unit.
-    function isPrefixRepeat(left: string, right: string, find: FindUnit): boolean {
+    function isPrefixRepeat(left: string, right: string, unrestricted: boolean): boolean {
       if (left !== right) return false;
-      const hit = find(left + right);
+      const hit = _findUnit(left + right, unrestricted);
       return hit !== null && hit.prefix.name === left && hit.unit.name === right;
     }
 
@@ -1190,8 +1233,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
       token: string
     ): ReadonlyArray<ReadonlyArray<{ readonly name: string; readonly power: number }>> {
       // A factor name spells the micro prefix as `u`: `µA` gives the factor `uA`.
-      return readings(expandSuperscripts(normalizeUnitSpellings(token)), findUnitUnrestricted).map(
-        (r) => r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
+      return readings(expandSuperscripts(normalizeUnitSpellings(token)), true).map((r) =>
+        r.map((f) => ({ name: f.name.replace(MICRO_SIGNS, 'u'), power: f.power }))
       );
     };
 
@@ -1211,7 +1254,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       token: string
     ): ReadonlyArray<ReadonlyArray<UnitReadingFactor>> {
       const tracked = expandSuperscriptsTracked(normalizeUnitSpellingsTracked(token));
-      return readings(tracked.text, findUnitUnrestricted).map((r) => {
+      return readings(tracked.text, true).map((r) => {
         let at = 0;
         return r.map((f) => {
           const source = token.slice(tracked.from[at], tracked.from[f.end]);
@@ -1406,6 +1449,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // The index does not track a direct delete and re-add of a name. When you add the name
         // again, the name moves to the end of insertion order. The scan never finds a direct
         // empty-string key.
+        // The reading search has the same rule for each substring of its token (unitSpans).
         for (let i = 1; i < str.length; i++) {
           const suffix = str.slice(i);
           if (hasOwnProperty(UNITS, suffix) && !index.keys.has(suffix)) {
@@ -1420,6 +1464,52 @@ export const createUnitClass = /* #__PURE__ */ factory(
         scanHits.set(hitKey, { name: lastScanName, found: result });
       }
       return result;
+    }
+
+    // Marks each substring of `token` that _findUnit accepts. The result is a grid of
+    // (length + 1) columns: the entry [start * (length + 1) + end] is 1 when token.slice(start, end)
+    // is a unit. One pass over the token replaces one _findUnit call for each substring.
+    function unitSpans(token: string, unrestricted: boolean): Uint8Array {
+      const length = token.length;
+      const width = length + 1;
+      const spans = new Uint8Array(length * width);
+      let index = getUnitIndex();
+      // An exact UNITS name is a unit with each prefix table (_findUnit, exact match).
+      // A name that the index does not contain was written directly to UNITS: build the index again.
+      for (let start = 0; start < length; start++) {
+        for (let end = start + 1; end <= length; end++) {
+          readingSearchSteps++;
+          const name = token.slice(start, end);
+          if (!hasOwnProperty(UNITS, name)) continue;
+          spans[start * width + end] = 1;
+          if (!index.keys.has(name)) {
+            invalidateUnitIndex();
+            index = getUnitIndex();
+          }
+        }
+      }
+      // A prefix and a UNITS name: only names that end with the character before `end` can match.
+      for (let end = 2; end <= length; end++) {
+        for (const name of index.buckets.get(token[end - 1]) ?? []) {
+          const at = end - name.length;
+          if (at < 1 || !hasOwnProperty(UNITS, name) || !token.startsWith(name, at)) continue;
+          const unit = UNITS[name];
+          const prefixes = unrestricted ? unrestrictedPrefixes(unit.prefixes) : unit.prefixes;
+          for (let start = at - 1; start >= 0; start--) {
+            readingSearchSteps++;
+            // A micro sign is only the micro prefix.
+            let prefixName = token.slice(start, at);
+            if (MICRO_SIGN.test(prefixName)) {
+              if (prefixName.length !== 1) break;
+              prefixName = 'u';
+            }
+            if (hasOwnProperty(prefixes, prefixName) && prefixes![prefixName] !== undefined) {
+              spans[start * width + end] = 1;
+            }
+          }
+        }
+      }
+      return spans;
     }
 
     Unit._findUnit = (name: string, unrestricted?: boolean): FoundUnit =>
