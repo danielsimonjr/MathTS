@@ -256,8 +256,9 @@ export function quaternionPow(q: Quat, t: number): number[] {
 
 /**
  * This function returns the axis and the angle of the rotation of a quaternion.
- * It is the inverse of {@link quaternionFromAxisAngle}. The axis has unit length and the angle is
- * in `[0, π]`. `q` and `−q` give the same result.
+ * It is the inverse of {@link quaternionFromAxisAngle}. The axis has unit
+ * length and the angle is in `[0, π]`. `q` and `−q` give the same result: at
+ * the angle `π`, the first non-zero component of the axis is positive.
  *
  * A rotation by the angle `0` has no axis. The function then returns the axis
  * `[1, 0, 0]`.
@@ -269,11 +270,18 @@ export function quaternionToAxisAngle(q: Quat): {
   axis: [number, number, number];
   angle: number;
 } {
-  let [w, x, y, z] = unitForm(q, 'quaternionToAxisAngle');
-  if (w < 0) [w, x, y, z] = [-w, -x, -y, -z];
+  const [w, x, y, z] = unitForm(q, 'quaternionToAxisAngle');
   const vNorm = length([x, y, z]);
   if (vNorm === 0) return { axis: [1, 0, 0], angle: 0 };
-  return { axis: [x / vNorm, y / vNorm, z / vNorm], angle: 2 * Math.atan2(vNorm, w) };
+  // The sign that makes w positive. At w = 0, the sign that makes the first
+  // non-zero component of the axis positive.
+  const lead = w !== 0 ? w : x !== 0 ? x : y !== 0 ? y : z;
+  const s = lead < 0 ? -vNorm : vNorm;
+  // `+ 0` changes -0 to 0.
+  return {
+    axis: [x / s + 0, y / s + 0, z / s + 0],
+    angle: 2 * Math.atan2(vNorm, Math.abs(w)),
+  };
 }
 
 /**
