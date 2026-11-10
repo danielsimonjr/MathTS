@@ -11,7 +11,7 @@
     "unreferencedAnywhereCount": 440,
     "referencedInModuleCount": 819,
     "unclassifiedExportCount": 0,
-    "noImporterFileCount": 13
+    "noImporterFileCount": 11
   },
   "unreferencedAnywhere": {
     "core/src/customs.ts": ["getSafeMethod"],
@@ -1782,8 +1782,6 @@
   "noImporterFiles": [
     "ast/src/re-export-types.d.ts",
     "core/bun-test-preload.mjs",
-    "functions/src/utils/customs.d.ts",
-    "functions/src/utils/string.d.ts",
     "functions/types/assemblyscript.d.ts",
     "functions/types/index.d.ts",
     "functions/types/modules.d.ts",

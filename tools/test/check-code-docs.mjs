@@ -8,8 +8,8 @@
  * set. The start folder does not change the root: a start outside the repository, or inside a
  * nested git repository, still checks the repository of the script.
  *
- * repo-tools does not measure declaration files (`*.d.ts`). The repository has 11 tracked
- * declaration files: 8 under `src` folders and 3 under `functions/types`.
+ * repo-tools does not measure declaration files (`*.d.ts`), so the gate does not cover the
+ * tracked declaration files under the `src` folders and `functions/types`.
  *
  * The command and its arguments come from one config file: `code-docs-gate.json` next to this
  * script. `--config=<path>` or the environment variable `CODE_DOCS_GATE_CONFIG` selects another
