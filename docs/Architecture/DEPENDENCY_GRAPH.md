@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 47 files
+- **functions/typed**: 48 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 50             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 540            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 541            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10733,7 +10733,7 @@ graph LR
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                             |
 | `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                        |
 | `@danielsimonjr/mathts-matrix`   | `DenseMatrix, backendManager, singularValues`                        |
-| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool`                                           |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                         |
 
 **Internal Dependencies:**
 
@@ -10752,14 +10752,14 @@ graph LR
 
 ---
 
-### `functions/src/typed/bitwise.ts` - Typed Bitwise Functions (Parallel-First)
+### `functions/src/typed/bitwise.ts` - Typed Bitwise Functions
 
 **Workspace Dependencies:**
 
-| Package                          | Import                 |
-| -------------------------------- | ---------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, BigNumber` |
-| `@danielsimonjr/mathts-parallel` | `computePool`          |
+| Package                          | Import                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`     | `mathTyped, BigNumber`                                                     |
+| `@danielsimonjr/mathts-parallel` | `bitAnd, bitOr, bitXor, bitNot, leftShift, rightArithShift, rightLogShift` |
 
 **Internal Dependencies:**
 
@@ -10883,7 +10883,9 @@ graph LR
 | -------------------------------- | -------------------------------------------------- | ------ |
 | `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS` | Import |
 | `../wasm/special/scalars.js`     | `_lgamma, erfcSelfContained, normalCDFScalar`      | Import |
-| `./parallel-map.js`              | `mapArray, kernelSource`                           | Import |
+| `./f64-kernels.js`               | `f64Unary`                                         | Import |
+| `./parallel-map.js`              | `kernelSource`                                     | Import |
+| `./worker-kernels.js`            | `numberLiteral, registerWorkerKernels`             | Import |
 
 **Exports:**
 
@@ -11238,6 +11240,7 @@ graph LR
 | Package                          | Import        |
 | -------------------------------- | ------------- |
 | `@danielsimonjr/mathts-parallel` | `computePool` |
+| `@danielsimonjr/mathts-core`     | `pairwiseSum` |
 
 **Exports:**
 
@@ -11282,11 +11285,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                                                                                                                                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul, transposeNestedArray` |
-| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                                                |
-| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                                              |
+| Package                        | Import                                                                                                                                                                                                                     |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul, transposeNestedArray` |
+| `@danielsimonjr/mathts-core`   | `mathTyped`                                                                                                                                                                                                                |
 
 **Exports:**
 
@@ -11338,7 +11340,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `kernelSource`, `mapArray`, `mapBinaryF64`
+- Functions: `kernelSource`, `mapBinaryF64`
 
 ---
 
@@ -11467,8 +11469,10 @@ graph LR
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
-| `./parallel-map.js`                  | `mapArray, kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                              | Import |
+| `./f64-kernels.js`                   | `f64Unary`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
+| `./parallel-map.js`                  | `kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import |
+| `./worker-kernels.js`                | `numberLiteral, registerWorkerKernels`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, factorial, upperGammaQ, incompleteBetaFraction, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, erfcScalar, betaScalar, gammaincScalar, gammaincpScalar, betaincScalar, besselIScalar, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar`                                                                                                                              | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
@@ -11576,6 +11580,14 @@ graph LR
 **Exports:**
 
 - Constants: `to`, `toBest`, `typedUnit`
+
+---
+
+### `functions/src/typed/worker-kernels.ts` - Worker kernel sources for the element-wise special functions and distributions.
+
+**Exports:**
+
+- Functions: `numberLiteral`, `registerWorkerKernels`, `workerKernel`
 
 ---
 
@@ -19144,9 +19156,9 @@ graph LR
 | `core/src/index`                                       | 17 files     | 0 files    |
 | `matrix/src/operations/index`                          | 16 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
+| `functions/src/typed/special`                          | 7 files      | 9 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
-| `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 
 ---
 
@@ -19648,7 +19660,7 @@ graph TD
         N343[complex]
         N344[dist-objects]
         N345[distributions]
-        N346[...37 more]
+        N346[...38 more]
     end
 
     subgraph Functions/unit
@@ -20010,14 +20022,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1272   |
+| Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214403 |
-| Total Exports           | 6919   |
+| Total Lines of Code     | 214248 |
+| Total Exports           | 6921   |
 | Total Re-exports        | 3001   |
 | Total Classes           | 61     |
 | Total Interfaces        | 597    |
-| Total Functions         | 2291   |
+| Total Functions         | 2293   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

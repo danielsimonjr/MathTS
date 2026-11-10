@@ -2,8 +2,8 @@
   "generated": "2026-11-10",
   "total": 218,
   "acceleratedCount": 40,
-  "parallelOnlyCount": 24,
-  "jsOnlyCount": 154,
+  "parallelOnlyCount": 17,
+  "jsOnlyCount": 161,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -291,41 +291,6 @@
   ],
   "parallelOnly": [
     {
-      "name": "bitAnd",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "bitNot",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "bitOr",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "bitXor",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "leftShift",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "max",
       "file": "arithmetic.ts",
       "routing": "parallel",
@@ -443,20 +408,6 @@
       "routing": "parallel",
       "dispatch": [],
       "effectiveBackend": "unknown"
-    },
-    {
-      "name": "rightArithShift",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "rightLogShift",
-      "file": "bitwise.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
     }
   ],
   "jsOnly": [
@@ -480,6 +431,10 @@
     "betainc",
     "bin",
     "binomialPMF",
+    "bitAnd",
+    "bitNot",
+    "bitOr",
+    "bitXor",
     "carmichaelLambda",
     "cbrt",
     "ceil",
@@ -537,6 +492,7 @@
     "larger",
     "largerEq",
     "lcm",
+    "leftShift",
     "legendreP",
     "logIntegral",
     "lowRankApprox",
@@ -580,6 +536,8 @@
     "random",
     "randomInt",
     "re",
+    "rightArithShift",
+    "rightLogShift",
     "risingFactorial",
     "round",
     "setCartesian",
@@ -623,8 +581,8 @@
     },
     "bitwise.ts": {
       "wasm": 0,
-      "parallel": 7,
-      "jsOnly": 0
+      "parallel": 0,
+      "jsOnly": 7
     },
     "combinatorics.ts": {
       "wasm": 0,

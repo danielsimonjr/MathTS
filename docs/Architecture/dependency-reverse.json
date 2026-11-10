@@ -2529,6 +2529,8 @@
     ],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/special.ts",
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
@@ -2550,6 +2552,10 @@
       "functions/src/typed/distributions.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/signal.ts",
+      "functions/src/typed/special.ts"
+    ],
+    "functions/src/typed/worker-kernels.ts": [
+      "functions/src/typed/distributions.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [

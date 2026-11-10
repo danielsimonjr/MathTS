@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-10'
-  totalFiles: 1272
+  totalFiles: 1273
   totalModules: 82
-  totalExports: 6919
+  totalExports: 6921
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -22716,6 +22716,7 @@ modules:
           imports:
             - computePool
             - ComputePool
+            - matmulSequential
       exports:
         - add
         - subtract
@@ -22830,7 +22831,7 @@ modules:
         - dot
         - typedArithmetic
     functions/src/typed/bitwise.ts:
-      description: Typed Bitwise Functions (Parallel-First)
+      description: Typed Bitwise Functions
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22848,7 +22849,13 @@ modules:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
-            - computePool
+            - bitAnd
+            - bitOr
+            - bitXor
+            - bitNot
+            - leftShift
+            - rightArithShift
+            - rightLogShift
       exports:
         - bitAnd
         - bitOr
@@ -23180,10 +23187,16 @@ modules:
             - _lgamma
             - erfcSelfContained
             - normalCDFScalar
+        - file: ./f64-kernels.js
+          imports:
+            - f64Unary
         - file: ./parallel-map.js
           imports:
-            - mapArray
             - kernelSource
+        - file: ./worker-kernels.js
+          imports:
+            - numberLiteral
+            - registerWorkerKernels
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -24247,6 +24260,10 @@ modules:
           directory: parallel
           imports:
             - computePool
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseSum
       exports:
         - GAUSS_WORKER_THRESHOLD
         - ARRAY_WORKER_THRESHOLD
@@ -24375,10 +24392,6 @@ modules:
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-parallel'
-          directory: parallel
-          imports:
-            - computePool
       exports:
         - pinv
         - cond
@@ -24641,11 +24654,9 @@ modules:
             - OpName
       exports:
         - kernelSource
-        - mapArray
         - mapBinaryF64
       functions:
         - kernelSource
-        - mapArray
         - mapBinaryF64
     functions/src/typed/polynomial-ideal.ts:
       description: Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
@@ -24923,33 +24934,28 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+        - file: ./f64-kernels.js
+          imports:
+            - f64Unary
         - file: ./parallel-map.js
           imports:
-            - mapArray
             - kernelSource
+        - file: ./worker-kernels.js
+          imports:
+            - numberLiteral
+            - registerWorkerKernels
         - file: ../wasm/special/scalars.js
           imports:
             - _lgamma
             - erfcSelfContained
-            - erfcScalar
             - factorial
-            - betaScalar
-            - gammaincScalar
-            - gammaincpScalar
             - upperGammaQ
-            - betaincScalar
-            - besselIScalar
+            - incompleteBetaFraction
             - besselHankel
             - besselJ0Series
             - besselJ1Series
             - besselY0Series
             - besselY1Series
-            - besselJ0Scalar
-            - besselJ1Scalar
-            - besselY0Scalar
-            - besselY1Scalar
-            - besselJScalar
-            - besselYScalar
             - besselJRealOrder
             - besselYRealOrder
             - besselHankelReal
@@ -24958,9 +24964,20 @@ modules:
             - airyUCoeffs
             - airyAsymPQ
             - airyScalar
+            - erfcScalar
+            - betaScalar
+            - gammaincScalar
+            - gammaincpScalar
+            - betaincScalar
+            - besselIScalar
+            - besselJ0Scalar
+            - besselJ1Scalar
+            - besselY0Scalar
+            - besselY1Scalar
+            - besselJScalar
+            - besselYScalar
             - airyAiScalar
             - airyBiScalar
-            - incompleteBetaFraction
             - ellipticKScalar
             - ellipticECompleteScalar
         - file: ../wasm/special/wasm-bridge.js
@@ -25297,6 +25314,20 @@ modules:
         - to
         - toBest
         - typedUnit
+    functions/src/typed/worker-kernels.ts:
+      description: Worker kernel sources for the element-wise special functions and distributions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - numberLiteral
+        - registerWorkerKernels
+        - workerKernel
+      functions:
+        - numberLiteral
+        - registerWorkerKernels
+        - workerKernel
   functions/unit:
     functions/src/unit/to.ts:
       description: Change the unit of a value.
@@ -42278,6 +42309,7 @@ dependencyGraph:
         - functions/src/typed/trigonometry.ts
         - functions/src/typed/typed-bridge.ts
         - functions/src/typed/unit.ts
+        - functions/src/typed/worker-kernels.ts
     - name: Functions/unit
       files:
         - functions/src/unit/to.ts
@@ -42991,13 +43023,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1272
+  totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214403
-  totalExports: 6919
+  totalLinesOfCode: 214248
+  totalExports: 6921
   totalClasses: 61
   totalInterfaces: 597
-  totalFunctions: 2291
+  totalFunctions: 2293
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639

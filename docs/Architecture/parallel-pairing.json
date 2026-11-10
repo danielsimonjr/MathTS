@@ -1,307 +1,13 @@
 {
   "generated": "2026-11-10",
   "total": 218,
-  "parallelizedCount": 68,
-  "effectiveCount": 55,
-  "disabledCount": 13,
-  "nonParallelCount": 150,
+  "parallelizedCount": 22,
+  "effectiveCount": 16,
+  "disabledCount": 6,
+  "nonParallelCount": 196,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
-    {
-      "name": "airyAi",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "airyBi",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "bernoulliPMF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselI",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselJ",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselJ0",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselJ1",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselK",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselY",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselY0",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "besselY1",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "beta",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "betainc",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "binomialPMF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "bitAnd",
-      "file": "bitwise.ts",
-      "ops": ["bitAnd"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "bitNot",
-      "file": "bitwise.ts",
-      "ops": ["bitNot"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "bitOr",
-      "file": "bitwise.ts",
-      "ops": ["bitOr"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "bitXor",
-      "file": "bitwise.ts",
-      "ops": ["bitXor"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "chebyshevT",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "cosIntegral",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "digamma",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "ellipticE",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "ellipticK",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "erfc",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "erfi",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "expIntegralEi",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "exponentialCDF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "exponentialPDF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "fresnelC",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "fresnelS",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "gammainc",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "gammaincp",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "geometricPMF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "hermiteH",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "laguerreL",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "lambertW",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "leftShift",
-      "file": "bitwise.ts",
-      "ops": ["leftShift"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "legendreP",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "lgamma",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "logIntegral",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "normalCDF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "normalPDF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
     {
       "name": "parallelAutoCorr",
       "file": "signal.ts",
@@ -455,34 +161,6 @@
       "ops": ["applyKernel"],
       "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
-    },
-    {
-      "name": "poissonPMF",
-      "file": "distributions.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
-    },
-    {
-      "name": "rightArithShift",
-      "file": "bitwise.ts",
-      "ops": ["rightArithShift"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "rightLogShift",
-      "file": "bitwise.ts",
-      "ops": ["rightLogShift"],
-      "thresholds": ["never"],
-      "effectiveness": "disabled"
-    },
-    {
-      "name": "sinIntegral",
-      "file": "special.ts",
-      "ops": ["applyKernel"],
-      "thresholds": ["50000 (global kernel)"],
-      "effectiveness": "effective"
     }
   ],
   "nonParallel": [
@@ -492,6 +170,8 @@
     "acot",
     "acsc",
     "add",
+    "airyAi",
+    "airyBi",
     "and",
     "arg",
     "asec",
@@ -501,8 +181,24 @@
     "atan2",
     "atanh",
     "bernoulli",
+    "bernoulliPMF",
+    "besselI",
+    "besselJ",
+    "besselJ0",
+    "besselJ1",
+    "besselK",
+    "besselY",
+    "besselY0",
+    "besselY1",
+    "beta",
     "betaPDF",
+    "betainc",
     "bin",
+    "binomialPMF",
+    "bitAnd",
+    "bitNot",
+    "bitOr",
+    "bitXor",
     "carlsonRC",
     "carlsonRD",
     "carlsonRF",
@@ -510,6 +206,7 @@
     "carmichaelLambda",
     "cbrt",
     "ceil",
+    "chebyshevT",
     "chineseRemainder",
     "combinations",
     "combinationsWithRep",
@@ -520,47 +217,68 @@
     "cond",
     "conj",
     "cos",
+    "cosIntegral",
     "cosh",
     "cot",
     "csc",
     "cube",
     "deepEqual",
+    "digamma",
     "divide",
     "divisorSigma",
     "divisors",
     "dot",
     "doubleFactorial",
+    "ellipticE",
     "ellipticEIncomplete",
     "ellipticF",
+    "ellipticK",
     "ellipticPi",
     "entropy",
     "equal",
     "equalScalar",
     "equalText",
+    "erfc",
+    "erfi",
     "eulerPhi",
     "exp",
+    "expIntegralEi",
     "expm1",
+    "exponentialCDF",
+    "exponentialPDF",
     "fallingFactorial",
     "fibonacci",
     "fix",
     "floor",
     "format",
+    "fresnelC",
+    "fresnelS",
     "fsum",
     "gammaPDF",
+    "gammainc",
+    "gammaincp",
+    "geometricPMF",
     "harmonicNumber",
+    "hermiteH",
     "hex",
     "hypot",
     "im",
     "integerDigits",
     "jacobiSymbol",
     "jsDivergence",
+    "laguerreL",
+    "lambertW",
     "larger",
     "largerEq",
     "lcm",
+    "leftShift",
+    "legendreP",
+    "lgamma",
     "log",
     "log10",
     "log1p",
     "log2",
+    "logIntegral",
     "lowRankApprox",
     "lucas",
     "lucasL",
@@ -579,6 +297,8 @@
     "norm",
     "norm2",
     "normFro",
+    "normalCDF",
+    "normalPDF",
     "not",
     "nthRoot",
     "nullish",
@@ -590,6 +310,7 @@
     "permutations",
     "pickRandom",
     "pinv",
+    "poissonPMF",
     "pow",
     "prime",
     "primeFactors",
@@ -598,6 +319,8 @@
     "random",
     "randomInt",
     "re",
+    "rightArithShift",
+    "rightLogShift",
     "risingFactorial",
     "round",
     "sec",
@@ -613,6 +336,7 @@
     "setUnion",
     "sign",
     "sin",
+    "sinIntegral",
     "singularValues",
     "sinh",
     "smaller",
@@ -655,43 +379,6 @@
       "threshold": "50000 (global kernel)",
       "active": true,
       "functions": [
-        "airyAi",
-        "airyBi",
-        "bernoulliPMF",
-        "besselI",
-        "besselJ",
-        "besselJ0",
-        "besselJ1",
-        "besselK",
-        "besselY",
-        "besselY0",
-        "besselY1",
-        "beta",
-        "betainc",
-        "binomialPMF",
-        "chebyshevT",
-        "cosIntegral",
-        "digamma",
-        "ellipticE",
-        "ellipticK",
-        "erfc",
-        "erfi",
-        "expIntegralEi",
-        "exponentialCDF",
-        "exponentialPDF",
-        "fresnelC",
-        "fresnelS",
-        "gammainc",
-        "gammaincp",
-        "geometricPMF",
-        "hermiteH",
-        "laguerreL",
-        "lambertW",
-        "legendreP",
-        "lgamma",
-        "logIntegral",
-        "normalCDF",
-        "normalPDF",
         "parallelAutoCorr",
         "parallelConv",
         "parallelFFT",
@@ -707,9 +394,7 @@
         "parallelStatQuantile",
         "parallelStatStd",
         "parallelStatVariance",
-        "parallelXCorr",
-        "poissonPMF",
-        "sinIntegral"
+        "parallelXCorr"
       ]
     },
     {
@@ -722,25 +407,25 @@
       "op": "bitAnd",
       "threshold": "never",
       "active": false,
-      "functions": ["bitAnd"]
+      "functions": []
     },
     {
       "op": "bitNot",
       "threshold": "never",
       "active": false,
-      "functions": ["bitNot"]
+      "functions": []
     },
     {
       "op": "bitOr",
       "threshold": "never",
       "active": false,
-      "functions": ["bitOr"]
+      "functions": []
     },
     {
       "op": "bitXor",
       "threshold": "never",
       "active": false,
-      "functions": ["bitXor"]
+      "functions": []
     },
     {
       "op": "characteristicPolynomial",
@@ -830,7 +515,7 @@
       "op": "leftShift",
       "threshold": "never",
       "active": false,
-      "functions": ["leftShift"]
+      "functions": []
     },
     {
       "op": "log",
@@ -950,13 +635,13 @@
       "op": "rightArithShift",
       "threshold": "never",
       "active": false,
-      "functions": ["rightArithShift"]
+      "functions": []
     },
     {
       "op": "rightLogShift",
       "threshold": "never",
       "active": false,
-      "functions": ["rightLogShift"]
+      "functions": []
     },
     {
       "op": "sampleChunk",
@@ -1057,8 +742,8 @@
     },
     "bitwise.ts": {
       "effective": 0,
-      "disabled": 7,
-      "none": 0
+      "disabled": 0,
+      "none": 7
     },
     "combinatorics.ts": {
       "effective": 0,
@@ -1071,9 +756,9 @@
       "none": 4
     },
     "distributions.ts": {
-      "effective": 8,
+      "effective": 0,
       "disabled": 0,
-      "none": 6
+      "none": 14
     },
     "logical.ts": {
       "effective": 0,
@@ -1106,9 +791,9 @@
       "none": 0
     },
     "special.ts": {
-      "effective": 31,
+      "effective": 0,
       "disabled": 0,
-      "none": 7
+      "none": 38
     },
     "statistics.ts": {
       "effective": 9,
