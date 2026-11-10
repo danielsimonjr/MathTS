@@ -5971,6 +5971,12 @@
       "quaternionFromAxisAngle": {
         "kind": "function"
       },
+      "quaternionFromEuler": {
+        "kind": "function"
+      },
+      "quaternionFromRotationMatrix": {
+        "kind": "function"
+      },
       "quaternionInverse": {
         "kind": "function"
       },
@@ -5990,6 +5996,9 @@
         "kind": "function"
       },
       "quaternionSlerp": {
+        "kind": "function"
+      },
+      "quaternionToAxisAngle": {
         "kind": "function"
       },
       "quaternionToEuler": {

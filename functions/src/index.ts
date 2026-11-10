@@ -536,6 +536,9 @@ export {
   quaternionLog,
   quaternionExp,
   quaternionPow,
+  quaternionToAxisAngle,
+  quaternionFromRotationMatrix,
+  quaternionFromEuler,
 } from './geometry/quaternion.js';
 
 // boundingBox, procrustes, kNN/radius queries, and multiset

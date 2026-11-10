@@ -14,6 +14,7 @@
  *   on column vectors: `v' = R · v`.
  * - **Euler angles.** {@link quaternionToEuler} gives ZYX intrinsic angles as
  *   `[roll, pitch, yaw]`: `q = qz(yaw) · qy(pitch) · qx(roll)`.
+ *   {@link quaternionFromEuler} takes the same angles.
  *
  * The rotation functions accept a quaternion of any finite, non-zero
  * magnitude. They read the quaternion as the rotation of its unit form. They
@@ -251,4 +252,93 @@ export function quaternionExp(q: Quat): number[] {
  */
 export function quaternionPow(q: Quat, t: number): number[] {
   return quaternionExp(quaternionLog(q).map((v) => v * t));
+}
+
+/**
+ * This function returns the axis and the angle of the rotation of a quaternion.
+ * It is the inverse of {@link quaternionFromAxisAngle}. The axis has unit length and the angle is
+ * in `[0, π]`. `q` and `−q` give the same result.
+ *
+ * A rotation by the angle `0` has no axis. The function then returns the axis
+ * `[1, 0, 0]`.
+ *
+ * @example
+ * quaternionToAxisAngle([0, 0, 0, 1])  // { axis: [0, 0, 1], angle: π }
+ */
+export function quaternionToAxisAngle(q: Quat): {
+  axis: [number, number, number];
+  angle: number;
+} {
+  let [w, x, y, z] = unitForm(q, 'quaternionToAxisAngle');
+  if (w < 0) [w, x, y, z] = [-w, -x, -y, -z];
+  const vNorm = length([x, y, z]);
+  if (vNorm === 0) return { axis: [1, 0, 0], angle: 0 };
+  return { axis: [x / vNorm, y / vNorm, z / vNorm], angle: 2 * Math.atan2(vNorm, w) };
+}
+
+/**
+ * Unit quaternion of a 3×3 rotation matrix that acts on column vectors. This
+ * function is the inverse of {@link quaternionToRotationMatrix}, up to the
+ * sign of the quaternion. The function uses the method of Shepperd. The
+ * largest of the trace and the three diagonal elements selects the component
+ * that the function computes first. Thus the function does not divide by a
+ * small number.
+ *
+ * The function does not examine the matrix for orthogonality. Throws when the
+ * matrix is not 3×3 or not finite.
+ *
+ * @example
+ * quaternionFromRotationMatrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])  // [1, 0, 0, 0]
+ */
+export function quaternionFromRotationMatrix(m: readonly (readonly number[])[]): number[] {
+  if (m.length !== 3 || m.some((row) => !row || row.length !== 3)) {
+    throw new Error('quaternionFromRotationMatrix: matrix must be 3 by 3');
+  }
+  if (m.some((row) => row.some((c) => !Number.isFinite(c)))) {
+    throw new Error('quaternionFromRotationMatrix: matrix must be finite');
+  }
+  const [[m00, m01, m02], [m10, m11, m12], [m20, m21, m22]] = m;
+  const trace = m00 + m11 + m22;
+  let q: number[];
+  if (trace >= m00 && trace >= m11 && trace >= m22) {
+    const s = 2 * Math.sqrt(1 + trace);
+    q = [s / 4, (m21 - m12) / s, (m02 - m20) / s, (m10 - m01) / s];
+  } else if (m00 >= m11 && m00 >= m22) {
+    const s = 2 * Math.sqrt(1 + m00 - m11 - m22);
+    q = [(m21 - m12) / s, s / 4, (m01 + m10) / s, (m02 + m20) / s];
+  } else if (m11 >= m22) {
+    const s = 2 * Math.sqrt(1 - m00 + m11 - m22);
+    q = [(m02 - m20) / s, (m01 + m10) / s, s / 4, (m12 + m21) / s];
+  } else {
+    const s = 2 * Math.sqrt(1 - m00 - m11 + m22);
+    q = [(m10 - m01) / s, (m02 + m20) / s, (m12 + m21) / s, s / 4];
+  }
+  return unitForm(q, 'quaternionFromRotationMatrix');
+}
+
+/**
+ * Unit quaternion for ZYX intrinsic Euler angles `[roll, pitch, yaw]` in
+ * radians: `q = qz(yaw) · qy(pitch) · qx(roll)`. This function is the inverse
+ * of {@link quaternionToEuler}. Throws when an angle is not finite.
+ *
+ * @example
+ * quaternionFromEuler([0, 0, Math.PI / 2])  // [0.70710678, 0, 0, 0.70710678]
+ */
+export function quaternionFromEuler(euler: readonly number[]): number[] {
+  const [roll, pitch, yaw] = euler;
+  if (!Number.isFinite(roll) || !Number.isFinite(pitch) || !Number.isFinite(yaw)) {
+    throw new Error('quaternionFromEuler: angles must be finite');
+  }
+  const cr = Math.cos(roll / 2);
+  const sr = Math.sin(roll / 2);
+  const cp = Math.cos(pitch / 2);
+  const sp = Math.sin(pitch / 2);
+  const cy = Math.cos(yaw / 2);
+  const sy = Math.sin(yaw / 2);
+  return [
+    cr * cp * cy + sr * sp * sy,
+    sr * cp * cy - cr * sp * sy,
+    cr * sp * cy + sr * cp * sy,
+    cr * cp * sy - sr * sp * cy,
+  ];
 }
