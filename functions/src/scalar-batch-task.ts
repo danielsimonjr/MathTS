@@ -31,6 +31,7 @@ export interface ScalarBatchTask {
   readonly variables: readonly string[];
 }
 
+/** Defines one worker batch task row: candidate index, evaluated values, validity flags and the all-valid flag. */
 export interface ScalarBatchTaskRow {
   readonly candidateIndex: number;
   readonly values: Float64Array;
@@ -38,6 +39,7 @@ export interface ScalarBatchTaskRow {
   readonly allValid: boolean;
 }
 
+/** Defines the reply message of {@link runScalarBatchTask}, which carries the computed batch rows. */
 export interface ScalarBatchTaskResult {
   readonly rows: readonly ScalarBatchTaskRow[];
 }

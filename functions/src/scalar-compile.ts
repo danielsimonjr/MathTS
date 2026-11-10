@@ -707,6 +707,9 @@ export function evaluateScalarTape(
   return { values, valid, allValid };
 }
 
+/**
+ * Validates a scalar tree and compiles it to a register tape with its root register, register count, variables and parameters.
+ */
 export function buildTape(
   node: ScalarNode,
   options: CompileScalarOptions,
@@ -743,6 +746,7 @@ export function buildTape(
   };
 }
 
+/** Compiles a scalar tree into an evaluator that reads column arrays. */
 export function compileScalar(node: ScalarNode, options: CompileScalarOptions): CompiledScalar {
   const messagePrefix = 'compileScalar:';
   const { tape, rootReg, nRegs, variables, parameters } = buildTape(node, options, messagePrefix);

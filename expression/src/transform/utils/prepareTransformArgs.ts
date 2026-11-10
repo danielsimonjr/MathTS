@@ -9,6 +9,7 @@ function compileAndEvaluate(arg: TransformArgNode, scope: unknown): unknown {
   return arg.compile().evaluate(scope);
 }
 
+/** Holds the evaluated collection, the compiled callback and the callback arity of filter and forEach transforms. */
 export interface PreparedTransformArgs {
   x: unknown;
   callback: unknown;

@@ -55,6 +55,7 @@ type OperatorCtor = new (
 ) => MathNode;
 type FunctionCtor = new (fn: string, args: MathNode[]) => MathNode;
 
+/** Defines the expression node classes and the simplify function that the scalar bridge needs. */
 export interface ScalarNodeBridgeDeps {
   ConstantNode: ConstantCtor;
   SymbolNode: SymbolCtor;
@@ -271,7 +272,7 @@ export function createScalarNodeBridge(deps: ScalarNodeBridgeDeps) {
    *
    * @param node - A well-formed {@link ScalarNode} (use `scalar.from` for transcendental arms).
    * @returns The wired `ConstantNode`, `SymbolNode`, `OperatorNode`, or `FunctionNode`.
-   * @throws {@link ScalarBuildError} when the tree is not a well-formed scalar node.
+   * @throws A {@link ScalarBuildError} when the tree is not a well-formed scalar node.
    *
    * @example
    * ```ts
@@ -289,7 +290,7 @@ export function createScalarNodeBridge(deps: ScalarNodeBridgeDeps) {
    *
    * @param node - An expression {@link MathNode}.
    * @returns A {@link ScalarNode} with the same structure (unary minus as `(-1)*x`).
-   * @throws {@link ScalarBuildError} when `node` is outside the scalar subset.
+   * @throws A {@link ScalarBuildError} when `node` is outside the scalar subset.
    *
    * @example
    * ```ts
@@ -307,7 +308,7 @@ export function createScalarNodeBridge(deps: ScalarNodeBridgeDeps) {
    * @param node - Input {@link ScalarNode}.
    * @param options - Optional {@link SimplifyOptions} (passed as the third argument to `simplify`).
    * @returns A simplified {@link ScalarNode}.
-   * @throws {@link ScalarBuildError} when simplification leaves the scalar subset.
+   * @throws A {@link ScalarBuildError} when simplification leaves the scalar subset, or when `simplify` throws.
    *
    * @example
    * ```ts

@@ -485,7 +485,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 433
+      "loc": 437
     },
     {
       "file": "compat/src/shims.ts",
@@ -4307,7 +4307,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 299
+      "loc": 307
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4741,7 +4741,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 77
     },
     {
       "file": "expression/src/transform/utils/shortCircuitBinary.ts",
@@ -6288,7 +6288,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 251
+      "loc": 254
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -7499,14 +7499,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 235
+      "loc": 241
     },
     {
       "file": "functions/src/scalar-batch-task.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 68
+      "loc": 70
     },
     {
       "file": "functions/src/scalar-batch.worker.ts",
@@ -7520,7 +7520,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 894
+      "loc": 898
     },
     {
       "file": "functions/src/scalar-dimension.ts",
@@ -7541,28 +7541,28 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 592
+      "loc": 594
     },
     {
       "file": "functions/src/scalar-node-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 360
+      "loc": 361
     },
     {
       "file": "functions/src/scalar-search.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2133
+      "loc": 2151
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 34
+      "loc": 35
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -8325,7 +8325,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1040
+      "loc": 1041
     },
     {
       "file": "functions/src/type/matrix/FibonacciHeap.ts",
@@ -8654,7 +8654,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 35
+      "loc": 36
     },
     {
       "file": "functions/src/typed/factorization/square-free.ts",
@@ -9011,7 +9011,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 187
+      "loc": 188
     },
     {
       "file": "functions/src/utils/isZero.ts",
@@ -9186,7 +9186,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 149
     },
     {
       "file": "functions/src/wasm/special/scalars.ts",
@@ -12518,7 +12518,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 175
+      "loc": 180
     },
     {
       "file": "matrix/src/backends/gpu/Sync.ts",
