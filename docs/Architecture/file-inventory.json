@@ -8710,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 657
+      "loc": 661
     },
     {
       "file": "functions/src/typed/interpolation.ts",
@@ -11951,7 +11951,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 176
+      "loc": 183
     },
     {
       "file": "functions/tests/typed-interpolation-wasm.test.ts",

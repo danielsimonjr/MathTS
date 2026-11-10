@@ -161,6 +161,23 @@ describe('workerKernel', () => {
     expect(() => workerKernel('besselK', '1); evil(' as unknown as number)).toThrow(TypeError);
   });
 
+  it('refuses too few parameters', () => {
+    expect(() => workerKernel('besselK')).toThrow(/"besselK" takes 1 parameters, got 0/);
+    expect(() => workerKernel('betainc', 2)).toThrow(/"betainc" takes 2 parameters, got 1/);
+    expect(() => workerKernel('normalCDF', 0, 1, 2)).toThrow(/takes 0 to 2 parameters, got 3/);
+  });
+
+  it('passes NaN and Infinity parameters to the workers as the sync call does', async () => {
+    const x = data(0.1, 5);
+    for (const n of [NaN, Infinity, -Infinity]) {
+      const r = await computePool.applyKernel(x, workerKernel('besselK', n));
+      expect(r.parallelized).toBe(true);
+      expect(mismatches(r.result, fns.besselK(n, x) as Float64Array)).toBe(0);
+    }
+    const r = await computePool.applyKernel(x, workerKernel('normalCDF', NaN, Infinity));
+    expect(mismatches(r.result, fns.normalCDF(x, NaN, Infinity) as Float64Array)).toBe(0);
+  });
+
   it('keeps the sign of a -0 parameter', () => {
     expect(workerKernel('besselK', -0)).toContain('besselKScalar(-0, x)');
   });

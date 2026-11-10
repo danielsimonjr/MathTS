@@ -236,6 +236,8 @@ function besselK01(x: f64): f64[] {
 
 /** Modified Bessel function of the second kind, K_n(x). */
 function besselKScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   const ni = Math.round(Math.abs(n));
   if (x <= 0) return NaN;
   const k01 = besselK01(x);
@@ -277,6 +279,8 @@ function ellipticEScalar(phi: f64, m: f64): f64 {
 
 /** Chebyshev polynomial of the first kind T_n(x). */
 function chebyshevTScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return x;
@@ -292,6 +296,8 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
 
 /** Hermite polynomial H_n(x) (physicist's convention). */
 function hermiteHScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
@@ -307,6 +313,8 @@ function hermiteHScalar(n: f64, x: f64): f64 {
 
 /** Laguerre polynomial L_n(x). */
 function laguerreLScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 1 - x;
@@ -322,6 +330,8 @@ function laguerreLScalar(n: f64, x: f64): f64 {
 
 /** Legendre polynomial P_n(x). */
 function legendrePScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return x;
@@ -1302,14 +1312,16 @@ export const ellipticPi = mathTyped('ellipticPi', {
 // Worker kernel sources for `workerKernel` (see worker-kernels.ts). Each source holds the
 // scalar that the synchronous function runs. The worker result is equal bit for bit.
 registerWorkerKernels({
-  erfc: [0, () => kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')],
-  erfi: [0, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')],
-  lgamma: [0, () => kernelSource([_lgamma], '(x) => _lgamma(x)')],
+  erfc: [0, 0, () => kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')],
+  erfi: [0, 0, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')],
+  lgamma: [0, 0, () => kernelSource([_lgamma], '(x) => _lgamma(x)')],
   beta: [
+    1,
     1,
     (b: number) => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
   ],
   gammainc: [
+    1,
     1,
     (a: number) =>
       kernelSource(
@@ -1319,6 +1331,7 @@ registerWorkerKernels({
   ],
   gammaincp: [
     1,
+    1,
     (a: number) =>
       kernelSource(
         [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
@@ -1327,22 +1340,26 @@ registerWorkerKernels({
   ],
   betainc: [
     2,
+    2,
     (a: number, b: number) =>
       kernelSource(
         [_lgamma, incompleteBetaFraction, betaincScalar],
         `(x) => betaincScalar(${numberLiteral(a)}, ${numberLiteral(b)}, x)`
       ),
   ],
-  digamma: [0, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')],
+  digamma: [0, 0, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')],
   besselJ0: [
+    0,
     0,
     () => kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)'),
   ],
   besselJ1: [
     0,
+    0,
     () => kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)'),
   ],
   besselY0: [
+    0,
     0,
     () =>
       kernelSource(
@@ -1352,6 +1369,7 @@ registerWorkerKernels({
   ],
   besselY1: [
     0,
+    0,
     () =>
       kernelSource(
         [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
@@ -1359,6 +1377,7 @@ registerWorkerKernels({
       ),
   ],
   besselJ: [
+    1,
     1,
     (n: number) =>
       kernelSource(
@@ -1378,6 +1397,7 @@ registerWorkerKernels({
       ),
   ],
   besselY: [
+    1,
     1,
     (n: number) =>
       kernelSource(
@@ -1403,6 +1423,7 @@ registerWorkerKernels({
   ],
   besselI: [
     1,
+    1,
     (n: number) =>
       kernelSource(
         [factorial, _lgamma, besselIScalar],
@@ -1411,50 +1432,59 @@ registerWorkerKernels({
   ],
   besselK: [
     1,
+    1,
     (n: number) =>
       kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${numberLiteral(n)}, x)`),
   ],
-  ellipticK: [0, () => kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')],
+  ellipticK: [0, 0, () => kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')],
   ellipticE: [
+    0,
     0,
     () =>
       kernelSource([ellipticEScalar, ellipticECompleteScalar], '(m) => ellipticECompleteScalar(m)'),
   ],
   chebyshevT: [
     1,
+    1,
     (n: number) =>
       kernelSource([chebyshevTScalar], `(x) => chebyshevTScalar(${numberLiteral(n)}, x)`),
   ],
   hermiteH: [
     1,
+    1,
     (n: number) => kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${numberLiteral(n)}, x)`),
   ],
   laguerreL: [
+    1,
     1,
     (n: number) =>
       kernelSource([laguerreLScalar], `(x) => laguerreLScalar(${numberLiteral(n)}, x)`),
   ],
   legendreP: [
     1,
+    1,
     (n: number) =>
       kernelSource([legendrePScalar], `(x) => legendrePScalar(${numberLiteral(n)}, x)`),
   ],
-  lambertW: [0, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')],
-  cosIntegral: [0, () => kernelSource([cosIntegralScalar], '(x) => cosIntegralScalar(x)')],
-  sinIntegral: [0, () => kernelSource([sinIntegralScalar], '(x) => sinIntegralScalar(x)')],
+  lambertW: [0, 0, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')],
+  cosIntegral: [0, 0, () => kernelSource([cosIntegralScalar], '(x) => cosIntegralScalar(x)')],
+  sinIntegral: [0, 0, () => kernelSource([sinIntegralScalar], '(x) => sinIntegralScalar(x)')],
   logIntegral: [
+    0,
     0,
     () => kernelSource([expIntegralEiScalar, logIntegralScalar], '(x) => logIntegralScalar(x)'),
   ],
-  expIntegralEi: [0, () => kernelSource([expIntegralEiScalar], '(x) => expIntegralEiScalar(x)')],
-  fresnelC: [0, () => kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')],
-  fresnelS: [0, () => kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')],
+  expIntegralEi: [0, 0, () => kernelSource([expIntegralEiScalar], '(x) => expIntegralEiScalar(x)')],
+  fresnelC: [0, 0, () => kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')],
+  fresnelS: [0, 0, () => kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')],
   airyAi: [
+    0,
     0,
     () =>
       kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar], '(x) => airyAiScalar(x)'),
   ],
   airyBi: [
+    0,
     0,
     () =>
       kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar], '(x) => airyBiScalar(x)'),

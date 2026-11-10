@@ -20,8 +20,15 @@
  * `workerKernel` is public.
  */
 
-/** A builder: the number of parameters it takes, and the function that makes the source. */
-type KernelBuilder = readonly [arity: number, build: (...params: number[]) => string];
+/**
+ * A builder: the least and the most number of parameters it takes, and the function that
+ * makes the source. Only normalPDF and normalCDF have optional parameters (mu = 0, sigma = 1).
+ */
+type KernelBuilder = readonly [
+  required: number,
+  max: number,
+  build: (...params: number[]) => string,
+];
 
 const BUILDERS = new Map<string, KernelBuilder>();
 
@@ -47,7 +54,7 @@ export function registerWorkerKernels(builders: Record<string, KernelBuilder>): 
  *   `workerKernel('normalCDF', mu, sigma)`. Each parameter must be a number.
  * @returns The source of a self-contained `(x) => number` function, for
  *   `computePool.applyKernel`.
- * @throws Error when the name is unknown, when there are too many parameters, or when a
+ * @throws Error when the name is unknown or the parameter count is wrong. TypeError when a
  *   parameter is not a number.
  */
 export function workerKernel(name: string, ...params: number[]): string {
@@ -57,9 +64,10 @@ export function workerKernel(name: string, ...params: number[]): string {
       `workerKernel: unknown kernel "${name}". Known: ${[...BUILDERS.keys()].sort().join(', ')}`
     );
   }
-  const [arity, build] = builder;
-  if (params.length > arity) {
-    throw new Error(`workerKernel: "${name}" takes ${arity} parameters, got ${params.length}`);
+  const [required, max, build] = builder;
+  if (params.length < required || params.length > max) {
+    const want = required === max ? `${max}` : `${required} to ${max}`;
+    throw new Error(`workerKernel: "${name}" takes ${want} parameters, got ${params.length}`);
   }
   // The parameters go into source that a worker evaluates, so workerKernel accepts only numbers.
   for (const p of params) {

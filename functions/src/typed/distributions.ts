@@ -642,6 +642,7 @@ export const noncentralChi2PDF = mathTyped('noncentralChi2PDF', {
 // scalar that the synchronous function runs. The worker result is equal bit for bit.
 registerWorkerKernels({
   normalPDF: [
+    0,
     2,
     (mu = 0, sigma = 1) =>
       kernelSource(
@@ -650,6 +651,7 @@ registerWorkerKernels({
       ),
   ],
   normalCDF: [
+    0,
     2,
     (mu = 0, sigma = 1) =>
       kernelSource(
@@ -659,6 +661,7 @@ registerWorkerKernels({
   ],
   exponentialPDF: [
     1,
+    1,
     (lambda: number) =>
       kernelSource(
         [exponentialPDFScalar],
@@ -666,6 +669,7 @@ registerWorkerKernels({
       ),
   ],
   exponentialCDF: [
+    1,
     1,
     (lambda: number) =>
       kernelSource(
@@ -675,6 +679,7 @@ registerWorkerKernels({
   ],
   poissonPMF: [
     1,
+    1,
     (lambda: number) =>
       kernelSource(
         [_logFactorial, poissonPMFScalar],
@@ -682,6 +687,7 @@ registerWorkerKernels({
       ),
   ],
   binomialPMF: [
+    2,
     2,
     (n: number, p: number) =>
       kernelSource(
@@ -691,10 +697,12 @@ registerWorkerKernels({
   ],
   geometricPMF: [
     1,
+    1,
     (p: number) =>
       kernelSource([geometricPMFScalar], `(k) => geometricPMFScalar(k, ${numberLiteral(p)})`),
   ],
   bernoulliPMF: [
+    1,
     1,
     (p: number) =>
       kernelSource([bernoulliPMFScalar], `(k) => bernoulliPMFScalar(k, ${numberLiteral(p)})`),

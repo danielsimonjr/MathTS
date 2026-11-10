@@ -2434,19 +2434,19 @@
 
       ## Numerical Integration
 
-      | Function                                 | Description                                                                                                        |
-      | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-      | `trapz(y[, x])`                          | Trapezoidal rule on sampled data                                                                                   |
-      | `simpson(f, a, b[, n])`                  | Simpson's 1/3 rule (`n` even)                                                                                      |
-      | `simpsons(f, a, b[, n])`                 | Simpson's rule variant (numeric layer)                                                                             |
-      | `gaussQuad(f, a, b[, n])`                | Gauss–Legendre quadrature                                                                                          |
-      | `romberg(f, a, b[, tol])`                | Romberg integration                                                                                                |
-      | `parallelGaussQuad(f, a, b[, n, order, { workerCount }])`| Async `gaussQuad` with a worker fan-out                                                                            |
-      | `parallelRomberg(f, a, b[, tol, { workerCount }])`| Async `romberg` with a worker fan-out                                                                              |
-      | `nintegrate(f, a, b[, tol])`             | Adaptive numerical integration                                                                                     |
-      | `quad(f, a, b[, opts])`                  | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
-      | `rootsLegendre(n)`                       | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
-      | `monteCarloIntegrate(f, bounds[, opts])` | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
+      | Function                                                  | Description                                                                                                        |
+      | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+      | `trapz(y[, x])`                                           | Trapezoidal rule on sampled data                                                                                   |
+      | `simpson(f, a, b[, n])`                                   | Simpson's 1/3 rule (`n` even)                                                                                      |
+      | `simpsons(f, a, b[, n])`                                  | Simpson's rule variant (numeric layer)                                                                             |
+      | `gaussQuad(f, a, b[, n])`                                 | Gauss–Legendre quadrature                                                                                          |
+      | `romberg(f, a, b[, tol])`                                 | Romberg integration                                                                                                |
+      | `parallelGaussQuad(f, a, b[, n, order, { workerCount }])` | Async `gaussQuad` with a worker fan-out                                                                            |
+      | `parallelRomberg(f, a, b[, tol, { workerCount }])`        | Async `romberg` with a worker fan-out                                                                              |
+      | `nintegrate(f, a, b[, tol])`                              | Adaptive numerical integration                                                                                     |
+      | `quad(f, a, b[, opts])`                                   | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
+      | `rootsLegendre(n)`                                        | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
+      | `monteCarloIntegrate(f, bounds[, opts])`                  | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
 
       ### Extra quadrature rules (gap analysis)
 
