@@ -1131,6 +1131,10 @@ green.
   (`typescript-eslint does not support TS 7.0.`). Both trace to TS 7.0 shipping
   without the stable programmatic Compiler API, expected in 7.1.
 
+### Removed
+
+- **`docs/Architecture/dependency-layers.json` and `docs/Architecture/unused-analysis.json` are no longer tracked.** The external `repo-tools map` wrote them, and the pre-commit hook staged them with the folder. No generator, consumer or gate of this repository uses them, so they went stale. `.gitignore` now names both. `repo-tools map . --out=<tmp>` gives a current copy of each, and that copy of `unused-analysis.json` holds the list of unused exports that repo-tools measures.
+
 ## [Unreleased]
 
 ### Fixed
