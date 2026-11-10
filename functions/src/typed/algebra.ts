@@ -31,6 +31,7 @@ import {
   factorMultivariateString,
 } from './factorization/index.js';
 import { polyGcdZ } from './factorization/integer-poly.js';
+import { euclidSnap } from './euclid.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
 
 // =============================================================================
@@ -131,14 +132,9 @@ function polyDivMod(a: number[], b: number[]): [number[], number[]] {
   return [trimPoly(quotient), trimPoly(remainder.slice(0, bt.length - 1))];
 }
 
-/** Numeric GCD (Euclidean algorithm) */
+/** Numeric GCD uses the Euclidean algorithm. A NaN or infinite input gives NaN, not a loop. */
 function gcdNum(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b !== 0) {
-    [a, b] = [b, a % b];
-  }
-  return a;
+  return euclidSnap(a, b, (x) => x);
 }
 
 /**

@@ -10713,6 +10713,7 @@ graph LR
 | `./polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, buchberger, normalize, polyToString, Poly`            | Import |
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                         | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                          | Import |
+| `./euclid.js`                     | `euclidSnap`                                                                                        | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
 
 **Exports:**
@@ -20025,7 +20026,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214610 |
+| Total Lines of Code     | 214636 |
 | Total Exports           | 6926   |
 | Total Re-exports        | 3004   |
 | Total Classes           | 61     |

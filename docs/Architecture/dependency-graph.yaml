@@ -22576,6 +22576,9 @@ modules:
         - file: ./factorization/integer-poly.js
           imports:
             - polyGcdZ
+        - file: ./euclid.js
+          imports:
+            - euclidSnap
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
@@ -43041,7 +43044,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214610
+  totalLinesOfCode: 214636
   totalExports: 6926
   totalClasses: 61
   totalInterfaces: 598

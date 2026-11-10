@@ -152,6 +152,19 @@ describeIfAS('elementwise AS pointer-kernel dispatch (Phase 3a)', () => {
     }
   });
 
+  it('the AS erfc kernel gives NaN for NaN and keeps the limits at +-Infinity', () => {
+    const n = Math.max(WASM_ELEMENTWISE_THRESHOLD, 2048);
+    const xs = new Float64Array(n).fill(0.5);
+    xs[0] = NaN;
+    xs[1] = Infinity;
+    xs[2] = -Infinity;
+    const out = elementwiseUnaryDispatch('erfc', xs);
+    expect(out).not.toBeNull();
+    expect(out![0]).toBeNaN();
+    expect(out![1]).toBe(0);
+    expect(out![2]).toBe(2);
+  });
+
   it('op-fusion (elementwiseChainDispatch) runs AS kernels in-memory and matches sequential JS', () => {
     const n = 2048;
     const chains: WasmElementwiseOp[][] = [

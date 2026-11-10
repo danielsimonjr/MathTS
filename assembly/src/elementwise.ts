@@ -64,6 +64,7 @@ function _erfcCF(a: f64): f64 {
 }
 
 function _erfc(x: f64): f64 {
+  if (x != x) return x; // A NaN input gives a NaN output.
   if (!isFinite(x)) return x > 0.0 ? 0.0 : 2.0;
   if (x < 0.0) return 2.0 - _erfc(-x); // erfc(-x) = 2 - erfc(x)
   return x < 1.5 ? 1.0 - _erfSeries(x) : _erfcCF(x);

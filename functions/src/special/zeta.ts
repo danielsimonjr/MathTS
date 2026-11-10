@@ -153,6 +153,10 @@ export const createZeta = /* #__PURE__ */ factory(
       createValue: (value: number) => T,
       determineDigits: (value: T) => number
     ): T {
+      // NaN is the only value not equal to itself. Without the guard, !isBounded(NaN) gives 1.
+      if (!equal(s, s)) {
+        return createValue(NaN);
+      }
       if (equal(s, 0)) {
         return createValue(-0.5);
       }

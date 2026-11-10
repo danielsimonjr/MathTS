@@ -67,6 +67,7 @@ export function _lgamma(x: f64): f64 {
  * Self-contained (`Math` only, recursive by name) for worker `kernelSource` serialization.
  */
 export function erfcSelfContained(x: f64): f64 {
+  if (x !== x) return NaN;
   if (!isFinite(x)) return x > 0 ? 0 : 2;
   if (x < 0) return 2 - erfcSelfContained(-x);
   if (x < 1.5) {
@@ -106,7 +107,7 @@ export function erfcScalar(x: f64): f64 {
 
 /** Normal CDF Φ(x; μ, σ) = ½·erfc((μ−x)/(σ√2)); same-module for worker kernels. */
 export function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
-  if (sigma <= 0) return NaN;
+  if (!(sigma > 0)) return NaN;
   return 0.5 * erfcSelfContained((mu - x) / (sigma * Math.SQRT2));
 }
 

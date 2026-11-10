@@ -318,6 +318,11 @@ export const createRange = /* #__PURE__ */ factory(
         : includeEnd
           ? largerEq
           : larger;
+      const infinite = (v: unknown) => v === Infinity || v === -Infinity;
+      if ((infinite(start) || infinite(end)) && ongoing(start, end)) {
+        // An infinite bound gives an infinite range, so the loop below never ends.
+        throw new RangeError('range: an infinite start or end gives an unbounded range');
+      }
       let x = start;
       while (ongoing(x, end)) {
         array.push(x);

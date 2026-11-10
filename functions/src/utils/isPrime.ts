@@ -50,6 +50,8 @@ export function trialPrime(x: number | bigint, c: TrialPrimeConsts<number | bigi
   const five = c.five as number;
   const six = c.six as number;
   const xv = x as number;
+  // NaN and +-Infinity are not prime. The trial loop never ends on Infinity.
+  if (xv !== xv || xv === Infinity || xv === -Infinity) return false;
   if (xv <= three) return xv > one;
   if (xv % two === zero || xv % three === zero) return false;
   for (let i = five; i * i <= xv; i += six) {

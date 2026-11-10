@@ -131,6 +131,8 @@ export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): Qu
   function panel(a: f64, b: f64, depth: i32): QuadResult {
     const { k, g } = gaussKronrod15(f, a, b);
     const panelError = Math.abs(k - g);
+    // A NaN error never meets the tolerance, so stop here and do not bisect to maxDepth.
+    if (panelError !== panelError) return { value: NaN, error: NaN };
 
     if (depth >= maxDepth || panelError <= Math.max(tol * Math.abs(k), atol)) {
       return { value: k, error: panelError };
