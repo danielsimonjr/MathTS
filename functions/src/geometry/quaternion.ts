@@ -15,9 +15,11 @@
  * - **Euler angles.** {@link quaternionToEuler} gives ZYX intrinsic angles as
  *   `[roll, pitch, yaw]`: `q = qz(yaw) · qy(pitch) · qx(roll)`.
  *
- * The rotation functions accept a quaternion of any non-zero magnitude. They
- * read the quaternion as the rotation of its unit form. They throw on the zero
- * quaternion.
+ * The rotation functions accept a quaternion of any finite, non-zero
+ * magnitude. They read the quaternion as the rotation of its unit form. They
+ * throw on the zero quaternion and on a quaternion that is not finite. The
+ * magnitude itself must be a finite number: components near the largest
+ * double can have a magnitude that is not finite.
  *
  * @packageDocumentation
  */
@@ -29,11 +31,39 @@ function dot4(a: readonly number[], b: readonly number[]): number {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 }
 
-/** Squared magnitude of `q`. Throws when the magnitude is zero: `name` is the caller. */
-function nonZeroMagSq(q: Quat, name: string): number {
-  const magSq = dot4(q, q);
-  if (magSq === 0) throw new Error(`${name}: zero-magnitude quaternion`);
-  return magSq;
+/**
+ * Limits of the sum of squares for the fast magnitude. Outside these limits
+ * the sum loses digits, underflows to zero or overflows.
+ */
+const SUM_SQ_MIN = 1e-280;
+const SUM_SQ_MAX = 1e280;
+
+/**
+ * Euclidean length of `v`. `Math.hypot` scales its arguments, so the length is
+ * correct where the sum of squares is not. The plain square root is the fast
+ * path for the usual range.
+ */
+function length(v: readonly number[]): number {
+  let sumSq = 0;
+  for (const c of v) sumSq += c * c;
+  return sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(...v);
+}
+
+/**
+ * Magnitude of `q`. Throws when the magnitude is zero or `q` is not finite:
+ * `name` is the caller.
+ */
+function magnitude(q: Quat, name: string): number {
+  const m = length(q);
+  if (m === 0) throw new Error(`${name}: zero-magnitude quaternion`);
+  if (!Number.isFinite(m)) throw new Error(`${name}: quaternion must be finite`);
+  return m;
+}
+
+/** Unit form of `q`. Throws as {@link magnitude} does. */
+function unitForm(q: Quat, name: string): [number, number, number, number] {
+  const m = magnitude(q, name);
+  return [q[0] / m, q[1] / m, q[2] / m, q[3] / m];
 }
 
 /** Hamilton product of two quaternions `[w, x, y, z]`. */
@@ -55,8 +85,7 @@ export function quaternionConjugate(q: Quat): number[] {
 
 /** Unit-normalize a quaternion. Throws on the zero quaternion. */
 export function quaternionNormalize(q: Quat): number[] {
-  const m = Math.sqrt(nonZeroMagSq(q, 'quaternionNormalize'));
-  return [q[0] / m, q[1] / m, q[2] / m, q[3] / m];
+  return unitForm(q, 'quaternionNormalize');
 }
 
 /**
@@ -67,8 +96,9 @@ export function quaternionNormalize(q: Quat): number[] {
  * quaternionInverse([0, 1, 0, 0])  // [0, -1, 0, 0]
  */
 export function quaternionInverse(q: Quat): number[] {
-  const magSq = nonZeroMagSq(q, 'quaternionInverse');
-  return [q[0] / magSq, -q[1] / magSq, -q[2] / magSq, -q[3] / magSq];
+  // Two divisions by |q|: the square of |q| can overflow or underflow.
+  const m = magnitude(q, 'quaternionInverse');
+  return [q[0] / m / m, -q[1] / m / m, -q[2] / m / m, -q[3] / m / m];
 }
 
 /**
@@ -77,28 +107,31 @@ export function quaternionInverse(q: Quat): number[] {
  * because such an axis defines no rotation.
  */
 export function quaternionFromAxisAngle(axis: Vec3, angle: number): number[] {
-  const n = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+  const n = length([axis[0], axis[1], axis[2]]);
   if (!(n > 0) || !Number.isFinite(n)) {
     throw new Error('quaternionFromAxisAngle: axis must be finite and non-zero');
   }
-  const s = Math.sin(angle / 2) / n;
-  return [Math.cos(angle / 2), axis[0] * s, axis[1] * s, axis[2] * s];
+  const s = Math.sin(angle / 2);
+  return [Math.cos(angle / 2), (axis[0] / n) * s, (axis[1] / n) * s, (axis[2] / n) * s];
 }
 
 /** Rotate a 3-vector by a quaternion: `q · [0, v] · q⁻¹`. */
 export function quaternionRotate(q: Quat, v: Vec3): number[] {
-  const r = quaternionMultiply(quaternionMultiply(q, [0, v[0], v[1], v[2]]), quaternionInverse(q));
+  const u = unitForm(q, 'quaternionRotate');
+  const r = quaternionMultiply(
+    quaternionMultiply(u, [0, v[0], v[1], v[2]]),
+    quaternionConjugate(u)
+  );
   return [r[1], r[2], r[3]];
 }
 
 /** 3×3 rotation matrix for a quaternion `[w, x, y, z]`. The matrix acts on column vectors. */
 export function quaternionToRotationMatrix(q: Quat): number[][] {
-  const [w, x, y, z] = q;
-  const s = 2 / nonZeroMagSq(q, 'quaternionToRotationMatrix');
+  const [w, x, y, z] = unitForm(q, 'quaternionToRotationMatrix');
   return [
-    [1 - s * (y * y + z * z), s * (x * y - z * w), s * (x * z + y * w)],
-    [s * (x * y + z * w), 1 - s * (x * x + z * z), s * (y * z - x * w)],
-    [s * (x * z - y * w), s * (y * z + x * w), 1 - s * (x * x + y * y)],
+    [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+    [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+    [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
   ];
 }
 
@@ -117,8 +150,8 @@ const SLERP_DOT_THRESHOLD = 0.9995;
  * quaternionSlerp([1,0,0,0], [0,1,0,0], 1)    // [0,1,0,0]
  */
 export function quaternionSlerp(q1: Quat, q2: Quat, t: number): number[] {
-  const a = quaternionNormalize(q1);
-  let b = quaternionNormalize(q2);
+  const a = unitForm(q1, 'quaternionSlerp');
+  let b: number[] = unitForm(q2, 'quaternionSlerp');
   let d = dot4(a, b);
   if (d < 0) {
     d = -d;
@@ -137,7 +170,10 @@ export function quaternionSlerp(q1: Quat, q2: Quat, t: number): number[] {
   return a.map((v, i) => s0 * v + s1 * b[i]);
 }
 
-/** Within this distance of `|sin(pitch)| = 1`, the rotation is at gimbal lock. */
+/**
+ * Within this distance of `|sin(pitch)| = 1`, the rotation is at gimbal lock.
+ * The band is about 1.4e-6 rad of pitch on each side of ±90°.
+ */
 const GIMBAL_LOCK_EPS = 1e-12;
 
 /**
@@ -153,11 +189,7 @@ const GIMBAL_LOCK_EPS = 1e-12;
  * quaternionToEuler([1, 0, 0, 0])  // [0, 0, 0]
  */
 export function quaternionToEuler(q: Quat): [number, number, number] {
-  const m = Math.sqrt(nonZeroMagSq(q, 'quaternionToEuler'));
-  const w = q[0] / m;
-  const x = q[1] / m;
-  const y = q[2] / m;
-  const z = q[3] / m;
+  const [w, x, y, z] = unitForm(q, 'quaternionToEuler');
   const sinp = 2 * (w * y - z * x);
   if (sinp > 1 - GIMBAL_LOCK_EPS) return [0, Math.PI / 2, -2 * Math.atan2(x, w)];
   if (sinp < -1 + GIMBAL_LOCK_EPS) return [0, -Math.PI / 2, 2 * Math.atan2(x, w)];
@@ -167,31 +199,27 @@ export function quaternionToEuler(q: Quat): [number, number, number] {
 }
 
 /**
- * Below this vector-part magnitude the axis is not defined, and the vector
- * part of the logarithm is zero. This rule prevents a 0/0 `NaN`.
- */
-const QUAT_VECTOR_EPS = 1e-15;
-
-/**
  * Quaternion logarithm. For `q = (w, v)`:
  * `log(q) = (ln|q|, θ·û)` where `θ = atan2(|v|, w)` and `û = v/|v|`.
  * For a unit quaternion the scalar part is `0` and `θ` is half of the
  * rotation angle. Throws on the zero quaternion.
  *
- * A quaternion with a zero vector part has no axis. The function returns
- * `(ln|w|, 0, 0, 0)`. For a negative `w`, the result is the logarithm of the
- * same rotation (`q` and `−q` are one rotation), not of the same quaternion.
+ * A quaternion with an exactly zero vector part has no axis. The function
+ * returns `(ln|w|, 0, 0, 0)`. For a negative `w`, the result is the logarithm
+ * of the same rotation (`q` and `−q` are one rotation), not of the same
+ * quaternion. Each other quaternion keeps its axis, so a negative `w` with a
+ * very small vector part gives a vector part of length near `π`.
  *
  * @example
  * quaternionLog([1, 0, 0, 0])  // [0, 0, 0, 0]
  */
 export function quaternionLog(q: Quat): number[] {
   const [w, x, y, z] = q;
-  const lnMag = Math.log(nonZeroMagSq(q, 'quaternionLog')) / 2;
-  const vNorm = Math.sqrt(x * x + y * y + z * z);
-  if (vNorm < QUAT_VECTOR_EPS) return [lnMag, 0, 0, 0];
-  const s = Math.atan2(vNorm, w) / vNorm;
-  return [lnMag, x * s, y * s, z * s];
+  const lnMag = Math.log(magnitude(q, 'quaternionLog'));
+  const vNorm = length([x, y, z]);
+  if (vNorm === 0) return [lnMag, 0, 0, 0];
+  const theta = Math.atan2(vNorm, w);
+  return [lnMag, (x / vNorm) * theta, (y / vNorm) * theta, (z / vNorm) * theta];
 }
 
 /**
@@ -205,11 +233,11 @@ export function quaternionLog(q: Quat): number[] {
  */
 export function quaternionExp(q: Quat): number[] {
   const [w, x, y, z] = q;
-  const vNorm = Math.sqrt(x * x + y * y + z * z);
+  const vNorm = length([x, y, z]);
   const ew = Math.exp(w);
-  if (vNorm < QUAT_VECTOR_EPS) return [ew, 0, 0, 0];
-  const s = (ew * Math.sin(vNorm)) / vNorm;
-  return [ew * Math.cos(vNorm), x * s, y * s, z * s];
+  if (vNorm === 0) return [ew, 0, 0, 0];
+  const s = ew * Math.sin(vNorm);
+  return [ew * Math.cos(vNorm), (x / vNorm) * s, (y / vNorm) * s, (z / vNorm) * s];
 }
 
 /**

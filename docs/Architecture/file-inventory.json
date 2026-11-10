@@ -6414,7 +6414,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 227
+      "loc": 255
     },
     {
       "file": "functions/src/geometry/spherical-voronoi.ts",
@@ -11307,7 +11307,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 401
+      "loc": 470
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",

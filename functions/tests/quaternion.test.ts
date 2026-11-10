@@ -159,7 +159,7 @@ describe('quaternionFromAxisAngle', () => {
     }
   });
 
-  it('throws on a zero axis, for each angle', () => {
+  it('throws on a zero axis, at a non-zero angle and at angle 0', () => {
     expect(() => quaternionFromAxisAngle([0, 0, 0], 1)).toThrow(/axis/i);
     expect(() => quaternionFromAxisAngle([0, 0, 0], 0)).toThrow(/axis/i);
   });
@@ -240,7 +240,8 @@ describe('quaternionSlerp', () => {
     const near = quaternionFromAxisAngle([0, 0, 1], 0.2 + 1e-6);
     const r = quaternionSlerp(a, near, 0.5);
     expect(mag(r)).toBeCloseTo(1, 14);
-    sameRotation(r, quaternionFromAxisAngle([0, 0, 1], 0.2 + 5e-7));
+    // 10 digits: the two end points differ in the 8th digit, so an end point fails.
+    close(r, quaternionFromAxisAngle([0, 0, 1], 0.2 + 5e-7), 10);
   });
 
   it('throws on a zero quaternion', () => {
@@ -276,8 +277,15 @@ describe('quaternionLog / quaternionExp / quaternionPow', () => {
     expect(() => quaternionLog([0, 0, 0, 0])).toThrow(/zero/i);
   });
 
-  it('a rotation by 2 pi has a zero logarithm', () => {
-    close(quaternionLog(quaternionFromAxisAngle([0, 0, 1], 2 * Math.PI)), [0, 0, 0, 0]);
+  it('log has no jump near w = -1: a rotation by 2 pi keeps its axis', () => {
+    const full = quaternionFromAxisAngle([0, 0, 1], 2 * Math.PI);
+    close(quaternionLog(full), [0, 0, 0, Math.PI]);
+    close(quaternionPow(full, 0.5), [0, 0, 0, 1]);
+  });
+
+  it('log of a quaternion with an exactly zero vector part has a zero vector part', () => {
+    expect(quaternionLog([-1, 0, 0, 0])).toEqual([0, 0, 0, 0]);
+    expect(quaternionLog([1, 0, 0, 0])).toEqual([0, 0, 0, 0]);
   });
 
   it('exp of a pure quaternion is a unit quaternion', () => {
@@ -396,5 +404,66 @@ describe('quaternion round trips', () => {
       matVec(quaternionToRotationMatrix(fromEuler(roll, pitch, yaw)), v),
       quaternionRotate(q, v)
     );
+  });
+});
+
+describe('quaternion magnitude range', () => {
+  const unitQ = quaternionFromAxisAngle([1, -2, 3], 0.9);
+  const v = [0.5, 1.5, -2];
+  const SCALES = [1e-200, 1e-170, 1e160, 1e200];
+
+  it('the rotation functions give the unit-form result at each scale', () => {
+    for (const k of SCALES) {
+      const q = unitQ.map((c) => c * k);
+      close(quaternionNormalize(q), unitQ);
+      close(quaternionRotate(q, v), quaternionRotate(unitQ, v));
+      const m = quaternionToRotationMatrix(q);
+      const expected = quaternionToRotationMatrix(unitQ);
+      m.forEach((row, i) => close(row, expected[i]));
+      close(quaternionToEuler(q), quaternionToEuler(unitQ));
+      close(quaternionSlerp(q, [k, 0, 0, 0], 0.5), quaternionSlerp(unitQ, [1, 0, 0, 0], 0.5));
+    }
+  });
+
+  it('the inverse times the quaternion is the identity at each scale', () => {
+    for (const k of SCALES) {
+      const q = unitQ.map((c) => c * k);
+      close(quaternionMultiply(q, quaternionInverse(q)), [1, 0, 0, 0]);
+    }
+  });
+
+  it('log keeps ln|q| and the half angle at each scale', () => {
+    const unitLog = quaternionLog(unitQ);
+    for (const k of SCALES) {
+      const log = quaternionLog(unitQ.map((c) => c * k));
+      expect(log[0]).toBeCloseTo(Math.log(k), 10);
+      close(log.slice(1), unitLog.slice(1));
+    }
+  });
+
+  it('the axis of quaternionFromAxisAngle can have each scale', () => {
+    for (const k of SCALES) {
+      close(quaternionFromAxisAngle([k, -2 * k, 3 * k], 0.9), unitQ);
+    }
+  });
+
+  it('exp accepts a very small vector part', () => {
+    close(quaternionExp([0, 1e-200, 0, 0]), [1, 1e-200, 0, 0]);
+  });
+
+  it('each function throws on a quaternion that is not finite', () => {
+    for (const bad of [
+      [NaN, 0, 0, 1],
+      [Infinity, 0, 0, 0],
+      [1, 0, -Infinity, 0],
+    ]) {
+      expect(() => quaternionNormalize(bad)).toThrow(/finite/i);
+      expect(() => quaternionInverse(bad)).toThrow(/finite/i);
+      expect(() => quaternionRotate(bad, v)).toThrow(/finite/i);
+      expect(() => quaternionToRotationMatrix(bad)).toThrow(/finite/i);
+      expect(() => quaternionToEuler(bad)).toThrow(/finite/i);
+      expect(() => quaternionLog(bad)).toThrow(/finite/i);
+      expect(() => quaternionSlerp(bad, unitQ, 0.5)).toThrow(/finite/i);
+    }
   });
 });
