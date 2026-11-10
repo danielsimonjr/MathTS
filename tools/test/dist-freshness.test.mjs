@@ -59,7 +59,7 @@ describe('generate-functions-reference preflight', () => {
     });
     const r = runPreflight(dir);
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /dist\/index\.js/);
+    assert.match(r.stderr, /dist[\\/]index\.js/);
     assert.match(r.stderr, /bun run build/);
   });
 
@@ -80,8 +80,8 @@ describe('generate-functions-reference preflight', () => {
     utimesSync(leaf, base + 5, base + 5);
     const r = runPreflight(dir);
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /src\/leaf\.ts/);
-    assert.doesNotMatch(r.stderr, /src\/index\.ts/);
+    assert.match(r.stderr, /src[\\/]leaf\.ts/);
+    assert.doesNotMatch(r.stderr, /src[\\/]index\.ts/);
   });
 
   test('barrel value export missing from dist exits 1 and names the export', () => {
@@ -174,7 +174,7 @@ describe('generate-functions-reference preflight', () => {
       env: { ...process.env, GITHUB_ACTIONS: 'true', CI: 'true' },
     });
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /src\/leaf\.ts/);
+    assert.match(r.stderr, /src[\\/]leaf\.ts/);
   });
 
   test('namespace re-export missing from dist exits 1 and names it', () => {

@@ -100,24 +100,24 @@ describe('measurePair()', () => {
   const slowMs = 12;
   const fastMs = 1;
 
+  // The time of a thunk is the value that the thunk gives. No clock is read, so the
+  // resolution of the system timer cannot change the result.
   async function timeFn(fn) {
-    const t0 = performance.now();
-    await fn();
-    return performance.now() - t0;
+    return fn();
   }
 
-  function sleep(ms) {
-    return () => new Promise((resolve) => setTimeout(resolve, ms));
+  function takes(ms) {
+    return async () => ms;
   }
 
   test('records each sample in the lane of the thunk that ran (even reps)', async () => {
-    const { aMs, bMs } = await measurePair(sleep(fastMs), sleep(slowMs), 4, timeFn, 0);
-    assert.ok(aMs < bMs / 2, `fast lane ${aMs} should sit well below slow lane ${bMs}`);
+    const { aMs, bMs } = await measurePair(takes(fastMs), takes(slowMs), 4, timeFn, 0);
+    assert.deepEqual({ aMs, bMs }, { aMs: fastMs, bMs: slowMs });
   });
 
   test('records each sample in the lane of the thunk that ran (odd reps)', async () => {
-    const { aMs, bMs } = await measurePair(sleep(fastMs), sleep(slowMs), 5, timeFn, 0);
-    assert.ok(aMs < bMs / 2, `fast lane ${aMs} should sit well below slow lane ${bMs}`);
+    const { aMs, bMs } = await measurePair(takes(fastMs), takes(slowMs), 5, timeFn, 0);
+    assert.deepEqual({ aMs, bMs }, { aMs: fastMs, bMs: slowMs });
   });
 });
 
