@@ -9,6 +9,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
+- [ ] **Issue 376: quaternion module.** Part 1 (2026-11-10): the 12 functions are in `functions/src/geometry/quaternion.ts` with the convention stated once and five behaviour fixes (non-unit input, gimbal lock, zero input). Part 2: add `quaternionToAxisAngle`, `quaternionFromRotationMatrix` and `quaternionFromEuler`, then close the issue. Five-axis (2026-11-10): speed not measured (no hot path changed); stability 44 new deterministic tests; reliability full `functions` suite 7759 passed; security no change; maintainability two helper sets and two files became one module. Clones after: 12 exact groups, 301 near pairs, none names a file of this change; the count before was not taken.
 - [x] UPT integration gaps (`docs/superpowers/plans/2026-11-05-upt-integration-gaps.md`): one task per PR in the plan's order (MT-1 … MT-10, D1, D4–D7), PRs #607–#622. MT-5 and MT-7 are not implemented (spec §4.10, §4.8).
 
 - [x] **`turbo run typecheck` races the builds it reads, and a failed run leaves a cleaned `dist/` behind.** `typecheck` depends on `^build` only, but

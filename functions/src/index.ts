@@ -519,28 +519,28 @@ export type {
   StftResult,
 } from './signal/spectral-peaks.js';
 
-// Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
+// Geodesy and vector slerp.
+export { haversine, EARTH_RADIUS_KM, slerp } from './geometry-extra.js';
+
+// Quaternion algebra and rotation conversions (one module, one convention).
 export {
-  haversine,
-  EARTH_RADIUS_KM,
-  slerp,
   quaternionMultiply,
   quaternionConjugate,
   quaternionNormalize,
+  quaternionInverse,
   quaternionFromAxisAngle,
   quaternionRotate,
   quaternionToRotationMatrix,
-} from './geometry-extra.js';
-
-// Phase 8 Task 3 — quaternion slerp/inverse/Euler, boundingBox, procrustes,
-// kd-tree kNN/radius queries, and multiset setIsSuperset/setEqual/setDisjoint.
-export {
-  quaternionInverse,
   quaternionSlerp,
   quaternionToEuler,
   quaternionLog,
   quaternionExp,
   quaternionPow,
+} from './geometry/quaternion.js';
+
+// boundingBox, procrustes, kNN/radius queries, and multiset
+// setIsSuperset/setEqual/setDisjoint.
+export {
   boundingBox,
   procrustes,
   kdTreeKNN,

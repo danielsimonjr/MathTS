@@ -3,7 +3,7 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-10",
-    "totalFiles": 1273,
+    "totalFiles": 1274,
     "totalModules": 82,
     "totalExports": 6929
   },
@@ -9840,27 +9840,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": [
-          "EARTH_RADIUS_KM",
-          "haversine",
-          "slerp",
-          "quaternionMultiply",
-          "quaternionConjugate",
-          "quaternionNormalize",
-          "quaternionFromAxisAngle",
-          "quaternionRotate",
-          "quaternionToRotationMatrix"
-        ],
-        "functions": [
-          "haversine",
-          "slerp",
-          "quaternionMultiply",
-          "quaternionConjugate",
-          "quaternionNormalize",
-          "quaternionFromAxisAngle",
-          "quaternionRotate",
-          "quaternionToRotationMatrix"
-        ],
+        "exports": ["EARTH_RADIUS_KM", "haversine", "slerp"],
+        "functions": ["haversine", "slerp"],
         "constants": ["EARTH_RADIUS_KM"]
       },
       "functions/src/grad-forward.ts": {
@@ -10391,28 +10372,30 @@
           },
           {
             "file": "./geometry-extra.js",
+            "imports": ["haversine", "EARTH_RADIUS_KM", "slerp"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry/quaternion.js",
             "imports": [
-              "haversine",
-              "EARTH_RADIUS_KM",
-              "slerp",
               "quaternionMultiply",
               "quaternionConjugate",
               "quaternionNormalize",
+              "quaternionInverse",
               "quaternionFromAxisAngle",
               "quaternionRotate",
-              "quaternionToRotationMatrix"
+              "quaternionToRotationMatrix",
+              "quaternionSlerp",
+              "quaternionToEuler",
+              "quaternionLog",
+              "quaternionExp",
+              "quaternionPow"
             ],
             "reExport": true
           },
           {
             "file": "./geometry/geometry-extra.js",
             "imports": [
-              "quaternionInverse",
-              "quaternionSlerp",
-              "quaternionToEuler",
-              "quaternionLog",
-              "quaternionExp",
-              "quaternionPow",
               "boundingBox",
               "procrustes",
               "kdTreeKNN",
@@ -11712,10 +11695,10 @@
           "quaternionMultiply",
           "quaternionConjugate",
           "quaternionNormalize",
+          "quaternionInverse",
           "quaternionFromAxisAngle",
           "quaternionRotate",
           "quaternionToRotationMatrix",
-          "quaternionInverse",
           "quaternionSlerp",
           "quaternionToEuler",
           "quaternionLog",
@@ -12447,10 +12430,10 @@
           "quaternionMultiply",
           "quaternionConjugate",
           "quaternionNormalize",
+          "quaternionInverse",
           "quaternionFromAxisAngle",
           "quaternionRotate",
           "quaternionToRotationMatrix",
-          "quaternionInverse",
           "quaternionSlerp",
           "quaternionToEuler",
           "quaternionLog",
@@ -16368,14 +16351,10 @@
         "constants": ["createDistance"]
       },
       "functions/src/geometry/geometry-extra.ts": {
-        "description": "Geometry & sets extras (Phase 8 Task 3): quaternion slerp/inverse/Euler,",
+        "description": "Geometry and set extras: axis-aligned bounding box, orthogonal Procrustes",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
-          {
-            "file": "../geometry-extra.js",
-            "imports": ["quaternionConjugate"]
-          },
           {
             "file": "../typed/set.js",
             "imports": ["setIsSubset", "setMultiplicity"]
@@ -16397,12 +16376,6 @@
           }
         ],
         "exports": [
-          "quaternionInverse",
-          "quaternionSlerp",
-          "quaternionToEuler",
-          "quaternionLog",
-          "quaternionExp",
-          "quaternionPow",
           "boundingBox",
           "procrustes",
           "kdTreeKNN",
@@ -16413,12 +16386,6 @@
         ],
         "interfaces": ["ProcrustesResult"],
         "functions": [
-          "quaternionInverse",
-          "quaternionSlerp",
-          "quaternionToEuler",
-          "quaternionLog",
-          "quaternionExp",
-          "quaternionPow",
           "boundingBox",
           "procrustes",
           "kdTreeKNN",
@@ -16552,6 +16519,41 @@
           "barycentricCoordinates",
           "pointInTriangle",
           "polygonIsConvex"
+        ]
+      },
+      "functions/src/geometry/quaternion.ts": {
+        "description": "Quaternion algebra and rotation conversions. This module is the one",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionInverse",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix",
+          "quaternionSlerp",
+          "quaternionToEuler",
+          "quaternionLog",
+          "quaternionExp",
+          "quaternionPow"
+        ],
+        "functions": [
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionInverse",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix",
+          "quaternionSlerp",
+          "quaternionToEuler",
+          "quaternionLog",
+          "quaternionExp",
+          "quaternionPow"
         ]
       },
       "functions/src/geometry/spherical-voronoi.ts": {
@@ -44288,6 +44290,7 @@
           "functions/src/geometry/mass-properties.ts",
           "functions/src/geometry/polygon-ops.ts",
           "functions/src/geometry/predicates.ts",
+          "functions/src/geometry/quaternion.ts",
           "functions/src/geometry/spherical-voronoi.ts",
           "functions/src/geometry/voronoi.ts"
         ]
@@ -45484,9 +45487,9 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1273,
+    "totalTypeScriptFiles": 1274,
     "totalModules": 82,
-    "totalLinesOfCode": 214856,
+    "totalLinesOfCode": 214919,
     "totalExports": 6929,
     "totalClasses": 61,
     "totalInterfaces": 598,
