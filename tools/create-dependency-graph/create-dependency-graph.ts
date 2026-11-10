@@ -46,8 +46,8 @@ import { basename, dirname, join, relative } from 'path';
  * carrying no `## Verification` section rather than skipping it silently.
  * These reports are generated here, on a different methodology, so that gate
  * cannot meaningfully verify their numbers -- their freshness is governed by
- * re-running `npm run docs:deps:full` (plain `docs:deps`
- * omits TEST_COVERAGE.md, which needs --include-tests).
+ * re-running `npm run docs:deps:full`, an alias of `docs:deps`. Both pass
+ * --include-tests, which writes TEST_COVERAGE.md.
  *
  * The marker MUST be emitted here rather than added by hand: a hand-added
  * marker survives exactly until the next regeneration, and then the gate fails
@@ -2633,7 +2633,7 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
   const b = coverage.policyBreakdown;
   return {
     metadata: {
-      generatedAt: new Date().toISOString(),
+      generatedAt: new Date().toISOString().split('T')[0],
       totalSourceFiles: coverage.sourceFiles.length,
       totalTestFiles: coverage.testFiles.length,
       testedCount: coverage.testedFiles.length,
