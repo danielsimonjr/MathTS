@@ -4816,9 +4816,9 @@ async function main(): Promise<void> {
 
   // Parse test files up-front UNCONDITIONALLY so the unused-analysis always sees
   // test-only consumers (a test importing `initWasm` or `resetPolyWasm` is a
-  // legitimate consumer). This used to be gated on --include-tests — but docs:deps
-  // runs without that flag, so every test-only-consumed export was false-flagged.
-  // The flag now gates only the test-coverage REPORT generation below.
+  // legitimate consumer). This step does not read --include-tests, so the
+  // unused-analysis is the same with and without the flag.
+  // The flag gates only the test-coverage REPORT generation below.
   const testFilePaths: string[] = [];
   if (isMonorepo) {
     for (const [, ws] of workspaceMap) {
