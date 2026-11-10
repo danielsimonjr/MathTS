@@ -61,7 +61,11 @@ def f(x):
 REG = []
 
 def reg(name, pkg, kind, sample, oracle, note="", call=None, method=None, ctor_arity=0):
-    """Append a function spec to REG, with a default call name when none is given."""
+    """Append a function spec to REG.
+
+    The default call name is `name`. When `method` is set, the default is the part of
+    `name` before the first dot.
+    """
     # `call` (optional) is the real export name when `name` is a display label.
     # `method`/`ctor_arity` describe a distribution object call:
     #   dist(args[:ctor_arity]).method(args[ctor_arity:]).
