@@ -26,7 +26,7 @@ import { capabilitiesInfo, listFunctions } from './introspect.js';
 import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit.js';
 import type { CellPosition } from './edit.js';
 import type { CellResult, Workbook, ParseResult, CellType, RunResult } from './types.js';
-import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { parse } from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html.js';
 import { toTeX } from './tex.js';
 import { toPDF } from './pdf.js';
@@ -34,15 +34,6 @@ import { toIpynb } from './ipynb.js';
 import { runWorkbookWithTimeout } from './timeout-runner.js';
 import type { RenderDoc, RenderCell } from './html.js';
 import { parseYamlSafe } from './yaml-safe.js';
-
-/**
- * The wired expression parser. `parse` is a real runtime export of the
- * functions package, but its declared type (`Parameters<typeof createEvaluate>[0]`)
- * references an expression type that doesn't resolve cleanly across the package
- * boundary, so TS omits the named export. The runtime value is present (verified
- * by the export E2E), so we assert the call signature here.
- */
-const parse = (mathFunctions as unknown as { parse: (expr: string) => unknown }).parse;
 
 /**
  * Result of one CLI command handler. `main()` writes `stdout` and `stderr` to the
