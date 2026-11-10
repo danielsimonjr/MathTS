@@ -11,9 +11,9 @@
  * - gaussQuad / romberg: function evaluation stays on the main thread; the
  *   weighted dot-product reduction (values × weights) is offloaded via
  *   `computePool.dot` when sub-interval count ≥ GAUSS_WORKER_THRESHOLD.
- * - trapz / simpson accepting a Float64Array of pre-computed values: the
- *   summation is offloaded via `computePool.sum` when length ≥
- *   ARRAY_WORKER_THRESHOLD.
+ * - trapzF64 / simpsonF64 (a Float64Array of pre-computed values) are synchronous
+ *   at every size and sum with `pairwiseSum`. gaussQuad and romberg stay async,
+ *   because their `workerCount` option sends sub-domains to workers.
  *
  * Worker-dispatch strategy (Slice 5.10) — sub-interval fan-out:
  * - gaussQuad / romberg accept an optional `workerCount` option (default 1).
@@ -42,6 +42,7 @@
  */
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { pairwiseSum } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // Thresholds
@@ -50,7 +51,10 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 /** Minimum sub-interval count before gaussQuad / romberg offload the reduction. */
 export const GAUSS_WORKER_THRESHOLD = 64;
 
-/** Minimum array length before trapzF64 / simpsonF64 offload the summation. */
+/**
+ * Former minimum array length before trapzF64 / simpsonF64 sent the summation to workers.
+ * @deprecated trapzF64 and simpsonF64 are synchronous at every size and do not read it.
+ */
 export const ARRAY_WORKER_THRESHOLD = 65_536;
 
 // =============================================================================
@@ -272,18 +276,17 @@ export function trapz(y: number[], x?: number[]): number {
 /**
  * Numerical integration using the trapezoidal rule over a Float64Array.
  *
- * For arrays with length ≥ ARRAY_WORKER_THRESHOLD the trapezoidal terms are
- * computed element-wise on the main thread and the final summation is
- * offloaded to the compute pool via `computePool.sum`.
+ * Synchronous at every size. The trapezoidal terms are summed with `pairwiseSum`
+ * (error O(log n) instead of O(n) for a naive loop).
  *
  * @param y  - Float64Array of function values (uniform spacing h=1 unless dx provided)
  * @param dx - Optional uniform step size (default 1)
- * @returns Promise resolving to the approximate integral
+ * @returns The approximate integral
  *
  * @example
- * await trapzF64(new Float64Array([0, 1, 0])) // => 1
+ * trapzF64(new Float64Array([0, 1, 0])) // => 1
  */
-export async function trapzF64(y: Float64Array, dx = 1): Promise<number> {
+export function trapzF64(y: Float64Array, dx = 1): number {
   const n = y.length;
   if (n < 2) {
     throw new Error('trapzF64 requires at least 2 data points');
@@ -296,17 +299,7 @@ export async function trapzF64(y: Float64Array, dx = 1): Promise<number> {
     terms[i - 1] = (y[i - 1] + y[i]) * halfDx;
   }
 
-  if (terms.length >= ARRAY_WORKER_THRESHOLD && computePool.isReady()) {
-    const result = await computePool.sum(terms);
-    return result.result;
-  }
-
-  // Sequential fallback
-  let sum = 0;
-  for (let i = 0; i < terms.length; i++) {
-    sum += terms[i];
-  }
-  return sum;
+  return pairwiseSum(terms);
 }
 
 // =============================================================================
@@ -344,14 +337,13 @@ export function simpson(f: (x: number) => number, a: number, b: number, n: numbe
  * Numerical integration using Simpson's 1/3 rule over a pre-computed
  * Float64Array of uniformly-spaced function values.
  *
- * For arrays with length ≥ ARRAY_WORKER_THRESHOLD the weighted terms are
- * computed on the main thread and the summation is offloaded to the pool.
+ * Synchronous at every size. The weighted terms are summed with `pairwiseSum`.
  *
  * @param y  - Float64Array of function values at uniform spacing
  * @param dx - Uniform step size (default 1)
- * @returns Promise resolving to the approximate integral
+ * @returns The approximate integral
  */
-export async function simpsonF64(y: Float64Array, dx = 1): Promise<number> {
+export function simpsonF64(y: Float64Array, dx = 1): number {
   const n = y.length - 1; // number of sub-intervals
   if (y.length < 3 || n % 2 !== 0) {
     throw new Error('simpsonF64 requires an odd number of points (even sub-intervals)');
@@ -365,16 +357,7 @@ export async function simpsonF64(y: Float64Array, dx = 1): Promise<number> {
     terms[i] = (i % 2 === 0 ? 2 : 4) * y[i];
   }
 
-  if (terms.length >= ARRAY_WORKER_THRESHOLD && computePool.isReady()) {
-    const result = await computePool.sum(terms);
-    return (result.result * dx) / 3;
-  }
-
-  let sum = 0;
-  for (let i = 0; i < terms.length; i++) {
-    sum += terms[i];
-  }
-  return (sum * dx) / 3;
+  return (pairwiseSum(terms) * dx) / 3;
 }
 
 // =============================================================================

@@ -70,8 +70,8 @@ describe('Numerical Integration', () => {
       expect(result).toBeCloseTo(2, 4);
     });
 
-    it('should throw for fewer than 2 points', async () => {
-      await expect(trapzF64(new Float64Array([1]))).rejects.toThrow();
+    it('should throw for fewer than 2 points', () => {
+      expect(() => trapzF64(new Float64Array([1]))).toThrow();
     });
 
     it('correctness above ARRAY_WORKER_THRESHOLD matches sequential', async () => {
@@ -126,9 +126,9 @@ describe('Numerical Integration', () => {
       expect(result).toBeCloseTo(2, 7);
     });
 
-    it('should throw for even number of points (odd sub-intervals)', async () => {
+    it('should throw for even number of points (odd sub-intervals)', () => {
       // 4 points = 3 sub-intervals (odd) => error
-      await expect(simpsonF64(new Float64Array([0, 1, 2, 3]))).rejects.toThrow();
+      expect(() => simpsonF64(new Float64Array([0, 1, 2, 3]))).toThrow();
     });
 
     it('correctness above ARRAY_WORKER_THRESHOLD matches sequential', async () => {

@@ -703,15 +703,14 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
 /**
  * 2D FFT of a matrix (array of arrays).
  *
- * The transform is two batches of independent 1D FFTs — every row, then every
- * column — so for large inputs each batch is dispatched to the worker pool via
- * `computePool.fftBatch`. Below the parallel threshold (or when the pool is
- * uninitialized) it falls back to the sequential per-row/per-column loop.
+ * The transform is two batches of independent 1D FFTs: every row, then every
+ * column. It is synchronous at every size. For worker threads, call
+ * `computePool.fftBatch` from `@danielsimonjr/mathts-parallel` on the packed rows.
  *
  * @param x - 2D input (rows x cols), each value is real
  * @returns `{ real: number[][], imag: number[][] }`
  */
-export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: number[][] }> {
+export function fft2d(x: number[][]): { real: number[][]; imag: number[][] } {
   const rows: i32 = x.length;
   const cols: i32 = x[0].length;
   const paddedCols: i32 = nextPowerOf2(cols);
@@ -731,26 +730,19 @@ export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: nu
     }
   }
 
-  let rowFFTReal: Float64Array;
-  let rowFFTImag: Float64Array;
-  if (computePool.shouldParallelize(paddedRows * paddedCols)) {
-    const batch = await computePool.fftBatch(rowReal, rowImag, paddedRows, paddedCols, false);
-    rowFFTReal = batch.result.real;
-    rowFFTImag = batch.result.imag;
-  } else {
-    rowFFTReal = rowReal;
-    rowFFTImag = rowImag;
-    for (let r: i32 = 0; r < paddedRows; r++) {
-      const base: i32 = r * paddedCols;
-      const slice = fftCoreFloat64(
-        rowReal.subarray(base, base + paddedCols),
-        rowImag.subarray(base, base + paddedCols),
-        false
-      );
-      rowFFTReal.set(slice.real, base);
-      rowFFTImag.set(slice.imag, base);
-    }
+  // fftCoreFloat64 returns new arrays; copy each row result back into the batch.
+  for (let r: i32 = 0; r < paddedRows; r++) {
+    const base: i32 = r * paddedCols;
+    const slice = fftCoreFloat64(
+      rowReal.subarray(base, base + paddedCols),
+      rowImag.subarray(base, base + paddedCols),
+      false
+    );
+    rowReal.set(slice.real, base);
+    rowImag.set(slice.imag, base);
   }
+  const rowFFTReal = rowReal;
+  const rowFFTImag = rowImag;
 
   // ---- Pass 2: FFT every column -------------------------------------------
   // Transpose the row-FFT result into column-major frames: `paddedCols`
@@ -765,26 +757,18 @@ export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: nu
     }
   }
 
-  let colFFTReal: Float64Array;
-  let colFFTImag: Float64Array;
-  if (computePool.shouldParallelize(paddedCols * paddedRows)) {
-    const batch = await computePool.fftBatch(colReal, colImag, paddedCols, paddedRows, false);
-    colFFTReal = batch.result.real;
-    colFFTImag = batch.result.imag;
-  } else {
-    colFFTReal = colReal;
-    colFFTImag = colImag;
-    for (let c: i32 = 0; c < paddedCols; c++) {
-      const base: i32 = c * paddedRows;
-      const slice = fftCoreFloat64(
-        colReal.subarray(base, base + paddedRows),
-        colImag.subarray(base, base + paddedRows),
-        false
-      );
-      colFFTReal.set(slice.real, base);
-      colFFTImag.set(slice.imag, base);
-    }
+  for (let c: i32 = 0; c < paddedCols; c++) {
+    const base: i32 = c * paddedRows;
+    const slice = fftCoreFloat64(
+      colReal.subarray(base, base + paddedRows),
+      colImag.subarray(base, base + paddedRows),
+      false
+    );
+    colReal.set(slice.real, base);
+    colImag.set(slice.imag, base);
   }
+  const colFFTReal = colReal;
+  const colFFTImag = colImag;
 
   // ---- Reassemble into row-major 2D output --------------------------------
   const outReal: number[][] = Array.from({ length: paddedRows }, () => new Array(paddedCols));
@@ -896,19 +880,18 @@ export function hilbertTransform(x: number[]): number[] {
 /**
  * Compute spectrogram using Short-Time Fourier Transform.
  *
- * Each windowed frame is FFT'd independently, so for large inputs the frames
- * are dispatched as a batch to the worker pool via `computePool.fftBatch`.
- * Below the parallel threshold (or when the pool is uninitialized) it falls
- * back to the sequential per-frame loop.
+ * Each windowed frame is an independent FFT. The function is synchronous at every
+ * size. For worker threads, call `computePool.fftBatch` from
+ * `@danielsimonjr/mathts-parallel` on the packed frames.
  *
  * @param x - Input signal
  * @param opts - { windowSize, hopSize, window }
  * @returns `{ magnitude: number[][], frequencies: number[], times: number[] }`
  */
-export async function spectrogram(
+export function spectrogram(
   x: number[],
   opts?: { windowSize?: i32; hopSize?: i32; window?: string }
-): Promise<{ magnitude: number[][]; frequencies: number[]; times: number[] }> {
+): { magnitude: number[][]; frequencies: number[]; times: number[] } {
   const windowSize: i32 = opts?.windowSize ?? 256;
   const hopSize: i32 = opts?.hopSize ?? Math.floor(windowSize / 2);
   const winType = opts?.window ?? 'hann';
@@ -936,36 +919,7 @@ export async function spectrogram(
     times[f] = starts[f] + windowSize / 2;
   }
 
-  // Parallel path: pack all windowed frames into one contiguous batch and
-  // dispatch the independent FFTs to the worker pool.
-  if (computePool.shouldParallelize(frameCount * nfft)) {
-    const realBatch = new Float64Array(frameCount * nfft);
-    const imagBatch = new Float64Array(frameCount * nfft);
-    for (let f: i32 = 0; f < frameCount; f++) {
-      const base: i32 = f * nfft;
-      const start: i32 = starts[f];
-      for (let i: i32 = 0; i < windowSize; i++) {
-        realBatch[base + i] = x[start + i] * win[i];
-      }
-    }
-
-    const batch = await computePool.fftBatch(realBatch, imagBatch, frameCount, nfft, false);
-
-    for (let f: i32 = 0; f < frameCount; f++) {
-      const base: i32 = f * nfft;
-      const mag: number[] = new Array<number>(nFreqs);
-      for (let i: i32 = 0; i < nFreqs; i++) {
-        const re: f64 = batch.result.real[base + i];
-        const im: f64 = batch.result.imag[base + i];
-        mag[i] = Math.sqrt(re * re + im * im);
-      }
-      magnitude[f] = mag;
-    }
-
-    return { magnitude, frequencies, times };
-  }
-
-  // Sequential fallback (below threshold or pool uninitialized).
+  // Each frame is an independent FFT of nfft points.
   for (let f: i32 = 0; f < frameCount; f++) {
     const start: i32 = starts[f];
     const real = new Float64Array(nfft);
