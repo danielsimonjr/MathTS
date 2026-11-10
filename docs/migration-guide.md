@@ -166,6 +166,10 @@ example, use `workerKernel('normalCDF', mu, sigma)` for `normalCDF(x, mu, sigma)
 `fft2d` and `spectrogram`, put the frames in one buffer and call `computePool.fftBatch`.
 The pool uses worker threads when the array has 50 000 elements or more.
 
+`gaussQuad` and `romberg` are synchronous. For the `workerCount` fan-out, call
+`parallelGaussQuad` or `parallelRomberg` with the same options. Give a self-contained closure,
+for example `(x) => Math.sin(x)`. A built-in function such as `Math.sin` cannot go to a worker.
+
 ### Int32Array bitwise overloads (synchronous)
 
 ```ts
@@ -283,25 +287,17 @@ cover it. If neither covers it, please file an issue.
 
 ### When to use the parallel/WASM tier
 
-The `Float64Array` overloads on arithmetic and trigonometry functions will
-automatically use the worker pool when the input is large enough, based on the
-per-op `thresholdByOp` map in `ComputePool`. You do not need to do anything
-special — just pass `Float64Array` instead of `number[]`.
+The typed `Float64Array` overloads run on the calling thread. They do not use the worker
+pool by themselves. To use workers, call `ComputePool` directly. For `computePool.matmul`,
+the `matmul` entry of `thresholdByOp` (default 4,096 elements, 64x64) sets the size at which
+the call goes to the workers. The `erfc`, `besselJ`, `spectrogram`, `fft2d`, `normalCDF`,
+`matrixPower` and `characteristicPolynomial` entries remain in the type for compatibility,
+but no function reads them.
 
-For most element-wise operations (add, subtract, multiply, sin, exp, …) the
-default threshold is `'never'`, meaning the in-process path is used because
-transfer overhead dominates at tested sizes. The parallel path wins for:
-
-| Operation                  | Break-even threshold    |
-| -------------------------- | ----------------------- |
-| `matmul`                   | 64x64 (4,096 elements)  |
-| `matrixPower`              | ~96x96 (9,216 elements) |
-| `characteristicPolynomial` | ~96x96 (9,216 elements) |
-| `spectrogram`              | 65,536 samples          |
-| `erfc`                     | 100,000 elements        |
-| `besselJ`                  | 1,000,000 elements      |
-
-These defaults were measured on a noisy CI container (2026-05-23).
+A 2026-05-23 CI run found the `matmul` break-even at 64x64. A 2026-11-09 run on a
+developer machine under load found no break-even up to 512x512. In that run,
+`computePool.matmul` was 0.49-1.06x the speed of the synchronous `matmul`. The two were
+about equal near 96x96 to 128x128 (3 runs).
 Run `npm run bench:parallel` on your target hardware to get representative
 numbers, then override via `thresholdByOp`:
 

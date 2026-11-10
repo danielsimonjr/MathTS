@@ -9536,7 +9536,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 375
+      "loc": 342
     },
     {
       "file": "functions/tests/cov-statistics.test.ts",

@@ -394,7 +394,7 @@ export interface GaussQuadOptions {
    * (no references to outer-scope variables). Use `Math.*` methods and
    * arithmetic only. Async closures are rejected. See `validateClosureSource`.
    * Give `(x) => Math.sin(x)`, not `Math.sin`: the source of a built-in function is
-   * `[native code]`, and the worker cannot make it again.
+   * `[native code]`, and the worker cannot rebuild the function.
    *
    * **Fall-back:** when `totalPoints < GAUSS_WORKER_THRESHOLD` or the pool is not
    * ready, `parallelGaussQuad` gives the synchronous `gaussQuad` result.

@@ -148,6 +148,11 @@ This is where worker dispatch pays off. `matmul` is O(n^3) work on O(n^2) data;
 the decompositions call `matmul` repeatedly. The speedup _grows_ with size
 (`matmul` 3.6x at 512x512), the hallmark of a genuinely compute-bound op.
 
+> **2026-11-09, a different machine:** 3 runs of `tools/benchmarks/sync-unary-kernels.mjs matmul`
+> on a developer machine (CPU load 8-100% from another build) gave `computePool.matmul` 0.49-1.06x
+> the speed of the synchronous `matmul`. The workers were about equal near 96x96 to 128x128 and
+> did not win at 512x512. The 64x64 break-even above is from the CI container of 2026-05-23.
+
 ### Signal — size = samples (or image side for `fft2d`)
 
 | operation    | sizes tested        | best speedup                   | break-even         |
