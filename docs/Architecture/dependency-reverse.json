@@ -1897,10 +1897,8 @@
     "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
     "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
     "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
-    "functions/src/geometry-extra.ts": [
-      "functions/src/geometry/geometry-extra.ts",
-      "functions/src/index.ts"
-    ],
+    "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/quaternion.ts": ["functions/src/index.ts"],
     "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
     "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
     "functions/src/geometry/hull.ts": [

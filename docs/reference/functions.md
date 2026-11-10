@@ -2528,22 +2528,22 @@ Geometric operations on 2D/3D/nD coordinate arrays.
 
 ### Quaternions
 
-Quaternions are `[w, x, y, z]` arrays (scalar-first).
+Quaternions are `[w, x, y, z]` arrays (scalar-first). The product is the Hamilton product. A quaternion rotates a vector actively (`v' = q·v·q⁻¹`, right-hand rule). `quaternionMultiply(a, b)` applies `b` first. The rotation functions accept a quaternion of any non-zero magnitude. They throw on the zero quaternion. The source module `functions/src/geometry/quaternion.ts` states the full convention.
 
-| Function                               | Description                                                             |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                                     |
-| `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                             |
-| `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude                   |
-| `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for a rotation of `angle` radians about `axis`          |
-| `quaternionRotate(q, v)`               | Rotate 3-vector `v` by unit quaternion `q`                              |
-| `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix for a unit quaternion                               |
-| `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                               |
-| `quaternionSlerp(q1, q2, t)`           | Spherical linear interpolation between two unit quaternions             |
-| `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians)               |
-| `quaternionLog(q)`                     | Logarithm `(0, θ·û)`; zero quaternion for the identity                  |
-| `quaternionExp(q)`                     | Exponential `eʷ·(cos\|v\|, sin\|v\|·v̂)`; inverse of `quaternionLog`     |
-| `quaternionPow(q, t)`                  | Power `exp(t·log(q))`; scales a unit quaternion's rotation angle by `t` |
+| Function                               | Description                                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------------- |
+| `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                                                    |
+| `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                                            |
+| `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude                                  |
+| `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for `angle` radians about `axis`; throws on a zero or non-finite axis  |
+| `quaternionRotate(q, v)`               | Rotate 3-vector `v` by the rotation of `q` (`q·v·q⁻¹`)                                 |
+| `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix of `q`; it acts on column vectors                                  |
+| `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                                              |
+| `quaternionSlerp(q1, q2, t)`           | Shortest-arc spherical interpolation; normalizes the inputs, returns a unit quaternion |
+| `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians); roll is `0` at gimbal lock  |
+| `quaternionLog(q)`                     | Logarithm `(ln\|q\|, θ·û)`; zero quaternion for the identity                           |
+| `quaternionExp(q)`                     | Exponential `eʷ·(cos\|v\|, sin\|v\|·v̂)`; inverse of `quaternionLog`                    |
+| `quaternionPow(q, t)`                  | Power `exp(t·log(q))`; scales a unit quaternion's rotation angle by `t`                |
 
 ### Bounding box & Procrustes alignment
 

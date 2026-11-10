@@ -164,7 +164,7 @@ describe('linalg-extra — degenerate input guards', () => {
   });
 });
 
-describe('geometry-extra — degenerate input guards', () => {
+describe('vector slerp and quaternion — degenerate input guards', () => {
   it('slerp throws on zero-length input and on antipodal directions', () => {
     expect(() => slerp([0, 0, 0], [1, 0, 0], 0.5)).toThrow(/non-zero|zero/i);
     expect(() => slerp([1, 0, 0], [0, 0, 0], 0.5)).toThrow(/non-zero|zero/i);
