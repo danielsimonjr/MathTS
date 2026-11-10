@@ -5,7 +5,10 @@
  * told apart by constructor name, not by identity.
  */
 
-/** @param {object} x */
+/**
+ * Returns the constructor name of an object, 'null' for a null prototype, or 'Object'.
+ * @param {object} x
+ */
 function constructorName(x) {
   const proto = Object.getPrototypeOf(x);
   if (proto === null) return 'null';
@@ -13,6 +16,7 @@ function constructorName(x) {
 }
 
 /**
+ * Returns true when two values have the same structure and values; a cycle guard stops infinite recursion.
  * @param {unknown} a
  * @param {unknown} b
  * @param {WeakMap<object, object>} [seen] pairs already being compared (cycle guard)

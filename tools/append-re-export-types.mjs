@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 
 export const RE_EXPORT_LINE = 'export type * from "./re-export-types.js";';
 
+/** Copies src/re-export-types.d.ts to dist and appends RE_EXPORT_LINE to dist/index.d.ts when the line is absent. */
 export function appendReExportTypes(pkgDir = process.cwd()) {
   fs.copyFileSync(
     path.join(pkgDir, 'src', 're-export-types.d.ts'),

@@ -91,6 +91,7 @@ const cases: WasmCase[] = [
   },
 ];
 
+/** Benchmarks the AssemblyScript managed special-function kernels against the JS scalar functions. */
 export async function main(): Promise<void> {
   await loadKernelTier();
   await runCases('SPECIAL FUNCTIONS — AssemblyScript managed kernels vs JS scalars', cases);

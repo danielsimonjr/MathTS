@@ -18,6 +18,7 @@ const NOTE =
   'Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. assembly has no test:coverage script (AssemblyScript; covered by test:wasm and tests/wasm/, not this gate).';
 
 /**
+ * Adds the LF and LH totals of an lcov report.
  * @param {string} lcovText
  * @returns {{ lf: number, lh: number }}
  */
@@ -32,6 +33,7 @@ export function parseLcovLineTotals(lcovText) {
 }
 
 /**
+ * Returns the percentage of lines hit.
  * @param {{ lf: number, lh: number }} totals
  * @returns {number | null} percent, or null when LF is 0
  */
@@ -40,12 +42,16 @@ export function linePercentFromTotals({ lf, lh }) {
   return (100 * lh) / lf;
 }
 
-/** @param {number} measuredPercent */
+/**
+ * Returns the coverage floor for a measured percentage: the integer part minus 1, not less than 0.
+ * @param {number} measuredPercent
+ */
 export function floorFromMeasured(measuredPercent) {
   return Math.max(0, Math.floor(measuredPercent) - 1);
 }
 
 /**
+ * Reads an lcov file and checks its line coverage against a floor.
  * @param {string} lcovPath
  * @param {number} floor
  * @returns {{ ok: boolean, message?: string, measured?: number }}
@@ -90,12 +96,16 @@ export function packagesWithCoverageScript() {
   return out;
 }
 
-/** @param {string} dir workspace directory relative to repo root */
+/**
+ * Returns the floor key of a workspace folder: its last path segment.
+ * @param {string} dir workspace directory relative to repo root
+ */
 export function packageFloorKey(dir) {
   return dir.includes('/') ? dir.split('/').pop() : dir;
 }
 
 /**
+ * Measures the line coverage of each package and returns the floors and the measured percentages.
  * @returns {{ note: string, packages: Record<string, { runner: string, floor: number }>, measured: Record<string, number> }}
  */
 export function measureFloors() {

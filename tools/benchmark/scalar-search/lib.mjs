@@ -8,6 +8,7 @@ import { existsSync, realpathSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
 
 /**
+ * Returns the median of the numbers.
  * @param {number[]} xs
  * @returns {number} median of `xs`; NaN for an empty list.
  */

@@ -11,6 +11,7 @@ OUT = Path(__file__).parent / "audit_summary.md"
 
 
 def strip_fences(text: str) -> str:
+    """Strip whitespace and markdown code fences from the text."""
     text = text.strip()
     text = re.sub(r"^```(?:json)?\s*", "", text)
     text = re.sub(r"\s*```\s*$", "", text)
@@ -18,6 +19,7 @@ def strip_fences(text: str) -> str:
 
 
 def load_audit(path: Path) -> list[dict]:
+    """Load fence-stripped audit JSON; fall back to the first JSON array, or an empty list."""
     raw = path.read_text(encoding="utf-8")
     cleaned = strip_fences(raw)
     try:
@@ -35,6 +37,7 @@ def load_audit(path: Path) -> list[dict]:
 
 
 def main():
+    """Aggregate all audit JSON files by category and write a markdown parity report with counts."""
     rows: list[dict] = []
     by_cat: dict[str, list[dict]] = {}
     for f in sorted(AUDITS.glob("*.json")):

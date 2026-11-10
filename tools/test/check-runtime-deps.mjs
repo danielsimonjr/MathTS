@@ -19,6 +19,7 @@ const FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
 const writeMode = process.argv.includes('--write');
 
 /**
+ * Returns the package.json paths of the root and of each workspace.
  * @param {string} [root] repository root; defaults to this checkout (tests pass a fixture)
  * @returns {string[]} repo-relative package.json paths (root first).
  */
@@ -27,6 +28,7 @@ export function runtimeManifestPaths(root = repoRoot) {
 }
 
 /**
+ * Reads the runtime dependency fields of one package.json.
  * @param {string} relPath repo-relative path to a package.json
  * @param {string} [root] repository root
  */
@@ -46,6 +48,7 @@ export function readRuntimeDepFields(relPath, root = repoRoot) {
 }
 
 /**
+ * Collects the runtime dependency fields of every package.json in the repository.
  * @param {string} [root] repository root
  * @returns {Record<string, Record<string, Record<string, string>>>}
  */
@@ -59,6 +62,7 @@ export function collectRuntimeDepsLock(root = repoRoot) {
 }
 
 /**
+ * Returns the version of each workspace package.
  * @param {string} [root] repository root
  * @returns {Record<string, string>} each workspace package name mapped to its version.
  */

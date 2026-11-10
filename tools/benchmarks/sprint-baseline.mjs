@@ -48,7 +48,10 @@ export function medianMs(fn, iterations) {
   return samples[Math.floor(TIMED_REPS / 2)];
 }
 
-/** @param {unknown} value */
+/**
+ * Returns a stable text fingerprint of a value.
+ * @param {unknown} value
+ */
 export function spellFingerprint(value) {
   if (value instanceof Complex) {
     return JSON.stringify({
@@ -74,7 +77,10 @@ export function spellFingerprint(value) {
   return JSON.stringify(value);
 }
 
-/** @param {number} n */
+/**
+ * Returns the text of a number, with '-0' for negative zero and 'NaN' for NaN.
+ * @param {number} n
+ */
 function spellNumber(n) {
   if (Object.is(n, -0)) return '-0';
   if (Number.isNaN(n)) return 'NaN';
@@ -265,7 +271,10 @@ function buildCases() {
   return cases;
 }
 
-/** @param {{ name: string, iterations: number, run: () => unknown, fingerprint?: () => string }[]} cases */
+/**
+ * Runs each case, records its fingerprint and median time, and returns them with the control ratio.
+ * @param {{ name: string, iterations: number, run: () => unknown, fingerprint?: () => string }[]} cases
+ */
 export function runSuite(cases) {
   /** @type {Record<string, string>} */
   const fingerprints = {};

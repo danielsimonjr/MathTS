@@ -17,6 +17,7 @@ export function scalarBatchImportFromBundle(outfile, scalarBatchDist) {
 }
 
 /**
+ * Bundles the scalar search benchmark with esbuild, with the MathTS packages kept external.
  * @param {string} repoRoot
  * @param {string} outfile
  */

@@ -61,6 +61,7 @@ def f(x):
 REG = []
 
 def reg(name, pkg, kind, sample, oracle, note="", call=None, method=None, ctor_arity=0):
+    """Append a function spec to REG, with a default call name when none is given."""
     # `call` (optional) is the real export name when `name` is a display label.
     # `method`/`ctor_arity` describe a distribution object call:
     #   dist(args[:ctor_arity]).method(args[ctor_arity:]).
@@ -134,10 +135,12 @@ reg("gammaincp", "functions", "real",  # upper regularized Q(a,x)
 # branches; oracle is mpmath at the same complex points. A {re,im} arg dict is
 # turned into a Complex by eval.mjs; `call=` reuses the real export name.
 def csample(r, re_lo, re_hi, im_lo, im_hi, n):
+    """Return n complex cases with real and imaginary parts uniform in the given ranges."""
     return [[{"re": float(re), "im": float(im)}]
             for re, im in zip(r.uniform(re_lo, re_hi, n), r.uniform(im_lo, im_hi, n))]
 
 def cmpc(a):
+    """Convert a sampled complex case to an mpmath complex value."""
     return mp.mpc(a[0]["re"], a[0]["im"])
 
 reg("zeta(complex)", "functions", "complex",
@@ -195,6 +198,7 @@ reg("gammaDist.quantile", "functions", "real", method="quantile", ctor_arity=2,
 
 # ---- Elementary, precision-sensitive ----
 def tiny_and_normal(r, n):
+    """Return n values: half of them near zero, the remainder uniform in [-0.5, 0.5]."""
     half = n // 2
     tiny = [float(x) for x in r.uniform(-1e-6, 1e-6, half)]
     normal = U(r, -0.5, 0.5, n - half)
@@ -235,6 +239,7 @@ reg("lcm", "functions", "real",
 
 # ---- Statistics (array input; population convention) ----
 def rand_arr(r, lo=15, hi=50, scale=10.0):
+    """Return a random-length list of floats from a normal(0, scale) distribution."""
     n = int(r.integers(lo, hi))
     return [float(x) for x in r.normal(0, scale, n)]
 
@@ -258,6 +263,7 @@ reg("mad", "functions", "real",
     lambda a: f(st.median_abs_deviation(a[0], scale=1.0)))
 
 def corr_pair(r):
+    """Return correlated x and y float lists, with y = 0.7x plus normal(0, 3) noise."""
     n = int(r.integers(20, 50))
     x = r.normal(0, 5, n)
     y = 0.7 * x + r.normal(0, 3, n)
@@ -269,6 +275,7 @@ reg("corr", "functions", "real",
 
 # ---- Signal: FFT (complex array) ----
 def fft_input(r):
+    """Return a list that holds one list of normal(0, 5) floats with length 8, 16 or 32."""
     n = int(r.choice([8, 16, 32]))
     return [[float(x) for x in r.normal(0, 5, n)]]
 
@@ -278,14 +285,17 @@ reg("fft", "functions", "complex_array",
 
 # ---- Linear algebra (matrix package) ----
 def rand_matrix(r, n):
+    """Return an n x n nested list of values uniform in [-5, 5)."""
     return [[float(x) for x in row] for row in r.uniform(-5, 5, (n, n))]
 
 def rand_spd(r, n):
+    """Return an n x n symmetric positive definite matrix, built as A A^T plus n I."""
     A = r.uniform(-3, 3, (n, n))
     M = A @ A.T + n * np.eye(n)
     return [[float(x) for x in row] for row in M]
 
 def rand_vec(r):
+    """Return a list of 3 to 7 values uniform in [-10, 10)."""
     n = int(r.integers(3, 8))
     return [float(x) for x in r.uniform(-10, 10, n)]
 
@@ -307,6 +317,7 @@ reg("eigvals", "matrix", "sorted_real",  # symmetric -> real eigenvalues
 # ----------------------------------------------------------------------------
 
 def cmd_gen():
+    """Generate the sampled cases and oracle values for each registered spec, and write inputs.json and oracle.json."""
     rng = np.random.default_rng(20260629)
     cases = []
     oracle = {}
@@ -330,12 +341,14 @@ def cmd_gen():
 
 
 def as_complex(v):
+    """Convert a value to a complex number from its re and im keys, or from a float."""
     if isinstance(v, dict) and "re" in v:
         return complex(v["re"], v["im"])
     return complex(float(v), 0.0)
 
 
 def relerr_scalar(got, exp):
+    """Return the relative error of two values, or the absolute error when the expected value is near zero."""
     g, e = as_complex(got), as_complex(exp)
     d = abs(g - e)
     denom = abs(e)
@@ -343,12 +356,14 @@ def relerr_scalar(got, exp):
 
 
 def relerr_array(got, exp):
+    """Return the maximum pairwise relative error, or inf for mismatched or non-list inputs."""
     if not isinstance(got, list) or len(got) != len(exp):
         return float("inf")
     return max((relerr_scalar(g, e) for g, e in zip(got, exp)), default=0.0)
 
 
 def cmd_report():
+    """Collect the relative errors and failures per function and write a markdown report with a 1e-6 threshold."""
     with open(os.path.join(HERE, "oracle.json")) as fh:
         oracle = json.load(fh)
     with open(os.path.join(HERE, "outputs.json")) as fh:
