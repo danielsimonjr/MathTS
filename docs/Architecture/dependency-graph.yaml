@@ -2786,7 +2786,6 @@ modules:
             - clone
         - file: ../../shared.js
           imports:
-            - memoize
             - endsWith
             - hasOwnProperty
             - warnOnce
@@ -43042,7 +43041,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214543
+  totalLinesOfCode: 214610
   totalExports: 6926
   totalClasses: 61
   totalInterfaces: 598

@@ -1059,7 +1059,7 @@ graph LR
 | `../../is.js`      | `isComplex, isUnit, typeOf`                                                                                                                                                                                                                                                                                                                        | Import             |
 | `../../factory.js` | `factory`                                                                                                                                                                                                                                                                                                                                          | Import             |
 | `../../object.js`  | `clone`                                                                                                                                                                                                                                                                                                                                            | Import             |
-| `../../shared.js`  | `memoize, endsWith, hasOwnProperty, warnOnce, isPollutingKey`                                                                                                                                                                                                                                                                                      | Import             |
+| `../../shared.js`  | `endsWith, hasOwnProperty, warnOnce, isPollutingKey`                                                                                                                                                                                                                                                                                               | Import             |
 | `../bignumber.js`  | `BIGNUMBER_PI`                                                                                                                                                                                                                                                                                                                                     | Import             |
 | `./unit-types.js`  | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, ConvertOptions, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitReadingFactor, UnitSystem, UnitSystemEntry` | Import (type-only) |
 | `./errors.js`      | `AmbiguousUnitError, DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                                       | Import             |
@@ -20025,7 +20025,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214543 |
+| Total Lines of Code     | 214610 |
 | Total Exports           | 6926   |
 | Total Re-exports        | 3004   |
 | Total Classes           | 61     |

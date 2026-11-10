@@ -2879,7 +2879,7 @@
           },
           {
             "file": "../../shared.js",
-            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce", "isPollutingKey"]
+            "imports": ["endsWith", "hasOwnProperty", "warnOnce", "isPollutingKey"]
           },
           {
             "file": "../bignumber.js",
@@ -45479,7 +45479,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1273,
     "totalModules": 82,
-    "totalLinesOfCode": 214543,
+    "totalLinesOfCode": 214610,
     "totalExports": 6926,
     "totalClasses": 61,
     "totalInterfaces": 598,
