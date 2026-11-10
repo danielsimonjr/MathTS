@@ -13505,7 +13505,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1709
+      "loc": 1710
     },
     {
       "file": "parallel/src/gemm-rows.ts",
