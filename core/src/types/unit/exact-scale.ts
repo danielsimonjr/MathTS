@@ -271,6 +271,9 @@ function bitLength(x: bigint): number {
   return (hex.length - 1) * 4 + (32 - Math.clz32(parseInt(hex[0]!, 16)));
 }
 
+/** The count of exact-ratio roundings since module load. A zero ratio needs no rounding. */
+let roundingCount = 0;
+
 /**
  * `num / den` (`den > 0`) rounded once to the nearest double, ties to even.
  *
@@ -278,11 +281,9 @@ function bitLength(x: bigint): number {
  * 53-bit significand window (or onto the fixed 2^-1074 grid below the smallest
  * normal) from the operands' bit lengths, then round from the remainder.
  */
-let roundingCount = 0;
-
 function rationalToNumber(num: bigint, den: bigint): number {
-  roundingCount++;
   if (num === 0n) return 0;
+  roundingCount++;
   const negative = num < 0n;
   const a = negative ? -num : num;
 

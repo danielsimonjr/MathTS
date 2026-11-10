@@ -122,27 +122,29 @@ describe('expression security limits', () => {
     ['sum', '1' + '+1'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['factorial', '1' + '!'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['accessor', 'a' + '.b'.repeat(MAX_COMPILE_DEPTH * 4)],
-  ])('evaluate rejects a left-deep %s with the compile-depth error', (_name, text) => {
-    expect(() => evaluate(text, { a: {} })).toThrow(
+  ])('evaluate stops a left-deep %s at the depth cap after a linear walk', (_name, text) => {
+    // Without a depth, the validator absorbs the RangeError and walks the subtree again. The work
+    // then doubles at every level past the overflow, and the call does not return. The check
+    // counts node visits, not time, so machine load cannot change the result.
+    // This block runs first: a walk that does not return would stop the public-path block below
+    // before any assertion, and the visit budget stops that walk here.
+    const ast = parse(text);
+    const visits = countVisits(ast);
+    const evaluateAst = createEvaluate(() => ast, {});
+    expect(() => evaluateAst(text, { a: {} })).toThrow(
       new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
     );
+    expect(visits.n).toBeLessThanOrEqual(2 * MAX_COMPILE_DEPTH);
   });
 
   it.each([
     ['sum', '1' + '+1'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['factorial', '1' + '!'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['accessor', 'a' + '.b'.repeat(MAX_COMPILE_DEPTH * 4)],
-  ])('evaluate stops a left-deep %s at the depth cap after a linear walk', (_name, text) => {
-    // Without a depth, the validator absorbs the RangeError and walks the subtree again. The work
-    // then doubles at every level past the overflow, and the call does not return. The check
-    // counts node visits, not time, so machine load cannot change the result.
-    const ast = parse(text);
-    const visits = countVisits(ast);
-    const evaluateAst = createEvaluate(() => ast, {});
-    expect(() => evaluateAst('x', { a: {} })).toThrow(
+  ])('evaluate rejects a left-deep %s with the compile-depth error', (_name, text) => {
+    expect(() => evaluate(text, { a: {} })).toThrow(
       new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
     );
-    expect(visits.n).toBeLessThanOrEqual(2 * MAX_COMPILE_DEPTH);
   });
 
   it('evaluate still accepts a long sum under the compile-depth cap', () => {

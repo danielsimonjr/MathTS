@@ -419,6 +419,7 @@ describe('Parallel Processing Tests', { timeout: 30000 }, () => {
 
   describe('Sequential Fallback', () => {
     it('should use sequential path for small operations', async () => {
+      let usedPool = false;
       try {
         const { ParallelMatrix } = await import('../../parallel/src/ParallelMatrix.js');
 
@@ -436,11 +437,13 @@ describe('Parallel Processing Tests', { timeout: 30000 }, () => {
           assert.strictEqual(poolSpy.mock.calls.length, 0, 'a small add must not use the pool');
           approxArrayEqual(result, [6, 6, 6, 6, 6]);
         } finally {
+          usedPool = poolSpy.mock.calls.length > 0;
           poolSpy.mockRestore();
           ParallelMatrix.configure({ minSizeForParallel: 1000 });
         }
       } catch (err) {
-        if (shouldSkip(err as Error)) {
+        // A pool error must not read as a skip: the pool call is the regression.
+        if (!usedPool && shouldSkip(err as Error)) {
           assert.ok(true, 'Module not available - skipping');
         } else {
           throw err;
