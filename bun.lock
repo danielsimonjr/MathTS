@@ -80,7 +80,7 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.4.47",
+      "version": "0.4.48",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.25.0",
         "@danielsimonjr/mathts-functions": "^0.80.0",
@@ -124,7 +124,7 @@
     },
     "expression": {
       "name": "@danielsimonjr/mathts-expression",
-      "version": "0.12.5",
+      "version": "0.12.6",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.25.0",
       },
@@ -138,7 +138,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.80.0",
+      "version": "0.80.1",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.25.0",
         "@danielsimonjr/mathts-expression": "^0.12.5",
@@ -196,7 +196,7 @@
     },
     "matrix": {
       "name": "@danielsimonjr/mathts-matrix",
-      "version": "0.9.5",
+      "version": "0.9.6",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.25.0",
         "@danielsimonjr/mathts-gpu": "^0.2.1",
