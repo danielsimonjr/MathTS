@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, repoRoot, runGate } from './check-code-docs.mjs';
 
@@ -153,4 +153,41 @@ test('the gate passes on a clean tree when the repository path has a space', () 
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('the gate fails on an undocumented export when the repository path has a shell character', () => {
+  const { root, git } = makeRepo('code-docs-gate&echo-');
+  try {
+    const script = installGate(root, git);
+    assert.equal(runScript(script, []), 0);
+    assert.equal(runScript(script, [`--root=${root}`]), 0);
+    inject(root, git);
+    assert.equal(runScript(script, []), 1);
+    assert.equal(runScript(script, [`--root=${root}`]), 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a relative --root is read from the start folder', () => {
+  const { root, git } = makeRepo();
+  try {
+    const script = installGate(root, git);
+    const options = { cwd: dirname(root) };
+    assert.equal(runScript(script, [`--root=${basename(root)}`], options), 0);
+    inject(root, git);
+    assert.equal(runScript(script, [`--root=${basename(root)}`], options), 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a --root that is not a directory stops the script and the message names it', () => {
+  const missing = join(tmpdir(), 'no-such-code-docs-gate-root');
+  const script = join(SCRIPT_DIR, 'check-code-docs.mjs');
+  const result = spawnSync(process.execPath, [script, `--root=${missing}`], { encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /is not an existing directory/);
+  assert.match(result.stderr, /no-such-code-docs-gate-root/);
+  assert.doesNotMatch(result.stderr, /did not start/);
 });

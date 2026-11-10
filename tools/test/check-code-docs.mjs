@@ -19,8 +19,8 @@
  * The exit code is the exit code of the check: 0 when no MUST issue is found.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync, realpathSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readFileSync, realpathSync, statSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULT_CONFIG = new URL('./code-docs-gate.json', import.meta.url);
@@ -74,19 +74,27 @@ function shellQuote(arg) {
 /**
  * Runs the check on a repository root.
  *
- * @param root - Repository root
+ * The check starts in the root and receives `.` as its path. The root is never part of the
+ * command line, so a shell character in the path of the root cannot change the command.
+ *
+ * @param root - Repository root; a relative path is read from the start folder
  * @param config - The config from {@link loadConfig}
  * @param stdio - The `stdio` option for the child process
- * @returns The exit code of the check; 1 when the command does not start
+ * @returns The exit code of the check; 1 when the command does not start or gives no exit code
+ * @throws An Error when the root is not an existing directory
  */
 export function runGate({ root, config, stdio = 'inherit' }) {
+  const cwd = resolve(root);
+  if (!statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) {
+    throw new Error(`code-docs gate: the root ${cwd} is not an existing directory`);
+  }
   const [cmd, ...prefix] = config.command;
-  const argv = [...prefix, ...config.args, root];
+  const argv = [...prefix, ...config.args, '.'];
   // On Windows the command is a `.cmd` shim, which starts only through the shell. The shell
-  // splits an argument at a space, so each such argument gets quotes.
+  // splits an argument at a space, so each such argument of the config gets quotes.
   const viaShell = process.platform === 'win32';
   const result = spawnSync(cmd, viaShell ? argv.map(shellQuote) : argv, {
-    cwd: root,
+    cwd,
     stdio,
     shell: viaShell,
   });
