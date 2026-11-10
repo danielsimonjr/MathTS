@@ -1,49 +1,68 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  mkdtempSync,
+  mkdirSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadConfig, listPaths, repoRoot, runGate } from './check-code-docs.mjs';
+import { loadConfig, repoRoot, runGate } from './check-code-docs.mjs';
 
 const SCRIPT_CONFIG = new URL('./code-docs-gate.json', import.meta.url);
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const UNDOCUMENTED = 'export function undocumented(): number {\n  return 3;\n}\n';
 
-/** Runs the gate script as a child process and returns its exit code. */
+/** Runs a gate script as a child process and returns its exit code. */
 function runScript(script, args, options = {}) {
   return spawnSync(process.execPath, [script, ...args], { stdio: 'pipe', ...options }).status;
 }
 
-/** Makes a throwaway git repository with one documented export in `pkg/src` and one undocumented export outside it. */
-function makeRepo() {
-  const root = mkdtempSync(join(tmpdir(), 'code-docs-gate-'));
-  const git = (...args) => execFileSync('git', args, { cwd: root, stdio: 'pipe' });
+/** Makes a git repository in a directory, with a test identity. */
+function gitIn(dir) {
+  const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
   git('init', '-q');
   git('config', 'user.email', 'test@example.com');
   git('config', 'user.name', 'test');
+  return git;
+}
+
+/** Makes a throwaway git repository with one documented export in `pkg/src`. */
+function makeRepo(prefix = 'code-docs-gate-') {
+  const root = mkdtempSync(join(tmpdir(), prefix));
+  const git = gitIn(root);
   mkdirSync(join(root, 'pkg', 'src'), { recursive: true });
-  mkdirSync(join(root, 'scripts'), { recursive: true });
   writeFileSync(
     join(root, 'pkg', 'src', 'a.ts'),
     '/** Returns one. */\nexport function one(): number {\n  return 1;\n}\n'
-  );
-  writeFileSync(
-    join(root, 'scripts', 'b.ts'),
-    'export function notInScope(): number {\n  return 2;\n}\n'
   );
   git('add', '.');
   git('commit', '-q', '-m', 'init');
   return { root, git };
 }
 
-/** The repository config with the include patterns replaced, so the test runs the same command. */
-function fixtureConfig(root) {
-  const config = { ...loadConfig(SCRIPT_CONFIG), include: [':(glob)*/src/**'] };
-  const path = join(root, 'gate.json');
-  writeFileSync(path, JSON.stringify(config));
-  return path;
+/** Adds an undocumented export to a repository and commits it. */
+function inject(root, git) {
+  writeFileSync(join(root, 'pkg', 'src', 'c.ts'), UNDOCUMENTED);
+  git('add', '.');
+  git('commit', '-q', '-m', 'inject');
+}
+
+/** Copies the gate script and its config into `tools/` of a repository and commits them. */
+function installGate(root, git) {
+  mkdirSync(join(root, 'tools'), { recursive: true });
+  const script = join(root, 'tools', 'check-code-docs.mjs');
+  copyFileSync(join(SCRIPT_DIR, 'check-code-docs.mjs'), script);
+  copyFileSync(fileURLToPath(SCRIPT_CONFIG), join(root, 'tools', 'code-docs-gate.json'));
+  git('add', '.');
+  git('commit', '-q', '-m', 'gate');
+  return script;
 }
 
 test('a missing config fails loudly', () => {
@@ -53,69 +72,57 @@ test('a missing config fails loudly', () => {
   );
 });
 
-test('a config without include patterns is refused', () => {
+test('a config without a command is refused', () => {
   const dir = mkdtempSync(join(tmpdir(), 'code-docs-gate-cfg-'));
   try {
     const path = join(dir, 'gate.json');
-    writeFileSync(path, JSON.stringify({ command: ['repo-tools'], args: [] }));
-    assert.throws(() => loadConfig(path), /include/);
+    writeFileSync(path, JSON.stringify({ args: ['docs', 'check'] }));
+    assert.throws(() => loadConfig(path), /command/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test('the path list holds tracked files that match the include patterns only', () => {
-  const { root } = makeRepo();
-  try {
-    assert.deepEqual(listPaths(root, [':(glob)*/src/**']), ['pkg/src/a.ts']);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
   }
 });
 
 test('the gate passes on a clean tree and fails on an injected undocumented export', () => {
   const { root, git } = makeRepo();
   try {
-    const config = loadConfig(fixtureConfig(root));
+    const config = loadConfig(SCRIPT_CONFIG);
     assert.equal(runGate({ root, config, stdio: 'pipe' }), 0);
-
-    writeFileSync(join(root, 'pkg', 'src', 'c.ts'), UNDOCUMENTED);
-    git('add', 'pkg/src/c.ts');
-    git('commit', '-q', '-m', 'inject');
+    inject(root, git);
     assert.equal(runGate({ root, config, stdio: 'pipe' }), 1);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test('the repository include patterns leave declaration files out', () => {
+test('the script checks its own repository when it starts outside any repository', () => {
   const { root, git } = makeRepo();
+  const outside = mkdtempSync(join(tmpdir(), 'code-docs-gate-cwd-'));
   try {
-    writeFileSync(join(root, 'pkg', 'src', 'types.d.ts'), 'export function declared(): number;\n');
-    git('add', '.');
-    git('commit', '-q', '-m', 'declaration');
-    assert.deepEqual(listPaths(root, loadConfig(SCRIPT_CONFIG).include), ['pkg/src/a.ts']);
+    const script = installGate(root, git);
+    assert.equal(runScript(script, [], { cwd: outside }), 0);
+    inject(root, git);
+    assert.equal(runScript(script, [], { cwd: outside }), 1);
   } finally {
+    rmSync(outside, { recursive: true, force: true });
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test('the script checks the whole repository when it starts in a subfolder', () => {
+test('the script checks its own repository when it starts inside a nested repository', () => {
   const { root, git } = makeRepo();
   try {
-    const configPath = fixtureConfig(root);
-    mkdirSync(join(root, 'pkg', 'nested', 'src'), { recursive: true });
-    writeFileSync(
-      join(root, 'pkg', 'nested', 'src', 'ok.ts'),
-      '/** Is one. */\nexport const ok = 1;\n'
-    );
-    writeFileSync(join(root, 'pkg', 'src', 'c.ts'), UNDOCUMENTED);
-    git('add', '.');
-    git('commit', '-q', '-m', 'inject');
-    const cwd = join(root, 'pkg');
-    assert.equal(realpathSync(repoRoot(cwd)), realpathSync(root));
-    const script = join(SCRIPT_DIR, 'check-code-docs.mjs');
-    assert.equal(runScript(script, [`--config=${configPath}`], { cwd }), 1);
+    const script = installGate(root, git);
+    const nested = join(root, 'pkg', 'nested');
+    mkdirSync(join(nested, 'src'), { recursive: true });
+    writeFileSync(join(nested, 'src', 'bad.ts'), UNDOCUMENTED);
+    const nestedGit = gitIn(nested);
+    nestedGit('add', '.');
+    nestedGit('commit', '-q', '-m', 'nested');
+    assert.equal(realpathSync(repoRoot(nested)), realpathSync(nested));
+    assert.equal(runScript(script, [], { cwd: nested }), 0);
+    inject(root, git);
+    assert.equal(runScript(script, [], { cwd: nested }), 1);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -125,14 +132,11 @@ test('the script runs the check when it starts through a link to its folder', ()
   const { root, git } = makeRepo();
   const links = mkdtempSync(join(tmpdir(), 'code-docs-gate-link-'));
   try {
-    const configPath = fixtureConfig(root);
-    writeFileSync(join(root, 'pkg', 'src', 'c.ts'), UNDOCUMENTED);
-    git('add', '.');
-    git('commit', '-q', '-m', 'inject');
+    inject(root, git);
     const link = join(links, 'gate');
     symlinkSync(SCRIPT_DIR, link, 'junction');
     const script = join(link, 'check-code-docs.mjs');
-    assert.equal(runScript(script, [`--config=${configPath}`, `--root=${root}`]), 1);
+    assert.equal(runScript(script, [`--root=${root}`]), 1);
   } finally {
     rmSync(join(links, 'gate'), { force: true });
     rmSync(links, { recursive: true, force: true });
@@ -140,16 +144,13 @@ test('the script runs the check when it starts through a link to its folder', ()
   }
 });
 
-test('the gate passes on a clean tree when the temporary folder has a space in its path', () => {
-  const { root } = makeRepo();
-  const spaced = mkdtempSync(join(tmpdir(), 'code docs gate '));
+test('the gate passes on a clean tree when the repository path has a space', () => {
+  const { root, git } = makeRepo('code docs gate ');
   try {
-    const configPath = fixtureConfig(root);
-    const script = join(SCRIPT_DIR, 'check-code-docs.mjs');
-    const env = { ...process.env, TEMP: spaced, TMP: spaced, TMPDIR: spaced };
-    assert.equal(runScript(script, [`--config=${configPath}`, `--root=${root}`], { env }), 0);
+    const script = installGate(root, git);
+    assert.equal(runScript(script, []), 0);
+    assert.equal(runScript(script, [`--root=${root}`]), 0);
   } finally {
-    rmSync(spaced, { recursive: true, force: true });
     rmSync(root, { recursive: true, force: true });
   }
 });
