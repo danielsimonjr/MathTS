@@ -11622,7 +11622,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 142
+      "loc": 150
     },
     {
       "file": "functions/tests/sparse-bridge.test.ts",

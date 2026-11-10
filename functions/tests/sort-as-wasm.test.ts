@@ -21,6 +21,7 @@ import {
   sortF64JS,
   argsortF64JS,
 } from '../src/wasm/sort/wasm-bridge.js';
+import { getWasm, withAsF64, type RawWasm } from '../src/wasm/bridges/common.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
 import { overrideWasmPolicy } from '../src/wasm/policy.js';
 
@@ -87,11 +88,13 @@ describeIfAS('sort bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     for (let i = 0; i < N; i++) expect(result[i]).toBe(ref[i]);
   });
 
-  it('sortF64Dispatch scales as O(n log n), not O(n²), on duplicate-heavy input', () => {
+  it('sort_f64 kernel does not go quadratic on duplicate-heavy input', () => {
     // The check is a ratio, not an absolute budget. The n and 4n samples alternate in one
     // process, so machine load slows both lanes together. Each lane keeps its fastest of 7
-    // samples. From n to 4n, O(n log n) grows the time about 4.6 times. O(n²) grows the time 16
-    // times.
+    // samples. The input has 3 distinct values, so the 3-way partition is linear: from n to 4n
+    // the time grows about 4 times. A quadratic sort grows the time 16 times. The sample calls
+    // the kernel export directly, with no JS fallback. A kernel trap gives a null result, and
+    // the null check then fails the test.
     const dupes = (n: number): Float64Array => {
       const out = new Float64Array(n);
       for (let i = 0; i < n; i++) out[i] = (i % 3) * 1.0;
@@ -101,9 +104,14 @@ describeIfAS('sort bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     const large = dupes(4 * N);
     const sample = (data: Float64Array): number => {
       const copy = Float64Array.from(data);
+      const wasm = getWasm() as unknown as RawWasm;
       const t0 = performance.now();
-      sortF64Dispatch(copy);
-      return performance.now() - t0;
+      const out = withAsF64(wasm, [copy], (mod, [h]) =>
+        (mod['sort_f64'] as (d: number) => number)(h)
+      );
+      const ms = performance.now() - t0;
+      expect(out).not.toBeNull();
+      return ms;
     };
     sample(small);
     sample(large);
