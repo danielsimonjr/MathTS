@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.25.3
+
+### Patch Changes
+
+- 4c870ff: `Unit.readings` and `Unit.parse` search a glued unit token in one pass. A token with many partial readings and no full reading no longer takes a time that doubles with each two characters. The readings and their order are the same.
+
 ## 0.25.2
 
 ### Patch Changes
