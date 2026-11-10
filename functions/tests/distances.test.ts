@@ -64,13 +64,49 @@ describe('wassersteinDistance sweep (Copilot review)', () => {
       12
     );
   });
-  it('is O(n log n): 50,000 points run in well under a second', () => {
+  it('reads each sample point a fixed number of times: 50,000 points', () => {
+    // The check counts element reads, not time, so machine load cannot change the result. The
+    // code makes 2 passes over each sample: one for the weights and one for the sorted copy. A
+    // scan per merged point reads the input O(n²) times.
     const n = 50000;
-    const a = Array.from({ length: n }, (_, i) => Math.sin(i));
-    const b = Array.from({ length: n }, (_, i) => Math.cos(i));
-    const t = performance.now();
+    const reads = { n: 0 };
+    const counted = (values: number[]): number[] =>
+      new Proxy(values, {
+        get(target, key, receiver) {
+          if (typeof key === 'string' && /^\d+$/.test(key)) reads.n++;
+          return Reflect.get(target, key, receiver);
+        },
+      });
+    const a = counted(Array.from({ length: n }, (_, i) => Math.sin(i)));
+    const b = counted(Array.from({ length: n }, (_, i) => Math.cos(i)));
     const d = wassersteinDistance(a, b);
-    expect(performance.now() - t).toBeLessThan(1000);
     expect(d).toBeGreaterThanOrEqual(0);
+    expect(reads.n).toBeLessThanOrEqual(4 * n);
+  });
+  it('does not go quadratic in the sweep over the sorted copies', () => {
+    // The read count above sees only the inputs. The sweep works on sorted copies, so this check
+    // is a ratio of two clock reads, not an absolute budget. The n and 4n samples alternate in
+    // one process, so machine load slows both lanes together. Each lane keeps its fastest of 7
+    // samples. From n to 4n, O(n log n) grows the time about 4.5 times. O(n²) grows the time 16
+    // times.
+    const n = 8192;
+    const points = (len: number, f: (i: number) => number): number[] =>
+      Array.from({ length: len }, (_, i) => f(i));
+    const small: [number[], number[]] = [points(n, Math.sin), points(n, Math.cos)];
+    const large: [number[], number[]] = [points(4 * n, Math.sin), points(4 * n, Math.cos)];
+    const sample = ([a, b]: [number[], number[]]): number => {
+      const t0 = performance.now();
+      wassersteinDistance(a, b);
+      return performance.now() - t0;
+    };
+    sample(small);
+    sample(large);
+    let smallMs = Infinity;
+    let largeMs = Infinity;
+    for (let k = 0; k < 7; k++) {
+      smallMs = Math.min(smallMs, sample(small));
+      largeMs = Math.min(largeMs, sample(large));
+    }
+    expect(largeMs / Math.max(smallMs, 0.01)).toBeLessThan(10);
   });
 });

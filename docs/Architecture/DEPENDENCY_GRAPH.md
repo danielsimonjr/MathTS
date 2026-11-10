@@ -1108,7 +1108,7 @@ graph LR
 
 - Interfaces: `ExactScale`
 - Types: `IrrationalName`, `IrrationalPowers`
-- Functions: `irrationalPower`, `isRationalScale`, `namedIrrationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `exactScalesEqual`, `addExactScales`, `roundExactScale`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `exactScaleNumberCacheHas`, `exactScaleToNumber`, `formatExactScale`, `readScaleExpression`
+- Functions: `irrationalPower`, `isRationalScale`, `namedIrrationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `exactScalesEqual`, `addExactScales`, `roundExactScale`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `exactScaleRoundingCount`, `exactScaleNumberCacheHas`, `exactScaleToNumber`, `formatExactScale`, `readScaleExpression`
 - Constants: `NAMED_IRRATIONALS`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `EXACT_SCALE_NUMBER_CACHE_LIMIT`
 
 ---
@@ -20026,12 +20026,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214691 |
-| Total Exports           | 6927   |
+| Total Lines of Code     | 214707 |
+| Total Exports           | 6928   |
 | Total Re-exports        | 3004   |
 | Total Classes           | 61     |
 | Total Interfaces        | 598    |
-| Total Functions         | 2296   |
+| Total Functions         | 2297   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

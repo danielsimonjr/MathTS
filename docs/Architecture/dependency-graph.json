@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-10",
     "totalFiles": 1273,
     "totalModules": 82,
-    "totalExports": 6927
+    "totalExports": 6928
   },
   "entryPoints": [
     {
@@ -3064,6 +3064,7 @@
           "roundExactScale",
           "clearExactScaleNumberCache",
           "exactScaleNumberCacheSize",
+          "exactScaleRoundingCount",
           "exactScaleNumberCacheHas",
           "exactScaleToNumber",
           "formatExactScale",
@@ -3086,6 +3087,7 @@
           "roundExactScale",
           "clearExactScaleNumberCache",
           "exactScaleNumberCacheSize",
+          "exactScaleRoundingCount",
           "exactScaleNumberCacheHas",
           "exactScaleToNumber",
           "formatExactScale",
@@ -45483,11 +45485,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1273,
     "totalModules": 82,
-    "totalLinesOfCode": 214691,
-    "totalExports": 6927,
+    "totalLinesOfCode": 214707,
+    "totalExports": 6928,
     "totalClasses": 61,
     "totalInterfaces": 598,
-    "totalFunctions": 2296,
+    "totalFunctions": 2297,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,

@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 780
+      "loc": 783
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -877,7 +877,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 522
+      "loc": 534
     },
     {
       "file": "core/src/types/unit/index.ts",
@@ -898,7 +898,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 322
+      "loc": 323
     },
     {
       "file": "core/src/types/unit/Unit.ts",
@@ -1220,7 +1220,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 169
+      "loc": 179
     },
     {
       "file": "core/tests/types/exact-scale-review.test.ts",
@@ -5259,7 +5259,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 113
+      "loc": 154
     },
     {
       "file": "expression/tests/security/parse-fuzz.test.ts",
@@ -9655,7 +9655,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 113
     },
     {
       "file": "functions/tests/distributions-extra.test.ts",
@@ -11622,7 +11622,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 150
     },
     {
       "file": "functions/tests/sparse-bridge.test.ts",
@@ -14737,7 +14737,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 478
+      "loc": 485
     },
     {
       "file": "tests/wasm/typescript-integration.test.ts",

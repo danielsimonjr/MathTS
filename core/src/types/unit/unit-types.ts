@@ -277,6 +277,7 @@ export interface UnitReadingFactor {
   readonly source: string;
 }
 
+/** The static side of `Unit`: the constructor, the parser and the unit-system controls. */
 export interface UnitConstructor {
   new (value?: Numeric | null, valuelessUnit?: string | UnitInstance): UnitInstance;
   prototype: UnitInstance;

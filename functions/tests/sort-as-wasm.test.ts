@@ -21,6 +21,7 @@ import {
   sortF64JS,
   argsortF64JS,
 } from '../src/wasm/sort/wasm-bridge.js';
+import { getWasm, withAsF64, type RawWasm } from '../src/wasm/bridges/common.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
 import { overrideWasmPolicy } from '../src/wasm/policy.js';
 
@@ -75,21 +76,52 @@ describeIfAS('sort bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     }
   });
 
-  it('sortF64Dispatch is fast + bit-identical on duplicate-heavy input (introsort)', () => {
-    // Heavy duplicates: the old Lomuto quicksort degraded to O(n²) here. The
-    // 3-way introsort keeps it O(n log n). Correctness is the primary assertion;
-    // a generous wall-clock ceiling guards against an accidental O(n²) regression.
+  it('sortF64Dispatch is bit-identical on duplicate-heavy input (introsort)', () => {
+    // Heavy duplicates: the old Lomuto quicksort degraded to O(n²) here.
     const dup = new Float64Array(N);
     for (let i = 0; i < N; i++) dup[i] = (i % 3) * 1.0;
-    const t0 = performance.now();
     const { result, counts } = countExportCalls(['sort_f64'], () =>
       sortF64Dispatch(Float64Array.from(dup))
     );
-    const dt = performance.now() - t0;
     expect(counts.sort_f64).toBeGreaterThan(0);
     const ref = sortF64JS(Float64Array.from(dup));
     for (let i = 0; i < N; i++) expect(result[i]).toBe(ref[i]);
-    expect(dt).toBeLessThan(1000); // O(n²) on 16 384 dupes would blow past this
+  });
+
+  it('sort_f64 kernel does not go quadratic on duplicate-heavy input', () => {
+    // The check is a ratio, not an absolute budget. The n and 4n samples alternate in one
+    // process, so machine load slows both lanes together. Each lane keeps its fastest of 7
+    // samples. The input has 3 distinct values, so the 3-way partition is linear: from n to 4n
+    // the time grows about 4 times. A quadratic sort grows the time 16 times. The sample calls
+    // the kernel export directly, with no JS fallback. A kernel trap gives a null result, and
+    // the null check then fails the test.
+    const dupes = (n: number): Float64Array => {
+      const out = new Float64Array(n);
+      for (let i = 0; i < n; i++) out[i] = (i % 3) * 1.0;
+      return out;
+    };
+    const small = dupes(N);
+    const large = dupes(4 * N);
+    const sample = (data: Float64Array): number => {
+      const copy = Float64Array.from(data);
+      const wasm = getWasm() as unknown as RawWasm;
+      const t0 = performance.now();
+      const out = withAsF64(wasm, [copy], (mod, [h]) =>
+        (mod['sort_f64'] as (d: number) => number)(h)
+      );
+      const ms = performance.now() - t0;
+      expect(out).not.toBeNull();
+      return ms;
+    };
+    sample(small);
+    sample(large);
+    let smallMs = Infinity;
+    let largeMs = Infinity;
+    for (let k = 0; k < 7; k++) {
+      smallMs = Math.min(smallMs, sample(small));
+      largeMs = Math.min(largeMs, sample(large));
+    }
+    expect(largeMs / Math.max(smallMs, 0.01)).toBeLessThan(10);
   });
 
   it('argsort/rank execute the AS kernel and match the JS stable reference on ties', () => {

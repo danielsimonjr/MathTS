@@ -118,7 +118,7 @@ export interface SeededRng {
   /**
    * Integer in `[0, maxExclusive)`.
    *
-   * @throws {RangeError} When `maxExclusive` is not an integer in `[1, 4294967296]`.
+   * @throws RangeError when `maxExclusive` is not an integer in `[1, 4294967296]`.
    */
   nextInt(maxExclusive: number): number;
   /**
@@ -170,7 +170,7 @@ function makeSeededRng(seedInt: number): SeededRng {
  *
  * @param seed - Integer (coerced with `| 0`) or string (hashed to int32).
  * @returns A frozen {@link SeededRng} instance.
- * @throws {TypeError} When `seed` is neither a number nor a string.
+ * @throws TypeError when `seed` is neither a number nor a string.
  *
  * @example
  * ```ts

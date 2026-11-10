@@ -271,6 +271,9 @@ function bitLength(x: bigint): number {
   return (hex.length - 1) * 4 + (32 - Math.clz32(parseInt(hex[0]!, 16)));
 }
 
+/** The count of exact-ratio roundings since module load. A zero ratio needs no rounding. */
+let roundingCount = 0;
+
 /**
  * `num / den` (`den > 0`) rounded once to the nearest double, ties to even.
  *
@@ -280,6 +283,7 @@ function bitLength(x: bigint): number {
  */
 function rationalToNumber(num: bigint, den: bigint): number {
   if (num === 0n) return 0;
+  roundingCount++;
   const negative = num < 0n;
   const a = negative ? -num : num;
 
@@ -388,6 +392,14 @@ export function clearExactScaleNumberCache(): void {
 /** How many exact scales have a cached double (tests / diagnostics). */
 export function exactScaleNumberCacheSize(): number {
   return numberCache.size;
+}
+
+/**
+ * How many times the code rounds an exact ratio to a double (tests / diagnostics). The count
+ * starts at module load and only goes up. A memo miss adds one.
+ */
+export function exactScaleRoundingCount(): number {
+  return roundingCount;
 }
 
 /** Whether the scale has a cached double. Reads the memo without changing its order (tests). */
