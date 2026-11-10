@@ -194,6 +194,8 @@ function zetaCriticalLine(t: f64): Cx {
  * siegelZ(14.134725) // ~-1.12e-7 (near the first zeta zero)
  */
 export function siegelZ(t: f64): f64 {
+  // Z(t) oscillates with no limit as |t| grows, and the zeta sum never ends at Infinity.
+  if (!Number.isFinite(t)) return NaN;
   const at = Math.abs(t);
   const z = zetaCriticalLine(at);
   const th = riemannSiegelTheta(at);

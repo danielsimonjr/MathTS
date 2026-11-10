@@ -29,7 +29,13 @@ function phi(z: number): number {
  * Owen's T function T(h, a) = (1/2π)∫₀ᵃ exp(−h²(1+x²)/2)/(1+x²) dx.
  */
 export function owensT(h: number, a: number): number {
+  if (typeof h !== 'number' || typeof a !== 'number') {
+    throw new TypeError('owensT requires two numbers (h, a)');
+  }
+  if (h !== h || a !== a) return NaN;
   if (a === 0) return 0;
+  // Closed form at an infinite a: T(h, +-Infinity) = +-(1 - Phi(|h|)) / 2. T is odd in a.
+  if (a === Infinity || a === -Infinity) return (Math.sign(a) * (1 - Phi(Math.abs(h)))) / 2;
   const integral = quad((x: number) => Math.exp((-h * h * (1 + x * x)) / 2) / (1 + x * x), 0, a, {
     tol: 1e-12,
   });
@@ -159,6 +165,7 @@ export function gevPDF(x: number, xi: number, mu = 0, sigma = 1): number {
  * Skellam PMF: e^(−(μ₁+μ₂)) (μ₁/μ₂)^(k/2) I_|k|(2√(μ₁μ₂)). Requires μ₁, μ₂ > 0.
  */
 export function skellamPMF(k: number, mu1: number, mu2: number): number {
+  if (Number.isNaN(k) || Number.isNaN(mu1) || Number.isNaN(mu2)) return NaN;
   if (!(mu1 > 0 && mu2 > 0)) throw new RangeError('skellamPMF requires mu1, mu2 > 0');
   if (!Number.isInteger(k)) return 0;
   return (
@@ -170,6 +177,9 @@ export function skellamPMF(k: number, mu1: number, mu2: number): number {
 
 /** Zipf PMF on {1..n}: k^(−s) / H_{n,s}. Zero for non-integer or out-of-range k. */
 export function zipfPMF(k: number, s: number, n: number): number {
+  if (Number.isNaN(k) || Number.isNaN(s) || Number.isNaN(n)) return NaN;
+  // The normalising sum runs from 1 to n. An infinite n makes the sum run forever.
+  if (n === Infinity) throw new RangeError('zipfPMF: n must be finite');
   if (!Number.isInteger(k) || k < 1 || k > n) return 0;
   let h = 0;
   for (let i = 1; i <= n; i++) h += Math.pow(i, -s);

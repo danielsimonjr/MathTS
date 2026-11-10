@@ -233,6 +233,7 @@ function rangeProb(w: number, k: number): number {
  * against the χ-scaled denominator density (synchronous Simpson + normalCDF/normalPDF).
  */
 export function studentizedRangeCDF(q: number, k: number, df: number): number {
+  if (Number.isNaN(q) || Number.isNaN(k) || Number.isNaN(df)) return NaN;
   if (!(k >= 2)) throw new Error('studentizedRangeCDF: k (number of groups) must be >= 2');
   if (q <= 0) return 0;
   if (!Number.isFinite(df)) return rangeProb(q, k);
@@ -257,6 +258,7 @@ export function studentizedRangeCDF(q: number, k: number, df: number): number {
 
 /** Quantile (inverse CDF) of the studentized range distribution, via bisection. */
 export function studentizedRangeQuantile(p: number, k: number, df: number): number {
+  if (Number.isNaN(p) || Number.isNaN(k) || Number.isNaN(df)) return NaN;
   if (!(p > 0 && p < 1)) throw new Error('studentizedRangeQuantile: p must be in (0, 1)');
   let lo = 0;
   // Bracket p by expanding hi geometrically until CDF(hi) >= p, rather than assuming a

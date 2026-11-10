@@ -7337,7 +7337,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `QuadOptions`, `QuadResult`
-- Functions: `quad`
+- Functions: `checkFiniteLimits`, `quad`
 
 ---
 
@@ -7638,9 +7638,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                         | Type   |
-| -------------------- | ------------------------------- | ------ |
-| `./adaptive-quad.js` | `quad, QuadOptions, QuadResult` | Import |
+| File                 | Imports                                            | Type   |
+| -------------------- | -------------------------------------------------- | ------ |
+| `./adaptive-quad.js` | `quad, checkFiniteLimits, QuadOptions, QuadResult` | Import |
 
 **Exports:**
 
@@ -10713,6 +10713,7 @@ graph LR
 | `./polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, buchberger, normalize, polyToString, Poly`            | Import |
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                         | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                          | Import |
+| `./euclid.js`                     | `euclidSnap`                                                                                        | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
 
 **Exports:**
@@ -20025,12 +20026,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214610 |
-| Total Exports           | 6926   |
+| Total Lines of Code     | 214691 |
+| Total Exports           | 6927   |
 | Total Re-exports        | 3004   |
 | Total Classes           | 61     |
 | Total Interfaces        | 598    |
-| Total Functions         | 2295   |
+| Total Functions         | 2296   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

@@ -44,6 +44,8 @@ interface JacobiElliptic {
  * since the AGM ladder is shared work.
  */
 function jacobiElliptic(u: number, m: number): JacobiElliptic {
+  // When m is NaN, both m < 0 and m > 1 are false. Test NaN first.
+  if (Number.isNaN(u) || Number.isNaN(m)) return { sn: NaN, cn: NaN, dn: NaN };
   if (m < 0 || m > 1) {
     throw new Error('jacobiElliptic: m (=k^2) must be in [0, 1]');
   }

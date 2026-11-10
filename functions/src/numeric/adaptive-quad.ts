@@ -102,6 +102,17 @@ function gaussKronrod15(f: (x: f64) => f64, a: f64, b: f64): { k: f64; g: f64 } 
 const ABS_FLOOR = 1e-14;
 
 /**
+ * Throw a RangeError when a bound is NaN or infinite. The quadrature rules here
+ * sample finite panels only, so a caller must map an infinite range first.
+ * @internal
+ */
+export function checkFiniteLimits(a: number, b: number, name: string): void {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    throw new RangeError(`${name}: infinite limits are not supported`);
+  }
+}
+
+/**
  * Adaptive Gauss-Kronrod (G7-K15) numerical integration of `f` over `[a, b]`.
  *
  * Each subinterval is evaluated with the 15-point Kronrod rule and its
@@ -124,6 +135,7 @@ const ABS_FLOOR = 1e-14;
  * ```
  */
 export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): QuadResult {
+  checkFiniteLimits(a, b, 'quad');
   const tol = opts?.tol ?? 1e-10;
   const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;
@@ -131,6 +143,8 @@ export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): Qu
   function panel(a: f64, b: f64, depth: i32): QuadResult {
     const { k, g } = gaussKronrod15(f, a, b);
     const panelError = Math.abs(k - g);
+    // A NaN error never meets the tolerance, so stop here and do not bisect to maxDepth.
+    if (panelError !== panelError) return { value: NaN, error: NaN };
 
     if (depth >= maxDepth || panelError <= Math.max(tol * Math.abs(k), atol)) {
       return { value: k, error: panelError };

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-10",
-  "totalFiles": 2205,
+  "totalFiles": 2206,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1247,
     "test-only": 0,
     "orphan": 0,
-    "test": 867,
+    "test": 868,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1273,
-    "tests": 867,
+    "tests": 868,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 986,
+    "@danielsimonjr/mathts-functions": 987,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -86,7 +86,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 201
+      "loc": 202
     },
     {
       "file": "assembly/src/heap.ts",
@@ -6232,7 +6232,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 108
+      "loc": 115
     },
     {
       "file": "functions/src/error/ArgumentsError.ts",
@@ -6470,7 +6470,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 332
+      "loc": 334
     },
     {
       "file": "functions/src/index.ts",
@@ -6771,7 +6771,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 375
+      "loc": 380
     },
     {
       "file": "functions/src/matrix/reshape.ts",
@@ -6981,14 +6981,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 145
+      "loc": 147
     },
     {
       "file": "functions/src/numeric/adaptive-quad.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 147
+      "loc": 161
     },
     {
       "file": "functions/src/numeric/bfgs.ts",
@@ -7149,7 +7149,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 195
+      "loc": 189
     },
     {
       "file": "functions/src/numeric/rational-nullspace.ts",
@@ -7800,7 +7800,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 123
+      "loc": 125
     },
     {
       "file": "functions/src/special/mathieu.ts",
@@ -7821,7 +7821,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 171
+      "loc": 172
     },
     {
       "file": "functions/src/special/spherical-bessel.ts",
@@ -7835,14 +7835,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 252
+      "loc": 254
     },
     {
       "file": "functions/src/special/wave-functions.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 546
+      "loc": 548
     },
     {
       "file": "functions/src/special/zeta-extra.ts",
@@ -7856,7 +7856,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 274
+      "loc": 278
     },
     {
       "file": "functions/src/statistics/corr.ts",
@@ -7975,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 230
+      "loc": 240
     },
     {
       "file": "functions/src/stats/effect-sizes.ts",
@@ -8136,14 +8136,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 72
+      "loc": 73
     },
     {
       "file": "functions/src/trigonometry/acsc.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 73
+      "loc": 74
     },
     {
       "file": "functions/src/trigonometry/acsch.ts",
@@ -8157,14 +8157,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 74
+      "loc": 75
     },
     {
       "file": "functions/src/trigonometry/asech.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 79
+      "loc": 80
     },
     {
       "file": "functions/src/trigonometry/asin.ts",
@@ -8528,14 +8528,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1838
+      "loc": 1834
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1716
+      "loc": 1718
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8563,7 +8563,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 891
+      "loc": 895
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1339
+      "loc": 1356
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -8591,7 +8591,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 15
+      "loc": 17
     },
     {
       "file": "functions/src/typed/f64-kernels.ts",
@@ -8696,7 +8696,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1016
+      "loc": 1021
     },
     {
       "file": "functions/src/typed/hypothesis.ts",
@@ -8808,7 +8808,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 905
+      "loc": 907
     },
     {
       "file": "functions/src/typed/string-derivative.ts",
@@ -9011,7 +9011,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 185
+      "loc": 187
     },
     {
       "file": "functions/src/utils/isZero.ts",
@@ -9193,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 930
+      "loc": 931
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -10981,6 +10981,13 @@
       "loc": 55
     },
     {
+      "file": "functions/tests/nonfinite-inputs.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 662
+    },
+    {
       "file": "functions/tests/nonparametric-extra.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11909,7 +11916,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 218
+      "loc": 231
     },
     {
       "file": "functions/tests/typed-geometry-hull-wasm.test.ts",

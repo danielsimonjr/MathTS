@@ -334,6 +334,8 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
   'number, number': (a: f64, b: f64) => (a + b) / 2,
 
   'number, number, number': (a: f64, b: f64, c: f64) => {
+    // A NaN makes the comparator return NaN. The sort order then becomes undefined.
+    if (a !== a || b !== b || c !== c) return NaN;
     // Median of three: sort and take middle
     const arr = [a, b, c].sort((x, y) => x - y);
     return arr[1];

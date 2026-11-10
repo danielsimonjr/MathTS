@@ -133,6 +133,11 @@ function dijkstraScan(adj: number[][], start: number): { dist: number[]; prev: n
  * shortestPath(adj, 0, 2) // => [0, 1, 2]
  */
 export function shortestPath(adj: number[][], start: number, end: number): number[] {
+  if (!Array.isArray(adj)) throw new TypeError('shortestPath: adj must be an array');
+  // A non-integer end never reaches -1 in the path walk below.
+  if (!Number.isInteger(start) || !Number.isInteger(end)) {
+    throw new RangeError('shortestPath: start and end must be integers');
+  }
   const n = adj.length;
   if (start < 0 || start >= n || end < 0 || end >= n) {
     throw new Error('shortestPath: start or end out of bounds');

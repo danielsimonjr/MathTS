@@ -1035,6 +1035,7 @@ export const lcm = mathTyped('lcm', {
  */
 export const xgcd = mathTyped('xgcd', {
   'number, number': (a: f64, b: f64): [f64, f64, f64] => {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return [NaN, NaN, NaN];
     a = Math.floor(a);
     b = Math.floor(b);
     let x = 0,
@@ -1308,7 +1309,8 @@ export const largerEq = mathTyped('largerEq', {
  * Compare two values: -1, 0, or 1
  */
 export const compare = mathTyped('compare', {
-  'number, number': (a: f64, b: f64): i32 => (a > b ? 1 : a < b ? -1 : 0),
+  // NaN compares as -1, the same as mathjs compare.
+  'number, number': (a: f64, b: f64): i32 => (a > b ? 1 : a === b ? 0 : -1),
   'bigint, bigint': (a: i64, b: i64): i32 => (a > b ? 1 : a < b ? -1 : 0),
   'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),

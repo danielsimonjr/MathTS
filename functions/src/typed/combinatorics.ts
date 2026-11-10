@@ -333,6 +333,9 @@ function _sieveOfEratosthenes(limit: number): number[] {
  */
 export const nextPrime = mathTyped('nextPrime', {
   number: (n: number): number => {
+    if (!Number.isFinite(n) || n >= Number.MAX_SAFE_INTEGER) {
+      throw new RangeError('nextPrime requires a finite number below Number.MAX_SAFE_INTEGER');
+    }
     if (n < 0) throw new Error('nextPrime requires a non-negative number');
     let candidate = Math.floor(n) + 1;
     if (candidate <= 2) return 2;
@@ -373,6 +376,7 @@ function _isPrime(n: number): boolean {
  */
 export const primePi = mathTyped('primePi', {
   number: (n: number): number => {
+    if (n !== n) return NaN;
     if (n < 2) return 0;
     const limit = Math.floor(n);
     const sieve = _sieveOfEratosthenes(limit);

@@ -12,7 +12,7 @@
  *
  * @packageDocumentation
  */
-import { quad, type QuadOptions, type QuadResult } from './adaptive-quad.js';
+import { quad, checkFiniteLimits, type QuadOptions, type QuadResult } from './adaptive-quad.js';
 
 /** Options for {@link tanhSinh}. */
 export interface TanhSinhOptions {
@@ -28,12 +28,6 @@ export type Limit1 = number | ((x: number) => number);
 export type Limit2 = number | ((x: number, y: number) => number);
 
 const TANH_SINH_T_MAX = 6;
-
-function checkFiniteLimits(a: number, b: number, name: string): void {
-  if (!Number.isFinite(a) || !Number.isFinite(b)) {
-    throw new RangeError(`${name}: infinite limits are not supported`);
-  }
-}
 
 /**
  * Tanh-sinh (double-exponential) quadrature of `f` over `[a, b]`.

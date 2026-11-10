@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-10'
   totalFiles: 1273
   totalModules: 82
-  totalExports: 6926
+  totalExports: 6927
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -17275,11 +17275,13 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - checkFiniteLimits
         - quad
       interfaces:
         - QuadOptions
         - QuadResult
       functions:
+        - checkFiniteLimits
         - quad
     functions/src/numeric/bfgs.ts:
       description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
@@ -17690,6 +17692,7 @@ modules:
         - file: ./adaptive-quad.js
           imports:
             - quad
+            - checkFiniteLimits
             - QuadOptions
             - QuadResult
       workspaceDependencies: []
@@ -22576,6 +22579,9 @@ modules:
         - file: ./factorization/integer-poly.js
           imports:
             - polyGcdZ
+        - file: ./euclid.js
+          imports:
+            - euclidSnap
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
@@ -43041,11 +43047,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214610
-  totalExports: 6926
+  totalLinesOfCode: 214691
+  totalExports: 6927
   totalClasses: 61
   totalInterfaces: 598
-  totalFunctions: 2295
+  totalFunctions: 2296
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639

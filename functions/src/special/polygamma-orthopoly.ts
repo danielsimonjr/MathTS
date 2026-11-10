@@ -60,7 +60,8 @@ export function polygamma(n: number, x: number): number {
   if (n === 0) {
     return digamma(x) as number;
   }
-  if (x <= 0 && Number.isInteger(x)) {
+  // -Infinity is not an integer, so the shift loop below never reaches the threshold.
+  if ((x <= 0 && Number.isInteger(x)) || x === -Infinity) {
     return NaN;
   }
 
