@@ -376,21 +376,21 @@ describe('arithmetic — Float64Array sequential fallbacks (below threshold)', (
 });
 
 describe('arithmetic — matrix helpers + pool lifecycle', () => {
-  it('matmul / transpose / matvec / outer', async () => {
+  it('matmul / transpose / matvec / outer', () => {
     // A (2x3) * B (3x2)
     const A = Float64Array.from([1, 2, 3, 4, 5, 6]);
     const Bm = Float64Array.from([7, 8, 9, 10, 11, 12]);
-    const prod = await matmul(A, 2, 3, Bm, 2);
+    const prod = matmul(A, 2, 3, Bm, 2);
     // Row 0: [1*7+2*9+3*11, 1*8+2*10+3*12] = [58, 64]
     expect(Array.from(prod)).toEqual([58, 64, 139, 154]);
 
-    const t = await transpose(A, 2, 3);
+    const t = transpose(A, 2, 3);
     expect(Array.from(t)).toEqual([1, 4, 2, 5, 3, 6]);
 
-    const mv = await matvec(A, 2, 3, Float64Array.from([1, 1, 1]));
+    const mv = matvec(A, 2, 3, Float64Array.from([1, 1, 1]));
     expect(Array.from(mv)).toEqual([6, 15]);
 
-    const o = await outer(Float64Array.from([1, 2]), Float64Array.from([3, 4]));
+    const o = outer(Float64Array.from([1, 2]), Float64Array.from([3, 4]));
     expect(Array.from(o)).toEqual([3, 4, 6, 8]);
   });
 

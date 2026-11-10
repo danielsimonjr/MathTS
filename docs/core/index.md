@@ -54,7 +54,7 @@ math.chain(3).add(4).multiply(2).done(); // 14
 
 ### Typed arrays and workers
 
-The arithmetic functions (`add`, `subtract`, `multiply`, `divide`, `abs`, `sqrt`, `exp`, `log`, `round`, `norm`, `min`, `max`, `dot` and the others in `typed/arithmetic.ts`) are synchronous on `Float64Array` input: they return a `Float64Array` or a number. Other typed functions, such as `sin`, still have an async `Float64Array` signature that returns a `Promise`:
+The typed functions are synchronous for `Float64Array` and `Int32Array` input. The arithmetic, trigonometry, bitwise, special-function and distribution overloads return a typed array or a number, not a `Promise`. Only the `parallel*` exports (for example `parallelFFT` and `parallelStatSum`) are async. For worker threads, use `ComputePool` or `parallelMap` from `@danielsimonjr/mathts-parallel`:
 
 ```typescript
 import { add, sin } from '@danielsimonjr/mathts-functions';
@@ -63,7 +63,7 @@ const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([10, 20, 30, 40]);
 
 const result = add(a, b); // Float64Array [11, 22, 33, 44], synchronous
-const sines = await sin(a); // Float64Array; sequential (ComputePool sin: 'never')
+const sines = sin(a); // Float64Array, synchronous
 ```
 
 Larger workloads use measured per-op thresholds in `@danielsimonjr/mathts-parallel` (not automatic for every array op).

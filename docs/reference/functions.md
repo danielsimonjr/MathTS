@@ -11,9 +11,9 @@ This package exposes functions from **two layers**:
 - **Typed layer** — native parallel-first implementations using typed-function
   dispatch. Support `number`, `bigint`, `Complex`, `Fraction`, `BigNumber`,
   `Unit`, `Dual` (forward-mode autodiff), and `Float64Array` where applicable.
-  The arithmetic `Float64Array` overloads are synchronous. The trigonometry, statistics,
-  signal and bitwise `Float64Array` overloads return a `Promise`; worker dispatch is gated
-  per op in `ComputePool` (many element-wise paths are `'never'` and stay inline JS).
+  The typed `Float64Array` and `Int32Array` overloads are synchronous. Only the
+  `parallel*` exports return a `Promise`; for worker threads, call `ComputePool` or
+  `parallelMap` from `@danielsimonjr/mathts-parallel`.
 - **Factory layer** — functions synced from mathjs and activated through the
   factory system (`det`, `inv`, `eigs`, set operations, units, sparse linear
   algebra, expression nodes, etc.). The numeric `det`/`inv` route large matrices
@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1326** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1329** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -216,9 +216,9 @@ the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
   arguments promote to the widest type (`number + Complex → Complex`,
   `number + Fraction → Fraction`).
 - `add`, `subtract`, `multiply`, `divide` and the other arithmetic `Float64Array`
-  overloads are synchronous. Other `Float64Array` overloads may return a `Promise` (or a
-  `ParallelResult` from the lower-level pool API). Per-op thresholds in `ComputePool` are often `'never'`, so
-  many typed paths still run inline JS even when the return type is async-friendly.
+  overloads are synchronous. The plain helpers `matmul`, `transpose`, `matvec` and `outer`
+  are synchronous too. The lower-level pool API (`computePool.matmul` and the others)
+  returns a `Promise` of a `ParallelResult`.
 - `add` and `multiply` on a `DenseMatrix` perform matrix algebra (the matrix
   product, not the element-wise product). Use `dotMultiply` / `dotDivide` /
   `dotPow` for element-wise operations.
@@ -320,24 +320,24 @@ deepEqual([1, 2, 3], [1, 2, 3]); // true
 
 Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-| Function                         | Description                                      | Accel                             |
-| -------------------------------- | ------------------------------------------------ | --------------------------------- |
-| `sin(x)`                         | Sine                                             | parallel†, WASM ([1024, 131072))  |
-| `cos(x)`                         | Cosine                                           | parallel†, WASM (≥16384)          |
-| `tan(x)`                         | Tangent                                          | parallel†                         |
-| `csc(x)` `cot(x)`                | Cosecant, cotangent                              | parallel                          |
-| `sec(x)`                         | Secant                                           | parallel, WASM ([16384, 1048576)) |
-| `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel                          |
-| `atan2(y, x)`                    | Two-argument arctangent                          | —                                 |
-| `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —                                 |
-| `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel                          |
-| `asinh(x)` `acosh(x)`            | Inverse hyperbolic sine, cosine                  | parallel                          |
-| `atanh(x)`                       | Inverse hyperbolic tangent                       | parallel, WASM (≥16384)           |
-| `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —                                 |
-| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —                                 |
-| `toRadians(deg)`                 | Convert degrees to radians                       | —                                 |
-| `toDegrees(rad)`                 | Convert radians to degrees                       | —                                 |
-| `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —                                 |
+| Function                         | Description                                      | Accel                   |
+| -------------------------------- | ------------------------------------------------ | ----------------------- |
+| `sin(x)`                         | Sine                                             | WASM ([1024, 131072))   |
+| `cos(x)`                         | Cosine                                           | WASM (≥16384)           |
+| `tan(x)`                         | Tangent                                          | —                       |
+| `csc(x)` `cot(x)`                | Cosecant, cotangent                              | —                       |
+| `sec(x)`                         | Secant                                           | WASM ([16384, 1048576)) |
+| `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | —                       |
+| `atan2(y, x)`                    | Two-argument arctangent                          | —                       |
+| `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —                       |
+| `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | —                       |
+| `asinh(x)` `acosh(x)`            | Inverse hyperbolic sine, cosine                  | —                       |
+| `atanh(x)`                       | Inverse hyperbolic tangent                       | WASM (≥16384)           |
+| `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —                       |
+| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —                       |
+| `toRadians(deg)`                 | Convert degrees to radians                       | —                       |
+| `toDegrees(rad)`                 | Convert radians to degrees                       | —                       |
+| `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —                       |
 
 ### Details
 
@@ -373,7 +373,7 @@ sin(Math.PI / 6); // 0.5
 cos(new Complex(0, 1)); // Complex(cosh(1), 0) ≈ Complex(1.543, 0)
 
 const angles = new Float64Array([0, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2]);
-const sines = await sin(angles); // parallel → Float64Array
+const sines = sin(angles); // Float64Array, synchronous
 
 toDegrees(Math.PI); // 180
 ```
@@ -384,19 +384,19 @@ toDegrees(Math.PI); // 180
 
 ### Bitwise
 
-| Function                | Description                              | Types                                 | Accel     |
-| ----------------------- | ---------------------------------------- | ------------------------------------- | --------- |
-| `bitAnd(a, b)`          | Bitwise AND                              | number, bigint, BigNumber, Int32Array | parallel† |
-| `bitOr(a, b)`           | Bitwise OR                               | number, bigint, BigNumber, Int32Array | parallel† |
-| `bitXor(a, b)`          | Bitwise XOR                              | number, bigint, BigNumber, Int32Array | parallel† |
-| `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | parallel† |
-| `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | parallel† |
-| `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | parallel† |
-| `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | parallel† |
+| Function                | Description                              | Types                                 | Accel |
+| ----------------------- | ---------------------------------------- | ------------------------------------- | ----- |
+| `bitAnd(a, b)`          | Bitwise AND                              | number, bigint, BigNumber, Int32Array | —     |
+| `bitOr(a, b)`           | Bitwise OR                               | number, bigint, BigNumber, Int32Array | —     |
+| `bitXor(a, b)`          | Bitwise XOR                              | number, bigint, BigNumber, Int32Array | —     |
+| `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | —     |
+| `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | —     |
+| `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | —     |
+| `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | —     |
 
-`Int32Array` paths may return a `Promise`, but bitwise ops are `'never'` in
-`DEFAULT_THRESHOLD_BY_OP` and have **no** WASM dispatch entry in `wasmPolicyAllows`
-today — they run as inline JS. Scalar (`number`, `bigint`, `BigNumber`) inputs are
+`Int32Array` paths are synchronous and return a new `Int32Array`; a length mismatch
+throws `RangeError`. Bitwise ops have **no** WASM dispatch entry in `wasmPolicyAllows`,
+so they run as inline JS. Scalar (`number`, `bigint`, `BigNumber`) inputs are
 synchronous. Shift operations also accept `(Int32Array, number)` for a scalar shift count.
 
 ### Logical
@@ -451,32 +451,37 @@ leftShift(1, 4); // 16
 
 ## Special Functions
 
+The `Float64Array` signatures are synchronous. To use worker threads, call
+`computePool.applyKernel(x, workerKernel(name, ...params))`. The worker result is equal to the
+synchronous result bit for bit.
+See [the migration guide](../migration-guide.md#worker-threads-for-special-functions-distributions-and-ffts).
+
 | Function                                                        | Description                                                                                                                                                                                                            | Accel       |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `erfc(x)`                                                       | Complementary error function `1 - erf(x)`                                                                                                                                                                              | parallel    |
+| `erfc(x)`                                                       | Complementary error function `1 - erf(x)`                                                                                                                                                                              | —           |
 | `erf(x)`                                                        | Error function (factory layer)                                                                                                                                                                                         | —           |
-| `erfi(x)`                                                       | Imaginary error function                                                                                                                                                                                               | parallel    |
-| `beta(a, b)`                                                    | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                                                                                                                                                                       | parallel    |
-| `betainc(a, b, x)`                                              | Incomplete beta function                                                                                                                                                                                               | parallel    |
-| `gammainc(a, x)`                                                | Regularized lower incomplete gamma `P(a, x)`                                                                                                                                                                           | parallel    |
-| `gammaincp(a, x)`                                               | Regularized upper incomplete gamma `Q(a, x)`                                                                                                                                                                           | parallel    |
-| `digamma(x)`                                                    | Digamma `d/dx ln Γ(x)`                                                                                                                                                                                                 | parallel    |
+| `erfi(x)`                                                       | Imaginary error function                                                                                                                                                                                               | —           |
+| `beta(a, b)`                                                    | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                                                                                                                                                                       | —           |
+| `betainc(a, b, x)`                                              | Incomplete beta function                                                                                                                                                                                               | —           |
+| `gammainc(a, x)`                                                | Regularized lower incomplete gamma `P(a, x)`                                                                                                                                                                           | —           |
+| `gammaincp(a, x)`                                               | Regularized upper incomplete gamma `Q(a, x)`                                                                                                                                                                           | —           |
+| `digamma(x)`                                                    | Digamma `d/dx ln Γ(x)`                                                                                                                                                                                                 | —           |
 | `gamma(x)`                                                      | Gamma function (factory layer)                                                                                                                                                                                         | —           |
 | `lgamma(x)`                                                     | Log-gamma (`typed` + factory); WASM only after `loadWasm()` at n ≥ 1 048 576                                                                                                                                           | WASM (≥1 M) |
 | `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)`                     | Bessel first kind; `n` may be a **real (non-integer) order** (Temme series for `x < 2`, Steed continued fraction beyond, ~1e-15; JS `Float64Array`, no WASM policy entry)                                              | —           |
 | `besselY0(x)` `besselY1(x)` `besselY(n, x)`                     | Bessel second kind (`x > 0`); real (non-integer) order `n` via the same Temme/Steed scheme                                                                                                                             | —           |
-| `besselI(n, x)` `besselK(n, x)`                                 | Modified Bessel functions                                                                                                                                                                                              | parallel    |
+| `besselI(n, x)` `besselK(n, x)`                                 | Modified Bessel functions                                                                                                                                                                                              | —           |
 | `airyAi(x)` `airyBi(x)`                                         | Airy functions of the first / second kind (JS; no WASM policy entry)                                                                                                                                                   | —           |
 | `ellipticK(m)` `ellipticE(m)`                                   | Complete elliptic integrals (JS; WASM dispatch refused; workers unreachable)                                                                                                                                           | —           |
-| `fresnelC(x)` `fresnelS(x)`                                     | Fresnel integrals                                                                                                                                                                                                      | parallel    |
-| `sinIntegral(x)` `cosIntegral(x)`                               | Sine / cosine integrals                                                                                                                                                                                                | parallel    |
-| `expIntegralEi(x)`                                              | Exponential integral `Ei(x)`                                                                                                                                                                                           | parallel    |
-| `logIntegral(x)`                                                | Logarithmic integral `li(x)`                                                                                                                                                                                           | parallel    |
-| `lambertW(x[, branch])`                                         | Lambert W function                                                                                                                                                                                                     | parallel    |
-| `chebyshevT(n, x)`                                              | Chebyshev polynomial (first kind)                                                                                                                                                                                      | parallel    |
-| `hermiteH(n, x)`                                                | Hermite polynomial                                                                                                                                                                                                     | parallel    |
-| `laguerreL(n, x)`                                               | Laguerre polynomial                                                                                                                                                                                                    | parallel    |
-| `legendreP(n, x)`                                               | Legendre polynomial                                                                                                                                                                                                    | parallel    |
+| `fresnelC(x)` `fresnelS(x)`                                     | Fresnel integrals                                                                                                                                                                                                      | —           |
+| `sinIntegral(x)` `cosIntegral(x)`                               | Sine / cosine integrals                                                                                                                                                                                                | —           |
+| `expIntegralEi(x)`                                              | Exponential integral `Ei(x)`                                                                                                                                                                                           | —           |
+| `logIntegral(x)`                                                | Logarithmic integral `li(x)`                                                                                                                                                                                           | —           |
+| `lambertW(x[, branch])`                                         | Lambert W function                                                                                                                                                                                                     | —           |
+| `chebyshevT(n, x)`                                              | Chebyshev polynomial (first kind)                                                                                                                                                                                      | —           |
+| `hermiteH(n, x)`                                                | Hermite polynomial                                                                                                                                                                                                     | —           |
+| `laguerreL(n, x)`                                               | Laguerre polynomial                                                                                                                                                                                                    | —           |
+| `legendreP(n, x)`                                               | Legendre polynomial                                                                                                                                                                                                    | —           |
 | `zeta(s)`                                                       | Riemann zeta function (factory layer)                                                                                                                                                                                  | —           |
 | `carlsonRC(x, y)`                                               | Carlson degenerate symmetric elliptic integral R_C(x, y)                                                                                                                                                               | —           |
 | `carlsonRF(x, y, z)`                                            | Carlson symmetric elliptic integral of the first kind R_F                                                                                                                                                              | —           |
@@ -957,22 +962,27 @@ quickSelect([3, 1, 4, 1, 5, 9, 2], 3); // 3 (4th smallest)
 
 ## Probability Distributions
 
+The `Float64Array` signatures are synchronous. To use worker threads, call
+`computePool.applyKernel(x, workerKernel(name, ...params))`. The worker result is equal to the
+synchronous result bit for bit.
+See [the migration guide](../migration-guide.md#worker-threads-for-special-functions-distributions-and-ffts).
+
 ### Density / mass functions
 
-| Function                       | Description                                                                                                                                                                             | Accel    |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | parallel |
-| `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | parallel |
-| `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | parallel |
-| `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | parallel |
-| `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | parallel |
-| `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | parallel |
-| `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | parallel |
-| `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | parallel |
-| `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —        |
-| `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —        |
-| `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —        |
-| `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —        |
+| Function                       | Description                                                                                                                                                                             | Accel |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | —     |
+| `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | —     |
+| `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | —     |
+| `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | —     |
+| `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | —     |
+| `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | —     |
+| `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | —     |
+| `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | —     |
+| `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —     |
+| `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —     |
+| `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —     |
+| `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —     |
 
 ### Distribution objects
 
@@ -1158,21 +1168,20 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 
 ### Decompositions & analysis (typed `matrix-ops`)
 
-| Function                      | Description                | Accel    |
-| ----------------------------- | -------------------------- | -------- |
-| `cholesky(A)`                 | Cholesky decomposition     | —        |
-| `hessenbergForm(A)`           | Hessenberg reduction       | —        |
-| `jordanForm(A)`               | Jordan normal form         | parallel |
-| `characteristicPolynomial(A)` | Characteristic polynomial  | parallel |
-| `matrixRank(A)`               | Rank                       | —        |
-| `matrixPower(A, p)`           | Matrix power (non-integer) | parallel |
-| `matrixLog(A)`                | Matrix logarithm           | parallel |
-| `polarDecomposition(A)`       | Polar decomposition        | parallel |
-| `rowReduce(A)`                | Reduced row echelon form   | —        |
+| Function                      | Description                | Accel |
+| ----------------------------- | -------------------------- | ----- |
+| `cholesky(A)`                 | Cholesky decomposition     | —     |
+| `hessenbergForm(A)`           | Hessenberg reduction       | —     |
+| `jordanForm(A)`               | Jordan normal form         | —     |
+| `characteristicPolynomial(A)` | Characteristic polynomial  | —     |
+| `matrixRank(A)`               | Rank                       | —     |
+| `matrixPower(A, p)`           | Matrix power (non-integer) | —     |
+| `matrixLog(A)`                | Matrix logarithm           | —     |
+| `polarDecomposition(A)`       | Polar decomposition        | —     |
+| `rowReduce(A)`                | Reduced row echelon form   | —     |
 
-The `parallel`-marked decompositions use internal `matMul`, which may call
-`computePool.matmul` when `shouldParallelize(m·n)` passes the 50k fallback;
-they therefore return a `Promise`.
+These decompositions are synchronous. The internal `matMul` of each decomposition is the
+dense kernel of `@danielsimonjr/mathts-matrix` at every size.
 
 ### Iterative Solvers
 
@@ -1900,17 +1909,19 @@ solve('x^2 - 4', 'x'); // [-2, 2]
 
 ## Numerical Integration
 
-| Function                                 | Description                                                                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `trapz(y[, x])`                          | Trapezoidal rule on sampled data                                                                                   |
-| `simpson(f, a, b[, n])`                  | Simpson's 1/3 rule (`n` even)                                                                                      |
-| `simpsons(f, a, b[, n])`                 | Simpson's rule variant (numeric layer)                                                                             |
-| `gaussQuad(f, a, b[, n])`                | Gauss–Legendre quadrature                                                                                          |
-| `romberg(f, a, b[, tol])`                | Romberg integration                                                                                                |
-| `nintegrate(f, a, b[, tol])`             | Adaptive numerical integration                                                                                     |
-| `quad(f, a, b[, opts])`                  | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
-| `rootsLegendre(n)`                       | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
-| `monteCarloIntegrate(f, bounds[, opts])` | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
+| Function                                                  | Description                                                                                                        |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `trapz(y[, x])`                                           | Trapezoidal rule on sampled data                                                                                   |
+| `simpson(f, a, b[, n])`                                   | Simpson's 1/3 rule (`n` even)                                                                                      |
+| `simpsons(f, a, b[, n])`                                  | Simpson's rule variant (numeric layer)                                                                             |
+| `gaussQuad(f, a, b[, n])`                                 | Gauss–Legendre quadrature                                                                                          |
+| `romberg(f, a, b[, tol])`                                 | Romberg integration                                                                                                |
+| `parallelGaussQuad(f, a, b[, n, order, { workerCount }])` | Async `gaussQuad` with a worker fan-out                                                                            |
+| `parallelRomberg(f, a, b[, tol, { workerCount }])`        | Async `romberg` with a worker fan-out                                                                              |
+| `nintegrate(f, a, b[, tol])`                              | Adaptive numerical integration                                                                                     |
+| `quad(f, a, b[, opts])`                                   | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
+| `rootsLegendre(n)`                                        | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
+| `monteCarloIntegrate(f, bounds[, opts])`                  | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
 
 ### Extra quadrature rules (gap analysis)
 
@@ -2293,7 +2304,7 @@ n ≥ 262 144) is separate from the worker pool.
 | `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                            | parallel†       |
 | `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                             | parallel†       |
 | `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —               |
-| `fft2d(matrix)`                                 | 2D FFT (nameless `shouldParallelize` on batch size; map `fft2d` is `'never'`)                                                          | parallel        |
+| `fft2d(matrix)`                                 | 2D FFT (synchronous; for worker threads use `computePool.fftBatch`)                                                                    | —               |
 | `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —               |
 | `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse (JS loops)                                                                                         | —               |
 | `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse (JS loops)                                                                                           | —               |
@@ -2314,7 +2325,7 @@ n ≥ 262 144) is separate from the worker pool.
 | `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —               |
 | `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —               |
 | `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —               |
-| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel        |
+| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | —               |
 | `periodogram(x)`                                | Power spectral density estimate (JS)                                                                                                   | —               |
 | `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —               |
 | `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —               |
@@ -3244,10 +3255,10 @@ Runtime probes for the optional acceleration tiers:
 ### Details
 
 - The arithmetic functions (`add`, `subtract`, `multiply`, `divide`, the unary ops of
-  `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous on `Float64Array` input. The
-  trigonometry, statistics, signal and bitwise `Float64Array` overloads still
-  return a `Promise` — `Promise<Float64Array>` for element-wise transforms,
-  `Promise<number>` for reductions.
+  `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous on `Float64Array` input,
+  as are the trigonometry, bitwise, special-function and distribution overloads. Only the
+  `parallel*` exports (`parallelStat*`, `parallelFFT`, `parallelConv` and the others) return
+  a `Promise`.
 - The worker pool is created lazily on first use. `initializePool()`,
   `getComputePool()`, and `terminatePool()` give explicit lifecycle control —
   call `terminatePool()` to release worker threads, for example before process
@@ -3288,7 +3299,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1326 exports).
+> `@danielsimonjr/mathts-functions` (1329 exports).
 
 ### Functions by category
 
@@ -3318,7 +3329,7 @@ await terminatePool();
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (22): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
+**Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
@@ -3345,6 +3356,8 @@ await terminatePool();
 **Expression Evaluation** (40): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `frontToJson`, `frontToLatexTable`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `runScalarSearch`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
 
 **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
+
+**Other exports (uncategorized)** (1): `workerKernel`
 
 ### Constants & values (72)
 

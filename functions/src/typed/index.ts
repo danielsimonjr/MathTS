@@ -59,6 +59,7 @@ export { typedSpecial } from './special.js';
 // Probability distribution functions
 export * from './distributions.js';
 export { typedDistributions } from './distributions.js';
+export { workerKernel } from './worker-kernels.js';
 
 // Geometry functions (pure math)
 export * from './geometry.js';

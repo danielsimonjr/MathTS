@@ -120,7 +120,7 @@ describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
       await computePool.terminate();
     });
 
-    afterAll(async () => {
+    afterAll(() => {
       computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
     });
 

@@ -22,11 +22,17 @@ export {
 
 export { WorkerPool } from './WorkerPool.js';
 
+// The sequential matmul kernel of the worker pool. The synchronous `matmul` of
+// @danielsimonjr/mathts-functions uses it at every size.
+export { matmulSequential } from '@danielsimonjr/mathts-workerpool';
+
 export type {
   ComputePoolConfig,
   ParallelResult,
   OpName,
   OpThreshold,
+  ThresholdByOp,
+  DeprecatedThresholdOp,
   DispatchOptions,
 } from './ComputePool.js';
 

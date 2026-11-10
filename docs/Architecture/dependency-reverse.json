@@ -10,6 +10,7 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
+    "packages/workerpool/src/matmul-sequential.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/worker-numerics.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/tensordot-range.ts",
@@ -2526,6 +2527,12 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/typed/f64-kernels.ts": [
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",
@@ -2545,6 +2552,11 @@
       "functions/src/typed/distributions.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/signal.ts",
+      "functions/src/typed/special.ts"
+    ],
+    "functions/src/typed/worker-kernels.ts": [
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/index.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [

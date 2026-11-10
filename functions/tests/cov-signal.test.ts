@@ -107,8 +107,8 @@ describe('signal — parallelFFTPower Object overload', () => {
 });
 
 describe('signal — spectrogram zero-frame early return', () => {
-  it('returns empty magnitude when signal shorter than windowSize', async () => {
-    const out = await spectrogram([1, 2, 3], { windowSize: 8, hopSize: 4, window: 'rect' });
+  it('returns empty magnitude when signal shorter than windowSize', () => {
+    const out = spectrogram([1, 2, 3], { windowSize: 8, hopSize: 4, window: 'rect' });
     expect(out.magnitude).toEqual([]);
     expect(out.times).toEqual([]);
     expect(out.frequencies.length).toBeGreaterThan(0);
@@ -167,21 +167,21 @@ describe('signal — parallel paths via lowered threshold', () => {
     for (let i = 0; i < expected.length; i++) expect(y[i]).toBeCloseTo(expected[i], 8);
   });
 
-  it('fft2d under parallel dispatch matches a DC-only input', async () => {
+  it('fft2d under parallel dispatch matches a DC-only input', () => {
     const img = [
       [1, 1],
       [1, 1],
     ];
-    const out = await fft2d(img);
+    const out = fft2d(img);
     // DC bin = sum of all = 4, all other bins ~0
     expect(out.real[0][0]).toBeCloseTo(4, 8);
     expect(out.real[0][1]).toBeCloseTo(0, 8);
     expect(out.real[1][0]).toBeCloseTo(0, 8);
   });
 
-  it('spectrogram under parallel dispatch produces frames', async () => {
+  it('spectrogram under parallel dispatch produces frames', () => {
     const sig = Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 8));
-    const out = await spectrogram(sig, { windowSize: 16, hopSize: 8, window: 'hann' });
+    const out = spectrogram(sig, { windowSize: 16, hopSize: 8, window: 'hann' });
     expect(out.magnitude.length).toBeGreaterThan(0);
     expect(out.magnitude[0].length).toBe(out.frequencies.length);
   });
@@ -300,8 +300,8 @@ describeIfAS('signal — results do not depend on whether the AS binary is loade
   it('lowpassFilter is unchanged with the AS binary loaded', () =>
     close(lowpassFilter(sig, 0.1, 65), jsLowpass, 6));
 
-  it('spectrogram produces frames matching the frequency-bin count with the AS binary loaded', async () => {
-    const out = await spectrogram(sig, { windowSize: 64, hopSize: 32, window: 'hann' });
+  it('spectrogram produces frames matching the frequency-bin count with the AS binary loaded', () => {
+    const out = spectrogram(sig, { windowSize: 64, hopSize: 32, window: 'hann' });
     expect(out.magnitude.length).toBeGreaterThan(0);
     expect(out.magnitude[0].length).toBe(out.frequencies.length);
   });

@@ -311,10 +311,10 @@ describe('Distribution parallel array overloads', () => {
     await computePool.terminate();
   });
 
-  it('normalPDF over a Float64Array matches the scalar implementation', async () => {
+  it('normalPDF over a Float64Array matches the scalar implementation', () => {
     const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
-    const std = (await normalPDF(xs)) as Float64Array;
-    const params = (await normalPDF(xs, 1, 2)) as Float64Array;
+    const std = normalPDF(xs) as Float64Array;
+    const params = normalPDF(xs, 1, 2) as Float64Array;
     expect(std.length).toBe(1000);
     for (let i = 0; i < xs.length; i += 37) {
       expect(std[i]).toBeCloseTo(normalPDF(xs[i]) as number, 12);
@@ -322,37 +322,37 @@ describe('Distribution parallel array overloads', () => {
     }
   });
 
-  it('normalCDF over a Float64Array matches the scalar implementation', async () => {
+  it('normalCDF over a Float64Array matches the scalar implementation', () => {
     const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
-    const arr = (await normalCDF(xs, 0, 1)) as Float64Array;
+    const arr = normalCDF(xs, 0, 1) as Float64Array;
     expect(arr[500]).toBeCloseTo(0.5, 12);
     for (let i = 0; i < xs.length; i += 37) {
       expect(arr[i]).toBeCloseTo(normalCDF(xs[i], 0, 1) as number, 12);
     }
   });
 
-  it('exponential PDF/CDF over a Float64Array match the scalar implementations', async () => {
+  it('exponential PDF/CDF over a Float64Array match the scalar implementations', () => {
     const xs = Float64Array.from({ length: 800 }, (_, i) => i / 100);
-    const pdf = (await exponentialPDF(xs, 1.5)) as Float64Array;
-    const cdf = (await exponentialCDF(xs, 1.5)) as Float64Array;
+    const pdf = exponentialPDF(xs, 1.5) as Float64Array;
+    const cdf = exponentialCDF(xs, 1.5) as Float64Array;
     for (let i = 0; i < xs.length; i += 29) {
       expect(pdf[i]).toBeCloseTo(exponentialPDF(xs[i], 1.5) as number, 12);
       expect(cdf[i]).toBeCloseTo(exponentialCDF(xs[i], 1.5) as number, 12);
     }
   });
 
-  it('discrete PMFs over a Float64Array match the scalar implementations', async () => {
+  it('discrete PMFs over a Float64Array match the scalar implementations', () => {
     const ks = Float64Array.from({ length: 600 }, (_, i) => i % 30);
-    const pois = (await poissonPMF(ks, 5)) as Float64Array;
-    const binom = (await binomialPMF(ks, 40, 0.3)) as Float64Array;
-    const geom = (await geometricPMF(
+    const pois = poissonPMF(ks, 5) as Float64Array;
+    const binom = binomialPMF(ks, 40, 0.3) as Float64Array;
+    const geom = geometricPMF(
       Float64Array.from({ length: 600 }, (_, i) => (i % 20) + 1),
       0.25
-    )) as Float64Array;
-    const bern = (await bernoulliPMF(
+    ) as Float64Array;
+    const bern = bernoulliPMF(
       Float64Array.from({ length: 600 }, (_, i) => i % 2),
       0.7
-    )) as Float64Array;
+    ) as Float64Array;
     for (let i = 0; i < ks.length; i += 17) {
       expect(pois[i]).toBeCloseTo(poissonPMF(ks[i], 5) as number, 12);
       expect(binom[i]).toBeCloseTo(binomialPMF(ks[i], 40, 0.3) as number, 12);

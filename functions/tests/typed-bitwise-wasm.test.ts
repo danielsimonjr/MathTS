@@ -236,13 +236,13 @@ describe('typed bitwise — WASM fallback when module not loaded', () => {
     await computePool.terminate(true);
   });
 
-  it('bitAnd falls through to ComputePool when wasmLoader has no module', async () => {
+  it('bitAnd falls through to ComputePool when wasmLoader has no module', () => {
     // Use a much smaller array so the test runs quickly via the in-process
     // ComputePool path — this proves the WASM-null path doesn't throw,
     // which is the actual contract under test.
     const a = Int32Array.from([0xff00, 0x0ff0, 0x00ff, 0x1234]);
     const b = Int32Array.from([0xf0f0, 0x0f0f, 0xaaaa, 0x4321]);
-    const out = (await bitAnd(a, b)) as Int32Array;
+    const out = bitAnd(a, b) as Int32Array;
     expect(Array.from(out)).toEqual([
       0xff00 & 0xf0f0,
       0x0ff0 & 0x0f0f,
@@ -251,7 +251,7 @@ describe('typed bitwise — WASM fallback when module not loaded', () => {
     ]);
   });
 
-  it('large-input bitOr without loaded module also reaches ComputePool successfully', async () => {
+  it('large-input bitOr without loaded module also reaches ComputePool successfully', () => {
     // Exceed the WASM threshold to confirm runBinaryBitwiseWasm() returns
     // null (no module) and the typed function still produces a correct
     // result via ComputePool.
@@ -262,7 +262,7 @@ describe('typed bitwise — WASM fallback when module not loaded', () => {
       a[i] = i | 0;
       b[i] = (i ^ 0xdeadbeef) | 0;
     }
-    const out = (await bitOr(a, b)) as Int32Array;
+    const out = bitOr(a, b) as Int32Array;
     expect(out).toBeInstanceOf(Int32Array);
     expect(out.length).toBe(len);
     // Verify the first and last elements match the oracle.

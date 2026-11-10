@@ -1,12 +1,12 @@
 /**
- * Typed Bitwise Functions (Parallel-First)
+ * Typed Bitwise Functions
  *
  * Polymorphic bitwise operations using typed-function for runtime
  * dispatch. Supports `number`, `BigNumber`, `bigint`, and `Int32Array`.
  *
- * Following the parallel-first philosophy per CLAUDE.md:
- * - Use the `ComputePool` for ALL `Int32Array` transformations.
- * - Use native ops on scalar inputs (no worker dispatch overhead).
+ * Every Int32Array signature in this file is synchronous and returns a new Int32Array.
+ * The loops are the in-process drivers of `@danielsimonjr/mathts-parallel` (`ops/bitwise.ts`).
+ * A length mismatch throws RangeError.
  *
  * BigNumber bitwise semantics: the mathjs-derived helpers in
  * `functions/src/utils/bignumber/bitwise.ts` operate on the
@@ -21,7 +21,15 @@
  */
 
 import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
-import { computePool } from '@danielsimonjr/mathts-parallel';
+import {
+  bitAnd as bitAndOp,
+  bitOr as bitOrOp,
+  bitXor as bitXorOp,
+  bitNot as bitNotOp,
+  leftShift as leftShiftOp,
+  rightArithShift as rightArithShiftOp,
+  rightLogShift as rightLogShiftOp,
+} from '@danielsimonjr/mathts-parallel';
 import {
   WASM_BITWISE_THRESHOLD,
   runBinaryBitwiseWasm,
@@ -106,6 +114,45 @@ function logShiftBigInt(x: bigint, n: bigint): bigint {
 }
 
 // =============================================================================
+// Int32Array helpers
+// =============================================================================
+
+/** Name of a binary bitwise operation of the WASM bridge. */
+type BinaryOp = Parameters<typeof runBinaryBitwiseWasm>[0];
+
+/**
+ * Apply a binary bitwise op to two Int32Arrays of the same length. The result is a new array.
+ * A length mismatch throws RangeError before the WASM tier is asked. At or above
+ * WASM_BITWISE_THRESHOLD the WASM tier is asked first; under the shipped policy it returns null.
+ */
+function i32Binary(
+  op: BinaryOp,
+  a: Int32Array,
+  b: Int32Array,
+  js: (a: Int32Array, b: Int32Array) => Int32Array
+): Int32Array {
+  if (a.length !== b.length) {
+    throw new RangeError(
+      `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
+    );
+  }
+  if (a.length >= WASM_BITWISE_THRESHOLD) {
+    const wasm = runBinaryBitwiseWasm(op, a, b);
+    if (wasm) return wasm;
+  }
+  return js(a, b);
+}
+
+/** Bitwise NOT of an Int32Array. The result is a new array. The WASM tier is asked first, as in i32Binary. */
+function i32Unary(a: Int32Array): Int32Array {
+  if (a.length >= WASM_BITWISE_THRESHOLD) {
+    const wasm = runUnaryBitwiseWasm('bitNot', a);
+    if (wasm) return wasm;
+  }
+  return bitNotOp(a);
+}
+
+// =============================================================================
 // Bitwise AND
 // =============================================================================
 
@@ -116,7 +163,7 @@ function logShiftBigInt(x: bigint, n: bigint): bigint {
  * ```typescript
  * bitAnd(0b1010, 0b1100);                   // 0b1000
  * bitAnd(53n, 131n);                        // 1n
- * await bitAnd(int32A, int32B);             // Parallel Int32Array AND
+ * bitAnd(int32A, int32B);                   // Int32Array AND
  * ```
  */
 export const bitAnd = mathTyped('bitAnd', {
@@ -132,14 +179,8 @@ export const bitAnd = mathTyped('bitAnd', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitAnd', (x, y) => x & y),
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('bitAnd', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.bitAnd(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('bitAnd', a, b, bitAndOp),
 
   // Variadic: fold from the left. typed-function packs the spread as a
   // single array argument (`fn(a, b, [...rest])`), so we receive it as
@@ -173,14 +214,8 @@ export const bitOr = mathTyped('bitOr', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitOr', (x, y) => x | y),
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('bitOr', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.bitOr(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('bitOr', a, b, bitOrOp),
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
     rest.reduce(
@@ -211,14 +246,8 @@ export const bitXor = mathTyped('bitXor', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitXor', (x, y) => x ^ y),
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('bitXor', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.bitXor(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('bitXor', a, b, bitXorOp),
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
     rest.reduce(
@@ -251,14 +280,7 @@ export const bitNot = mathTyped('bitNot', {
     return bigIntToBigNumber(~ai);
   },
 
-  Int32Array: async (a: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD) {
-      const wasmResult = runUnaryBitwiseWasm('bitNot', a);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.bitNot(a);
-    return result.result;
-  },
+  Int32Array: (a: Int32Array): Int32Array => i32Unary(a),
 });
 
 // =============================================================================
@@ -286,14 +308,8 @@ export const leftShift = mathTyped('leftShift', {
     return bigIntToBigNumber(ai << bi);
   },
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('leftShift', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.leftShift(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('leftShift', a, b, leftShiftOp),
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
     rest.reduce(
@@ -332,14 +348,8 @@ export const rightArithShift = mathTyped('rightArithShift', {
     return bigIntToBigNumber(ai >> bi);
   },
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('rightArithShift', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.rightArithShift(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('rightArithShift', a, b, rightArithShiftOp),
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
     rest.reduce(
@@ -378,14 +388,8 @@ export const rightLogShift = mathTyped('rightLogShift', {
     return bigIntToBigNumber(logShiftBigInt(ai, bi));
   },
 
-  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
-    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
-      const wasmResult = runBinaryBitwiseWasm('rightLogShift', a, b);
-      if (wasmResult) return wasmResult;
-    }
-    const result = await computePool.rightLogShift(a, b);
-    return result.result;
-  },
+  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+    i32Binary('rightLogShift', a, b, rightLogShiftOp),
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
     rest.reduce(

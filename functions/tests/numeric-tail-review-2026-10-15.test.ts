@@ -31,8 +31,8 @@ describe('gammaincp computes the upper tail directly', () => {
     expect(gammaincp(3, 0)).toBe(1);
   });
 
-  it('the vector form agrees with the scalar form on the far tail', async () => {
-    const out = (await gammaincp(5, new Float64Array([1, 80]))) as Float64Array;
+  it('the vector form agrees with the scalar form on the far tail', () => {
+    const out = gammaincp(5, new Float64Array([1, 80])) as Float64Array;
     expect(out[0]).toBeCloseTo(gammaincp(5, 1) as number, 15);
     expect(out[1]).toBeGreaterThan(0);
     expect(out[1]).toBeCloseTo(gammaincp(5, 80) as number, 40);

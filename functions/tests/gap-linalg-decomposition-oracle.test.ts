@@ -60,12 +60,12 @@ describe('pinv — Moore-Penrose via the four Penrose conditions', () => {
 });
 
 describe('polarDecomposition — A = U·P (U orthogonal, P symmetric PSD)', () => {
-  it('U is orthogonal, P is symmetric, and U·P reconstructs A', async () => {
+  it('U is orthogonal, P is symmetric, and U·P reconstructs A', () => {
     const A: Mat = [
       [2, 1],
       [1, 3],
     ];
-    const { U, P } = (await polarDecomposition(A)) as { U: Mat; P: Mat };
+    const { U, P } = polarDecomposition(A) as { U: Mat; P: Mat };
     // UᵀU = I
     matClose(
       mul(T(U), U),

@@ -485,6 +485,8 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
 
 /** Bessel function of the first kind, general integer order n: J_n(x). */
 export function besselJScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   if (Number.isFinite(n) && n !== Math.round(n)) return besselJRealOrder(n, x);
   const ni = Math.round(n);
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselJScalar(-ni, x);
@@ -532,6 +534,8 @@ export function besselJScalar(n: f64, x: f64): f64 {
  * the mathematically correct form so the scalar and array paths agree.)
  */
 export function besselYScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the recurrence below would never end.
+  if (!Number.isFinite(n)) return NaN;
   if (x <= 0) return NaN;
   if (Number.isFinite(n) && n !== Math.round(n)) return besselYRealOrder(n, x);
   const ni = Math.round(n);

@@ -218,6 +218,9 @@
       "mathWorkerPool": {
         "kind": "object"
       },
+      "matmulSequential": {
+        "kind": "function"
+      },
       "tensordotRange": {
         "kind": "function"
       },
@@ -5647,7 +5650,13 @@
       "parallelFFTPower": {
         "kind": "function"
       },
+      "parallelGaussQuad": {
+        "kind": "function"
+      },
       "parallelIFFT": {
+        "kind": "function"
+      },
+      "parallelRomberg": {
         "kind": "function"
       },
       "parallelStatCorr": {
@@ -6920,6 +6929,9 @@
         "kind": "function"
       },
       "wishartSample": {
+        "kind": "function"
+      },
+      "workerKernel": {
         "kind": "function"
       },
       "xgcd": {
@@ -9211,6 +9223,9 @@
       "DEFAULT_THRESHOLD_BY_OP": {
         "kind": "object"
       },
+      "DeprecatedThresholdOp": {
+        "kind": "type"
+      },
       "DispatchOptions": {
         "kind": "type"
       },
@@ -9251,6 +9266,9 @@
         "kind": "type"
       },
       "ReduceOptions": {
+        "kind": "type"
+      },
+      "ThresholdByOp": {
         "kind": "type"
       },
       "ThresholdConfig": {
@@ -9296,6 +9314,9 @@
         "kind": "function"
       },
       "leftShift": {
+        "kind": "function"
+      },
+      "matmulSequential": {
         "kind": "function"
       },
       "mergeArrayChunks": {

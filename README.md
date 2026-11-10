@@ -208,18 +208,14 @@ the remaining element-wise ops by up to 1.6×.
 > stay in JS where V8 JITs them faster than WASM plus the marshalling cost.
 > Results on developer hardware will differ from CI.
 
-Per-operation worker-pool thresholds (from `npm run bench:parallel`,
-default values in `parallel/src/ComputePool.ts`):
+Per-operation thresholds of the `computePool.*` calls (from `npm run bench:parallel`,
+default values in `parallel/src/ComputePool.ts`). The typed `Float64Array` functions
+are synchronous and do not read them:
 
-| Op                         | Default threshold  | Rationale                                   |
-| -------------------------- | ------------------ | ------------------------------------------- |
-| `matmul`                   | 4,096 elements     | Break-even at 64x64                         |
-| `matrixPower`              | 9,216 elements     | Break-even at ~96x96                        |
-| `characteristicPolynomial` | 9,216 elements     | Break-even at ~96x96                        |
-| `spectrogram`              | 65,536 samples     | Break-even measured on CI                   |
-| `erfc`                     | 100,000 elements   | Special-function compute cost               |
-| `besselJ`                  | 1,000,000 elements | Special-function compute cost               |
-| Most element-wise ops      | `'never'`          | Transfer overhead dominates at tested sizes |
+| Op                    | Default threshold | Rationale                                                                                     |
+| --------------------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `matmul`              | 4,096 elements    | 64x64 on CI (2026-05-23); no break-even to 512x512 on a loaded developer machine (2026-11-09) |
+| Most element-wise ops | `'never'`         | Transfer overhead dominates at tested sizes                                                   |
 
 Bitwise WASM bridges exist in source but `wasmPolicyAllows` keeps them on JavaScript
 (see the table above). `ComputePool` bitwise ops are also `'never'`.

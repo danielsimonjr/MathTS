@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-10", "f": 1270, "e": 6914, "re": 2999 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-10", "f": 1273, "e": 6926, "re": 3004 },
   "s": {
-    "loc": 214510,
+    "loc": 214610,
     "cls": 61,
-    "int": 597,
-    "fn": 2288,
+    "int": 598,
+    "fn": 2295,
     "tg": 168,
     "en": 0,
     "co": 1639,
@@ -40,7 +40,7 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "chunkTyped",
         "chunkPairTyped",
@@ -50,6 +50,7 @@
         "Transfer",
         "forEachMultiIndex",
         "tensordotRange",
+        "matmulSequential",
         "DEFAULT_WORKER_CONFIG",
         "mathWorkerPool",
         "canUseWasm",
@@ -58,8 +59,7 @@
         "transferArrayBuffer",
         "transferTypedArray",
         "createSharedFloat64Array",
-        "createSharedBuffer",
-        "isSharedBuffer"
+        "createSharedBuffer"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -1138,7 +1138,7 @@
       ]
     },
     "functions/typed": {
-      "f": 46,
+      "f": 48,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1626,13 +1626,14 @@
         "ParallelMatrix",
         "WorkerPool",
         "gemmRows",
+        "matmulSequential",
         "parallelMatmul",
         "parallelMatvec",
-        "parallelTranspose",
-        "parallelOuter"
+        "parallelTranspose"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": [
+        "ThresholdByOp",
         "ComputePoolConfig",
         "DispatchOptions",
         "ParallelResult",
@@ -1899,7 +1900,7 @@
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
-    { "p": "typed/index.ts", "i": 52, "o": 2 },
+    { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/array.ts", "i": 0, "o": 49 },

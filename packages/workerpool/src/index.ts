@@ -20,6 +20,7 @@ import {
 import { compileFunctionSource } from './compile-function-source.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
+import { assertMatmulBuffers, matmulSequential } from './matmul-sequential.js';
 import {
   _workerPairwiseSum,
   _workerPairwiseDot,
@@ -1196,28 +1197,12 @@ export class MathWorkerPool {
     bCols: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
-    if (a.length !== aRows * aCols) {
-      throw new Error(`matmul: a has ${a.length} elements, expected ${aRows}x${aCols}`);
-    }
-    if (b.length !== aCols * bCols) {
-      throw new Error(
-        `matmul: inner dimensions must match (b has ${b.length} elements, expected aCols*bCols = ${aCols}*${bCols})`
-      );
-    }
+    assertMatmulBuffers(a.length, aRows, aCols, b.length, bCols);
     const resultSize = aRows * bCols;
     const start = performance.now();
 
     if (!this.shouldParallelize(resultSize, options)) {
-      const result = new Float64Array(resultSize);
-      for (let i = 0; i < aRows; i++) {
-        for (let j = 0; j < bCols; j++) {
-          let sum = 0;
-          for (let k = 0; k < aCols; k++) {
-            sum += a[i * aCols + k] * b[k * bCols + j];
-          }
-          result[i * bCols + j] = sum;
-        }
-      }
+      const result = matmulSequential(a, aRows, aCols, b, bCols);
       return {
         result,
         duration: performance.now() - start,
@@ -2477,3 +2462,4 @@ export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
 /** @internal */
 export { forEachMultiIndex } from './multi-index.js';
 export { tensordotRange } from './tensordot-range.js';
+export { matmulSequential } from './matmul-sequential.js';

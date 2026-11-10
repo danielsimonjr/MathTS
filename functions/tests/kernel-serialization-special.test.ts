@@ -133,17 +133,17 @@ describe('kernelSource serialization — Airy Ai / Bi', () => {
     }
   });
 
-  it('airyAi Float64Array worker path matches scalar', async () => {
+  it('airyAi Float64Array worker path matches scalar', () => {
     const xs = new Float64Array(pinX);
-    const parallel = (await airyAi(xs)) as Float64Array;
+    const parallel = airyAi(xs) as Float64Array;
     for (let i = 0; i < xs.length; i++) {
       expect(Object.is(parallel[i]!, airyAiScalar(xs[i]!))).toBe(true);
     }
   });
 
-  it('airyBi Float64Array worker path matches scalar', async () => {
+  it('airyBi Float64Array worker path matches scalar', () => {
     const xs = new Float64Array(pinX);
-    const parallel = (await airyBi(xs)) as Float64Array;
+    const parallel = airyBi(xs) as Float64Array;
     for (let i = 0; i < xs.length; i++) {
       expect(Object.is(parallel[i]!, airyBiScalar(xs[i]!))).toBe(true);
     }
@@ -165,11 +165,11 @@ describe('kernelSource serialization — betainc', () => {
     }
   });
 
-  it('betainc Float64Array worker path matches scalar', async () => {
+  it('betainc Float64Array worker path matches scalar', () => {
     const a = 2;
     const b = 5;
     const xs = new Float64Array([0.1, 0.3, 0.8]);
-    const parallel = (await betainc(a, b, xs)) as Float64Array;
+    const parallel = betainc(a, b, xs) as Float64Array;
     for (let i = 0; i < xs.length; i++) {
       expect(Object.is(parallel[i]!, betaincScalar(a, b, xs[i]!))).toBe(true);
     }
