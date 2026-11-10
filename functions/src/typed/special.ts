@@ -8,9 +8,11 @@
  * elliptic integrals, orthogonal polynomials and integral functions.
  *
  * Each single-argument function has a `Float64Array` overload that evaluates
- * the function across a whole array, parallelizing large inputs via the
- * worker pool. Multi-argument functions take a `Float64Array` for their
- * varying argument with the remaining parameters fixed.
+ * the function across a whole array. Multi-argument functions take a `Float64Array`
+ * for their varying argument with the remaining parameters fixed. Every Float64Array
+ * overload is synchronous and returns a new Float64Array. The WASM bridge call stays
+ * first where it exists. For worker threads, use `parallelMap` or
+ * `computePool.applyKernel` from `@danielsimonjr/mathts-parallel`.
  *
  * @packageDocumentation
  */
@@ -18,29 +20,20 @@
 import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
 import { gammaG, gammaP } from '../plain/number/index.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
-import { mapArray, kernelSource } from './parallel-map.js';
+import { f64Unary } from './f64-kernels.js';
+import { kernelSource } from './parallel-map.js';
+import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
 import {
   _lgamma,
   erfcSelfContained,
-  erfcScalar,
   factorial,
-  betaScalar,
-  gammaincScalar,
-  gammaincpScalar,
   upperGammaQ,
-  betaincScalar,
-  besselIScalar,
+  incompleteBetaFraction,
   besselHankel,
   besselJ0Series,
   besselJ1Series,
   besselY0Series,
   besselY1Series,
-  besselJ0Scalar,
-  besselJ1Scalar,
-  besselY0Scalar,
-  besselY1Scalar,
-  besselJScalar,
-  besselYScalar,
   besselJRealOrder,
   besselYRealOrder,
   besselHankelReal,
@@ -49,9 +42,20 @@ import {
   airyUCoeffs,
   airyAsymPQ,
   airyScalar,
+  erfcScalar,
+  betaScalar,
+  gammaincScalar,
+  gammaincpScalar,
+  betaincScalar,
+  besselIScalar,
+  besselJ0Scalar,
+  besselJ1Scalar,
+  besselY0Scalar,
+  besselY1Scalar,
+  besselJScalar,
+  besselYScalar,
   airyAiScalar,
   airyBiScalar,
-  incompleteBetaFraction,
   ellipticKScalar,
   ellipticECompleteScalar,
 } from '../wasm/special/scalars.js';
@@ -545,12 +549,10 @@ function fresnelSScalar(x: f64): f64 {
  */
 export const erfc = mathTyped('erfc', {
   number: erfcScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     const wasm = elementwiseUnaryDispatch('erfc', x);
-    if (wasm) return Promise.resolve(wasm);
-    return mapArray(x, erfcScalar, () =>
-      kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')
-    );
+    if (wasm) return wasm;
+    return f64Unary(x, erfcScalar);
   },
 });
 
@@ -562,8 +564,7 @@ export const erfc = mathTyped('erfc', {
  */
 export const erfi = mathTyped('erfi', {
   number: erfiScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, erfiScalar, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, erfiScalar),
 });
 
 // =============================================================================
@@ -621,11 +622,11 @@ function lgammaComplex(z: Complex): Complex {
 export const lgamma = mathTyped('lgamma', {
   number: _lgamma,
   Complex: lgammaComplex,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(lgammaDispatch(x));
+      return lgammaDispatch(x);
     }
-    return mapArray(x, _lgamma, () => kernelSource([_lgamma], '(x) => _lgamma(x)'));
+    return f64Unary(x, _lgamma);
   },
 });
 
@@ -641,12 +642,8 @@ export const lgamma = mathTyped('lgamma', {
  */
 export const beta = mathTyped('beta', {
   'number, number': betaScalar,
-  'Float64Array, number': (a: Float64Array, b: f64): Promise<Float64Array> =>
-    mapArray(
-      a,
-      (v) => betaScalar(v, b),
-      () => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${b})`)
-    ),
+  'Float64Array, number': (a: Float64Array, b: f64): Float64Array =>
+    f64Unary(a, (v) => betaScalar(v, b)),
 });
 
 /**
@@ -661,12 +658,8 @@ export const beta = mathTyped('beta', {
  */
 export const gammainc = mathTyped('gammainc', {
   'number, number': gammaincScalar,
-  'number, Float64Array': (a: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => gammaincScalar(a, v),
-      () => kernelSource([_lgamma, upperGammaQ, gammaincScalar], `(x) => gammaincScalar(${a}, x)`)
-    ),
+  'number, Float64Array': (a: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => gammaincScalar(a, v)),
 });
 
 /**
@@ -678,16 +671,8 @@ export const gammainc = mathTyped('gammainc', {
  */
 export const gammaincp = mathTyped('gammaincp', {
   'number, number': gammaincpScalar,
-  'number, Float64Array': (a: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => gammaincpScalar(a, v),
-      () =>
-        kernelSource(
-          [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
-          `(x) => gammaincpScalar(${a}, x)`
-        )
-    ),
+  'number, Float64Array': (a: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => gammaincpScalar(a, v)),
 });
 
 /**
@@ -700,16 +685,8 @@ export const gammaincp = mathTyped('gammaincp', {
  */
 export const betainc = mathTyped('betainc', {
   'number, number, number': betaincScalar,
-  'number, number, Float64Array': (a: f64, b: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => betaincScalar(a, b, v),
-      () =>
-        kernelSource(
-          [_lgamma, incompleteBetaFraction, betaincScalar],
-          `(x) => betaincScalar(${a}, ${b}, x)`
-        )
-    ),
+  'number, number, Float64Array': (a: f64, b: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => betaincScalar(a, b, v)),
 });
 
 /**
@@ -723,8 +700,7 @@ export const betainc = mathTyped('betainc', {
  */
 export const digamma = mathTyped('digamma', {
   number: digammaScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, digammaScalar, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, digammaScalar),
 });
 
 // =============================================================================
@@ -742,13 +718,11 @@ export const digamma = mathTyped('digamma', {
  */
 export const besselJ0 = mathTyped('besselJ0', {
   number: besselJ0Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselJ0Dispatch(x));
+      return besselJ0Dispatch(x);
     }
-    return mapArray(x, besselJ0Scalar, () =>
-      kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)')
-    );
+    return f64Unary(x, besselJ0Scalar);
   },
 });
 
@@ -763,13 +737,11 @@ export const besselJ0 = mathTyped('besselJ0', {
  */
 export const besselJ1 = mathTyped('besselJ1', {
   number: besselJ1Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselJ1Dispatch(x));
+      return besselJ1Dispatch(x);
     }
-    return mapArray(x, besselJ1Scalar, () =>
-      kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)')
-    );
+    return f64Unary(x, besselJ1Scalar);
   },
 });
 
@@ -784,16 +756,11 @@ export const besselJ1 = mathTyped('besselJ1', {
  */
 export const besselY0 = mathTyped('besselY0', {
   number: besselY0Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselY0Dispatch(x));
+      return besselY0Dispatch(x);
     }
-    return mapArray(x, besselY0Scalar, () =>
-      kernelSource(
-        [besselHankel, besselJ0Series, besselY0Series, besselY0Scalar],
-        '(x) => besselY0Scalar(x)'
-      )
-    );
+    return f64Unary(x, besselY0Scalar);
   },
 });
 
@@ -808,16 +775,11 @@ export const besselY0 = mathTyped('besselY0', {
  */
 export const besselY1 = mathTyped('besselY1', {
   number: besselY1Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselY1Dispatch(x));
+      return besselY1Dispatch(x);
     }
-    return mapArray(x, besselY1Scalar, () =>
-      kernelSource(
-        [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
-        '(x) => besselY1Scalar(x)'
-      )
-    );
+    return f64Unary(x, besselY1Scalar);
   },
 });
 
@@ -833,30 +795,11 @@ export const besselY1 = mathTyped('besselY1', {
  */
 export const besselJ = mathTyped('besselJ', {
   'number, number': besselJScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> => {
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselJDispatch(n, x));
+      return besselJDispatch(n, x);
     }
-    return mapArray(
-      x,
-      (v) => besselJScalar(n, v),
-      () =>
-        kernelSource(
-          [
-            besselHankel,
-            besselJ0Series,
-            besselJ1Series,
-            besselJ0Scalar,
-            besselJ1Scalar,
-            besselGammaAux,
-            besselJYTemme,
-            besselHankelReal,
-            besselJRealOrder,
-            besselJScalar,
-          ],
-          `(x) => besselJScalar(${n}, x)`
-        )
-    );
+    return f64Unary(x, (v) => besselJScalar(n, v));
   },
 });
 
@@ -872,35 +815,11 @@ export const besselJ = mathTyped('besselJ', {
  */
 export const besselY = mathTyped('besselY', {
   'number, number': besselYScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> => {
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(besselYDispatch(n, x));
+      return besselYDispatch(n, x);
     }
-    return mapArray(
-      x,
-      (v) => besselYScalar(n, v),
-      () =>
-        kernelSource(
-          [
-            besselHankel,
-            besselJ0Series,
-            besselJ1Series,
-            besselY0Series,
-            besselY1Series,
-            besselJ0Scalar,
-            besselJ1Scalar,
-            besselY0Scalar,
-            besselY1Scalar,
-            besselGammaAux,
-            besselJYTemme,
-            besselHankelReal,
-            besselJRealOrder,
-            besselYRealOrder,
-            besselYScalar,
-          ],
-          `(x) => besselYScalar(${n}, x)`
-        )
-    );
+    return f64Unary(x, (v) => besselYScalar(n, v));
   },
 });
 
@@ -913,12 +832,8 @@ export const besselY = mathTyped('besselY', {
  */
 export const besselI = mathTyped('besselI', {
   'number, number': besselIScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => besselIScalar(n, v),
-      () => kernelSource([factorial, _lgamma, besselIScalar], `(x) => besselIScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => besselIScalar(n, v)),
 });
 
 /**
@@ -930,12 +845,8 @@ export const besselI = mathTyped('besselI', {
  */
 export const besselK = mathTyped('besselK', {
   'number, number': besselKScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => besselKScalar(n, v),
-      () => kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => besselKScalar(n, v)),
 });
 
 // =============================================================================
@@ -963,13 +874,11 @@ export const besselK = mathTyped('besselK', {
  */
 export const ellipticK = mathTyped('ellipticK', {
   number: ellipticKScalar,
-  Float64Array: (m: Float64Array): Promise<Float64Array> => {
+  Float64Array: (m: Float64Array): Float64Array => {
     if (m.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(ellipticKDispatch(m));
+      return ellipticKDispatch(m);
     }
-    return mapArray(m, ellipticKScalar, () =>
-      kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')
-    );
+    return f64Unary(m, ellipticKScalar);
   },
 });
 
@@ -996,13 +905,11 @@ export const ellipticK = mathTyped('ellipticK', {
 export const ellipticE = mathTyped('ellipticE', {
   'number, number': ellipticEScalar,
   number: ellipticECompleteScalar,
-  Float64Array: (m: Float64Array): Promise<Float64Array> => {
+  Float64Array: (m: Float64Array): Float64Array => {
     if (m.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(ellipticEDispatch(m));
+      return ellipticEDispatch(m);
     }
-    return mapArray(m, ellipticECompleteScalar, () =>
-      kernelSource([ellipticEScalar, ellipticECompleteScalar], '(m) => ellipticECompleteScalar(m)')
-    );
+    return f64Unary(m, ellipticECompleteScalar);
   },
 });
 
@@ -1019,12 +926,8 @@ export const ellipticE = mathTyped('ellipticE', {
  */
 export const chebyshevT = mathTyped('chebyshevT', {
   'number, number': chebyshevTScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => chebyshevTScalar(n, v),
-      () => kernelSource([chebyshevTScalar], `(x) => chebyshevTScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => chebyshevTScalar(n, v)),
 });
 
 /**
@@ -1036,12 +939,8 @@ export const chebyshevT = mathTyped('chebyshevT', {
  */
 export const hermiteH = mathTyped('hermiteH', {
   'number, number': hermiteHScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => hermiteHScalar(n, v),
-      () => kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => hermiteHScalar(n, v)),
 });
 
 /**
@@ -1053,12 +952,8 @@ export const hermiteH = mathTyped('hermiteH', {
  */
 export const laguerreL = mathTyped('laguerreL', {
   'number, number': laguerreLScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => laguerreLScalar(n, v),
-      () => kernelSource([laguerreLScalar], `(x) => laguerreLScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => laguerreLScalar(n, v)),
 });
 
 /**
@@ -1070,12 +965,8 @@ export const laguerreL = mathTyped('laguerreL', {
  */
 export const legendreP = mathTyped('legendreP', {
   'number, number': legendrePScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
-      x,
-      (v) => legendrePScalar(n, v),
-      () => kernelSource([legendrePScalar], `(x) => legendrePScalar(${n}, x)`)
-    ),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
+    f64Unary(x, (v) => legendrePScalar(n, v)),
 });
 
 // =============================================================================
@@ -1101,8 +992,7 @@ export const lambertW = mathTyped('lambertW', {
     if (branch === -1) return lambertWm1Scalar(x);
     throw new Error('lambertW: branch must be 0 or -1');
   },
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, lambertWScalar, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, lambertWScalar),
 });
 
 // =============================================================================
@@ -1117,10 +1007,7 @@ export const lambertW = mathTyped('lambertW', {
  */
 export const cosIntegral = mathTyped('cosIntegral', {
   number: cosIntegralScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, cosIntegralScalar, () =>
-      kernelSource([cosIntegralScalar], '(x) => cosIntegralScalar(x)')
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, cosIntegralScalar),
 });
 
 /**
@@ -1131,10 +1018,7 @@ export const cosIntegral = mathTyped('cosIntegral', {
  */
 export const sinIntegral = mathTyped('sinIntegral', {
   number: sinIntegralScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, sinIntegralScalar, () =>
-      kernelSource([sinIntegralScalar], '(x) => sinIntegralScalar(x)')
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, sinIntegralScalar),
 });
 
 /**
@@ -1145,10 +1029,7 @@ export const sinIntegral = mathTyped('sinIntegral', {
  */
 export const logIntegral = mathTyped('logIntegral', {
   number: logIntegralScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, logIntegralScalar, () =>
-      kernelSource([expIntegralEiScalar, logIntegralScalar], '(x) => logIntegralScalar(x)')
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, logIntegralScalar),
 });
 
 /**
@@ -1159,10 +1040,7 @@ export const logIntegral = mathTyped('logIntegral', {
  */
 export const expIntegralEi = mathTyped('expIntegralEi', {
   number: expIntegralEiScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, expIntegralEiScalar, () =>
-      kernelSource([expIntegralEiScalar], '(x) => expIntegralEiScalar(x)')
-    ),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, expIntegralEiScalar),
 });
 
 // =============================================================================
@@ -1177,8 +1055,7 @@ export const expIntegralEi = mathTyped('expIntegralEi', {
  */
 export const fresnelC = mathTyped('fresnelC', {
   number: fresnelCScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, fresnelCScalar, () => kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, fresnelCScalar),
 });
 
 /**
@@ -1189,8 +1066,7 @@ export const fresnelC = mathTyped('fresnelC', {
  */
 export const fresnelS = mathTyped('fresnelS', {
   number: fresnelSScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, fresnelSScalar, () => kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')),
+  Float64Array: (x: Float64Array): Float64Array => f64Unary(x, fresnelSScalar),
 });
 
 // =============================================================================
@@ -1218,13 +1094,11 @@ export const fresnelS = mathTyped('fresnelS', {
  */
 export const airyAi = mathTyped('airyAi', {
   number: airyAiScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(airyAiDispatch(x));
+      return airyAiDispatch(x);
     }
-    return mapArray(x, airyAiScalar, () =>
-      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar], '(x) => airyAiScalar(x)')
-    );
+    return f64Unary(x, airyAiScalar);
   },
 });
 
@@ -1244,13 +1118,11 @@ export const airyAi = mathTyped('airyAi', {
  */
 export const airyBi = mathTyped('airyBi', {
   number: airyBiScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
-      return Promise.resolve(airyBiDispatch(x));
+      return airyBiDispatch(x);
     }
-    return mapArray(x, airyBiScalar, () =>
-      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar], '(x) => airyBiScalar(x)')
-    );
+    return f64Unary(x, airyBiScalar);
   },
 });
 
@@ -1426,6 +1298,168 @@ export const ellipticPi = mathTyped('ellipticPi', {
 // =============================================================================
 // Named Export Collection
 // =============================================================================
+
+// Worker kernel sources for `workerKernel` (see worker-kernels.ts). Each source holds the
+// scalar that the synchronous function runs. The worker result is equal bit for bit.
+registerWorkerKernels({
+  erfc: [0, () => kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')],
+  erfi: [0, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')],
+  lgamma: [0, () => kernelSource([_lgamma], '(x) => _lgamma(x)')],
+  beta: [
+    1,
+    (b: number) => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
+  ],
+  gammainc: [
+    1,
+    (a: number) =>
+      kernelSource(
+        [_lgamma, upperGammaQ, gammaincScalar],
+        `(x) => gammaincScalar(${numberLiteral(a)}, x)`
+      ),
+  ],
+  gammaincp: [
+    1,
+    (a: number) =>
+      kernelSource(
+        [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
+        `(x) => gammaincpScalar(${numberLiteral(a)}, x)`
+      ),
+  ],
+  betainc: [
+    2,
+    (a: number, b: number) =>
+      kernelSource(
+        [_lgamma, incompleteBetaFraction, betaincScalar],
+        `(x) => betaincScalar(${numberLiteral(a)}, ${numberLiteral(b)}, x)`
+      ),
+  ],
+  digamma: [0, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')],
+  besselJ0: [
+    0,
+    () => kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)'),
+  ],
+  besselJ1: [
+    0,
+    () => kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)'),
+  ],
+  besselY0: [
+    0,
+    () =>
+      kernelSource(
+        [besselHankel, besselJ0Series, besselY0Series, besselY0Scalar],
+        '(x) => besselY0Scalar(x)'
+      ),
+  ],
+  besselY1: [
+    0,
+    () =>
+      kernelSource(
+        [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
+        '(x) => besselY1Scalar(x)'
+      ),
+  ],
+  besselJ: [
+    1,
+    (n: number) =>
+      kernelSource(
+        [
+          besselHankel,
+          besselJ0Series,
+          besselJ1Series,
+          besselJ0Scalar,
+          besselJ1Scalar,
+          besselGammaAux,
+          besselJYTemme,
+          besselHankelReal,
+          besselJRealOrder,
+          besselJScalar,
+        ],
+        `(x) => besselJScalar(${numberLiteral(n)}, x)`
+      ),
+  ],
+  besselY: [
+    1,
+    (n: number) =>
+      kernelSource(
+        [
+          besselHankel,
+          besselJ0Series,
+          besselJ1Series,
+          besselY0Series,
+          besselY1Series,
+          besselJ0Scalar,
+          besselJ1Scalar,
+          besselY0Scalar,
+          besselY1Scalar,
+          besselGammaAux,
+          besselJYTemme,
+          besselHankelReal,
+          besselJRealOrder,
+          besselYRealOrder,
+          besselYScalar,
+        ],
+        `(x) => besselYScalar(${numberLiteral(n)}, x)`
+      ),
+  ],
+  besselI: [
+    1,
+    (n: number) =>
+      kernelSource(
+        [factorial, _lgamma, besselIScalar],
+        `(x) => besselIScalar(${numberLiteral(n)}, x)`
+      ),
+  ],
+  besselK: [
+    1,
+    (n: number) =>
+      kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${numberLiteral(n)}, x)`),
+  ],
+  ellipticK: [0, () => kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')],
+  ellipticE: [
+    0,
+    () =>
+      kernelSource([ellipticEScalar, ellipticECompleteScalar], '(m) => ellipticECompleteScalar(m)'),
+  ],
+  chebyshevT: [
+    1,
+    (n: number) =>
+      kernelSource([chebyshevTScalar], `(x) => chebyshevTScalar(${numberLiteral(n)}, x)`),
+  ],
+  hermiteH: [
+    1,
+    (n: number) => kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${numberLiteral(n)}, x)`),
+  ],
+  laguerreL: [
+    1,
+    (n: number) =>
+      kernelSource([laguerreLScalar], `(x) => laguerreLScalar(${numberLiteral(n)}, x)`),
+  ],
+  legendreP: [
+    1,
+    (n: number) =>
+      kernelSource([legendrePScalar], `(x) => legendrePScalar(${numberLiteral(n)}, x)`),
+  ],
+  lambertW: [0, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')],
+  cosIntegral: [0, () => kernelSource([cosIntegralScalar], '(x) => cosIntegralScalar(x)')],
+  sinIntegral: [0, () => kernelSource([sinIntegralScalar], '(x) => sinIntegralScalar(x)')],
+  logIntegral: [
+    0,
+    () => kernelSource([expIntegralEiScalar, logIntegralScalar], '(x) => logIntegralScalar(x)'),
+  ],
+  expIntegralEi: [0, () => kernelSource([expIntegralEiScalar], '(x) => expIntegralEiScalar(x)')],
+  fresnelC: [0, () => kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')],
+  fresnelS: [0, () => kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')],
+  airyAi: [
+    0,
+    () =>
+      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar], '(x) => airyAiScalar(x)'),
+  ],
+  airyBi: [
+    0,
+    () =>
+      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar], '(x) => airyBiScalar(x)'),
+  ],
+});
 
 /**
  * All typed special functions.
