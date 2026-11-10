@@ -3,6 +3,7 @@ import type { IndexInterface } from '../type/matrix/types.js';
 
 type Index = IndexInterface;
 
+/** Defines the dependencies that {@link flattenSetPair} needs: size, subset, Index and flatten. */
 export interface FlattenSetPairDeps {
   size: (arr: MathArray | Matrix) => number[];
   subset: (arr: number[], index: Index) => number;

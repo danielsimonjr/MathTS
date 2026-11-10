@@ -39,7 +39,7 @@ const globalConfig: Required<DecimalConfig> = {
 };
 
 /**
- * Decimal class for arbitrary precision arithmetic.
+ * Returns the value that `better` prefers over all other values, or a NaN Decimal when the list is empty.
  */
 function decimalExtreme(
   values: (Decimal | number | string)[],
@@ -54,6 +54,7 @@ function decimalExtreme(
   return best;
 }
 
+/** Represents an arbitrary-precision decimal number with digits, exponent and sign. */
 export class Decimal {
   /** Coefficient digits as array of numbers (0-9) */
   public d: number[] | null;

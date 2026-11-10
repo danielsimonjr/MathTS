@@ -355,6 +355,7 @@ export interface SearchProgress {
   readonly selected?: ScoredCandidate<ScalarNode>;
 }
 
+/** Names the reasons a scalar search stops: limits, cancellation or early stop. */
 export type ScalarSearchStopReason =
   'max-evaluations' | 'max-candidates' | 'cancelled' | 'early-stop';
 
@@ -376,7 +377,10 @@ export interface ScalarSearchResult {
   readonly simplifyFallbacks: number;
 }
 
-/** @internal Exported for unit tests; not part of the package barrel. */
+/**
+ * Gives tests access to the private `simplifyCandidate` routine.
+ * @internal Exported for unit tests; not part of the package barrel.
+ */
 export function simplifyCandidateForTest(
   node: ScalarNode,
   mode: ScalarSearchOptions['simplify'],
@@ -385,7 +389,10 @@ export function simplifyCandidateForTest(
   return simplifyCandidate(node, mode, recordFallback);
 }
 
-/** @internal Exported for unit tests; not part of the package barrel. */
+/**
+ * Adds individuals to a new hall of fame and returns its Pareto front.
+ * @internal Exported for unit tests; not part of the package barrel.
+ */
 export function hallFrontForTest(individuals: readonly EvaluatedIndividual[]): {
   front: ScoredCandidate<ScalarNode>[];
   fittedParameters: Float64Array[];
@@ -397,7 +404,10 @@ export function hallFrontForTest(individuals: readonly EvaluatedIndividual[]): {
   return hall.front();
 }
 
-/** @internal One evaluated tree; exported for the unit tests, not the package barrel. */
+/**
+ * Defines one evaluated tree: its node, key, loss, complexity and parameters.
+ * @internal Exported for the unit tests, not the package barrel.
+ */
 export interface EvaluatedIndividual {
   readonly node: ScalarNode;
   readonly key: string;
@@ -1266,6 +1276,9 @@ export function parsimonyKey(ind: EvaluatedIndividual, share: number, scaling: n
   return Math.log(Math.max(ind.loss, Number.MIN_VALUE)) + scaling * share;
 }
 
+/**
+ * Draws tournament contestants, ranks them by loss with optional parsimony, and returns a rank with geometric probability.
+ */
 export function tournamentSelect(
   population: readonly EvaluatedIndividual[],
   rng: SeededRng,
@@ -1317,7 +1330,10 @@ function truncateDistinct(merged: EvaluatedIndividual[], size: number): Evaluate
   return out;
 }
 
-/** @internal One island's random stream and population. */
+/**
+ * Defines one island with its own random stream and population.
+ * @internal
+ */
 export interface Island {
   readonly rng: SeededRng;
   /** Best first after the first generation; the initial deal is in enumeration order. */

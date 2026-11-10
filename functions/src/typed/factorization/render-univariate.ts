@@ -1,3 +1,4 @@
+/** Defines the rendering facts of one coefficient for {@link renderDescendingUnivariate}. */
 export interface UnivariateTerm {
   zero: boolean;
   negative: boolean;

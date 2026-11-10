@@ -176,7 +176,10 @@ export function pushConfigOverlay(overlay: ConfigOptions): void {
   overlayActive = true;
 }
 
-/** @internal */
+/**
+ * Pops the top config overlay and clears the active flag when the overlay stack becomes empty.
+ * @internal
+ */
 export function popConfigOverlay(): void {
   configOverlayStack.pop();
   overlayActive = configOverlayStack.length > 0;

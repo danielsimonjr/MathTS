@@ -26,6 +26,7 @@ interface IsPrimeDependencies {
   typed: TypedFunction;
 }
 
+/** Defines typed zero and small-integer literals for the trial-division primality test. */
 export type TrialPrimeConsts<T extends number | bigint> = {
   zero: T;
   one: T;

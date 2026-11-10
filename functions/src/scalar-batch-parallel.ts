@@ -65,6 +65,7 @@ export interface ScalarPopulationParallelOptions {
   readonly pool?: Pick<WorkerPool, 'execute'>;
 }
 
+/** Defines one scalar tree with its index and optional parameters to score within a population. */
 export interface ScalarPopulationEvalItem {
   /** Returned unchanged with the result. */
   readonly index: number;
@@ -72,12 +73,14 @@ export interface ScalarPopulationEvalItem {
   readonly params?: ArrayLike<number>;
 }
 
+/** Holds the columns, the items and the optional parallel settings for {@link evaluateScalarPopulation}. */
 export interface EvaluateScalarPopulationOptions extends CompileScalarOptions {
   readonly columns: readonly Float64Array[];
   readonly items: readonly ScalarPopulationEvalItem[];
   readonly parallel?: ScalarPopulationParallelOptions;
 }
 
+/** Defines one population evaluation result with the item index and its batch result. */
 export interface ScalarPopulationEvalResult {
   readonly index: number;
   readonly batch: ScalarBatchResult;
@@ -99,7 +102,10 @@ function defaultWorkerCount(): number {
   return 4;
 }
 
-/** @internal Worker chunk count for {@link evaluateScalarPopulation}; not on the barrel. */
+/**
+ * Returns the worker chunk count for {@link evaluateScalarPopulation}: hardware concurrency minus one, minimum two, else four.
+ * @internal Not on the barrel.
+ */
 export function scalarParallelWorkerCount(): number {
   return defaultWorkerCount();
 }

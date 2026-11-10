@@ -224,6 +224,14 @@ export function createEvaluate(
     scope?: Record<string, unknown> | Scope,
     options?: EvaluateOptions
   ): unknown[];
+  /**
+   * Evaluates one expression string, or maps each string in an array, with the given scope and options.
+   *
+   * @param exprOrExprs - One expression string or an array of expression strings
+   * @param scope - Optional scope with variable bindings
+   * @param options - Optional flags
+   * @returns One result, or an array of results
+   */
   function evaluate(
     exprOrExprs: string | string[],
     scope?: Record<string, unknown> | Scope,

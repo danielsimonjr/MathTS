@@ -165,23 +165,8 @@ export interface MathInstance {
 }
 
 /**
- * Create a MathTS instance with mathjs-compatible API
- *
- * @param factories - Factory functions to include (use `all` for the full
- *   `@danielsimonjr/mathts-functions` surface; defaults to `all`)
- * @param config - Configuration options
- * @returns MathTS instance with mathjs-compatible API
- *
- * @example
- * ```typescript
- * import { create, all } from '@danielsimonjr/mathts-compat';
- * const math = create(all);
- *
- * math.add(1, 2);             // 3
- * math.complex(3, 4);         // Complex(3, 4)
- * math.matrix([[1,2],[3,4]]); // DenseMatrix
- * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
- * ```
+ * Copies the name, length, prototype and own properties of `from` onto the wrapper `to`.
+ * Keys that refuse redefinition stay as they are.
  */
 function copyFunctionSurface(
   from: (...args: unknown[]) => unknown,
@@ -240,6 +225,25 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   return wrapped as T;
 }
 
+/**
+ * Create a MathTS instance with mathjs-compatible API
+ *
+ * @param factories - Factory functions to include (use `all` for the full
+ *   `@danielsimonjr/mathts-functions` surface; defaults to `all`)
+ * @param config - Configuration options
+ * @returns MathTS instance with mathjs-compatible API
+ *
+ * @example
+ * ```typescript
+ * import { create, all } from '@danielsimonjr/mathts-compat';
+ * const math = create(all);
+ *
+ * math.add(1, 2);             // 3
+ * math.complex(3, 4);         // Complex(3, 4)
+ * math.matrix([[1,2],[3,4]]); // DenseMatrix
+ * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
+ * ```
+ */
 export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}

@@ -4,6 +4,7 @@
 
 import type { BufferPool, GPUContext, ShaderManager } from '@danielsimonjr/mathts-gpu';
 
+/** Maps one shader binding to a storage buffer index; index -1 selects the uniform buffer. */
 export type ShaderBindEntry = { binding: number; bufferIndex: number };
 
 /**
@@ -16,6 +17,7 @@ export interface RunShaderHost {
   getShaderManager(): ShaderManager;
 }
 
+/** Defines all data that {@link runShader} needs for one dispatch: pipeline, buffers, bindings, workgroups and result. */
 export interface RunShaderPlan {
   pipeline: string;
   bytes: number[];
@@ -29,6 +31,7 @@ export interface RunShaderPlan {
 
 const UNIFORM_BYTES = 16;
 
+/** Builds the run-shader plan for element-wise addition of two matrices. */
 export function planRunShaderFromAdd(
   a: Float32Array,
   b: Float32Array,
@@ -54,6 +57,7 @@ export function planRunShaderFromAdd(
   };
 }
 
+/** Builds the run-shader plan for the product of an M x K matrix and a K x N matrix. */
 export function planRunShaderFromMatmul(
   a: Float32Array,
   b: Float32Array,
@@ -79,6 +83,7 @@ export function planRunShaderFromMatmul(
   };
 }
 
+/** Builds the run-shader plan for a matrix transpose. */
 export function planRunShaderFromTranspose(
   a: Float32Array,
   rows: number,

@@ -33,6 +33,7 @@ export const DEFAULT_MUTATION_WEIGHTS = {
   randomizeTree: 0.000502,
 } as const;
 
+/** Names one mutation operator, a key of {@link DEFAULT_MUTATION_WEIGHTS}. */
 export type MutationWeightKey = keyof typeof DEFAULT_MUTATION_WEIGHTS;
 
 const MUTATION_DRAW_ORDER: readonly MutationWeightKey[] = [
@@ -56,6 +57,7 @@ export interface ScalarMutationContext {
   readonly temperature: number;
 }
 
+/** Defines one scalar mutation that returns a new node, or null when it does not apply. */
 export type ScalarMutationOperator = (
   node: ScalarNode,
   rng: SeededRng,
