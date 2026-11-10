@@ -75,21 +75,45 @@ describeIfAS('sort bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     }
   });
 
-  it('sortF64Dispatch is fast + bit-identical on duplicate-heavy input (introsort)', () => {
-    // Heavy duplicates: the old Lomuto quicksort degraded to O(n²) here. The
-    // 3-way introsort keeps it O(n log n). Correctness is the primary assertion;
-    // a generous wall-clock ceiling guards against an accidental O(n²) regression.
+  it('sortF64Dispatch is bit-identical on duplicate-heavy input (introsort)', () => {
+    // Heavy duplicates: the old Lomuto quicksort degraded to O(n²) here.
     const dup = new Float64Array(N);
     for (let i = 0; i < N; i++) dup[i] = (i % 3) * 1.0;
-    const t0 = performance.now();
     const { result, counts } = countExportCalls(['sort_f64'], () =>
       sortF64Dispatch(Float64Array.from(dup))
     );
-    const dt = performance.now() - t0;
     expect(counts.sort_f64).toBeGreaterThan(0);
     const ref = sortF64JS(Float64Array.from(dup));
     for (let i = 0; i < N; i++) expect(result[i]).toBe(ref[i]);
-    expect(dt).toBeLessThan(1000); // O(n²) on 16 384 dupes would blow past this
+  });
+
+  it('sortF64Dispatch scales as O(n log n), not O(n²), on duplicate-heavy input', () => {
+    // The check is a ratio, not an absolute budget. The n and 4n samples alternate in one
+    // process, so machine load slows both lanes together. Each lane keeps its fastest of 7
+    // samples. From n to 4n, O(n log n) grows the time about 4.6 times. O(n²) grows the time 16
+    // times.
+    const dupes = (n: number): Float64Array => {
+      const out = new Float64Array(n);
+      for (let i = 0; i < n; i++) out[i] = (i % 3) * 1.0;
+      return out;
+    };
+    const small = dupes(N);
+    const large = dupes(4 * N);
+    const sample = (data: Float64Array): number => {
+      const copy = Float64Array.from(data);
+      const t0 = performance.now();
+      sortF64Dispatch(copy);
+      return performance.now() - t0;
+    };
+    sample(small);
+    sample(large);
+    let smallMs = Infinity;
+    let largeMs = Infinity;
+    for (let k = 0; k < 7; k++) {
+      smallMs = Math.min(smallMs, sample(small));
+      largeMs = Math.min(largeMs, sample(large));
+    }
+    expect(largeMs / Math.max(smallMs, 0.01)).toBeLessThan(10);
   });
 
   it('argsort/rank execute the AS kernel and match the JS stable reference on ties', () => {

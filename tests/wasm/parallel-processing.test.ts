@@ -12,7 +12,7 @@
  * Import paths updated for Mathts monorepo structure.
  */
 import assert from 'assert';
-import { describe, it, afterAll } from 'vitest';
+import { describe, it, afterAll, vi } from 'vitest';
 
 const EPSILON = 1e-10;
 
@@ -423,18 +423,22 @@ describe('Parallel Processing Tests', { timeout: 30000 }, () => {
         const { ParallelMatrix } = await import('../../parallel/src/ParallelMatrix.js');
 
         ParallelMatrix.configure({ minSizeForParallel: 100000 });
-
-        const startTime = Date.now();
-        const a = new Float64Array([1, 2, 3, 4, 5]);
-        const b = new Float64Array([5, 4, 3, 2, 1]);
-
-        const result = await ParallelMatrix.add(a, b, 5);
-        const duration = Date.now() - startTime;
-
-        assert.ok(duration < 50, `Sequential should be fast, took ${duration}ms`);
-        approxArrayEqual(result, [6, 6, 6, 6, 6]);
-
-        ParallelMatrix.configure({ minSizeForParallel: 1000 });
+        // The sequential path never asks for the worker pool. The check reads the path, not the
+        // time, so machine load cannot change the result.
+        const poolSpy = vi.spyOn(
+          ParallelMatrix as unknown as { getWorkerPool: () => unknown },
+          'getWorkerPool'
+        );
+        try {
+          const a = new Float64Array([1, 2, 3, 4, 5]);
+          const b = new Float64Array([5, 4, 3, 2, 1]);
+          const result = await ParallelMatrix.add(a, b, 5);
+          assert.strictEqual(poolSpy.mock.calls.length, 0, 'a small add must not use the pool');
+          approxArrayEqual(result, [6, 6, 6, 6, 6]);
+        } finally {
+          poolSpy.mockRestore();
+          ParallelMatrix.configure({ minSizeForParallel: 1000 });
+        }
       } catch (err) {
         if (shouldSkip(err as Error)) {
           assert.ok(true, 'Module not available - skipping');

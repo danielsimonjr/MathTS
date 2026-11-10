@@ -8,6 +8,32 @@ import {
   MAX_PARSE_RECURSION,
 } from '../../src/limits.js';
 import type { MathNode } from '../../src/node/Node.js';
+import { createEvaluate } from '../../src/evaluator/evaluate.js';
+
+/**
+ * Count the forEach calls on every tree node. The walk is iterative because the trees are deeper
+ * than the call stack allows. After 8 * MAX_COMPILE_DEPTH visits, a RangeError stops a runaway
+ * walk.
+ */
+function countVisits(root: MathNode): { n: number } {
+  const visits = { n: 0 };
+  const stack: MathNode[] = [root];
+  while (stack.length > 0) {
+    const node = stack.pop() as MathNode;
+    const original = node.forEach;
+    Object.defineProperty(node, 'forEach', {
+      configurable: true,
+      writable: true,
+      value(this: MathNode, callback: (child: MathNode) => void) {
+        visits.n++;
+        if (visits.n > 8 * MAX_COMPILE_DEPTH) throw new RangeError('visit budget');
+        return original.call(this, callback);
+      },
+    });
+    original.call(node, (child: MathNode) => stack.push(child));
+  }
+  return visits;
+}
 
 /**
  * Nesting cap measurement (Node 22, 2026-10-30): `('('.repeat(n)+'1'+')'.repeat(n))`
@@ -96,14 +122,27 @@ describe('expression security limits', () => {
     ['sum', '1' + '+1'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['factorial', '1' + '!'.repeat(MAX_COMPILE_DEPTH * 4)],
     ['accessor', 'a' + '.b'.repeat(MAX_COMPILE_DEPTH * 4)],
-  ])('evaluate rejects a left-deep %s with the compile-depth error, quickly', (_name, text) => {
-    // Before the validator carried a depth, it absorbed the RangeError and re-walked the subtree,
-    // so the work doubled at every overflowing level and this call did not return.
-    const started = Date.now();
+  ])('evaluate rejects a left-deep %s with the compile-depth error', (_name, text) => {
     expect(() => evaluate(text, { a: {} })).toThrow(
       new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
     );
-    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
+  it.each([
+    ['sum', '1' + '+1'.repeat(MAX_COMPILE_DEPTH * 4)],
+    ['factorial', '1' + '!'.repeat(MAX_COMPILE_DEPTH * 4)],
+    ['accessor', 'a' + '.b'.repeat(MAX_COMPILE_DEPTH * 4)],
+  ])('evaluate stops a left-deep %s at the depth cap after a linear walk', (_name, text) => {
+    // Without a depth, the validator absorbs the RangeError and walks the subtree again. The work
+    // then doubles at every level past the overflow, and the call does not return. The check
+    // counts node visits, not time, so machine load cannot change the result.
+    const ast = parse(text);
+    const visits = countVisits(ast);
+    const evaluateAst = createEvaluate(() => ast, {});
+    expect(() => evaluateAst('x', { a: {} })).toThrow(
+      new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
+    );
+    expect(visits.n).toBeLessThanOrEqual(2 * MAX_COMPILE_DEPTH);
   });
 
   it('evaluate still accepts a long sum under the compile-depth cap', () => {

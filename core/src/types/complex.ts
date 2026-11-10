@@ -739,9 +739,12 @@ export class Complex implements IComplex {
   }
 }
 
-// Merged with the class so the four tangent methods keep their method signatures in the emitted
-// `.d.ts` (a `declare tan: () => Complex` field would publish them as properties). Their bodies are
-// installed by the class's static block, and `complex-tan-family-pin.test.ts` calls each one.
+/**
+ * The four tangent methods of {@link Complex}, merged with the class. The merge keeps their method
+ * signatures in the emitted `.d.ts`; a `declare tan: () => Complex` field publishes a property.
+ * The static block of the class installs the bodies, and `complex-tan-family-pin.test.ts` calls
+ * each one.
+ */
 export interface Complex {
   /**
    * Tangent: tan(x+iy) = (sin 2x + i sinh 2y) / (cos 2x + cosh 2y)

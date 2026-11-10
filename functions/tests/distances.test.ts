@@ -64,13 +64,23 @@ describe('wassersteinDistance sweep (Copilot review)', () => {
       12
     );
   });
-  it('is O(n log n): 50,000 points run in well under a second', () => {
+  it('reads each sample point a fixed number of times: 50,000 points', () => {
+    // The check counts element reads, not time, so machine load cannot change the result. The
+    // sweep sorts a copy of each sample once, so the sweep reads each input point once. A scan
+    // per merged point reads the input O(n²) times.
     const n = 50000;
-    const a = Array.from({ length: n }, (_, i) => Math.sin(i));
-    const b = Array.from({ length: n }, (_, i) => Math.cos(i));
-    const t = performance.now();
+    const reads = { n: 0 };
+    const counted = (values: number[]): number[] =>
+      new Proxy(values, {
+        get(target, key, receiver) {
+          if (typeof key === 'string' && /^\d+$/.test(key)) reads.n++;
+          return Reflect.get(target, key, receiver);
+        },
+      });
+    const a = counted(Array.from({ length: n }, (_, i) => Math.sin(i)));
+    const b = counted(Array.from({ length: n }, (_, i) => Math.cos(i)));
     const d = wassersteinDistance(a, b);
-    expect(performance.now() - t).toBeLessThan(1000);
     expect(d).toBeGreaterThanOrEqual(0);
+    expect(reads.n).toBeLessThanOrEqual(4 * n);
   });
 });

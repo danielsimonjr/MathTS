@@ -596,6 +596,7 @@
       "exactScaleNumberCacheHas",
       "exactScaleNumberCacheSize",
       "exactScaleOf",
+      "exactScaleRoundingCount",
       "exactScalesEqual",
       "exactScaleToNumber",
       "expm1",

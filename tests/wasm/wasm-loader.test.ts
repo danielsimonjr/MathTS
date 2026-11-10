@@ -74,15 +74,15 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
       assert.strictEqual(module1, module2, 'Should return same cached module');
     });
 
-    it('should load WASM within reasonable time', async () => {
-      const startTime = Date.now();
-
+    it('should report the module that load() resolved', async () => {
+      // The check has no wall-clock budget: load time measures the machine, not the loader. The runner's
+      // test timeout still fails a load that does not resolve.
       const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js');
       const loader = WasmLoader.getInstance();
-      await loader.load();
-      const loadTime = Date.now() - startTime;
+      const module = await loader.load();
 
-      assert.ok(loadTime < 5000, `WASM load time ${loadTime}ms should be < 5000ms`);
+      assert.ok(loader.isLoaded(), 'loader reports loaded after load()');
+      assert.strictEqual(loader.getModule(), module, 'getModule() returns the loaded module');
     });
   });
 

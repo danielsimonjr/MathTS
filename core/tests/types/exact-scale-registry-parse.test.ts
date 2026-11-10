@@ -5,7 +5,7 @@
  * - the bit-length normalization shift rounds like the decimal parser at every magnitude
  * - Unit.prototype.exactScale is memoized per unit list
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   NAMED_IRRATIONALS,
   UNIT_EXACT_SCALE,
@@ -21,6 +21,7 @@ import {
   powerExactScale,
   exactScalesEqual,
   exactScaleToNumber,
+  exactScaleRoundingCount,
   formatExactScale,
   readScaleExpression,
   type ExactScale,
@@ -150,19 +151,28 @@ describe('Unit.prototype.exactScale memo', () => {
     expect(Unit.exactScale('km^-1')).toEqual(ratioExactScale(1, 1000));
   });
 
-  it('keeps conversions fast: 20000 psi to Pa conversions within a generous budget', () => {
-    const run = () => {
-      let sum = 0;
-      for (let i = 1; i <= 20000; i++) sum += new Unit(i, 'psi').toNumber('Pa');
-      return sum;
-    };
-    run(); // warm up
-    const start = performance.now();
-    const sum = run();
-    const ms = performance.now() - start;
+  it('keeps conversions on the memo path: 1000 psi to Pa conversions', () => {
+    // The check counts work, not time, so machine load cannot change the result. Each conversion
+    // reads the unit-list memo 2 times and rounds 1 fresh exact reading. Without the memos, the
+    // code builds the unit-list scale again on each read. The rounding then runs about 4 times
+    // per conversion.
+    const N = 1000;
+    new Unit(1, 'psi').toNumber('Pa');
+    const baseline = exactScaleRoundingCount();
+    const spy = vi.spyOn(Unit.prototype, 'exactScale');
+    let sum = 0;
+    let calls = 0;
+    let distinct = 0;
+    try {
+      for (let i = 1; i <= N; i++) sum += new Unit(i, 'psi').toNumber('Pa');
+      calls = spy.mock.calls.length;
+      distinct = new Set(spy.mock.results.map((r) => r.value)).size;
+    } finally {
+      spy.mockRestore();
+    }
     expect(sum).toBeGreaterThan(0);
-    // About 0.17 s on a laptop (0.65 s before the unit-list memo and identity rounding, 0.07 s
-    // before #346). The budget is loose so a slow runner does not flake.
-    expect(ms).toBeLessThan(4000);
+    expect(calls).toBe(2 * N);
+    expect(distinct).toBe(2);
+    expect(exactScaleRoundingCount() - baseline).toBeLessThanOrEqual(N);
   });
 });
