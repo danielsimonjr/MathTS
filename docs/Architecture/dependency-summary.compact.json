@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-09", "f": 1270, "e": 6914, "re": 2999 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-10", "f": 1271, "e": 6918, "re": 3001 },
   "s": {
-    "loc": 214443,
+    "loc": 214491,
     "cls": 61,
     "int": 597,
-    "fn": 2288,
+    "fn": 2290,
     "tg": 168,
     "en": 0,
     "co": 1639,
@@ -40,7 +40,7 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "chunkTyped",
         "chunkPairTyped",
@@ -50,6 +50,7 @@
         "Transfer",
         "forEachMultiIndex",
         "tensordotRange",
+        "matmulSequential",
         "DEFAULT_WORKER_CONFIG",
         "mathWorkerPool",
         "canUseWasm",
@@ -58,8 +59,7 @@
         "transferArrayBuffer",
         "transferTypedArray",
         "createSharedFloat64Array",
-        "createSharedBuffer",
-        "isSharedBuffer"
+        "createSharedBuffer"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -1626,10 +1626,10 @@
         "ParallelMatrix",
         "WorkerPool",
         "gemmRows",
+        "matmulSequential",
         "parallelMatmul",
         "parallelMatvec",
-        "parallelTranspose",
-        "parallelOuter"
+        "parallelTranspose"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": [

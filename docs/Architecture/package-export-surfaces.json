@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-09",
+  "generated": "2026-11-10",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4489,6 +4489,7 @@
       "_workerPairwiseSum",
       "_workerScaledSsq",
       "_workerScaledSsqDiff",
+      "assertMatmulBuffers",
       "canUseSharedMemory",
       "canUseWasm",
       "chunkPairTyped",
@@ -4509,6 +4510,7 @@
       "isWorkerWasmAvailable",
       "mathWorkerPool",
       "MathWorkerPool",
+      "matmulSequential",
       "pool",
       "Pool",
       "tensordotRange",
@@ -4550,6 +4552,7 @@
       "leftShift",
       "MapOptions",
       "MatmulOptions",
+      "matmulSequential",
       "memorySizeBytes",
       "mergeArrayChunks",
       "mergeFloat64Chunks",

@@ -218,6 +218,9 @@
       "mathWorkerPool": {
         "kind": "object"
       },
+      "matmulSequential": {
+        "kind": "function"
+      },
       "tensordotRange": {
         "kind": "function"
       },
@@ -9296,6 +9299,9 @@
         "kind": "function"
       },
       "leftShift": {
+        "kind": "function"
+      },
+      "matmulSequential": {
         "kind": "function"
       },
       "mergeArrayChunks": {

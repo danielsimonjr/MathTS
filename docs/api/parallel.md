@@ -353,11 +353,11 @@ lengths, and `histogram` requires a positive integer `bins`.
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-parallel` (68 exports).
+> `@danielsimonjr/mathts-parallel` (69 exports).
 
-### Functions (60)
+### Functions (61)
 
-`bitAnd`, `bitNot`, `bitOr`, `bitXor`, `calculateChunks`, `calculateOptimalChunks`, `chunkArray`, `chunkFloat64Array`, `dispatch`, `leftShift`, `mergeArrayChunks`, `mergeFloat64Chunks`, `parallelAbs`, `parallelAdd`, `parallelCos`, `parallelCount`, `parallelDistance`, `parallelDivide`, `parallelDot`, `parallelElementwise`, `parallelEvery`, `parallelExp`, `parallelFilter`, `parallelFind`, `parallelForEach`, `parallelHistogram`, `parallelLog`, `parallelMap`, `parallelMatmul`, `parallelMatvec`, `parallelMax`, `parallelMean`, `parallelMin`, `parallelMinMax`, `parallelMultiply`, `parallelNegate`, `parallelNorm`, `parallelOuter`, `parallelReduce`, `parallelScale`, `parallelSin`, `parallelSome`, `parallelSort`, `parallelSqrt`, `parallelSquare`, `parallelStd`, `parallelSubtract`, `parallelSum`, `parallelTan`, `parallelTranspose`, `parallelUnary`, `parallelVariance`, `partition2D`, `partitionRange`, `resolveOpThreshold`, `rightArithShift`, `rightLogShift`, `shouldChunkParallelize`, `shouldParallelize`, `Transfer`
+`bitAnd`, `bitNot`, `bitOr`, `bitXor`, `calculateChunks`, `calculateOptimalChunks`, `chunkArray`, `chunkFloat64Array`, `dispatch`, `leftShift`, `matmulSequential`, `mergeArrayChunks`, `mergeFloat64Chunks`, `parallelAbs`, `parallelAdd`, `parallelCos`, `parallelCount`, `parallelDistance`, `parallelDivide`, `parallelDot`, `parallelElementwise`, `parallelEvery`, `parallelExp`, `parallelFilter`, `parallelFind`, `parallelForEach`, `parallelHistogram`, `parallelLog`, `parallelMap`, `parallelMatmul`, `parallelMatvec`, `parallelMax`, `parallelMean`, `parallelMin`, `parallelMinMax`, `parallelMultiply`, `parallelNegate`, `parallelNorm`, `parallelOuter`, `parallelReduce`, `parallelScale`, `parallelSin`, `parallelSome`, `parallelSort`, `parallelSqrt`, `parallelSquare`, `parallelStd`, `parallelSubtract`, `parallelSum`, `parallelTan`, `parallelTranspose`, `parallelUnary`, `parallelVariance`, `partition2D`, `partitionRange`, `resolveOpThreshold`, `rightArithShift`, `rightLogShift`, `shouldChunkParallelize`, `shouldParallelize`, `Transfer`
 
 ### Constants & values (5)
 

@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-09",
-    "totalFiles": 1270,
+    "lastUpdated": "2026-11-10",
+    "totalFiles": 1271,
     "totalModules": 82,
-    "totalExports": 6914
+    "totalExports": 6918
   },
   "entryPoints": [
     {
@@ -279,6 +279,10 @@
             "imports": ["fftFrameInPlace"]
           },
           {
+            "file": "./matmul-sequential.js",
+            "imports": ["assertMatmulBuffers", "matmulSequential"]
+          },
+          {
             "file": "./worker-numerics.js",
             "imports": [
               "_workerPairwiseSum",
@@ -302,6 +306,11 @@
             "file": "./tensordot-range.js",
             "imports": ["tensordotRange"],
             "reExport": true
+          },
+          {
+            "file": "./matmul-sequential.js",
+            "imports": ["matmulSequential"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -311,6 +320,7 @@
           "chunkPairTyped",
           "forEachMultiIndex",
           "tensordotRange",
+          "matmulSequential",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -330,7 +340,13 @@
           "getPoolStats",
           "MathWorkerPool"
         ],
-        "reExported": ["chunkTyped", "chunkPairTyped", "forEachMultiIndex", "tensordotRange"],
+        "reExported": [
+          "chunkTyped",
+          "chunkPairTyped",
+          "forEachMultiIndex",
+          "tensordotRange",
+          "matmulSequential"
+        ],
         "classes": ["MathWorkerPool"],
         "interfaces": [
           "WorkerpoolCapabilities",
@@ -359,6 +375,15 @@
           "getPoolStats"
         ],
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+      },
+      "packages/workerpool/src/matmul-sequential.ts": {
+        "description": "Sequential matrix multiplication: the one kernel for the inline branch of",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["assertMatmulBuffers", "matmulSequential"],
+        "functions": ["assertMatmulBuffers", "matmulSequential"]
       },
       "packages/workerpool/src/multi-index.ts": {
         "description": "Multi-dimensional index iteration (no imports — safe for the worker bundle).",
@@ -38926,6 +38951,11 @@
           {
             "package": "@danielsimonjr/mathts-workerpool",
             "directory": "packages/workerpool",
+            "imports": ["matmulSequential"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-workerpool",
+            "directory": "packages/workerpool",
             "imports": ["PoolOptions", "ExecOptions", "PoolStats"]
           }
         ],
@@ -38937,6 +38967,7 @@
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
           "WorkerPool",
+          "matmulSequential",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39027,6 +39058,7 @@
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
           "WorkerPool",
+          "matmulSequential",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -43764,6 +43796,7 @@
           "packages/workerpool/src/compile-function-source.ts",
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
+          "packages/workerpool/src/matmul-sequential.ts",
           "packages/workerpool/src/multi-index.ts",
           "packages/workerpool/src/tensordot-range.ts",
           "packages/workerpool/src/worker-numerics.ts",
@@ -45380,17 +45413,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1270,
+    "totalTypeScriptFiles": 1271,
     "totalModules": 82,
-    "totalLinesOfCode": 214443,
-    "totalExports": 6914,
+    "totalLinesOfCode": 214491,
+    "totalExports": 6918,
     "totalClasses": 61,
     "totalInterfaces": 597,
-    "totalFunctions": 2288,
+    "totalFunctions": 2290,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 2999,
+    "totalReExports": 3001,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
