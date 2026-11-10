@@ -29,7 +29,13 @@ function phi(z: number): number {
  * Owen's T function T(h, a) = (1/2π)∫₀ᵃ exp(−h²(1+x²)/2)/(1+x²) dx.
  */
 export function owensT(h: number, a: number): number {
+  if (typeof h !== 'number' || typeof a !== 'number') {
+    throw new TypeError('owensT requires two numbers (h, a)');
+  }
+  if (h !== h || a !== a) return NaN;
   if (a === 0) return 0;
+  // Closed form at an infinite a: T(h, +-Infinity) = +-(1 - Phi(|h|)) / 2. T is odd in a.
+  if (a === Infinity || a === -Infinity) return (Math.sign(a) * (1 - Phi(Math.abs(h)))) / 2;
   const integral = quad((x: number) => Math.exp((-h * h * (1 + x * x)) / 2) / (1 + x * x), 0, a, {
     tol: 1e-12,
   });

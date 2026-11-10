@@ -1803,6 +1803,7 @@
       "chebyshevFit",
       "chebyshevT",
       "checkBroadcastingRules",
+      "checkFiniteLimits",
       "chi2Contingency",
       "Chi2ContingencyOptions",
       "Chi2ContingencyResult",

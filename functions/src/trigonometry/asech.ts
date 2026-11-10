@@ -63,11 +63,12 @@ export const createAsech = /* #__PURE__ */ factory(
           return new Complex(Math.log(ret - xInv), Math.PI);
         }
 
-        return new Complex(x, 0).asech();
+        // asech(x) = acosh(1/x). The core Complex type has no asech method.
+        return new Complex(1 / x, 0).acosh();
       },
 
       Complex: function (x: Complex) {
-        return x.asech();
+        return x.inverse().acosh();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {

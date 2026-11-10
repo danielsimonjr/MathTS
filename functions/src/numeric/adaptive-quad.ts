@@ -102,6 +102,17 @@ function gaussKronrod15(f: (x: f64) => f64, a: f64, b: f64): { k: f64; g: f64 } 
 const ABS_FLOOR = 1e-14;
 
 /**
+ * Throw a RangeError when a bound is NaN or infinite. The quadrature rules here
+ * sample finite panels only, so a caller must map an infinite range first.
+ * @internal
+ */
+export function checkFiniteLimits(a: number, b: number, name: string): void {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    throw new RangeError(`${name}: infinite limits are not supported`);
+  }
+}
+
+/**
  * Adaptive Gauss-Kronrod (G7-K15) numerical integration of `f` over `[a, b]`.
  *
  * Each subinterval is evaluated with the 15-point Kronrod rule and its
@@ -124,6 +135,7 @@ const ABS_FLOOR = 1e-14;
  * ```
  */
 export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): QuadResult {
+  checkFiniteLimits(a, b, 'quad');
   const tol = opts?.tol ?? 1e-10;
   const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;

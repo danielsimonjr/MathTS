@@ -43,10 +43,10 @@ const NOT_NAN_ALLOWLIST: Record<string, string> = {
   size: 'the size of a scalar is []',
   compare: 'NaN compares as -1, the same as mathjs compare',
   factory_compare: 'NaN compares as -1, the same as mathjs compare',
-  and: 'logical operator on the truth value of NaN (false)',
-  or: 'logical operator on the truth value of NaN (false)',
-  xor: 'logical operator on the truth value of NaN (false)',
-  not: 'logical operator on the truth value of NaN (false)',
+  and: 'NaN is falsy, so and(NaN, x) is false',
+  or: 'NaN is falsy, so or(NaN, 2) is the truth value of 2 (true)',
+  xor: 'NaN is falsy, so xor(NaN, 2) is the truth value of 2 (true)',
+  not: 'NaN is falsy, so not(NaN) is true',
   equal: 'IEEE 754 comparison with NaN is false',
   equalScalar: 'IEEE 754 comparison with NaN is false',
   larger: 'IEEE 754 comparison with NaN is false',
@@ -66,16 +66,74 @@ const NOT_NAN_ALLOWLIST: Record<string, string> = {
   isPositive: 'predicate: NaN is not positive',
   isZero: 'predicate: NaN is not zero',
   isPrime: 'predicate: NaN is not prime (pinned to false below)',
-  bin: 'formats the value as text: "0bNaN"',
-  hex: 'formats the value as text: "0xNaN"',
-  oct: 'formats the value as text: "0oNaN"',
-  unit: 'builds a Unit whose value is NaN',
   range: 'a range with a NaN bound has no elements',
 };
 
-/** A result propagates NaN when it holds a NaN, or when the call refuses the input. */
-function propagatesNaN(out: string): boolean {
-  return out.includes('NaN') || out.startsWith('throws:');
+/**
+ * Exports that refuse a NaN argument with an error, and the error classes each may throw.
+ * Most validate an integer, a sign or a selector argument. Any other throw fails the test.
+ */
+const THROWS_ON_NAN: Record<string, string[]> = {
+  bellNumbers: ['TypeError'],
+  bernoulli: ['RangeError'],
+  bin: ['Error'],
+  bitAnd: ['Error'],
+  bitNot: ['Error'],
+  bitOr: ['Error'],
+  bitXor: ['Error'],
+  carmichaelLambda: ['Error'],
+  catalan: ['TypeError'],
+  combinations: ['TypeError'],
+  combinationsWithRep: ['TypeError'],
+  composition: ['TypeError'],
+  divisorSigma: ['Error'],
+  divisors: ['Error'],
+  doubleFactorial: ['Error'],
+  eulerPhi: ['Error'],
+  factory_ceil: ['RangeError'],
+  factory_fix: ['RangeError'],
+  factory_floor: ['RangeError'],
+  factory_gcd: ['Error'],
+  factory_lcm: ['Error'],
+  factory_round: ['Error'],
+  factory_xgcd: ['Error'],
+  fallingFactorial: ['Error'],
+  fibonacci: ['Error'],
+  harmonicNumber: ['Error'],
+  hex: ['Error'],
+  identity: ['Error'],
+  integerDigits: ['Error'],
+  invmod: ['Error'],
+  jacobiSymbol: ['Error'],
+  lambertW: ['Error'],
+  leftShift: ['Error'],
+  lucas: ['Error'],
+  lucasL: ['Error'],
+  moebiusMu: ['Error'],
+  oct: ['Error'],
+  partitions: ['Error'],
+  permutations: ['TypeError'],
+  prime: ['Error'],
+  primeFactors: ['Error'],
+  randomInt: ['RangeError', 'TypeError'],
+  range: ['TypeError'],
+  rightArithShift: ['Error'],
+  rightLogShift: ['Error'],
+  risingFactorial: ['Error'],
+  stirlingS2: ['TypeError'],
+  subfactorial: ['Error'],
+};
+
+/** The error class of a thrown result, or null when the call returned. */
+function thrownClass(out: string): string | null {
+  return out.startsWith('throws:') ? out.slice('throws:'.length) : null;
+}
+
+/** True when the result is acceptable for a NaN argument to the named export. */
+function acceptsNaNResult(name: string, out: string): boolean {
+  const cls = thrownClass(out);
+  if (cls !== null) return THROWS_ON_NAN[name]?.includes(cls) ?? false;
+  return out.includes('NaN') || name in NOT_NAN_ALLOWLIST;
 }
 
 function allNumberJobs(values: string[]): Job[] {
@@ -100,7 +158,31 @@ function allNumberJobs(values: string[]): Job[] {
   return jobs;
 }
 
-/** Calls that looped forever before the fix. */
+/**
+ * Plain (not typed) function exports, called with one non-finite value per parameter.
+ * The arity is fn.length. Classes are skipped. These calls are checked for hangs only,
+ * because most plain exports take arrays or callbacks, so a number argument is a type error.
+ */
+function plainFunctionJobs(values: string[]): Job[] {
+  const jobs: Job[] = [];
+  for (const [name, v] of Object.entries(fns)) {
+    if (typeof v !== 'function' || 'signatures' in v || v.length === 0) continue;
+    if (/^class\b/.test(Function.prototype.toString.call(v))) continue;
+    const proto = (v as { prototype?: object }).prototype;
+    if (proto && Object.getOwnPropertyNames(proto).length > 1) continue;
+    for (let pos = 0; pos < v.length; pos++) {
+      for (const val of values) {
+        jobs.push({
+          name,
+          args: Array.from({ length: v.length }, (_, i) => (i === pos ? val : i === 0 ? 0.5 : 2)),
+        });
+      }
+    }
+  }
+  return jobs;
+}
+
+/** Calls that looped forever, or gave a wrong value, before the fix. */
 const HANG_ROWS: { job: Job; expect: (out: string) => boolean; want: string }[] = [];
 for (const name of ['gcd', 'lcm', 'xgcd']) {
   for (const val of ['NaN', 'Inf', '-Inf']) {
@@ -141,14 +223,40 @@ for (const v of ['Inf', '-Inf']) {
     want: 'boolean:false',
   });
 }
+/** T(h, +-Infinity) = +-(1 - Phi(|h|)) / 2. */
+const OWENS_T_INF = (1 - (normalCDF(0.5) as number)) / 2;
+const near = (o: string, want: number) => Math.abs(Number(o) - want) < 1e-12;
 HANG_ROWS.push(
-  { job: { name: 'owensT', args: [] }, expect: (o) => o === 'NaN', want: 'NaN' },
+  {
+    job: { name: 'owensT', args: [] },
+    expect: (o) => o === 'throws:TypeError',
+    want: 'throws:TypeError',
+  },
   { job: { name: 'owensT', args: [0.5, 'NaN'] }, expect: (o) => o === 'NaN', want: 'NaN' },
   {
-    job: { name: 'quad', args: [0, 'NaN'], integrand: 'identity' },
-    expect: (o) => o === '{value:NaN}',
-    want: '{value:NaN}',
+    job: { name: 'owensT', args: [0.5, 'Inf'] },
+    expect: (o) => near(o, OWENS_T_INF),
+    want: String(OWENS_T_INF),
   },
+  {
+    job: { name: 'owensT', args: [0.5, '-Inf'] },
+    expect: (o) => near(o, -OWENS_T_INF),
+    want: String(-OWENS_T_INF),
+  },
+  {
+    job: { name: 'quad', args: [0, 'NaN'], integrand: 'identity' },
+    expect: (o) => o === 'throws:RangeError',
+    want: 'throws:RangeError',
+  },
+  {
+    job: { name: 'quad', args: [0, 'Inf'], integrand: 'identity' },
+    expect: (o) => o === 'throws:RangeError',
+    want: 'throws:RangeError',
+  },
+  { job: { name: 'ferrersP', args: ['Inf', 2, 2] }, expect: (o) => o === 'NaN', want: 'NaN' },
+  { job: { name: 'siegelZ', args: ['Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
+  { job: { name: 'siegelZ', args: ['-Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
+  { job: { name: 'trigamma', args: ['-Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
   {
     job: { name: 'quad', args: [0, 1], integrand: 'nan' },
     expect: (o) => o === '{value:NaN}',
@@ -169,6 +277,22 @@ HANG_ROWS.push(
         ] as unknown as number,
         0,
         0.5,
+      ],
+    },
+    expect: (o) => o === 'throws:RangeError',
+    want: 'throws:RangeError',
+  },
+  {
+    // Finite-input change: main returned [] for a non-integer start.
+    job: {
+      name: 'shortestPath',
+      args: [
+        [
+          [0, 1],
+          [1, 0],
+        ] as unknown as number,
+        0.5,
+        1,
       ],
     },
     expect: (o) => o === 'throws:RangeError',
@@ -200,7 +324,11 @@ beforeAll(async () => {
       js: "import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);",
     },
   });
-  const jobs = [...allNumberJobs(['NaN', 'Inf', '-Inf']), ...HANG_ROWS.map((r) => r.job)];
+  const jobs = [
+    ...allNumberJobs(['NaN', 'Inf', '-Inf']),
+    ...plainFunctionJobs(['NaN', 'Inf', '-Inf']),
+    ...HANG_ROWS.map((r) => r.job),
+  ];
   sweepJobCount = jobs.length;
   const worker = new Worker(new URL('./helpers/nonfinite-sweep.worker.mjs', import.meta.url), {
     workerData: { bundleUrl: pathToFileURL(outfile).href, jobs },
@@ -243,7 +371,7 @@ afterAll(() => {
   if (bundleDir) rmSync(bundleDir, { recursive: true, force: true });
 });
 
-describe('non-finite inputs: sweep of every all-number typed signature', () => {
+describe('non-finite inputs: sweep of typed signatures and plain functions', () => {
   it('no call loops forever', () => {
     expect(hangError).toBeNull();
   });
@@ -251,11 +379,27 @@ describe('non-finite inputs: sweep of every all-number typed signature', () => {
   it('a NaN argument gives NaN, unless the export is in the reviewed allowlist', () => {
     expect(results.length).toBe(sweepJobCount);
     const bad = results
-      .filter((r) => r.job.sig && r.job.args.includes('NaN') && !(r.job.name in NOT_NAN_ALLOWLIST))
+      .filter((r) => r.job.sig && r.job.args.includes('NaN'))
       .filter((r) => !HANG_ROWS.some((h) => sameJob(h.job, r.job)))
-      .filter((r) => !propagatesNaN(r.out))
+      .filter((r) => !acceptsNaNResult(r.job.name, r.out))
       .map((r) => `${r.job.name}(${r.job.sig}) ${JSON.stringify(r.job.args)} -> ${r.out}`);
     expect(bad).toEqual([]);
+  });
+
+  it('every allowlist entry is still needed', () => {
+    const nanResults = results.filter((r) => r.job.sig && r.job.args.includes('NaN'));
+    const deadNotNaN = Object.keys(NOT_NAN_ALLOWLIST).filter(
+      (name) =>
+        !nanResults.some(
+          (r) => r.job.name === name && thrownClass(r.out) === null && !r.out.includes('NaN')
+        )
+    );
+    const deadThrows = Object.entries(THROWS_ON_NAN).flatMap(([name, classes]) =>
+      classes
+        .filter((cls) => !nanResults.some((r) => r.job.name === name && thrownClass(r.out) === cls))
+        .map((cls) => `${name}:${cls}`)
+    );
+    expect([...deadNotNaN, ...deadThrows]).toEqual([]);
   });
 
   it('each former hang gives its contract result', () => {
@@ -321,6 +465,18 @@ describe('non-finite inputs: direct rows', () => {
 
   it('isPrime(NaN) is false', () => {
     expect(isPrime(NaN)).toBe(false);
+  });
+
+  it('acoth, asech, acsc and asec give the complex value off the real domain', () => {
+    const c = (v: unknown) => [(v as { re: number }).re, (v as { im: number }).im];
+    expect(c(fns.acoth(0.5))[0]).toBeCloseTo(0.5493061443340548, 14);
+    expect(c(fns.acoth(0.5))[1]).toBeCloseTo(-1.5707963267948966, 14);
+    expect(c(fns.factory_acsc(0.5))[1]).toBeCloseTo(-1.3169578969248166, 14);
+    expect(c(fns.factory_asec(0.5))[1]).toBeCloseTo(1.3169578969248166, 14);
+    expect(c(fns.asech(2))[1]).toBeCloseTo(1.0471975511965976, 14);
+    for (const f of [fns.acoth, fns.asech, fns.factory_acsc, fns.factory_asec]) {
+      expect(c(f(NaN)).some(Number.isNaN)).toBe(true);
+    }
   });
 });
 

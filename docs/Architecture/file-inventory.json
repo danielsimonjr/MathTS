@@ -6988,7 +6988,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 149
+      "loc": 161
     },
     {
       "file": "functions/src/numeric/bfgs.ts",
@@ -7149,7 +7149,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 195
+      "loc": 189
     },
     {
       "file": "functions/src/numeric/rational-nullspace.ts",
@@ -7821,7 +7821,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 171
+      "loc": 172
     },
     {
       "file": "functions/src/special/spherical-bessel.ts",
@@ -7835,14 +7835,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 252
+      "loc": 254
     },
     {
       "file": "functions/src/special/wave-functions.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 546
+      "loc": 548
     },
     {
       "file": "functions/src/special/zeta-extra.ts",
@@ -7975,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 230
+      "loc": 236
     },
     {
       "file": "functions/src/stats/effect-sizes.ts",
@@ -8136,14 +8136,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 72
+      "loc": 73
     },
     {
       "file": "functions/src/trigonometry/acsc.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 73
+      "loc": 74
     },
     {
       "file": "functions/src/trigonometry/acsch.ts",
@@ -8157,14 +8157,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 74
+      "loc": 75
     },
     {
       "file": "functions/src/trigonometry/asech.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 79
+      "loc": 80
     },
     {
       "file": "functions/src/trigonometry/asin.ts",
@@ -10985,7 +10985,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 358
+      "loc": 514
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",
