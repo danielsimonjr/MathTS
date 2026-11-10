@@ -12,9 +12,9 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      64 |
-| Parallel — disabled (all ops `'never'`)    |      16 |
-| Non-parallel (no worker-pool path)         |     138 |
+| Parallel — effective (op threshold active) |      55 |
+| Parallel — disabled (all ops `'never'`)    |      13 |
+| Non-parallel (no worker-pool path)         |     150 |
 | **Total**                                  | **218** |
 
 Global fallback threshold (`thresholdElements`, for ops absent from the per-op map): **50000** elements.
@@ -23,14 +23,8 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 
 | Function                | Ops                        | Thresholds (elements)                 | Module        |
 | ----------------------- | -------------------------- | ------------------------------------- | ------------- |
-| `acos`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
-| `acosh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
 | `airyAi`                | `applyKernel`              | 50000 (global kernel)                 | special       |
 | `airyBi`                | `applyKernel`              | 50000 (global kernel)                 | special       |
-| `asin`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
-| `asinh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
-| `atan`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
-| `atanh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
 | `bernoulliPMF`          | `applyKernel`              | 50000 (global kernel)                 | distributions |
 | `besselI`               | `applyKernel`              | 50000 (global kernel)                 | special       |
 | `besselJ`               | `applyKernel`              | 50000 (global kernel)                 | special       |
@@ -45,8 +39,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `binomialPMF`           | `applyKernel`              | 50000 (global kernel)                 | distributions |
 | `chebyshevT`            | `applyKernel`              | 50000 (global kernel)                 | special       |
 | `cosIntegral`           | `applyKernel`              | 50000 (global kernel)                 | special       |
-| `cot`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
-| `csc`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
 | `digamma`               | `applyKernel`              | 50000 (global kernel)                 | special       |
 | `ellipticE`             | `applyKernel`              | 50000 (global kernel)                 | special       |
 | `ellipticK`             | `applyKernel`              | 50000 (global kernel)                 | special       |
@@ -85,31 +77,27 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelStatVariance`  | `applyKernel`, `variance`  | 50000 (global kernel), never          | statistics    |
 | `parallelXCorr`         | `applyKernel`              | 50000 (global kernel)                 | signal        |
 | `poissonPMF`            | `applyKernel`              | 50000 (global kernel)                 | distributions |
-| `sec`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
 | `sinIntegral`           | `applyKernel`              | 50000 (global kernel)                 | special       |
 
 ## Disabled parallel paths (wired but always inline JS)
 
 These route to the worker pool but every op resolves to `'never'` — overhead dominated at all benchmarked sizes, so they always run inline JS today. Kept wired so a future threshold retune (`tools/benchmark/parallel/run.ts`) can switch them on without code churn.
 
-| Function               | Ops (all `'never'`) | Module       |
-| ---------------------- | ------------------- | ------------ |
-| `bitAnd`               | `bitAnd`            | bitwise      |
-| `bitNot`               | `bitNot`            | bitwise      |
-| `bitOr`                | `bitOr`             | bitwise      |
-| `bitXor`               | `bitXor`            | bitwise      |
-| `cos`                  | `cos`               | trigonometry |
-| `leftShift`            | `leftShift`         | bitwise      |
-| `parallelStatDistance` | `distance`          | statistics   |
-| `parallelStatMax`      | `max`               | statistics   |
-| `parallelStatMean`     | `mean`              | statistics   |
-| `parallelStatMin`      | `min`               | statistics   |
-| `parallelStatMinMax`   | `minMax`            | statistics   |
-| `parallelStatSum`      | `sum`               | statistics   |
-| `rightArithShift`      | `rightArithShift`   | bitwise      |
-| `rightLogShift`        | `rightLogShift`     | bitwise      |
-| `sin`                  | `sin`               | trigonometry |
-| `tan`                  | `tan`               | trigonometry |
+| Function               | Ops (all `'never'`) | Module     |
+| ---------------------- | ------------------- | ---------- |
+| `bitAnd`               | `bitAnd`            | bitwise    |
+| `bitNot`               | `bitNot`            | bitwise    |
+| `bitOr`                | `bitOr`             | bitwise    |
+| `bitXor`               | `bitXor`            | bitwise    |
+| `leftShift`            | `leftShift`         | bitwise    |
+| `parallelStatDistance` | `distance`          | statistics |
+| `parallelStatMax`      | `max`               | statistics |
+| `parallelStatMean`     | `mean`              | statistics |
+| `parallelStatMin`      | `min`               | statistics |
+| `parallelStatMinMax`   | `minMax`            | statistics |
+| `parallelStatSum`      | `sum`               | statistics |
+| `rightArithShift`      | `rightArithShift`   | bitwise    |
+| `rightLogShift`        | `rightLogShift`     | bitwise    |
 
 ## Per-module counts
 
@@ -129,7 +117,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | special       |        31 |        0 |            7 |
 | statistics    |         9 |        6 |            2 |
 | string        |         0 |        0 |            5 |
-| trigonometry  |         9 |        3 |            7 |
+| trigonometry  |         0 |        0 |           19 |
 | unit          |         0 |        0 |            2 |
 
 ## Canonical op thresholds
@@ -140,7 +128,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | -------------------------- | --------------------- | :-----: | ----------: |
 | `abs`                      | never                 |    —    |           0 |
 | `add`                      | never                 |    —    |           0 |
-| `applyKernel`              | 50000 (global kernel) |    ✓    |          64 |
+| `applyKernel`              | 50000 (global kernel) |    ✓    |          55 |
 | `besselJ`                  | 1000000               |    ✓    |           0 |
 | `bitAnd`                   | never                 |    —    |           1 |
 | `bitNot`                   | never                 |    —    |           1 |
@@ -148,7 +136,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `bitXor`                   | never                 |    —    |           1 |
 | `characteristicPolynomial` | 9216                  |    ✓    |           0 |
 | `chiSquareTest`            | 4096                  |    ✓    |           0 |
-| `cos`                      | never                 |    —    |           1 |
+| `cos`                      | never                 |    —    |           0 |
 | `distance`                 | never                 |    —    |           1 |
 | `distanceMatrix`           | never                 |    —    |           0 |
 | `divide`                   | never                 |    —    |           0 |
@@ -186,14 +174,14 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `scale`                    | never                 |    —    |           0 |
 | `shapiroWilkTest`          | 4096                  |    ✓    |           0 |
 | `sign`                     | never                 |    —    |           0 |
-| `sin`                      | never                 |    —    |           1 |
+| `sin`                      | never                 |    —    |           0 |
 | `spectrogram`              | 65536                 |    ✓    |           0 |
 | `sqrt`                     | never                 |    —    |           0 |
 | `square`                   | never                 |    —    |           0 |
 | `std`                      | never                 |    —    |           1 |
 | `subtract`                 | never                 |    —    |           0 |
 | `sum`                      | never                 |    —    |           1 |
-| `tan`                      | never                 |    —    |           1 |
+| `tan`                      | never                 |    —    |           0 |
 | `tensordot`                | 8192                  |    ✓    |           0 |
 | `transpose`                | never                 |    —    |           0 |
 | `variance`                 | never                 |    —    |           2 |
@@ -202,6 +190,6 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 
 Pure-JS or WASM-only typed functions — see `wasm-pairing.md` for their WASM routing.
 
-`abs`, `acot`, `acsc`, `add`, `and`, `arg`, `asec`, `atan2`, `bernoulli`, `betaPDF`, `bin`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `carmichaelLambda`, `cbrt`, `ceil`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `compare`, `compareNatural`, `compareText`, `compareUnits`, `cond`, `conj`, `cosh`, `cube`, `deepEqual`, `divide`, `divisorSigma`, `divisors`, `dot`, `doubleFactorial`, `ellipticEIncomplete`, `ellipticF`, `ellipticPi`, `entropy`, `equal`, `equalScalar`, `equalText`, `eulerPhi`, `exp`, `expm1`, `fallingFactorial`, `fibonacci`, `fix`, `floor`, `format`, `fsum`, `gammaPDF`, `harmonicNumber`, `hex`, `hypot`, `im`, `integerDigits`, `jacobiSymbol`, `jsDivergence`, `larger`, `largerEq`, `lcm`, `log`, `log10`, `log1p`, `log2`, `lowRankApprox`, `lucas`, `lucasL`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `max`, `mean`, `min`, `mod`, `moebiusMu`, `multinomial`, `multiply`, `nextPrime`, `noncentralChi2PDF`, `norm`, `norm2`, `normFro`, `not`, `nthRoot`, `nullish`, `oct`, `or`, `parallelStatCumsum`, `parallelStatMode`, `partitions`, `permutations`, `pickRandom`, `pinv`, `pow`, `prime`, `primeFactors`, `primePi`, `print`, `random`, `randomInt`, `re`, `risingFactorial`, `round`, `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`, `sign`, `singularValues`, `sinh`, `smaller`, `smallerEq`, `sqrt`, `square`, `std`, `studentTPDF`, `subfactorial`, `subtract`, `sum`, `tanh`, `to`, `toBest`, `toDegrees`, `toRadians`, `unaryMinus`, `unaryPlus`, `unequal`, `variance`, `xgcd`, `xor`
+`abs`, `acos`, `acosh`, `acot`, `acsc`, `add`, `and`, `arg`, `asec`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `bernoulli`, `betaPDF`, `bin`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `carmichaelLambda`, `cbrt`, `ceil`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `compare`, `compareNatural`, `compareText`, `compareUnits`, `cond`, `conj`, `cos`, `cosh`, `cot`, `csc`, `cube`, `deepEqual`, `divide`, `divisorSigma`, `divisors`, `dot`, `doubleFactorial`, `ellipticEIncomplete`, `ellipticF`, `ellipticPi`, `entropy`, `equal`, `equalScalar`, `equalText`, `eulerPhi`, `exp`, `expm1`, `fallingFactorial`, `fibonacci`, `fix`, `floor`, `format`, `fsum`, `gammaPDF`, `harmonicNumber`, `hex`, `hypot`, `im`, `integerDigits`, `jacobiSymbol`, `jsDivergence`, `larger`, `largerEq`, `lcm`, `log`, `log10`, `log1p`, `log2`, `lowRankApprox`, `lucas`, `lucasL`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `max`, `mean`, `min`, `mod`, `moebiusMu`, `multinomial`, `multiply`, `nextPrime`, `noncentralChi2PDF`, `norm`, `norm2`, `normFro`, `not`, `nthRoot`, `nullish`, `oct`, `or`, `parallelStatCumsum`, `parallelStatMode`, `partitions`, `permutations`, `pickRandom`, `pinv`, `pow`, `prime`, `primeFactors`, `primePi`, `print`, `random`, `randomInt`, `re`, `risingFactorial`, `round`, `sec`, `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`, `sign`, `sin`, `singularValues`, `sinh`, `smaller`, `smallerEq`, `sqrt`, `square`, `std`, `studentTPDF`, `subfactorial`, `subtract`, `sum`, `tan`, `tanh`, `to`, `toBest`, `toDegrees`, `toRadians`, `unaryMinus`, `unaryPlus`, `unequal`, `variance`, `xgcd`, `xor`
 
 > Notes: element-wise arithmetic/transcendental ops (`add`/`sin`/`exp`/…) and the signal/reduction ops are `'never'` — the 2026-05 parallel benchmark found worker overhead dominates at every tested size for memory-bound element-wise work. The active set is the compute-bound ops (tensordot, matmul, matrixPower, characteristicPolynomial, the hypothesis tests, and the special functions erfc/besselJ/spectrogram/sampleChunk) plus any generic `applyKernel` path above the 50000-element global threshold. Re-tune via `tools/benchmark/parallel/run.ts`.

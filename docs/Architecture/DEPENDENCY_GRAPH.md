@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 46 files
+- **functions/typed**: 47 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 50             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 539            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 540            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10740,6 +10740,7 @@ graph LR
 | File                                 | Imports                                 | Type   |
 | ------------------------------------ | --------------------------------------- | ------ |
 | `./euclid.js`                        | `euclidSnap`                            | Import |
+| `./f64-kernels.js`                   | `f64Unary`                              | Import |
 | `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
 
@@ -10895,6 +10896,14 @@ graph LR
 **Exports:**
 
 - Functions: `euclidSnap`
+
+---
+
+### `functions/src/typed/f64-kernels.ts` - Shared element-wise kernel for the synchronous typed Float64Array signatures.
+
+**Exports:**
+
+- Functions: `f64Unary`
 
 ---
 
@@ -11520,19 +11529,19 @@ graph LR
 
 ---
 
-### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions (Parallel-First)
+### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                |
-| -------------------------------- | ------------------------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, BigNumber, Dual` |
-| `@danielsimonjr/mathts-parallel` | `computePool`                         |
+| Package                      | Import                                |
+| ---------------------------- | ------------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Dual` |
 
 **Internal Dependencies:**
 
 | File                                 | Imports                    | Type   |
 | ------------------------------------ | -------------------------- | ------ |
+| `./f64-kernels.js`                   | `f64Unary`                 | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
 
 **Exports:**
@@ -19639,7 +19648,7 @@ graph TD
         N343[complex]
         N344[dist-objects]
         N345[distributions]
-        N346[...36 more]
+        N346[...37 more]
     end
 
     subgraph Functions/unit
@@ -20001,14 +20010,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1271   |
+| Total TypeScript Files  | 1272   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214491 |
-| Total Exports           | 6918   |
+| Total Lines of Code     | 214403 |
+| Total Exports           | 6919   |
 | Total Re-exports        | 3001   |
 | Total Classes           | 61     |
 | Total Interfaces        | 597    |
-| Total Functions         | 2290   |
+| Total Functions         | 2291   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

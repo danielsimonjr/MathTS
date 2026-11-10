@@ -13,8 +13,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | Routing (static)            |   Count |
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      40 |
-| Parallel only (worker pool) |      28 |
-| JS-only                     |     150 |
+| Parallel only (worker pool) |      24 |
+| JS-only                     |     154 |
 | **Total**                   | **218** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 40 wasm-routed functions, **38 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
@@ -26,8 +26,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `abs`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `airyAi`              | wasm          | wasm      | `airyAiDispatch`               | special       |
 | `airyBi`              | wasm          | wasm      | `airyBiDispatch`               | special       |
-| `atan`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `atanh`               | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `atan`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `atanh`               | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
 | `besselJ`             | wasm          | wasm      | `besselJDispatch`              | special       |
 | `besselJ0`            | wasm          | wasm      | `besselJ0Dispatch`             | special       |
 | `besselJ1`            | wasm          | wasm      | `besselJ1Dispatch`             | special       |
@@ -38,9 +38,9 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `carlsonRD`           | wasm          | wasm      | `carlsonRDDispatch`            | special       |
 | `carlsonRF`           | wasm          | wasm      | `carlsonRFDispatch`            | special       |
 | `carlsonRJ`           | wasm          | wasm      | `carlsonRJDispatch`            | special       |
-| `cos`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `cot`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `csc`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `cos`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `cot`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `csc`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
 | `ellipticE`           | wasm          | wasm      | `ellipticEDispatch`            | special       |
 | `ellipticEIncomplete` | wasm          | wasm      | `ellipticEIncompleteDispatch`  | special       |
 | `ellipticF`           | wasm          | wasm      | `ellipticFIncompleteDispatch`  | special       |
@@ -58,44 +58,40 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `parallelFFT`         | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelIFFT`        | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelStatMedian`  | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
-| `sec`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `sin`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `sec`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `sin`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
 | `sinh`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `tan`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
+| `tan`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
 | `tanh`                | wasm          | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 
 ## Parallel-only functions (worker pool, not WASM)
 
-| Function                | Module       |
-| ----------------------- | ------------ |
-| `acos`                  | trigonometry |
-| `acosh`                 | trigonometry |
-| `asin`                  | trigonometry |
-| `asinh`                 | trigonometry |
-| `bitAnd`                | bitwise      |
-| `bitNot`                | bitwise      |
-| `bitOr`                 | bitwise      |
-| `bitXor`                | bitwise      |
-| `leftShift`             | bitwise      |
-| `max`                   | arithmetic   |
-| `min`                   | arithmetic   |
-| `norm`                  | arithmetic   |
-| `parallelConv`          | signal       |
-| `parallelStatCorr`      | statistics   |
-| `parallelStatDistance`  | statistics   |
-| `parallelStatHistogram` | statistics   |
-| `parallelStatMAD`       | statistics   |
-| `parallelStatMax`       | statistics   |
-| `parallelStatMean`      | statistics   |
-| `parallelStatMin`       | statistics   |
-| `parallelStatMinMax`    | statistics   |
-| `parallelStatNorm`      | statistics   |
-| `parallelStatProd`      | statistics   |
-| `parallelStatStd`       | statistics   |
-| `parallelStatSum`       | statistics   |
-| `parallelStatVariance`  | statistics   |
-| `rightArithShift`       | bitwise      |
-| `rightLogShift`         | bitwise      |
+| Function                | Module     |
+| ----------------------- | ---------- |
+| `bitAnd`                | bitwise    |
+| `bitNot`                | bitwise    |
+| `bitOr`                 | bitwise    |
+| `bitXor`                | bitwise    |
+| `leftShift`             | bitwise    |
+| `max`                   | arithmetic |
+| `min`                   | arithmetic |
+| `norm`                  | arithmetic |
+| `parallelConv`          | signal     |
+| `parallelStatCorr`      | statistics |
+| `parallelStatDistance`  | statistics |
+| `parallelStatHistogram` | statistics |
+| `parallelStatMAD`       | statistics |
+| `parallelStatMax`       | statistics |
+| `parallelStatMean`      | statistics |
+| `parallelStatMin`       | statistics |
+| `parallelStatMinMax`    | statistics |
+| `parallelStatNorm`      | statistics |
+| `parallelStatProd`      | statistics |
+| `parallelStatStd`       | statistics |
+| `parallelStatSum`       | statistics |
+| `parallelStatVariance`  | statistics |
+| `rightArithShift`       | bitwise    |
+| `rightLogShift`         | bitwise    |
 
 ## Per-module counts
 
@@ -115,7 +111,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | special       |   19 |        0 |      19 |
 | statistics    |    1 |       13 |       3 |
 | string        |    0 |        0 |       5 |
-| trigonometry  |    8 |        4 |       7 |
+| trigonometry  |    8 |        0 |      11 |
 | unit          |    0 |        0 |       2 |
 
 > Notes: the `matrix` package backend runs the AssemblyScript binary separately from the typed-API dispatch counted here. After the 2026-07 WASM audit that backend is scoped to **SIMD matmul via `backendManager` (≥256 flop count)**; public `DenseMatrix.multiply` and `lu`/`qr`/`cholesky` are JS; `WASMBackend` dense LU/QR/Cholesky/inverse/determinant are opt-in only; element-wise/transpose/reductions and eig/svd run on JS (measured 0.2–6× slower on WASM — memory-bound or scalar; the eig/svd AS kernels were deleted). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set here. The formerly-parked kernels (poly fits, Airy, argsort/rank) were fixed and repointed to AS in Phase 6 (Airy truncation-cap: AS vs JS ≈4e-16; poly fits attempt the AS kernel ≥1024 points with a validated-JS rank-deficiency fallback) — G2 closed 2026-07-04.

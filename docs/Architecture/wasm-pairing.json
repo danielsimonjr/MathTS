@@ -2,8 +2,8 @@
   "generated": "2026-11-10",
   "total": 218,
   "acceleratedCount": 40,
-  "parallelOnlyCount": 28,
-  "jsOnlyCount": 150,
+  "parallelOnlyCount": 24,
+  "jsOnlyCount": 154,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -32,14 +32,14 @@
     {
       "name": "atan",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "atanh",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -116,21 +116,21 @@
     {
       "name": "cos",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "cot",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "csc",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -256,14 +256,14 @@
     {
       "name": "sec",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
       "name": "sin",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -277,7 +277,7 @@
     {
       "name": "tan",
       "file": "trigonometry.ts",
-      "routing": "wasm+parallel",
+      "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
@@ -290,34 +290,6 @@
     }
   ],
   "parallelOnly": [
-    {
-      "name": "acos",
-      "file": "trigonometry.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "acosh",
-      "file": "trigonometry.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "asin",
-      "file": "trigonometry.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "asinh",
-      "file": "trigonometry.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
     {
       "name": "bitAnd",
       "file": "bitwise.ts",
@@ -488,12 +460,16 @@
     }
   ],
   "jsOnly": [
+    "acos",
+    "acosh",
     "acot",
     "acsc",
     "add",
     "and",
     "arg",
     "asec",
+    "asin",
+    "asinh",
     "atan2",
     "bernoulli",
     "bernoulliPMF",
@@ -712,8 +688,8 @@
     },
     "trigonometry.ts": {
       "wasm": 8,
-      "parallel": 4,
-      "jsOnly": 7
+      "parallel": 0,
+      "jsOnly": 11
     },
     "unit.ts": {
       "wasm": 0,

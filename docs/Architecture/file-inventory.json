@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-10",
-  "totalFiles": 2191,
+  "totalFiles": 2199,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1245,
+    "build-entry": 1246,
     "test-only": 0,
     "orphan": 0,
-    "test": 855,
+    "test": 862,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1271,
-    "tests": 855,
+    "src": 1272,
+    "tests": 862,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 973,
+    "@danielsimonjr/mathts-functions": 981,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -8528,7 +8528,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1698
+      "loc": 1692
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8581,6 +8581,13 @@
     },
     {
       "file": "functions/src/typed/euclid.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 15
+    },
+    {
+      "file": "functions/src/typed/f64-kernels.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
@@ -8815,7 +8822,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 392
+      "loc": 295
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -12022,6 +12029,55 @@
       "area": "tests",
       "disposition": "test",
       "loc": 240
+    },
+    {
+      "file": "functions/tests/typed-sync-bitwise-wasm-tier.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 104
+    },
+    {
+      "file": "functions/tests/typed-sync-bitwise.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
+    },
+    {
+      "file": "functions/tests/typed-sync-distributions.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 87
+    },
+    {
+      "file": "functions/tests/typed-sync-matrix-helpers.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 81
+    },
+    {
+      "file": "functions/tests/typed-sync-special.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 111
+    },
+    {
+      "file": "functions/tests/typed-sync-trig-wasm-tier.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 55
+    },
+    {
+      "file": "functions/tests/typed-sync-trig.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 92
     },
     {
       "file": "functions/tests/typed-unit.test.ts",

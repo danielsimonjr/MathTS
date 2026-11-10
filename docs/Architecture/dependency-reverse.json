@@ -2527,6 +2527,10 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/typed/f64-kernels.ts": [
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",

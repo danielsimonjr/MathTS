@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-10'
-  totalFiles: 1271
+  totalFiles: 1272
   totalModules: 82
-  totalExports: 6918
+  totalExports: 6919
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -22666,6 +22666,9 @@ modules:
         - file: ./euclid.js
           imports:
             - euclidSnap
+        - file: ./f64-kernels.js
+          imports:
+            - f64Unary
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23228,6 +23231,16 @@ modules:
         - euclidSnap
       functions:
         - euclidSnap
+    functions/src/typed/f64-kernels.ts:
+      description: Shared element-wise kernel for the synchronous typed Float64Array signatures.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - f64Unary
+      functions:
+        - f64Unary
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -25187,10 +25200,13 @@ modules:
         - print
         - typedString
     functions/src/typed/trigonometry.ts:
-      description: Typed Trigonometric Functions (Parallel-First)
+      description: Typed Trigonometric Functions
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./f64-kernels.js
+          imports:
+            - f64Unary
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
@@ -25202,10 +25218,6 @@ modules:
             - Complex
             - BigNumber
             - Dual
-        - package: '@danielsimonjr/mathts-parallel'
-          directory: parallel
-          imports:
-            - computePool
       exports:
         - sin
         - cos
@@ -42230,6 +42242,7 @@ dependencyGraph:
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
         - functions/src/typed/euclid.ts
+        - functions/src/typed/f64-kernels.ts
         - functions/src/typed/factorization/finite-field.ts
         - functions/src/typed/factorization/hensel.ts
         - functions/src/typed/factorization/index.ts
@@ -42978,13 +42991,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1271
+  totalTypeScriptFiles: 1272
   totalModules: 82
-  totalLinesOfCode: 214491
-  totalExports: 6918
+  totalLinesOfCode: 214403
+  totalExports: 6919
   totalClasses: 61
   totalInterfaces: 597
-  totalFunctions: 2290
+  totalFunctions: 2291
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639

@@ -16,6 +16,7 @@
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
+import { f64Unary } from './f64-kernels.js';
 import {
   pairwiseSum,
   neumaierSum,
@@ -98,13 +99,6 @@ function f64Binary(a: Float64Array, b: Float64Array, f: NumberBin): Float64Array
   }
   const out = new Float64Array(a.length);
   for (let i = 0; i < a.length; i++) out[i] = f(a[i], b[i]);
-  return out;
-}
-
-/** Apply `f` to each element of a Float64Array. The result is a new array; the input does not change. */
-function f64Unary(a: Float64Array, f: (x: number) => number): Float64Array {
-  const out = new Float64Array(a.length);
-  for (let i = 0; i < a.length; i++) out[i] = f(a[i]);
   return out;
 }
 
