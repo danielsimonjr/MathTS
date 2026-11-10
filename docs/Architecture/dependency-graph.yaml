@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-10'
   totalFiles: 1274
   totalModules: 82
-  totalExports: 6929
+  totalExports: 6935
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9801,6 +9801,9 @@ modules:
             - quaternionLog
             - quaternionExp
             - quaternionPow
+            - quaternionToAxisAngle
+            - quaternionFromRotationMatrix
+            - quaternionFromEuler
           reExport: true
         - file: ./geometry/geometry-extra.js
           imports:
@@ -11037,6 +11040,9 @@ modules:
         - quaternionLog
         - quaternionExp
         - quaternionPow
+        - quaternionToAxisAngle
+        - quaternionFromRotationMatrix
+        - quaternionFromEuler
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -11771,6 +11777,9 @@ modules:
         - quaternionLog
         - quaternionExp
         - quaternionPow
+        - quaternionToAxisAngle
+        - quaternionFromRotationMatrix
+        - quaternionFromEuler
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -15521,6 +15530,9 @@ modules:
         - quaternionLog
         - quaternionExp
         - quaternionPow
+        - quaternionToAxisAngle
+        - quaternionFromRotationMatrix
+        - quaternionFromEuler
       functions:
         - quaternionMultiply
         - quaternionConjugate
@@ -15534,6 +15546,9 @@ modules:
         - quaternionLog
         - quaternionExp
         - quaternionPow
+        - quaternionToAxisAngle
+        - quaternionFromRotationMatrix
+        - quaternionFromEuler
     functions/src/geometry/spherical-voronoi.ts:
       description: Spherical Voronoi diagram — a consumer of the 3-D convex hull.
       externalDependencies: []
@@ -43061,15 +43076,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1274
   totalModules: 82
-  totalLinesOfCode: 214919
-  totalExports: 6929
+  totalLinesOfCode: 215020
+  totalExports: 6935
   totalClasses: 61
   totalInterfaces: 598
-  totalFunctions: 2298
+  totalFunctions: 2301
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639
-  totalReExports: 3004
+  totalReExports: 3007
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

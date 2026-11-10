@@ -17,6 +17,9 @@ import {
   quaternionLog,
   quaternionExp,
   quaternionPow,
+  quaternionToAxisAngle,
+  quaternionFromRotationMatrix,
+  quaternionFromEuler,
 } from '../src/index.js';
 
 const close = (a: readonly number[], b: readonly number[], digits = 12): void => {
@@ -465,5 +468,283 @@ describe('quaternion magnitude range', () => {
       expect(() => quaternionLog(bad)).toThrow(/finite/i);
       expect(() => quaternionSlerp(bad, unitQ, 0.5)).toThrow(/finite/i);
     }
+  });
+});
+
+describe('quaternionToAxisAngle', () => {
+  const R3 = 1 / Math.sqrt(3);
+
+  it('gives the axis [1, 0, 0] and the angle 0 for the identity', () => {
+    expect(quaternionToAxisAngle([1, 0, 0, 0])).toEqual({ axis: [1, 0, 0], angle: 0 });
+    expect(quaternionToAxisAngle([-3, 0, 0, 0])).toEqual({ axis: [1, 0, 0], angle: 0 });
+  });
+
+  it('gives pinned values', () => {
+    const half = quaternionToAxisAngle([0, 0, 0, 1]);
+    close(half.axis, [0, 0, 1]);
+    expect(half.angle).toBeCloseTo(Math.PI, 12);
+    const third = quaternionToAxisAngle([0.5, 0.5, 0.5, 0.5]);
+    close(third.axis, [R3, R3, R3]);
+    expect(third.angle).toBeCloseTo((2 * Math.PI) / 3, 12);
+  });
+
+  it('gives an angle in [0, pi]: a negative w flips the axis', () => {
+    const neg = quaternionToAxisAngle([-0.5, -0.5, -0.5, -0.5]);
+    close(neg.axis, [R3, R3, R3]);
+    expect(neg.angle).toBeCloseTo((2 * Math.PI) / 3, 12);
+    const long = quaternionToAxisAngle(quaternionFromAxisAngle([0, 0, 1], (3 * Math.PI) / 2));
+    close(long.axis, [0, 0, -1]);
+    expect(long.angle).toBeCloseTo(Math.PI / 2, 12);
+  });
+
+  it('gives one axis for q and -q at a half turn', () => {
+    // At w = 0 the first non-zero component of the axis is positive.
+    for (const [q, axis] of [
+      [
+        [0, 0, 0, 1],
+        [0, 0, 1],
+      ],
+      [
+        [0, 0, 0, -1],
+        [0, 0, 1],
+      ],
+      [
+        [-0, -0, -0, -1],
+        [0, 0, 1],
+      ],
+      [
+        [0, -2, 0, 0],
+        [1, 0, 0],
+      ],
+      [
+        [0, 0, -1, 0],
+        [0, 1, 0],
+      ],
+      [
+        [0, 0, 3, -4],
+        [0, 0.6, -0.8],
+      ],
+      [
+        [0, 0, -3, 4],
+        [0, 0.6, -0.8],
+      ],
+    ]) {
+      const r = quaternionToAxisAngle(q);
+      expect(r.axis).toEqual(axis);
+      expect(r.angle).toBe(Math.PI);
+    }
+  });
+
+  it('gives the angle 0 for a full turn', () => {
+    const full = quaternionToAxisAngle(quaternionFromAxisAngle([0, 0, 1], 2 * Math.PI));
+    expect(full.angle).toBeCloseTo(0, 12);
+    expect(mag(full.axis)).toBeCloseTo(1, 12);
+  });
+
+  it('reads a non-unit quaternion as its unit form', () => {
+    const r = quaternionToAxisAngle([2, 0, 0, 2]);
+    close(r.axis, [0, 0, 1]);
+    expect(r.angle).toBeCloseTo(Math.PI / 2, 12);
+    const big = quaternionToAxisAngle([1e200, 0, 0, 1e200]);
+    close(big.axis, [0, 0, 1]);
+    expect(big.angle).toBeCloseTo(Math.PI / 2, 12);
+  });
+
+  it('is the inverse of quaternionFromAxisAngle', () => {
+    for (const [axis, angle] of [
+      [[1, 0, 0], 0.3],
+      [[0, 1, 0], 2.9],
+      [[1, -2, 3], 1.1],
+      [[-4, 0.5, 0.25], Math.PI],
+      [[0, 0, 1], 1e-9],
+    ] as [number[], number][]) {
+      const q = quaternionFromAxisAngle(axis, angle);
+      const r = quaternionToAxisAngle(q);
+      sameRotation(quaternionFromAxisAngle(r.axis, r.angle), q);
+      expect(r.angle).toBeCloseTo(angle, 12);
+      close(
+        r.axis,
+        axis.map((c) => c / mag(axis))
+      );
+    }
+  });
+
+  it('throws on the zero quaternion and on a quaternion that is not finite', () => {
+    expect(() => quaternionToAxisAngle([0, 0, 0, 0])).toThrow(/zero/i);
+    expect(() => quaternionToAxisAngle([NaN, 0, 0, 1])).toThrow(/finite/i);
+  });
+});
+
+describe('quaternionFromRotationMatrix', () => {
+  const H = Math.SQRT1_2;
+  const R3 = 1 / Math.sqrt(3);
+
+  it('gives the identity quaternion for the identity matrix', () => {
+    close(
+      quaternionFromRotationMatrix([
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ]),
+      [1, 0, 0, 0]
+    );
+  });
+
+  it('gives pinned values on each branch of the method', () => {
+    // Half turns about x, y and z: the trace is -1, so one diagonal branch runs.
+    sameRotation(
+      quaternionFromRotationMatrix([
+        [1, 0, 0],
+        [0, -1, 0],
+        [0, 0, -1],
+      ]),
+      [0, 1, 0, 0]
+    );
+    sameRotation(
+      quaternionFromRotationMatrix([
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1],
+      ]),
+      [0, 0, 1, 0]
+    );
+    sameRotation(
+      quaternionFromRotationMatrix([
+        [-1, 0, 0],
+        [0, -1, 0],
+        [0, 0, 1],
+      ]),
+      [0, 0, 0, 1]
+    );
+    // 120 degrees about [1, 1, 1]: x goes to y, y to z, z to x.
+    sameRotation(
+      quaternionFromRotationMatrix([
+        [0, 0, 1],
+        [1, 0, 0],
+        [0, 1, 0],
+      ]),
+      [0.5, 0.5, 0.5, 0.5]
+    );
+    // Half turn about [1, 1, 0] / sqrt(2).
+    sameRotation(
+      quaternionFromRotationMatrix([
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 0, -1],
+      ]),
+      [0, H, H, 0]
+    );
+  });
+
+  it('gives a unit quaternion', () => {
+    const q = quaternionFromRotationMatrix(rodrigues([0, 0.6, 0.8], 2.5));
+    expect(mag(q)).toBeCloseTo(1, 12);
+  });
+
+  it('is the inverse of quaternionToRotationMatrix', () => {
+    for (const q of [
+      [1, 0, 0, 0],
+      [0.9, 0.1, -0.2, 0.3],
+      [0.1, 0.9, 0.2, -0.3],
+      [-0.1, 0.2, 0.9, 0.3],
+      [0.1, -0.2, 0.3, 0.9],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+      [0, 1, 1, 1],
+      [1e-9, 1, 2, -3],
+    ]) {
+      const unit = quaternionNormalize(q);
+      sameRotation(quaternionFromRotationMatrix(quaternionToRotationMatrix(q)), unit);
+    }
+  });
+
+  it('agrees with the Rodrigues matrix of an axis and an angle', () => {
+    for (const [axis, angle] of [
+      [[1, 0, 0], 0.4],
+      [[0, 0.6, 0.8], 3.1],
+      [[R3, R3, R3], 2.0],
+      [[0, 0, 1], -1.2],
+    ] as [number[], number][]) {
+      sameRotation(
+        quaternionFromRotationMatrix(rodrigues(axis, angle)),
+        quaternionFromAxisAngle(axis, angle)
+      );
+    }
+  });
+
+  it('throws on a matrix that is not 3 by 3 or not finite', () => {
+    expect(() =>
+      quaternionFromRotationMatrix([
+        [1, 0],
+        [0, 1],
+      ])
+    ).toThrow(/3/);
+    expect(() =>
+      quaternionFromRotationMatrix([
+        [1, 0, 0],
+        [0, 1],
+        [0, 0, 1],
+      ])
+    ).toThrow(/3/);
+    expect(() =>
+      quaternionFromRotationMatrix([
+        [1, 0, 0],
+        [0, NaN, 0],
+        [0, 0, 1],
+      ])
+    ).toThrow(/finite/i);
+  });
+});
+
+describe('quaternionFromEuler', () => {
+  const H = Math.SQRT1_2;
+
+  it('gives pinned values', () => {
+    close(quaternionFromEuler([0, 0, 0]), [1, 0, 0, 0]);
+    close(quaternionFromEuler([Math.PI / 2, 0, 0]), [H, H, 0, 0]);
+    close(quaternionFromEuler([0, Math.PI / 2, 0]), [H, 0, H, 0]);
+    close(quaternionFromEuler([0, 0, Math.PI / 2]), [H, 0, 0, H]);
+  });
+
+  it('is qz(yaw) * qy(pitch) * qx(roll)', () => {
+    for (const [roll, pitch, yaw] of [
+      [0.3, -0.4, 1.2],
+      [-2.5, 1.1, 0.7],
+      [3.0, -1.5, -2.9],
+    ]) {
+      const expected = quaternionMultiply(
+        quaternionFromAxisAngle([0, 0, 1], yaw),
+        quaternionMultiply(
+          quaternionFromAxisAngle([0, 1, 0], pitch),
+          quaternionFromAxisAngle([1, 0, 0], roll)
+        )
+      );
+      close(quaternionFromEuler([roll, pitch, yaw]), expected);
+    }
+  });
+
+  it('is the inverse of quaternionToEuler', () => {
+    for (const e of [
+      [0.3, -0.4, 1.2],
+      [-2.5, 1.1, 0.7],
+      [3.0, -1.5, -2.9],
+      [0, 0, 0],
+    ]) {
+      close(quaternionToEuler(quaternionFromEuler(e)), e, 10);
+    }
+  });
+
+  it('rebuilds the rotation at gimbal lock', () => {
+    for (const pitch of [Math.PI / 2, -Math.PI / 2]) {
+      const q = quaternionFromEuler([0.7, pitch, -0.2]);
+      sameRotation(quaternionFromEuler(quaternionToEuler(q)), q);
+    }
+  });
+
+  it('throws on an angle that is not finite', () => {
+    expect(() => quaternionFromEuler([0, NaN, 0])).toThrow(/finite/i);
+    expect(() => quaternionFromEuler([Infinity, 0, 0])).toThrow(/finite/i);
+    expect(() => quaternionFromEuler([0, 0])).toThrow(/finite/i);
   });
 });

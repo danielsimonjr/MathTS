@@ -548,7 +548,7 @@
       implementation is the public export. A subset of factory shadows are also exported
       under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-      **Coverage**: the [export index](#complete-export-index) below lists **1329** exports
+      **Coverage**: the [export index](#complete-export-index) below lists **1332** exports
       (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
       type-conversion helpers in the generated index). The
       complete, always-current export list is the [export index](#complete-export-index)
@@ -3053,22 +3053,25 @@
 
       ### Quaternions
 
-      Quaternions are `[w, x, y, z]` arrays (scalar-first). The product is the Hamilton product. A quaternion rotates a vector actively (`v' = q·v·q⁻¹`, right-hand rule). `quaternionMultiply(a, b)` applies `b` first. The rotation functions accept a quaternion of any non-zero magnitude. They throw on the zero quaternion. The source module `functions/src/geometry/quaternion.ts` states the full convention.
+      Quaternions are `[w, x, y, z]` arrays (scalar-first). The product is the Hamilton product. A quaternion rotates a vector actively (`v' = q·v·q⁻¹`, right-hand rule). `quaternionMultiply(a, b)` applies `b` first. The rotation functions accept a quaternion of any finite, non-zero magnitude. The rotation functions throw on the zero quaternion and on a quaternion that is not finite. The source module `functions/src/geometry/quaternion.ts` states the full convention.
 
-      | Function                               | Description                                                                            |
-      | -------------------------------------- | -------------------------------------------------------------------------------------- |
-      | `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                                                    |
-      | `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                                            |
-      | `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude                                  |
-      | `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for `angle` radians about `axis`; throws on a zero or non-finite axis  |
-      | `quaternionRotate(q, v)`               | Rotate 3-vector `v` by the rotation of `q` (`q·v·q⁻¹`)                                 |
-      | `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix of `q`; it acts on column vectors                                  |
-      | `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                                              |
-      | `quaternionSlerp(q1, q2, t)`           | Shortest-arc spherical interpolation; normalizes the inputs, returns a unit quaternion |
-      | `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians); roll is `0` at gimbal lock  |
-      | `quaternionLog(q)`                     | Logarithm `(ln\|q\|, θ·û)`; zero quaternion for the identity                           |
-      | `quaternionExp(q)`                     | Exponential `eʷ·(cos\|v\|, sin\|v\|·v̂)`; inverse of `quaternionLog`                    |
-      | `quaternionPow(q, t)`                  | Power `exp(t·log(q))`; scales a unit quaternion's rotation angle by `t`                |
+      | Function                                  | Description                                                                                  |
+      | ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+      | `quaternionMultiply(q1, q2)`              | Hamilton product of two quaternions                                                          |
+      | `quaternionConjugate(q)`                  | Conjugate `[w, −x, −y, −z]`                                                                  |
+      | `quaternionNormalize(q)`                  | Unit-normalize a quaternion; throws on zero magnitude                                        |
+      | `quaternionFromAxisAngle(axis, angle)`    | Unit quaternion for `angle` radians about `axis`; throws on a zero or non-finite axis        |
+      | `quaternionRotate(q, v)`                  | Rotate 3-vector `v` by the rotation of `q` (`q·v·q⁻¹`)                                       |
+      | `quaternionToRotationMatrix(q)`           | 3×3 rotation matrix of `q`; the matrix acts on column vectors                                |
+      | `quaternionInverse(q)`                    | Multiplicative inverse `conj(q) / \|q\|²`                                                    |
+      | `quaternionSlerp(q1, q2, t)`              | Shortest-arc spherical interpolation; normalizes the inputs, returns a unit quaternion       |
+      | `quaternionToEuler(q)`                    | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians); roll is `0` at gimbal lock        |
+      | `quaternionLog(q)`                        | Logarithm `(ln\|q\|, θ·û)`; zero quaternion for the identity                                 |
+      | `quaternionExp(q)`                        | Exponential `eʷ·(cos\|v\|, sin\|v\|·v̂)`; inverse of `quaternionLog`                          |
+      | `quaternionPow(q, t)`                     | Power `exp(t·log(q))`; scales a unit quaternion's rotation angle by `t`                      |
+      | `quaternionToAxisAngle(q)`                | `{ axis, angle }` of the rotation: unit axis, angle in `[0, π]`; axis `[1, 0, 0]` at `0`     |
+      | `quaternionFromRotationMatrix(m)`         | Unit quaternion of a 3×3 rotation matrix (method of Shepperd); `q` and `−q` are one rotation |
+      | `quaternionFromEuler([roll, pitch, yaw])` | Unit quaternion for ZYX intrinsic Euler angles (radians); inverse of `quaternionToEuler`     |
 
       ### Bounding box & Procrustes alignment
 
@@ -3824,7 +3827,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1329 exports).
+      > `@danielsimonjr/mathts-functions` (1332 exports).
 
       ### Functions by category
 
@@ -3862,7 +3865,7 @@
 
       **Signal Processing** (103): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `blackmanHarrisWindow`, `bohmanWindow`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirp`, `chirpZTransform`, `coherence`, `cont2discrete`, `conv2`, `convolve`, `correlate`, `cosineWindow`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dtw`, `dwt`, `ellip`, `exponentialWindow`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `flattopWindow`, `fourier`, `freqz`, `gaussianWindow`, `gaussPulse`, `getWindow`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `iirNotch`, `iirPeak`, `impulseResponse`, `invFourier`, `irfft`, `istft`, `kaiserWindow`, `lfilter`, `lfilterZi`, `lombScargle`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `nuttallWindow`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `parzenWindow`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sawtooth`, `sinc`, `sos2tf`, `sosfilt`, `spectrogram`, `squareWave`, `ss2tf`, `stepResponse`, `stft`, `sweepPoly`, `tf2ss`, `tf2zpk`, `tukeyWindow`, `unitImpulse`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
-      **Geometry** (80): `alphaShape`, `angle2D`, `angle3D`, `arcLength`, `area`, `barycentricCoordinates`, `boundingBox`, `catmullRom`, `centroid`, `chebyshevDistance`, `closestPair`, `conj`, `convexHull`, `convexHull2D`, `convexHull3D`, `coordinateTransform`, `cross3D`, `curvature`, `delaunay`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `douglasPeucker`, `earClipping`, `frechetDistance`, `halfspaceIntersection`, `hausdorffDistance`, `haversine`, `inCircle`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `massProperties`, `minimumEnclosingCircle`, `minkowskiDistance`, `minkowskiSum`, `nearestNeighbor`, `orient2D`, `orient3D`, `pointInPolygon`, `pointInTriangle`, `polygonArea`, `polygonClip`, `polygonIsConvex`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `sphericalVoronoi`, `triangleArea`, `voronoi`, `voronoiDiagram`
+      **Geometry** (83): `alphaShape`, `angle2D`, `angle3D`, `arcLength`, `area`, `barycentricCoordinates`, `boundingBox`, `catmullRom`, `centroid`, `chebyshevDistance`, `closestPair`, `conj`, `convexHull`, `convexHull2D`, `convexHull3D`, `coordinateTransform`, `cross3D`, `curvature`, `delaunay`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `douglasPeucker`, `earClipping`, `frechetDistance`, `halfspaceIntersection`, `hausdorffDistance`, `haversine`, `inCircle`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `massProperties`, `minimumEnclosingCircle`, `minkowskiDistance`, `minkowskiSum`, `nearestNeighbor`, `orient2D`, `orient3D`, `pointInPolygon`, `pointInTriangle`, `polygonArea`, `polygonClip`, `polygonIsConvex`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionFromEuler`, `quaternionFromRotationMatrix`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToAxisAngle`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `sphericalVoronoi`, `triangleArea`, `voronoi`, `voronoiDiagram`
 
       **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 

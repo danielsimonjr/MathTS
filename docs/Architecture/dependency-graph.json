@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-10",
     "totalFiles": 1274,
     "totalModules": 82,
-    "totalExports": 6929
+    "totalExports": 6935
   },
   "entryPoints": [
     {
@@ -10389,7 +10389,10 @@
               "quaternionToEuler",
               "quaternionLog",
               "quaternionExp",
-              "quaternionPow"
+              "quaternionPow",
+              "quaternionToAxisAngle",
+              "quaternionFromRotationMatrix",
+              "quaternionFromEuler"
             ],
             "reExport": true
           },
@@ -11704,6 +11707,9 @@
           "quaternionLog",
           "quaternionExp",
           "quaternionPow",
+          "quaternionToAxisAngle",
+          "quaternionFromRotationMatrix",
+          "quaternionFromEuler",
           "boundingBox",
           "procrustes",
           "kdTreeKNN",
@@ -12439,6 +12445,9 @@
           "quaternionLog",
           "quaternionExp",
           "quaternionPow",
+          "quaternionToAxisAngle",
+          "quaternionFromRotationMatrix",
+          "quaternionFromEuler",
           "boundingBox",
           "procrustes",
           "kdTreeKNN",
@@ -16539,7 +16548,10 @@
           "quaternionToEuler",
           "quaternionLog",
           "quaternionExp",
-          "quaternionPow"
+          "quaternionPow",
+          "quaternionToAxisAngle",
+          "quaternionFromRotationMatrix",
+          "quaternionFromEuler"
         ],
         "functions": [
           "quaternionMultiply",
@@ -16553,7 +16565,10 @@
           "quaternionToEuler",
           "quaternionLog",
           "quaternionExp",
-          "quaternionPow"
+          "quaternionPow",
+          "quaternionToAxisAngle",
+          "quaternionFromRotationMatrix",
+          "quaternionFromEuler"
         ]
       },
       "functions/src/geometry/spherical-voronoi.ts": {
@@ -45489,15 +45504,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1274,
     "totalModules": 82,
-    "totalLinesOfCode": 214919,
-    "totalExports": 6929,
+    "totalLinesOfCode": 215020,
+    "totalExports": 6935,
     "totalClasses": 61,
     "totalInterfaces": 598,
-    "totalFunctions": 2298,
+    "totalFunctions": 2301,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 3004,
+    "totalReExports": 3007,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

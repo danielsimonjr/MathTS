@@ -685,6 +685,17 @@ const CALLS: Record<string, unknown[][]> = {
   quaternionLog: [[[1, 0, 0, 0]]],
   quaternionExp: [[[0, 0, 0, 0]]],
   quaternionPow: [[[1, 0, 0, 0], 2]],
+  quaternionToAxisAngle: [[[1, 0, 0, 0]]],
+  quaternionFromRotationMatrix: [
+    [
+      [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+    ],
+  ],
+  quaternionFromEuler: [[[0, 0, 0]]],
   boundingBox: [
     [
       [

@@ -6414,7 +6414,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 255
+      "loc": 353
     },
     {
       "file": "functions/src/geometry/spherical-voronoi.ts",
@@ -6491,7 +6491,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 999
+      "loc": 1002
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -11286,7 +11286,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 920
+      "loc": 931
     },
     {
       "file": "functions/tests/qr-fraction-error.test.ts",
@@ -11307,7 +11307,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 470
+      "loc": 751
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",
