@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.9.0
+
+### Minor Changes
+
+- 2c631ff: Seven `thresholdByOp` keys are now `@deprecated`: `erfc`, `besselJ`, `normalCDF`, `spectrogram`, `fft2d`, `matrixPower` and `characteristicPolynomial`. No function reads these keys. The typed functions with these names are synchronous and do not ask the pool. The keys stay in the type, so a caller that sets them does not break. Instead of each key, use the function itself, or one of these worker paths:
+  
+  - `erfc`, `besselJ`, `normalCDF`: `computePool.applyKernel(x, workerKernel(name, ...params))`.
+  - `spectrogram`, `fft2d`: `computePool.fftBatch`.
+  - `matrixPower`, `characteristicPolynomial`: `computePool.matmul` for the products.
+  
+  New exported types: `ThresholdByOp`, the type of `thresholdByOp` and of `DEFAULT_THRESHOLD_BY_OP`, which carries the deprecation notes. `DeprecatedThresholdOp` is the union of the seven keys.
+- 2c631ff: New export `matmulSequential(a, aRows, aCols, b, bCols)`: the sequential row-major matrix product. `@danielsimonjr/mathts-workerpool` exports it, and `@danielsimonjr/mathts-parallel` re-exports it. The inline branch of `MathWorkerPool.matmul` (below the worker threshold) now calls it, and the synchronous `matmul` of `@danielsimonjr/mathts-functions` uses it at every size. The function throws the same shape errors as `MathWorkerPool.matmul`. The worker kernel uses the same loop order, so the results are equal bit for bit.
+
+### Patch Changes
+
+- Updated dependencies [2c631ff]
+  - @danielsimonjr/mathts-workerpool@0.4.0
+
 ## 0.8.4
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-plot
 
+## 0.4.27
+
+### Patch Changes
+
+- Updated dependencies [2c631ff]
+  - @danielsimonjr/mathts-functions@0.79.0
+
 ## 0.4.26
 
 ### Patch Changes
