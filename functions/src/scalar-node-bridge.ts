@@ -308,7 +308,7 @@ export function createScalarNodeBridge(deps: ScalarNodeBridgeDeps) {
    * @param node - Input {@link ScalarNode}.
    * @param options - Optional {@link SimplifyOptions} (passed as the third argument to `simplify`).
    * @returns A simplified {@link ScalarNode}.
-   * @throws A {@link ScalarBuildError} when simplification leaves the scalar subset.
+   * @throws A {@link ScalarBuildError} when simplification leaves the scalar subset, or when `simplify` throws.
    *
    * @example
    * ```ts

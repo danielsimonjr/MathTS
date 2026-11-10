@@ -138,7 +138,11 @@ function indexDispatch(
   return cfg.js(data);
 }
 
-/** Returns the sort permutation of float64 data, with WASM when the policy allows, else JavaScript. */
+/**
+ * Returns the stable sort permutation of float64 data.
+ * Uses WASM when the length is at or above {@link WASM_SORT_THRESHOLD} and the policy allows.
+ * Uses JavaScript in all other conditions, and when the WASM call fails.
+ */
 export function argsortF64Dispatch(data: Float64Array): Int32Array {
   return indexDispatch(data, { exportName: 'argsort_f64', js: argsortF64JS });
 }

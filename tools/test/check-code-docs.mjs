@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /**
  * Code-docs gate. The script lists the tracked files that match the include patterns, then runs
- * `repo-tools docs check` on that list. The check must run from the repository root: with a
- * folder argument, repo-tools skips `.code-docs.json`.
+ * `repo-tools docs check` on that list. The working directory of the check is the repository
+ * root, because repo-tools reads `.code-docs.json` from the working directory only. The root is
+ * the top level of the git repository that holds the current directory, unless `--root` is set.
+ *
+ * Declaration files (`*.d.ts`) are outside the gate: repo-tools does not measure them, and the
+ * include patterns leave them out so that the verdict covers every listed file.
  *
  * The include patterns, the command and its arguments come from one config file:
  * `code-docs-gate.json` next to this script. `--config=<path>` or the environment variable
@@ -12,7 +16,7 @@
  * The exit code is the exit code of the check: 0 when no MUST issue is found.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,7 +58,7 @@ export function loadConfig(path) {
  * Lists the tracked files of a repository that match git pathspecs.
  *
  * @param root - Repository root
- * @param include - Git pathspecs, for example `:(glob)*\/src/**`
+ * @param include - Git pathspecs, for example `:(glob)*\/src/**` or `:(exclude,glob)**\/*.d.ts`
  * @returns Repository-relative paths with forward slashes
  */
 export function listPaths(root, include) {
@@ -64,6 +68,26 @@ export function listPaths(root, include) {
     maxBuffer: 64 * 1024 * 1024,
   });
   return out.split('\0').filter(Boolean);
+}
+
+/**
+ * Finds the top level of the git repository that holds a directory.
+ *
+ * @param cwd - A directory in the repository
+ * @returns The absolute path of the repository root
+ * @throws An Error when the directory is not in a git repository
+ */
+export function repoRoot(cwd) {
+  return execFileSync('git', ['rev-parse', '--show-toplevel'], {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+}
+
+/** Quotes an argument for the Windows command shell when it holds a space. */
+function shellQuote(arg) {
+  return /\s/.test(arg) ? `"${arg}"` : arg;
 }
 
 /**
@@ -83,10 +107,14 @@ export function runGate({ root, config, stdio = 'inherit' }) {
     const list = join(dir, 'paths.txt');
     writeFileSync(list, paths.join('\n') + '\n');
     const [cmd, ...prefix] = config.command;
-    const result = spawnSync(cmd, [...prefix, ...config.args, `--paths-from=${list}`], {
+    const argv = [...prefix, ...config.args, `--paths-from=${list}`];
+    // On Windows the command is a `.cmd` shim, which starts only through the shell. The shell
+    // splits an argument at a space, so each such argument gets quotes.
+    const viaShell = process.platform === 'win32';
+    const result = spawnSync(cmd, viaShell ? argv.map(shellQuote) : argv, {
       cwd: root,
       stdio,
-      shell: process.platform === 'win32',
+      shell: viaShell,
     });
     if (result.error) {
       console.error(`code-docs gate: ${cmd} did not start: ${result.error.message}`);
@@ -103,11 +131,21 @@ function argValue(name) {
   return hit === undefined ? undefined : hit.slice(name.length + 3);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+/** Is true when this file is the script that node started, also through a link or a junction. */
+function isEntryPoint() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint()) {
   const configPath = argValue('config') ?? process.env.CODE_DOCS_GATE_CONFIG ?? DEFAULT_CONFIG;
   try {
     const config = loadConfig(configPath);
-    process.exit(runGate({ root: argValue('root') ?? process.cwd(), config }));
+    process.exit(runGate({ root: argValue('root') ?? repoRoot(process.cwd()), config }));
   } catch (err) {
     console.error(err.message);
     process.exit(1);

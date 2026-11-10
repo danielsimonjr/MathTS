@@ -7555,7 +7555,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2149
+      "loc": 2151
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -9186,7 +9186,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 145
+      "loc": 149
     },
     {
       "file": "functions/src/wasm/special/scalars.ts",

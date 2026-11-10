@@ -390,7 +390,8 @@ export function simplifyCandidateForTest(
 }
 
 /**
- * Adds individuals to a new hall of fame and returns its Pareto front.
+ * Adds individuals to a new hall of fame.
+ * Returns its Pareto front and the fitted parameters of each front member.
  * @internal Exported for unit tests; not part of the package barrel.
  */
 export function hallFrontForTest(individuals: readonly EvaluatedIndividual[]): {
@@ -1277,7 +1278,8 @@ export function parsimonyKey(ind: EvaluatedIndividual, share: number, scaling: n
 }
 
 /**
- * Draws tournament contestants, ranks them by loss with optional parsimony, and returns a rank with geometric probability.
+ * Draws tournament contestants and ranks them by loss, with optional parsimony.
+ * Returns the contestant at a rank that has a geometric distribution: the best rank is the most probable.
  */
 export function tournamentSelect(
   population: readonly EvaluatedIndividual[],

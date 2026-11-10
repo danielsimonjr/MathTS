@@ -1,5 +1,5 @@
 {
-  "include": [":(glob)*/src/**", ":(glob)packages/*/src/**"],
+  "include": [":(glob)*/src/**", ":(glob)packages/*/src/**", ":(exclude,glob)**/*.d.ts"],
   "command": ["repo-tools"],
   "args": ["docs", "check", "."]
 }
