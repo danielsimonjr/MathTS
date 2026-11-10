@@ -417,9 +417,9 @@ jobs:
       - name: Architecture documents match the code
         run: repo-tools check . --docs="${ARCHITECTURE_DOCS_DIR}"
 
-      # Every exported symbol in the files that tools/test/code-docs-gate.json includes has a doc
-      # comment that repo-tools accepts. The script runs the check from the repository root, so
-      # the exclusions in .code-docs.json apply. The test pins that the gate can fail.
+      # repo-tools finds no MUST doc-comment issue in the tracked source files of the whole
+      # repository. The script checks the repository that holds it, with the exclusions in
+      # .code-docs.json. The test pins that the gate can fail.
       - name: Code doc comments
         run: |
           node --test tools/test/check-code-docs.test.mjs

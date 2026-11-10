@@ -2,7 +2,13 @@ import { randomMatrix } from './helpers.mjs';
 
 export const entry = '@danielsimonjr/mathts-functions';
 
-/** @param {typeof import('@danielsimonjr/mathts-functions')} F @param {number} rows @param {number} cols @param {number} seed */
+/**
+ * Returns a case function that runs F.qr on a seeded random rows x cols matrix.
+ * @param {typeof import('@danielsimonjr/mathts-functions')} F
+ * @param {number} rows
+ * @param {number} cols
+ * @param {number} seed
+ */
 function qrCase(F, rows, cols, seed) {
   const A = randomMatrix(rows, cols, seed);
   return () => F.qr(A);
@@ -178,7 +184,11 @@ export const cases = [
   },
 ];
 
-/** @param {number} n @param {number} seed */
+/**
+ * Returns a seeded random n x n matrix with the entries above the diagonal set to 0.
+ * @param {number} n
+ * @param {number} seed
+ */
 function lowerTriangular(n, seed) {
   const A = randomMatrix(n, n, seed);
   for (let i = 0; i < n; i++) {
@@ -188,7 +198,11 @@ function lowerTriangular(n, seed) {
   return A;
 }
 
-/** @param {number} n @param {number} seed */
+/**
+ * Returns a seeded random n x n matrix with the entries below the diagonal set to 0.
+ * @param {number} n
+ * @param {number} seed
+ */
 function upperTriangular(n, seed) {
   const A = randomMatrix(n, n, seed);
   for (let i = 0; i < n; i++) {

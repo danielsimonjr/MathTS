@@ -16,6 +16,8 @@ function walkSrcTs(dir, out = []) {
 }
 
 /**
+ * Returns an error message when a package declares no dist entry, or when the dist entry is missing or
+ * older than a file in its src folder. A package with no src folder is ok.
  * @param {string} pkgDir absolute package directory under the repo
  * @returns {string | null} error message, or null if ok
  */

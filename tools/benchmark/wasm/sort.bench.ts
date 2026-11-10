@@ -44,6 +44,7 @@ const cases: WasmCase[] = [
   },
 ];
 
+/** Benchmarks the AssemblyScript introsort kernel sort_f64 against JS Array.sort. */
 export async function main(): Promise<void> {
   await loadKernelTier();
   await runCases('SORT — AssemblyScript sort_f64 (introsort) vs JS Array.sort', cases);

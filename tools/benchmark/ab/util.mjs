@@ -2,7 +2,10 @@
 import { existsSync, realpathSync } from 'node:fs';
 import { basename, delimiter, join } from 'node:path';
 
-/** @param {number} seed */
+/**
+ * Returns a seeded mulberry32 random number generator.
+ * @param {number} seed
+ */
 export function mulberry32(seed) {
   let a = seed >>> 0;
   return () => {
@@ -14,7 +17,10 @@ export function mulberry32(seed) {
   };
 }
 
-/** @param {number[]} xs positive numbers */
+/**
+ * Returns the geometric mean of the numbers, or NaN for an empty list.
+ * @param {number[]} xs positive numbers
+ */
 export function geometricMean(xs) {
   if (xs.length === 0) return NaN;
   let sum = 0;
@@ -22,7 +28,10 @@ export function geometricMean(xs) {
   return Math.exp(sum / xs.length);
 }
 
-/** @param {number[]} xs */
+/**
+ * Returns the median of the numbers, or NaN for an empty list.
+ * @param {number[]} xs
+ */
 export function median(xs) {
   if (xs.length === 0) return NaN;
   const s = [...xs].sort((a, b) => a - b);
@@ -30,17 +39,24 @@ export function median(xs) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-/** @param {string} repoRoot */
+/**
+ * Returns the folder that holds the base tree for the A/B benchmark.
+ * @param {string} repoRoot
+ */
 export function perfBaseDir(repoRoot) {
   return `${repoRoot}/node_modules/.perf-base`;
 }
 
-/** @param {string} repoRoot */
+/**
+ * Returns the folder that holds the control tree for the A/B benchmark.
+ * @param {string} repoRoot
+ */
 export function perfControlDir(repoRoot) {
   return `${repoRoot}/node_modules/.perf-base-control`;
 }
 
 /**
+ * Returns the node_modules folder of the base tree or the control tree.
  * @param {import('node:path').PathLike} repoRoot
  * @param {'base' | 'control'} which
  */

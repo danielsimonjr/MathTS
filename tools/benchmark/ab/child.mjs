@@ -21,6 +21,7 @@ import { repoRoot as defaultRepoRoot } from '../../test/workspaces.mjs';
 const repoRoot = process.env.PERF_REPO_ROOT || defaultRepoRoot;
 
 /**
+ * Imports the dist entry of a package from a module root folder.
  * @param {string} moduleRoot
  * @param {string} pkgName
  */
@@ -31,6 +32,7 @@ async function importFromTree(moduleRoot, pkgName) {
 }
 
 /**
+ * Imports a package namespace from the head tree, the base tree or the control tree.
  * @param {string} entry package name
  * @param {'base' | 'head' | 'control'} which
  */
@@ -68,7 +70,10 @@ const BUDGET_MS = 2500;
 const WARM_MIN_MS = process.versions.bun ? 2000 : 400;
 const WARM_MAX_MS = process.versions.bun ? 6000 : 2000;
 
-/** @param {number[]} xs */
+/**
+ * Returns the median of the numbers (the upper middle value for an even count).
+ * @param {number[]} xs
+ */
 function medianOf(xs) {
   const s = [...xs].sort((x, y) => x - y);
   return s[Math.floor(s.length / 2)];

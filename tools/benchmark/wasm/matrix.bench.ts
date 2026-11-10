@@ -71,6 +71,7 @@ const welchCase: WasmCase = {
   note: `Welch PSD, frame=${FRAME}, overlap=${OVERLAP}, Hann window (FFT per frame).`,
 };
 
+/** Initializes the WASM backend and runs the matrix multiply and Welch benchmark cases against JS. */
 export async function main(): Promise<void> {
   await loadKernelTier();
   await wasmBackend.initialize();

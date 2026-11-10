@@ -5,7 +5,10 @@ export const entry = '@danielsimonjr/mathts-autograd';
 
 function randTensor(shape, seed) {
   const r = mulberry32(seed);
-  /** @param {number[]} dims */
+  /**
+   * Builds a nested array with the given dimensions, filled with random values in [-1, 1).
+   * @param {number[]} dims
+   */
   function build(dims) {
     if (dims.length === 1) {
       const row = new Array(dims[0]);

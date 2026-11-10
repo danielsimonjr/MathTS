@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The `code-docs` gate runs on the whole repository.** `tools/test/check-code-docs.mjs` runs the check that `.code-docs.json` names on every tracked source file, and CI and `bun run docs:code-check` use it. The check starts in the repository root and receives `.` as its path, so a shell character in the path of the root cannot change the command. A relative `--root` is read from the start folder. A `--root` that is not a directory stops the script with a message that names the path. The tools comments and two unused declaration files changed so that the gate reports 0 MUST issues.
 - **`Unit.readingsWithSource` gives the source text of each factor.** `Unit.readings` names each factor by its canonical spelling, so `µmK` gives `um` and `ΩK` gives `ohm`. A consumer that prints a reading cannot get the spelling of the user back. The new function gives the same readings, and each factor also has `source`: the part of the token that the factor reads, with its power. Thus, `µmK` gives `{ name: 'um', power: 1, source: 'µm' }`, then `K` with the source `K`. For each reading, the sources in order make the token again, character for character. The new type is `UnitReadingFactor`. `Unit.readings` is unchanged. Test: `core/tests/unit/unit-readings-source.test.ts`.
 
 ### Fixed

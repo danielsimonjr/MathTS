@@ -75,6 +75,7 @@ def load_mathts_active(category: str) -> dict[str, str]:
 
 
 def build_prompt(category: str, mathjs_funcs: dict, mathts_files: dict) -> str:
+    """Build a prompt with truncated sources that asks for a JSON audit array."""
     # Truncate each mathjs file aggressively (we only need signature + algorithm summary)
     mj_section = ""
     for name, src in mathjs_funcs.items():
@@ -112,6 +113,7 @@ def build_prompt(category: str, mathjs_funcs: dict, mathts_files: dict) -> str:
 
 
 def main():
+    """Send a category audit prompt to the LLM and write the result to audits/<category>.json."""
     if len(sys.argv) != 2:
         print("Usage: python audit_category.py <category>")
         sys.exit(1)

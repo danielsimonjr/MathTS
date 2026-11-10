@@ -27,6 +27,7 @@ export const OUTAGE_STDERR_RE =
  */
 
 /**
+ * Classifies one audit attempt as a pass, an outage or an advisory failure.
  * @param {AuditAttemptResult} result
  * @returns {'ok' | 'outage' | 'advisory'}
  */
@@ -66,7 +67,8 @@ function emitAttempt(result, kind) {
 }
 
 /**
- * @param {number} attemptIndex
+ * Runs bun audit one time and returns its exit code and output.
+ * @param {number} _attemptIndex Index of the attempt; this function does not use it
  * @returns {Promise<AuditAttemptResult>}
  */
 export async function defaultRunOnce(_attemptIndex) {
@@ -97,6 +99,7 @@ export async function defaultRunOnce(_attemptIndex) {
 }
 
 /**
+ * Runs the audit, retries after an outage, and returns the exit code.
  * @param {{ runOnce?: (attemptIndex: number) => Promise<AuditAttemptResult>, backoffMs?: number[], maxAttempts?: number }} [options]
  * @returns {Promise<number>} process exit code
  */

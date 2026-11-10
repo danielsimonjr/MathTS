@@ -9,6 +9,7 @@
  */
 
 /**
+ * Calls a function reps times and returns the mean time per call in microseconds.
  * @param {() => unknown} fn
  * @param {number} reps
  * @returns {number} microseconds per call

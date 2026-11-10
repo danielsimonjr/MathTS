@@ -29,7 +29,10 @@ const SKIP_RUNTIME_IMPORT = new Set(['@danielsimonjr/mathts-workerpool/worker'])
 /** @typedef {{ kind: string }} ExportEntry */
 /** @typedef {Record<string, Record<string, Record<string, ExportEntry>>>} LockTree */
 
-/** @param {string} text */
+/**
+ * Removes block comments and whole-line comments from the text.
+ * @param {string} text
+ */
 function stripComments(text) {
   return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 }
@@ -163,7 +166,11 @@ function entryFiles(root, dir, target) {
   return { types: join(root, dir, types), runtime: imp ? join(root, dir, imp) : null };
 }
 
-/** @param {string} runtimeFile @returns {Record<string, string>} */
+/**
+ * Imports a runtime file in a child Node process and returns the typeof of each export.
+ * @param {string} runtimeFile
+ * @returns {Record<string, string>}
+ */
 function runtimeKinds(runtimeFile) {
   const script = [
     `const m = await import(${JSON.stringify(pathToFileURL(runtimeFile).href)});`,
@@ -277,13 +284,20 @@ export function diffTrees(live, expected) {
   return lines;
 }
 
-/** @param {string[]} args @param {string} flag */
+/**
+ * Returns the argument that follows a flag, or undefined when the flag is not given.
+ * @param {string[]} args
+ * @param {string} flag
+ */
 function flagValue(args, flag) {
   const at = args.indexOf(flag);
   return at >= 0 ? args[at + 1] : undefined;
 }
 
-/** @param {string[]} args */
+/**
+ * Compares the public export names with the lock file, or writes the file with --write, and returns the exit code.
+ * @param {string[]} args
+ */
 export function main(args) {
   const root = resolve(flagValue(args, '--root') ?? repoRoot);
   const lockPath = resolve(flagValue(args, '--lock') ?? join(root, 'tools/test/export-lock.json'));

@@ -1,6 +1,11 @@
 import { mulberry32 } from '../util.mjs';
 
-/** @param {number} rows @param {number} cols @param {number} seed */
+/**
+ * Returns a rows x cols nested array of seeded random values.
+ * @param {number} rows
+ * @param {number} cols
+ * @param {number} seed
+ */
 export function randomMatrix(rows, cols, seed) {
   const rand = mulberry32(seed);
   const m = [];

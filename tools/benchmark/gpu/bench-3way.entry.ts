@@ -22,6 +22,7 @@ import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 // Served from the repo root by the local static server.
 const WASM_URL = '/matrix/dist/wasm/mathts-as.wasm';
 
+/** Holds the timing and accuracy data for one matrix size; gpuMs is NaN when WebGPU is unavailable. */
 export interface Row {
   n: number;
   jsMs: number;
@@ -32,6 +33,7 @@ export interface Row {
   wasmMaxDiff: number; // vs JS reference
   gpuMaxDiff: number; // vs JS reference (f32 precision → larger)
 }
+/** Holds the benchmark rows, the WASM active flag and the GPU status text. */
 export interface BenchResult {
   rows: Row[];
   wasmActive: boolean;
@@ -83,6 +85,7 @@ async function medianAsync(reps: number, fn: () => Promise<unknown>): Promise<nu
   return ts[Math.floor(ts.length / 2)];
 }
 
+/** Benchmarks the JS, WASM and GPU matrix multiply for each size and records the median times and the maximum differences. */
 export async function runBench(
   sizes: number[] = [128, 256, 512, 1024],
   reps = 5

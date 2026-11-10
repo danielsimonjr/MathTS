@@ -14765,7 +14765,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 138
+      "loc": 141
     },
     {
       "file": "tools/benchmark/gpu/elementwise.bench.ts",
@@ -14828,7 +14828,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 70
+      "loc": 71
     },
     {
       "file": "tools/benchmark/parallel/run.ts",
@@ -14877,7 +14877,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 119
+      "loc": 120
     },
     {
       "file": "tools/benchmark/wasm/harness.ts",
@@ -14891,14 +14891,14 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 86
+      "loc": 87
     },
     {
       "file": "tools/benchmark/wasm/opt-in.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 518
+      "loc": 519
     },
     {
       "file": "tools/benchmark/wasm/run.ts",
@@ -14912,21 +14912,21 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 291
+      "loc": 292
     },
     {
       "file": "tools/benchmark/wasm/sort.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 58
+      "loc": 59
     },
     {
       "file": "tools/benchmark/wasm/special.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 105
+      "loc": 106
     },
     {
       "file": "tools/benchmark/wasm/transcendental-dispatch.bench.ts",

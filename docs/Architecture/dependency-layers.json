@@ -36495,14 +36495,6 @@
         "exports": ["complexEquals"],
         "functions": ["complexEquals"]
       },
-      "functions/src/utils/customs.d.ts": {
-        "description": "Type definitions for customs utility functions",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": []
-      },
       "functions/src/utils/customs.ts": {
         "description": "Get a property of a plain object",
         "externalDependencies": [],
@@ -37342,14 +37334,6 @@
         "workspaceDependencies": [],
         "exports": ["product"],
         "functions": ["product"]
-      },
-      "functions/src/utils/string.d.ts": {
-        "description": "Type definitions for string utility functions",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": []
       },
       "functions/src/utils/string.ts": {
         "description": "Generic-value string formatting (`format`, `stringify`, `compareText`).",
@@ -46786,7 +46770,6 @@
         "functions/src/utils/clone.ts",
         "functions/src/utils/collection.ts",
         "functions/src/utils/complex.ts",
-        "functions/src/utils/customs.d.ts",
         "functions/src/utils/customs.ts",
         "functions/src/utils/emitter.ts",
         "functions/src/utils/factory.ts",
@@ -46811,7 +46794,6 @@
         "functions/src/utils/parseNumber.ts",
         "functions/src/utils/print.ts",
         "functions/src/utils/product.ts",
-        "functions/src/utils/string.d.ts",
         "functions/src/utils/string.ts",
         "functions/src/utils/switch.ts",
         "functions/src/utils/typeOf.ts",

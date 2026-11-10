@@ -29,6 +29,7 @@ const TREE_SHAKE_RATIO = 0.8;
 const SENTINELS = { '@danielsimonjr/mathts-core': 'kilogram' };
 
 /**
+ * Is true when the actual size differs from the budget by more than the tolerance.
  * @param {number} budget
  * @param {number} actual
  * @param {{ bytes: number, ratio: number }} tolerance
@@ -61,12 +62,20 @@ export function staticClosure(entry) {
   return [...seen];
 }
 
-/** @param {Record<string, any>} entries lock entries of one subpath */
+/**
+ * Returns the name of the first function export in the lock entries, or null.
+ * @param {Record<string, any>} entries lock entries of one subpath
+ */
 function firstRuntimeFunction(entries) {
   return Object.keys(entries).find((name) => entries[name].kind === 'function') ?? null;
 }
 
-/** @param {string} root @param {string} entry @param {string | null} exportName */
+/**
+ * Bundles an entry, or one export of it, with esbuild and returns the output text.
+ * @param {string} root
+ * @param {string} entry
+ * @param {string | null} exportName
+ */
 function bundleText(root, entry, exportName) {
   const common = {
     bundle: true,
@@ -178,13 +187,20 @@ export function compareBudget(live, budget) {
   return failures;
 }
 
-/** @param {string[]} args @param {string} flag */
+/**
+ * Returns the argument that follows a flag, or undefined when the flag is not given.
+ * @param {string[]} args
+ * @param {string} flag
+ */
 function flagValue(args, flag) {
   const at = args.indexOf(flag);
   return at >= 0 ? args[at + 1] : undefined;
 }
 
-/** @param {string[]} args */
+/**
+ * Compares the measured bundle sizes with the budget file, or writes the file with --write, and returns the exit code.
+ * @param {string[]} args
+ */
 export function main(args) {
   const root = resolve(flagValue(args, '--root') ?? repoRoot);
   const budgetPath = resolve(

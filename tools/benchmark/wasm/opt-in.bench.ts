@@ -459,6 +459,7 @@ interface Row {
   relDiff: number;
 }
 
+/** Times the selected benchmark cases with the WASM tier off and on, then prints a comparison table. */
 export async function main(): Promise<void> {
   const only = process.argv.slice(2).filter((a) => !a.startsWith('-'));
   const selected = only.length ? cases.filter((c) => only.includes(c.name)) : cases;

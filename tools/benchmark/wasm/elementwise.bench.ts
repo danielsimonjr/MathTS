@@ -102,6 +102,7 @@ const chainCase: WasmCase = {
   note: 'Op-fusion: one copy-in / one copy-out for the whole chain.',
 };
 
+/** Benchmarks the AssemblyScript array_<op>_ptr kernels against the JS Math functions for eight unary operations and one chain. */
 export async function main(): Promise<void> {
   await loadKernelTier();
   const ops: WasmElementwiseOp[] = ['abs', 'sin', 'cos', 'tan', 'exp', 'log', 'sinh', 'tanh'];

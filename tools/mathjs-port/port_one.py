@@ -24,10 +24,12 @@ from rlm_query import llm_query  # noqa: E402
 
 
 def load_manifest() -> dict:
+    """Return the parsed manifest.json file next to the script."""
     return json.loads((Path(__file__).parent / "manifest.json").read_text(encoding="utf-8"))
 
 
 def find_entry(manifest: dict, name: str) -> dict:
+    """Return the manifest port entry with the given name, or raise KeyError."""
     for entry in manifest["ports"]:
         if entry["name"] == name:
             return entry
@@ -35,6 +37,7 @@ def find_entry(manifest: dict, name: str) -> dict:
 
 
 def read_or_empty(path: Path, max_chars: int = 20000) -> str:
+    """Return the file text truncated to max_chars, or a missing-file message."""
     if not path.exists():
         return f"(file not found: {path})"
     text = path.read_text(encoding="utf-8", errors="replace")
@@ -42,6 +45,7 @@ def read_or_empty(path: Path, max_chars: int = 20000) -> str:
 
 
 def build_prompt(entry: dict) -> str:
+    """Build a porting prompt with the mathjs source, the tests, the target file and the language constraints."""
     mathjs_src = read_or_empty(MATHJS / entry["mathjs_source"])
     mathjs_test = read_or_empty(MATHJS / entry["mathjs_test"])
     target_path = REPO / entry["target_path"]
@@ -86,6 +90,7 @@ def build_prompt(entry: dict) -> str:
 
 
 def main():
+    """Prompt the LLM for one function port and write the draft file."""
     if len(sys.argv) != 2:
         print("Usage: python port_one.py <function_name>")
         sys.exit(1)

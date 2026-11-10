@@ -43,6 +43,7 @@ PACKAGES = [
 
 
 def should_include(path):
+    """Return True when no part of the path is in EXCLUDE_DIRS."""
     parts = path.parts
     return not any(p in EXCLUDE_DIRS for p in parts)
 
@@ -71,6 +72,7 @@ def classify_file(rel_path):
 
 
 def count_lines(path):
+    """Return the line count of a UTF-8 file, or 0 when the read fails."""
     try:
         return len(path.read_text(encoding="utf-8", errors="replace").split("\n"))
     except Exception:
@@ -78,6 +80,7 @@ def count_lines(path):
 
 
 def extract_exports(content):
+    """Return the exported declaration names and the names in export lists (the alias after " as ")."""
     exports = []
     for m in re.finditer(
         r"export\s+(?:const|function|class|type|interface|enum)\s+(\w+)", content
@@ -116,6 +119,7 @@ def extract_factory_info(content):
 
 
 def extract_class_methods(content, class_name):
+    """Return the unique method names in the named class body, without the constructor and keywords."""
     methods = []
     match = re.search(rf"class\s+{class_name}\s*[^{{]*\{{", content)
     if not match:
@@ -151,6 +155,7 @@ def extract_class_methods(content, class_name):
 
 
 def build_metadata():
+    """Return the metadata: the generation time and the project data from the root package.json."""
     pkg_path = ROOT / "package.json"
     pkg = json.loads(pkg_path.read_text()) if pkg_path.exists() else {}
     return {
@@ -446,6 +451,7 @@ def build_cross_package_deps():
 
 
 def main():
+    """Build the codebase inventory, write tools/codebase-inventory.json, and print its size and summary."""
     print("Building MathTS codebase inventory...", file=sys.stderr)
 
     inventory = {

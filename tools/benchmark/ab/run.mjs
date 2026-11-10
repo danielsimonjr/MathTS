@@ -101,6 +101,7 @@ if (specs.length === 0) {
 const nodeExe = nodeBinary();
 
 /**
+ * Runs child.mjs synchronously on Node or Bun, with the given environment added.
  * @param {'node' | 'bun'} engine
  * @param {Record<string, string>} env
  */
@@ -118,7 +119,10 @@ function spawnChild(engine, env) {
   return spawnSync(nodeExe, [childPath], options);
 }
 
-/** @param {import('node:child_process').SpawnSyncReturns<string>} out */
+/**
+ * Parses the last stdout line of a child as JSON, or returns a failed result when the line is not JSON.
+ * @param {import('node:child_process').SpawnSyncReturns<string>} out
+ */
 function parseChild(out) {
   const line = (out.stdout || '').trim().split('\n').filter(Boolean).pop();
   try {
@@ -129,6 +133,7 @@ function parseChild(out) {
 }
 
 /**
+ * Returns the environment variables that tell a child which repository, case file and case to run.
  * @param {string} caseFile
  * @param {string} caseName
  * @param {Record<string, string>} extra

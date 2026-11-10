@@ -33,6 +33,7 @@ export interface BenchReportOp {
   sizes: SizeResult[];
 }
 
+/** Holds the generated ISO date, the machine metadata and the benchmark operations. */
 export interface BenchReport {
   /** ISO date; passed in (not read from the clock) so the transform stays pure. */
   generated: string;

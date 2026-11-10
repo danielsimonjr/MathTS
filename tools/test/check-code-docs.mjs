@@ -1,24 +1,26 @@
 #!/usr/bin/env node
 /**
- * Code-docs gate. The script lists the tracked files that match the include patterns, then runs
- * `repo-tools docs check` on that list. The working directory of the check is the repository
- * root, because repo-tools reads `.code-docs.json` from the working directory only. The root is
- * the top level of the git repository that holds the current directory, unless `--root` is set.
+ * Code-docs gate. The script runs `repo-tools docs check <root>` on the whole repository.
+ * repo-tools measures the tracked files of the root and applies the `.code-docs.json` of the
+ * root, from any start folder.
  *
- * Declaration files (`*.d.ts`) are outside the gate: repo-tools does not measure them, and the
- * include patterns leave them out so that the verdict covers every listed file.
+ * The root is the top level of the git repository that holds this script, unless `--root` is
+ * set. The start folder does not change the root: a start outside the repository, or inside a
+ * nested git repository, still checks the repository of the script.
  *
- * The include patterns, the command and its arguments come from one config file:
- * `code-docs-gate.json` next to this script. `--config=<path>` or the environment variable
- * `CODE_DOCS_GATE_CONFIG` selects another file. A missing or bad config stops the script.
+ * repo-tools does not measure declaration files (`*.d.ts`), so the gate does not cover the
+ * tracked declaration files under the `src` folders and `functions/types`.
+ *
+ * The command and its arguments come from one config file: `code-docs-gate.json` next to this
+ * script. `--config=<path>` or the environment variable `CODE_DOCS_GATE_CONFIG` selects another
+ * file. A missing or bad config stops the script.
  *
  * Usage: node tools/test/check-code-docs.mjs [--config=<path>] [--root=<path>]
  * The exit code is the exit code of the check: 0 when no MUST issue is found.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFileSync, realpathSync, statSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULT_CONFIG = new URL('./code-docs-gate.json', import.meta.url);
@@ -27,7 +29,7 @@ const DEFAULT_CONFIG = new URL('./code-docs-gate.json', import.meta.url);
  * Reads and validates the gate config.
  *
  * @param path - Path or file URL of the config file
- * @returns The config: `include` (git pathspecs), `command` (argv prefix) and `args`
+ * @returns The config: `command` (argv prefix) and `args` (put before the root)
  * @throws An Error when the file is missing, is not JSON, or lacks a field
  */
 export function loadConfig(path) {
@@ -38,11 +40,6 @@ export function loadConfig(path) {
     throw new Error(`code-docs gate config ${String(path)} cannot be read: ${err.message}`);
   }
   const isStrings = (v) => Array.isArray(v) && v.every((s) => typeof s === 'string');
-  if (!isStrings(config.include) || config.include.length === 0) {
-    throw new Error(
-      `code-docs gate config ${String(path)}: "include" must be a non-empty string array`
-    );
-  }
   if (!isStrings(config.command) || config.command.length === 0) {
     throw new Error(
       `code-docs gate config ${String(path)}: "command" must be a non-empty string array`
@@ -52,22 +49,6 @@ export function loadConfig(path) {
     throw new Error(`code-docs gate config ${String(path)}: "args" must be a string array`);
   }
   return config;
-}
-
-/**
- * Lists the tracked files of a repository that match git pathspecs.
- *
- * @param root - Repository root
- * @param include - Git pathspecs, for example `:(glob)*\/src/**` or `:(exclude,glob)**\/*.d.ts`
- * @returns Repository-relative paths with forward slashes
- */
-export function listPaths(root, include) {
-  const out = execFileSync('git', ['ls-files', '-z', '--', ...include], {
-    cwd: root,
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  return out.split('\0').filter(Boolean);
 }
 
 /**
@@ -91,41 +72,40 @@ function shellQuote(arg) {
 }
 
 /**
- * Runs the check on the tracked files that the config includes.
+ * Runs the check on a repository root.
  *
- * @param options - `root` (repository root), `config` (from {@link loadConfig}) and `stdio` for the child
- * @returns The exit code of the check; 1 when the include patterns match no file
+ * The check starts in the root and receives `.` as its path. The root is never part of the
+ * command line, so a shell character in the path of the root cannot change the command.
+ *
+ * @param root - Repository root; a relative path is read from the start folder
+ * @param config - The config from {@link loadConfig}
+ * @param stdio - The `stdio` option for the child process
+ * @returns The exit code of the check; 1 when the command does not start or gives no exit code
+ * @throws An Error when the root is not an existing directory
  */
 export function runGate({ root, config, stdio = 'inherit' }) {
-  const paths = listPaths(root, config.include);
-  if (paths.length === 0) {
-    console.error('code-docs gate: the include patterns match no tracked file');
+  const cwd = resolve(root);
+  if (!statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) {
+    throw new Error(`code-docs gate: the root ${cwd} is not an existing directory`);
+  }
+  const [cmd, ...prefix] = config.command;
+  const argv = [...prefix, ...config.args, '.'];
+  // On Windows the command is a `.cmd` shim, which starts only through the shell. The shell
+  // splits an argument at a space, so each such argument of the config gets quotes.
+  const viaShell = process.platform === 'win32';
+  const result = spawnSync(cmd, viaShell ? argv.map(shellQuote) : argv, {
+    cwd,
+    stdio,
+    shell: viaShell,
+  });
+  if (result.error) {
+    console.error(`code-docs gate: ${cmd} did not start: ${result.error.message}`);
     return 1;
   }
-  const dir = mkdtempSync(join(tmpdir(), 'code-docs-gate-'));
-  try {
-    const list = join(dir, 'paths.txt');
-    writeFileSync(list, paths.join('\n') + '\n');
-    const [cmd, ...prefix] = config.command;
-    const argv = [...prefix, ...config.args, `--paths-from=${list}`];
-    // On Windows the command is a `.cmd` shim, which starts only through the shell. The shell
-    // splits an argument at a space, so each such argument gets quotes.
-    const viaShell = process.platform === 'win32';
-    const result = spawnSync(cmd, viaShell ? argv.map(shellQuote) : argv, {
-      cwd: root,
-      stdio,
-      shell: viaShell,
-    });
-    if (result.error) {
-      console.error(`code-docs gate: ${cmd} did not start: ${result.error.message}`);
-      return 1;
-    }
-    return result.status ?? 1;
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  return result.status ?? 1;
 }
 
+/** Returns the value of the `--<name>=<value>` argument, or undefined when it is not given. */
 function argValue(name) {
   const hit = process.argv.slice(2).find((a) => a.startsWith(`--${name}=`));
   return hit === undefined ? undefined : hit.slice(name.length + 3);
@@ -145,7 +125,8 @@ if (isEntryPoint()) {
   const configPath = argValue('config') ?? process.env.CODE_DOCS_GATE_CONFIG ?? DEFAULT_CONFIG;
   try {
     const config = loadConfig(configPath);
-    process.exit(runGate({ root: argValue('root') ?? repoRoot(process.cwd()), config }));
+    const scriptDir = dirname(realpathSync(fileURLToPath(import.meta.url)));
+    process.exit(runGate({ root: argValue('root') ?? repoRoot(scriptDir), config }));
   } catch (err) {
     console.error(err.message);
     process.exit(1);

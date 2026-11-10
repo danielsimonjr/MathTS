@@ -236,6 +236,7 @@ async function runControl(compiledSmall: ReturnType<typeof compileScalar>): Prom
   return ratio;
 }
 
+/** Prints the interpreted and compiled scalar evaluation times per tree and size, with the batch-to-interpreted ratio. */
 export async function main(): Promise<void> {
   console.log(
     'evaluateScalar per row vs compileScalar batch. ratio = batch/interp (< 1: compiled wins).'

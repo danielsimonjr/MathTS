@@ -15,10 +15,12 @@ MATHTS = Path(os.environ.get("MATHTS_DIR", Path.home() / "Github" / "Mathts"))
 
 
 def norm(p):
+    """Convert a path to a string with forward slashes."""
     return str(p).replace("\\", "/")
 
 
 def collect_ts(root):
+    """Return the relative paths of all TypeScript files under root, without node_modules and conflicted files."""
     out = set()
     for f in root.rglob("*.ts"):
         s = norm(f)
