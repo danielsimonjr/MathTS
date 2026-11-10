@@ -154,6 +154,39 @@ describe('_findUnit (last-character index)', () => {
     expect(find('dazb')).toEqual(referenceFind('dazb', false));
   });
 
+  it('does not track a direct delete and re-add of a name (documented limit)', () => {
+    Unit.createUnitSingle('zc', { definition: '1 m', prefixes: 'short' });
+    Unit.createUnitSingle('azc', { definition: '1 m', prefixes: 'short' });
+    created.push('zc', 'azc');
+    expect(find('dazc')).toEqual({ unit: 'zc', prefix: 'da' });
+    const def = Unit.UNITS['zc'];
+    delete Unit.UNITS['zc'];
+    Unit.UNITS['zc'] = def; // 'zc' is now after 'azc' in insertion order
+    expect(referenceFind('dazc', false)).toEqual({ unit: 'azc', prefix: 'd' });
+    // The index keeps the old order. Unit.deleteUnit and Unit.createUnitSingle are tracked.
+    expect(find('dazc')).toEqual({ unit: 'zc', prefix: 'da' });
+  });
+
+  it('never finds an empty-string key written directly (documented limit)', () => {
+    Unit.UNITS[''] = { ...Unit.UNITS['m'], name: 'EMPTY' };
+    try {
+      expect(referenceFind('k', false)).toEqual({ unit: 'EMPTY', prefix: 'k' });
+      expect(find('k')).toBeNull();
+    } finally {
+      delete Unit.UNITS[''];
+    }
+  });
+
+  it('drops a remembered hit when its UNITS entry is replaced directly', () => {
+    Unit.createUnitSingle('zd', { definition: '1 m', prefixes: 'short' });
+    created.push('zd');
+    const first = Unit._findUnit('kzd');
+    expect(first?.unit.name).toBe('zd');
+    const replacement: UnitDef = { ...Unit.UNITS['zd'], value: 2 };
+    Unit.UNITS['zd'] = replacement;
+    expect(Unit._findUnit('kzd')?.unit).toBe(replacement);
+  });
+
   it('finds a unit written straight into Unit.UNITS, after a miss on it', () => {
     expect(find('kzzq')).toBeNull();
     const def: UnitDef = { ...Unit.UNITS['m'], name: 'zzq' };

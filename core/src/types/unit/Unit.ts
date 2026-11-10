@@ -1318,10 +1318,19 @@ export const createUnitClass = /* #__PURE__ */ factory(
     type UnitIndex = { buckets: Map<string, string[]>; keys: Set<string> };
     // Groups the UNITS names by the last character. Each group keeps the UNITS insertion order.
     let unitIndex: UnitIndex | undefined;
+    // The scan hits use mode and spelling as keys. Each entry contains the UNITS name that the scan matches.
+    const scanHits = new Map<
+      string,
+      { name: string; found: { unit: UnitDef; prefix: PrefixDef } }
+    >();
+    const SCAN_HIT_LIMIT = 10000;
+    // The value contains the name that the last successful scanUnits call matches.
+    let lastScanName = '';
 
-    // The function removes the index. Call the function after each change to UNITS.
+    // The function removes the index and the scan hits. Call the function after each change to UNITS.
     function invalidateUnitIndex(): void {
       unitIndex = undefined;
+      scanHits.clear();
     }
 
     function getUnitIndex(): UnitIndex {
@@ -1361,6 +1370,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
             const prefix = hasOwnProperty(prefixes, prefixName) ? prefixes![prefixName] : undefined;
             if (prefix !== undefined) {
               // store unit, prefix, and value
+              lastScanName = name;
               return { unit, prefix };
             }
           }
@@ -1378,21 +1388,42 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
       if (str === '') return null;
 
+      const hitKey = (unrestricted ? '1:' : '0:') + str;
+      const hit = scanHits.get(hitKey);
+      if (
+        hit !== undefined &&
+        hasOwnProperty(UNITS, hit.name) &&
+        UNITS[hit.name] === hit.found.unit
+      ) {
+        return hit.found;
+      }
       const index = getUnitIndex();
-      const result = scanUnits(str, unrestricted, index);
-      if (result !== null) return result;
-      // A name that you write to UNITS directly is not in the index. The name is last in
-      // insertion order, so the name can change a miss only. Rebuild the index when a suffix
-      // of str is a name of that type.
-      for (let i = 1; i < str.length; i++) {
-        const suffix = str.slice(i);
-        if (hasOwnProperty(UNITS, suffix) && !index.keys.has(suffix)) {
-          invalidateUnitIndex();
-          return scanUnits(str, unrestricted, getUnitIndex());
+      let result = scanUnits(str, unrestricted, index);
+      if (result === null) {
+        // The index tracks a name that you write directly to UNITS only when the name is new.
+        // A new name is last in insertion order. Thus, a new name can change only a miss.
+        // A miss rebuilds the index when a suffix of str is a name that the index does not contain.
+        // The index does not track a direct delete and re-add of a name. When you add the name
+        // again, the name moves to the end of insertion order. The scan never finds a direct
+        // empty-string key.
+        for (let i = 1; i < str.length; i++) {
+          const suffix = str.slice(i);
+          if (hasOwnProperty(UNITS, suffix) && !index.keys.has(suffix)) {
+            invalidateUnitIndex();
+            result = scanUnits(str, unrestricted, getUnitIndex());
+            break;
+          }
         }
       }
-      return null;
+      if (result !== null) {
+        if (scanHits.size >= SCAN_HIT_LIMIT) scanHits.clear();
+        scanHits.set(hitKey, { name: lastScanName, found: result });
+      }
+      return result;
     }
+
+    Unit._findUnit = (name: string, unrestricted?: boolean): FoundUnit =>
+      _findUnit(name, unrestricted === true);
 
     /**
      * Test if the given expression is a unit.
@@ -1402,9 +1433,6 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *                        The unit can have prefix, like "cm"
      * @return true if the given string is a unit
      */
-    Unit._findUnit = (name: string, unrestricted?: boolean): FoundUnit =>
-      _findUnit(name, unrestricted === true);
-
     Unit.isValuelessUnit = function (name: string): boolean {
       return _findUnit(name) !== null;
     };
