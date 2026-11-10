@@ -1069,6 +1069,7 @@ graph LR
 
 **Exports:**
 
+- Functions: `unitReadingSearchSteps`
 - Constants: `createUnitClass`
 
 ---
@@ -20026,12 +20027,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214762 |
-| Total Exports           | 6928   |
+| Total Lines of Code     | 214856 |
+| Total Exports           | 6929   |
 | Total Re-exports        | 3004   |
 | Total Classes           | 61     |
 | Total Interfaces        | 598    |
-| Total Functions         | 2297   |
+| Total Functions         | 2298   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

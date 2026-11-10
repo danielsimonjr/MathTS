@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-10",
-  "totalFiles": 2206,
+  "totalFiles": 2207,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1247,
     "test-only": 0,
     "orphan": 0,
-    "test": 868,
+    "test": 869,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1273,
-    "tests": 868,
+    "tests": 869,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 26,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 118,
+    "@danielsimonjr/mathts-core": 119,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3364
+      "loc": 3459
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1333,6 +1333,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "core/tests/unit/unit-readings-matcher.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 240
     },
     {
       "file": "core/tests/unit/unit-readings-source.test.ts",
@@ -15031,7 +15038,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1621
+      "loc": 1620
     },
     {
       "file": "workbook/src/contract.ts",
@@ -15367,7 +15374,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 82
+      "loc": 81
     },
     {
       "file": "workbook/tests/markdown-tex.test.ts",
@@ -15472,7 +15479,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 94
+      "loc": 93
     },
     {
       "file": "workbook/tsdown.config.ts",
