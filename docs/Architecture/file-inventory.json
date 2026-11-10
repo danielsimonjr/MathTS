@@ -6232,7 +6232,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 108
+      "loc": 115
     },
     {
       "file": "functions/src/error/ArgumentsError.ts",
@@ -6470,7 +6470,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 332
+      "loc": 334
     },
     {
       "file": "functions/src/index.ts",
@@ -6981,7 +6981,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 145
+      "loc": 147
     },
     {
       "file": "functions/src/numeric/adaptive-quad.ts",
@@ -7800,7 +7800,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 123
+      "loc": 125
     },
     {
       "file": "functions/src/special/mathieu.ts",
@@ -7975,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 236
+      "loc": 240
     },
     {
       "file": "functions/src/stats/effect-sizes.ts",
@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1339
+      "loc": 1356
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -10985,7 +10985,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 514
+      "loc": 662
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",

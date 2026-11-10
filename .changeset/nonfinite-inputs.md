@@ -14,6 +14,7 @@ Behaviour changes (the reason for the minor bump):
   - `shortestPath` throws a `TypeError` when `adj` is not an array, and a `RangeError` when `start` or `end` is not an integer. This changes one finite input: `shortestPath(adj, 0.5, 1)` returned `[]` and now throws. Before, a non-integer `end` looped forever.
   - `quad` (and `nintegrate` and `arcLength`, which call it) throws a `RangeError` for a NaN or infinite bound. Before, an infinite bound bisected to depth 50 and did not end in practice.
   - `owensT` throws a `TypeError` when an argument is missing.
+  - `zipfPMF(k, s, Infinity)` throws a `RangeError`. Before, its normalising sum looped forever.
 
 Fixes:
 
@@ -22,6 +23,7 @@ Fixes:
 - `owensT(h, Infinity)` returns `(1 - Phi(|h|)) / 2`, and `owensT(h, -Infinity)` the negative value. Before, both did not end. `owensT` with a NaN argument returns `NaN`.
 - `ferrersP` with an infinite degree or order, `siegelZ` / `riemannSiegelZ` at +-Infinity, and `trigamma` / `polygamma` at -Infinity return `NaN`. Before, they looped forever.
 - `acoth`, `asech`, `acsc` and `asec` give the complex result off their real domain (for example `acoth(0.5)`). Before, they threw `TypeError: ... is not a function`, because the core Complex type has no such methods.
+- A NaN in any argument gives `NaN` for `fQuantile`, `gammaQuantile`, `studentTQuantile`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `skellamPMF`, `zipfPMF`, `clamp` (a NaN bound) and `ferrersP` (a NaN `x`). Before, they returned a finite number (for example `studentTQuantile(NaN, 2)` gave about -1000), or threw for a NaN parameter (`studentizedRangeQuantile`, `skellamPMF`). Every distribution object's `quantile(NaN)` also gives `NaN`.
 - `erfc(NaN)` (JS and the AssemblyScript kernel), `normalCDF` with a NaN in any position, `primePi(NaN)`, the three-argument median and `zeta(NaN)` return `NaN`. Before, they returned 2, 1, 0, a sorted element and 1.
 
 Other finite inputs give the same results as before.

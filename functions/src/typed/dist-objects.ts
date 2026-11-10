@@ -114,6 +114,7 @@ function _normalCdfStd(z: f64): f64 {
  * replacing the old Winitzki `_erfInv` (~1e-3).
  */
 function _normalQuantileStd(p: f64): f64 {
+  if (p !== p) return NaN;
   if (p <= 0) return -Infinity;
   if (p >= 1) return Infinity;
   const a = [
@@ -287,6 +288,7 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
       return betaincClosedScalar(x, alpha, beta_);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       // Newton's method on the CDF
       if (p <= 0) return 0;
       if (p >= 1) return 1;
@@ -379,6 +381,7 @@ export function binomialDist(n: number, p: f64): Distribution {
       return betaincClosedScalar(q, n - kInt, kInt + 1);
     },
     quantile: (prob: f64) => {
+      if (prob !== prob) return NaN;
       if (prob <= 0) return 0;
       if (prob >= 1) return n;
       let cumul = 0;
@@ -441,6 +444,7 @@ export function chiSquaredDist(k: number): Distribution {
       return gammaincScalar(halfK, x / 2);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       // Newton's method
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
@@ -500,6 +504,7 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
     pdf: (x: f64) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)),
     cdf: (x: f64) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
       return -Math.log(1 - p) / lambda;
@@ -556,6 +561,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
       return betaincClosedScalar((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       // Newton's method
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
@@ -627,6 +633,7 @@ export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
       return gammaincScalar(shape, x * rate);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
       // Bisection
@@ -683,6 +690,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       return _normalCdfStd((Math.log(x) - mu) / sigma);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
       return Math.exp(mu + sigma * _normalQuantileStd(p));
@@ -729,6 +737,7 @@ export function poissonDist(lambda: f64): Distribution {
       return 1 - gammaincScalar(kInt + 1, lambda);
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
       let cumul = 0;
@@ -796,6 +805,7 @@ export function tDist(nu: f64): Distribution {
       return x >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return -Infinity;
       if (p >= 1) return Infinity;
       if (p === 0.5) return 0;
@@ -859,6 +869,7 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
       return (x - a) / range;
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return a;
       if (p >= 1) return b;
       return a + p * range;
@@ -905,6 +916,7 @@ export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
       return 1 - Math.exp(-Math.pow(x / lambda, k));
     },
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
       return lambda * Math.pow(-Math.log(1 - p), 1 / k);
@@ -991,6 +1003,7 @@ export function hypergeometricDist(
     pdf: pmf,
     cdf,
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return kMin;
       if (p >= 1) return kMax;
       for (let k = kMin; k <= kMax; k++) if (cdf(k) >= p) return k;
@@ -1034,6 +1047,7 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
     pdf: pmf,
     cdf,
     quantile: (prob: f64) => {
+      if (prob !== prob) return NaN;
       if (prob <= 0) return 0;
       if (prob >= 1) return Infinity;
       let cumul = 0;
@@ -1126,6 +1140,7 @@ export function triangularDist(a: number, c: number, b: number): Distribution {
   if (!(a <= c && c <= b && a < b))
     throw new Error('triangularDist: require a <= mode <= b, a < b');
   const quantile = (p: f64): f64 => {
+    if (p !== p) return NaN;
     if (p <= 0) return a;
     if (p >= 1) return b;
     const fc = (c - a) / (b - a);
@@ -1179,6 +1194,7 @@ export function discreteUniformDist(lo: number, hi: number): Distribution {
     pdf: (x: f64) => (Number.isInteger(x) && x >= lo && x <= hi ? 1 / k : 0),
     cdf,
     quantile: (p: f64) => {
+      if (p !== p) return NaN;
       if (p <= 0) return lo;
       if (p >= 1) return hi;
       return Math.min(hi, lo + Math.ceil(p * k) - 1);
@@ -1232,6 +1248,7 @@ export function gumbelDist(mu: number, beta: number): Distribution {
 export function invGaussDist(mu: number, lambda: number): Distribution {
   if (mu <= 0 || lambda <= 0) throw new Error('invGaussDist: mu and lambda must be positive');
   const quantile = (p: f64): f64 => {
+    if (p !== p) return NaN;
     // No closed form — bisection on the (monotone) CDF.
     if (p <= 0) return 0;
     if (p >= 1) return Infinity;

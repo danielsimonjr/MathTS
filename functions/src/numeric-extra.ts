@@ -31,6 +31,8 @@ export function clamp(x: readonly number[], lo: number, hi: number): number[];
  * function does not change the input.
  */
 export function clamp(x: number | readonly number[], lo: number, hi: number): number | number[] {
+  // Both v < NaN and v > NaN are false. When the bound is NaN, v passes through unchanged.
+  if (Number.isNaN(lo) || Number.isNaN(hi)) return Array.isArray(x) ? x.map(() => NaN) : NaN;
   const c = (v: number) => (v < lo ? lo : v > hi ? hi : v);
   return Array.isArray(x) ? x.map(c) : c(x as number);
 }

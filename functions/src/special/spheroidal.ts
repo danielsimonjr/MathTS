@@ -34,7 +34,7 @@ function checkMN(m: number, n: number, name: string): void {
  */
 export function ferrersP(n: number, m: number, x: f64): f64 {
   // The recurrences below count up to m and n, so a non-finite degree or order never ends.
-  if (!Number.isFinite(n) || !Number.isFinite(m)) return NaN;
+  if (Number.isNaN(x) || !Number.isFinite(n) || !Number.isFinite(m)) return NaN;
   if (m < 0 || n < m) return 0;
   const s = Math.max(0, 1 - x * x);
   const somx2 = Math.sqrt(s);

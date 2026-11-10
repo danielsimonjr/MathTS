@@ -18,13 +18,19 @@ import {
 } from './typed/dist-objects.js';
 import { betaincScalar, gammaincpScalar } from './wasm/special/scalars.js';
 
+/** True when any argument is NaN. The distribution constructors throw on a NaN parameter. */
+function nanIn(...xs: number[]): boolean {
+  return xs.some((x) => Number.isNaN(x));
+}
+
 /** Standard (or general) normal quantile (inverse CDF). */
 export const normalQuantile = (p: number, mu = 0, sigma = 1): number =>
   normal(mu, sigma).quantile(p);
 
 /** Student-t CDF and quantile with `df` degrees of freedom. */
 export const studentTCDF = (x: number, df: number): number => studentT(df).cdf(x);
-export const studentTQuantile = (p: number, df: number): number => studentT(df).quantile(p);
+export const studentTQuantile = (p: number, df: number): number =>
+  nanIn(p, df) ? NaN : studentT(df).quantile(p);
 
 /** Chi-squared PDF / CDF / quantile with `df` degrees of freedom. */
 export const chiSquaredCDF = (x: number, df: number): number => chiSquared(df).cdf(x);
@@ -42,7 +48,8 @@ export const chiSquaredSF = (x: number, df: number): number => {
 
 /** F-distribution CDF / quantile with `d1`, `d2` degrees of freedom. */
 export const fCDF = (x: number, d1: number, d2: number): number => fisherF(d1, d2).cdf(x);
-export const fQuantile = (p: number, d1: number, d2: number): number => fisherF(d1, d2).quantile(p);
+export const fQuantile = (p: number, d1: number, d2: number): number =>
+  nanIn(p, d1, d2) ? NaN : fisherF(d1, d2).quantile(p);
 
 /**
  * F survival function P(X > x) with `d1`, `d2` degrees of freedom, computed directly
@@ -59,7 +66,7 @@ export const fSF = (x: number, d1: number, d2: number): number => {
 /** Gamma CDF / quantile (shape `k`, rate `θ⁻¹`). */
 export const gammaCDF = (x: number, shape: number, rate = 1): number => gammaD(shape, rate).cdf(x);
 export const gammaQuantile = (p: number, shape: number, rate = 1): number =>
-  gammaD(shape, rate).quantile(p);
+  nanIn(p, shape, rate) ? NaN : gammaD(shape, rate).quantile(p);
 
 /** Beta CDF / quantile with shape parameters `a`, `b`. */
 export const betaCDF = (x: number, a: number, b: number): number => betaD(a, b).cdf(x);

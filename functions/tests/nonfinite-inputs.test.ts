@@ -159,9 +159,54 @@ function allNumberJobs(values: string[]): Job[] {
 }
 
 /**
- * Plain (not typed) function exports, called with one non-finite value per parameter.
- * The arity is fn.length. Classes are skipped. These calls are checked for hangs only,
- * because most plain exports take arrays or callbacks, so a number argument is a type error.
+ * Plain exports whose finite base call (0.5, 2, 2, ...) returns a number, but which do not
+ * take numbers. A number argument is not valid input for them, so their result for a NaN
+ * argument is not checked.
+ */
+const PLAIN_NOT_SCALAR: Record<string, string> = {
+  chebyshevDistance: 'takes two point arrays',
+  distanceND: 'takes two point arrays',
+  divergence: 'takes a vector field callback and a point',
+  graphDistance: 'takes an adjacency matrix',
+  hermiteInterp: 'takes node, value and derivative arrays',
+  identityMutation: 'genetic operator; takes a genome',
+  inCircle: 'takes point arrays',
+  integerNthRoot: 'takes a bigint',
+  invFourier: 'takes a coefficient array',
+  lagrangeInterp: 'takes node and value arrays',
+  logsumexp: 'takes an array',
+  manhattanDistance: 'takes two point arrays',
+  minkowskiDistance: 'takes two point arrays',
+  mutualInformation: 'takes two sample arrays',
+  orient2D: 'takes point arrays',
+  orient3D: 'takes point arrays',
+  polygonArea: 'takes a vertex array',
+  polygonPerimeter: 'takes a vertex array',
+  polyval: 'takes a coefficient array',
+  replacer: 'JSON replacer; takes a key and a value',
+  reviver: 'JSON reviver; takes a key and a value',
+  substitute: 'takes an expression and a scope',
+  trapz: 'takes sample arrays',
+  trapzF64: 'takes a Float64Array',
+};
+
+/** Plain scalar exports that refuse a NaN argument, with the error classes each may throw. */
+const PLAIN_THROWS_ON_NAN: Record<string, string[]> = {
+  clebschGordan: ['RangeError'],
+  integerSqrt: ['RangeError'],
+  mvnPdf: ['Error'],
+  truncatedNormalMean: ['RangeError'],
+  wigner3j: ['RangeError'],
+  wigner6j: ['RangeError'],
+};
+
+/** A base result is scalar when it prints as a number. */
+const isScalarOut = (out: string) => /^-?(\d|Infinity)/.test(out);
+
+/**
+ * Plain (not typed) function exports. The arity is fn.length; classes are skipped. Each
+ * gets one finite base call, then one non-finite value per parameter. Every call is
+ * checked for hangs. When the base call returns a number, a NaN argument must give NaN.
  */
 function plainFunctionJobs(values: string[]): Job[] {
   const jobs: Job[] = [];
@@ -170,6 +215,7 @@ function plainFunctionJobs(values: string[]): Job[] {
     if (/^class\b/.test(Function.prototype.toString.call(v))) continue;
     const proto = (v as { prototype?: object }).prototype;
     if (proto && Object.getOwnPropertyNames(proto).length > 1) continue;
+    jobs.push({ name, args: Array.from({ length: v.length }, (_, i) => (i === 0 ? 0.5 : 2)) });
     for (let pos = 0; pos < v.length; pos++) {
       for (const val of values) {
         jobs.push({
@@ -257,6 +303,11 @@ HANG_ROWS.push(
   { job: { name: 'siegelZ', args: ['Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
   { job: { name: 'siegelZ', args: ['-Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
   { job: { name: 'trigamma', args: ['-Inf'] }, expect: (o) => o === 'NaN', want: 'NaN' },
+  {
+    job: { name: 'zipfPMF', args: [1, 2, 'Inf'] },
+    expect: (o) => o === 'throws:RangeError',
+    want: 'throws:RangeError',
+  },
   {
     job: { name: 'quad', args: [0, 1], integrand: 'nan' },
     expect: (o) => o === '{value:NaN}',
@@ -386,6 +437,52 @@ describe('non-finite inputs: sweep of typed signatures and plain functions', () 
     expect(bad).toEqual([]);
   });
 
+  it('a plain export that returns a number gives NaN for a NaN argument', () => {
+    const plain = results.filter(
+      (r) => !r.job.sig && !HANG_ROWS.some((h) => sameJob(h.job, r.job))
+    );
+    const scalar = new Set(
+      plain
+        .filter((r) => r.job.args.every((a) => typeof a === 'number') && isScalarOut(r.out))
+        .map((r) => r.job.name)
+    );
+    expect(scalar.size).toBeGreaterThan(50);
+    const bad = plain
+      .filter((r) => scalar.has(r.job.name) && r.job.args.includes('NaN'))
+      .filter((r) => !(r.job.name in PLAIN_NOT_SCALAR))
+      .filter((r) => {
+        const cls = thrownClass(r.out);
+        if (cls !== null) return !(PLAIN_THROWS_ON_NAN[r.job.name]?.includes(cls) ?? false);
+        return !r.out.includes('NaN');
+      })
+      .map((r) => `${r.job.name} ${JSON.stringify(r.job.args)} -> ${r.out}`);
+    expect(bad).toEqual([]);
+    const dead = [
+      ...Object.keys(PLAIN_NOT_SCALAR).filter(
+        (name) =>
+          !plain.some(
+            (r) =>
+              r.job.name === name &&
+              r.job.args.includes('NaN') &&
+              thrownClass(r.out) === null &&
+              !r.out.includes('NaN')
+          )
+      ),
+      ...Object.entries(PLAIN_THROWS_ON_NAN).flatMap(([name, classes]) =>
+        classes
+          .filter(
+            (cls) =>
+              !plain.some(
+                (r) =>
+                  r.job.name === name && r.job.args.includes('NaN') && thrownClass(r.out) === cls
+              )
+          )
+          .map((cls) => `${name}:${cls}`)
+      ),
+    ];
+    expect(dead).toEqual([]);
+  });
+
   it('every allowlist entry is still needed', () => {
     const nanResults = results.filter((r) => r.job.sig && r.job.args.includes('NaN'));
     const deadNotNaN = Object.keys(NOT_NAN_ALLOWLIST).filter(
@@ -477,6 +574,57 @@ describe('non-finite inputs: direct rows', () => {
     for (const f of [fns.acoth, fns.asech, fns.factory_acsc, fns.factory_asec]) {
       expect(c(f(NaN)).some(Number.isNaN)).toBe(true);
     }
+  });
+});
+
+describe('non-finite inputs: plain scalar functions give NaN for a NaN argument', () => {
+  type F = (...a: number[]) => number;
+  const f = (name: string) => (fns as unknown as Record<string, F>)[name];
+  const rows: [string, number[]][] = [
+    ['fQuantile', [NaN, 2, 2]],
+    ['fQuantile', [0.5, NaN, 2]],
+    ['fQuantile', [0.5, 2, NaN]],
+    ['gammaQuantile', [NaN, 2]],
+    ['gammaQuantile', [0.5, NaN]],
+    ['gammaQuantile', [0.5, 2, NaN]],
+    ['studentTQuantile', [NaN, 2]],
+    ['studentTQuantile', [0.5, NaN]],
+    ['studentizedRangeCDF', [NaN, 3, 10]],
+    ['studentizedRangeCDF', [2, NaN, 10]],
+    ['studentizedRangeCDF', [2, 3, NaN]],
+    ['studentizedRangeQuantile', [NaN, 3, 10]],
+    ['studentizedRangeQuantile', [0.5, NaN, 10]],
+    ['studentizedRangeQuantile', [0.5, 3, NaN]],
+    ['jacobiSN', [0.5, NaN]],
+    ['jacobiSN', [NaN, 0.3]],
+    ['jacobiCN', [0.5, NaN]],
+    ['jacobiCN', [NaN, 0.3]],
+    ['skellamPMF', [NaN, 2, 2]],
+    ['skellamPMF', [1, NaN, 2]],
+    ['skellamPMF', [1, 2, NaN]],
+    ['zipfPMF', [NaN, 2, 5]],
+    ['zipfPMF', [1, NaN, 5]],
+    ['zipfPMF', [1, 2, NaN]],
+    ['clamp', [0.5, NaN, 2]],
+    ['clamp', [0.5, 0, NaN]],
+    ['clamp', [NaN, 0, 1]],
+    ['ferrersP', [0.5, 2, NaN]],
+    ['ferrersP', [2, 1, NaN]],
+  ];
+  for (const [name, args] of rows) {
+    it(`${name}(${args.join(', ')}) is NaN`, () => {
+      expect(f(name)(...args)).toBeNaN();
+    });
+  }
+  it('finite results do not change', () => {
+    expect(f('fQuantile')(0.5, 2, 2)).toBeCloseTo(1, 9);
+    expect(f('gammaQuantile')(0.5, 1)).toBeCloseTo(Math.LN2, 9);
+    expect(f('studentTQuantile')(0.975, 10)).toBeCloseTo(2.2281388519649385, 8);
+    expect(f('jacobiSN')(0.5, 0.3)).toBeCloseTo(0.4742156227, 9);
+    expect(f('jacobiCN')(0.5, 0.3)).toBeCloseTo(0.8804087364, 9);
+    expect(f('zipfPMF')(1, 2, 2)).toBeCloseTo(0.8, 14);
+    expect(f('clamp')(5, 0, 1)).toBe(1);
+    expect(f('skellamPMF')(0, 1, 1)).toBeCloseTo(Math.exp(-2) * 2.2795853023360673, 12);
   });
 });
 
