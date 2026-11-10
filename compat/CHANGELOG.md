@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-compat
 
+## 0.4.48
+
+### Patch Changes
+
+- 2b8dc33: Add or correct the doc comments of exported symbols, so the published declarations describe them. `create` in compat now carries its own doc comment. The change is to comments only: the emitted JavaScript is unchanged.
+- Updated dependencies [2b8dc33]
+  - @danielsimonjr/mathts-functions@0.80.1
+  - @danielsimonjr/mathts-matrix@0.9.6
+
 ## 0.4.47
 
 ### Patch Changes
