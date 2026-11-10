@@ -796,7 +796,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
     // N·N is a reading, because `NN` is not a prefixed unit.
     function isPrefixRepeat(left: string, right: string, unrestricted: boolean): boolean {
       if (left !== right) return false;
-      const hit = _findUnit(left + right, unrestricted);
+      const joined = left + right;
+      // An exact UNITS name has the empty prefix. Such a name is not a prefix and a unit.
+      if (hasOwnProperty(UNITS, joined)) return false;
+      // The scan reads the tables of this call. unitSpans built the index for this token,
+      // and the search does not use the scan hits of _findUnit.
+      const hit = scanUnits(joined, unrestricted, getUnitIndex());
       return hit !== null && hit.prefix.name === left && hit.unit.name === right;
     }
 

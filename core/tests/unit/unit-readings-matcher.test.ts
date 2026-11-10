@@ -201,6 +201,21 @@ describe('Unit.readings: units and prefixes that change after the first call', (
     Unit.UNITS.m.prefixes = Unit.PREFIXES.NONE;
     expect(actual('kmK')).not.toContain('km*K');
   });
+
+  it('applies the prefix-repeat rule with the prefix table at the time of the call', () => {
+    expect(actual('mmK')).toContain('mm*K');
+    expect(actual('mmK')).not.toContain('m*m*K');
+    savedPrefixes = Unit.UNITS.m.prefixes;
+    Unit.UNITS.m.prefixes = Unit.PREFIXES.NONE;
+    expect(actual('mmK')).not.toContain('mm*K');
+    expect(actual('mmK')).toContain('m*m*K');
+  });
+
+  it('reads a repeated name when the doubled name is a unit that has no prefix table', () => {
+    directUnit('qv', Unit.PREFIXES.SHORT);
+    directUnit('qvqv', undefined);
+    expect(actual('qvqvK')).toEqual(['qv*qv*K', 'qvqv*K']);
+  });
 });
 
 describe('Unit.readings: the search does not repeat work on a token with no reading', () => {

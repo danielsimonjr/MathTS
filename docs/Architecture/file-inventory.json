@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3454
+      "loc": 3459
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1339,7 +1339,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 225
+      "loc": 240
     },
     {
       "file": "core/tests/unit/unit-readings-source.test.ts",
