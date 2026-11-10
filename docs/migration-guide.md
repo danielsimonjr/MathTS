@@ -292,7 +292,7 @@ pool by themselves. To use workers, call `ComputePool` directly. For `computePoo
 the `matmul` entry of `thresholdByOp` (default 4,096 elements, 64x64) sets the size at which
 the call goes to the workers. The `erfc`, `besselJ`, `spectrogram`, `fft2d`, `normalCDF`,
 `matrixPower` and `characteristicPolynomial` entries remain in the type for compatibility,
-but no function reads them.
+but no function reads them. They are `@deprecated`.
 
 A 2026-05-23 CI run found the `matmul` break-even at 64x64. A 2026-11-09 run on a
 developer machine under load found no break-even up to 512x512. In that run,

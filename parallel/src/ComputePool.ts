@@ -139,6 +139,61 @@ export function resolveOpThreshold(t: OpThreshold): number {
 }
 
 /**
+ * `thresholdByOp` keys that no function reads. The typed functions with these names are
+ * synchronous and do not ask the pool. The keys stay so that a caller that sets them does
+ * not break.
+ */
+export type DeprecatedThresholdOp =
+  | 'erfc'
+  | 'besselJ'
+  | 'normalCDF'
+  | 'spectrogram'
+  | 'fft2d'
+  | 'matrixPower'
+  | 'characteristicPolynomial';
+
+/** Per-op worker thresholds. Each key is an `OpName`. */
+export interface ThresholdByOp extends Partial<
+  Record<Exclude<OpName, DeprecatedThresholdOp>, OpThreshold>
+> {
+  /**
+   * @deprecated Nothing reads this key. `erfc` is synchronous. For worker threads, call
+   * `computePool.applyKernel(x, workerKernel('erfc'))`.
+   */
+  erfc?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `besselJ` is synchronous. For worker threads, call
+   * `computePool.applyKernel(x, workerKernel('besselJ', n))`.
+   */
+  besselJ?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `normalCDF` is synchronous. For worker threads, call
+   * `computePool.applyKernel(x, workerKernel('normalCDF', mu, sigma))`.
+   */
+  normalCDF?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `spectrogram` is synchronous. For worker threads, put
+   * the windowed frames in one buffer and call `computePool.fftBatch`.
+   */
+  spectrogram?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `fft2d` is synchronous. For worker threads, call
+   * `computePool.fftBatch` on the rows, then on the columns.
+   */
+  fft2d?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `matrixPower` is synchronous and uses the sequential
+   * `denseMatMul`. For a worker product, call `computePool.matmul`.
+   */
+  matrixPower?: OpThreshold;
+  /**
+   * @deprecated Nothing reads this key. `characteristicPolynomial` is synchronous and uses
+   * the sequential `denseMatMul`. For a worker product, call `computePool.matmul`.
+   */
+  characteristicPolynomial?: OpThreshold;
+}
+
+/**
  * Configuration for ComputePool
  * Extends the base WorkerPoolConfig with MathTS-specific options
  */
@@ -165,7 +220,7 @@ export interface ComputePoolConfig {
    * `{ matmul: 1_024 }` retunes matmul and keeps every other entry; set an op to
    * `undefined` to send it to `thresholdElements`.
    */
-  thresholdByOp?: Partial<Record<OpName, OpThreshold>>;
+  thresholdByOp?: ThresholdByOp;
   /** Elements per chunk for parallel operations */
   chunkSize: number;
   /** Worker type: 'auto' | 'web' | 'thread' */
@@ -191,7 +246,7 @@ export interface ComputePoolConfig {
  * category-level {@link ThresholdDispatcher} derives its overlapping values
  * (e.g. matmul) from here so the two cannot silently diverge.
  */
-export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
+export const DEFAULT_THRESHOLD_BY_OP: ThresholdByOp = {
   // element-wise: overhead dominates at all tested sizes
   add: 'never',
   subtract: 'never',

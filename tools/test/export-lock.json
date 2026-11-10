@@ -9223,6 +9223,9 @@
       "DEFAULT_THRESHOLD_BY_OP": {
         "kind": "object"
       },
+      "DeprecatedThresholdOp": {
+        "kind": "type"
+      },
       "DispatchOptions": {
         "kind": "type"
       },
@@ -9263,6 +9266,9 @@
         "kind": "type"
       },
       "ReduceOptions": {
+        "kind": "type"
+      },
+      "ThresholdByOp": {
         "kind": "type"
       },
       "ThresholdConfig": {

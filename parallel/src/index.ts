@@ -31,6 +31,8 @@ export type {
   ParallelResult,
   OpName,
   OpThreshold,
+  ThresholdByOp,
+  DeprecatedThresholdOp,
   DispatchOptions,
 } from './ComputePool.js';
 

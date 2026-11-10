@@ -1,9 +1,9 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-10", "f": 1273, "e": 6924, "re": 3002 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-10", "f": 1273, "e": 6926, "re": 3004 },
   "s": {
-    "loc": 214486,
+    "loc": 214542,
     "cls": 61,
-    "int": 597,
+    "int": 598,
     "fn": 2295,
     "tg": 168,
     "en": 0,
@@ -1633,6 +1633,7 @@
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": [
+        "ThresholdByOp",
         "ComputePoolConfig",
         "DispatchOptions",
         "ParallelResult",

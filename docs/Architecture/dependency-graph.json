@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-10",
     "totalFiles": 1273,
     "totalModules": 82,
-    "totalExports": 6924
+    "totalExports": 6926
   },
   "entryPoints": [
     {
@@ -38818,7 +38818,7 @@
           "ComputePool"
         ],
         "classes": ["ComputePool"],
-        "interfaces": ["ComputePoolConfig", "DispatchOptions", "ParallelResult"],
+        "interfaces": ["ThresholdByOp", "ComputePoolConfig", "DispatchOptions", "ParallelResult"],
         "functions": ["resolveOpThreshold"],
         "constants": ["DEFAULT_THRESHOLD_BY_OP", "DEFAULT_POOL_CONFIG", "computePool"]
       },
@@ -38971,6 +38971,8 @@
               "ParallelResult",
               "OpName",
               "OpThreshold",
+              "ThresholdByOp",
+              "DeprecatedThresholdOp",
               "DispatchOptions"
             ],
             "reExport": true,
@@ -39089,6 +39091,8 @@
           "ParallelResult",
           "OpName",
           "OpThreshold",
+          "ThresholdByOp",
+          "DeprecatedThresholdOp",
           "DispatchOptions",
           "MatmulOptions",
           "ElementwiseOptions",
@@ -39180,6 +39184,8 @@
           "ParallelResult",
           "OpName",
           "OpThreshold",
+          "ThresholdByOp",
+          "DeprecatedThresholdOp",
           "DispatchOptions",
           "MatmulOptions",
           "ElementwiseOptions",
@@ -45473,15 +45479,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1273,
     "totalModules": 82,
-    "totalLinesOfCode": 214486,
-    "totalExports": 6924,
+    "totalLinesOfCode": 214542,
+    "totalExports": 6926,
     "totalClasses": 61,
-    "totalInterfaces": 597,
+    "totalInterfaces": 598,
     "totalFunctions": 2295,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 3002,
+    "totalReExports": 3004,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
