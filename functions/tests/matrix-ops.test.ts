@@ -97,12 +97,12 @@ describe('characteristicPolynomial', () => {
   });
 
   it('should throw for non-square matrix', async () => {
-    await expect(
+    expect(() =>
       characteristicPolynomial([
         [1, 2, 3],
         [4, 5, 6],
       ])
-    ).rejects.toThrow('square');
+    ).toThrow('square');
   });
 });
 
@@ -452,7 +452,7 @@ describe('matrixPower', () => {
   });
 
   it('should throw for singular matrix with negative power', async () => {
-    await expect(
+    expect(() =>
       matrixPower(
         [
           [1, 0],
@@ -460,7 +460,7 @@ describe('matrixPower', () => {
         ],
         -1
       )
-    ).rejects.toThrow('singular');
+    ).toThrow('singular');
   });
 });
 
@@ -517,12 +517,12 @@ describe('matrixLog', () => {
   });
 
   it('should throw for matrix with non-positive eigenvalues', async () => {
-    await expect(
+    expect(() =>
       matrixLog([
         [-1, 0],
         [0, 1],
       ])
-    ).rejects.toThrow();
+    ).toThrow();
   });
 });
 

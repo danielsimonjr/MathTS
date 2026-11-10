@@ -6,7 +6,7 @@
  *
  * Every typed-function signature in this file is synchronous. Each Float64Array signature
  * returns a Float64Array (element-wise ops) or a number (reductions), not a Promise.
- * The standalone helpers matmul, transpose, matvec and outer stay async. Some unary
+ * The standalone helpers matmul, transpose, matvec and outer are synchronous too. Some unary
  * ops use the WASM tier first after `loadWasm()` loads the tier.
  * For worker threads, use `ComputePool` or
  * `parallelMap` from `@danielsimonjr/mathts-parallel`.
@@ -40,7 +40,7 @@ import type { UnitInstance as Unit, TypedFunction } from '@danielsimonjr/mathts-
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
-import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
+import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
@@ -1522,55 +1522,79 @@ export const dot = mathTyped('dot', {
 });
 
 // =============================================================================
-// Matrix Operations (Parallel-First)
+// Matrix Operations
 // =============================================================================
 
 /**
- * Parallel matrix multiplication
+ * Matrix multiplication of row-major Float64Arrays: A (aRows x aCols) times B (aCols x bCols).
+ * Synchronous at every size (`matmulSequential`). For worker threads above the measured
+ * break-even, use `computePool.matmul` from `@danielsimonjr/mathts-parallel`.
  * @param a First matrix as flat Float64Array (row-major)
  * @param aRows Number of rows in A
  * @param aCols Number of columns in A (must equal bRows)
  * @param b Second matrix as flat Float64Array (row-major)
  * @param bCols Number of columns in B
+ * @throws Error when `a` or `b` does not hold the elements that its shape gives
  */
-export async function matmul(
+export function matmul(
   a: Float64Array,
   aRows: i32,
   aCols: i32,
   b: Float64Array,
   bCols: i32
-): Promise<Float64Array> {
-  const result = await computePool.matmul(a, aRows, aCols, b, bCols);
-  return result.result;
+): Float64Array {
+  return matmulSequential(a, aRows, aCols, b, bCols);
 }
 
 /**
- * Parallel matrix transpose
+ * Transpose of a row-major `rows x cols` matrix. The result is a new `cols x rows` array.
+ * @throws Error when `data` does not hold rows*cols elements
  */
-export async function transpose(data: Float64Array, rows: i32, cols: i32): Promise<Float64Array> {
-  const result = await computePool.transpose(data, rows, cols);
-  return result.result;
+export function transpose(data: Float64Array, rows: i32, cols: i32): Float64Array {
+  if (data.length !== rows * cols) {
+    throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
+  }
+  const out = new Float64Array(rows * cols);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) out[j * rows + i] = data[i * cols + j];
+  }
+  return out;
 }
 
 /**
- * Parallel matrix-vector multiplication
+ * Matrix-vector product of a row-major `rows x cols` matrix and a vector of length cols.
+ * @throws Error when the matrix or the vector length does not match the shape
  */
-export async function matvec(
+export function matvec(
   matrix: Float64Array,
   rows: i32,
   cols: i32,
   vector: Float64Array
-): Promise<Float64Array> {
-  const result = await computePool.matvec(matrix, rows, cols, vector);
-  return result.result;
+): Float64Array {
+  if (matrix.length !== rows * cols) {
+    throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
+  }
+  if (vector.length !== cols) {
+    throw new Error(`matvec: vector length ${vector.length} !== cols (${cols})`);
+  }
+  const out = new Float64Array(rows);
+  for (let i = 0; i < rows; i++) {
+    let s = 0;
+    for (let j = 0; j < cols; j++) s += matrix[i * cols + j] * vector[j];
+    out[i] = s;
+  }
+  return out;
 }
 
 /**
- * Parallel outer product
+ * Outer product of two vectors: a row-major `a.length x b.length` matrix.
  */
-export async function outer(a: Float64Array, b: Float64Array): Promise<Float64Array> {
-  const result = await computePool.outer(a, b);
-  return result.result;
+export function outer(a: Float64Array, b: Float64Array): Float64Array {
+  const out = new Float64Array(a.length * b.length);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) out[i * b.length + j] = a[i] * b[j];
+  }
+  return out;
 }
 
 // =============================================================================
