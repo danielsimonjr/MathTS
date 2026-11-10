@@ -46,8 +46,8 @@ import { basename, dirname, join, relative } from 'path';
  * carrying no `## Verification` section rather than skipping it silently.
  * These reports are generated here, on a different methodology, so that gate
  * cannot meaningfully verify their numbers -- their freshness is governed by
- * re-running `npm run docs:deps:full` (plain `docs:deps`
- * omits TEST_COVERAGE.md, which needs --include-tests).
+ * re-running `npm run docs:deps:full`, an alias of `docs:deps`. Both pass
+ * --include-tests, which writes TEST_COVERAGE.md.
  *
  * The marker MUST be emitted here rather than added by hand: a hand-added
  * marker survives exactly until the next regeneration, and then the gate fails
@@ -2633,7 +2633,7 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
   const b = coverage.policyBreakdown;
   return {
     metadata: {
-      generatedAt: new Date().toISOString(),
+      generatedAt: new Date().toISOString().split('T')[0],
       totalSourceFiles: coverage.sourceFiles.length,
       totalTestFiles: coverage.testFiles.length,
       testedCount: coverage.testedFiles.length,
@@ -4816,9 +4816,9 @@ async function main(): Promise<void> {
 
   // Parse test files up-front UNCONDITIONALLY so the unused-analysis always sees
   // test-only consumers (a test importing `initWasm` or `resetPolyWasm` is a
-  // legitimate consumer). This used to be gated on --include-tests — but docs:deps
-  // runs without that flag, so every test-only-consumed export was false-flagged.
-  // The flag now gates only the test-coverage REPORT generation below.
+  // legitimate consumer). This step does not read --include-tests, so the
+  // unused-analysis is the same with and without the flag.
+  // The flag gates only the test-coverage REPORT generation below.
   const testFilePaths: string[] = [];
   if (isMonorepo) {
     for (const [, ws] of workspaceMap) {

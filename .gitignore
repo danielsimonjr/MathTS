@@ -117,3 +117,7 @@ tools/benchmark/gpu/bench-3way.bundle.js
 # them, and the pre-commit hook stages everything in docs/Architecture.
 docs/Architecture/dependency-layers.json
 docs/Architecture/unused-analysis.json
+
+# Local output of `bun run docs:deps`. TEST_COVERAGE.md is the tracked report. The JSON is 4 MB
+# and no tool of the repository reads it.
+docs/Architecture/test-coverage.json

@@ -175,7 +175,8 @@ is reported. With the policy loaded, the tool builds a
 - `coverage-policy.json` is the source of truth.
 - `TEST_COVERAGE.md` gains the "Coverage (effective, active code only)"
   row and the "Untested-file breakdown by category" table.
-- `test-coverage.json`'s `metadata.effectiveCoverage` carries the
+- `test-coverage.json` is local output that git does not track. Its
+  `metadata.effectiveCoverage` carries the
   same data as a machine-readable object, with a per-file
   classification under `classifiedUntested` (category = `null` for
   active gaps).
