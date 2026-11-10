@@ -90,11 +90,11 @@ describe('managed-ABI calls keep WASM memory bounded', () => {
     await assertBounded('welchPSD', () => welchPSD(signal, { frameLength: 256 }));
   });
 
-  it('results stay correct after many resets', async () => {
+  it('results stay correct after many resets', () => {
     const xs = Float64Array.from({ length: 4096 }, (_, i) => 1 + i / 100);
-    const first = (await lgamma(xs)) as Float64Array;
-    for (let i = 0; i < 50; i++) await lgamma(xs);
-    const last = (await lgamma(xs)) as Float64Array;
+    const first = lgamma(xs) as Float64Array;
+    for (let i = 0; i < 50; i++) lgamma(xs);
+    const last = lgamma(xs) as Float64Array;
     expect(Array.from(last)).toEqual(Array.from(first));
   });
 });

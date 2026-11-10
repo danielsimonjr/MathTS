@@ -128,7 +128,7 @@ describe('matrixRank edges used by the Jordan walk', () => {
     ).toBe(2);
   });
 
-  it('Jordan form of a diagonal matrix agrees with matrixRank of A − λI', async () => {
+  it('Jordan form of a diagonal matrix agrees with matrixRank of A − λI', () => {
     const A = [
       [2, 0],
       [0, 3],
@@ -142,7 +142,7 @@ describe('matrixRank edges used by the Jordan walk', () => {
         1e-8
       )
     ).toBe(1);
-    const { J } = await jordanForm(A);
+    const { J } = jordanForm(A);
     expect(J[0][0]).toBeCloseTo(2, 6);
     expect(J[1][1]).toBeCloseTo(3, 6);
     expect(J[0][1]).toBe(0);
@@ -178,9 +178,9 @@ describe('upper gamma continued fraction', () => {
     expect(gammaincp(1, -1)).toBeNaN();
   });
 
-  it('Float64Array gammaincp matches the scalar, series and continued fraction', async () => {
+  it('Float64Array gammaincp matches the scalar, series and continued fraction', () => {
     const xs = Float64Array.from([0, 0.5, 1, 8, 80]);
-    const arr = (await gammaincp(5, xs)) as Float64Array;
+    const arr = gammaincp(5, xs) as Float64Array;
     expect(arr.length).toBe(xs.length);
     for (let i = 0; i < xs.length; i++) {
       expect(arr[i]).toBe(gammaincp(5, xs[i]) as number);

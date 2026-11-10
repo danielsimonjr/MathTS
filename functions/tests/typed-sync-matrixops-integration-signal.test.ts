@@ -147,6 +147,19 @@ describe('trapzF64 and simpsonF64 are synchronous and sum pairwise', () => {
     expect(pairwiseSum(terms)).not.toBe(naiveSum(terms));
   });
 
+  it('pins the last-bit change at 10 points (9 terms, more than the 8 leaf accumulators)', () => {
+    // Integer eighths near 1e15, where the spacing of doubles is 1/8: every input is exact.
+    const eighths = [
+      8000000000005570, 8000000000007056, 8000000000004664, -8000000000002316, 8000000000006030,
+      -8000000000000706, 8000000000006681, -8000000000005039, -8000000000002361, 8000000000007215,
+    ];
+    const y = Float64Array.from(eighths, (m) => m / 8);
+    // pairwiseSum gives 1000000000002550.125. The naive loop of the old version gave
+    // 1000000000002550.375.
+    expect(trapzF64(y, 1)).toBe(8000000000020401 / 8);
+    expect(trapzF64(y, 1)).not.toBe(8000000000020403 / 8);
+  });
+
   it('keeps the small-input errors, thrown synchronously', () => {
     expect(() => trapzF64(new Float64Array([1]))).toThrow('at least 2 data points');
     expect(() => simpsonF64(new Float64Array([0, 1, 2, 3]))).toThrow('odd number of points');

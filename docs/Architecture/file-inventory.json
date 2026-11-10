@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 723
+      "loc": 731
     },
     {
       "file": "functions/src/typed/euclid.ts",
@@ -8794,7 +8794,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1517
+      "loc": 1537
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -12077,7 +12077,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 255
+      "loc": 258
     },
     {
       "file": "functions/tests/typed-sync-special-wasm-tier.test.ts",

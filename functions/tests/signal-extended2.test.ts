@@ -106,19 +106,19 @@ describe('dwt', () => {
 // =============================================================================
 
 describe('fft2d', () => {
-  it('should compute 2D FFT', async () => {
+  it('should compute 2D FFT', () => {
     const x = [
       [1, 2],
       [3, 4],
     ];
-    const result = await fft2d(x);
+    const result = fft2d(x);
     expect(result.real.length).toBe(2);
     expect(result.imag.length).toBe(2);
     // DC component should be sum of all elements
     expectClose(result.real[0][0], 10, 1e-6);
   });
 
-  it('parallel result matches sequential result', async () => {
+  it('parallel result matches sequential result', () => {
     // Build a deterministic 16x16 real matrix.
     const n = 16;
     const x: number[][] = Array.from({ length: n }, (_, r) =>
@@ -127,11 +127,11 @@ describe('fft2d', () => {
 
     // Sequential reference: thresholds high enough that the pool path is skipped.
     computePool.updateConfig({ thresholdElements: 1_000_000 });
-    const seq = await fft2d(x);
+    const seq = fft2d(x);
 
     // Parallel: lower the threshold so fftBatch dispatches to workers.
     computePool.updateConfig({ thresholdElements: 16 });
-    const par = await fft2d(x);
+    const par = fft2d(x);
     computePool.updateConfig({ thresholdElements: 1_000_000 });
 
     expect(par.real.length).toBe(seq.real.length);
@@ -188,15 +188,15 @@ describe('hilbertTransform', () => {
 // =============================================================================
 
 describe('spectrogram', () => {
-  it('should produce magnitude matrix', async () => {
+  it('should produce magnitude matrix', () => {
     const x = Array.from({ length: 512 }, (_, i) => Math.sin((2 * Math.PI * 10 * i) / 512));
-    const result = await spectrogram(x, { windowSize: 64 });
+    const result = spectrogram(x, { windowSize: 64 });
     expect(result.magnitude.length).toBeGreaterThan(0);
     expect(result.frequencies.length).toBeGreaterThan(0);
     expect(result.times.length).toBe(result.magnitude.length);
   });
 
-  it('parallel result matches sequential result', async () => {
+  it('parallel result matches sequential result', () => {
     // Rectangular window keeps the WASM fast-path out of the picture so the
     // comparison isolates the pure-TS sequential vs. worker-batch paths.
     const x = Array.from(
@@ -208,11 +208,11 @@ describe('spectrogram', () => {
 
     // Sequential reference.
     computePool.updateConfig({ thresholdElements: 1_000_000 });
-    const seq = await spectrogram(x, opts);
+    const seq = spectrogram(x, opts);
 
     // Parallel: lower the threshold so the windowed frames batch to workers.
     computePool.updateConfig({ thresholdElements: 64 });
-    const par = await spectrogram(x, opts);
+    const par = spectrogram(x, opts);
     computePool.updateConfig({ thresholdElements: 1_000_000 });
 
     expect(par.magnitude.length).toBe(seq.magnitude.length);

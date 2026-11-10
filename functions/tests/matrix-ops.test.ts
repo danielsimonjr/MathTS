@@ -61,29 +61,29 @@ function transpose(A: number[][]): number[][] {
 // =============================================================================
 
 describe('characteristicPolynomial', () => {
-  it('should compute characteristic polynomial of 2x2 matrix', async () => {
+  it('should compute characteristic polynomial of 2x2 matrix', () => {
     // [[2,1],[1,2]] -> lambda^2 - 4*lambda + 3 -> [3, -4, 1]
-    const coeffs = await characteristicPolynomial([
+    const coeffs = characteristicPolynomial([
       [2, 1],
       [1, 2],
     ]);
     expectArrayClose(coeffs, [3, -4, 1]);
   });
 
-  it('should compute characteristic polynomial of identity', async () => {
+  it('should compute characteristic polynomial of identity', () => {
     // 2x2 identity -> lambda^2 - 2*lambda + 1 -> [1, -2, 1]
-    const coeffs = await characteristicPolynomial([
+    const coeffs = characteristicPolynomial([
       [1, 0],
       [0, 1],
     ]);
     expectArrayClose(coeffs, [1, -2, 1]);
   });
 
-  it('should compute characteristic polynomial of 3x3 matrix', async () => {
+  it('should compute characteristic polynomial of 3x3 matrix', () => {
     // [[1,0,0],[0,2,0],[0,0,3]] -> (lambda-1)(lambda-2)(lambda-3)
     // = lambda^3 - 6*lambda^2 + 11*lambda - 6
     // coeffs in ascending: [-6, 11, -6, 1]
-    const coeffs = await characteristicPolynomial([
+    const coeffs = characteristicPolynomial([
       [1, 0, 0],
       [0, 2, 0],
       [0, 0, 3],
@@ -91,12 +91,12 @@ describe('characteristicPolynomial', () => {
     expectArrayClose(coeffs, [-6, 11, -6, 1]);
   });
 
-  it('should handle 1x1 matrix', async () => {
-    const coeffs = await characteristicPolynomial([[5]]);
+  it('should handle 1x1 matrix', () => {
+    const coeffs = characteristicPolynomial([[5]]);
     expectArrayClose(coeffs, [-5, 1]);
   });
 
-  it('should throw for non-square matrix', async () => {
+  it('should throw for non-square matrix', () => {
     expect(() =>
       characteristicPolynomial([
         [1, 2, 3],
@@ -370,8 +370,8 @@ describe('hessenbergForm', () => {
 // =============================================================================
 
 describe('matrixPower', () => {
-  it('should compute positive integer power', async () => {
-    const result = await matrixPower(
+  it('should compute positive integer power', () => {
+    const result = matrixPower(
       [
         [1, 1],
         [0, 1],
@@ -384,8 +384,8 @@ describe('matrixPower', () => {
     ]);
   });
 
-  it('should return identity for p=0', async () => {
-    const result = await matrixPower(
+  it('should return identity for p=0', () => {
+    const result = matrixPower(
       [
         [5, 3],
         [2, 7],
@@ -398,21 +398,21 @@ describe('matrixPower', () => {
     ]);
   });
 
-  it('should return copy for p=1', async () => {
+  it('should return copy for p=1', () => {
     const A = [
       [1, 2],
       [3, 4],
     ];
-    const result = await matrixPower(A, 1);
+    const result = matrixPower(A, 1);
     expectMatrixClose(result, A);
   });
 
-  it('should compute inverse for p=-1', async () => {
+  it('should compute inverse for p=-1', () => {
     const A = [
       [1, 2],
       [3, 4],
     ];
-    const Ainv = await matrixPower(A, -1);
+    const Ainv = matrixPower(A, -1);
     const product = matMul(A, Ainv);
     expectMatrixClose(product, [
       [1, 0],
@@ -420,12 +420,12 @@ describe('matrixPower', () => {
     ]);
   });
 
-  it('should compute negative integer power', async () => {
+  it('should compute negative integer power', () => {
     const A = [
       [1, 1],
       [0, 1],
     ];
-    const result = await matrixPower(A, -2);
+    const result = matrixPower(A, -2);
     // A^{-1} = [[1,-1],[0,1]], A^{-2} = [[1,-2],[0,1]]
     expectMatrixClose(result, [
       [1, -2],
@@ -433,8 +433,8 @@ describe('matrixPower', () => {
     ]);
   });
 
-  it('should compute square root of diagonal matrix', async () => {
-    const result = await matrixPower(
+  it('should compute square root of diagonal matrix', () => {
+    const result = matrixPower(
       [
         [4, 0],
         [0, 9],
@@ -451,7 +451,7 @@ describe('matrixPower', () => {
     );
   });
 
-  it('should throw for singular matrix with negative power', async () => {
+  it('should throw for singular matrix with negative power', () => {
     expect(() =>
       matrixPower(
         [
@@ -469,8 +469,8 @@ describe('matrixPower', () => {
 // =============================================================================
 
 describe('matrixLog', () => {
-  it('should compute log of identity as zero matrix', async () => {
-    const result = await matrixLog([
+  it('should compute log of identity as zero matrix', () => {
+    const result = matrixLog([
       [1, 0],
       [0, 1],
     ]);
@@ -484,10 +484,10 @@ describe('matrixLog', () => {
     );
   });
 
-  it('should compute log of upper triangular near-identity', async () => {
+  it('should compute log of upper triangular near-identity', () => {
     // exp([[0,1],[0,0]]) = [[1,1],[0,1]]
     // so log([[1,1],[0,1]]) should be [[0,1],[0,0]]
-    const result = await matrixLog([
+    const result = matrixLog([
       [1, 1],
       [0, 1],
     ]);
@@ -501,8 +501,8 @@ describe('matrixLog', () => {
     );
   });
 
-  it('should compute log of diagonal matrix', async () => {
-    const result = await matrixLog([
+  it('should compute log of diagonal matrix', () => {
+    const result = matrixLog([
       [Math.E, 0],
       [0, Math.E * Math.E],
     ]);
@@ -516,7 +516,7 @@ describe('matrixLog', () => {
     );
   });
 
-  it('should throw for matrix with non-positive eigenvalues', async () => {
+  it('should throw for matrix with non-positive eigenvalues', () => {
     expect(() =>
       matrixLog([
         [-1, 0],
@@ -531,8 +531,8 @@ describe('matrixLog', () => {
 // =============================================================================
 
 describe('polarDecomposition', () => {
-  it('should decompose diagonal matrix', async () => {
-    const { U, P } = await polarDecomposition([
+  it('should decompose diagonal matrix', () => {
+    const { U, P } = polarDecomposition([
       [2, 0],
       [0, 3],
     ]);
@@ -548,12 +548,12 @@ describe('polarDecomposition', () => {
     );
   });
 
-  it('should produce orthogonal U', async () => {
+  it('should produce orthogonal U', () => {
     const A = [
       [1, 2],
       [3, 4],
     ];
-    const { U } = await polarDecomposition(A);
+    const { U } = polarDecomposition(A);
     const UtU = matMul(transpose(U), U);
     expectMatrixClose(
       UtU,
@@ -565,28 +565,28 @@ describe('polarDecomposition', () => {
     );
   });
 
-  it('should produce symmetric positive semi-definite P', async () => {
+  it('should produce symmetric positive semi-definite P', () => {
     const A = [
       [1, 2],
       [3, 4],
     ];
-    const { P } = await polarDecomposition(A);
+    const { P } = polarDecomposition(A);
     // P should be symmetric
     expectMatrixClose(P, transpose(P), 1e-8);
   });
 
-  it('should satisfy A = U * P', async () => {
+  it('should satisfy A = U * P', () => {
     const A = [
       [1, 2],
       [3, 4],
     ];
-    const { U, P } = await polarDecomposition(A);
+    const { U, P } = polarDecomposition(A);
     const product = matMul(U, P);
     expectMatrixClose(product, A, 1e-8);
   });
 
-  it('should handle identity matrix', async () => {
-    const { U, P } = await polarDecomposition([
+  it('should handle identity matrix', () => {
+    const { U, P } = polarDecomposition([
       [1, 0],
       [0, 1],
     ]);
@@ -614,8 +614,8 @@ describe('polarDecomposition', () => {
 // =============================================================================
 
 describe('jordanForm', () => {
-  it('should handle diagonal matrix with distinct eigenvalues', async () => {
-    const { J } = await jordanForm([
+  it('should handle diagonal matrix with distinct eigenvalues', () => {
+    const { J } = jordanForm([
       [2, 0],
       [0, 3],
     ]);
@@ -628,8 +628,8 @@ describe('jordanForm', () => {
     expect(Math.abs(J[1][0])).toBeLessThan(1e-6);
   });
 
-  it('should handle identity matrix', async () => {
-    const { J } = await jordanForm([
+  it('should handle identity matrix', () => {
+    const { J } = jordanForm([
       [1, 0],
       [0, 1],
     ]);
@@ -643,8 +643,8 @@ describe('jordanForm', () => {
     );
   });
 
-  it('should handle 3x3 diagonal matrix', async () => {
-    const { J } = await jordanForm([
+  it('should handle 3x3 diagonal matrix', () => {
+    const { J } = jordanForm([
       [1, 0, 0],
       [0, 2, 0],
       [0, 0, 3],
@@ -655,9 +655,9 @@ describe('jordanForm', () => {
     expect(diag[2]).toBeCloseTo(3, 6);
   });
 
-  it('should handle matrix with repeated eigenvalue (2x2 Jordan block)', async () => {
+  it('should handle matrix with repeated eigenvalue (2x2 Jordan block)', () => {
     // [[2,1],[0,2]] has eigenvalue 2 with algebraic mult 2, geometric mult 1
-    const { J } = await jordanForm([
+    const { J } = jordanForm([
       [2, 1],
       [0, 2],
     ]);
@@ -702,9 +702,9 @@ describe('matrix-ops parallel matmul path', () => {
 
   beforeAll(async () => {
     // Pool not yet initialized -> sequential reference values.
-    seqPow = await matrixPower(A, 5);
-    seqChar = await characteristicPolynomial(A);
-    seqPolarP = (await polarDecomposition(A)).P;
+    seqPow = matrixPower(A, 5);
+    seqChar = characteristicPolynomial(A);
+    seqPolarP = polarDecomposition(A).P;
 
     await computePool.initialize();
     // n*n = 576 -> crosses this lowered threshold and offloads to workers.
@@ -718,8 +718,8 @@ describe('matrix-ops parallel matmul path', () => {
 
   it(
     'matrixPower agrees with the sequential path',
-    async () => {
-      const parPow = await matrixPower(A, 5);
+    () => {
+      const parPow = matrixPower(A, 5);
       expectMatrixClose(parPow, seqPow, 1e-9);
     },
     PARALLEL_TEST_TIMEOUT
@@ -727,8 +727,8 @@ describe('matrix-ops parallel matmul path', () => {
 
   it(
     'characteristicPolynomial agrees with the sequential path',
-    async () => {
-      const parChar = await characteristicPolynomial(A);
+    () => {
+      const parChar = characteristicPolynomial(A);
       expectArrayClose(parChar, seqChar, 1e-6);
     },
     PARALLEL_TEST_TIMEOUT
@@ -736,8 +736,8 @@ describe('matrix-ops parallel matmul path', () => {
 
   it(
     'polarDecomposition agrees with the sequential path',
-    async () => {
-      const parPolar = await polarDecomposition(A);
+    () => {
+      const parPolar = polarDecomposition(A);
       expectMatrixClose(parPolar.P, seqPolarP, 1e-9);
     },
     PARALLEL_TEST_TIMEOUT

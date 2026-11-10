@@ -376,13 +376,13 @@ describe('spectrogram / periodogram preallocated outputs', () => {
     expect(r.psd.indexOf(Math.max(...r.psd))).toBe(8);
   });
 
-  it('spectrogram has one magnitude row and one time per frame', async () => {
+  it('spectrogram has one magnitude row and one time per frame', () => {
     const x = Array.from({ length: 256 }, (_, i) => Math.sin(0.3 * i));
-    const r = await spectrogram(x, { windowSize: 64, hopSize: 32 });
+    const r = spectrogram(x, { windowSize: 64, hopSize: 32 });
     expect(r.magnitude.length).toBe(r.times.length);
     expect(r.magnitude.length).toBe(7);
     expect(r.magnitude[0].length).toBe(33);
-    expect((await spectrogram([1, 2], { windowSize: 64, hopSize: 32 })).magnitude).toEqual([]);
+    expect(spectrogram([1, 2], { windowSize: 64, hopSize: 32 }).magnitude).toEqual([]);
   });
 });
 
