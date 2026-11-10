@@ -27,6 +27,7 @@ for (const job of workerData.jobs) {
   );
   if (job.integrand) args.unshift(job.integrand === 'nan' ? () => NaN : (x) => x);
   let out;
+  const t0 = performance.now();
   try {
     let r = fn(...args);
     if (r && typeof r.then === 'function') r = await r;
@@ -34,6 +35,6 @@ for (const job of workerData.jobs) {
   } catch (e) {
     out = `throws:${e?.constructor?.name ?? 'unknown'}`;
   }
-  parentPort.postMessage({ type: 'result', job, out });
+  parentPort.postMessage({ type: 'result', job, out, ms: performance.now() - t0 });
 }
 parentPort.postMessage({ type: 'done' });

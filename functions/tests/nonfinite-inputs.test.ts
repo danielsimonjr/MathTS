@@ -18,7 +18,12 @@ import * as fns from '../src/index.js';
 import { erfc, normalCDF, primePi, compare, factory_compare, zeta, isPrime } from '../src/index.js';
 import { parallelStatMedian } from '../src/typed/statistics.js';
 
-/** Budget for one call in the sweep worker. A hang fails at this limit. */
+/**
+ * Budgets for the sweep worker. A call that does not return in its budget fails the test.
+ * Measured on an idle machine: the bundle loads in about 1 s, the slowest call takes 2 ms,
+ * and the full sweep of 1,344 calls takes about 1 s. The budgets allow for CI load.
+ */
+const LOAD_BUDGET_MS = 30_000;
 const CALL_BUDGET_MS = 10_000;
 
 type Job = {
@@ -204,20 +209,23 @@ beforeAll(async () => {
   });
   await new Promise<void>((resolve, reject) => {
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const arm = (label: string) => {
+    const arm = (label: string, budget: number) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        hangError = `call did not return in ${CALL_BUDGET_MS} ms: ${label}`;
+        hangError = `call did not return in ${budget} ms: ${label}`;
         void worker.terminate();
         resolve();
-      }, CALL_BUDGET_MS);
+      }, budget);
     };
-    arm('loading the bundle');
+    arm('loading the bundle', LOAD_BUDGET_MS);
     worker.on('message', (msg: { type: string; job?: Job; out?: string }) => {
       if (msg.type === 'result' && msg.job) {
         results.push({ job: msg.job, out: msg.out ?? '' });
       } else if (msg.type === 'start' && msg.job) {
-        arm(`${msg.job.name}(${msg.job.sig ?? ''}) args=${JSON.stringify(msg.job.args)}`);
+        arm(
+          `${msg.job.name}(${msg.job.sig ?? ''}) args=${JSON.stringify(msg.job.args)}`,
+          CALL_BUDGET_MS
+        );
       } else if (msg.type === 'done') {
         clearTimeout(timer);
         void worker.terminate();

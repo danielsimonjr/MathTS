@@ -14,4 +14,4 @@ Non-finite inputs (NaN, +Infinity, -Infinity) no longer hang or give a wrong num
 - `erfc(NaN)` (JS and the AssemblyScript kernel), `normalCDF` with a NaN in any position, `primePi(NaN)`, the three-argument median and `zeta(NaN)` return `NaN`. Before, they returned 2, 1, 0, a sorted element and 1.
 - Behaviour change: the typed `compare(NaN, x)` and `compare(x, NaN)` return `-1`, the same as mathjs and the factory `compare`. Before, they returned `0`. No function in the package calls the typed `compare`; `sort` and `partitionSelect` use the factory `compare`, which already returned `-1`.
 
-Finite inputs give the same results as before.
+Finite inputs give the same results as before, with one exception: `nextPrime(n)` for `n >= Number.MAX_SAFE_INTEGER` now throws a `RangeError`. Before, the first candidate `floor(n) + 1` was already above the safe-integer range, so the result was not exact.
