@@ -12,14 +12,12 @@ and want to move to `@danielsimonjr/mathts-*`.
   long-term surface: explicit TypeScript overloads and direct imports (not the
   `create(all)` / `math.*` style). The package still loads one bundled entry that
   activates the factory graph — do not expect per-symbol tree-shaking from that entry.
-- `Float64Array` inputs to the arithmetic functions (`add`, `subtract`, `multiply`,
-  `divide`, the unary ops of `typed/arithmetic.ts`, `norm`, `min`, `max`, `dot`) are synchronous: they return a
-  `Float64Array` or a number. Use `ComputePool` or `parallelMap` from
-  `@danielsimonjr/mathts-parallel` for worker threads. The trigonometry, statistics,
-  signal and bitwise `Float64Array` overloads are still async.
-- `Int32Array` bitwise inputs are async, but bitwise WASM kernels are not enabled in
-  `functions/src/wasm/policy.ts` and worker bitwise ops are also `'never'` — they run
-  in-process after the Promise wrapper.
+- The typed `Float64Array` and `Int32Array` overloads (arithmetic, trigonometry, bitwise,
+  special functions, distributions) are synchronous: they return a typed array or a number.
+  Only the `parallel*` exports (for example `parallelFFT`, `parallelStatSum`) are async.
+  Use `ComputePool` or `parallelMap` from `@danielsimonjr/mathts-parallel` for worker threads.
+- `Int32Array` bitwise inputs throw `RangeError` when the lengths differ. Bitwise WASM
+  kernels are not enabled in `functions/src/wasm/policy.ts`, so the ops run in-process.
 - `bigint` is a first-class scalar type for arithmetic and bitwise ops.
 
 ---
@@ -145,11 +143,30 @@ const result = add(a, b); // Float64Array([6, 8, 10, 12])
 ```
 
 The `Float64Array` overload is present on all element-wise arithmetic and
-trigonometry functions. For most element-wise operations the default threshold
-is `'never'` (in-process is faster at tested sizes). The pool will be used when
-`ComputePool.shouldParallelize(n, op)` returns true.
+trigonometry functions, and it is synchronous. For worker threads, call the
+`ComputePool` method or `parallelMap` yourself.
 
-### Int32Array bitwise overloads (async, in-process today)
+### Worker threads for special functions, distributions and FFTs
+
+The `Float64Array` signatures of the special functions and the distributions are synchronous.
+To run one of these functions on worker threads, get the kernel source from `workerKernel`.
+Give the source to `computePool.applyKernel`:
+
+```ts
+import { computePool } from '@danielsimonjr/mathts-parallel';
+import { besselK, workerKernel } from '@danielsimonjr/mathts-functions';
+
+await computePool.initialize();
+const { result } = await computePool.applyKernel(x, workerKernel('besselK', 1));
+// result equals besselK(1, x) bit for bit
+```
+
+Give the scalar parameters in the order of the typed signature. Do not give the array. For
+example, use `workerKernel('normalCDF', mu, sigma)` for `normalCDF(x, mu, sigma)`. For
+`fft2d` and `spectrogram`, put the frames in one buffer and call `computePool.fftBatch`.
+The pool uses worker threads when the array has 50 000 elements or more.
+
+### Int32Array bitwise overloads (synchronous)
 
 ```ts
 import { bitAnd, bitOr, bitXor, bitNot, leftShift } from '@danielsimonjr/mathts-functions';
@@ -157,13 +174,13 @@ import { bitAnd, bitOr, bitXor, bitNot, leftShift } from '@danielsimonjr/mathts-
 const a = new Int32Array([0b1100, 0b1010]);
 const b = new Int32Array([0b1010, 0b0110]);
 
-const r = await bitAnd(a, b); // Int32Array([0b1000, 0b0010])
+const r = bitAnd(a, b); // Int32Array([0b1000, 0b0010])
 ```
 
-The typed bitwise functions are `async` (they return a `Promise`), but dispatch
-stays on in-process JS: `wasmPolicyAllows` has no bitwise kernels (see
-`functions/src/wasm/policy.ts`), and `ComputePool` bitwise ops are `'never'`.
-The `WASM_BITWISE_THRESHOLD` constant in the bridge is not wired through policy.
+The typed bitwise functions are synchronous and return a new `Int32Array`. At or above
+`WASM_BITWISE_THRESHOLD` (65 536 elements), the functions ask the WASM bridge first.
+Because `wasmPolicyAllows` has no bitwise kernels (see `functions/src/wasm/policy.ts`),
+the in-process JS loop runs. A length mismatch throws `RangeError`.
 
 ### Beyond mathjs: the scientific layer
 
@@ -184,25 +201,15 @@ computational-geometry predicates. None of these exist in mathjs; browse them at
 The following changes affect code that bypasses the compat shim and calls
 MathTS packages directly.
 
-### Functions that are now async
+### Functions that are async
 
-Several functions that were synchronous in mathjs are `async` in MathTS because
-their internal matrix products are offloaded to the worker pool for large inputs.
-Await them or they will return a `Promise` rather than a value.
+`parallelIFFT` is `async` in MathTS (it was synchronous in mathjs). Await it, or it
+returns a `Promise` rather than a value.
 
-| Function                   | Package            | Was sync in mathjs                 |
-| -------------------------- | ------------------ | ---------------------------------- |
-| `characteristicPolynomial` | `mathts-functions` | yes                                |
-| `matrixPower`              | `mathts-functions` | yes                                |
-| `matrixLog`                | `mathts-functions` | yes                                |
-| `polarDecomposition`       | `mathts-functions` | yes                                |
-| `jordanForm`               | `mathts-functions` | yes                                |
-| `spectrogram`              | `mathts-functions` | yes                                |
-| `fft2d`                    | `mathts-functions` | yes                                |
-| `parallelIFFT`             | `mathts-functions` | yes (was parallel-prefix but sync) |
-
-`rowReduce`, `matrixRank`, `cholesky`, and `hessenbergForm` are unchanged
-(they do not internally multiply matrices).
+`characteristicPolynomial`, `matrixPower`, `matrixLog`, `polarDecomposition`,
+`jordanForm`, `spectrogram` and `fft2d` were async in earlier MathTS releases. These functions are
+synchronous again, as in mathjs. Code that awaits these functions still works. `.then` on
+the return value does not work.
 
 ### New typed overloads for scalar types
 

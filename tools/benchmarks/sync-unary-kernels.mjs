@@ -10,12 +10,16 @@
  *             50k threshold): 14 arithmetic ops and 9 trigonometry ops. Worker arm:
  *             computePool.applyKernel with the kernel source the old signature sent.
  *   mapped    special and distributions ops that dispatched through the old async mapArray
- *             helper (nameless gate, applyKernel). Worker arm: the same function from a build
- *             of the parent commit, awaited. Set BENCH_BASELINE_DIST to its index.js
- *             (default functions/.bench/baseline-dist/index.js). The section fails when the
- *             file is missing.
- *   fft       fft2d and spectrogram (nameless gate, computePool.fftBatch). Worker arm: the
- *             parent-commit build, as for `mapped`. Size = rows*cols or frames*nfft.
+ *             helper (nameless gate, applyKernel).
+ *   fft       fft2d and spectrogram (nameless gate, computePool.fftBatch). Size = rows*cols
+ *             or frames*nfft.
+ *
+ *             Two builds of functions cannot load in one process (typed-function conversions
+ *             register twice), so `mapped` and `fft` time one build per run, awaited, and print
+ *             one time column. Run them once as is, and once with `--baseline` and
+ *             BENCH_BASELINE_DIST set to the index.js of a build of the parent commit
+ *             (default functions/.bench/baseline-dist/index.js; the run fails when the file is
+ *             missing). The worker speedup is the ratio of the two time columns.
  *   matmul    matmul (sync, matmulSequential) against computePool.matmul (workers above its
  *             4 096-element threshold), square n x n.
  *
@@ -27,12 +31,13 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { computePool } from '../../parallel/dist/index.js';
-import * as fns from '../../functions/dist/index.js';
 
 const REPS = 9;
 const SIZES = [5e4, 5e5, 5e6];
 const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
-const sections = process.argv.slice(2).length ? process.argv.slice(2) : ['unary'];
+const args = process.argv.slice(2).filter((a) => a !== '--baseline');
+const useBaseline = process.argv.includes('--baseline');
+const sections = args.length ? args : ['unary'];
 
 // op name -> worker kernel source (the source the old typed signature sent)
 const OPS = {
@@ -98,14 +103,23 @@ function randomArray(n, range) {
   return a;
 }
 
+/** Time `run()` REPS times and print one single-arm table row. */
+async function row1(label, n, run) {
+  const t = [];
+  for (let r = 0; r < REPS; r++) {
+    const t0 = performance.now();
+    await run();
+    t.push(performance.now() - t0);
+  }
+  console.log(`| ${label} | ${n} | ${median(t).toFixed(2)} |`);
+}
+
 async function loadBaseline() {
   const path = resolve(process.env.BENCH_BASELINE_DIST ?? 'functions/.bench/baseline-dist/index.js');
   if (!existsSync(path)) {
     throw new Error(`baseline build not found: ${path} (set BENCH_BASELINE_DIST)`);
   }
-  const old = await import(pathToFileURL(path).href);
-  await old.loadWasm();
-  return old;
+  return import(pathToFileURL(path).href);
 }
 
 const header = () => {
@@ -113,6 +127,8 @@ const header = () => {
   console.log('|---|---|---|---|---|');
 };
 
+const fns = useBaseline ? await loadBaseline() : await import('../../functions/dist/index.js');
+const build = useBaseline ? 'parent-commit build (old async path)' : 'shipped build (sync)';
 const wasm = await fns.loadWasm();
 await computePool.initialize();
 console.log(`WASM tier loaded: ${wasm}`);
@@ -137,33 +153,35 @@ if (sections.includes('unary')) {
   }
 }
 
-if (sections.includes('mapped') || sections.includes('fft')) {
-  const old = await loadBaseline();
-  if (sections.includes('mapped')) {
-    console.log('\n## mapped (worker arm: the parent-commit build, awaited)\n');
-    header();
-    for (const [name, [args, range]] of Object.entries(MAPPED)) {
-      for (const n of SIZES) {
-        const a = randomArray(n, range);
-        const callArgs = args(a);
-        await row(name, n, () => fns[name](...callArgs), () => old[name](...callArgs));
-      }
+const header1 = (title) => {
+  console.log(`
+## ${title}: ${build}
+`);
+  console.log('| op | size | ms |');
+  console.log('|---|---|---|');
+};
+
+if (sections.includes('mapped')) {
+  header1('mapped');
+  for (const [name, [args, range]] of Object.entries(MAPPED)) {
+    for (const n of SIZES) {
+      const callArgs = args(randomArray(n, range));
+      await row1(name, n, () => fns[name](...callArgs));
     }
   }
-  if (sections.includes('fft')) {
-    console.log('\n## fft (worker arm: the parent-commit build, awaited)\n');
-    header();
-    for (const n of SIZES) {
-      const side = 2 ** Math.round(Math.log2(Math.sqrt(n)));
-      const x = Array.from({ length: side }, () => Array.from({ length: side }, Math.random));
-      await row(`fft2d ${side}x${side}`, side * side, () => fns.fft2d(x), () => old.fft2d(x));
-    }
-    for (const n of SIZES) {
-      // windowSize 256, hop 256: frames * nfft = n.
-      const x = Array.from({ length: n }, Math.random);
-      const opts = { windowSize: 256, hopSize: 256 };
-      await row('spectrogram', n, () => fns.spectrogram(x, opts), () => old.spectrogram(x, opts));
-    }
+}
+
+if (sections.includes('fft')) {
+  header1('fft');
+  for (const n of SIZES) {
+    const side = 2 ** Math.round(Math.log2(Math.sqrt(n)));
+    const x = Array.from({ length: side }, () => Array.from({ length: side }, Math.random));
+    await row1(`fft2d ${side}x${side}`, side * side, () => fns.fft2d(x));
+  }
+  for (const n of SIZES) {
+    // windowSize 256, hop 256: frames * nfft = n.
+    const x = Array.from({ length: n }, Math.random);
+    await row1('spectrogram', n, () => fns.spectrogram(x, { windowSize: 256, hopSize: 256 }));
   }
 }
 

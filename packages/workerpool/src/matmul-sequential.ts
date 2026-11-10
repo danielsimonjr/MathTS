@@ -31,7 +31,7 @@ export function assertMatmulBuffers(
 /**
  * Multiplies the row-major matrix A (aRows x aCols) by B (aCols x bCols).
  * The result is a new array. The inputs do not change.
- * The worker kernel `matmulRows` uses the same loop order, so the results are equal bit for bit.
+ * The worker kernel `matmulRows` uses the same loop order. The results are equal bit for bit.
  *
  * @throws Error when `a` or `b` does not hold the elements that its shape gives
  */

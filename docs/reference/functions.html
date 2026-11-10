@@ -845,24 +845,24 @@
 
       Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-      | Function                         | Description                                      | Accel                             |
-      | -------------------------------- | ------------------------------------------------ | --------------------------------- |
-      | `sin(x)`                         | Sine                                             | WASM ([1024, 131072))  |
-      | `cos(x)`                         | Cosine                                           | WASM (≥16384)          |
-      | `tan(x)`                         | Tangent                                          | —                         |
-      | `csc(x)` `cot(x)`                | Cosecant, cotangent                              | —                          |
+      | Function                         | Description                                      | Accel                   |
+      | -------------------------------- | ------------------------------------------------ | ----------------------- |
+      | `sin(x)`                         | Sine                                             | WASM ([1024, 131072))   |
+      | `cos(x)`                         | Cosine                                           | WASM (≥16384)           |
+      | `tan(x)`                         | Tangent                                          | —                       |
+      | `csc(x)` `cot(x)`                | Cosecant, cotangent                              | —                       |
       | `sec(x)`                         | Secant                                           | WASM ([16384, 1048576)) |
-      | `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | —                          |
-      | `atan2(y, x)`                    | Two-argument arctangent                          | —                                 |
-      | `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —                                 |
-      | `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | —                          |
-      | `asinh(x)` `acosh(x)`            | Inverse hyperbolic sine, cosine                  | —                          |
+      | `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | —                       |
+      | `atan2(y, x)`                    | Two-argument arctangent                          | —                       |
+      | `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —                       |
+      | `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | —                       |
+      | `asinh(x)` `acosh(x)`            | Inverse hyperbolic sine, cosine                  | —                       |
       | `atanh(x)`                       | Inverse hyperbolic tangent                       | WASM (≥16384)           |
-      | `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —                                 |
-      | `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —                                 |
-      | `toRadians(deg)`                 | Convert degrees to radians                       | —                                 |
-      | `toDegrees(rad)`                 | Convert radians to degrees                       | —                                 |
-      | `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —                                 |
+      | `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —                       |
+      | `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —                       |
+      | `toRadians(deg)`                 | Convert degrees to radians                       | —                       |
+      | `toDegrees(rad)`                 | Convert radians to degrees                       | —                       |
+      | `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —                       |
 
       ### Details
 
@@ -909,15 +909,15 @@
 
       ### Bitwise
 
-      | Function                | Description                              | Types                                 | Accel     |
-      | ----------------------- | ---------------------------------------- | ------------------------------------- | --------- |
-      | `bitAnd(a, b)`          | Bitwise AND                              | number, bigint, BigNumber, Int32Array | — |
-      | `bitOr(a, b)`           | Bitwise OR                               | number, bigint, BigNumber, Int32Array | — |
-      | `bitXor(a, b)`          | Bitwise XOR                              | number, bigint, BigNumber, Int32Array | — |
-      | `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | — |
-      | `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | — |
-      | `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | — |
-      | `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | — |
+      | Function                | Description                              | Types                                 | Accel |
+      | ----------------------- | ---------------------------------------- | ------------------------------------- | ----- |
+      | `bitAnd(a, b)`          | Bitwise AND                              | number, bigint, BigNumber, Int32Array | —     |
+      | `bitOr(a, b)`           | Bitwise OR                               | number, bigint, BigNumber, Int32Array | —     |
+      | `bitXor(a, b)`          | Bitwise XOR                              | number, bigint, BigNumber, Int32Array | —     |
+      | `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | —     |
+      | `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | —     |
+      | `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | —     |
+      | `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | —     |
 
       `Int32Array` paths are synchronous and return a new `Int32Array`; a length mismatch
       throws `RangeError`. Bitwise ops have **no** WASM dispatch entry in `wasmPolicyAllows`,
@@ -983,30 +983,30 @@
 
       | Function                                                        | Description                                                                                                                                                                                                            | Accel       |
       | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-      | `erfc(x)`                                                       | Complementary error function `1 - erf(x)`                                                                                                                                                                              | —    |
+      | `erfc(x)`                                                       | Complementary error function `1 - erf(x)`                                                                                                                                                                              | —           |
       | `erf(x)`                                                        | Error function (factory layer)                                                                                                                                                                                         | —           |
-      | `erfi(x)`                                                       | Imaginary error function                                                                                                                                                                                               | —    |
-      | `beta(a, b)`                                                    | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                                                                                                                                                                       | —    |
-      | `betainc(a, b, x)`                                              | Incomplete beta function                                                                                                                                                                                               | —    |
-      | `gammainc(a, x)`                                                | Regularized lower incomplete gamma `P(a, x)`                                                                                                                                                                           | —    |
-      | `gammaincp(a, x)`                                               | Regularized upper incomplete gamma `Q(a, x)`                                                                                                                                                                           | —    |
-      | `digamma(x)`                                                    | Digamma `d/dx ln Γ(x)`                                                                                                                                                                                                 | —    |
+      | `erfi(x)`                                                       | Imaginary error function                                                                                                                                                                                               | —           |
+      | `beta(a, b)`                                                    | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                                                                                                                                                                       | —           |
+      | `betainc(a, b, x)`                                              | Incomplete beta function                                                                                                                                                                                               | —           |
+      | `gammainc(a, x)`                                                | Regularized lower incomplete gamma `P(a, x)`                                                                                                                                                                           | —           |
+      | `gammaincp(a, x)`                                               | Regularized upper incomplete gamma `Q(a, x)`                                                                                                                                                                           | —           |
+      | `digamma(x)`                                                    | Digamma `d/dx ln Γ(x)`                                                                                                                                                                                                 | —           |
       | `gamma(x)`                                                      | Gamma function (factory layer)                                                                                                                                                                                         | —           |
       | `lgamma(x)`                                                     | Log-gamma (`typed` + factory); WASM only after `loadWasm()` at n ≥ 1 048 576                                                                                                                                           | WASM (≥1 M) |
       | `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)`                     | Bessel first kind; `n` may be a **real (non-integer) order** (Temme series for `x < 2`, Steed continued fraction beyond, ~1e-15; JS `Float64Array`, no WASM policy entry)                                              | —           |
       | `besselY0(x)` `besselY1(x)` `besselY(n, x)`                     | Bessel second kind (`x > 0`); real (non-integer) order `n` via the same Temme/Steed scheme                                                                                                                             | —           |
-      | `besselI(n, x)` `besselK(n, x)`                                 | Modified Bessel functions                                                                                                                                                                                              | —    |
+      | `besselI(n, x)` `besselK(n, x)`                                 | Modified Bessel functions                                                                                                                                                                                              | —           |
       | `airyAi(x)` `airyBi(x)`                                         | Airy functions of the first / second kind (JS; no WASM policy entry)                                                                                                                                                   | —           |
       | `ellipticK(m)` `ellipticE(m)`                                   | Complete elliptic integrals (JS; WASM dispatch refused; workers unreachable)                                                                                                                                           | —           |
-      | `fresnelC(x)` `fresnelS(x)`                                     | Fresnel integrals                                                                                                                                                                                                      | —    |
-      | `sinIntegral(x)` `cosIntegral(x)`                               | Sine / cosine integrals                                                                                                                                                                                                | —    |
-      | `expIntegralEi(x)`                                              | Exponential integral `Ei(x)`                                                                                                                                                                                           | —    |
-      | `logIntegral(x)`                                                | Logarithmic integral `li(x)`                                                                                                                                                                                           | —    |
-      | `lambertW(x[, branch])`                                         | Lambert W function                                                                                                                                                                                                     | —    |
-      | `chebyshevT(n, x)`                                              | Chebyshev polynomial (first kind)                                                                                                                                                                                      | —    |
-      | `hermiteH(n, x)`                                                | Hermite polynomial                                                                                                                                                                                                     | —    |
-      | `laguerreL(n, x)`                                               | Laguerre polynomial                                                                                                                                                                                                    | —    |
-      | `legendreP(n, x)`                                               | Legendre polynomial                                                                                                                                                                                                    | —    |
+      | `fresnelC(x)` `fresnelS(x)`                                     | Fresnel integrals                                                                                                                                                                                                      | —           |
+      | `sinIntegral(x)` `cosIntegral(x)`                               | Sine / cosine integrals                                                                                                                                                                                                | —           |
+      | `expIntegralEi(x)`                                              | Exponential integral `Ei(x)`                                                                                                                                                                                           | —           |
+      | `logIntegral(x)`                                                | Logarithmic integral `li(x)`                                                                                                                                                                                           | —           |
+      | `lambertW(x[, branch])`                                         | Lambert W function                                                                                                                                                                                                     | —           |
+      | `chebyshevT(n, x)`                                              | Chebyshev polynomial (first kind)                                                                                                                                                                                      | —           |
+      | `hermiteH(n, x)`                                                | Hermite polynomial                                                                                                                                                                                                     | —           |
+      | `laguerreL(n, x)`                                               | Laguerre polynomial                                                                                                                                                                                                    | —           |
+      | `legendreP(n, x)`                                               | Legendre polynomial                                                                                                                                                                                                    | —           |
       | `zeta(s)`                                                       | Riemann zeta function (factory layer)                                                                                                                                                                                  | —           |
       | `carlsonRC(x, y)`                                               | Carlson degenerate symmetric elliptic integral R_C(x, y)                                                                                                                                                               | —           |
       | `carlsonRF(x, y, z)`                                            | Carlson symmetric elliptic integral of the first kind R_F                                                                                                                                                              | —           |
@@ -1494,20 +1494,20 @@
 
       ### Density / mass functions
 
-      | Function                       | Description                                                                                                                                                                             | Accel    |
-      | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-      | `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | — |
-      | `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | — |
-      | `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | — |
-      | `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | — |
-      | `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | — |
-      | `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | — |
-      | `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | — |
-      | `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | — |
-      | `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —        |
-      | `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —        |
-      | `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —        |
-      | `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —        |
+      | Function                       | Description                                                                                                                                                                             | Accel |
+      | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+      | `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | —     |
+      | `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | —     |
+      | `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | —     |
+      | `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | —     |
+      | `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | —     |
+      | `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | —     |
+      | `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | —     |
+      | `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | —     |
+      | `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —     |
+      | `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —     |
+      | `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —     |
+      | `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —     |
 
       ### Distribution objects
 
@@ -1693,17 +1693,17 @@
 
       ### Decompositions & analysis (typed `matrix-ops`)
 
-      | Function                      | Description                | Accel    |
-      | ----------------------------- | -------------------------- | -------- |
-      | `cholesky(A)`                 | Cholesky decomposition     | —        |
-      | `hessenbergForm(A)`           | Hessenberg reduction       | —        |
-      | `jordanForm(A)`               | Jordan normal form         | — |
-      | `characteristicPolynomial(A)` | Characteristic polynomial  | — |
-      | `matrixRank(A)`               | Rank                       | —        |
-      | `matrixPower(A, p)`           | Matrix power (non-integer) | — |
-      | `matrixLog(A)`                | Matrix logarithm           | — |
-      | `polarDecomposition(A)`       | Polar decomposition        | — |
-      | `rowReduce(A)`                | Reduced row echelon form   | —        |
+      | Function                      | Description                | Accel |
+      | ----------------------------- | -------------------------- | ----- |
+      | `cholesky(A)`                 | Cholesky decomposition     | —     |
+      | `hessenbergForm(A)`           | Hessenberg reduction       | —     |
+      | `jordanForm(A)`               | Jordan normal form         | —     |
+      | `characteristicPolynomial(A)` | Characteristic polynomial  | —     |
+      | `matrixRank(A)`               | Rank                       | —     |
+      | `matrixPower(A, p)`           | Matrix power (non-integer) | —     |
+      | `matrixLog(A)`                | Matrix logarithm           | —     |
+      | `polarDecomposition(A)`       | Polar decomposition        | —     |
+      | `rowReduce(A)`                | Reduced row echelon form   | —     |
 
       These decompositions are synchronous. The internal `matMul` of each decomposition is the
       dense kernel of `@danielsimonjr/mathts-matrix` at every size.
@@ -2827,7 +2827,7 @@
       | `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                            | parallel†       |
       | `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                             | parallel†       |
       | `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —               |
-      | `fft2d(matrix)`                                 | 2D FFT (synchronous; for worker threads use `computePool.fftBatch`)                                                          | —        |
+      | `fft2d(matrix)`                                 | 2D FFT (synchronous; for worker threads use `computePool.fftBatch`)                                                                    | —               |
       | `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —               |
       | `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse (JS loops)                                                                                         | —               |
       | `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse (JS loops)                                                                                           | —               |
@@ -2848,7 +2848,7 @@
       | `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —               |
       | `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —               |
       | `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —               |
-      | `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | —        |
+      | `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | —               |
       | `periodogram(x)`                                | Power spectral density estimate (JS)                                                                                                   | —               |
       | `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —               |
       | `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —               |
