@@ -37687,7 +37687,7 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
-            - '* as mathFunctions'
+            - parse
       exports:
         - runCommand
         - validateCommand
@@ -43049,7 +43049,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214770
+  totalLinesOfCode: 214762
   totalExports: 6928
   totalClasses: 61
   totalInterfaces: 598

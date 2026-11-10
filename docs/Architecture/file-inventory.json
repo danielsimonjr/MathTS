@@ -15031,7 +15031,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1629
+      "loc": 1621
     },
     {
       "file": "workbook/src/contract.ts",
@@ -15367,7 +15367,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 82
     },
     {
       "file": "workbook/tests/markdown-tex.test.ts",
@@ -15472,7 +15472,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 98
+      "loc": 94
     },
     {
       "file": "workbook/tsdown.config.ts",
