@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-09'
+  lastUpdated: '2026-11-10'
   totalFiles: 1270
   totalModules: 82
   totalExports: 6914
@@ -2764,7 +2764,6 @@ modules:
             - clone
         - file: ../../shared.js
           imports:
-            - memoize
             - endsWith
             - hasOwnProperty
             - warnOnce
@@ -42951,7 +42950,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1270
   totalModules: 82
-  totalLinesOfCode: 214443
+  totalLinesOfCode: 214482
   totalExports: 6914
   totalClasses: 61
   totalInterfaces: 597

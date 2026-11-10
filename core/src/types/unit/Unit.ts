@@ -1,7 +1,7 @@
 import { isComplex, isUnit, typeOf } from '../../is.js';
 import { factory } from '../../factory.js';
 import { clone } from '../../object.js';
-import { memoize, endsWith, hasOwnProperty, warnOnce, isPollutingKey } from '../../shared.js';
+import { endsWith, hasOwnProperty, warnOnce, isPollutingKey } from '../../shared.js';
 import { BIGNUMBER_PI } from '../bignumber.js';
 import type {
   BaseUnitDef,
@@ -1314,53 +1314,85 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return table;
     }
 
-    const _findUnit = memoize(
-      (...args: unknown[]): { unit: UnitDef; prefix: PrefixDef } | null => {
-        const str = args[0] as string;
-        const unrestricted = args[1] === true;
-        // First, match units names exactly. For example, a user could define 'mm' as 10^-4 m, which is silly, but then we would want 'mm' to match the user-defined unit.
-        if (hasOwnProperty(UNITS, str)) {
-          const unit = UNITS[str];
-          const prefix = unit.prefixes![''];
-          return { unit, prefix };
-        }
+    type FoundUnit = { unit: UnitDef; prefix: PrefixDef } | null;
+    type UnitIndex = { buckets: Map<string, string[]>; keys: Set<string> };
+    // Groups the UNITS names by the last character. Each group keeps the UNITS insertion order.
+    let unitIndex: UnitIndex | undefined;
 
-        for (const name in UNITS) {
-          if (hasOwnProperty(UNITS, name)) {
-            if (endsWith(str, name)) {
-              const unit = UNITS[name];
-              const prefixLen = str.length - name.length;
-              // A micro sign is only the micro prefix.
-              let prefixName = str.substring(0, prefixLen);
-              if (MICRO_SIGN.test(prefixName)) {
-                if (prefixName.length !== 1) continue;
-                prefixName = 'u';
-              }
-              const prefixes = unrestricted ? unrestrictedPrefixes(unit.prefixes) : unit.prefixes;
-              const prefix = hasOwnProperty(prefixes, prefixName)
-                ? prefixes![prefixName]
-                : undefined;
-              if (prefix !== undefined) {
-                // store unit, prefix, and value
-                return { unit, prefix };
-              }
+    // The function removes the index. Call the function after each change to UNITS.
+    function invalidateUnitIndex(): void {
+      unitIndex = undefined;
+    }
+
+    function getUnitIndex(): UnitIndex {
+      if (unitIndex !== undefined) return unitIndex;
+      const buckets = new Map<string, string[]>();
+      const keys = new Set<string>();
+      for (const name in UNITS) {
+        if (hasOwnProperty(UNITS, name)) {
+          const last = name.at(-1)!;
+          let bucket = buckets.get(last);
+          if (bucket === undefined) {
+            bucket = [];
+            buckets.set(last, bucket);
+          }
+          bucket.push(name);
+          keys.add(name);
+        }
+      }
+      unitIndex = { buckets, keys };
+      return unitIndex;
+    }
+
+    // Only names that end with the last character of str can match. The scan reads one group only.
+    function scanUnits(str: string, unrestricted: boolean, index: UnitIndex): FoundUnit {
+      for (const name of index.buckets.get(str.at(-1)!) ?? []) {
+        if (hasOwnProperty(UNITS, name)) {
+          if (endsWith(str, name)) {
+            const unit = UNITS[name];
+            const prefixLen = str.length - name.length;
+            // A micro sign is only the micro prefix.
+            let prefixName = str.substring(0, prefixLen);
+            if (MICRO_SIGN.test(prefixName)) {
+              if (prefixName.length !== 1) continue;
+              prefixName = 'u';
+            }
+            const prefixes = unrestricted ? unrestrictedPrefixes(unit.prefixes) : unit.prefixes;
+            const prefix = hasOwnProperty(prefixes, prefixName) ? prefixes![prefixName] : undefined;
+            if (prefix !== undefined) {
+              // store unit, prefix, and value
+              return { unit, prefix };
             }
           }
         }
-
-        return null;
-      },
-      // The scan above is linear in the number of units (~200 built in). 100 entries is fewer
-      // than the distinct spellings one expression-heavy document uses, so it thrashed; 1000
-      // keeps them all at a few hundred KB. A prefix-split fast path was NOT added: the scan
-      // returns the first name in UNITS insertion order whose suffix and prefix both match, and
-      // a split-based lookup cannot reproduce that order without an insertion-order index that
-      // would have to track every UNITS mutation.
-      {
-        hasher: (args: unknown[]): string => (args[1] === true ? '1:' : '0:') + (args[0] as string),
-        limit: 1000,
       }
-    );
+      return null;
+    }
+
+    function _findUnit(str: string, unrestricted = false): FoundUnit {
+      // First, match units names exactly. For example, a user could define 'mm' as 10^-4 m, which is silly, but then we would want 'mm' to match the user-defined unit.
+      if (hasOwnProperty(UNITS, str)) {
+        const unit = UNITS[str];
+        const prefix = unit.prefixes![''];
+        return { unit, prefix };
+      }
+      if (str === '') return null;
+
+      const index = getUnitIndex();
+      const result = scanUnits(str, unrestricted, index);
+      if (result !== null) return result;
+      // A name that you write to UNITS directly is not in the index. The name is last in
+      // insertion order, so the name can change a miss only. Rebuild the index when a suffix
+      // of str is a name of that type.
+      for (let i = 1; i < str.length; i++) {
+        const suffix = str.slice(i);
+        if (hasOwnProperty(UNITS, suffix) && !index.keys.has(suffix)) {
+          invalidateUnitIndex();
+          return scanUnits(str, unrestricted, getUnitIndex());
+        }
+      }
+      return null;
+    }
 
     /**
      * Test if the given expression is a unit.
@@ -1370,6 +1402,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *                        The unit can have prefix, like "cm"
      * @return true if the given string is a unit
      */
+    Unit._findUnit = (name: string, unrestricted?: boolean): FoundUnit =>
+      _findUnit(name, unrestricted === true);
+
     Unit.isValuelessUnit = function (name: string): boolean {
       return _findUnit(name) !== null;
     };
@@ -2904,6 +2939,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         UNITS[name] = alias;
       }
     }
+    invalidateUnitIndex();
 
     // apply the angle values now, to the rows and their aliases
     calculateAngleValues(config);
@@ -3275,8 +3311,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         Unit.UNITS[aliasName] = alias;
       }
 
-      // delete the memoization cache because we created a new unit
-      delete _findUnit.cache;
+      invalidateUnitIndex();
 
       return new Unit(null, name);
     };
@@ -3284,8 +3319,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     Unit.deleteUnit = function (name: string): void {
       delete Unit.UNITS[name];
 
-      // delete the memoization cache because we deleted a unit
-      delete _findUnit.cache;
+      invalidateUnitIndex();
     };
 
     // expose arrays with prefixes, dimensions, units, systems

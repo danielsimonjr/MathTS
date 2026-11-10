@@ -2,7 +2,7 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-09",
+    "lastUpdated": "2026-11-10",
     "totalFiles": 1270,
     "totalModules": 82,
     "totalExports": 6914
@@ -2854,7 +2854,7 @@
           },
           {
             "file": "../../shared.js",
-            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce", "isPollutingKey"]
+            "imports": ["endsWith", "hasOwnProperty", "warnOnce", "isPollutingKey"]
           },
           {
             "file": "../bignumber.js",
@@ -45382,7 +45382,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1270,
     "totalModules": 82,
-    "totalLinesOfCode": 214443,
+    "totalLinesOfCode": 214482,
     "totalExports": 6914,
     "totalClasses": 61,
     "totalInterfaces": 597,
