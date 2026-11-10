@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1327 exports).
+> `@danielsimonjr/mathts-functions` (1329 exports).
 
 ### Functions by category
 
@@ -678,7 +678,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (22): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
+**Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 

@@ -5650,7 +5650,13 @@
       "parallelFFTPower": {
         "kind": "function"
       },
+      "parallelGaussQuad": {
+        "kind": "function"
+      },
       "parallelIFFT": {
+        "kind": "function"
+      },
+      "parallelRomberg": {
         "kind": "function"
       },
       "parallelStatCorr": {

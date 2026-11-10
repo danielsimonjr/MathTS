@@ -11246,7 +11246,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `GaussQuadOptions`, `RombergOptions`
-- Functions: `validateClosureSource`, `trapz`, `trapzF64`, `simpson`, `simpsonF64`, `gaussQuad`, `romberg`
+- Functions: `validateClosureSource`, `trapz`, `trapzF64`, `simpson`, `simpsonF64`, `gaussQuad`, `parallelGaussQuad`, `romberg`, `parallelRomberg`
 - Constants: `GAUSS_WORKER_THRESHOLD`, `ARRAY_WORKER_THRESHOLD`
 
 ---
@@ -20025,12 +20025,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1273   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 214425 |
-| Total Exports           | 6922   |
+| Total Lines of Code     | 214454 |
+| Total Exports           | 6924   |
 | Total Re-exports        | 3002   |
 | Total Classes           | 61     |
 | Total Interfaces        | 597    |
-| Total Functions         | 2293   |
+| Total Functions         | 2295   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

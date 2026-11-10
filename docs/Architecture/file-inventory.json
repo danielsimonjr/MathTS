@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-10",
-  "totalFiles": 2203,
+  "totalFiles": 2204,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1247,
     "test-only": 0,
     "orphan": 0,
-    "test": 865,
+    "test": 866,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1273,
-    "tests": 865,
+    "tests": 866,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 985,
+    "@danielsimonjr/mathts-functions": 986,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -8710,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 650
+      "loc": 657
     },
     {
       "file": "functions/src/typed/interpolation.ts",
@@ -8794,7 +8794,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1507
+      "loc": 1517
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -8843,7 +8843,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 72
+      "loc": 80
     },
     {
       "file": "functions/src/types.ts",
@@ -9186,7 +9186,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 926
+      "loc": 930
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -9508,7 +9508,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 122
+      "loc": 123
     },
     {
       "file": "functions/tests/cov-numeric.test.ts",
@@ -11646,6 +11646,13 @@
       "loc": 352
     },
     {
+      "file": "functions/tests/special-nonfinite-order.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
+    },
+    {
       "file": "functions/tests/special-oracle-inventory.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11944,7 +11951,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 139
+      "loc": 176
     },
     {
       "file": "functions/tests/typed-interpolation-wasm.test.ts",
@@ -12070,7 +12077,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 245
+      "loc": 255
     },
     {
       "file": "functions/tests/typed-sync-special-wasm-tier.test.ts",
@@ -12280,7 +12287,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 225
+      "loc": 242
     },
     {
       "file": "functions/tests/workerpool-stress.test.ts",

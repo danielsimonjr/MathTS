@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1327** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1329** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -1909,17 +1909,19 @@ solve('x^2 - 4', 'x'); // [-2, 2]
 
 ## Numerical Integration
 
-| Function                                 | Description                                                                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `trapz(y[, x])`                          | Trapezoidal rule on sampled data                                                                                   |
-| `simpson(f, a, b[, n])`                  | Simpson's 1/3 rule (`n` even)                                                                                      |
-| `simpsons(f, a, b[, n])`                 | Simpson's rule variant (numeric layer)                                                                             |
-| `gaussQuad(f, a, b[, n])`                | Gauss–Legendre quadrature                                                                                          |
-| `romberg(f, a, b[, tol])`                | Romberg integration                                                                                                |
-| `nintegrate(f, a, b[, tol])`             | Adaptive numerical integration                                                                                     |
-| `quad(f, a, b[, opts])`                  | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
-| `rootsLegendre(n)`                       | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
-| `monteCarloIntegrate(f, bounds[, opts])` | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
+| Function                                                  | Description                                                                                                        |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `trapz(y[, x])`                                           | Trapezoidal rule on sampled data                                                                                   |
+| `simpson(f, a, b[, n])`                                   | Simpson's 1/3 rule (`n` even)                                                                                      |
+| `simpsons(f, a, b[, n])`                                  | Simpson's rule variant (numeric layer)                                                                             |
+| `gaussQuad(f, a, b[, n])`                                 | Gauss–Legendre quadrature                                                                                          |
+| `romberg(f, a, b[, tol])`                                 | Romberg integration                                                                                                |
+| `parallelGaussQuad(f, a, b[, n, order, { workerCount }])` | Async `gaussQuad` with a worker fan-out                                                                            |
+| `parallelRomberg(f, a, b[, tol, { workerCount }])`        | Async `romberg` with a worker fan-out                                                                              |
+| `nintegrate(f, a, b[, tol])`                              | Adaptive numerical integration                                                                                     |
+| `quad(f, a, b[, opts])`                                   | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
+| `rootsLegendre(n)`                                        | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
+| `monteCarloIntegrate(f, bounds[, opts])`                  | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
 
 ### Extra quadrature rules (gap analysis)
 
@@ -3297,7 +3299,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1327 exports).
+> `@danielsimonjr/mathts-functions` (1329 exports).
 
 ### Functions by category
 
@@ -3327,7 +3329,7 @@ await terminatePool();
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (22): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
+**Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 

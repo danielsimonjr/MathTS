@@ -1,5 +1,6 @@
 /**
- * Tests for Slice 5.10 — gaussQuad / romberg sub-interval worker fan-out.
+ * Tests for the worker fan-out of parallelGaussQuad / parallelRomberg, and for the
+ * synchronous gaussQuad / romberg that refuse workerCount > 1.
  *
  * These tests cover:
  *  1. Single-worker path produces identical results to no-option path.
@@ -14,105 +15,148 @@
  * 10. Arrow-function form stringifies and dispatches correctly.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
   gaussQuad,
   romberg,
+  parallelGaussQuad,
+  parallelRomberg,
   validateClosureSource,
   GAUSS_WORKER_THRESHOLD,
 } from '../src/typed/integration.js';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+beforeAll(async () => {
+  await computePool.initialize();
+  // Fail, do not skip: without a ready pool the fan-out tests prove nothing.
+  expect(computePool.isReady()).toBe(true);
+});
 
-// ---------------------------------------------------------------------------
-// Test suite
-// ---------------------------------------------------------------------------
+afterAll(async () => {
+  vi.restoreAllMocks();
+  await computePool.terminate();
+});
 
-describe('Slice 5.10 — sub-interval fan-out (gaussQuad / romberg)', () => {
-  // 1. Single-worker path is identical to no-option path
-  it('gaussQuad: workerCount=1 returns same result as default (sanity)', async () => {
-    const n = GAUSS_WORKER_THRESHOLD; // 64 sub-intervals, totalPoints=320 ≥ 64
-    const withOption = await Promise.resolve(
-      gaussQuad(Math.sin, 0, Math.PI, n, 5, { workerCount: 1 })
-    );
-    const withoutOption = await Promise.resolve(gaussQuad(Math.sin, 0, Math.PI, n));
-    expect(withOption).toBeCloseTo(withoutOption as number, 12);
+describe('gaussQuad / romberg are synchronous', () => {
+  it('gaussQuad returns a number at every n', () => {
+    expect(typeof gaussQuad(Math.sin, 0, Math.PI, 3)).toBe('number');
+    expect(typeof gaussQuad(Math.sin, 0, Math.PI, GAUSS_WORKER_THRESHOLD)).toBe('number');
+    expect(gaussQuad(Math.sin, 0, Math.PI, GAUSS_WORKER_THRESHOLD)).toBeCloseTo(2, 12);
   });
 
-  // 2. Multi-worker correctness for ∫₀^π sin(x) dx = 2
-  it('gaussQuad: workerCount=4 ∫₀^π sin(x) dx ≈ 2 (within 1e-9)', async () => {
-    const n = GAUSS_WORKER_THRESHOLD; // 64 sub-intervals, totalPoints ≥ threshold
-    const result = await Promise.resolve(gaussQuad(Math.sin, 0, Math.PI, n, 5, { workerCount: 4 }));
+  it('romberg returns a number', () => {
+    const r = romberg(Math.sin, 0, Math.PI);
+    expect(typeof r).toBe('number');
+    expect(r).toBeCloseTo(2, 10);
+  });
+
+  it('workerCount 1 is accepted and gives the default result', () => {
+    const n = GAUSS_WORKER_THRESHOLD;
+    expect(gaussQuad(Math.sin, 0, Math.PI, n, 5, { workerCount: 1 })).toBe(
+      gaussQuad(Math.sin, 0, Math.PI, n)
+    );
+    expect(romberg(Math.sin, 0, Math.PI, 1e-12, { workerCount: 1 })).toBe(
+      romberg(Math.sin, 0, Math.PI)
+    );
+  });
+
+  it('workerCount > 1 throws a TypeError that names the parallel export', () => {
+    expect(() => gaussQuad(Math.sin, 0, Math.PI, 64, 5, { workerCount: 4 })).toThrow(TypeError);
+    expect(() => gaussQuad(Math.sin, 0, Math.PI, 64, 5, { workerCount: 4 })).toThrow(
+      /parallelGaussQuad/
+    );
+    expect(() => romberg(Math.sin, 0, Math.PI, 1e-12, { workerCount: 2 })).toThrow(TypeError);
+    expect(() => romberg(Math.sin, 0, Math.PI, 1e-12, { workerCount: 2 })).toThrow(
+      /parallelRomberg/
+    );
+  });
+});
+
+describe('parallelGaussQuad / parallelRomberg — worker fan-out', () => {
+  it('parallelGaussQuad workerCount=4 reaches the workers, integral of sin on [0, pi] = 2', async () => {
+    const spy = vi.spyOn(computePool, 'integrateFanOut');
+    spy.mockClear();
+    const result = await parallelGaussQuad(
+      (x) => Math.sin(x),
+      0,
+      Math.PI,
+      GAUSS_WORKER_THRESHOLD,
+      5,
+      {
+        workerCount: 4,
+      }
+    );
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(result).toBeCloseTo(2, 9);
   });
 
-  // 3. Multi-worker correctness for ∫₀^1 x² dx = 1/3
-  it('gaussQuad: workerCount=4 ∫₀^1 x² dx ≈ 1/3 (within 1e-9)', async () => {
+  it('parallelGaussQuad workerCount=4 integral of x^2 on [0, 1] = 1/3, terse arrow too', async () => {
     const n = GAUSS_WORKER_THRESHOLD;
-    const result = await Promise.resolve(gaussQuad((x) => x * x, 0, 1, n, 5, { workerCount: 4 }));
-    expect(result).toBeCloseTo(1 / 3, 9);
+    expect(await parallelGaussQuad((x) => x * x, 0, 1, n, 5, { workerCount: 4 })).toBeCloseTo(
+      1 / 3,
+      9
+    );
+    const f = (x: number) => x ** 2;
+    expect(await parallelGaussQuad(f, 0, 1, n, 5, { workerCount: 2 })).toBeCloseTo(1 / 3, 9);
   });
 
-  // 4. Closure referencing outer-scope variable is rejected
-  it('gaussQuad: rejects closure that captures an outer-scope variable', async () => {
+  it('parallelGaussQuad rejects a closure that captures an outer-scope variable', async () => {
     // Not a literal initializer: Bun's runtime transpiler inlines a `const`
     // literal into the closure, so its source text would no longer name `scale`.
-    const scale = Number('2'); // outer-scope variable — not available in worker
-    const f = (x: number) => scale * Math.sin(x); // captures `scale`
-
-    // The rejection happens when workerCount > 1 and pool is ready.
-    // In test env the pool may or may not be ready; we test validateClosureSource
-    // directly for reliability, and also verify the error propagates through
-    // gaussQuad if the pool happens to be ready.
-    expect(() => validateClosureSource(f.toString())).toThrow(/outer-scope identifier.*scale/);
+    const scale = Number('2');
+    const f = (x: number) => scale * Math.sin(x);
+    await expect(parallelGaussQuad(f, 0, 1, 64, 5, { workerCount: 4 })).rejects.toThrow(
+      /outer-scope identifier.*scale/
+    );
   });
 
-  // 5. Async closure is rejected
-  it('gaussQuad: rejects async closure', () => {
-    // An async function stringifies with 'async' in its source.
+  it('validateClosureSource rejects an async closure', () => {
     const asyncFn = async (x: number) => Math.sin(x);
     expect(() => validateClosureSource(asyncFn.toString())).toThrow(
       /async closures cannot be dispatched/
     );
   });
 
-  // 6. workerCount set but totalPoints < GAUSS_WORKER_THRESHOLD → in-process fallback
-  it('gaussQuad: small n (totalPoints < threshold) falls back to sequential when workerCount > 1', async () => {
-    // n=3, order=5 → totalPoints=15 < 64=GAUSS_WORKER_THRESHOLD
-    // Should not throw and should return the correct answer in-process.
-    const result = await Promise.resolve(gaussQuad((x) => x * x, 0, 1, 3, 5, { workerCount: 4 }));
-    // n=3 is in single-interval legacy mode (2–5 point GL), so workerCount is
-    // irrelevant; the result should be exact.
-    expect(result).toBeCloseTo(1 / 3, 12);
+  it('parallelGaussQuad below the threshold gives the sync result without workers', async () => {
+    const spy = vi.spyOn(computePool, 'integrateFanOut');
+    spy.mockClear();
+    // n=3 is single-interval mode; n=6, order 5 gives 30 points < 64.
+    expect(await parallelGaussQuad((x) => x * x, 0, 1, 3, 5, { workerCount: 4 })).toBe(
+      gaussQuad((x) => x * x, 0, 1, 3)
+    );
+    expect(await parallelGaussQuad((x) => x * x, 0, 1, 6, 5, { workerCount: 4 })).toBe(
+      gaussQuad((x) => x * x, 0, 1, 6)
+    );
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  // 7. validateClosureSource: arrow function (x) => ... is accepted
-  it('validateClosureSource: accepts simple arrow function (x) => x*x', () => {
-    const f = (x: number) => x * x;
-    expect(() => validateClosureSource(f.toString())).not.toThrow();
+  it('parallelGaussQuad workerCount 1 gives the sync result without workers', async () => {
+    const spy = vi.spyOn(computePool, 'integrateFanOut');
+    spy.mockClear();
+    expect(await parallelGaussQuad((x) => Math.sin(x), 0, Math.PI, 64)).toBe(
+      gaussQuad(Math.sin, 0, Math.PI, 64)
+    );
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  // 8. validateClosureSource: classic function expression is accepted
-  it('validateClosureSource: accepts classic function expression', () => {
-    // function(x) { return Math.sin(x); }
-    const fnSource = 'function(x) { return Math.sin(x); }';
-    expect(() => validateClosureSource(fnSource)).not.toThrow();
+  it('validateClosureSource accepts an arrow function and a function expression', () => {
+    expect(() => validateClosureSource(((x: number) => x * x).toString())).not.toThrow();
+    expect(() => validateClosureSource('function(x) { return Math.sin(x); }')).not.toThrow();
   });
 
-  // 9. romberg fan-out: ∫₀^π sin(x) dx ≈ 2 with workerCount=4
-  it('romberg: workerCount=4 ∫₀^π sin(x) dx ≈ 2 (within 1e-9)', async () => {
-    const result = await romberg(Math.sin, 0, Math.PI, 1e-12, { workerCount: 4 });
+  it('parallelRomberg workerCount=4 reaches the workers, integral of sin on [0, pi] = 2', async () => {
+    const spy = vi.spyOn(computePool, 'integrateFanOut');
+    spy.mockClear();
+    const result = await parallelRomberg((x) => Math.sin(x), 0, Math.PI, 1e-12, { workerCount: 4 });
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(result).toBeCloseTo(2, 9);
   });
 
-  // 10. gaussQuad fan-out: arrow function without parens (x => ...) stringifies
-  it('gaussQuad: workerCount=2 works with terse arrow x => x**2', async () => {
-    const f = (x: number) => x ** 2;
-    const n = GAUSS_WORKER_THRESHOLD;
-    const result = await Promise.resolve(gaussQuad(f, 0, 1, n, 5, { workerCount: 2 }));
-    expect(result).toBeCloseTo(1 / 3, 9);
+  it('parallelRomberg workerCount 1 gives the sync result without workers', async () => {
+    const spy = vi.spyOn(computePool, 'integrateFanOut');
+    spy.mockClear();
+    expect(await parallelRomberg((x) => 1 / x, 1, 2)).toBe(romberg((x) => 1 / x, 1, 2));
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 

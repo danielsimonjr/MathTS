@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-10'
   totalFiles: 1273
   totalModules: 82
-  totalExports: 6922
+  totalExports: 6924
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -24279,7 +24279,9 @@ modules:
         - simpson
         - simpsonF64
         - gaussQuad
+        - parallelGaussQuad
         - romberg
+        - parallelRomberg
       interfaces:
         - GaussQuadOptions
         - RombergOptions
@@ -24290,7 +24292,9 @@ modules:
         - simpson
         - simpsonF64
         - gaussQuad
+        - parallelGaussQuad
         - romberg
+        - parallelRomberg
       constants:
         - GAUSS_WORKER_THRESHOLD
         - ARRAY_WORKER_THRESHOLD
@@ -43031,11 +43035,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1273
   totalModules: 82
-  totalLinesOfCode: 214425
-  totalExports: 6922
+  totalLinesOfCode: 214454
+  totalExports: 6924
   totalClasses: 61
   totalInterfaces: 597
-  totalFunctions: 2293
+  totalFunctions: 2295
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639
