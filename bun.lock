@@ -32,7 +32,7 @@
       "name": "@danielsimonjr/mathts-arithmetic",
       "version": "0.1.80",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.77.0",
+        "@danielsimonjr/mathts-functions": "^0.78.0",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -96,7 +96,7 @@
     },
     "core": {
       "name": "@danielsimonjr/mathts-core",
-      "version": "0.25.0",
+      "version": "0.25.1",
       "dependencies": {
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
@@ -302,7 +302,7 @@
       "name": "@danielsimonjr/mathts-signal",
       "version": "0.1.80",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.77.0",
+        "@danielsimonjr/mathts-functions": "^0.78.0",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -315,7 +315,7 @@
       "name": "@danielsimonjr/mathts-statistics",
       "version": "0.4.8",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.77.0",
+        "@danielsimonjr/mathts-functions": "^0.78.0",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -342,7 +342,7 @@
       "name": "@danielsimonjr/mathts-trigonometry",
       "version": "0.1.80",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.77.0",
+        "@danielsimonjr/mathts-functions": "^0.78.0",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
