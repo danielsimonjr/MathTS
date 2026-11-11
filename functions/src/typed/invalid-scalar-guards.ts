@@ -10,7 +10,7 @@
 import { BigNumber, Complex, Dual, Fraction } from '@danielsimonjr/mathts-core';
 import { Matrix } from '@danielsimonjr/mathts-matrix';
 
-/** Runtime type label used in `add` / `multiply` TypeErrors (`null`, `string`, `[object Date]`, …). */
+/** Human-readable label for a rejected operand in a `TypeError` message. */
 export function formatUnexpectedArgumentType(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
@@ -18,7 +18,7 @@ export function formatUnexpectedArgumentType(value: unknown): string {
   return typeof value;
 }
 
-/** Throw a `TypeError` that names `fn`, the runtime type of `value`, and `index`. */
+/** Throw a typed-function-style operand `TypeError` for function `fn` at argument `index`. */
 export function unexpectedArgumentType(fn: string, value: unknown, index: number): never {
   throw new TypeError(
     `${fn}: unexpected type ${formatUnexpectedArgumentType(value)} at index ${index}`
