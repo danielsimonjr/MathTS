@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1281
+  totalFiles: 1282
   totalModules: 82
-  totalExports: 6985
+  totalExports: 6996
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -22941,6 +22941,16 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+        - file: ./complex-promotion.js
+          imports:
+            - logReal
+            - logRealBase
+            - log10Real
+            - log2Real
+            - log1pReal
+            - sqrtReal
+            - powReal
+            - nthRootReal
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -23335,6 +23345,56 @@ modules:
         - partitions
         - harmonicNumber
         - integerDigits
+    functions/src/typed/complex-promotion.ts:
+      description: mathjs-compatible complex promotion for real scalar kernels in the typed layer.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/number.js
+          imports:
+            - isInteger
+            - isPowZeroAtInfinity
+        - file: ../plain/number/index.js
+          imports:
+            - nthRootNumber
+            - powNumber
+        - file: ../factories/scope.js
+          imports:
+            - factoryScope
+        - file: ../core/config.js
+          imports:
+            - ConfigOptions
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - Fraction
+      exports:
+        - isPredictableMode
+        - logReal
+        - logRealBase
+        - log10Real
+        - log2Real
+        - log1pReal
+        - sqrtReal
+        - powReal
+        - nthRootReal
+        - acscReal
+        - asecReal
+      functions:
+        - isPredictableMode
+        - logReal
+        - logRealBase
+        - log10Real
+        - log2Real
+        - log1pReal
+        - sqrtReal
+        - powReal
+        - nthRootReal
+        - acscReal
+        - asecReal
     functions/src/typed/complex.ts:
       description: Typed Complex Helper Functions
       externalDependencies: []
@@ -25498,6 +25558,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./complex-promotion.js
+          imports:
+            - acscReal
+            - asecReal
+            - isPredictableMode
         - file: ./f64-kernels.js
           imports:
             - f64Unary
@@ -40858,6 +40923,10 @@ modules:
             - sin
             - cos
             - tan
+            - asin
+            - acos
+            - atan
+            - atan2
             - sum
             - mean
             - min
@@ -40888,6 +40957,10 @@ modules:
         - sin
         - cos
         - tan
+        - asin
+        - acos
+        - atan
+        - atan2
         - sum
         - mean
         - min
@@ -40916,10 +40989,6 @@ modules:
         - bignumber
         - matrix
         - sparse
-        - asin
-        - acos
-        - atan
-        - atan2
         - variance
         - std
         - conj
@@ -40943,10 +41012,6 @@ modules:
         - bignumber
         - matrix
         - sparse
-        - asin
-        - acos
-        - atan
-        - atan2
         - variance
         - std
         - conj
@@ -40977,6 +41042,10 @@ modules:
         - sin
         - cos
         - tan
+        - asin
+        - acos
+        - atan
+        - atan2
         - sum
         - mean
         - min
@@ -42569,6 +42638,7 @@ dependencyGraph:
         - functions/src/typed/cas.ts
         - functions/src/typed/centrality-restarts.ts
         - functions/src/typed/combinatorics.ts
+        - functions/src/typed/complex-promotion.ts
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
@@ -43323,18 +43393,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1281
+  totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217471
-  totalExports: 6985
+  totalLinesOfCode: 217597
+  totalExports: 6996
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2345
-  totalTypeGuards: 169
+  totalFunctions: 2352
+  totalTypeGuards: 170
   totalEnums: 0
-  totalConstants: 1640
+  totalConstants: 1644
   totalReExports: 3016
-  totalTypeOnlyImports: 643
+  totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

@@ -14,6 +14,7 @@
 
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 
+import { acscReal, asecReal, isPredictableMode } from './complex-promotion.js';
 import { f64Unary } from './f64-kernels.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
@@ -112,11 +113,10 @@ export const cot = mathTyped('cot', {
  */
 export const asin = mathTyped('asin', {
   number: (a: number) => {
-    if (a < -1 || a > 1) {
-      // Return complex result for values outside [-1, 1]
-      return new Complex(a, 0).asin();
+    if ((a >= -1 && a <= 1) || isPredictableMode()) {
+      return Math.asin(a);
     }
-    return Math.asin(a);
+    return new Complex(a, 0).asin();
   },
   Complex: (a: Complex) => a.asin(),
   BigNumber: (a: BigNumber) => a.asin(),
@@ -130,10 +130,10 @@ export const asin = mathTyped('asin', {
  */
 export const acos = mathTyped('acos', {
   number: (a: number) => {
-    if (a < -1 || a > 1) {
-      return new Complex(a, 0).acos();
+    if ((a >= -1 && a <= 1) || isPredictableMode()) {
+      return Math.acos(a);
     }
-    return Math.acos(a);
+    return new Complex(a, 0).acos();
   },
   Complex: (a: Complex) => a.acos(),
   BigNumber: (a: BigNumber) => a.acos(),
@@ -166,7 +166,7 @@ export const atan2 = mathTyped('atan2', {
  * Arc cosecant
  */
 export const acsc = mathTyped('acsc', {
-  number: (a: number) => Math.asin(1 / a),
+  number: (a: number) => acscReal(a),
   Complex: (a: Complex) => a.inverse().asin(),
   // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
@@ -176,7 +176,7 @@ export const acsc = mathTyped('acsc', {
  * Arc secant
  */
 export const asec = mathTyped('asec', {
-  number: (a: number) => Math.acos(1 / a),
+  number: (a: number) => asecReal(a),
   Complex: (a: Complex) => a.inverse().acos(),
   // BigNumber: asec(a) = acos(1/a).
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),
@@ -211,7 +211,15 @@ export const asinh = mathTyped('asinh', {
  * Inverse hyperbolic cosine
  */
 export const acosh = mathTyped('acosh', {
-  number: (a: number) => Math.acosh(a),
+  number: (a: number) => {
+    if (a >= 1 || isPredictableMode()) {
+      return Math.acosh(a);
+    }
+    if (a <= -1) {
+      return new Complex(Math.log(Math.sqrt(a * a - 1) - a), Math.PI);
+    }
+    return new Complex(a, 0).acosh();
+  },
   Complex: (a: Complex) => a.acosh(),
   BigNumber: (a: BigNumber) => a.acosh(),
 
@@ -223,7 +231,12 @@ export const acosh = mathTyped('acosh', {
  * Inverse hyperbolic tangent
  */
 export const atanh = mathTyped('atanh', {
-  number: (a: number) => Math.atanh(a),
+  number: (a: number) => {
+    if ((a <= 1 && a >= -1) || isPredictableMode()) {
+      return Math.atanh(a);
+    }
+    return new Complex(a, 0).atanh();
+  },
   Complex: (a: Complex) => a.atanh(),
   BigNumber: (a: BigNumber) => a.atanh(),
 

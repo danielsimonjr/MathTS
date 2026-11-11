@@ -42,6 +42,16 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
+import {
+  logReal,
+  logRealBase,
+  log10Real,
+  log2Real,
+  log1pReal,
+  sqrtReal,
+  powReal,
+  nthRootReal,
+} from './complex-promotion.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -665,7 +675,7 @@ export const sign = mathTyped('sign', {
  */
 export const pow = mathTyped('pow', {
   // Hot cases stay inline.
-  'number, number': (a: f64, b: f64): f64 => Math.pow(a, b),
+  'number, number': (a: f64, b: f64): f64 | Complex => powReal(a, b),
   'bigint, bigint': (a: i64, b: i64): i64 => a ** b,
 
   // Rich-type policy cases DELEGATE to core's scalar `pow`, which correctly guards
@@ -722,12 +732,7 @@ export const pow = mathTyped('pow', {
  * Square root. The Float64Array signature is synchronous.
  */
 export const sqrt = mathTyped('sqrt', {
-  number: (a: f64): f64 | Complex => {
-    if (a < 0) {
-      return new Complex(0, Math.sqrt(-a));
-    }
-    return Math.sqrt(a);
-  },
+  number: (a: f64): f64 | Complex => sqrtReal(a),
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber => a.sqrt(),
   Dual: (a: Dual): Dual => a.sqrt(),
@@ -806,7 +811,8 @@ export const cbrt = mathTyped('cbrt', {
  * N-th root
  */
 export const nthRoot = mathTyped('nthRoot', {
-  'number, number': (a: f64, n: f64): f64 => Math.pow(a, 1 / n),
+  'number, number': (a: f64, n: f64): f64 => nthRootReal(a, n),
+  number: (a: f64): f64 => nthRootReal(a, 2),
   'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
   'BigNumber, number': (a: BigNumber, n: f64): BigNumber => a.pow(1 / n),
 });
@@ -833,11 +839,11 @@ export const exp = mathTyped('exp', {
  * Natural logarithm (ln x). The Float64Array signature is synchronous.
  */
 export const log = mathTyped('log', {
-  number: (a: f64): f64 => Math.log(a),
+  number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
   BigNumber: (a: BigNumber): BigNumber => a.ln(),
   Dual: (a: Dual): Dual => a.log(),
-  'number, number': (a: f64, base: f64): f64 => Math.log(a) / Math.log(base),
+  'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
 
   // Float64Array log (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
@@ -848,7 +854,7 @@ export const log = mathTyped('log', {
  * Base-10 logarithm
  */
 export const log10 = mathTyped('log10', {
-  number: (a: f64): f64 => Math.log10(a),
+  number: (a: f64): f64 | Complex => log10Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN10)),
   BigNumber: (a: BigNumber): BigNumber => a.log10(),
 
@@ -861,7 +867,7 @@ export const log10 = mathTyped('log10', {
  * Base-2 logarithm
  */
 export const log2 = mathTyped('log2', {
-  number: (a: f64): f64 => Math.log2(a),
+  number: (a: f64): f64 | Complex => log2Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN2)),
   BigNumber: (a: BigNumber): BigNumber => a.log2(),
 
@@ -874,7 +880,7 @@ export const log2 = mathTyped('log2', {
  * log(1 + x) with higher precision for small x
  */
 export const log1p = mathTyped('log1p', {
-  number: (a: f64): f64 => Math.log1p(a),
+  number: (a: f64): f64 | Complex => log1pReal(a),
 
   // Float64Array log1p (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
