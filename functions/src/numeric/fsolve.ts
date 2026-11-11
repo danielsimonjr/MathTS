@@ -12,6 +12,46 @@ import { norm2 } from '@danielsimonjr/mathts-core';
 import { numericJacobian, type VectorField } from './numeric-jacobian.js';
 import { linsolve } from '../typed/numeric.js';
 
+/** Residual map for `fsolve` — vector form, or scalar in 1-D when `x0` is a number. */
+export type FsolveField = ((x: number[]) => number | number[]) | ((x: number) => number);
+
+function coerceResidual(r: number | number[], n: number): number[] {
+  if (typeof r === 'number') {
+    if (n !== 1) {
+      throw new TypeError(`fsolve: F(x0) must be a number[] of length ${n}`);
+    }
+    return [r];
+  }
+  if (!Array.isArray(r) || r.length !== n) {
+    throw new TypeError(`fsolve: F(x0) must be a number[] of length ${n}`);
+  }
+  return r.slice();
+}
+
+/**
+ * Bind `F` and initial `x` for damped Newton. A numeric `x0` selects the SciPy-style
+ * scalar call `F(x[0])`; an array `x0` always calls `F(x)`.
+ */
+function prepareFsolve(
+  F: FsolveField,
+  x0: number | readonly number[]
+): { x: number[]; evalF: VectorField } {
+  if (typeof x0 === 'number') {
+    const x = [x0];
+    const scalarF = F as (x: number) => number;
+    return {
+      x,
+      evalF: (v) => coerceResidual(scalarF(v[0]), v.length),
+    };
+  }
+  const x = Array.from(x0);
+  const vecF = F as (x: number[]) => number | number[];
+  return {
+    x,
+    evalF: (v) => coerceResidual(vecF(v), v.length),
+  };
+}
+
 type f64 = number;
 type i32 = number;
 
@@ -41,27 +81,36 @@ function maxNorm(v: readonly number[]): number {
  * Update `x <- x + lambda*delta` and repeat until
  * `max_i |F_i(x)| < tol` (converged) or `maxIter` is exhausted.
  *
- * @param F - Vector field whose root is sought (`F(x) = 0`)
- * @param x0 - Initial guess (length n)
+ * @param F - Residual map `F(x) = 0`. For `x0` as a number, `F` is called as
+ *   `F(x[0])` (SciPy-style 1-D). For array `x0`, `F(x)` must return a length-`n`
+ *   residual vector (or a scalar when `n === 1`).
+ * @param x0 - Initial guess: a number for 1-D, or a length-`n` vector.
  * @param opts - Options (tol, maxIter)
  * @returns Approximate solution vector x with F(x) ~ 0
+ * @throws {TypeError} If `F(x)` is not a length-`n` residual vector.
  * @throws If the Jacobian is singular (`linsolve` fails) or Newton fails to
  *   converge within `maxIter` iterations.
  *
  * @example
  * fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]) // => ~[1, 1]
+ * fsolve((x) => x * x - 2, 1) // => ~[√2] (scalar 1-D)
  */
-export function fsolve(F: VectorField, x0: readonly number[], opts: FsolveOptions = {}): number[] {
+export function fsolve(
+  F: FsolveField,
+  x0: number | readonly number[],
+  opts: FsolveOptions = {}
+): number[] {
   const tol = opts.tol ?? 1e-10;
   const maxIter = opts.maxIter ?? 100;
 
-  let x = Array.from(x0);
-  let Fx = F(x);
+  const { x: xInit, evalF } = prepareFsolve(F, x0);
+  let x = xInit;
+  let Fx = evalF(x);
 
   for (let iter = 0; iter < maxIter; iter++) {
     if (maxNorm(Fx) < tol) return x;
 
-    const J = numericJacobian(F, x);
+    const J = numericJacobian(evalF, x);
     const rhs = Fx.map((v) => -v);
 
     let delta: number[];
@@ -78,14 +127,14 @@ export function fsolve(F: VectorField, x0: readonly number[], opts: FsolveOption
     // improves the residual norm; fall back to a full Newton step (lambda=1).
     // Full Newton step (lambda = 1) — also the fallback if no halving below improves it.
     let xNext = x.map((xi, i) => xi + delta[i]);
-    let FxNext = F(xNext);
+    let FxNext = evalF(xNext);
 
     if (norm2(FxNext) >= residualNorm) {
       let trialLambda = 1;
       for (let halving = 0; halving < 20; halving++) {
         trialLambda /= 2;
         const xTrial = x.map((xi, i) => xi + trialLambda * delta[i]);
-        const FxTrial = F(xTrial);
+        const FxTrial = evalF(xTrial);
         if (norm2(FxTrial) < residualNorm) {
           xNext = xTrial;
           FxNext = FxTrial;
