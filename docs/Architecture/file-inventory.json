@@ -8598,7 +8598,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1723
+      "loc": 1736
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9774,7 +9774,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 80
+      "loc": 207
     },
     {
       "file": "functions/tests/dtw.test.ts",

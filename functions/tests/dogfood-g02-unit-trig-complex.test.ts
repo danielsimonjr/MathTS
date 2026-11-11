@@ -5,11 +5,35 @@
  * multiply(complex(0,1), unit('2 ohm')) → 2i ohm.
  */
 import { describe, it, expect } from 'vitest';
-import { sin, multiply, evaluate } from '@danielsimonjr/mathts-functions';
+import {
+  sin,
+  cos,
+  tan,
+  csc,
+  sec,
+  cot,
+  asin,
+  acos,
+  atan,
+  sinh,
+  cosh,
+  tanh,
+  multiply,
+  divide,
+  evaluate,
+} from '@danielsimonjr/mathts-functions';
 /** Re-export package surface (#834) — same impl as typed/trigonometry. */
-import { sin as tsin } from '../../trigonometry/src/index.js';
-import { Unit, Complex, isComplex, type UnitInstance } from '@danielsimonjr/mathts-core';
+import { sin as tsin, cos as tcos } from '../../trigonometry/src/index.js';
+import {
+  Unit,
+  Complex,
+  Fraction,
+  BigNumber,
+  isComplex,
+  type UnitInstance,
+} from '@danielsimonjr/mathts-core';
 import { create, all } from '@danielsimonjr/mathts-compat';
+import { DimensionError } from '@danielsimonjr/mathts-core/internal';
 
 /** Verified against mathjs@13.2.3 (2026-11-11). */
 const MATHJS_ORACLE = {
@@ -74,6 +98,109 @@ describe('G02 #823 — multiply(Complex, Unit)', () => {
 
 describe('G02 — non-angle Unit in sin throws DimensionError', () => {
   it('sin(5 m) is rejected', () => {
-    expect(() => sin(new Unit(5, 'm'))).toThrow(/no angle/);
+    expect(() => sin(new Unit(5, 'm'))).toThrow(DimensionError);
+    expect(() => sin(new Unit(5, 'm'))).toThrow(/Unit in function sin is no angle/);
+  });
+
+  it('cos/tan/csc name the function in the dimension error', () => {
+    expect(() => cos(new Unit(1, 'kg'))).toThrow(/Unit in function cos is no angle/);
+    expect(() => tan(new Unit(1, 'Hz'))).toThrow(/Unit in function tan is no angle/);
+    expect(() => csc(new Unit(1, 's'))).toThrow(/Unit in function csc is no angle/);
+  });
+});
+
+/**
+ * Angle-unit probes. mathjs@13.2.3 oracles (2026-11-11).
+ * `new Unit(n, name)` keeps an exact SI scale, so a gradian/degree whose
+ * float product is one ulp off π (mathjs and `evaluate`) can differ in the
+ * last bit of a near-zero sine. The kernel is Math.sin of the unit's own
+ * SI value; the expression parser matches mathjs.
+ */
+describe('G02 — angle units rad/deg/grad/cycle on forward trig', () => {
+  const near = (actual: unknown, expected: number) => {
+    expect(actual).toBeCloseTo(expected, 12);
+  };
+
+  it('sin of rad, deg, grad, and cycle', () => {
+    expect(sin(new Unit(Math.PI / 2, 'rad'))).toBe(1);
+    expect(sin(new Unit(90, 'deg'))).toBe(1);
+    expect(sin(new Unit(0.25, 'cycle'))).toBe(1);
+    // Exact SI of 200 grad is π; Math.sin(π) is the positive residual.
+    expect(sin(new Unit(200, 'grad'))).toBe(Math.sin(Math.PI));
+    // Expression parse matches mathjs@13.2.3 bit-for-bit.
+    expect(evaluate('sin(200 grad)')).toBe(-3.216245299353273e-16);
+    expect(evaluate('sin(0.25 cycle)')).toBe(1);
+    expect(evaluate('cos(0.5 cycle)')).toBe(-1);
+  });
+
+  it('cos/tan/csc/sec/cot on degree units', () => {
+    expect(cos(new Unit(180, 'deg'))).toBe(-1);
+    expect(tcos(new Unit(0, 'deg'))).toBe(1);
+    near(tan(new Unit(45, 'deg')), 1);
+    expect(csc(new Unit(90, 'deg'))).toBe(1);
+    expect(sec(new Unit(0, 'deg'))).toBe(1);
+    near(cot(new Unit(45, 'deg')), 1);
+    expect(evaluate('tan(45 deg)')).toBeCloseTo(1, 12);
+  });
+
+  it('complex-valued angle unit uses the complex kernel', () => {
+    // mathjs sin(unit(i*π/2, rad)) === 2.3012989023072947i
+    const z = sin(new Unit(new Complex(0, Math.PI / 2), 'rad'));
+    expect(isComplex(z)).toBe(true);
+    expect((z as Complex).re).toBeCloseTo(0, 12);
+    expect((z as Complex).im).toBeCloseTo(2.3012989023072947, 12);
+  });
+});
+
+describe('G02 — inverse and hyperbolic reject Unit (mathjs 13 has no Unit signature)', () => {
+  it('asin/acos/atan and sinh/cosh/tanh throw on Unit and keep plain numbers', () => {
+    const angle = new Unit(0, 'deg');
+    for (const fn of [asin, acos, atan, sinh, cosh, tanh]) {
+      expect(() => fn(angle)).toThrow(/Unexpected type of argument/);
+    }
+    expect(asin(0.5)).toBeCloseTo(0.5235987755982989, 12);
+    expect(acos(0)).toBeCloseTo(Math.PI / 2, 12);
+    expect(atan(1)).toBeCloseTo(Math.PI / 4, 12);
+    expect(sinh(0.5)).toBeCloseTo(0.5210953054937474, 12);
+    expect(cosh(0)).toBe(1);
+    expect(tanh(0)).toBe(0);
+    expect(sin(Math.PI / 2)).toBe(1);
+    expect(cos(0)).toBe(1);
+  });
+});
+
+describe('G02 — divide Complex×Unit both orders, real scalars stay real', () => {
+  it('divide(i, 2 ohm) and divide(2 ohm, i) match mathjs strings', () => {
+    expect(String(divide(new Complex(0, 1), new Unit(2, 'ohm')))).toBe('(0.5i) S');
+    expect(String(divide(new Unit(2, 'ohm'), new Complex(0, 1)))).toBe('(-2i) ohm');
+  });
+
+  it('divide(1, 2 ohm) stays a real 0.5 S (not a zero-imaginary Complex)', () => {
+    const z = divide(1, new Unit(2, 'ohm')) as UnitInstance;
+    expect(String(z)).toBe('0.5 S');
+    expect(typeof z.value).toBe('number');
+    expect(z.value).toBe(0.5);
+  });
+
+  it('Fraction and BigNumber × Unit do not collapse to Complex', () => {
+    const mf = multiply(new Fraction(1, 2), new Unit(4, 'm')) as UnitInstance;
+    expect(isComplex(mf.value)).toBe(false);
+    expect(mf.value).toBeInstanceOf(Fraction);
+    const mb = multiply(BigNumber.fromNumber(2), new Unit(3, 'm')) as UnitInstance;
+    expect(isComplex(mb.value)).toBe(false);
+    expect(mb.value).toBeInstanceOf(BigNumber);
+    const df = divide(new Fraction(1, 2), new Unit(4, 'ohm')) as UnitInstance;
+    expect(isComplex(df.value)).toBe(false);
+    expect(String(df)).toBe('1/8 S');
+  });
+
+  it('1 / (jωC) is a real-coefficient complex admittance', () => {
+    const jwC = multiply(multiply(new Complex(0, 1), 2 * Math.PI * 60), new Unit(1e-6, 'F'));
+    const y = divide(1, jwC) as UnitInstance;
+    expect(y).toBeInstanceOf(Unit);
+    expect(isComplex(y.value)).toBe(true);
+    const v = y.value as Complex;
+    expect(v.re).toBeCloseTo(0, 8);
+    expect(v.im).toBeLessThan(0);
   });
 });
