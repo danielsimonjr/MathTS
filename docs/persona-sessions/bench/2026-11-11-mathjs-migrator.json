@@ -1,0 +1,84 @@
+{
+  "persona": "mathjs-migrator",
+  "date": "2026-11-11",
+  "oracle": "mathjs@13.2.3",
+  "subject": "@danielsimonjr/mathts-compat@0.4.52",
+  "engine": "Node v22.23.4",
+  "os": "linux 6.12.113 x86_64",
+  "cpu": "Intel(R) Xeon(R) Processor, 4 vCPU",
+  "method": "Single process, both libraries imported. 5 warmup calls each, then 8 interleaved ABBA rounds. Median wall time of rounds. n=5000 unless noted.",
+  "cases": [
+    {
+      "name": "add(1,2)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.042754,
+      "mathts_ms": 0.767036,
+      "ratio_mathts_over_mathjs": 17.94
+    },
+    {
+      "name": "multiply(3,4)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.030106,
+      "mathts_ms": 0.374425,
+      "ratio_mathts_over_mathjs": 12.44
+    },
+    {
+      "name": "sin(0.5)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.162402,
+      "mathts_ms": 0.50639,
+      "ratio_mathts_over_mathjs": 3.12
+    },
+    {
+      "name": "evaluate('1+2')",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 5.69287,
+      "mathts_ms": 6.816918,
+      "ratio_mathts_over_mathjs": 1.2
+    },
+    {
+      "name": "unit(5,'cm').to('inch').toString()",
+      "n": 2000,
+      "rounds": 6,
+      "mathjs_ms": 9.47504,
+      "mathts_ms": 12.751923,
+      "ratio_mathts_over_mathjs": 1.35
+    },
+    {
+      "name": "det([[1,2],[3,4]])",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 2.505291,
+      "mathts_ms": 1.046755,
+      "ratio_mathts_over_mathjs": 0.42
+    },
+    {
+      "name": "chain(3).add(4).multiply(2).done()",
+      "n": 2000,
+      "rounds": 6,
+      "mathjs_ms": 1.578244,
+      "mathts_ms": 1.631633,
+      "ratio_mathts_over_mathjs": 1.03
+    }
+  ],
+  "bundle": {
+    "vite_8_create_all_evaluate": {
+      "entry_js_bytes": 2718360,
+      "entry_js_kb": 2718.36,
+      "gzip_kb": 625.08,
+      "internal_chunk_kb": 206.18,
+      "note": "Vite externalized Node builtins (fs, crypto, worker_threads)."
+    },
+    "esbuild_browser_with_empty_builtin_aliases": {
+      "bytes": 3108215,
+      "note": "Fails without aliases; see issue 708."
+    }
+  },
+  "issues": [
+    727, 728, 729, 730, 731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741, 742, 743, 744
+  ]
+}
