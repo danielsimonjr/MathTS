@@ -1,6 +1,6 @@
 /**
- * Allocation-free 4x4 matrix kernels. Matrices are column-major (`m[column * 4 + row]`),
- * as in the kernels of `kernels.generated.ts`. Quaternions are `[w, x, y, z]`. The
+ * Allocation-free 4x4 matrix kernels, and `mat3ToQuat`. Matrices are column-major
+ * (`m[column * 4 + row]`), as in the kernels of `kernels.generated.ts`. Quaternions are `[w, x, y, z]`. The
  * functions do not allocate and do not throw. Each function reads all of its inputs
  * before it writes, so an output may be the same array as an input, at any offset.
  *
@@ -498,6 +498,68 @@ export function mat4Decompose(
     outRotation[r + 2] = (m23 + m32) / s;
     outRotation[r + 3] = 0.25 * s;
   }
+}
+
+/**
+ * Converts a 3x3 rotation matrix to a unit quaternion `[w, x, y, z]`, by the Shepperd
+ * method. The matrix is column-major (`m[column * 3 + row]`), as in the kernels of
+ * `kernels.generated.ts`. The result equals the rotation that `mat4Decompose` writes
+ * for an affine matrix with this upper 3x3 and unit scale, bit for bit. The function
+ * assumes a proper rotation: it does not orthonormalize, and a matrix with scale or
+ * shear gives a quaternion that is not of unit length.
+ *
+ * @param out - Receives `[w, x, y, z]` at `outOff`.
+ * @param m - Input matrix, read at `mOff`. `out` may be `m`, at any offset.
+ * @param outOff - Index of the first value of `out`. Default 0.
+ * @param mOff - Index of the first cell of `m`. Default 0.
+ * @returns `out`.
+ */
+export function mat3ToQuat<T extends KernelOutput>(
+  out: T,
+  m: KernelInput,
+  outOff = 0,
+  mOff = 0
+): T {
+  // The Shepperd branches of mat4Decompose, written out again: a shared helper took the
+  // nine cells as arguments, V8 did not inline it here, and each call boxed them
+  // (61 GC entries per 1e6 calls in tools/test/kernels-alloc.test.mjs).
+  const m11 = m[mOff]!;
+  const m21 = m[mOff + 1]!;
+  const m31 = m[mOff + 2]!;
+  const m12 = m[mOff + 3]!;
+  const m22 = m[mOff + 4]!;
+  const m32 = m[mOff + 5]!;
+  const m13 = m[mOff + 6]!;
+  const m23 = m[mOff + 7]!;
+  const m33 = m[mOff + 8]!;
+  const trace = m11 + m22 + m33;
+  const r = outOff;
+  if (trace > 0) {
+    const s = 0.5 / Math.sqrt(trace + 1);
+    out[r] = 0.25 / s;
+    out[r + 1] = (m32 - m23) * s;
+    out[r + 2] = (m13 - m31) * s;
+    out[r + 3] = (m21 - m12) * s;
+  } else if (m11 > m22 && m11 > m33) {
+    const s = 2 * Math.sqrt(1 + m11 - m22 - m33);
+    out[r] = (m32 - m23) / s;
+    out[r + 1] = 0.25 * s;
+    out[r + 2] = (m12 + m21) / s;
+    out[r + 3] = (m13 + m31) / s;
+  } else if (m22 > m33) {
+    const s = 2 * Math.sqrt(1 + m22 - m11 - m33);
+    out[r] = (m13 - m31) / s;
+    out[r + 1] = (m12 + m21) / s;
+    out[r + 2] = 0.25 * s;
+    out[r + 3] = (m23 + m32) / s;
+  } else {
+    const s = 2 * Math.sqrt(1 + m33 - m11 - m22);
+    out[r] = (m21 - m12) / s;
+    out[r + 1] = (m13 + m31) / s;
+    out[r + 2] = (m23 + m32) / s;
+    out[r + 3] = 0.25 * s;
+  }
+  return out;
 }
 
 /**

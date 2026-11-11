@@ -5314,6 +5314,9 @@
       "mat3Multiply": {
         "kind": "function"
       },
+      "mat3ToQuat": {
+        "kind": "function"
+      },
       "mat3Transpose": {
         "kind": "function"
       },
