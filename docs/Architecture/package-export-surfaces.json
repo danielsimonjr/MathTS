@@ -3988,6 +3988,7 @@
       "tridiagSolveJS",
       "trigamma",
       "trigExpand",
+      "trigFromAngleUnit",
       "trigReduce",
       "trigToExp",
       "tril",

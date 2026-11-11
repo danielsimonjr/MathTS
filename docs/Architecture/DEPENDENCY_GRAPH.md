@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 50 files
+- **functions/typed**: 51 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 51             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 552            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 553            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -11762,6 +11762,27 @@ graph LR
 
 ---
 
+### `functions/src/typed/trig-angle-unit.ts` - Shared angle-Unit handling for typed trigonometry (mathjs parity).
+
+**Workspace Dependencies:**
+
+| Package                      | Import               |
+| ---------------------------- | -------------------- |
+| `@danielsimonjr/mathts-core` | `Complex, isComplex` |
+| `@danielsimonjr/mathts-core` | `UnitInstance`       |
+
+**Internal Dependencies:**
+
+| File                         | Imports          | Type   |
+| ---------------------------- | ---------------- | ------ |
+| `../error/DimensionError.js` | `DimensionError` | Import |
+
+**Exports:**
+
+- Functions: `trigFromAngleUnit`
+
+---
+
 ### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions
 
 **Workspace Dependencies:**
@@ -11769,6 +11790,7 @@ graph LR
 | Package                      | Import                                |
 | ---------------------------- | ------------------------------------- |
 | `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Dual` |
+| `@danielsimonjr/mathts-core` | `UnitInstance`                        |
 
 **Internal Dependencies:**
 
@@ -11776,6 +11798,7 @@ graph LR
 | ------------------------------------ | --------------------------------------- | ------ |
 | `./complex-promotion.js`             | `acscReal, asecReal, isPredictableMode` | Import |
 | `./f64-kernels.js`                   | `f64Unary`                              | Import |
+| `./trig-angle-unit.js`               | `trigFromAngleUnit`                     | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
 
 **Exports:**
@@ -19392,7 +19415,7 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
-| `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
+| `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
 | `functions/src/typed/special`                          | 7 files      | 9 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
@@ -19898,7 +19921,7 @@ graph TD
         N344[complex-promotion]
         N345[complex]
         N346[dist-objects]
-        N347[...40 more]
+        N347[...41 more]
     end
 
     subgraph Functions/unit
@@ -20260,14 +20283,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1286   |
+| Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218245 |
-| Total Exports           | 7012   |
+| Total Lines of Code     | 218334 |
+| Total Exports           | 7013   |
 | Total Re-exports        | 3021   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2361   |
+| Total Functions         | 2362   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
