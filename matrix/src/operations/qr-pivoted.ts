@@ -16,6 +16,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
 import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
 
 /**
@@ -47,9 +48,10 @@ export interface QRPivotedOptions {
  * @param A    - Input matrix (m × n).
  * @param opts - Optional rank tolerance.
  */
-export function qrPivoted(A: DenseMatrix, opts?: QRPivotedOptions): QRPivotedResult {
-  const m = A.rows;
-  const n = A.cols;
+export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions): QRPivotedResult {
+  const dense = decompositionInputToDenseMatrix(A);
+  const m = dense.rows;
+  const n = dense.cols;
   const tol = opts?.tolerance ?? 1e-10;
   const k = Math.min(m, n);
 
@@ -63,7 +65,7 @@ export function qrPivoted(A: DenseMatrix, opts?: QRPivotedOptions): QRPivotedRes
   }
 
   // Working copy (row-major number[][], mirrors A's contents).
-  const W = A.toArray();
+  const W = dense.toArray();
   // Accumulates Q = H_0 · H_1 · … · H_{k-1} (product of Householder reflectors).
   const Qacc = eye(m);
   const perm = Array.from({ length: n }, (_, i) => i);

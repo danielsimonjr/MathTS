@@ -64,3 +64,11 @@ export { condest } from './condest.js';
 // `transpose` is published as `transposeNestedArray` because `transpose` is already
 // the DenseMatrix typed function.
 export { matMul, transpose as transposeNestedArray } from './common.js';
+
+export {
+  decompositionInputToDenseMatrix,
+  decompositionInputToNestedArray,
+  isPackedMatrixDescriptor,
+  type DecompositionMatrixInput,
+  type PackedMatrixDescriptor,
+} from './as-packed.js';
