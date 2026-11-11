@@ -339,7 +339,11 @@ jobs:
         run: bun run build
 
       - name: Test with coverage
+        # ubuntu-latest (26.04) aborts this job with SIGABRT / "Out of memory"
+        # when Turbo runs every package's coverage task at once (exit 137).
         run: bun run test:coverage
+        env:
+          TURBO_CONCURRENCY: '2'
 
       - name: Per-package coverage floors
         run: |
