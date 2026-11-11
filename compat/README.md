@@ -21,6 +21,9 @@ npm install @danielsimonjr/mathts-compat
   package.
 - Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
   operations. See `docs/api/compat.md` for the full export index.
+- With default `predictable: false` (mathjs parity), real-scalar `asin`/`acos`/`log`/`pow`
+  and related helpers promote out-of-domain values to `Complex` instead of `NaN`.
+  `create(all, { predictable: true })` keeps real-only `Math.*` behaviour.
 
 ## License
 

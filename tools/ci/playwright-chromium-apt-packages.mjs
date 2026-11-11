@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Apt packages Playwright needs for Chromium on Ubuntu 24.04 / 26.04 x64.
- * Derived from playwright@1.62.1 nativeDeps (ubuntu24.04-x64 / ubuntu26.04-x64:
- * identical chromium + tools lists). Re-check when bumping the playwright devDependency.
+ * Apt packages Playwright needs for Chromium on Ubuntu 24.04 and 26.04 x64.
+ * Derived from playwright@1.62.1 nativeDeps. ubuntu26.04-x64 chromium + tools
+ * is the same list as ubuntu24.04-x64. Re-check when bumping Playwright.
  */
 import { readFileSync } from 'node:fs';
 
-const CHROMIUM_AND_TOOLS = [
+const NOBLE_CHROMIUM_AND_TOOLS = [
   'xvfb',
   'fonts-noto-color-emoji',
   'fonts-unifont',
@@ -42,27 +42,22 @@ const CHROMIUM_AND_TOOLS = [
   'libxrandr2',
 ];
 
-/** Playwright 1.62 publishes matching chromium deps for noble (24.04) and 26.04. */
-const SUPPORTED_UBUNTU_VERSIONS = new Set(['24.04', '26.04']);
-
-function readUbuntuVersionId() {
+function isSupportedUbuntu() {
   try {
     const osRelease = readFileSync('/etc/os-release', 'utf8');
-    const match = osRelease.match(/^VERSION_ID="([^"]+)"/m);
-    return match?.[1] ?? null;
+    return /VERSION_ID="(?:24|26)\.04"/.test(osRelease);
   } catch {
-    return null;
+    return false;
   }
 }
 
-const versionId = readUbuntuVersionId();
-if (!versionId || !SUPPORTED_UBUNTU_VERSIONS.has(versionId)) {
+if (!isSupportedUbuntu()) {
   console.error(
-    `playwright-chromium-apt-packages.mjs: expected Ubuntu ${[...SUPPORTED_UBUNTU_VERSIONS].join(' or ')}; got ${versionId ?? 'unknown'} — package list may be wrong`,
+    'playwright-chromium-apt-packages.mjs: expected Ubuntu 24.04 or 26.04; package list may be wrong',
   );
   process.exit(1);
 }
 
-for (const pkg of CHROMIUM_AND_TOOLS) {
+for (const pkg of NOBLE_CHROMIUM_AND_TOOLS) {
   console.log(pkg);
 }
