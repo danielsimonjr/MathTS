@@ -157,7 +157,7 @@ jobs:
           node --test tools/test/gen-kernels.test.mjs
 
       - name: Fixed-size kernels zero-allocation test
-        run: node --expose-gc --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
+        run: node --expose-gc --allow-natives-syntax --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release

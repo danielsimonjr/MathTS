@@ -1,5 +1,5 @@
 // Zero-allocation check for the fixed-size kernels of @danielsimonjr/mathts-functions.
-// Run: node --expose-gc --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
+// Run: node --expose-gc --allow-natives-syntax --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
 // (after the functions build). It counts GC entries during 1e6 calls per kernel: a kernel
 // that allocates forces scavenges in a 1 MB semi-space, a kernel that does not causes none.
 // The allocating twin quaternionMultiply is the positive control.
@@ -16,7 +16,7 @@ const { KERNEL_NAMES } = await import(
 );
 
 if (typeof globalThis.gc !== 'function') {
-  throw new Error('Run with node --expose-gc --max-semi-space-size=1');
+  throw new Error('Run with node --expose-gc --allow-natives-syntax --max-semi-space-size=1');
 }
 
 const WARM = 1e6;
@@ -83,6 +83,19 @@ function makeLoop(arity, returnsNumber) {
   );
 }
 
+/**
+ * Optimizes `loop` with TurboFan before the window (needs --allow-natives-syntax). Without
+ * it, the tier the loop reaches after the warm-up depends on the V8 version: on Node 22 the
+ * loop entered the window in a tier that did not inline the kernel, and a double returned
+ * from a call that is not inlined is boxed at the call boundary.
+ */
+// eslint-disable-next-line no-new-func -- natives syntax parses only inside runtime-compiled code
+const forceOptimize = new Function(
+  'loop',
+  'args',
+  '%PrepareFunctionForOptimization(loop); loop(...args); loop(...args); %OptimizeFunctionOnNextCall(loop); loop(...args);'
+);
+
 /** GC entries seen while `run(CALLS)` runs, after a warm-up of `WARM` calls. */
 async function gcCount(run) {
   // Many short runs, not one long one: one long run is optimized by on-stack replacement,
@@ -120,6 +133,7 @@ for (const name of KERNEL_NAMES) {
     const returnsNumber = typeof fn(...args) === 'number';
     const loop = makeLoop(args.length, returnsNumber);
     const sink = new Float64Array(1);
+    forceOptimize(loop, [fn, sink, ...args, 1000]);
     const n = await gcCount((calls) => loop(fn, sink, ...args, calls));
     kept[0] = sink;
     assert.equal(n, 0, `${name}: ${n} GC entries in ${CALLS} calls`);
