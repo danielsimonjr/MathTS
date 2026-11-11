@@ -128,9 +128,10 @@ const UNARY: Array<[string, Fn, number[], number[], ((x: number) => number)?]> =
   ['exp', exp as Fn, [0], [1]],
   // Scalar log promotes negative reals to Complex; Float64Array stays Math.log (NaN).
   ['log', log as Fn, [1], [0], Math.log],
-  ['log10', log10 as Fn, [100, 1000], [2, 3]],
-  ['log2', log2 as Fn, [8, 1024], [3, 10]],
-  ['log1p', log1p as Fn, [0, -0], [0, -0]],
+  // Scalar log10/log2/log1p promote out-of-domain reals; Float64Array stays Math.*.
+  ['log10', log10 as Fn, [100, 1000], [2, 3], Math.log10],
+  ['log2', log2 as Fn, [8, 1024], [3, 10], Math.log2],
+  ['log1p', log1p as Fn, [0, -0], [0, -0], Math.log1p],
   ['expm1', expm1 as Fn, [0, -0], [0, -0]],
   // round(-0.4) is -0 (Math.round keeps the sign); round(2.5) is 3, round(-2.5) is -2.
   ['round', round as Fn, [-0.4, 2.5, -2.5, 1.4], [-0, 3, -2, 1]],

@@ -10863,13 +10863,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                      | Type   |
-| ------------------------------------ | -------------------------------------------- | ------ |
-| `./euclid.js`                        | `euclidSnap`                                 | Import |
-| `./f64-kernels.js`                   | `f64Unary`                                   | Import |
-| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`      | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                   | Import |
-| `./complex-promotion.js`             | `logReal, logRealBase, powReal, nthRootReal` | Import |
+| File                                 | Imports                                                                                | Type   |
+| ------------------------------------ | -------------------------------------------------------------------------------------- | ------ |
+| `./euclid.js`                        | `euclidSnap`                                                                           | Import |
+| `./f64-kernels.js`                   | `f64Unary`                                                                             | Import |
+| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`                                                | Import |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                             | Import |
+| `./complex-promotion.js`             | `logReal, logRealBase, log10Real, log2Real, log1pReal, sqrtReal, powReal, nthRootReal` | Import |
 
 **Exports:**
 
@@ -10976,7 +10976,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isPredictableMode`, `logReal`, `logRealBase`, `powReal`, `nthRootReal`
+- Functions: `isPredictableMode`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `log1pReal`, `sqrtReal`, `powReal`, `nthRootReal`, `acscReal`, `asecReal`
 
 ---
 
@@ -11694,11 +11694,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                    | Type   |
-| ------------------------------------ | -------------------------- | ------ |
-| `./complex-promotion.js`             | `isPredictableMode`        | Import |
-| `./f64-kernels.js`                   | `f64Unary`                 | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
+| File                                 | Imports                                 | Type   |
+| ------------------------------------ | --------------------------------------- | ------ |
+| `./complex-promotion.js`             | `acscReal, asecReal, isPredictableMode` | Import |
+| `./f64-kernels.js`                   | `f64Unary`                              | Import |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
 
 **Exports:**
 
@@ -20184,12 +20184,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1282   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217537 |
-| Total Exports           | 6990   |
+| Total Lines of Code     | 217597 |
+| Total Exports           | 6996   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
 | Total Interfaces        | 600    |
-| Total Functions         | 2346   |
+| Total Functions         | 2352   |
 | Total Type Guards       | 170    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |

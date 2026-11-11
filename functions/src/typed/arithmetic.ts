@@ -42,7 +42,16 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
-import { logReal, logRealBase, powReal, nthRootReal } from './complex-promotion.js';
+import {
+  logReal,
+  logRealBase,
+  log10Real,
+  log2Real,
+  log1pReal,
+  sqrtReal,
+  powReal,
+  nthRootReal,
+} from './complex-promotion.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -723,12 +732,7 @@ export const pow = mathTyped('pow', {
  * Square root. The Float64Array signature is synchronous.
  */
 export const sqrt = mathTyped('sqrt', {
-  number: (a: f64): f64 | Complex => {
-    if (a < 0) {
-      return new Complex(0, Math.sqrt(-a));
-    }
-    return Math.sqrt(a);
-  },
+  number: (a: f64): f64 | Complex => sqrtReal(a),
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber => a.sqrt(),
   Dual: (a: Dual): Dual => a.sqrt(),
@@ -850,7 +854,7 @@ export const log = mathTyped('log', {
  * Base-10 logarithm
  */
 export const log10 = mathTyped('log10', {
-  number: (a: f64): f64 => Math.log10(a),
+  number: (a: f64): f64 | Complex => log10Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN10)),
   BigNumber: (a: BigNumber): BigNumber => a.log10(),
 
@@ -863,7 +867,7 @@ export const log10 = mathTyped('log10', {
  * Base-2 logarithm
  */
 export const log2 = mathTyped('log2', {
-  number: (a: f64): f64 => Math.log2(a),
+  number: (a: f64): f64 | Complex => log2Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN2)),
   BigNumber: (a: BigNumber): BigNumber => a.log2(),
 
@@ -876,7 +880,7 @@ export const log2 = mathTyped('log2', {
  * log(1 + x) with higher precision for small x
  */
 export const log1p = mathTyped('log1p', {
-  number: (a: f64): f64 => Math.log1p(a),
+  number: (a: f64): f64 | Complex => log1pReal(a),
 
   // Float64Array log1p (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>

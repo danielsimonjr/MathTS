@@ -8,10 +8,12 @@ import { create as mjCreate, all as mjAll } from 'mathjs';
 import { Complex } from '@danielsimonjr/mathts-core';
 
 type Scalars = {
-  log: (x: number) => unknown;
+  log: (x: number, base?: number) => unknown;
   pow: (x: number, y: number) => unknown;
   nthRoot: (x: number, n: number) => unknown;
   acosh: (x: number) => unknown;
+  acsc: (x: number) => unknown;
+  log10: (x: number) => unknown;
   evaluate: (expr: string) => unknown;
 };
 
@@ -34,6 +36,8 @@ describe('G01 #728 compat asin delegates to functions', () => {
     const mjPred = mjCreate(mjAll, { predictable: true });
     expect(mt.asin(2)).toBeNaN();
     expect(String(mjPred.asin(2))).toBe(String(mt.asin(2)));
+    expect(mt.sqrt(-1)).toBeNaN();
+    expect(String(mjPred.sqrt(-1))).toBe(String(mt.sqrt(-1)));
   });
 });
 
@@ -46,6 +50,9 @@ describe('G01 #729 compat principal values', () => {
       { run: (m) => m.nthRoot(-8, 3), label: 'nthRoot(-8,3)' },
       { run: (m) => m.acosh(0), label: 'acosh(0)' },
       { run: (m) => m.evaluate('log(-1)'), label: 'evaluate log(-1)' },
+      { run: (m) => m.log(8, -2), label: 'log(8,-2)' },
+      { run: (m) => m.acsc(0.5), label: 'acsc(0.5)' },
+      { run: (m) => m.log10(-1), label: 'log10(-1)' },
     ];
     for (const { run, label } of cases) {
       const mjVal = run(mj as typeof mt);

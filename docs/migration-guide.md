@@ -80,7 +80,9 @@ real domain of `log`, `pow`, `asin`, `acos`, `acosh`, and similar functions
 return `Complex` principal values — for example `math.log(-1)` is `iπ`, not
 `NaN`. `nthRoot(-8, 3)` stays the real odd root `-2` while `pow(-8, 1/3)` is the
 principal complex cube root. Set `math.config({ predictable: true })` when you
-want strictly real `Math.*` results (including `NaN` for those cases).
+want strictly real `Math.*` results (including `NaN` for those cases, and for
+`sqrt` of a negative). A negative logarithm base promotes too: `log(8, -2)` is
+complex, not `NaN`.
 
 One confirmed divergence (see `CHANGELOG.md` audit section):
 `divisorSigma(n, k)` — MathTS uses `(n, k=1)` where mathjs uses `(k, n)`

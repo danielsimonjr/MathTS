@@ -14,7 +14,7 @@
 
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 
-import { isPredictableMode } from './complex-promotion.js';
+import { acscReal, asecReal, isPredictableMode } from './complex-promotion.js';
 import { f64Unary } from './f64-kernels.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
@@ -166,7 +166,7 @@ export const atan2 = mathTyped('atan2', {
  * Arc cosecant
  */
 export const acsc = mathTyped('acsc', {
-  number: (a: number) => Math.asin(1 / a),
+  number: (a: number) => acscReal(a),
   Complex: (a: Complex) => a.inverse().asin(),
   // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
@@ -176,7 +176,7 @@ export const acsc = mathTyped('acsc', {
  * Arc secant
  */
 export const asec = mathTyped('asec', {
-  number: (a: number) => Math.acos(1 / a),
+  number: (a: number) => asecReal(a),
   Complex: (a: Complex) => a.inverse().acos(),
   // BigNumber: asec(a) = acos(1/a).
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),

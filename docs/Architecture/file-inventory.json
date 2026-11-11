@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2228,
+  "totalFiles": 2229,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1256,
     "test-only": 0,
     "orphan": 0,
-    "test": 881,
+    "test": 882,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1282,
-    "tests": 881,
+    "tests": 882,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1004,
+    "@danielsimonjr/mathts-functions": 1005,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 119,
@@ -534,7 +534,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 68
+      "loc": 75
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -8605,7 +8605,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1720
+      "loc": 1724
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8640,7 +8640,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 83
+      "loc": 139
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -9777,11 +9777,18 @@
       "loc": 51
     },
     {
+      "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 150
+    },
+    {
       "file": "functions/tests/dogfood-g01-complex-promotion.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 68
+      "loc": 59
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -11986,7 +11993,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 252
+      "loc": 253
     },
     {
       "file": "functions/tests/typed-arithmetic.test.ts",

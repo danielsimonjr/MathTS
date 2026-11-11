@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-11",
     "totalFiles": 1282,
     "totalModules": 82,
-    "totalExports": 6990
+    "totalExports": 6996
   },
   "entryPoints": [
     {
@@ -24448,7 +24448,16 @@
           },
           {
             "file": "./complex-promotion.js",
-            "imports": ["logReal", "logRealBase", "powReal", "nthRootReal"]
+            "imports": [
+              "logReal",
+              "logRealBase",
+              "log10Real",
+              "log2Real",
+              "log1pReal",
+              "sqrtReal",
+              "powReal",
+              "nthRootReal"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -24894,8 +24903,32 @@
             "imports": ["Complex", "Fraction"]
           }
         ],
-        "exports": ["isPredictableMode", "logReal", "logRealBase", "powReal", "nthRootReal"],
-        "functions": ["isPredictableMode", "logReal", "logRealBase", "powReal", "nthRootReal"]
+        "exports": [
+          "isPredictableMode",
+          "logReal",
+          "logRealBase",
+          "log10Real",
+          "log2Real",
+          "log1pReal",
+          "sqrtReal",
+          "powReal",
+          "nthRootReal",
+          "acscReal",
+          "asecReal"
+        ],
+        "functions": [
+          "isPredictableMode",
+          "logReal",
+          "logRealBase",
+          "log10Real",
+          "log2Real",
+          "log1pReal",
+          "sqrtReal",
+          "powReal",
+          "nthRootReal",
+          "acscReal",
+          "asecReal"
+        ]
       },
       "functions/src/typed/complex.ts": {
         "description": "Typed Complex Helper Functions",
@@ -27199,7 +27232,7 @@
         "internalDependencies": [
           {
             "file": "./complex-promotion.js",
-            "imports": ["isPredictableMode"]
+            "imports": ["acscReal", "asecReal", "isPredictableMode"]
           },
           {
             "file": "./f64-kernels.js",
@@ -45821,11 +45854,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1282,
     "totalModules": 82,
-    "totalLinesOfCode": 217537,
-    "totalExports": 6990,
+    "totalLinesOfCode": 217597,
+    "totalExports": 6996,
     "totalClasses": 61,
     "totalInterfaces": 600,
-    "totalFunctions": 2346,
+    "totalFunctions": 2352,
     "totalTypeGuards": 170,
     "totalEnums": 0,
     "totalConstants": 1644,
