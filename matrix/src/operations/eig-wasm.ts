@@ -13,18 +13,23 @@
  * @packageDocumentation
  */
 
+import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { eig, eigvals, powerIteration, type EigResult, type EigOptions } from './eig.js';
 
 /**
  * Eigendecomposition. Delegates to the JS {@link eig} (WASM path retired — see file header).
  */
-export async function eigWasm(matrix: number[][], options?: EigOptions): Promise<EigResult> {
-  const n = matrix.length;
+export async function eigWasm(
+  matrix: DecompositionMatrixInput,
+  options?: EigOptions
+): Promise<EigResult> {
+  const nested = decompositionInputToNestedArray(matrix);
+  const n = nested.length;
   if (n === 0) {
     return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
   }
   for (let i = 0; i < n; i++) {
-    if (matrix[i].length !== n) {
+    if (nested[i].length !== n) {
       throw new Error('Matrix must be square');
     }
   }
@@ -35,7 +40,7 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
  * Eigenvalues only. Delegates to the JS {@link eigvals} (WASM path retired).
  */
 export async function eigvalsWasm(
-  matrix: number[][],
+  matrix: DecompositionMatrixInput,
   options?: Omit<EigOptions, 'computeVectors'>
 ): Promise<Array<{ re: number; im: number }>> {
   return eigvals(matrix, options);
@@ -46,7 +51,7 @@ export async function eigvalsWasm(
  * (WASM path retired).
  */
 export async function spectralRadiusWasm(
-  matrix: number[][],
+  matrix: DecompositionMatrixInput,
   options?: { maxIterations?: number; tolerance?: number }
 ): Promise<number> {
   const result = powerIteration(matrix, options);

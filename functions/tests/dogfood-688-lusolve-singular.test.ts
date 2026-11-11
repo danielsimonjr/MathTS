@@ -212,6 +212,18 @@ describe('#688 lusolve singular / non-finite', () => {
     expect(x[1][0].toString()).toBe('2');
   });
 
+  it('packed Float64Array singular system throws (G05 input)', () => {
+    const packed = new Float64Array([1, 2, 2, 4]);
+    expect(() => lusolve(packed, bConsistent)).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+  });
+
+  it('packed Float64Array well-conditioned system solves', () => {
+    const packed = new Float64Array([4, 3, 6, 3]);
+    const x = lusolve(packed, [10, 12]) as number[][];
+    expect(x[0][0]).toBeCloseTo(1, 12);
+    expect(x[1][0]).toBeCloseTo(2, 12);
+  });
+
   it('NaN off the diagonal throws', () => {
     expect(() =>
       lusolve(
