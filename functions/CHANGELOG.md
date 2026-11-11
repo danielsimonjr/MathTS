@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.84.0
+
+### Minor Changes
+
+- dca8981: Add `mat3ToQuat`, an allocation-free conversion of a column-major 3x3 rotation matrix to a unit quaternion `[w, x, y, z]` (Shepperd method). It uses the out-parameter style of the vec3/quat/mat3 kernels, and it uses the Shepperd branches of `mat4Decompose`.
+
 ## 0.83.0
 
 ### Minor Changes
