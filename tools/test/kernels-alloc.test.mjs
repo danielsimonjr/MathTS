@@ -55,6 +55,12 @@ function argsFor(name) {
       return [out(3), v(9), v(3)];
     case 'mat3Transpose':
       return [out(9), v(9)];
+    case 'eigSym3':
+      return [out(3), out(9), Float64Array.of(4, 1, 2, 1, 5, 3, 2, 3, 6)];
+    case 'rotateTensor':
+      return [out(9), v(9), v(9)];
+    case 'parallelAxis':
+      return [out(9), v(9), 2, v(3)];
     case 'mat3Inverse':
       return [out(9), Float64Array.of(2, 1, 0, 1, 3, 1, 0, 1, 4)];
     default:
@@ -125,7 +131,10 @@ test('positive control: the allocating twin quaternionMultiply triggers GC', asy
   assert.ok(n > 0, `expected GC entries from the allocating twin, saw ${n}`);
 });
 
-for (const name of KERNEL_NAMES) {
+/** Hand-written allocation-free functions next to the generated kernels (functions/src/geometry/sym3.ts). */
+const EXTRA_NAMES = ['eigSym3', 'rotateTensor', 'parallelAxis'];
+
+for (const name of [...KERNEL_NAMES, ...EXTRA_NAMES]) {
   test(`${name} makes no allocation`, async () => {
     const fn = F[name];
     assert.equal(typeof fn, 'function', `${name} is not exported from functions/dist`);

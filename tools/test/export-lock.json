@@ -3952,6 +3952,9 @@
       "egyptianFraction": {
         "kind": "function"
       },
+      "eigSym3": {
+        "kind": "function"
+      },
       "eigenvectorCentrality": {
         "kind": "function"
       },
@@ -5656,6 +5659,9 @@
       "parallelAutoCorr": {
         "kind": "function"
       },
+      "parallelAxis": {
+        "kind": "function"
+      },
       "parallelConv": {
         "kind": "function"
       },
@@ -6188,6 +6194,9 @@
         "kind": "function"
       },
       "rotate": {
+        "kind": "function"
+      },
+      "rotateTensor": {
         "kind": "function"
       },
       "rotateTree": {

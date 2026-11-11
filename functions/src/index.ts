@@ -543,6 +543,7 @@ export {
 
 // Allocation-free fixed-size kernels (vec2, vec3, quat, mat3).
 export * from './geometry/kernels.generated.js';
+export * from './geometry/sym3.js';
 
 // boundingBox, procrustes, kNN/radius queries, and multiset
 // setIsSuperset/setEqual/setDisjoint.
