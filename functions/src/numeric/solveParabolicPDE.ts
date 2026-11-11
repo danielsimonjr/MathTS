@@ -64,9 +64,9 @@ export interface SolveParabolicPDEOptions {
   nx: number;
   /** Initial condition `u0(x)`. */
   u0: (x: number) => number;
-  /** Left (`x = x0`) boundary condition. */
+  /** Left (`x = x0`) boundary condition — must be `{ type, value }`, not a bare number. */
   bcLeft: ParabolicBC;
-  /** Right (`x = x1`) boundary condition. */
+  /** Right (`x = x1`) boundary condition — must be `{ type, value }`, not a bare number. */
   bcRight: ParabolicBC;
   /** Relative tolerance for the BDF integrator (default 1e-6). */
   tol?: number;
@@ -91,15 +91,61 @@ export interface ParabolicPDESolution {
   u: number[][];
 }
 
-/** Normalise a coefficient into a function of `x`. */
-function asSpaceFn(c: SpaceCoefficient | undefined, dflt: number): (x: number) => number {
-  if (c === undefined) return () => dflt;
-  return typeof c === 'function' ? c : () => c;
+/** Normalise a coefficient into a function of `x`. Rejects values that would feed NaNs into BDF. */
+function asSpaceFn(
+  name: string,
+  c: SpaceCoefficient | undefined,
+  dflt: number | undefined
+): (x: number) => number {
+  if (c === undefined) {
+    if (dflt === undefined) {
+      throw new TypeError(`solveParabolicPDE: ${name} is required`);
+    }
+    return () => dflt;
+  }
+  if (typeof c === 'function') return c;
+  if (typeof c === 'number' && Number.isFinite(c)) return () => c;
+  throw new TypeError(
+    `solveParabolicPDE: ${name} must be a finite number or (x: number) => number`
+  );
 }
 
 /** Normalise a boundary datum into a function of `t`. */
 function asTimeFn(g: BoundaryDatum): (t: number) => number {
   return typeof g === 'function' ? g : () => g;
+}
+
+function finiteSample(label: string, v: unknown): number {
+  if (typeof v !== 'number' || !Number.isFinite(v)) {
+    throw new TypeError(`solveParabolicPDE: ${label} must be a finite number (got ${String(v)})`);
+  }
+  return v;
+}
+
+const BC_SHAPE = "{ type: 'dirichlet' | 'neumann', value: number | (t: number) => number }";
+
+/**
+ * Reject shorthand numbers (e.g. `bcLeft: 0`), Robin objects, and non-datum
+ * `value`s before the BDF integrator runs. Robin is not implemented; a number
+ * `value` is a constant Dirichlet/Neumann datum and a function is `g(t)`.
+ */
+function assertParabolicBC(name: 'bcLeft' | 'bcRight', bc: unknown): asserts bc is ParabolicBC {
+  if (typeof bc !== 'object' || bc === null || !('type' in bc) || !('value' in bc)) {
+    throw new TypeError(`solveParabolicPDE: ${name} must be ${BC_SHAPE}`);
+  }
+  const { type, value } = bc as { type: unknown; value: unknown };
+  if (type !== 'dirichlet' && type !== 'neumann') {
+    throw new TypeError(
+      `solveParabolicPDE: ${name}.type must be 'dirichlet' or 'neumann' (robin is not supported); got ${String(type)}`
+    );
+  }
+  const valueOk =
+    (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'function';
+  if (!valueOk) {
+    throw new TypeError(
+      `solveParabolicPDE: ${name}.value must be a finite number or (t: number) => number`
+    );
+  }
 }
 
 /**
@@ -117,6 +163,8 @@ function asTimeFn(g: BoundaryDatum): (t: number) => number {
  * // sol.u[sol.t.length - 1] ≈ e^{−π²·0.1} sin(πx)
  */
 export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicPDESolution {
+  assertParabolicBC('bcLeft', options.bcLeft);
+  assertParabolicBC('bcRight', options.bcRight);
   const { x0, x1, T, nx, u0, bcLeft, bcRight } = options;
 
   if (!(nx >= 3) || !Number.isInteger(nx)) {
@@ -129,9 +177,16 @@ export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicP
     throw new Error('solveParabolicPDE: require T > 0');
   }
 
+  if (typeof u0 !== 'function') {
+    throw new TypeError('solveParabolicPDE: u0 must be (x: number) => number');
+  }
+  if (options.source !== undefined && typeof options.source !== 'function') {
+    throw new TypeError('solveParabolicPDE: source must be (x, t, u) => number');
+  }
+
   const h = (x1 - x0) / (nx - 1);
-  const D = asSpaceFn(options.diffusion, 0);
-  const c = asSpaceFn(options.advection, 0);
+  const D = asSpaceFn('diffusion', options.diffusion, undefined);
+  const c = asSpaceFn('advection', options.advection, 0);
   const f: ParabolicSource = options.source ?? (() => 0);
   const gL = asTimeFn(bcLeft.value);
   const gR = asTimeFn(bcRight.value);
@@ -162,6 +217,8 @@ export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicP
   // Semi-discrete RHS: U'(t) for the free nodes.
   const rhs = (t: number, U: number[]): number[] => {
     const full = reconstruct(t, U);
+    if (leftDirichlet) finiteSample('bcLeft value', full[0]);
+    if (rightDirichlet) finiteSample('bcRight value', full[nx - 1]);
     const out = new Array<number>(m);
     for (let s = 0; s < m; s++) {
       const i = freeIdx[s];
@@ -170,24 +227,34 @@ export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicP
       let ux: number;
       if (i === 0) {
         // Neumann-left: ghost u_{-1} = u_1 − 2h·gL so u_x(x0) = gL.
-        const g = gL(t);
+        const g = finiteSample('bcLeft value', gL(t));
         uxx = (2 * full[1] - 2 * full[0] - 2 * h * g) / (h * h);
         ux = g;
       } else if (i === nx - 1) {
         // Neumann-right: ghost u_{nx} = u_{nx-2} + 2h·gR so u_x(x1) = gR.
-        const g = gR(t);
+        const g = finiteSample('bcRight value', gR(t));
         uxx = (2 * full[nx - 2] - 2 * full[nx - 1] + 2 * h * g) / (h * h);
         ux = g;
       } else {
         uxx = (full[i - 1] - 2 * full[i] + full[i + 1]) / (h * h);
         ux = (full[i + 1] - full[i - 1]) / (2 * h);
       }
-      out[s] = D(xi) * uxx + c(xi) * ux + f(xi, t, full[i]);
+      const Di = finiteSample('diffusion', D(xi));
+      const ci = finiteSample('advection', c(xi));
+      const fi = finiteSample('source', f(xi, t, full[i]));
+      out[s] = Di * uxx + ci * ux + fi;
     }
     return out;
   };
 
   const y0: number[] = freeIdx.map((i) => u0(x[i]));
+  for (let s = 0; s < y0.length; s++) {
+    if (typeof y0[s] !== 'number' || !Number.isFinite(y0[s])) {
+      throw new TypeError(
+        `solveParabolicPDE: u0(${x[freeIdx[s]]}) must be a finite number (got ${String(y0[s])})`
+      );
+    }
+  }
 
   const bdfOptions: { tol?: number; maxStep?: number } = {};
   if (options.tol !== undefined) bdfOptions.tol = options.tol;
