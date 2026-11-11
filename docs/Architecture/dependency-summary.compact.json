@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1279, "e": 6972, "re": 3014 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1281, "e": 6984, "re": 3016 },
   "s": {
-    "loc": 216492,
+    "loc": 217408,
     "cls": 61,
     "int": 600,
-    "fn": 2332,
+    "fn": 2344,
     "tg": 169,
     "en": 0,
     "co": 1640,
-    "toi": 640
+    "toi": 643
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -652,7 +652,7 @@
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
     },
     "functions/geometry": {
-      "f": 18,
+      "f": 20,
       "exp": [
         "alphaShape",
         "circumcircle",
@@ -666,14 +666,14 @@
         "curvature",
         "delaunay",
         "createDistance",
+        "frustumFromMatrix",
+        "frustumContainsPoint",
+        "frustumIntersectsSphere",
+        "frustumIntersectsAabb",
         "boundingBox",
         "procrustes",
         "kdTreeKNN",
-        "kdTreeRadius",
-        "setIsSuperset",
-        "setEqual",
-        "setDisjoint",
-        "halfspaceIntersection"
+        "kdTreeRadius"
       ],
       "int": [
         "AlphaShapeResult",
@@ -1896,8 +1896,8 @@
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 13 },
+    { "p": "src/index.ts", "i": 208, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
-    { "p": "src/index.ts", "i": 206, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },

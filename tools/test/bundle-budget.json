@@ -14,7 +14,7 @@
     "matrix/dist/wasm/mathts-as.wasm": 62490,
     "tensor/dist/index.js": 75569,
     "autograd/dist/index.js": 56170,
-    "functions/dist/index.js": 1730269,
+    "functions/dist/index.js": 1757184,
     "functions/dist/wasm/mathts-as.wasm": 62490,
     "expression/dist/index.js": 346947,
     "parser/dist/index.js": 500,

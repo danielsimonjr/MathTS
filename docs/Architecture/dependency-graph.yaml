@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1279
+  totalFiles: 1281
   totalModules: 82
-  totalExports: 6972
+  totalExports: 6984
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9405,6 +9405,14 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./geometry/mat4.js
+          imports:
+            - '*'
+          reExport: true
+        - file: ./geometry/frustum.js
+          imports:
+            - '*'
+          reExport: true
         - file: ./config-api.js
           imports:
             - config
@@ -11577,6 +11585,8 @@ modules:
         - '* from ./factories/index.js'
         - '* from ./geometry/kernels.generated.js'
         - '* from ./geometry/sym3.js'
+        - '* from ./geometry/mat4.js'
+        - '* from ./geometry/frustum.js'
         - config
         - runWithConfig
         - loadWasm
@@ -15392,6 +15402,31 @@ modules:
         - createDistance
       constants:
         - createDistance
+    functions/src/geometry/frustum.ts:
+      description: View frustum as six planes, with allocation-free containment tests. The planes are
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./kernels.generated.js
+          imports:
+            - KernelInput
+            - KernelOutput
+          typeOnly: true
+        - file: ./mat4.js
+          imports:
+            - Mat4DepthRange
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - frustumFromMatrix
+        - frustumContainsPoint
+        - frustumIntersectsSphere
+        - frustumIntersectsAabb
+      functions:
+        - frustumFromMatrix
+        - frustumContainsPoint
+        - frustumIntersectsSphere
+        - frustumIntersectsAabb
     functions/src/geometry/geometry-extra.ts:
       description: 'Geometry and set extras: axis-aligned bounding box, orthogonal Procrustes'
       externalDependencies: []
@@ -15582,6 +15617,35 @@ modules:
         - massProperties
       constants:
         - MASS_PROPERTY_SHAPES
+    functions/src/geometry/mat4.ts:
+      description: Allocation-free 4x4 matrix kernels. Matrices are column-major (`m[column * 4 + row]`),
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./kernels.generated.js
+          imports:
+            - KernelInput
+            - KernelOutput
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - mat4Multiply
+        - mat4Determinant
+        - mat4Invert
+        - mat4Compose
+        - mat4Decompose
+        - mat4LookAt
+        - mat4Perspective
+        - mat4Orthographic
+      functions:
+        - mat4Multiply
+        - mat4Determinant
+        - mat4Invert
+        - mat4Compose
+        - mat4Decompose
+        - mat4LookAt
+        - mat4Perspective
+        - mat4Orthographic
     functions/src/geometry/polygon-ops.ts:
       description: 'Polygon operations (Gap-analysis 2026-11-04 Batch E9): Sutherland-Hodgman'
       externalDependencies: []
@@ -42165,6 +42229,7 @@ dependencyGraph:
         - functions/src/geometry/curves.ts
         - functions/src/geometry/delaunay.ts
         - functions/src/geometry/distance.ts
+        - functions/src/geometry/frustum.ts
         - functions/src/geometry/geometry-extra.ts
         - functions/src/geometry/halfspace-intersection.ts
         - functions/src/geometry/hull.ts
@@ -42172,6 +42237,7 @@ dependencyGraph:
         - functions/src/geometry/intersect3d.ts
         - functions/src/geometry/kernels.generated.ts
         - functions/src/geometry/mass-properties.ts
+        - functions/src/geometry/mat4.ts
         - functions/src/geometry/polygon-ops.ts
         - functions/src/geometry/predicates.ts
         - functions/src/geometry/quaternion.ts
@@ -43255,18 +43321,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1279
+  totalTypeScriptFiles: 1281
   totalModules: 82
-  totalLinesOfCode: 216492
-  totalExports: 6972
+  totalLinesOfCode: 217408
+  totalExports: 6984
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2332
+  totalFunctions: 2344
   totalTypeGuards: 169
   totalEnums: 0
   totalConstants: 1640
-  totalReExports: 3014
-  totalTypeOnlyImports: 640
+  totalReExports: 3016
+  totalTypeOnlyImports: 643
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

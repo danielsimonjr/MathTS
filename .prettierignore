@@ -48,3 +48,4 @@ tools/codebase-inventory.json
 
 # Generated static landing site (tools/generate-landing-site.mjs is authoritative)
 docs/landing/
+functions/tests/fixtures/fourjs-parity.json

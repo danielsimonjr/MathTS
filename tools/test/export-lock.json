@@ -2683,6 +2683,9 @@
       "MassPropertyShapeRecord": {
         "kind": "type"
       },
+      "Mat4DepthRange": {
+        "kind": "type"
+      },
       "MathNode": {
         "kind": "type"
       },
@@ -4477,6 +4480,18 @@
       "frontToLatexTable": {
         "kind": "function"
       },
+      "frustumContainsPoint": {
+        "kind": "function"
+      },
+      "frustumFromMatrix": {
+        "kind": "function"
+      },
+      "frustumIntersectsAabb": {
+        "kind": "function"
+      },
+      "frustumIntersectsSphere": {
+        "kind": "function"
+      },
       "fsolve": {
         "kind": "function"
       },
@@ -5300,6 +5315,30 @@
         "kind": "function"
       },
       "mat3Transpose": {
+        "kind": "function"
+      },
+      "mat4Compose": {
+        "kind": "function"
+      },
+      "mat4Decompose": {
+        "kind": "function"
+      },
+      "mat4Determinant": {
+        "kind": "function"
+      },
+      "mat4Invert": {
+        "kind": "function"
+      },
+      "mat4LookAt": {
+        "kind": "function"
+      },
+      "mat4Multiply": {
+        "kind": "function"
+      },
+      "mat4Orthographic": {
+        "kind": "function"
+      },
+      "mat4Perspective": {
         "kind": "function"
       },
       "mathieuA": {

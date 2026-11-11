@@ -23,6 +23,13 @@ const WARM = 1e6;
 const CALLS = 1e6;
 
 /** Argument lists for each kernel: Float64Array inputs, offsets 0. */
+/** The six planes of a perspective camera at the origin that looks down -Z. */
+function cameraPlanes() {
+  const proj = new Float64Array(16);
+  F.mat4Perspective(proj, 1.2, 1, 1, 50);
+  return F.frustumFromMatrix(new Float64Array(24), proj);
+}
+
 function argsFor(name) {
   const v = (n) => Float64Array.from({ length: n }, (_, i) => 0.25 + i * 0.125);
   const out = (n) => new Float64Array(n);
@@ -83,6 +90,46 @@ function argsFor(name) {
     }
     case 'mat3Inverse':
       return [out(9), Float64Array.of(2, 1, 0, 1, 3, 1, 0, 1, 4)];
+    case 'mat4Multiply':
+      return [out(16), v(16), v(16)];
+    case 'mat4Invert':
+      return [out(16), Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1)];
+    case 'mat4Determinant':
+      return [Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1)];
+    case 'mat4Compose':
+      return [
+        out(16),
+        Float64Array.of(1, -2, 3),
+        Float64Array.of(0.9, 0.1, 0.2, 0.3),
+        Float64Array.of(2, 0.5, 3),
+      ];
+    case 'mat4Decompose':
+      return [
+        out(3),
+        out(4),
+        out(3),
+        Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1),
+      ];
+    case 'mat4LookAt':
+      return [
+        out(16),
+        Float64Array.of(3, 4, 5),
+        Float64Array.of(-1, 2, 0.5),
+        Float64Array.of(0, 1, 0),
+      ];
+    case 'mat4Perspective':
+      return [out(16), 1, 1.5, 0.5, 100, 'negative-one-to-one'];
+    case 'mat4Orthographic':
+      return [out(16), -1, 1, -1, 1, 0.1, 10, 'zero-to-one'];
+    case 'frustumFromMatrix':
+      return [out(24), v(16), 'negative-one-to-one'];
+    // Real planes and an inside probe, so all six plane tests and the `true` return run.
+    case 'frustumContainsPoint':
+      return [cameraPlanes(), Float64Array.of(0, 0, -10)];
+    case 'frustumIntersectsSphere':
+      return [cameraPlanes(), Float64Array.of(0, 0, -10), 1];
+    case 'frustumIntersectsAabb':
+      return [cameraPlanes(), Float64Array.of(-1, -1, -11), Float64Array.of(1, 1, -9)];
     default:
       throw new Error(`no arguments for ${name}`);
   }
@@ -152,7 +199,24 @@ test('positive control: the allocating twin quaternionMultiply triggers GC', asy
 });
 
 /** Hand-written allocation-free functions next to the generated kernels (geometry/sym3.ts, numeric/box-lcp.ts). */
-const EXTRA_NAMES = ['eigSym3', 'rotateTensor', 'parallelAxis', 'solveBoxLcp'];
+const EXTRA_NAMES = [
+  'eigSym3',
+  'rotateTensor',
+  'parallelAxis',
+  'solveBoxLcp',
+  'mat4Multiply',
+  'mat4Invert',
+  'mat4Determinant',
+  'mat4Compose',
+  'mat4Decompose',
+  'mat4LookAt',
+  'mat4Perspective',
+  'mat4Orthographic',
+  'frustumFromMatrix',
+  'frustumContainsPoint',
+  'frustumIntersectsSphere',
+  'frustumIntersectsAabb',
+];
 
 for (const name of [...KERNEL_NAMES, ...EXTRA_NAMES]) {
   test(`${name} makes no allocation`, async () => {
