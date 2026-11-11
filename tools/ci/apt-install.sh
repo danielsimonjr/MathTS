@@ -6,8 +6,9 @@
 set -euo pipefail
 
 readonly APT_MIRRORS_FILE=/etc/apt/apt-mirrors.txt
-readonly OFFICIAL_ARCHIVE="http://archive.ubuntu.com/ubuntu/"
-readonly OFFICIAL_SECURITY="http://security.ubuntu.com/ubuntu/"
+readonly OFFICIAL_ARCHIVE="https://archive.ubuntu.com/ubuntu/"
+readonly OFFICIAL_SECURITY="https://security.ubuntu.com/ubuntu/"
+readonly AZURE_MIRROR_HOST=azure.archive.ubuntu.com
 
 APT_OPTS=(
   -o Acquire::Retries=3
@@ -33,15 +34,43 @@ apt_log_has_install_fetch_errors() {
   grep -qE '^E: Failed to fetch|^E: Unable to fetch some archives' "$logfile"
 }
 
+host_resolves() {
+  local host=$1
+  getent ahostsv4 "$host" &>/dev/null
+}
+
+maybe_preflight_drop_azure() {
+  if [[ $MIRRORS_SWITCHED -eq 1 ]]; then
+    return 0
+  fi
+  if host_resolves "$AZURE_MIRROR_HOST"; then
+    return 0
+  fi
+  log "${AZURE_MIRROR_HOST} does not resolve; skipping azure mirror before first apt-get"
+  switch_to_official_mirrors
+}
+
 run_apt_get() {
+  local is_update=0
+  if [[ ${1-} == update ]]; then
+    is_update=1
+  fi
+
   local logfile
   logfile=$(mktemp)
   apt-get "${APT_OPTS[@]}" "$@" 2>&1 | tee "$logfile"
   local rc=${PIPESTATUS[0]}
 
   if [[ $rc -eq 0 ]]; then
-    if apt_log_is_retriable "$logfile" || apt_log_has_install_fetch_errors "$logfile"; then
+    if apt_log_has_install_fetch_errors "$logfile"; then
       rc=100
+    elif apt_log_is_retriable "$logfile"; then
+      if [[ $is_update -eq 1 && $MIRRORS_SWITCHED -eq 1 ]]; then
+        log "apt update incomplete after mirror fallback; continuing with cached indexes"
+        rc=0
+      else
+        rc=100
+      fi
     fi
   elif apt_log_is_retriable "$logfile" || apt_log_has_install_fetch_errors "$logfile"; then
     rc=100
@@ -118,17 +147,23 @@ switch_to_official_mirrors() {
 }
 
 apt_get_with_fallback() {
-  local rc=0
-  run_apt_get "$@" || rc=$?
-  if [[ $rc -eq 0 ]]; then
-    return 0
-  fi
-  if [[ $rc -ne 100 ]]; then
+  maybe_preflight_drop_azure
+  local attempt rc=0
+  for attempt in 1 2 3; do
+    run_apt_get "$@" && return 0
+    rc=$?
+    if [[ $rc -eq 100 && $MIRRORS_SWITCHED -eq 0 ]]; then
+      switch_to_official_mirrors
+      continue
+    fi
+    if [[ $rc -eq 100 && $attempt -lt 3 ]]; then
+      log "apt transient failure (attempt ${attempt}/3); retrying in 5s"
+      sleep 5
+      continue
+    fi
     return "$rc"
-  fi
-  switch_to_official_mirrors
-  run_apt_get "$@" || rc=$?
-  [[ $rc -eq 0 ]]
+  done
+  return "$rc"
 }
 
 do_update() {
@@ -142,18 +177,7 @@ do_install() {
     return 2
   fi
   do_update
-  local rc=0
-  run_apt_get install -y --no-install-recommends "${packages[@]}" || rc=$?
-  if [[ $rc -eq 0 ]]; then
-    return 0
-  fi
-  if [[ $rc -ne 100 ]]; then
-    return "$rc"
-  fi
-  switch_to_official_mirrors
-  do_update
-  run_apt_get install -y --no-install-recommends "${packages[@]}" || rc=$?
-  [[ $rc -eq 0 ]]
+  apt_get_with_fallback install -y --no-install-recommends "${packages[@]}"
 }
 
 # Playwright install-deps (and --dry-run) invoke apt-get directly; this entry
