@@ -43,6 +43,22 @@ host_resolves() {
   getent ahostsv4 "$host" &>/dev/null
 }
 
+ensure_apt_dns() {
+  if host_resolves "$ARCHIVE_MIRROR_HOST" || host_resolves "$AZURE_MIRROR_HOST"; then
+    return 0
+  fi
+  local resolv=/etc/resolv.conf
+  log "ubuntu archive hosts do not resolve via system DNS; using public resolvers"
+  local bak="${resolv}.mathts-ci-bak"
+  if [[ ! -f $bak ]]; then
+    cp -p "$resolv" "$bak"
+  fi
+  {
+    printf 'nameserver 8.8.8.8\n'
+    printf 'nameserver 1.1.1.1\n'
+  } >"$resolv"
+}
+
 maybe_preflight_drop_azure() {
   if [[ $MIRRORS_SWITCHED -eq 1 ]]; then
     return 0
@@ -165,6 +181,7 @@ switch_to_official_mirrors() {
 }
 
 apt_get_with_fallback() {
+  ensure_apt_dns
   maybe_preflight_drop_azure
   local attempt rc=0
   for attempt in 1 2 3; do
