@@ -30,24 +30,24 @@ I did not fix product code this round.
 
 ## Accuracy that is fine
 
-| Check | Max abs (rel) | Oracle |
-| ----- | ------------- | ------ |
-| 2×2 det, lusolve, inv | 0 | closed form |
-| 3×3 det | 0 | expansion = 1 |
-| SPD 3×3 solve | 1.11e-16 | `[1,1,1]` |
-| lstsq | 2.22e-15 (3.3e-15) | normal equations `[2/3, 1/2]` |
-| `findRoot` √2 on `[1,2]` | 0 | `Math.SQRT2` |
-| `quad` ∫₀¹ e^{-x²} | 2.44e-15 | 0.7468241328124271 |
-| `nintegrate` ∫₀^π sin | 5.77e-15 | 2 |
-| `exp(-1)` RK45 | rel 4.13e-13 | `e⁻¹` |
-| harmonic at `t=2π` | abs 1.57e-12 | `[1,0]` |
-| Robertson Radau t=40 | **8.07e-11** | Hairer `[0.7158270684, 9.185534764e-6, 0.2841637460]` |
-| Robertson mass | ≤ 9e-16 | `y1+y2+y3=1` |
-| SVD S vs ml-matrix | 7.1e-15 | ml-matrix 6.15.1 |
-| Hilbert-10 `linsolve` residual | 4.37e-11 | `Ax-b` |
-| `nelderMead` Rosenbrock | `fx=1.4e-16` | `[1,1]` |
-| `(1+2i)(3+4i)` | 0 | `-5+10i` |
-| `exp(iπ)` | 1.22e-16 imag | `-1` |
+| Check                          | Max abs (rel)      | Oracle                                                |
+| ------------------------------ | ------------------ | ----------------------------------------------------- |
+| 2×2 det, lusolve, inv          | 0                  | closed form                                           |
+| 3×3 det                        | 0                  | expansion = 1                                         |
+| SPD 3×3 solve                  | 1.11e-16           | `[1,1,1]`                                             |
+| lstsq                          | 2.22e-15 (3.3e-15) | normal equations `[2/3, 1/2]`                         |
+| `findRoot` √2 on `[1,2]`       | 0                  | `Math.SQRT2`                                          |
+| `quad` ∫₀¹ e^{-x²}             | 2.44e-15           | 0.7468241328124271                                    |
+| `nintegrate` ∫₀^π sin          | 5.77e-15           | 2                                                     |
+| `exp(-1)` RK45                 | rel 4.13e-13       | `e⁻¹`                                                 |
+| harmonic at `t=2π`             | abs 1.57e-12       | `[1,0]`                                               |
+| Robertson Radau t=40           | **8.07e-11**       | Hairer `[0.7158270684, 9.185534764e-6, 0.2841637460]` |
+| Robertson mass                 | ≤ 9e-16            | `y1+y2+y3=1`                                          |
+| SVD S vs ml-matrix             | 7.1e-15            | ml-matrix 6.15.1                                      |
+| Hilbert-10 `linsolve` residual | 4.37e-11           | `Ax-b`                                                |
+| `nelderMead` Rosenbrock        | `fx=1.4e-16`       | `[1,1]`                                               |
+| `(1+2i)(3+4i)`                 | 0                  | `-5+10i`                                              |
+| `exp(iπ)`                      | 1.22e-16 imag      | `-1`                                                  |
 
 Hilbert-12 inverse vs exact integers is **8.1% relative** with `cond₂ ≈ 1.8e16`; that is f64, not a MathTS-only failure. Residuals of the solve stay `~5e-9`. `condest` is ~2× `cond` (1-norm estimator vs 2-norm) — I did not file that.
 
@@ -115,21 +115,21 @@ Runtime is a JS number.
 
 ## Bench (median ms)
 
-| op | n | MathTS | mathjs | ml-matrix |
-| -- | - | ------ | ------ | --------- |
-| DenseMatrix.multiply / multiply / mmul | 200 | 9.46 | 25.1 | **6.94** |
-| | 500 | 147.5 | 542 | **104.3** |
-| | 1000 | 1155 | 7415 | **642** |
-| lusolve / lusolve / solve | 200 | 7.68 | 38.5 | **3.47** |
-| | 500 | 95.8 | 581 | **36.4** |
-| | 1000 | 845 | 4537 | **277** |
-| lu+luSolve (matrix) | 1000 | 390 | — | — |
-| svd | 200 | 65.4 | — | 65.2 |
-| svd | 500 | 1045 | — | **953** |
-| sin 1e6 | — | 6.53 (f64) | 65.8 (`map`) | — (JS loop 3.85) |
-| Robertson BDF t=40 | — | 1.56 | — | — |
-| Robertson Radau | — | 1.90 | — | — |
-| VdP μ=1000 BDF t=1 | — | 0.71 | — | — |
+| op                                     | n    | MathTS     | mathjs       | ml-matrix        |
+| -------------------------------------- | ---- | ---------- | ------------ | ---------------- |
+| DenseMatrix.multiply / multiply / mmul | 200  | 9.46       | 25.1         | **6.94**         |
+|                                        | 500  | 147.5      | 542          | **104.3**        |
+|                                        | 1000 | 1155       | 7415         | **642**          |
+| lusolve / lusolve / solve              | 200  | 7.68       | 38.5         | **3.47**         |
+|                                        | 500  | 95.8       | 581          | **36.4**         |
+|                                        | 1000 | 845        | 4537         | **277**          |
+| lu+luSolve (matrix)                    | 1000 | 390        | —            | —                |
+| svd                                    | 200  | 65.4       | —            | 65.2             |
+| svd                                    | 500  | 1045       | —            | **953**          |
+| sin 1e6                                | —    | 6.53 (f64) | 65.8 (`map`) | — (JS loop 3.85) |
+| Robertson BDF t=40                     | —    | 1.56       | —            | —                |
+| Robertson Radau                        | —    | 1.90       | —            | —                |
+| VdP μ=1000 BDF t=1                     | —    | 0.71       | —            | —                |
 
 JSON: `docs/persona-sessions/bench/2026-11-11-numerical-analyst.json`.
 
@@ -139,19 +139,19 @@ For **well-scaled dense algebra, quadrature, complex arithmetic, and stiff IVPs 
 
 ## Issue index
 
-| # | Title | Severity | Intended labels |
-| - | ----- | -------- | ---------------- |
-| [688](https://github.com/danielsimonjr/MathTS/issues/688) | lusolve silent particular solution on consistent singular / NaN / Inf | P0 | dogfood, bug, P0, persona:numerical-analyst |
-| [689](https://github.com/danielsimonjr/MathTS/issues/689) | fsolve TypeError v is not iterable | P0 | dogfood, bug, P0, persona:numerical-analyst |
-| [690](https://github.com/danielsimonjr/MathTS/issues/690) | solve() CAS returns [] for Ax=b | P1 | dogfood, api, P1, persona:numerical-analyst |
-| [691](https://github.com/danielsimonjr/MathTS/issues/691) | stiffODESolver arg order vs solveODE | P1 | dogfood, api, P1, persona:numerical-analyst |
-| [692](https://github.com/danielsimonjr/MathTS/issues/692) | sin rejects number[] | P1 | dogfood, api, P1, persona:numerical-analyst |
-| [693](https://github.com/danielsimonjr/MathTS/issues/693) | DenseMatrix.multiply 1.8× vs ml-matrix n=1000 | P1 | dogfood, perf, P1, persona:numerical-analyst |
-| [694](https://github.com/danielsimonjr/MathTS/issues/694) | lusolve 2.2× vs matrix lu+luSolve n=1000 | P1 | dogfood, perf, P1, persona:numerical-analyst |
-| [695](https://github.com/danielsimonjr/MathTS/issues/695) | linalg README export list wrong | P2 | dogfood, docs, P2, persona:numerical-analyst |
-| [696](https://github.com/danielsimonjr/MathTS/issues/696) | package.json not in exports | P2 | dogfood, packaging, P2, persona:numerical-analyst |
-| [697](https://github.com/danielsimonjr/MathTS/issues/697) | workerpool types need @types/node | P2 | dogfood, packaging, P2, persona:numerical-analyst |
-| [698](https://github.com/danielsimonjr/MathTS/issues/698) | RK45 stiff maxIter message | P1 | dogfood, api, P1, persona:numerical-analyst |
-| [699](https://github.com/danielsimonjr/MathTS/issues/699) | svd n=500 1.10× ml-matrix | P2 | dogfood, perf, P2, persona:numerical-analyst |
-| [700](https://github.com/danielsimonjr/MathTS/issues/700) | det() union return type | P2 | dogfood, api, P2, persona:numerical-analyst |
-| [701](https://github.com/danielsimonjr/MathTS/issues/701) | lusolve rejects Float64Array | P2 | dogfood, api, P2, persona:numerical-analyst |
+| #                                                         | Title                                                                 | Severity | Intended labels                                   |
+| --------------------------------------------------------- | --------------------------------------------------------------------- | -------- | ------------------------------------------------- |
+| [688](https://github.com/danielsimonjr/MathTS/issues/688) | lusolve silent particular solution on consistent singular / NaN / Inf | P0       | dogfood, bug, P0, persona:numerical-analyst       |
+| [689](https://github.com/danielsimonjr/MathTS/issues/689) | fsolve TypeError v is not iterable                                    | P0       | dogfood, bug, P0, persona:numerical-analyst       |
+| [690](https://github.com/danielsimonjr/MathTS/issues/690) | solve() CAS returns [] for Ax=b                                       | P1       | dogfood, api, P1, persona:numerical-analyst       |
+| [691](https://github.com/danielsimonjr/MathTS/issues/691) | stiffODESolver arg order vs solveODE                                  | P1       | dogfood, api, P1, persona:numerical-analyst       |
+| [692](https://github.com/danielsimonjr/MathTS/issues/692) | sin rejects number[]                                                  | P1       | dogfood, api, P1, persona:numerical-analyst       |
+| [693](https://github.com/danielsimonjr/MathTS/issues/693) | DenseMatrix.multiply 1.8× vs ml-matrix n=1000                         | P1       | dogfood, perf, P1, persona:numerical-analyst      |
+| [694](https://github.com/danielsimonjr/MathTS/issues/694) | lusolve 2.2× vs matrix lu+luSolve n=1000                              | P1       | dogfood, perf, P1, persona:numerical-analyst      |
+| [695](https://github.com/danielsimonjr/MathTS/issues/695) | linalg README export list wrong                                       | P2       | dogfood, docs, P2, persona:numerical-analyst      |
+| [696](https://github.com/danielsimonjr/MathTS/issues/696) | package.json not in exports                                           | P2       | dogfood, packaging, P2, persona:numerical-analyst |
+| [697](https://github.com/danielsimonjr/MathTS/issues/697) | workerpool types need @types/node                                     | P2       | dogfood, packaging, P2, persona:numerical-analyst |
+| [698](https://github.com/danielsimonjr/MathTS/issues/698) | RK45 stiff maxIter message                                            | P1       | dogfood, api, P1, persona:numerical-analyst       |
+| [699](https://github.com/danielsimonjr/MathTS/issues/699) | svd n=500 1.10× ml-matrix                                             | P2       | dogfood, perf, P2, persona:numerical-analyst      |
+| [700](https://github.com/danielsimonjr/MathTS/issues/700) | det() union return type                                               | P2       | dogfood, api, P2, persona:numerical-analyst       |
+| [701](https://github.com/danielsimonjr/MathTS/issues/701) | lusolve rejects Float64Array                                          | P2       | dogfood, api, P2, persona:numerical-analyst       |
