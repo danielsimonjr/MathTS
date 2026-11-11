@@ -1,0 +1,277 @@
+{
+  "persona": "newcomer",
+  "date": "2026-11-11",
+  "environment": {
+    "node": "v22.23.4",
+    "npm": "10.9.9",
+    "typescript": "7.0.2",
+    "os": "linux 6.12.113 x86_64",
+    "cpu": "Intel Xeon 4 CPUs",
+    "module": "ESM",
+    "tsconfig": {
+      "strict": true,
+      "moduleResolution": "NodeNext",
+      "target": "ES2022"
+    },
+    "install": "npm i @danielsimonjr/mathts-*@latest (registry, not repo pack)",
+    "cloneShaDocsOnly": "fef4010b8a468215a26bcdb9642db0556055b9bb"
+  },
+  "versions": {
+    "core": "0.26.0",
+    "matrix": "0.10.0",
+    "linalg": "0.2.5",
+    "tensor": "0.3.5",
+    "functions": "0.84.0",
+    "arithmetic": "0.1.86",
+    "trigonometry": "0.1.86",
+    "statistics": "0.4.14",
+    "signal": "0.1.86",
+    "numbers": "0.1.28",
+    "units": "0.7.5",
+    "parser": "0.1.34",
+    "ast": "0.1.33",
+    "expression": "0.12.7",
+    "evaluator": "0.1.33",
+    "autograd": "0.4.5",
+    "parallel": "0.10.0",
+    "workerpool": "0.4.0",
+    "gpu": "0.2.1",
+    "compat": "0.4.52",
+    "plot": "0.4.32",
+    "workbook": "0.5.18"
+  },
+  "packages": {
+    "core": {
+      "pass": 1,
+      "fail": 1,
+      "n_a": 0,
+      "samples": [
+        {
+          "id": "usage-isNumber-isMatrix",
+          "runtime": "pass",
+          "compileSkipLibCheck": "pass",
+          "notes": "Requires extra @danielsimonjr/mathts-matrix (#799). Comments match."
+        },
+        {
+          "id": "createSeededRng-fragment",
+          "runtime": "fail",
+          "error": "ReferenceError: createSeededRng is not defined",
+          "issue": 794
+        }
+      ]
+    },
+    "matrix": {
+      "pass": 2,
+      "fail": 0,
+      "samples": [
+        { "id": "DenseMatrix-ops-decomps", "runtime": "pass" },
+        { "id": "backendManager.initialize-multiply", "runtime": "pass" }
+      ]
+    },
+    "linalg": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "tensor": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }],
+      "proseAttempt": {
+        "call": "Tensor.fromNested([[1,2],[3,4]])",
+        "runtime": "fail",
+        "error": "TypeError: Cannot read properties of undefined (reading 'reduce')",
+        "issue": 795
+      }
+    },
+    "functions": {
+      "pass": 1,
+      "fail": 0,
+      "samples": [
+        {
+          "id": "scalar-search-front-tex",
+          "runtime": "pass",
+          "notes": "grad 5 / [3,1]; scalarToTex matches; numericallyEquivalent consistent; runScalarSearch completes."
+        }
+      ]
+    },
+    "arithmetic": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }],
+      "exportListVsRoot": { "issue": 804 }
+    },
+    "trigonometry": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "statistics": {
+      "pass": 1,
+      "fail": 0,
+      "samples": [
+        {
+          "id": "anova-kendall-hypergeometric-ks2",
+          "runtime": "pass",
+          "notes": "kendallTau===0.6; hypergeometric pdf(1)≈0.43133719722856767 (README 0.4313371972)."
+        }
+      ]
+    },
+    "signal": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }],
+      "discoverability": { "fftExport": false, "dupIssue": 774 }
+    },
+    "numbers": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }],
+      "proseAttempt": {
+        "call": "new BigNumber(1).toString()",
+        "runtime": "fail",
+        "dupIssue": 714
+      }
+    },
+    "units": {
+      "pass": 1,
+      "fail": 0,
+      "samples": [
+        {
+          "id": "Unit-kmh-to-ms",
+          "runtime": "pass",
+          "notes": "value 27.77777777777778"
+        }
+      ]
+    },
+    "parser": {
+      "pass": 1,
+      "fail": 0,
+      "samples": [
+        {
+          "id": "import-createParse",
+          "runtime": "pass",
+          "notes": "Import-only fence. Calling createParse() throws; dup #715."
+        }
+      ]
+    },
+    "ast": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "expression": {
+      "pass": 1,
+      "fail": 1,
+      "samples": [
+        { "id": "scalarEquals", "runtime": "pass", "notes": "true as commented" },
+        {
+          "id": "mathML-parse",
+          "runtime": "fail",
+          "error": "ReferenceError: parse is not defined",
+          "issue": 793
+        }
+      ]
+    },
+    "evaluator": {
+      "pass": 1,
+      "fail": 0,
+      "samples": [
+        {
+          "id": "import-createEvaluate-commented",
+          "runtime": "pass",
+          "notes": "Does not call evaluate. compileExpression('2+3') throws; #796 / #715."
+        }
+      ]
+    },
+    "autograd": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "parallel": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "workerpool": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }]
+    },
+    "gpu": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 797 }]
+    },
+    "compat": {
+      "pass": 0,
+      "fail": 0,
+      "n_a": 1,
+      "samples": [{ "id": "none", "runtime": "n/a", "issue": 798 }],
+      "notes": "Working create(all) sample is only on the repo root README, not this package README."
+    },
+    "plot": {
+      "pass": 5,
+      "fail": 1,
+      "samples": [
+        { "id": "line", "runtime": "pass" },
+        { "id": "overlay", "runtime": "pass" },
+        { "id": "surface", "runtime": "pass" },
+        { "id": "plot-polymorphic", "runtime": "pass" },
+        { "id": "toTikZ", "runtime": "pass" },
+        {
+          "id": "renderToFile",
+          "runtime": "fail",
+          "error": "ReferenceError: svgString is not defined (then PlotRenderError without rsvg)",
+          "issue": 800,
+          "dupIssue": 780
+        }
+      ]
+    },
+    "workbook": {
+      "pass": 2,
+      "fail": 0,
+      "samples": [
+        { "id": "toTeX-fragment", "runtime": "pass" },
+        { "id": "parseWorkbook-runReport", "runtime": "pass" },
+        { "id": "yaml-example.mtsw", "runtime": "pass", "notes": "mtsw run; checkPi true" },
+        { "id": "yaml-pair-scope", "runtime": "pass", "notes": "total === 5" }
+      ]
+    },
+    "root-readme": {
+      "pass": 5,
+      "fail": 0,
+      "compileSkipLibCheck": {
+        "compat-evaluate": "fail",
+        "error": "TS18046 math.evaluate is of type 'unknown'",
+        "dupIssue": 737
+      },
+      "samples": [
+        { "id": "compat-create-all", "runtime": "pass", "compile": "fail-unknown" },
+        { "id": "typed-functions-add-evaluate", "runtime": "pass" },
+        { "id": "computePool", "runtime": "pass" },
+        { "id": "scientific-toolkit", "runtime": "pass", "notes": "realRoots ≈ [1,2,3] not exact ints" },
+        { "id": "loadWasm", "runtime": "pass" }
+      ]
+    }
+  },
+  "summary": {
+    "packageReadmeTsFences": { "pass": 17, "fail": 3, "packagesWithNoTsFence": 12 },
+    "rootReadmeTsFencesRuntime": { "pass": 5, "fail": 0 },
+    "issuesFiled": [789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804],
+    "duplicateCommentsAttempted": [715, 774, 737, 697, 780, 714, 695, 759, 706, 751],
+    "duplicateCommentsResult": "403 Resource not accessible by integration"
+  }
+}
