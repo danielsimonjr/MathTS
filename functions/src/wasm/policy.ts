@@ -1,3 +1,5 @@
+import { isDeterministic } from '@danielsimonjr/mathts-core';
+
 /**
  * Where the AssemblyScript tier runs once a consumer has called `loadWasm()`.
  *
@@ -56,6 +58,15 @@ const WASM_DISPATCH_POLICY: Readonly<Record<string, WasmBand>> = {
   sort_f64: { min: 1048576 },
 };
 
+/**
+ * AS kernels whose output is bit-identical to the JS path. Deterministic mode keeps
+ * only these on WASM. Measured 2026-11-11 on Node 26: 1M inputs including +/-0,
+ * subnormals and NaN. `abs` showed 0 bit differences; every other kernel differed.
+ * `sort_f64` gives equal values but can order -0 and +0 differently from the JS sort,
+ * so it is excluded.
+ */
+export const DETERMINISTIC_WASM: ReadonlySet<string> = new Set(['array_abs_ptr']);
+
 let overrides: Record<string, WasmBand | null> | null = null;
 
 /**
@@ -64,6 +75,7 @@ let overrides: Record<string, WasmBand | null> | null = null;
  * means the JS path runs, exactly as when the module is not loaded.
  */
 export function wasmPolicyAllows(kernel: string, n: number): boolean {
+  if (isDeterministic() && !DETERMINISTIC_WASM.has(kernel)) return false;
   const own = (o: Record<string, WasmBand | null>, k: string): boolean =>
     Object.prototype.hasOwnProperty.call(o, k);
   const band =

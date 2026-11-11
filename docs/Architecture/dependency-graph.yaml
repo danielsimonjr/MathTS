@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1277
+  totalFiles: 1279
   totalModules: 82
-  totalExports: 6966
+  totalExports: 6972
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -708,6 +708,18 @@ modules:
         - isSafeProperty
         - getSafeMethod
         - isSafeMethod
+    core/src/deterministic.ts:
+      description: 'Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - setDeterministic
+        - isDeterministic
+      functions:
+        - setDeterministic
+        - isDeterministic
     core/src/factory.ts:
       description: Type for a factory function that creates instances
       externalDependencies: []
@@ -946,6 +958,11 @@ modules:
           imports:
             - rowMajorStrides
           reExport: true
+        - file: ./deterministic.js
+          imports:
+            - setDeterministic
+            - isDeterministic
+          reExport: true
         - file: ./types/interfaces.js
           imports:
             - MathTSValue
@@ -1179,6 +1196,8 @@ modules:
         - createSeededRng
         - SeededRng
         - rowMajorStrides
+        - setDeterministic
+        - isDeterministic
         - VERSION
         - MathTSValue
         - Scalar
@@ -1371,6 +1390,8 @@ modules:
         - createSeededRng
         - SeededRng
         - rowMajorStrides
+        - setDeterministic
+        - isDeterministic
         - MathTSValue
         - Scalar
         - BackendType
@@ -3716,7 +3737,11 @@ modules:
             - OperationType
         - file: ./register-backends.js
           imports: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isDeterministic
       exports:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
@@ -9015,7 +9040,12 @@ modules:
           imports:
             - pushConfigOverlay
             - popConfigOverlay
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isDeterministic
+            - setDeterministic
       exports:
         - runWithConfig
         - config
@@ -15688,14 +15718,16 @@ modules:
       description: WebGPU fused element-wise chain.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./implicit.js
+          imports:
+            - implicitGpuAllowed
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-gpu'
           directory: gpu
           imports:
             - getGpuDevice
             - getGlobalGPUContext
-            - isGpuEnabled
             - GPU_MIN_ELEMENTS
             - ShaderManager
             - BufferPool
@@ -15724,14 +15756,16 @@ modules:
       description: WebGPU FFT — Stockham autosort, radix-2, f32.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./implicit.js
+          imports:
+            - implicitGpuAllowed
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-gpu'
           directory: gpu
           imports:
             - getGpuDevice
             - getGlobalGPUContext
-            - isGpuEnabled
             - ShaderManager
             - BufferPool
             - serializeGpu
@@ -15745,6 +15779,24 @@ modules:
       functions:
         - resetGpuFft
         - fftGpuDispatch
+    functions/src/gpu/implicit.ts:
+      description: Whether an implicit call may route to the GPU.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isDeterministic
+        - package: '@danielsimonjr/mathts-gpu'
+          directory: gpu
+          imports:
+            - isGpuEnabled
+      exports:
+        - implicitGpuAllowed
+      functions:
+        - implicitGpuAllowed
   functions/graph:
     functions/src/graph/community-coloring.ts:
       description: Graph Coloring, Cliques, Community Detection, Katz Centrality, Isomorphism
@@ -23263,6 +23315,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - isDeterministic
             - mulberry32
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -24416,6 +24469,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - isDeterministic
             - pairwiseSum
       exports:
         - GAUSS_WORKER_THRESHOLD
@@ -26809,8 +26863,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isDeterministic
       exports:
+        - DETERMINISTIC_WASM
         - wasmPolicyAllows
         - overrideWasmPolicy
         - wasmDispatchPolicy
@@ -26820,6 +26879,8 @@ modules:
         - wasmPolicyAllows
         - overrideWasmPolicy
         - wasmDispatchPolicy
+      constants:
+        - DETERMINISTIC_WASM
     functions/src/wasm/poly/wasm-bridge.ts:
       description: WASM dispatch bridge for polynomial hot-loop kernels.
       externalDependencies: []
@@ -36828,6 +36889,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - isDeterministic
             - pairwiseSum
             - norm2
             - pairwiseDot
@@ -41775,6 +41837,7 @@ dependencyGraph:
         - core/src/config.ts
         - core/src/constants.ts
         - core/src/customs.ts
+        - core/src/deterministic.ts
         - core/src/factory.ts
         - core/src/index.ts
         - core/src/internal.ts
@@ -42119,6 +42182,7 @@ dependencyGraph:
       files:
         - functions/src/gpu/elementwise-gpu.ts
         - functions/src/gpu/fft-gpu.ts
+        - functions/src/gpu/implicit.ts
     - name: Functions/graph
       files:
         - functions/src/graph/community-coloring.ts
@@ -43191,17 +43255,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1277
+  totalTypeScriptFiles: 1279
   totalModules: 82
-  totalLinesOfCode: 216401
-  totalExports: 6966
+  totalLinesOfCode: 216492
+  totalExports: 6972
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2329
-  totalTypeGuards: 168
+  totalFunctions: 2332
+  totalTypeGuards: 169
   totalEnums: 0
-  totalConstants: 1639
-  totalReExports: 3012
+  totalConstants: 1640
+  totalReExports: 3014
   totalTypeOnlyImports: 640
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

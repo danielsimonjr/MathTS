@@ -39,7 +39,7 @@
  */
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
-import { pairwiseSum } from '@danielsimonjr/mathts-core';
+import { isDeterministic, pairwiseSum } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // Thresholds
@@ -512,6 +512,7 @@ export async function parallelGaussQuad(
   const clampedOrder = order >= 2 && order <= 5 ? order : 5;
   const composite = n > 5;
   if (
+    !isDeterministic() &&
     composite &&
     workerCount > 1 &&
     n * clampedOrder >= GAUSS_WORKER_THRESHOLD &&
@@ -645,7 +646,7 @@ export async function parallelRomberg(
   tol: number = 1e-12,
   options: RombergOptions = {}
 ): Promise<number> {
-  if ((options.workerCount ?? 1) > 1 && computePool.isReady()) {
+  if (!isDeterministic() && (options.workerCount ?? 1) > 1 && computePool.isReady()) {
     validateClosureSource(f.toString());
     return computePool.integrateFanOut(
       f.toString(),

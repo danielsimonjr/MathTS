@@ -10,18 +10,19 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ## 1. Getting Started ✅
 
-| Doc                                            | What it covers                                                    |
-| ---------------------------------------------- | ----------------------------------------------------------------- |
-| [getting-started.md](getting-started.md)       | Install, first computations, instance setup.                      |
-| [advanced.md](advanced.md)                     | Advanced usage patterns.                                          |
-| [backends.md](backends.md)                     | JS / WASM / WebGPU backend selection.                             |
-| [performance.md](performance.md)               | Current performance guidance and numbers.                         |
-| [../README.md](../README.md)                   | Repo top-level overview.                                          |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md)       | How to contribute.                                                |
-| [../SUPPORT.md](../SUPPORT.md)                 | Getting help.                                                     |
-| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community standards.                                              |
-| [../SECURITY.md](../SECURITY.md)               | Security policy / reporting.                                      |
-| [../examples/README.md](../examples/README.md) | Runnable examples, including the 2026-11 scientific toolkit tour. |
+| Doc                                            | What it covers                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------------------- |
+| [getting-started.md](getting-started.md)       | Install, first computations, instance setup.                            |
+| [advanced.md](advanced.md)                     | Advanced usage patterns.                                                |
+| [backends.md](backends.md)                     | JS / WASM / WebGPU backend selection.                                   |
+| [determinism.md](determinism.md)               | Deterministic mode: bit-identical results across the JS and WASM tiers. |
+| [performance.md](performance.md)               | Current performance guidance and numbers.                               |
+| [../README.md](../README.md)                   | Repo top-level overview.                                                |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md)       | How to contribute.                                                      |
+| [../SUPPORT.md](../SUPPORT.md)                 | Getting help.                                                           |
+| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community standards.                                                    |
+| [../SECURITY.md](../SECURITY.md)               | Security policy / reporting.                                            |
+| [../examples/README.md](../examples/README.md) | Runnable examples, including the 2026-11 scientific toolkit tour.       |
 
 ## 2. Architecture & Reference (current) ✅
 

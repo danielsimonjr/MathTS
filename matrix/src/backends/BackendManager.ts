@@ -12,6 +12,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
+import { isDeterministic } from '@danielsimonjr/mathts-core';
 import {
   DEFAULT_CONFIG,
   getConfig,
@@ -207,6 +208,7 @@ export class BackendManager {
    *   4. JS fallback
    */
   selectBackend(elementCount: number, operation?: OperationType): MatrixBackend {
+    if (isDeterministic()) return jsBackend;
     const { preferredBackend, operationThresholds, wasmThreshold, gpuThreshold } = this.hints;
 
     // Check preferred backend first

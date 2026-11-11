@@ -49,12 +49,12 @@
 import {
   getGpuDevice,
   getGlobalGPUContext,
-  isGpuEnabled,
   ShaderManager,
   BufferPool,
   serializeGpu,
   type GPUContextOptions,
 } from '@danielsimonjr/mathts-gpu';
+import { implicitGpuAllowed } from './implicit.js';
 
 /** Threads per workgroup. Each thread owns one butterfly, so a pass covers n/2 threads. */
 const WORKGROUP_SIZE = 64;
@@ -229,7 +229,7 @@ export function fftGpuDispatch(
   // 150 ms GPU dispatch happened to be in flight. A pure-CPU call must never acquire a
   // GPU-global serialization dependency.
   const n = real.length;
-  if (!(options?.gpu ?? isGpuEnabled())) return Promise.resolve(null);
+  if (!implicitGpuAllowed(options)) return Promise.resolve(null);
   if (imag.length !== n) return Promise.resolve(null);
   if (n < FFT_GPU_MIN_ELEMENTS) return Promise.resolve(null); // below this the GPU is ~1.17x: not worth f32
   if (!isPowerOf2(n)) return Promise.resolve(null); // radix-2 only; the CPU handles chirp-z
