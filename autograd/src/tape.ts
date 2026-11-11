@@ -177,19 +177,55 @@ export class TapedTensor {
     return new Tensor(this.shape, new Float64Array(this.primal), axisLabels);
   }
 
-  add(other: TapedTensor): TapedTensor {
-    this.checkSameShape(other, 'add');
-    const out = new Float64Array(this.primal.length);
-    for (let i = 0; i < out.length; i++) out[i] = this.primal[i] + other.primal[i];
+  add(other: TapedTensor | number): TapedTensor {
+    if (typeof other === 'number') {
+      const out = new Float64Array(this.primal.length);
+      for (let i = 0; i < out.length; i++) out[i] = this.primal[i] + other;
+      const thisGradSlot = this.tape.getInputGrad(this.id)!;
+      const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+        for (let i = 0; i < outputGrad.length; i++) {
+          thisGradSlot[i] += outputGrad[i];
+        }
+      });
+      return new TapedTensor(this.shape, out, this.tape, id);
+    }
+    assertSameTape(this, other);
+    if (sameTensorShape(this.shape, other.shape)) {
+      const out = new Float64Array(this.primal.length);
+      for (let i = 0; i < out.length; i++) out[i] = this.primal[i] + other.primal[i];
+      const thisGradSlot = this.tape.getInputGrad(this.id)!;
+      const otherGradSlot = this.tape.getInputGrad(other.id)!;
+      const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
+        for (let i = 0; i < outputGrad.length; i++) {
+          thisGradSlot[i] += outputGrad[i];
+          otherGradSlot[i] += outputGrad[i];
+        }
+      });
+      return new TapedTensor(this.shape, out, this.tape, id);
+    }
+    const outT = this.toPrimalTensor().add(other.toPrimalTensor());
+    const out = new Float64Array(outT.data);
+    const outShape = [...outT.shape];
+    const aShape = this.shape;
+    const bShape = other.shape;
+    const aData = this.primal;
+    const bData = other.primal;
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const otherGradSlot = this.tape.getInputGrad(other.id)!;
     const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
-      for (let i = 0; i < outputGrad.length; i++) {
-        thisGradSlot[i] += outputGrad[i];
-        otherGradSlot[i] += outputGrad[i];
-      }
+      broadcastBinaryBackward(
+        outputGrad,
+        outShape,
+        aShape,
+        aData,
+        thisGradSlot,
+        bShape,
+        bData,
+        otherGradSlot,
+        'add'
+      );
     });
-    return new TapedTensor(this.shape, out, this.tape, id);
+    return new TapedTensor(outShape, out, this.tape, id);
   }
 
   sub(other: TapedTensor): TapedTensor {
@@ -246,32 +282,60 @@ export class TapedTensor {
     return new TapedTensor(this.shape, out, this.tape, id);
   }
 
-  mul(other: TapedTensor): TapedTensor {
-    this.checkSameShape(other, 'mul');
-    const out = new Float64Array(this.primal.length);
-    for (let i = 0; i < out.length; i++) out[i] = this.primal[i] * other.primal[i];
-    const thisPrimal = this.primal; // capture for closure
-    const otherPrimal = other.primal;
+  mul(other: TapedTensor | number): TapedTensor {
+    if (typeof other === 'number') {
+      return this.scale(other);
+    }
+    assertSameTape(this, other);
+    if (sameTensorShape(this.shape, other.shape)) {
+      const out = new Float64Array(this.primal.length);
+      for (let i = 0; i < out.length; i++) out[i] = this.primal[i] * other.primal[i];
+      const thisPrimal = this.primal; // capture for closure
+      const otherPrimal = other.primal;
+      const thisGradSlot = this.tape.getInputGrad(this.id)!;
+      const otherGradSlot = this.tape.getInputGrad(other.id)!;
+      // I3 fix: explicit alias check. Without it, t.mul(t) yields the correct
+      // gradient only by aliasing accident (both slots are the same Float64Array,
+      // so two += b accumulate to +2b). A future refactor that splits the slots
+      // would silently halve the gradient. Be explicit.
+      const isAliased = this === other;
+      const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
+        for (let i = 0; i < outputGrad.length; i++) {
+          if (isAliased) {
+            // (a · a)' grad: d(a²)/da = 2a; via VJP: thisGrad += 2·outputGrad·a.
+            thisGradSlot[i] += 2 * outputGrad[i] * thisPrimal[i];
+          } else {
+            // d(a·b)/da = b; d(a·b)/db = a.
+            thisGradSlot[i] += outputGrad[i] * otherPrimal[i];
+            otherGradSlot[i] += outputGrad[i] * thisPrimal[i];
+          }
+        }
+      });
+      return new TapedTensor(this.shape, out, this.tape, id);
+    }
+    const outT = this.toPrimalTensor().mul(other.toPrimalTensor());
+    const out = new Float64Array(outT.data);
+    const outShape = [...outT.shape];
+    const aShape = this.shape;
+    const bShape = other.shape;
+    const aData = this.primal;
+    const bData = other.primal;
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const otherGradSlot = this.tape.getInputGrad(other.id)!;
-    // I3 fix: explicit alias check. Without it, t.mul(t) yields the correct
-    // gradient only by aliasing accident (both slots are the same Float64Array,
-    // so two += b accumulate to +2b). A future refactor that splits the slots
-    // would silently halve the gradient. Be explicit.
-    const isAliased = this === other;
     const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
-      for (let i = 0; i < outputGrad.length; i++) {
-        if (isAliased) {
-          // (a · a)' grad: d(a²)/da = 2a; via VJP: thisGrad += 2·outputGrad·a.
-          thisGradSlot[i] += 2 * outputGrad[i] * thisPrimal[i];
-        } else {
-          // d(a·b)/da = b; d(a·b)/db = a.
-          thisGradSlot[i] += outputGrad[i] * otherPrimal[i];
-          otherGradSlot[i] += outputGrad[i] * thisPrimal[i];
-        }
-      }
+      broadcastBinaryBackward(
+        outputGrad,
+        outShape,
+        aShape,
+        aData,
+        thisGradSlot,
+        bShape,
+        bData,
+        otherGradSlot,
+        'mul'
+      );
     });
-    return new TapedTensor(this.shape, out, this.tape, id);
+    return new TapedTensor(outShape, out, this.tape, id);
   }
 
   scale(k: number): TapedTensor {
@@ -1733,6 +1797,67 @@ export class TapedTensor {
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+function sameTensorShape(a: ReadonlyArray<number>, b: ReadonlyArray<number>): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+/**
+ * Accumulate gradients for a broadcast elementwise add/mul: each output element
+ * maps to input flat indices with NumPy broadcast rules (stride 0 on length-1 axes).
+ */
+function broadcastBinaryBackward(
+  outputGrad: Float64Array,
+  outShape: ReadonlyArray<number>,
+  aShape: ReadonlyArray<number>,
+  aData: Float64Array,
+  aGradSlot: Float64Array,
+  bShape: ReadonlyArray<number>,
+  bData: Float64Array,
+  bGradSlot: Float64Array,
+  op: 'add' | 'mul'
+): void {
+  const rank = outShape.length;
+  const outSize = outputGrad.length;
+  const aStrides = Tensor.rowMajorStrides(aShape);
+  const bStrides = Tensor.rowMajorStrides(bShape);
+  const aRankOffset = rank - aShape.length;
+  const bRankOffset = rank - bShape.length;
+  const aEffStrides = new Array<number>(rank).fill(0);
+  const bEffStrides = new Array<number>(rank).fill(0);
+  for (let i = 0; i < rank; i++) {
+    const ai = i - aRankOffset;
+    if (ai >= 0 && aShape[ai] !== 1) {
+      aEffStrides[i] = aStrides[ai];
+    }
+    const bi = i - bRankOffset;
+    if (bi >= 0 && bShape[bi] !== 1) {
+      bEffStrides[i] = bStrides[bi];
+    }
+  }
+
+  const coords = new Array<number>(rank).fill(0);
+  for (let n = 0; n < outSize; n++) {
+    let aFlat = 0;
+    let bFlat = 0;
+    for (let k = 0; k < rank; k++) {
+      aFlat += coords[k] * aEffStrides[k];
+      bFlat += coords[k] * bEffStrides[k];
+    }
+    const g = outputGrad[n];
+    if (op === 'add') {
+      aGradSlot[aFlat] += g;
+      bGradSlot[bFlat] += g;
+    } else {
+      aGradSlot[aFlat] += g * bData[bFlat];
+      bGradSlot[bFlat] += g * aData[aFlat];
+    }
+    for (let k = rank - 1; k >= 0; k--) {
+      if (++coords[k] < outShape[k]) break;
+      coords[k] = 0;
+    }
+  }
+}
 
 /**
  * Reverse-mode adjoint scatter for sum/mean reductions: map each input flat index
