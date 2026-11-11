@@ -256,6 +256,7 @@ interface UnitLike {
   clone(): UnitLike;
   multiply(other: unknown): unknown;
   divide(other: unknown): unknown;
+  divideInto(numerator: unknown): unknown;
   abs(): unknown;
 }
 
@@ -500,6 +501,15 @@ export const multiply = withBinaryScalarGuards(
     'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
     'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
     'number, Unit': (a: f64, b: Unit): Unit => unitMul(b, a) as Unit,
+    // Real scalars must be explicit. A missing signature lets Fraction/BigNumber
+    // convert to Complex and hit `Complex, Unit`, which stores a zero-imaginary Complex
+    // and formats as `(2) m` instead of `2 m`.
+    'Fraction, Unit': (a: Fraction, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, Fraction': (a: Unit, b: Fraction): Unit => unitMul(a, b) as Unit,
+    'BigNumber, Unit': (a: BigNumber, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, BigNumber': (a: Unit, b: BigNumber): Unit => unitMul(a, b) as Unit,
+    'Complex, Unit': (a: Complex, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, Complex': (a: Unit, b: Complex): Unit => unitMul(a, b) as Unit,
 
     // Dual numbers (forward-mode AD).
     'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
@@ -604,6 +614,14 @@ export const divide = mathTyped('divide', {
   // Unit division / scaling (mathjs parity). Unit ÷ Unit may be dimensionless.
   'Unit, Unit': (a: Unit, b: Unit): Unit => unitDiv(a, b) as Unit,
   'Unit, number': (a: Unit, b: f64): Unit => unitDiv(a, b) as Unit,
+  // Same conversion trap as multiply: without these, `1 / (2 ohm)` becomes Complex.
+  'number, Unit': (a: f64, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Fraction, Unit': (a: Fraction, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, Fraction': (a: Unit, b: Fraction): Unit => unitDiv(a, b) as Unit,
+  'BigNumber, Unit': (a: BigNumber, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, BigNumber': (a: Unit, b: BigNumber): Unit => unitDiv(a, b) as Unit,
+  'Complex, Unit': (a: Complex, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, Complex': (a: Unit, b: Complex): Unit => unitDiv(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.div(b),

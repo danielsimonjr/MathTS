@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2235,
+  "totalFiles": 2237,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1258,
+    "build-entry": 1259,
     "test-only": 0,
     "orphan": 0,
-    "test": 886,
+    "test": 887,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1284,
-    "tests": 886,
+    "src": 1285,
+    "tests": 887,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1008,
+    "@danielsimonjr/mathts-functions": 1010,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
@@ -8612,7 +8612,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1747
+      "loc": 1765
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8916,11 +8916,18 @@
       "loc": 287
     },
     {
+      "file": "functions/src/typed/trig-angle-unit.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 45
+    },
+    {
       "file": "functions/src/typed/trigonometry.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 308
+      "loc": 334
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -9803,6 +9810,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 59
+    },
+    {
+      "file": "functions/tests/dogfood-g02-unit-trig-complex.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 207
     },
     {
       "file": "functions/tests/dogfood-g03-null-scalar-dispatch.test.ts",
