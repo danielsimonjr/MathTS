@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2213,
+  "totalFiles": 2215,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1250,
+    "build-entry": 1251,
     "test-only": 0,
     "orphan": 0,
-    "test": 872,
+    "test": 873,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1276,
-    "tests": 872,
+    "src": 1277,
+    "tests": 873,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 993,
+    "@danielsimonjr/mathts-functions": 995,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -6505,7 +6505,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1006
+      "loc": 1010
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7024,6 +7024,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 192
+    },
+    {
+      "file": "functions/src/numeric/box-lcp.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 216
     },
     {
       "file": "functions/src/numeric/bspline.ts",
@@ -9341,6 +9348,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 105
+    },
+    {
+      "file": "functions/tests/box-lcp.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 425
     },
     {
       "file": "functions/tests/canonical-aliases.test.ts",

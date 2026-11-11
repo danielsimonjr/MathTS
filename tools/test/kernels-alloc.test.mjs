@@ -61,6 +61,26 @@ function argsFor(name) {
       return [out(9), v(9), v(9)];
     case 'parallelAxis':
       return [out(9), v(9), 2, v(3)];
+    case 'solveBoxLcp': {
+      // A 3x3 contact block (normal, two friction tangents) with a reused options object
+      // and result, as a solver loop would pass them. x converges in the warm-up, so the
+      // window also covers the early-stop path.
+      const A = Float64Array.of(3, 0.5, 0.2, 0.5, 2, 0.1, 0.2, 0.1, 2);
+      const options = {
+        iterations: 20,
+        tolerance: 0,
+        findex: Int32Array.of(-1, 0, 0),
+        result: { iterations: 0, residual: 0, converged: false },
+      };
+      return [
+        A,
+        Float64Array.of(2, 1, -1),
+        Float64Array.of(0, -0.5, -0.5),
+        Float64Array.of(Infinity, 0.5, 0.5),
+        out(3),
+        options,
+      ];
+    }
     case 'mat3Inverse':
       return [out(9), Float64Array.of(2, 1, 0, 1, 3, 1, 0, 1, 4)];
     default:
@@ -131,8 +151,8 @@ test('positive control: the allocating twin quaternionMultiply triggers GC', asy
   assert.ok(n > 0, `expected GC entries from the allocating twin, saw ${n}`);
 });
 
-/** Hand-written allocation-free functions next to the generated kernels (functions/src/geometry/sym3.ts). */
-const EXTRA_NAMES = ['eigSym3', 'rotateTensor', 'parallelAxis'];
+/** Hand-written allocation-free functions next to the generated kernels (geometry/sym3.ts, numeric/box-lcp.ts). */
+const EXTRA_NAMES = ['eigSym3', 'rotateTensor', 'parallelAxis', 'solveBoxLcp'];
 
 for (const name of [...KERNEL_NAMES, ...EXTRA_NAMES]) {
   test(`${name} makes no allocation`, async () => {

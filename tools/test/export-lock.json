@@ -2224,6 +2224,12 @@
       "BoundaryDatum": {
         "kind": "type"
       },
+      "BoxLcpOptions": {
+        "kind": "type"
+      },
+      "BoxLcpResult": {
+        "kind": "type"
+      },
       "CAS_BATCH_THRESHOLD": {
         "kind": "number"
       },
@@ -6455,6 +6461,9 @@
         "kind": "function"
       },
       "solveBanded": {
+        "kind": "function"
+      },
+      "solveBoxLcp": {
         "kind": "function"
       },
       "solveDAE": {

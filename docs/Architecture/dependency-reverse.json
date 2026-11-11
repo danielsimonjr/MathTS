@@ -1889,6 +1889,7 @@
     ],
     "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
     "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/box-lcp.ts": ["functions/src/index.ts"],
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
     "functions/src/signal-filter-extra.ts": [
       "functions/src/index.ts",

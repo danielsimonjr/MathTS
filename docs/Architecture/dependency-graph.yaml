@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1276
+  totalFiles: 1277
   totalModules: 82
-  totalExports: 6962
+  totalExports: 6966
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9731,6 +9731,10 @@ modules:
             - nnls
             - lsqBounded
           reExport: true
+        - file: ./numeric/box-lcp.js
+          imports:
+            - solveBoxLcp
+          reExport: true
         - file: ./cas-integration.js
           imports:
             - symbolicIntegral
@@ -10565,6 +10569,12 @@ modules:
             - LsqBoundedResult
           reExport: true
           typeOnly: true
+        - file: ./numeric/box-lcp.js
+          imports:
+            - BoxLcpOptions
+            - BoxLcpResult
+          reExport: true
+          typeOnly: true
         - file: ./signal/fir-smoothing.js
           imports:
             - DeconvolveResult
@@ -10996,6 +11006,7 @@ modules:
         - bfgs
         - nnls
         - lsqBounded
+        - solveBoxLcp
         - symbolicIntegral
         - firwin
         - butter
@@ -11455,6 +11466,8 @@ modules:
         - NnlsResult
         - LsqBoundedOptions
         - LsqBoundedResult
+        - BoxLcpOptions
+        - BoxLcpResult
         - DeconvolveResult
         - RemezType
         - FindPeaksOptions
@@ -11735,6 +11748,7 @@ modules:
         - bfgs
         - nnls
         - lsqBounded
+        - solveBoxLcp
         - symbolicIntegral
         - firwin
         - butter
@@ -12194,6 +12208,8 @@ modules:
         - NnlsResult
         - LsqBoundedOptions
         - LsqBoundedResult
+        - BoxLcpOptions
+        - BoxLcpResult
         - DeconvolveResult
         - RemezType
         - FindPeaksOptions
@@ -17412,6 +17428,19 @@ modules:
         - BfgsResult
       functions:
         - bfgs
+    functions/src/numeric/box-lcp.ts:
+      description: Projected Gauss-Seidel solver for the dense box-constrained linear
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - solveBoxLcp
+      interfaces:
+        - BoxLcpOptions
+        - BoxLcpResult
+      functions:
+        - solveBoxLcp
     functions/src/numeric/bspline.ts:
       description: B-spline curve **fitting** (`bsplineFit`) and **evaluation** (`bsplineEval`)
       externalDependencies: []
@@ -42173,6 +42202,7 @@ dependencyGraph:
       files:
         - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/bfgs.ts
+        - functions/src/numeric/box-lcp.ts
         - functions/src/numeric/bspline.ts
         - functions/src/numeric/constrained.ts
         - functions/src/numeric/control-equations.ts
@@ -43161,18 +43191,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1276
+  totalTypeScriptFiles: 1277
   totalModules: 82
-  totalLinesOfCode: 216181
-  totalExports: 6962
+  totalLinesOfCode: 216401
+  totalExports: 6966
   totalClasses: 61
-  totalInterfaces: 598
-  totalFunctions: 2328
+  totalInterfaces: 600
+  totalFunctions: 2329
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639
-  totalReExports: 3009
-  totalTypeOnlyImports: 639
+  totalReExports: 3012
+  totalTypeOnlyImports: 640
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
