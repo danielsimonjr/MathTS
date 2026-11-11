@@ -8,15 +8,19 @@ set -euo pipefail
 readonly APT_MIRRORS_FILE=/etc/apt/apt-mirrors.txt
 readonly OFFICIAL_ARCHIVE="https://archive.ubuntu.com/ubuntu/"
 readonly OFFICIAL_SECURITY="https://security.ubuntu.com/ubuntu/"
+readonly US_ARCHIVE="https://us.archive.ubuntu.com/ubuntu/"
 readonly AZURE_MIRROR_HOST=azure.archive.ubuntu.com
+readonly ARCHIVE_MIRROR_HOST=archive.ubuntu.com
 
+# Match GitHub runner-images apt failover timings (see configure-apt.sh).
 APT_OPTS=(
-  -o Acquire::Retries=3
-  -o Acquire::http::Timeout=30
-  -o Acquire::https::Timeout=30
+  -o Acquire::Retries=2
+  -o Acquire::http::Timeout=15
+  -o Acquire::https::Timeout=15
 )
 
 MIRRORS_SWITCHED=0
+US_MIRROR_ADDED=0
 
 log() {
   printf 'apt-install.sh: %s\n' "$*" >&2
@@ -48,6 +52,9 @@ maybe_preflight_drop_azure() {
   fi
   log "${AZURE_MIRROR_HOST} does not resolve; skipping azure mirror before first apt-get"
   switch_to_official_mirrors
+  if ! host_resolves "$ARCHIVE_MIRROR_HOST"; then
+    add_us_archive_mirror
+  fi
 }
 
 run_apt_get() {
@@ -89,11 +96,22 @@ run_apt_get() {
 }
 
 ensure_official_mirrors_in_list() {
-  if ! grep -qi 'archive\.ubuntu\.com' "$APT_MIRRORS_FILE"; then
+  if ! grep -qi 'archive\.ubuntu\.com/ubuntu' "$APT_MIRRORS_FILE"; then
     printf '%s\tpriority:1\n' "$OFFICIAL_ARCHIVE" >>"$APT_MIRRORS_FILE"
   fi
   if ! grep -qi 'security\.ubuntu\.com' "$APT_MIRRORS_FILE"; then
     printf '%s\tpriority:2\n' "$OFFICIAL_SECURITY" >>"$APT_MIRRORS_FILE"
+  fi
+}
+
+add_us_archive_mirror() {
+  if [[ $US_MIRROR_ADDED -eq 1 ]]; then
+    return 0
+  fi
+  US_MIRROR_ADDED=1
+  log "adding ${US_ARCHIVE} to ${APT_MIRRORS_FILE}"
+  if ! grep -qi 'us\.archive\.ubuntu\.com' "$APT_MIRRORS_FILE"; then
+    printf '%s\tpriority:1\n' "$US_ARCHIVE" >>"$APT_MIRRORS_FILE"
   fi
 }
 
@@ -156,12 +174,15 @@ apt_get_with_fallback() {
       switch_to_official_mirrors
       continue
     fi
+    if [[ $rc -eq 100 && $attempt -eq 2 ]]; then
+      add_us_archive_mirror
+    fi
     if [[ $rc -eq 100 && $attempt -lt 3 ]]; then
       log "apt transient failure (attempt ${attempt}/3); retrying in 5s"
       sleep 5
       continue
     fi
-    return "$rc"
+    return $((rc == 100 ? 1 : rc))
   done
   return "$rc"
 }
