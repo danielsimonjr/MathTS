@@ -639,7 +639,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 37
+      "loc": 40
     },
     {
       "file": "core/src/error/DimensionError.ts",
@@ -6197,7 +6197,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 66
+      "loc": 75
     },
     {
       "file": "functions/src/core/config.ts",
@@ -9690,7 +9690,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 175
+      "loc": 211
     },
     {
       "file": "functions/tests/diophantine.test.ts",

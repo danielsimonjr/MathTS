@@ -12,6 +12,7 @@
  * across the package boundary rather than being lost in that module's very large
  * generated declaration file.
  */
+import { isDeterministic, setDeterministic } from '@danielsimonjr/mathts-core';
 import { DEFAULT_CONFIG, type ConfigOptions } from './core/config.js';
 import { pushConfigOverlay, popConfigOverlay } from './factories/scope.js';
 
@@ -54,12 +55,20 @@ export function runWithConfig<T>(overlay: Partial<ConfigOptions>, fn: () => T): 
  * Read or update the global MathTS runtime config. Call with no argument to
  * read the current config; pass a partial to merge it (in place on
  * `DEFAULT_CONFIG`) and get the updated copy back. mathjs-compatible
- * `math.config(...)`.
+ * `math.config(...)`. The key `deterministic` is forwarded to core's
+ * `setDeterministic` (it is not stored in `DEFAULT_CONFIG`), and the returned copy
+ * reports the current mode.
  *
  * Does not read or write active {@link runWithConfig} overlays; compat
  * `create(all, config)` uses overlays instead of mutating this singleton.
  */
-export function config(options?: Partial<ConfigOptions>): ConfigOptions {
-  if (options) Object.assign(DEFAULT_CONFIG, options);
-  return { ...DEFAULT_CONFIG };
+export function config(
+  options?: Partial<ConfigOptions> & { deterministic?: boolean }
+): ConfigOptions & { deterministic: boolean } {
+  if (options) {
+    const { deterministic, ...rest } = options;
+    if (deterministic !== undefined) setDeterministic(deterministic === true);
+    Object.assign(DEFAULT_CONFIG, rest);
+  }
+  return { ...DEFAULT_CONFIG, deterministic: isDeterministic() };
 }

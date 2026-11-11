@@ -122,7 +122,7 @@ if (hasWebGPU()) {
 ```typescript
 import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-backendManager.forceBackend('wasm'); // stick to WASM when possible
+backendManager.forceBackend('wasm'); // stick to WASM when possible (deterministic mode overrides this: see determinism.md)
 backendManager.forceBackend(null); // restore auto-selection
 ```
 

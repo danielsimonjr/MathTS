@@ -13,6 +13,10 @@ import {
 } from '../src/wasm/policy.js';
 import { sortF64Dispatch } from '../src/wasm/sort/wasm-bridge.js';
 import { implicitGpuAllowed } from '../src/gpu/implicit.js';
+import { fftGpuDispatch } from '../src/gpu/fft-gpu.js';
+import { elementwiseChainGpuDispatch } from '../src/gpu/elementwise-gpu.js';
+import { GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
+import { config } from '../src/config-api.js';
 import { parallelGaussQuad, parallelRomberg } from '../src/typed/integration.js';
 import { normalDist } from '../src/typed/dist-objects.js';
 
@@ -54,9 +58,20 @@ describe('deterministic mode flag', () => {
   });
 });
 
+describe('config({ deterministic })', () => {
+  it('forwards to setDeterministic and reports the mode', () => {
+    expect(config().deterministic).toBe(false);
+    expect(config({ deterministic: true }).deterministic).toBe(true);
+    expect(isDeterministic()).toBe(true);
+    expect('deterministic' in (config() as object)).toBe(true);
+    config({ deterministic: false });
+    expect(isDeterministic()).toBe(false);
+  });
+});
+
 describe('WASM policy in deterministic mode', () => {
   beforeAll(async () => {
-    await loadWasm();
+    expect(await loadWasm()).toBe(true);
   });
 
   it('keeps exactly the measured bit-identical kernels', () => {
@@ -127,6 +142,27 @@ describe('implicit GPU in deterministic mode', () => {
     enableGpu();
     expect(implicitGpuAllowed()).toBe(true);
     expect(implicitGpuAllowed({ gpu: false })).toBe(false);
+  });
+  it('the FFT and chain dispatchers ask for a device when off, not when on', async () => {
+    const requestAdapter = vi.fn().mockResolvedValue(null);
+    vi.stubGlobal('navigator', { gpu: { requestAdapter } });
+    try {
+      const n = 1 << 20;
+      const run = async (): Promise<void> => {
+        await fftGpuDispatch(new Float64Array(n), new Float64Array(n), false, { gpu: true });
+        await elementwiseChainGpuDispatch(['sin'], new Float64Array(GPU_MIN_ELEMENTS), {
+          gpu: true,
+        });
+      };
+      setDeterministic(true);
+      await run();
+      expect(requestAdapter).not.toHaveBeenCalled();
+      setDeterministic(false);
+      await run();
+      expect(requestAdapter).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
   it('is refused when on, even with gpu: true', () => {
     enableGpu();

@@ -1,5 +1,5 @@
 /**
- * Deterministic mode: a process-wide switch that makes implicit routing reproducible.
+ * Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible.
  *
  * When on, the library runs the JavaScript path for every implicit choice that could
  * change result bits: WASM kernels except the ones measured bit-identical to JS, implicit
@@ -7,7 +7,9 @@
  * then match across runs on the same engine and version.
  *
  * Named entry points are not gated. `gpuMatmul`, `gpuMatrixBackend`, `wasmBackend.*` and
- * direct `computePool.*` calls run as the caller named them.
+ * the `computePool` methods `applyKernel`, `applyKernel2`, `integrateFanOut`,
+ * `distributionSampleFanOut`, `fftBatch` and `distanceMatrix` run as the caller named them.
+ * The other `computePool` methods decide through `shouldParallelize`, so they are gated.
  *
  * The guarantee covers the same engine and version only. Bit identity across engines is
  * not guaranteed.
@@ -18,7 +20,8 @@
 let deterministic = false;
 
 /**
- * Turn deterministic mode on or off for the whole process.
+ * Turn deterministic mode on or off for this instance of the core module
+ * (one per thread or worker that loads it).
  *
  * @param on - `true` routes implicit calls to the JavaScript path; `false` restores routing.
  */

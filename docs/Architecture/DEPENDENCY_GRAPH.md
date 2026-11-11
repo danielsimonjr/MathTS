@@ -555,7 +555,7 @@ graph LR
 
 ---
 
-### `core/src/deterministic.ts` - Deterministic mode: a process-wide switch that makes implicit routing reproducible.
+### `core/src/deterministic.ts` - Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible.
 
 **Exports:**
 
@@ -4371,6 +4371,12 @@ graph LR
 ---
 
 ### `functions/src/config-api.ts` - Runtime configuration accessor (GC12) — standalone module.
+
+**Workspace Dependencies:**
+
+| Package                      | Import                              |
+| ---------------------------- | ----------------------------------- |
+| `@danielsimonjr/mathts-core` | `isDeterministic, setDeterministic` |
 
 **Internal Dependencies:**
 
@@ -20121,7 +20127,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1279   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 216480 |
+| Total Lines of Code     | 216492 |
 | Total Exports           | 6972   |
 | Total Re-exports        | 3014   |
 | Total Classes           | 61     |

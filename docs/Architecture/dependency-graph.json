@@ -752,7 +752,7 @@
         ]
       },
       "core/src/deterministic.ts": {
-        "description": "Deterministic mode: a process-wide switch that makes implicit routing reproducible.",
+        "description": "Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -9622,7 +9622,13 @@
             "imports": ["pushConfigOverlay", "popConfigOverlay"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["isDeterministic", "setDeterministic"]
+          }
+        ],
         "exports": ["runWithConfig", "config"],
         "functions": ["runWithConfig", "config"]
       },
@@ -45690,7 +45696,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1279,
     "totalModules": 82,
-    "totalLinesOfCode": 216480,
+    "totalLinesOfCode": 216492,
     "totalExports": 6972,
     "totalClasses": 61,
     "totalInterfaces": 600,

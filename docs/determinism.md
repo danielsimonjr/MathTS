@@ -11,7 +11,7 @@ setDeterministic(true);
 isDeterministic(); // true
 ```
 
-The flag is global to the module instance. The default is off. `setDeterministic(false)` restores the normal routing.
+The flag is global to the core module instance. The default is off. `config({ deterministic: true })` from `@danielsimonjr/mathts-functions` does the same, and `config()` reports the mode in its `deterministic` field. `setDeterministic(false)` restores the normal routing.
 
 ## What the mode changes
 
@@ -52,6 +52,7 @@ Each of these kernels gave different bits from its JS path in the same measureme
 
 - The guarantee is for one engine and one engine version. ECMAScript does not specify `Math.sin`, `Math.exp` and the other transcendental functions to the bit. V8, SpiderMonkey and JavaScriptCore can give different results.
 - A function that calls `Math.random` without a seed is not deterministic. Give a `seed` where the function accepts one.
-- The mode does not gate a tier that you call by name: `gpuMatmul`, `gpuMatrixBackend`, `wasmBackend.*`, direct `computePool.*` calls, and `createScalarBatchPool` or `searchScalars` with a pool.
-- `distanceMatrix` has only a worker path. It is not in the guaranteed set.
+- The mode does not gate a tier that you call by name: `gpuMatmul`, `gpuMatrixBackend`, `wasmBackend.*`, `createScalarBatchPool` or `searchScalars` with a pool, and these `computePool` methods: `applyKernel`, `applyKernel2`, `integrateFanOut`, `distributionSampleFanOut`, `fftBatch`, `distanceMatrix`. The other `computePool` methods (for example `sum` and `elementwise`) decide through `shouldParallelize`, so the mode gates them, also with `forceParallel`.
+- `computePool.distanceMatrix` can use the workers in deterministic mode. Its worker loop and its inline loop do the same arithmetic in the same order, so the bits are the same.
+- The flag belongs to one instance of the core module. Each worker thread that loads MathTS has its own flag.
 - A pure-JS function has one path, so it is deterministic on one engine in both modes. Examples are the fixed-size geometry kernels, `solveBoxLcp` and the quaternion functions.
