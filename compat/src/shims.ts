@@ -39,6 +39,10 @@ import {
   sin as _sin,
   cos as _cos,
   tan as _tan,
+  asin as _asin,
+  acos as _acos,
+  atan as _atan,
+  atan2 as _atan2,
   sum as _sum,
   mean as _mean,
   min as _min,
@@ -232,47 +236,11 @@ export const sin: TypedFunction = _sin;
 export const cos: TypedFunction = _cos;
 export const tan: TypedFunction = _tan;
 
-// Inverse trig (shims - these may not be fully implemented in MathTS yet)
-/**
- * Return the inverse sine of `x`. This shim calls `Math.asin`.
- *
- * @param x - The sine value.
- * @returns The angle in radians.
- */
-export function asin(x: number): number {
-  return Math.asin(x);
-}
-
-/**
- * Return the inverse cosine of `x`. This shim calls `Math.acos`.
- *
- * @param x - The cosine value.
- * @returns The angle in radians.
- */
-export function acos(x: number): number {
-  return Math.acos(x);
-}
-
-/**
- * Return the inverse tangent of `x`. This shim calls `Math.atan`.
- *
- * @param x - The tangent value.
- * @returns The angle in radians.
- */
-export function atan(x: number): number {
-  return Math.atan(x);
-}
-
-/**
- * Return the angle of the point (`x`, `y`). This shim calls `Math.atan2(y, x)`.
- *
- * @param y - The y coordinate. This argument comes first.
- * @param x - The x coordinate.
- * @returns The angle in radians.
- */
-export function atan2(y: number, x: number): number {
-  return Math.atan2(y, x);
-}
+// Inverse trig — delegate to functions typed implementations (complex promotion).
+export const asin: TypedFunction = _asin;
+export const acos: TypedFunction = _acos;
+export const atan: TypedFunction = _atan;
+export const atan2: TypedFunction = _atan2;
 
 // =============================================================================
 // Statistical Function Shims
