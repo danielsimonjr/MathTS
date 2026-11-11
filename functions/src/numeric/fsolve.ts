@@ -44,12 +44,29 @@ function prepareFsolve(
       evalF: (v) => coerceResidual(scalarF(v[0]), v.length),
     };
   }
-  const x = Array.from(x0);
+  if (!Array.isArray(x0) && !ArrayBuffer.isView(x0)) {
+    throw new TypeError(
+      'fsolve: x0 must be a finite number or a non-empty array of finite numbers'
+    );
+  }
+  const x = Array.from(x0 as ArrayLike<number>);
   const vecF = F as (x: number[]) => number | number[];
   return {
     x,
     evalF: (v) => coerceResidual(vecF(v), v.length),
   };
+}
+
+function assertFiniteGuess(x: readonly number[]): void {
+  if (x.length === 0 || x.some((xi) => !Number.isFinite(xi))) {
+    throw new TypeError(
+      'fsolve: x0 must be a finite number or a non-empty array of finite numbers'
+    );
+  }
+}
+
+function residualIsFinite(v: readonly number[]): boolean {
+  return v.every((vi) => Number.isFinite(vi));
 }
 
 type f64 = number;
@@ -87,9 +104,10 @@ function maxNorm(v: readonly number[]): number {
  * @param x0 - Initial guess: a number for 1-D, or a length-`n` vector.
  * @param opts - Options (tol, maxIter)
  * @returns Approximate solution vector x with F(x) ~ 0
- * @throws {TypeError} If `F(x)` is not a length-`n` residual vector.
- * @throws If the Jacobian is singular (`linsolve` fails) or Newton fails to
- *   converge within `maxIter` iterations.
+ * @throws {TypeError} If `x0` is empty or non-finite, or `F(x)` is not a length-`n` residual vector.
+ * @throws If the residual is non-finite, the Jacobian is singular (`linsolve` fails),
+ *   or Newton fails to converge within `maxIter` iterations. The convergence error
+ *   includes the iteration count and the final `max |F_i|`.
  *
  * @example
  * fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]) // => ~[1, 1]
@@ -105,7 +123,11 @@ export function fsolve(
 
   const { x: xInit, evalF } = prepareFsolve(F, x0);
   let x = xInit;
+  assertFiniteGuess(x);
   let Fx = evalF(x);
+  if (!residualIsFinite(Fx)) {
+    throw new Error('fsolve: non-finite residual at the initial guess');
+  }
 
   for (let iter = 0; iter < maxIter; iter++) {
     if (maxNorm(Fx) < tol) return x;
@@ -128,14 +150,18 @@ export function fsolve(
     // Full Newton step (lambda = 1) — also the fallback if no halving below improves it.
     let xNext = x.map((xi, i) => xi + delta[i]);
     let FxNext = evalF(xNext);
+    let nextNorm = norm2(FxNext);
 
-    if (norm2(FxNext) >= residualNorm) {
+    // A NaN/Inf trial norm must not count as an improvement: `NaN >= r` is false,
+    // which used to accept a non-finite Newton step and then burn `maxIter`.
+    if (!Number.isFinite(nextNorm) || nextNorm >= residualNorm) {
       let trialLambda = 1;
       for (let halving = 0; halving < 20; halving++) {
         trialLambda /= 2;
         const xTrial = x.map((xi, i) => xi + trialLambda * delta[i]);
         const FxTrial = evalF(xTrial);
-        if (norm2(FxTrial) < residualNorm) {
+        const trialNorm = norm2(FxTrial);
+        if (Number.isFinite(trialNorm) && trialNorm < residualNorm) {
           xNext = xTrial;
           FxNext = FxTrial;
           break;
@@ -143,12 +169,18 @@ export function fsolve(
       }
     }
 
+    if (!residualIsFinite(FxNext)) {
+      throw new Error(`fsolve: non-finite residual at iteration ${iter}`);
+    }
+
     x = xNext;
     Fx = FxNext;
   }
 
   if (maxNorm(Fx) < tol) return x;
-  throw new Error(`fsolve: failed to converge within ${maxIter} iterations`);
+  const resid = maxNorm(Fx);
+  const iters = `${maxIter} iteration${maxIter === 1 ? '' : 's'}`;
+  throw new Error(`fsolve: failed to converge within ${iters} (max |F| = ${resid})`);
 }
 
 /** Alias for `fsolve` — `root(F, x0)` solves `F(x) = 0`. */

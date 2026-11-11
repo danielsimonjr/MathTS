@@ -273,7 +273,7 @@ describe('Eigenvalue Decomposition', () => {
   describe('Error cases', () => {
     it('should throw if Float64Array length is not a perfect square', () => {
       const A = new Float64Array([1, 2, 3]);
-      expect(() => eig(A)).toThrow('Float64Array length must be a perfect square');
+      expect(() => eig(A)).toThrow(/not a perfect square/);
     });
 
     it('should throw if 2D array matrix is not square', () => {

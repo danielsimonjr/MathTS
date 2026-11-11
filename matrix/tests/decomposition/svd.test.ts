@@ -515,7 +515,7 @@ describe('Singular Value Decomposition', () => {
     it('should throw for non-square Float64Array', () => {
       const A = new Float64Array([1, 2, 3]);
 
-      expect(() => svd(A)).toThrow('Float64Array must represent a square matrix');
+      expect(() => svd(A)).toThrow(/not a perfect square/);
     });
 
     it('should accept Float64Array', () => {

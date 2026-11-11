@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1281,
+    "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 6985
+    "totalExports": 7009
   },
   "entryPoints": [
     {
@@ -5059,6 +5059,29 @@
       }
     },
     "matrix/operations": {
+      "matrix/src/operations/as-packed.ts": {
+        "description": "Normalize decomposition inputs (DenseMatrix, nested arrays, packed f64).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix", "isDenseMatrix"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ],
+        "interfaces": ["PackedMatrixDescriptor"],
+        "functions": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ]
+      },
       "matrix/src/operations/cholesky.ts": {
         "description": "Cholesky Decomposition (DenseMatrix primitive)",
         "externalDependencies": [],
@@ -5067,6 +5090,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5141,6 +5168,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./eig.js",
             "imports": ["eig", "eigvals", "powerIteration", "EigResult", "EigOptions"]
           }
@@ -5157,6 +5188,10 @@
           {
             "file": "./common.js",
             "imports": ["isSymmetric", "eye"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5294,6 +5329,17 @@
             "file": "./common.js",
             "imports": ["matMul", "transpose"],
             "reExport": true
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": [
+              "decompositionInputToDenseMatrix",
+              "decompositionInputToNestedArray",
+              "isPackedMatrixDescriptor",
+              "DecompositionMatrixInput",
+              "PackedMatrixDescriptor"
+            ],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -5347,6 +5393,11 @@
           "condest",
           "matMul",
           "transposeNestedArray",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor",
           "transpose"
         ],
         "reExported": [
@@ -5397,7 +5448,12 @@
           "QLResult",
           "condest",
           "matMul",
-          "transpose"
+          "transpose",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -5448,6 +5504,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5484,6 +5544,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./qr.js",
             "imports": ["qr"]
           }
@@ -5503,6 +5567,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./common.js",
             "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
           }
@@ -5520,6 +5588,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5535,6 +5607,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           },
           {
             "file": "./common.js",
@@ -5589,6 +5665,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./svd.js",
             "imports": ["svd", "SVDResult", "SVDOptions"]
           }
@@ -5615,6 +5695,10 @@
           {
             "file": "./givens.js",
             "imports": ["applyGivensCols", "givensRotation"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -7337,7 +7421,18 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["decompositionInputToNestedArray", "isPackedMatrixDescriptor"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["PackedMatrixDescriptor"]
+          }
+        ],
         "exports": ["createLusolve"],
         "constants": ["createLusolve"]
       },
@@ -24445,6 +24540,23 @@
           {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch"]
+          },
+          {
+            "file": "./invalid-scalar-guards.js",
+            "imports": ["withBinaryScalarGuards"]
+          },
+          {
+            "file": "./complex-promotion.js",
+            "imports": [
+              "logReal",
+              "logRealBase",
+              "log10Real",
+              "log2Real",
+              "log1pReal",
+              "sqrtReal",
+              "powReal",
+              "nthRootReal"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -24858,6 +24970,63 @@
           "partitions",
           "harmonicNumber",
           "integerDigits"
+        ]
+      },
+      "functions/src/typed/complex-promotion.ts": {
+        "description": "mathjs-compatible complex promotion for real scalar kernels in the typed layer.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/number.js",
+            "imports": ["isInteger", "isPowZeroAtInfinity"]
+          },
+          {
+            "file": "../plain/number/index.js",
+            "imports": ["nthRootNumber", "powNumber"]
+          },
+          {
+            "file": "../factories/scope.js",
+            "imports": ["factoryScope"]
+          },
+          {
+            "file": "../core/config.js",
+            "imports": ["ConfigOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex", "Fraction"]
+          }
+        ],
+        "exports": [
+          "isPredictableMode",
+          "logReal",
+          "logRealBase",
+          "log10Real",
+          "log2Real",
+          "log1pReal",
+          "sqrtReal",
+          "powReal",
+          "nthRootReal",
+          "acscReal",
+          "asecReal"
+        ],
+        "functions": [
+          "isPredictableMode",
+          "logReal",
+          "logRealBase",
+          "log10Real",
+          "log2Real",
+          "log1pReal",
+          "sqrtReal",
+          "powReal",
+          "nthRootReal",
+          "acscReal",
+          "asecReal"
         ]
       },
       "functions/src/typed/complex.ts": {
@@ -26216,6 +26385,36 @@
           "legendreFit"
         ]
       },
+      "functions/src/typed/invalid-scalar-guards.ts": {
+        "description": "Guards for typed `add` / `multiply`: reject operands that must not be coerced",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber", "Complex", "Dual", "Fraction"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["Matrix"]
+          }
+        ],
+        "exports": [
+          "formatUnexpectedArgumentType",
+          "unexpectedArgumentType",
+          "rejectInvalidBinaryScalars",
+          "withBinaryScalarGuards"
+        ],
+        "functions": [
+          "formatUnexpectedArgumentType",
+          "unexpectedArgumentType",
+          "rejectInvalidBinaryScalars",
+          "withBinaryScalarGuards"
+        ]
+      },
       "functions/src/typed/logical.ts": {
         "description": "Typed Logical Functions",
         "externalDependencies": [],
@@ -27155,14 +27354,47 @@
         "exports": ["bin", "hex", "oct", "format", "print", "typedString"],
         "constants": ["bin", "hex", "oct", "format", "print", "typedString"]
       },
+      "functions/src/typed/trig-angle-unit.ts": {
+        "description": "Shared angle-Unit handling for typed trigonometry (mathjs parity).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex", "isComplex"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
+          }
+        ],
+        "exports": ["trigFromAngleUnit"],
+        "functions": ["trigFromAngleUnit"]
+      },
       "functions/src/typed/trigonometry.ts": {
         "description": "Typed Trigonometric Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./complex-promotion.js",
+            "imports": ["acscReal", "asecReal", "isPredictableMode"]
+          },
+          {
             "file": "./f64-kernels.js",
             "imports": ["f64Unary"]
+          },
+          {
+            "file": "./trig-angle-unit.js",
+            "imports": ["trigFromAngleUnit"]
           },
           {
             "file": "../wasm/elementwise/wasm-bridge.js",
@@ -27174,6 +27406,11 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped", "Complex", "BigNumber", "Dual"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
           }
         ],
         "exports": [
@@ -43117,6 +43354,10 @@
               "sin",
               "cos",
               "tan",
+              "asin",
+              "acos",
+              "atan",
+              "atan2",
               "sum",
               "mean",
               "min",
@@ -43147,6 +43388,10 @@
           "sin",
           "cos",
           "tan",
+          "asin",
+          "acos",
+          "atan",
+          "atan2",
           "sum",
           "mean",
           "min",
@@ -43175,10 +43420,6 @@
           "bignumber",
           "matrix",
           "sparse",
-          "asin",
-          "acos",
-          "atan",
-          "atan2",
           "variance",
           "std",
           "conj",
@@ -43203,10 +43444,6 @@
           "bignumber",
           "matrix",
           "sparse",
-          "asin",
-          "acos",
-          "atan",
-          "atan2",
           "variance",
           "std",
           "conj",
@@ -43238,6 +43475,10 @@
           "sin",
           "cos",
           "tan",
+          "asin",
+          "acos",
+          "atan",
+          "atan2",
           "sum",
           "mean",
           "min",
@@ -44270,6 +44511,7 @@
       {
         "name": "Matrix/operations",
         "files": [
+          "matrix/src/operations/as-packed.ts",
           "matrix/src/operations/cholesky.ts",
           "matrix/src/operations/common.ts",
           "matrix/src/operations/condest.ts",
@@ -44954,6 +45196,7 @@
           "functions/src/typed/cas.ts",
           "functions/src/typed/centrality-restarts.ts",
           "functions/src/typed/combinatorics.ts",
+          "functions/src/typed/complex-promotion.ts",
           "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
@@ -44977,6 +45220,7 @@
           "functions/src/typed/index.ts",
           "functions/src/typed/integration.ts",
           "functions/src/typed/interpolation.ts",
+          "functions/src/typed/invalid-scalar-guards.ts",
           "functions/src/typed/logical.ts",
           "functions/src/typed/matrix-ops.ts",
           "functions/src/typed/normal-equations-solve.ts",
@@ -44991,6 +45235,7 @@
           "functions/src/typed/statistics.ts",
           "functions/src/typed/string-derivative.ts",
           "functions/src/typed/string.ts",
+          "functions/src/typed/trig-angle-unit.ts",
           "functions/src/typed/trigonometry.ts",
           "functions/src/typed/typed-bridge.ts",
           "functions/src/typed/unit.ts",
@@ -45773,18 +46018,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1281,
+    "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 217522,
-    "totalExports": 6985,
+    "totalLinesOfCode": 218152,
+    "totalExports": 7009,
     "totalClasses": 61,
-    "totalInterfaces": 600,
-    "totalFunctions": 2345,
-    "totalTypeGuards": 169,
+    "totalInterfaces": 601,
+    "totalFunctions": 2360,
+    "totalTypeGuards": 171,
     "totalEnums": 0,
-    "totalConstants": 1640,
-    "totalReExports": 3016,
-    "totalTypeOnlyImports": 643,
+    "totalConstants": 1644,
+    "totalReExports": 3021,
+    "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

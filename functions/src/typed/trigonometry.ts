@@ -13,8 +13,11 @@
  */
 
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
+import { acscReal, asecReal, isPredictableMode } from './complex-promotion.js';
 import { f64Unary } from './f64-kernels.js';
+import { trigFromAngleUnit } from './trig-angle-unit.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
@@ -36,6 +39,7 @@ export const sin = mathTyped('sin', {
   Complex: (a: Complex): Complex => a.sin(),
   BigNumber: (a: BigNumber): BigNumber => a.sin(),
   Dual: (a: Dual): Dual => a.sin(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'sin', Math.sin, (z) => z.sin()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('sin', a) ?? f64Unary(a, Math.sin),
@@ -49,6 +53,7 @@ export const cos = mathTyped('cos', {
   Complex: (a: Complex): Complex => a.cos(),
   BigNumber: (a: BigNumber): BigNumber => a.cos(),
   Dual: (a: Dual): Dual => a.cos(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'cos', Math.cos, (z) => z.cos()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('cos', a) ?? f64Unary(a, Math.cos),
@@ -62,6 +67,7 @@ export const tan = mathTyped('tan', {
   Complex: (a: Complex): Complex => a.tan(),
   BigNumber: (a: BigNumber): BigNumber => a.tan(),
   Dual: (a: Dual): Dual => a.tan(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'tan', Math.tan, (z) => z.tan()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('tan', a) ?? f64Unary(a, Math.tan),
@@ -74,6 +80,13 @@ export const csc = mathTyped('csc', {
   number: (a: number) => 1 / Math.sin(a),
   Complex: (a: Complex) => a.sin().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.sin()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'csc',
+      (x) => 1 / Math.sin(x),
+      (z) => z.sin().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('csc', a) ?? f64Unary(a, (x) => 1 / Math.sin(x)),
@@ -86,6 +99,13 @@ export const sec = mathTyped('sec', {
   number: (a: number) => 1 / Math.cos(a),
   Complex: (a: Complex) => a.cos().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.cos()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'sec',
+      (x) => 1 / Math.cos(x),
+      (z) => z.cos().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('sec', a) ?? f64Unary(a, (x) => 1 / Math.cos(x)),
@@ -98,6 +118,13 @@ export const cot = mathTyped('cot', {
   number: (a: number) => 1 / Math.tan(a),
   Complex: (a: Complex) => a.tan().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.tan()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'cot',
+      (x) => 1 / Math.tan(x),
+      (z) => z.tan().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('cot', a) ?? f64Unary(a, (x) => 1 / Math.tan(x)),
@@ -112,11 +139,10 @@ export const cot = mathTyped('cot', {
  */
 export const asin = mathTyped('asin', {
   number: (a: number) => {
-    if (a < -1 || a > 1) {
-      // Return complex result for values outside [-1, 1]
-      return new Complex(a, 0).asin();
+    if ((a >= -1 && a <= 1) || isPredictableMode()) {
+      return Math.asin(a);
     }
-    return Math.asin(a);
+    return new Complex(a, 0).asin();
   },
   Complex: (a: Complex) => a.asin(),
   BigNumber: (a: BigNumber) => a.asin(),
@@ -130,10 +156,10 @@ export const asin = mathTyped('asin', {
  */
 export const acos = mathTyped('acos', {
   number: (a: number) => {
-    if (a < -1 || a > 1) {
-      return new Complex(a, 0).acos();
+    if ((a >= -1 && a <= 1) || isPredictableMode()) {
+      return Math.acos(a);
     }
-    return Math.acos(a);
+    return new Complex(a, 0).acos();
   },
   Complex: (a: Complex) => a.acos(),
   BigNumber: (a: BigNumber) => a.acos(),
@@ -166,7 +192,7 @@ export const atan2 = mathTyped('atan2', {
  * Arc cosecant
  */
 export const acsc = mathTyped('acsc', {
-  number: (a: number) => Math.asin(1 / a),
+  number: (a: number) => acscReal(a),
   Complex: (a: Complex) => a.inverse().asin(),
   // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
@@ -176,7 +202,7 @@ export const acsc = mathTyped('acsc', {
  * Arc secant
  */
 export const asec = mathTyped('asec', {
-  number: (a: number) => Math.acos(1 / a),
+  number: (a: number) => asecReal(a),
   Complex: (a: Complex) => a.inverse().acos(),
   // BigNumber: asec(a) = acos(1/a).
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),
@@ -211,7 +237,15 @@ export const asinh = mathTyped('asinh', {
  * Inverse hyperbolic cosine
  */
 export const acosh = mathTyped('acosh', {
-  number: (a: number) => Math.acosh(a),
+  number: (a: number) => {
+    if (a >= 1 || isPredictableMode()) {
+      return Math.acosh(a);
+    }
+    if (a <= -1) {
+      return new Complex(Math.log(Math.sqrt(a * a - 1) - a), Math.PI);
+    }
+    return new Complex(a, 0).acosh();
+  },
   Complex: (a: Complex) => a.acosh(),
   BigNumber: (a: BigNumber) => a.acosh(),
 
@@ -223,7 +257,12 @@ export const acosh = mathTyped('acosh', {
  * Inverse hyperbolic tangent
  */
 export const atanh = mathTyped('atanh', {
-  number: (a: number) => Math.atanh(a),
+  number: (a: number) => {
+    if ((a <= 1 && a >= -1) || isPredictableMode()) {
+      return Math.atanh(a);
+    }
+    return new Complex(a, 0).atanh();
+  },
   Complex: (a: Complex) => a.atanh(),
   BigNumber: (a: BigNumber) => a.atanh(),
 

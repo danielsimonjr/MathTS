@@ -498,6 +498,17 @@
       "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
     },
     {
+      "names": ["add", "multiply"],
+      "filesGlob": [
+        "compat/src/shims.ts",
+        "functions/src/typed/arithmetic.ts",
+        "functions/src/typed/factorization/integer-poly.ts",
+        "matrix/src/typed-operations.ts",
+        "matrix/src/types/dense/arithmetic.ts"
+      ],
+      "reason": "cross-package arithmetic homonyms: compat/src/shims.ts is the mathjs shim; functions/src/typed/arithmetic.ts is the mathTyped dispatch surface (pre-dispatch scalar guard wrapper in G03 does not change the contract); matrix/ exposes DenseMatrix ops and typed-operations DISPATCH_VARIANT; integer-poly.add is polynomial-ring addition, not scalar add. Distinct-by-domain; parity pinned in compat/tests/parity-oracle.test.ts and functions/tests/dogfood-g03-null-scalar-dispatch.test.ts."
+    },
+    {
       "names": ["transpose"],
       "filesGlob": [
         "compat/src/shims.ts",
