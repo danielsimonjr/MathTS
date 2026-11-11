@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Robust apt-get update/install for GitHub Actions ubuntu runners when the
-# configured azure apt mirror fails DNS or fetch. Tries current sources first,
-# then rewrites to archive.ubuntu.com / security.ubuntu.com and retries.
+# configured azure apt mirror fails DNS or fetch. Tries mirror+file sources
+# first, then drops azure.archive.ubuntu.com from /etc/apt/apt-mirrors.txt so
+# apt fails over to archive.ubuntu.com / security.ubuntu.com.
 set -euo pipefail
 
-readonly OFFICIAL_ARCHIVE="http://archive.ubuntu.com/ubuntu"
-readonly OFFICIAL_SECURITY="http://security.ubuntu.com/ubuntu"
+readonly APT_MIRRORS_FILE=/etc/apt/apt-mirrors.txt
+readonly OFFICIAL_ARCHIVE="http://archive.ubuntu.com/ubuntu/"
+readonly OFFICIAL_SECURITY="http://security.ubuntu.com/ubuntu/"
 
 APT_OPTS=(
   -o Acquire::Retries=3
@@ -22,7 +24,7 @@ log() {
 apt_log_is_retriable() {
   local logfile=$1
   grep -qiE \
-    'Could not resolve|Temporary failure resolving|Temporary failure in name resolution|Failed to fetch|Connection timed out|Connection failed|Network is unreachable|mirrorfile.*failure|Mirror sync in progress|Clearsigned file .*not valid|Some index files failed to download|Failed to fetch mirror|mirror\\+file:/etc/apt/apt-mirrors\\.txt' \
+    'Could not resolve|Temporary failure resolving|Temporary failure in name resolution|Failed to fetch|Connection timed out|Connection failed|Network is unreachable|mirrorfile.*failure|Mirror sync in progress|Clearsigned file .*not valid|Some index files failed to download|Failed to fetch mirror|mirror\\+file:/etc/apt/apt-mirrors\\.txt|azure\\.archive\\.ubuntu\\.com' \
     "$logfile"
 }
 
@@ -57,26 +59,13 @@ run_apt_get() {
   return 0
 }
 
-rewrite_deb822_sources_file() {
-  local target=$1
-  local bak="${target}.mathts-ci-bak"
-  if [[ ! -f $bak ]]; then
-    cp -p "$target" "$bak"
+ensure_official_mirrors_in_list() {
+  if ! grep -qi 'archive\.ubuntu\.com' "$APT_MIRRORS_FILE"; then
+    printf '%s\tpriority:1\n' "$OFFICIAL_ARCHIVE" >>"$APT_MIRRORS_FILE"
   fi
-  awk -v archive="$OFFICIAL_ARCHIVE" -v security="$OFFICIAL_SECURITY" '
-    BEGIN { suites = "" }
-    /^$/ { suites = ""; print; next }
-    /^Suites:/ { suites = $0; print; next }
-    /^URIs:/ {
-      if (suites ~ /(^|[[:space:]])[^[:space:]]*-security([[:space:]]|$)/) {
-        print "URIs: " security
-      } else {
-        print "URIs: " archive
-      }
-      next
-    }
-    { print }
-  ' "$bak" >"$target"
+  if ! grep -qi 'security\.ubuntu\.com' "$APT_MIRRORS_FILE"; then
+    printf '%s\tpriority:2\n' "$OFFICIAL_SECURITY" >>"$APT_MIRRORS_FILE"
+  fi
 }
 
 switch_to_official_mirrors() {
@@ -84,37 +73,47 @@ switch_to_official_mirrors() {
     return 0
   fi
   MIRRORS_SWITCHED=1
-  log "switching apt sources to official Ubuntu mirrors"
+  log "dropping unreachable entries from ${APT_MIRRORS_FILE} and preferring official Ubuntu archives"
 
+  # Ubuntu 24.04+ runners point URIs: mirror+file:/etc/apt/apt-mirrors.txt in
+  # deb822 ubuntu.sources — edit the mirror list, not ubuntu.sources (runner-images).
+  if [[ -f $APT_MIRRORS_FILE ]]; then
+    local bak="${APT_MIRRORS_FILE}.mathts-ci-bak"
+    if [[ ! -f $bak ]]; then
+      cp -p "$APT_MIRRORS_FILE" "$bak"
+    fi
+    grep -vi 'azure\.archive\.ubuntu\.com' "$bak" >"$APT_MIRRORS_FILE" || true
+    ensure_official_mirrors_in_list
+  else
+    log "warning: ${APT_MIRRORS_FILE} missing; writing official mirrors"
+    printf '%s\tpriority:1\n' "$OFFICIAL_ARCHIVE" >"$APT_MIRRORS_FILE"
+    printf '%s\tpriority:2\n' "$OFFICIAL_SECURITY" >>"$APT_MIRRORS_FILE"
+  fi
+
+  # Legacy one-line sources (ubuntu-22.04 and partial configs): replace azure
+  # hosts with the official archive URI.
   local f
-  for f in /etc/apt/sources.list.d/*.sources; do
-    [[ -f $f ]] || continue
-    [[ $f == *mathts-ci-bak ]] && continue
-    rewrite_deb822_sources_file "$f"
-  done
-
   for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
     [[ -f $f ]] || continue
     [[ $f == *mathts-ci-bak ]] && continue
-    local list_bak="${f}.mathts-ci-bak"
-    if [[ ! -f $list_bak ]]; then
-      cp -p "$f" "$list_bak"
+    if grep -q 'azure\.archive\.ubuntu\.com' "$f"; then
+      local list_bak="${f}.mathts-ci-bak"
+      if [[ ! -f $list_bak ]]; then
+        cp -p "$f" "$list_bak"
+      fi
+      sed -E \
+        -e "s|https?://azure\\.archive\\.ubuntu\\.com/ubuntu/?|${OFFICIAL_ARCHIVE}|g" \
+        -e "s|mirror\\+file:/etc/apt/apt-mirrors\\.txt|${OFFICIAL_ARCHIVE}|g" \
+        "$list_bak" >"$f"
     fi
-    sed -E \
-      -e "s|mirror\\+file:/etc/apt/apt-mirrors\\.txt|${OFFICIAL_ARCHIVE}|g" \
-      -e "s|https?://[^ ]*\\.archive\\.ubuntu\\.com/ubuntu|${OFFICIAL_ARCHIVE}|g" \
-      -e "s|https?://security\\.ubuntu\\.com/ubuntu|${OFFICIAL_SECURITY}|g" \
-      "$list_bak" >"$f"
   done
 
-  if [[ -f /etc/apt/apt-mirrors.txt ]]; then
-    if [[ ! -f /etc/apt/apt-mirrors.txt.mathts-ci-bak ]]; then
-      cp -p /etc/apt/apt-mirrors.txt /etc/apt/apt-mirrors.txt.mathts-ci-bak
+  # If a previous version of this script rewrote deb822 URIs, restore mirror+file.
+  local sources=/etc/apt/sources.list.d/ubuntu.sources
+  if [[ -f ${sources}.mathts-ci-bak ]]; then
+    if ! grep -q 'mirror+file:/etc/apt/apt-mirrors.txt' "$sources" 2>/dev/null; then
+      cp -p "${sources}.mathts-ci-bak" "$sources"
     fi
-    {
-      printf '%s\n' "$OFFICIAL_ARCHIVE"
-      printf '%s\n' "$OFFICIAL_SECURITY"
-    } >/etc/apt/apt-mirrors.txt
   fi
 }
 
