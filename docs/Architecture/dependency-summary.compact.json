@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1275, "e": 6959, "re": 3008 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1276, "e": 6962, "re": 3009 },
   "s": {
-    "loc": 215805,
+    "loc": 216181,
     "cls": 61,
     "int": 598,
-    "fn": 2325,
+    "fn": 2328,
     "tg": 168,
     "en": 0,
     "co": 1639,
-    "toi": 638
+    "toi": 639
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -652,7 +652,7 @@
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
     },
     "functions/geometry": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "alphaShape",
         "circumcircle",
@@ -1896,7 +1896,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 13 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
-    { "p": "src/index.ts", "i": 203, "o": 0 },
+    { "p": "src/index.ts", "i": 204, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },

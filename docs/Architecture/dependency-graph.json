@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1275,
+    "totalFiles": 1276,
     "totalModules": 82,
-    "totalExports": 6959
+    "totalExports": 6962
   },
   "entryPoints": [
     {
@@ -9961,6 +9961,11 @@
             "reExport": true
           },
           {
+            "file": "./geometry/sym3.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
             "file": "./config-api.js",
             "imports": ["config", "runWithConfig"],
             "reExport": true
@@ -12198,6 +12203,7 @@
           "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "* from ./geometry/kernels.generated.js",
+          "* from ./geometry/sym3.js",
           "config",
           "runWithConfig",
           "loadWasm",
@@ -16650,6 +16656,21 @@
         "exports": ["sphericalVoronoi"],
         "interfaces": ["SphericalVoronoiResult"],
         "functions": ["sphericalVoronoi"]
+      },
+      "functions/src/geometry/sym3.ts": {
+        "description": "Symmetric 3x3 eigen-decomposition and inertia-tensor operations. Matrices are",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./kernels.generated.js",
+            "imports": ["KernelInput", "KernelOutput"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["eigSym3", "rotateTensor", "parallelAxis"],
+        "functions": ["eigSym3", "rotateTensor", "parallelAxis"]
       },
       "functions/src/geometry/voronoi.ts": {
         "description": "Voronoi diagram (2-D) — a consumer of the Delaunay triangulation.",
@@ -44373,6 +44394,7 @@
           "functions/src/geometry/predicates.ts",
           "functions/src/geometry/quaternion.ts",
           "functions/src/geometry/spherical-voronoi.ts",
+          "functions/src/geometry/sym3.ts",
           "functions/src/geometry/voronoi.ts"
         ]
       },
@@ -45568,18 +45590,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1275,
+    "totalTypeScriptFiles": 1276,
     "totalModules": 82,
-    "totalLinesOfCode": 215805,
-    "totalExports": 6959,
+    "totalLinesOfCode": 216181,
+    "totalExports": 6962,
     "totalClasses": 61,
     "totalInterfaces": 598,
-    "totalFunctions": 2325,
+    "totalFunctions": 2328,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1639,
-    "totalReExports": 3008,
-    "totalTypeOnlyImports": 638,
+    "totalReExports": 3009,
+    "totalTypeOnlyImports": 639,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

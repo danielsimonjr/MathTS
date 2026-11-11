@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2211,
+  "totalFiles": 2213,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1249,
+    "build-entry": 1250,
     "test-only": 0,
     "orphan": 0,
-    "test": 871,
+    "test": 872,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1275,
-    "tests": 871,
+    "src": 1276,
+    "tests": 872,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 991,
+    "@danielsimonjr/mathts-functions": 993,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 118,
@@ -6431,6 +6431,13 @@
       "loc": 155
     },
     {
+      "file": "functions/src/geometry/sym3.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 375
+    },
+    {
       "file": "functions/src/geometry/voronoi.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6498,7 +6505,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1005
+      "loc": 1006
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -10594,6 +10601,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 478
+    },
+    {
+      "file": "functions/tests/geometry/sym3.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 509
     },
     {
       "file": "functions/tests/global-optimizers.test.ts",

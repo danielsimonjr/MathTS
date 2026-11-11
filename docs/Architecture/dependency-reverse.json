@@ -1799,7 +1799,11 @@
       "functions/src/index.ts"
     ],
     "functions/src/typed/cas.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/kernels.generated.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/kernels.generated.ts": [
+      "functions/src/geometry/sym3.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/sym3.ts": ["functions/src/index.ts"],
     "functions/src/config-api.ts": ["functions/src/index.ts"],
     "functions/src/wasm/WasmLoader.ts": [
       "functions/src/index.ts",
