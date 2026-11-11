@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { WorkerPool } from '../src/WorkerPool.js';
 
 /**
- * Issue #806 — `new WorkerPool()` must throw synchronously; async `initialize()`
+ * Issue #806 — `new WorkerPool()` must throw synchronously; fire-and-forget `initialize()`
  * used to call `workerScript.startsWith` on undefined and emit an unhandled rejection.
  */
 describe('WorkerPool constructor (#806)', () => {
