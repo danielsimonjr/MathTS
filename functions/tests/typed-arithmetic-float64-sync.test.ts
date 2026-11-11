@@ -126,7 +126,8 @@ const UNARY: Array<[string, Fn, number[], number[], ((x: number) => number)?]> =
   ['cube', cube as Fn, [-2, 3], [-8, 27]],
   ['cbrt', cbrt as Fn, [27, -8], [3, -2]],
   ['exp', exp as Fn, [0], [1]],
-  ['log', log as Fn, [1], [0]],
+  // Scalar log promotes negative reals to Complex; Float64Array stays Math.log (NaN).
+  ['log', log as Fn, [1], [0], Math.log],
   ['log10', log10 as Fn, [100, 1000], [2, 3]],
   ['log2', log2 as Fn, [8, 1024], [3, 10]],
   ['log1p', log1p as Fn, [0, -0], [0, -0]],

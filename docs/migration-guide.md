@@ -75,6 +75,13 @@ Behavior parity is the goal. If you find a divergence between mathjs v15
 behavior and the compat shim, please file an issue — do not assume differences
 are intentional without checking.
 
+With the default `predictable: false` (same as mathjs), real inputs outside the
+real domain of `log`, `pow`, `asin`, `acos`, `acosh`, and similar functions
+return `Complex` principal values — for example `math.log(-1)` is `iπ`, not
+`NaN`. `nthRoot(-8, 3)` stays the real odd root `-2` while `pow(-8, 1/3)` is the
+principal complex cube root. Set `math.config({ predictable: true })` when you
+want strictly real `Math.*` results (including `NaN` for those cases).
+
 One confirmed divergence (see `CHANGELOG.md` audit section):
 `divisorSigma(n, k)` — MathTS uses `(n, k=1)` where mathjs uses `(k, n)`
 (both required). If your code calls `math.divisorSigma`, verify argument order.

@@ -42,6 +42,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
+import { logReal, logRealBase, powReal, nthRootReal } from './complex-promotion.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -665,7 +666,7 @@ export const sign = mathTyped('sign', {
  */
 export const pow = mathTyped('pow', {
   // Hot cases stay inline.
-  'number, number': (a: f64, b: f64): f64 => Math.pow(a, b),
+  'number, number': (a: f64, b: f64): f64 | Complex => powReal(a, b),
   'bigint, bigint': (a: i64, b: i64): i64 => a ** b,
 
   // Rich-type policy cases DELEGATE to core's scalar `pow`, which correctly guards
@@ -806,7 +807,8 @@ export const cbrt = mathTyped('cbrt', {
  * N-th root
  */
 export const nthRoot = mathTyped('nthRoot', {
-  'number, number': (a: f64, n: f64): f64 => Math.pow(a, 1 / n),
+  'number, number': (a: f64, n: f64): f64 => nthRootReal(a, n),
+  number: (a: f64): f64 => nthRootReal(a, 2),
   'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
   'BigNumber, number': (a: BigNumber, n: f64): BigNumber => a.pow(1 / n),
 });
@@ -833,11 +835,11 @@ export const exp = mathTyped('exp', {
  * Natural logarithm (ln x). The Float64Array signature is synchronous.
  */
 export const log = mathTyped('log', {
-  number: (a: f64): f64 => Math.log(a),
+  number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
   BigNumber: (a: BigNumber): BigNumber => a.ln(),
   Dual: (a: Dual): Dual => a.log(),
-  'number, number': (a: f64, base: f64): f64 => Math.log(a) / Math.log(base),
+  'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
 
   // Float64Array log (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>

@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 48 files
+- **functions/typed**: 49 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 50             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 548            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 549            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10863,12 +10863,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                 | Type   |
-| ------------------------------------ | --------------------------------------- | ------ |
-| `./euclid.js`                        | `euclidSnap`                            | Import |
-| `./f64-kernels.js`                   | `f64Unary`                              | Import |
-| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
+| File                                 | Imports                                      | Type   |
+| ------------------------------------ | -------------------------------------------- | ------ |
+| `./euclid.js`                        | `euclidSnap`                                 | Import |
+| `./f64-kernels.js`                   | `f64Unary`                                   | Import |
+| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`      | Import |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                   | Import |
+| `./complex-promotion.js`             | `logReal, logRealBase, powReal, nthRootReal` | Import |
 
 **Exports:**
 
@@ -10953,6 +10954,29 @@ graph LR
 **Exports:**
 
 - Constants: `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `prime`, `nextPrime`, `primePi`, `primeFactors`, `divisors`, `eulerPhi`, `divisorSigma`, `carmichaelLambda`, `moebiusMu`, `jacobiSymbol`, `chineseRemainder`, `lucasL`, `partitions`, `harmonicNumber`, `integerDigits`
+
+---
+
+### `functions/src/typed/complex-promotion.ts` - mathjs-compatible complex promotion for real scalar kernels in the typed layer.
+
+**Workspace Dependencies:**
+
+| Package                      | Import              |
+| ---------------------------- | ------------------- |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction` |
+
+**Internal Dependencies:**
+
+| File                       | Imports                          | Type               |
+| -------------------------- | -------------------------------- | ------------------ |
+| `../utils/number.js`       | `isInteger, isPowZeroAtInfinity` | Import             |
+| `../plain/number/index.js` | `nthRootNumber, powNumber`       | Import             |
+| `../factories/scope.js`    | `factoryScope`                   | Import             |
+| `../core/config.js`        | `ConfigOptions`                  | Import (type-only) |
+
+**Exports:**
+
+- Functions: `isPredictableMode`, `logReal`, `logRealBase`, `powReal`, `nthRootReal`
 
 ---
 
@@ -11672,6 +11696,7 @@ graph LR
 
 | File                                 | Imports                    | Type   |
 | ------------------------------------ | -------------------------- | ------ |
+| `./complex-promotion.js`             | `isPredictableMode`        | Import |
 | `./f64-kernels.js`                   | `f64Unary`                 | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
 
@@ -18765,17 +18790,17 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                  |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2` |
-| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                         |
-| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil`           |
-| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                    |
+| Package                           | Import                                                                                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                        |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
+| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                                   |
 
 **Exports:**
 
-- Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `asin`, `acos`, `atan`, `atan2`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
-- Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
+- Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
+- Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
 
 ---
 
@@ -19258,14 +19283,14 @@ graph LR
 | `functions/src/factories/index`                        | 244 files    | 13 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 204 files  |
 | `functions/src/index`                                  | 135 files    | 0 files    |
-| `functions/src/plain/number/index`                     | 9 files      | 53 files   |
-| `functions/src/core/config`                            | 0 files      | 56 files   |
+| `functions/src/plain/number/index`                     | 9 files      | 54 files   |
+| `functions/src/core/config`                            | 0 files      | 57 files   |
 | `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
-| `functions/src/utils/number`                           | 0 files      | 44 files   |
+| `functions/src/utils/number`                           | 0 files      | 45 files   |
 | `functions/src/utils/collection`                       | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -19792,10 +19817,10 @@ graph TD
         N341[cas]
         N342[centrality-restarts]
         N343[combinatorics]
-        N344[complex]
-        N345[dist-objects]
-        N346[distributions]
-        N347[...38 more]
+        N344[complex-promotion]
+        N345[complex]
+        N346[dist-objects]
+        N347[...39 more]
     end
 
     subgraph Functions/unit
@@ -20157,17 +20182,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1281   |
+| Total TypeScript Files  | 1282   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217471 |
-| Total Exports           | 6985   |
+| Total Lines of Code     | 217537 |
+| Total Exports           | 6990   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
 | Total Interfaces        | 600    |
-| Total Functions         | 2345   |
-| Total Type Guards       | 169    |
+| Total Functions         | 2346   |
+| Total Type Guards       | 170    |
 | Total Enums             | 0      |
-| Type-only Imports       | 643    |
+| Type-only Imports       | 644    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
