@@ -16,6 +16,7 @@ import {
   applyHouseholderRight,
 } from './common.js';
 import { applyGivensCols, givensRotation } from './givens.js';
+import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
  * Result of SVD decomposition
@@ -364,15 +365,15 @@ function completeOrthonormalBasis(cols: number[][], m: number): number[][] {
  * again with one-sided Jacobi SVD, because that method is correct for
  * rank-deficient input.
  *
- * @param matrix - Input matrix as a 2D array, or as a row-major
- *   `Float64Array`. A `Float64Array` must hold a square matrix.
+ * @param matrix - `DenseMatrix`, nested `number[][]`, square row-major
+ *   `Float64Array`, or `{ data, rows, cols }`.
  * @param options - Iteration limit, tolerances, and the `fullMatrices` flag.
  *   Default rank tolerance: 1e-10.
  * @returns The factors U, S, and V, and the numerical rank. For an empty
  *   input, all arrays are empty and the rank is 0.
  * @throws Error if a `Float64Array` length is not a perfect square.
  */
-export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {}): SVDResult {
+export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -380,23 +381,9 @@ export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {})
     rankTolerance = 1e-10,
   } = options;
 
-  // Convert to 2D array if needed
-  let A: number[][];
-  let m: number, n: number;
-
-  if (matrix instanceof Float64Array) {
-    // Assume square matrix
-    const size = Math.sqrt(matrix.length);
-    if (size !== Math.floor(size)) {
-      throw new Error('Float64Array must represent a square matrix');
-    }
-    m = n = size;
-    A = Array.from({ length: m }, (_, i) => Array.from({ length: n }, (_, j) => matrix[i * n + j]));
-  } else {
-    A = matrix;
-    m = A.length;
-    n = A[0]?.length || 0;
-  }
+  let A = decompositionInputToNestedArray(matrix);
+  let m = A.length;
+  let n = A[0]?.length || 0;
 
   if (m === 0 || n === 0) {
     return { U: [], S: [], V: [], rank: 0 };
@@ -548,7 +535,7 @@ export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {})
  * Compute only singular values (faster than full SVD)
  */
 export function singularValues(
-  matrix: number[][] | Float64Array,
+  matrix: DecompositionMatrixInput,
   options?: Omit<SVDOptions, 'fullMatrices'>
 ): number[] {
   return svd(matrix, { ...options }).S;
@@ -557,13 +544,13 @@ export function singularValues(
 /**
  * Compute the pseudoinverse (Moore-Penrose inverse) using SVD
  */
-export function pinv(matrix: number[][], options?: SVDOptions): number[][] {
-  const { U, S, V, rank } = svd(matrix, options);
+export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): number[][] {
+  const nested = decompositionInputToNestedArray(matrix);
+  const { U, S, V, rank } = svd(nested, options);
 
   if (rank === 0) {
-    // Zero matrix
-    const n = matrix[0]?.length || 0;
-    const m = matrix.length;
+    const m = nested.length;
+    const n = nested[0]?.length || 0;
     return Array.from({ length: n }, () => new Array(m).fill(0));
   }
 
@@ -598,11 +585,16 @@ export function pinv(matrix: number[][], options?: SVDOptions): number[][] {
  * Low-rank approximation using SVD
  * Keeps only the top r singular values
  */
-export function lowRankApprox(matrix: number[][], r: number, options?: SVDOptions): number[][] {
-  const { U, S, V } = svd(matrix, options);
+export function lowRankApprox(
+  matrix: DecompositionMatrixInput,
+  r: number,
+  options?: SVDOptions
+): number[][] {
+  const nested = decompositionInputToNestedArray(matrix);
+  const { U, S, V } = svd(nested, options);
 
-  const m = matrix.length;
-  const n = matrix[0].length;
+  const m = nested.length;
+  const n = nested[0]?.length ?? 0;
   const k = Math.min(r, S.length);
 
   // Reconstruct with top k singular values
@@ -624,7 +616,7 @@ export function lowRankApprox(matrix: number[][], r: number, options?: SVDOption
 /**
  * Compute condition number using SVD
  */
-export function cond(matrix: number[][], options?: SVDOptions): number {
+export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
   const S = singularValues(matrix, options);
 
   if (S.length === 0 || S[S.length - 1] === 0) {
@@ -638,7 +630,7 @@ export function cond(matrix: number[][], options?: SVDOptions): number {
  * Compute matrix norm using SVD
  * Returns the spectral norm (largest singular value)
  */
-export function norm2(matrix: number[][], options?: SVDOptions): number {
+export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
   const S = singularValues(matrix, options);
   return S[0] || 0;
 }
@@ -647,9 +639,10 @@ export function norm2(matrix: number[][], options?: SVDOptions): number {
  * Compute Frobenius norm using SVD
  * Equals sqrt(sum of squared singular values)
  */
-export function normFro(matrix: number[][]): number {
+export function normFro(matrix: DecompositionMatrixInput): number {
+  const nested = decompositionInputToNestedArray(matrix);
   let sum = 0;
-  for (const row of matrix) {
+  for (const row of nested) {
     for (const val of row) {
       sum += val * val;
     }

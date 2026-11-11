@@ -42,6 +42,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
+import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import {
   logReal,
   logRealBase,
@@ -255,6 +256,7 @@ interface UnitLike {
   clone(): UnitLike;
   multiply(other: unknown): unknown;
   divide(other: unknown): unknown;
+  divideInto(numerator: unknown): unknown;
   abs(): unknown;
 }
 
@@ -313,80 +315,93 @@ const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
  * add(new Complex(1, 2), new Complex(3, 4));   // Complex(4, 6)
  * add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
  * add(float64A, float64B);                     // Float64Array, synchronous
+ * add(true, 1);                                // 2 (boolean coerces to 0/1)
  * ```
+ *
+ * `null`, `undefined`, strings, symbols, functions, and objects that are not a
+ * numeric type, Unit, matrix, array, or typed array throw
+ * `TypeError: add: unexpected type …`. A numeric string is not coerced to Complex.
+ * `bigint` mixed with `number` returns a `number`, not a Fraction.
  */
-export const add = mathTyped('add', {
-  'number, number': (a: f64, b: f64): f64 => a + b,
+export const add = withBinaryScalarGuards(
+  'add',
+  mathTyped('add', {
+    'number, number': (a: f64, b: f64): f64 => a + b,
 
-  'bigint, bigint': (a: i64, b: i64): i64 => a + b,
+    'bigint, bigint': (a: i64, b: i64): i64 => a + b,
 
-  'Complex, Complex': (a: Complex, b: Complex): Complex => a.add(b),
+    'bigint, number': (a: i64, b: f64): f64 => Number(a) + b,
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.add(b),
+    'number, bigint': (a: f64, b: i64): f64 => a + Number(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.add(b),
+    'Complex, Complex': (a: Complex, b: Complex): Complex => a.add(b),
 
-  // Unit arithmetic (mathjs parity): same-dimension units add (e.g. 5 cm + 3 mm).
-  'Unit, Unit': (a: Unit, b: Unit): Unit => unitAdd(a, b) as Unit,
+    'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.add(b),
 
-  // Dual numbers (forward-mode AD).
-  'Dual, Dual': (a: Dual, b: Dual): Dual => a.add(b),
-  'Dual, number': (a: Dual, b: f64): Dual => a.add(Dual.constant(b)),
-  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).add(b),
+    'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.add(b),
 
-  // Mixed type operations (auto-coercion via conversions)
-  'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
-  'Complex, number': (a: Complex, b: f64): Complex => a.add(Complex.fromNumber(b)),
+    // Unit arithmetic (mathjs parity): same-dimension units add (e.g. 5 cm + 3 mm).
+    'Unit, Unit': (a: Unit, b: Unit): Unit => unitAdd(a, b) as Unit,
 
-  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).add(b),
-  'Fraction, number': (a: Fraction, b: f64): Fraction => a.add(Fraction.fromNumber(b)),
+    // Dual numbers (forward-mode AD).
+    'Dual, Dual': (a: Dual, b: Dual): Dual => a.add(b),
+    'Dual, number': (a: Dual, b: f64): Dual => a.add(Dual.constant(b)),
+    'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).add(b),
 
-  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).add(b),
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.add(BigNumber.fromNumber(b)),
+    // Mixed type operations (auto-coercion via conversions)
+    'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
+    'Complex, number': (a: Complex, b: f64): Complex => a.add(Complex.fromNumber(b)),
 
-  // Float64Array addition (synchronous)
-  'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
-    f64Binary(a, b, (x, y) => x + y),
+    'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).add(b),
+    'Fraction, number': (a: Fraction, b: f64): Fraction => a.add(Fraction.fromNumber(b)),
 
-  // Element-wise addition over plain (possibly nested / N-D) arrays, with scalar
-  // broadcast. Leaves fold through the binary `add`, so number / Complex /
-  // Fraction / BigNumber elements all work.
-  'Array, Array': (a: unknown[], b: unknown[]): unknown =>
-    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
-  'Array, number': (a: unknown[], b: f64): unknown =>
-    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
-  'number, Array': (a: f64, b: unknown[]): unknown =>
-    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+    'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).add(b),
+    'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.add(BigNumber.fromNumber(b)),
 
-  // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
-  // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
-  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
-  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
-  'DenseMatrix, number': (a: unknown, b: f64): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
-  'number, DenseMatrix': (a: f64, b: unknown): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
-  'SparseMatrix, number': (a: unknown, b: f64): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
-  'number, SparseMatrix': (a: f64, b: unknown): unknown =>
-    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    // Float64Array addition (synchronous)
+    'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
+      f64Binary(a, b, (x, y) => x + y),
 
-  // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
-  // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
-  // only number. (Needed e.g. by polynomialRoot's `add(b, C, …)` where C is a
-  // complex cube root.) NOTE: this typed-function fork delivers the variadic
-  // rest as a single packed array argument, not via JS spread.
-  'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
-    const op = add as unknown as (x: unknown, y: unknown) => unknown;
-    let result = op(a, b);
-    for (let i = 0; i < rest.length; i++) {
-      result = op(result, rest[i]);
-    }
-    return result;
-  },
-});
+    // Element-wise addition over plain (possibly nested / N-D) arrays, with scalar
+    // broadcast. Leaves fold through the binary `add`, so number / Complex /
+    // Fraction / BigNumber elements all work.
+    'Array, Array': (a: unknown[], b: unknown[]): unknown =>
+      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+    'Array, number': (a: unknown[], b: f64): unknown =>
+      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+    'number, Array': (a: f64, b: unknown[]): unknown =>
+      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+
+    // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
+    // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
+    'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'DenseMatrix, number': (a: unknown, b: f64): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'number, DenseMatrix': (a: f64, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'SparseMatrix, number': (a: unknown, b: f64): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'number, SparseMatrix': (a: f64, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+
+    // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
+    // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
+    // only number. (Needed e.g. by polynomialRoot's `add(b, C, …)` where C is a
+    // complex cube root.) NOTE: this typed-function fork delivers the variadic
+    // rest as a single packed array argument, not via JS spread.
+    'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
+      const op = add as unknown as (x: unknown, y: unknown) => unknown;
+      let result = op(a, b);
+      for (let i = 0; i < rest.length; i++) {
+        result = op(result, rest[i]);
+      }
+      return result;
+    },
+  })
+);
 addForNumberPath.fn = add;
 
 // =============================================================================
@@ -462,102 +477,120 @@ subtractForNumberPath.fn = subtract;
 
 /**
  * Polymorphic multiplication function. The Float64Array signature is synchronous.
+ * Invalid operands throw `TypeError: multiply: unexpected type …` (same rules as `add`).
+ * Booleans coerce to 0/1. `bigint` mixed with `number` returns a `number`.
  */
-export const multiply = mathTyped('multiply', {
-  'number, number': (a: f64, b: f64): f64 => a * b,
+export const multiply = withBinaryScalarGuards(
+  'multiply',
+  mathTyped('multiply', {
+    'number, number': (a: f64, b: f64): f64 => a * b,
 
-  'bigint, bigint': (a: i64, b: i64): i64 => a * b,
+    'bigint, bigint': (a: i64, b: i64): i64 => a * b,
 
-  'Complex, Complex': (a: Complex, b: Complex): Complex => a.multiply(b),
+    'bigint, number': (a: i64, b: f64): f64 => Number(a) * b,
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.multiply(b),
+    'number, bigint': (a: f64, b: i64): f64 => a * Number(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.multiply(b),
+    'Complex, Complex': (a: Complex, b: Complex): Complex => a.multiply(b),
 
-  // Unit multiplication / scaling (mathjs parity).
-  'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
-  'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
-  'number, Unit': (a: f64, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.multiply(b),
 
-  // Dual numbers (forward-mode AD).
-  'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
-  'Dual, number': (a: Dual, b: f64): Dual => a.mul(Dual.constant(b)),
-  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).mul(b),
+    'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.multiply(b),
 
-  // Matrix × matrix (2-D arrays) routed through the native DenseMatrix +
-  // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
-  // Previously `multiply(2DArray, 2DArray)` threw; this is additive. Non-2-D
-  // Array operands throw a clear message pointing at the right primitive.
-  'Array, Array': (a: unknown[], b: unknown[]): number[][] => {
-    if (!Array.isArray(a[0]) || !Array.isArray(b[0])) {
-      throw new TypeError(
-        'multiply(Array, Array) requires two 2-D matrices; use dot() for vector dot products'
-      );
-    }
-    const A = DenseMatrix.fromArray(a as number[][]);
-    const B = DenseMatrix.fromArray(b as number[][]);
-    return backendManager.multiply(A, B).toArray();
-  },
+    // Unit multiplication / scaling (mathjs parity).
+    'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
+    'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
+    'number, Unit': (a: f64, b: Unit): Unit => unitMul(b, a) as Unit,
+    // Real scalars must be explicit. A missing signature lets Fraction/BigNumber
+    // convert to Complex and hit `Complex, Unit`, which stores a zero-imaginary Complex
+    // and formats as `(2) m` instead of `2 m`.
+    'Fraction, Unit': (a: Fraction, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, Fraction': (a: Unit, b: Fraction): Unit => unitMul(a, b) as Unit,
+    'BigNumber, Unit': (a: BigNumber, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, BigNumber': (a: Unit, b: BigNumber): Unit => unitMul(a, b) as Unit,
+    'Complex, Unit': (a: Complex, b: Unit): Unit => unitMul(b, a) as Unit,
+    'Unit, Complex': (a: Unit, b: Complex): Unit => unitMul(a, b) as Unit,
 
-  // Matrix × matrix on boxed matrices returns a boxed matrix (mathjs parity) —
-  // NOT a bare array. The `Array, Array` path above returns an array, and
-  // reaching it via the Matrix~>Array conversion would strip the matrix type
-  // (breaking callers like `sylvester` that call `.toArray()` on the product).
-  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-    const A = DenseMatrix.fromArray((a as { toArray(): number[][] }).toArray());
-    const B = DenseMatrix.fromArray((b as { toArray(): number[][] }).toArray());
-    return new MathJSDenseMatrix(backendManager.multiply(A, B).toArray());
-  },
+    // Dual numbers (forward-mode AD).
+    'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
+    'Dual, number': (a: Dual, b: f64): Dual => a.mul(Dual.constant(b)),
+    'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).mul(b),
 
-  'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
-  'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
+    // Matrix × matrix (2-D arrays) routed through the native DenseMatrix +
+    // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
+    // Previously `multiply(2DArray, 2DArray)` threw; this is additive. Non-2-D
+    // Array operands throw a clear message pointing at the right primitive.
+    'Array, Array': (a: unknown[], b: unknown[]): number[][] => {
+      if (!Array.isArray(a[0]) || !Array.isArray(b[0])) {
+        throw new TypeError(
+          'multiply(Array, Array) requires two 2-D matrices; use dot() for vector dot products'
+        );
+      }
+      const A = DenseMatrix.fromArray(a as number[][]);
+      const B = DenseMatrix.fromArray(b as number[][]);
+      return backendManager.multiply(A, B).toArray();
+    },
 
-  'number, Fraction': (a: f64, b: Fraction): Fraction => b.multiply(Fraction.fromNumber(a)),
-  'Fraction, number': (a: Fraction, b: f64): Fraction => a.multiply(Fraction.fromNumber(b)),
+    // Matrix × matrix on boxed matrices returns a boxed matrix (mathjs parity) —
+    // NOT a bare array. The `Array, Array` path above returns an array, and
+    // reaching it via the Matrix~>Array conversion would strip the matrix type
+    // (breaking callers like `sylvester` that call `.toArray()` on the product).
+    'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
+      const A = DenseMatrix.fromArray((a as { toArray(): number[][] }).toArray());
+      const B = DenseMatrix.fromArray((b as { toArray(): number[][] }).toArray());
+      return new MathJSDenseMatrix(backendManager.multiply(A, B).toArray());
+    },
 
-  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => b.multiply(BigNumber.fromNumber(a)),
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.multiply(BigNumber.fromNumber(b)),
+    'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
+    'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
 
-  // Float64Array element-wise multiplication (synchronous)
-  'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
-    f64Binary(a, b, (x, y) => x * y),
+    'number, Fraction': (a: f64, b: Fraction): Fraction => b.multiply(Fraction.fromNumber(a)),
+    'Fraction, number': (a: Fraction, b: f64): Fraction => a.multiply(Fraction.fromNumber(b)),
 
-  // Float64Array scaled by a number (synchronous)
-  'Float64Array, number': (a: Float64Array, scalar: f64): Float64Array =>
-    f64Unary(a, (x) => x * scalar),
+    'number, BigNumber': (a: f64, b: BigNumber): BigNumber => b.multiply(BigNumber.fromNumber(a)),
+    'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.multiply(BigNumber.fromNumber(b)),
 
-  'number, Float64Array': (scalar: f64, a: Float64Array): Float64Array =>
-    f64Unary(a, (x) => scalar * x),
+    // Float64Array element-wise multiplication (synchronous)
+    'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
+      f64Binary(a, b, (x, y) => x * y),
 
-  // Scalar × collection = element-wise scaling (mathjs parity). Matrix × matrix
-  // stays matrix multiplication — the `Array, Array` matmul above (reached for
-  // Matrix operands via the Matrix~>Array conversion); element-wise product of
-  // two collections is `dotMultiply`.
-  'Array, number': (a: unknown[], b: f64): unknown =>
-    elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-  'number, Array': (a: f64, b: unknown[]): unknown =>
-    elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-  'DenseMatrix, number': (a: unknown, b: f64): unknown =>
-    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-  'number, DenseMatrix': (a: f64, b: unknown): unknown =>
-    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-  'SparseMatrix, number': (a: unknown, b: f64): unknown =>
-    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-  'number, SparseMatrix': (a: f64, b: unknown): unknown =>
-    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    // Float64Array scaled by a number (synchronous)
+    'Float64Array, number': (a: Float64Array, scalar: f64): Float64Array =>
+      f64Unary(a, (x) => x * scalar),
 
-  // Variadic multiplication over ANY types (mathjs parity); folds pairwise
-  // through the binary `multiply`. See the variadic-add note above re: types and
-  // the packed-array rest shape.
-  'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
-    const op = multiply as unknown as (x: unknown, y: unknown) => unknown;
-    let result = op(a, b);
-    for (let i = 0; i < rest.length; i++) {
-      result = op(result, rest[i]);
-    }
-    return result;
-  },
-});
+    'number, Float64Array': (scalar: f64, a: Float64Array): Float64Array =>
+      f64Unary(a, (x) => scalar * x),
+
+    // Scalar × collection = element-wise scaling (mathjs parity). Matrix × matrix
+    // stays matrix multiplication — the `Array, Array` matmul above (reached for
+    // Matrix operands via the Matrix~>Array conversion); element-wise product of
+    // two collections is `dotMultiply`.
+    'Array, number': (a: unknown[], b: f64): unknown =>
+      elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    'number, Array': (a: f64, b: unknown[]): unknown =>
+      elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    'DenseMatrix, number': (a: unknown, b: f64): unknown =>
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    'number, DenseMatrix': (a: f64, b: unknown): unknown =>
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    'SparseMatrix, number': (a: unknown, b: f64): unknown =>
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+    'number, SparseMatrix': (a: f64, b: unknown): unknown =>
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+
+    // Variadic multiplication over ANY types (mathjs parity); folds pairwise
+    // through the binary `multiply`. See the variadic-add note above re: types and
+    // the packed-array rest shape.
+    'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
+      const op = multiply as unknown as (x: unknown, y: unknown) => unknown;
+      let result = op(a, b);
+      for (let i = 0; i < rest.length; i++) {
+        result = op(result, rest[i]);
+      }
+      return result;
+    },
+  })
+);
 multiplyForNumberPath.fn = multiply;
 
 // =============================================================================
@@ -581,6 +614,14 @@ export const divide = mathTyped('divide', {
   // Unit division / scaling (mathjs parity). Unit ÷ Unit may be dimensionless.
   'Unit, Unit': (a: Unit, b: Unit): Unit => unitDiv(a, b) as Unit,
   'Unit, number': (a: Unit, b: f64): Unit => unitDiv(a, b) as Unit,
+  // Same conversion trap as multiply: without these, `1 / (2 ohm)` becomes Complex.
+  'number, Unit': (a: f64, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Fraction, Unit': (a: Fraction, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, Fraction': (a: Unit, b: Fraction): Unit => unitDiv(a, b) as Unit,
+  'BigNumber, Unit': (a: BigNumber, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, BigNumber': (a: Unit, b: BigNumber): Unit => unitDiv(a, b) as Unit,
+  'Complex, Unit': (a: Complex, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, Complex': (a: Unit, b: Complex): Unit => unitDiv(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.div(b),

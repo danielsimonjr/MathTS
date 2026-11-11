@@ -14,8 +14,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      40 |
 | Parallel only (worker pool) |      17 |
-| JS-only                     |     161 |
-| **Total**                   | **218** |
+| JS-only                     |     159 |
+| **Total**                   | **216** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 40 wasm-routed functions, **38 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
 
@@ -90,7 +90,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Module        | WASM | Parallel | JS-only |
 | ------------- | ---: | -------: | ------: |
-| arithmetic    |    9 |        3 |      33 |
+| arithmetic    |    9 |        3 |      31 |
 | bitwise       |    0 |        0 |       7 |
 | combinatorics |    0 |        0 |      21 |
 | complex       |    0 |        0 |       4 |

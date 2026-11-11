@@ -1453,6 +1453,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DecompositionMatrixInput": {
+        "kind": "type"
+      },
       "DenseMatrix": {
         "kind": "function"
       },
@@ -1523,6 +1526,9 @@
         "kind": "type"
       },
       "OperationType": {
+        "kind": "type"
+      },
+      "PackedMatrixDescriptor": {
         "kind": "type"
       },
       "ParallelBackend": {
@@ -1634,6 +1640,15 @@
         "kind": "function"
       },
       "createWASMBackend": {
+        "kind": "function"
+      },
+      "decompositionInputToDenseMatrix": {
+        "kind": "function"
+      },
+      "decompositionInputToNestedArray": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "destroyGlobalGPU": {
