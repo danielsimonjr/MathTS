@@ -28,50 +28,50 @@ import { createParse, createParserClass } from '@danielsimonjr/mathts-parser';
 
 ### 2. Grammar corpus (functions `parse` / `evaluate`)
 
-| input | parse | toString / toTex | evaluate |
-| --- | --- | --- | --- |
-| `2+3*4` | OperatorNode | `2 + 3 * 4` / `2+3\cdot4` | **14** |
-| `2^3^2` | ok | TeX `{2}^{{3}^{2}}` | **512** (right assoc, good) |
-| `-2^2` | ok | `-2 ^ 2` | **-4** (unary minus vs power, matches mathjs) |
-| `2*-3` | ok | | **-6** |
-| `2(3+4)`, `2x`, `x y` | implicit multiply | `2 (3 + 4)` | 14; `2x` needs scope |
-| `5!` | ok | `5!` | **120** |
-| `[[1,2],[3,4]]` | ArrayNode | bmatrix TeX | nested array |
-| `f(x) = x^2` | FunctionAssignmentNode | TeX `\mathrm{f}\left(x\right)={ x}^{2}` | **Security: function definitions disabled** unless `{ unsafe: true }` → then `f(3)=9` [#725](https://github.com/danielsimonjr/MathTS/issues/725) |
-| `x=3` | AssignmentNode | | same security gate |
-| `2 inch`, `2 * inch` | ok | | Unit 2 inch; `2 inch to cm` → **5.08 cm** |
-| `π`, `sin(π/2)` | SymbolNode `π` | TeX uses `π` | **Undefined symbol "π"**; `pi` works [#720](https://github.com/danielsimonjr/MathTS/issues/720) |
-| `√2` | **Syntax error (char 1)** | — | — (mathjs same) |
-| `1 + * 2`, `(1+2`, `x[1` | SyntaxError with **char index** | — | good |
-| `1e` | `1 e` | | **2.718…** [#723](https://github.com/danielsimonjr/MathTS/issues/723) |
-| `2**3` | Value expected (char 3) | | mathjs same |
-| `x==y==z` | RelationalNode | TeX `x= y= z` (equals, not ==) | unbound |
-| `a ? b : c` | ConditionalNode | cases TeX | unbound |
-| `1; 2` | BlockNode | | **2** |
-| `sum(i, 1, 3, i)` | FunctionNode | | **4+2i** [#721](https://github.com/danielsimonjr/MathTS/issues/721) |
+| input                    | parse                           | toString / toTex                        | evaluate                                                                                                                                         |
+| ------------------------ | ------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `2+3*4`                  | OperatorNode                    | `2 + 3 * 4` / `2+3\cdot4`               | **14**                                                                                                                                           |
+| `2^3^2`                  | ok                              | TeX `{2}^{{3}^{2}}`                     | **512** (right assoc, good)                                                                                                                      |
+| `-2^2`                   | ok                              | `-2 ^ 2`                                | **-4** (unary minus vs power, matches mathjs)                                                                                                    |
+| `2*-3`                   | ok                              |                                         | **-6**                                                                                                                                           |
+| `2(3+4)`, `2x`, `x y`    | implicit multiply               | `2 (3 + 4)`                             | 14; `2x` needs scope                                                                                                                             |
+| `5!`                     | ok                              | `5!`                                    | **120**                                                                                                                                          |
+| `[[1,2],[3,4]]`          | ArrayNode                       | bmatrix TeX                             | nested array                                                                                                                                     |
+| `f(x) = x^2`             | FunctionAssignmentNode          | TeX `\mathrm{f}\left(x\right)={ x}^{2}` | **Security: function definitions disabled** unless `{ unsafe: true }` → then `f(3)=9` [#725](https://github.com/danielsimonjr/MathTS/issues/725) |
+| `x=3`                    | AssignmentNode                  |                                         | same security gate                                                                                                                               |
+| `2 inch`, `2 * inch`     | ok                              |                                         | Unit 2 inch; `2 inch to cm` → **5.08 cm**                                                                                                        |
+| `π`, `sin(π/2)`          | SymbolNode `π`                  | TeX uses `π`                            | **Undefined symbol "π"**; `pi` works [#720](https://github.com/danielsimonjr/MathTS/issues/720)                                                  |
+| `√2`                     | **Syntax error (char 1)**       | —                                       | — (mathjs same)                                                                                                                                  |
+| `1 + * 2`, `(1+2`, `x[1` | SyntaxError with **char index** | —                                       | good                                                                                                                                             |
+| `1e`                     | `1 e`                           |                                         | **2.718…** [#723](https://github.com/danielsimonjr/MathTS/issues/723)                                                                            |
+| `2**3`                   | Value expected (char 3)         |                                         | mathjs same                                                                                                                                      |
+| `x==y==z`                | RelationalNode                  | TeX `x= y= z` (equals, not ==)          | unbound                                                                                                                                          |
+| `a ? b : c`              | ConditionalNode                 | cases TeX                               | unbound                                                                                                                                          |
+| `1; 2`                   | BlockNode                       |                                         | **2**                                                                                                                                            |
+| `sum(i, 1, 3, i)`        | FunctionNode                    |                                         | **4+2i** [#721](https://github.com/danielsimonjr/MathTS/issues/721)                                                                              |
 
 `evaluate('2x', { x: 5 })` is 10. Parenthesis nesting: **124** evaluates to 1; **125** `expression exceeds nesting limit (char 125)` while README says 125 [#722](https://github.com/danielsimonjr/MathTS/issues/722). `toHTML()` on `2x+3!` looks fine.
 
 ### 3. CAS vs SymPy 1.14
 
-| op | MathTS | SymPy |
-| --- | --- | --- |
-| `simplify('x^2+2*x+1')` | unchanged | `(x + 1)**2` |
-| `fullSimplify` / `casSimplify` | unchanged | same |
-| `expand('(x+1)^2')` | `1 + 2*x + 1*x^2` | `x**2 + 2*x + 1` |
-| `factor('x^2+2*x+1')` | `(x + 1)*(x + 1)` | `(x + 1)**2` |
-| `derivative('sin(x)*x','x')` | `cos(x) * x + sin(x)` | `x*cos(x) + sin(x)` **match** |
-| `casDerivative(...)` | **`d/dx(sin(x)*x)`** | — |
-| `integrate('x^2','x')` | `x^3/3` | match |
-| `integrate('sin(x)')` | `-cos(x)` | match |
-| `integrate('1/x')` | **`log(x)`** | `log(x)` |
-| `symbolicIntegral('1/x')` | **`1 * log(abs(x))`** | — |
-| `integrate('exp(-x^2)')` | unevaluated `integral(...)` | erf form |
-| `solve('x^2-2')` | **±1.4142135623730951** | `±sqrt(2)` |
-| `solve('x^2+1')` | `i, -i` exact | match-ish |
-| `solve('sin(x)=0')` | **63 floats** ~[-31π,31π] | `k π` |
-| `substitute('x^2+y',{x:2})` | **`2^2+y`** | `4+y` |
-| `rationalize('1/x+1/y')` | `(y + x) / (x * y)` | match |
+| op                             | MathTS                      | SymPy                         |
+| ------------------------------ | --------------------------- | ----------------------------- |
+| `simplify('x^2+2*x+1')`        | unchanged                   | `(x + 1)**2`                  |
+| `fullSimplify` / `casSimplify` | unchanged                   | same                          |
+| `expand('(x+1)^2')`            | `1 + 2*x + 1*x^2`           | `x**2 + 2*x + 1`              |
+| `factor('x^2+2*x+1')`          | `(x + 1)*(x + 1)`           | `(x + 1)**2`                  |
+| `derivative('sin(x)*x','x')`   | `cos(x) * x + sin(x)`       | `x*cos(x) + sin(x)` **match** |
+| `casDerivative(...)`           | **`d/dx(sin(x)*x)`**        | —                             |
+| `integrate('x^2','x')`         | `x^3/3`                     | match                         |
+| `integrate('sin(x)')`          | `-cos(x)`                   | match                         |
+| `integrate('1/x')`             | **`log(x)`**                | `log(x)`                      |
+| `symbolicIntegral('1/x')`      | **`1 * log(abs(x))`**       | —                             |
+| `integrate('exp(-x^2)')`       | unevaluated `integral(...)` | erf form                      |
+| `solve('x^2-2')`               | **±1.4142135623730951**     | `±sqrt(2)`                    |
+| `solve('x^2+1')`               | `i, -i` exact               | match-ish                     |
+| `solve('sin(x)=0')`            | **63 floats** ~[-31π,31π]   | `k π`                         |
+| `substitute('x^2+y',{x:2})`    | **`2^2+y`**                 | `4+y`                         |
+| `rationalize('1/x+1/y')`       | `(y + x) / (x * y)`         | match                         |
 
 Issues: [#716](https://github.com/danielsimonjr/MathTS/issues/716) simplify, [#717](https://github.com/danielsimonjr/MathTS/issues/717) two integrals, [#718](https://github.com/danielsimonjr/MathTS/issues/718) casDerivative, [#719](https://github.com/danielsimonjr/MathTS/issues/719) solve, [#724](https://github.com/danielsimonjr/MathTS/issues/724) substitute. `derivative('abs(x)','x')` is `abs(x)/x`; at `x=0` that evaluates to **NaN** (not a filed crash; expected distributionally messy).
 
@@ -99,21 +99,21 @@ See the JSON. Headline: **scoped `evaluate` median 0.0036 ms vs mathjs 0.012 ms 
 
 ## Findings
 
-| # | sev | issue |
-| --- | --- | --- |
-| 1 | P0 | [#714](https://github.com/danielsimonjr/MathTS/issues/714) `new BigNumber(1)` crash |
-| 2 | P1 | [#715](https://github.com/danielsimonjr/MathTS/issues/715) parser/evaluator factories unusable from README |
-| 3 | P1 | [#716](https://github.com/danielsimonjr/MathTS/issues/716) simplify no-op; factor not a square |
-| 4 | P1 | [#717](https://github.com/danielsimonjr/MathTS/issues/717) `integrate` vs `symbolicIntegral` on 1/x |
-| 5 | P1 | [#718](https://github.com/danielsimonjr/MathTS/issues/718) `casDerivative` unevaluated |
-| 6 | P1 | [#719](https://github.com/danielsimonjr/MathTS/issues/719) `solve` numeric, not ±√2 / kπ |
-| 7 | P1 | [#720](https://github.com/danielsimonjr/MathTS/issues/720) Unicode `π` parse/eval split |
-| 8 | P1 | [#721](https://github.com/danielsimonjr/MathTS/issues/721) `sum(i,1,3,i)` → 4+2i |
-| 9 | P2 | [#722](https://github.com/danielsimonjr/MathTS/issues/722) nesting 125 vs 124 |
-| 10 | P2 | [#723](https://github.com/danielsimonjr/MathTS/issues/723) `1e` → e |
-| 11 | P2 | [#724](https://github.com/danielsimonjr/MathTS/issues/724) substitute no fold |
-| 12 | P2 | [#725](https://github.com/danielsimonjr/MathTS/issues/725) assignment sandbox vs README |
-| 13 | P2 | [#726](https://github.com/danielsimonjr/MathTS/issues/726) GPU types + `evaluate: unknown` |
+| #   | sev | issue                                                                                                      |
+| --- | --- | ---------------------------------------------------------------------------------------------------------- |
+| 1   | P0  | [#714](https://github.com/danielsimonjr/MathTS/issues/714) `new BigNumber(1)` crash                        |
+| 2   | P1  | [#715](https://github.com/danielsimonjr/MathTS/issues/715) parser/evaluator factories unusable from README |
+| 3   | P1  | [#716](https://github.com/danielsimonjr/MathTS/issues/716) simplify no-op; factor not a square             |
+| 4   | P1  | [#717](https://github.com/danielsimonjr/MathTS/issues/717) `integrate` vs `symbolicIntegral` on 1/x        |
+| 5   | P1  | [#718](https://github.com/danielsimonjr/MathTS/issues/718) `casDerivative` unevaluated                     |
+| 6   | P1  | [#719](https://github.com/danielsimonjr/MathTS/issues/719) `solve` numeric, not ±√2 / kπ                   |
+| 7   | P1  | [#720](https://github.com/danielsimonjr/MathTS/issues/720) Unicode `π` parse/eval split                    |
+| 8   | P1  | [#721](https://github.com/danielsimonjr/MathTS/issues/721) `sum(i,1,3,i)` → 4+2i                           |
+| 9   | P2  | [#722](https://github.com/danielsimonjr/MathTS/issues/722) nesting 125 vs 124                              |
+| 10  | P2  | [#723](https://github.com/danielsimonjr/MathTS/issues/723) `1e` → e                                        |
+| 11  | P2  | [#724](https://github.com/danielsimonjr/MathTS/issues/724) substitute no fold                              |
+| 12  | P2  | [#725](https://github.com/danielsimonjr/MathTS/issues/725) assignment sandbox vs README                    |
+| 13  | P2  | [#726](https://github.com/danielsimonjr/MathTS/issues/726) GPU types + `evaluate: unknown`                 |
 
 Intended labels on every body: `dogfood` + `bug|api|perf|docs|packaging` + `P0|P1|P2` + `persona:symbolic-user` (token cannot apply labels).
 
