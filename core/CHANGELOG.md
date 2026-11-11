@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.26.0
+
+### Minor Changes
+
+- 2f73d66: Add a deterministic mode (issue 380). `setDeterministic(true)` from `@danielsimonjr/mathts-core` (or `config({ deterministic: true })` from functions) makes results bit-identical whether or not the WASM tier is loaded: only the WASM kernels measured bit-identical to JS (`abs` on a `Float64Array`) still run, and implicit WebGPU, worker-pool parallelism, the integration and sampling fan-outs, and the WASM matrix backend are skipped. See `docs/determinism.md`.
+
 ## 0.25.3
 
 ### Patch Changes
