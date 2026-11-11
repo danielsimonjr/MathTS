@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan **group-by-group**. Each group is one PR. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Close all 139 open MathTS `dogfood` GitHub issues at root cause, one PR per group, P0 groups first.
+**Goal:** Close all 139 open MathTS `dogfood` GitHub issues at root cause, one PR per group, P0 groups first. Review (2026-11-11) split three clusters, so there are 36 groups. G01–G11 stay the P0 wave.
 
 **Architecture:** Issues were clustered by shared dispatch tables, types, and packages on `main` (2026-11-11). Builders implement only their group. Reviewer (grok-4.7) gates each PR against this plan's root-cause lines and the spec.
 
@@ -23,6 +23,7 @@
 - TDD: write the issue's exact repro as a failing test, confirm red, implement, confirm green, changeset, commit.
 - Packages are pre-1.0: breaking change = **minor** changeset naming old vs new; otherwise patch.
 - Do not set `RELEASES_ENABLED`. Do not tag. Do not `npm publish`. Do not merge the version PR.
+- After the PR is open, poll `gh pr checks <PR> --watch`. Do not end the run while any check is pending. Do not merge.
 - Import extensions `.js` except `tensor/src/` bare imports.
 - Float32/Float64 copies: `new Float64Array(x)`, never `TypedArray.from`.
 - WASM SHA-384, expression sandbox (`getSafeProperty`), WorkerPool `timeoutMs` must not regress.
@@ -30,11 +31,13 @@
 
 ## File map (by wave)
 
-| Wave | Groups  | Packages                                                                    |
-| ---- | ------- | --------------------------------------------------------------------------- |
-| P0   | G01–G11 | functions, compat, core, parallel, matrix, autograd, numbers                |
-| P1   | G12–G27 | parallel, gpu, autograd, tensor, compat, expression, units, plot, packaging |
-| P2   | G28–G36 | docs, plot, workbook, remaining API polish                                  |
+| Wave | Groups                 | Packages                                                                    |
+| ---- | ---------------------- | --------------------------------------------------------------------------- |
+| P0   | G01–G11                | functions, compat, core, parallel, matrix, autograd, numbers                |
+| P1   | G12–G27, G34, G35, G36 | parallel, gpu, autograd, tensor, compat, expression, units, plot, packaging |
+| P2   | G28–G33                | docs, plot, workbook, remaining API polish                                  |
+
+Build order is the dependency order at the bottom, not numeric id order. G34–G36 are P1 groups added in review so a P1 issue is not left in a P2 group and so tensor/API clusters stay one root cause per PR.
 
 ---
 
@@ -64,7 +67,9 @@
 - `compat/src/shims.ts:242` `asin`/`acos`/`atan` call `Math.asin` and `create(all)` prefers those shims over `functions.asin`.
 - Typed/factory `log`/`pow`/`nthRoot`/`acosh` use `Math.log` / `Math.pow` / `Math.acosh` without a Complex branch (`functions/src/typed/` trigonometry + arithmetic; `nthRoot` lacks the odd-real branch that `cbrt` already has).
 
-**Design:** Delete or stop installing inverse-trig shims that shadow functions. Centralize “if the real JS math is NaN and the input is real, promote to Complex” in one helper used by `log`, `pow`, `nthRoot`, `asin`, `acos`, `atan`, `acosh`, `atanh`. Match mathjs principal values (`log(-1) = iπ`, `pow(-8,1/3)` Complex, `nthRoot(-8,3) = -2` real odd root).
+**Design:** #728 is the compat override, not a missing `functions` kernel. `asin`/`acos` in `functions/src/typed/trigonometry.ts` already return `Complex` for real inputs outside `[-1, 1]`. `compat/src/index.ts` installs `shims.asin` / `acos` / `atan` (`shims.ts:242` calls `Math.asin`). Stop installing those shims; point `create(all)` at the functions implementations. Do not add a second complex branch inside the shim.
+
+#729 is the number kernels in `functions/src/typed/arithmetic.ts` (`log` ~835, `pow` ~666, `nthRoot` ~808) and `acosh` (`trigonometry.ts`, `Math.acosh`). Branch on the input domain **before** calling `Math.*`. `log(x)` for `x < 0` is principal `Complex` (`log(-1) = iπ`); `x === 0` stays `-Infinity`. `pow` of a negative base and a non-integer exponent is principal `Complex`. `nthRoot(-8, 3)` is the real odd root `-2` (same sign rule `cbrt` already uses). Do **not** implement nthRoot as "if `Math.pow` is NaN, wrap as Complex" — that returns the principal complex root and fails the issue. `atanh(|x|>1)` follows the same domain split as `acosh(x<1)`.
 
 **Tests:**
 
@@ -96,10 +101,10 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 **Root cause:**
 
-- Typed `sin`/`cos`/`tan` register `number | Complex | BigNumber | …` but not `Unit` (`functions/src/typed/` trig). `evaluate("sin(90 deg)")` therefore throws typed-function.
-- `multiply` signatures omit `Complex, Unit` / `Unit, Complex` even though scalar multiply documents them (`functions` multiply factory + typed arithmetic).
+- Typed `sin`/`cos`/`tan` in `functions/src/typed/trigonometry.ts` have no `Unit` signature, so `evaluate("sin(90 deg)")` throws typed-function. That part is right.
+- Public `multiply` does **not** omit the pair because nobody wrote a scalar helper. `functions/src/arithmetic/multiplyScalar.ts` already has `'number | Fraction | Complex, Unit'` and `'Unit, number | Fraction | Complex | Unit'`. The symbol users call is `functions/src/typed/arithmetic.ts` `multiply` (~456): it has `Unit, number` and `number, Unit` only. `Complex`×`Unit` then hits the variadic `'any, any, ...any'` (~542), which typed-function reports as `Too few arguments ... index: 2`. Patching only `multiplyScalar` does not fix the repro.
 
-**Design:** Convert angle Units to radians via existing Unit SI value, then call the numeric kernel. Register `multiply(Complex, Unit)` as `new Unit(complex * unit.value, unit)`. Same for `divide`. Do not stringify the unit away.
+**Design:** On the public `multiply` and `divide` in `typed/arithmetic.ts`, add `Complex, Unit` and `Unit, Complex` that call the Unit method (the scalar helper's behavior), returning a Unit whose value is complex. Do not stringify the unit. For trig, convert an angle Unit to radians through the existing SI value, then call the numeric kernel. A non-angle Unit throws `DimensionError`.
 
 **Tests:** exact `sin(new Unit(90,"deg")) === 1`, `math.evaluate("sin(90 deg)") === 1`, `multiply(new Complex(0,1), new Unit(1,"F"))` returns a Unit whose value is `0+1i` farad.
 
@@ -188,9 +193,9 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 **Root cause:** `functions/src/algebra/solver/lusolve.ts` + `usolve`: zero pivot with zero RHS treated as free variable = 0. NaN comparisons skip the zero-pivot test. Contrast `linsolve` / `solvePivoted` which reject tiny pivots.
 
-**Design:** After LUP, if any |U_ii| < eps or non-finite, throw `Error('lusolve: matrix is singular')` (or exported LinearIndependence error). Do not return a particular 0-filled solution. Same for Inf/NaN entries.
+**Design:** The free-variable write is `usolve.ts` `_denseBackwardSubstitutionNumber`: when the RHS entry compares equal to 0 it sets `xj = 0` and does not test the pivot (~215-217). A nonzero RHS with a zero pivot already throws. `equalScalar(NaN, 0)` is false, so a NaN pivot skips that throw. After LUP, if any diagonal is non-finite or `|U_ii|` is below the same pivot tolerance `linsolve` uses, throw `Error` matching the existing singular message (do not invent a second error type). Consistent and inconsistent singular systems both throw. Do not return the 0-filled particular solution.
 
-**Tests:** `[[1,1],[2,2]], [1,2]` throws; NaN matrix throws; well-conditioned 2×2 still matches.
+**Tests:** issue matrix `[[1,2],[2,4]]` with `b = [1,2]` throws; inconsistent `[1,1]` still throws; NaN and Infinity matrices throw; a well-conditioned 2×2 still matches.
 
 **Docs:** lusolve JSDoc.  
 **Risk:** mathjs sometimes returns particular solutions; this issue's AC overrides.
@@ -205,7 +210,7 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 **Root cause:** `autograd/src/tape.ts:180-182` `add`/`mul` call `checkSameShape`; `tensor` already broadcasts.
 
-**Design:** Reuse tensor broadcast shapes; backward scatters adjoints with `broadcast_to` reverse (sum reduced axes). Scalars: `add(1)` must not say “different Tapes” (see G13 for detach).
+**Design:** `checkSameShape` calls `assertSameTape` before comparing shapes (`tape.ts:508-510`). A bare number has no `.tape`, so `add(1)` throws "different Tapes" even though there is one tape. Accept `TapedTensor | number` (and a shape-compatible tensor) **before** `assertSameTape`. Broadcast with the same rules as `Tensor`; the backward sums adjoints over the reduced axes. A number is a scalar tape-less operand, not a second tape. Detach / `no_grad` stays G13.
 
 **Tests:** MLP bias `y.add(b)` with shapes `[2,3]` + `[3]`; finite grads vs finite difference.
 
@@ -220,11 +225,11 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 **Severity:** P0  
 **Breaking API:** **Yes** if overload `studentTTest(sample, number)` currently means two-sample. Must match SciPy `ttest_1samp`. Document two-sample as `(a, b)` arrays only.
 
-**Root cause:** Second numeric arg is not `popmean`; implementation treats it as a second sample (length 1) → NaN df.
+**Root cause:** `functions/src/typed/hypothesis.ts` `studentTTest` (~327). One-sample runs only when `sample2` is nullish, and that test is against μ = 0. A number is not nullish. `sample2.length` is then `undefined`, and `undefined < 2` is false, so the "sample2 must have at least 2 elements" throw does not run. Welch proceeds and returns NaN. It is not a length-1 sample.
 
-**Design:** If arg2 is `number`, one-sample vs popmean. If arg2 is array, two-sample. Options object `{ popmean, alternative }`. Parity: SciPy `ttest_1samp([1,2,3,4,5], 5.5)`.
+**Design:** If arg2 is a finite `number`, one-sample versus that popmean (SciPy `ttest_1samp`). If arg2 is an array, two-sample Welch, unchanged. A non-array, non-number throws `TypeError`. Options object `{ popmean, alternative }` may exist in addition; the positional number must work because that is the repro. Today a number is a silent NaN, not a supported two-sample of `[0]`, so this is a bugfix. Callers who passed a one-element array still hit the existing length check.
 
-**Tests:** exact issue repro; p-value vs SciPy within 1e-10.
+**Tests:** exact issue repro `studentTTest([1,2,3,4,5,6,7,8,9,10], 5.5)` equals SciPy `ttest_1samp` of that sample: statistic `0`, p-value `1`, df `9` (within 1e-10). Also `studentTTest([1,2,3,4,5])` unchanged versus μ = 0 (statistic ≈ 4.242640687119285). Do not use `[1,2,3,4,5]` versus `5.5` as the oracle — that is a different hypothesis.
 
 **Docs:** statistics README.  
 **Risk:** any caller using `studentTTest(x, 0)` as two-sample of `[0]` — extremely unlikely.
@@ -239,9 +244,9 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 **Root cause:** `functions/src/typed/numeric.ts:2254-2256` empty `if (r > 0.5)` comment. `solveParabolicPDE` is the real solver; `bcLeft: 0` number vs `{type,value}` hangs (#833).
 
-**Design:** `solvePDE` either delegates to `solveParabolicPDE` or throws “use solveParabolicPDE” **and** CFL check. Validate BC objects before the time loop (finite timeout test: 50ms).
+**Design:** `solvePDE` already is the explicit Euler solver. The empty `if` is the bug. When `r > 0.5`, throw a CFL error unless `{ allowUnstable: true }`. Do not replace the function with "use solveParabolicPDE" — that leaves the silent wrong answer for every caller of `solvePDE` and does not implement the check. `solveParabolicPDE` (`functions/src/numeric/solveParabolicPDE.ts`) is a different method-of-lines + BDF solver and has no CFL cap. #833: it reads `bcLeft.value` (~136) with no check that `bcLeft` is `{ type, value }`. `bcLeft: 0` throws while reading `.value` (a bad TypeError, not a loop). Validate both boundaries before any grid or BDF call and throw a `TypeError` that names `{ type: 'dirichlet' | 'neumann', value }`. Do not "fix" the hang story by raising a test timeout or wrapping the call in `AbortSignal`.
 
-**Tests:** r>0.5 throws; `bcLeft: 0` throws within 50ms; implicit scheme still solves a heat problem vs analytic.
+**Tests:** `solvePDE` with `r > 0.5` throws and the message mentions CFL; `r ≤ 0.5` still returns a field; `solveParabolicPDE({ bcLeft: 0, ... })` throws the validation `TypeError` on the first call; a valid implicit heat problem matches the analytic solution. The validation test's assertion is the error, not a 50ms race.
 
 **Docs:** numeric JSDoc.  
 **Risk:** do not hang CI — the hang test must use `AbortSignal` or a step cap.
@@ -267,8 +272,8 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G12 — ComputePool init, thresholds, Vite worker (P1)
 
-**Issues:** #757 #758 #710 #829  
-**Root cause:** methods sequential unless `initialize()`; after `terminate()` they still compute; `thresholdByOp.sin === 'never'` / 100 chunks at n=1e6 (`parallel/src/ComputePool.ts`); Vite 404 `worker.js`.  
+**Issues:** #757 #758 #710 #829 #709  
+**Root cause:** methods sequential unless `initialize()`; after `terminate()` they still compute; `thresholdByOp.sin === 'never'` / 100 chunks at n=1e6 (`parallel/src/ComputePool.ts`); Vite 404 `worker.js`. #709 is the same pool: `matmul(a, b, n, n, n)` is accepted as the documented `(a, aRows, aCols, b, bCols)` and then throws on dimensions. The fix is a signature check that names both call shapes, not a second matmul kernel.  
 **Design:** auto-init on first parallel op; after terminate throw; honor `thresholdByOp`; document Vite `worker` plugin / `new URL(..., import.meta.url)`. Chunk count ≈ hardwareConcurrency, not 100.  
 **Tests:** exact `forceParallel` n=1e6 chunk count; terminate then call throws; worker URL unit test.  
 **Breaking:** terminate-then-compute currently “works” — **yes**, throw is AC.  
@@ -280,20 +285,20 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 **Issues:** #756 #764 #755 #754 #763 #765  
 **Root cause:** second `backward()` triples grads; Tape grows without `reset()`; no `detach`/`no_grad`; no relu/softmax/GELU/CE; jacobian/grad rank-1 only; README claims ML.  
-**Design:** second backward accumulates 2× or zeros adjoints then reapplies (PyTorch-like; pick one, document). `reset()` bound in README. `detach()` clones primal without tape. Activations as TapedTensor methods with FD tests. `reshape`/`sum({keepDims})` on TapedTensor.  
-**Tests:** issue repros + FD.  
-**Breaking:** if second backward currently 3×, fixing to 2× is a bugfix not a break.  
+**Design:** #756's expected result is a second `backward()` that accumulates **2×**, and the actual result is **3×**. `Tape.backward` overwrites the seed (`tape.ts` ~84) and does not clear input slots, so a second call should add one more copy (2×). The extra factor is a real extra `+=` somewhere in that replay — find it. Do not divide gradients by 3 and do not switch to zeroing unless the issue's acceptance text is updated. `reset()` is documented and drops nodes (#764); tensors from before `reset()` stay invalid. `detach()` clones the primal with no tape node so `add(1)` is not required to invent a second tape (scalar add itself is G08). Activations are real ops with finite-difference tests, not README aliases. `reshape` / `sum({keepDims})` record backward on the tape; they use G36's tensor rules.  
+**Tests:** issue repros + FD. The second-backward test asserts 2× the first gradient, not "not 3×" alone.  
+**Breaking:** 3× → 2× is the bugfix the issue asks for.  
 **Docs:** autograd README rewrite (#765).
 
 ---
 
 ### G14 — Tensor construction and NumPy-shaped API (P1)
 
-**Issues:** #795 #750 #749 #752 #751 #760 #748 #753 #761 #762 #831  
-**Root cause:** `fromNested` requires shape; `flip` axes not iterable; `stack` omitted axis zeros; reshape copies and rejects `-1`; no zeros/ones/full/arange; f64-only; constructor accepts f32; `matMul` rank-2 camelCase vs taped `matmul`; no in-place; `slice` not a method; no cross/dot.  
-**Design:** infer shape in `fromNested`; `flip(t,0)` axes as number; `stack` default axis 0; reshape view when contiguous + `-1`; factories; **keep f64 as default** but add `dtype` field that **rejects** Float32Array at runtime (#748) unless `#760` implements f32 (prefer reject + docs for P1, f32 as follow-up if too large — if implementing dtype, it is its own sub-PR stacked). `Tensor.matmul` alias batched. `cross`/`dot` for 3-vectors. In-place ops optional P2 in same PR only if tests are cheap.  
-**Breaking:** constructor currently accepts f32 — rejecting is **yes**.  
-**Tests:** each issue's exact throw/result.
+**Issues:** #795 #750 #749 #748  
+**Root cause:** `fromNested` requires a shape argument and then reduces an empty axis ("reduce of undefined"); `flip(t, 0)` treats a number axis as a non-iterable; `stack` with the axis omitted writes a zero tensor instead of stacking on axis 0; the constructor stores any `{length}` object and keeps a `Float32Array` as `this.data` (`#748`).  
+**Design:** Infer a rectangular shape in `fromNested` and throw `TypeError` on a jagged nest. `flip` accepts a single axis number. `stack` defaults to axis 0 and throws if the inputs cannot stack — it must not return zeros. Constructor: `data` must already be a `Float64Array`; otherwise throw `TypeError: data must be a Float64Array`. Do not copy a `Float32Array` in and pretend it is f64 (that hides #748). dtype / factories / views are G36.  
+**Breaking:** **Yes** for the constructor (runtime today accepts f32, Int32, arrays, and arraylikes). Minor changeset.  
+**Tests:** each issue's exact repro, including the `{length:2, 0:1, 1:2}` arraylike.
 
 ---
 
@@ -359,11 +364,11 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G21 — CAS simplify / integrate / solve (P1)
 
-**Issues:** #716 #717 #718 #719 #721  
-**Root cause:** simplify rule set never factors; two integral tables disagree on `log(abs(x))`; `casDerivative` prints Diff; `solve` numeric; `sum(i,1,3,i)` is variadic + imaginary unit.  
-**Design:** `simplify` runs factor+expand for polynomials; unify `integrate` with `symbolicIntegral` (`log(abs(x))`); `casDerivative` calls `derivative`; `solve("x^2-2")` returns `±sqrt(2)` symbols; `sum` 4-arg summation if first is symbol name — **or** document `summation` and make `sum(i,…)` throw a hint (imaginary `i` collision). Prefer dedicated `summation` + evaluate hint.  
-**Tests:** SymPy strings from issues.  
-**Breaking:** `sum(i,1,3,i)` currently Complex — changing **yes**.
+**Issues:** #716 #717 #718 #719 #721 #690 #832  
+**Root cause:** one CAS surface. `simplify` has no polynomial square rewrite; `integrate` and `symbolicIntegral` disagree on `log(abs(x))`; `casDerivative` prints an unevaluated diff; `solve` is numeric for `"x^2-2"` and, for a matrix, returns `[]` because the string solver ignores non-strings (#690, `typed/cas.ts`). `integrate(Math.sin, 0, π)` calls `expr.trim` because the string integrator is the only implementation (#832). `sum(i,1,3,i)` is variadic addition plus the imaginary unit.  
+**Design:** `simplify` of a polynomial runs the factor/expand rules until `(x+1)^2` (not `(x+1)*(x+1)`). `integrate("1/x")` and `symbolicIntegral("1/x")` both return `log(abs(x))`. `casDerivative` calls `derivative`. `solve("x^2-2")` returns symbolic `±sqrt(2)`, not two floats. `solve([[4,3],[6,3]], [10,12])` throws `TypeError` that `solve(equation, variable)` is symbolic and names `linsolve` — the issue's acceptance test is the throw, not a silent dispatch into `lusolve` (that would make `[]` into a number array and hide the CAS/linear name collision). `integrate(fn, a, b)` for a JS function dispatches to the existing `quad` (the string method stays for strings). `sum(symbol, lo, hi, body)` is not variadic `i`: either a real summation or a throw that names `summation` and says `i` is the imaginary unit. Prefer the throw plus a `summation` that returns 6, and test both. Do not special-case the single string `"i"`.  
+**Tests:** SymPy / mathjs strings from the issues, plus the matrix `solve` throw and `integrate(Math.sin, 0, Math.PI) ≈ 2`.  
+**Breaking:** **Yes** for `sum(i,1,3,i)` (today Complex) and for `solve(matrix)` (today `[]`). Minor changeset naming both.
 
 ---
 
@@ -409,10 +414,10 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G26 — Perf: sort, GEMM, lusolve, wasm messaging (P1)
 
-**Issues:** #712 #693 #694 #711 #735  
-**Root cause:** `Array.sort` comparator; ijk GEMM; factory lusolve vs packed lu; `loadWasm()` does not change public `sin` (policy); compat `add` dispatch.  
-**Design:** typed-array sort path; blocked GEMM on `DenseMatrix.multiply`; `lusolve` call packed kernel; **do not** flip wasm policy for `sin` — change `loadWasm` docs + `isWasmLoaded` messaging (#711 is docs/policy). Measure `create(all).add` and cut typed dispatch for number,number. Use A/B harness rules in AGENTS.md.  
-**Tests:** correctness + optional bench gate only if existing harness.  
+**Issues:** #712 #693 #694 #711 #735 #699  
+**Root cause:** separate kernels, one perf PR only because they share the measurement rule. `sort` on `number[]` uses a comparator; `DenseMatrix.multiply` is ijk; factory `lusolve` does not call the packed `lu`+`luSolve` (#694, depends on G05 and G07 — do not start until those are merged); public `sin` **does** call `elementwiseUnaryDispatch` (`trigonometry.ts` + `wasm/elementwise/wasm-bridge.ts`), and `array_sin_ptr` is allowed for `1024 <= n < 131072` (`policy.ts`). #711 is not "loadWasm is unwired". The published 0.76 ratio and the dogfood 0.598→0.582 ms at n=1e5 disagree. #699 is 1.10× vs ml-matrix at n=500 with accuracy already matching; the issue accepts a documented JS SVD cost.  
+**Design:** Blocked GEMM and a typed-array sort only where a fresh interleaved A/B (AGENTS.md rules, both engines, ≥5 runs) shows a real win. `lusolve` may call the packed kernel only after G07 still throws on the singular fixtures. For #711: re-measure public `sin` at n=1e5 with the module loaded and unloaded. If the bridge returns null, fix `getWasm` / `loadWasm` so the policy band actually runs. If both runs are ~1.0, **narrow the policy band** and correct `BENCHMARK_RESULTS.md` so the docs stop claiming a win the public symbol does not have. Do not hard-code n=1e5 and do not enable kernels the policy measured slower. For #699: document the JS SVD cost in the matrix README (the issue's allowed close). A rewrite is in this PR only when a fresh bench is within 5% of ml-matrix without loosening the 3×3 residual checks. #735: time `create(all).add(1,2)` against mathjs on the number,number path; remove dispatch overhead only if the A/B gate passes. Never `TypedArray.from`. A null tier fails the bench.  
+**Tests:** correctness for sort/GEMM/lusolve. Perf gates use the existing harness only; do not weaken a tolerance to go green. #699's accuracy assertions stay.  
 **Breaking:** no.
 
 ---
@@ -429,8 +434,8 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G28 — README / newcomer docs (P2)
 
-**Issues:** #804 #803 #802 #801 #800 #799 #798 #797 #794 #793 (if not G22) #695 #782  
-**Design:** one docs PR: install lines, TypeScript samples, package count 22 vs 24 workspace members, TypeDoc job or remove `/api` link, plot `svgString`, linalg DenseMatrix sample, `sample` vs `sampleN`.  
+**Issues:** #804 #803 #802 #801 #800 #799 #798 #797 #794 #695 #782 #820  
+**Design:** one docs PR: install lines, TypeScript samples, package count 22 published vs 24 workspace members, TypeDoc job or remove the dead `/api` link, plot `svgString`, linalg DenseMatrix sample, `sample` vs `sampleN`. #820: workerpool README calls `chunkTyped` internal while the package root-exports it — either export it in the README as public or stop exporting it. Do not leave the contradiction. #793 stays in G22 (the MathML sample is the expression README, fixed with the lexer/sandbox docs).  
 **Tests:** optional `tools/test` that extracts fenced blocks — if too heavy, at least compile samples in `docs/` tests.  
 **Breaking:** no.
 
@@ -446,10 +451,10 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G30 — Stats SciPy leftover (P2)
 
-**Issues:** #786 #783 #777 #778 #781 #772 #784  
-**Design:** p-value underflow `erfc` not 0; KS named `'norm'`; kendall exact default n≤10; quantile `{method}` NumPy names; `describe` std/quartiles; `gammaDist` **document rate vs scale** and add `{scale}`; heatmap colorbar.  
-**Tests:** SciPy numbers from issues.  
-**Breaking:** gammaDist scale **yes** if default flips — prefer options, keep rate default.
+**Issues:** #786 #783 #777 #778 #781 #784  
+**Design:** p-value underflow via `erfc`, not a hard 0, on the perfect-correlation case; KS accepts the name `'norm'` (and the issue's `'normal'` if that is the repro string — test the string the issue passes); kendall exact test is the default at n≤10; quantile `{method}` accepts the NumPy names the issue lists; `describe` gains std and quartiles; heatmap SVG gets a colorbar, ticks, and title using the same text path as line plots. `gammaDist` is G35 (it is P1).  
+**Tests:** SciPy numbers copied from each issue.  
+**Breaking:** no if kendall's default changes only where the issue says the exact test is SciPy's default. Document it.
 
 ---
 
@@ -463,17 +468,51 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 
 ### G32 — Expression P2 robustness
 
-**Issues:** #817 #816 #818 #723 #722 #724 #743 #744 #739 #742 #820  
-**Design:** block comments in lexer; clone/sanitize evaluate results; workbook `constructor` key via `setSafeProperty` allowlist or Map; `1e` SyntaxError; docs nesting 124; substitute then simplify; Fraction toString mathjs `0.1` **or** document canonical `1/10`; `size` format `[2, 3]`; `createUnit` overwrite option; L→mL 1000 exact via rational factors; workerpool README vs export.  
-**Breaking:** `1e` currently 2.718 — SyntaxError **yes**.
+**Issues:** #817 #816 #818 #723 #722 #724 #743 #744 #739 #742  
+**Design:** These share the expression/unit formatting edge, not one kernel. Land them as one PR only if the diff stays reviewable; otherwise stack G32a (lexer/sandbox: #817 #816 #818 #723 #722 #724) and G32b (formatting: #743 #744 #739 #742) and put `Fixes` only on the issues that PR closes. Block comments in the lexer. `evaluate` must not return a host object by identity (`process`). Workbook object keys go through `setSafeProperty` (sandbox invariant — a `constructor` key must not write `Object.prototype`). `parse("1e")` is a `SyntaxError` (breaking: today it is `1*e`). Nesting-limit docs match the parser (124 accepted, 125 rejected) or the parser matches the docs — pick the implementation and fix the other; do not only edit the sentence if the issue's AC is the parser. `substitute` then folds constants (`2^2+y` → `4+y`) by the existing simplify rules, not a special case for `{x:2}`. Fraction `toString`: match mathjs `0.1` **or** document canonical `1/10` in the README the issue cites — the AC allows the doc close. `size` formats `[2, 3]`. `createUnit("furlong")` has an explicit overwrite option because furlong already exists. `1 L` → mL is 1000 exactly (rational factors, not a one-off for litres). #820 moved to G28.  
+**Breaking:** `1e` → SyntaxError **yes**. Minor.
 
 ---
 
 ### G33 — Remaining API nits (P2)
 
-**Issues:** #826 #819 #832 #831 (if not G14) #709 #692 #690 #732 leftover  
-**Design:** `DimensionMismatchError` export; reject NaN Unit; `integrate(fn)` dispatch to `quad`; ComputePool matmul arg check message; `sin(number[])` map; `solve(A,b)` detect matrices → `lusolve` **or** throw “use lusolve”.  
-**Breaking:** `solve` matrix currently `[]` — throw/hint **yes**.
+**Issues:** #826 #819  
+**Design:** Export `DimensionMismatchError` and throw it from unit add (`add(m, s)`), and give `Unit` an `add` that uses it. `new Unit(NaN, 'm')` throws `TypeError` (non-finite value). #832 is G21, #831 is G36, #709 is G12, #692 is G34, #690 is G21, #732 is G16 only.  
+**Breaking:** no (invalid inputs and a new exported error).
+
+---
+
+### G34 — elementwise `sin` on `number[]` (P1)
+
+**Issues:** #692  
+**Severity:** P1  
+**Root cause:** `functions/src/typed/trigonometry.ts` `sin` has `Float64Array` and scalars, not `Array`. A `number[]` falls through to the typed-function mismatch, which lists Dual/string/boolean and not Array.  
+**Design:** One elementwise array signature shared by the unary trig kernels: `number[]` in, `number[]` out, same values as `Float64Array`. Implement it by copying into a `Float64Array` with `new Float64Array(x)` (never `TypedArray.from`) and copying back out, or by iterating the array with the same kernel — do not special-case length 2. The issue also requires `sin(Float64Array)` of length 1e6 within 1.2× of a `Math.sin` loop on Node 22. If the typed path misses that, fix `f64Unary` / the call overhead. Do not drop the bench assertion and do not raise its ratio.  
+**Tests:** `sin([0, Math.PI/2])` deep-equals `[0, 1]`; the 1e6 bench, gated like the other perf benches (warm up, median).  
+**Breaking:** no (new signature).
+
+---
+
+### G35 — `gammaDist` rate vs SciPy scale (P1)
+
+**Issues:** #772  
+**Severity:** P1  
+**Root cause:** `gammaDist(shape, rate)` is the rate parameterization. SciPy `stats.gamma(a, scale=)` uses scale. The statistics README never says which. This is not a variance/ddof bug (G19) and it is P1, so it does not wait in G30.  
+**Design:** Keep the numeric default as **rate** (R `dgamma`, and the current numbers). JSDoc and the statistics README say `scale = 1/rate` and show `gammaDist(2, 2).pdf(1) === 0.541…` versus SciPy `scale=0.5`. Add an options form `{ scale }` so `gammaDist(2, { scale: 2 }).pdf(1)` matches SciPy `0.15163266492815836`. Do not flip the positional second argument to scale — that breaks every current caller to satisfy one notebook.  
+**Tests:** both pdf values from the issue, and mean/variance 4 and 8 for scale 2.  
+**Breaking:** no if the positional argument stays rate. Document that in the changeset as a non-breaking clarification.
+
+---
+
+### G36 — Tensor factories, views, dtype tag (P1)
+
+**Issues:** #752 #751 #760 #753 #761 #762 #831  
+**Severity:** P1  
+**Depends on:** G14 (constructor already rejects non-Float64Array). G13's taped `reshape` uses these rules.  
+**Root cause:** no `zeros` / `ones` / `full` / `arange`; `reshape` always copies and rejects `-1`; no `dtype` field; `matMul` is rank-2 camelCase while `TapedTensor.matmul` is batched; no in-place ops; `slice` rejects a negative step and is not a method; no `cross` / `dot` for 3-vectors.  
+**Design:** Factories return f64 tensors. `reshape(-1)` infers the unknown extent and returns a view when the data is contiguous; a non-contiguous view copies and the test shows which. `dtype` getter is `'float64'`. Do not add float32 storage in this PR — #760's acceptance allows the callout plus the getter, and #748 (G14) is the rejection. `Tensor.matmul` is the batched alias of `matMul` (one implementation). `cross` and `dot` for length-3 vectors. `slice` is a method and honors a negative step. In-place `add_` / `mul_` / `fill_` write `this.data` and return `this`; they are not a second math library.  
+**Tests:** each issue's repro. A reshape view test mutates the base buffer and reads the view.  
+**Breaking:** no, except reshape of a contiguous tensor may start returning a view. Document that mutating `.data` aliases. Minor if any existing caller depended on a copy.
 
 ---
 
@@ -483,9 +522,9 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | --: | --- | ----- | ----------------------------- |
 | 688 | P0  | G07   | lusolve singular silent       |
 | 689 | P0  | G06   | fsolve scalar residual        |
-| 690 | P1  | G33   | solve is CAS not linsolve     |
+| 690 | P1  | G21   | solve is CAS not linsolve     |
 | 691 | P1  | G25   | stiffODESolver arg order      |
-| 692 | P1  | G33   | sin rejects number[]          |
+| 692 | P1  | G34   | sin rejects number[]          |
 | 693 | P1  | G26   | DenseMatrix.multiply GEMM     |
 | 694 | P1  | G26   | functions lusolve slow        |
 | 695 | P2  | G28   | linalg README exports         |
@@ -500,7 +539,7 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | 706 | P1  | G18   | fft rejects Float64Array      |
 | 707 | P1  | G27   | evaluate 1.13MB               |
 | 708 | P1  | G27   | node builtins in barrel       |
-| 709 | P2  | G33   | ComputePool.matmul args       |
+| 709 | P2  | G12   | ComputePool.matmul args       |
 | 710 | P1  | G12   | ComputePool.sin not parallel  |
 | 711 | P1  | G26   | loadWasm sin no speedup       |
 | 712 | P1  | G26   | sort/median slow              |
@@ -539,18 +578,18 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | 748 | P1  | G14   | Tensor accepts f32            |
 | 749 | P1  | G14   | stack omitted axis            |
 | 750 | P1  | G14   | flip axes                     |
-| 751 | P1  | G14   | no zeros/ones                 |
-| 752 | P1  | G14   | reshape copy / -1             |
-| 753 | P1  | G14   | matMul vs matmul              |
+| 751 | P1  | G36   | no zeros/ones                 |
+| 752 | P1  | G36   | reshape copy / -1             |
+| 753 | P1  | G36   | matMul vs matmul              |
 | 754 | P1  | G13   | no relu/softmax               |
 | 755 | P1  | G13   | no detach                     |
 | 756 | P1  | G13   | second backward 3×            |
 | 757 | P1  | G12   | ComputePool initialize        |
 | 758 | P1  | G12   | forceParallel 6× slower       |
 | 759 | P2  | G15   | GPU status error              |
-| 760 | P1  | G14   | Tensor f64-only               |
-| 761 | P2  | G14   | no in-place ops               |
-| 762 | P2  | G14   | slice negative step           |
+| 760 | P1  | G36   | Tensor f64-only               |
+| 761 | P2  | G36   | no in-place ops               |
+| 762 | P2  | G36   | slice negative step           |
 | 763 | P1  | G13   | no reshape/keepDims           |
 | 764 | P1  | G13   | Tape RSS leak                 |
 | 765 | P2  | G13   | autograd README ML            |
@@ -559,7 +598,7 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | 768 | P1  | G18   | welchPSD empty                |
 | 769 | P1  | G19   | variance ddof                 |
 | 771 | P1  | G19   | no skipna                     |
-| 772 | P1  | G30   | gammaDist rate vs scale       |
+| 772 | P1  | G35   | gammaDist rate vs scale       |
 | 773 | P1  | G18   | resample not scipy            |
 | 774 | P1  | G18   | signal has no fft             |
 | 775 | P2  | G19   | empty median/mean             |
@@ -601,10 +640,10 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | 814 | P2  | G24   | DenseMatrix nested ctor       |
 | 815 | P2  | G24   | multiply(2)                   |
 | 816 | P2  | G32   | evaluate returns process      |
-| 817 | P2  | G32   | /* */ comments                |
+| 817 | P2  | G32   | /\* \*/ comments              |
 | 818 | P2  | G32   | workbook constructor key      |
 | 819 | P2  | G33   | Unit(NaN)                     |
-| 820 | P2  | G32   | chunkTyped export             |
+| 820 | P2  | G28   | chunkTyped export             |
 | 822 | P0  | G10   | solvePDE CFL                  |
 | 823 | P0  | G02   | multiply(Complex,Unit)        |
 | 824 | P1  | G25   | solveODE maxIter              |
@@ -614,8 +653,8 @@ Parity vs mathjs `create(all)` for the issue's listed expressions.
 | 828 | P1  | G23   | e vs charge / G               |
 | 829 | P1  | G12   | Vite worker.js 404            |
 | 830 | P2  | G17   | Unit as type TS2749           |
-| 831 | P2  | G14   | Tensor cross/dot              |
-| 832 | P2  | G33   | integrate(Math.sin)           |
+| 831 | P2  | G36   | Tensor cross/dot              |
+| 832 | P2  | G21   | integrate(Math.sin)           |
 | 833 | P1  | G10   | solveParabolicPDE hang        |
 | 834 | P1  | G02   | sin(Unit deg)                 |
 | 835 | P1  | G15   | hasWebGPU vs init             |
@@ -627,47 +666,63 @@ Count check: 139 rows. Missing GitHub numbers in the dogfood dump (not open / no
 
 ## Group index (name, issues, severity)
 
-| Group | Name                      | Issues                                                | Highest |
-| ----- | ------------------------- | ----------------------------------------------------- | ------- |
-| G01   | Complex promotion         | 728, 729                                              | P0      |
-| G02   | Unit trig + Complex×Unit  | 727, 823, 834                                         | P0      |
-| G03   | Null scalar dispatch      | 807, 813                                              | P0      |
-| G04   | WorkerPool constructor    | 806                                                   | P0      |
-| G05   | Decomposition input types | 704, 705, 701                                         | P0      |
-| G06   | fsolve scalar             | 689                                                   | P0      |
-| G07   | lusolve singular          | 688                                                   | P0      |
-| G08   | TapedTensor broadcast     | 747                                                   | P0      |
-| G09   | studentTTest popmean      | 766                                                   | P0      |
-| G10   | PDE CFL + BC              | 822, 833                                              | P0      |
-| G11   | BigNumber constructor     | 714                                                   | P0      |
-| G12   | ComputePool / workers     | 757, 758, 710, 829                                    | P1      |
-| G13   | Autograd ML surface       | 756, 764, 755, 754, 763, 765                          | P1      |
-| G14   | Tensor API                | 795, 750, 749, 752, 751, 760, 748, 753, 761, 762, 831 | P1      |
-| G15   | GPU status                | 835, 759                                              | P1      |
-| G16   | mathjs compat             | 730, 731, 732, 733, 734, 738                          | P1      |
-| G17   | TypeScript types          | 737, 785, 726, 700, 830                               | P1      |
-| G18   | FFT / signal              | 706, 774, 768, 773, 779                               | P1      |
-| G19   | Stats NaN/ddof            | 769, 771, 767, 776, 775                               | P1      |
-| G20   | parser/evaluator packages | 715, 796                                              | P1      |
-| G21   | CAS                       | 716, 717, 718, 719, 721                               | P1      |
-| G22   | Expression lexer/sandbox  | 720, 809, 808, 793, 725                               | P1      |
-| G23   | Units / CODATA            | 811, 825, 812, 828, 827                               | P1      |
-| G24   | DenseMatrix ctor/size     | 810, 814, 815                                         | P1      |
-| G25   | ODE API                   | 824, 698, 691                                         | P1      |
-| G26   | Perf + wasm messaging     | 712, 693, 694, 711, 735, 699                          | P1      |
-| G27   | Packaging P1              | 708, 736, 707, 791, 792                               | P1      |
-| G28   | README newcomer           | 804, 803, 802, 801, 800, 799, 798, 797, 794, 695, 782 | P2      |
-| G29   | Packaging P2              | 789, 790, 741, 740, 696, 697                          | P2      |
-| G30   | Stats SciPy leftover      | 786, 783, 777, 778, 781, 772, 784                     | P2      |
-| G31   | Plot                      | 836, 780                                              | P2      |
-| G32   | Expression/unit P2        | 817, 816, 818, 723, 722, 724, 743, 744, 739, 742, 820 | P2      |
-| G33   | API nits                  | 826, 819, 832, 709, 692, 690                          | P2      |
+| Group | Name                      | Issues                                                     | Highest |
+| ----- | ------------------------- | ---------------------------------------------------------- | ------- |
+| G01   | Complex promotion         | 728, 729                                                   | P0      |
+| G02   | Unit trig + Complex×Unit  | 727, 823, 834                                              | P0      |
+| G03   | Null scalar dispatch      | 807, 813                                                   | P0      |
+| G04   | WorkerPool constructor    | 806                                                        | P0      |
+| G05   | Decomposition input types | 704, 705, 701                                              | P0      |
+| G06   | fsolve scalar             | 689                                                        | P0      |
+| G07   | lusolve singular          | 688                                                        | P0      |
+| G08   | TapedTensor broadcast     | 747                                                        | P0      |
+| G09   | studentTTest popmean      | 766                                                        | P0      |
+| G10   | PDE CFL + BC              | 822, 833                                                   | P0      |
+| G11   | BigNumber constructor     | 714                                                        | P0      |
+| G12   | ComputePool / workers     | 757, 758, 710, 829, 709                                    | P1      |
+| G13   | Autograd ML surface       | 756, 764, 755, 754, 763, 765                               | P1      |
+| G14   | Tensor construction       | 795, 750, 749, 748                                         | P1      |
+| G15   | GPU status                | 835, 759                                                   | P1      |
+| G16   | mathjs compat             | 730, 731, 732, 733, 734, 738                               | P1      |
+| G17   | TypeScript types          | 737, 785, 726, 700, 830                                    | P1      |
+| G18   | FFT / signal              | 706, 774, 768, 773, 779                                    | P1      |
+| G19   | Stats NaN/ddof            | 769, 771, 767, 776, 775                                    | P1      |
+| G20   | parser/evaluator packages | 715, 796                                                   | P1      |
+| G21   | CAS                       | 716, 717, 718, 719, 721, 690, 832                          | P1      |
+| G22   | Expression lexer/sandbox  | 720, 809, 808, 793, 725                                    | P1      |
+| G23   | Units / CODATA            | 811, 825, 812, 828, 827                                    | P1      |
+| G24   | DenseMatrix ctor/size     | 810, 814, 815                                              | P1      |
+| G25   | ODE API                   | 824, 698, 691                                              | P1      |
+| G26   | Perf + wasm messaging     | 712, 693, 694, 711, 735, 699                               | P1      |
+| G27   | Packaging P1              | 708, 736, 707, 791, 792                                    | P1      |
+| G28   | README newcomer           | 804, 803, 802, 801, 800, 799, 798, 797, 794, 695, 782, 820 | P2      |
+| G29   | Packaging P2              | 789, 790, 741, 740, 696, 697                               | P2      |
+| G30   | Stats SciPy leftover      | 786, 783, 777, 778, 781, 784                               | P2      |
+| G31   | Plot                      | 836, 780                                                   | P2      |
+| G32   | Expression/unit P2        | 817, 816, 818, 723, 722, 724, 743, 744, 739, 742           | P2      |
+| G33   | Unit errors               | 826, 819                                                   | P2      |
+| G34   | sin(number[])             | 692                                                        | P1      |
+| G35   | gammaDist scale option    | 772                                                        | P1      |
+| G36   | Tensor factories / views  | 752, 751, 760, 753, 761, 762, 831                          | P1      |
 
 ---
 
+## Build order
+
+P0 first, then P1, then P2. Inside a wave, a group waits on the groups named here. Anything not listed can start once its wave's predecessors are merged or stacked.
+
+1. G01–G11, any order except G05 before any lusolve perf work.
+2. G14, then G36, then G13 (taped reshape uses tensor reshape; scalar broadcast is G08 and is already merged).
+3. G12, G15, G34, G18, G19, G35, G20, G22, G23, G24, G25 can proceed in parallel after the P0 wave.
+4. G21 after G07 only in the sense that the `solve` error names `linsolve`, which already exists. No code dependency.
+5. G26 after G05 and G07 (packed lusolve must keep the singular throw).
+6. G16 after G01 and G02 (the migration gap table describes the behavior those PRs ship).
+7. G17 after G01, G02, G09, G34, G35 (public signatures those PRs change).
+8. G27, then the P2 wave: G28, G29, G30 (after G19 and G35), G31, G32, G33.
+
 ## Self-review
 
-- Spec coverage: 139 issues mapped; 0 unmapped from the dump.
-- Already-fixed: none on `main` 2026-11-11.
-- Placeholders: none; each group names files, design, tests, docs, breaking yes/no.
-- G14 `dtype` may split: if f32 training is too large, G14a (bugs: fromNested/flip/stack/reshape/reject f32) then G14b (zeros/dtype/in-place) as a stacked PR — still `Fixes` only the issues that PR closes.
+- Spec coverage: 139 issues mapped; 0 unmapped from the dump (checked against `gh issue list --label dogfood --state open`).
+- Already-fixed: none of the cited bugs on this tree.
+- G14 is the constructor cluster. Factories, views, and `dtype` are G36, not an optional follow-up.
+- No P1 issue remains only in a P2 group. #772 is G35. #692 is G34. #690 is G21.

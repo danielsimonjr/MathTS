@@ -28,9 +28,22 @@ Every issue body was read with `gh issue view N -R danielsimonjr/MathTS`. Claime
 ## Grouping rules
 
 1. One PR = one root-cause cluster (shared file, type, or dispatch table). Do not mix packaging LICENSE with PDE CFL.
-2. Order: any group that contains a **P0** first (G01–G11), then remaining **P1** groups, then **P2**.
+2. Order: any group that contains a **P0** first (G01–G11), then remaining **P1** groups, then **P2**. A **P1 issue must not sit only in a P2 group**.
 3. A group that is mostly P2 but shares a P0 root stays in the P0 wave (e.g. #813 with #807).
 4. Breaking API changes are allowed only when the issue's acceptance criteria require it, the package is pre-1.0, and the PR changeset is **minor** with the old/new behavior named.
+5. Do not close a perf issue by special-casing the repro size. Re-measure with the A/B rules in `AGENTS.md`. A documented-cost acceptance criterion may close the issue when a fresh bench is inside noise.
+
+## Reviewer corrections (2026-11-11, grok-4.7)
+
+Checked cited file:line on this branch (same tree as `main` for these paths). Coverage of the 139 open `dogfood` issues stays exact (each issue in one group).
+
+- **G01:** `functions` `asin`/`acos` already return `Complex` outside `[-1,1]` (`trigonometry.ts`). #728 is the compat shim at `shims.ts:242` installed by `compat/src/index.ts`. #729 is `log`/`pow`/`nthRoot`/`acosh` number kernels. Do not promote `nthRoot` via "Math returned NaN".
+- **G02:** `multiplyScalar` already lists `Complex, Unit`. The public `multiply` in `typed/arithmetic.ts` does not, so the variadic `any, any, ...any` reports "Too few arguments".
+- **G08:** `add(1)` throws "different Tapes" because `assertSameTape` runs before any scalar overload (`tape.ts:508-510`).
+- **G09:** Oracle is `ttest_1samp([1..10], 5.5)` → statistic 0, p = 1, df = 9. A number is not a length-1 sample: `undefined < 2` is false, so the short-sample throw is skipped.
+- **G10:** `solvePDE`'s empty `if (r > 0.5)` is the CFL bug. `solveParabolicPDE` is a different MOL/BDF solver; `bcLeft: 0` hits `.value` with no shape check. Do not replace `solvePDE` with a redirect.
+- **G11–G07, G03–G06** cited lines match.
+- **Grouping:** #690 and #832 join G21 (`solve` / `integrate`). #709 joins G12. #692 is G34 (P1). #772 is G35 (P1), not G30. #820 joins G28. Tensor surface beyond the constructor bugs is G36, before G13.
 
 ## Builder rules (normative)
 
@@ -44,6 +57,7 @@ Copied into the plan. Reviewers reject a PR that violates them.
 - Never commit repo-tools JSON dumps (`dependency-graph.json` churn, file-inventory dumps, persona JSON).
 - Keep Compile & Lint docs steps green: `bun run docs:functions:check`, `bun run docs:deps:test`, `bun run check:browser-safety`. If a public export or README sample changes, update generated docs via the existing generator, do not hand-edit `docs/api/` indexes.
 - After editing a dependency package, rebuild it before downstream tests (`bunx turbo test --filter=…` so `^build` runs).
+- After the PR is open, poll `gh pr checks <PR> --watch`. Do not end the run while checks are pending. Do not merge.
 - Do not set `RELEASES_ENABLED`. Do not tag or publish.
 - Conventional Commits. Changeset per published-package behavior change.
 
