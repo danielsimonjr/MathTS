@@ -17,7 +17,8 @@ npm install @danielsimonjr/mathts-numbers
 
 - `Complex` + `isComplex` + `I`, `COMPLEX_ZERO/ONE/NEG_ONE`.
 - `Fraction` + `isFraction` + `FRACTION_ZERO/ONE/NEG_ONE/HALF/THIRD/QUARTER`.
-- `BigNumber` + `isBigNumber` + `BIGNUMBER_ZERO/ONE/NEG_ONE/TEN/PI/E/LN2/LN10`.
+- `BigNumber` + `bignumber` + `isBigNumber` + `BIGNUMBER_ZERO/ONE/NEG_ONE/TEN/PI/E/LN2/LN10`.
+- Construct with `BigNumber.from(1)`, `bignumber('0.1')`, or `new BigNumber(1)` (same factories).
 - Types: `IComplex`, `IFraction`, `IBigNumber`, `BigNumberConfig`, `RoundingMode`.
 
 ## License

@@ -76,23 +76,71 @@ export class BigNumber implements MathTSValue {
   private readonly _isNaN: boolean = false;
   private readonly _isInfinite: boolean = false;
 
-  private constructor(
-    sign: 1 | -1 | 0,
-    coefficient: bigint,
-    exponent: number,
+  /**
+   * Create a BigNumber from a public value, or build the internal `(sign, coefficient, exponent)` representation.
+   *
+   * `new BigNumber(1)` and `BigNumber.from(1)` are equivalent. The two-argument form
+   * `(sign, coefficient, …)` is reserved for class internals.
+   */
+  constructor(
+    signOrValue?: 1 | -1 | 0 | number | string | bigint | BigNumber,
+    coefficient?: bigint,
+    exponent: number = 0,
     isNaN: boolean = false,
     isInfinite: boolean = false
   ) {
-    this._sign = sign;
-    this._coefficient = coefficient;
-    this._exponent = exponent;
-    this._isNaN = isNaN;
-    this._isInfinite = isInfinite;
+    if (coefficient !== undefined) {
+      this._sign = signOrValue as 1 | -1 | 0;
+      this._coefficient = coefficient;
+      this._exponent = exponent;
+      this._isNaN = isNaN;
+      this._isInfinite = isInfinite;
+      return;
+    }
+
+    const value = signOrValue === undefined ? 0 : signOrValue;
+    if (value === null || (typeof value === 'object' && !(value instanceof BigNumber))) {
+      throw new TypeError(
+        'BigNumber requires a number, string, bigint, or another BigNumber ' +
+          `(received ${value === null ? 'null' : typeof value})`
+      );
+    }
+    const created = BigNumber.from(value as number | string | bigint | BigNumber);
+    // Satisfy strictPropertyInitialization on the discarded `this` (constructor return replaces the instance).
+    this._sign = created._sign;
+    this._coefficient = created._coefficient;
+    this._exponent = created._exponent;
+    this._isNaN = created._isNaN;
+    this._isInfinite = created._isInfinite;
+    // eslint-disable-next-line no-constructor-return -- delegate public construction to factories
+    return created;
   }
 
   // ============================================================
   // Static Factory Methods
   // ============================================================
+
+  /**
+   * Create a BigNumber from a number, string, bigint, or existing instance (mathjs / Decimal.js style).
+   */
+  static from(value: number | string | bigint | BigNumber): BigNumber {
+    if (value instanceof BigNumber) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return BigNumber.parse(value);
+    }
+    if (typeof value === 'bigint') {
+      return BigNumber.fromBigInt(value);
+    }
+    if (typeof value === 'number') {
+      return BigNumber.fromNumber(value);
+    }
+    throw new TypeError(
+      'BigNumber.from requires a number, string, bigint, or BigNumber ' +
+        `(received ${typeof value})`
+    );
+  }
 
   /**
    * Create a BigNumber from a number
@@ -1575,6 +1623,16 @@ export class BigNumber implements MathTSValue {
 /**
  * Common BigNumber constants
  */
+/**
+ * mathjs-compatible factory — same dispatch as {@link BigNumber.from}.
+ */
+export function bignumber(value?: number | string | bigint | BigNumber): BigNumber {
+  if (value === undefined) {
+    return BigNumber.fromNumber(0);
+  }
+  return BigNumber.from(value);
+}
+
 export const BIGNUMBER_ZERO = BigNumber.fromNumber(0);
 export const BIGNUMBER_ONE = BigNumber.fromNumber(1);
 export const BIGNUMBER_NEG_ONE = BigNumber.fromNumber(-1);
