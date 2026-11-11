@@ -118,7 +118,7 @@ The codebase is organized into the following modules:
 - **core/types**: 20 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
-- **matrix/operations**: 18 files
+- **matrix/operations**: 19 files
 - **matrix/types**: 7 files
 - **tensor**: 4 files
 - **tensor/operations**: 18 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 51             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 50             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 51             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 550            | 0               |
@@ -1739,13 +1739,30 @@ graph LR
 
 ## Matrix/operations Dependencies
 
+### `matrix/src/operations/as-packed.ts` - Normalize decomposition inputs (DenseMatrix, nested arrays, packed f64).
+
+**Internal Dependencies:**
+
+| File                      | Imports                      | Type   |
+| ------------------------- | ---------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Import |
+
+**Exports:**
+
+- Interfaces: `PackedMatrixDescriptor`
+- Types: `DecompositionMatrixInput`
+- Functions: `isPackedMatrixDescriptor`, `decompositionInputToNestedArray`, `decompositionInputToDenseMatrix`
+
+---
+
 ### `matrix/src/operations/cholesky.ts` - Cholesky Decomposition (DenseMatrix primitive)
 
 **Internal Dependencies:**
 
-| File                      | Imports       | Type   |
-| ------------------------- | ------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
 
 **Exports:**
 
@@ -1781,9 +1798,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File       | Imports                                               | Type   |
-| ---------- | ----------------------------------------------------- | ------ |
-| `./eig.js` | `eig, eigvals, powerIteration, EigResult, EigOptions` | Import |
+| File             | Imports                                                     | Type   |
+| ---------------- | ----------------------------------------------------------- | ------ |
+| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| `./eig.js`       | `eig, eigvals, powerIteration, EigResult, EigOptions`       | Import |
 
 **Exports:**
 
@@ -1795,9 +1813,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports            | Type   |
-| ------------- | ------------------ | ------ |
-| `./common.js` | `isSymmetric, eye` | Import |
+| File             | Imports                                                     | Type   |
+| ---------------- | ----------------------------------------------------------- | ------ |
+| `./common.js`    | `isSymmetric, eye`                                          | Import |
+| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
 
 **Exports:**
 
@@ -1834,28 +1853,29 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports                                                                                 | Type      |
-| ----------------- | --------------------------------------------------------------------------------------- | --------- |
-| `./eig.js`        | `eig, eigvals, powerIteration, EigResult, EigOptions`                                   | Re-export |
-| `./svd.js`        | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions` | Re-export |
-| `./eig-wasm.js`   | `eigWasm, eigvalsWasm, spectralRadiusWasm`                                              | Re-export |
-| `./svd-wasm.js`   | `svdWasm`                                                                               | Re-export |
-| `./pinv.js`       | `pinv, PinvOptions`                                                                     | Re-export |
-| `./qr.js`         | `qr, QRResult, QROptions`                                                               | Re-export |
-| `./lu.js`         | `lu, luSolve, LUResult`                                                                 | Re-export |
-| `./cholesky.js`   | `cholesky, CholeskyResult`                                                              | Re-export |
-| `./expm.js`       | `matrixExpm, ExpmOptions`                                                               | Re-export |
-| `./logm.js`       | `matrixLogm, LogmOptions`                                                               | Re-export |
-| `./sqrtm.js`      | `matrixSqrtm, SqrtmOptions`                                                             | Re-export |
-| `./schur.js`      | `matrixSchur, SchurResult, SchurOptions`                                                | Re-export |
-| `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions`                                          | Re-export |
-| `./qr-family.js`  | `lq, rq, ql, LQResult, RQResult, QLResult`                                              | Re-export |
-| `./condest.js`    | `condest`                                                                               | Re-export |
-| `./common.js`     | `matMul, transpose`                                                                     | Re-export |
+| File              | Imports                                                                                                                                        | Type      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `./eig.js`        | `eig, eigvals, powerIteration, EigResult, EigOptions`                                                                                          | Re-export |
+| `./svd.js`        | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions`                                                        | Re-export |
+| `./eig-wasm.js`   | `eigWasm, eigvalsWasm, spectralRadiusWasm`                                                                                                     | Re-export |
+| `./svd-wasm.js`   | `svdWasm`                                                                                                                                      | Re-export |
+| `./pinv.js`       | `pinv, PinvOptions`                                                                                                                            | Re-export |
+| `./qr.js`         | `qr, QRResult, QROptions`                                                                                                                      | Re-export |
+| `./lu.js`         | `lu, luSolve, LUResult`                                                                                                                        | Re-export |
+| `./cholesky.js`   | `cholesky, CholeskyResult`                                                                                                                     | Re-export |
+| `./expm.js`       | `matrixExpm, ExpmOptions`                                                                                                                      | Re-export |
+| `./logm.js`       | `matrixLogm, LogmOptions`                                                                                                                      | Re-export |
+| `./sqrtm.js`      | `matrixSqrtm, SqrtmOptions`                                                                                                                    | Re-export |
+| `./schur.js`      | `matrixSchur, SchurResult, SchurOptions`                                                                                                       | Re-export |
+| `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions`                                                                                                 | Re-export |
+| `./qr-family.js`  | `lq, rq, ql, LQResult, RQResult, QLResult`                                                                                                     | Re-export |
+| `./condest.js`    | `condest`                                                                                                                                      | Re-export |
+| `./common.js`     | `matMul, transpose`                                                                                                                            | Re-export |
+| `./as-packed.js`  | `decompositionInputToDenseMatrix, decompositionInputToNestedArray, isPackedMatrixDescriptor, DecompositionMatrixInput, PackedMatrixDescriptor` | Re-export |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `isPackedMatrixDescriptor`, `DecompositionMatrixInput`, `PackedMatrixDescriptor`
 
 ---
 
@@ -1882,9 +1902,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports       | Type   |
-| ------------------------- | ------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
 
 **Exports:**
 
@@ -1913,10 +1934,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports       | Type   |
-| ------------------------- | ------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./qr.js`                 | `qr`          | Import |
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
+| `./qr.js`                 | `qr`                                                        | Import |
 
 **Exports:**
 
@@ -1932,6 +1954,7 @@ graph LR
 | File                      | Imports                                                         | Type   |
 | ------------------------- | --------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                   | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`     | Import |
 | `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 
 **Exports:**
@@ -1945,9 +1968,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports       | Type   |
-| ------------------------- | ------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
 
 **Exports:**
 
@@ -1963,6 +1987,7 @@ graph LR
 | File                      | Imports                                                                      | Type   |
 | ------------------------- | ---------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`                  | Import |
 | `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 | `./givens.js`             | `applyGivensRight, givensRotation`                                           | Import |
 
@@ -1995,9 +2020,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File       | Imports                      | Type   |
-| ---------- | ---------------------------- | ------ |
-| `./svd.js` | `svd, SVDResult, SVDOptions` | Import |
+| File             | Imports                                                     | Type   |
+| ---------------- | ----------------------------------------------------------- | ------ |
+| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| `./svd.js`       | `svd, SVDResult, SVDOptions`                                | Import |
 
 **Exports:**
 
@@ -2009,10 +2035,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                                      | Type   |
-| ------------- | ---------------------------------------------------------------------------- | ------ |
-| `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
-| `./givens.js` | `applyGivensCols, givensRotation`                                            | Import |
+| File             | Imports                                                                      | Type   |
+| ---------------- | ---------------------------------------------------------------------------- | ------ |
+| `./common.js`    | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js`    | `applyGivensCols, givensRotation`                                            | Import |
+| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput`                  | Import |
 
 **Exports:**
 
@@ -3016,6 +3043,13 @@ graph LR
 ---
 
 ### `functions/src/algebra/solver/lusolve.ts` - Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+
+**Workspace Dependencies:**
+
+| Package                        | Import                                                      |
+| ------------------------------ | ----------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `decompositionInputToNestedArray, isPackedMatrixDescriptor` |
+| `@danielsimonjr/mathts-matrix` | `PackedMatrixDescriptor`                                    |
 
 **Internal Dependencies:**
 
@@ -19315,9 +19349,9 @@ graph LR
 | `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
+| `matrix/src/types/DenseMatrix`                         | 4 files      | 22 files   |
 | `expression/src/node/Node`                             | 6 files      | 20 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
-| `matrix/src/types/DenseMatrix`                         | 4 files      | 21 files   |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
@@ -19325,11 +19359,11 @@ graph LR
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `core/src/index`                                       | 18 files     | 0 files    |
+| `matrix/src/operations/index`                          | 17 files     | 1 file     |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
-| `matrix/src/operations/index`                          | 16 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `functions/src/typed/special`                          | 7 files      | 9 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
@@ -19444,17 +19478,17 @@ graph TD
     end
 
     subgraph Matrix/operations
-        N60[cholesky]
-        N61[common]
-        N62[condest]
-        N63[eig-wasm]
-        N64[eig]
-        N65[expm]
-        N66[givens]
-        N67[index]
-        N68[logm]
-        N69[lu]
-        N70[...8 more]
+        N60[as-packed]
+        N61[cholesky]
+        N62[common]
+        N63[condest]
+        N64[eig-wasm]
+        N65[eig]
+        N66[expm]
+        N67[givens]
+        N68[index]
+        N69[logm]
+        N70[...9 more]
     end
 
     subgraph Matrix/types
@@ -20198,15 +20232,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1283   |
+| Total TypeScript Files  | 1284   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217777 |
-| Total Exports           | 7000   |
-| Total Re-exports        | 3016   |
+| Total Lines of Code     | 217997 |
+| Total Exports           | 7008   |
+| Total Re-exports        | 3021   |
 | Total Classes           | 61     |
-| Total Interfaces        | 600    |
-| Total Functions         | 2356   |
-| Total Type Guards       | 170    |
+| Total Interfaces        | 601    |
+| Total Functions         | 2359   |
+| Total Type Guards       | 171    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
 | Runtime Circular Deps   | 0      |
