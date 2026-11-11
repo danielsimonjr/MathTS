@@ -1,5 +1,7 @@
 /**
  * Dogfood relay G01 — compat create(all) complex promotion (#728, #729).
+ * The live oracle is mathjs 15.2.0 (13.2.3 and 14.x are high-severity
+ * advisories). The expressions below were checked equal to mathjs 13.2.3.
  */
 import { describe, it, expect } from 'vitest';
 import { create, all, type MathInstance } from '../src/index.js';
