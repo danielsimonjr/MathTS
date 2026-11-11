@@ -14,6 +14,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
  * Result of `lu`: the factors L and U and the row permutation P.
@@ -36,16 +37,17 @@ export interface LUResult {
  * @throws {Error} if `A` is not square.
  * @throws {Error} if `A` is singular (zero pivot encountered).
  */
-export function lu(A: DenseMatrix): LUResult {
-  const n = A.rows;
-  if (A.cols !== n) {
-    throw new Error(`lu: matrix must be square (got ${A.rows}×${A.cols})`);
+export function lu(A: DecompositionMatrixInput): LUResult {
+  const dense = decompositionInputToDenseMatrix(A);
+  const n = dense.rows;
+  if (dense.cols !== n) {
+    throw new Error(`lu: matrix must be square (got ${dense.rows}×${dense.cols})`);
   }
 
   // Working copy in row-major order. We overwrite this in place with the
   // compact LU factorisation (L below diagonal, U on and above diagonal).
   // `toFloat64Array()` already returns a fresh copy, so no second copy is needed.
-  const W = A.toFloat64Array();
+  const W = dense.toFloat64Array();
 
   const perm = new Array<number>(n);
   for (let i = 0; i < n; i++) perm[i] = i;

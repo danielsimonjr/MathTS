@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.
+- **Dense decompositions accept the same matrix shapes (G05 dogfood).** `svd`, `svdWasm`, `lu`, `qr` (and `lq`/`rq`/`ql`/`qrPivoted`), `cholesky`, `eig`, and `matrixSchur` share one input normalizer. A `DenseMatrix` is no longer read as an empty array (`{ U: [], S: [], V: [], rank: 0 }` from `svd` / `svdWasm`). Nested `number[][]`, a square row-major `Float64Array` (length 0 is 0×0), and `{ data, rows, cols }` are accepted. A packed descriptor is rejected when it also carries `L`/`U`/`p`/`P`, so it cannot be solved as an LU factor. Ragged and unknown inputs throw `TypeError`. `lusolve` accepts a square `Float64Array` and the same packed descriptor, and still treats `{ L, U, p }` as a decomposition.
+
 ### Added
 
 - **Three quaternion conversions close the set (issue 376, part 2).** `quaternionToAxisAngle(q)` returns `{ axis, angle }`: a unit axis and an angle in `[0, π]`. `q` and `−q` give the same result. At the angle `π`, the first non-zero component of the axis is positive. A rotation by the angle `0` has no axis, and the function then returns the axis `[1, 0, 0]`. `quaternionFromRotationMatrix(m)` returns the unit quaternion of a 3×3 rotation matrix that acts on column vectors. The function uses the method of Shepperd, so it does not divide by a small number. The function does not examine the matrix for orthogonality. The function throws when the matrix is not 3×3 or not finite. `quaternionFromEuler([roll, pitch, yaw])` returns the unit quaternion `qz(yaw) · qy(pitch) · qx(roll)`. The function throws when an angle is not finite. Each function is the inverse of a function that the package has: `quaternionFromAxisAngle`, `quaternionToRotationMatrix` and `quaternionToEuler`. Test: `functions/tests/quaternion.test.ts`.

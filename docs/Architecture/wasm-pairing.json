@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-11",
-  "total": 218,
+  "total": 216,
   "acceleratedCount": 40,
   "parallelOnlyCount": 17,
-  "jsOnlyCount": 161,
+  "jsOnlyCount": 159,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
@@ -415,7 +415,6 @@
     "acosh",
     "acot",
     "acsc",
-    "add",
     "and",
     "arg",
     "asec",
@@ -505,7 +504,6 @@
     "mod",
     "moebiusMu",
     "multinomial",
-    "multiply",
     "nextPrime",
     "norm2",
     "normFro",
@@ -577,7 +575,7 @@
     "arithmetic.ts": {
       "wasm": 9,
       "parallel": 3,
-      "jsOnly": 33
+      "jsOnly": 31
     },
     "bitwise.ts": {
       "wasm": 0,

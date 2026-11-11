@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1282,
+    "totalFiles": 1284,
     "totalModules": 82,
-    "totalExports": 6996
+    "totalExports": 7008
   },
   "entryPoints": [
     {
@@ -5059,6 +5059,29 @@
       }
     },
     "matrix/operations": {
+      "matrix/src/operations/as-packed.ts": {
+        "description": "Normalize decomposition inputs (DenseMatrix, nested arrays, packed f64).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix", "isDenseMatrix"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ],
+        "interfaces": ["PackedMatrixDescriptor"],
+        "functions": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ]
+      },
       "matrix/src/operations/cholesky.ts": {
         "description": "Cholesky Decomposition (DenseMatrix primitive)",
         "externalDependencies": [],
@@ -5067,6 +5090,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5141,6 +5168,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./eig.js",
             "imports": ["eig", "eigvals", "powerIteration", "EigResult", "EigOptions"]
           }
@@ -5157,6 +5188,10 @@
           {
             "file": "./common.js",
             "imports": ["isSymmetric", "eye"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5294,6 +5329,17 @@
             "file": "./common.js",
             "imports": ["matMul", "transpose"],
             "reExport": true
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": [
+              "decompositionInputToDenseMatrix",
+              "decompositionInputToNestedArray",
+              "isPackedMatrixDescriptor",
+              "DecompositionMatrixInput",
+              "PackedMatrixDescriptor"
+            ],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -5347,6 +5393,11 @@
           "condest",
           "matMul",
           "transposeNestedArray",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor",
           "transpose"
         ],
         "reExported": [
@@ -5397,7 +5448,12 @@
           "QLResult",
           "condest",
           "matMul",
-          "transpose"
+          "transpose",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -5448,6 +5504,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5484,6 +5544,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./qr.js",
             "imports": ["qr"]
           }
@@ -5503,6 +5567,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./common.js",
             "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
           }
@@ -5520,6 +5588,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5535,6 +5607,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           },
           {
             "file": "./common.js",
@@ -5589,6 +5665,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./svd.js",
             "imports": ["svd", "SVDResult", "SVDOptions"]
           }
@@ -5615,6 +5695,10 @@
           {
             "file": "./givens.js",
             "imports": ["applyGivensCols", "givensRotation"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -7337,7 +7421,18 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["decompositionInputToNestedArray", "isPackedMatrixDescriptor"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["PackedMatrixDescriptor"]
+          }
+        ],
         "exports": ["createLusolve"],
         "constants": ["createLusolve"]
       },
@@ -24447,6 +24542,10 @@
             "imports": ["elementwiseUnaryDispatch"]
           },
           {
+            "file": "./invalid-scalar-guards.js",
+            "imports": ["withBinaryScalarGuards"]
+          },
+          {
             "file": "./complex-promotion.js",
             "imports": [
               "logReal",
@@ -26284,6 +26383,36 @@
           "polyFit",
           "chebyshevFit",
           "legendreFit"
+        ]
+      },
+      "functions/src/typed/invalid-scalar-guards.ts": {
+        "description": "Guards for typed `add` / `multiply`: reject operands that must not be coerced",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber", "Complex", "Dual", "Fraction"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["Matrix"]
+          }
+        ],
+        "exports": [
+          "formatUnexpectedArgumentType",
+          "unexpectedArgumentType",
+          "rejectInvalidBinaryScalars",
+          "withBinaryScalarGuards"
+        ],
+        "functions": [
+          "formatUnexpectedArgumentType",
+          "unexpectedArgumentType",
+          "rejectInvalidBinaryScalars",
+          "withBinaryScalarGuards"
         ]
       },
       "functions/src/typed/logical.ts": {
@@ -44348,6 +44477,7 @@
       {
         "name": "Matrix/operations",
         "files": [
+          "matrix/src/operations/as-packed.ts",
           "matrix/src/operations/cholesky.ts",
           "matrix/src/operations/common.ts",
           "matrix/src/operations/condest.ts",
@@ -45056,6 +45186,7 @@
           "functions/src/typed/index.ts",
           "functions/src/typed/integration.ts",
           "functions/src/typed/interpolation.ts",
+          "functions/src/typed/invalid-scalar-guards.ts",
           "functions/src/typed/logical.ts",
           "functions/src/typed/matrix-ops.ts",
           "functions/src/typed/normal-equations-solve.ts",
@@ -45852,17 +45983,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1282,
+    "totalTypeScriptFiles": 1284,
     "totalModules": 82,
     "totalLinesOfCode": 217619,
     "totalExports": 6996,
     "totalClasses": 61,
-    "totalInterfaces": 600,
-    "totalFunctions": 2352,
-    "totalTypeGuards": 170,
+    "totalInterfaces": 601,
+    "totalFunctions": 2359,
+    "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1644,
-    "totalReExports": 3016,
+    "totalReExports": 3021,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

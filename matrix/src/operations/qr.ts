@@ -16,6 +16,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
  * Result of `qr`: the factors Q and R, where A = Q · R.
@@ -38,13 +39,14 @@ export interface QROptions {
 /**
  * Compute the QR decomposition of `A` such that `A = Q · R`.
  *
- * @param A    - Input matrix (m × n, m ≥ 0, n ≥ 0).
+ * @param A    - `DenseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
  * @param opts - Optional mode selector (`'reduced'` thin QR or `'full'` square Q).
  */
-export function qr(A: DenseMatrix, opts?: QROptions): QRResult {
+export function qr(A: DecompositionMatrixInput, opts?: QROptions): QRResult {
+  const dense = decompositionInputToDenseMatrix(A);
   const mode = opts?.mode ?? 'reduced';
-  const m = A.rows;
-  const n = A.cols;
+  const m = dense.rows;
+  const n = dense.cols;
 
   if (m === 0 || n === 0) {
     if (mode === 'full') {
@@ -60,7 +62,7 @@ export function qr(A: DenseMatrix, opts?: QROptions): QRResult {
     };
   }
 
-  const aFlat = A.toFloat64Array();
+  const aFlat = dense.toFloat64Array();
   const k = Math.min(m, n);
 
   // Column-major scratch space for Q: index Qcm[i + j * m] for row i, col j.

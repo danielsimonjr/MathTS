@@ -17,7 +17,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1256 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1258 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |      883 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |  1006 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   119 |
+| `@danielsimonjr/mathts-matrix`         |   121 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    51 |
 | `@danielsimonjr/mathts-parser`         |     4 |
@@ -1321,6 +1321,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/index.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/integration.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/interpolation.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/typed/invalid-scalar-guards.ts`                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/logical.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/matrix-ops.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/normal-equations-solve.ts`                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1890,6 +1891,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/backends/WasmLoader.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/config.ts`                                                            | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/index.ts`                                                             | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/operations/as-packed.ts`                                              | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/cholesky.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/common.ts`                                                 | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/condest.ts`                                                | @danielsimonjr/mathts-matrix         | src      | build-entry |
@@ -1932,6 +1934,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/backends/WasmLoader-browser.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WasmLoader-pool.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/config.test.ts`                                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/decomposition/dogfood-g05-decomposition-inputs.test.ts`             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/eig-general-wasm.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/eig-nonsymmetric.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/eig-symmetric-regression.test.ts`                     | @danielsimonjr/mathts-matrix         | tests    | test        |
