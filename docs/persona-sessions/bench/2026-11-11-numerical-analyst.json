@@ -1,0 +1,356 @@
+{
+  "persona": "numerical-analyst",
+  "date": "2026-11-11",
+  "label": "persona:numerical-analyst",
+  "env": {
+    "node": "v22.23.4",
+    "os": "Linux 6.12.113 x86_64",
+    "cpu": "Intel Xeon Processor, 4 cores, KVM",
+    "scratch": "/tmp/mathts-na (plain ESM, npm registry, not a repo build)",
+    "cloneSHA": "f970c4bee077ea00afc31ae290ce8ac3c8a174e9",
+    "packages": {
+      "@danielsimonjr/mathts-matrix": "0.10.0",
+      "@danielsimonjr/mathts-functions": "0.84.0",
+      "@danielsimonjr/mathts-linalg": "0.2.5",
+      "@danielsimonjr/mathts-core": "0.26.0",
+      "mathjs": "15.2.0",
+      "ml-matrix": "6.15.1"
+    },
+    "protocol": "warmup then repeats; median_ms; SPD nested number[][] with diagonal += n"
+  },
+  "accuracy_highlights": {
+    "det_2x2_abs": 0,
+    "lusolve_2x2_abs": 0,
+    "lstsq_overdetermined_abs": 2.220446049250313e-15,
+    "findRoot_sqrt2_abs": 0,
+    "quad_exp_neg_x2_abs": 2.4424906541753444e-15,
+    "nintegrate_sin_0_pi_abs": 5.773159728050814e-15,
+    "ode_exp_decay_rel": 4.1269769828408625e-13,
+    "ode_harmonic_endpoint_abs": 1.570410468332284e-12,
+    "robertson_Radau_vs_Hairer_max_abs": 8.073408608311183e-11,
+    "robertson_BDF_vs_Hairer_max_abs": 8.392315069549738e-7,
+    "robertson_Rosenbrock_max_abs": 3.643688182286553e-7,
+    "robertson_RODAS_max_abs": 4.448434431925108e-8,
+    "svd_3x3_S_vs_mlmatrix_abs": 7.105427357601002e-15,
+    "svd_recon_U_S_Vt_abs": 3.552713678800501e-15,
+    "hilbert10_linsolve_residual_abs": 4.3655745685100555e-11,
+    "hilbert12_inv_vs_exact_rel": 0.08143193365232593,
+    "complex_mul_1plus2i_abs": 0
+  },
+  "cases": [
+    {
+      "name": "matmul",
+      "lib": "mathts-DenseMatrix.multiply",
+      "n": 200,
+      "median_ms": 9.462204,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "matmul",
+      "lib": "mathts-matMul-nested",
+      "n": 200,
+      "median_ms": 12.850255,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "matmul",
+      "lib": "mathjs.multiply",
+      "n": 200,
+      "median_ms": 25.117088,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "matmul",
+      "lib": "ml-matrix.mmul",
+      "n": 200,
+      "median_ms": 6.939505,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-linsolve",
+      "n": 200,
+      "median_ms": 4.387096,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lusolve",
+      "n": 200,
+      "median_ms": 7.681086,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lu+luSolve",
+      "n": 200,
+      "median_ms": 4.308375,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathjs.lusolve",
+      "n": 200,
+      "median_ms": 38.539339,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "solve",
+      "lib": "ml-matrix.solve",
+      "n": 200,
+      "median_ms": 3.472803,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "svd",
+      "lib": "mathts-svd",
+      "n": 200,
+      "median_ms": 65.449047,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "svd",
+      "lib": "ml-matrix.SVD",
+      "n": 200,
+      "median_ms": 65.243506,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "matmul",
+      "lib": "mathts-DenseMatrix.multiply",
+      "n": 500,
+      "median_ms": 147.544141,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "matmul",
+      "lib": "mathts-matMul-nested",
+      "n": 500,
+      "median_ms": 199.617334,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "matmul",
+      "lib": "mathjs.multiply",
+      "n": 500,
+      "median_ms": 542.07364,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "matmul",
+      "lib": "ml-matrix.mmul",
+      "n": 500,
+      "median_ms": 104.326415,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-linsolve",
+      "n": 500,
+      "median_ms": 77.398308,
+      "repeats": 5,
+      "warmup": 4,
+      "note": "higher variance (61–79 ms)"
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lusolve",
+      "n": 500,
+      "median_ms": 95.811052,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lu+luSolve",
+      "n": 500,
+      "median_ms": 48.30933,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "solve",
+      "lib": "mathjs.lusolve",
+      "n": 500,
+      "median_ms": 581.473493,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "solve",
+      "lib": "ml-matrix.solve",
+      "n": 500,
+      "median_ms": 36.430041,
+      "repeats": 5,
+      "warmup": 4
+    },
+    {
+      "name": "svd",
+      "lib": "mathts-svd",
+      "n": 500,
+      "median_ms": 1045.406148,
+      "repeats": 3,
+      "warmup": 1
+    },
+    {
+      "name": "svd",
+      "lib": "ml-matrix.SVD",
+      "n": 500,
+      "median_ms": 953.221546,
+      "repeats": 3,
+      "warmup": 1
+    },
+    {
+      "name": "matmul",
+      "lib": "mathts-DenseMatrix.multiply",
+      "n": 1000,
+      "median_ms": 1155.262436,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "matmul",
+      "lib": "mathts-matMul-nested",
+      "n": 1000,
+      "median_ms": 1601.413637,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "matmul",
+      "lib": "mathjs.multiply",
+      "n": 1000,
+      "median_ms": 7414.861662,
+      "repeats": 3,
+      "warmup": 1
+    },
+    {
+      "name": "matmul",
+      "lib": "ml-matrix.mmul",
+      "n": 1000,
+      "median_ms": 642.019179,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-linsolve",
+      "n": 1000,
+      "median_ms": 632.620185,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lusolve",
+      "n": 1000,
+      "median_ms": 844.726892,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "solve",
+      "lib": "mathts-lu+luSolve",
+      "n": 1000,
+      "median_ms": 389.974178,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "solve",
+      "lib": "mathjs.lusolve",
+      "n": 1000,
+      "median_ms": 4537.10238,
+      "repeats": 3,
+      "warmup": 1
+    },
+    {
+      "name": "solve",
+      "lib": "ml-matrix.solve",
+      "n": 1000,
+      "median_ms": 276.978079,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "elementwise_sin",
+      "lib": "mathts-sin-Float64Array",
+      "n": 1000000,
+      "median_ms": 6.529384,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "elementwise_sin",
+      "lib": "js-Math.sin-loop-f64",
+      "n": 1000000,
+      "median_ms": 3.853171,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "elementwise_sin",
+      "lib": "mathjs.map-sin-Array",
+      "n": 1000000,
+      "median_ms": 65.752226,
+      "repeats": 3,
+      "warmup": 2
+    },
+    {
+      "name": "ode_exp_RK45",
+      "lib": "mathts-solveODE",
+      "n": 1,
+      "median_ms": 0.317574,
+      "repeats": 7,
+      "warmup": 5,
+      "note": "y'=-y on [0,1], tol 1e-8"
+    },
+    {
+      "name": "ode_robertson_BDF",
+      "lib": "mathts-solveODE",
+      "n": 40,
+      "median_ms": 1.559294,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "ode_robertson_Radau",
+      "lib": "mathts-solveODE",
+      "n": 40,
+      "median_ms": 1.897842,
+      "repeats": 5,
+      "warmup": 3
+    },
+    {
+      "name": "ode_vdp_BDF_t1",
+      "lib": "mathts-solveODE",
+      "n": 1,
+      "median_ms": 0.712149,
+      "repeats": 5,
+      "warmup": 3,
+      "note": "Van der Pol mu=1000, t in [0,1], y0=[2,0]"
+    }
+  ],
+  "ratios_vs_mlmatrix": {
+    "matmul_n1000_DenseMatrix_over_mmul": 1.8,
+    "solve_n1000_lusolve_over_mlsolve": 3.05,
+    "solve_n1000_lu_luSolve_over_mlsolve": 1.41,
+    "svd_n500_over_ml": 1.1
+  },
+  "issues": [688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700, 701]
+}
