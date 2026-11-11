@@ -1,0 +1,68 @@
+{
+  "persona": "symbolic-user",
+  "date": "2026-11-11",
+  "engine": "Node v22.23.4",
+  "os": "Linux 6.12.113 x86_64",
+  "cpu": "Intel(R) Xeon(R) Processor (4 cores)",
+  "packages": {
+    "@danielsimonjr/mathts-functions": "0.84.0",
+    "@danielsimonjr/mathts-parser": "0.1.34",
+    "@danielsimonjr/mathts-ast": "0.1.33",
+    "@danielsimonjr/mathts-expression": "0.12.7",
+    "@danielsimonjr/mathts-evaluator": "0.1.33",
+    "@danielsimonjr/mathts-numbers": "0.1.28",
+    "@danielsimonjr/mathts-core": "0.26.0",
+    "mathjs": "15.2.0"
+  },
+  "method": "warmup then odd-count timed reps in one process; median and ~p90 of samples; public symbols only",
+  "rows": [
+    {
+      "name": "parse 40-char trig polynomial",
+      "expr": "sin(x)^2+cos(x)^2+(a+b)^2",
+      "warmup": 8,
+      "iters": 21,
+      "mathts_median_ms": 0.029101,
+      "mathjs_median_ms": 0.028219,
+      "ratio_mathts_over_mathjs": 1.03
+    },
+    {
+      "name": "parse 200-term sin+cos^2 sum",
+      "n_terms": 200,
+      "warmup": 3,
+      "iters": 7,
+      "mathts_median_ms": 1.590288,
+      "mathjs_median_ms": 1.39319,
+      "ratio_mathts_over_mathjs": 1.14
+    },
+    {
+      "name": "evaluate scoped scalar sin(x)+cos(x)+x^2",
+      "scope": { "x": 0.3 },
+      "warmup": 8,
+      "iters": 21,
+      "mathts_median_ms": 0.003602,
+      "mathjs_median_ms": 0.012012,
+      "ratio_mathts_over_mathjs": 0.3
+    },
+    {
+      "name": "compiled evaluate same scalar",
+      "warmup": 8,
+      "iters": 21,
+      "mathts_median_ms": 0.001829,
+      "mathjs_median_ms": 0.002054,
+      "ratio_mathts_over_mathjs": 0.89
+    },
+    {
+      "name": "parse+toString (x+1)^2",
+      "warmup": 8,
+      "iters": 21,
+      "mathts_median_ms": 0.018633,
+      "mathjs_median_ms": 0.016833,
+      "ratio_mathts_over_mathjs": 1.11
+    }
+  ],
+  "notes": [
+    "An earlier 11-iter parse of a shorter string looked ~3x faster than mathjs; the 21-iter 40-char row is a tie. Do not publish the first probe.",
+    "Huge exponents: evaluate('2^10000') and compileExpr('2^1000000') return Infinity with no error (not timed as a win).",
+    "Oracle: sympy 1.14.0 for expand/factor/diff/integrate/solve strings."
+  ]
+}
