@@ -59,6 +59,9 @@ export class WorkerPool {
   private startupFailures = 0;
 
   constructor(workerScript: string, maxWorkers?: number) {
+    if (typeof workerScript !== 'string' || workerScript.length === 0) {
+      throw new TypeError('WorkerPool requires a workerScript URL or path');
+    }
     // 0 (and undefined) mean auto-detect, the convention `ParallelConfig` documents.
     if (maxWorkers !== undefined && (!Number.isInteger(maxWorkers) || maxWorkers < 0)) {
       throw new RangeError(
@@ -68,7 +71,11 @@ export class WorkerPool {
     this.workerScript = workerScript;
     this.maxWorkers = maxWorkers || this.getOptimalWorkerCount();
     this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
-    this.initialize();
+    // initialize() is async. A rejection here (invalid file:// URL, worker_threads
+    // import failure) must not surface as an unhandled rejection from the constructor.
+    void this.initialize().catch((err: unknown) => {
+      console.error('WorkerPool: failed to initialize workers:', err);
+    });
   }
 
   private getOptimalWorkerCount(): number {
