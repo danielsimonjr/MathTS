@@ -6131,7 +6131,7 @@ graph LR
 
 ---
 
-### `functions/src/geometry/mat4.ts` - Allocation-free 4x4 matrix kernels. Matrices are column-major (`m[column * 4 + row]`),
+### `functions/src/geometry/mat4.ts` - Allocation-free 4x4 matrix kernels, and `mat3ToQuat`. Matrices are column-major
 
 **Internal Dependencies:**
 
@@ -6142,7 +6142,7 @@ graph LR
 **Exports:**
 
 - Types: `Mat4DepthRange`
-- Functions: `mat4Multiply`, `mat4Determinant`, `mat4Invert`, `mat4Compose`, `mat4Decompose`, `mat4LookAt`, `mat4Perspective`, `mat4Orthographic`
+- Functions: `mat4Multiply`, `mat4Determinant`, `mat4Invert`, `mat4Compose`, `mat4Decompose`, `mat3ToQuat`, `mat4LookAt`, `mat4Perspective`, `mat4Orthographic`
 
 ---
 
@@ -20159,12 +20159,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1281   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217408 |
-| Total Exports           | 6984   |
+| Total Lines of Code     | 217471 |
+| Total Exports           | 6985   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
 | Total Interfaces        | 600    |
-| Total Functions         | 2344   |
+| Total Functions         | 2345   |
 | Total Type Guards       | 169    |
 | Total Enums             | 0      |
 | Type-only Imports       | 643    |
