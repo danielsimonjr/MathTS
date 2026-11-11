@@ -8,7 +8,7 @@ I did **not** build MathTS from the repo. Scratch projects: `/tmp/phys-dash` (No
 
 1. SI derived units N, J, W, Pa, Hz, ohm, F, H, T, Wb and conversions to SI base products — all `toNumber()` **1**.
 2. Imperial: 1 mi = 1.609344 km, 1 in = 2.54 cm, 1 ft = 0.3048 m, 1 lb = 0.45359237 kg, 1 gal = 3.785411784 L, 1 hp = 745.6998715822702 W, 1 psi = 6894.757293168362 Pa, 1 mph = 0.44704 m/s. These match the usual exact US survey/avoirdupois figures. `toNumber` prints a deprecation warning (`use toNumeric`).
-3. `F.add(1 m, 2 m)` → `3 m`. `F.add(1 m, 1 s)` throws a plain `Error`, not `DimensionMismatchError`. `Unit` has `.multiply` (2 m × 3 s → `6 m s`) but **no `.add`**. `new Unit(1,'m').to('s')` *does* throw `DimensionMismatchError`.
+3. `F.add(1 m, 2 m)` → `3 m`. `F.add(1 m, 1 s)` throws a plain `Error`, not `DimensionMismatchError`. `Unit` has `.multiply` (2 m × 3 s → `6 m s`) but **no `.add`**. `new Unit(1,'m').to('s')` _does_ throw `DimensionMismatchError`.
 4. Temperature: 0 °C → 273.15 K, 32 °F → 273.15 K, 212 °F → 100 °C. Good.
 5. dB/dBm/Np refused. `1 B` is a byte (`8 bits`), not a bel.
 6. Format: `1234.567 m` → `1.234567 km`; `{precision:4}` → `1.235 km`. Fine for sig-figs-ish display.
@@ -28,23 +28,23 @@ I did not fix any of this. Issues #822–#836; comments on #707/#708/#726/#757/#
 
 ## Findings
 
-| # | Sev | Issue | Title |
-| --- | --- | --- | --- |
-| 1 | P0 | [#822](https://github.com/danielsimonjr/MathTS/issues/822) | `solvePDE` ignores CFL r>0.5 and returns a silently wrong heat profile |
-| 2 | P0 | [#823](https://github.com/danielsimonjr/MathTS/issues/823) | `multiply(Complex, Unit)` throws Too few arguments (no unitful jωC) |
-| 3 | P1 | [#824](https://github.com/danielsimonjr/MathTS/issues/824) | `solveODE` default maxIter 1e5 aborts SHO t=100 and long orbits |
-| 4 | P1 | [#825](https://github.com/danielsimonjr/MathTS/issues/825) | dB/dBm/Np are refused; B is byte not bel |
-| 5 | P2 | [#826](https://github.com/danielsimonjr/MathTS/issues/826) | `add(m,s)` throws plain Error, not `DimensionMismatchError`; Unit has no add |
-| 6 | P1 | [#827](https://github.com/danielsimonjr/MathTS/issues/827) | CODATA constants have values but no uncertainties |
-| 7 | P1 | [#828](https://github.com/danielsimonjr/MathTS/issues/828) | `evaluate("e")` is Euler; `physicsScope().e` is charge in zC; G unbound |
-| 8 | P1 | [#829](https://github.com/danielsimonjr/MathTS/issues/829) | Vite dev 404s parallel `worker.js` so ComputePool never parallelizes in the browser |
-| 9 | P2 | [#830](https://github.com/danielsimonjr/MathTS/issues/830) | `Unit` cannot be used as a TypeScript type (TS2749) |
-| 10 | P2 | [#831](https://github.com/danielsimonjr/MathTS/issues/831) | Tensor has no cross or dot for 3-vectors |
-| 11 | P2 | [#832](https://github.com/danielsimonjr/MathTS/issues/832) | `integrate(Math.sin, 0, π)` throws `expr.trim is not a function` |
-| 12 | P1 | [#833](https://github.com/danielsimonjr/MathTS/issues/833) | `solveParabolicPDE({bcLeft:0})` hangs |
-| 13 | P1 | [#834](https://github.com/danielsimonjr/MathTS/issues/834) | `sin(new Unit(90,"deg"))` throws |
-| 14 | P1 | [#835](https://github.com/danielsimonjr/MathTS/issues/835) | `hasWebGPU()` true in Chromium but init false / status error |
-| 15 | P2 | [#836](https://github.com/danielsimonjr/MathTS/issues/836) | plot is static SVG only; no live canvas update |
+| #   | Sev | Issue                                                      | Title                                                                               |
+| --- | --- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 1   | P0  | [#822](https://github.com/danielsimonjr/MathTS/issues/822) | `solvePDE` ignores CFL r>0.5 and returns a silently wrong heat profile              |
+| 2   | P0  | [#823](https://github.com/danielsimonjr/MathTS/issues/823) | `multiply(Complex, Unit)` throws Too few arguments (no unitful jωC)                 |
+| 3   | P1  | [#824](https://github.com/danielsimonjr/MathTS/issues/824) | `solveODE` default maxIter 1e5 aborts SHO t=100 and long orbits                     |
+| 4   | P1  | [#825](https://github.com/danielsimonjr/MathTS/issues/825) | dB/dBm/Np are refused; B is byte not bel                                            |
+| 5   | P2  | [#826](https://github.com/danielsimonjr/MathTS/issues/826) | `add(m,s)` throws plain Error, not `DimensionMismatchError`; Unit has no add        |
+| 6   | P1  | [#827](https://github.com/danielsimonjr/MathTS/issues/827) | CODATA constants have values but no uncertainties                                   |
+| 7   | P1  | [#828](https://github.com/danielsimonjr/MathTS/issues/828) | `evaluate("e")` is Euler; `physicsScope().e` is charge in zC; G unbound             |
+| 8   | P1  | [#829](https://github.com/danielsimonjr/MathTS/issues/829) | Vite dev 404s parallel `worker.js` so ComputePool never parallelizes in the browser |
+| 9   | P2  | [#830](https://github.com/danielsimonjr/MathTS/issues/830) | `Unit` cannot be used as a TypeScript type (TS2749)                                 |
+| 10  | P2  | [#831](https://github.com/danielsimonjr/MathTS/issues/831) | Tensor has no cross or dot for 3-vectors                                            |
+| 11  | P2  | [#832](https://github.com/danielsimonjr/MathTS/issues/832) | `integrate(Math.sin, 0, π)` throws `expr.trim is not a function`                    |
+| 12  | P1  | [#833](https://github.com/danielsimonjr/MathTS/issues/833) | `solveParabolicPDE({bcLeft:0})` hangs                                               |
+| 13  | P1  | [#834](https://github.com/danielsimonjr/MathTS/issues/834) | `sin(new Unit(90,"deg"))` throws                                                    |
+| 14  | P1  | [#835](https://github.com/danielsimonjr/MathTS/issues/835) | `hasWebGPU()` true in Chromium but init false / status error                        |
+| 15  | P2  | [#836](https://github.com/danielsimonjr/MathTS/issues/836) | plot is static SVG only; no live canvas update                                      |
 
 Intended labels on every issue: `dogfood`, one of `bug|api|perf|docs|packaging`, `P0|P1|P2`, `persona:engineering-physicist` (first line of each body; this token cannot apply labels).
 
