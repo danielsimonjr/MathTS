@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-10'
-  totalFiles: 1274
+  lastUpdated: '2026-11-11'
+  totalFiles: 1275
   totalModules: 82
-  totalExports: 6935
+  totalExports: 6959
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9367,6 +9367,10 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./geometry/kernels.generated.js
+          imports:
+            - '*'
+          reExport: true
         - file: ./config-api.js
           imports:
             - config
@@ -11524,6 +11528,7 @@ modules:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
         - '* from ./factories/index.js'
+        - '* from ./geometry/kernels.generated.js'
         - config
         - runWithConfig
         - loadWasm
@@ -15447,6 +15452,62 @@ modules:
         - rayTriangleIntersect
         - rayPlaneIntersect
         - segmentSegmentClosest
+    functions/src/geometry/kernels.generated.ts:
+      description: Allocation-free fixed-size kernels for 2-vectors, 3-vectors, quaternions and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - vec2Add
+        - vec2Sub
+        - vec2Scale
+        - vec2ScaleAndAdd
+        - vec2Dot
+        - vec2Length
+        - vec2Normalize
+        - vec3Add
+        - vec3Sub
+        - vec3Scale
+        - vec3ScaleAndAdd
+        - vec3Dot
+        - vec3Length
+        - vec3Normalize
+        - vec3Cross
+        - quatMultiply
+        - quatConjugate
+        - quatNormalize
+        - quatRotate
+        - quatIntegrate
+        - mat3Multiply
+        - mat3MulVec
+        - mat3Transpose
+        - mat3Inverse
+      functions:
+        - vec2Add
+        - vec2Sub
+        - vec2Scale
+        - vec2ScaleAndAdd
+        - vec2Dot
+        - vec2Length
+        - vec2Normalize
+        - vec3Add
+        - vec3Sub
+        - vec3Scale
+        - vec3ScaleAndAdd
+        - vec3Dot
+        - vec3Length
+        - vec3Normalize
+        - vec3Cross
+        - quatMultiply
+        - quatConjugate
+        - quatNormalize
+        - quatRotate
+        - quatIntegrate
+        - mat3Multiply
+        - mat3MulVec
+        - mat3Transpose
+        - mat3Inverse
     functions/src/geometry/mass-properties.ts:
       description: 'Mass properties of solids and plane figures: volume (area in 2-D), mass,'
       externalDependencies: []
@@ -41993,6 +42054,7 @@ dependencyGraph:
         - functions/src/geometry/hull.ts
         - functions/src/geometry/intersect.ts
         - functions/src/geometry/intersect3d.ts
+        - functions/src/geometry/kernels.generated.ts
         - functions/src/geometry/mass-properties.ts
         - functions/src/geometry/polygon-ops.ts
         - functions/src/geometry/predicates.ts
@@ -43074,17 +43136,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1274
+  totalTypeScriptFiles: 1275
   totalModules: 82
-  totalLinesOfCode: 215020
-  totalExports: 6935
+  totalLinesOfCode: 215805
+  totalExports: 6959
   totalClasses: 61
   totalInterfaces: 598
-  totalFunctions: 2301
+  totalFunctions: 2325
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1639
-  totalReExports: 3007
+  totalReExports: 3008
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

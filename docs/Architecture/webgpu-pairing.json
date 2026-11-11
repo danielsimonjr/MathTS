@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "status": "7 standalone function(s) route to WebGPU; 2 of 218 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
   "total": 218,
   "gpuAcceleratedCount": 2,

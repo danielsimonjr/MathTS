@@ -541,6 +541,9 @@ export {
   quaternionFromEuler,
 } from './geometry/quaternion.js';
 
+// Allocation-free fixed-size kernels (vec2, vec3, quat, mat3).
+export * from './geometry/kernels.generated.js';
+
 // boundingBox, procrustes, kNN/radius queries, and multiset
 // setIsSuperset/setEqual/setDisjoint.
 export {

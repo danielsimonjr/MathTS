@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1799,6 +1799,7 @@
       "functions/src/index.ts"
     ],
     "functions/src/typed/cas.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/kernels.generated.ts": ["functions/src/index.ts"],
     "functions/src/config-api.ts": ["functions/src/index.ts"],
     "functions/src/wasm/WasmLoader.ts": [
       "functions/src/index.ts",

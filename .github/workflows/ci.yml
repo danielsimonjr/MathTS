@@ -148,6 +148,17 @@ jobs:
       - name: Scalar-search harness tests
         run: node --test tools/test/scalar-search-harness.test.mjs
 
+      # Allocation-free fixed-size kernels (functions/src/geometry/kernels.generated.ts). The
+      # generator check needs no build; the zero-allocation test imports functions/dist and
+      # runs on Node with --expose-gc, so it is a direct `node` call, not a vitest file.
+      - name: Fixed-size kernels generator check
+        run: |
+          node functions/scripts/gen-kernels.mjs --check
+          node --test tools/test/gen-kernels.test.mjs
+
+      - name: Fixed-size kernels zero-allocation test
+        run: node --expose-gc --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
+
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
       # tag lands on. No other job runs the script. These tests run the real script against

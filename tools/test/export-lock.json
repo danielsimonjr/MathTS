@@ -2581,6 +2581,12 @@
       "KendallTauTestResult": {
         "kind": "type"
       },
+      "KernelInput": {
+        "kind": "type"
+      },
+      "KernelOutput": {
+        "kind": "type"
+      },
       "KruskalResult": {
         "kind": "type"
       },
@@ -5269,6 +5275,18 @@
       "massProperties": {
         "kind": "function"
       },
+      "mat3Inverse": {
+        "kind": "function"
+      },
+      "mat3MulVec": {
+        "kind": "function"
+      },
+      "mat3Multiply": {
+        "kind": "function"
+      },
+      "mat3Transpose": {
+        "kind": "function"
+      },
       "mathieuA": {
         "kind": "function"
       },
@@ -5961,6 +5979,21 @@
       },
       "quantumOfCirculation": {
         "kind": "object"
+      },
+      "quatConjugate": {
+        "kind": "function"
+      },
+      "quatIntegrate": {
+        "kind": "function"
+      },
+      "quatMultiply": {
+        "kind": "function"
+      },
+      "quatNormalize": {
+        "kind": "function"
+      },
+      "quatRotate": {
+        "kind": "function"
       },
       "quaternionConjugate": {
         "kind": "function"
@@ -6869,6 +6902,51 @@
         "kind": "function"
       },
       "variation": {
+        "kind": "function"
+      },
+      "vec2Add": {
+        "kind": "function"
+      },
+      "vec2Dot": {
+        "kind": "function"
+      },
+      "vec2Length": {
+        "kind": "function"
+      },
+      "vec2Normalize": {
+        "kind": "function"
+      },
+      "vec2Scale": {
+        "kind": "function"
+      },
+      "vec2ScaleAndAdd": {
+        "kind": "function"
+      },
+      "vec2Sub": {
+        "kind": "function"
+      },
+      "vec3Add": {
+        "kind": "function"
+      },
+      "vec3Cross": {
+        "kind": "function"
+      },
+      "vec3Dot": {
+        "kind": "function"
+      },
+      "vec3Length": {
+        "kind": "function"
+      },
+      "vec3Normalize": {
+        "kind": "function"
+      },
+      "vec3Scale": {
+        "kind": "function"
+      },
+      "vec3ScaleAndAdd": {
+        "kind": "function"
+      },
+      "vec3Sub": {
         "kind": "function"
       },
       "vonMangoldt": {
