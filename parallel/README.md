@@ -21,8 +21,9 @@ npm install @danielsimonjr/mathts-parallel
   covered by its timeout too, and `terminate()` cancels the timers and stops a worker that
   was still starting. `@danielsimonjr/mathts-functions` uses it for `searchScalars`
   (`parallel` option). Construction requires a non-empty `workerScript` (worker entry path
-  or `file://` URL); for chunked numeric work prefer `ComputePool`, which wires the worker
-  script for you.
+  or `file://` URL string, not a `URL` object). Omit it and construction throws
+  `TypeError` before any worker starts. For chunked numeric work prefer `ComputePool`,
+  which wires the worker script for you.
 
 ## License
 
