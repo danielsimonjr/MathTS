@@ -518,6 +518,11 @@ function emitFunction(row) {
   return lines.join('\n');
 }
 
+/**
+ * Builds the text of kernels.generated.ts from the op table.
+ *
+ * @returns The full file text, with LF line endings and a trailing newline.
+ */
 export function generate() {
   const functions = [];
   for (const row of ROWS) {
@@ -526,6 +531,13 @@ export function generate() {
   return HEADER + '\n\n' + functions.join('\n\n') + '\n';
 }
 
+/**
+ * Finds syntax that allocates in generated kernel text: spread, `.map(`, arrow functions and
+ * array destructuring.
+ *
+ * @param text - The generated file text.
+ * @returns One message per forbidden token found; empty when the text is clean.
+ */
 export function staticGuard(text) {
   const forbidden = ['...', '.map(', '=>', 'const ['];
   const problems = [];
