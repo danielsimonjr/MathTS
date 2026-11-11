@@ -10,8 +10,8 @@
 
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
-| Total Source Files                     | 1282                  |
-| Total Test Files                       | 863                   |
+| Total Source Files                     | 1283                  |
+| Total Test Files                       | 864                   |
 | Source Files with Tests                | 530                   |
 | Source Files without Tests             | 753                   |
 | Coverage (raw, direct-import)          | **41.3%**             |
@@ -1605,6 +1605,7 @@ The following 753 source files are not directly imported by any test file:
 | `tests/docs-sync.test.ts`                               | 170 files           |
 | `tests/dogfood-g01-complex-promotion-edges.test.ts`     | 170 files           |
 | `tests/dogfood-g01-complex-promotion.test.ts`           | 170 files           |
+| `tests/dogfood-g03-null-scalar-dispatch.test.ts`        | 0 files             |
 | `tests/dogfood-g09-student-ttest-popmean.test.ts`       | 1 files             |
 | `tests/dtw.test.ts`                                     | 1 files             |
 | `tests/effect-sizes.test.ts`                            | 1 files             |
