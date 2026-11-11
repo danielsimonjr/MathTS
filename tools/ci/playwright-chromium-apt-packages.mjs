@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Apt packages Playwright needs for Chromium on Ubuntu 24.04 (noble) x64.
- * Derived from playwright@1.62.1 nativeDeps (ubuntu24.04-x64 chromium + tools).
- * Re-check when bumping the playwright devDependency.
+ * Apt packages Playwright needs for Chromium on Ubuntu 24.04 and 26.04 x64.
+ * Derived from playwright@1.62.1 nativeDeps. ubuntu26.04-x64 chromium + tools
+ * is the same list as ubuntu24.04-x64. Re-check when bumping Playwright.
  */
 import { readFileSync } from 'node:fs';
 
@@ -42,18 +42,18 @@ const NOBLE_CHROMIUM_AND_TOOLS = [
   'libxrandr2',
 ];
 
-function isUbuntu2404() {
+function isSupportedUbuntu() {
   try {
     const osRelease = readFileSync('/etc/os-release', 'utf8');
-    return /VERSION_ID="24\.04"/.test(osRelease);
+    return /VERSION_ID="(?:24|26)\.04"/.test(osRelease);
   } catch {
     return false;
   }
 }
 
-if (!isUbuntu2404()) {
+if (!isSupportedUbuntu()) {
   console.error(
-    'playwright-chromium-apt-packages.mjs: expected Ubuntu 24.04 (noble); package list may be wrong',
+    'playwright-chromium-apt-packages.mjs: expected Ubuntu 24.04 or 26.04; package list may be wrong',
   );
   process.exit(1);
 }
