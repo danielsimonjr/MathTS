@@ -572,11 +572,15 @@ describe('solvePDE (heat equation)', () => {
     expect(res.u[5]).toBeLessThan(1);
   });
 
-  it('still computes when r > 0.5 (CFL branch taken, no throw)', () => {
+  it('throws RangeError when r > 0.5 unless allowUnstable', () => {
+    expect(() =>
+      solvePDE({ alpha: 1 }, { L: 1, nx: 11, nt: 5, T: 1 }, { left: 0, right: 0, initial: () => 1 })
+    ).toThrow(RangeError);
     const res = solvePDE(
       { alpha: 1 },
       { L: 1, nx: 11, nt: 5, T: 1 },
-      { left: 0, right: 0, initial: () => 1 }
+      { left: 0, right: 0, initial: () => 1 },
+      { allowUnstable: true }
     );
     expect(res.u.length).toBe(11);
   });
