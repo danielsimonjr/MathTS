@@ -11,6 +11,18 @@ import { DimensionError } from '../error/DimensionError.js';
 type TrigKernel = (x: number) => number;
 type ComplexTrigKernel = (x: Complex) => Complex;
 
+/**
+ * Apply a trig kernel to an angle unit.
+ *
+ * Non-angle units throw `DimensionError`. A numeric value uses `numberKernel`;
+ * a complex value uses `complexKernel`. The unit's SI value is already radians.
+ *
+ * @param u - Angle unit (radians, degrees, gradians, or cycles)
+ * @param fnName - Public function name, used in the dimension error
+ * @param numberKernel - Real kernel, given the angle in radians
+ * @param complexKernel - Complex kernel, given the angle in radians
+ * @returns The kernel result
+ */
 export function trigFromAngleUnit(
   u: UnitInstance,
   fnName: string,

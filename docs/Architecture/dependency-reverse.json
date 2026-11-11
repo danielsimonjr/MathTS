@@ -1004,6 +1004,7 @@
       "functions/src/trigonometry/cosh.ts",
       "functions/src/trigonometry/tanh.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
+      "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/relational.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
@@ -1083,6 +1084,7 @@
       "functions/src/trigonometry/asin.ts",
       "functions/src/trigonometry/atanh.ts",
       "functions/src/type/unit/physicalConstants.ts",
+      "functions/src/typed/complex-promotion.ts",
       "functions/src/types.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
@@ -1318,6 +1320,7 @@
       "functions/src/trigonometry/sec.ts",
       "functions/src/trigonometry/sech.ts",
       "functions/src/trigonometry/sinh.ts",
+      "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/special.ts",
       "functions/src/utils/isNaN.ts",
       "functions/src/utils/isNegative.ts",
@@ -1691,7 +1694,8 @@
     "functions/src/factories/scope.ts": [
       "functions/src/config-api.ts",
       "functions/src/factories/evaluate.ts",
-      "functions/src/factories/index.ts"
+      "functions/src/factories/index.ts",
+      "functions/src/typed/complex-promotion.ts"
     ],
     "functions/src/typed/arithmetic.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2555,6 +2559,11 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",
       "functions/src/typed/special.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
+    "functions/src/typed/invalid-scalar-guards.ts": ["functions/src/typed/arithmetic.ts"],
+    "functions/src/typed/complex-promotion.ts": [
+      "functions/src/typed/arithmetic.ts",
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
