@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1277,
+    "totalFiles": 1279,
     "totalModules": 82,
-    "totalExports": 6966
+    "totalExports": 6972
   },
   "entryPoints": [
     {
@@ -751,6 +751,15 @@
           "isSafeMethod"
         ]
       },
+      "core/src/deterministic.ts": {
+        "description": "Deterministic mode: a process-wide switch that makes implicit routing reproducible.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["setDeterministic", "isDeterministic"],
+        "functions": ["setDeterministic", "isDeterministic"]
+      },
       "core/src/factory.ts": {
         "description": "Type for a factory function that creates instances",
         "externalDependencies": [],
@@ -1016,6 +1025,11 @@
             "reExport": true
           },
           {
+            "file": "./deterministic.js",
+            "imports": ["setDeterministic", "isDeterministic"],
+            "reExport": true
+          },
+          {
             "file": "./types/interfaces.js",
             "imports": [
               "MathTSValue",
@@ -1257,6 +1271,8 @@
           "createSeededRng",
           "SeededRng",
           "rowMajorStrides",
+          "setDeterministic",
+          "isDeterministic",
           "VERSION",
           "MathTSValue",
           "Scalar",
@@ -1450,6 +1466,8 @@
           "createSeededRng",
           "SeededRng",
           "rowMajorStrides",
+          "setDeterministic",
+          "isDeterministic",
           "MathTSValue",
           "Scalar",
           "BackendType",
@@ -3853,7 +3871,13 @@
             "imports": []
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["isDeterministic"]
+          }
+        ],
         "exports": [
           "DEFAULT_EXTENDED_HINTS",
           "backendManager",
@@ -16714,7 +16738,12 @@
         "description": "WebGPU fused element-wise chain.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./implicit.js",
+            "imports": ["implicitGpuAllowed"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-gpu",
@@ -16722,7 +16751,6 @@
             "imports": [
               "getGpuDevice",
               "getGlobalGPUContext",
-              "isGpuEnabled",
               "GPU_MIN_ELEMENTS",
               "ShaderManager",
               "BufferPool",
@@ -16754,7 +16782,12 @@
         "description": "WebGPU FFT — Stockham autosort, radix-2, f32.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./implicit.js",
+            "imports": ["implicitGpuAllowed"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-gpu",
@@ -16762,7 +16795,6 @@
             "imports": [
               "getGpuDevice",
               "getGlobalGPUContext",
-              "isGpuEnabled",
               "ShaderManager",
               "BufferPool",
               "serializeGpu",
@@ -16773,6 +16805,26 @@
         "exports": ["resetGpuFft", "fftGpuDispatch"],
         "interfaces": ["GpuFftOptions", "GpuFftResult"],
         "functions": ["resetGpuFft", "fftGpuDispatch"]
+      },
+      "functions/src/gpu/implicit.ts": {
+        "description": "Whether an implicit call may route to the GPU.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["isDeterministic"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["isGpuEnabled"]
+          }
+        ],
+        "exports": ["implicitGpuAllowed"],
+        "functions": ["implicitGpuAllowed"]
       }
     },
     "functions/graph": {
@@ -24762,7 +24814,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mulberry32"]
+            "imports": ["isDeterministic", "mulberry32"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -25997,7 +26049,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum"]
+            "imports": ["isDeterministic", "pairwiseSum"]
           }
         ],
         "exports": [
@@ -28527,10 +28579,22 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["isDeterministic"]
+          }
+        ],
+        "exports": [
+          "DETERMINISTIC_WASM",
+          "wasmPolicyAllows",
+          "overrideWasmPolicy",
+          "wasmDispatchPolicy"
+        ],
         "interfaces": ["WasmBand"],
-        "functions": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"]
+        "functions": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"],
+        "constants": ["DETERMINISTIC_WASM"]
       },
       "functions/src/wasm/poly/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for polynomial hot-loop kernels.",
@@ -38925,6 +38989,7 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": [
+              "isDeterministic",
               "pairwiseSum",
               "norm2",
               "pairwiseDot",
@@ -44016,6 +44081,7 @@
           "core/src/config.ts",
           "core/src/constants.ts",
           "core/src/customs.ts",
+          "core/src/deterministic.ts",
           "core/src/factory.ts",
           "core/src/index.ts",
           "core/src/internal.ts",
@@ -44427,7 +44493,11 @@
       },
       {
         "name": "Functions/gpu",
-        "files": ["functions/src/gpu/elementwise-gpu.ts", "functions/src/gpu/fft-gpu.ts"]
+        "files": [
+          "functions/src/gpu/elementwise-gpu.ts",
+          "functions/src/gpu/fft-gpu.ts",
+          "functions/src/gpu/implicit.ts"
+        ]
       },
       {
         "name": "Functions/graph",
@@ -45618,17 +45688,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1277,
+    "totalTypeScriptFiles": 1279,
     "totalModules": 82,
-    "totalLinesOfCode": 216401,
-    "totalExports": 6966,
+    "totalLinesOfCode": 216480,
+    "totalExports": 6972,
     "totalClasses": 61,
     "totalInterfaces": 600,
-    "totalFunctions": 2329,
-    "totalTypeGuards": 168,
+    "totalFunctions": 2332,
+    "totalTypeGuards": 169,
     "totalEnums": 0,
-    "totalConstants": 1639,
-    "totalReExports": 3012,
+    "totalConstants": 1640,
+    "totalReExports": 3014,
     "totalTypeOnlyImports": 640,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

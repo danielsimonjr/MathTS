@@ -676,6 +676,9 @@
       "isDenseMatrix": {
         "kind": "function"
       },
+      "isDeterministic": {
+        "kind": "function"
+      },
       "isDual": {
         "kind": "function"
       },
@@ -788,6 +791,9 @@
         "kind": "function"
       },
       "scaledDistance": {
+        "kind": "function"
+      },
+      "setDeterministic": {
         "kind": "function"
       },
       "subtractScalar": {

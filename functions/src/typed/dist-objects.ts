@@ -23,7 +23,7 @@
  * @packageDocumentation
  */
 
-import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
+import { isDeterministic, mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
   _lgamma,
@@ -194,7 +194,12 @@ async function _sampleNDispatch(
 ): Promise<Float64Array> {
   const seed = opts?.seed !== undefined ? opts.seed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
 
-  if (distName !== null && n >= DIST_WORKER_THRESHOLD && computePool.isReady()) {
+  if (
+    !isDeterministic() &&
+    distName !== null &&
+    n >= DIST_WORKER_THRESHOLD &&
+    computePool.isReady()
+  ) {
     const K = opts?.workerCount !== undefined ? opts.workerCount : computePool.workerCount;
     const effectiveK = Math.max(1, Math.min(K, n));
     return computePool.distributionSampleFanOut(distName, params, n, seed, effectiveK);

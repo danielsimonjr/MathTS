@@ -29,13 +29,13 @@
 import {
   getGpuDevice,
   getGlobalGPUContext,
-  isGpuEnabled,
   GPU_MIN_ELEMENTS,
   ShaderManager,
   BufferPool,
   serializeGpu,
   type GPUContextOptions,
 } from '@danielsimonjr/mathts-gpu';
+import { implicitGpuAllowed } from './implicit.js';
 
 /**
  * IEEE bit patterns, constructed explicitly.
@@ -487,7 +487,7 @@ function chainGatesOpen(
   n: number,
   options: GpuChainOptions | undefined
 ): boolean {
-  const enabled = options?.gpu ?? isGpuEnabled();
+  const enabled = implicitGpuAllowed(options);
   return enabled && ops.length > 0 && n >= GPU_MIN_ELEMENTS && isGpuChainSupported(ops);
 }
 

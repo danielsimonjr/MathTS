@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1277, "e": 6966, "re": 3012 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1279, "e": 6972, "re": 3014 },
   "s": {
-    "loc": 216401,
+    "loc": 216480,
     "cls": 61,
     "int": 600,
-    "fn": 2329,
-    "tg": 168,
+    "fn": 2332,
+    "tg": 169,
     "en": 0,
-    "co": 1639,
+    "co": 1640,
     "toi": 640
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -92,7 +92,7 @@
       ]
     },
     "core": {
-      "f": 18,
+      "f": 19,
       "exp": [
         "arraySize",
         "validate",
@@ -689,7 +689,7 @@
       ]
     },
     "functions/gpu": {
-      "f": 2,
+      "f": 3,
       "exp": [
         "GPU_ELEMENTWISE_OPS",
         "GPU_REDUCE_OPS",
@@ -699,7 +699,8 @@
         "elementwiseChainReduceGpuDispatch",
         "reduceNumbers",
         "resetGpuFft",
-        "fftGpuDispatch"
+        "fftGpuDispatch",
+        "implicitGpuAllowed"
       ],
       "int": ["GpuChainOptions", "GpuFftOptions", "GpuFftResult"]
     },

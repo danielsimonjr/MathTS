@@ -264,3 +264,6 @@ export {
 } from './numeric/stable.js';
 export { mulberry32, boxMuller, createSeededRng, type SeededRng } from './numeric/rng.js';
 export { rowMajorStrides } from './numeric/strides.js';
+
+// Deterministic mode (process-wide switch for reproducible implicit routing)
+export { setDeterministic, isDeterministic } from './deterministic.js';

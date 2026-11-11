@@ -8,6 +8,7 @@
  */
 
 import {
+  isDeterministic,
   pairwiseSum,
   norm2,
   pairwiseDot,
@@ -520,6 +521,7 @@ export class ComputePool {
    * backward-compatibility with existing callers that don't know the op name).
    */
   shouldParallelize(elementCount: number, op?: OpName, force?: DispatchOptions): boolean {
+    if (isDeterministic()) return false;
     if (force?.forceSequential) return false;
     if (force?.forceParallel) return this.config.enabled && this.workerPool.isReady();
     const byOp = this.config.thresholdByOp;

@@ -115,6 +115,7 @@
     "core/src/numeric/stable.ts": ["core/src/index.ts"],
     "core/src/numeric/rng.ts": ["core/src/index.ts"],
     "core/src/numeric/strides.ts": ["core/src/index.ts"],
+    "core/src/deterministic.ts": ["core/src/index.ts"],
     "core/src/types/interfaces.ts": [
       "core/src/index.ts",
       "core/src/types/bignumber.ts",
@@ -2343,6 +2344,10 @@
     "functions/src/typed/set.ts": [
       "functions/src/geometry/geometry-extra.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/gpu/implicit.ts": [
+      "functions/src/gpu/elementwise-gpu.ts",
+      "functions/src/gpu/fft-gpu.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo13xDD.ts": [
       "functions/src/logical/nullish.ts",
