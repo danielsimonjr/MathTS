@@ -64,9 +64,9 @@ export interface SolveParabolicPDEOptions {
   nx: number;
   /** Initial condition `u0(x)`. */
   u0: (x: number) => number;
-  /** Left (`x = x0`) boundary condition. */
+  /** Left (`x = x0`) boundary condition — must be `{ type, value }`, not a bare number. */
   bcLeft: ParabolicBC;
-  /** Right (`x = x1`) boundary condition. */
+  /** Right (`x = x1`) boundary condition — must be `{ type, value }`, not a bare number. */
   bcRight: ParabolicBC;
   /** Relative tolerance for the BDF integrator (default 1e-6). */
   tol?: number;
@@ -102,6 +102,21 @@ function asTimeFn(g: BoundaryDatum): (t: number) => number {
   return typeof g === 'function' ? g : () => g;
 }
 
+const BC_SHAPE = "{ type: 'dirichlet' | 'neumann', value: number | (t: number) => number }";
+
+/** Reject shorthand numbers (e.g. `bcLeft: 0`) before the BDF integrator runs. */
+function assertParabolicBC(name: 'bcLeft' | 'bcRight', bc: unknown): asserts bc is ParabolicBC {
+  if (
+    typeof bc !== 'object' ||
+    bc === null ||
+    !('type' in bc) ||
+    !('value' in bc) ||
+    ((bc as ParabolicBC).type !== 'dirichlet' && (bc as ParabolicBC).type !== 'neumann')
+  ) {
+    throw new TypeError(`solveParabolicPDE: ${name} must be ${BC_SHAPE}`);
+  }
+}
+
 /**
  * Solve the general 1-D parabolic PDE `u_t = D(x)·u_xx + c(x)·u_x + f(x, t, u)`
  * by the method of lines onto the BDF stiff ODE solver.
@@ -117,6 +132,8 @@ function asTimeFn(g: BoundaryDatum): (t: number) => number {
  * // sol.u[sol.t.length - 1] ≈ e^{−π²·0.1} sin(πx)
  */
 export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicPDESolution {
+  assertParabolicBC('bcLeft', options.bcLeft);
+  assertParabolicBC('bcRight', options.bcRight);
   const { x0, x1, T, nx, u0, bcLeft, bcRight } = options;
 
   if (!(nx >= 3) || !Number.isInteger(nx)) {

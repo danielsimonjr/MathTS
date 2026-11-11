@@ -2238,12 +2238,14 @@ export function linprog(
  * @param pde - { alpha: diffusion coefficient }
  * @param domain - { L: domain length, nx: spatial points, nt: time steps, T: final time }
  * @param bc - { left: left BC value, right: right BC value, initial: initial condition function }
+ * @param options - `{ allowUnstable?: boolean }` — when false (default), throws if the explicit-Euler CFL number `r = α Δt/Δx²` exceeds `0.5`.
  * @returns `{ x: number[], u: number[] }` solution at final time
  */
 export function solvePDE(
   pde: { alpha: f64 },
   domain: { L: f64; nx: i32; nt: i32; T: f64 },
-  bc: { left: f64; right: f64; initial: (x: f64) => f64 }
+  bc: { left: f64; right: f64; initial: (x: f64) => f64 },
+  options?: { allowUnstable?: boolean }
 ): { x: number[]; u: number[] } {
   const { alpha } = pde;
   const { L, nx, nt, T } = domain;
@@ -2251,8 +2253,10 @@ export function solvePDE(
   const dt = T / nt;
   const r = (alpha * dt) / (dx * dx);
 
-  if (r > 0.5) {
-    // CFL condition warning - still compute but may be unstable
+  if (r > 0.5 && !options?.allowUnstable) {
+    throw new RangeError(
+      `solvePDE: explicit Euler heat step violates CFL stability (r=${r} > limit 0.5); use smaller Δt, coarser nx, or pass { allowUnstable: true }`
+    );
   }
 
   const x: number[] = [];
