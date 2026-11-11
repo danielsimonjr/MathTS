@@ -5,7 +5,9 @@
  * before it writes, so an output may be the same array as an input, at any offset.
  *
  * The arithmetic of the kernels with a `@fourjs/math` counterpart keeps the term order
- * of that counterpart, so the results match it bit for bit.
+ * of that counterpart, so for finite input on the same engine the results match it bit
+ * for bit. The exceptions are documented on each function: `mat4Determinant` sums in
+ * another order, `mat4Invert` has no singular branch, and `mat4Compose` takes no pivot.
  *
  * @packageDocumentation
  */
@@ -25,14 +27,14 @@ export type Mat4DepthRange = 'negative-one-to-one' | 'zero-to-one';
  * @param bOff - Index of the first cell of `b`. Default 0.
  * @returns `out`.
  */
-export function mat4Multiply(
-  out: KernelOutput,
+export function mat4Multiply<T extends KernelOutput>(
+  out: T,
   a: KernelInput,
   b: KernelInput,
   outOff = 0,
   aOff = 0,
   bOff = 0
-): KernelOutput {
+): T {
   const a11 = a[aOff]!;
   const a21 = a[aOff + 1]!;
   const a31 = a[aOff + 2]!;
@@ -148,7 +150,12 @@ export function mat4Determinant(m: KernelInput, mOff = 0): number {
  * @param mOff - Index of the first cell of `m`. Default 0.
  * @returns `out`.
  */
-export function mat4Invert(out: KernelOutput, m: KernelInput, outOff = 0, mOff = 0): KernelOutput {
+export function mat4Invert<T extends KernelOutput>(
+  out: T,
+  m: KernelInput,
+  outOff = 0,
+  mOff = 0
+): T {
   const n11 = m[mOff]!;
   const n21 = m[mOff + 1]!;
   const n31 = m[mOff + 2]!;
@@ -308,7 +315,9 @@ export function mat4Invert(out: KernelOutput, m: KernelInput, outOff = 0, mOff =
 /**
  * Builds a translate-rotate-scale matrix: `T · R · S`. The upper 3x3 block is the
  * rotation columns scaled by `scale`, and the translation column is `position`.
- * The result equals `@fourjs/math` `Matrix4.compose` with a zero pivot.
+ * For finite input it equals `@fourjs/math` `Matrix4.compose` with a zero pivot, except
+ * that a `-0` position cell stays `-0` (fourJS gives `+0`) and an infinite scale does not
+ * reach the translation column (fourJS gives NaN there).
  *
  * @param out - Receives the 16 cells at `outOff`.
  * @param position - Translation `[x, y, z]`, read at `pOff`.
@@ -320,8 +329,8 @@ export function mat4Invert(out: KernelOutput, m: KernelInput, outOff = 0, mOff =
  * @param sOff - Index of the first value of `scale`. Default 0.
  * @returns `out`.
  */
-export function mat4Compose(
-  out: KernelOutput,
+export function mat4Compose<T extends KernelOutput>(
+  out: T,
   position: KernelInput,
   rotation: KernelInput,
   scale: KernelInput,
@@ -329,7 +338,7 @@ export function mat4Compose(
   pOff = 0,
   rOff = 0,
   sOff = 0
-): KernelOutput {
+): T {
   const w = rotation[rOff]!;
   const x = rotation[rOff + 1]!;
   const y = rotation[rOff + 2]!;
@@ -507,8 +516,8 @@ export function mat4Decompose(
  * @param upOff - Index of the first value of `up`. Default 0.
  * @returns `out`.
  */
-export function mat4LookAt(
-  out: KernelOutput,
+export function mat4LookAt<T extends KernelOutput>(
+  out: T,
   eye: KernelInput,
   target: KernelInput,
   up: KernelInput,
@@ -516,7 +525,7 @@ export function mat4LookAt(
   eyeOff = 0,
   targetOff = 0,
   upOff = 0
-): KernelOutput {
+): T {
   const ex = eye[eyeOff]!;
   const ey = eye[eyeOff + 1]!;
   const ez = eye[eyeOff + 2]!;
@@ -585,15 +594,15 @@ export function mat4LookAt(
  * @param outOff - Index of the first cell of `out`. Default 0.
  * @returns `out`.
  */
-export function mat4Perspective(
-  out: KernelOutput,
+export function mat4Perspective<T extends KernelOutput>(
+  out: T,
   fovY: number,
   aspect: number,
   near: number,
   far: number,
   depthRange: Mat4DepthRange = 'negative-one-to-one',
   outOff = 0
-): KernelOutput {
+): T {
   const focalLength = 1 / Math.tan(fovY * 0.5);
   const nearMinusFar = near - far;
 
@@ -639,8 +648,8 @@ export function mat4Perspective(
  * @param outOff - Index of the first cell of `out`. Default 0.
  * @returns `out`.
  */
-export function mat4Orthographic(
-  out: KernelOutput,
+export function mat4Orthographic<T extends KernelOutput>(
+  out: T,
   left: number,
   right: number,
   bottom: number,
@@ -649,7 +658,7 @@ export function mat4Orthographic(
   far: number,
   depthRange: Mat4DepthRange = 'negative-one-to-one',
   outOff = 0
-): KernelOutput {
+): T {
   const width = right - left;
   const height = top - bottom;
   const depth = far - near;

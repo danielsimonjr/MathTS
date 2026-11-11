@@ -10,6 +10,7 @@ import {
   mat4Invert,
   mat4LookAt,
   mat4Multiply,
+  mat4Orthographic,
   mat4Perspective,
 } from '../src/index.js';
 
@@ -158,5 +159,141 @@ describe('frustum kernels', () => {
     frustumFromMatrix(big, big, 'negative-one-to-one', 2, 0);
     close(big.subarray(2, 26), planes, 0);
     expect(frustumContainsPoint(big, [0, 0, -10], 2)).toBe(true);
+  });
+});
+
+describe('review: orientation, offsets, guards and boundaries', () => {
+  it('lookAt from +Z at the origin is the identity rotation and translates by -5', () => {
+    const v = new Float64Array(16);
+    mat4LookAt(v, [0, 0, 5], [0, 0, 0], [0, 1, 0]);
+    close(v, [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -5, 1], 0);
+  });
+
+  it('lookAt, perspective and frustum agree as a pipeline', () => {
+    const view = new Float64Array(16);
+    mat4LookAt(view, [10, 0, 0], [0, 0, 0], [0, 1, 0]);
+    const proj = new Float64Array(16);
+    mat4Perspective(proj, 1, 1, 1, 100);
+    const vp = mat4Multiply(new Float64Array(16), proj, view);
+    const planes = frustumFromMatrix(new Float64Array(24), vp);
+    expect(frustumContainsPoint(planes, [0, 0, 0])).toBe(true); // in front of the camera
+    expect(frustumContainsPoint(planes, [20, 0, 0])).toBe(false); // behind it
+    expect(frustumContainsPoint(planes, [0, 0, 8])).toBe(false); // outside the left/right planes
+  });
+
+  it('every kernel honours every offset', () => {
+    const pad = (xs: ArrayLike<number>, off: number): Float64Array => {
+      const a = new Float64Array(off + xs.length + 3).fill(Number.NaN);
+      a.set(xs, off);
+      return a;
+    };
+    const q = [Math.cos(0.4), Math.sin(0.4) * 0.6, 0, Math.sin(0.4) * 0.8];
+    const P = [1, -2, 3];
+    const S = [2, 0.5, 3];
+    const ref = (f: (o: Float64Array) => unknown, n: number): Float64Array => {
+      const o = new Float64Array(n);
+      f(o);
+      return o;
+    };
+    const check = (
+      n: number,
+      plain: (o: Float64Array) => unknown,
+      shifted: (o: Float64Array) => unknown
+    ): void => {
+      const want = ref(plain, n);
+      const o = new Float64Array(n + 9).fill(Number.NaN);
+      shifted(o);
+      close(o.subarray(5, 5 + n), want, 0);
+      expect(Number.isNaN(o[4]!) && Number.isNaN(o[5 + n]!)).toBe(true);
+    };
+    check(
+      16,
+      (o) => mat4Invert(o, M),
+      (o) => mat4Invert(o, pad(M, 2), 5, 2)
+    );
+    expect(mat4Determinant(pad(M, 3), 3)).toBe(mat4Determinant(M));
+    check(
+      16,
+      (o) => mat4Compose(o, P, q, S),
+      (o) => mat4Compose(o, pad(P, 1), pad(q, 2), pad(S, 3), 5, 1, 2, 3)
+    );
+    check(
+      16,
+      (o) => mat4LookAt(o, [3, 4, 5], [-1, 2, 0.5], [0, 1, 0]),
+      (o) => mat4LookAt(o, pad([3, 4, 5], 1), pad([-1, 2, 0.5], 2), pad([0, 1, 0], 3), 5, 1, 2, 3)
+    );
+    check(
+      16,
+      (o) => mat4Perspective(o, 1, 1.5, 0.5, 100, 'zero-to-one'),
+      (o) => mat4Perspective(o, 1, 1.5, 0.5, 100, 'zero-to-one', 5)
+    );
+    check(
+      16,
+      (o) => mat4Orthographic(o, -2, 3, -1, 4, 0.5, 9, 'zero-to-one'),
+      (o) => mat4Orthographic(o, -2, 3, -1, 4, 0.5, 9, 'zero-to-one', 5)
+    );
+    check(
+      24,
+      (o) => frustumFromMatrix(o, M),
+      (o) => frustumFromMatrix(o, pad(M, 2), 'negative-one-to-one', 5, 2)
+    );
+    const m = mat4Compose(new Float64Array(16), P, q, S);
+    const dp = new Float64Array(8).fill(Number.NaN);
+    const dr = new Float64Array(9).fill(Number.NaN);
+    const ds = new Float64Array(8).fill(Number.NaN);
+    mat4Decompose(dp, dr, ds, pad(m, 4), 2, 3, 4, 4);
+    close(dp.subarray(2, 5), P, 1e-12);
+    close(dr.subarray(3, 7), q, 1e-12);
+    close(ds.subarray(4, 7), S, 1e-12);
+    const vp = new Float64Array(16);
+    mat4Perspective(vp, 1.2, 1, 1, 50);
+    const pl = pad(frustumFromMatrix(new Float64Array(24), vp), 3);
+    for (const [pt, inside] of [
+      [[0, 0, -10], true],
+      [[0, 0, 10], false],
+    ] as const) {
+      expect(frustumContainsPoint(pl, pad(pt, 2), 3, 2)).toBe(inside);
+      expect(frustumIntersectsSphere(pl, pad(pt, 1), 0.5, 3, 1)).toBe(inside);
+      const lo = [pt[0] - 1, pt[1] - 1, pt[2] - 1];
+      const hi = [pt[0] + 1, pt[1] + 1, pt[2] + 1];
+      expect(frustumIntersectsAabb(pl, pad(lo, 1), pad(hi, 2), 3, 1, 2)).toBe(inside);
+    }
+  });
+
+  it('decompose: a zero scale on any axis gives the identity rotation', () => {
+    const q = [Math.cos(0.4), Math.sin(0.4) * 0.6, 0, Math.sin(0.4) * 0.8];
+    for (const s of [
+      [0, 1, 1],
+      [1, 0, 1],
+      [1, 1, 0],
+    ]) {
+      const m = mat4Compose(new Float64Array(16), [1, 2, 3], q, s);
+      const r = new Float64Array(4);
+      mat4Decompose(new Float64Array(3), r, new Float64Array(3), m);
+      expect(Array.from(r)).toEqual([1, 0, 0, 0]);
+    }
+  });
+
+  it('frustum planes: NaN and infinite rows give the everything-inside plane', () => {
+    for (const bad of [Number.NaN, Number.POSITIVE_INFINITY]) {
+      const m = Float64Array.from(I);
+      m[0] = bad; // reaches the x component of the left and right planes
+      const p = frustumFromMatrix(new Float64Array(24), m);
+      expect([p[0], p[1], p[2], p[3]]).toEqual([0, 0, 0, Infinity]);
+      expect([p[4], p[5], p[6], p[7]]).toEqual([0, 0, 0, Infinity]);
+    }
+  });
+
+  it('boundaries: a point on a plane, a sphere and a box that touch it count as inside', () => {
+    // Orthographic box [-1, 1]^2, near 1, far 3: the right plane is x = 1.
+    const m = new Float64Array(16);
+    mat4Orthographic(m, -1, 1, -1, 1, 1, 3);
+    const p = frustumFromMatrix(new Float64Array(24), m);
+    expect(frustumContainsPoint(p, [1, 0, -2])).toBe(true);
+    expect(frustumContainsPoint(p, [1 + 1e-9, 0, -2])).toBe(false);
+    expect(frustumIntersectsSphere(p, [2, 0, -2], 1)).toBe(true);
+    expect(frustumIntersectsSphere(p, [2 + 1e-9, 0, -2], 1)).toBe(false);
+    expect(frustumIntersectsAabb(p, [1, 0, -2], [2, 1, -1])).toBe(true);
+    expect(frustumIntersectsAabb(p, [1 + 1e-9, 0, -2], [2, 1, -1])).toBe(false);
   });
 });

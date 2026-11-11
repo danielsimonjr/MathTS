@@ -6365,7 +6365,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 218
+      "loc": 222
     },
     {
       "file": "functions/src/geometry/geometry-extra.ts",
@@ -6421,7 +6421,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 683
+      "loc": 692
     },
     {
       "file": "functions/src/geometry/polygon-ops.ts",
@@ -11013,14 +11013,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 167
+      "loc": 177
     },
     {
       "file": "functions/tests/mat4.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 163
+      "loc": 300
     },
     {
       "file": "functions/tests/matrix-bridge-accel.test.ts",

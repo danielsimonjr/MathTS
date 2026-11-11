@@ -1,7 +1,7 @@
 /**
  * Bit-exact parity of the mat4 and frustum kernels with fourJS `Matrix4` / `Frustum`.
- * The fixture comes from `functions/scripts/gen-fourjs-parity.mjs` (run by hand with Bun
- * against a fourJS checkout). Every float64 in it is 16 hex digits of its bits.
+ * The fixture comes from `functions/scripts/gen-fourjs-parity.mjs` (run by hand with Node
+ * against a built fourJS checkout). Every float64 in it is 16 hex digits of its bits.
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
@@ -58,6 +58,8 @@ function hex(x: number): Hex {
     view.getUint32(4).toString(16).padStart(8, '0')
   );
 }
+/** Distance in ulps between two finite float64 values of the same sign. */
+const ulps = (a: Hex, b: Hex): number => Math.abs(Number(BigInt(`0x${a}`) - BigInt(`0x${b}`)));
 const nums = (hs: Hex[]): Float64Array => Float64Array.from(hs, num);
 const hexes = (xs: ArrayLike<number>): Hex[] => Array.from(xs, hex);
 
@@ -113,7 +115,15 @@ describe('mat4 kernels match fourJS Matrix4 bit for bit', () => {
       const [fovY, aspect, near, far] = c.args.map(num) as [number, number, number, number];
       const out = new Float64Array(16);
       mat4Perspective(out, fovY, aspect, near, far, c.depthRange);
-      expect(hexes(out)).toEqual(c.out);
+      // Cells 0 and 5 hold 1 / Math.tan(fovY / 2). Math.tan differs by one ulp between
+      // V8 (the fixture's engine) and JavaScriptCore (the Bun test step) for some inputs.
+      // Those two cells may differ by at most one ulp; the other 14 are exact.
+      const got = hexes(out);
+      for (let i = 0; i < 16; i++) {
+        if (i === 0 || i === 5)
+          expect(ulps(got[i]!, c.out[i]!), `cell ${i}`).toBeLessThanOrEqual(1);
+        else expect(got[i], `cell ${i}`).toBe(c.out[i]);
+      }
     }
   });
 

@@ -1,7 +1,8 @@
 /**
  * View frustum as six planes, with allocation-free containment tests. The planes are
  * stored as `(nx, ny, nz, d)` with unit inward normals, in the order left, right,
- * bottom, top, near, far. The tests follow `@fourjs/math` `Frustum` bit for bit.
+ * bottom, top, near, far. The functions keep the arithmetic of `@fourjs/math` `Frustum`,
+ * so for the same input on the same engine they give the same planes and answers.
  *
  * @packageDocumentation
  */
@@ -47,13 +48,13 @@ function normalizePlane(planes: KernelOutput, offset: number): void {
  * @param mOff - Index of the first cell of `m`. Default 0.
  * @returns `planes`.
  */
-export function frustumFromMatrix(
-  planes: KernelOutput,
+export function frustumFromMatrix<T extends KernelOutput>(
+  planes: T,
   m: KernelInput,
   depthRange: Mat4DepthRange = 'negative-one-to-one',
   planesOff = 0,
   mOff = 0
-): KernelOutput {
+): T {
   // Rows of a column-major matrix: row `i` is `m[column * 4 + i]`.
   const r0x = m[mOff]!;
   const r0y = m[mOff + 4]!;
@@ -144,8 +145,9 @@ export function frustumContainsPoint(
 }
 
 /**
- * Tests whether a bounding sphere touches the frustum. A `NaN` or infinite component in
- * `center` or `radius` gives `true`.
+ * Tests whether a bounding sphere touches the frustum. A `NaN` component in `center` or a
+ * `NaN` `radius` gives `true`. An infinite component does not: it gives the result of
+ * the IEEE comparison (for example a centre at `-Infinity` on x gives `false`).
  *
  * @param planes - Six planes, 24 numbers, read at `planesOff`.
  * @param center - Sphere centre `[x, y, z]`, read at `cOff`.
@@ -177,7 +179,9 @@ export function frustumIntersectsSphere(
  * Tests whether an axis-aligned box touches the frustum. Each plane is tested against its
  * positive vertex, the corner furthest along the normal. A zero normal component selects
  * the maximum. An inverted box (`min > max` on an axis) is used as given. `NaN` bounds
- * give `true`.
+ * give `true`. An infinite bound on an axis where a plane normal component is exactly 0
+ * gives `0 * Infinity = NaN`, so that plane cannot reject the box (the safe direction,
+ * as in fourJS): an axis-aligned camera never culls a box that is infinite along x or y.
  *
  * @param planes - Six planes, 24 numbers, read at `planesOff`.
  * @param min - Box minimum corner `[x, y, z]`, read at `minOff`.

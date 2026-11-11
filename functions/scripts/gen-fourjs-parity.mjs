@@ -9,6 +9,10 @@
  * the test needs no fourJS:
  *
  *   node functions/scripts/gen-fourjs-parity.mjs --fourjs <path to the fourJS checkout>
+ *     [--seed <int, default 0x381>] [--count <int, default 24>] [--out <file>]
+ *
+ * `--out` defaults to `functions/tests/fixtures/fourjs-parity.json`. The script refuses a
+ * fourJS tree with uncommitted changes, because the fixture records its commit.
  *
  * Use Node, the engine that runs the test: `Math.tan` differs by one ulp between V8
  * and JavaScriptCore (Bun) for some inputs, so a fixture made under Bun fails on Node.
@@ -21,11 +25,17 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const SEED = 0x381;
-const COUNT = 24;
-
-const at = process.argv.indexOf('--fourjs');
-const fourjs = at >= 0 ? process.argv[at + 1] : undefined;
+function arg(name) {
+  const i = process.argv.indexOf(name);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+}
+const SEED = Number(arg('--seed') ?? 0x381);
+const COUNT = Number(arg('--count') ?? 24);
+if (!Number.isInteger(SEED) || !Number.isInteger(COUNT) || COUNT < 1) {
+  console.error('--seed and --count must be integers (count >= 1)');
+  process.exit(2);
+}
+const fourjs = arg('--fourjs');
 if (!fourjs) {
   console.error('usage: node functions/scripts/gen-fourjs-parity.mjs --fourjs <fourJS checkout>');
   process.exit(2);
@@ -34,6 +44,14 @@ const { Matrix4, Frustum, Quaternion, Vector3 } = await import(
   pathToFileURL(join(fourjs, 'packages', 'math', 'dist', 'index.js')).href
 );
 const sha = execFileSync('git', ['-C', fourjs, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const dirty = execFileSync('git', ['-C', fourjs, 'status', '--porcelain', '--', 'packages/math'], {
+  encoding: 'utf8',
+}).trim();
+if (dirty) {
+  console.error(`fourJS packages/math has uncommitted changes; commit or stash them first:
+${dirty}`);
+  process.exit(2);
+}
 
 const view = new DataView(new ArrayBuffer(8));
 /** float64 → 16 hex digits of its bits, big-endian. */
@@ -208,7 +226,7 @@ for (const depthRange of DEPTHS) {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const out = join(here, '..', 'tests', 'fixtures', 'fourjs-parity.json');
+const out = arg('--out') ?? join(here, '..', 'tests', 'fixtures', 'fourjs-parity.json');
 writeFileSync(out, JSON.stringify(fixture) + '\n');
 const counts = Object.entries(fixture)
   .filter(([, v]) => Array.isArray(v))

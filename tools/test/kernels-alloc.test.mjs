@@ -23,6 +23,13 @@ const WARM = 1e6;
 const CALLS = 1e6;
 
 /** Argument lists for each kernel: Float64Array inputs, offsets 0. */
+/** The six planes of a perspective camera at the origin that looks down -Z. */
+function cameraPlanes() {
+  const proj = new Float64Array(16);
+  F.mat4Perspective(proj, 1.2, 1, 1, 50);
+  return F.frustumFromMatrix(new Float64Array(24), proj);
+}
+
 function argsFor(name) {
   const v = (n) => Float64Array.from({ length: n }, (_, i) => 0.25 + i * 0.125);
   const out = (n) => new Float64Array(n);
@@ -116,12 +123,13 @@ function argsFor(name) {
       return [out(16), -1, 1, -1, 1, 0.1, 10, 'zero-to-one'];
     case 'frustumFromMatrix':
       return [out(24), v(16), 'negative-one-to-one'];
+    // Real planes and an inside probe, so all six plane tests and the `true` return run.
     case 'frustumContainsPoint':
-      return [v(24), Float64Array.of(0, 0, -10)];
+      return [cameraPlanes(), Float64Array.of(0, 0, -10)];
     case 'frustumIntersectsSphere':
-      return [v(24), Float64Array.of(0, 0, -10), 1];
+      return [cameraPlanes(), Float64Array.of(0, 0, -10), 1];
     case 'frustumIntersectsAabb':
-      return [v(24), Float64Array.of(-1, -1, -11), Float64Array.of(1, 1, -9)];
+      return [cameraPlanes(), Float64Array.of(-1, -1, -11), Float64Array.of(1, 1, -9)];
     default:
       throw new Error(`no arguments for ${name}`);
   }
