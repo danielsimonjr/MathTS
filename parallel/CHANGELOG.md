@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-parallel
 
+## [Unreleased]
+
+### Patch Changes
+
+- Fix `WorkerPool` constructor: missing or empty `workerScript` now throws a synchronous
+  `TypeError` instead of an unhandled rejection when workers start.
+
 ## 0.10.0
 
 ### Minor Changes
