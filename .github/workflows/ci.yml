@@ -142,6 +142,9 @@ jobs:
       - name: Bun audit retry tests
         run: node --test tools/test/bun-audit-retry.test.mjs
 
+      - name: Apt install fallback tests
+        run: node --test tools/test/apt-install.test.mjs
+
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
@@ -377,10 +380,11 @@ jobs:
 
       - name: Install Playwright OS dependencies
         run: |
-          mapfile -t pw_pkgs < <(node tools/ci/playwright-chromium-apt-packages.mjs)
-          if ((${#pw_pkgs[@]} > 0)); then
-            sudo bash tools/ci/apt-install.sh install "${pw_pkgs[@]}"
-          fi
+          pkg_file=$(mktemp)
+          node tools/ci/playwright-chromium-apt-packages.mjs >"$pkg_file"
+          mapfile -t pw_pkgs <"$pkg_file"
+          rm -f "$pkg_file"
+          sudo bash tools/ci/apt-install.sh install "${pw_pkgs[@]}"
 
       - name: Install Playwright browsers
         run: bunx --bun playwright install chromium
