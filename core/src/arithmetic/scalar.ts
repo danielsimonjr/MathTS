@@ -28,6 +28,31 @@ import { Fraction } from '../types/fraction.js';
 /** Any scalar core can do arithmetic on. */
 export type NumericScalar = number | bigint | Complex | Fraction | BigNumber;
 
+function formatUnexpectedScalarType(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'object') return Object.prototype.toString.call(value);
+  return typeof value;
+}
+
+function unexpectedScalarType(fn: string, value: unknown): never {
+  throw new TypeError(`${fn}: unexpected type ${formatUnexpectedScalarType(value)}`);
+}
+
+function assertNumericScalar(value: unknown, fn: string): asserts value is NumericScalar {
+  if (value == null) unexpectedScalarType(fn, value);
+  if (
+    typeof value === 'number' ||
+    typeof value === 'bigint' ||
+    value instanceof Complex ||
+    value instanceof Fraction ||
+    value instanceof BigNumber
+  ) {
+    return;
+  }
+  unexpectedScalarType(fn, value);
+}
+
 function isPrimitive(v: NumericScalar): v is number | bigint {
   return typeof v === 'number' || typeof v === 'bigint';
 }
@@ -35,6 +60,7 @@ function isPrimitive(v: NumericScalar): v is number | bigint {
 // --- promotion: lift any scalar into a specific rich domain --------------------
 
 function asComplex(v: NumericScalar): Complex {
+  if (v == null) unexpectedScalarType('asComplex', v);
   return v instanceof Complex ? v : new Complex(number(v), 0);
 }
 
@@ -45,6 +71,7 @@ function asBigNumber(v: NumericScalar): BigNumber {
 }
 
 function asFraction(v: NumericScalar): Fraction {
+  if (v == null) unexpectedScalarType('asFraction', v);
   if (v instanceof Fraction) return v;
   if (typeof v === 'number' || typeof v === 'bigint') return new Fraction(v);
   return new Fraction(number(v));
@@ -52,20 +79,29 @@ function asFraction(v: NumericScalar): Fraction {
 
 // --- binary operations ---------------------------------------------------------
 
-/** Add two scalar values, `x + y`. */
+/**
+ * Add two scalar values, `x + y`.
+ *
+ * `null`, `undefined`, and values outside {@link NumericScalar} throw `TypeError`
+ * (`addScalar: unexpected type …`). Two numbers return `x + y` before that check.
+ */
 export function addScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
   if (typeof x === 'number' && typeof y === 'number') return x + y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x + y;
+  assertNumericScalar(x, 'addScalar');
+  assertNumericScalar(y, 'addScalar');
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) + Number(y);
   if (x instanceof Complex || y instanceof Complex) return asComplex(x).add(asComplex(y));
   if (x instanceof BigNumber || y instanceof BigNumber) return asBigNumber(x).add(asBigNumber(y));
   return asFraction(x).add(asFraction(y));
 }
 
-/** Subtract two scalar values, `x − y` (order preserved through promotion). */
+/** Subtract two scalar values, `x − y` (order preserved through promotion). Invalid operands throw `TypeError`. */
 export function subtractScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
   if (typeof x === 'number' && typeof y === 'number') return x - y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x - y;
+  assertNumericScalar(x, 'subtractScalar');
+  assertNumericScalar(y, 'subtractScalar');
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) - Number(y);
   if (x instanceof Complex || y instanceof Complex) return asComplex(x).subtract(asComplex(y));
   if (x instanceof BigNumber || y instanceof BigNumber)
@@ -73,10 +109,12 @@ export function subtractScalar(x: NumericScalar, y: NumericScalar): NumericScala
   return asFraction(x).subtract(asFraction(y));
 }
 
-/** Multiply two scalar values, `x · y`. */
+/** Multiply two scalar values, `x · y`. Invalid operands throw `TypeError`. */
 export function multiplyScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
   if (typeof x === 'number' && typeof y === 'number') return x * y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x * y;
+  assertNumericScalar(x, 'multiplyScalar');
+  assertNumericScalar(y, 'multiplyScalar');
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) * Number(y);
   if (x instanceof Complex || y instanceof Complex) return asComplex(x).multiply(asComplex(y));
   if (x instanceof BigNumber || y instanceof BigNumber)
@@ -84,10 +122,12 @@ export function multiplyScalar(x: NumericScalar, y: NumericScalar): NumericScala
   return asFraction(x).multiply(asFraction(y));
 }
 
-/** Divide two scalar values, `x ÷ y` (order preserved through promotion). */
+/** Divide two scalar values, `x ÷ y` (order preserved through promotion). Invalid operands throw `TypeError`. */
 export function divideScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
   if (typeof x === 'number' && typeof y === 'number') return x / y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x / y;
+  assertNumericScalar(x, 'divideScalar');
+  assertNumericScalar(y, 'divideScalar');
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) / Number(y);
   if (x instanceof Complex || y instanceof Complex) return asComplex(x).divide(asComplex(y));
   if (x instanceof BigNumber || y instanceof BigNumber)
@@ -105,6 +145,9 @@ export function divideScalar(x: NumericScalar, y: NumericScalar): NumericScalar 
  * returned 1 and `Fraction.pow(0.5)` threw `BigInt(0.5)`.)
  */
 export function pow(base: NumericScalar, exp: NumericScalar): NumericScalar {
+  if (typeof base === 'number' && typeof exp === 'number') return Math.pow(base, exp);
+  assertNumericScalar(base, 'pow');
+  assertNumericScalar(exp, 'pow');
   if (base instanceof Complex) return base.pow(exp instanceof Complex ? exp : number(exp));
   if (base instanceof BigNumber || base instanceof Fraction) {
     const n = typeof exp === 'bigint' ? exp : number(exp);
@@ -121,6 +164,7 @@ export function pow(base: NumericScalar, exp: NumericScalar): NumericScalar {
 export function abs(x: NumericScalar): NumericScalar {
   if (typeof x === 'number') return Math.abs(x);
   if (typeof x === 'bigint') return x < 0n ? -x : x;
+  assertNumericScalar(x, 'abs');
   return x.abs();
 }
 
@@ -128,6 +172,7 @@ export function abs(x: NumericScalar): NumericScalar {
 export function fix(x: NumericScalar): NumericScalar {
   if (typeof x === 'number') return Math.trunc(x);
   if (typeof x === 'bigint') return x;
+  assertNumericScalar(x, 'fix');
   if (x instanceof Complex) return new Complex(Math.trunc(x.re), Math.trunc(x.im));
   return x.sign() >= 0 ? x.floor() : x.ceil();
 }
@@ -142,6 +187,7 @@ export function fix(x: NumericScalar): NumericScalar {
 export function round(x: NumericScalar): NumericScalar {
   if (typeof x === 'number') return Math.round(x);
   if (typeof x === 'bigint') return x;
+  assertNumericScalar(x, 'round');
   if (x instanceof Complex) return new Complex(Math.round(x.re), Math.round(x.im));
   if (x instanceof BigNumber) return x.round(0, 'halfCeil');
   return x.round();
@@ -160,7 +206,10 @@ export function equal(
   relTol: number = DEFAULT_CONFIG.relTol,
   absTol: number = DEFAULT_CONFIG.absTol
 ): boolean {
+  if (typeof x === 'number' && typeof y === 'number') return nearlyEqual(x, y, relTol, absTol);
   if (typeof x === 'bigint' && typeof y === 'bigint') return x === y;
+  assertNumericScalar(x, 'equal');
+  assertNumericScalar(y, 'equal');
   if (isPrimitive(x) && isPrimitive(y)) return nearlyEqual(Number(x), Number(y), relTol, absTol);
   if (x instanceof Complex || y instanceof Complex) return asComplex(x).equals(asComplex(y));
   if (x instanceof Fraction && y instanceof Fraction) return x.equals(y);
@@ -189,15 +238,21 @@ export function isNumeric(x: unknown): boolean {
 
 /**
  * Convert any scalar to a plain JS `number`. A non-real `Complex` (nonzero
- * imaginary part) has no real-number value and throws.
+ * imaginary part) has no real-number value and throws. `null`, `undefined`, and
+ * values outside {@link NumericScalar} throw `TypeError` with the runtime type —
+ * never a property access on null.
  */
 export function number(x: NumericScalar): number {
   if (typeof x === 'number') return x;
+  assertNumericScalar(x, 'number');
   if (typeof x === 'bigint') return Number(x);
   if (x instanceof Fraction) return x.toNumber();
   if (x instanceof BigNumber) return x.toNumber();
-  if (x.im !== 0) {
-    throw new TypeError(`Cannot convert ${x.toString()} to a number: imaginary part is nonzero`);
+  if (x instanceof Complex) {
+    if (x.im !== 0) {
+      throw new TypeError(`Cannot convert ${x.toString()} to a number: imaginary part is nonzero`);
+    }
+    return x.re;
   }
-  return x.re;
+  return unexpectedScalarType('number', x);
 }
