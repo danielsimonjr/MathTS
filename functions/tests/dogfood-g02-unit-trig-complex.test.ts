@@ -11,7 +11,7 @@ import { sin as tsin } from '../../trigonometry/src/index.js';
 import { Unit, Complex, isComplex, type UnitInstance } from '@danielsimonjr/mathts-core';
 import { create, all } from '@danielsimonjr/mathts-compat';
 
-/** Verified against mathjs@13.2.3 in /tmp/mj-oracle (2026-11-11). */
+/** Verified against mathjs@13.2.3 (2026-11-11). */
 const MATHJS_ORACLE = {
   sin90deg: 1,
   cos180deg: -1,
