@@ -30,11 +30,27 @@ describe('#688 lusolve singular / non-finite', () => {
   });
 
   it('NaN coefficients throw before returning a vector', () => {
-    expect(() => lusolve([[NaN, 1], [0, 1]], [1, 1])).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+    expect(() =>
+      lusolve(
+        [
+          [NaN, 1],
+          [0, 1],
+        ],
+        [1, 1]
+      )
+    ).toThrow(LUSOLVE_SINGULAR_MESSAGE);
   });
 
   it('Infinity coefficients throw', () => {
-    expect(() => lusolve([[Infinity, 1], [0, 1]], [1, 1])).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+    expect(() =>
+      lusolve(
+        [
+          [Infinity, 1],
+          [0, 1],
+        ],
+        [1, 1]
+      )
+    ).toThrow(LUSOLVE_SINGULAR_MESSAGE);
   });
 
   it('well-conditioned 2×2 still solves', () => {

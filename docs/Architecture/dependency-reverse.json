@@ -916,6 +916,7 @@
       "functions/src/algebra/simplifyCore.ts",
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
+      "functions/src/algebra/solver/validate-u-pivots.ts",
       "functions/src/algebra/symbolicEqual.ts",
       "functions/src/arithmetic/cbrt.ts",
       "functions/src/arithmetic/hypot.ts",
@@ -1115,6 +1116,13 @@
       "functions/src/algebra/solver/usolveAll.ts"
     ],
     "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
+    "functions/src/algebra/solver/validate-u-pivots.ts": [
+      "functions/src/algebra/solver/lusolve.ts"
+    ],
+    "functions/src/algebra/solver/pivot-tolerance.ts": [
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/validate-u-pivots.ts"
+    ],
     "functions/src/utils/array.ts": [
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/arithmetic/hypot.ts",

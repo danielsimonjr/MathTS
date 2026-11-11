@@ -1,8 +1,7 @@
 /** Absolute pivot floor — matches `linsolve` (`typed/numeric.ts` `solvePivoted`). */
 export const LU_PIVOT_TOL = 1e-15;
 
-export const LUSOLVE_SINGULAR_MESSAGE =
-  'Linear system cannot be solved since matrix is singular';
+export const LUSOLVE_SINGULAR_MESSAGE = 'Linear system cannot be solved since matrix is singular';
 
 /** After `lusolve`'s LU factorization: reject non-finite entries and tiny pivots. */
 export function isBadLuFactorPivot(value: unknown, tol: number = LU_PIVOT_TOL): boolean {
