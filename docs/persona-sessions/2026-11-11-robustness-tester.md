@@ -19,7 +19,7 @@ sizes, algebraic round-trips, and invalid types. Rounds 1–2 already filed
   evaluator 0.1.33, expression 0.12.7, units 0.7.5, numbers 0.1.28,
   workbook 0.5.18, workerpool 0.4.0, parallel 0.10.0, arithmetic 0.1.86
 - Property tests: `fast-check` seed **20261111**
-- Harness (re-run later): `docs/persona-sessions/bench/2026-11-11-robustness-tester.harness.mjs`
+- Harness (re-run later): `docs/persona-sessions/bench/2026-11-11-robustness-tester.harness.mjs.txt` (copy to `harness.mjs`; kept as `.txt` so Architecture-docs CI does not count it as a source module)
 - Results JSON: `docs/persona-sessions/bench/2026-11-11-robustness-tester.json`
 
 `createParse` / `createEvaluate` from the thin parser/evaluator packages still
@@ -129,4 +129,4 @@ formula injection does not reach `process` unless you put it in scope; it can
 still knock out a notebook with a reserved object key (#818).
 
 Re-run: copy the harness into a scratch project that has the published
-packages and `fast-check`, then `node 2026-11-11-robustness-tester.harness.mjs`.
+packages and `fast-check`, then copy the `.mjs.txt` harness to `harness.mjs` and `node harness.mjs`.

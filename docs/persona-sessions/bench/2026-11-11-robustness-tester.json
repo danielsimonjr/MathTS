@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-parallel": "0.10.0",
     "@danielsimonjr/mathts-arithmetic": "0.1.86"
   },
-  "harness": "docs/persona-sessions/bench/2026-11-11-robustness-tester.harness.mjs",
+  "harness": "docs/persona-sessions/bench/2026-11-11-robustness-tester.harness.mjs.txt",
   "properties": {
     "add_commute": { "ok": true, "runs": 200 },
     "mul_commute": { "ok": true, "runs": 200 },

@@ -8,7 +8,7 @@
  *     @danielsimonjr/mathts-matrix @danielsimonjr/mathts-units \
  *     @danielsimonjr/mathts-parallel @danielsimonjr/mathts-workbook \
  *     @danielsimonjr/mathts-workerpool
- *   node /path/to/2026-11-11-robustness-tester.harness.mjs
+ *   cp 2026-11-11-robustness-tester.harness.mjs.txt harness.mjs && node harness.mjs
  *
  * Fixed seed so failures shrink to a stable counterexample.
  */
