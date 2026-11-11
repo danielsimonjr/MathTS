@@ -358,7 +358,7 @@ jobs:
 
   browser:
     name: Browser (WebGPU smoke)
-    # Playwright's apt list is Ubuntu 24.04 (noble) only. ubuntu-latest is no longer that release.
+    # Noble package list in playwright-chromium-apt-packages.mjs; ubuntu-latest may be >24.04.
     runs-on: ubuntu-24.04
     needs: compile
     timeout-minutes: 20

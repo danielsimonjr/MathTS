@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1283
+  totalFiles: 1284
   totalModules: 82
-  totalExports: 7004
+  totalExports: 7008
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -23028,6 +23028,9 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+        - file: ./invalid-scalar-guards.js
+          imports:
+            - withBinaryScalarGuards
         - file: ./complex-promotion.js
           imports:
             - logReal
@@ -24758,6 +24761,33 @@ modules:
         - polyFit
         - chebyshevFit
         - legendreFit
+    functions/src/typed/invalid-scalar-guards.ts:
+      description: 'Guards for typed `add` / `multiply`: reject operands that must not be coerced'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+            - Complex
+            - Dual
+            - Fraction
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - Matrix
+      exports:
+        - formatUnexpectedArgumentType
+        - unexpectedArgumentType
+        - rejectInvalidBinaryScalars
+        - withBinaryScalarGuards
+      functions:
+        - formatUnexpectedArgumentType
+        - unexpectedArgumentType
+        - rejectInvalidBinaryScalars
+        - withBinaryScalarGuards
     functions/src/typed/logical.ts:
       description: Typed Logical Functions
       externalDependencies: []
@@ -42750,6 +42780,7 @@ dependencyGraph:
         - functions/src/typed/index.ts
         - functions/src/typed/integration.ts
         - functions/src/typed/interpolation.ts
+        - functions/src/typed/invalid-scalar-guards.ts
         - functions/src/typed/logical.ts
         - functions/src/typed/matrix-ops.ts
         - functions/src/typed/normal-equations-solve.ts
@@ -43481,13 +43512,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1283
+  totalTypeScriptFiles: 1284
   totalModules: 82
-  totalLinesOfCode: 217817
-  totalExports: 7004
+  totalLinesOfCode: 217975
+  totalExports: 7008
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2355
+  totalFunctions: 2359
   totalTypeGuards: 171
   totalEnums: 0
   totalConstants: 1644
