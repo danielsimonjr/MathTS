@@ -71,6 +71,56 @@ describe('dogfood G10 — solvePDE CFL (#822)', () => {
     );
     expect(result.u.length).toBe(21);
   });
+
+  it('negative diffusivity (r < 0) is outside the FTCS band', () => {
+    expect(() =>
+      solvePDE(
+        { alpha: -1 },
+        { L: 1, nx: 21, nt: 40, T: 0.05 },
+        { left: 0, right: 0, initial: (x) => Math.sin(Math.PI * x) }
+      )
+    ).toThrow(/CFL/);
+  });
+
+  it('non-finite r throws even when allowUnstable is set', () => {
+    expect(() =>
+      solvePDE(
+        { alpha: Number.NaN },
+        { L: 1, nx: 21, nt: 40, T: 0.05 },
+        { left: 0, right: 0, initial: (x) => Math.sin(Math.PI * x) },
+        { allowUnstable: true }
+      )
+    ).toThrow(/not finite/);
+  });
+
+  it('malformed Dirichlet values throw before the time loop', () => {
+    expect(() =>
+      solvePDE(
+        { alpha: 1 },
+        { L: 1, nx: 21, nt: 40, T: 0.05 },
+        { left: Number.NaN, right: 0, initial: (x) => x }
+      )
+    ).toThrow(TypeError);
+  });
+
+  it('stable FTCS matches e^{-π²t} sin(πx) at the midpoint', () => {
+    const alpha = 1;
+    const L = 1;
+    const nx = 41;
+    const dx = L / (nx - 1);
+    const r = 0.4;
+    const dt = (r * dx * dx) / alpha;
+    const T = 0.02;
+    const nt = Math.round(T / dt);
+    const result = solvePDE(
+      { alpha },
+      { L, nx, nt, T: dt * nt },
+      { left: 0, right: 0, initial: (x) => Math.sin(Math.PI * x) }
+    );
+    const mid = (nx - 1) / 2;
+    const exact = Math.exp(-(Math.PI ** 2) * dt * nt) * Math.sin(Math.PI * result.x[mid]);
+    expect(Math.abs(result.u[mid] - exact)).toBeLessThan(2e-3);
+  });
 });
 
 describe('dogfood G10 — solveParabolicPDE BC (#833)', () => {
@@ -119,6 +169,66 @@ describe('dogfood G10 — solveParabolicPDE BC (#833)', () => {
         bcRight: 0 as unknown as { type: 'dirichlet'; value: 0 },
       })
     ).toThrow(/bcRight/);
+  });
+
+  it('robin, missing value, and non-finite value throw before BDF', () => {
+    const base = {
+      x0: 0,
+      x1: 1,
+      T: 0.05,
+      nx: 21,
+      u0: (x: number) => Math.sin(Math.PI * x),
+      diffusion: 1,
+      bcRight: { type: 'dirichlet' as const, value: 0 },
+    };
+    expect(() =>
+      solveParabolicPDE({
+        ...base,
+        bcLeft: { type: 'robin', value: 0 } as unknown as { type: 'dirichlet'; value: 0 },
+      })
+    ).toThrow(/robin/);
+    expect(() =>
+      solveParabolicPDE({
+        ...base,
+        bcLeft: { type: 'dirichlet' } as unknown as { type: 'dirichlet'; value: 0 },
+      })
+    ).toThrow(/value/);
+    expect(() =>
+      solveParabolicPDE({
+        ...base,
+        bcLeft: { type: 'dirichlet', value: Number.NaN },
+      })
+    ).toThrow(TypeError);
+    expect(() =>
+      solveParabolicPDE({
+        ...base,
+        bcLeft: { type: 'neumann', value: () => Number.NaN },
+      })
+    ).toThrow(/bcLeft value/);
+    expect(() =>
+      solveParabolicPDE({
+        ...base,
+        diffusion: '1' as unknown as number,
+        bcLeft: { type: 'dirichlet', value: 0 },
+      })
+    ).toThrow(/diffusion/);
+  });
+
+  it('time-dependent Dirichlet datum is applied at the final time', () => {
+    const T = 0.05;
+    const r = solveParabolicPDE({
+      x0: 0,
+      x1: 1,
+      T,
+      nx: 21,
+      u0: () => 0,
+      bcLeft: { type: 'dirichlet', value: (t) => t },
+      bcRight: { type: 'dirichlet', value: (t) => 2 * t },
+      diffusion: 1,
+    });
+    const last = r.u.at(-1)!;
+    expect(last[0]).toBeCloseTo(r.t.at(-1)!, 12);
+    expect(last[20]).toBeCloseTo(2 * r.t.at(-1)!, 12);
   });
 
   it('valid Dirichlet BC matches closed-form heat solution at T=0.05', () => {

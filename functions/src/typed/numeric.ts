@@ -2233,12 +2233,22 @@ export function linprog(
 /**
  * Simple 1D PDE solver using finite differences (heat equation).
  *
- * Solves u_t = alpha * u_xx on domain [0, L] with boundary conditions.
+ * Solves `u_t = α u_xx` on `[0, L]` with the forward-time central-space (explicit Euler)
+ * scheme. That scheme is stable if and only if the mesh Fourier number
+ * `r = α Δt / Δx²` lies in `[0, 0.5]`. There is no second spatial dimension and no
+ * other time scheme on this entry point, so the 2-D sum-of-`r` bound and implicit
+ * (Crank–Nicolson / BDF) limits do not apply — use {@link solveParabolicPDE} for an
+ * implicit method of lines.
  *
- * @param pde - { alpha: diffusion coefficient }
- * @param domain - { L: domain length, nx: spatial points, nt: time steps, T: final time }
- * @param bc - { left: left BC value, right: right BC value, initial: initial condition function }
- * @param options - `{ allowUnstable?: boolean }` — when false (default), throws if the explicit-Euler CFL number `r = α Δt/Δx²` exceeds `0.5`.
+ * `{ allowUnstable: true }` is an explicit opt-out for callers who want the legacy
+ * integrator anyway (a demonstration of the instability, not a solution of the PDE).
+ * It does not bypass non-finite `r` or a malformed boundary object. The default
+ * throws `RangeError` so a CFL violation cannot come back as a finite wrong field.
+ *
+ * @param pde - `{ alpha: diffusion coefficient }` (`α`; negative `α` makes `r < 0`, which is unstable)
+ * @param domain - `{ L: domain length, nx: spatial points, nt: time steps, T: final time }`
+ * @param bc - `{ left, right }` finite Dirichlet values and `initial(x)`
+ * @param options - `{ allowUnstable?: boolean }` — default false
  * @returns `{ x: number[], u: number[] }` solution at final time
  */
 export function solvePDE(
@@ -2247,15 +2257,30 @@ export function solvePDE(
   bc: { left: f64; right: f64; initial: (x: f64) => f64 },
   options?: { allowUnstable?: boolean }
 ): { x: number[]; u: number[] } {
+  if (
+    typeof bc?.initial !== 'function' ||
+    !Number.isFinite(bc.left) ||
+    !Number.isFinite(bc.right)
+  ) {
+    throw new TypeError(
+      'solvePDE: bc must be { left: number, right: number, initial: (x: number) => number } with finite left and right'
+    );
+  }
+
   const { alpha } = pde;
   const { L, nx, nt, T } = domain;
   const dx = L / (nx - 1);
   const dt = T / nt;
   const r = (alpha * dt) / (dx * dx);
 
-  if (r > 0.5 && !options?.allowUnstable) {
+  if (!Number.isFinite(r)) {
     throw new RangeError(
-      `solvePDE: explicit Euler heat step violates CFL stability (r=${r} > limit 0.5); use smaller Δt, coarser nx, or pass { allowUnstable: true }`
+      `solvePDE: explicit Euler CFL number r=${String(r)} is not finite (check alpha, L, nx, nt, T); stable band is [0, 0.5]`
+    );
+  }
+  if ((r < 0 || r > 0.5) && !options?.allowUnstable) {
+    throw new RangeError(
+      `solvePDE: explicit Euler heat step violates CFL stability (r=${r} outside [0, 0.5]); use smaller Δt, coarser nx, or pass { allowUnstable: true }`
     );
   }
 
