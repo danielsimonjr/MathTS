@@ -68,20 +68,25 @@ describe('mat3ToQuat', () => {
     });
   }
 
-  it('reads and writes at offsets, and may write over its input', () => {
-    const m = rotationOf(BRANCHES.m22!);
-    const expected = new Float64Array(4);
-    mat3ToQuat(expected, m);
+  for (const [branch, q] of Object.entries(BRANCHES)) {
+    it(`reads and writes at offsets, and may write over its input, in the ${branch} branch`, () => {
+      const m = rotationOf(q);
+      const expected = Array.from(mat3ToQuat(new Float64Array(4), m));
 
-    const buf = new Float64Array(2 + 9);
-    buf.set(m, 2);
-    const out = new Float64Array(5);
-    mat3ToQuat(out, buf, 1, 2);
-    expect(out[0]).toBe(0);
-    expect(Array.from(out.subarray(1))).toEqual(Array.from(expected));
+      // Separate arrays, with sentinels around the written range.
+      const src = new Float64Array(3 + 9);
+      src.set(m, 3);
+      const out = new Float64Array(1 + 4 + 2).fill(7);
+      mat3ToQuat(out, src, 1, 3);
+      expect(Array.from(out)).toEqual([7, ...expected, 7, 7]);
 
-    // Output over the first cells of the input.
-    mat3ToQuat(buf, buf, 2, 2);
-    expect(Array.from(buf.subarray(2, 6))).toEqual(Array.from(expected));
-  });
+      // One array: the output above, at, and below the matrix.
+      for (const outOff of [3, 2, 1]) {
+        const buf = new Float64Array(2 + 9 + 2).fill(7);
+        buf.set(m, 2);
+        mat3ToQuat(buf, buf, outOff, 2);
+        expect(Array.from(buf.subarray(outOff, outOff + 4)), `outOff ${outOff}`).toEqual(expected);
+      }
+    });
+  }
 });

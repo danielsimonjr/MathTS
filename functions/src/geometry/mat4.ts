@@ -503,8 +503,9 @@ export function mat4Decompose(
 /**
  * Converts a 3x3 rotation matrix to a unit quaternion `[w, x, y, z]`, by the Shepperd
  * method. The matrix is column-major (`m[column * 3 + row]`), as in the kernels of
- * `kernels.generated.ts`. The result equals the rotation that `mat4Decompose` writes
- * for an affine matrix with this upper 3x3 and unit scale, bit for bit. The function
+ * `kernels.generated.ts`. It uses the Shepperd branches of `mat4Decompose`, so it gives
+ * the same rotation bit for bit when each column of `m` has a computed length of exactly
+ * 1, and the same rotation to rounding otherwise. The function
  * assumes a proper rotation: it does not orthonormalize, and a matrix with scale or
  * shear gives a quaternion that is not of unit length.
  *
