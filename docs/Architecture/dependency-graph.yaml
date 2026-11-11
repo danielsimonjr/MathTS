@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1281
+  totalFiles: 1282
   totalModules: 82
-  totalExports: 6985
+  totalExports: 6989
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -22941,6 +22941,9 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+        - file: ./invalid-scalar-guards.js
+          imports:
+            - withBinaryScalarGuards
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -24611,6 +24614,22 @@ modules:
         - polyFit
         - chebyshevFit
         - legendreFit
+    functions/src/typed/invalid-scalar-guards.ts:
+      description: 'Guards for typed `add` / `multiply`: reject operands that must not be coerced'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - formatUnexpectedArgumentType
+        - unexpectedArgumentType
+        - rejectInvalidBinaryScalars
+        - withBinaryScalarGuards
+      functions:
+        - formatUnexpectedArgumentType
+        - unexpectedArgumentType
+        - rejectInvalidBinaryScalars
+        - withBinaryScalarGuards
     functions/src/typed/logical.ts:
       description: Typed Logical Functions
       externalDependencies: []
@@ -42592,6 +42611,7 @@ dependencyGraph:
         - functions/src/typed/index.ts
         - functions/src/typed/integration.ts
         - functions/src/typed/interpolation.ts
+        - functions/src/typed/invalid-scalar-guards.ts
         - functions/src/typed/logical.ts
         - functions/src/typed/matrix-ops.ts
         - functions/src/typed/normal-equations-solve.ts
@@ -43323,13 +43343,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1281
+  totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217471
-  totalExports: 6985
+  totalLinesOfCode: 217579
+  totalExports: 6989
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2345
+  totalFunctions: 2349
   totalTypeGuards: 169
   totalEnums: 0
   totalConstants: 1640

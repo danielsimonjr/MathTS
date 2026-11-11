@@ -28,6 +28,31 @@ import { Fraction } from '../types/fraction.js';
 /** Any scalar core can do arithmetic on. */
 export type NumericScalar = number | bigint | Complex | Fraction | BigNumber;
 
+function formatUnexpectedScalarType(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'object') return Object.prototype.toString.call(value);
+  return typeof value;
+}
+
+function unexpectedScalarType(fn: string, value: unknown): never {
+  throw new TypeError(`${fn}: unexpected type ${formatUnexpectedScalarType(value)}`);
+}
+
+function assertNumericScalar(value: unknown, fn: string): asserts value is NumericScalar {
+  if (value == null) unexpectedScalarType(fn, value);
+  if (
+    typeof value === 'number' ||
+    typeof value === 'bigint' ||
+    value instanceof Complex ||
+    value instanceof Fraction ||
+    value instanceof BigNumber
+  ) {
+    return;
+  }
+  unexpectedScalarType(fn, value);
+}
+
 function isPrimitive(v: NumericScalar): v is number | bigint {
   return typeof v === 'number' || typeof v === 'bigint';
 }
@@ -54,6 +79,8 @@ function asFraction(v: NumericScalar): Fraction {
 
 /** Add two scalar values, `x + y`. */
 export function addScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
+  assertNumericScalar(x, 'addScalar');
+  assertNumericScalar(y, 'addScalar');
   if (typeof x === 'number' && typeof y === 'number') return x + y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x + y;
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) + Number(y);
@@ -64,6 +91,8 @@ export function addScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
 
 /** Subtract two scalar values, `x − y` (order preserved through promotion). */
 export function subtractScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
+  assertNumericScalar(x, 'subtractScalar');
+  assertNumericScalar(y, 'subtractScalar');
   if (typeof x === 'number' && typeof y === 'number') return x - y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x - y;
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) - Number(y);
@@ -75,6 +104,8 @@ export function subtractScalar(x: NumericScalar, y: NumericScalar): NumericScala
 
 /** Multiply two scalar values, `x · y`. */
 export function multiplyScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
+  assertNumericScalar(x, 'multiplyScalar');
+  assertNumericScalar(y, 'multiplyScalar');
   if (typeof x === 'number' && typeof y === 'number') return x * y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x * y;
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) * Number(y);
@@ -86,6 +117,8 @@ export function multiplyScalar(x: NumericScalar, y: NumericScalar): NumericScala
 
 /** Divide two scalar values, `x ÷ y` (order preserved through promotion). */
 export function divideScalar(x: NumericScalar, y: NumericScalar): NumericScalar {
+  assertNumericScalar(x, 'divideScalar');
+  assertNumericScalar(y, 'divideScalar');
   if (typeof x === 'number' && typeof y === 'number') return x / y;
   if (typeof x === 'bigint' && typeof y === 'bigint') return x / y;
   if (isPrimitive(x) && isPrimitive(y)) return Number(x) / Number(y);
@@ -189,15 +222,21 @@ export function isNumeric(x: unknown): boolean {
 
 /**
  * Convert any scalar to a plain JS `number`. A non-real `Complex` (nonzero
- * imaginary part) has no real-number value and throws.
+ * imaginary part) has no real-number value and throws. `null`, `undefined`, and
+ * values outside {@link NumericScalar} throw `TypeError` with the runtime type —
+ * never a property access on null.
  */
 export function number(x: NumericScalar): number {
+  assertNumericScalar(x, 'number');
   if (typeof x === 'number') return x;
   if (typeof x === 'bigint') return Number(x);
   if (x instanceof Fraction) return x.toNumber();
   if (x instanceof BigNumber) return x.toNumber();
-  if (x.im !== 0) {
-    throw new TypeError(`Cannot convert ${x.toString()} to a number: imaginary part is nonzero`);
+  if (x instanceof Complex) {
+    if (x.im !== 0) {
+      throw new TypeError(`Cannot convert ${x.toString()} to a number: imaginary part is nonzero`);
+    }
+    return x.re;
   }
-  return x.re;
+  return unexpectedScalarType('number', x);
 }

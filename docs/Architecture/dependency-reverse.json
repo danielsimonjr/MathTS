@@ -2556,6 +2556,7 @@
       "functions/src/typed/special.ts",
       "functions/src/typed/trigonometry.ts"
     ],
+    "functions/src/typed/invalid-scalar-guards.ts": ["functions/src/typed/arithmetic.ts"],
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",

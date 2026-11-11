@@ -259,3 +259,34 @@ describe('number (convert any scalar to a JS number)', () => {
     expect(() => number(C(3, 4))).toThrow();
   });
 });
+
+/** Issue #807 — null must not reach Complex.im access via asFraction → number(). */
+describe('nullish and invalid operands (#807)', () => {
+  const rejectsImCrash = (fn: (x: never, y: number) => unknown, name: string) => {
+    for (const v of [null, undefined] as const) {
+      it(`${name}(${v === null ? 'null' : 'undefined'}, 1) throws a typed error`, () => {
+        expect(() => fn(v as never, 1)).toThrow(
+          new RegExp(`${name}: unexpected type ${v === null ? 'null' : 'undefined'}`)
+        );
+        try {
+          fn(v as never, 1);
+        } catch (e) {
+          expect((e as Error).message).not.toMatch(/reading 'im'/);
+        }
+      });
+    }
+  };
+
+  rejectsImCrash(addScalar as (x: never, y: number) => unknown, 'addScalar');
+  rejectsImCrash(multiplyScalar as (x: never, y: number) => unknown, 'multiplyScalar');
+  rejectsImCrash(divideScalar as (x: never, y: number) => unknown, 'divideScalar');
+
+  it('number(null) throws without reading .im', () => {
+    expect(() => number(null as never)).toThrow(/number: unexpected type null/);
+    try {
+      number(null as never);
+    } catch (e) {
+      expect((e as Error).message).not.toMatch(/reading 'im'/);
+    }
+  });
+});
