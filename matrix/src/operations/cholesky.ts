@@ -10,6 +10,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
  * Result of `cholesky`: the lower-triangular factor of the decomposition.
@@ -21,18 +22,21 @@ export interface CholeskyResult {
 
 /**
  * Compute the Cholesky decomposition of the symmetric positive-definite
- * `DenseMatrix` A such that A = L · Lᵀ.
+ * matrix A such that A = L · Lᵀ.
  *
+ * @param A - `DenseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
  * @throws {Error} if `A` is not square.
  * @throws {Error} if `A` is not positive definite (non-positive diagonal pivot).
+ * @throws {TypeError} if `A` is not one of the accepted matrix shapes.
  */
-export function cholesky(A: DenseMatrix): CholeskyResult {
-  const n = A.rows;
-  if (A.cols !== n) {
-    throw new Error(`cholesky: matrix must be square (got ${A.rows}×${A.cols})`);
+export function cholesky(A: DecompositionMatrixInput): CholeskyResult {
+  const dense = decompositionInputToDenseMatrix(A);
+  const n = dense.rows;
+  if (dense.cols !== n) {
+    throw new Error(`cholesky: matrix must be square (got ${dense.rows}×${dense.cols})`);
   }
 
-  const src = A.toFloat64Array();
+  const src = dense.toFloat64Array();
   const lData = new Float64Array(n * n);
 
   for (let i = 0; i < n; i++) {

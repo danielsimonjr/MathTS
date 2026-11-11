@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1283, "e": 7000, "re": 3016 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1284, "e": 7008, "re": 3021 },
   "s": {
-    "loc": 217762,
+    "loc": 217982,
     "cls": 61,
-    "int": 600,
-    "fn": 2356,
-    "tg": 170,
+    "int": 601,
+    "fn": 2359,
+    "tg": 171,
     "en": 0,
     "co": 1644,
     "toi": 644
@@ -317,8 +317,11 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 18,
+      "f": 19,
       "exp": [
+        "isPackedMatrixDescriptor",
+        "decompositionInputToNestedArray",
+        "decompositionInputToDenseMatrix",
         "cholesky",
         "eye",
         "cloneMatrix",
@@ -335,12 +338,10 @@
         "norm1",
         "householder",
         "applyHouseholderLeft",
-        "applyHouseholderRight",
-        "condest",
-        "eigWasm",
-        "eigvalsWasm"
+        "applyHouseholderRight"
       ],
       "int": [
+        "PackedMatrixDescriptor",
         "CholeskyResult",
         "EigResult",
         "EigOptions",
@@ -349,8 +350,7 @@
         "LUResult",
         "PinvOptions",
         "LQResult",
-        "RQResult",
-        "QLResult"
+        "RQResult"
       ]
     },
     "matrix/types": {

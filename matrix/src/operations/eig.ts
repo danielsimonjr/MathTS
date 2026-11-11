@@ -6,6 +6,7 @@
  */
 
 import { isSymmetric, eye } from './common.js';
+import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
  * Result of eigenvalue decomposition
@@ -592,26 +593,17 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
  * Compute eigenvalues and eigenvectors of a square matrix
  * Uses QR algorithm with implicit shifts
  *
- * @param matrix - Square matrix (n x n)
+ * @param matrix - Square `DenseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
  * @param options - Computation options
  * @returns Eigenvalues and eigenvectors
+ * @throws {TypeError} if `matrix` is not one of the accepted shapes, or a non-square `Float64Array`.
  */
-export function eig(matrix: number[][] | Float64Array, options: EigOptions = {}): EigResult {
+export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}): EigResult {
   // maxIterations / tolerance are accepted for API compatibility but the
   // general solver (orthes/hqr2) manages its own iteration/convergence.
   const { computeVectors = true } = options;
 
-  // Convert to 2D array if needed
-  let A: number[][];
-  if (matrix instanceof Float64Array) {
-    const n = Math.sqrt(matrix.length);
-    if (n !== Math.floor(n)) {
-      throw new Error('Float64Array length must be a perfect square');
-    }
-    A = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => matrix[i * n + j]));
-  } else {
-    A = matrix;
-  }
+  const A = decompositionInputToNestedArray(matrix);
 
   const n = A.length;
   if (n === 0) {
@@ -651,7 +643,7 @@ export function eig(matrix: number[][] | Float64Array, options: EigOptions = {})
  * Compute only eigenvalues (faster, no eigenvector computation)
  */
 export function eigvals(
-  matrix: number[][] | Float64Array,
+  matrix: DecompositionMatrixInput,
   options?: Omit<EigOptions, 'computeVectors'>
 ): Array<{ re: number; im: number }> {
   return eig(matrix, { ...options, computeVectors: false }).values;
@@ -662,11 +654,12 @@ export function eigvals(
  * Faster than full eigendecomposition when only largest eigenvalue needed
  */
 export function powerIteration(
-  matrix: number[][],
+  matrix: DecompositionMatrixInput,
   options: { maxIterations?: number; tolerance?: number } = {}
 ): { value: number; vector: number[] } {
+  const nested = decompositionInputToNestedArray(matrix);
   const { maxIterations = 1000, tolerance = 1e-12 } = options;
-  const n = matrix.length;
+  const n = nested.length;
 
   // Random initial vector
   let v = Array.from({ length: n }, () => Math.random() - 0.5);
@@ -683,7 +676,7 @@ export function powerIteration(
     const w = new Array(n).fill(0);
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        w[i] += matrix[i][j] * v[j];
+        w[i] += nested[i][j] * v[j];
       }
     }
 
