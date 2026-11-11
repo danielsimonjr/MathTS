@@ -42,7 +42,11 @@ function isAllowedObject(value: object): boolean {
   return proto?.isUnit === true || proto?.isMatrix === true;
 }
 
-/** Reject binary operands that typed-function would convert or mis-dispatch. */
+/**
+ * Reject binary operands that typed-function would convert or mis-dispatch.
+ * Numbers, bigints, and booleans pass. Objects must be an array, a typed array,
+ * or a Complex, Fraction, BigNumber, Dual, Unit, or matrix.
+ */
 export function rejectInvalidBinaryScalars(fn: string, args: unknown[]): void {
   const n = Math.min(args.length, 2);
   for (let i = 0; i < n; i++) {
@@ -53,7 +57,10 @@ export function rejectInvalidBinaryScalars(fn: string, args: unknown[]): void {
   }
 }
 
-/** Run invalid-scalar checks before typed-function dispatch (incl. conversions). */
+/**
+ * Run invalid-scalar checks before typed-function dispatch (incl. conversions).
+ * Two numbers skip the scan and call `typedFn` directly.
+ */
 export function withBinaryScalarGuards<T extends (...args: never[]) => unknown>(
   name: string,
   typedFn: T
