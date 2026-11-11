@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1284,
+    "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7008
+    "totalExports": 7009
   },
   "entryPoints": [
     {
@@ -27354,6 +27354,31 @@
         "exports": ["bin", "hex", "oct", "format", "print", "typedString"],
         "constants": ["bin", "hex", "oct", "format", "print", "typedString"]
       },
+      "functions/src/typed/trig-angle-unit.ts": {
+        "description": "Shared angle-Unit handling for typed trigonometry (mathjs parity).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex", "isComplex"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
+          }
+        ],
+        "exports": ["trigFromAngleUnit"],
+        "functions": ["trigFromAngleUnit"]
+      },
       "functions/src/typed/trigonometry.ts": {
         "description": "Typed Trigonometric Functions",
         "externalDependencies": [],
@@ -27368,6 +27393,10 @@
             "imports": ["f64Unary"]
           },
           {
+            "file": "./trig-angle-unit.js",
+            "imports": ["trigFromAngleUnit"]
+          },
+          {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch"]
           }
@@ -27377,6 +27406,11 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped", "Complex", "BigNumber", "Dual"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
           }
         ],
         "exports": [
@@ -45201,6 +45235,7 @@
           "functions/src/typed/statistics.ts",
           "functions/src/typed/string-derivative.ts",
           "functions/src/typed/string.ts",
+          "functions/src/typed/trig-angle-unit.ts",
           "functions/src/typed/trigonometry.ts",
           "functions/src/typed/typed-bridge.ts",
           "functions/src/typed/unit.ts",
@@ -45983,13 +46018,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1284,
+    "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 217982,
-    "totalExports": 7008,
+    "totalLinesOfCode": 218071,
+    "totalExports": 7009,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2359,
+    "totalFunctions": 2360,
     "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1644,
