@@ -73,16 +73,11 @@ export class DualTensor {
     return new Tensor(this.shape, new Float64Array(this.tangent));
   }
 
-  /** Elementwise addition following dual-number rule: (a+b, a'+b'). */
+  /** Elementwise addition following dual-number rule: (a+b, a'+b'); broadcasts like Tensor. */
   add(other: DualTensor): DualTensor {
-    this.checkSameShape(other, 'add');
-    const p = new Float64Array(this.primal.length);
-    const t = new Float64Array(this.tangent.length);
-    for (let i = 0; i < p.length; i++) {
-      p[i] = this.primal[i] + other.primal[i];
-      t[i] = this.tangent[i] + other.tangent[i];
-    }
-    return new DualTensor(this.shape, p, t);
+    const p = this.toPrimalTensor().add(other.toPrimalTensor());
+    const t = this.toTangentTensor().add(other.toTangentTensor());
+    return new DualTensor([...p.shape], new Float64Array(p.data), new Float64Array(t.data));
   }
 
   /** Elementwise subtraction following dual-number rule: (a-b, a'-b'). */
@@ -106,23 +101,13 @@ export class DualTensor {
    * the forward-mode implementation with the reverse-mode alias fix.
    */
   mul(other: DualTensor): DualTensor {
-    this.checkSameShape(other, 'mul');
-    const p = new Float64Array(this.primal.length);
-    const t = new Float64Array(this.tangent.length);
-    if (this === other) {
-      // (a · a)' = 2·a·a'
-      for (let i = 0; i < p.length; i++) {
-        p[i] = this.primal[i] * this.primal[i];
-        t[i] = 2 * this.primal[i] * this.tangent[i];
-      }
-    } else {
-      for (let i = 0; i < p.length; i++) {
-        p[i] = this.primal[i] * other.primal[i];
-        // (a·b)' = a'·b + a·b'
-        t[i] = this.tangent[i] * other.primal[i] + this.primal[i] * other.tangent[i];
-      }
-    }
-    return new DualTensor(this.shape, p, t);
+    const p = this.toPrimalTensor().mul(other.toPrimalTensor());
+    const aTan = this.toTangentTensor();
+    const bTan = other.toTangentTensor();
+    const bPrim = other.toPrimalTensor();
+    const aPrim = this.toPrimalTensor();
+    const t = aTan.mul(bPrim).add(aPrim.mul(bTan));
+    return new DualTensor([...p.shape], new Float64Array(p.data), new Float64Array(t.data));
   }
 
   /** Scalar multiplication following dual-number rule: (k·a, k·a'). */
