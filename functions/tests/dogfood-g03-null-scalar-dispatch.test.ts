@@ -12,6 +12,7 @@ import {
   Fraction,
   BigNumber,
   Unit,
+  type UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { add, multiply } from '@danielsimonjr/mathts-functions';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
@@ -101,14 +102,14 @@ describe('#813 probes — second operand, dates, and real dispatch', () => {
     expect(f.denominator).toBe(2n);
     const b = A(BigNumber.fromNumber(0.1), BigNumber.fromNumber(0.2)) as BigNumber;
     expect(b.toNumber()).toBeCloseTo(0.3, 10);
-    const u = A(new Unit(1, 'm'), new Unit(2, 'm')) as Unit;
+    const u = A(new Unit(1, 'm'), new Unit(2, 'm')) as UnitInstance;
     expect(u.value).toBe(3);
     const mat = A(DenseMatrix.fromArray([[1, 2]]), 3) as { _data: number[][] };
     expect(mat._data).toEqual([[4, 5]]);
     expect(A([1, 2], 1)).toEqual([2, 3]);
     const f64 = A(new Float64Array([1, 2]), new Float64Array([3, 4])) as Float64Array;
     expect(Array.from(f64)).toEqual([4, 6]);
-    const scaled = M(new Unit(2, 'm'), 3) as Unit;
+    const scaled = M(new Unit(2, 'm'), 3) as UnitInstance;
     expect(scaled.value).toBe(6);
   });
 
