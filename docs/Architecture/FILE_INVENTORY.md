@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2220
+**Total files**: 2224
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1253 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1255 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      876 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      878 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2220** |                                                                                                                |
+| **Total**     | **2224** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1279 |
-| `tests`    |   876 |
+| `src`      |  1281 |
+| `tests`    |   878 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   120 |
 | `@danielsimonjr/mathts-evaluator`      |     4 |
 | `@danielsimonjr/mathts-expression`     |   562 |
-| `@danielsimonjr/mathts-functions`      |   997 |
+| `@danielsimonjr/mathts-functions`      |  1001 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   119 |
@@ -972,6 +972,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/geometry/curves.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/delaunay.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/distance.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/geometry/frustum.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/geometry-extra.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/halfspace-intersection.ts`                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/hull.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -979,6 +980,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/geometry/intersect3d.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/kernels.generated.ts`                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/mass-properties.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/geometry/mat4.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/polygon-ops.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/predicates.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/quaternion.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1634,6 +1636,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/logistic-regression.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/lomb-scargle.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/mad-median-vs-mean-ad.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/mat4-fourjs-parity.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/mat4.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-bridge-accel.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-functions.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-multiply-gc7.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |

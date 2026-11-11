@@ -83,6 +83,45 @@ function argsFor(name) {
     }
     case 'mat3Inverse':
       return [out(9), Float64Array.of(2, 1, 0, 1, 3, 1, 0, 1, 4)];
+    case 'mat4Multiply':
+      return [out(16), v(16), v(16)];
+    case 'mat4Invert':
+      return [out(16), Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1)];
+    case 'mat4Determinant':
+      return [Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1)];
+    case 'mat4Compose':
+      return [
+        out(16),
+        Float64Array.of(1, -2, 3),
+        Float64Array.of(0.9, 0.1, 0.2, 0.3),
+        Float64Array.of(2, 0.5, 3),
+      ];
+    case 'mat4Decompose':
+      return [
+        out(3),
+        out(4),
+        out(3),
+        Float64Array.of(2, 1, 0, 0, -1, 3, 1, 0, 0.5, 0, 4, 0, 7, -2, 5, 1),
+      ];
+    case 'mat4LookAt':
+      return [
+        out(16),
+        Float64Array.of(3, 4, 5),
+        Float64Array.of(-1, 2, 0.5),
+        Float64Array.of(0, 1, 0),
+      ];
+    case 'mat4Perspective':
+      return [out(16), 1, 1.5, 0.5, 100, 'negative-one-to-one'];
+    case 'mat4Orthographic':
+      return [out(16), -1, 1, -1, 1, 0.1, 10, 'zero-to-one'];
+    case 'frustumFromMatrix':
+      return [out(24), v(16), 'negative-one-to-one'];
+    case 'frustumContainsPoint':
+      return [v(24), Float64Array.of(0, 0, -10)];
+    case 'frustumIntersectsSphere':
+      return [v(24), Float64Array.of(0, 0, -10), 1];
+    case 'frustumIntersectsAabb':
+      return [v(24), Float64Array.of(-1, -1, -11), Float64Array.of(1, 1, -9)];
     default:
       throw new Error(`no arguments for ${name}`);
   }
@@ -152,7 +191,24 @@ test('positive control: the allocating twin quaternionMultiply triggers GC', asy
 });
 
 /** Hand-written allocation-free functions next to the generated kernels (geometry/sym3.ts, numeric/box-lcp.ts). */
-const EXTRA_NAMES = ['eigSym3', 'rotateTensor', 'parallelAxis', 'solveBoxLcp'];
+const EXTRA_NAMES = [
+  'eigSym3',
+  'rotateTensor',
+  'parallelAxis',
+  'solveBoxLcp',
+  'mat4Multiply',
+  'mat4Invert',
+  'mat4Determinant',
+  'mat4Compose',
+  'mat4Decompose',
+  'mat4LookAt',
+  'mat4Perspective',
+  'mat4Orthographic',
+  'frustumFromMatrix',
+  'frustumContainsPoint',
+  'frustumIntersectsSphere',
+  'frustumIntersectsAabb',
+];
 
 for (const name of [...KERNEL_NAMES, ...EXTRA_NAMES]) {
   test(`${name} makes no allocation`, async () => {

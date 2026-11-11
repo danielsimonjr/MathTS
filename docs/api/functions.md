@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1360 exports).
+> `@danielsimonjr/mathts-functions` (1372 exports).
 
 ### Functions by category
 
@@ -706,7 +706,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (29): `eigSym3`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3Transpose`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
+**Other exports (uncategorized)** (41): `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
 
 ### Constants & values (72)
 

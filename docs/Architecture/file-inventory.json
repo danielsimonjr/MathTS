@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2220,
+  "totalFiles": 2224,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1253,
+    "build-entry": 1255,
     "test-only": 0,
     "orphan": 0,
-    "test": 876,
+    "test": 878,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1279,
-    "tests": 876,
+    "src": 1281,
+    "tests": 878,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 997,
+    "@danielsimonjr/mathts-functions": 1001,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 119,
@@ -6361,6 +6361,13 @@
       "loc": 498
     },
     {
+      "file": "functions/src/geometry/frustum.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 218
+    },
+    {
       "file": "functions/src/geometry/geometry-extra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6408,6 +6415,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 377
+    },
+    {
+      "file": "functions/src/geometry/mat4.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 683
     },
     {
       "file": "functions/src/geometry/polygon-ops.ts",
@@ -6519,7 +6533,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1010
+      "loc": 1012
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -10993,6 +11007,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 45
+    },
+    {
+      "file": "functions/tests/mat4-fourjs-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 167
+    },
+    {
+      "file": "functions/tests/mat4.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 163
     },
     {
       "file": "functions/tests/matrix-bridge-accel.test.ts",
