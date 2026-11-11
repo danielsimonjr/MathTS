@@ -327,7 +327,7 @@ function _fPValue(f: f64, d1: f64, d2: f64): f64 {
  * studentTTest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5.5) // one-sample vs 5.5
  * studentTTest([1, 2, 3], [4, 5, 6]) // two-sample Welch
  */
-export function studentTTest(sample1: f64[], sample2?: f64[] | number): TTestResult {
+export function studentTTest(sample1: f64[], sample2?: f64[] | number | null): TTestResult {
   if (sample1.length < 2) throw new Error('studentTTest: sample1 must have at least 2 elements');
 
   if (sample2 === undefined || sample2 === null) {
