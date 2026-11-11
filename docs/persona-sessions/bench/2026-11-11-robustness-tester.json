@@ -1,0 +1,65 @@
+{
+  "persona": "robustness-tester",
+  "date": "2026-11-11",
+  "seed": 20261111,
+  "commit": "fef4010b8a468215a26bcdb9642db0556055b9bb",
+  "runtime": {
+    "node": "v22.23.4",
+    "os": "linux 6.12.113+ x86_64",
+    "cpu": "Intel(R) Xeon(R) Processor, 4 cores, KVM"
+  },
+  "packages": {
+    "@danielsimonjr/mathts-core": "0.26.0",
+    "@danielsimonjr/mathts-matrix": "0.10.0",
+    "@danielsimonjr/mathts-functions": "0.84.0",
+    "@danielsimonjr/mathts-parser": "0.1.34",
+    "@danielsimonjr/mathts-evaluator": "0.1.33",
+    "@danielsimonjr/mathts-expression": "0.12.7",
+    "@danielsimonjr/mathts-units": "0.7.5",
+    "@danielsimonjr/mathts-numbers": "0.1.28",
+    "@danielsimonjr/mathts-workbook": "0.5.18",
+    "@danielsimonjr/mathts-workerpool": "0.4.0",
+    "@danielsimonjr/mathts-parallel": "0.10.0",
+    "@danielsimonjr/mathts-arithmetic": "0.1.86"
+  },
+  "harness": "docs/persona-sessions/bench/2026-11-11-robustness-tester.harness.mjs",
+  "properties": {
+    "add_commute": { "ok": true, "runs": 200 },
+    "mul_commute": { "ok": true, "runs": 200 },
+    "eval_random_string_no_crash": { "ok": true, "runs": 400, "maxLength": 80 }
+  },
+  "timings_ms": {
+    "unit_parse_invalid_m_repeat": [
+      { "n": 2000, "ms": 3.66 },
+      { "n": 4000, "ms": 11.67 },
+      { "n": 8000, "ms": 42.33 }
+    ]
+  },
+  "findings": [
+    { "id": "workerpool-missing-script", "issue": 806, "severity": "P0" },
+    { "id": "addScalar-null", "issue": 807, "severity": "P0" },
+    { "id": "evaluate-leaks-parse-typed", "issue": 808, "severity": "P1" },
+    { "id": "huge-int-infinity", "issue": 809, "severity": "P1" },
+    { "id": "zeros-1e8", "issue": 810, "severity": "P1" },
+    { "id": "unit-parse-scaling", "issue": 811, "severity": "P1" },
+    { "id": "deg-value-si", "issue": 812, "severity": "P1" },
+    { "id": "add-types", "issue": 813, "severity": "P2" },
+    { "id": "dense-ctor-2d", "issue": 814, "severity": "P2" },
+    { "id": "multiply-scalar", "issue": 815, "severity": "P2" },
+    { "id": "scope-process-identity", "issue": 816, "severity": "P2" },
+    { "id": "block-comment", "issue": 817, "severity": "P2" },
+    { "id": "workbook-constructor-key", "issue": 818, "severity": "P2" },
+    { "id": "unit-nan", "issue": 819, "severity": "P2" },
+    { "id": "workerpool-internal-exports", "issue": 820, "severity": "P2" }
+  ],
+  "duplicates_not_refiled": [714, 715, 722, 723, 725, 696],
+  "sandbox_held": [
+    "constructor",
+    "__proto__",
+    "Function",
+    "eval",
+    "globalThis as free symbol",
+    "sin.apply / call / bind",
+    "object literal __proto__ key"
+  ]
+}
