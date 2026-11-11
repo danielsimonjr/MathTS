@@ -71,7 +71,11 @@ export class WorkerPool {
     this.workerScript = workerScript;
     this.maxWorkers = maxWorkers || this.getOptimalWorkerCount();
     this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
-    this.initialize();
+    // initialize() is async. A rejection here (invalid file:// URL, worker_threads
+    // import failure) must not surface as an unhandled rejection from the constructor.
+    void this.initialize().catch((err: unknown) => {
+      console.error('WorkerPool: failed to initialize workers:', err);
+    });
   }
 
   private getOptimalWorkerCount(): number {

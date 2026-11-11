@@ -29,4 +29,30 @@ describe('WorkerPool constructor (#806)', () => {
   it('throws when workerScript is an empty string', () => {
     expect(() => new WorkerPool('')).toThrow(/workerScript/);
   });
+
+  it('throws synchronously for a zero-arg call and for non-strings', () => {
+    const Ctor = WorkerPool as unknown as new (...args: unknown[]) => WorkerPool;
+    expect(() => new Ctor()).toThrow(TypeError);
+    expect(() => new Ctor()).toThrow(/workerScript/);
+    for (const bad of [null, 1, {}, new URL('file:///tmp/worker.js'), new String('/worker.js')]) {
+      expect(() => new Ctor(bad)).toThrow(TypeError);
+      expect(() => new Ctor(bad)).toThrow(/workerScript/);
+    }
+  });
+
+  it('does not emit unhandledRejection for an invalid file:// script', async () => {
+    const reasons: unknown[] = [];
+    const onRejection = (reason: unknown) => {
+      reasons.push(reason);
+    };
+    process.on('unhandledRejection', onRejection);
+    const pool = new WorkerPool('file://not a url', 1);
+    try {
+      await new Promise((r) => setTimeout(r, 200));
+      expect(reasons).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', onRejection);
+      await pool.terminate();
+    }
+  });
 });
