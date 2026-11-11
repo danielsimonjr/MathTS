@@ -13,7 +13,11 @@
 
 import { rowMajorStrides } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
-import type { NestedArray as CoreNestedArray } from '@danielsimonjr/mathts-core/internal';
+import {
+  arraySize,
+  validate,
+  type NestedArray as CoreNestedArray,
+} from '@danielsimonjr/mathts-core/internal';
 import { Index } from './named-index.js';
 
 /**
@@ -48,6 +52,9 @@ export class Tensor {
   readonly axisLabels?: ReadonlyArray<Index>;
 
   constructor(shape: ReadonlyArray<number>, data: Float64Array, axisLabels?: ReadonlyArray<Index>) {
+    if (!(data instanceof Float64Array)) {
+      throw new TypeError('Tensor: data must be a Float64Array');
+    }
     if (data.length !== Tensor.sizeOf(shape)) {
       throw new Error(
         `Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`
@@ -74,26 +81,44 @@ export class Tensor {
     return rowMajorStrides(shape);
   }
 
-  static fromNested(data: NestedArray, shape: ReadonlyArray<number>): Tensor {
-    const size = Tensor.sizeOf(shape);
+  static fromNested(data: NestedArray): Tensor;
+  static fromNested(data: NestedArray, shape: ReadonlyArray<number>): Tensor;
+  static fromNested(data: NestedArray, shape?: ReadonlyArray<number>): Tensor {
+    const resolvedShape: number[] =
+      shape !== undefined
+        ? [...shape]
+        : typeof data === 'number'
+          ? []
+          : (() => {
+              const inferred = arraySize(data);
+              try {
+                validate(data, inferred);
+              } catch (err) {
+                const detail = err instanceof Error ? err.message : 'jagged nested array';
+                throw new TypeError(`Tensor.fromNested: ${detail}`);
+              }
+              return inferred;
+            })();
+
+    const size = Tensor.sizeOf(resolvedShape);
     const out = new Float64Array(size);
     let cursor = 0;
     const walk = (node: NestedArray, depth: number): void => {
-      if (depth === shape.length) {
+      if (depth === resolvedShape.length) {
         if (typeof node !== 'number') {
           throw new Error(`Tensor.fromNested: expected a number at depth ${depth}`);
         }
         out[cursor++] = node;
         return;
       }
-      if (!Array.isArray(node) || node.length !== shape[depth]) {
+      if (!Array.isArray(node) || node.length !== resolvedShape[depth]) {
         throw new Error(`Tensor.fromNested: shape mismatch at depth ${depth}`);
       }
       for (const child of node) walk(child, depth + 1);
     };
     walk(data, 0);
     if (cursor !== size) throw new Error(`Tensor.fromNested: filled ${cursor} of ${size}`);
-    return new Tensor([...shape], out);
+    return new Tensor(resolvedShape, out);
   }
 
   static identity(n: number): Tensor {

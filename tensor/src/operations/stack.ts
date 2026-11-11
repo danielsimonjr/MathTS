@@ -50,9 +50,12 @@ export interface StackOpts {
  * // Stack two row-vectors [a, b, c] and [d, e, f] → 2×3 matrix:
  * const matrix = stack([v1, v2], 0);
  */
-export function stack(tensors: Tensor[], axis: number, opts?: StackOpts): Tensor {
+export function stack(tensors: Tensor[], axis = 0, opts?: StackOpts): Tensor {
   if (tensors.length === 0) {
     throw new Error('stack: tensors array must be non-empty');
+  }
+  if (!Number.isInteger(axis)) {
+    throw new TypeError('stack: axis must be an integer');
   }
 
   const first = tensors[0];
