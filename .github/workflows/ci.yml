@@ -142,6 +142,9 @@ jobs:
       - name: Bun audit retry tests
         run: node --test tools/test/bun-audit-retry.test.mjs
 
+      - name: Apt install fallback tests
+        run: node --test tools/test/apt-install.test.mjs
+
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
@@ -370,15 +373,21 @@ jobs:
         run: node tools/test/check-bun-version.mjs
 
       - name: Install Mesa lavapipe (software Vulkan adapter for WebGPU)
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y mesa-vulkan-drivers libegl1
+        run: sudo bash tools/ci/apt-install.sh install mesa-vulkan-drivers libegl1
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install Playwright OS dependencies
+        run: |
+          pkg_file=$(mktemp)
+          node tools/ci/playwright-chromium-apt-packages.mjs >"$pkg_file"
+          mapfile -t pw_pkgs <"$pkg_file"
+          rm -f "$pkg_file"
+          sudo bash tools/ci/apt-install.sh install "${pw_pkgs[@]}"
+
       - name: Install Playwright browsers
-        run: bunx --bun playwright install chromium --with-deps
+        run: bunx --bun playwright install chromium
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
       # matrix#build and functions#build after @danielsimonjr/mathts-wasm#build, and their
