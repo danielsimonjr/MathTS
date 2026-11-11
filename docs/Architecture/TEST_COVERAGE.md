@@ -10,12 +10,12 @@
 
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
-| Total Source Files                     | 1282                  |
-| Total Test Files                       | 862                   |
+| Total Source Files                     | 1283                  |
+| Total Test Files                       | 863                   |
 | Source Files with Tests                | 530                   |
-| Source Files without Tests             | 752                   |
+| Source Files without Tests             | 753                   |
 | Coverage (raw, direct-import)          | **41.3%**             |
-| Coverage (effective, active code only) | **47.3%** (379 / 801) |
+| Coverage (effective, active code only) | **47.3%** (379 / 802) |
 
 > The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
 
@@ -26,13 +26,13 @@
 | **Synced mathjs categories in functions/**     |   299 | Mechanically synced from upstream mathjs by ~/.            |
 | **Synced expression utils + transforms**       |     4 | Synced from mathjs.                                        |
 | **AssemblyScript sources under assembly/src/** |    27 | AssemblyScript is not a vitest target.                     |
-| **Active (real gap — needs a test)**           |   422 | These are the files that should grow a direct-import test. |
+| **Active (real gap — needs a test)**           |   423 | These are the files that should grow a direct-import test. |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 752 source files are not directly imported by any test file:
+The following 753 source files are not directly imported by any test file:
 
 ### workerpool/
 
@@ -745,6 +745,7 @@ The following 752 source files are not directly imported by any test file:
 - `functions/src/typed/complex-promotion.ts` → Expected test: `tests/unit/src/complex-promotion.test.ts`
 - `functions/src/typed/f64-kernels.ts` → Expected test: `tests/unit/src/f64-kernels.test.ts`
 - `functions/src/typed/factorization/render-univariate.ts` → Expected test: `tests/unit/src/render-univariate.test.ts`
+- `functions/src/typed/invalid-scalar-guards.ts` → Expected test: `tests/unit/src/invalid-scalar-guards.test.ts`
 - `functions/src/typed/normal-equations-solve.ts` → Expected test: `tests/unit/src/normal-equations-solve.test.ts`
 - `functions/src/typed/string-derivative.ts` → Expected test: `tests/unit/src/string-derivative.test.ts`
 - `functions/src/unit/to.ts` → Expected test: `tests/unit/src/to.test.ts`
@@ -1604,6 +1605,7 @@ The following 752 source files are not directly imported by any test file:
 | `tests/docs-sync.test.ts`                               | 170 files           |
 | `tests/dogfood-g01-complex-promotion-edges.test.ts`     | 170 files           |
 | `tests/dogfood-g01-complex-promotion.test.ts`           | 170 files           |
+| `tests/dogfood-g03-null-scalar-dispatch.test.ts`        | 0 files             |
 | `tests/dtw.test.ts`                                     | 1 files             |
 | `tests/effect-sizes.test.ts`                            | 1 files             |
 | `tests/eigs-correctness.test.ts`                        | 0 files             |

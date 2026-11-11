@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-11",
-  "totalFiles": 2229,
+  "totalFiles": 2231,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1256,
+    "build-entry": 1257,
     "test-only": 0,
     "orphan": 0,
-    "test": 882,
+    "test": 883,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1282,
-    "tests": 882,
+    "src": 1283,
+    "tests": 883,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1005,
+    "@danielsimonjr/mathts-functions": 1007,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 119,
@@ -597,7 +597,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 259
     },
     {
       "file": "core/src/array.ts",
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 262
+      "loc": 324
     },
     {
       "file": "core/tests/bignumber-comparison-coercion.test.ts",
@@ -8605,7 +8605,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1724
+      "loc": 1747
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8802,6 +8802,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 681
+    },
+    {
+      "file": "functions/src/typed/invalid-scalar-guards.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 80
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -9789,6 +9796,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 59
+    },
+    {
+      "file": "functions/tests/dogfood-g03-null-scalar-dispatch.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 123
     },
     {
       "file": "functions/tests/dtw.test.ts",

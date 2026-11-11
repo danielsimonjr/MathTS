@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 49 files
+- **functions/typed**: 50 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 50             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 549            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 550            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10869,6 +10869,7 @@ graph LR
 | `./f64-kernels.js`                   | `f64Unary`                                                                             | Import |
 | `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`                                                | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                             | Import |
+| `./invalid-scalar-guards.js`         | `withBinaryScalarGuards`                                                               | Import |
 | `./complex-promotion.js`             | `logReal, logRealBase, log10Real, log2Real, log1pReal, sqrtReal, powReal, nthRootReal` | Import |
 
 **Exports:**
@@ -11415,6 +11416,21 @@ graph LR
 **Exports:**
 
 - Functions: `linearInterp`, `lagrangeInterp`, `newtonInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`, `chebyshevFit`, `legendreFit`
+
+---
+
+### `functions/src/typed/invalid-scalar-guards.ts` - Guards for typed `add` / `multiply`: reject operands that must not be coerced
+
+**Workspace Dependencies:**
+
+| Package                        | Import                               |
+| ------------------------------ | ------------------------------------ |
+| `@danielsimonjr/mathts-core`   | `BigNumber, Complex, Dual, Fraction` |
+| `@danielsimonjr/mathts-matrix` | `Matrix`                             |
+
+**Exports:**
+
+- Functions: `formatUnexpectedArgumentType`, `unexpectedArgumentType`, `rejectInvalidBinaryScalars`, `withBinaryScalarGuards`
 
 ---
 
@@ -19820,7 +19836,7 @@ graph TD
         N344[complex-promotion]
         N345[complex]
         N346[dist-objects]
-        N347[...39 more]
+        N347[...40 more]
     end
 
     subgraph Functions/unit
@@ -20182,14 +20198,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1282   |
+| Total TypeScript Files  | 1283   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217597 |
-| Total Exports           | 6996   |
+| Total Lines of Code     | 217755 |
+| Total Exports           | 7000   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
 | Total Interfaces        | 600    |
-| Total Functions         | 2352   |
+| Total Functions         | 2356   |
 | Total Type Guards       | 170    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
