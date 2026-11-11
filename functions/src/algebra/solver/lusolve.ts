@@ -92,6 +92,23 @@ export const createLusolve = /* #__PURE__ */ factory(
       typeof createSolveValidation
     >[0]) as unknown as SolveValidationFunction;
 
+    function lusolveFromNested(
+      nested: number[][],
+      b: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix {
+      const aMatrix = matrix(nested);
+      const d = lup(aMatrix);
+      return _lusolve(d.L, d.U, d.p, null, b);
+    }
+
+    function isLUPDecomposition(value: unknown): value is LUPDecomposition {
+      if (typeof value !== 'object' || value === null) {
+        return false;
+      }
+      const o = value as Record<string, unknown>;
+      return 'L' in o && 'U' in o && 'p' in o;
+    }
+
     /**
      * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
      *
@@ -125,23 +142,6 @@ export const createLusolve = /* #__PURE__ */ factory(
      *
      * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
      */
-    function lusolveFromNested(
-      nested: number[][],
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): DenseMatrix {
-      const aMatrix = matrix(nested);
-      const d = lup(aMatrix);
-      return _lusolve(d.L, d.U, d.p, null, b);
-    }
-
-    function isLUPDecomposition(value: unknown): value is LUPDecomposition {
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-      const o = value as Record<string, unknown>;
-      return 'L' in o && 'U' in o && 'p' in o;
-    }
-
     return typed(name, {
       'Array, Array | Matrix': function (
         a: unknown[][],

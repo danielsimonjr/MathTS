@@ -9767,7 +9767,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 57
+      "loc": 56
     },
     {
       "file": "functions/tests/dtw.test.ts",
