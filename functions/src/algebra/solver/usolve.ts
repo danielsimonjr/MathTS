@@ -2,6 +2,7 @@ import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { isSingularSubstitutionPivot, LUSOLVE_SINGULAR_MESSAGE } from './pivot-tolerance.js';
 
 // Type definitions
 interface MatrixConstructor {
@@ -190,12 +191,12 @@ export const createUsolve = /* #__PURE__ */ factory(
     ): number {
       for (let j = columns - 1; j >= 0; j--) {
         const bj = (bdata[j][0] as number) || 0;
+        const vjj = mdata[j][j];
+        if (isSingularSubstitutionPivot(vjj) || ops.equalScalar(vjj, 0)) {
+          throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        }
         let xj: number;
         if (!ops.equalScalar(bj, 0)) {
-          const vjj = mdata[j][j];
-          if (ops.equalScalar(vjj, 0)) {
-            throw new Error('Linear system cannot be solved since matrix is singular');
-          }
           const quot = ops.div(bj, vjj);
           if (typeof quot !== 'number') {
             return j;
@@ -256,15 +257,12 @@ export const createUsolve = /* #__PURE__ */ factory(
         // x[j]
         let xj: unknown;
 
+        const vjj = mdata[j][j];
+        if (isSingularSubstitutionPivot(vjj) || equalScalar(vjj, 0)) {
+          throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        }
+
         if (!equalScalar(bj, 0)) {
-          // value at [j, j]
-          const vjj = mdata[j][j];
-
-          if (equalScalar(vjj, 0)) {
-            // system cannot be solved
-            throw new Error('Linear system cannot be solved since matrix is singular');
-          }
-
           xj = divideScalar(bj, vjj);
 
           // loop rows
@@ -309,38 +307,35 @@ export const createUsolve = /* #__PURE__ */ factory(
       for (let j = columns - 1; j >= 0; j--) {
         const bj = bdata[j][0] || 0;
 
+        let vjj: unknown = 0;
+
+        // upper triangular matrix values & index (column j)
+        const jValues: unknown[] = [];
+        const jIndices: number[] = [];
+
+        // first & last indeces in column
+        const firstIndex = ptr[j];
+        const lastIndex = ptr[j + 1];
+
+        // values in column, find value at [j, j], loop backwards
+        for (let k = lastIndex - 1; k >= firstIndex; k--) {
+          const i = index[k];
+
+          // check row (rows are not sorted!)
+          if (i === j) {
+            vjj = values![k];
+          } else if (i < j) {
+            // store upper triangular
+            jValues.push(values![k]);
+            jIndices.push(i);
+          }
+        }
+
+        if (isSingularSubstitutionPivot(vjj) || equalScalar(vjj, 0)) {
+          throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        }
+
         if (!equalScalar(bj, 0)) {
-          // non-degenerate row, find solution
-
-          let vjj: unknown = 0;
-
-          // upper triangular matrix values & index (column j)
-          const jValues: unknown[] = [];
-          const jIndices: number[] = [];
-
-          // first & last indeces in column
-          const firstIndex = ptr[j];
-          const lastIndex = ptr[j + 1];
-
-          // values in column, find value at [j, j], loop backwards
-          for (let k = lastIndex - 1; k >= firstIndex; k--) {
-            const i = index[k];
-
-            // check row (rows are not sorted!)
-            if (i === j) {
-              vjj = values![k];
-            } else if (i < j) {
-              // store upper triangular
-              jValues.push(values![k]);
-              jIndices.push(i);
-            }
-          }
-
-          // at this point we must have a value in vjj
-          if (equalScalar(vjj, 0)) {
-            throw new Error('Linear system cannot be solved since matrix is singular');
-          }
-
           const xj = divideScalar(bj, vjj);
 
           for (let k = 0, lastIndex = jIndices.length; k < lastIndex; k++) {
@@ -350,7 +345,6 @@ export const createUsolve = /* #__PURE__ */ factory(
 
           x[j] = [xj];
         } else {
-          // degenerate row, we can choose any value
           x[j] = [0];
         }
       }

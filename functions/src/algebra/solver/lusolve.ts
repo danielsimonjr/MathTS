@@ -3,6 +3,7 @@ import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { csIpvec } from '../sparse/csIpvec.js';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { validateUpperTriangularPivots } from './validate-u-pivots.js';
 
 interface MatrixConstructor {
   (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
@@ -119,6 +120,9 @@ export const createLusolve = /* #__PURE__ */ factory(
      * @param {Number} [threshold]             Partial pivoting threshold (1 for partial pivoting), see slu for details. Matrix must be a SparseMatrix.
      *
      * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
+     *
+     * Throws when the factorization is singular or contains non-finite values (same pivot
+     * tolerance as `linsolve`), including rank-deficient but consistent systems.
      */
     return typed(name, {
       'Array, Array | Matrix': function (
@@ -194,6 +198,8 @@ export const createLusolve = /* #__PURE__ */ factory(
       } else {
         bMatrix = solveValidation(L, b, true);
       }
+
+      validateUpperTriangularPivots(U);
 
       // use forward substitution to resolve L * y = b
       const y = lsolve(L, bMatrix);
