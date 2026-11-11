@@ -5567,21 +5567,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 218
+      "loc": 353
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 19
+      "loc": 21
     },
     {
       "file": "functions/src/algebra/solver/usolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 359
+      "loc": 362
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -5602,7 +5602,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 111
     },
     {
       "file": "functions/src/algebra/sparse/csAmd.ts",
@@ -9802,7 +9802,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 72
+      "loc": 227
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",
@@ -11811,7 +11811,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 465
+      "loc": 464
     },
     {
       "file": "functions/tests/special-accuracy.test.ts",

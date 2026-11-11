@@ -37,6 +37,22 @@ function failSingular(): never {
   throw new Error(LUSOLVE_SINGULAR_MESSAGE);
 }
 
+/** Max |finite number| in a dense factor. Non-finite numbers fail before this is used. */
+function denseNumberScale(data: unknown[][]): number {
+  let scale = 0;
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    for (let j = 0; j < (row?.length ?? 0); j++) {
+      const v = row[j];
+      if (typeof v === 'number' && Number.isFinite(v)) {
+        const a = Math.abs(v);
+        if (a > scale) scale = a;
+      }
+    }
+  }
+  return scale;
+}
+
 function validateDenseDiagonal(data: unknown[][]): void {
   const n = data.length;
   for (let i = 0; i < n; i++) {
@@ -47,7 +63,10 @@ function validateDenseDiagonal(data: unknown[][]): void {
         failSingular();
       }
     }
-    if (isBadLuFactorPivot(row?.[i])) {
+  }
+  const scale = denseNumberScale(data);
+  for (let i = 0; i < n; i++) {
+    if (isBadLuFactorPivot(data[i]?.[i], scale)) {
       failSingular();
     }
   }
@@ -58,11 +77,22 @@ function validateSparseDiagonal(m: SparseMatrix): void {
   const n = size[0];
   if (!values || !index || !ptr) {
     for (let i = 0; i < n; i++) {
-      if (isBadLuFactorPivot(0)) {
+      if (isBadLuFactorPivot(0, 0)) {
         failSingular();
       }
     }
     return;
+  }
+  let scale = 0;
+  for (let k = 0; k < values.length; k++) {
+    const v = values[k];
+    if (typeof v === 'number' && !Number.isFinite(v)) {
+      failSingular();
+    }
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      const a = Math.abs(v);
+      if (a > scale) scale = a;
+    }
   }
   for (let j = 0; j < n; j++) {
     let diag: unknown = 0;
@@ -73,10 +103,7 @@ function validateSparseDiagonal(m: SparseMatrix): void {
         diag = values[k];
       }
     }
-    if (typeof diag === 'number' && !Number.isFinite(diag)) {
-      failSingular();
-    }
-    if (isBadLuFactorPivot(diag)) {
+    if (isBadLuFactorPivot(diag, scale)) {
       failSingular();
     }
   }

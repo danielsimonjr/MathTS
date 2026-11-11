@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-11",
     "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7005
+    "totalExports": 7004
   },
   "entryPoints": [
     {
@@ -7311,13 +7311,13 @@
         "constants": ["createLsolveAll"]
       },
       "functions/src/algebra/solver/lusolve.ts": {
-        "description": "Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.",
+        "description": "Max |entry| when every entry is a finite number.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "../../utils/is.js",
-            "imports": ["isArray", "isMatrix"]
+            "imports": ["isArray", "isDenseMatrix", "isMatrix", "isSparseMatrix"]
           },
           {
             "file": "../../utils/factory.js",
@@ -7337,6 +7337,14 @@
             "typeOnly": true
           },
           {
+            "file": "../../factories/matrix-bridge.js",
+            "imports": ["MathJSSparseMatrix"]
+          },
+          {
+            "file": "./pivot-tolerance.js",
+            "imports": ["LUSOLVE_SINGULAR_MESSAGE"]
+          },
+          {
             "file": "./validate-u-pivots.js",
             "imports": ["validateUpperTriangularPivots"]
           }
@@ -7346,18 +7354,13 @@
         "constants": ["createLusolve"]
       },
       "functions/src/algebra/solver/pivot-tolerance.ts": {
-        "description": "During `usolve` substitution: reject a zero/tiny **finite** pivot (including when the",
+        "description": "Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": [
-          "LU_PIVOT_TOL",
-          "LUSOLVE_SINGULAR_MESSAGE",
-          "isBadLuFactorPivot",
-          "isSingularSubstitutionPivot"
-        ],
-        "functions": ["isBadLuFactorPivot", "isSingularSubstitutionPivot"],
+        "exports": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE", "isBadLuFactorPivot"],
+        "functions": ["isBadLuFactorPivot"],
         "constants": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE"]
       },
       "functions/src/algebra/solver/usolve.ts": {
@@ -7384,7 +7387,7 @@
           },
           {
             "file": "./pivot-tolerance.js",
-            "imports": ["isSingularSubstitutionPivot", "LUSOLVE_SINGULAR_MESSAGE"]
+            "imports": ["LUSOLVE_SINGULAR_MESSAGE"]
           }
         ],
         "workspaceDependencies": [],
@@ -45932,12 +45935,12 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 217858,
-    "totalExports": 7005,
+    "totalLinesOfCode": 218025,
+    "totalExports": 7004,
     "totalClasses": 61,
     "totalInterfaces": 600,
-    "totalFunctions": 2359,
-    "totalTypeGuards": 172,
+    "totalFunctions": 2358,
+    "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1646,
     "totalReExports": 3016,

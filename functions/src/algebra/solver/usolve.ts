@@ -2,7 +2,7 @@ import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
-import { isSingularSubstitutionPivot, LUSOLVE_SINGULAR_MESSAGE } from './pivot-tolerance.js';
+import { LUSOLVE_SINGULAR_MESSAGE } from './pivot-tolerance.js';
 
 // Type definitions
 interface MatrixConstructor {
@@ -192,7 +192,10 @@ export const createUsolve = /* #__PURE__ */ factory(
       for (let j = columns - 1; j >= 0; j--) {
         const bj = (bdata[j][0] as number) || 0;
         const vjj = mdata[j][j];
-        if (isSingularSubstitutionPivot(vjj) || ops.equalScalar(vjj, 0)) {
+        // Exact zero is a free variable even when the RHS compares equal to 0.
+        // A merely tiny pivot is not: `1e-20 * x = 0` has the unique solution 0,
+        // and `lusolve` judges near-singularity relative to the factor's scale.
+        if (vjj === 0) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
         let xj: number;
@@ -258,7 +261,7 @@ export const createUsolve = /* #__PURE__ */ factory(
         let xj: unknown;
 
         const vjj = mdata[j][j];
-        if (isSingularSubstitutionPivot(vjj) || equalScalar(vjj, 0)) {
+        if (typeof vjj === 'number' ? vjj === 0 : equalScalar(vjj, 0)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
@@ -331,7 +334,7 @@ export const createUsolve = /* #__PURE__ */ factory(
           }
         }
 
-        if (isSingularSubstitutionPivot(vjj) || equalScalar(vjj, 0)) {
+        if (typeof vjj === 'number' ? vjj === 0 : equalScalar(vjj, 0)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 

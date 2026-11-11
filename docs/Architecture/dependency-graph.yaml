@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-11'
   totalFiles: 1285
   totalModules: 82
-  totalExports: 7005
+  totalExports: 7004
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7032,14 +7032,16 @@ modules:
       constants:
         - createLsolveAll
     functions/src/algebra/solver/lusolve.ts:
-      description: Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+      description: Max |entry| when every entry is a finite number.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../utils/is.js
           imports:
             - isArray
+            - isDenseMatrix
             - isMatrix
+            - isSparseMatrix
         - file: ../../utils/factory.js
           imports:
             - factory
@@ -7053,6 +7055,12 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../../factories/matrix-bridge.js
+          imports:
+            - MathJSSparseMatrix
+        - file: ./pivot-tolerance.js
+          imports:
+            - LUSOLVE_SINGULAR_MESSAGE
         - file: ./validate-u-pivots.js
           imports:
             - validateUpperTriangularPivots
@@ -7062,7 +7070,7 @@ modules:
       constants:
         - createLusolve
     functions/src/algebra/solver/pivot-tolerance.ts:
-      description: 'During `usolve` substitution: reject a zero/tiny **finite** pivot (including when the'
+      description: Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -7071,10 +7079,8 @@ modules:
         - LU_PIVOT_TOL
         - LUSOLVE_SINGULAR_MESSAGE
         - isBadLuFactorPivot
-        - isSingularSubstitutionPivot
       functions:
         - isBadLuFactorPivot
-        - isSingularSubstitutionPivot
       constants:
         - LU_PIVOT_TOL
         - LUSOLVE_SINGULAR_MESSAGE
@@ -7100,7 +7106,6 @@ modules:
           typeOnly: true
         - file: ./pivot-tolerance.js
           imports:
-            - isSingularSubstitutionPivot
             - LUSOLVE_SINGULAR_MESSAGE
       workspaceDependencies: []
       exports:
@@ -13337,7 +13342,7 @@ modules:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
         The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose
-        union is 
+        union is
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -43470,12 +43475,12 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1285
   totalModules: 82
-  totalLinesOfCode: 217858
-  totalExports: 7005
+  totalLinesOfCode: 218025
+  totalExports: 7004
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2359
-  totalTypeGuards: 172
+  totalFunctions: 2358
+  totalTypeGuards: 171
   totalEnums: 0
   totalConstants: 1646
   totalReExports: 3016

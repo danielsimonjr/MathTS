@@ -1,18 +1,20 @@
-/** Absolute pivot floor — matches `linsolve` (`typed/numeric.ts` `solvePivoted`). */
+/**
+ * Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+ * (`typed/numeric.ts` `solvePivoted`). Applied as `|U_ii| < LU_PIVOT_TOL * scale`
+ * where `scale` is the max absolute entry of the factor, so a well-conditioned
+ * matrix that is only small (or only large) is not judged singular.
+ */
 export const LU_PIVOT_TOL = 1e-15;
 
 export const LUSOLVE_SINGULAR_MESSAGE = 'Linear system cannot be solved since matrix is singular';
 
-/** After `lusolve`'s LU factorization: reject non-finite entries and tiny pivots. */
-export function isBadLuFactorPivot(value: unknown, tol: number = LU_PIVOT_TOL): boolean {
-  return typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) < tol;
-}
-
 /**
- * During `usolve` substitution: reject a zero/tiny **finite** pivot (including when the
- * RHS is zero). Non-finite pivots are left to divideScalar so direct `usolve` stays
- * bit-exact on NaN/±Infinity (P7 number-path contract).
+ * After LU: a numeric pivot is unusable when it is non-finite, exact zero, or tiny
+ * relative to `scale` (max |entry| of the factor). Non-numbers (BigNumber, Fraction,
+ * Complex) are not judged here — substitution still handles them.
  */
-export function isSingularSubstitutionPivot(value: unknown, tol: number = LU_PIVOT_TOL): boolean {
-  return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) < tol;
+export function isBadLuFactorPivot(value: unknown, scale: number): boolean {
+  if (typeof value !== 'number') return false;
+  if (!Number.isFinite(value) || value === 0) return true;
+  return Math.abs(value) < LU_PIVOT_TOL * scale;
 }

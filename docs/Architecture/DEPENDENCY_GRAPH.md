@@ -3015,18 +3015,20 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+### `functions/src/algebra/solver/lusolve.ts` - Max |entry| when every entry is a finite number.
 
 **Internal Dependencies:**
 
-| File                           | Imports                         | Type               |
-| ------------------------------ | ------------------------------- | ------------------ |
-| `../../utils/is.js`            | `isArray, isMatrix`             | Import             |
-| `../../utils/factory.js`       | `factory`                       | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation`         | Import             |
-| `../sparse/csIpvec.js`         | `csIpvec`                       | Import             |
-| `../../core/function/typed.js` | `TypedFunction`                 | Import (type-only) |
-| `./validate-u-pivots.js`       | `validateUpperTriangularPivots` | Import             |
+| File                               | Imports                                            | Type               |
+| ---------------------------------- | -------------------------------------------------- | ------------------ |
+| `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix` | Import             |
+| `../../utils/factory.js`           | `factory`                                          | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation`                            | Import             |
+| `../sparse/csIpvec.js`             | `csIpvec`                                          | Import             |
+| `../../core/function/typed.js`     | `TypedFunction`                                    | Import (type-only) |
+| `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                               | Import             |
+| `./pivot-tolerance.js`             | `LUSOLVE_SINGULAR_MESSAGE`                         | Import             |
+| `./validate-u-pivots.js`           | `validateUpperTriangularPivots`                    | Import             |
 
 **Exports:**
 
@@ -3034,11 +3036,11 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/pivot-tolerance.ts` - During `usolve` substitution: reject a zero/tiny **finite** pivot (including when the
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
 
 **Exports:**
 
-- Functions: `isBadLuFactorPivot`, `isSingularSubstitutionPivot`
+- Functions: `isBadLuFactorPivot`
 - Constants: `LU_PIVOT_TOL`, `LUSOLVE_SINGULAR_MESSAGE`
 
 ---
@@ -3047,13 +3049,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                                                 | Type               |
-| ------------------------------ | ------------------------------------------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`                                               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation`                                 | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`                                         | Import             |
-| `../../core/function/typed.js` | `TypedFunction`                                         | Import (type-only) |
-| `./pivot-tolerance.js`         | `isSingularSubstitutionPivot, LUSOLVE_SINGULAR_MESSAGE` | Import             |
+| File                           | Imports                    | Type               |
+| ------------------------------ | -------------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`                  | Import             |
+| `./utils/solveValidation.js`   | `createSolveValidation`    | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`            | Import             |
+| `../../core/function/typed.js` | `TypedFunction`            | Import (type-only) |
+| `./pivot-tolerance.js`         | `LUSOLVE_SINGULAR_MESSAGE` | Import             |
 
 **Exports:**
 
@@ -20226,13 +20228,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1285   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217858 |
-| Total Exports           | 7005   |
+| Total Lines of Code     | 218025 |
+| Total Exports           | 7004   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
 | Total Interfaces        | 600    |
-| Total Functions         | 2359   |
-| Total Type Guards       | 172    |
+| Total Functions         | 2358   |
+| Total Type Guards       | 171    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
 | Runtime Circular Deps   | 0      |
