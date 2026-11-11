@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.83.0
+
+### Minor Changes
+
+- 52e586e: Add `solveBoxLcp`, a dense box-constrained LCP solver by projected Gauss-Seidel (w = A x - b, lo <= x <= hi). It supports friction bounds coupled to another variable (`findex`, |x_j| <= mu x_i), warm start through an in/out `x`, over-relaxation, and a reusable result object, so a solver loop makes no allocation (issue 379).
+- 2f73d66: Add a deterministic mode (issue 380). `setDeterministic(true)` from `@danielsimonjr/mathts-core` (or `config({ deterministic: true })` from functions) makes results bit-identical whether or not the WASM tier is loaded: only the WASM kernels measured bit-identical to JS (`abs` on a `Float64Array`) still run, and implicit WebGPU, worker-pool parallelism, the integration and sampling fan-outs, and the WASM matrix backend are skipped. See `docs/determinism.md`.
+- ff20f7c: Add allocation-free mat4 and frustum kernels (issue 381): `mat4Multiply`, `mat4Invert`, `mat4Compose`, `mat4Decompose`, `mat4LookAt`, `mat4Perspective` and `mat4Orthographic` (both with a `depthRange` of `'negative-one-to-one'` or `'zero-to-one'`), and `frustumFromMatrix`, `frustumContainsPoint`, `frustumIntersectsSphere` and `frustumIntersectsAabb`. They use the out-parameter style of the vec3/quat/mat3 kernels, and a fixture test pins them to fourJS `Matrix4` and `Frustum` bit for bit on finite input (except `mat4Determinant`, which sums in another order so that V8 inlines it).
+- be1a7de: Add `eigSym3`, an allocation-free eigen-decomposition of a symmetric 3x3 matrix (cyclic Jacobi; ascending eigenvalues and an orthonormal right-handed eigenvector matrix), and the inertia-tensor operations `rotateTensor` (R I Rᵀ) and `parallelAxis` (Steiner's theorem). They use the conventions of the fixed-size kernels: column-major 3x3, caller-supplied outputs at offsets (issue 377).
+
+### Patch Changes
+
+- Updated dependencies [2f73d66]
+  - @danielsimonjr/mathts-core@0.26.0
+  - @danielsimonjr/mathts-parallel@0.10.0
+  - @danielsimonjr/mathts-matrix@0.10.0
+  - @danielsimonjr/mathts-expression@0.12.7
+
 ## 0.82.0
 
 ### Minor Changes
