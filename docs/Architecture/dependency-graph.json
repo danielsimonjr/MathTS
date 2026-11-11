@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-11",
-    "totalFiles": 1281,
+    "totalFiles": 1282,
     "totalModules": 82,
-    "totalExports": 6985
+    "totalExports": 6991
   },
   "entryPoints": [
     {
@@ -5059,6 +5059,21 @@
       }
     },
     "matrix/operations": {
+      "matrix/src/operations/as-packed.ts": {
+        "description": "Normalize decomposition inputs (DenseMatrix, nested arrays, packed f64).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix", "isDenseMatrix"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["decompositionInputToNestedArray", "decompositionInputToDenseMatrix"],
+        "interfaces": ["PackedMatrixDescriptor"],
+        "functions": ["decompositionInputToNestedArray", "decompositionInputToDenseMatrix"]
+      },
       "matrix/src/operations/cholesky.ts": {
         "description": "Cholesky Decomposition (DenseMatrix primitive)",
         "externalDependencies": [],
@@ -5294,6 +5309,16 @@
             "file": "./common.js",
             "imports": ["matMul", "transpose"],
             "reExport": true
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": [
+              "decompositionInputToDenseMatrix",
+              "decompositionInputToNestedArray",
+              "DecompositionMatrixInput",
+              "PackedMatrixDescriptor"
+            ],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -5347,6 +5372,10 @@
           "condest",
           "matMul",
           "transposeNestedArray",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor",
           "transpose"
         ],
         "reExported": [
@@ -5397,7 +5426,11 @@
           "QLResult",
           "condest",
           "matMul",
-          "transpose"
+          "transpose",
+          "decompositionInputToDenseMatrix",
+          "decompositionInputToNestedArray",
+          "DecompositionMatrixInput",
+          "PackedMatrixDescriptor"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -5448,6 +5481,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5615,6 +5652,10 @@
           {
             "file": "./givens.js",
             "imports": ["applyGivensCols", "givensRotation"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -7337,7 +7378,18 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["decompositionInputToNestedArray"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["PackedMatrixDescriptor"]
+          }
+        ],
         "exports": ["createLusolve"],
         "constants": ["createLusolve"]
       },
@@ -44270,6 +44322,7 @@
       {
         "name": "Matrix/operations",
         "files": [
+          "matrix/src/operations/as-packed.ts",
           "matrix/src/operations/cholesky.ts",
           "matrix/src/operations/common.ts",
           "matrix/src/operations/condest.ts",
@@ -45773,17 +45826,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1281,
+    "totalTypeScriptFiles": 1282,
     "totalModules": 82,
-    "totalLinesOfCode": 217471,
-    "totalExports": 6985,
+    "totalLinesOfCode": 217667,
+    "totalExports": 6991,
     "totalClasses": 61,
-    "totalInterfaces": 600,
-    "totalFunctions": 2345,
+    "totalInterfaces": 601,
+    "totalFunctions": 2347,
     "totalTypeGuards": 169,
     "totalEnums": 0,
     "totalConstants": 1640,
-    "totalReExports": 3016,
+    "totalReExports": 3020,
     "totalTypeOnlyImports": 643,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

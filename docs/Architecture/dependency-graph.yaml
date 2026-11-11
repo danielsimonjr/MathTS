@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1281
+  totalFiles: 1282
   totalModules: 82
-  totalExports: 6985
+  totalExports: 6991
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4851,6 +4851,24 @@ modules:
         - diagonal
         - typedMatrixOperations
   matrix/operations:
+    matrix/src/operations/as-packed.ts:
+      description: Normalize decomposition inputs (DenseMatrix, nested arrays, packed f64).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+            - isDenseMatrix
+      workspaceDependencies: []
+      exports:
+        - decompositionInputToNestedArray
+        - decompositionInputToDenseMatrix
+      interfaces:
+        - PackedMatrixDescriptor
+      functions:
+        - decompositionInputToNestedArray
+        - decompositionInputToDenseMatrix
     matrix/src/operations/cholesky.ts:
       description: Cholesky Decomposition (DenseMatrix primitive)
       externalDependencies: []
@@ -5104,6 +5122,13 @@ modules:
             - matMul
             - transpose
           reExport: true
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
+            - PackedMatrixDescriptor
+          reExport: true
       workspaceDependencies: []
       exports:
         - eig
@@ -5155,6 +5180,10 @@ modules:
         - condest
         - matMul
         - transposeNestedArray
+        - decompositionInputToDenseMatrix
+        - decompositionInputToNestedArray
+        - DecompositionMatrixInput
+        - PackedMatrixDescriptor
         - transpose
       reExported:
         - eig
@@ -5205,6 +5234,10 @@ modules:
         - condest
         - matMul
         - transpose
+        - decompositionInputToDenseMatrix
+        - decompositionInputToNestedArray
+        - DecompositionMatrixInput
+        - PackedMatrixDescriptor
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -5247,6 +5280,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
         - lu
@@ -5428,6 +5465,10 @@ modules:
           imports:
             - applyGivensCols
             - givensRotation
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
         - svd
@@ -7053,7 +7094,15 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - decompositionInputToNestedArray
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - PackedMatrixDescriptor
       exports:
         - createLusolve
       constants:
@@ -41988,6 +42037,7 @@ dependencyGraph:
         - matrix/src/typed-operations.ts
     - name: Matrix/operations
       files:
+        - matrix/src/operations/as-packed.ts
         - matrix/src/operations/cholesky.ts
         - matrix/src/operations/common.ts
         - matrix/src/operations/condest.ts
@@ -43323,17 +43373,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1281
+  totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217471
-  totalExports: 6985
+  totalLinesOfCode: 217667
+  totalExports: 6991
   totalClasses: 61
-  totalInterfaces: 600
-  totalFunctions: 2345
+  totalInterfaces: 601
+  totalFunctions: 2347
   totalTypeGuards: 169
   totalEnums: 0
   totalConstants: 1640
-  totalReExports: 3016
+  totalReExports: 3020
   totalTypeOnlyImports: 643
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

@@ -1,3 +1,5 @@
+import { decompositionInputToNestedArray } from '@danielsimonjr/mathts-matrix';
+import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
@@ -120,15 +122,50 @@ export const createLusolve = /* #__PURE__ */ factory(
      *
      * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
      */
+    function lusolveFromNested(
+      nested: number[][],
+      b: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix {
+      const aMatrix = matrix(nested);
+      const d = lup(aMatrix);
+      return _lusolve(d.L, d.U, d.p, null, b);
+    }
+
+    function isPackedMatrixDescriptor(value: unknown): value is PackedMatrixDescriptor {
+      if (typeof value !== 'object' || value === null) {
+        return false;
+      }
+      const o = value as Record<string, unknown>;
+      return (
+        o.data instanceof Float64Array &&
+        typeof o.rows === 'number' &&
+        typeof o.cols === 'number' &&
+        !('L' in o) &&
+        !('U' in o)
+      );
+    }
+
+    function isLUPDecomposition(value: unknown): value is LUPDecomposition {
+      if (typeof value !== 'object' || value === null) {
+        return false;
+      }
+      const o = value as Record<string, unknown>;
+      return 'L' in o && 'U' in o && 'p' in o;
+    }
+
     return typed(name, {
       'Array, Array | Matrix': function (
         a: unknown[][],
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        const aMatrix = matrix(a);
-        const d = lup(aMatrix);
-        const x = _lusolve(d.L, d.U, d.p, null, b);
-        return x.valueOf();
+        return lusolveFromNested(a as number[][], b).valueOf();
+      },
+
+      'Float64Array, Array | Matrix': function (
+        a: Float64Array,
+        b: unknown[][] | DenseMatrix | SparseMatrix
+      ): unknown[][] {
+        return lusolveFromNested(decompositionInputToNestedArray(a), b).valueOf();
       },
 
       'DenseMatrix, Array | Matrix': function (
@@ -158,10 +195,16 @@ export const createLusolve = /* #__PURE__ */ factory(
       },
 
       'Object, Array | Matrix': function (
-        d: LUPDecomposition,
+        a: LUPDecomposition | PackedMatrixDescriptor | unknown,
         b: unknown[][] | DenseMatrix | SparseMatrix
-      ): DenseMatrix {
-        return _lusolve(d.L, d.U, d.p, d.q, b);
+      ): DenseMatrix | unknown[][] {
+        if (isLUPDecomposition(a)) {
+          return _lusolve(a.L, a.U, a.p, a.q, b);
+        }
+        if (isPackedMatrixDescriptor(a)) {
+          return lusolveFromNested(decompositionInputToNestedArray(a), b);
+        }
+        throw new TypeError('Invalid Matrix LU decomposition');
       },
     });
 
