@@ -259,3 +259,65 @@ describe('number (convert any scalar to a JS number)', () => {
     expect(() => number(C(3, 4))).toThrow();
   });
 });
+
+/** Issue #807 — null must not reach Complex.im access via asFraction → number(). */
+describe('nullish and invalid operands (#807)', () => {
+  const rejectsImCrash = (fn: (x: never, y: number) => unknown, name: string) => {
+    for (const v of [null, undefined] as const) {
+      it(`${name}(${v === null ? 'null' : 'undefined'}, 1) throws a typed error`, () => {
+        expect(() => fn(v as never, 1)).toThrow(
+          new RegExp(`${name}: unexpected type ${v === null ? 'null' : 'undefined'}`)
+        );
+        try {
+          fn(v as never, 1);
+        } catch (e) {
+          expect((e as Error).message).not.toMatch(/reading 'im'/);
+        }
+      });
+    }
+  };
+
+  rejectsImCrash(addScalar as (x: never, y: number) => unknown, 'addScalar');
+  rejectsImCrash(multiplyScalar as (x: never, y: number) => unknown, 'multiplyScalar');
+  rejectsImCrash(divideScalar as (x: never, y: number) => unknown, 'divideScalar');
+
+  it('number(null) throws without reading .im', () => {
+    expect(() => number(null as never)).toThrow(/number: unexpected type null/);
+    try {
+      number(null as never);
+    } catch (e) {
+      expect((e as Error).message).not.toMatch(/reading 'im'/);
+    }
+  });
+
+  it('number(undefined) and number({}) name the runtime type', () => {
+    expect(() => number(undefined as never)).toThrow(/number: unexpected type undefined/);
+    expect(() => number({} as never)).toThrow(/number: unexpected type \[object Object\]/);
+  });
+
+  it('rejects the second operand and non-numeric primitives', () => {
+    expect(() => addScalar(1, null as never)).toThrow(/addScalar: unexpected type null/);
+    expect(() => divideScalar(1, undefined as never)).toThrow(
+      /divideScalar: unexpected type undefined/
+    );
+    expect(() => multiplyScalar('2' as never, 1)).toThrow(/multiplyScalar: unexpected type string/);
+    expect(() => addScalar(true as never, 1)).toThrow(/addScalar: unexpected type boolean/);
+    expect(() => subtractScalar(1n, '1' as never)).toThrow(
+      /subtractScalar: unexpected type string/
+    );
+  });
+
+  it('abs/pow/equal do not read properties of null', () => {
+    expect(() => abs(null as never)).toThrow(/abs: unexpected type null/);
+    expect(() => pow(null as never, 2)).toThrow(/pow: unexpected type null/);
+    expect(() => equal(1, undefined as never)).toThrow(/equal: unexpected type undefined/);
+  });
+
+  it('number and bigint fast paths stay exact', () => {
+    expect(addScalar(1, 2)).toBe(3);
+    expect(addScalar(1n, 2n)).toBe(3n);
+    expect(multiplyScalar(1.5, 2)).toBe(3);
+    expect(number(4)).toBe(4);
+    expect(equal(0.1 + 0.2, 0.3)).toBe(true);
+  });
+});

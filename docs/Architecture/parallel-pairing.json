@@ -1,10 +1,10 @@
 {
   "generated": "2026-11-11",
-  "total": 218,
+  "total": 216,
   "parallelizedCount": 22,
   "effectiveCount": 16,
   "disabledCount": 6,
-  "nonParallelCount": 196,
+  "nonParallelCount": 194,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
@@ -169,7 +169,6 @@
     "acosh",
     "acot",
     "acsc",
-    "add",
     "airyAi",
     "airyBi",
     "and",
@@ -291,7 +290,6 @@
     "mod",
     "moebiusMu",
     "multinomial",
-    "multiply",
     "nextPrime",
     "noncentralChi2PDF",
     "norm",
@@ -738,7 +736,7 @@
     "arithmetic.ts": {
       "effective": 0,
       "disabled": 0,
-      "none": 45
+      "none": 43
     },
     "bitwise.ts": {
       "effective": 0,
