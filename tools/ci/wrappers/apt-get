@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Drop-in ahead of /usr/bin/apt-get so Playwright install-deps --dry-run can
+# simulate installs through the same mirror fallback as apt-install.sh.
+set -euo pipefail
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+exec bash "${script_dir}/../apt-install.sh" apt-get-forward "$@"
