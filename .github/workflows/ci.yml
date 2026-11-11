@@ -354,7 +354,8 @@ jobs:
 
   browser:
     name: Browser (WebGPU smoke)
-    runs-on: ubuntu-latest
+    # Playwright's apt list is Ubuntu 24.04 (noble) only. ubuntu-latest is no longer that release.
+    runs-on: ubuntu-24.04
     needs: compile
     timeout-minutes: 20
 
