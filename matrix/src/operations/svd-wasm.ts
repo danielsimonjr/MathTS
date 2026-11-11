@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { svd, type SVDResult, type SVDOptions } from './svd.js';
 
 /** Count singular values above the rank tolerance. */
@@ -37,17 +38,21 @@ function toThin(full: SVDResult, k: number, rankTolerance: number): SVDResult {
  * Thin SVD. Delegates to the JS {@link svd} and truncates to the economy form
  * (WASM path retired — see file header).
  *
- * @param matrix - Input matrix (m x n) as a row-major 2D array
+ * @param matrix - `DenseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
  * @param options - SVD options; `rankTolerance` controls the rank estimate
  * @returns thin SVD `{ U (m x k), S (k), V (n x k), rank }`
  */
-export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise<SVDResult> {
-  const m = matrix.length;
-  const n = matrix[0]?.length ?? 0;
+export async function svdWasm(
+  matrix: DecompositionMatrixInput,
+  options?: SVDOptions
+): Promise<SVDResult> {
+  const nested = decompositionInputToNestedArray(matrix);
+  const m = nested.length;
+  const n = nested[0]?.length ?? 0;
   if (m === 0 || n === 0) {
     return { U: [], S: [], V: [], rank: 0 };
   }
   const k = Math.min(m, n);
   const rankTolerance = options?.rankTolerance ?? 1e-10;
-  return toThin(svd(matrix, options), k, rankTolerance);
+  return toThin(svd(nested, options), k, rankTolerance);
 }

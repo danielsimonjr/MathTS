@@ -15,6 +15,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
 import {
   eye,
   cloneMatrix,
@@ -350,14 +351,18 @@ export interface SchurOptions {
  *   [[a, b], [-b, a]]  (approximately)
  * and the complex pair is  a ± bi.
  *
- * @param A - Square DenseMatrix (n × n, real entries).
+ * @param A - Square `DenseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
  * @param opts - Optional algorithm parameters.
  * @returns { Q, T } satisfying Q · T · Q^T ≈ A.
  * @throws Error if A is not square.
+ * @throws {TypeError} if `A` is not one of the accepted matrix shapes.
  */
-export function matrixSchur(A: DenseMatrix, opts?: SchurOptions): SchurResult {
-  const n = A.rows;
-  if (n !== A.cols) throw new Error(`matrixSchur: matrix must be square (got ${A.rows}×${A.cols})`);
+export function matrixSchur(A: DecompositionMatrixInput, opts?: SchurOptions): SchurResult {
+  const dense = decompositionInputToDenseMatrix(A);
+  const n = dense.rows;
+  if (n !== dense.cols) {
+    throw new Error(`matrixSchur: matrix must be square (got ${dense.rows}×${dense.cols})`);
+  }
   if (n === 0) {
     return {
       Q: DenseMatrix.zeros(0, 0),
@@ -368,7 +373,7 @@ export function matrixSchur(A: DenseMatrix, opts?: SchurOptions): SchurResult {
   const maxIterations = opts?.maxIterations ?? 1000;
   const tolerance = opts?.tolerance ?? 1e-12;
 
-  const Aarr = A.toArray();
+  const Aarr = dense.toArray();
   const { H, Q } = schurRaw(Aarr, maxIterations, tolerance);
 
   const n2 = n * n;
