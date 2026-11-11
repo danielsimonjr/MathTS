@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
  * Apt packages Playwright needs for Chromium on Ubuntu 24.04 and 26.04 x64.
- * Derived from playwright@1.62.1 nativeDeps: `ubuntu24.04-x64` and
- * `ubuntu26.04-x64` list the same chromium and tools packages.
- * Re-check when bumping the playwright devDependency.
+ * Derived from playwright@1.62.1 nativeDeps. ubuntu26.04-x64 chromium + tools
+ * is the same list as ubuntu24.04-x64. Re-check when bumping Playwright.
  */
 import { readFileSync } from 'node:fs';
 

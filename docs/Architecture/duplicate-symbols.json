@@ -2415,7 +2415,7 @@
     },
     {
       "name": "acos",
-      "category": "constant+function",
+      "category": "constant",
       "definers": [
         {
           "file": "compat/src/shims.ts",
@@ -2520,7 +2520,7 @@
     },
     {
       "name": "asin",
-      "category": "constant+function",
+      "category": "constant",
       "definers": [
         {
           "file": "compat/src/shims.ts",
@@ -2562,7 +2562,7 @@
     },
     {
       "name": "atan",
-      "category": "constant+function",
+      "category": "constant",
       "definers": [
         {
           "file": "compat/src/shims.ts",
@@ -2583,7 +2583,7 @@
     },
     {
       "name": "atan2",
-      "category": "constant+function",
+      "category": "constant",
       "definers": [
         {
           "file": "compat/src/shims.ts",

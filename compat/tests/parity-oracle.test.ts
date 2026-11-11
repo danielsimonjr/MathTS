@@ -131,10 +131,10 @@ describe('compat parity — det vs numpy oracle + functions', () => {
 describe('compat parity — trig wrappers vs numpy oracle + functions', () => {
   // numpy: acos(.5)=π/3, asin(.5)=π/6, atan(2), atan2(1,2)
   const cases: Array<[string, () => number, () => number, number]> = [
-    ['acos(0.5)', () => cAcos(0.5), () => fAcos(0.5) as number, Math.acos(0.5)],
-    ['asin(0.5)', () => cAsin(0.5), () => fAsin(0.5) as number, Math.asin(0.5)],
-    ['atan(2)', () => cAtan(2), () => fAtan(2) as number, Math.atan(2)],
-    ['atan2(1,2)', () => cAtan2(1, 2), () => fAtan2(1, 2) as number, Math.atan2(1, 2)],
+    ['acos(0.5)', () => cAcos(0.5) as number, () => fAcos(0.5) as number, Math.acos(0.5)],
+    ['asin(0.5)', () => cAsin(0.5) as number, () => fAsin(0.5) as number, Math.asin(0.5)],
+    ['atan(2)', () => cAtan(2) as number, () => fAtan(2) as number, Math.atan(2)],
+    ['atan2(1,2)', () => cAtan2(1, 2) as number, () => fAtan2(1, 2) as number, Math.atan2(1, 2)],
   ];
   for (const [label, compatFn, funcsFn, oracle] of cases) {
     it(`${label} matches Math oracle and functions`, () => {

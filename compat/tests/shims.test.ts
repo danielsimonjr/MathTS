@@ -43,17 +43,17 @@ import {
 import { Complex } from '@danielsimonjr/mathts-core';
 
 describe('Inverse trig functions', () => {
-  it('asin should wrap Math.asin', () => {
+  it('asin delegates to functions (in-range matches Math)', () => {
     expect(asin(0)).toBe(0);
     expect(asin(1)).toBeCloseTo(Math.PI / 2);
   });
 
-  it('acos should wrap Math.acos', () => {
+  it('acos delegates to functions (in-range matches Math)', () => {
     expect(acos(1)).toBe(0);
     expect(acos(0)).toBeCloseTo(Math.PI / 2);
   });
 
-  it('atan should wrap Math.atan', () => {
+  it('atan delegates to functions (in-range matches Math)', () => {
     expect(atan(0)).toBe(0);
     expect(atan(1)).toBeCloseTo(Math.PI / 4);
   });
