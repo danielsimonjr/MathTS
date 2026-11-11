@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-11",
     "totalFiles": 1281,
     "totalModules": 82,
-    "totalExports": 6984
+    "totalExports": 6985
   },
   "entryPoints": [
     {
@@ -16650,7 +16650,7 @@
         "constants": ["MASS_PROPERTY_SHAPES"]
       },
       "functions/src/geometry/mat4.ts": {
-        "description": "Allocation-free 4x4 matrix kernels. Matrices are column-major (`m[column * 4 + row]`),",
+        "description": "Allocation-free 4x4 matrix kernels, and `mat3ToQuat`. Matrices are column-major",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -16667,6 +16667,7 @@
           "mat4Invert",
           "mat4Compose",
           "mat4Decompose",
+          "mat3ToQuat",
           "mat4LookAt",
           "mat4Perspective",
           "mat4Orthographic"
@@ -16677,6 +16678,7 @@
           "mat4Invert",
           "mat4Compose",
           "mat4Decompose",
+          "mat3ToQuat",
           "mat4LookAt",
           "mat4Perspective",
           "mat4Orthographic"
@@ -45773,11 +45775,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1281,
     "totalModules": 82,
-    "totalLinesOfCode": 217408,
-    "totalExports": 6984,
+    "totalLinesOfCode": 217471,
+    "totalExports": 6985,
     "totalClasses": 61,
     "totalInterfaces": 600,
-    "totalFunctions": 2344,
+    "totalFunctions": 2345,
     "totalTypeGuards": 169,
     "totalEnums": 0,
     "totalConstants": 1640,

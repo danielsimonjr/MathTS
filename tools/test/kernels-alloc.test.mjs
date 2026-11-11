@@ -103,6 +103,8 @@ function argsFor(name) {
         Float64Array.of(0.9, 0.1, 0.2, 0.3),
         Float64Array.of(2, 0.5, 3),
       ];
+    case 'mat3ToQuat':
+      return [out(4), Float64Array.of(-0.6, 0.8, 0, -0.8, -0.6, 0, 0, 0, 1)];
     case 'mat4Decompose':
       return [
         out(3),
@@ -198,7 +200,7 @@ test('positive control: the allocating twin quaternionMultiply triggers GC', asy
   assert.ok(n > 0, `expected GC entries from the allocating twin, saw ${n}`);
 });
 
-/** Hand-written allocation-free functions next to the generated kernels (geometry/sym3.ts, numeric/box-lcp.ts). */
+/** Hand-written allocation-free functions next to the generated kernels (geometry/sym3.ts, geometry/mat4.ts, geometry/frustum.ts, numeric/box-lcp.ts). */
 const EXTRA_NAMES = [
   'eigSym3',
   'rotateTensor',
@@ -209,6 +211,7 @@ const EXTRA_NAMES = [
   'mat4Determinant',
   'mat4Compose',
   'mat4Decompose',
+  'mat3ToQuat',
   'mat4LookAt',
   'mat4Perspective',
   'mat4Orthographic',
