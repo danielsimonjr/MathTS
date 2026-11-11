@@ -59,6 +59,9 @@ export class WorkerPool {
   private startupFailures = 0;
 
   constructor(workerScript: string, maxWorkers?: number) {
+    if (typeof workerScript !== 'string' || workerScript.length === 0) {
+      throw new TypeError('WorkerPool requires a workerScript URL or path');
+    }
     // 0 (and undefined) mean auto-detect, the convention `ParallelConfig` documents.
     if (maxWorkers !== undefined && (!Number.isInteger(maxWorkers) || maxWorkers < 0)) {
       throw new RangeError(
