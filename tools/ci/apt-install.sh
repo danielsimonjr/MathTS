@@ -19,28 +19,64 @@ log() {
   printf 'apt-install.sh: %s\n' "$*" >&2
 }
 
-apt_output_is_retriable() {
+apt_log_is_retriable() {
   local logfile=$1
   grep -qiE \
-    'Could not resolve|Temporary failure resolving|Temporary failure in name resolution|Failed to fetch|Connection timed out|Connection failed|Network is unreachable|mirrorfile.*failure|Mirror sync in progress|Clearsigned file .*not valid' \
+    'Could not resolve|Temporary failure resolving|Temporary failure in name resolution|Failed to fetch|Connection timed out|Connection failed|Network is unreachable|mirrorfile.*failure|Mirror sync in progress|Clearsigned file .*not valid|Some index files failed to download|Failed to fetch mirror|mirror\\+file:/etc/apt/apt-mirrors\\.txt' \
     "$logfile"
+}
+
+apt_log_has_install_fetch_errors() {
+  local logfile=$1
+  grep -qE '^E: Failed to fetch|^E: Unable to fetch some archives' "$logfile"
 }
 
 run_apt_get() {
   local logfile
   logfile=$(mktemp)
-  local rc=0
-  if ! apt-get "${APT_OPTS[@]}" "$@" 2>&1 | tee "$logfile"; then
-    rc=$?
-    if apt_output_is_retriable "$logfile"; then
-      rm -f "$logfile"
-      return 100
+  apt-get "${APT_OPTS[@]}" "$@" 2>&1 | tee "$logfile"
+  local rc=${PIPESTATUS[0]}
+
+  if [[ $rc -eq 0 ]]; then
+    if apt_log_is_retriable "$logfile" || apt_log_has_install_fetch_errors "$logfile"; then
+      rc=100
     fi
+  elif apt_log_is_retriable "$logfile" || apt_log_has_install_fetch_errors "$logfile"; then
+    rc=100
+  fi
+
+  if [[ $rc -eq 100 ]]; then
+    rm -f "$logfile"
+    return 100
+  fi
+  if [[ $rc -ne 0 ]]; then
     rm -f "$logfile"
     return "$rc"
   fi
   rm -f "$logfile"
   return 0
+}
+
+rewrite_deb822_sources_file() {
+  local target=$1
+  local bak="${target}.mathts-ci-bak"
+  if [[ ! -f $bak ]]; then
+    cp -p "$target" "$bak"
+  fi
+  awk -v archive="$OFFICIAL_ARCHIVE" -v security="$OFFICIAL_SECURITY" '
+    BEGIN { suites = "" }
+    /^$/ { suites = ""; print; next }
+    /^Suites:/ { suites = $0; print; next }
+    /^URIs:/ {
+      if (suites ~ /(^|[[:space:]])[^[:space:]]*-security([[:space:]]|$)/) {
+        print "URIs: " security
+      } else {
+        print "URIs: " archive
+      }
+      next
+    }
+    { print }
+  ' "$bak" >"$target"
 }
 
 switch_to_official_mirrors() {
@@ -50,28 +86,13 @@ switch_to_official_mirrors() {
   MIRRORS_SWITCHED=1
   log "switching apt sources to official Ubuntu mirrors"
 
-  if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
-    local bak="/etc/apt/sources.list.d/ubuntu.sources.mathts-ci-bak"
-    if [[ ! -f $bak ]]; then
-      cp -p /etc/apt/sources.list.d/ubuntu.sources "$bak"
-    fi
-    awk -v archive="$OFFICIAL_ARCHIVE" -v security="$OFFICIAL_SECURITY" '
-      BEGIN { suites = "" }
-      /^$/ { suites = ""; print; next }
-      /^Suites:/ { suites = $0; print; next }
-      /^URIs:/ {
-        if (suites ~ /(^|[[:space:]])[^[:space:]]*-security([[:space:]]|$)/) {
-          print "URIs: " security
-        } else {
-          print "URIs: " archive
-        }
-        next
-      }
-      { print }
-    ' "$bak" > /etc/apt/sources.list.d/ubuntu.sources
-  fi
-
   local f
+  for f in /etc/apt/sources.list.d/*.sources; do
+    [[ -f $f ]] || continue
+    [[ $f == *mathts-ci-bak ]] && continue
+    rewrite_deb822_sources_file "$f"
+  done
+
   for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
     [[ -f $f ]] || continue
     [[ $f == *mathts-ci-bak ]] && continue
@@ -90,20 +111,25 @@ switch_to_official_mirrors() {
     if [[ ! -f /etc/apt/apt-mirrors.txt.mathts-ci-bak ]]; then
       cp -p /etc/apt/apt-mirrors.txt /etc/apt/apt-mirrors.txt.mathts-ci-bak
     fi
-    printf '%s\n' "$OFFICIAL_ARCHIVE" >/etc/apt/apt-mirrors.txt
+    {
+      printf '%s\n' "$OFFICIAL_ARCHIVE"
+      printf '%s\n' "$OFFICIAL_SECURITY"
+    } >/etc/apt/apt-mirrors.txt
   fi
 }
 
 apt_get_with_fallback() {
   local rc=0
-  if ! run_apt_get "$@"; then
-    rc=$?
-    if [[ $rc -ne 100 ]]; then
-      return "$rc"
-    fi
-    switch_to_official_mirrors
-    run_apt_get "$@" 
+  run_apt_get "$@" || rc=$?
+  if [[ $rc -eq 0 ]]; then
+    return 0
   fi
+  if [[ $rc -ne 100 ]]; then
+    return "$rc"
+  fi
+  switch_to_official_mirrors
+  run_apt_get "$@" || rc=$?
+  [[ $rc -eq 0 ]]
 }
 
 do_update() {
@@ -118,15 +144,17 @@ do_install() {
   fi
   do_update
   local rc=0
-  if ! run_apt_get install -y --no-install-recommends "${packages[@]}"; then
-    rc=$?
-    if [[ $rc -ne 100 ]]; then
-      return "$rc"
-    fi
-    switch_to_official_mirrors
-    do_update
-    run_apt_get install -y --no-install-recommends "${packages[@]}"
+  run_apt_get install -y --no-install-recommends "${packages[@]}" || rc=$?
+  if [[ $rc -eq 0 ]]; then
+    return 0
   fi
+  if [[ $rc -ne 100 ]]; then
+    return "$rc"
+  fi
+  switch_to_official_mirrors
+  do_update
+  run_apt_get install -y --no-install-recommends "${packages[@]}" || rc=$?
+  [[ $rc -eq 0 ]]
 }
 
 # Playwright install-deps (and --dry-run) invoke apt-get directly; this entry
