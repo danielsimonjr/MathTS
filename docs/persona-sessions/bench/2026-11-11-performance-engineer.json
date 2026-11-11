@@ -1,0 +1,986 @@
+{
+  "persona": "performance-engineer",
+  "date": "2026-11-11",
+  "env": {
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "cores": 4,
+    "node": "v22.23.4",
+    "bun": null,
+    "os": "linux x64",
+    "exposeGc": true,
+    "repoSha": "f970c4bee077ea00afc31ae290ce8ac3c8a174e9",
+    "packages": {
+      "@danielsimonjr/mathts-functions": {
+        "version": "0.84.0",
+        "diskBytes": 3884325,
+        "deps": [
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-expression",
+          "@danielsimonjr/mathts-gpu",
+          "@danielsimonjr/mathts-matrix",
+          "@danielsimonjr/mathts-parallel",
+          "bignumber.js",
+          "complex.js",
+          "decimal.js",
+          "escape-latex",
+          "fraction.js",
+          "javascript-natural-sort",
+          "seedrandom",
+          "tiny-emitter",
+          "typed-function"
+        ]
+      },
+      "@danielsimonjr/mathts-matrix": {
+        "version": "0.10.0",
+        "diskBytes": 454789,
+        "deps": [
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-gpu",
+          "@danielsimonjr/mathts-parallel"
+        ]
+      },
+      "@danielsimonjr/mathts-core": {
+        "version": "0.26.0",
+        "diskBytes": 572701,
+        "deps": ["typed-function"]
+      },
+      "@danielsimonjr/mathts-linalg": {
+        "version": "0.2.5",
+        "diskBytes": 5195,
+        "deps": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-matrix"]
+      },
+      "@danielsimonjr/mathts-tensor": {
+        "version": "0.3.5",
+        "diskBytes": 150157,
+        "deps": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-matrix"]
+      },
+      "@danielsimonjr/mathts-signal": {
+        "version": "0.1.86",
+        "diskBytes": 4644,
+        "deps": ["@danielsimonjr/mathts-functions"]
+      },
+      "@danielsimonjr/mathts-statistics": {
+        "version": "0.4.14",
+        "diskBytes": 15216,
+        "deps": ["@danielsimonjr/mathts-functions"]
+      },
+      "@danielsimonjr/mathts-parallel": {
+        "version": "0.10.0",
+        "diskBytes": 143444,
+        "deps": ["@danielsimonjr/mathts-workerpool", "@danielsimonjr/mathts-core"]
+      },
+      "@danielsimonjr/mathts-expression": {
+        "version": "0.12.7",
+        "diskBytes": 1665609,
+        "deps": ["@danielsimonjr/mathts-core"]
+      },
+      "mathjs": {
+        "version": "15.2.0",
+        "diskBytes": 9830690,
+        "deps": [
+          "@babel/runtime",
+          "complex.js",
+          "decimal.js",
+          "escape-latex",
+          "fraction.js",
+          "javascript-natural-sort",
+          "seedrandom",
+          "tiny-emitter",
+          "typed-function"
+        ]
+      },
+      "ml-matrix": {
+        "version": "6.15.1",
+        "diskBytes": 1113749,
+        "deps": ["is-any-array", "ml-array-rescale"]
+      },
+      "fft.js": {
+        "version": "4.0.4",
+        "diskBytes": 22390,
+        "deps": []
+      }
+    }
+  },
+  "importTimesMs": {
+    "@danielsimonjr/mathts-functions": {
+      "median": 395.7,
+      "p95": 402.1,
+      "n": 7
+    },
+    "@danielsimonjr/mathts-matrix": {
+      "median": 64,
+      "p95": 64.8,
+      "n": 7
+    },
+    "@danielsimonjr/mathts-core": {
+      "median": 20.3,
+      "p95": 25.5,
+      "n": 7
+    },
+    "@danielsimonjr/mathts-tensor": {
+      "median": 66.3,
+      "p95": 72.7,
+      "n": 7
+    },
+    "mathjs": {
+      "median": 318.7,
+      "p95": 391.7,
+      "n": 7
+    },
+    "ml-matrix": {
+      "median": 15.9,
+      "p95": 19.6,
+      "n": 7
+    },
+    "fft.js": {
+      "median": 3.9,
+      "p95": 4,
+      "n": 7
+    }
+  },
+  "bundlesMinifyBytes": {
+    "functions-named-evaluate": 1131967,
+    "functions-star": 1632994,
+    "matrix-named-DenseMatrix": 331761,
+    "matrix-star": 378240,
+    "mathjs-evaluate": 671231,
+    "fft-js": 5090,
+    "ml-matrix-Matrix": 71158
+  },
+  "cases": [
+    {
+      "name": "mathts.evaluate.scalar",
+      "ms": {
+        "n": 80,
+        "min": 0.0024549999998271232,
+        "median": 0.0026955000000725704,
+        "p95": 0.005125350000014348,
+        "max": 0.04727200000002085,
+        "mean": 0.003731199999995738,
+        "stdev": 0.005403274827359732,
+        "variance": 0.00002919537885997935
+      },
+      "heapDeltaBytes": {
+        "rss": -3739648,
+        "heapUsed": 46792,
+        "external": -182920
+      }
+    },
+    {
+      "name": "mathts.compileExpr.evaluate",
+      "ms": {
+        "n": 80,
+        "min": 0.0015099999998255953,
+        "median": 0.0016439999999420252,
+        "p95": 0.0019896999998877617,
+        "max": 0.030076999999891996,
+        "mean": 0.002045825000001855,
+        "stdev": 0.0031616572267239044,
+        "variance": 0.000009996076419295492
+      },
+      "heapDeltaBytes": {
+        "rss": -4665344,
+        "heapUsed": 45560,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.parse+compile+evaluate",
+      "ms": {
+        "n": 40,
+        "min": 0.021324000000049637,
+        "median": 0.02231700000015735,
+        "p95": 0.04662049999989209,
+        "max": 0.14879099999984646,
+        "mean": 0.028971625000008317,
+        "stdev": 0.022178636413978187,
+        "variance": 0.0004918919131834392
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 6048,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathjs.evaluate.scalar",
+      "ms": {
+        "n": 80,
+        "min": 0.021214999999983775,
+        "median": 0.021914999999921747,
+        "p95": 0.030195200000196102,
+        "max": 0.1868449999999484,
+        "mean": 0.025185449999975164,
+        "stdev": 0.019021732632635,
+        "variance": 0.00036182631234745117
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 7392,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathjs.compile.evaluate",
+      "ms": {
+        "n": 80,
+        "min": 0.0017619999998714775,
+        "median": 0.0018630000000712243,
+        "p95": 0.0023367999999322816,
+        "max": 0.0396939999998267,
+        "mean": 0.002400524999987397,
+        "stdev": 0.004209035533732137,
+        "variance": 0.000017715980124219777
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 1312,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.add.1e5.number[]",
+      "ms": {
+        "n": 12,
+        "min": 0.3734780000002047,
+        "median": 0.7080119999999397,
+        "p95": 3.550222099999881,
+        "max": 4.97908799999982,
+        "mean": 1.1446483333332935,
+        "stdev": 1.2625072108819562,
+        "variance": 1.593924457528936
+      },
+      "heapDeltaBytes": {
+        "rss": -53248,
+        "heapUsed": 8496,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.sin.1e5.Float64Array",
+      "ms": {
+        "n": 12,
+        "min": 0.41982400000006237,
+        "median": 0.5983324999999695,
+        "p95": 3.2619692500001065,
+        "max": 3.311384000000089,
+        "mean": 1.009040916666682,
+        "stdev": 1.0123809134097352,
+        "variance": 1.0249151138363297
+      },
+      "heapDeltaBytes": {
+        "rss": 4718592,
+        "heapUsed": 3664,
+        "external": 6400000
+      }
+    },
+    {
+      "name": "mathts.DenseMatrix.add.1e5",
+      "ms": {
+        "n": 10,
+        "min": 0.1402940000000399,
+        "median": 0.30363199999999324,
+        "p95": 3.5111756999999666,
+        "max": 3.7761869999999362,
+        "mean": 0.918080199999963,
+        "stdev": 1.2910123049693092,
+        "variance": 1.6667127715821686
+      },
+      "heapDeltaBytes": {
+        "rss": -1445888,
+        "heapUsed": 3952,
+        "external": 4000000
+      }
+    },
+    {
+      "name": "mathjs.add.1e5",
+      "ms": {
+        "n": 8,
+        "min": 5.655285999999933,
+        "median": 7.951066499999911,
+        "p95": 9.318936499999984,
+        "max": 9.644733999999971,
+        "mean": 7.55982524999996,
+        "stdev": 1.4037829666537434,
+        "variance": 1.9706066174671846
+      },
+      "heapDeltaBytes": {
+        "rss": 118784,
+        "heapUsed": 10288,
+        "external": -800000
+      }
+    },
+    {
+      "name": "mathts.add.1e6.Float64Array-as-array",
+      "ms": {
+        "n": 5,
+        "min": 60.432152999999744,
+        "median": 87.2039050000003,
+        "p95": 88.59646039999998,
+        "max": 88.89874499999996,
+        "mean": 77.69995159999999,
+        "stdev": 12.489638610000988,
+        "variance": 155.9910726084274
+      },
+      "heapDeltaBytes": {
+        "rss": -106496,
+        "heapUsed": 104,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.DenseMatrix.multiply.128",
+      "ms": {
+        "n": 10,
+        "min": 2.315426000000116,
+        "median": 2.354029999999966,
+        "p95": 6.9428705000001765,
+        "max": 10.593356000000313,
+        "mean": 3.192755200000056,
+        "stdev": 2.467419053809299,
+        "variance": 6.088156787101175
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 6272,
+        "external": 1179648
+      }
+    },
+    {
+      "name": "ml-matrix.mmul.128",
+      "ms": {
+        "n": 10,
+        "min": 1.891627999999855,
+        "median": 1.9562014999999064,
+        "p95": 6.558249549999928,
+        "max": 10.238205999999991,
+        "mean": 2.7841843999999583,
+        "stdev": 2.485261288677891,
+        "variance": 6.176523673000892
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 3128,
+        "external": 1056768
+      }
+    },
+    {
+      "name": "mathjs.multiply.nested.128",
+      "ms": {
+        "n": 3,
+        "min": 5.3728399999999965,
+        "median": 6.329675999999836,
+        "p95": 12.08613270000037,
+        "max": 12.72573900000043,
+        "mean": 8.142751666666754,
+        "stdev": 3.2641194275380117,
+        "variance": 10.654475637231076
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 14456,
+        "external": -131072
+      }
+    },
+    {
+      "name": "mathts.DenseMatrix.multiply.512",
+      "ms": {
+        "n": 5,
+        "min": 152.62649899999997,
+        "median": 154.37765799999988,
+        "p95": 155.11353999999974,
+        "max": 155.18462699999964,
+        "mean": 154.2335368,
+        "stdev": 0.8797438677763313,
+        "variance": 0.7739492728900591
+      },
+      "heapDeltaBytes": {
+        "rss": 8388608,
+        "heapUsed": 456,
+        "external": 8126464
+      }
+    },
+    {
+      "name": "ml-matrix.mmul.512",
+      "ms": {
+        "n": 5,
+        "min": 86.31940300000042,
+        "median": 86.90506800000003,
+        "p95": 87.79006960000024,
+        "max": 87.8517380000003,
+        "mean": 87.08397040000018,
+        "stdev": 0.5472855406679327,
+        "variance": 0.29952146302419136
+      },
+      "heapDeltaBytes": {
+        "rss": 6709248,
+        "heapUsed": 280,
+        "external": 6303744
+      }
+    },
+    {
+      "name": "mathts.DenseMatrix.multiply.1024",
+      "ms": {
+        "n": 3,
+        "min": 1214.060684,
+        "median": 1216.294484,
+        "p95": 1219.3565764999992,
+        "max": 1219.6968089999991,
+        "mean": 1216.683992333333,
+        "stdev": 2.31736399244279,
+        "variance": 5.370175873470387
+      },
+      "heapDeltaBytes": {
+        "rss": 18866176,
+        "heapUsed": 104,
+        "external": 10485760
+      }
+    },
+    {
+      "name": "ml-matrix.mmul.1024",
+      "ms": {
+        "n": 3,
+        "min": 669.0309579999994,
+        "median": 671.166564000001,
+        "p95": 671.9494307999992,
+        "max": 672.036415999999,
+        "mean": 670.7446459999998,
+        "stdev": 1.262723391849068,
+        "variance": 1.5944703643228149
+      },
+      "heapDeltaBytes": {
+        "rss": 282624,
+        "heapUsed": 104,
+        "external": 8396800
+      }
+    },
+    {
+      "name": "mathts.backendManager.multiply.512",
+      "ms": {
+        "n": 5,
+        "min": 40.48323100000016,
+        "median": 41.16126599999916,
+        "p95": 41.41205259999915,
+        "max": 41.472851999998966,
+        "mean": 40.986319999999616,
+        "stdev": 0.36605087948550924,
+        "variance": 0.1339932463721148
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 1480,
+        "external": 25165824
+      }
+    },
+    {
+      "name": "mathts.backendManager.multiply.512.forceWasm",
+      "ms": {
+        "n": 4,
+        "min": 40.4776039999997,
+        "median": 40.76144599999952,
+        "p95": 41.06799349999928,
+        "max": 41.07488299999932,
+        "mean": 40.768844749999516,
+        "stdev": 0.2835974515153737,
+        "variance": 0.08042751450601472
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 9472,
+        "external": 18874368
+      }
+    },
+    {
+      "name": "mathts.luSolve.500",
+      "error": "A.toFloat64Array is not a function"
+    },
+    {
+      "name": "mathjs.lusolve.500",
+      "ms": {
+        "n": 3,
+        "min": 488.0238169999975,
+        "median": 525.0800549999985,
+        "p95": 579.1134530999992,
+        "max": 585.1171639999993,
+        "mean": 532.7403453333318,
+        "stdev": 40.00657899153512,
+        "variance": 1600.5263626059395
+      },
+      "heapDeltaBytes": {
+        "rss": 18481152,
+        "heapUsed": 75872,
+        "external": -2097152
+      }
+    },
+    {
+      "name": "mathts.svd.nested.128",
+      "ms": {
+        "n": 4,
+        "min": 99.93950299999779,
+        "median": 113.9217690000005,
+        "p95": 120.58384620000143,
+        "max": 120.8972700000013,
+        "mean": 112.17007775000002,
+        "stdev": 8.361128148323127,
+        "variance": 69.90846391268133
+      },
+      "heapDeltaBytes": {
+        "rss": 131072,
+        "heapUsed": 28320,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.svd.nested.500",
+      "ms": {
+        "n": 1,
+        "min": 8361.966413999999,
+        "median": 8361.966413999999,
+        "p95": 8361.966413999999,
+        "max": 8361.966413999999,
+        "mean": 8361.966413999999,
+        "stdev": 0,
+        "variance": 0
+      },
+      "heapDeltaBytes": {
+        "rss": 393216,
+        "heapUsed": 4086600,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.svd.DenseMatrix.500",
+      "ms": {
+        "n": 3,
+        "min": 0.0010020000008807983,
+        "median": 0.0027929999996558763,
+        "p95": 0.012882900000477092,
+        "max": 0.01400400000056834,
+        "mean": 0.005933000000368338,
+        "stdev": 0.005753706110054887,
+        "variance": 0.000033105134000882936
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 2464,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.fft.number[].65536",
+      "ms": {
+        "n": 6,
+        "min": 4.385718000001361,
+        "median": 8.585144000002401,
+        "p95": 18.366999249999935,
+        "max": 19.341483000000153,
+        "mean": 10.63452616666776,
+        "stdev": 5.110473088544304,
+        "variance": 26.116935188735557
+      },
+      "heapDeltaBytes": {
+        "rss": 20480,
+        "heapUsed": 26288,
+        "external": -5145728
+      }
+    },
+    {
+      "name": "mathts.parallelFFT.65536",
+      "ms": {
+        "n": 6,
+        "min": 4.2976159999998345,
+        "median": 4.969381499997326,
+        "p95": 5.101165249998303,
+        "max": 5.118534999997792,
+        "mean": 4.852165666665314,
+        "stdev": 0.2804523938850547,
+        "variance": 0.07865354523585788
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 104,
+        "external": 11534336
+      }
+    },
+    {
+      "name": "fft.js.transform.65536",
+      "ms": {
+        "n": 6,
+        "min": 3.449590000000171,
+        "median": 3.7262750000008964,
+        "p95": 15.952361499999824,
+        "max": 19.851862999999867,
+        "mean": 6.4189648333334235,
+        "stdev": 6.013336708228538,
+        "variance": 36.16021836652883
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 30712,
+        "external": -1048576
+      }
+    },
+    {
+      "name": "mathjs.fft.65536",
+      "ms": {
+        "n": 3,
+        "min": 760.8873080000012,
+        "median": 761.7224930000011,
+        "p95": 763.4804846000028,
+        "max": 763.675817000003,
+        "mean": 762.0952060000018,
+        "stdev": 1.1685124007471697,
+        "variance": 1.365421230699914
+      },
+      "heapDeltaBytes": {
+        "rss": 55250944,
+        "heapUsed": -2104,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.fft.number[].1048576",
+      "ms": {
+        "n": 3,
+        "min": 206.38683700000183,
+        "median": 254.34202899999946,
+        "p95": 355.8240724000003,
+        "max": 367.0998550000004,
+        "mean": 275.94290700000056,
+        "stdev": 67.3652580412444,
+        "variance": 4538.077990963443
+      },
+      "heapDeltaBytes": {
+        "rss": 219267072,
+        "heapUsed": 240,
+        "external": -8912896
+      }
+    },
+    {
+      "name": "mathts.parallelFFT.1048576",
+      "ms": {
+        "n": 3,
+        "min": 61.141466000000946,
+        "median": 61.95711400000073,
+        "p95": 62.18497870000137,
+        "max": 62.21029700000145,
+        "mean": 61.76962566666771,
+        "stdev": 0.4560437354702676,
+        "variance": 0.2079758886616754
+      },
+      "heapDeltaBytes": {
+        "rss": 33685504,
+        "heapUsed": 8056,
+        "external": 41943040
+      }
+    },
+    {
+      "name": "fft.js.transform.1048576",
+      "ms": {
+        "n": 3,
+        "min": 90.35051100000055,
+        "median": 91.45456399999966,
+        "p95": 96.98757769999975,
+        "max": 97.60235699999976,
+        "mean": 93.13581066666666,
+        "stdev": 3.1903249957290427,
+        "variance": 10.178173578373515
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 3384,
+        "external": -16777216
+      }
+    },
+    {
+      "name": "mathts.mean.1e6",
+      "ms": {
+        "n": 8,
+        "min": 0.44435599999997066,
+        "median": 0.4614850000016304,
+        "p95": 0.479723149999154,
+        "max": 0.482506000000285,
+        "mean": 0.4620741250005267,
+        "stdev": 0.012634758499665643,
+        "variance": 0.0001596371223448732
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 472,
+        "external": -8388608
+      }
+    },
+    {
+      "name": "mathts.std.1e6",
+      "ms": {
+        "n": 6,
+        "min": 1.2363469999982044,
+        "median": 1.2563809999992372,
+        "p95": 1.3305367499997374,
+        "max": 1.339535999999498,
+        "mean": 1.272104166666395,
+        "stdev": 0.037577653050780806,
+        "variance": 0.0014120800088048557
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 280,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.variance.1e6",
+      "ms": {
+        "n": 6,
+        "min": 1.2299679999996442,
+        "median": 1.2449384999999893,
+        "p95": 1.2691759999997885,
+        "max": 1.2723929999992833,
+        "mean": 1.2473038333331108,
+        "stdev": 0.0151311571207973,
+        "variance": 0.00022895191581425483
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 280,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.median.1e6",
+      "ms": {
+        "n": 4,
+        "min": 92.59248500000103,
+        "median": 117.78845849999925,
+        "p95": 156.19402934999562,
+        "max": 160.59680699999444,
+        "mean": 122.1915522499985,
+        "stdev": 26.2297421525627,
+        "variance": 687.9993733899246
+      },
+      "heapDeltaBytes": {
+        "rss": 20480,
+        "heapUsed": 14064,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathjs.mean.1e6",
+      "ms": {
+        "n": 6,
+        "min": 9.595196000002034,
+        "median": 9.777082500000688,
+        "p95": 15.21279749999485,
+        "max": 16.97309399999358,
+        "mean": 10.95141933333313,
+        "stdev": 2.695159850538133,
+        "variance": 7.263886619952733
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": -176,
+        "external": 0
+      }
+    },
+    {
+      "name": "mathts.sort.1e5",
+      "ms": {
+        "n": 8,
+        "min": 23.31250100000034,
+        "median": 24.675061999998434,
+        "p95": 26.341933850001805,
+        "max": 26.47150700000202,
+        "mean": 24.83605125000031,
+        "stdev": 1.0525437778525844,
+        "variance": 1.1078484042961902
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 2176,
+        "external": 0
+      }
+    },
+    {
+      "name": "js.Float64Array.sort.1e5",
+      "ms": {
+        "n": 8,
+        "min": 6.494919999997364,
+        "median": 6.591888999999355,
+        "p95": 6.672486249999201,
+        "max": 6.694348999997601,
+        "mean": 6.587660999999571,
+        "stdev": 0.06357166488057608,
+        "variance": 0.004041356575688271
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 416,
+        "external": 4800000
+      }
+    },
+    {
+      "name": "mathts.Tensor.mul.broadcast.1000x1000",
+      "ms": {
+        "n": 10,
+        "min": 9.02179199999955,
+        "median": 9.258636500002467,
+        "p95": 11.16692925000134,
+        "max": 11.352560999999696,
+        "mean": 9.73871070000023,
+        "stdev": 0.8744100977294782,
+        "variance": 0.7645930190112755
+      },
+      "heapDeltaBytes": {
+        "rss": 23855104,
+        "heapUsed": 8200,
+        "external": -800000
+      }
+    },
+    {
+      "name": "ComputePool.sin.1e6",
+      "ms": {
+        "n": 6,
+        "min": 5.872314000000188,
+        "median": 6.292820999999094,
+        "p95": 9.256101999995735,
+        "max": 10.1841959999947,
+        "mean": 6.855555833331891,
+        "stdev": 1.5035017493242355,
+        "variance": 2.2605175102210366
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 8064,
+        "external": -16000
+      }
+    },
+    {
+      "name": "typed.sin.number[].1e6",
+      "ms": {
+        "n": 4,
+        "min": 4.627941999999166,
+        "median": 4.832268999998632,
+        "p95": 8.260295650000261,
+        "max": 8.85555100000056,
+        "mean": 5.787007749999248,
+        "stdev": 1.7740119874591695,
+        "variance": 3.1471185316488324
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 3200,
+        "external": 24000000
+      }
+    },
+    {
+      "name": "ComputePool.matmul.256",
+      "error": "matmul: a has 65536 elements, expected 0.0009999998333333417,0.0019999986666669333,0.002999995500002025,0.003999989333341867,0.004999979166692708,0.0059999640000648,0.006999942833473391,0.007999914666"
+    },
+    {
+      "name": "DenseMatrix.multiply.256",
+      "ms": {
+        "n": 6,
+        "min": 25.950802999999723,
+        "median": 26.056716999995842,
+        "p95": 26.176377000001594,
+        "max": 26.186797000002116,
+        "mean": 26.059539833332867,
+        "stdev": 0.08982795541707198,
+        "variance": 0.00806906157441147
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 280,
+        "external": -5378560
+      }
+    },
+    {
+      "name": "mathts.sin.1e5.afterLoadWasm",
+      "ms": {
+        "n": 10,
+        "min": 0.5484980000037467,
+        "median": 0.581803499997477,
+        "p95": 0.6278150000020104,
+        "max": 0.6482539999997243,
+        "mean": 0.5841432000008353,
+        "stdev": 0.026265964812759012,
+        "variance": 0.0006899009075450946
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": 1432,
+        "external": -4836568
+      }
+    },
+    {
+      "name": "mathts.sort.1e6.afterLoadWasm",
+      "ms": {
+        "n": 3,
+        "min": 377.9283779999969,
+        "median": 381.2928370000009,
+        "p95": 417.1747372000042,
+        "max": 421.16161500000453,
+        "mean": 393.4609433333341,
+        "stdev": 19.635432330002917,
+        "variance": 385.55020278612375
+      },
+      "heapDeltaBytes": {
+        "rss": 0,
+        "heapUsed": -934600,
+        "external": -4503
+      }
+    }
+  ],
+  "extra": {
+    "luSolve.DenseMatrix.500": {
+      "median": 49.48,
+      "p95": 51,
+      "n": 3
+    },
+    "ComputePool.matmul.256.correctArity": {
+      "median": 25.42,
+      "p95": 25.57,
+      "n": 6,
+      "parallelized": true,
+      "chunks": 1
+    }
+  },
+  "determinism": [
+    {
+      "name": "evaluate.scalar",
+      "a": 1.1438735613349222,
+      "b": 1.1438735613349222,
+      "equal": true
+    },
+    {
+      "name": "svd.32",
+      "maxAbsS": 0,
+      "equal": true
+    },
+    {
+      "name": "fft.256",
+      "maxAbs": 0,
+      "equal": true
+    },
+    {
+      "name": "matmul.64",
+      "maxAbs": 0,
+      "equal": true
+    },
+    {
+      "name": "svd.DenseMatrix.empty",
+      "S": [],
+      "rank": 0,
+      "silentEmpty": true
+    }
+  ],
+  "notes": [
+    "SKIP_META: reused prior import/bundle measurements",
+    "backendManager.initialize() => undefined backends=js,wasm",
+    "FAIL mathts.luSolve.500: A.toFloat64Array is not a function",
+    "FAIL ComputePool.matmul.256: matmul: a has 65536 elements, expected 0.0009999998333333417,0.0019999986666669333,0.002999995500002025,0.003999989333341867,0.004999979166692708,0.0059999640000648,0.006999942833473391,0.007999914666939733,0.00",
+    "ComputePool.sin parallelized=false chunks=1 duration=5.925017999994452",
+    "isWasmLoaded before loadWasm: false",
+    "loadWasm() => true isWasmLoaded=true"
+  ]
+}
