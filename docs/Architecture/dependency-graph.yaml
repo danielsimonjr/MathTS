@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-11'
   totalFiles: 1282
   totalModules: 82
-  totalExports: 6991
+  totalExports: 6993
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4862,11 +4862,13 @@ modules:
             - isDenseMatrix
       workspaceDependencies: []
       exports:
+        - isPackedMatrixDescriptor
         - decompositionInputToNestedArray
         - decompositionInputToDenseMatrix
       interfaces:
         - PackedMatrixDescriptor
       functions:
+        - isPackedMatrixDescriptor
         - decompositionInputToNestedArray
         - decompositionInputToDenseMatrix
     matrix/src/operations/cholesky.ts:
@@ -4877,6 +4879,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
         - cholesky
@@ -4945,6 +4951,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
         - file: ./eig.js
           imports:
             - eig
@@ -4970,6 +4980,10 @@ modules:
           imports:
             - isSymmetric
             - eye
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
         - eig
@@ -5126,6 +5140,7 @@ modules:
           imports:
             - decompositionInputToDenseMatrix
             - decompositionInputToNestedArray
+            - isPackedMatrixDescriptor
             - DecompositionMatrixInput
             - PackedMatrixDescriptor
           reExport: true
@@ -5182,6 +5197,7 @@ modules:
         - transposeNestedArray
         - decompositionInputToDenseMatrix
         - decompositionInputToNestedArray
+        - isPackedMatrixDescriptor
         - DecompositionMatrixInput
         - PackedMatrixDescriptor
         - transpose
@@ -5236,6 +5252,7 @@ modules:
         - transpose
         - decompositionInputToDenseMatrix
         - decompositionInputToNestedArray
+        - isPackedMatrixDescriptor
         - DecompositionMatrixInput
         - PackedMatrixDescriptor
     matrix/src/operations/logm.ts:
@@ -5319,6 +5336,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
         - file: ./qr.js
           imports:
             - qr
@@ -5345,6 +5366,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
         - file: ./common.js
           imports:
             - eye
@@ -5367,6 +5392,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
         - qr
@@ -5383,6 +5412,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
         - file: ./common.js
           imports:
             - eye
@@ -5439,6 +5472,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
         - file: ./svd.js
           imports:
             - svd
@@ -7099,6 +7136,7 @@ modules:
           directory: matrix
           imports:
             - decompositionInputToNestedArray
+            - isPackedMatrixDescriptor
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -43375,15 +43413,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217667
-  totalExports: 6991
+  totalLinesOfCode: 217691
+  totalExports: 6993
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2347
-  totalTypeGuards: 169
+  totalFunctions: 2348
+  totalTypeGuards: 170
   totalEnums: 0
   totalConstants: 1640
-  totalReExports: 3020
+  totalReExports: 3021
   totalTypeOnlyImports: 643
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

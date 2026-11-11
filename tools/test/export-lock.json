@@ -1645,6 +1645,9 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
+      "isPackedMatrixDescriptor": {
+        "kind": "function"
+      },
       "destroyGlobalGPU": {
         "kind": "function"
       },

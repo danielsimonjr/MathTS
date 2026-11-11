@@ -544,13 +544,13 @@ export function singularValues(
 /**
  * Compute the pseudoinverse (Moore-Penrose inverse) using SVD
  */
-export function pinv(matrix: number[][], options?: SVDOptions): number[][] {
-  const { U, S, V, rank } = svd(matrix, options);
+export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): number[][] {
+  const nested = decompositionInputToNestedArray(matrix);
+  const { U, S, V, rank } = svd(nested, options);
 
   if (rank === 0) {
-    // Zero matrix
-    const n = matrix[0]?.length || 0;
-    const m = matrix.length;
+    const m = nested.length;
+    const n = nested[0]?.length || 0;
     return Array.from({ length: n }, () => new Array(m).fill(0));
   }
 
@@ -585,11 +585,16 @@ export function pinv(matrix: number[][], options?: SVDOptions): number[][] {
  * Low-rank approximation using SVD
  * Keeps only the top r singular values
  */
-export function lowRankApprox(matrix: number[][], r: number, options?: SVDOptions): number[][] {
-  const { U, S, V } = svd(matrix, options);
+export function lowRankApprox(
+  matrix: DecompositionMatrixInput,
+  r: number,
+  options?: SVDOptions
+): number[][] {
+  const nested = decompositionInputToNestedArray(matrix);
+  const { U, S, V } = svd(nested, options);
 
-  const m = matrix.length;
-  const n = matrix[0].length;
+  const m = nested.length;
+  const n = nested[0]?.length ?? 0;
   const k = Math.min(r, S.length);
 
   // Reconstruct with top k singular values
@@ -611,7 +616,7 @@ export function lowRankApprox(matrix: number[][], r: number, options?: SVDOption
 /**
  * Compute condition number using SVD
  */
-export function cond(matrix: number[][], options?: SVDOptions): number {
+export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
   const S = singularValues(matrix, options);
 
   if (S.length === 0 || S[S.length - 1] === 0) {
@@ -625,7 +630,7 @@ export function cond(matrix: number[][], options?: SVDOptions): number {
  * Compute matrix norm using SVD
  * Returns the spectral norm (largest singular value)
  */
-export function norm2(matrix: number[][], options?: SVDOptions): number {
+export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
   const S = singularValues(matrix, options);
   return S[0] || 0;
 }
@@ -634,9 +639,10 @@ export function norm2(matrix: number[][], options?: SVDOptions): number {
  * Compute Frobenius norm using SVD
  * Equals sqrt(sum of squared singular values)
  */
-export function normFro(matrix: number[][]): number {
+export function normFro(matrix: DecompositionMatrixInput): number {
+  const nested = decompositionInputToNestedArray(matrix);
   let sum = 0;
-  for (const row of matrix) {
+  for (const row of nested) {
     for (const val of row) {
       sum += val * val;
     }

@@ -253,6 +253,19 @@
     "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
     "matrix/src/typed-operations.ts": ["matrix/src/index.ts"],
     "matrix/src/parallel-matrix.ts": ["matrix/src/index.ts"],
+    "matrix/src/operations/as-packed.ts": [
+      "matrix/src/operations/cholesky.ts",
+      "matrix/src/operations/eig-wasm.ts",
+      "matrix/src/operations/eig.ts",
+      "matrix/src/operations/index.ts",
+      "matrix/src/operations/lu.ts",
+      "matrix/src/operations/qr-family.ts",
+      "matrix/src/operations/qr-pivoted.ts",
+      "matrix/src/operations/qr.ts",
+      "matrix/src/operations/schur.ts",
+      "matrix/src/operations/svd-wasm.ts",
+      "matrix/src/operations/svd.ts"
+    ],
     "matrix/src/operations/lu.ts": [
       "matrix/src/operations/condest.ts",
       "matrix/src/operations/index.ts"
@@ -300,11 +313,6 @@
     "matrix/src/operations/qr-pivoted.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/qr-family.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/condest.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/as-packed.ts": [
-      "matrix/src/operations/index.ts",
-      "matrix/src/operations/lu.ts",
-      "matrix/src/operations/svd.ts"
-    ],
     "matrix/src/operations/givens.ts": [
       "matrix/src/operations/schur.ts",
       "matrix/src/operations/svd.ts"

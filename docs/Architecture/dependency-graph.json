@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-11",
     "totalFiles": 1282,
     "totalModules": 82,
-    "totalExports": 6991
+    "totalExports": 6993
   },
   "entryPoints": [
     {
@@ -5070,9 +5070,17 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["decompositionInputToNestedArray", "decompositionInputToDenseMatrix"],
+        "exports": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ],
         "interfaces": ["PackedMatrixDescriptor"],
-        "functions": ["decompositionInputToNestedArray", "decompositionInputToDenseMatrix"]
+        "functions": [
+          "isPackedMatrixDescriptor",
+          "decompositionInputToNestedArray",
+          "decompositionInputToDenseMatrix"
+        ]
       },
       "matrix/src/operations/cholesky.ts": {
         "description": "Cholesky Decomposition (DenseMatrix primitive)",
@@ -5082,6 +5090,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5156,6 +5168,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./eig.js",
             "imports": ["eig", "eigvals", "powerIteration", "EigResult", "EigOptions"]
           }
@@ -5172,6 +5188,10 @@
           {
             "file": "./common.js",
             "imports": ["isSymmetric", "eye"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5315,6 +5335,7 @@
             "imports": [
               "decompositionInputToDenseMatrix",
               "decompositionInputToNestedArray",
+              "isPackedMatrixDescriptor",
               "DecompositionMatrixInput",
               "PackedMatrixDescriptor"
             ],
@@ -5374,6 +5395,7 @@
           "transposeNestedArray",
           "decompositionInputToDenseMatrix",
           "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
           "DecompositionMatrixInput",
           "PackedMatrixDescriptor",
           "transpose"
@@ -5429,6 +5451,7 @@
           "transpose",
           "decompositionInputToDenseMatrix",
           "decompositionInputToNestedArray",
+          "isPackedMatrixDescriptor",
           "DecompositionMatrixInput",
           "PackedMatrixDescriptor"
         ]
@@ -5521,6 +5544,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./qr.js",
             "imports": ["qr"]
           }
@@ -5540,6 +5567,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
             "file": "./common.js",
             "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
           }
@@ -5557,6 +5588,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -5572,6 +5607,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
           },
           {
             "file": "./common.js",
@@ -5625,6 +5664,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
+          },
           {
             "file": "./svd.js",
             "imports": ["svd", "SVDResult", "SVDOptions"]
@@ -7382,7 +7425,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["decompositionInputToNestedArray"]
+            "imports": ["decompositionInputToNestedArray", "isPackedMatrixDescriptor"]
           },
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -45828,15 +45871,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1282,
     "totalModules": 82,
-    "totalLinesOfCode": 217667,
-    "totalExports": 6991,
+    "totalLinesOfCode": 217691,
+    "totalExports": 6993,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2347,
-    "totalTypeGuards": 169,
+    "totalFunctions": 2348,
+    "totalTypeGuards": 170,
     "totalEnums": 0,
     "totalConstants": 1640,
-    "totalReExports": 3020,
+    "totalReExports": 3021,
     "totalTypeOnlyImports": 643,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -31,11 +31,15 @@ function isNestedNumberMatrix(value: unknown): value is number[][] {
   return Array.isArray(value[0]);
 }
 
-function isPackedDescriptor(value: unknown): value is PackedMatrixDescriptor {
+/** True for `{ data, rows, cols }` and not for an LUP result (`L`, `U`, `p`). */
+export function isPackedMatrixDescriptor(value: unknown): value is PackedMatrixDescriptor {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
   const o = value as Record<string, unknown>;
+  if ('L' in o || 'U' in o || 'p' in o || 'P' in o) {
+    return false;
+  }
   return (
     o.data instanceof Float64Array &&
     typeof o.rows === 'number' &&
@@ -60,23 +64,28 @@ function invalidDecompositionInput(actual: unknown): never {
   throw new TypeError(`Matrix decomposition expected ${ACCEPTED_TYPES_MSG}, got ${tag}`);
 }
 
-function nestedFromFloat64Square(data: Float64Array): {
-  rows: number;
-  cols: number;
-  nested: number[][];
-} {
-  const n = Math.sqrt(data.length);
-  if (data.length === 0 || n !== Math.floor(n)) {
+function squareSize(length: number): number {
+  if (length === 0) {
+    return 0;
+  }
+  const n = Math.sqrt(length);
+  if (n !== Math.floor(n)) {
     throw new TypeError(
-      `Matrix decomposition: Float64Array length ${data.length} is not a perfect square; use ${ACCEPTED_TYPES_MSG}`
+      `Matrix decomposition: Float64Array length ${length} is not a perfect square; use ${ACCEPTED_TYPES_MSG}`
     );
   }
-  const size = n as number;
-  const nested: number[][] = [];
-  for (let i = 0; i < size; i++) {
-    nested.push(Array.from(data.subarray(i * size, (i + 1) * size)));
+  return n;
+}
+
+function nestedFromPacked(data: Float64Array, rows: number, cols: number): number[][] {
+  if (rows === 0) {
+    return [];
   }
-  return { rows: size, cols: size, nested };
+  const nested: number[][] = [];
+  for (let i = 0; i < rows; i++) {
+    nested.push(Array.from(data.subarray(i * cols, (i + 1) * cols)));
+  }
+  return nested;
 }
 
 function resolveDimensions(input: DecompositionMatrixInput): {
@@ -91,23 +100,19 @@ function resolveDimensions(input: DecompositionMatrixInput): {
     const rows = input.length;
     const cols = input[0]?.length ?? 0;
     for (let i = 0; i < rows; i++) {
-      if ((input[i]?.length ?? 0) !== cols) {
-        throw new Error(`Matrix decomposition: jagged nested array at row ${i}`);
+      if (!Array.isArray(input[i]) || input[i].length !== cols) {
+        throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
       }
     }
     return { rows, cols, nested: input };
   }
   if (input instanceof Float64Array) {
-    const { rows, cols, nested } = nestedFromFloat64Square(input);
-    return { rows, cols, nested };
+    const size = squareSize(input.length);
+    return { rows: size, cols: size, nested: nestedFromPacked(input, size, size) };
   }
-  if (isPackedDescriptor(input)) {
+  if (isPackedMatrixDescriptor(input)) {
     const { rows, cols, data } = input;
-    const nested: number[][] = [];
-    for (let i = 0; i < rows; i++) {
-      nested.push(Array.from(data.subarray(i * cols, (i + 1) * cols)));
-    }
-    return { rows, cols, nested };
+    return { rows, cols, nested: nestedFromPacked(data, rows, cols) };
   }
   return invalidDecompositionInput(input);
 }
@@ -121,7 +126,7 @@ export function decompositionInputToNestedArray(input: DecompositionMatrixInput)
     !isDenseMatrix(input) &&
     !isNestedNumberMatrix(input) &&
     !(input instanceof Float64Array) &&
-    !isPackedDescriptor(input)
+    !isPackedMatrixDescriptor(input)
   ) {
     invalidDecompositionInput(input);
   }
@@ -136,11 +141,15 @@ export function decompositionInputToDenseMatrix(input: DecompositionMatrixInput)
   if (isDenseMatrix(input)) {
     return input;
   }
-  if (
-    !isNestedNumberMatrix(input) &&
-    !(input instanceof Float64Array) &&
-    !isPackedDescriptor(input)
-  ) {
+  if (input instanceof Float64Array) {
+    const n = squareSize(input.length);
+    // One copy. The constructor keeps this buffer; the caller's array stays unchanged.
+    return new DenseMatrix(n, n, new Float64Array(input));
+  }
+  if (isPackedMatrixDescriptor(input)) {
+    return new DenseMatrix(input.rows, input.cols, new Float64Array(input.data));
+  }
+  if (!isNestedNumberMatrix(input)) {
     invalidDecompositionInput(input);
   }
   const { rows, cols, nested } = resolveDimensions(input);

@@ -1,4 +1,7 @@
-import { decompositionInputToNestedArray } from '@danielsimonjr/mathts-matrix';
+import {
+  decompositionInputToNestedArray,
+  isPackedMatrixDescriptor,
+} from '@danielsimonjr/mathts-matrix';
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
@@ -131,20 +134,6 @@ export const createLusolve = /* #__PURE__ */ factory(
       return _lusolve(d.L, d.U, d.p, null, b);
     }
 
-    function isPackedMatrixDescriptor(value: unknown): value is PackedMatrixDescriptor {
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-      const o = value as Record<string, unknown>;
-      return (
-        o.data instanceof Float64Array &&
-        typeof o.rows === 'number' &&
-        typeof o.cols === 'number' &&
-        !('L' in o) &&
-        !('U' in o)
-      );
-    }
-
     function isLUPDecomposition(value: unknown): value is LUPDecomposition {
       if (typeof value !== 'object' || value === null) {
         return false;
@@ -202,7 +191,16 @@ export const createLusolve = /* #__PURE__ */ factory(
           return _lusolve(a.L, a.U, a.p, a.q, b);
         }
         if (isPackedMatrixDescriptor(a)) {
-          return lusolveFromNested(decompositionInputToNestedArray(a), b);
+          return lusolveFromNested(decompositionInputToNestedArray(a), b).valueOf();
+        }
+        const candidate = a as Record<string, unknown>;
+        if (
+          candidate.data instanceof Float64Array &&
+          typeof candidate.rows === 'number' &&
+          typeof candidate.cols === 'number'
+        ) {
+          // Same normalizer as svd/lu: length and integer checks throw TypeError.
+          decompositionInputToNestedArray(a as PackedMatrixDescriptor);
         }
         throw new TypeError('Invalid Matrix LU decomposition');
       },

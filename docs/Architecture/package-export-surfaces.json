@@ -4309,6 +4309,7 @@
       "isDenseMatrix",
       "isGPUSuitableForMatrixOps",
       "isMatrix",
+      "isPackedMatrixDescriptor",
       "isSharedMemoryAvailable",
       "isSparseMatrix",
       "isSymmetric",
