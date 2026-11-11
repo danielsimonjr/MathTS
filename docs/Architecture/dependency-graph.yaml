@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-11'
-  totalFiles: 1281
+  totalFiles: 1282
   totalModules: 82
-  totalExports: 6985
+  totalExports: 6986
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -25493,6 +25493,28 @@ modules:
         - format
         - print
         - typedString
+    functions/src/typed/trig-angle-unit.ts:
+      description: Shared angle-Unit handling for typed trigonometry (mathjs parity).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../error/DimensionError.js
+          imports:
+            - DimensionError
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - isComplex
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - UnitInstance
+      exports:
+        - trigFromAngleUnit
+      functions:
+        - trigFromAngleUnit
     functions/src/typed/trigonometry.ts:
       description: Typed Trigonometric Functions
       externalDependencies: []
@@ -25501,6 +25523,9 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+        - file: ./trig-angle-unit.js
+          imports:
+            - trigFromAngleUnit
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
@@ -25512,6 +25537,10 @@ modules:
             - Complex
             - BigNumber
             - Dual
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - UnitInstance
       exports:
         - sin
         - cos
@@ -42606,6 +42635,7 @@ dependencyGraph:
         - functions/src/typed/statistics.ts
         - functions/src/typed/string-derivative.ts
         - functions/src/typed/string.ts
+        - functions/src/typed/trig-angle-unit.ts
         - functions/src/typed/trigonometry.ts
         - functions/src/typed/typed-bridge.ts
         - functions/src/typed/unit.ts
@@ -43323,13 +43353,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1281
+  totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217471
-  totalExports: 6985
+  totalLinesOfCode: 217535
+  totalExports: 6986
   totalClasses: 61
   totalInterfaces: 600
-  totalFunctions: 2345
+  totalFunctions: 2346
   totalTypeGuards: 169
   totalEnums: 0
   totalConstants: 1640

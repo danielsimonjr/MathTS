@@ -245,6 +245,7 @@ interface UnitLike {
   clone(): UnitLike;
   multiply(other: unknown): unknown;
   divide(other: unknown): unknown;
+  divideInto(numerator: unknown): unknown;
   abs(): unknown;
 }
 
@@ -468,6 +469,8 @@ export const multiply = mathTyped('multiply', {
   'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
   'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
   'number, Unit': (a: f64, b: Unit): Unit => unitMul(b, a) as Unit,
+  'Complex, Unit': (a: Complex, b: Unit): Unit => unitMul(b, a) as Unit,
+  'Unit, Complex': (a: Unit, b: Complex): Unit => unitMul(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
@@ -571,6 +574,8 @@ export const divide = mathTyped('divide', {
   // Unit division / scaling (mathjs parity). Unit ÷ Unit may be dimensionless.
   'Unit, Unit': (a: Unit, b: Unit): Unit => unitDiv(a, b) as Unit,
   'Unit, number': (a: Unit, b: f64): Unit => unitDiv(a, b) as Unit,
+  'Complex, Unit': (a: Complex, b: Unit): Unit => asUnit(b).divideInto(a) as Unit,
+  'Unit, Complex': (a: Unit, b: Complex): Unit => unitDiv(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.div(b),

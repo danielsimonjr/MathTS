@@ -13,8 +13,10 @@
  */
 
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
 import { f64Unary } from './f64-kernels.js';
+import { trigFromAngleUnit } from './trig-angle-unit.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
@@ -36,6 +38,7 @@ export const sin = mathTyped('sin', {
   Complex: (a: Complex): Complex => a.sin(),
   BigNumber: (a: BigNumber): BigNumber => a.sin(),
   Dual: (a: Dual): Dual => a.sin(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'sin', Math.sin, (z) => z.sin()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('sin', a) ?? f64Unary(a, Math.sin),
@@ -49,6 +52,7 @@ export const cos = mathTyped('cos', {
   Complex: (a: Complex): Complex => a.cos(),
   BigNumber: (a: BigNumber): BigNumber => a.cos(),
   Dual: (a: Dual): Dual => a.cos(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'cos', Math.cos, (z) => z.cos()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('cos', a) ?? f64Unary(a, Math.cos),
@@ -62,6 +66,7 @@ export const tan = mathTyped('tan', {
   Complex: (a: Complex): Complex => a.tan(),
   BigNumber: (a: BigNumber): BigNumber => a.tan(),
   Dual: (a: Dual): Dual => a.tan(),
+  Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'tan', Math.tan, (z) => z.tan()),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('tan', a) ?? f64Unary(a, Math.tan),
@@ -74,6 +79,13 @@ export const csc = mathTyped('csc', {
   number: (a: number) => 1 / Math.sin(a),
   Complex: (a: Complex) => a.sin().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.sin()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'csc',
+      (x) => 1 / Math.sin(x),
+      (z) => z.sin().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('csc', a) ?? f64Unary(a, (x) => 1 / Math.sin(x)),
@@ -86,6 +98,13 @@ export const sec = mathTyped('sec', {
   number: (a: number) => 1 / Math.cos(a),
   Complex: (a: Complex) => a.cos().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.cos()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'sec',
+      (x) => 1 / Math.cos(x),
+      (z) => z.cos().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('sec', a) ?? f64Unary(a, (x) => 1 / Math.cos(x)),
@@ -98,6 +117,13 @@ export const cot = mathTyped('cot', {
   number: (a: number) => 1 / Math.tan(a),
   Complex: (a: Complex) => a.tan().inverse(),
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.tan()),
+  Unit: (a: UnitInstance) =>
+    trigFromAngleUnit(
+      a,
+      'cot',
+      (x) => 1 / Math.tan(x),
+      (z) => z.tan().inverse()
+    ),
 
   Float64Array: (a: Float64Array): Float64Array =>
     elementwiseUnaryDispatch('cot', a) ?? f64Unary(a, (x) => 1 / Math.tan(x)),
