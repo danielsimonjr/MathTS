@@ -470,6 +470,10 @@ export type {
   LsqBoundedResult,
 } from './numeric/nnls.js';
 
+// Issue 379 — box-constrained LCP (projected Gauss-Seidel) for contact and joint impulses.
+export { solveBoxLcp } from './numeric/box-lcp.js';
+export type { BoxLcpOptions, BoxLcpResult } from './numeric/box-lcp.js';
+
 // Gap-analysis Wave D — symbolic indefinite integration (complements numeric integrate).
 export { symbolicIntegral } from './cas-integration.js';
 
