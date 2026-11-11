@@ -2111,7 +2111,8 @@
       "functions/src/type/matrix/utils/matAlgo07xSSf.ts",
       "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts",
       "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts",
-      "functions/src/type/matrix/utils/matAlgo13xDD.ts"
+      "functions/src/type/matrix/utils/matAlgo13xDD.ts",
+      "functions/src/typed/trig-angle-unit.ts"
     ],
     "functions/src/error/IndexError.ts": [
       "functions/src/core/create.ts",
@@ -2660,6 +2661,7 @@
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/gauss-legendre4.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
+    "functions/src/typed/trig-angle-unit.ts": ["functions/src/typed/trigonometry.ts"],
     "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
