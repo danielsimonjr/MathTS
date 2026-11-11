@@ -590,7 +590,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 259
     },
     {
       "file": "core/src/array.ts",
@@ -954,7 +954,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 293
+      "loc": 324
     },
     {
       "file": "core/tests/bignumber-comparison-coercion.test.ts",
@@ -8598,7 +8598,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1733
+      "loc": 1741
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8794,7 +8794,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 54
+      "loc": 71
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -9774,7 +9774,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 67
+      "loc": 122
     },
     {
       "file": "functions/tests/dtw.test.ts",

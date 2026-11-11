@@ -304,7 +304,13 @@ const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
  * add(new Complex(1, 2), new Complex(3, 4));   // Complex(4, 6)
  * add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
  * add(float64A, float64B);                     // Float64Array, synchronous
+ * add(true, 1);                                // 2 (boolean coerces to 0/1)
  * ```
+ *
+ * `null`, `undefined`, strings, symbols, functions, and objects that are not a
+ * numeric type, Unit, matrix, array, or typed array throw
+ * `TypeError: add: unexpected type …`. A numeric string is not coerced to Complex.
+ * `bigint` mixed with `number` returns a `number`, not a Fraction.
  */
 export const add = withBinaryScalarGuards(
   'add',
@@ -460,6 +466,8 @@ subtractForNumberPath.fn = subtract;
 
 /**
  * Polymorphic multiplication function. The Float64Array signature is synchronous.
+ * Invalid operands throw `TypeError: multiply: unexpected type …` (same rules as `add`).
+ * Booleans coerce to 0/1. `bigint` mixed with `number` returns a `number`.
  */
 export const multiply = withBinaryScalarGuards(
   'multiply',

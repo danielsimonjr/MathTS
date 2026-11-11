@@ -1,17 +1,19 @@
 /**
  * Guards for typed `add` / `multiply`: reject operands that must not be coerced
- * (nullish, strings, plain objects, …). Typed-function conversions (e.g. string→number)
+ * (nullish, strings, plain objects, dates, …). Typed-function conversions (e.g. string→number)
  * run before signature tests, so explicit `string, any` signatures do not fire; these
  * checks run before dispatch instead.
+ *
+ * Two numbers skip the scan. That is the hot path (`add(1, 2)`); the checks exist
+ * for values typed-function would convert or report as a missing argument.
  */
+import { BigNumber, Complex, Dual, Fraction } from '@danielsimonjr/mathts-core';
+import { Matrix } from '@danielsimonjr/mathts-matrix';
 
 export function formatUnexpectedArgumentType(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
-  if (typeof value === 'string') return 'string';
-  if (typeof value === 'symbol') return 'symbol';
-  if (typeof value === 'function') return 'function';
-  if (typeof value === 'object') return '[object Object]';
+  if (typeof value === 'object') return Object.prototype.toString.call(value);
   return typeof value;
 }
 
@@ -21,23 +23,31 @@ export function unexpectedArgumentType(fn: string, value: unknown, index: number
   );
 }
 
-function isPlainObject(value: object): boolean {
-  const proto = Object.getPrototypeOf(value);
-  return proto === null || proto === Object.prototype;
+function isAllowedObject(value: object): boolean {
+  if (Array.isArray(value) || ArrayBuffer.isView(value)) return true;
+  if (
+    value instanceof Complex ||
+    value instanceof Fraction ||
+    value instanceof BigNumber ||
+    value instanceof Dual ||
+    value instanceof Matrix
+  ) {
+    return true;
+  }
+  const proto = (
+    value as { constructor?: { prototype?: { isUnit?: boolean; isMatrix?: boolean } } }
+  ).constructor?.prototype;
+  return proto?.isUnit === true || proto?.isMatrix === true;
 }
 
 /** Reject binary operands that typed-function would convert or mis-dispatch. */
 export function rejectInvalidBinaryScalars(fn: string, args: unknown[]): void {
-  const n = Math.min(2, args.length);
+  const n = Math.min(args.length, 2);
   for (let i = 0; i < n; i++) {
     const v = args[i];
-    if (v == null) unexpectedArgumentType(fn, v, i);
-    if (typeof v === 'string' || typeof v === 'symbol' || typeof v === 'function') {
-      unexpectedArgumentType(fn, v, i);
-    }
-    if (typeof v === 'object' && v !== null && !Array.isArray(v) && isPlainObject(v)) {
-      unexpectedArgumentType(fn, v, i);
-    }
+    if (typeof v === 'number' || typeof v === 'bigint' || typeof v === 'boolean') continue;
+    if (typeof v === 'object' && v !== null && isAllowedObject(v)) continue;
+    unexpectedArgumentType(fn, v, i);
   }
 }
 
@@ -46,8 +56,15 @@ export function withBinaryScalarGuards<T extends (...args: never[]) => unknown>(
   name: string,
   typedFn: T
 ): T {
-  return Object.assign((...args: Parameters<T>) => {
+  const guarded = function (this: unknown, ...args: Parameters<T>) {
+    const a = args[0];
+    const b = args[1];
+    if (typeof a === 'number' && typeof b === 'number') {
+      return typedFn.apply(this, args);
+    }
     rejectInvalidBinaryScalars(name, args as unknown[]);
-    return typedFn(...args);
-  }, typedFn) as T;
+    return typedFn.apply(this, args);
+  };
+  Object.defineProperty(guarded, 'name', { value: name });
+  return Object.assign(guarded, typedFn) as T;
 }

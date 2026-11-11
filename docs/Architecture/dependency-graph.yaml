@@ -24619,7 +24619,18 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+            - Complex
+            - Dual
+            - Fraction
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - Matrix
       exports:
         - formatUnexpectedArgumentType
         - unexpectedArgumentType
@@ -43345,7 +43356,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1282
   totalModules: 82
-  totalLinesOfCode: 217579
+  totalLinesOfCode: 217620
   totalExports: 6989
   totalClasses: 61
   totalInterfaces: 600

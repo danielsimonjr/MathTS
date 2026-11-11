@@ -11397,6 +11397,13 @@ graph LR
 
 ### `functions/src/typed/invalid-scalar-guards.ts` - Guards for typed `add` / `multiply`: reject operands that must not be coerced
 
+**Workspace Dependencies:**
+
+| Package                        | Import                               |
+| ------------------------------ | ------------------------------------ |
+| `@danielsimonjr/mathts-core`   | `BigNumber, Complex, Dual, Fraction` |
+| `@danielsimonjr/mathts-matrix` | `Matrix`                             |
+
 **Exports:**
 
 - Functions: `formatUnexpectedArgumentType`, `unexpectedArgumentType`, `rejectInvalidBinaryScalars`, `withBinaryScalarGuards`
@@ -20168,7 +20175,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1282   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 217579 |
+| Total Lines of Code     | 217620 |
 | Total Exports           | 6989   |
 | Total Re-exports        | 3016   |
 | Total Classes           | 61     |
