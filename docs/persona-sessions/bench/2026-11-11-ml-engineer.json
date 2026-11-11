@@ -1,0 +1,104 @@
+{
+  "persona": "ml-engineer",
+  "date": "2026-11-11",
+  "commit": "fef4010b8a468215a26bcdb9642db0556055b9bb",
+  "engine": {
+    "node": "v22.23.4",
+    "os": "linux-6.12.113+",
+    "cpus": 4,
+    "cpu": "Intel(R) Xeon(R) Processor"
+  },
+  "packages": {
+    "@danielsimonjr/mathts-tensor": "0.3.5",
+    "@danielsimonjr/mathts-autograd": "0.4.5",
+    "@danielsimonjr/mathts-gpu": "0.2.1",
+    "@danielsimonjr/mathts-parallel": "0.10.0",
+    "@danielsimonjr/mathts-workerpool": "0.4.0",
+    "@danielsimonjr/mathts-matrix": "0.10.0",
+    "@danielsimonjr/mathts-linalg": "0.2.5"
+  },
+  "autograd_fd_max_rel_err": {
+    "square.sum": 3.83e-11,
+    "sin.sum": 2.82e-11,
+    "cos.sum": 1.33e-10,
+    "exp.sum": 1.97e-10,
+    "log.sum": 3.79e-11,
+    "tanh.sum": 5.4e-11,
+    "abs.sum": 8.23e-11,
+    "sqrt.sum": 1.17e-10,
+    "reciprocal.sum": 3.79e-11,
+    "pow3.sum": 9.79e-12,
+    "mean": 8.92e-12,
+    "prod": 6.09e-12
+  },
+  "train": {
+    "linreg_y_3x_plus_2": {
+      "steps": 400,
+      "w": 2.999999999999511,
+      "b": 1.9999999999999996,
+      "loss0": 7.193548387096775,
+      "lossN": 9.825962226357899e-26,
+      "ms": 19.421,
+      "step_ms": 0.0486
+    },
+    "xor_mlp_2_8_1_tanh": {
+      "steps": 2500,
+      "ms": 48.838,
+      "step_ms": 0.0195,
+      "pred": [-0.012159121113005286, 0.9846433049933525, 0.9835499238929463, -0.02046404252672827],
+      "final_mse": 0.00026826358705788156
+    },
+    "spiral_mlp_2_24_1_tanh_mse": {
+      "steps": 1200,
+      "n": 80,
+      "ms": 149.551,
+      "step_ms": 0.1246,
+      "acc_max_logged": 0.625,
+      "acc_final": 0.5,
+      "loss0": 0.9971938904906548,
+      "lossN": 0.16209409592957003
+    }
+  },
+  "memory_rss_bytes": {
+    "new_tape_per_step_64x64": [
+      78503936, 83214336, 83214336, 83214336, 83214336, 83214336, 83214336, 83214336, 83214336,
+      83214336
+    ],
+    "reuse_tape_no_reset_64x64": [
+      83214336, 83345408, 85442560, 87408640, 89550848, 91516928, 93614080, 95711232, 97677312,
+      99643392
+    ],
+    "reuse_tape_reset_64x64": [
+      101609472, 103743488, 103743488, 103743488, 103743488, 103743488, 103743488, 103743488,
+      103743488, 103743488
+    ]
+  },
+  "gpu_node": {
+    "isBrowser": false,
+    "hasWebGPU": false,
+    "getGpuDevice": null,
+    "initializeGlobalGPU": false,
+    "GPUContext.initialize": false,
+    "GPUContext.status": "error"
+  },
+  "parallel": {
+    "sin_n": 1000000,
+    "sin_default_after_init": { "parallelized": false, "chunks": 1, "duration_ms": 9.873857 },
+    "sin_forceParallel_after_init": {
+      "parallelized": true,
+      "chunks": 100,
+      "duration_ms": 58.753866,
+      "maxDiff": 0
+    },
+    "sin_forceParallel_before_init": { "parallelized": false, "chunks": 1 },
+    "matmul_256": {
+      "parallelized": true,
+      "chunks": 4,
+      "duration_ms": 20.350545,
+      "serial_naive_ms": 33.517429,
+      "c00_diff": 0
+    },
+    "map_error": "boom-2",
+    "workerpool_timeout": "Worker task timed out after 200ms"
+  }
+}
