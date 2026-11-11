@@ -42,18 +42,20 @@ const NOBLE_CHROMIUM_AND_TOOLS = [
   'libxrandr2',
 ];
 
-function isSupportedUbuntu() {
+function ubuntuVersionId() {
   try {
     const osRelease = readFileSync('/etc/os-release', 'utf8');
-    return /VERSION_ID="(?:24|26)\.04"/.test(osRelease);
+    const match = osRelease.match(/^VERSION_ID="([^"]+)"/m);
+    return match ? match[1] : 'unknown';
   } catch {
-    return false;
+    return 'unknown';
   }
 }
 
-if (!isSupportedUbuntu()) {
+const versionId = ubuntuVersionId();
+if (versionId !== '24.04' && versionId !== '26.04') {
   console.error(
-    'playwright-chromium-apt-packages.mjs: expected Ubuntu 24.04 or 26.04; package list may be wrong',
+    `playwright-chromium-apt-packages.mjs: expected Ubuntu 24.04 or 26.04; got ${versionId}. Package list may be wrong`
   );
   process.exit(1);
 }

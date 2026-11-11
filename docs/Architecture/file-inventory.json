@@ -3,7 +3,7 @@
   "totalFiles": 2230,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1256,
+    "build-entry": 1257,
     "test-only": 0,
     "orphan": 0,
     "test": 883,
@@ -597,7 +597,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 259
     },
     {
       "file": "core/src/array.ts",
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 262
+      "loc": 324
     },
     {
       "file": "core/tests/bignumber-comparison-coercion.test.ts",
@@ -8605,7 +8605,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1724
+      "loc": 1747
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8802,6 +8802,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 681
+    },
+    {
+      "file": "functions/src/typed/invalid-scalar-guards.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 80
     },
     {
       "file": "functions/src/typed/logical.ts",

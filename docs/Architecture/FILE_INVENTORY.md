@@ -17,7 +17,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1256 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1257 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |      883 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
@@ -1321,6 +1321,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/index.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/integration.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/interpolation.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/typed/invalid-scalar-guards.ts`                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/logical.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/matrix-ops.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/normal-equations-solve.ts`                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
