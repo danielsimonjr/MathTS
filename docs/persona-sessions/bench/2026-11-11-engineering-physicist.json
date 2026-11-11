@@ -1,0 +1,87 @@
+{
+  "persona": "engineering-physicist",
+  "date": "2026-11-11",
+  "commit": "fef4010b8a468215a26bcdb9642db0556055b9bb",
+  "node": "v22.23.4",
+  "packages": {
+    "@danielsimonjr/mathts-units": "0.7.5",
+    "@danielsimonjr/mathts-functions": "0.84.0",
+    "@danielsimonjr/mathts-numbers": "0.1.28",
+    "@danielsimonjr/mathts-trigonometry": "0.1.86",
+    "@danielsimonjr/mathts-tensor": "0.3.5",
+    "@danielsimonjr/mathts-gpu": "0.2.1",
+    "@danielsimonjr/mathts-plot": "0.4.32",
+    "@danielsimonjr/mathts-workbook": "0.5.18",
+    "@danielsimonjr/mathts-parallel": "0.10.0",
+    "@danielsimonjr/mathts-core": "0.26.0"
+  },
+  "cases": [
+    {
+      "name": "sho_rk45_0_pi",
+      "n_steps": 173,
+      "max_abs_err_vs_cos": 1.30846e-10,
+      "energy_drift": -5.23384e-10,
+      "unit": "dimensionless SHO x''=-4x"
+    },
+    {
+      "name": "heat_solvePDE_cfl80",
+      "nx": 21,
+      "nt": 5,
+      "T": 1,
+      "midpoint": -0.85807,
+      "exact_mid": 5.16e-5,
+      "cfl_r": 80
+    },
+    {
+      "name": "heat_solveParabolicPDE",
+      "nx": 21,
+      "T": 0.05,
+      "wall_ms": 17,
+      "max_err": 0.000620068
+    },
+    {
+      "name": "two_body_default_maxIter",
+      "tspan": [0, 10000],
+      "result": "throw Maximum number of iterations reached",
+      "wall_ms_before_throw": 79
+    },
+    {
+      "name": "sho_t_1e4_maxIter_1e6",
+      "n_steps": 540336,
+      "t_end": 10000
+    },
+    {
+      "name": "rlc_60Hz_numeric",
+      "R": 10,
+      "L": 0.01,
+      "C": 1e-6,
+      "Z": "10 - 2648.8124736806153i"
+    },
+    {
+      "name": "vite_build",
+      "index_js_kB": 1138.32,
+      "gzip_kB": 348.75,
+      "worker_kB": 14.17
+    },
+    {
+      "name": "playwright_dashboard",
+      "nav_ms": 2171,
+      "ode_ms": 5.8,
+      "plot_ms_cumulative": 8.3,
+      "sin_65536_ms": 1.0,
+      "raf_p50_ms": 16.7,
+      "hasWebGPU": true,
+      "initializeGlobalGPU": false,
+      "gpu_status": "error",
+      "worker_404": "/node_modules/.vite/deps/worker.js",
+      "pool_parallelized": false
+    },
+    {
+      "name": "codata_2022_central_ok",
+      "electronMass": 9.1093837139e-31,
+      "gravitationConstant": 6.6743e-11,
+      "speedOfLight": 299792458,
+      "uncertainties_present": false
+    }
+  ]
+}
