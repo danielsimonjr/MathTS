@@ -24956,7 +24956,14 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber", "Dual"]
+            "imports": [
+              "mathTyped",
+              "Complex",
+              "Fraction",
+              "BigNumber",
+              "Dual",
+              "DimensionMismatchError"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -46925,7 +46932,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1302,
     "totalModules": 82,
-    "totalLinesOfCode": 223463,
+    "totalLinesOfCode": 223499,
     "totalExports": 7123,
     "totalClasses": 61,
     "totalInterfaces": 611,

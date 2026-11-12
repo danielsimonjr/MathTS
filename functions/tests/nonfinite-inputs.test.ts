@@ -122,6 +122,7 @@ const THROWS_ON_NAN: Record<string, string[]> = {
   risingFactorial: ['Error'],
   stirlingS2: ['TypeError'],
   subfactorial: ['Error'],
+  unit: ['TypeError'],
 };
 
 /** The error class of a thrown result, or null when the call returned. */

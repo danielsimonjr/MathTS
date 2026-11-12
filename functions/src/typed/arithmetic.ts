@@ -14,7 +14,14 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+import {
+  mathTyped,
+  Complex,
+  Fraction,
+  BigNumber,
+  Dual,
+  DimensionMismatchError,
+} from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import {
@@ -276,6 +283,7 @@ const multiplyForNumberPath: { fn?: object } = {};
  */
 interface UnitLike {
   value?: unknown;
+  _exactSI?: unknown;
   equalBase(other: unknown): boolean;
   clone(): UnitLike;
   multiply(other: unknown): unknown;
@@ -309,13 +317,14 @@ function unitAddSub(a: unknown, b: unknown, op: ScalarOp): unknown {
   const ua = asUnit(a);
   const ub = asUnit(b);
   if (!ua.equalBase(b)) {
-    throw new Error('Cannot add/subtract units with different dimensions');
+    throw new DimensionMismatchError('Cannot add/subtract units with different dimensions');
   }
   if (ua.value == null || ub.value == null) {
     throw new Error('Cannot add/subtract a valueless unit');
   }
   const res = ua.clone();
   res.value = op(ua.value, ub.value);
+  res._exactSI = undefined;
   return res;
 }
 

@@ -11,18 +11,6 @@ import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index
 import { lu, luSolve } from '@danielsimonjr/mathts-matrix';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
 
-function medianTime(fn: () => void, warmup: number, reps: number): number {
-  for (let i = 0; i < warmup; i++) fn();
-  const xs: number[] = [];
-  for (let i = 0; i < reps; i++) {
-    const t0 = performance.now();
-    fn();
-    xs.push(performance.now() - t0);
-  }
-  xs.sort((a, b) => a - b);
-  return xs[Math.floor(xs.length / 2)];
-}
-
 describe('G26 #712 sort on number[]', () => {
   it('sort([3,1,2]) matches ascending order', () => {
     expect(sort([3, 1, 2])).toEqual([1, 2, 3]);
@@ -96,20 +84,32 @@ describe('G26 #694 lusolve uses packed matrix lu', () => {
       M[i][i] += n;
     }
     const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
-    const tFac = medianTime(
-      () => {
-        luSolve(lu(M), b);
-      },
-      2,
-      3
-    );
-    const tSolve = medianTime(
-      () => {
-        lusolve(M, b);
-      },
-      2,
-      3
-    );
+    const fac = () => {
+      luSolve(lu(M), b);
+    };
+    const solve = () => {
+      lusolve(M, b);
+    };
+    for (let i = 0; i < 2; i++) {
+      fac();
+      solve();
+    }
+    const facTimes: number[] = [];
+    const solveTimes: number[] = [];
+    for (let i = 0; i < 7; i++) {
+      const order = i % 2 === 0 ? [fac, solve] : [solve, fac];
+      for (const fn of order) {
+        const t0 = performance.now();
+        fn();
+        const dt = performance.now() - t0;
+        if (fn === fac) facTimes.push(dt);
+        else solveTimes.push(dt);
+      }
+    }
+    facTimes.sort((a, c) => a - c);
+    solveTimes.sort((a, c) => a - c);
+    const tFac = facTimes[Math.floor(facTimes.length / 2)] ?? 0;
+    const tSolve = solveTimes[Math.floor(solveTimes.length / 2)] ?? 0;
     expect(tSolve / tFac).toBeLessThan(1.2);
   }, 120_000);
 
