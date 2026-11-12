@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2267,
+  "totalFiles": 2268,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1267,
     "test-only": 0,
     "orphan": 0,
-    "test": 909,
+    "test": 910,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1293,
-    "tests": 909,
+    "tests": 910,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1024,
+    "@danielsimonjr/mathts-functions": 1025,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 124,
@@ -492,7 +492,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 489
+      "loc": 476
     },
     {
       "file": "compat/src/shims.ts",
@@ -4349,7 +4349,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 307
+      "loc": 308
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4545,7 +4545,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2049
+      "loc": 2070
     },
     {
       "file": "expression/src/Parser.ts",
@@ -5315,7 +5315,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 275
+      "loc": 276
     },
     {
       "file": "expression/tests/stringSubset-clone.test.ts",
@@ -6323,7 +6323,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 455
+      "loc": 506
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -9922,6 +9922,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 196
+    },
+    {
+      "file": "functions/tests/dogfood-g22-expression-sandbox.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
     },
     {
       "file": "functions/tests/dogfood-g23-units-physics.test.ts",

@@ -207,6 +207,7 @@ describe('security: pre-compile AST validator (default-safe)', () => {
       'evaluate',
       'parse',
       'compile',
+      'typed',
       'simplify',
       'derivative',
       'help',
