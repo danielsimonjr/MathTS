@@ -88,12 +88,8 @@ function formatValue(value: unknown, options?: unknown): string {
   return String(value);
 }
 
-/** `new BigNumber(x)` adapter — core's BigNumber ctor is private + type-specific. */
-const BigNumberCtor = function (value: number | string | bigint): BigNumber {
-  if (typeof value === 'string') return BigNumber.parse(value);
-  if (typeof value === 'bigint') return BigNumber.fromBigInt(value);
-  return BigNumber.fromNumber(value);
-} as unknown as BigNumberConstructor;
+/** Factory scope expects a constructable `BigNumber` with mathjs-style `new BigNumber(x)`. */
+const BigNumberCtor = BigNumber as unknown as BigNumberConstructor;
 
 /** `Complex` adapter carrying the static `.I` the factory reads. */
 const ComplexCtor = Object.assign(

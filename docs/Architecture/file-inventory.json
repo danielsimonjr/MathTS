@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2247,
+  "totalFiles": 2249,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1263,
     "test-only": 0,
     "orphan": 0,
-    "test": 893,
+    "test": 895,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1289,
-    "tests": 893,
+    "tests": 895,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 27,
     "@danielsimonjr/mathts-compat": 17,
-    "@danielsimonjr/mathts-core": 120,
+    "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
@@ -32,7 +32,7 @@
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
-    "@danielsimonjr/mathts-numbers": 3,
+    "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
     "@danielsimonjr/mathts-parallel": 52,
@@ -702,7 +702,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 270
+      "loc": 271
     },
     {
       "file": "core/src/internal.ts",
@@ -807,7 +807,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1592
+      "loc": 1692
     },
     {
       "file": "core/src/types/complex.ts",
@@ -884,7 +884,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 131
+      "loc": 127
     },
     {
       "file": "core/src/types/unit/errors.ts",
@@ -1172,6 +1172,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 57
+    },
+    {
+      "file": "core/tests/types/bignumber-constructor.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 111
     },
     {
       "file": "core/tests/types/bignumber-coverage.test.ts",
@@ -13547,14 +13554,21 @@
       "package": "@danielsimonjr/mathts-numbers",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 51
+      "loc": 52
+    },
+    {
+      "file": "numbers/tests/dogfood-g11-bignumber-constructor.test.ts",
+      "package": "@danielsimonjr/mathts-numbers",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "numbers/tests/numbers.test.ts",
       "package": "@danielsimonjr/mathts-numbers",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 86
     },
     {
       "file": "numbers/vitest.config.ts",

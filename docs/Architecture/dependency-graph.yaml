@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1289
   totalModules: 82
-  totalExports: 7017
+  totalExports: 7020
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -807,6 +807,7 @@ modules:
         - file: ./types/bignumber.js
           imports:
             - BigNumber
+            - bignumber
             - isBigNumber
             - BIGNUMBER_ZERO
             - BIGNUMBER_ONE
@@ -1079,6 +1080,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -1274,6 +1276,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -2610,6 +2613,7 @@ modules:
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
         - isBigNumber
+        - bignumber
         - BigNumber
       classes:
         - BigNumber
@@ -2617,6 +2621,7 @@ modules:
         - BigNumberConfig
       functions:
         - isBigNumber
+        - bignumber
       constants:
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -35925,6 +35930,7 @@ modules:
             - FRACTION_THIRD
             - FRACTION_QUARTER
             - BigNumber
+            - bignumber
             - isBigNumber
             - BIGNUMBER_ZERO
             - BIGNUMBER_ONE
@@ -35958,6 +35964,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -35988,6 +35995,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -43637,15 +43645,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1289
   totalModules: 82
-  totalLinesOfCode: 219011
-  totalExports: 7017
+  totalLinesOfCode: 219109
+  totalExports: 7020
   totalClasses: 61
   totalInterfaces: 602
-  totalFunctions: 2364
+  totalFunctions: 2365
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1646
-  totalReExports: 3023
+  totalReExports: 3025
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
