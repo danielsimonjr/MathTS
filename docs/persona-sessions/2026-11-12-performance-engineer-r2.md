@@ -11,7 +11,7 @@ Re-evaluate MathTS for a latency-sensitive Node and browser product after the A-
 - Scratch ESM project: `/tmp/mathts-perf-dogfood-r2` (outside repo). Pinned versions per owner list (confirmed with `npm ls`).
 - Node v22.23.4, linux x64, 4-core Intel Xeon KVM, `node --expose-gc`.
 - Competitors: mathjs 15.2.0, ml-matrix 6.15.1, fft.js 4.0.4.
-- Harness: `docs/persona-sessions/bench/2026-11-12-performance-engineer-r2.mjs` → JSON `docs/persona-sessions/bench/2026-11-12-performance-engineer-r2.json`.
+- Harness: `docs/persona-sessions/bench/2026-11-12-performance-engineer-r2.harness.mjs.txt` (rename to `.mjs` to run; kept as text so it is not counted as repo source, same as the round 1 robustness harness) → JSON `docs/persona-sessions/bench/2026-11-12-performance-engineer-r2.json`.
 - Re-run against npm: `cd <scratch> && npm i … && node --expose-gc harness-r2.mjs` (copy harness from docs tree; use scratch `node_modules`).
 
 Published versions exercised:
