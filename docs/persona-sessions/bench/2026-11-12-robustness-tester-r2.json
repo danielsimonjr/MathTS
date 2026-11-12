@@ -1,0 +1,81 @@
+{
+  "persona": "robustness-tester",
+  "round": 2,
+  "date": "2026-11-12",
+  "seed": 20261112,
+  "node": "v22.23.4",
+  "scratchDir": "/tmp/mathts-robust-r2",
+  "packages": {
+    "core": "0.27.0",
+    "functions": "0.85.0",
+    "parser": "0.1.35",
+    "evaluator": "0.1.34",
+    "expression": "0.13.0",
+    "matrix": "0.10.1",
+    "units": "0.7.6",
+    "numbers": "0.1.29",
+    "workbook": "0.5.19",
+    "parallel": "0.10.1",
+    "workerpool": "0.4.1",
+    "arithmetic": "0.1.87",
+    "compat": "0.5.0"
+  },
+  "harnessNote": "Adapted from 2026-11-11-robustness-tester.harness.mjs.txt; round-1 checks inverted where fixes landed. Full script: /tmp/mathts-robust-r2/r2-harness.mjs",
+  "round1Recheck": {
+    "#806": true,
+    "#807": true,
+    "#808": true,
+    "#809": true,
+    "#810": true,
+    "#811": true,
+    "#812": false,
+    "#813": true,
+    "#814": true,
+    "#815": true,
+    "#816": true,
+    "#817": true,
+    "#818": true,
+    "#819": true,
+    "#820": true
+  },
+  "round1Details": {
+    "#806": "sync TypeError: WorkerPool requires a workerScript URL or path",
+    "#807": "addScalar/number/multiplyScalar reject null with TypeError (no .im crash)",
+    "#808": "evaluate('parse'|'typed') -> Undefined symbol",
+    "#809": "SyntaxError Numeric overflow instead of silent Infinity",
+    "#810": "DenseMatrix too large exceeds 100000000 element cap",
+    "#811": "invalid unit string parse ratio n=8k/n=2k ~1.9x (<3x threshold)",
+    "#812": "Unit(180,'deg').value still Math.PI — regression #921",
+    "#813": "add(null|string) throws unexpected type",
+    "#814": "new DenseMatrix([[1,2],[3,4]]) works",
+    "#815": "multiply(2) scales matrix",
+    "#816": "host scope process blocked by sanitizeEvaluateResult",
+    "#817": "parse('/* c */ 1') -> 1",
+    "#818": "workbook constructor key cell succeeds",
+    "#819": "Unit(NaN,'m') throws Unit value must be finite",
+    "#820": "chunkTyped documented in workerpool README table"
+  },
+  "propertyTests": {
+    "addCommute": { "seed": 20261112, "runs": 300, "pass": true },
+    "evalRandomStrings": { "seed": 20261112, "runs": 600, "maxLength": 100, "pass": true },
+    "evalFns": { "seed": 20261112, "runs": 500, "pass": true }
+  },
+  "securityProbes": {
+    "sandboxConstructor": "Undefined symbol",
+    "sandboxProtoLiteral": "evaluates to {x:1} without global pollution",
+    "assignment": "disabled without unsafe",
+    "hostScopeProcess": "Security: evaluate cannot return a host object",
+    "workbookEvaluateCall": "forbidden function evaluate",
+    "parenthesisNest125": "accept",
+    "parenthesisNest126": "expression exceeds nesting limit (char 126)",
+    "exprLengthCap": "rejects >1e6 chars",
+    "wasmLoadWasm": "loadWasm() succeeds; integrity path exercised"
+  },
+  "newIssues": [
+    { "number": 921, "title": "Regression: Unit.value for deg is still radians (#812)" },
+    { "number": 922, "title": "parse() accepts Unicode mathematical digit 𝟙 but evaluate() throws" },
+    { "number": 923, "title": "mod(10,0) returns silent NaN" },
+    { "number": 924, "title": "createParse(create(all)) missing AST constructor dependencies" }
+  ],
+  "relatedOpen": [{ "number": 883, "title": "Regression: createParse()/createEvaluate() zero-arg still throw (#715)" }]
+}
