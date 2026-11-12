@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2272,
+  "totalFiles": 2273,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1268,
     "test-only": 0,
     "orphan": 0,
-    "test": 913,
+    "test": 914,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1294,
-    "tests": 913,
+    "tests": 914,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 27,
+    "@danielsimonjr/mathts-autograd": 28,
     "@danielsimonjr/mathts-compat": 18,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 4,
@@ -310,7 +310,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 102
+      "loc": 109
     },
     {
       "file": "autograd/src/index.ts",
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2604
+      "loc": 3047
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -353,6 +353,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 68
+    },
+    {
+      "file": "autograd/tests/dogfood-g13.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 410
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
