@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1291,
+    "totalFiles": 1292,
     "totalModules": 82,
-    "totalExports": 7074
+    "totalExports": 7078
   },
   "entryPoints": [
     {
@@ -5759,6 +5759,10 @@
             "imports": ["* as reduction"]
           },
           {
+            "file": "./dense/limits.js",
+            "imports": ["assertDenseMatrixSize"]
+          },
+          {
             "file": "./dense/storage.js",
             "imports": ["contiguousDenseData"]
           }
@@ -5827,6 +5831,16 @@
         "exports": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"],
         "functions": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"]
       },
+      "matrix/src/types/dense/limits.ts": {
+        "description": "Preflight limits for dense matrix allocation (DoS guard).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["DENSE_MATRIX_MAX_ELEMENTS", "assertDenseMatrixSize"],
+        "functions": ["assertDenseMatrixSize"],
+        "constants": ["DENSE_MATRIX_MAX_ELEMENTS"]
+      },
       "matrix/src/types/dense/reduction.ts": {
         "description": "Add all elements of a matrix.",
         "externalDependencies": [],
@@ -5877,6 +5891,11 @@
             "reExport": true
           },
           {
+            "file": "./dense/limits.js",
+            "imports": ["DENSE_MATRIX_MAX_ELEMENTS", "assertDenseMatrixSize"],
+            "reExport": true
+          },
+          {
             "file": "./SparseMatrix.js",
             "imports": ["SparseMatrix", "isSparseMatrix"],
             "reExport": true
@@ -5900,6 +5919,8 @@
           "isMatrix",
           "DenseMatrix",
           "isDenseMatrix",
+          "DENSE_MATRIX_MAX_ELEMENTS",
+          "assertDenseMatrixSize",
           "SparseMatrix",
           "isSparseMatrix",
           "MatrixDimensions",
@@ -5913,6 +5934,8 @@
           "isMatrix",
           "DenseMatrix",
           "isDenseMatrix",
+          "DENSE_MATRIX_MAX_ELEMENTS",
+          "assertDenseMatrixSize",
           "SparseMatrix",
           "isSparseMatrix",
           "MatrixDimensions",
@@ -44838,6 +44861,7 @@
           "matrix/src/types/Matrix.ts",
           "matrix/src/types/SparseMatrix.ts",
           "matrix/src/types/dense/arithmetic.ts",
+          "matrix/src/types/dense/limits.ts",
           "matrix/src/types/dense/reduction.ts",
           "matrix/src/types/dense/storage.ts",
           "matrix/src/types/index.ts"
@@ -46323,17 +46347,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1291,
+    "totalTypeScriptFiles": 1292,
     "totalModules": 82,
-    "totalLinesOfCode": 221081,
-    "totalExports": 7074,
+    "totalLinesOfCode": 221197,
+    "totalExports": 7078,
     "totalClasses": 61,
     "totalInterfaces": 604,
-    "totalFunctions": 2396,
+    "totalFunctions": 2397,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1649,
-    "totalReExports": 3043,
+    "totalConstants": 1650,
+    "totalReExports": 3045,
     "totalTypeOnlyImports": 645,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
