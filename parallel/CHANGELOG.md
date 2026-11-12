@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.10.1
+
+### Patch Changes
+
+- adcebad: Packaging (G27): neutral esbuild bundles no longer resolve Node builtins (workerpool requires are indirect; natural sort is in-repo ESM). `@danielsimonjr/mathts-functions/evaluate` is the same safe evaluate as the root and a smaller bundle. Safe evaluate keeps parse, typed, createUnit, resolve, simplify, derivative, and node constructors unreachable. ESM-only migration note, GitHub blob URLs in package READMEs, and a deterministic README stats check.
+- e4900c1: Fix `WorkerPool` constructor to throw synchronously when `workerScript` is missing or empty, instead of an unhandled rejection during async worker startup.
+- 8d727a1: ComputePool lazy-inits workers on parallel dispatch, throws after `terminate()` on every compute method, and rejects a swapped `matmul` call before stringifying buffers. Workerpool sizes large-array chunks from `maxWorkers` with a 65,536-element floor, resolves `new URL('./worker.js', import.meta.url)`, and rewrites Vite's prebundled `/.vite/deps/worker.js` to the package worker. An in-flight `initialize()` cannot leave workers running after `terminate()`.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [8d727a1]
+- Updated dependencies [b5f036d]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [a07bf29]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-workerpool@0.4.1
+
 ## [Unreleased]
 
 ### Patch Changes

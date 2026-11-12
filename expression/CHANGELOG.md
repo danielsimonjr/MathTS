@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-expression
 
+## 0.13.0
+
+### Minor Changes
+
+- 6c0194b: Expression lexer and sandbox: `/* */` and `//` comments; `parse("1e")` and `evaluate("1e")` now throw `SyntaxError` (incomplete scientific notation); parenthesis nesting accepts 125 levels per docs; evaluate sanitizes results so host scope objects (e.g. `process`) are not returned by identity; object literals skip forbidden keys at runtime. `substitute` uses resolve + simplifyConstant with constant folding.
+
+### Patch Changes
+
+- fd3cbef: Ship default-wired `parse`, `evaluate`, and one-argument `compileExpression` on the focused parser/evaluator packages so README samples run without the functions barrel.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- 064c834: Bind Unicode `π` and `√` in the default evaluate scope; throw on IEEE numeric literal overflow, including decimals; keep compiler and dispatch symbols (`parse`, `typed`, `createUnit`, `resolve`, and the other forbidden calls) out of the safe evaluate namespace and out of the namespace expression callbacks compile against; fix expression README MathML sample and sandbox docs.
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [b5f036d]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [a07bf29]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+
 ## [Unreleased]
 
 ### Minor Changes

@@ -1,5 +1,62 @@
 # @danielsimonjr/mathts-functions
 
+## 0.85.0
+
+### Minor Changes
+
+- d3313ec: `solvePDE` now throws `RangeError` when the explicit-Euler Fourier number `r = α Δt/Δx²` is outside the stable band `[0, 0.5]` (negative `α` included), unless `{ allowUnstable: true }` is passed. Non-finite `r` and non-finite `left`/`right` always throw. `solveParabolicPDE` validates Dirichlet/Neumann `{ type, value }` (number or `g(t)`) before integrating and rejects Robin, bare numbers, and non-finite coefficients or boundary samples so they cannot spin the BDF loop.
+- 6c0194b: Expression lexer and sandbox: `/* */` and `//` comments; `parse("1e")` and `evaluate("1e")` now throw `SyntaxError` (incomplete scientific notation); parenthesis nesting accepts 125 levels per docs; evaluate sanitizes results so host scope objects (e.g. `process`) are not returned by identity; object literals skip forbidden keys at runtime. `substitute` uses resolve + simplifyConstant with constant folding.
+- 25f7ffa: **Breaking:** `solve` now rejects non-string (matrix) input with a `TypeError` naming `linsolve` instead of returning `[]`. Quadratics such as `x^2 - 2` return symbolic radical strings (e.g. `sqrt(2)`) rather than floating approximations.
+  
+  **Breaking:** `evaluate('sum(i, 1, 3, i)')` (and similar four-argument indexed-sum misuse) now throws with guidance to use `summation`, instead of returning a complex variadic sum.
+  
+  Unify `integrate('1/x')` and `symbolicIntegral('1/x')` on `log(abs(x))`. `casDerivative` delegates to `derivative`. `integrate(fn, a, b)` dispatches numeric quadrature via `quad`. Polynomial `simplify`/`factor` canonicalize perfect squares as `(x+1)^2`.
+- 5e692c5: ODE: `maxIter` counts accepted steps; richer max-step errors with stiffness hints; `stiffODESolver(f, tspan, y0)` matches `solveODE` (legacy order via `legacyArgumentOrder`).
+- c4daa21: `lusolve` now throws when the LU factor is singular or non-finite, including consistent rank-deficient systems that previously returned a particular solution with free variables set to zero in `usolve`. The pivot floor is `1e-15` times the largest absolute entry (the same cutoff `linsolve` uses on a unit-scale matrix); numeric systems smaller than 1 are equilibrated so that floor stays relative to the matrix. Direct `usolve` still propagates NaN/±Infinity and still solves a tiny nonsingular triangle.
+- 39e08ef: Real scalar `log`, `pow`, `nthRoot`, `acosh`, `atanh`, `asin`, and `acos` now match mathjs complex promotion when `predictable` is false. Previously these returned `NaN` for many out-of-domain reals. `predictable: true` preserves real-only `Math.*` results. Compat inverse-trig shims delegate to functions instead of calling `Math.asin` directly.
+
+### Patch Changes
+
+- ef236dc: Linear-time unit parsing with a 10k length cap; decibel (power) and neper (field) units; physics scope binds `e0`/`G`/`c`/`hbar` (bare `e` stays Euler — breaking for callers that read `physicsScope().e` as the elementary charge); CODATA 2022 absolute uncertainties on physical constants, `0` when the constant is exact. Dimensionless CODATA values (`fineStructure`, `weakMixingAngle`, `sackurTetrode`) stay usable as numbers via `valueOf` and also expose `.unc` (their runtime type is object).
+- a85e335: Unary element-wise functions (`sin`, `cos`, `exp`, `log`, `sqrt`, `abs`, and the other synchronous trig and arithmetic unaries) accept `number[]`, nested arrays, and Matrix through one shared `Array | Matrix` signature. Flat numeric vectors still use the Float64Array kernel. Mixed elements dispatch per leaf, and `sqrt`/`log` of a negative promote to Complex the same way the scalar does. A Matrix result stays that matrix class while every value is a real number.
+- adcebad: Packaging (G27): neutral esbuild bundles no longer resolve Node builtins (workerpool requires are indirect; natural sort is in-repo ESM). `@danielsimonjr/mathts-functions/evaluate` is the same safe evaluate as the root and a smaller bundle. Safe evaluate keeps parse, typed, createUnit, resolve, simplify, derivative, and node constructors unreachable. ESM-only migration note, GitHub blob URLs in package READMEs, and a deterministic README stats check.
+- 17f64da: Fraction `toString` uses decimal form when the denominator is a power of ten (`0.1`), and `toJSON` emits numeric `n` and `d` when they are safe integers. `size` returns a Matrix when `config.matrix` is `Matrix`, including for native dense matrices, and that matrix stringifies as `[2, 3]`. `createUnit` replaces an existing unit only when `{ override: true }` is passed. Unit conversions keep exact rational scales, so `1 L` is `1000 mL`.
+- e47134f: Document `gammaDist` rate parameterization and add `{ scale }` option for SciPy parity. Positional second argument remains **rate**; `gammaDist(2, { scale: 2 })` matches SciPy `stats.gamma(a=2, scale=2)`.
+- 0421fec: Public FFT/signal fixes (dogfood G18): factory `fft` accepts `Float64Array`; `@danielsimonjr/mathts-signal` exports `fft`/`ifft` aliases; `welchPSD`/`bartlettPSD` throw when the signal is shorter than the frame; `resample(x, num)` matches SciPy Fourier resample; `windowFunction` accepts SciPy `(type, length)` argument order.
+- b5f036d: Publish public call overloads generated from the live typed-function signatures (add, abs, sqrt, exp, log, trig, mean, variance, std, det, evaluate), keep them in sync with a failing check, fix `Unit` as a type via interface merge, and stop referencing `@webgpu/types` so consumers resolve WebGPU names from the TypeScript DOM lib.
+- e817055: `studentTTest(sample, popmean)` runs a one-sample t-test against the hypothesized mean (SciPy `ttest_1samp`) instead of treating a numeric second argument as a second sample and returning NaN. Non-finite or non-array/non-number second arguments throw `TypeError`.
+- 43e2715: G26 dogfood: faster number sort/median, blocked GEMM, packed `lusolve`, compat scalar fast path, wasm sin policy band, SVD README note.
+- 0badf5b: Add mathjs instance methods (`import`, `typed`, `compile`), matrix `subset` via factory bridge, JSON reviver for Unit/BigNumber, and honest migration guide gap table (dogfood G16).
+- e51c0d5: Descriptive statistics: NumPy `{ ddof }` on typed `variance`/`std`, `{ skipNaN: true }` and `nanmean`/`nanmedian`/`nanvariance`, `Float64Array` on median/mode/quantileSeq/mad/corr, constant-input variance fast path for huge magnitudes, and empty `median`/`mad` return `NaN` (empty `mode` returns `[]`).
+- 7247de3: Reject nullish and invalid operands in core scalar helpers and typed `add`/`multiply` instead of crashing on `.im` or coercing strings to Complex.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- 93c6e56: Normalize decomposition inputs: `svd`, `lu`, `qr`, `cholesky`, `eig`, and `matrixSchur` accept `DenseMatrix`, nested arrays, square `Float64Array`, and `{ data, rows, cols }`; ragged and unknown inputs throw `TypeError`. `lusolve` accepts square packed `Float64Array` and that descriptor, and still accepts an `{ L, U, p }` decomposition.
+- 064c834: Bind Unicode `π` and `√` in the default evaluate scope; throw on IEEE numeric literal overflow, including decimals; keep compiler and dispatch symbols (`parse`, `typed`, `createUnit`, `resolve`, and the other forbidden calls) out of the safe evaluate namespace and out of the namespace expression callbacks compile against; fix expression README MathML sample and sandbox docs.
+- ca97716: `Unit.add` for same-dimension addition; incompatible unit `add`/`subtract` throw `DimensionMismatchError`. `new Unit(NaN, …)` and non-finite numeric values throw `TypeError: Unit value must be finite`.
+- 5a0b2e1: SciPy/NumPy parity for dogfood stats leftovers (G30): stable Pearson/linregress p-values, Kendall exact small-n default, NumPy quantile methods, `describe` quartiles, KS norm names and scipy `auto` two-sample p-values, heatmap colorbar/labels.
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [ea94cc4]
+- Updated dependencies [e4900c1]
+- Updated dependencies [17f64da]
+- Updated dependencies [8d727a1]
+- Updated dependencies [b5f036d]
+- Updated dependencies [43e2715]
+- Updated dependencies [6c0194b]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [fd3cbef]
+- Updated dependencies [72df4ec]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [064c834]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-matrix@0.10.1
+  - @danielsimonjr/mathts-parallel@0.10.1
+  - @danielsimonjr/mathts-gpu@0.3.0
+  - @danielsimonjr/mathts-expression@0.13.0
+
 ## [Unreleased]
 
 ### Minor Changes

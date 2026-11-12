@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.2.6
+
+### Patch Changes
+
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [b5f036d]
+- Updated dependencies [43e2715]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [72df4ec]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-matrix@0.10.1
+
 ## 0.2.5
 
 ### Patch Changes

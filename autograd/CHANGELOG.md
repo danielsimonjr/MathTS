@@ -1,5 +1,28 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.5.0
+
+### Minor Changes
+
+- 0a2a4f0: Fix repeated `Tape.backward()` gradient accumulation (stale intermediate cotangent slots). Add `detach`, `Tape.noGrad`, `reshape`, ReLU/GELU/softmax/cross-entropy on `TapedTensor`, rank-N `grad()` input, and honest README limits. Seal the tape after `backward()` until `reset()` to prevent unbounded graph growth.
+
+### Patch Changes
+
+- 48014e2: Fix TapedTensor and DualTensor elementwise add/mul to use Tensor broadcasting rules, including scalar add and correct gradient reduction over broadcast axes (issue #747).
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [b5f036d]
+- Updated dependencies [a75b3d0]
+- Updated dependencies [0c40e8e]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [a07bf29]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-tensor@0.4.0
+
 ## 0.4.5
 
 ### Patch Changes

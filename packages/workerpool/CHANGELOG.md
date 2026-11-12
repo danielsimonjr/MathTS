@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.4.1
+
+### Patch Changes
+
+- 8d727a1: ComputePool lazy-inits workers on parallel dispatch, throws after `terminate()` on every compute method, and rejects a swapped `matmul` call before stringifying buffers. Workerpool sizes large-array chunks from `maxWorkers` with a 65,536-element floor, resolves `new URL('./worker.js', import.meta.url)`, and rewrites Vite's prebundled `/.vite/deps/worker.js` to the package worker. An in-flight `initialize()` cannot leave workers running after `terminate()`.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,36 @@
 # @danielsimonjr/mathts-signal
 
+## 0.1.87
+
+### Patch Changes
+
+- 0421fec: Public FFT/signal fixes (dogfood G18): factory `fft` accepts `Float64Array`; `@danielsimonjr/mathts-signal` exports `fft`/`ifft` aliases; `welchPSD`/`bartlettPSD` throw when the signal is shorter than the frame; `resample(x, num)` matches SciPy Fourier resample; `windowFunction` accepts SciPy `(type, length)` argument order.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [a85e335]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [e47134f]
+- Updated dependencies [0421fec]
+- Updated dependencies [b5f036d]
+- Updated dependencies [e817055]
+- Updated dependencies [43e2715]
+- Updated dependencies [d3313ec]
+- Updated dependencies [6c0194b]
+- Updated dependencies [0badf5b]
+- Updated dependencies [e51c0d5]
+- Updated dependencies [7247de3]
+- Updated dependencies [25f7ffa]
+- Updated dependencies [5e692c5]
+- Updated dependencies [c4daa21]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [064c834]
+- Updated dependencies [39e08ef]
+- Updated dependencies [ca97716]
+- Updated dependencies [5a0b2e1]
+  - @danielsimonjr/mathts-functions@0.85.0
+
 ## 0.1.86
 
 ### Patch Changes

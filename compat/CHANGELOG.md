@@ -1,5 +1,50 @@
 # @danielsimonjr/mathts-compat
 
+## 0.5.0
+
+### Minor Changes
+
+- 0badf5b: Add mathjs instance methods (`import`, `typed`, `compile`), matrix `subset` via factory bridge, JSON reviver for Unit/BigNumber, and honest migration guide gap table (dogfood G16).
+- 39e08ef: Real scalar `log`, `pow`, `nthRoot`, `acosh`, `atanh`, `asin`, and `acos` now match mathjs complex promotion when `predictable` is false. Previously these returned `NaN` for many out-of-domain reals. `predictable: true` preserves real-only `Math.*` results. Compat inverse-trig shims delegate to functions instead of calling `Math.asin` directly.
+
+### Patch Changes
+
+- 17f64da: Fraction `toString` uses decimal form when the denominator is a power of ten (`0.1`), and `toJSON` emits numeric `n` and `d` when they are safe integers. `size` returns a Matrix when `config.matrix` is `Matrix`, including for native dense matrices, and that matrix stringifies as `[2, 3]`. `createUnit` replaces an existing unit only when `{ override: true }` is passed. Unit conversions keep exact rational scales, so `1 L` is `1000 mL`.
+- b5f036d: Publish public call overloads generated from the live typed-function signatures (add, abs, sqrt, exp, log, trig, mean, variance, std, det, evaluate), keep them in sync with a failing check, fix `Unit` as a type via interface merge, and stop referencing `@webgpu/types` so consumers resolve WebGPU names from the TypeScript DOM lib.
+- 43e2715: G26 dogfood: faster number sort/median, blocked GEMM, packed `lusolve`, compat scalar fast path, wasm sin policy band, SVD README note.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [a85e335]
+- Updated dependencies [adcebad]
+- Updated dependencies [e4900c1]
+- Updated dependencies [17f64da]
+- Updated dependencies [e47134f]
+- Updated dependencies [0421fec]
+- Updated dependencies [8d727a1]
+- Updated dependencies [b5f036d]
+- Updated dependencies [e817055]
+- Updated dependencies [43e2715]
+- Updated dependencies [d3313ec]
+- Updated dependencies [6c0194b]
+- Updated dependencies [0badf5b]
+- Updated dependencies [e51c0d5]
+- Updated dependencies [7247de3]
+- Updated dependencies [25f7ffa]
+- Updated dependencies [e7939a7]
+- Updated dependencies [5e692c5]
+- Updated dependencies [72df4ec]
+- Updated dependencies [c4daa21]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [064c834]
+- Updated dependencies [39e08ef]
+- Updated dependencies [ca97716]
+- Updated dependencies [5a0b2e1]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-functions@0.85.0
+  - @danielsimonjr/mathts-matrix@0.10.1
+  - @danielsimonjr/mathts-parallel@0.10.1
+
 ## 0.4.52
 
 ### Patch Changes

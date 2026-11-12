@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-gpu
 
+## 0.3.0
+
+### Minor Changes
+
+- ea94cc4: GPU init without an adapter now reports `GPUContext.status === 'unavailable'` instead of `'error'`, updates `hasWebGPU()` after a failed adapter probe, adds `initializeGlobalGPUWithReason()`, and makes `isGPUSuitableForMatrixOps()` safe with no arguments. A rejected `requestAdapter` or `requestDevice` stays `'error'` with `lastError` set. `enableGpuUnavailableWarnings()` is off by default.
+
+### Patch Changes
+
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-core
 
+## 0.27.0
+
+### Minor Changes
+
+- 17f64da: Fraction `toString` uses decimal form when the denominator is a power of ten (`0.1`), and `toJSON` emits numeric `n` and `d` when they are safe integers. `size` returns a Matrix when `config.matrix` is `Matrix`, including for native dense matrices, and that matrix stringifies as `[2, 3]`. `createUnit` replaces an existing unit only when `{ override: true }` is passed. Unit conversions keep exact rational scales, so `1 L` is `1000 mL`.
+
+### Patch Changes
+
+- ef236dc: Linear-time unit parsing with a 10k length cap; decibel (power) and neper (field) units; physics scope binds `e0`/`G`/`c`/`hbar` (bare `e` stays Euler — breaking for callers that read `physicsScope().e` as the elementary charge); CODATA 2022 absolute uncertainties on physical constants, `0` when the constant is exact. Dimensionless CODATA values (`fineStructure`, `weakMixingAngle`, `sackurTetrode`) stay usable as numbers via `valueOf` and also expose `.unc` (their runtime type is object).
+- adcebad: Packaging (G27): neutral esbuild bundles no longer resolve Node builtins (workerpool requires are indirect; natural sort is in-repo ESM). `@danielsimonjr/mathts-functions/evaluate` is the same safe evaluate as the root and a smaller bundle. Safe evaluate keeps parse, typed, createUnit, resolve, simplify, derivative, and node constructors unreachable. ESM-only migration note, GitHub blob URLs in package READMEs, and a deterministic README stats check.
+- b5f036d: Publish public call overloads generated from the live typed-function signatures (add, abs, sqrt, exp, log, trig, mean, variance, std, det, evaluate), keep them in sync with a failing check, fix `Unit` as a type via interface merge, and stop referencing `@webgpu/types` so consumers resolve WebGPU names from the TypeScript DOM lib.
+- 7247de3: Reject nullish and invalid operands in core scalar helpers and typed `add`/`multiply` instead of crashing on `.im` or coercing strings to Complex.
+- e7939a7: `new BigNumber(x)` and `BigNumber.from(x)` now construct working instances (fixes runtime/type mismatch from a private constructor erased in JS). Export `bignumber` from core and `@danielsimonjr/mathts-numbers`. A second constructor argument throws; `new BigNumber(existing)` copies and `BigNumber.from(existing)` keeps the same instance. Internal values use a private token so `new BigNumber(1, 2)` cannot set the coefficient.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- ca97716: `Unit.add` for same-dimension addition; incompatible unit `add`/`subtract` throw `DimensionMismatchError`. `new Unit(NaN, …)` and non-finite numeric values throw `TypeError: Unit value must be finite`.
+
 ## 0.26.0
 
 ### Minor Changes
