@@ -29,6 +29,7 @@ if (!exportTotal) {
 }
 
 const block = `${BEGIN}
+
 The function layer (\`@danielsimonjr/mathts-functions\` ${version}) exposes **${exportTotal.toLocaleString('en-US')} exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
