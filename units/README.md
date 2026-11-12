@@ -14,7 +14,7 @@ npm install @danielsimonjr/mathts-units
 
 ## What it exports
 
-- `Unit` -- dimensional quantity class (`new Unit(5, 'km')`), with `.to()`, `.toBest()`, `.value`, `.type`.
+- `Unit` -- dimensional quantity class (`new Unit(5, 'km')`), with `.to()`, `.toBest()`, `.value`, `.type`. In TypeScript, annotate values as `Unit` (same name as the constructor) or `UnitInstance`.
 - **`.value` is the SI magnitude** (radians for angles, meters per second after `.to('m/s')`, etc.). For a number in the unit's current display, use `.toNumber('deg')`, `.toJSON().value`, or `String(u)`.
 - **Logarithmic units.** `dB` and `dBW` are power quantities (`10 log10` of a power ratio). `dBm` is power referred to 1 mW (`0 dBm` = 1 mW). `Np` is a field quantity (`ln` of an amplitude ratio), so `1 Np` = `20/ln(10)` dB. `B` is the byte (8 bit), not the bel.
 - `isUnit` / `isUnitValue` -- type guards.
@@ -25,7 +25,11 @@ npm install @danielsimonjr/mathts-units
 - `toSiDimensionVector` / `fromSiDimensionVector` — `SiDimensionVector` exponents are core `Fraction`s (`SiDimensionExponent` is `number | Fraction` on the way in); `Unit.dimensions` remains `number[]`. Import `Fraction` from `@danielsimonjr/mathts-core` when comparing components.
 
 ```ts
-import { Unit } from '@danielsimonjr/mathts-units';
+import { Unit, type UnitInstance } from '@danielsimonjr/mathts-units';
+
+// Either annotation works:
+// const a: Unit = new Unit(1, 'N');
+// const b: UnitInstance = new Unit(1, 'N');
 // After .to('m/s'), .value is SI (m/s):
 new Unit(100, 'km/h').to('m/s').value; // 27.777...
 // For 180° in degrees, not radians, use .toNumber('deg'):
