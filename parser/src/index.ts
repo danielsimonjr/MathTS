@@ -22,6 +22,8 @@
  */
 
 export {
+  // Ready-to-call parse (default wired instance)
+  parse,
   // Parser entry points
   createParse,
   createParserClass,

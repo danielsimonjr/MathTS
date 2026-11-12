@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2280
+**Total files**: 2284
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1272 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1273 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      917 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      920 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2280** |                                                                                                                |
+| **Total**     | **2284** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1298 |
-| `tests`    |   917 |
+| `src`      |  1299 |
+| `tests`    |   920 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -46,15 +46,15 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-autograd`       |    28 |
 | `@danielsimonjr/mathts-compat`         |    18 |
 | `@danielsimonjr/mathts-core`           |   121 |
-| `@danielsimonjr/mathts-evaluator`      |     4 |
-| `@danielsimonjr/mathts-expression`     |   562 |
+| `@danielsimonjr/mathts-evaluator`      |     5 |
+| `@danielsimonjr/mathts-expression`     |   564 |
 | `@danielsimonjr/mathts-functions`      |  1034 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   126 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    53 |
-| `@danielsimonjr/mathts-parser`         |     4 |
+| `@danielsimonjr/mathts-parser`         |     5 |
 | `@danielsimonjr/mathts-plot`           |    46 |
 | `@danielsimonjr/mathts-signal`         |     4 |
 | `@danielsimonjr/mathts-statistics`     |     4 |
@@ -273,6 +273,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tsdown.config.ts`                                                           | @danielsimonjr/mathts-core           | config   | config      |
 | `core/vitest.config.ts`                                                           | @danielsimonjr/mathts-core           | config   | config      |
 | `evaluator/src/index.ts`                                                          | @danielsimonjr/mathts-evaluator      | src      | build-entry |
+| `evaluator/tests/dogfood-796.test.ts`                                             | @danielsimonjr/mathts-evaluator      | tests    | test        |
 | `evaluator/tests/evaluator.test.ts`                                               | @danielsimonjr/mathts-evaluator      | tests    | test        |
 | `evaluator/tests/facade-sync.test.ts`                                             | @danielsimonjr/mathts-evaluator      | tests    | test        |
 | `evaluator/vitest.config.ts`                                                      | @danielsimonjr/mathts-evaluator      | config   | config      |
@@ -285,6 +286,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `examples/scientific-toolkit.ts`                                                  | (root)                               | examples | example     |
 | `expression/src/compiler/compile.ts`                                              | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/compiler/index.ts`                                                | @danielsimonjr/mathts-expression     | src      | build-entry |
+| `expression/src/default-instance.ts`                                              | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/embeddedDocs/constants/e.ts`                                      | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/embeddedDocs/constants/false.ts`                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/embeddedDocs/constants/i.ts`                                      | @danielsimonjr/mathts-expression     | src      | build-entry |
@@ -777,6 +779,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/ConditionalNode.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/ConstantNode.test.ts`                                           | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/DimensionError.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/dogfood-g20-parser-evaluator.test.ts`                           | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/errorTransform.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/evaluate.test.ts`                                               | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/evaluator-extra.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -2114,6 +2117,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/tests/ws2-gated-ops.test.ts`                                            | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/vitest.config.ts`                                                       | @danielsimonjr/mathts-parallel       | config   | config      |
 | `parser/src/index.ts`                                                             | @danielsimonjr/mathts-parser         | src      | build-entry |
+| `parser/tests/dogfood-715.test.ts`                                                | @danielsimonjr/mathts-parser         | tests    | test        |
 | `parser/tests/facade-sync.test.ts`                                                | @danielsimonjr/mathts-parser         | tests    | test        |
 | `parser/tests/parser.test.ts`                                                     | @danielsimonjr/mathts-parser         | tests    | test        |
 | `parser/vitest.config.ts`                                                         | @danielsimonjr/mathts-parser         | config   | config      |
