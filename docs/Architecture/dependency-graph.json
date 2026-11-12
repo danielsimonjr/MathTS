@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1301,
+    "totalFiles": 1302,
     "totalModules": 82,
-    "totalExports": 7118
+    "totalExports": 7123
   },
   "entryPoints": [
     {
@@ -44679,8 +44679,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["draw2D"],
-        "functions": ["draw2D"]
+        "exports": ["build2DScene", "draw2D"],
+        "functions": ["build2DScene", "draw2D"]
       },
       "plot/src/heatmap.ts": {
         "description": "heatmap module",
@@ -44758,6 +44758,11 @@
             "reExport": true
           },
           {
+            "file": "./update.js",
+            "imports": ["update"],
+            "reExport": true
+          },
+          {
             "file": "./marks2d.js",
             "imports": ["line", "scatter", "bar", "area", "step", "errorbar", "quiver"],
             "reExport": true
@@ -44808,6 +44813,7 @@
         "exports": [
           "plot",
           "toTikZ",
+          "update",
           "line",
           "scatter",
           "bar",
@@ -44832,6 +44838,7 @@
         "reExported": [
           "plot",
           "toTikZ",
+          "update",
           "line",
           "scatter",
           "bar",
@@ -44926,6 +44933,10 @@
             "file": "./types.js",
             "imports": ["Layer2D", "PlotOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "./update.js",
+            "imports": ["update"]
           }
         ],
         "workspaceDependencies": [
@@ -44936,7 +44947,8 @@
           }
         ],
         "exports": ["plot", "toTikZ"],
-        "functions": ["plot", "toTikZ"]
+        "functions": ["toTikZ"],
+        "constants": ["plot"]
       },
       "plot/src/render-core.ts": {
         "description": "Shared rendering context, computed once per `draw2D` call and threaded",
@@ -44977,6 +44989,10 @@
             "imports": ["spawn"]
           },
           {
+            "module": "module",
+            "imports": ["createRequire"]
+          },
+          {
             "module": "fs/promises",
             "imports": ["writeFile", "rm", "rename", "mkdtemp", "readFile"]
           },
@@ -44987,11 +45003,17 @@
           {
             "module": "os",
             "imports": ["tmpdir"]
+          },
+          {
+            "module": "url",
+            "imports": ["fileURLToPath"]
           }
         ],
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "resvgWasmImport",
+          "renderPngWithResvgWasm",
           "runTool",
           "hasTool",
           "renderToFile",
@@ -45001,7 +45023,15 @@
         ],
         "classes": ["PlotRenderError"],
         "interfaces": ["RenderOptions"],
-        "functions": ["runTool", "hasTool", "renderToFile", "latexArgs", "latexToPdf"]
+        "functions": [
+          "renderPngWithResvgWasm",
+          "runTool",
+          "hasTool",
+          "renderToFile",
+          "latexArgs",
+          "latexToPdf"
+        ],
+        "constants": ["resvgWasmImport"]
       },
       "plot/src/scale.ts": {
         "description": "scale module",
@@ -45091,6 +45121,34 @@
         "workspaceDependencies": [],
         "exports": [],
         "interfaces": ["AxisSpec", "PlotOptions", "Layer2D"]
+      },
+      "plot/src/update.ts": {
+        "description": "Identity of everything except series coordinates. Equal keys mean the existing",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./frame.js",
+            "imports": ["build2DScene"]
+          },
+          {
+            "file": "./svg.js",
+            "imports": ["emitSVG"]
+          },
+          {
+            "file": "./scene.js",
+            "imports": ["Prim", "Scene"],
+            "typeOnly": true
+          },
+          {
+            "file": "./types.js",
+            "imports": ["Layer2D", "PlotOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["update"],
+        "functions": ["update", "update", "update", "update"]
       }
     },
     "plot/three": {
@@ -46850,7 +46908,8 @@
           "plot/src/scene.ts",
           "plot/src/svg.ts",
           "plot/src/tikz.ts",
-          "plot/src/types.ts"
+          "plot/src/types.ts",
+          "plot/src/update.ts"
         ]
       },
       {
@@ -46864,18 +46923,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1301,
+    "totalTypeScriptFiles": 1302,
     "totalModules": 82,
-    "totalLinesOfCode": 223195,
-    "totalExports": 7118,
+    "totalLinesOfCode": 223463,
+    "totalExports": 7123,
     "totalClasses": 61,
     "totalInterfaces": 611,
-    "totalFunctions": 2425,
+    "totalFunctions": 2430,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1653,
-    "totalReExports": 3060,
-    "totalTypeOnlyImports": 657,
+    "totalConstants": 1655,
+    "totalReExports": 3061,
+    "totalTypeOnlyImports": 659,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 0,

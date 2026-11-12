@@ -105,6 +105,7 @@ export function svgDoc(width: number, height: number, body: string, bg: string):
       ['viewBox', `0 0 ${width} ${height}`],
       ['width', '100%'],
       ['role', 'img'],
+      ['data-mathts-plot', '1'],
     ],
     el('rect', [
       ['x', 0],
@@ -137,13 +138,21 @@ export function line(
   ]);
 }
 /** Make an SVG `<circle>` element. The `fill-opacity` attribute is added only when the opacity is below 1. Every attribute value is escaped with `escAttr`. */
-export function circle(cx: number, cy: number, r: number, fill: string, opacity?: number): string {
+export function circle(
+  cx: number,
+  cy: number,
+  r: number,
+  fill: string,
+  opacity?: number,
+  live?: string
+): string {
   return el('circle', [
     ['cx', r2(cx)],
     ['cy', r2(cy)],
     ['r', r],
     ['fill', fill],
     ['fill-opacity', opacityAttr(opacity)],
+    ['data-mathts-live', live],
   ]);
 }
 /** Make a filled SVG `<rect>` element. Position and size are rounded to two decimals. Every attribute value is escaped with `escAttr`. */
@@ -157,12 +166,18 @@ export function rect(x: number, y: number, w: number, h: number, fill: string): 
   ]);
 }
 /** Make an SVG `<polyline>` element with no fill from a list of [x, y] points. Every attribute value is escaped with `escAttr`. */
-export function polyline(pts: Array<[number, number]>, stroke: string, w = 2): string {
+export function polyline(
+  pts: Array<[number, number]>,
+  stroke: string,
+  w = 2,
+  live?: string
+): string {
   return el('polyline', [
     ['points', points(pts)],
     ['fill', 'none'],
     ['stroke', stroke],
     ['stroke-width', w],
+    ['data-mathts-live', live],
   ]);
 }
 /** Make an SVG `<polygon>` element from a list of [x, y] vertices. The stroke is `none` by default. Every attribute value is escaped with `escAttr`. */
@@ -208,11 +223,11 @@ function primSVG(p: Prim): string {
     case 'line':
       return line(p.x1, p.y1, p.x2, p.y2, p.stroke, p.w, p.opacity);
     case 'circle':
-      return circle(p.cx, p.cy, p.r, p.fill, p.opacity);
+      return circle(p.cx, p.cy, p.r, p.fill, p.opacity, p.live);
     case 'rect':
       return rect(p.x, p.y, p.w, p.h, p.fill);
     case 'polyline':
-      return polyline(p.pts, p.stroke, p.w);
+      return polyline(p.pts, p.stroke, p.w, p.live);
     case 'polygon':
       return polygon(p.pts, p.fill, p.stroke);
     case 'text':

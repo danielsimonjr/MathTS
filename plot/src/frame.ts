@@ -34,8 +34,8 @@ function noDataScene(width: number, height: number, theme: Theme): Scene {
   };
 }
 
-/** Shared 2-D rendering core: builds a Scene (axes+ticks+grid+labels+legend+marks). Never throws. */
-export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
+/** Build a 2-D Scene (axes, ticks, grid, labels, legend, marks). Never throws. */
+export function build2DScene(layers: Layer2D[], opts: PlotOptions = {}): Scene {
   const width = opts.width ?? 520;
   const height = opts.height ?? 320;
   const theme = THEMES[opts.theme ?? 'light'];
@@ -43,14 +43,14 @@ export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
     // "has data" is decided on the y-series alone (x may legitimately default to indices);
     // an empty/all-non-finite y for every layer means nothing is plottable.
     const yAll = layers.flatMap((l) => coerce1d(l.y));
-    if (yAll.length === 0) return emit(noDataScene(width, height, theme), opts);
+    if (yAll.length === 0) return noDataScene(width, height, theme);
 
     const xdom = combinedExtent(layers, (l) =>
       l.x ? coerce1d(l.x) : coerce1d(l.y).map((_, i) => i)
     );
     const ydom = combinedExtent(layers, (l) => coerce1d(l.y));
     if (!Number.isFinite(xdom[0]) || !Number.isFinite(ydom[0]))
-      return emit(noDataScene(width, height, theme), opts);
+      return noDataScene(width, height, theme);
 
     const innerX: [number, number] = [MARGIN.left, width - MARGIN.right];
     const innerY: [number, number] = [height - MARGIN.bottom, MARGIN.top];
@@ -186,8 +186,13 @@ export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
       });
     }
 
-    return emit({ width, height, bg: theme.bg, prims }, opts);
+    return { width, height, bg: theme.bg, prims };
   } catch {
-    return emit(noDataScene(width, height, theme), opts);
+    return noDataScene(width, height, theme);
   }
+}
+
+/** Shared 2-D rendering core: builds a Scene and emits SVG/TikZ. Never throws. */
+export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
+  return emit(build2DScene(layers, opts), opts);
 }

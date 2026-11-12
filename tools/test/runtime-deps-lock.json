@@ -200,7 +200,9 @@
       "@danielsimonjr/mathts-functions": "^0.84.0",
       "@danielsimonjr/mathts-expression": "^0.12.7"
     },
-    "peerDependencies": {},
+    "peerDependencies": {
+      "@resvg/resvg-wasm": "^2.6.2"
+    },
     "optionalDependencies": {}
   }
 }

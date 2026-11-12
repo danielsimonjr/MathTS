@@ -4,6 +4,7 @@ import { overlay } from './overlay.js';
 import { contour } from './contour.js';
 import { surface } from './three/surface.js';
 import type { Layer2D, PlotOptions } from './types.js';
+import { update } from './update.js';
 
 function isLayerArray(v: unknown): v is Layer2D[] {
   return (
@@ -74,6 +75,8 @@ function plotExpr(source: string, opts: PlotOptions): string {
     : contour(g2, { title: source, ...rest });
 }
 
+type PlotFn = ((a: unknown, b?: unknown, c?: PlotOptions) => string) & { update: typeof update };
+
 /**
  * Generic entry point. Data forms:
  *   plot(y, opts?)            → line, x = 0..n-1
@@ -81,13 +84,15 @@ function plotExpr(source: string, opts: PlotOptions): string {
  *   plot(layers[], opts?)     → overlay
  *   plot(source, opts?)       → expression sampling (line / contour / surface)
  */
-export function plot(a: unknown, b?: unknown, c?: PlotOptions): string {
+function plotImpl(a: unknown, b?: unknown, c?: PlotOptions): string {
   if (typeof a === 'string') return plotExpr(a, (b as PlotOptions) ?? {});
   if (isLayerArray(a)) return overlay(a, (b as PlotOptions) ?? {});
   if (Array.isArray(b) || b instanceof Float64Array) return line(a, b as Layer2D['y'], c);
   // single series → indices for x
   return line(undefined, a as Layer2D['y'], (b as PlotOptions) ?? {});
 }
+
+export const plot: PlotFn = Object.assign(plotImpl, { update });
 
 /** Generic TikZ entry — same polymorphism as plot(), forced to the TikZ backend. */
 export function toTikZ(a: unknown, b?: unknown, c?: PlotOptions): string {

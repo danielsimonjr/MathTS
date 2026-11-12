@@ -187,7 +187,7 @@ The codebase is organized into the following modules:
 - **assembly/types**: 1 file
 - **compat**: 4 files
 - **gpu**: 8 files
-- **plot**: 18 files
+- **plot**: 19 files
 - **plot/three**: 3 files
 
 ---
@@ -221,7 +221,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 4              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 21             | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
 ### Package Dependency Diagram
 
@@ -19367,7 +19367,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `draw2D`
+- Functions: `build2DScene`, `draw2D`
 
 ---
 
@@ -19419,6 +19419,7 @@ graph LR
 | File                  | Imports                                            | Type                  |
 | --------------------- | -------------------------------------------------- | --------------------- |
 | `./plot.js`           | `plot, toTikZ`                                     | Re-export             |
+| `./update.js`         | `update`                                           | Re-export             |
 | `./marks2d.js`        | `line, scatter, bar, area, step, errorbar, quiver` | Re-export             |
 | `./histogram.js`      | `histogram`                                        | Re-export             |
 | `./heatmap.js`        | `heatmap`                                          | Re-export             |
@@ -19432,7 +19433,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `plot`, `toTikZ`, `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`, `histogram`, `heatmap`, `contour`, `overlay`, `surface`, `scatter3d`, `curve3d`, `viridis`, `Data`, `PlotOptions`, `AxisSpec`, `Layer2D`
+- Re-exports: `plot`, `toTikZ`, `update`, `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`, `histogram`, `heatmap`, `contour`, `overlay`, `surface`, `scatter3d`, `curve3d`, `viridis`, `Data`, `PlotOptions`, `AxisSpec`, `Layer2D`
 
 ---
 
@@ -19491,10 +19492,12 @@ graph LR
 | `./contour.js`       | `contour`              | Import             |
 | `./three/surface.js` | `surface`              | Import             |
 | `./types.js`         | `Layer2D, PlotOptions` | Import (type-only) |
+| `./update.js`        | `update`               | Import             |
 
 **Exports:**
 
-- Functions: `plot`, `toTikZ`
+- Functions: `toTikZ`
+- Constants: `plot`
 
 ---
 
@@ -19523,15 +19526,18 @@ graph LR
 | Module          | Import                                     |
 | --------------- | ------------------------------------------ |
 | `child_process` | `spawn`                                    |
+| `module`        | `createRequire`                            |
 | `fs/promises`   | `writeFile, rm, rename, mkdtemp, readFile` |
 | `path`          | `extname, join`                            |
 | `os`            | `tmpdir`                                   |
+| `url`           | `fileURLToPath`                            |
 
 **Exports:**
 
 - Classes: `PlotRenderError`
 - Interfaces: `RenderOptions`
-- Functions: `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
+- Functions: `renderPngWithResvgWasm`, `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
+- Constants: `resvgWasmImport`
 
 ---
 
@@ -19589,6 +19595,23 @@ graph LR
 
 - Interfaces: `AxisSpec`, `PlotOptions`, `Layer2D`
 - Types: `Data`
+
+---
+
+### `plot/src/update.ts` - Identity of everything except series coordinates. Equal keys mean the existing
+
+**Internal Dependencies:**
+
+| File         | Imports                | Type               |
+| ------------ | ---------------------- | ------------------ |
+| `./frame.js` | `build2DScene`         | Import             |
+| `./svg.js`   | `emitSVG`              | Import             |
+| `./scene.js` | `Prim, Scene`          | Import (type-only) |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `update`, `update`, `update`, `update`
 
 ---
 
@@ -20486,7 +20509,7 @@ graph TD
         N516[marks2d]
         N517[overlay]
         N518[palette]
-        N519[...8 more]
+        N519[...9 more]
     end
 
     subgraph Plot/three
@@ -20580,17 +20603,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1301   |
+| Total TypeScript Files  | 1302   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 223195 |
-| Total Exports           | 7118   |
-| Total Re-exports        | 3060   |
+| Total Lines of Code     | 223463 |
+| Total Exports           | 7123   |
+| Total Re-exports        | 3061   |
 | Total Classes           | 61     |
 | Total Interfaces        | 611    |
-| Total Functions         | 2425   |
+| Total Functions         | 2430   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 657    |
+| Type-only Imports       | 659    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 1      |
 

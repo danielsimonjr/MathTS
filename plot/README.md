@@ -2,10 +2,12 @@
 
 Headless SVG 2D/3D plotting for [MathTS](https://github.com/danielsimonjr/mathts).
 
-Pure functions returning self-contained SVG strings — no browser, no canvas, no runtime
-dependencies beyond the MathTS bedrock (`core`/`functions`/`expression`). Every function
-coerces its input and never throws on bad data: empty, `NaN`, or `Infinity` inputs render a
-"no data" placeholder SVG instead of crashing. See
+Pure functions returning self-contained SVG strings — no WebGL/canvas dependency on the main
+entry. Snapshot functions (`line`, `plot`, …) only need the MathTS bedrock (`core`/`functions`/
+`expression`). For live simulation dashboards, use `update(el, x, y, opts?)` or `plot.update` to
+patch line charts in an existing DOM container instead of replacing `innerHTML` every frame.
+Every function coerces its input and never throws on bad data: empty, `NaN`, or `Infinity` inputs
+render a "no data" placeholder SVG instead of crashing. See
 `docs/superpowers/specs/2026-07-07-plotting-design.md` for the design.
 
 ## Install
@@ -27,6 +29,19 @@ import { line } from '@danielsimonjr/mathts-plot';
 
 const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares', xLabel: 'x', yLabel: 'y' });
 // svg === '<svg ...>...</svg>'
+```
+
+### Live updates (`update` / `plot.update`)
+
+```ts
+import { update } from '@danielsimonjr/mathts-plot';
+
+const chart = document.getElementById('chart')!;
+update(chart, [0, 1, 2], [0, 1, 0], { title: 'SHO' });
+// Later frames with the same axes, title, and point count patch the polyline.
+update(chart, [0, 1, 2], [0, 1, 0.5], { title: 'SHO' });
+// A different layer type, point count, or data range replaces the plot SVG
+// inside `chart` (the container stays). plot.update is the same function.
 ```
 
 ### `overlay` — combine several layers on shared, auto-scaled axes
@@ -132,7 +147,9 @@ Per-type mark functions, each `(x, y, opts?) => string` unless noted:
 ### `./render` — PNG/PDF from SVG (Node only)
 
 The main `.` entry returns SVG/TikZ strings only. For file output, import the isolated
-Node subpath (shells out to `rsvg-convert` / `resvg` or `pdflatex` / `tectonic` on PATH):
+Node subpath. PNG conversion tries, in order: `rsvg-convert` on PATH, the `resvg` binary on
+PATH, then the optional peer **`@resvg/resvg-wasm`** (lazy-loaded WASM; not required at install
+time). LaTeX PDF still uses `pdflatex` / `tectonic` on PATH.
 
 ```ts
 import { line } from '@danielsimonjr/mathts-plot';
@@ -140,12 +157,18 @@ import { renderToFile } from '@danielsimonjr/mathts-plot/render';
 
 const svgString = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares' });
 
-// Requires rsvg-convert (librsvg) or resvg on PATH for PNG; SVG-only workflows can skip this.
+// PNG: PATH rsvg-convert / resvg, then optional @resvg/resvg-wasm. SVG write needs neither.
 try {
   await renderToFile(svgString, 'plot.png', { density: 144 });
 } catch (error) {
   console.warn('PNG export skipped:', (error as Error).message);
 }
+```
+
+Install the optional WASM renderer when PATH has no librsvg/resvg:
+
+```sh
+npm install @resvg/resvg-wasm
 ```
 
 See `docs/api/plot.md` for `RenderOptions`, `PlotRenderError`, and `hasTool`.
