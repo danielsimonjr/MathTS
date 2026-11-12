@@ -51,7 +51,8 @@ interface TypedFunction {
 interface ParseDependencies {
   typed: TypedFunction;
   numeric: (value: string, type: string) => unknown;
-  config: NumberTypeConfig;
+  /** A config object, or an accessor that returns the current config (compat `math.config`). */
+  config: NumberTypeConfig | (() => NumberTypeConfig);
   AccessorNode: NodeConstructor;
   ArrayNode: NodeConstructor;
   AssignmentNode: NodeConstructor;
@@ -1966,7 +1967,10 @@ export const createParse = /* #__PURE__ */ factory(
         numberStr = state.token;
         getToken(state);
 
-        const numericType = safeNumberType(numberStr, config);
+        const numericType = safeNumberType(
+          numberStr,
+          typeof config === 'function' ? config() : config
+        );
         const value = numeric(numberStr, numericType);
         // ±Infinity is an overflow. A decimal point must not sneak past
         // (`1` followed by hundreds of zeros, then `.5` is Infinity).

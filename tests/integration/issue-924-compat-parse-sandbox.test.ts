@@ -36,3 +36,13 @@ describe('#924 createParse(create(all)) keeps the expression sandbox', () => {
     expect(() => node.compile().evaluate({})).toThrow(/Undefined symbol/);
   });
 });
+
+describe('#924 createParse reads a compat config accessor', () => {
+  it('0.1 is a BigNumber when the instance is configured for BigNumber', () => {
+    const math = create(all, { number: 'BigNumber' }) as unknown as Record<string, unknown>;
+    const viaInstance = (math.parse as (s: string) => { value: unknown })('0.1').value;
+    const viaFactory = (createParse(math)('0.1') as unknown as { value: unknown }).value;
+    expect((viaInstance as { isBigNumber?: boolean }).isBigNumber).toBe(true);
+    expect((viaFactory as { isBigNumber?: boolean }).isBigNumber).toBe(true);
+  });
+});
