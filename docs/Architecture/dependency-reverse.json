@@ -930,6 +930,7 @@
       "functions/src/algebra/simplifyCore.ts",
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
+      "functions/src/algebra/solver/validate-u-pivots.ts",
       "functions/src/algebra/symbolicEqual.ts",
       "functions/src/arithmetic/cbrt.ts",
       "functions/src/arithmetic/hypot.ts",
@@ -1129,6 +1130,19 @@
       "functions/src/algebra/solver/usolveAll.ts"
     ],
     "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
+    "functions/src/factories/matrix-bridge.ts": [
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/factories/scope.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
+    "functions/src/algebra/solver/pivot-tolerance.ts": [
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/validate-u-pivots.ts"
+    ],
+    "functions/src/algebra/solver/validate-u-pivots.ts": [
+      "functions/src/algebra/solver/lusolve.ts"
+    ],
     "functions/src/utils/array.ts": [
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/arithmetic/hypot.ts",
@@ -2351,10 +2365,6 @@
     "functions/src/algebra/lyap.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/unit/physicalConstants.ts": ["functions/src/factories/index.ts"],
     "functions/src/typed/typed-bridge.ts": ["functions/src/factories/scope.ts"],
-    "functions/src/factories/matrix-bridge.ts": [
-      "functions/src/factories/scope.ts",
-      "functions/src/typed/arithmetic.ts"
-    ],
     "functions/src/geometry/circumcircle.ts": [
       "functions/src/geometry/alpha-shape.ts",
       "functions/src/geometry/voronoi.ts"

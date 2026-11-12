@@ -123,7 +123,7 @@ The codebase is organized into the following modules:
 - **tensor**: 4 files
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
-- **functions/algebra**: 45 files
+- **functions/algebra**: 47 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 34 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 51             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 551            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 553            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3042,7 +3042,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+### `functions/src/algebra/solver/lusolve.ts` - Max |entry| when every entry is a finite number.
 
 **Workspace Dependencies:**
 
@@ -3053,13 +3053,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/is.js`            | `isArray, isMatrix`     | Import             |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../sparse/csIpvec.js`         | `csIpvec`               | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| File                               | Imports                                            | Type               |
+| ---------------------------------- | -------------------------------------------------- | ------------------ |
+| `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix` | Import             |
+| `../../utils/factory.js`           | `factory`                                          | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation`                            | Import             |
+| `../sparse/csIpvec.js`             | `csIpvec`                                          | Import             |
+| `../../core/function/typed.js`     | `TypedFunction`                                    | Import (type-only) |
+| `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                               | Import             |
+| `./pivot-tolerance.js`             | `LUSOLVE_SINGULAR_MESSAGE`                         | Import             |
+| `./validate-u-pivots.js`           | `validateUpperTriangularPivots`                    | Import             |
 
 **Exports:**
 
@@ -3067,16 +3070,26 @@ graph LR
 
 ---
 
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+
+**Exports:**
+
+- Functions: `isBadLuFactorPivot`
+- Constants: `LU_PIVOT_TOL`, `LUSOLVE_SINGULAR_MESSAGE`
+
+---
+
 ### `functions/src/algebra/solver/usolve.ts` - Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| File                           | Imports                    | Type               |
+| ------------------------------ | -------------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`                  | Import             |
+| `./utils/solveValidation.js`   | `createSolveValidation`    | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`            | Import             |
+| `../../core/function/typed.js` | `TypedFunction`            | Import (type-only) |
+| `./pivot-tolerance.js`         | `LUSOLVE_SINGULAR_MESSAGE` | Import             |
 
 **Exports:**
 
@@ -3113,6 +3126,21 @@ graph LR
 **Exports:**
 
 - Functions: `createSolveValidation`
+
+---
+
+### `functions/src/algebra/solver/validate-u-pivots.ts` - Reject non-finite coefficients and singular upper-triangular factors before
+
+**Internal Dependencies:**
+
+| File                   | Imports                                        | Type   |
+| ---------------------- | ---------------------------------------------- | ------ |
+| `../../utils/is.js`    | `isDenseMatrix, isSparseMatrix`                | Import |
+| `./pivot-tolerance.js` | `isBadLuFactorPivot, LUSOLVE_SINGULAR_MESSAGE` | Import |
+
+**Exports:**
+
+- Functions: `validateUpperTriangularPivots`
 
 ---
 
@@ -19358,7 +19386,7 @@ graph LR
 | `functions/src/index`                                  | 135 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
-| `functions/src/utils/is`                               | 0 files      | 56 files   |
+| `functions/src/utils/is`                               | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -19566,7 +19594,7 @@ graph TD
         N107[polynomialRoot]
         N108[rationalize]
         N109[resolve]
-        N110[...35 more]
+        N110[...37 more]
     end
 
     subgraph Functions/arithmetic
@@ -20255,15 +20283,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1285   |
+| Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218397 |
-| Total Exports           | 7012   |
+| Total Lines of Code     | 218667 |
+| Total Exports           | 7016   |
 | Total Re-exports        | 3023   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2361   |
-| Total Type Guards       | 171    |
+| Total Functions         | 2363   |
+| Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
 | Runtime Circular Deps   | 0      |
