@@ -205,11 +205,13 @@ isGpuEnabled(); // true
 disableGpu(); // back to CPU tiers
 ```
 
-| Function       | Signature       | Description                            |
-| -------------- | --------------- | -------------------------------------- |
-| `enableGpu`    | `() => void`    | Enable implicit GPU routing            |
-| `disableGpu`   | `() => void`    | Disable implicit GPU routing (default) |
-| `isGpuEnabled` | `() => boolean` | Current flag state                     |
+| Function                        | Signature       | Description                                           |
+| ------------------------------- | --------------- | ----------------------------------------------------- |
+| `enableGpu`                     | `() => void`    | Enable implicit GPU routing                           |
+| `disableGpu`                    | `() => void`    | Disable implicit GPU routing (default)                |
+| `isGpuEnabled`                  | `() => boolean` | Current flag state                                    |
+| `enableGpuUnavailableWarnings`  | `() => void`    | Log once when the adapter is missing (off by default) |
+| `disableGpuUnavailableWarnings` | `() => void`    | Silence that warning again                            |
 
 > Explicit entry points (e.g. `gpuMatmul`) are their own opt-in and do not
 > require `enableGpu()`.
