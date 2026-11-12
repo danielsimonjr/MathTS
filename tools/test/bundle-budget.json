@@ -16,7 +16,7 @@
     "autograd/dist/index.js": 59159,
     "functions/dist/index.js": 1771409,
     "functions/dist/wasm/mathts-as.wasm": 62501,
-    "expression/dist/index.js": 346947,
+    "expression/dist/index.js": 351187,
     "parser/dist/index.js": 500,
     "units/dist/index.js": 975,
     "numbers/dist/index.js": 377,
