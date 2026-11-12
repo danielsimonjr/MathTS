@@ -598,31 +598,6 @@ export function variables(expr: string): string[] {
   return [...vars].sort();
 }
 
-/**
- * Substitute variables in an expression string with their values.
- *
- * @param expr - Expression string
- * @param vars - Map of variable name to replacement value
- * @returns Expression string with substitutions applied
- *
- * @example
- * ```typescript
- * substitute('x^2 + y', { x: '3', y: '1' }); // '3^2 + 1'
- * substitute('a*b + c', { a: '(x+1)' }); // '(x+1)*b + c'
- * ```
- */
-export function substitute(expr: string, vars: Record<string, string>): string {
-  let result = expr;
-  // Sort by length descending to avoid partial replacements
-  const keys = Object.keys(vars).sort((a, b) => b.length - a.length);
-  for (const key of keys) {
-    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = new RegExp('\\b' + escaped + '\\b', 'g');
-    result = result.replace(pattern, vars[key]);
-  }
-  return result;
-}
-
 // =============================================================================
 // Univariate polynomial/rational CAS engine (Phase 8 Task 6)
 // =============================================================================
@@ -1814,7 +1789,6 @@ export const typedAlgebra = {
   expand,
   factor,
   collect,
-  substitute,
   variables,
   cancel,
   together,

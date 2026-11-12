@@ -123,7 +123,7 @@ The codebase is organized into the following modules:
 - **tensor**: 5 files
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
-- **functions/algebra**: 47 files
+- **functions/algebra**: 48 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 34 files
@@ -165,7 +165,7 @@ The codebase is organized into the following modules:
 - **expression/function**: 1 file
 - **expression/node**: 20 files
 - **expression/transform**: 33 files
-- **expression/utils**: 13 files
+- **expression/utils**: 14 files
 - **parser**: 1 file
 - **units**: 1 file
 - **numbers**: 1 file
@@ -204,8 +204,8 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 52             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 559            | 0               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 483            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 560            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 484            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3461,6 +3461,23 @@ graph LR
 
 ---
 
+### `functions/src/algebra/substitute.ts` - substitute module
+
+**Internal Dependencies:**
+
+| File                        | Imports         | Type               |
+| --------------------------- | --------------- | ------------------ |
+| `../utils/factory.js`       | `factory`       | Import             |
+| `../utils/is.js`            | `isNode`        | Import             |
+| `../utils/node.js`          | `MathNode`      | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+
+- Constants: `createSubstitute`
+
+---
+
 ### `functions/src/algebra/sylvester.ts` - Solves the real-valued Sylvester equation AX+XB=C for X, where A, B and C are
 
 **Internal Dependencies:**
@@ -5932,6 +5949,7 @@ graph LR
 | `../arithmetic/utils/nodeOperations.js`  | `createNodeOperations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Import                |
 | `../algebra/leafCount.js`                | `createLeafCount`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import                |
 | `../algebra/resolve.js`                  | `createResolve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
+| `../algebra/substitute.js`               | `createSubstitute`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import                |
 | `../algebra/simplifyConstant.js`         | `createSimplifyConstant`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Import                |
 | `../algebra/simplify/util.js`            | `createUtil`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import                |
 | `../type/unit/function/splitUnit.js`     | `createSplitUnit`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import                |
@@ -6001,7 +6019,7 @@ graph LR
 
 **Exports:**
 
-- Constants: `addScalar`, `multiplyScalar`, `subtractScalar`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `map`, `size`, `squeeze`, `erf`, `acoth`, `acsch`, `asech`, `coth`, `csch`, `sech`, `toBest`, `clone`, `isBounded`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `numeric`, `typeOf`, `factory_abs`, `factory_cube`, `factory_exp`, `factory_expm1`, `factory_log10`, `factory_log2`, `factory_sign`, `factory_sqrt`, `factory_square`, `factory_unaryMinus`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atanh`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_csc`, `factory_sec`, `factory_sin`, `factory_sinh`, `factory_tan`, `factory_tanh`, `parseNumberWithConfig`, `divideScalar`, `mode`, `prod`, `hasNumericValue`, `isFinite`, `isZero`, `factory_unaryPlus`, `factory_dot`, `factory_transpose`, `factory_ctranspose`, `identity`, `zeros`, `ones`, `diag`, `kron`, `matrixFromFunction`, `matrixFromColumns`, `matrixFromRows`, `count`, `trace`, `det`, `reshape`, `factory_equal`, `isInteger`, `concat`, `mapSlices`, `resize`, `subset`, `inv`, `factory_cbrt`, `nthRoots`, `factory_round`, `factory_xgcd`, `factory_log`, `catalan`, `zpk2tf`, `factory_cumsum`, `factory_sum`, `csCounts`, `csSymperm`, `csAmd`, `csSqr`, `lsolve`, `lsolveAll`, `usolve`, `usolveAll`, `factory_compare`, `factory_larger`, `factory_largerEq`, `factory_smaller`, `factory_smallerEq`, `dotDivide`, `dotMultiply`, `factory_gcd`, `factory_lcm`, `factory_log1p`, `factory_mod`, `factory_nthRoot`, `factory_pow`, `factory_ceil`, `factory_floor`, `expm`, `factory_atan2`, `to`, `dotPow`, `factory_fix`, `invmod`, `composition`, `partitionSelect`, `qr`, `range`, `distance`, `gamma`, `factory_max`, `factory_min`, `factory_hypot`, `factorial`, `sort`, `stirlingS2`, `bellNumbers`, `nodeOperations`, `leafCount`, `resolve`, `simplifyConstant`, `simplifyUtil`, `splitUnit`, `fft`, `Chain`, `factory_subtract`, `factory_divide`, `ifft`, `chain`, `factory_createUnit`, `unit`, `column`, `row`, `cross`, `diff`, `sqrtm`, `lup`, `slu`, `csChol`, `csLu`, `csSpsolve`, `intersect`, `factory_mean`, `median`, `factory_variance`, `quantileSeq`, `kldivergence`, `freqz`, `simplifyCore`, `polynomialRoot`, `solveODE`, `zeta`, `indexFn`, `eigs`, `lusolve`, `corr`, `mad`, `factory_std`, `simplify`, `derivative`, `factory_norm`, `rationalize`, `symbolicEqual`, `rotationMatrix`, `schur`, `rotate`, `sylvester`, `lyap`, `speedOfLight`, `gravitationConstant`, `planckConstant`, `reducedPlanckConstant`, `magneticConstant`, `electricConstant`, `vacuumImpedance`, `coulomb`, `coulombConstant`, `elementaryCharge`, `bohrMagneton`, `conductanceQuantum`, `inverseConductanceQuantum`, `magneticFluxQuantum`, `nuclearMagneton`, `klitzing`, `josephson`, `faraday`, `fineStructure`, `boltzmann`, `gasConstant`, `molarVolume`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `avogadro`, `loschmidt`, `sackurTetrode`, `stefanBoltzmann`, `firstRadiation`, `spectralRadiance`, `secondRadiation`, `wienDisplacement`, `electronMass`, `protonMass`, `neutronMass`, `deuteronMass`, `atomicMass`, `bohrRadius`, `classicalElectronRadius`, `gravity`, `planckLength`, `planckMass`, `planckTime`, `planckCharge`, `planckTemperature`, `hartreeEnergy`, `quantumOfCirculation`, `rydberg`, `thomsonCrossSection`, `weakMixingAngle`, `efimovFactor`, `fermiCoupling`, `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `number`, `string`, `boolean`, `bigint`, `cumsum`, `ctranspose`, `createUnit`
+- Constants: `addScalar`, `multiplyScalar`, `subtractScalar`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `map`, `size`, `squeeze`, `erf`, `acoth`, `acsch`, `asech`, `coth`, `csch`, `sech`, `toBest`, `clone`, `isBounded`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `numeric`, `typeOf`, `factory_abs`, `factory_cube`, `factory_exp`, `factory_expm1`, `factory_log10`, `factory_log2`, `factory_sign`, `factory_sqrt`, `factory_square`, `factory_unaryMinus`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atanh`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_csc`, `factory_sec`, `factory_sin`, `factory_sinh`, `factory_tan`, `factory_tanh`, `parseNumberWithConfig`, `divideScalar`, `mode`, `prod`, `hasNumericValue`, `isFinite`, `isZero`, `factory_unaryPlus`, `factory_dot`, `factory_transpose`, `factory_ctranspose`, `identity`, `zeros`, `ones`, `diag`, `kron`, `matrixFromFunction`, `matrixFromColumns`, `matrixFromRows`, `count`, `trace`, `det`, `reshape`, `factory_equal`, `isInteger`, `concat`, `mapSlices`, `resize`, `subset`, `inv`, `factory_cbrt`, `nthRoots`, `factory_round`, `factory_xgcd`, `factory_log`, `catalan`, `zpk2tf`, `factory_cumsum`, `factory_sum`, `csCounts`, `csSymperm`, `csAmd`, `csSqr`, `lsolve`, `lsolveAll`, `usolve`, `usolveAll`, `factory_compare`, `factory_larger`, `factory_largerEq`, `factory_smaller`, `factory_smallerEq`, `dotDivide`, `dotMultiply`, `factory_gcd`, `factory_lcm`, `factory_log1p`, `factory_mod`, `factory_nthRoot`, `factory_pow`, `factory_ceil`, `factory_floor`, `expm`, `factory_atan2`, `to`, `dotPow`, `factory_fix`, `invmod`, `composition`, `partitionSelect`, `qr`, `range`, `distance`, `gamma`, `factory_max`, `factory_min`, `factory_hypot`, `factorial`, `sort`, `stirlingS2`, `bellNumbers`, `nodeOperations`, `leafCount`, `resolve`, `simplifyConstant`, `substitute`, `simplifyUtil`, `splitUnit`, `fft`, `Chain`, `factory_subtract`, `factory_divide`, `ifft`, `chain`, `factory_createUnit`, `unit`, `column`, `row`, `cross`, `diff`, `sqrtm`, `lup`, `slu`, `csChol`, `csLu`, `csSpsolve`, `intersect`, `factory_mean`, `median`, `factory_variance`, `quantileSeq`, `kldivergence`, `freqz`, `simplifyCore`, `polynomialRoot`, `solveODE`, `zeta`, `indexFn`, `eigs`, `lusolve`, `corr`, `mad`, `factory_std`, `simplify`, `derivative`, `factory_norm`, `rationalize`, `symbolicEqual`, `rotationMatrix`, `schur`, `rotate`, `sylvester`, `lyap`, `speedOfLight`, `gravitationConstant`, `planckConstant`, `reducedPlanckConstant`, `magneticConstant`, `electricConstant`, `vacuumImpedance`, `coulomb`, `coulombConstant`, `elementaryCharge`, `bohrMagneton`, `conductanceQuantum`, `inverseConductanceQuantum`, `magneticFluxQuantum`, `nuclearMagneton`, `klitzing`, `josephson`, `faraday`, `fineStructure`, `boltzmann`, `gasConstant`, `molarVolume`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `avogadro`, `loschmidt`, `sackurTetrode`, `stefanBoltzmann`, `firstRadiation`, `spectralRadiance`, `secondRadiation`, `wienDisplacement`, `electronMass`, `protonMass`, `neutronMass`, `deuteronMass`, `atomicMass`, `bohrRadius`, `classicalElectronRadius`, `gravity`, `planckLength`, `planckMass`, `planckTime`, `planckCharge`, `planckTemperature`, `hartreeEnergy`, `quantumOfCirculation`, `rydberg`, `thomsonCrossSection`, `weakMixingAngle`, `efimovFactor`, `fermiCoupling`, `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `number`, `string`, `boolean`, `bigint`, `cumsum`, `ctranspose`, `createUnit`
 - Re-exports: `MathNode`, `StringOptions`, `SimplifyOptions`
 
 ---
@@ -11019,7 +11037,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `polyval`, `polyadd`, `polymul`, `polyder`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `degree`, `coefficientList`, `discriminant`, `differences`, `variables`, `substitute`, `expand`, `factor`, `collect`, `cancel`, `together`, `apart`, `trigExpand`, `trigReduce`, `trigToExp`, `expToTrig`, `tangentLine`, `reduce`, `combine`, `complexExpand`, `normalForm`, `powerExpand`, `fullSimplify`, `element`, `eliminate`, `symbolicPartialDerivative`, `functionExpand`, `resultant`
+- Functions: `polyval`, `polyadd`, `polymul`, `polyder`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `degree`, `coefficientList`, `discriminant`, `differences`, `variables`, `expand`, `factor`, `collect`, `cancel`, `together`, `apart`, `trigExpand`, `trigReduce`, `trigToExp`, `expToTrig`, `tangentLine`, `reduce`, `combine`, `complexExpand`, `normalForm`, `powerExpand`, `fullSimplify`, `element`, `eliminate`, `symbolicPartialDerivative`, `functionExpand`, `resultant`
 - Constants: `typedAlgebra`
 
 ---
@@ -12925,7 +12943,7 @@ graph LR
 | `./utils/number.js`     | `safeNumberType`                                                                          | Import             |
 | `./utils/number.js`     | `NumberTypeConfig`                                                                        | Import (type-only) |
 | `./utils/object.js`     | `hasOwnProperty`                                                                          | Import             |
-| `./utils/customs.js`    | `setSafeProperty`                                                                         | Import             |
+| `./utils/customs.js`    | `isSafeProperty, setSafeProperty`                                                         | Import             |
 | `./limits.js`           | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
 | `./node/Node.js`        | `MathNode`                                                                                | Import (type-only) |
 
@@ -12997,12 +13015,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                           | Type               |
-| --------------------- | ------------------------------------------------- | ------------------ |
-| `../utils/map.js`     | `ObjectWrappingMap`                               | Import             |
-| `../utils/customs.js` | `getSafeProperty, setSafeProperty, getSafeMethod` | Import             |
-| `../limits.js`        | `MAX_COMPILE_DEPTH`                               | Import             |
-| `../node/Node.js`     | `MathNode`                                        | Import (type-only) |
+| File                  | Imports                                                           | Type               |
+| --------------------- | ----------------------------------------------------------------- | ------------------ |
+| `../utils/map.js`     | `ObjectWrappingMap`                                               | Import             |
+| `../utils/customs.js` | `getSafeProperty, setSafeProperty, getSafeMethod, isSafeProperty` | Import             |
+| `../limits.js`        | `MAX_COMPILE_DEPTH`                                               | Import             |
+| `../node/Node.js`     | `MathNode`                                                        | Import (type-only) |
 
 **Exports:**
 
@@ -16661,12 +16679,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                     | Type               |
-| ------------------------ | --------------------------- | ------------------ |
-| `../compiler/compile.js` | `compile`                   | Import             |
-| `../limits.js`           | `MAX_COMPILE_DEPTH`         | Import             |
-| `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
-| `../node/Node.js`        | `MathNode`                  | Import (type-only) |
+| File                      | Imports                     | Type               |
+| ------------------------- | --------------------------- | ------------------ |
+| `../compiler/compile.js`  | `compile`                   | Import             |
+| `../limits.js`            | `MAX_COMPILE_DEPTH`         | Import             |
+| `../utils/safe-result.js` | `sanitizeEvaluateResult`    | Import             |
+| `../compiler/compile.js`  | `CompiledExpression, Scope` | Import (type-only) |
+| `../node/Node.js`         | `MathNode`                  | Import (type-only) |
 
 **Exports:**
 
@@ -17779,6 +17798,26 @@ graph LR
 **Exports:**
 
 - Constants: `printTemplate`
+
+---
+
+### `expression/src/utils/safe-result.ts` - Refuse to return host objects (e.g. scope-injected `process`) from safe evaluate.
+
+**Workspace Dependencies:**
+
+| Package                      | Import                        |
+| ---------------------------- | ----------------------------- |
+| `@danielsimonjr/mathts-core` | `isComplex, isFraction, Unit` |
+
+**Internal Dependencies:**
+
+| File           | Imports                                          | Type   |
+| -------------- | ------------------------------------------------ | ------ |
+| `./customs.js` | `isPlainObject, isSafeProperty, setSafeProperty` | Import |
+
+**Exports:**
+
+- Functions: `sanitizeEvaluateResult`
 
 ---
 
@@ -19557,13 +19596,13 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/utils/factory`                          | 1 file       | 260 files  |
-| `functions/src/factories/index`                        | 244 files    | 14 files   |
-| `functions/src/core/function/typed`                    | 3 files      | 204 files  |
+| `functions/src/utils/factory`                          | 1 file       | 261 files  |
+| `functions/src/factories/index`                        | 245 files    | 14 files   |
+| `functions/src/core/function/typed`                    | 3 files      | 205 files  |
 | `functions/src/index`                                  | 136 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
+| `functions/src/utils/is`                               | 0 files      | 58 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
-| `functions/src/utils/is`                               | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
@@ -19784,7 +19823,7 @@ graph TD
         N109[polynomialRoot]
         N110[rationalize]
         N111[resolve]
-        N112[...37 more]
+        N112[...38 more]
     end
 
     subgraph Functions/arithmetic
@@ -20235,7 +20274,7 @@ graph TD
         N434[mathml]
         N435[number]
         N436[object]
-        N437[...3 more]
+        N437[...4 more]
     end
 
     subgraph Parser
@@ -20475,17 +20514,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1296   |
+| Total TypeScript Files  | 1298   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 222488 |
-| Total Exports           | 7103   |
+| Total Lines of Code     | 222637 |
+| Total Exports           | 7105   |
 | Total Re-exports        | 3054   |
 | Total Classes           | 61     |
 | Total Interfaces        | 608    |
 | Total Functions         | 2416   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 650    |
+| Type-only Imports       | 652    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 0      |
 

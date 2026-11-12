@@ -9,6 +9,7 @@
 
 import { compile } from '../compiler/compile.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
+import { sanitizeEvaluateResult } from '../utils/safe-result.js';
 import type { CompiledExpression, Scope } from '../compiler/compile.js';
 import type { MathNode } from '../node/Node.js';
 
@@ -271,7 +272,8 @@ export function createEvaluate(
         if (oldest !== undefined) cache.delete(oldest);
       }
     }
-    return compiled.evaluate(scope);
+    const result = compiled.evaluate(scope);
+    return unsafe ? result : sanitizeEvaluateResult(result);
   }
 
   return evaluate;

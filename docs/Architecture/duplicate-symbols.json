@@ -5823,10 +5823,10 @@
     },
     {
       "name": "substitute",
-      "category": "function",
+      "category": "constant+function",
       "definers": [
         {
-          "file": "functions/src/typed/algebra.ts",
+          "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"

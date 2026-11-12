@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1296
+  totalFiles: 1298
   totalModules: 82
-  totalExports: 7103
+  totalExports: 7105
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7717,6 +7717,30 @@ modules:
         - csUnflip
       functions:
         - csUnflip
+    functions/src/algebra/substitute.ts:
+      description: substitute module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isNode
+        - file: ../utils/node.js
+          imports:
+            - MathNode
+          typeOnly: true
+        - file: ../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - createSubstitute
+      constants:
+        - createSubstitute
     functions/src/algebra/sylvester.ts:
       description: Solves the real-valued Sylvester equation AX+XB=C for X, where A, B and C are
       externalDependencies: []
@@ -14677,6 +14701,9 @@ modules:
         - file: ../algebra/resolve.js
           imports:
             - createResolve
+        - file: ../algebra/substitute.js
+          imports:
+            - createSubstitute
         - file: ../algebra/simplifyConstant.js
           imports:
             - createSimplifyConstant
@@ -15131,6 +15158,7 @@ modules:
         - leafCount
         - resolve
         - simplifyConstant
+        - substitute
         - simplifyUtil
         - splitUnit
         - fft
@@ -15391,6 +15419,7 @@ modules:
         - leafCount
         - resolve
         - simplifyConstant
+        - substitute
         - simplifyUtil
         - splitUnit
         - fft
@@ -23246,7 +23275,6 @@ modules:
         - discriminant
         - differences
         - variables
-        - substitute
         - expand
         - factor
         - collect
@@ -23283,7 +23311,6 @@ modules:
         - discriminant
         - differences
         - variables
-        - substitute
         - expand
         - factor
         - collect
@@ -28404,6 +28431,7 @@ modules:
             - hasOwnProperty
         - file: ./utils/customs.js
           imports:
+            - isSafeProperty
             - setSafeProperty
         - file: ./limits.js
           imports:
@@ -28526,6 +28554,7 @@ modules:
             - getSafeProperty
             - setSafeProperty
             - getSafeMethod
+            - isSafeProperty
         - file: ../limits.js
           imports:
             - MAX_COMPILE_DEPTH
@@ -33933,6 +33962,9 @@ modules:
         - file: ../limits.js
           imports:
             - MAX_COMPILE_DEPTH
+        - file: ../utils/safe-result.js
+          imports:
+            - sanitizeEvaluateResult
         - file: ../compiler/compile.js
           imports:
             - CompiledExpression
@@ -35950,6 +35982,27 @@ modules:
         - printTemplate
       constants:
         - printTemplate
+    expression/src/utils/safe-result.ts:
+      description: Refuse to return host objects (e.g. scope-injected `process`) from safe evaluate.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./customs.js
+          imports:
+            - isPlainObject
+            - isSafeProperty
+            - setSafeProperty
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isComplex
+            - isFraction
+            - Unit
+      exports:
+        - sanitizeEvaluateResult
+      functions:
+        - sanitizeEvaluateResult
     expression/src/utils/scope.ts:
       description: Create a new scope which can access the parent scope,
       externalDependencies: []
@@ -42881,6 +42934,7 @@ dependencyGraph:
         - functions/src/algebra/sparse/csSymperm.ts
         - functions/src/algebra/sparse/csTdfs.ts
         - functions/src/algebra/sparse/csUnflip.ts
+        - functions/src/algebra/substitute.ts
         - functions/src/algebra/sylvester.ts
         - functions/src/algebra/symbolicEqual.ts
     - name: Functions/arithmetic
@@ -43960,6 +44014,7 @@ dependencyGraph:
         - expression/src/utils/number.ts
         - expression/src/utils/object.ts
         - expression/src/utils/print.ts
+        - expression/src/utils/safe-result.ts
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
     - name: Parser
@@ -44119,18 +44174,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1296
+  totalTypeScriptFiles: 1298
   totalModules: 82
-  totalLinesOfCode: 222488
-  totalExports: 7103
+  totalLinesOfCode: 222637
+  totalExports: 7105
   totalClasses: 61
   totalInterfaces: 608
   totalFunctions: 2416
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1651
+  totalConstants: 1653
   totalReExports: 3054
-  totalTypeOnlyImports: 650
+  totalTypeOnlyImports: 652
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

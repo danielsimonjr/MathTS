@@ -629,8 +629,10 @@ describe('parse – object literals', () => {
     expect(node.properties['key'].value).toBe(42);
   });
 
-  it('rejects {__proto__: 1} (prototype pollution at parse time)', () => {
-    expect(() => parse('{__proto__: 1}')).toThrow(/No access to property/);
+  it('skips unsafe keys in {__proto__: 1} at parse time', () => {
+    const node = parse('{safe: 1, __proto__: 1}') as unknown as ParsedNode;
+    expect(node.properties.safe).toBeDefined();
+    expect(node.properties.__proto__).toBeUndefined();
     expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });
