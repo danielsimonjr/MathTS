@@ -203,10 +203,10 @@ describe('G16 dogfood — mathjs compat surface', () => {
     expect(fMj(2)).toBe(3);
     expect(() => fMt('a')).toThrow();
     expect(() => fMj('a')).toThrow();
-    expect((mt.typed as { isTypedFunction(value: unknown): boolean }).isTypedFunction(fMt)).toBe(
-      true
-    );
-    expect(mj.typed.isTypedFunction(fMj)).toBe(true);
+    const mtIs = mt.typed as unknown as { isTypedFunction(value: unknown): boolean };
+    const mjIs = mj.typed as unknown as { isTypedFunction(value: unknown): boolean };
+    expect(mtIs.isTypedFunction(fMt)).toBe(true);
+    expect(mjIs.isTypedFunction(fMj)).toBe(true);
   });
 
   it('#732 compile is the same function as compileExpr', () => {
