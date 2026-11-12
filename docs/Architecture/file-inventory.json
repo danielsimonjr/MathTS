@@ -10068,7 +10068,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 156
+      "loc": 155
     },
     {
       "file": "functions/tests/elementwise-wasm.browser.test.ts",
@@ -13470,7 +13470,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 110
     },
     {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",
