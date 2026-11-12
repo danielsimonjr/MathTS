@@ -141,7 +141,7 @@ The codebase is organized into the following modules:
 - **functions/matrix**: 49 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 6 files
-- **functions/numeric**: 32 files
+- **functions/numeric**: 33 files
 - **functions/plain**: 10 files
 - **functions/probability**: 16 files
 - **functions/relational**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 53             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 557            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 558            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -7844,6 +7844,16 @@ graph LR
 
 ---
 
+### `functions/src/numeric/ode-step-limit.ts` - Default cap on **accepted** steps for every ODE driver.
+
+**Exports:**
+
+- Interfaces: `ODEStepLimitContext`
+- Functions: `odeAcceptedBudget`, `odeMaxStepsError`, `odeMaxAttempts`
+- Constants: `ODE_DEFAULT_MAX_ACCEPTED_STEPS`
+
+---
+
 ### `functions/src/numeric/open-root-finders.ts` - Open (non-bracketing) scalar root-finders.
 
 **Exports:**
@@ -7948,6 +7958,7 @@ graph LR
 | ----------------------- | -------------------------------------------------------------------- | ------------------ |
 | `./numeric-jacobian.js` | `numericJacobian`                                                    | Import             |
 | `./hermite.js`          | `hermiteCubic`                                                       | Import             |
+| `./ode-step-limit.js`   | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                | Import             |
 | `../utils/is.js`        | `isUnit, isNumber, isBigNumber`                                      | Import             |
 | `../utils/factory.js`   | `factory`                                                            | Import             |
 | `../types.js`           | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
@@ -11649,7 +11660,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `LinprogOptions`, `LinprogResult`
+- Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `StiffODESolverOptions`, `LinprogOptions`, `LinprogResult`
 - Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `linprog`, `linprog`, `solvePDE`
 - Re-exports: `rationalNullspace`, `RationalNullspaceOptions`, `RationalNullspaceResult`, `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`, `solveDAE`, `SolveDAEOptions`, `DAESolution`, `DAEDifferential`, `DAEConstraint`, `DAEJacobianBlocks`, `solveDDE`, `SolveDDEOptions`, `DDESolution`, `DDEForcing`, `DDEHistory`, `gaussLegendre4`, `GL4_A`, `GL4_B`, `GL4_C`, `GL4ConvergenceError`, `GaussLegendre4Options`, `GaussLegendre4Solution`
 
@@ -19892,7 +19903,7 @@ graph TD
         N222[finite-differences]
         N223[fsolve]
         N224[gauss-legendre4]
-        N225[...22 more]
+        N225[...23 more]
     end
 
     subgraph Functions/plain
@@ -20415,14 +20426,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1294   |
+| Total TypeScript Files  | 1295   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221935 |
-| Total Exports           | 7090   |
+| Total Lines of Code     | 222153 |
+| Total Exports           | 7094   |
 | Total Re-exports        | 3045   |
 | Total Classes           | 61     |
-| Total Interfaces        | 603    |
-| Total Functions         | 2409   |
+| Total Interfaces        | 605    |
+| Total Functions         | 2412   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 645    |

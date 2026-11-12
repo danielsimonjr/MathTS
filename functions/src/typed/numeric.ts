@@ -1138,6 +1138,47 @@ function _wholeStepCount(span: f64, dt: f64): f64 | null {
   return nearest >= 1 && Math.abs(q - nearest) <= 4 * Number.EPSILON * nearest ? nearest : null;
 }
 
+/** Options for {@link stiffODESolver} positional argument layout (#691). */
+export interface StiffODESolverOptions {
+  /**
+   * @deprecated Use `(f, tspan, y0)` — the same layout as `solveODE`. When `true`, keeps the
+   * pre-0.85 positional order `(f, y0, tspan)`.
+   */
+  legacyArgumentOrder?: boolean;
+}
+
+function _isNumericTspan(v: number[]): boolean {
+  return v.length === 2 && v.every((x) => typeof x === 'number' && Number.isFinite(x));
+}
+
+function _resolveStiffODEArgs(
+  arg1: number[],
+  arg2: number[],
+  options?: StiffODESolverOptions
+): { tspan: [f64, f64]; y0: number[] } {
+  if (options?.legacyArgumentOrder === true) {
+    return { y0: arg1, tspan: arg2 as [f64, f64] };
+  }
+  if (options?.legacyArgumentOrder === false) {
+    return { tspan: arg1 as [f64, f64], y0: arg2 };
+  }
+  const a1T = _isNumericTspan(arg1);
+  const a2T = _isNumericTspan(arg2);
+  // A 2-element state looks like a time span. Guessing from which pair is
+  // ordered misfires (y0 = [1, 0] versus tspan = [0, 1], or y0 = [1, 1] versus
+  // a zero-length span). Only one pair is unambiguous: that pair is tspan.
+  // Both pairs follow the documented order, (tspan, y0).
+  if (a2T && !a1T) {
+    return { y0: arg1, tspan: arg2 as [f64, f64] };
+  }
+  if (a1T) {
+    return { tspan: arg1 as [f64, f64], y0: arg2 };
+  }
+  throw new TypeError(
+    'stiffODESolver(f, tspan, y0): pass [t0, t1] then the state vector (same order as solveODE). For the old (f, y0, tspan) layout use { legacyArgumentOrder: true }.'
+  );
+}
+
 /**
  * Solve stiff ODE systems.
  *
@@ -1148,25 +1189,29 @@ function _wholeStepCount(span: f64, dt: f64): f64 | null {
  * function targets (71% error on `y'=-15y`; `null`/NaN on the stiff mode of `diag(-1,-1000)`).
  *
  * @param f - System function
- * @param y0 - Initial state
- * @param tspan - Time span
+ * @param arg1 - With default layout, time span `[t0, t1]` (same as `solveODE`); with
+ *   `{ legacyArgumentOrder: true }`, initial state `y0`
+ * @param arg2 - With default layout, initial state `y0`; with `{ legacyArgumentOrder: true }`,
+ *   time span `[t0, t1]`
+ * @param options - When omitted, `(f, tspan, y0)`. A state that is not a length-2
+ *   numeric pair is still read as the old `(f, y0, tspan)` call. When both
+ *   arguments are length-2 pairs, the documented order is used and the old
+ *   order is not guessed. Set `legacyArgumentOrder: true` for `(f, y0, tspan)`.
  * @returns Solution
  */
 export function stiffODESolver(
   f: (t: f64, y: number[]) => number[],
-  y0: number[],
-  tspan: [f64, f64]
+  arg1: number[],
+  arg2: number[],
+  options?: StiffODESolverOptions
 ): ODESolution {
-  // rosenbrockSolve's ForcingFunction is typed over the general MathNumericType/MathArray
-  // surface (it's shared with the mathjs-style solveODE factory); internally it always calls
-  // f with a plain (number, number[]) pair, so these casts just narrow back to that guarantee.
-  //
-  // stiffODESolver's signature takes no options, so a tolerance is baked in here rather than
-  // left at rosenbrockSolve's generic default (rtol=1e-4). That default trades accuracy for
-  // speed via atol = rtol*1e-3, which floors the absolute error near the scale of a stiff
-  // mode's already-tiny value (e.g. ~13% relative error decaying y'=-15y to ~3e-7) — too loose
-  // for a solver whose whole purpose is resolving stiff decay accurately. tol: 1e-7 keeps that
-  // error under 1e-9 while remaining well within maxIter (1e5).
+  const { tspan, y0 } = _resolveStiffODEArgs(arg1, arg2, options);
+  if (!_isNumericTspan(tspan)) {
+    throw new TypeError('stiffODESolver: tspan must be a finite numeric pair [tStart, tEnd]');
+  }
+  if (!Array.isArray(y0) || y0.length === 0 || !y0.every((v) => typeof v === 'number')) {
+    throw new TypeError('stiffODESolver: y0 must be a non-empty numeric state vector');
+  }
   return rosenbrockSolve((t, y) => f(t as number, y as number[]), tspan, y0, { tol: 1e-7 });
 }
 
