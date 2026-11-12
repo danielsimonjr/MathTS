@@ -10,6 +10,7 @@ function factorial(n: number): number {
 }
 
 /**
+ * Two-sided exact p-value for Kendall τ with no ties (enumeration, small n).
  * @param n Sample size
  * @param c Concordant pair count (`tot - discordant`), SciPy's `tot-dis`
  */

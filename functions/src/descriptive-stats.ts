@@ -298,6 +298,7 @@ function _kendallTauCore(
   return { tau: (P - Q) / denom, P, Q, hasTies, n };
 }
 
+/** Kendall's rank correlation τ for paired samples (τ only; use `kendalltau` for p-value). */
 export function kendallTau(x: Vec, y: Vec): number {
   return _kendallTauCore(x, y).tau;
 }

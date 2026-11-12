@@ -6316,7 +6316,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 611
+      "loc": 612
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -6617,7 +6617,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 83
+      "loc": 84
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -8101,7 +8101,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 178
+      "loc": 181
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",

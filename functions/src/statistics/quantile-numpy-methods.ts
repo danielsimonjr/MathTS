@@ -41,6 +41,7 @@ const ALIASES: Record<string, NumpyQuantileMethod> = {
   inclusive: 'linear',
 };
 
+/** Parse a quantile `method` string (NumPy names and mathjs/R aliases) or throw. */
 export function assertNumpyQuantileMethod(mode: string): NumpyQuantileMethod {
   const mapped = (ALIASES[mode] ?? mode) as NumpyQuantileMethod;
   if (!ALL_METHODS.includes(mapped)) {
@@ -157,11 +158,13 @@ export function quantileOfSorted(
   return left + gamma * (right - left);
 }
 
+/** Third argument to `quantileSeq`: NumPy-style `{ method, sorted }` or legacy forms. */
 export interface QuantileSeqOptions {
   method?: string;
   sorted?: boolean;
 }
 
+/** Normalize `quantileSeq`'s optional third argument to `{ sorted, mode }`. */
 export function parseQuantileThirdArg(
   third: unknown
 ): { sorted: boolean; mode: NumpyQuantileMethod } | null {
