@@ -383,7 +383,18 @@ export function create(
     identity: shims.identity,
     zeros: shims.zeros,
     ones: shims.ones,
-    size: shims.size,
+    size: wrapWithInstanceConfig(
+      ((...args: unknown[]) => {
+        const dims = (mathFunctions.size as (...a: unknown[]) => unknown)(...args);
+        if (currentConfig.matrix === 'Matrix' && Array.isArray(dims)) {
+          return (mathFunctions.matrix as (data: unknown) => unknown)(dims);
+        }
+        return dims;
+      }) as (...args: unknown[]) => unknown,
+      currentConfig,
+      configBaseline,
+      createdWithCustomConfig
+    ),
 
     // Type checking
     isComplex: shims.isComplex,

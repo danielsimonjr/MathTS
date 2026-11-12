@@ -8,6 +8,8 @@ interface UnitDefinitionOptions {
   prefixes?: string;
   aliases?: string[];
   offset?: number;
+  /** Replace a unit that already exists (built-ins such as `furlong` included). */
+  override?: boolean;
 }
 
 /**
@@ -87,6 +89,7 @@ export const createCreateUnit = /* #__PURE__ */ factory(
      *     - `prefixes {string}` "none", "short", "long", "binary_short", or "binary_long". The default is "none".
      *     - `aliases {Array}` Array of strings. Example: ['knots', 'kt', 'kts']
      *     - `offset {Numeric}` An offset to apply when converting from the unit. For example, the offset for celsius is 273.15. Default is 0.
+     *     - `override {boolean}` When true, replace an existing unit of the same name. Required for built-ins such as `furlong`.
      *
      * See also:
      *

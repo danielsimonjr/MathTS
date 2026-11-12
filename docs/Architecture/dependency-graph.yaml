@@ -17434,7 +17434,7 @@ modules:
       constants:
         - createRow
     functions/src/matrix/size.ts:
-      description: Calculate the size of a matrix or scalar. Always returns an Array containing numbers.
+      description: Native `DenseMatrix` / `SparseMatrix` are not the factory Matrix type (no
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -44806,7 +44806,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1310
   totalModules: 82
-  totalLinesOfCode: 224402
+  totalLinesOfCode: 224502
   totalExports: 7160
   totalClasses: 61
   totalInterfaces: 613

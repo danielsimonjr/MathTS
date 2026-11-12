@@ -125,8 +125,8 @@ describe('Fraction', () => {
     it('should convert to JSON', () => {
       const json = new Fraction(3n, 4n).toJSON();
       expect(json.mathjs).toBe('Fraction');
-      expect(json.n).toBe('3');
-      expect(json.d).toBe('4');
+      expect(json.n).toBe(3);
+      expect(json.d).toBe(4);
     });
 
     it('should convert to decimal string', () => {

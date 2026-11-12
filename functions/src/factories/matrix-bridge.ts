@@ -163,6 +163,14 @@ export class MathJSDenseMatrix {
     };
   }
 
+  toString(): string {
+    if (this._size.length === 1) {
+      const flat = this._data as unknown as number[];
+      return `[${flat.join(', ')}]`;
+    }
+    return this._data.map((row) => `[ ${row.join(', ')} ]`).join('\n');
+  }
+
   /**
    * Create a new matrix of the same type from nested array data.
    * Used internally by mathjs factories (e.g. transpose calls x.create(...)).
