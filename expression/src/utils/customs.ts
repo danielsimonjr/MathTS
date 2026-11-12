@@ -1,4 +1,41 @@
 import { hasOwnProperty } from './object.js';
+import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } from './is.js';
+
+/**
+ * Values the expression sandbox may read or call methods on.
+ * Host objects (`process`, `globalThis`, constructors, prototypes) are not receivers:
+ * `isSafeProperty` already rejects them, but `isSafeMethod` used to allow any
+ * function not inherited from `Object`/`Function`, so `process.cwd()` ran.
+ */
+function isSandboxReceiver(object: unknown): boolean {
+  if (object === null || object === undefined) return false;
+  if (isPlainObject(object) || Array.isArray(object)) return true;
+  if (
+    object instanceof Float64Array ||
+    object instanceof Float32Array ||
+    object instanceof Int32Array
+  )
+    return true;
+  if (
+    isComplex(object) ||
+    isFraction(object) ||
+    isBigNumber(object) ||
+    isMatrix(object) ||
+    isUnit(object) ||
+    isResultSet(object)
+  ) {
+    return true;
+  }
+  const branded = object as { isTensor?: boolean };
+  return branded.isTensor === true;
+}
+
+/** Throw when member access would land on a host object. */
+function assertSandboxReceiver(object: unknown): void {
+  if (!isSandboxReceiver(object)) {
+    throw new Error('No access to host object');
+  }
+}
 
 /**
  * Get a property of a plain object
@@ -102,6 +139,7 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
  * @return {boolean} Returns true when safe, false otherwise
  */
 function isSafeMethod(object: unknown, method: unknown): boolean {
+  if (!isSandboxReceiver(object)) return false;
   if (
     object === null ||
     object === undefined ||
@@ -168,3 +206,4 @@ export { isSafeProperty };
 export { getSafeMethod };
 export { isSafeMethod };
 export { isPlainObject };
+export { isSandboxReceiver, assertSandboxReceiver };

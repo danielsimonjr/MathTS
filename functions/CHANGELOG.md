@@ -13,6 +13,7 @@
 
 ### Patch Changes
 
+- Expression G32a: `substitute` resolves and constant-folds via `simplifyConstant` (Fixes #724).
 - Unit `add`/`subtract` throw exported `DimensionMismatchError` when dimensions differ (Fixes #826).
 - Synchronous unary element-wise functions (`sin`, `cos`, `tan`, `abs`, `exp`, `log`, …) accept flat `number[]` and return `number[]` with the same values as the `Float64Array` path (Fixes #692).
 

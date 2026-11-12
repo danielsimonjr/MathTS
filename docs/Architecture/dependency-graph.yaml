@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1306
+  totalFiles: 1308
   totalModules: 82
-  totalExports: 7150
+  totalExports: 7155
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7766,6 +7766,30 @@ modules:
         - csUnflip
       functions:
         - csUnflip
+    functions/src/algebra/substitute.ts:
+      description: substitute module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isNode
+        - file: ../utils/node.js
+          imports:
+            - MathNode
+          typeOnly: true
+        - file: ../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - createSubstitute
+      constants:
+        - createSubstitute
     functions/src/algebra/sylvester.ts:
       description: Solves the real-valued Sylvester equation AX+XB=C for X, where A, B and C are
       externalDependencies: []
@@ -14800,6 +14824,9 @@ modules:
         - file: ../algebra/resolve.js
           imports:
             - createResolve
+        - file: ../algebra/substitute.js
+          imports:
+            - createSubstitute
         - file: ../algebra/simplifyConstant.js
           imports:
             - createSimplifyConstant
@@ -15254,6 +15281,7 @@ modules:
         - leafCount
         - resolve
         - simplifyConstant
+        - substitute
         - simplifyUtil
         - splitUnit
         - fft
@@ -15514,6 +15542,7 @@ modules:
         - leafCount
         - resolve
         - simplifyConstant
+        - substitute
         - simplifyUtil
         - splitUnit
         - fft
@@ -23391,7 +23420,6 @@ modules:
         - discriminant
         - differences
         - variables
-        - substitute
         - expand
         - factor
         - collect
@@ -23428,7 +23456,6 @@ modules:
         - discriminant
         - differences
         - variables
-        - substitute
         - expand
         - factor
         - collect
@@ -28845,6 +28872,7 @@ modules:
             - hasOwnProperty
         - file: ./utils/customs.js
           imports:
+            - isSafeProperty
             - setSafeProperty
         - file: ./limits.js
           imports:
@@ -28967,6 +28995,8 @@ modules:
             - getSafeProperty
             - setSafeProperty
             - getSafeMethod
+            - isSafeProperty
+            - assertSandboxReceiver
         - file: ../limits.js
           imports:
             - MAX_COMPILE_DEPTH
@@ -34374,6 +34404,10 @@ modules:
         - file: ../limits.js
           imports:
             - MAX_COMPILE_DEPTH
+        - file: ../utils/safe-result.js
+          imports:
+            - sanitizeEvaluateResult
+            - trustedMathFunctions
         - file: ../compiler/compile.js
           imports:
             - CompiledExpression
@@ -35955,13 +35989,21 @@ modules:
         - reduce
         - scatter
     expression/src/utils/customs.ts:
-      description: Get a property of a plain object
+      description: Values the expression sandbox may read or call methods on.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - hasOwnProperty
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isComplex
+            - isFraction
+            - isMatrix
+            - isResultSet
+            - isUnit
       workspaceDependencies: []
       exports:
         - getSafeProperty
@@ -35970,6 +36012,8 @@ modules:
         - getSafeMethod
         - isSafeMethod
         - isPlainObject
+        - isSandboxReceiver
+        - assertSandboxReceiver
     expression/src/utils/factory.ts:
       description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
@@ -36391,6 +36435,31 @@ modules:
         - printTemplate
       constants:
         - printTemplate
+    expression/src/utils/safe-result.ts:
+      description: Functions copied onto the math namespace (`sin`, `min`, …). Safe evaluate may
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isComplex
+            - isFraction
+            - isMatrix
+            - isResultSet
+            - isUnit
+        - file: ./customs.js
+          imports:
+            - isPlainObject
+            - isSafeProperty
+            - setSafeProperty
+      workspaceDependencies: []
+      exports:
+        - trustedMathFunctions
+        - sanitizeEvaluateResult
+      functions:
+        - trustedMathFunctions
+        - sanitizeEvaluateResult
     expression/src/utils/scope.ts:
       description: Create a new scope which can access the parent scope,
       externalDependencies: []
@@ -43439,6 +43508,7 @@ dependencyGraph:
         - functions/src/algebra/sparse/csSymperm.ts
         - functions/src/algebra/sparse/csTdfs.ts
         - functions/src/algebra/sparse/csUnflip.ts
+        - functions/src/algebra/substitute.ts
         - functions/src/algebra/sylvester.ts
         - functions/src/algebra/symbolicEqual.ts
     - name: Functions/arithmetic
@@ -44524,6 +44594,7 @@ dependencyGraph:
         - expression/src/utils/number.ts
         - expression/src/utils/object.ts
         - expression/src/utils/print.ts
+        - expression/src/utils/safe-result.ts
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
     - name: Parser
@@ -44685,18 +44756,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1306
+  totalTypeScriptFiles: 1308
   totalModules: 82
-  totalLinesOfCode: 223798
-  totalExports: 7150
+  totalLinesOfCode: 224063
+  totalExports: 7155
   totalClasses: 61
   totalInterfaces: 612
-  totalFunctions: 2431
+  totalFunctions: 2432
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1656
+  totalConstants: 1658
   totalReExports: 3111
-  totalTypeOnlyImports: 660
+  totalTypeOnlyImports: 662
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 1
   unusedFilesCount: 0

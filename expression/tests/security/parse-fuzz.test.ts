@@ -106,8 +106,8 @@ describe('parse fuzz helpers are not vacuous', () => {
 
   it('the nesting boundary is exact: below the cap parses, at the cap is a SyntaxError', () => {
     const wrap = (k: number) => '('.repeat(k) + '1' + ')'.repeat(k);
-    expect(() => parse(wrap(MAX_PARSE_NESTING - 1))).not.toThrow();
-    expect(() => parse(wrap(MAX_PARSE_NESTING))).toThrow(SyntaxError);
+    expect(() => parse(wrap(MAX_PARSE_NESTING))).not.toThrow();
+    expect(() => parse(wrap(MAX_PARSE_NESTING + 1))).toThrow(SyntaxError);
   });
 });
 

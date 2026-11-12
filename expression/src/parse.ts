@@ -11,7 +11,7 @@ import { deepMap } from './utils/collection.js';
 import { safeNumberType } from './utils/number.js';
 import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
-import { setSafeProperty } from './utils/customs.js';
+import { isSafeProperty, setSafeProperty } from './utils/customs.js';
 import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
 import type { MathNode } from './node/Node.js';
 
@@ -413,11 +413,31 @@ export const createParse = /* #__PURE__ */ factory(
 
       // skip over ignored characters:
       while (true) {
-        // comments:
-        if (currentCharacter(state) === '#') {
+        // comments: # line, // line, and /* */ block
+        const c0 = currentCharacter(state);
+        const c1 = currentString(state, 2);
+        if (c0 === '#') {
           while (currentCharacter(state) !== '\n' && currentCharacter(state) !== '') {
             state.comment += currentCharacter(state);
             next(state);
+          }
+        } else if (c1 === '//') {
+          while (currentCharacter(state) !== '\n' && currentCharacter(state) !== '') {
+            next(state);
+          }
+        } else if (c1 === '/*') {
+          next(state);
+          next(state);
+          while (currentCharacter(state) !== '') {
+            if (currentCharacter(state) === '*' && nextCharacter(state) === '/') {
+              next(state);
+              next(state);
+              break;
+            }
+            next(state);
+          }
+          if (currentCharacter(state) === '') {
+            throw createSyntaxError(state, 'Unclosed comment');
           }
         }
         // whitespace: space, tab, and newline when inside parameters
@@ -584,6 +604,11 @@ export const createParse = /* #__PURE__ */ factory(
           ) {
             next(state);
             throw createSyntaxError(state, 'Digit expected, got "' + currentCharacter(state) + '"');
+          } else {
+            throw createSyntaxError(
+              state,
+              'Digit expected, got "' + (nextCharacter(state) || 'end of expression') + '"'
+            );
           }
         }
 
@@ -632,7 +657,7 @@ export const createParse = /* #__PURE__ */ factory(
      * New line characters will be ignored until closeParams(state) is called
      */
     function openParams(state: ParserState): void {
-      if (state.nestingLevel >= MAX_PARSE_NESTING - 1) {
+      if (state.nestingLevel >= MAX_PARSE_NESTING) {
         throw createSyntaxError(state, 'expression exceeds nesting limit');
       }
       state.nestingLevel++;
@@ -1904,10 +1929,10 @@ export const createParse = /* #__PURE__ */ factory(
             }
             getToken(state);
 
-            // Sandbox: object-literal keys go through setSafeProperty so
-            // `{__proto__: ...}` cannot pollute `properties` during parse
-            // (assignment to obj['__proto__'] sets [[Prototype]]).
-            setSafeProperty(properties, key, parseAssignment(state));
+            const valueNode = parseAssignment(state);
+            if (isSafeProperty(properties, key)) {
+              setSafeProperty(properties, key, valueNode);
+            }
           }
         } while ((state.token as string) === ',');
 

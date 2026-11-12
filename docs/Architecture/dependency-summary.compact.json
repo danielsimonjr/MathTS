@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1306, "e": 7150, "re": 3111 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1308, "e": 7155, "re": 3111 },
   "s": {
-    "loc": 223798,
+    "loc": 224063,
     "cls": 61,
     "int": 612,
-    "fn": 2431,
+    "fn": 2432,
     "tg": 175,
     "en": 0,
-    "co": 1656,
-    "toi": 660
+    "co": 1658,
+    "toi": 662
   },
   "c": { "rt": 2, "to": 1, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -468,7 +468,7 @@
       "cls": ["DualTensor", "Tape", "TapedTensor"]
     },
     "functions/algebra": {
-      "f": 47,
+      "f": 48,
       "exp": [
         "createLup",
         "createQr",
@@ -1170,11 +1170,11 @@
         "discriminant",
         "differences",
         "variables",
-        "substitute",
         "expand",
         "factor",
         "collect",
-        "cancel"
+        "cancel",
+        "together"
       ],
       "cls": ["DivisorGeobucket"],
       "int": [
@@ -1375,7 +1375,7 @@
       "int": ["PreparedTransformArgs"]
     },
     "expression/utils": {
-      "f": 13,
+      "f": 14,
       "exp": [
         "arraySize",
         "validate",
@@ -1934,13 +1934,13 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 247, "o": 14 },
-    { "p": "utils/factory.ts", "i": 1, "o": 260 },
+    { "p": "factories/index.ts", "i": 248, "o": 14 },
+    { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
-    { "p": "function/typed.ts", "i": 3, "o": 204 },
+    { "p": "function/typed.ts", "i": 3, "o": 205 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
+    { "p": "utils/is.ts", "i": 0, "o": 58 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
-    { "p": "utils/is.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
