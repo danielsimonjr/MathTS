@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1302, "e": 7123, "re": 3061 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1306, "e": 7150, "re": 3111 },
   "s": {
-    "loc": 223599,
+    "loc": 223798,
     "cls": 61,
-    "int": 611,
-    "fn": 2430,
+    "int": 612,
+    "fn": 2431,
     "tg": 175,
     "en": 0,
-    "co": 1655,
-    "toi": 659
+    "co": 1656,
+    "toi": 660
   },
   "c": { "rt": 2, "to": 1, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -92,7 +92,7 @@
       ]
     },
     "core": {
-      "f": 19,
+      "f": 20,
       "exp": [
         "arraySize",
         "validate",
@@ -540,7 +540,7 @@
       ]
     },
     "functions": {
-      "f": 34,
+      "f": 35,
       "exp": [
         "gradient",
         "hessian",
@@ -918,7 +918,7 @@
       "int": ["BigNumberBinomialType"]
     },
     "functions/relational": {
-      "f": 13,
+      "f": 14,
       "exp": [
         "createCompare",
         "createCompareNumber",
@@ -934,13 +934,14 @@
         "createLargerNumber",
         "createLargerEq",
         "createLargerEqNumber",
+        "naturalSort",
         "createSmaller",
         "createSmallerNumber",
         "createSmallerEq",
         "createSmallerEqNumber",
-        "createUnequal",
-        "createUnequalNumber"
-      ]
+        "createUnequal"
+      ],
+      "int": ["NaturalSort"]
     },
     "functions/set": {
       "f": 11,
@@ -1152,7 +1153,7 @@
       ]
     },
     "functions/typed": {
-      "f": 52,
+      "f": 53,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1940,12 +1941,12 @@
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "utils/is.ts", "i": 0, "o": 57 },
-    { "p": "typed/index.ts", "i": 53, "o": 2 },
+    { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/array.ts", "i": 0, "o": 47 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 46 },
-    { "p": "utils/collection.ts", "i": 0, "o": 41 }
+    { "p": "typed/expression-eval-barrel.ts", "i": 41, "o": 1 }
   ]
 }
