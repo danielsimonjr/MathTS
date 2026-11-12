@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1288
   totalModules: 82
-  totalExports: 7025
+  totalExports: 7028
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -16582,6 +16582,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ./complex-to-interleaved.js
           imports:
             - complexToInterleaved
@@ -19790,9 +19791,11 @@ modules:
       exports:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
       functions:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
     functions/src/signal/fft-helpers.ts:
       description: numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`
       externalDependencies: []
@@ -25355,6 +25358,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
@@ -37129,6 +37133,8 @@ modules:
           imports:
             - parallelFFT
             - parallelIFFT
+            - parallelFFT
+            - parallelIFFT
             - parallelFFTMagnitude
             - parallelFFTPower
             - parallelConv
@@ -37164,6 +37170,8 @@ modules:
       exports:
         - parallelFFT
         - parallelIFFT
+        - fft
+        - ifft
         - parallelFFTMagnitude
         - parallelFFTPower
         - parallelConv
@@ -43641,11 +43649,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1288
   totalModules: 82
-  totalLinesOfCode: 219138
-  totalExports: 7025
+  totalLinesOfCode: 219365
+  totalExports: 7028
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2367
+  totalFunctions: 2368
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1648

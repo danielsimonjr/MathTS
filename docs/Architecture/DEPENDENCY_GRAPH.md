@@ -6746,13 +6746,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                | Type               |
-| ----------------------------- | ---------------------- | ------------------ |
-| `../utils/array.js`           | `arraySize`            | Import             |
-| `../signal/fft-core-f64.js`   | `fftCoreFloat64`       | Import             |
-| `./complex-to-interleaved.js` | `complexToInterleaved` | Import             |
-| `../utils/factory.js`         | `factory`              | Import             |
-| `../core/function/typed.js`   | `TypedFunction`        | Import (type-only) |
+| File                          | Imports                           | Type               |
+| ----------------------------- | --------------------------------- | ------------------ |
+| `../utils/array.js`           | `arraySize`                       | Import             |
+| `../signal/fft-core-f64.js`   | `fftCoreFloat64, fftExactFloat64` | Import             |
+| `./complex-to-interleaved.js` | `complexToInterleaved`            | Import             |
+| `../utils/factory.js`         | `factory`                         | Import             |
+| `../core/function/typed.js`   | `TypedFunction`                   | Import (type-only) |
 
 **Exports:**
 
@@ -8851,7 +8851,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitReverse`, `fftCoreFloat64`
+- Functions: `bitReverse`, `fftCoreFloat64`, `fftExactFloat64`
 
 ---
 
@@ -11683,7 +11683,7 @@ graph LR
 
 | File                            | Imports                                                                                                                                    | Type   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
+| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
 | `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
@@ -17834,9 +17834,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
+| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
 
 **Exports:**
 
@@ -20298,12 +20298,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1288   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 219138 |
-| Total Exports           | 7025   |
+| Total Lines of Code     | 219365 |
+| Total Exports           | 7028   |
 | Total Re-exports        | 3026   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2367   |
+| Total Functions         | 2368   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
