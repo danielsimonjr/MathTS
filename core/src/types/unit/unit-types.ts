@@ -314,7 +314,7 @@ export interface UnitConstructor {
    * (see {@link Unit.readingsWithSource}).
    */
   readingsWithSource(token: string): ReadonlyArray<ReadonlyArray<UnitReadingFactor>>;
-  createUnitSingle(name: string, obj?: unknown): UnitInstance;
+  createUnitSingle(name: string, obj?: unknown, options?: CreateUnitOptions): UnitInstance;
   deleteUnit(name: string): void;
   _getNumberConverter(type: string): ConverterFn;
   /**

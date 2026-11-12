@@ -296,14 +296,42 @@ export class Fraction implements IFraction {
     if (this.denominator === 1n) {
       return this.numerator.toString();
     }
+    const dec = this.toTerminatingDecimalString();
+    if (dec !== null) {
+      return dec;
+    }
     return `${this.numerator}/${this.denominator}`;
   }
 
-  toJSON(): { mathjs: string; n: string; d: string } {
+  /** Decimal form when the denominator is a power of 10 (e.g. 1/10 → `0.1`). */
+  private toTerminatingDecimalString(): string | null {
+    let den = this.denominator;
+    if (den <= 0n) return null;
+    let places = 0n;
+    while (den % 10n === 0n) {
+      den /= 10n;
+      places += 1n;
+    }
+    if (den !== 1n) return null;
+    const scale = 10n ** places;
+    const sign = this.numerator < 0n ? '-' : '';
+    const num = this.numerator < 0n ? -this.numerator : this.numerator;
+    const whole = num / scale;
+    const frac = num % scale;
+    if (frac === 0n) {
+      return sign + whole.toString();
+    }
+    const fracStr = frac.toString().padStart(Number(places), '0').replace(/0+$/, '');
+    return sign + whole.toString() + '.' + fracStr;
+  }
+
+  toJSON(): { mathjs: string; n: number | string; d: number | string } {
+    const nNum = Number(this.numerator);
+    const dNum = Number(this.denominator);
     return {
       mathjs: 'Fraction',
-      n: this.numerator.toString(),
-      d: this.denominator.toString(),
+      n: Number.isSafeInteger(nNum) ? nNum : this.numerator.toString(),
+      d: Number.isSafeInteger(dNum) ? dNum : this.denominator.toString(),
     };
   }
 

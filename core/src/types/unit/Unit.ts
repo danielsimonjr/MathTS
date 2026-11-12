@@ -3298,7 +3298,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         let lastNotFound: unknown;
         for (const key of pending) {
           try {
-            created.set(key, Unit.createUnitSingle(key, obj[key]));
+            created.set(key, Unit.createUnitSingle(key, obj[key], options));
           } catch (ex) {
             if (ex instanceof UnitParseError && /not found\./.test(ex.message)) {
               stillPending.push(key);
@@ -3352,18 +3352,30 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *
      * @return
      */
-    Unit.createUnitSingle = function (name: string, obj?: unknown): UnitInstance {
+    function definitionMatchesExistingUnit(name: string, defUnit: UnitInstance): boolean {
+      try {
+        const existing = new Unit(1, name);
+        const proposedSi = defUnit.clone();
+        proposedSi.toSI();
+        const existingSi = existing.clone();
+        existingSi.toSI();
+        return proposedSi.equalBase(existingSi);
+      } catch {
+        return false;
+      }
+    }
+
+    Unit.createUnitSingle = function (
+      name: string,
+      obj?: unknown,
+      options?: CreateUnitOptions
+    ): UnitInstance {
       if (typeof obj === 'undefined' || obj === null) {
         obj = {};
       }
 
       if (typeof name !== 'string') {
         throw new TypeError("createUnitSingle expects first parameter to be of type 'string'");
-      }
-
-      // Check collisions with existing units
-      if (hasOwnProperty(UNITS, name)) {
-        throw new Error('Cannot create unit "' + name + '": a unit with that name already exists');
       }
 
       // Name checks: an existing unit or alias is refused above, and `assertUnitNameIsValid`
@@ -3429,6 +3441,18 @@ export const createUnitClass = /* #__PURE__ */ factory(
         }
       } else if (definition && (definition as { type?: unknown }).type === 'Unit') {
         defUnit = (definition as UnitInstance).clone();
+      }
+
+      if (hasOwnProperty(UNITS, name)) {
+        if (options?.override) {
+          Unit.deleteUnit(name);
+        } else if (defUnit && definitionMatchesExistingUnit(name, defUnit)) {
+          return new Unit(1, name);
+        } else {
+          throw new Error(
+            'Cannot create unit "' + name + '": a unit with that name already exists'
+          );
+        }
       }
 
       aliases = aliases || [];

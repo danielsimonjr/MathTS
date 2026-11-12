@@ -348,7 +348,10 @@ export function create(
     identity: shims.identity,
     zeros: shims.zeros,
     ones: shims.ones,
-    size: shims.size,
+    size: wrapWithInstanceConfig(
+      mathFunctions.size as (...args: unknown[]) => unknown,
+      currentConfig
+    ),
 
     // Type checking
     isComplex: shims.isComplex,
