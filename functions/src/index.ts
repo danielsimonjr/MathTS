@@ -11,6 +11,7 @@
 
 // Typed functions (polymorphic via mathTyped)
 export * from './typed/index.js';
+export type * from './typed/public-type-exports.js';
 
 // CAS functions — re-exported from the entry point rather than from
 // `typed/index.js` so the module graph stays acyclic: `cas.ts` depends on the

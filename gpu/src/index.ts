@@ -1,5 +1,3 @@
-/// <reference types="@webgpu/types" />
-
 /**
  * @danielsimonjr/mathts-gpu — shared WebGPU foundation for MathTS.
  * @packageDocumentation
