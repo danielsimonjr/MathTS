@@ -384,7 +384,13 @@ export function create(
     zeros: shims.zeros,
     ones: shims.ones,
     size: wrapWithInstanceConfig(
-      mathFunctions.size as (...args: unknown[]) => unknown,
+      ((...args: unknown[]) => {
+        const dims = (mathFunctions.size as (...a: unknown[]) => unknown)(...args);
+        if (currentConfig.matrix === 'Matrix' && Array.isArray(dims)) {
+          return (mathFunctions.matrix as (data: unknown) => unknown)(dims);
+        }
+        return dims;
+      }) as (...args: unknown[]) => unknown,
       currentConfig,
       configBaseline,
       createdWithCustomConfig
