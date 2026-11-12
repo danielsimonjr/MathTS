@@ -9306,6 +9306,9 @@
       "dwt": {
         "kind": "function"
       },
+      "fft": {
+        "kind": "function"
+      },
       "fourier": {
         "kind": "function"
       },
@@ -9325,6 +9328,9 @@
         "kind": "function"
       },
       "idst": {
+        "kind": "function"
+      },
+      "ifft": {
         "kind": "function"
       },
       "invFourier": {

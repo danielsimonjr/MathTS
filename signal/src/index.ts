@@ -11,6 +11,8 @@
 export {
   parallelFFT,
   parallelIFFT,
+  parallelFFT as fft,
+  parallelIFFT as ifft,
   parallelFFTMagnitude,
   parallelFFTPower,
   parallelConv,
