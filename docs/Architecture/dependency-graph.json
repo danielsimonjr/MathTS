@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1287,
+    "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7045
+    "totalExports": 7048
   },
   "entryPoints": [
     {
@@ -5932,6 +5932,14 @@
           {
             "file": "./named-index.js",
             "imports": ["Index"]
+          },
+          {
+            "file": "./reshape-shape.js",
+            "imports": ["resolveReshapeShape"]
+          },
+          {
+            "file": "./operations/slice.js",
+            "imports": ["slice", "SliceRange"]
           }
         ],
         "workspaceDependencies": [
@@ -5954,7 +5962,7 @@
         ],
         "exports": ["Tensor"],
         "classes": ["Tensor"],
-        "interfaces": ["EinsumSpec"]
+        "interfaces": ["TensorStorage", "EinsumSpec"]
       },
       "tensor/src/contraction-sequence.ts": {
         "description": "contractNetwork — given an ordered list of Tensors (each carrying",
@@ -6082,7 +6090,7 @@
           },
           {
             "file": "./Tensor.js",
-            "imports": ["NestedArray", "EinsumSpec"],
+            "imports": ["NestedArray", "EinsumSpec", "TensorStorage", "TensorDtype"],
             "reExport": true,
             "typeOnly": true
           },
@@ -6204,6 +6212,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6253,6 +6263,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6287,6 +6299,15 @@
         "classes": ["Index"],
         "interfaces": ["IndexOpts"],
         "functions": ["idx"]
+      },
+      "tensor/src/reshape-shape.ts": {
+        "description": "reshape-shape module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["resolveReshapeShape"],
+        "functions": ["resolveReshapeShape"]
       }
     },
     "tensor/operations": {
@@ -44506,10 +44527,12 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [],
+      "runtime": [
+        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"]
+      ],
       "typeOnly": [],
-      "total": 0,
-      "runtimeCount": 0,
+      "total": 1,
+      "runtimeCount": 1,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -44690,7 +44713,8 @@
           "tensor/src/Tensor.ts",
           "tensor/src/contraction-sequence.ts",
           "tensor/src/index.ts",
-          "tensor/src/named-index.ts"
+          "tensor/src/named-index.ts",
+          "tensor/src/reshape-shape.ts"
         ]
       },
       {
@@ -46160,19 +46184,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1287,
+    "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 219695,
-    "totalExports": 7045,
+    "totalLinesOfCode": 220014,
+    "totalExports": 7048,
     "totalClasses": 61,
-    "totalInterfaces": 601,
-    "totalFunctions": 2375,
+    "totalInterfaces": 602,
+    "totalFunctions": 2376,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1648,
-    "totalReExports": 3036,
+    "totalReExports": 3038,
     "totalTypeOnlyImports": 645,
-    "runtimeCircularDeps": 0,
+    "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0

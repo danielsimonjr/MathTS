@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1287, "e": 7045, "re": 3036 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1288, "e": 7048, "re": 3038 },
   "s": {
-    "loc": 219695,
+    "loc": 220014,
     "cls": 61,
-    "int": 601,
-    "fn": 2375,
+    "int": 602,
+    "fn": 2376,
     "tg": 172,
     "en": 0,
     "co": 1648,
     "toi": 645
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": { "rt": 1, "to": 0, "rtp": ["Tensor→slice→Tensor"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -381,7 +381,7 @@
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
     },
     "tensor": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "Tensor",
         "contractNetwork",
@@ -403,7 +403,13 @@
         "stack"
       ],
       "cls": ["Tensor", "Index"],
-      "int": ["EinsumSpec", "ContractNetworkOpts", "ContractNetworkResult", "IndexOpts"]
+      "int": [
+        "TensorStorage",
+        "EinsumSpec",
+        "ContractNetworkOpts",
+        "ContractNetworkResult",
+        "IndexOpts"
+      ]
     },
     "tensor/operations": {
       "f": 18,
