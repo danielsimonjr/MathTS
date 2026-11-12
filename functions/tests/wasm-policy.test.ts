@@ -28,10 +28,10 @@ const ramp = (n: number, lo = 0.1, hi = 0.9): Float64Array =>
 
 describe('wasmPolicyAllows', () => {
   it('dispatches inside a band and not outside it (max is exclusive)', () => {
-    expect(wasmPolicyAllows('array_sin_ptr', 1023)).toBe(false);
-    expect(wasmPolicyAllows('array_sin_ptr', 1024)).toBe(true);
-    expect(wasmPolicyAllows('array_sin_ptr', 131071)).toBe(true);
-    expect(wasmPolicyAllows('array_sin_ptr', 131072)).toBe(false);
+    expect(wasmPolicyAllows('array_sin_ptr', 16383)).toBe(false);
+    expect(wasmPolicyAllows('array_sin_ptr', 16384)).toBe(true);
+    expect(wasmPolicyAllows('array_sin_ptr', 65535)).toBe(true);
+    expect(wasmPolicyAllows('array_sin_ptr', 65536)).toBe(false);
     expect(wasmPolicyAllows('array_abs_ptr', 1e7)).toBe(true);
   });
 
@@ -74,7 +74,7 @@ describe('after loadWasm(), public functions follow the policy', () => {
     await a.result;
     expect(a.counts.array_abs_ptr).toBeGreaterThan(0);
 
-    const s = countExportCalls(['array_sin_ptr'], () => sin(ramp(4096)));
+    const s = countExportCalls(['array_sin_ptr'], () => sin(ramp(32768)));
     await s.result;
     expect(s.counts.array_sin_ptr).toBeGreaterThan(0);
 
@@ -95,8 +95,8 @@ describe('after loadWasm(), public functions follow the policy', () => {
     expect(fit.result[3]).toBeCloseTo(-3, 9);
   });
 
-  it('a band limit sends larger inputs back to JS (sin stops at 131,072)', async () => {
-    const s = countExportCalls(['array_sin_ptr'], () => sin(ramp(131072)));
+  it('a band limit sends larger inputs back to JS (sin stops at 65,536)', async () => {
+    const s = countExportCalls(['array_sin_ptr'], () => sin(ramp(65536)));
     await s.result;
     expect(s.counts.array_sin_ptr).toBe(0);
   });

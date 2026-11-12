@@ -1,5 +1,6 @@
 import type { Matrix } from '../Matrix.js';
 import { contiguousDenseData } from './storage.js';
+import { gemmF64 } from './gemm-f64.js';
 
 /**
  * Contiguous row-major view of a matrix's data. Using the flat Float64Array
@@ -79,8 +80,8 @@ export function multiplyElementwise(a: Matrix<number>, b: Matrix<number>): Float
 /**
  * Multiply two matrices (matrix product a · b).
  *
- * The function does not check that `a.cols` equals `b.rows`. The loop skips
- * the zero elements of `a`.
+ * The function does not check that `a.cols` equals `b.rows`. Zero times a
+ * non-finite value is NaN, matching IEEE multiplication.
  *
  * @param a - Left matrix (n × p).
  * @param b - Right matrix (p × m).
@@ -92,29 +93,7 @@ export function multiply(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const m = b.cols;
   const ad = flat(a);
   const bd = flat(b);
-  const result = new Float64Array(n * m);
-  // ikj loop order: sequential access of bd and result rows (cache-friendly),
-  // hoists a[i][k] out of the inner loop.
-  for (let i = 0; i < n; i++) {
-    const ai = i * p;
-    const ri = i * m;
-    for (let k = 0; k < p; k++) {
-      const aik = ad[ai + k];
-      const bk = k * m;
-      if (aik === 0) {
-        // Match JSBackend: 0×∞ and 0×NaN must yield NaN, not skip silently.
-        for (let j = 0; j < m; j++) {
-          const bij = bd[bk + j];
-          if (bij !== 0 && !Number.isFinite(bij)) {
-            result[ri + j] += aik * bij;
-          }
-        }
-        continue;
-      }
-      for (let j = 0; j < m; j++) result[ri + j] += aik * bd[bk + j];
-    }
-  }
-  return result;
+  return gemmF64(ad, bd, n, p, m);
 }
 
 /**
