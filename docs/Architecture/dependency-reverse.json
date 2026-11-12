@@ -475,6 +475,7 @@
       "functions/src/algebra/sparse/csSpsolve.ts",
       "functions/src/algebra/sparse/csSqr.ts",
       "functions/src/algebra/sparse/csSymperm.ts",
+      "functions/src/algebra/substitute.ts",
       "functions/src/algebra/sylvester.ts",
       "functions/src/algebra/symbolicEqual.ts",
       "functions/src/arithmetic/abs.ts",
@@ -748,6 +749,7 @@
       "functions/src/algebra/sparse/csSpsolve.ts",
       "functions/src/algebra/sparse/csSqr.ts",
       "functions/src/algebra/sparse/csSymperm.ts",
+      "functions/src/algebra/substitute.ts",
       "functions/src/algebra/sylvester.ts",
       "functions/src/algebra/symbolicEqual.ts",
       "functions/src/arithmetic/abs.ts",
@@ -942,6 +944,7 @@
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/algebra/solver/validate-u-pivots.ts",
+      "functions/src/algebra/substitute.ts",
       "functions/src/algebra/symbolicEqual.ts",
       "functions/src/arithmetic/cbrt.ts",
       "functions/src/arithmetic/hypot.ts",
@@ -1055,6 +1058,7 @@
       "functions/src/algebra/simplify/wildcards.ts",
       "functions/src/algebra/simplifyConstant.ts",
       "functions/src/algebra/simplifyCore.ts",
+      "functions/src/algebra/substitute.ts",
       "functions/src/algebra/symbolicEqual.ts"
     ],
     "functions/src/core/config.ts": [
@@ -2348,6 +2352,7 @@
     "functions/src/arithmetic/utils/nodeOperations.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/leafCount.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/resolve.ts": ["functions/src/factories/index.ts"],
+    "functions/src/algebra/substitute.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyConstant.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/unit/function/splitUnit.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/fft.ts": ["functions/src/factories/index.ts"],
@@ -2828,7 +2833,9 @@
       "expression/src/transform/utils/dimToZeroBase.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts",
       "expression/src/transform/utils/prepareTransformArgs.ts",
-      "expression/src/transform/utils/shortCircuitBinary.ts"
+      "expression/src/transform/utils/shortCircuitBinary.ts",
+      "expression/src/utils/customs.ts",
+      "expression/src/utils/safe-result.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3079,7 +3086,8 @@
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/utils/access.ts",
       "expression/src/node/utils/assign.ts",
-      "expression/src/parse.ts"
+      "expression/src/parse.ts",
+      "expression/src/utils/safe-result.ts"
     ],
     "expression/src/limits.ts": [
       "expression/src/compiler/compile.ts",
@@ -4257,6 +4265,7 @@
     "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": [
       "expression/src/embeddedDocs/physicalConstants/index.ts"
     ],
+    "expression/src/utils/safe-result.ts": ["expression/src/evaluator/evaluate.ts"],
     "expression/src/node/utils/access.ts": [
       "expression/src/node/AccessorNode.ts",
       "expression/src/node/AssignmentNode.ts"

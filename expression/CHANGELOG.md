@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-expression
 
+## [Unreleased]
+
+### Minor Changes
+
+- G32a: `/* */` and `//` comments in the lexer; `1e` without exponent is `SyntaxError`; nesting limit 125; evaluate sanitizes return values; object literals skip forbidden keys at parse and eval time.
+
 ## 0.12.7
 
 ### Patch Changes

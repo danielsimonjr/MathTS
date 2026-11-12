@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2312,
+  "totalFiles": 2317,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1282,
+    "build-entry": 1284,
     "test-only": 0,
     "orphan": 0,
-    "test": 939,
+    "test": 942,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1308,
-    "tests": 939,
+    "src": 1310,
+    "tests": 942,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 57,
-    "@danielsimonjr/mathts-expression": 564,
-    "@danielsimonjr/mathts-functions": 1050,
+    "@danielsimonjr/mathts-expression": 566,
+    "@danielsimonjr/mathts-functions": 1052,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -43,7 +43,7 @@
     "@danielsimonjr/mathts-tensor": 59,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 66
+    "@danielsimonjr/mathts-workbook": 67
   },
   "files": [
     {
@@ -1584,7 +1584,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 852
+      "loc": 862
     },
     {
       "file": "expression/src/compiler/index.ts",
@@ -4405,7 +4405,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 309
+      "loc": 320
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4601,7 +4601,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2070
+      "loc": 2095
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4888,7 +4888,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 171
+      "loc": 210
     },
     {
       "file": "expression/src/utils/factory.ts",
@@ -4945,6 +4945,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 2
+    },
+    {
+      "file": "expression/src/utils/safe-result.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 153
     },
     {
       "file": "expression/src/utils/scope.ts",
@@ -5007,7 +5014,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 638
+      "loc": 641
     },
     {
       "file": "expression/tests/compile.test.ts",
@@ -5050,6 +5057,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 101
+    },
+    {
+      "file": "expression/tests/dogfood-g32a.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 95
     },
     {
       "file": "expression/tests/errorTransform.test.ts",
@@ -5273,7 +5287,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 792
+      "loc": 796
     },
     {
       "file": "expression/tests/Parser-extra.test.ts",
@@ -5843,6 +5857,13 @@
       "loc": 15
     },
     {
+      "file": "functions/src/algebra/substitute.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 49
+    },
+    {
       "file": "functions/src/algebra/sylvester.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6407,7 +6428,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1754
+      "loc": 1758
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -8766,7 +8787,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1841
+      "loc": 1815
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -10104,6 +10125,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 131
+    },
+    {
+      "file": "functions/tests/dogfood-g32a-724.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
     },
     {
       "file": "functions/tests/dogfood-g33-unit-api-nits.test.ts",
@@ -11468,7 +11496,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 663
+      "loc": 662
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",
@@ -15970,6 +15998,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 689
+    },
+    {
+      "file": "workbook/tests/dogfood-g32a-818.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "workbook/tests/edit.test.ts",

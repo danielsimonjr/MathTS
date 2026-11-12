@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2312
+**Total files**: 2317
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1282 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1284 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      939 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      942 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2312** |                                                                                                                |
+| **Total**     | **2317** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1308 |
-| `tests`    |   939 |
+| `src`      |  1310 |
+| `tests`    |   942 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -47,8 +47,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    21 |
 | `@danielsimonjr/mathts-core`           |   123 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
-| `@danielsimonjr/mathts-expression`     |   564 |
-| `@danielsimonjr/mathts-functions`      |  1050 |
+| `@danielsimonjr/mathts-expression`     |   566 |
+| `@danielsimonjr/mathts-functions`      |  1052 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   126 |
@@ -63,7 +63,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
 | `@danielsimonjr/mathts-wasm`           |    27 |
-| `@danielsimonjr/mathts-workbook`       |    66 |
+| `@danielsimonjr/mathts-workbook`       |    67 |
 | `@danielsimonjr/mathts-workerpool`     |    24 |
 
 ## All files
@@ -770,6 +770,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/src/utils/number.ts`                                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/utils/object.ts`                                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/utils/print.ts`                                                   | @danielsimonjr/mathts-expression     | src      | build-entry |
+| `expression/src/utils/safe-result.ts`                                             | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/utils/scope.ts`                                                   | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/utils/string.ts`                                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/tests/access.test.ts`                                                 | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -785,6 +786,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/ConstantNode.test.ts`                                           | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/DimensionError.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/dogfood-g20-parser-evaluator.test.ts`                           | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/dogfood-g32a.test.ts`                                           | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/errorTransform.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/evaluate.test.ts`                                               | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/evaluator-extra.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -898,6 +900,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/algebra/sparse/csSymperm.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/algebra/sparse/csTdfs.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/algebra/sparse/csUnflip.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/algebra/substitute.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/algebra/sylvester.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/algebra/symbolicEqual.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/abs.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1507,6 +1510,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-g25-ode.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g26.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g30-stats-scipy-parity.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g32a-724.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g33-unit-api-nits.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dtw.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/effect-sizes.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2345,6 +2349,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `workbook/tests/barrel-graph-tex.test.ts`                                         | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/chart-markup.test.ts`                                             | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/cli.test.ts`                                                      | @danielsimonjr/mathts-workbook       | tests    | test        |
+| `workbook/tests/dogfood-g32a-818.test.ts`                                         | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/edit.test.ts`                                                     | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/example-e2e.test.ts`                                              | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/executor-modes.test.ts`                                           | @danielsimonjr/mathts-workbook       | tests    | test        |

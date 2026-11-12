@@ -38,7 +38,7 @@ function countVisits(root: MathNode): { n: number } {
 /**
  * Nesting cap measurement (Node 22, 2026-10-30): `('('.repeat(n)+'1'+')'.repeat(n))`
  * parses through n=249; n=250 throws RangeError without a cap. MAX_PARSE_NESTING=125
- * throws SyntaxError before stack overflow (124 parses, 125 does not).
+ * throws SyntaxError before stack overflow (125 parses, 126 does not).
  */
 function parenthesisChain(depth: number): MathNode {
   let node = {
@@ -75,12 +75,12 @@ describe('expression security limits', () => {
     expect(compiled.evaluate()).toBe(3);
   });
 
-  it('parses nesting MAX_PARSE_NESTING - 1 and rejects one deeper with SyntaxError', () => {
-    const okDepth = MAX_PARSE_NESTING - 1;
+  it('parses nesting MAX_PARSE_NESTING and rejects one deeper with SyntaxError', () => {
+    const okDepth = MAX_PARSE_NESTING;
     const exprOk = '('.repeat(okDepth) + '1' + ')'.repeat(okDepth);
     expect(parse(exprOk)).toBeDefined();
 
-    const exprDeep = '('.repeat(MAX_PARSE_NESTING) + '1' + ')'.repeat(MAX_PARSE_NESTING);
+    const exprDeep = '('.repeat(MAX_PARSE_NESTING + 1) + '1' + ')'.repeat(MAX_PARSE_NESTING + 1);
     expect(() => parse(exprDeep)).toThrow(SyntaxError);
     expect(() => parse(exprDeep)).toThrow(/nesting limit/);
     expect(() => parse(exprDeep)).not.toThrow(RangeError);
@@ -96,7 +96,7 @@ describe('expression security limits', () => {
   });
 
   it('keeps the recursion cap above what MAX_PARSE_NESTING parenthesis levels need', () => {
-    const okDepth = MAX_PARSE_NESTING - 1;
+    const okDepth = MAX_PARSE_NESTING;
     // a parenthesis level re-enters assignment and unary once each: 2 per level
     expect(MAX_PARSE_RECURSION).toBeGreaterThanOrEqual(2 * okDepth);
     expect(() => parse('('.repeat(okDepth) + '1' + ')'.repeat(okDepth))).not.toThrow();
