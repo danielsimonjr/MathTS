@@ -3364,6 +3364,8 @@
       "odeAdaptiveStep",
       "odeGeneral",
       "ODEMatrixSolution",
+      "odeMaxAttempts",
+      "odeMaxStepsError",
       "ODEOptions",
       "ols",
       "OlsOptions",

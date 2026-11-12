@@ -1648,9 +1648,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1724,6 +1721,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -3014,6 +3014,9 @@
         "kind": "type"
       },
       "StftResult": {
+        "kind": "type"
+      },
+      "StiffODESolverOptions": {
         "kind": "type"
       },
       "StringOptions": {

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1287,
+    "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7016
+    "totalExports": 7018
   },
   "entryPoints": [
     {
@@ -19201,6 +19201,16 @@
         "interfaces": ["NumericJacobianStepRule", "NumericJacobianOptions"],
         "functions": ["numericJacobian", "centralDifferenceGradient"]
       },
+      "functions/src/numeric/ode-step-limit.ts": {
+        "description": "ode-step-limit module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["odeMaxStepsError", "odeMaxAttempts"],
+        "interfaces": ["ODEStepLimitContext"],
+        "functions": ["odeMaxStepsError", "odeMaxAttempts"]
+      },
       "functions/src/numeric/open-root-finders.ts": {
         "description": "Open (non-bracketing) scalar root-finders.",
         "externalDependencies": [],
@@ -19307,6 +19317,10 @@
           {
             "file": "./hermite.js",
             "imports": ["hermiteCubic"]
+          },
+          {
+            "file": "./ode-step-limit.js",
+            "imports": ["odeMaxAttempts", "odeMaxStepsError"]
           },
           {
             "file": "../utils/is.js",
@@ -26736,6 +26750,7 @@
           "FindRootOptions",
           "MinimizeOptions",
           "ODESolution",
+          "StiffODESolverOptions",
           "LinprogOptions",
           "LinprogResult"
         ],
@@ -44998,6 +45013,7 @@
           "functions/src/numeric/monte-carlo.ts",
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
+          "functions/src/numeric/ode-step-limit.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/propagate-uncertainty.ts",
           "functions/src/numeric/quadrature-extra.ts",
@@ -46071,13 +46087,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1287,
+    "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 218799,
-    "totalExports": 7016,
+    "totalLinesOfCode": 219000,
+    "totalExports": 7018,
     "totalClasses": 61,
-    "totalInterfaces": 601,
-    "totalFunctions": 2363,
+    "totalInterfaces": 603,
+    "totalFunctions": 2365,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1646,
