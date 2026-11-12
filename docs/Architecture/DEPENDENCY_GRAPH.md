@@ -110,7 +110,7 @@ The codebase is organized into the following modules:
 - **packages/typed-function**: 1 file
 - **packages/workerpool**: 10 files
 - **core/arithmetic**: 1 file
-- **core**: 20 files
+- **core**: 19 files
 - **core/error**: 3 files
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
@@ -126,7 +126,7 @@ The codebase is organized into the following modules:
 - **functions/algebra**: 47 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
-- **functions**: 35 files
+- **functions**: 34 files
 - **functions/cas**: 7 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 52 files
+- **functions/typed**: 51 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly**: 8 files
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
-- **compat**: 3 files
+- **compat**: 4 files
 - **gpu**: 8 files
 - **plot**: 18 files
 - **plot/three**: 3 files
@@ -200,11 +200,11 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 52             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 51             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 52             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 561            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 559            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 483            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -219,7 +219,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 16             | 0               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 4              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 21             | 0               |
 
@@ -647,7 +647,6 @@ graph LR
 | `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
 | `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
-| `./node-module-import.js`    | `importModule`                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, ConvertOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
@@ -656,7 +655,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -683,14 +682,6 @@ graph LR
 
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
 - Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
-
----
-
-### `core/src/node-module-import.ts` - Runtime `import()` with a non-literal module specifier so browser bundlers
-
-**Exports:**
-
-- Functions: `importModule`
 
 ---
 
@@ -773,10 +764,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                        | Type               |
-| ------------------------- | ------------------------------ | ------------------ |
-| `./types/wasm-loader.js`  | `LoadingMetrics, WasmManifest` | Import (type-only) |
-| `./node-module-import.js` | `importModule`                 | Import             |
+| File                     | Imports                        | Type               |
+| ------------------------ | ------------------------------ | ------------------ |
+| `./types/wasm-loader.js` | `LoadingMetrics, WasmManifest` | Import (type-only) |
 
 **Exports:**
 
@@ -4671,9 +4661,10 @@ graph LR
 | `./geometry/mat4.js`                     | `*`                                                                                                                                                                                                                                                                                                                  | Re-export             |
 | `./geometry/frustum.js`                  | `*`                                                                                                                                                                                                                                                                                                                  | Re-export             |
 | `./config-api.js`                        | `config, runWithConfig`                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./core/function/import.js`              | `importFactory, ImportOptions`                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./wasm/WasmLoader.js`                   | `loadWasm, isWasmLoaded`                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./typed/unit.js`                        | `to, toBest`                                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./factories/evaluate.js`                | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer`                                                                                                                                                                                                                                              | Re-export             |
+| `./factories/evaluate.js`                | `evaluate, compileExpr, createInstanceEvaluator, EVALUATE_SCOPE_OMIT, parse, parser, physicsScope, reviver, replacer`                                                                                                                                                                                                | Re-export             |
 | `./scalar-eval.js`                       | `evaluateScalar, scalar, ScalarEvalError`                                                                                                                                                                                                                                                                            | Re-export             |
 | `./scalar-compile.js`                    | `compileScalar, compileScalarGradient`                                                                                                                                                                                                                                                                               | Re-export             |
 | `./scalar-mutate.js`                     | `addNode, crossoverSubtrees, DEFAULT_MUTATION_WEIGHTS, deleteNode, identityMutation, insertNode, mutateConstant, mutateFeature, mutateOperator, MUTATE_CONSTANT_NEGATE_PROBABILITY, randomizeTree, rotateTree, simplifyConstants, swapOperands, weightedMutation`                                                    | Re-export             |
@@ -4875,7 +4866,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `* from ./geometry/kernels.generated.js`, `* from ./geometry/sym3.js`, `* from ./geometry/mat4.js`, `* from ./geometry/frustum.js`, `config`, `runWithConfig`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `runScalarSearch`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `nanmedian`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `studentTTwoSidedP`, `chiSquaredCDF`, `chiSquaredQuantile`, `chiSquaredSF`, `fCDF`, `fQuantile`, `fSF`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `solveBoxLcp`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionInverse`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `quaternionToAxisAngle`, `quaternionFromRotationMatrix`, `quaternionFromEuler`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `wilsonInterval`, `newcombePairedInterval`, `cohensKappa`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `eigvals`, `powerIteration`, `matrixPinv`, `weightedMean`, `weightedVariance`, `weightedMedian`, `weightedQuantile`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`, `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`, `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`, `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`, `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`, `erfinv`, `erfcinv`, `erfcx`, `dawson`, `expIntegralE1`, `expn`, `sinhIntegral`, `coshIntegral`, `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`, `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`, `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`, `differentialEvolution`, `simulatedAnnealing`, `minimizeConstrained`, `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`, `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`, `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`, `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`, `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`, `conv2`, `sinc`, `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`, `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`, `lombScargle`, `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`, `dtw`, `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`, `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`, `orient2D`, `orient3D`, `inCircle`, `pointInTriangle`, `barycentricCoordinates`, `polygonIsConvex`, `polygonClip`, `minkowskiSum`, `earClipping`, `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarDimensionFilter`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchRunOptions`, `ScalarSearchRunProblem`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `UnitDimensionOptions`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `BoxLcpOptions`, `BoxLcpResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`, `QRPivotedResult`, `QRPivotedOptions`, `LQResult`, `RQResult`, `QLResult`, `PinvOptions`, `EigOptions`, `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`, `ConstrainedOptions`, `ConstrainedResult`, `GaussRule`, `TanhSinhOptions`, `Limit1`, `Limit2`, `ScalarSolveOptions`, `FixedPointOptions`, `ConvMode`, `ExtraWindowName`, `WindowOptions`, `ChirpMethod`, `ChirpOptions`, `LombScargleOptions`, `StateSpace`, `DiscretizeMethod`, `BiquadCoefficients`, `DtwOptions`, `DtwResult`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `* from ./geometry/kernels.generated.js`, `* from ./geometry/sym3.js`, `* from ./geometry/mat4.js`, `* from ./geometry/frustum.js`, `config`, `runWithConfig`, `importFactory`, `ImportOptions`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `createInstanceEvaluator`, `EVALUATE_SCOPE_OMIT`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `runScalarSearch`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `nanmedian`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `studentTTwoSidedP`, `chiSquaredCDF`, `chiSquaredQuantile`, `chiSquaredSF`, `fCDF`, `fQuantile`, `fSF`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `solveBoxLcp`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionInverse`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `quaternionToAxisAngle`, `quaternionFromRotationMatrix`, `quaternionFromEuler`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `wilsonInterval`, `newcombePairedInterval`, `cohensKappa`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `eigvals`, `powerIteration`, `matrixPinv`, `weightedMean`, `weightedVariance`, `weightedMedian`, `weightedQuantile`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`, `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`, `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`, `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`, `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`, `erfinv`, `erfcinv`, `erfcx`, `dawson`, `expIntegralE1`, `expn`, `sinhIntegral`, `coshIntegral`, `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`, `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`, `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`, `differentialEvolution`, `simulatedAnnealing`, `minimizeConstrained`, `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`, `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`, `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`, `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`, `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`, `conv2`, `sinc`, `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`, `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`, `lombScargle`, `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`, `dtw`, `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`, `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`, `orient2D`, `orient3D`, `inCircle`, `pointInTriangle`, `barycentricCoordinates`, `polygonIsConvex`, `polygonClip`, `minkowskiSum`, `earClipping`, `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarDimensionFilter`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchRunOptions`, `ScalarSearchRunProblem`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `UnitDimensionOptions`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `BoxLcpOptions`, `BoxLcpResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`, `QRPivotedResult`, `QRPivotedOptions`, `LQResult`, `RQResult`, `QLResult`, `PinvOptions`, `EigOptions`, `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`, `ConstrainedOptions`, `ConstrainedResult`, `GaussRule`, `TanhSinhOptions`, `Limit1`, `Limit2`, `ScalarSolveOptions`, `FixedPointOptions`, `ConvMode`, `ExtraWindowName`, `WindowOptions`, `ChirpMethod`, `ChirpOptions`, `LombScargleOptions`, `StateSpace`, `DiscretizeMethod`, `BiquadCoefficients`, `DtwOptions`, `DtwResult`
 
 ---
 
@@ -5079,12 +5070,6 @@ graph LR
 
 ### `functions/src/scalar-batch.worker.ts` - Worker entry for parallel {@link evaluateScalarPopulation} (M14). Built as its own
 
-**Workspace Dependencies:**
-
-| Package                      | Import         |
-| ---------------------------- | -------------- |
-| `@danielsimonjr/mathts-core` | `importModule` |
-
 **Internal Dependencies:**
 
 | File                     | Imports                               | Type   |
@@ -5262,21 +5247,6 @@ graph LR
 - Types: `FilterBtype`
 - Functions: `firwin`, `lfilter`, `lfilterZi`, `filtfilt`, `polyFromRoots`, `zpkToTf`, `analogToDigital`, `butter`
 - Constants: `sinc`, `cAdd`, `cSub`, `cMul`, `cDiv`, `cScale`
-
----
-
-### `functions/src/subpath-evaluate.ts` - Focused entry: `import { evaluate } from '@danielsimonjr/mathts-functions/evaluate'`.
-
-**Internal Dependencies:**
-
-| File                      | Imports                                                                 | Type                  |
-| ------------------------- | ----------------------------------------------------------------------- | --------------------- |
-| `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer` | Re-export             |
-| `./factories/evaluate.js` | `PhysicsEvaluateOptions`                                                | Re-export (type-only) |
-
-**Exports:**
-
-- Re-exports: `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `PhysicsEvaluateOptions`
 
 ---
 
@@ -5747,25 +5717,25 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpressionWithDeps`                                               |
-| `@danielsimonjr/mathts-core`       | `Complex, Fraction, I, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E, Unit, UnitInstance` |
+| Package                            | Import                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpressionWithDeps`                                                          |
+| `@danielsimonjr/mathts-core`       | `BigNumber, Complex, Fraction, I, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E, Unit, UnitInstance` |
 
 **Internal Dependencies:**
 
-| File                                 | Imports                   | Type   |
-| ------------------------------------ | ------------------------- | ------ |
-| `./scope.js`                         | `factoryScope`            | Import |
-| `./index.js`                         | `* as activatedFactories` | Import |
-| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import |
+| File                | Imports                   | Type   |
+| ------------------- | ------------------------- | ------ |
+| `./scope.js`        | `factoryScope`            | Import |
+| `./index.js`        | `* as activatedFactories` | Import |
+| `../typed/index.js` | `* as typedFns`           | Import |
 
 **Exports:**
 
 - Interfaces: `PhysicsEvaluateOptions`, `PhysicsScopeOptions`
 - Types: `PhysicsCharge`
-- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `replacer`, `reviver`
-- Constants: `parse`
+- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `replacer`, `reviver`, `createInstanceEvaluator`
+- Constants: `EVALUATE_SCOPE_OMIT`, `parse`
 
 ---
 
@@ -11258,60 +11228,6 @@ graph LR
 **Exports:**
 
 - Functions: `euclidSnap`
-
----
-
-### `functions/src/typed/expression-eval-barrel.ts` - Typed surface for `factories/evaluate.ts` and the `@danielsimonjr/mathts-functions/evaluate`
-
-**Internal Dependencies:**
-
-| File                  | Imports              | Type      |
-| --------------------- | -------------------- | --------- |
-| `./arithmetic.js`     | `*`                  | Re-export |
-| `./trigonometry.js`   | `*`                  | Re-export |
-| `./statistics.js`     | `*`                  | Re-export |
-| `./signal.js`         | `*`                  | Re-export |
-| `./bitwise.js`        | `*`                  | Re-export |
-| `./logical.js`        | `*`                  | Re-export |
-| `./complex.js`        | `*`                  | Re-export |
-| `./set.js`            | `*`                  | Re-export |
-| `./special.js`        | `*`                  | Re-export |
-| `./fused.js`          | `*`                  | Re-export |
-| `./distributions.js`  | `*`                  | Re-export |
-| `./geometry.js`       | `*`                  | Re-export |
-| `./algebra.js`        | `*`                  | Re-export |
-| `./integration.js`    | `*`                  | Re-export |
-| `./interpolation.js`  | `*`                  | Re-export |
-| `./numeric.js`        | `*`                  | Re-export |
-| `./combinatorics.js`  | `*`                  | Re-export |
-| `./graph.js`          | `*`                  | Re-export |
-| `./dist-objects.js`   | `*`                  | Re-export |
-| `./hypothesis.js`     | `*`                  | Re-export |
-| `./matrix-ops.js`     | `*`                  | Re-export |
-| `./relational.js`     | `*`                  | Re-export |
-| `./string.js`         | `*`                  | Re-export |
-| `./probability.js`    | `*`                  | Re-export |
-| `./unit.js`           | `*`                  | Re-export |
-| `./arithmetic.js`     | `typedArithmetic`    | Re-export |
-| `./trigonometry.js`   | `typedTrigonometry`  | Re-export |
-| `./statistics.js`     | `typedStatistics`    | Re-export |
-| `./signal.js`         | `typedSignal`        | Re-export |
-| `./bitwise.js`        | `typedBitwise`       | Re-export |
-| `./logical.js`        | `typedLogical`       | Re-export |
-| `./complex.js`        | `typedComplex`       | Re-export |
-| `./set.js`            | `typedSet`           | Re-export |
-| `./special.js`        | `typedSpecial`       | Re-export |
-| `./distributions.js`  | `typedDistributions` | Re-export |
-| `./worker-kernels.js` | `workerKernel`       | Re-export |
-| `./algebra.js`        | `typedAlgebra`       | Re-export |
-| `./relational.js`     | `typedRelational`    | Re-export |
-| `./string.js`         | `typedString`        | Re-export |
-| `./probability.js`    | `typedProbability`   | Re-export |
-| `./unit.js`           | `typedUnit`          | Re-export |
-
-**Exports:**
-
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `workerKernel`, `typedAlgebra`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
@@ -18142,12 +18058,6 @@ graph LR
 
 ### `parallel/src/WorkerPool.ts` - WorkerPool manages a pool of Web Workers for parallel computation
 
-**Workspace Dependencies:**
-
-| Package                      | Import         |
-| ---------------------------- | -------------- |
-| `@danielsimonjr/mathts-core` | `importModule` |
-
 **Exports:**
 
 - Classes: `WorkerPool`
@@ -19139,11 +19049,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File         | Imports              | Type      |
-| ------------ | -------------------- | --------- |
-| `./shims.js` | `shims`              | Import    |
-| `./chain.js` | `createChain, Chain` | Import    |
-| `./shims.js` | `*`                  | Re-export |
+| File                | Imports                 | Type      |
+| ------------------- | ----------------------- | --------- |
+| `./shims.js`        | `shims`                 | Import    |
+| `./chain.js`        | `createChain, Chain`    | Import    |
+| `./instance-api.js` | `wireMathjsInstanceApi` | Import    |
+| `./shims.js`        | `*`                     | Re-export |
 
 **Exports:**
 
@@ -19154,19 +19065,49 @@ graph LR
 
 ---
 
+### `compat/src/instance-api.ts` - mathjs instance methods on `create(all)`: import, typed, compile, and
+
+**External Dependencies:**
+
+| Package          | Import          |
+| ---------------- | --------------- |
+| `typed-function` | `typedFunction` |
+
+**Workspace Dependencies:**
+
+| Package                           | Import                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`      | `mathTyped`                                                                                              |
+| `@danielsimonjr/mathts-functions` | `createInstanceEvaluator, EVALUATE_SCOPE_OMIT, reviver, replacer, runWithConfig, PhysicsEvaluateOptions` |
+| `@danielsimonjr/mathts-functions` | `importFactory, ImportOptions`                                                                           |
+
+**Internal Dependencies:**
+
+| File         | Imports        | Type               |
+| ------------ | -------------- | ------------------ |
+| `./index.js` | `MathJSConfig` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `CompatExpressionLayers`, `WiredCompatInstance`
+- Functions: `wireMathjsInstanceApi`
+
+---
+
 ### `compat/src/shims.ts` - mathjs Compatibility Shims
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                 |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                |
-| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                        |
-| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
-| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                                   |
+| Package                           | Import                                                                                                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                        |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse` |
+| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                                                   |
 
 **Exports:**
 
+- Types: `CompatMatrixValue`
 - Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
 
@@ -19651,7 +19592,7 @@ graph LR
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 244 files    | 14 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 204 files  |
-| `functions/src/index`                                  | 136 files    | 0 files    |
+| `functions/src/index`                                  | 137 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `functions/src/utils/is`                               | 0 files      | 57 files   |
@@ -19664,29 +19605,29 @@ graph LR
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 33 files     | 0 files    |
-| `functions/src/typed/index`                            | 29 files     | 1 file     |
+| `functions/src/typed/index`                            | 29 files     | 2 files    |
 | `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `matrix/src/types/DenseMatrix`                         | 5 files      | 22 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
-| `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/node/Node`                             | 6 files      | 21 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `expression/src/default-instance`                      | 20 files     | 2 files    |
-| `core/src/internal`                                    | 21 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `core/src/internal`                                    | 20 files     | 0 files    |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `functions/src/typed/numeric`                          | 9 files      | 10 files   |
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 17 files     | 1 file     |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
-| `functions/src/typed/special`                          | 7 files      | 10 files   |
+| `functions/src/typed/special`                          | 7 files      | 9 files    |
+| `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 
 ---
 
@@ -19694,10 +19635,10 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**2 circular dependencies detected:**
+**3 circular dependencies detected:**
 
 - **Runtime cycles**: 2 (require attention)
-- **Type-only cycles**: 0 (safe, no runtime impact)
+- **Type-only cycles**: 1 (safe, no runtime impact)
 
 ### Runtime Circular Dependencies
 
@@ -19705,6 +19646,12 @@ These cycles involve runtime imports and may cause issues:
 
 - tensor/src/Tensor.ts -> tensor/src/operations/slice.ts -> tensor/src/Tensor.ts
 - functions/src/typed/algebra.ts -> functions/src/cas/polynomial-canonical.ts -> functions/src/typed/algebra.ts
+
+### Type-Only Circular Dependencies
+
+These cycles only involve type imports and are safe (erased at runtime):
+
+- compat/src/index.ts -> compat/src/instance-api.ts -> compat/src/index.ts
 
 ---
 
@@ -19746,7 +19693,7 @@ graph TD
         N19[factory]
         N20[index]
         N21[internal]
-        N22[...10 more]
+        N22[...9 more]
     end
 
     subgraph Core/error
@@ -19914,7 +19861,7 @@ graph TD
         N139[front-export]
         N140[geometry-extra]
         N141[grad-forward]
-        N142[...25 more]
+        N142[...24 more]
     end
 
     subgraph Functions/cas
@@ -20204,7 +20151,7 @@ graph TD
         N348[complex-promotion]
         N349[complex]
         N350[dist-objects]
-        N351[...42 more]
+        N351[...41 more]
     end
 
     subgraph Functions/unit
@@ -20447,38 +20394,39 @@ graph TD
     subgraph Compat
         N496[chain]
         N497[index]
-        N498[shims]
+        N498[instance-api]
+        N499[shims]
     end
 
     subgraph Gpu
-        N499[BufferPool]
-        N500[GPUContext]
-        N501[ShaderManager]
-        N502[detect]
-        N503[device]
-        N504[flag]
-        N505[index]
-        N506[serialize]
+        N500[BufferPool]
+        N501[GPUContext]
+        N502[ShaderManager]
+        N503[detect]
+        N504[device]
+        N505[flag]
+        N506[index]
+        N507[serialize]
     end
 
     subgraph Plot
-        N507[coerce]
-        N508[contour]
-        N509[emit]
-        N510[frame]
-        N511[heatmap]
-        N512[histogram]
-        N513[index]
-        N514[marks2d]
-        N515[overlay]
-        N516[palette]
-        N517[...8 more]
+        N508[coerce]
+        N509[contour]
+        N510[emit]
+        N511[frame]
+        N512[heatmap]
+        N513[histogram]
+        N514[index]
+        N515[marks2d]
+        N516[overlay]
+        N517[palette]
+        N518[...8 more]
     end
 
     subgraph Plot/three
-        N518[points3d]
-        N519[project]
-        N520[surface]
+        N519[points3d]
+        N520[project]
+        N521[surface]
     end
 
     N4 --> N2
@@ -20566,18 +20514,18 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1299   |
+| Total TypeScript Files  | 1297   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 222615 |
-| Total Exports           | 7129   |
-| Total Re-exports        | 3104   |
+| Total Lines of Code     | 222811 |
+| Total Exports           | 7110   |
+| Total Re-exports        | 3058   |
 | Total Classes           | 61     |
-| Total Interfaces        | 608    |
-| Total Functions         | 2417   |
+| Total Interfaces        | 610    |
+| Total Functions         | 2418   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 651    |
 | Runtime Circular Deps   | 2      |
-| Type-only Circular Deps | 0      |
+| Type-only Circular Deps | 1      |
 
 ---

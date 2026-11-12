@@ -1,7 +1,8 @@
-# Migrating from mathjs v15 to MathTS
+# Migrating from mathjs (v13–v15) to MathTS
 
-Audience: users who have an existing codebase that imports from `mathjs` v15.x
-and want to move to `@danielsimonjr/mathts-*`.
+Audience: users who have an existing codebase that imports from `mathjs` v13–v15
+and want to move to `@danielsimonjr/mathts-*`. Parity checks in this repo use
+**mathjs 13.2.3** as the oracle unless an issue cites another version.
 
 ## TL;DR
 
@@ -9,9 +10,11 @@ and want to move to `@danielsimonjr/mathts-*`.
   with an `import` condition only — there is no `require` entry and no CommonJS
   build. Use `import` / `await import()` from Node, Bun, or bundlers; legacy CJS
   apps need a small ESM wrapper or dynamic `import()`.
-- The compat shim (`@danielsimonjr/mathts-compat`) provides `create(all)` so
-  the most common mathjs patterns work unchanged: `math.add`, `math.complex`,
-  `math.matrix`, `math.evaluate`, `math.simplify`, `math.det`, `math.eigs`.
+- The compat shim (`@danielsimonjr/mathts-compat`) implements much of the mathjs
+  `create(all)` surface (`math.add`, `math.import`, `math.typed`, `math.compile`,
+  `math.evaluate`, `math.subset`, JSON `reviver`, …) but is **not** a silent
+  drop-in. Use the [compatibility matrix](#compat-matrix-mathjs-13--v15) below before
+  you plan porting effort.
 - The typed-function API (`@danielsimonjr/mathts-functions`) is the recommended
   long-term surface: explicit TypeScript overloads and direct imports (not the
   `create(all)` / `math.*` style). The package still loads one bundled entry that
@@ -34,7 +37,7 @@ Install:
 npm install @danielsimonjr/mathts-compat
 ```
 
-Replace the import:
+Replace the import, then audit call sites against the matrix:
 
 ```ts
 // Before
@@ -44,10 +47,13 @@ import { create, all } from 'mathjs';
 import { create, all } from '@danielsimonjr/mathts-compat';
 ```
 
-The rest of the call sites are unchanged:
+Typical patterns that work on the compat instance:
 
 ```ts
 const math = create(all);
+math.import({ myFn: (x) => x + 1 });
+math.typed('double', { number: (x) => x * 2 });
+const compiled = math.compile('x^2'); // alias of compileExpr
 
 // Arithmetic
 math.add(1, 2); // 3
@@ -75,9 +81,22 @@ math.simplify('x + x'); // 2x
 math.integrate('x^2', 'x'); // x^3/3
 ```
 
-Behavior parity is the goal. If you find a divergence between mathjs v15
-behavior and the compat shim, please file an issue — do not assume differences
-are intentional without checking.
+Behavior parity with mathjs is an explicit goal, but gaps remain — see the
+matrix. If you find a divergence, file an issue; do not assume differences are
+intentional without checking.
+
+### Compat matrix (mathjs 13–v15)
+
+| Area                                          | mathjs                                                        | MathTS compat (`create(all)`) | Notes                                                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `math.import` / `math.typed` / `math.compile` | yes                                                           | yes                           | `compile` aliases `compileExpr`; imports register with `evaluate`.                                                                               |
+| `math.subset` + `math.index` on matrices      | yes                                                           | yes                           | `math.matrix` returns the mathjs bridge matrix (subset/index compatible).                                                                        |
+| `JSON.stringify` + `math.reviver`             | Unit, BigNumber, Complex, Fraction, DenseMatrix, SparseMatrix | same set                      | BigNumber keeps the full decimal string. Extra Unit field `skipSimp` is accepted on revive.                                                      |
+| Safe `math.evaluate`                          | sandboxed                                                     | sandboxed                     | Denylisted symbols (`parse`, `typed`, `import`, `compile`, …) are not callable from expressions even if `import` overrides them on the instance. |
+| `math.createUnit` on instance                 | yes                                                           | yes (via functions spread)    | Not a package-level named export.                                                                                                                |
+| ESM-only                                      | CJS + ESM                                                     | ESM only                      | No CommonJS `main` build.                                                                                                                        |
+| Full factory / extension tree-shaking         | bundled instance                                              | bundled instance              | Same activation model as `@danielsimonjr/mathts-functions`.                                                                                      |
+| Drop-in “change one import line”              | —                                                             | **no**                        | Read this guide + compat README before estimating effort.                                                                                        |
 
 With the default `predictable: false` (same as mathjs), real inputs outside the
 real domain of `log`, `pow`, `asin`, `acos`, `acosh`, and similar functions

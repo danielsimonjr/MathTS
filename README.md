@@ -11,11 +11,14 @@ ESM-only npm workspaces monorepo. It accelerates computation through an Assembly
 WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and optional
 WebGPU paths (caller opt-in, f32). Each kernel picks JS, workers, WASM, or GPU
 from measured thresholds — not one fixed cascade.
-All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
+The monorepo has **24 workspace packages** under the `@danielsimonjr/mathts-*` scope; **22 are
+published for end users** (`npm install` below). `@danielsimonjr/mathts-wasm` (AssemblyScript build
+artefacts) and `@danielsimonjr/mathts-typed-function` (fork consumed via npm alias inside
+`core`/`functions`) ship on npm but are not part of the newcomer install list.
 
 <!-- BEGIN GENERATED FUNCTIONS STATS (tools/sync-readme-functions-stats.mjs) -->
 
-The function layer (`@danielsimonjr/mathts-functions` 0.84.0) exposes **1,377 exports** in
+The function layer (`@danielsimonjr/mathts-functions` 0.84.0) exposes **1,380 exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
 <!-- END GENERATED FUNCTIONS STATS -->
@@ -66,7 +69,7 @@ Or install a single focused domain — thin re-export packages (no duplicated co
 ```bash
 npm install @danielsimonjr/mathts-numbers       # Complex, Fraction, BigNumber
 npm install @danielsimonjr/mathts-units         # Unit / dimensional analysis
-npm install @danielsimonjr/mathts-linalg        # eig, svd, qr, lu, cholesky, schur
+npm install @danielsimonjr/mathts-matrix @danielsimonjr/mathts-linalg  # matrices + decompositions
 npm install @danielsimonjr/mathts-arithmetic    # add, multiply, sqrt, …
 npm install @danielsimonjr/mathts-trigonometry  # sin, cos, tan, …
 npm install @danielsimonjr/mathts-statistics    # mean, variance, quantile, …
@@ -105,8 +108,8 @@ import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Scalar dispatch — synchronous
 add(1, 2); // 3
-add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
-add(new Fraction(1, 3), new Fraction(1, 6)); // Fraction(1/2)
+add(new Complex(1, 2), new Complex(3, 4)); // 4 + 6i
+add(new Fraction(1, 3), new Fraction(1, 6)); // 1/2
 add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
 sin(Math.PI / 2); // 1
 
@@ -244,7 +247,7 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 | `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels)                                                      |
 | `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                                                                       |
 | `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                                                                                    |
-| `@danielsimonjr/mathts-functions`      | 1,377 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
+| `@danielsimonjr/mathts-functions`      | 1,380 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
 | `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                                                                        |
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (15 node classes + `Node` base)                                                                                  |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                                                                      |
@@ -364,9 +367,10 @@ cd functions && bunx vitest run
 
 ## Status
 
-MathTS is an actively developed monorepo of 24 independently-versioned packages.
-The dependency graph has **0 runtime circular dependencies** (verified by
-`tools/create-dependency-graph`, which regenerates the reports below).
+MathTS is an actively developed monorepo of 24 workspace packages (22 published for application use).
+The dependency graph has **2 runtime circular dependencies** (verified by
+`tools/create-dependency-graph` and `repo-tools check`; see
+`docs/Architecture/DEPENDENCY_GRAPH.md`).
 
 Recent milestones (see [`ROADMAP.md`](./ROADMAP.md) "Recently shipped" and the package changelogs):
 
@@ -416,19 +420,20 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 
 ## Documentation
 
-| Document                                                                               | Contents                                                               |
-| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [`CHANGELOG.md`](./CHANGELOG.md)                                                       | Full change history                                                    |
-| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                     | Package metrics, two-layer code architecture                           |
-| [`docs/Architecture/ARCHITECTURE.md`](./docs/Architecture/ARCHITECTURE.md)             | Component design, circular-dependency audit                            |
-| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md)     | Generated dependency graph                                             |
-| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)           | Per-file coverage report                                               |
-| [`docs/migration-guide.md`](./docs/migration-guide.md)                                 | Migrating from mathjs v15                                              |
-| [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)                 | ScalarNode toolkit, Pareto selection, and search                       |
-| [`TODO.md`](./TODO.md)                                                                 | Open items and deferred decisions                                      |
-| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,377 exports) with Accel column |
-| [`docs/README.md`](./docs/README.md)                                                   | Index of every document in `docs/`                                     |
-| [`docs/getting-started.md`](./docs/getting-started.md)                                 | Install, first computations, function categories                       |
-| [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)                          | Searchable function reference site (`bun run docs:landing`)            |
-| [`docs/roadmap/GAP_ANALYSIS_2026-11-04.md`](./docs/roadmap/GAP_ANALYSIS_2026-11-04.md) | 2026-11 gap analysis (shipped in `functions@0.72.0`)                   |
-| [`examples/README.md`](./examples/README.md)                                           | Runnable examples (`bun --tsconfig-override=…`)                        |
+| Document                                                                               | Contents                                                                  |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`CHANGELOG.md`](./CHANGELOG.md)                                                       | Full change history                                                       |
+| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                     | Package metrics, two-layer code architecture                              |
+| [`docs/Architecture/ARCHITECTURE.md`](./docs/Architecture/ARCHITECTURE.md)             | Component design, circular-dependency audit                               |
+| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md)     | Generated dependency graph                                                |
+| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)           | Per-file coverage report                                                  |
+| [`docs/migration-guide.md`](./docs/migration-guide.md)                                 | Migrating from mathjs v15                                                 |
+| [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)                 | ScalarNode toolkit, Pareto selection, and search                          |
+| [`TODO.md`](./TODO.md)                                                                 | Open items and deferred decisions                                         |
+| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,380 exports) with Accel column    |
+| [`docs/README.md`](./docs/README.md)                                                   | Index of every document in `docs/`                                        |
+| [`docs/getting-started.md`](./docs/getting-started.md)                                 | Install, first computations, function categories                          |
+| [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)                          | Searchable **functions** reference (`bun run docs:landing`); not TypeDoc  |
+| [`docs/api/`](./docs/api/) (GitHub)                                                    | Per-package markdown API index for all public packages (browse on `main`) |
+| [`docs/roadmap/GAP_ANALYSIS_2026-11-04.md`](./docs/roadmap/GAP_ANALYSIS_2026-11-04.md) | 2026-11 gap analysis (shipped in `functions@0.72.0`)                      |
+| [`examples/README.md`](./examples/README.md)                                           | Runnable examples (`bun --tsconfig-override=…`)                           |

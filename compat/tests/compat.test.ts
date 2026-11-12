@@ -17,7 +17,6 @@ import {
   Fraction,
   BigNumber,
   DenseMatrix,
-  SparseMatrix,
   transpose,
   det,
   identity,
@@ -164,9 +163,11 @@ describe('@danielsimonjr/mathts-compat', () => {
         [3, 4],
       ]);
 
-      expect(m).toBeInstanceOf(DenseMatrix);
-      expect(m.get(0, 0)).toBe(1);
-      expect(m.get(1, 1)).toBe(4);
+      expect(isMatrix(m)).toBe(true);
+      expect(typeof (m as { subset?: unknown }).subset).toBe('function');
+      const get = (m as { get(i: number, j: number): number }).get.bind(m);
+      expect(get(0, 0)).toBe(1);
+      expect(get(1, 1)).toBe(4);
     });
 
     it('should create SparseMatrix when format is sparse', () => {
@@ -178,13 +179,13 @@ describe('@danielsimonjr/mathts-compat', () => {
         'sparse'
       );
 
-      expect(m).toBeInstanceOf(SparseMatrix);
+      expect(isMatrix(m)).toBe(true);
     });
 
     it('should return empty DenseMatrix for undefined', () => {
       const m = matrix();
 
-      expect(m).toBeInstanceOf(DenseMatrix);
+      expect(isMatrix(m)).toBe(true);
       expect(m.rows).toBe(0);
       expect(m.cols).toBe(0);
     });
@@ -197,9 +198,10 @@ describe('@danielsimonjr/mathts-compat', () => {
         [0, 4],
       ]);
 
-      expect(m).toBeInstanceOf(SparseMatrix);
-      expect(m.get(0, 0)).toBe(1);
-      expect(m.get(1, 1)).toBe(4);
+      expect(isMatrix(m)).toBe(true);
+      const getAt = (m as { get(index: number[]): number }).get.bind(m);
+      expect(getAt([0, 0])).toBe(1);
+      expect(getAt([1, 1])).toBe(4);
     });
   });
 

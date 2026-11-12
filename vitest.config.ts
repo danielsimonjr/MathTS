@@ -65,6 +65,7 @@ export default defineConfig({
     // runner the package declares, and it made a CLI filter such as
     // `vitest run tests/wasm/` also pick up `matrix/tests/wasm/**`.
     include: [
+      'tests/docs/**/*.test.ts',
       'tests/integration/**/*.test.ts',
       'tests/wasm/**/*.test.ts',
       // NOTE: `tests/benchmark/**` is deliberately NOT here — see `vitest.config.bench.ts`.
