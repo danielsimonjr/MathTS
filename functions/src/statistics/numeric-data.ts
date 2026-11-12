@@ -8,9 +8,13 @@
  */
 import { flatten } from '../utils/array.js';
 
+/** A `Float32Array` or `Float64Array` numeric column. */
 export type FloatTyped = Float32Array | Float64Array;
+
+/** Plain array or typed-array input accepted by typed reductions. */
 export type NumericVectorInput = number[] | FloatTyped;
 
+/** Options for NumPy-style statistics (`ddof`, `skipNaN`). */
 export type StatReduceOptions = {
   /** NumPy/pandas spelling: 0 = population (uncorrected), 1 = sample (unbiased). */
   ddof?: number;
@@ -18,10 +22,12 @@ export type StatReduceOptions = {
   skipNaN?: boolean;
 };
 
+/** Type guard for {@link FloatTyped} buffers. */
 export function isFloatTyped(x: unknown): x is FloatTyped {
   return x instanceof Float32Array || x instanceof Float64Array;
 }
 
+/** Copy `ArrayLike<number>` into a mutable `number[]` without `Array.from`. */
 export function copyToNumberArray(a: ArrayLike<number>): number[] {
   const out = new Array<number>(a.length);
   for (let i = 0; i < a.length; i++) out[i] = a[i];
@@ -40,6 +46,7 @@ export function flattenForStatistics(array: unknown[] | MatrixLike | FloatTyped)
   return flatten((array as MatrixLike).valueOf()) as unknown[];
 }
 
+/** Optionally drop non-finite entries before a reduction. */
 export function finiteNumbers(x: NumericVectorInput, skipNaN: boolean): number[] {
   if (!skipNaN) {
     if (Array.isArray(x)) return x;
@@ -53,6 +60,7 @@ export function finiteNumbers(x: NumericVectorInput, skipNaN: boolean): number[]
   return out;
 }
 
+/** Parse and validate the second-argument options object for typed stats. */
 export function parseStatOptions(arg: unknown): StatReduceOptions {
   if (arg === null || arg === undefined || typeof arg !== 'object' || Array.isArray(arg)) {
     throw new TypeError(
@@ -87,6 +95,7 @@ export function parseStatOptions(arg: unknown): StatReduceOptions {
 /** Map NumPy `ddof` or mathjs normalization string to variance normalization. */
 type VarianceNorm = 'unbiased' | 'uncorrected' | 'biased';
 
+/** Map `{ ddof }`, a normalization string, or both to variance normalization + skipNaN. */
 export function normalizationFromSecondArg(
   arg: string | StatReduceOptions | undefined,
   defaultNorm: VarianceNorm = 'unbiased'
@@ -114,6 +123,7 @@ export function isConstantArrayLike(xs: ArrayLike<number>): boolean {
   return true;
 }
 
+/** Copy two equally-sized typed arrays into `number[]` pairs for Pearson `corr`. */
 export function typedArrayPairToNumbers(A: FloatTyped, B: FloatTyped): [number[], number[]] {
   if (A.length !== B.length) {
     throw new SyntaxError(
