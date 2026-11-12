@@ -80,8 +80,8 @@ export function multiplyElementwise(a: Matrix<number>, b: Matrix<number>): Float
 /**
  * Multiply two matrices (matrix product a · b).
  *
- * The function does not check that `a.cols` equals `b.rows`. The loop skips
- * the zero elements of `a`.
+ * The function does not check that `a.cols` equals `b.rows`. Zero times a
+ * non-finite value is NaN, matching IEEE multiplication.
  *
  * @param a - Left matrix (n × p).
  * @param b - Right matrix (p × m).

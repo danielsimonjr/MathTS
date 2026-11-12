@@ -35,6 +35,11 @@ export function gemmF64(
   const out = result ?? new Float64Array(n * m);
   if (result) out.fill(0);
 
+  if (!skipZeroInA) {
+    gemmDot(ad, bd, out, n, p, m);
+    return out;
+  }
+
   if (n * p * m < BLOCKED_MIN_FLOPS) {
     gemmIkj(ad, bd, out, n, p, m, 0, n, 0, m, 0, p, skipZeroInA);
     return out;
@@ -52,6 +57,59 @@ export function gemmF64(
     }
   }
   return out;
+}
+
+/**
+ * C = A · B by a packed column of B and a contiguous dot with each row of A.
+ * Same access pattern as ml-matrix `mmul`, on flat row-major storage.
+ */
+function gemmDot(
+  ad: Float64Array,
+  bd: Float64Array,
+  out: Float64Array,
+  n: number,
+  p: number,
+  m: number
+): void {
+  const rows = new Array<number[]>(n);
+  for (let i = 0; i < n; i++) {
+    const ai = i * p;
+    const row = new Array<number>(p);
+    for (let k = 0; k < p; k++) row[k] = ad[ai + k]!;
+    rows[i] = row;
+  }
+  const b0 = new Array<number>(p);
+  const b1 = new Array<number>(p);
+  let j = 0;
+  for (; j + 1 < m; j += 2) {
+    for (let k = 0; k < p; k++) {
+      const bk = k * m + j;
+      b0[k] = bd[bk]!;
+      b1[k] = bd[bk + 1]!;
+    }
+    for (let i = 0; i < n; i++) {
+      const row = rows[i]!;
+      let s0 = 0;
+      let s1 = 0;
+      for (let k = 0; k < p; k++) {
+        const a = row[k]!;
+        s0 += a * b0[k]!;
+        s1 += a * b1[k]!;
+      }
+      const oi = i * m + j;
+      out[oi] = s0;
+      out[oi + 1] = s1;
+    }
+  }
+  if (j < m) {
+    for (let k = 0; k < p; k++) b0[k] = bd[k * m + j]!;
+    for (let i = 0; i < n; i++) {
+      const row = rows[i]!;
+      let s = 0;
+      for (let k = 0; k < p; k++) s += row[k]! * b0[k]!;
+      out[i * m + j] = s;
+    }
+  }
 }
 
 function gemmIkj(

@@ -13218,7 +13218,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 90
+      "loc": 148
     },
     {
       "file": "matrix/src/types/dense/limits.ts",
