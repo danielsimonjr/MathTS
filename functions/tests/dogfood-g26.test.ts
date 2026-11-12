@@ -84,32 +84,32 @@ describe('G26 #694 lusolve uses packed matrix lu', () => {
       M[i][i] += n;
     }
     const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
-    // Interleave the two paths. Timing every factory call before every
-    // lusolve call lets engine state alone move the ratio across 1.2.
-    for (let i = 0; i < 2; i++) {
+    const fac = () => {
       luSolve(lu(M), b);
+    };
+    const solve = () => {
       lusolve(M, b);
+    };
+    for (let i = 0; i < 2; i++) {
+      fac();
+      solve();
     }
     const facTimes: number[] = [];
     const solveTimes: number[] = [];
-    for (let i = 0; i < 5; i++) {
-      let t0 = performance.now();
-      luSolve(lu(M), b);
-      facTimes.push(performance.now() - t0);
-      t0 = performance.now();
-      lusolve(M, b);
-      solveTimes.push(performance.now() - t0);
-      t0 = performance.now();
-      lusolve(M, b);
-      solveTimes.push(performance.now() - t0);
-      t0 = performance.now();
-      luSolve(lu(M), b);
-      facTimes.push(performance.now() - t0);
+    for (let i = 0; i < 7; i++) {
+      const order = i % 2 === 0 ? [fac, solve] : [solve, fac];
+      for (const fn of order) {
+        const t0 = performance.now();
+        fn();
+        const dt = performance.now() - t0;
+        if (fn === fac) facTimes.push(dt);
+        else solveTimes.push(dt);
+      }
     }
-    facTimes.sort((a, b) => a - b);
-    solveTimes.sort((a, b) => a - b);
-    const tFac = facTimes[Math.floor(facTimes.length / 2)];
-    const tSolve = solveTimes[Math.floor(solveTimes.length / 2)];
+    facTimes.sort((a, c) => a - c);
+    solveTimes.sort((a, c) => a - c);
+    const tFac = facTimes[Math.floor(facTimes.length / 2)] ?? 0;
+    const tSolve = solveTimes[Math.floor(solveTimes.length / 2)] ?? 0;
     expect(tSolve / tFac).toBeLessThan(1.2);
   }, 120_000);
 
