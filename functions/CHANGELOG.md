@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## Unreleased
+
+### Patch Changes
+
+- Synchronous unary element-wise functions (`sin`, `cos`, `tan`, `abs`, `exp`, `log`, …) accept flat `number[]` and return `number[]` with the same values as the `Float64Array` path (Fixes #692).
+
 ## 0.84.0
 
 ### Minor Changes
