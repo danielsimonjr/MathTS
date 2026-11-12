@@ -10,7 +10,7 @@
  */
 import { factoryScope } from '../../../functions/src/factories/scope.js';
 import * as activatedFactories from '../../../functions/src/factories/index.js';
-import * as typedFns from '../../../functions/src/typed/index.js';
+import * as typedFns from '../../../functions/src/typed/expression-eval-barrel.js';
 
 import { createNode } from '../../src/node/Node.js';
 import { createConstantNode } from '../../src/node/ConstantNode.js';

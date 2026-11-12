@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1310                  |
-| Total Test Files                       | 913                   |
+| Total Test Files                       | 914                   |
 | Source Files with Tests                | 542                   |
 | Source Files without Tests             | 768                   |
 | Coverage (raw, direct-import)          | **41.4%**             |
@@ -2095,6 +2095,7 @@ The following 768 source files are not directly imported by any test file:
 | `security/sandbox.test.ts`                               | 8 files             |
 | `tests/stringSubset-clone.test.ts`                       | 3 files             |
 | `tests/stringSubset-set-clone.test.ts`                   | 5 files             |
+| `tests/suite-heap-budget.test.ts`                        | 0 files             |
 | `tests/toMathML.test.ts`                                 | 1 files             |
 | `tests/types.test.ts`                                    | 1 files             |
 | `tests/utils-array-extra.test.ts`                        | 2 files             |

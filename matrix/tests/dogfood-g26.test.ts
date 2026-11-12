@@ -3,69 +3,18 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { performance } from 'node:perf_hooks';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { DenseMatrix, matMul, svd } from '../src/index.js';
 import { Matrix as MLMatrix, SVD as MLSvd } from 'ml-matrix';
-
-function medianTime(fn: () => void, warmup: number, reps: number): number {
-  for (let i = 0; i < warmup; i++) fn();
-  const xs: number[] = [];
-  for (let i = 0; i < reps; i++) {
-    const t0 = performance.now();
-    fn();
-    xs.push(performance.now() - t0);
-  }
-  xs.sort((a, b) => a - b);
-  return xs[Math.floor(xs.length / 2)];
-}
-
-function randSpd(n: number, seed: number): number[][] {
-  let s = seed;
-  const rnd = () => {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    return s / 0xffffffff;
-  };
-  const A = Array.from({ length: n }, () => Array(n).fill(0));
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      const v = rnd();
-      A[i][j] += v;
-      A[j][i] += v;
-    }
-    A[i][i] += n;
-  }
-  return A;
-}
+import { nodeBinary } from './helpers/node-binary.js';
 
 describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
-  it('n=1000 median ≤ 1.15× ml-matrix mmul (issue AC)', () => {
-    const n = 1000;
-    const A = randSpd(n, 42);
-    const B = randSpd(n, 99);
-    const AD = DenseMatrix.fromArray(A);
-    const BD = DenseMatrix.fromArray(B);
-    const AM = new MLMatrix(A);
-    const BM = new MLMatrix(B);
-    const mlTimes: number[] = [];
-    const mathTsTimes: number[] = [];
-    const ratios: number[] = [];
-    for (let w = 0; w < 4; w++) {
-      medianTime(() => AM.mmul(BM), 0, 1);
-      medianTime(() => AD.multiply(BD), 0, 1);
-    }
-    for (let r = 0; r < 9; r++) {
-      const mathTsFirst = r % 2 === 0;
-      if (mathTsFirst) {
-        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
-        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
-      } else {
-        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
-        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
-      }
-      ratios.push(mathTsTimes[mathTsTimes.length - 1] / mlTimes[mlTimes.length - 1]);
-    }
-    ratios.sort((a, b) => a - b);
-    const ratio = ratios[Math.floor(ratios.length / 2)];
+  it('n=1000 ABBA median ≤ 1.15× ml-matrix mmul (isolated Node gate)', () => {
+    const gate = fileURLToPath(new URL('./helpers/gemm-perf-gate.mjs', import.meta.url));
+    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
+    expect(checksum).toBeGreaterThan(0);
     expect(ratio).toBeLessThan(1.15);
   }, 180_000);
 

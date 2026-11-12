@@ -158,6 +158,9 @@ jobs:
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
+      - name: Wall-clock perf gate tests
+        run: node --test tools/test/wall-clock-perf-gate.test.mjs
+
       - name: Scalar-search harness tests
         run: node --test tools/test/scalar-search-harness.test.mjs
 
