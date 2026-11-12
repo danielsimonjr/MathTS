@@ -12,6 +12,10 @@ export interface PlotOptions {
   title?: string;
   xLabel?: string;
   yLabel?: string;
+  /** Heatmap: draw a viridis colorbar (default true when data present). */
+  colorbar?: boolean;
+  xTickLabels?: string[];
+  yTickLabels?: string[];
   x?: AxisSpec;
   y?: AxisSpec;
   width?: number;

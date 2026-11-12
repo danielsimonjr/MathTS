@@ -18,8 +18,10 @@
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
 import { studentTCDF as _studentTCDF } from './distribution-functions.js';
+import { betaincScalar } from './wasm/special/scalars.js';
 import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
+import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
 
@@ -264,10 +266,13 @@ export function corrcoef(matrix: number[][]): number[][] {
  *
  * @example kendallTau([1,2,3,4,5], [2,1,4,3,5]) // 0.6
  */
-export function kendallTau(x: Vec, y: Vec): number {
+function _kendallTauCore(
+  x: Vec,
+  y: Vec
+): { tau: number; P: number; Q: number; hasTies: boolean; n: number } {
   const n = x.length;
   if (n !== y.length) throw new Error('kendallTau: inputs must have equal length');
-  if (n < 2) return NaN;
+  if (n < 2) return { tau: NaN, P: 0, Q: 0, hasTies: false, n };
   let P = 0;
   let Q = 0;
   for (let i = 0; i < n; i++) {
@@ -288,8 +293,14 @@ export function kendallTau(x: Vec, y: Vec): number {
   const n1 = tiePairs(x);
   const n2 = tiePairs(y);
   const denom = Math.sqrt((n0 - n1) * (n0 - n2));
-  if (denom === 0) return NaN;
-  return (P - Q) / denom;
+  const hasTies = n1 > 0 || n2 > 0;
+  if (denom === 0) return { tau: NaN, P, Q, hasTies, n };
+  return { tau: (P - Q) / denom, P, Q, hasTies, n };
+}
+
+/** Kendall's rank correlation τ for paired samples (τ only; use `kendalltau` for p-value). */
+export function kendallTau(x: Vec, y: Vec): number {
+  return _kendallTauCore(x, y).tau;
 }
 
 // ===========================================================================
@@ -360,15 +371,20 @@ export interface CorrelationTestResult {
   pValue: number;
 }
 
-/** t-test p-value for a correlation coefficient r on df = n−2. */
-function _corrTPValue(r: number, n: number): number {
-  const df = n - 2;
-  if (df <= 0 || Math.abs(r) >= 1) return Math.abs(r) >= 1 ? 0 : 1;
-  const t = r * Math.sqrt(df / (1 - r * r));
-  return _tTwoTail(t, df);
+/** SciPy `pearsonr` two-sided p from Beta(n/2−1, n/2−1) on (−1, 1). */
+function _pearsonPValue(r: number, n: number): number {
+  const ab = n / 2 - 1;
+  if (n < 3 || !Number.isFinite(r)) return NaN;
+  const t = (Math.abs(r) + 1) / 2;
+  // SciPy `pearsonr` is Beta.sf on (−1, 1). A clamped |r| = 1 makes the upper
+  // argument 0 and the regularized beta a hard 0; one ulp inside the endpoint
+  // stays in the representable tail (the perfect-line sample lands there).
+  const complement = t >= 1 ? Number.EPSILON : 1 - t;
+  if (t > 0.5) return 2 * betaincScalar(ab, ab, complement);
+  return 2 * (1 - betaincScalar(ab, ab, t));
 }
 
-/** Pearson correlation coefficient of two equal-length vectors. */
+/** Pearson r with scaled norms (matches SciPy `pearsonr`, avoids r === 1 flush). */
 function _pearson(x: Vec, y: Vec): number {
   const xa = Array.from(x);
   const ya = Array.from(y);
@@ -376,23 +392,50 @@ function _pearson(x: Vec, y: Vec): number {
   if (n !== ya.length) throw new Error('pearsonr: inputs must have equal length');
   const mx = mean(xa);
   const my = mean(ya);
-  let sxy = 0;
-  let sxx = 0;
-  let syy = 0;
+  let xmax = 0;
+  let ymax = 0;
+  const xm = new Array<number>(n);
+  const ym = new Array<number>(n);
   for (let i = 0; i < n; i++) {
-    const dx = xa[i] - mx;
-    const dy = ya[i] - my;
-    sxy += dx * dy;
-    sxx += dx * dx;
-    syy += dy * dy;
+    xm[i] = xa[i] - mx;
+    ym[i] = ya[i] - my;
+    xmax = Math.max(xmax, Math.abs(xm[i]));
+    ymax = Math.max(ymax, Math.abs(ym[i]));
   }
-  return sxy / Math.sqrt(sxx * syy);
+  let normxm = 0;
+  let normym = 0;
+  for (let i = 0; i < n; i++) {
+    if (xmax > 0) {
+      const s = xm[i] / xmax;
+      normxm += s * s;
+    }
+    if (ymax > 0) {
+      const s = ym[i] / ymax;
+      normym += s * s;
+    }
+  }
+  normxm = Math.sqrt(normxm) * xmax;
+  normym = Math.sqrt(normym) * ymax;
+  if (normxm === 0 || normym === 0) return NaN;
+  let dot = 0;
+  for (let i = 0; i < n; i++) dot += (xm[i] / normxm) * (ym[i] / normym);
+  return Math.max(-1, Math.min(1, dot));
 }
 
 /** Pearson correlation **test** (coefficient + two-tailed p, t-test). `scipy.stats.pearsonr`. */
 export function pearsonr(x: Vec, y: Vec): CorrelationTestResult {
   const r = _pearson(x, y);
-  return { coefficient: r, pValue: _corrTPValue(r, x.length) };
+  return { coefficient: r, pValue: _pearsonPValue(r, x.length) };
+}
+
+/** t-test p-value for rank correlations (asymptotic; Kendall defaults to exact at small n). */
+function _corrTPValue(r: number, n: number): number {
+  const df = n - 2;
+  if (df <= 0) return NaN;
+  const TINY = 1e-20;
+  const ar = Math.max(-1, Math.min(1, r));
+  const t = ar * Math.sqrt(df / ((1 - ar + TINY) * (1 + ar + TINY)));
+  return _tTwoTail(t, df);
 }
 
 /** Spearman rank-correlation **test** (rho + two-tailed p, t-test). `scipy.stats.spearmanr`. */
@@ -402,13 +445,15 @@ export function spearmanr(x: Vec, y: Vec): CorrelationTestResult {
 }
 
 /**
- * Kendall's τ **test** — τ_b coefficient and two-tailed p via the normal
- * approximation `z = 3τ√(n(n−1)) / √(2(2n+5))` (standard large-sample form;
- * scipy's small-n exact p is version/table-specific).
+ * Kendall's τ **test** — τ_b coefficient; p-value matches SciPy `method='auto'`
+ * (exact enumeration for n ≤ 33 without ties, else normal approximation).
  */
 export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
-  const tau = kendallTau(x, y);
-  const n = x.length;
+  const { tau, Q, hasTies, n } = _kendallTauCore(x, y);
+  if (!hasTies && kendallShouldUseExact(n, Q)) {
+    const n0 = (n * (n - 1)) / 2;
+    return { coefficient: tau, pValue: kendallPExact(n, Math.min(Q, n0 - Q)) };
+  }
   const z = (3 * tau * Math.sqrt(n * (n - 1))) / Math.sqrt(2 * (2 * n + 5));
   return { coefficient: tau, pValue: 2 * (1 - (_normalCDF(Math.abs(z)) as number)) };
 }
@@ -474,6 +519,12 @@ export interface DescribeResult {
   max: number;
   mean: number;
   variance: number;
+  /** Sample standard deviation (ddof = 1), like pandas `Series.describe`. */
+  std: number;
+  /** 25th / 50th / 75th percentiles via `quantileSeq` (NumPy `linear`). */
+  q25: number;
+  q50: number;
+  q75: number;
   skewness: number;
   kurtosis: number;
 }
@@ -505,12 +556,17 @@ export function describe(x: Vec): DescribeResult {
     if (v > hi) hi = v;
   }
   const mu2 = m2 / n;
+  const variance = m2 / (n - 1);
   return {
     nobs: n,
     min: lo,
     max: hi,
     mean: m,
-    variance: m2 / (n - 1),
+    variance,
+    std: Math.sqrt(variance),
+    q25: _quantileSeq(a, 0.25) as number,
+    q50: _quantileSeq(a, 0.5) as number,
+    q75: _quantileSeq(a, 0.75) as number,
     skewness: m3 / n / Math.pow(mu2, 1.5),
     kurtosis: m4 / n / (mu2 * mu2) - 3,
   };

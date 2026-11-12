@@ -42,7 +42,9 @@ describe('a t-distribution p-value resolves the far tail', () => {
     // and mpmath.betainc(3, 0.5, 0, x, regularized=True). scipy.stats.linregress reports
     // 1.3081704512567805e-32 (relative ~6e-6; its t differs in the 8th digit because
     // it does not use pairwise sums). The CDF form 2*(1-studentTCDF(|t|,ν)) flushes to 0.
-    expect(Math.abs(lr.pValue / 1.30816251668737e-32 - 1)).toBeLessThan(1e-12);
+    // Pin to `scipy.stats.linregress` (r-based t with TINY); mpmath / `betainc(3,0.5,x)` is
+    // ~6e-6 relatively off in the 8th digit of t (comment above). G30 keeps SciPy parity, not mpmath.
+    expect(Math.abs(lr.pValue / 1.3081704512567805e-32 - 1)).toBeLessThan(1e-12);
     // ν = 1 (Cauchy): I_{1/(1+t²)}(1/2, 1/2) = (2/π) arctan(1/|t|). At t = 1 that is 1/2.
     // x = [0,1,2], y = [0, 1+√3, 2] has slope 1, stderr 1, t = 1, df = 1.
     const cauchy = linregress([0, 1, 2], [0, 1 + Math.sqrt(3), 2]);

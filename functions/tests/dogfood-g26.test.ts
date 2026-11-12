@@ -90,13 +90,15 @@ describe('G26 #694 lusolve uses packed matrix lu', () => {
     const solve = () => {
       lusolve(M, b);
     };
-    for (let i = 0; i < 2; i++) {
+    // Both arms, before the timed ABBA loop. A 7-sample median on Node 22
+    // read 1.23 under CI load while Node 20 stayed under 1.2. The bound stays 1.2.
+    for (let i = 0; i < 6; i++) {
       fac();
       solve();
     }
     const facTimes: number[] = [];
     const solveTimes: number[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 15; i++) {
       const order = i % 2 === 0 ? [fac, solve] : [solve, fac];
       for (const fn of order) {
         const t0 = performance.now();

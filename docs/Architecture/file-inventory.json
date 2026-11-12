@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2314,
+  "totalFiles": 2318,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1282,
+    "build-entry": 1284,
     "test-only": 0,
     "orphan": 0,
-    "test": 941,
+    "test": 943,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1308,
-    "tests": 941,
+    "src": 1310,
+    "tests": 943,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 57,
     "@danielsimonjr/mathts-expression": 566,
-    "@danielsimonjr/mathts-functions": 1049,
+    "@danielsimonjr/mathts-functions": 1052,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -37,7 +37,7 @@
     "@danielsimonjr/mathts-workerpool": 24,
     "@danielsimonjr/mathts-parallel": 53,
     "@danielsimonjr/mathts-parser": 5,
-    "@danielsimonjr/mathts-plot": 50,
+    "@danielsimonjr/mathts-plot": 51,
     "@danielsimonjr/mathts-signal": 4,
     "@danielsimonjr/mathts-statistics": 4,
     "@danielsimonjr/mathts-tensor": 59,
@@ -6386,7 +6386,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 558
+      "loc": 614
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -6681,6 +6681,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 1017
+    },
+    {
+      "file": "functions/src/kendall-exact.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 84
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7618,7 +7625,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 91
+      "loc": 95
     },
     {
       "file": "functions/src/relational/compare.ts",
@@ -8167,11 +8174,18 @@
       "loc": 163
     },
     {
+      "file": "functions/src/statistics/quantile-numpy-methods.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 185
+    },
+    {
       "file": "functions/src/statistics/quantileSeq.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 356
+      "loc": 373
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -8969,7 +8983,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2124
+      "loc": 2137
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -10110,7 +10124,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 163
+      "loc": 165
+    },
+    {
+      "file": "functions/tests/dogfood-g30-stats-scipy-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 131
     },
     {
       "file": "functions/tests/dogfood-g32a-724.test.ts",
@@ -10201,7 +10222,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 55
+      "loc": 52
     },
     {
       "file": "functions/tests/exact-pvalues.test.ts",
@@ -10824,7 +10845,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 451
+      "loc": 450
     },
     {
       "file": "functions/tests/gap-stiff-bdf-radau-oracle.test.ts",
@@ -12287,7 +12308,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 104
+      "loc": 106
     },
     {
       "file": "functions/tests/system-response.test.ts",
@@ -14597,7 +14618,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 75
+      "loc": 151
     },
     {
       "file": "plot/src/histogram.ts",
@@ -14709,7 +14730,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 43
+      "loc": 47
     },
     {
       "file": "plot/src/update.ts",
@@ -14731,6 +14752,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 31
+    },
+    {
+      "file": "plot/tests/dogfood-g30-heatmap.test.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 29
     },
     {
       "file": "plot/tests/dom-helpers.ts",
