@@ -39,7 +39,8 @@ const WASM_DISPATCH_POLICY: Readonly<Record<string, WasmBand>> = {
   // Element-wise (public `abs`, `sin`, ... on a Float64Array).
   array_abs_ptr: { min: 1024 }, // 0.76/0.55 · 0.44/0.42 · 0.54/0.54 · 0.49/0.71
   array_log10_ptr: { min: 1024 }, // 0.89/0.82 · 0.70/0.77 · 0.70/0.72 · 0.76/0.83
-  array_sin_ptr: { min: 1024, max: 131072 }, // 0.76/0.77 · 0.72/0.75 · (0.92/0.81 · 0.79/0.96)
+  // G26 #711: n=1e5 measured ~1.0 on/off on Node 22 after loadWasm; band stops below 64K.
+  array_sin_ptr: { min: 16384, max: 65536 }, // 0.64–0.79 at 16K–64K in 2026-09-26 opt-in runs
   array_log1p_ptr: { min: 1024, max: 16384 }, // 0.82/0.88 · (1.09/1.24 ...)
   array_cos_ptr: { min: 16384 }, // (1.54/0.79) · 0.64/0.61 · 0.62/0.62 · 0.79/0.69
   array_atanh_ptr: { min: 16384 }, // (0.93/0.85) · 0.70/0.73 · 0.77/0.78 · 0.81/0.83
