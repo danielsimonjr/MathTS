@@ -37,8 +37,8 @@ describe('mad vs parallelStatMAD (median AD vs mean AD)', () => {
     expect(await parallelStatMeanAD(EVEN)).toBeCloseTo(3, 10);
   });
 
-  it('empty mad throws; empty parallelStatMAD is NaN', async () => {
-    expect(() => mad([])).toThrow(/empty array/i);
+  it('empty mad returns NaN; empty parallelStatMAD is NaN', async () => {
+    expect(mad([])).toBeNaN();
     expect(Number.isNaN(await parallelStatMAD([]))).toBe(true);
   });
 });

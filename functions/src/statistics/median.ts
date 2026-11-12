@@ -1,10 +1,18 @@
 import { containsCollections } from '../utils/collection.js';
-import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
 import { medianNumbers } from '../utils/median-numbers.js';
+import {
+  flattenForStatistics,
+  finiteNumbers,
+  isFloatTyped,
+  numberGrid,
+  reduceNumericMatrix,
+  type FloatTyped,
+  type StatReduceOptions,
+} from './numeric-data.js';
 
 // Type definitions for median
 interface MatrixType {
@@ -47,24 +55,68 @@ export const createMedian = /* #__PURE__ */ factory(
       }
       return true;
     }
+    function medianOfNumbers(xs: ArrayLike<number>, skipNaN: boolean): unknown {
+      const data = skipNaN ? finiteNumbers(xs, true) : xs;
+      if (data.length === 0) return NaN;
+      return _median(Array.isArray(data) ? data : (copyNumbers(data) as number[]));
+    }
+
+    function copyNumbers(xs: ArrayLike<number>): number[] {
+      const out = new Array<number>(xs.length);
+      for (let i = 0; i < xs.length; i++) out[i] = xs[i];
+      return out;
+    }
+
+    /** Numeric matrices (nested arrays and DenseMatrix) reduce here; BigNumber falls through to mapSlices. */
+    function medianAlong(
+      array: unknown[] | MatrixType,
+      dim: number | { valueOf(): number },
+      skipNaN: boolean
+    ): unknown {
+      if (numberGrid(array)) {
+        return reduceNumericMatrix(
+          array,
+          dim,
+          false,
+          (xs) => medianOfNumbers(xs, skipNaN) as number
+        );
+      }
+      try {
+        return mapSlices(array, dim, (x: unknown) => {
+          if (!skipNaN) return _median(x as unknown[] | MatrixType);
+          const flat = flattenForStatistics(x as unknown[] | MatrixType | FloatTyped);
+          const kept: number[] = [];
+          for (let i = 0; i < flat.length; i++) {
+            const v = flat[i];
+            if (typeof v !== 'number') return _median(x as unknown[] | MatrixType);
+            if (!Number.isNaN(v)) kept.push(v);
+          }
+          if (kept.length === 0) return NaN;
+          return _median(kept);
+        });
+      } catch (err) {
+        throw improveErrorMessage(err, 'median', undefined);
+      }
+    }
+
     /**
      * Recursively calculate the median of an n-dimensional array
      * @param {Array | Matrix} array - Input array or matrix
      * @return {number | BigNumber | Complex | Unit} median
      * @private
      */
-    function _median(array: unknown[] | MatrixType): unknown {
+    function _median(array: unknown[] | MatrixType | FloatTyped): unknown {
       try {
-        const flat = flatten((array as MatrixType).valueOf()) as unknown[];
+        const flat = flattenForStatistics(array);
 
         const num = flat.length;
         if (num === 0) {
-          throw new Error('Cannot calculate median of an empty array');
+          return NaN;
         }
 
         const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
         if (cmpNum) {
-          return medianNumbers(flat as number[]);
+          return medianNumbers(flat);
         }
 
         if (num % 2 === 0) {
@@ -138,17 +190,58 @@ export const createMedian = /* #__PURE__ */ factory(
     return typed(name, {
       // median([a, b, c, d, ...])
       'Array | Matrix': _median,
+      'Float64Array | Float32Array': _median,
+      'Array | Matrix, Object': (array: unknown[] | MatrixType, opts: StatReduceOptions) => {
+        if (opts.skipNaN === true || opts.skipna === true) {
+          if (opts.skipNaN === true && opts.skipna === false) {
+            throw new TypeError('skipNaN and skipna disagree');
+          }
+          if (opts.skipNaN === false && opts.skipna === true) {
+            throw new TypeError('skipNaN and skipna disagree');
+          }
+          const finite = finiteNumbers(
+            isFloatTyped(array) ? array : (flattenForStatistics(array) as number[]),
+            true
+          );
+          if (finite.length === 0) return NaN;
+          return _median(finite);
+        }
+        return _median(array);
+      },
+      'Float64Array | Float32Array, Object': (
+        array: FloatTyped,
+        opts: StatReduceOptions
+      ): unknown => {
+        if (opts.skipNaN === true || opts.skipna === true) {
+          const finite = finiteNumbers(array, true);
+          if (finite.length === 0) return NaN;
+          return _median(finite);
+        }
+        return _median(array);
+      },
 
       // median([a, b, c, d, ...], dim)
       'Array | Matrix, number | BigNumber': function (
         _array: unknown[] | MatrixType,
         _dim: number | { valueOf(): number }
       ): unknown {
-        try {
-          return mapSlices(_array, _dim, (x: unknown) => _median(x as unknown[] | MatrixType));
-        } catch (err) {
-          throw improveErrorMessage(err, 'median', undefined);
+        return medianAlong(_array, _dim, false);
+      },
+
+      // median(A, dim, { skipNaN }) — NaNs omitted per slice (NumPy nanmedian axis)
+      'Array | Matrix, number | BigNumber, Object': function (
+        _array: unknown[] | MatrixType,
+        _dim: number | { valueOf(): number },
+        opts: StatReduceOptions
+      ): unknown {
+        const skip = opts.skipNaN === true || opts.skipna === true;
+        if (
+          (opts.skipNaN === true && opts.skipna === false) ||
+          (opts.skipNaN === false && opts.skipna === true)
+        ) {
+          throw new TypeError('skipNaN and skipna disagree');
         }
+        return medianAlong(_array, _dim, skip);
       },
 
       // median(a, b, c, d, ...)

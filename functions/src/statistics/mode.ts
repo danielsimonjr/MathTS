@@ -1,6 +1,6 @@
-import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { flattenForStatistics, type FloatTyped } from './numeric-data.js';
 
 // Type definitions for mode
 interface MatrixType {
@@ -47,8 +47,9 @@ export const createMode = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix': _mode,
+      'Float64Array | Float32Array': _mode,
 
-      '...': function (args: unknown[]): unknown[] {
+      '...': function (args: unknown[]): unknown {
         return _mode(args);
       },
     });
@@ -59,11 +60,11 @@ export const createMode = /* #__PURE__ */ factory(
      * @return {Array} mode
      * @private
      */
-    function _mode(values: unknown[] | MatrixType): unknown[] {
-      const flat = flatten((values as MatrixType).valueOf()) as unknown[];
+    function _mode(values: unknown[] | MatrixType | FloatTyped): unknown {
+      const flat = flattenForStatistics(values);
       const num = flat.length;
       if (num === 0) {
-        throw new Error('Cannot calculate mode of an empty array');
+        return NaN;
       }
 
       const count: Record<string, number> = {};

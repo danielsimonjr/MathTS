@@ -2,11 +2,12 @@
  * Median of a flat finite `number[]` via quickselect (O(n) average).
  * Empty → NaN; does not mutate the caller's array.
  */
-export function medianNumbers(arr: readonly number[]): number {
+export function medianNumbers(arr: ArrayLike<number>): number {
   const n = arr.length;
   if (n === 0) return NaN;
   if (n === 1) return arr[0];
-  const work = arr.slice();
+  const work = new Array<number>(n);
+  for (let i = 0; i < n; i++) work[i] = arr[i];
   const mid = (n - 1) >>> 1;
   if (n % 2 === 1) {
     return quickSelectInPlace(work, 0, n - 1, mid);

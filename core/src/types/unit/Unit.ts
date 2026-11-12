@@ -28,6 +28,7 @@ import type {
   UnitSystem,
   UnitSystemEntry,
 } from './unit-types.js';
+import type { LogarithmicUnitKind } from './unit-types.js';
 import { AmbiguousUnitError, DimensionMismatchError, UnitParseError } from './errors.js';
 import { isEffectivelyImaginary } from './va-var.js';
 import {
@@ -149,6 +150,95 @@ let readingSearchSteps = 0;
  */
 export function unitReadingSearchSteps(): number {
   return readingSearchSteps;
+}
+
+/** Maximum characters in a full unit string accepted by {@link Unit.parse}. */
+export const MAX_UNIT_STRING_LENGTH = 10_000;
+
+/**
+ * Tokens longer than this skip the factorial unit-factor search in {@link Unit.parse}.
+ * (A valid physical unit spelling is far shorter.)
+ */
+const MAX_COMBINATORIC_UNIT_TOKEN_LENGTH = 64;
+
+function asNumberForLog(x: Numeric): number {
+  return typeof x === 'number' ? x : Number(x);
+}
+
+function linearFromLogarithmic(kind: LogarithmicUnitKind, logValue: Numeric): number {
+  const v = asNumberForLog(logValue);
+  switch (kind) {
+    case 'decibel-power':
+      return 10 ** (v / 10);
+    case 'decibel-amplitude':
+      return 10 ** (v / 20);
+    case 'neper':
+      return Math.exp(v);
+    case 'decibel-re-1mw':
+      return 1e-3 * 10 ** (v / 10);
+    case 'decibel-re-1w':
+      return 10 ** (v / 10);
+    default:
+      return v;
+  }
+}
+
+function logFromLinear(kind: LogarithmicUnitKind, linear: Numeric): number {
+  const v = asNumberForLog(linear);
+  let raw: number;
+  switch (kind) {
+    case 'decibel-power':
+    case 'decibel-re-1w':
+      raw = 10 * Math.log10(v);
+      break;
+    case 'decibel-amplitude':
+      // Field (amplitude) quantity: 20 log10, not the power-quantity 10 log10.
+      raw = 20 * Math.log10(v);
+      break;
+    case 'neper':
+      raw = Math.log(v);
+      break;
+    case 'decibel-re-1mw':
+      raw = 10 * Math.log10(v / 1e-3);
+      break;
+    default:
+      return v;
+  }
+  return snapLogReading(kind, v, raw);
+}
+
+/**
+ * A power-ratio decibel and a field-ratio neper (or field decibel) describe the
+ * same level only after the field ratio is squared. `dB` stores 10^(dB/10);
+ * `Np` stores exp(Np). 1 Np is then 20/ln(10) dB.
+ */
+function bridgeLogLinear(
+  value: Numeric | null,
+  from: LogarithmicUnitKind | undefined,
+  to: LogarithmicUnitKind | undefined
+): Numeric | null {
+  if (value === null || from === undefined || to === undefined || from === to) return value;
+  const isField = (k: LogarithmicUnitKind): boolean => k === 'neper' || k === 'decibel-amplitude';
+  if (typeof value !== 'number') return value;
+  if (isField(from) && to === 'decibel-power') return value * value;
+  if (from === 'decibel-power' && isField(to)) return Math.sqrt(value);
+  return value;
+}
+
+function logarithmicKindOf(unit: {
+  units: Array<{ power: number; unit: { logarithmic?: LogarithmicUnitKind } }>;
+}): LogarithmicUnitKind | undefined {
+  if (unit.units.length !== 1 || unit.units[0].power !== 1) return undefined;
+  return unit.units[0].unit.logarithmic;
+}
+
+/** Use a shorter decimal when it regenerates the same linear magnitude. */
+function snapLogReading(kind: LogarithmicUnitKind, linear: number, raw: number): number {
+  if (!Number.isFinite(raw) || !Number.isFinite(linear)) return raw;
+  const snapped = Number(raw.toPrecision(12));
+  if (snapped === raw) return raw;
+  if (linearFromLogarithmic(kind, snapped) === linear) return snapped;
+  return raw;
 }
 
 /**
@@ -443,8 +533,13 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // ratio once instead of rounding through an SI double. The normalized value is that
       // quantity rounded once (what _normalize gives), so the scale and product are built once.
       this._exactSI = undefined;
+      const hasLogarithmicUnit = this.units.some((u) => u.unit.logarithmic !== undefined);
       const scale =
-        typeof value === 'number' && Number.isFinite(value) && value !== 0 && this.units.length > 0
+        !hasLogarithmicUnit &&
+        typeof value === 'number' &&
+        Number.isFinite(value) &&
+        value !== 0 &&
+        this.units.length > 0
           ? this.exactScale()
           : null;
       if (scale !== null) {
@@ -694,6 +789,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
     // The readings are in ascending order of the cut positions.
     function readings(token: string, unrestricted = false): Factor[][] {
       const length = token.length;
+      if (length > MAX_COMBINATORIC_UNIT_TOKEN_LENGTH) {
+        return [];
+      }
       const spans = unitSpans(token, unrestricted);
       const result: Factor[][] = [];
       const factors: Factor[] = [];
@@ -828,6 +926,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new TypeError('Invalid argument in Unit.parse, string expected');
       }
 
+      if (str.length > MAX_UNIT_STRING_LENGTH) {
+        throw new UnitParseError(
+          'Unit string exceeds maximum length of ' + MAX_UNIT_STRING_LENGTH.toString()
+        );
+      }
+
       text = expandSuperscripts(normalizeUnitSpellings(str));
       index = -1;
       c = '';
@@ -953,7 +1057,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
             throw new UnitParseError('Unit "' + uStr + '" is refused: ' + refused);
           }
           // Not one unit: cut the token into factors (rule B).
-          const ways = isPrefixedUnitSpelling(uStr) ? [] : readings(uStr);
+          const ways =
+            uStr.length > MAX_COMBINATORIC_UNIT_TOKEN_LENGTH || isPrefixedUnitSpelling(uStr)
+              ? []
+              : readings(uStr);
           if (ways.length === 0) {
             if (GLUED_ZERO_POWER.test(uStr)) {
               throw new UnitParseError(
@@ -1283,6 +1390,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
       if (value === null || value === undefined || this.units.length === 0) {
         return value ?? null;
       }
+      const logOnly =
+        this.units.length === 1 &&
+        this.units[0].power === 1 &&
+        this.units[0].unit.logarithmic !== undefined
+          ? this.units[0].unit.logarithmic
+          : undefined;
+      if (logOnly !== undefined) {
+        return linearFromLogarithmic(logOnly, value);
+      }
       const scale = this.exactScale();
       if (scale !== null) {
         const exact = applyExactScale(value, scale, false);
@@ -1316,6 +1432,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
     ): Numeric | null {
       if (value === null || value === undefined || this.units.length === 0) {
         return value ?? null;
+      }
+      const logOnlyDenorm =
+        this.units.length === 1 &&
+        this.units[0].power === 1 &&
+        this.units[0].unit.logarithmic !== undefined
+          ? this.units[0].unit.logarithmic
+          : undefined;
+      if (logOnlyDenorm !== undefined) {
+        return logFromLinear(logOnlyDenorm, value);
       }
       const scale = this.exactScale();
       if (scale !== null) {
@@ -1451,11 +1576,18 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // The index tracks a name that you write directly to UNITS only when the name is new.
         // A new name is last in insertion order. Thus, a new name can change only a miss.
         // A miss rebuilds the index when a suffix of str is a name that the index does not contain.
+        // Only a suffix no longer than the longest current name can be that name: hashing every
+        // suffix of a long unknown token is quadratic in the token length.
         // The index does not track a direct delete and re-add of a name. When you add the name
         // again, the name moves to the end of insertion order. The scan never finds a direct
         // empty-string key.
         // The reading search has the same rule for each substring of its token (unitSpans).
-        for (let i = 1; i < str.length; i++) {
+        let maxName = 0;
+        for (const name in UNITS) {
+          if (hasOwnProperty(UNITS, name) && name.length > maxName) maxName = name.length;
+        }
+        const from = Math.max(1, str.length - maxName);
+        for (let i = from; i < str.length; i++) {
           const suffix = str.slice(i);
           if (hasOwnProperty(UNITS, suffix) && !index.keys.has(suffix)) {
             invalidateUnitIndex();
@@ -2046,7 +2178,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
         other.units.length === 0 ||
         this.units[0].unit.offset === other.units[0].unit.offset
       ) {
-        other.value = clone(value);
+        other.value = bridgeLogLinear(
+          clone(value),
+          logarithmicKindOf(this),
+          logarithmicKindOf(other)
+        );
         other._exactSI = liveExactSI(this);
       } else {
         /* Need to adjust value by difference in offset to convert */
@@ -2845,6 +2981,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       };
       if (row.reciprocal) def.reciprocal = true;
       if (row.cycles) def.cycles = 1;
+      if (row.logarithmic) def.logarithmic = row.logarithmic;
       if (!row.imaginary) attachExactScale(def, exact, exactOffset);
       UNITS[key] = def;
     }

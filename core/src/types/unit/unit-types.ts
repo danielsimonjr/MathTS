@@ -55,6 +55,10 @@ export interface BaseUnitDef {
   key?: string;
 }
 
+/** Logarithmic unit kinds (decibel / neper families). */
+export type LogarithmicUnitKind =
+  'decibel-power' | 'decibel-amplitude' | 'neper' | 'decibel-re-1mw' | 'decibel-re-1w';
+
 /**
  * A unit definition entry in the UNITS table. `dimensions` and `base.key` are
  * populated after the literal is created (see the module-init loops), hence
@@ -71,6 +75,8 @@ export interface UnitDef {
   reciprocal?: boolean;
   /** Turns counted by one of this unit. A cycle-counting unit (Hz, rpm) has 1; absent means 0. */
   cycles?: number;
+  /** Converts log-domain readings (dB, Np, …) to a linear SI magnitude. */
+  logarithmic?: LogarithmicUnitKind;
   /** The exact scale to SI, from the unit table. Absent for a `createUnit` unit and for VAR. */
   exact?: ExactScale;
   /** The exact `offset`, present whenever `exact` is. */
@@ -233,6 +239,10 @@ export interface UnitInstance {
   skipAutomaticSimplification: boolean;
   type: 'Unit';
   isUnit: boolean;
+  /** CODATA absolute uncertainty, when present on a physical constant. */
+  uncertainty?: number;
+  /** Alias for {@link uncertainty} on physical constants. */
+  unc?: number;
   constructor: UnitConstructor;
 
   clone(): UnitInstance;

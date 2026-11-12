@@ -43,7 +43,7 @@ const PAIRWISE_BLOCK = 128;
  *
  * Not exact: for that, use {@link neumaierSum}. Pairwise is the right default because it is free.
  */
-export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length): number {
+export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length, shift = 0): number {
   const n = end - start;
 
   if (n <= PAIRWISE_BLOCK) {
@@ -61,19 +61,32 @@ export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length): 
 
     let i = start;
     const limit = start + (n - (n % 8));
-    for (; i < limit; i += 8) {
-      s0 += xs[i];
-      s1 += xs[i + 1];
-      s2 += xs[i + 2];
-      s3 += xs[i + 3];
-      s4 += xs[i + 4];
-      s5 += xs[i + 5];
-      s6 += xs[i + 6];
-      s7 += xs[i + 7];
+    if (shift === 0) {
+      for (; i < limit; i += 8) {
+        s0 += xs[i];
+        s1 += xs[i + 1];
+        s2 += xs[i + 2];
+        s3 += xs[i + 3];
+        s4 += xs[i + 4];
+        s5 += xs[i + 5];
+        s6 += xs[i + 6];
+        s7 += xs[i + 7];
+      }
+    } else {
+      for (; i < limit; i += 8) {
+        s0 += xs[i] - shift;
+        s1 += xs[i + 1] - shift;
+        s2 += xs[i + 2] - shift;
+        s3 += xs[i + 3] - shift;
+        s4 += xs[i + 4] - shift;
+        s5 += xs[i + 5] - shift;
+        s6 += xs[i + 6] - shift;
+        s7 += xs[i + 7] - shift;
+      }
     }
 
     let tail = 0;
-    for (; i < end; i++) tail += xs[i];
+    for (; i < end; i++) tail += shift === 0 ? xs[i] : xs[i] - shift;
 
     // Combine the partials pairwise too, not left-to-right.
     return s0 + s1 + (s2 + s3) + (s4 + s5 + (s6 + s7)) + tail;
@@ -81,7 +94,7 @@ export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length): 
 
   // Split on an even boundary so both halves stay block-aligned.
   const half = (n >> 1) - ((n >> 1) % 8);
-  return pairwiseSum(xs, start, start + half) + pairwiseSum(xs, start + half, end);
+  return pairwiseSum(xs, start, start + half, shift) + pairwiseSum(xs, start + half, end, shift);
 }
 
 /**
@@ -258,6 +271,12 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
  * The deviation vector is never materialised: both pairwise sums walk `xs` in
  * registers, so variance/std no longer pay an extra n-long allocation.
  *
+ * When every value is finite the sums run on `xᵢ − x₀`. Variance is shift-invariant, and
+ * subtracting the first sample keeps a mean near `1e308` from overflowing to `Infinity`
+ * before the deviations are formed (`[1e308, 1e308, 1e308]` is exactly 0; a finite spread
+ * such as `1e150` on that pedestal stays finite). Non-finite values keep the unshifted
+ * path so `NaN` and `Infinity` still propagate.
+ *
  * Divide the result by `n` (uncorrected), `n − 1` (unbiased/sample), or `n + 1` (biased) for the
  * corresponding variance. Returns 0 for fewer than two elements.
  */
@@ -265,12 +284,28 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
   const n = xs.length;
   if (n < 2) return 0;
 
-  const mean = pairwiseSum(xs) / n;
+  let shift = 0;
+  let allFinite = Number.isFinite(xs[0]);
+  if (allFinite) {
+    for (let i = 1; i < n; i++) {
+      if (!Number.isFinite(xs[i])) {
+        allFinite = false;
+        break;
+      }
+    }
+    if (allFinite) shift = xs[0];
+  }
+
+  const mean = pairwiseSum(xs, 0, n, shift) / n;
   // Same pairwise tree as `pairwiseSum(d)` + `pairwiseDot(d, d)`, but the
   // deviations are formed in registers — no n-long scratch array.
-  const { sumD, sumDD } = pairwiseDeviationSums(xs, mean, 0, n);
+  const { sumD, sumDD } = pairwiseDeviationSums(xs, mean, 0, n, shift);
 
-  const corrected = sumDD - (sumD * sumD) / n;
+  // The (Σd)²/n correction is a rounding residual. When Σd² has already overflowed,
+  // that residual overflows too and Inf−Inf becomes NaN. Finite inputs then have an
+  // infinite variance, which is Infinity.
+  let corrected = sumDD - (sumD * sumD) / n;
+  if (allFinite && !Number.isFinite(corrected)) corrected = Infinity;
   // Clamp only genuine negatives (tiny round-off on near-constant input) to 0. Written as
   // `corrected < 0` — NOT `corrected > 0 ? … : 0` — so NaN/±Infinity propagate (both comparisons
   // are false for NaN): variance of data containing NaN must stay NaN, matching NumPy and the
@@ -286,7 +321,8 @@ function pairwiseDeviationSums(
   xs: ArrayLike<number>,
   mean: number,
   start: number,
-  end: number
+  end: number,
+  shift = 0
 ): { sumD: number; sumDD: number } {
   const n = end - start;
 
@@ -311,14 +347,14 @@ function pairwiseDeviationSums(
     let i = start;
     const limit = start + (n - (n % 8));
     for (; i < limit; i += 8) {
-      const a0 = xs[i] - mean;
-      const a1 = xs[i + 1] - mean;
-      const a2 = xs[i + 2] - mean;
-      const a3 = xs[i + 3] - mean;
-      const a4 = xs[i + 4] - mean;
-      const a5 = xs[i + 5] - mean;
-      const a6 = xs[i + 6] - mean;
-      const a7 = xs[i + 7] - mean;
+      const a0 = xs[i] - shift - mean;
+      const a1 = xs[i + 1] - shift - mean;
+      const a2 = xs[i + 2] - shift - mean;
+      const a3 = xs[i + 3] - shift - mean;
+      const a4 = xs[i + 4] - shift - mean;
+      const a5 = xs[i + 5] - shift - mean;
+      const a6 = xs[i + 6] - shift - mean;
+      const a7 = xs[i + 7] - shift - mean;
       d0 += a0;
       q0 += a0 * a0;
       d1 += a1;
@@ -340,7 +376,7 @@ function pairwiseDeviationSums(
     let tailD = 0;
     let tailDD = 0;
     for (; i < end; i++) {
-      const a = xs[i] - mean;
+      const a = xs[i] - shift - mean;
       tailD += a;
       tailDD += a * a;
     }
@@ -352,8 +388,8 @@ function pairwiseDeviationSums(
   }
 
   const half = (n >> 1) - ((n >> 1) % 8);
-  const left = pairwiseDeviationSums(xs, mean, start, start + half);
-  const right = pairwiseDeviationSums(xs, mean, start + half, end);
+  const left = pairwiseDeviationSums(xs, mean, start, start + half, shift);
+  const right = pairwiseDeviationSums(xs, mean, start + half, end, shift);
   return { sumD: left.sumD + right.sumD, sumDD: left.sumDD + right.sumDD };
 }
 

@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1287, "e": 7038, "re": 3030 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1290, "e": 7070, "re": 3043 },
   "s": {
-    "loc": 219395,
+    "loc": 220790,
     "cls": 61,
-    "int": 601,
-    "fn": 2375,
-    "tg": 172,
+    "int": 602,
+    "fn": 2393,
+    "tg": 175,
     "en": 0,
-    "co": 1647,
-    "toi": 644
+    "co": 1648,
+    "toi": 645
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": { "rt": 1, "to": 0, "rtp": ["Tensor→slice→Tensor"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -381,7 +381,7 @@
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
     },
     "tensor": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "Tensor",
         "contractNetwork",
@@ -403,7 +403,13 @@
         "stack"
       ],
       "cls": ["Tensor", "Index"],
-      "int": ["EinsumSpec", "ContractNetworkOpts", "ContractNetworkResult", "IndexOpts"]
+      "int": [
+        "TensorStorage",
+        "EinsumSpec",
+        "ContractNetworkOpts",
+        "ContractNetworkResult",
+        "IndexOpts"
+      ]
     },
     "tensor/operations": {
       "f": 18,
@@ -1015,7 +1021,7 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 15,
+      "f": 17,
       "exp": [
         "createCorr",
         "createCumSum",
@@ -1026,12 +1032,17 @@
         "createMedian",
         "createMin",
         "createMode",
-        "createProd",
-        "createQuantileSeq",
-        "createStd",
-        "createSum",
-        "improveErrorMessage",
-        "createVariance"
+        "nanmedian",
+        "isFloatTyped",
+        "copyToNumberArray",
+        "flattenForStatistics",
+        "finiteNumbers",
+        "isVarianceNorm",
+        "parseStatOptions",
+        "normalizationFromSecondArg",
+        "normalizationFromStringAndOptions",
+        "numberGrid",
+        "flattenNumeric"
       ]
     },
     "functions/stats": {
@@ -1896,8 +1907,8 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 246, "o": 13 },
-    { "p": "src/index.ts", "i": 208, "o": 0 },
+    { "p": "factories/index.ts", "i": 246, "o": 14 },
+    { "p": "src/index.ts", "i": 209, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
@@ -1905,7 +1916,7 @@
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
-    { "p": "utils/array.ts", "i": 0, "o": 49 },
+    { "p": "utils/array.ts", "i": 0, "o": 47 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 45 },
     { "p": "utils/collection.ts", "i": 0, "o": 41 }
