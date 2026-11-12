@@ -1,10 +1,10 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1296, "e": 7090, "re": 3047 },
   "s": {
-    "loc": 222115,
+    "loc": 222185,
     "cls": 61,
-    "int": 606,
-    "fn": 2409,
+    "int": 608,
+    "fn": 2411,
     "tg": 175,
     "en": 0,
     "co": 1650,
@@ -1179,14 +1179,14 @@
       "int": [
         "SampleNOptions",
         "Distribution",
+        "GammaDistOptions",
+        "GammaDistNamedOptions",
         "MultivariateDistribution",
         "UnaryRealSpec",
         "MultiPoly",
         "UnivariateTerm",
         "SquareFreeFactor",
-        "KDTreeNode",
-        "CentralityRestartOptions",
-        "PageRankOptions"
+        "KDTreeNode"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
