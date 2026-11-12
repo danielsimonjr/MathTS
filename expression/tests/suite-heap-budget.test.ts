@@ -24,8 +24,12 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 
-/** Heap growth after bootstrap + 64 parses. Measured ~63 MiB; 96 MiB leaves headroom. */
-const BOOTSTRAP_HEAP_BUDGET_BYTES = 96 * 1024 * 1024;
+/**
+ * Heap growth after bootstrap + 64 parses.
+ * Bun isolate measured ~63 MiB. Node vitest (CI Test 20/22) measured ~148 MiB
+ * because the worker is already warm. 256 MiB fails a doubling of that Node figure.
+ */
+const BOOTSTRAP_HEAP_BUDGET_BYTES = 256 * 1024 * 1024;
 
 describe('expression suite heap budget (#878)', () => {
   it('bootstrap graph stays under the documented heap budget', async () => {
@@ -44,14 +48,15 @@ describe('expression suite heap budget (#878)', () => {
     expect(delta).toBeLessThan(BOOTSTRAP_HEAP_BUDGET_BYTES);
   });
 
-  it('importing the factory matrix bridge does not instantiate WASM', () => {
+  it('importing the functions bundle does not instantiate WASM', () => {
+    const entry = new URL('../../functions/dist/index.js', import.meta.url);
     const script = `
       let hits = 0;
       const compile = WebAssembly.compile.bind(WebAssembly);
       const instantiate = WebAssembly.instantiate.bind(WebAssembly);
       WebAssembly.compile = async (...args) => { hits++; return compile(...args); };
       WebAssembly.instantiate = async (...args) => { hits++; return instantiate(...args); };
-      await import(${JSON.stringify(new URL('../../functions/src/factories/matrix-bridge.ts', import.meta.url).href)});
+      await import(${JSON.stringify(entry.href)});
       await new Promise((resolve) => setTimeout(resolve, 300));
       if (hits !== 0) {
         console.error('wasm instantiations: ' + hits);
