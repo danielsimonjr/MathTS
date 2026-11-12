@@ -130,7 +130,11 @@ describe('#772 gammaDist rate vs SciPy scale', () => {
     expect(() =>
       gammaDist({ shape: 2, scale: 2, rate: 1 } as { shape: number; scale: number })
     ).toThrow(/not both/);
-    expect(() => gammaDist({ shape: 2, scale: 2 }, 1)).toThrow(/not both/);
+    const namedPlusRate = gammaDist as (
+      options: { shape: number; scale: number },
+      rate: number
+    ) => unknown;
+    expect(() => namedPlusRate({ shape: 2, scale: 2 }, 1)).toThrow(/not both/);
   });
 
   it('rejects non-positive, NaN, and non-finite parameters', () => {
