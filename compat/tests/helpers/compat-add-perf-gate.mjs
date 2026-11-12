@@ -21,14 +21,15 @@ function timeLoop(fn) {
   return performance.now() - t0;
 }
 
-for (let w = 0; w < 20; w++) {
+// Extra warmup under CI turbo contention (G26 #735 gate was ~2.05 at 12 ABBA rounds).
+for (let w = 0; w < 50; w++) {
   mj.add(1, 2);
   mt.add(1, 2);
 }
 
 const ra = [];
 const rb = [];
-for (let r = 0; r < 12; r++) {
+for (let r = 0; r < 16; r++) {
   if (r % 2 === 0) {
     ra.push(timeLoop(() => mj.add(1, 2)));
     rb.push(timeLoop(() => mt.add(1, 2)));
