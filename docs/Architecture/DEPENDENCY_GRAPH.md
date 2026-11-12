@@ -2172,11 +2172,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                        |
-| ------------------------------ | ----------------------------- |
-| `@danielsimonjr/mathts-core`   | `rowMajorStrides`             |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
-| `@danielsimonjr/mathts-core`   | `NestedArray`                 |
+| Package                        | Import                             |
+| ------------------------------ | ---------------------------------- |
+| `@danielsimonjr/mathts-core`   | `rowMajorStrides`                  |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager`      |
+| `@danielsimonjr/mathts-core`   | `arraySize, validate, NestedArray` |
 
 **Internal Dependencies:**
 
@@ -20320,7 +20320,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1289   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218906 |
+| Total Lines of Code     | 218957 |
 | Total Exports           | 7028   |
 | Total Re-exports        | 3025   |
 | Total Classes           | 61     |
