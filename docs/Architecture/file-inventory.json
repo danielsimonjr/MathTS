@@ -6302,7 +6302,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 120
+      "loc": 116
     },
     {
       "file": "functions/src/error/ArgumentsError.ts",
