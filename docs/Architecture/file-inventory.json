@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2262,
+  "totalFiles": 2264,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1265,
     "test-only": 0,
     "orphan": 0,
-    "test": 906,
+    "test": 908,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1291,
-    "tests": 906,
+    "tests": 908,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1021,
+    "@danielsimonjr/mathts-functions": 1023,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 123,
@@ -8647,7 +8647,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2052
+      "loc": 2088
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8682,7 +8682,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 139
+      "loc": 170
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -8717,7 +8717,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 15
+      "loc": 157
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -8962,7 +8962,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 334
+      "loc": 349
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -9945,6 +9945,13 @@
       "loc": 33
     },
     {
+      "file": "functions/tests/elementwise-number-array-692.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
+    },
+    {
       "file": "functions/tests/elementwise-wasm.browser.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10923,6 +10930,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 89
+    },
+    {
+      "file": "functions/tests/helpers/node-binary.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
     },
     {
       "file": "functions/tests/helpers/wasm-spy.ts",
