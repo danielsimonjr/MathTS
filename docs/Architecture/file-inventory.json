@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2276,
+  "totalFiles": 2278,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1270,
+    "build-entry": 1271,
     "test-only": 0,
     "orphan": 0,
-    "test": 915,
+    "test": 916,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1296,
-    "tests": 915,
+    "src": 1297,
+    "tests": 916,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
-    "@danielsimonjr/mathts-compat": 17,
+    "@danielsimonjr/mathts-compat": 19,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 55,
@@ -499,14 +499,21 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 437
+      "loc": 465
+    },
+    {
+      "file": "compat/src/instance-api.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 126
     },
     {
       "file": "compat/src/shims.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 668
+      "loc": 732
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -520,14 +527,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 397
+      "loc": 399
     },
     {
       "file": "compat/tests/coverage-gaps.test.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 111
+      "loc": 112
     },
     {
       "file": "compat/tests/create.test.ts",
@@ -549,6 +556,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 77
+    },
+    {
+      "file": "compat/tests/dogfood-g16-mathjs-compat-surface.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 282
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -6358,7 +6372,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 506
+      "loc": 610
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -6610,7 +6624,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1013
+      "loc": 1016
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -9662,7 +9676,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 98
     },
     {
       "file": "functions/tests/core/function/import.test.ts",

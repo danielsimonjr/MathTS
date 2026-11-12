@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1296
+  totalFiles: 1297
   totalModules: 82
-  totalExports: 7103
+  totalExports: 7110
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9647,6 +9647,11 @@ modules:
             - config
             - runWithConfig
           reExport: true
+        - file: ./core/function/import.js
+          imports:
+            - importFactory
+            - ImportOptions
+          reExport: true
         - file: ./wasm/WasmLoader.js
           imports:
             - loadWasm
@@ -9661,6 +9666,8 @@ modules:
           imports:
             - evaluate
             - compileExpr
+            - createInstanceEvaluator
+            - EVALUATE_SCOPE_OMIT
             - parse
             - parser
             - physicsScope
@@ -11078,12 +11085,16 @@ modules:
       exports:
         - config
         - runWithConfig
+        - importFactory
+        - ImportOptions
         - loadWasm
         - isWasmLoaded
         - to
         - toBest
         - evaluate
         - compileExpr
+        - createInstanceEvaluator
+        - EVALUATE_SCOPE_OMIT
         - parse
         - parser
         - physicsScope
@@ -11823,12 +11834,16 @@ modules:
         - '* from ./geometry/frustum.js'
         - config
         - runWithConfig
+        - importFactory
+        - ImportOptions
         - loadWasm
         - isWasmLoaded
         - to
         - toBest
         - evaluate
         - compileExpr
+        - createInstanceEvaluator
+        - EVALUATE_SCOPE_OMIT
         - parse
         - parser
         - physicsScope
@@ -14095,6 +14110,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - BigNumber
             - Complex
             - Fraction
             - I
@@ -14108,6 +14124,7 @@ modules:
             - Unit
             - UnitInstance
       exports:
+        - EVALUATE_SCOPE_OMIT
         - parse
         - physicsScope
         - evaluate
@@ -14115,6 +14132,7 @@ modules:
         - parser
         - replacer
         - reviver
+        - createInstanceEvaluator
       interfaces:
         - PhysicsEvaluateOptions
         - PhysicsScopeOptions
@@ -14127,7 +14145,9 @@ modules:
         - parser
         - replacer
         - reviver
+        - createInstanceEvaluator
       constants:
+        - EVALUATE_SCOPE_OMIT
         - parse
     functions/src/factories/index.ts:
       description: Activated mathjs leaf factory functions.
@@ -41472,6 +41492,9 @@ modules:
           imports:
             - createChain
             - Chain
+        - file: ./instance-api.js
+          imports:
+            - wireMathjsInstanceApi
         - file: ./shims.js
           imports:
             - '*'
@@ -41547,6 +41570,44 @@ modules:
         - create
       constants:
         - all
+    compat/src/instance-api.ts:
+      description: 'mathjs instance methods on `create(all)`: import, typed, compile, and'
+      externalDependencies:
+        - package: typed-function
+          imports:
+            - typedFunction
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./index.js
+          imports:
+            - MathJSConfig
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - createInstanceEvaluator
+            - EVALUATE_SCOPE_OMIT
+            - reviver
+            - replacer
+            - runWithConfig
+            - PhysicsEvaluateOptions
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - importFactory
+            - ImportOptions
+      exports:
+        - wireMathjsInstanceApi
+      interfaces:
+        - CompatExpressionLayers
+        - WiredCompatInstance
+      functions:
+        - wireMathjsInstanceApi
     compat/src/shims.ts:
       description: mathjs Compatibility Shims
       externalDependencies: []
@@ -41603,6 +41664,8 @@ modules:
             - round
             - floor
             - ceil
+            - matrix
+            - sparse
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -42653,10 +42716,13 @@ dependencyGraph:
       - - functions/src/typed/algebra.ts
         - functions/src/cas/polynomial-canonical.ts
         - functions/src/typed/algebra.ts
-    typeOnly: []
-    total: 2
+    typeOnly:
+      - - compat/src/index.ts
+        - compat/src/instance-api.ts
+        - compat/src/index.ts
+    total: 3
     runtimeCount: 2
-    typeOnlyCount: 0
+    typeOnlyCount: 1
   layers:
     - name: Packages/typed-function
       files:
@@ -44082,6 +44148,7 @@ dependencyGraph:
       files:
         - compat/src/chain.ts
         - compat/src/index.ts
+        - compat/src/instance-api.ts
         - compat/src/shims.ts
     - name: Gpu
       files:
@@ -44119,19 +44186,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1296
+  totalTypeScriptFiles: 1297
   totalModules: 82
-  totalLinesOfCode: 222488
-  totalExports: 7103
+  totalLinesOfCode: 222813
+  totalExports: 7110
   totalClasses: 61
-  totalInterfaces: 608
-  totalFunctions: 2416
+  totalInterfaces: 610
+  totalFunctions: 2418
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1651
-  totalReExports: 3054
-  totalTypeOnlyImports: 650
+  totalConstants: 1652
+  totalReExports: 3058
+  totalTypeOnlyImports: 651
   runtimeCircularDeps: 2
-  typeOnlyCircularDeps: 0
+  typeOnlyCircularDeps: 1
   unusedFilesCount: 0
   unusedExportsCount: 0

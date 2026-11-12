@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1377** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1380** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -3302,7 +3302,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1377 exports).
+> `@danielsimonjr/mathts-functions` (1380 exports).
 
 ### Functions by category
 
@@ -3360,11 +3360,11 @@ await terminatePool();
 
 **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (46): `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3ToQuat`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `nanmean`, `nanmedian`, `nanstd`, `nanvariance`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
+**Other exports (uncategorized)** (48): `createInstanceEvaluator`, `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `importFactory`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3ToQuat`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `nanmean`, `nanmedian`, `nanstd`, `nanvariance`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
 
-### Constants & values (72)
+### Constants & values (73)
 
-`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `DEFAULT_MUTATION_WEIGHTS`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `DEFAULT_MUTATION_WEIGHTS`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `EVALUATE_SCOPE_OMIT`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
 ### Classes & types (2)
 
