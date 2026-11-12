@@ -4,7 +4,14 @@
  * Manages WebGPU device, queue, and command encoding.
  */
 
-import { hasWebGPU, getGPUAdapter, detectGPUCapabilities, type GPUCapabilities } from './detect.js';
+import {
+  hasWebGPUSurface,
+  getGPUAdapter,
+  capabilitiesFromAdapter,
+  markWebGPUAdapterUnavailable,
+  resetWebGPUAvailabilityCache,
+  type GPUCapabilities,
+} from './detect.js';
 
 /**
  * Options for GPUContext initialization
@@ -23,7 +30,8 @@ export interface GPUContextOptions {
 /**
  * Status of the GPU context
  */
-export type GPUContextStatus = 'uninitialized' | 'initializing' | 'ready' | 'error' | 'lost';
+export type GPUContextStatus =
+  'uninitialized' | 'initializing' | 'ready' | 'unavailable' | 'error' | 'lost';
 
 /**
  * Event emitted when device is lost
@@ -116,30 +124,39 @@ export class GPUContext {
     }
   }
 
+  private _markUnavailable(): void {
+    this._status = 'unavailable';
+    this._lastError = null;
+    this.device = null;
+    this.adapter = null;
+  }
+
   private async _doInitialize(options: GPUContextOptions): Promise<boolean> {
     this._status = 'initializing';
 
+    if (!hasWebGPUSurface()) {
+      markWebGPUAdapterUnavailable();
+      this._capabilities = null;
+      this._markUnavailable();
+      return false;
+    }
+
     try {
-      // Check WebGPU support
-      if (!hasWebGPU()) {
-        throw new Error('WebGPU is not supported in this environment');
-      }
-
-      // Detect capabilities
-      this._capabilities = await detectGPUCapabilities(options.preferHighPerformance ?? true);
-
-      if (!this._capabilities.supported) {
-        throw new Error('WebGPU adapter not available');
-      }
-
-      // Get adapter
+      // One adapter request. A second request could resolve null and flip a
+      // live adapter to "unavailable". Default power preference matches
+      // detectGPUCapabilities (high-performance unless explicitly low-power).
+      const preferHigh = options.preferHighPerformance !== false;
       this.adapter = await getGPUAdapter({
-        powerPreference: options.preferHighPerformance ? 'high-performance' : 'low-power',
+        powerPreference: preferHigh ? 'high-performance' : 'low-power',
       });
 
       if (!this.adapter) {
-        throw new Error('Failed to get GPU adapter');
+        this._capabilities = null;
+        this._markUnavailable();
+        return false;
       }
+
+      this._capabilities = capabilitiesFromAdapter(this.adapter);
 
       // Request device with required features and limits
       const deviceDescriptor: GPUDeviceDescriptor = {
@@ -151,12 +168,15 @@ export class GPUContext {
       this.device = await this.adapter.requestDevice(deviceDescriptor);
 
       if (!this.device) {
-        throw new Error('Failed to get GPU device');
+        this._status = 'error';
+        this._lastError = new Error('Failed to get GPU device');
+        return false;
       }
 
       // Setup device lost handler
       this.device.lost.then((info) => {
         this._status = 'lost';
+        this._lastError = new Error(info.message || 'GPU device lost');
         const event: DeviceLostEvent = {
           reason: info.reason,
           message: info.message,
@@ -170,11 +190,12 @@ export class GPUContext {
         this._lastError = new Error(`GPU Error: ${event.error.message}`);
       };
 
+      this._lastError = null;
       this._status = 'ready';
       return true;
     } catch (error) {
       this._status = 'error';
-      this._lastError = error as Error;
+      this._lastError = error instanceof Error ? error : new Error(String(error));
       return false;
     }
   }
@@ -383,11 +404,33 @@ export function getGlobalGPUContext(): GPUContext {
 }
 
 /**
+ * Result of global GPU initialization with a stable reason when `ok` is false.
+ */
+export type GlobalGPUInitResult = { ok: true } | { ok: false; reason: 'unavailable' | 'error' };
+
+/**
+ * Initialize the global GPU context and report why initialization failed.
+ */
+export async function initializeGlobalGPUWithReason(
+  options?: GPUContextOptions
+): Promise<GlobalGPUInitResult> {
+  const ctx = getGlobalGPUContext();
+  const ok = await ctx.initialize(options);
+  if (ok) {
+    return { ok: true };
+  }
+  if (ctx.status === 'unavailable') {
+    return { ok: false, reason: 'unavailable' };
+  }
+  return { ok: false, reason: 'error' };
+}
+
+/**
  * Initialize the global GPU context
  */
 export async function initializeGlobalGPU(options?: GPUContextOptions): Promise<boolean> {
-  const ctx = getGlobalGPUContext();
-  return ctx.initialize(options);
+  const result = await initializeGlobalGPUWithReason(options);
+  return result.ok;
 }
 
 /**
@@ -398,4 +441,5 @@ export function destroyGlobalGPU(): void {
     globalContext.destroy();
     globalContext = null;
   }
+  resetWebGPUAvailabilityCache();
 }
