@@ -10,6 +10,17 @@ A drop-in [mathjs](https://mathjs.org)-compatible API over MathTS — the quicke
 npm install @danielsimonjr/mathts-compat
 ```
 
+## Example
+
+```ts
+import { create, all } from '@danielsimonjr/mathts-compat';
+
+const math = create(all);
+math.add(1, 2); // 3
+math.evaluate('sin(pi/2)'); // 1
+math.complex(2, 3); // 2 + 3i
+```
+
 ## What it provides
 
 - `create(all)` exposes `math.evaluate`, `math.chain`, `math.config`, and functions

@@ -14,6 +14,16 @@ Matrix where supported).
 npm install @danielsimonjr/mathts-trigonometry
 ```
 
+## Example
+
+```ts
+import { sin, cos, asin } from '@danielsimonjr/mathts-trigonometry';
+
+sin(Math.PI / 2); // 1
+cos(0); // 1
+asin(1); // π/2
+```
+
 ## What it exports
 
 `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot` (plus the `typedTrigonometry` bundle).
