@@ -7729,7 +7729,7 @@
         "kind": "type"
       },
       "parse": {
-        "kind": "type"
+        "kind": "function"
       },
       "properties": {
         "kind": "object"
@@ -8383,7 +8383,16 @@
       "compileExpression": {
         "kind": "function"
       },
+      "compileExpressionWithDeps": {
+        "kind": "function"
+      },
       "createEvaluate": {
+        "kind": "function"
+      },
+      "evaluate": {
+        "kind": "function"
+      },
+      "parse": {
         "kind": "function"
       }
     }
@@ -9099,6 +9108,18 @@
         "kind": "function"
       },
       "multivariateNormal": {
+        "kind": "function"
+      },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanstd": {
+        "kind": "function"
+      },
+      "nanvariance": {
         "kind": "function"
       },
       "negativeBinomialDist": {
