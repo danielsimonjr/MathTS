@@ -9,7 +9,16 @@ import * as mod from '../src/index.js';
  */
 describe('@danielsimonjr/mathts-signal re-export surface', () => {
   it('exposes the signal operations', () => {
-    for (const fn of ['parallelFFT', 'parallelIFFT', 'convolve', 'correlate', 'dct', 'welchPSD']) {
+    for (const fn of [
+      'fft',
+      'ifft',
+      'parallelFFT',
+      'parallelIFFT',
+      'convolve',
+      'correlate',
+      'dct',
+      'welchPSD',
+    ]) {
       expect(typeof (mod as Record<string, unknown>)[fn]).toBe('function');
     }
   });

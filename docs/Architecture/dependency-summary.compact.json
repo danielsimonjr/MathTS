@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1288, "e": 7029, "re": 3032 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1288, "e": 7037, "re": 3033 },
   "s": {
-    "loc": 219056,
+    "loc": 219539,
     "cls": 61,
     "int": 601,
-    "fn": 2368,
+    "fn": 2372,
     "tg": 172,
     "en": 0,
-    "co": 1647,
+    "co": 1648,
     "toi": 649
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -51,6 +51,7 @@
         "forEachMultiIndex",
         "tensordotRange",
         "matmulSequential",
+        "MIN_WORKER_CHUNK",
         "DEFAULT_WORKER_CONFIG",
         "mathWorkerPool",
         "canUseWasm",
@@ -58,8 +59,7 @@
         "transferFloat64",
         "transferArrayBuffer",
         "transferTypedArray",
-        "createSharedFloat64Array",
-        "createSharedBuffer"
+        "createSharedFloat64Array"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -965,6 +965,7 @@
         "dtw",
         "bitReverse",
         "fftCoreFloat64",
+        "fftExactFloat64",
         "rfft",
         "irfft",
         "fftshift",
@@ -972,8 +973,7 @@
         "fftfreq",
         "rfftfreq",
         "fftn",
-        "complex",
-        "complexConj"
+        "complex"
       ],
       "int": [
         "DtwOptions",
@@ -1610,6 +1610,8 @@
       "exp": [
         "parallelFFT",
         "parallelIFFT",
+        "fft",
+        "ifft",
         "parallelFFTMagnitude",
         "parallelFFTPower",
         "parallelConv",
@@ -1625,9 +1627,7 @@
         "idst",
         "dwt",
         "fourier",
-        "invFourier",
-        "hilbertTransform",
-        "periodogram"
+        "invFourier"
       ]
     },
     "parallel": {
@@ -1643,9 +1643,9 @@
         "WorkerPool",
         "gemmRows",
         "matmulSequential",
+        "resolveDefaultWorkerScript",
         "parallelMatmul",
-        "parallelMatvec",
-        "parallelTranspose"
+        "parallelMatvec"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": [

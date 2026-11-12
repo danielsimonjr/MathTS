@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7029
+    "totalExports": 7037
   },
   "entryPoints": [
     {
@@ -321,6 +321,7 @@
           "forEachMultiIndex",
           "tensordotRange",
           "matmulSequential",
+          "MIN_WORKER_CHUNK",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -335,6 +336,8 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats",
@@ -370,11 +373,13 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats"
         ],
-        "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+        "constants": ["MIN_WORKER_CHUNK", "DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
       "packages/workerpool/src/matmul-sequential.ts": {
         "description": "Sequential matrix multiplication: the one kernel for the inline branch of",
@@ -17680,7 +17685,7 @@
           },
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "./complex-to-interleaved.js",
@@ -21021,8 +21026,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["bitReverse", "fftCoreFloat64"],
-        "functions": ["bitReverse", "fftCoreFloat64"]
+        "exports": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"],
+        "functions": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"]
       },
       "functions/src/signal/fft-helpers.ts": {
         "description": "numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`",
@@ -26972,7 +26977,7 @@
         "internalDependencies": [
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "../gpu/fft-gpu.js",
@@ -39386,6 +39391,8 @@
             "imports": [
               "parallelFFT",
               "parallelIFFT",
+              "parallelFFT",
+              "parallelIFFT",
               "parallelFFTMagnitude",
               "parallelFFTPower",
               "parallelConv",
@@ -39424,6 +39431,8 @@
         "exports": [
           "parallelFFT",
           "parallelIFFT",
+          "fft",
+          "ifft",
           "parallelFFTMagnitude",
           "parallelFFTPower",
           "parallelConv",
@@ -39503,7 +39512,7 @@
         "internalDependencies": [
           {
             "file": "./validate.js",
-            "imports": ["assertSameLength", "assertMatmulShape"]
+            "imports": ["assertSameLength", "assertMatmulShape", "assertMatmulArgs"]
           },
           {
             "file": "./ops/bitwise.js",
@@ -39745,7 +39754,7 @@
           {
             "package": "@danielsimonjr/mathts-workerpool",
             "directory": "packages/workerpool",
-            "imports": ["matmulSequential"]
+            "imports": ["matmulSequential", "resolveDefaultWorkerScript"]
           },
           {
             "package": "@danielsimonjr/mathts-workerpool",
@@ -39762,6 +39771,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39855,6 +39865,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39959,8 +39970,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["assertSameLength", "assertMatmulShape"],
-        "functions": ["assertSameLength", "assertMatmulShape"]
+        "exports": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"],
+        "functions": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"]
       }
     },
     "parallel/operations": {
@@ -46237,15 +46248,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 219056,
-    "totalExports": 7029,
+    "totalLinesOfCode": 219539,
+    "totalExports": 7037,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2368,
+    "totalFunctions": 2372,
     "totalTypeGuards": 172,
     "totalEnums": 0,
-    "totalConstants": 1647,
-    "totalReExports": 3032,
+    "totalConstants": 1648,
+    "totalReExports": 3033,
     "totalTypeOnlyImports": 649,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
