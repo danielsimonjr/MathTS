@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-11",
-  "totalFiles": 2238,
+  "generated": "2026-11-12",
+  "totalFiles": 2239,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1259,
     "test-only": 0,
     "orphan": 0,
-    "test": 888,
+    "test": 889,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1285,
-    "tests": 888,
+    "tests": 889,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 26,
+    "@danielsimonjr/mathts-autograd": 27,
     "@danielsimonjr/mathts-compat": 17,
     "@danielsimonjr/mathts-core": 120,
     "@danielsimonjr/mathts-evaluator": 4,
@@ -296,7 +296,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 346
+      "loc": 331
     },
     {
       "file": "autograd/src/forward-grad.ts",
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2479
+      "loc": 2604
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -352,7 +352,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 49
+      "loc": 68
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
@@ -423,6 +423,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 78
+    },
+    {
+      "file": "autograd/tests/tape-broadcast-ad.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 416
     },
     {
       "file": "autograd/tests/tape-decomposition-ad.test.ts",
