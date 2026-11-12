@@ -2042,12 +2042,6 @@
     ],
     "functions/src/geometry/polygon-ops.ts": ["functions/src/index.ts"],
     "functions/src/geometry/curves.ts": ["functions/src/index.ts"],
-    "functions/src/typed/public-type-exports.ts": [
-      "functions/src/factories/index.ts",
-      "functions/src/index.ts",
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/trigonometry.ts"
-    ],
     "functions/src/numeric/solveODE.ts": [
       "functions/src/factories/index.ts",
       "functions/src/index.ts",
@@ -2067,6 +2061,12 @@
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/typed/public-type-exports.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/index.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
@@ -2455,6 +2455,7 @@
       "functions/src/numeric/solveDDE.ts",
       "functions/src/numeric/solveODE.ts"
     ],
+    "functions/src/numeric/ode-step-limit.ts": ["functions/src/numeric/solveODE.ts"],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",
       "functions/src/plain/number/probability.ts",

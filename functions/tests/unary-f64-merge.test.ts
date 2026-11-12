@@ -76,7 +76,7 @@ const MERGE_UNARIES: Array<{ name: string; fn: UnaryF64; scalar: (x: number) => 
   { name: 'ceil', fn: (a) => ceil(a) as Promise<Float64Array>, scalar: Math.ceil },
   { name: 'fix', fn: (a) => fix(a) as Promise<Float64Array>, scalar: Math.trunc },
   { name: 'cosh', fn: (a) => cosh(a) as Promise<Float64Array>, scalar: Math.cosh },
-  { name: 'log10', fn: (a) => log10(a) as Promise<Float64Array>, scalar: Math.log10 },
+  { name: 'log10', fn: (a) => log10(a) as unknown as Promise<Float64Array>, scalar: Math.log10 },
   { name: 'log2', fn: (a) => log2(a) as Promise<Float64Array>, scalar: Math.log2 },
   { name: 'log1p', fn: (a) => log1p(a) as Promise<Float64Array>, scalar: Math.log1p },
   { name: 'expm1', fn: (a) => expm1(a) as Promise<Float64Array>, scalar: Math.expm1 },
@@ -155,7 +155,7 @@ describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
   it('log10 at 0 and 1 matches Math.log10 (wasm-off)', async () => {
     const xs = Float64Array.from([0, 1, 10, -1]);
     const expected = oracleUnary([0, 1, 10, -1], Math.log10);
-    const actual = await (log10(xs) as Promise<Float64Array>);
+    const actual = await (log10(xs) as unknown as Promise<Float64Array>);
     expectF64Close(actual, expected);
   });
 

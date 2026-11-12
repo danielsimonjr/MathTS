@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2272,
+  "totalFiles": 2276,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1266,
+    "build-entry": 1267,
     "test-only": 0,
     "orphan": 0,
-    "test": 915,
+    "test": 918,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1292,
-    "tests": 915,
+    "src": 1293,
+    "tests": 918,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -22,13 +22,13 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 27,
+    "@danielsimonjr/mathts-autograd": 28,
     "@danielsimonjr/mathts-compat": 17,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1031,
+    "@danielsimonjr/mathts-functions": 1034,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 123,
@@ -310,7 +310,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 102
+      "loc": 109
     },
     {
       "file": "autograd/src/index.ts",
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2604
+      "loc": 3047
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -353,6 +353,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 68
+    },
+    {
+      "file": "autograd/tests/dogfood-g13.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 410
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
@@ -499,7 +506,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 672
+      "loc": 683
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -6568,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1023
+      "loc": 1014
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7229,6 +7236,13 @@
       "loc": 154
     },
     {
+      "file": "functions/src/numeric/ode-step-limit.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 60
+    },
+    {
       "file": "functions/src/numeric/open-root-finders.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7275,7 +7289,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1823
+      "loc": 1936
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -8647,7 +8661,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2089
+      "loc": 2108
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8878,7 +8892,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2308
+      "loc": 2353
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -8906,7 +8920,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 17
+      "loc": 8
     },
     {
       "file": "functions/src/typed/relational.ts",
@@ -9900,7 +9914,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 27
+      "loc": 50
     },
     {
       "file": "functions/tests/dogfood-g18-signal-api.test.ts",
@@ -9929,6 +9943,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 140
+    },
+    {
+      "file": "functions/tests/dogfood-g25-ode.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 153
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -10670,7 +10691,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 116
     },
     {
       "file": "functions/tests/gap-wave-a.test.ts",
@@ -11902,7 +11923,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 65
+      "loc": 69
     },
     {
       "file": "functions/tests/solveode-stiff-driver-pin.test.ts",
@@ -12126,14 +12147,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 10
+      "loc": 18
     },
     {
       "file": "functions/tests/type-consumer-g17/issue-726-evaluate.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 7
+      "loc": 10
     },
     {
       "file": "functions/tests/type-consumer-g17/issue-726-gpu.ts",
@@ -12147,14 +12168,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 10
+      "loc": 13
     },
     {
       "file": "functions/tests/type-consumer-g17/issue-785-variance.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 7
+      "loc": 10
     },
     {
       "file": "functions/tests/type-consumer-g17/issue-830-unit.ts",
@@ -12162,6 +12183,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 7
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-g34-containers.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
     },
     {
       "file": "functions/tests/typed-algebra-wasm.test.ts",
@@ -12714,7 +12742,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 46
+      "loc": 44
     },
     {
       "file": "gpu/src/serialize.ts",

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1292,
+    "totalFiles": 1293,
     "totalModules": 82,
-    "totalExports": 7098
+    "totalExports": 7086
   },
   "entryPoints": [
     {
@@ -121,7 +121,7 @@
     {
       "file": "gpu/src/index.ts",
       "type": "main",
-      "description": "/ <reference types=\"@webgpu/types\" />"
+      "description": "One serialization queue for ALL GPU dispatches (the error scope is a per-device stack)."
     },
     {
       "file": "plot/src/index.ts",
@@ -6809,7 +6809,13 @@
             "imports": ["Tape", "TapedTensor"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-tensor",
+            "directory": "tensor",
+            "imports": ["Tensor"]
+          }
+        ],
         "exports": ["valueAndGrad", "grad", "derivative", "jacobian"],
         "functions": ["valueAndGrad", "grad", "derivative", "jacobian"]
       },
@@ -11186,21 +11192,6 @@
             "reExport": true
           },
           {
-            "file": "./typed/public-type-exports.js",
-            "imports": [
-              "PublicAdd",
-              "PublicSin",
-              "PublicVariance",
-              "PublicMean",
-              "PublicDet",
-              "PublicEvaluate",
-              "AddCallable",
-              "SinCallable"
-            ],
-            "reExport": true,
-            "typeOnly": true
-          },
-          {
             "file": "./factories/evaluate.js",
             "imports": ["PhysicsEvaluateOptions"],
             "reExport": true,
@@ -11713,6 +11704,12 @@
           {
             "file": "./signal/dtw.js",
             "imports": ["DtwOptions", "DtwResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./typed/public-type-exports.js",
+            "imports": ["*"],
             "reExport": true,
             "typeOnly": true
           }
@@ -12303,14 +12300,6 @@
           "catmullRom",
           "arcLength",
           "curvature",
-          "PublicAdd",
-          "PublicSin",
-          "PublicVariance",
-          "PublicMean",
-          "PublicDet",
-          "PublicEvaluate",
-          "AddCallable",
-          "SinCallable",
           "PhysicsEvaluateOptions",
           "SolveODESolution",
           "ODEMatrixSolution",
@@ -13057,14 +13046,6 @@
           "catmullRom",
           "arcLength",
           "curvature",
-          "PublicAdd",
-          "PublicSin",
-          "PublicVariance",
-          "PublicMean",
-          "PublicDet",
-          "PublicEvaluate",
-          "AddCallable",
-          "SinCallable",
           "PhysicsEvaluateOptions",
           "SolveODESolution",
           "ODEMatrixSolution",
@@ -13255,7 +13236,8 @@
           "DiscretizeMethod",
           "BiquadCoefficients",
           "DtwOptions",
-          "DtwResult"
+          "DtwResult",
+          "type * from ./typed/public-type-exports.js"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -19323,6 +19305,22 @@
         "interfaces": ["NumericJacobianStepRule", "NumericJacobianOptions"],
         "functions": ["numericJacobian", "centralDifferenceGradient"]
       },
+      "functions/src/numeric/ode-step-limit.ts": {
+        "description": "Default cap on **accepted** steps for every ODE driver.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "ODE_DEFAULT_MAX_ACCEPTED_STEPS",
+          "odeAcceptedBudget",
+          "odeMaxStepsError",
+          "odeMaxAttempts"
+        ],
+        "interfaces": ["ODEStepLimitContext"],
+        "functions": ["odeAcceptedBudget", "odeMaxStepsError", "odeMaxAttempts"],
+        "constants": ["ODE_DEFAULT_MAX_ACCEPTED_STEPS"]
+      },
       "functions/src/numeric/open-root-finders.ts": {
         "description": "Open (non-bracketing) scalar root-finders.",
         "externalDependencies": [],
@@ -19429,6 +19427,10 @@
           {
             "file": "./hermite.js",
             "imports": ["hermiteCubic"]
+          },
+          {
+            "file": "./ode-step-limit.js",
+            "imports": ["odeAcceptedBudget", "odeMaxAttempts", "odeMaxStepsError"]
           },
           {
             "file": "../utils/is.js",
@@ -24803,7 +24805,17 @@
           },
           {
             "file": "./public-type-exports.js",
-            "imports": ["PublicAdd", "PublicMean", "PublicVariance"],
+            "imports": [
+              "PublicAbs",
+              "PublicAdd",
+              "PublicExp",
+              "PublicLog",
+              "PublicLog10",
+              "PublicMean",
+              "PublicSqrt",
+              "PublicStd",
+              "PublicVariance"
+            ],
             "typeOnly": true
           },
           {
@@ -26982,6 +26994,7 @@
           "FindRootOptions",
           "MinimizeOptions",
           "ODESolution",
+          "StiffODESolverOptions",
           "LinprogOptions",
           "LinprogResult"
         ],
@@ -27131,41 +27144,14 @@
         "internalDependencies": [
           {
             "file": "../../types/public-overloads.generated.js",
-            "imports": [
-              "PublicAdd",
-              "PublicSin",
-              "PublicVariance",
-              "PublicMean",
-              "PublicDet",
-              "PublicEvaluate",
-              "AddCallable",
-              "SinCallable"
-            ],
+            "imports": ["*"],
             "reExport": true,
             "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
-        "exports": [
-          "PublicAdd",
-          "PublicSin",
-          "PublicVariance",
-          "PublicMean",
-          "PublicDet",
-          "PublicEvaluate",
-          "AddCallable",
-          "SinCallable"
-        ],
-        "reExported": [
-          "PublicAdd",
-          "PublicSin",
-          "PublicVariance",
-          "PublicMean",
-          "PublicDet",
-          "PublicEvaluate",
-          "AddCallable",
-          "SinCallable"
-        ]
+        "exports": [],
+        "reExported": ["type * from ../../types/public-overloads.generated.js"]
       },
       "functions/src/typed/relational.ts": {
         "description": "Typed Relational Functions",
@@ -27737,7 +27723,7 @@
           },
           {
             "file": "./public-type-exports.js",
-            "imports": ["PublicSin"],
+            "imports": ["PublicCos", "PublicSin", "PublicTan"],
             "typeOnly": true
           },
           {
@@ -43706,7 +43692,17 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
-            "imports": ["PublicAdd", "PublicSin"]
+            "imports": [
+              "PublicAbs",
+              "PublicAdd",
+              "PublicCos",
+              "PublicExp",
+              "PublicLog",
+              "PublicMean",
+              "PublicSin",
+              "PublicSqrt",
+              "PublicTan"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-functions",
@@ -44009,7 +44005,7 @@
         "constants": ["GPU_MIN_ELEMENTS"]
       },
       "gpu/src/index.ts": {
-        "description": "/ <reference types=\"@webgpu/types\" />",
+        "description": "One serialization queue for ALL GPU dispatches (the error scope is a per-device stack).",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -45375,6 +45371,7 @@
           "functions/src/numeric/monte-carlo.ts",
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
+          "functions/src/numeric/ode-step-limit.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/propagate-uncertainty.ts",
           "functions/src/numeric/quadrature-extra.ts",
@@ -46451,17 +46448,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1292,
+    "totalTypeScriptFiles": 1293,
     "totalModules": 82,
-    "totalLinesOfCode": 221237,
-    "totalExports": 7098,
+    "totalLinesOfCode": 221915,
+    "totalExports": 7086,
     "totalClasses": 61,
-    "totalInterfaces": 604,
-    "totalFunctions": 2402,
+    "totalInterfaces": 606,
+    "totalFunctions": 2405,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1649,
-    "totalReExports": 3061,
+    "totalConstants": 1650,
+    "totalReExports": 3047,
     "totalTypeOnlyImports": 651,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,

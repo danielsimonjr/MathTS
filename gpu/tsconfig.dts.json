@@ -4,6 +4,5 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/index.ts", "types/**/*.d.ts", "src/**/*.d.ts"],
-  "files": ["types/webgpu-reference.d.ts"]
+  "include": ["src/index.ts", "types/**/*.d.ts", "src/**/*.d.ts"]
 }

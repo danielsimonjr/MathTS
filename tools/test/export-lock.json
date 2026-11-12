@@ -2221,6 +2221,9 @@
       "AStarResult": {
         "kind": "type"
       },
+      "AbsCallable": {
+        "kind": "type"
+      },
       "AddCallable": {
         "kind": "type"
       },
@@ -2359,6 +2362,9 @@
       "CorrelationTestResult": {
         "kind": "type"
       },
+      "CosCallable": {
+        "kind": "type"
+      },
       "CoulombFG": {
         "kind": "type"
       },
@@ -2399,6 +2405,9 @@
         "kind": "type"
       },
       "DescribeResult": {
+        "kind": "type"
+      },
+      "DetCallable": {
         "kind": "type"
       },
       "DimensionInference": {
@@ -2444,6 +2453,15 @@
         "kind": "type"
       },
       "EigshResult": {
+        "kind": "type"
+      },
+      "ElementwiseLeaf": {
+        "kind": "type"
+      },
+      "EvaluateCallable": {
+        "kind": "type"
+      },
+      "ExpCallable": {
         "kind": "type"
       },
       "ExtraWindowName": {
@@ -2692,6 +2710,12 @@
       "LjungBoxResult": {
         "kind": "type"
       },
+      "Log10Callable": {
+        "kind": "type"
+      },
+      "LogCallable": {
+        "kind": "type"
+      },
       "LogisticRegressionOptions": {
         "kind": "type"
       },
@@ -2737,6 +2761,9 @@
       "MathNode": {
         "kind": "type"
       },
+      "Matrix": {
+        "kind": "type"
+      },
       "MaxFlowResult": {
         "kind": "type"
       },
@@ -2744,6 +2771,9 @@
         "kind": "type"
       },
       "McNemarResult": {
+        "kind": "type"
+      },
+      "MeanCallable": {
         "kind": "type"
       },
       "MinCutResult": {
@@ -2884,7 +2914,13 @@
       "ProportionZResult": {
         "kind": "type"
       },
+      "PublicAbs": {
+        "kind": "type"
+      },
       "PublicAdd": {
+        "kind": "type"
+      },
+      "PublicCos": {
         "kind": "type"
       },
       "PublicDet": {
@@ -2893,10 +2929,28 @@
       "PublicEvaluate": {
         "kind": "type"
       },
+      "PublicExp": {
+        "kind": "type"
+      },
+      "PublicLog": {
+        "kind": "type"
+      },
+      "PublicLog10": {
+        "kind": "type"
+      },
       "PublicMean": {
         "kind": "type"
       },
       "PublicSin": {
+        "kind": "type"
+      },
+      "PublicSqrt": {
+        "kind": "type"
+      },
+      "PublicStd": {
+        "kind": "type"
+      },
+      "PublicTan": {
         "kind": "type"
       },
       "PublicVariance": {
@@ -3058,13 +3112,22 @@
       "SphericalVoronoiResult": {
         "kind": "type"
       },
+      "SqrtCallable": {
+        "kind": "type"
+      },
       "StateSpace": {
+        "kind": "type"
+      },
+      "StdCallable": {
         "kind": "type"
       },
       "StftOptions": {
         "kind": "type"
       },
       "StftResult": {
+        "kind": "type"
+      },
+      "StiffODESolverOptions": {
         "kind": "type"
       },
       "StringOptions": {
@@ -3083,6 +3146,9 @@
         "kind": "type"
       },
       "TTestResult": {
+        "kind": "type"
+      },
+      "TanCallable": {
         "kind": "type"
       },
       "TanhSinhOptions": {
@@ -3107,6 +3173,9 @@
         "kind": "type"
       },
       "VarNormalization": {
+        "kind": "type"
+      },
+      "VarianceCallable": {
         "kind": "type"
       },
       "VarianceTestResult": {

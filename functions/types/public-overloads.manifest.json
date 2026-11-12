@@ -1,25 +1,17 @@
 {
   "exports": [
-    {
-      "name": "add",
-      "source": "src/typed/arithmetic.ts"
-    },
-    {
-      "name": "sin",
-      "source": "src/typed/trigonometry.ts"
-    },
-    {
-      "name": "variance",
-      "source": "src/typed/arithmetic.ts"
-    },
-    {
-      "name": "mean",
-      "source": "src/typed/arithmetic.ts"
-    },
-    {
-      "name": "det",
-      "source": "src/matrix/det.ts",
-      "mathTypedPattern": "typed(name,"
-    }
+    { "name": "add", "source": "src/typed/arithmetic.ts" },
+    { "name": "abs", "source": "src/typed/arithmetic.ts" },
+    { "name": "sqrt", "source": "src/typed/arithmetic.ts" },
+    { "name": "exp", "source": "src/typed/arithmetic.ts" },
+    { "name": "log", "source": "src/typed/arithmetic.ts" },
+    { "name": "log10", "source": "src/typed/arithmetic.ts" },
+    { "name": "mean", "source": "src/typed/arithmetic.ts" },
+    { "name": "variance", "source": "src/typed/arithmetic.ts" },
+    { "name": "std", "source": "src/typed/arithmetic.ts" },
+    { "name": "sin", "source": "src/typed/trigonometry.ts" },
+    { "name": "cos", "source": "src/typed/trigonometry.ts" },
+    { "name": "tan", "source": "src/typed/trigonometry.ts" },
+    { "name": "det", "source": "src/matrix/det.ts", "mathTypedPattern": "return typed(name," }
   ]
 }

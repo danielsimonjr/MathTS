@@ -53,7 +53,17 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
-import type { PublicAdd, PublicMean, PublicVariance } from './public-type-exports.js';
+import type {
+  PublicAbs,
+  PublicAdd,
+  PublicExp,
+  PublicLog,
+  PublicLog10,
+  PublicMean,
+  PublicSqrt,
+  PublicStd,
+  PublicVariance,
+} from './public-type-exports.js';
 import {
   logReal,
   logRealBase,
@@ -703,7 +713,7 @@ export const abs = mathTyped('abs', {
   // Float64Array abs (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'abs', (x) => Math.abs(x)),
   'Array | Matrix': unaryCollection({ real: Math.abs, wasmKernel: 'abs' }),
-});
+}) as PublicAbs;
 
 /**
  * Sign function
@@ -798,7 +808,7 @@ export const sqrt = mathTyped('sqrt', {
   // Float64Array sqrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.sqrt(x)),
   'Array | Matrix': unaryCollection({ real: Math.sqrt, inRealDomain: staysRealSqrt }),
-});
+}) as PublicSqrt;
 
 /**
  * Square. The Float64Array signature is synchronous.
@@ -895,7 +905,7 @@ export const exp = mathTyped('exp', {
   // Float64Array exp (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'exp', (x) => Math.exp(x)),
   'Array | Matrix': unaryCollection({ real: Math.exp, wasmKernel: 'exp' }),
-});
+}) as PublicExp;
 
 /**
  * Natural logarithm (ln x). The Float64Array signature is synchronous.
@@ -914,7 +924,7 @@ export const log = mathTyped('log', {
     wasmKernel: 'log',
     inRealDomain: staysRealLog,
   }),
-});
+}) as PublicLog;
 
 /**
  * Base-10 logarithm
@@ -932,7 +942,7 @@ export const log10 = mathTyped('log10', {
     wasmKernel: 'log10',
     inRealDomain: staysRealLog,
   }),
-});
+}) as PublicLog10;
 
 /**
  * Base-2 logarithm
@@ -1846,12 +1856,19 @@ export const std = mathTyped('std', {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return stdOf(varianceAlong(m, dim, request, skipNaN));
   },
-});
+}) as PublicStd;
+
+type NanReduce = (
+  x: NumericVectorInput | number[][],
+  dimOrOpts?: number | StatReduceOptions,
+  opts?: StatReduceOptions
+) => number | number[];
 
 /** `mean` with NaN omitted (`numpy.nanmean`). A `dim` reduces along that axis. */
 export function nanmean(x: NumericVectorInput | number[][], dim?: number): number | number[] {
-  if (dim === undefined) return mean(x, { skipNaN: true }) as number;
-  return mean(x, dim, { skipNaN: true }) as number | number[];
+  const call = mean as NanReduce;
+  if (dim === undefined) return call(x, { skipNaN: true }) as number;
+  return call(x, dim, { skipNaN: true }) as number | number[];
 }
 
 /** `variance` with NaN omitted (`numpy.nanvar`, default sample `ddof=1`). */
@@ -1860,8 +1877,9 @@ export function nanvariance(
   ddof: number = 1,
   dim?: number
 ): number | number[] {
-  if (dim === undefined) return variance(x, { skipNaN: true, ddof }) as number;
-  return variance(x, dim, { skipNaN: true, ddof }) as number | number[];
+  const call = variance as NanReduce;
+  if (dim === undefined) return call(x, { skipNaN: true, ddof }) as number;
+  return call(x, dim, { skipNaN: true, ddof }) as number | number[];
 }
 
 /** `std` with NaN omitted (`numpy.nanstd`, default sample `ddof=1`). */
@@ -1870,8 +1888,9 @@ export function nanstd(
   ddof: number = 1,
   dim?: number
 ): number | number[] {
-  if (dim === undefined) return std(x, { skipNaN: true, ddof }) as number;
-  return std(x, dim, { skipNaN: true, ddof }) as number | number[];
+  const call = std as NanReduce;
+  if (dim === undefined) return call(x, { skipNaN: true, ddof }) as number;
+  return call(x, dim, { skipNaN: true, ddof }) as number | number[];
 }
 
 /**

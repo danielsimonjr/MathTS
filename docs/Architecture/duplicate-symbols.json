@@ -7,8 +7,8 @@
     "runtimeByTag": {
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 15,
-      "ALIAS_DELEGATION": 6,
-      "ALLOWLISTED": 230
+      "ALIAS_DELEGATION": 4,
+      "ALLOWLISTED": 232
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -26,7 +26,8 @@
           "file": "compat/src/shims.ts",
           "package": "@danielsimonjr/mathts-compat",
           "public": true,
-          "tag": "ALIAS_DELEGATION"
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
         },
         {
           "file": "core/src/arithmetic/scalar.ts",
@@ -277,7 +278,8 @@
           "file": "compat/src/shims.ts",
           "package": "@danielsimonjr/mathts-compat",
           "public": true,
-          "tag": "ALIAS_DELEGATION"
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
@@ -303,7 +305,8 @@
           "file": "compat/src/shims.ts",
           "package": "@danielsimonjr/mathts-compat",
           "public": true,
-          "tag": "ALIAS_DELEGATION"
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
@@ -355,7 +358,8 @@
           "file": "compat/src/shims.ts",
           "package": "@danielsimonjr/mathts-compat",
           "public": true,
-          "tag": "ALIAS_DELEGATION"
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
@@ -454,26 +458,6 @@
       "tag": "ALIAS_DELEGATION"
     },
     {
-      "name": "cos",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "ALIAS_DELEGATION"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALIAS_DELEGATION"
-    },
-    {
       "name": "floor",
       "category": "constant",
       "definers": [
@@ -525,26 +509,6 @@
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALIAS_DELEGATION"
-    },
-    {
-      "name": "tan",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "ALIAS_DELEGATION"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -2984,6 +2948,27 @@
         },
         {
           "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "cos",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -5830,6 +5815,27 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "mathjs factory-layer reimplementations (the `math.create({...})` plugin escape-hatch) of the core primitives in core/src/arithmetic/scalar.ts / core/src/array.ts. The scalar arith ops (add/subtract/multiply/divideScalar) + isNumeric are the SAME semantics as core and are guarded functions≡core≡oracle by functions/tests/gap-factory-core-parity.test.ts; the array ops (concat/filter/flatten/forEach/map/reshape/resize/squeeze) are the mathjs Matrix-aware factory contracts over core's pure-array primitives (oracle-pinned in the same test); `number` is distinct-by-contract (functions parses strings/units, core coerces a NumericScalar). core stays canonical. NOTE (surfaced): the deeper 'collapse the factory layer into typed' ADR is an open call — allowlist-with-parity is the interim divergence guard, not a resolution. 2026-07 dedup campaign, closing tail slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "tan",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",

@@ -5,4 +5,4 @@
 '@danielsimonjr/mathts-units': patch
 ---
 
-Publish concrete public overloads for add, sin, variance, mean, det, and evaluate; fix `Unit` as a type via interface merge; add consumer type fixtures and generator sync.
+Publish public call overloads generated from the live typed-function signatures (add, abs, sqrt, exp, log, trig, mean, variance, std, det, evaluate), keep them in sync with a failing check, fix `Unit` as a type via interface merge, and stop referencing `@webgpu/types` so consumers resolve WebGPU names from the TypeScript DOM lib.

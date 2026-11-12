@@ -24,7 +24,7 @@ import {
   staysRealUnitInterval,
 } from './complex-promotion.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
-import type { PublicSin } from './public-type-exports.js';
+import type { PublicCos, PublicSin, PublicTan } from './public-type-exports.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
 
 // =============================================================================
@@ -64,7 +64,7 @@ export const cos = mathTyped('cos', {
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'cos', Math.cos),
   'Array | Matrix': unaryCollection({ real: Math.cos, wasmKernel: 'cos' }),
-});
+}) as PublicCos;
 
 /**
  * Tangent function
@@ -78,7 +78,7 @@ export const tan = mathTyped('tan', {
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'tan', Math.tan),
   'Array | Matrix': unaryCollection({ real: Math.tan, wasmKernel: 'tan' }),
-});
+}) as PublicTan;
 
 /**
  * Cosecant function (1/sin)

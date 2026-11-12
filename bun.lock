@@ -167,9 +167,6 @@
     "gpu": {
       "name": "@danielsimonjr/mathts-gpu",
       "version": "0.2.1",
-      "dependencies": {
-        "@webgpu/types": "^0.1.72",
-      },
       "devDependencies": {
         "@types/node": "^26.4.0",
         "@webgpu/types": "^0.1.72",
@@ -177,12 +174,6 @@
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
       },
-      "peerDependencies": {
-        "@webgpu/types": "^0.1.72",
-      },
-      "optionalPeers": [
-        "@webgpu/types",
-      ],
     },
     "linalg": {
       "name": "@danielsimonjr/mathts-linalg",
@@ -213,12 +204,6 @@
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
       },
-      "peerDependencies": {
-        "@webgpu/types": "^0.1.72",
-      },
-      "optionalPeers": [
-        "@webgpu/types",
-      ],
     },
     "numbers": {
       "name": "@danielsimonjr/mathts-numbers",
