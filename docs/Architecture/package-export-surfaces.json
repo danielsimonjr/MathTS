@@ -491,6 +491,7 @@
       "tau",
       "transpose",
       "variance",
+      "wireMathjsInstanceApi",
       "zeros"
     ],
     "core": [
@@ -2098,6 +2099,7 @@
       "createIndex",
       "createIndexClass",
       "createIndexError",
+      "createInstanceEvaluator",
       "createIntersect",
       "createInv",
       "createInverseConductanceQuantum",
@@ -2525,6 +2527,7 @@
       "eulerPhi",
       "eulerPolynomial",
       "evaluate",
+      "EVALUATE_SCOPE_OMIT",
       "evaluateScalar",
       "evaluateScalarPopulation",
       "evaluateScalarTape",
@@ -2889,6 +2892,7 @@
       "implicitDiff",
       "implicitGpuAllowed",
       "importFactory",
+      "ImportOptions",
       "improveErrorMessage",
       "impulseResponse",
       "inCircle",

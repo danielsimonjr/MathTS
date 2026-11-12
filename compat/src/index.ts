@@ -19,6 +19,7 @@
 
 import { shims } from './shims.js';
 import { createChain, type Chain } from './chain.js';
+import { wireMathjsInstanceApi } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -97,6 +98,31 @@ export interface MathInstance {
 
   // Configuration
   config: (newConfig?: Partial<MathJSConfig>) => MathJSConfig;
+
+  /** mathjs extension API — register functions visible to `evaluate`. */
+  import: (
+    functions: unknown,
+    options?: { override?: boolean; silent?: boolean; wrap?: boolean }
+  ) => void;
+  /** mathjs typed-function dispatcher for custom overloads. */
+  typed: (...args: unknown[]) => unknown;
+  /** Alias of `compileExpr` (mathjs naming). */
+  compile: (
+    expr: string,
+    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
+  ) => {
+    evaluate(scope?: Record<string, unknown>): unknown;
+  };
+  evaluate: (
+    expr: string,
+    scope?: Record<string, unknown>,
+    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
+  ) => unknown;
+  reviver: (key: string, value: unknown) => unknown;
+  replacer: (key: string, value: unknown) => unknown;
+  subset: (...args: unknown[]) => unknown;
+  index: (...args: unknown[]) => unknown;
+  unit: (...args: unknown[]) => unknown;
 
   // Type creation
   complex: typeof shims.complex;
@@ -289,7 +315,7 @@ export function create(
   const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
   const currentConfig: MathJSConfig = { ...configBaseline };
 
-  const instance: MathInstance = {
+  const instance: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...factories,
@@ -433,7 +459,9 @@ export function create(
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);
 
-  return instance;
+  wireMathjsInstanceApi(instance as Record<string, unknown>, currentConfig);
+
+  return instance as MathInstance;
 }
 
 /**

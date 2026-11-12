@@ -52,6 +52,8 @@ import {
   round as _round,
   floor as _floor,
   ceil as _ceil,
+  matrix as _factoryMatrix,
+  sparse as _factorySparse,
 } from '@danielsimonjr/mathts-functions';
 
 import {
@@ -128,6 +130,52 @@ export function bignumber(value?: number | string | BigNumber): BigNumber {
   return BigNumber.fromNumber(value);
 }
 
+/** Matrix values returned from the compat `matrix` shim (native or mathjs bridge). */
+export type CompatMatrixValue =
+  | DenseMatrix
+  | SparseMatrix
+  | {
+      isMatrix: boolean;
+      toArray(): unknown;
+      subset(...args: unknown[]): unknown;
+      get(...args: unknown[]): unknown;
+      transpose(): CompatMatrixValue;
+      rows: number;
+      cols: number;
+    };
+
+/** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
+function isCompatBridgeMatrix(x: unknown): boolean {
+  if (x instanceof DenseMatrix || x instanceof SparseMatrix) {
+    return true;
+  }
+  if (typeof x === 'object' && x !== null) {
+    const proto = Object.getPrototypeOf(x) as { isMatrix?: boolean } | null;
+    return proto?.isMatrix === true;
+  }
+  return false;
+}
+
+/** Normalize compat/matrix inputs to a native `DenseMatrix` for linear algebra shims. */
+function compatToDenseMatrix(m: unknown): DenseMatrix {
+  if (m instanceof DenseMatrix) {
+    return m;
+  }
+  if (m instanceof SparseMatrix) {
+    return DenseMatrix.fromArray(m.toArray() as number[][]);
+  }
+  if (Array.isArray(m)) {
+    return DenseMatrix.fromArray(m as number[][]);
+  }
+  if (typeof m === 'object' && m !== null && 'toArray' in m) {
+    const arr = (m as { toArray(): unknown }).toArray();
+    if (Array.isArray(arr)) {
+      return DenseMatrix.fromArray(arr as number[][]);
+    }
+  }
+  throw new TypeError('Expected DenseMatrix or 2D array');
+}
+
 /**
  * Create a matrix (mathjs-compatible)
  * @example
@@ -136,29 +184,31 @@ export function bignumber(value?: number | string | BigNumber): BigNumber {
  */
 export function matrix(
   data?: number[][] | DenseMatrix | SparseMatrix,
-  format?: 'dense' | 'sparse'
-): DenseMatrix | SparseMatrix {
-  if (data === undefined) {
-    return DenseMatrix.zeros(0, 0);
+  format?: 'dense' | 'sparse' | string
+): CompatMatrixValue {
+  if (data === undefined && format === undefined) {
+    return _factoryMatrix() as CompatMatrixValue;
   }
   if (data instanceof DenseMatrix || data instanceof SparseMatrix) {
+    if (format === 'sparse' && data instanceof DenseMatrix) {
+      return _factorySparse(data.toArray()) as CompatMatrixValue;
+    }
     return data;
   }
-  const dense = DenseMatrix.fromArray(data);
-  if (format === 'sparse') {
-    return SparseMatrix.fromDense(dense);
+  if (data === undefined) {
+    return _factoryMatrix(undefined, format) as CompatMatrixValue;
   }
-  return dense;
+  return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
 }
 
 /**
  * Create a sparse matrix (mathjs-compatible)
  */
-export function sparse(data?: number[][]): SparseMatrix {
+export function sparse(data?: number[][]): CompatMatrixValue {
   if (data === undefined) {
-    return SparseMatrix.zeros(0, 0);
+    return _factorySparse() as CompatMatrixValue;
   }
-  return SparseMatrix.fromDense(DenseMatrix.fromArray(data));
+  return _factorySparse(data) as CompatMatrixValue;
 }
 
 // =============================================================================
@@ -168,16 +218,20 @@ export function sparse(data?: number[][]): SparseMatrix {
 // add/subtract/multiply must be matrix-aware for mathjs parity: the
 // functions-package versions are scalar-only and throw on number[][]. Delegate
 // 2-D array / DenseMatrix operands to the matrix package, scalars to functions.
-type MatrixLike = number[][] | DenseMatrix;
+type MatrixLike = number[][] | DenseMatrix | CompatMatrixValue;
 
 const isMatrixLike = (x: unknown): x is MatrixLike =>
-  x instanceof DenseMatrix ||
+  isCompatBridgeMatrix(x) ||
   (Array.isArray(x) && x.length > 0 && Array.isArray((x as unknown[])[0]));
 
-const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
-  x instanceof DenseMatrix ? x : DenseMatrix.fromArray(x as number[][]);
+const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 
-const unwrap = (r: unknown): unknown => (r instanceof DenseMatrix ? r.toArray() : r);
+const unwrap = (r: unknown): unknown =>
+  isCompatBridgeMatrix(r) && !(r instanceof DenseMatrix)
+    ? (r as { toArray(): unknown }).toArray()
+    : r instanceof DenseMatrix
+      ? r.toArray()
+      : r;
 
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
@@ -271,7 +325,10 @@ export const mean: TypedFunction = _mean;
 type Normalization = 'unbiased' | 'uncorrected' | 'biased';
 
 function toNumericArray(data: unknown): number[] {
-  if (data instanceof DenseMatrix) return data.toArray().flat(Infinity) as number[];
+  if (isCompatBridgeMatrix(data)) {
+    const flat = (data as { toArray(): unknown }).toArray();
+    return (Array.isArray(flat) ? flat : [flat]).flat(Infinity) as number[];
+  }
   if (Array.isArray(data)) return (data as unknown[]).flat(Infinity) as number[];
   return [data as number];
 }
@@ -379,13 +436,17 @@ export function arg(c: Complex): number {
  * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
  * plain nested array for array input, a Matrix for Matrix input).
  */
-export function transpose(
-  m: DenseMatrix | SparseMatrix | number[][]
-): DenseMatrix | SparseMatrix | number[][] {
+export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][] {
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m).transpose().toArray();
   }
-  return m.transpose();
+  if (m instanceof DenseMatrix || m instanceof SparseMatrix) {
+    return m.transpose();
+  }
+  if (isCompatBridgeMatrix(m)) {
+    return (m as { transpose(): CompatMatrixValue }).transpose();
+  }
+  throw new TypeError('Expected matrix or 2D array');
 }
 
 /**
@@ -393,12 +454,15 @@ export function transpose(
  *
  * Computes the determinant using LU decomposition.
  */
-export function det(m: DenseMatrix | number[][]): number {
-  const matrix = Array.isArray(m) ? DenseMatrix.fromArray(m) : m;
-
-  if (!(matrix instanceof DenseMatrix)) {
+export function det(m: CompatMatrixValue | number[][]): number {
+  // The matrix-package SparseMatrix was rejected before this compat surface
+  // routed math.matrix/math.sparse through the factory bridge. mathjs det()
+  // accepts math.sparse() (that bridge matrix, converted below via toArray).
+  // The native class stays rejected so existing callers keep the same error.
+  if (m instanceof SparseMatrix) {
     throw new TypeError('Expected DenseMatrix or 2D array');
   }
+  const matrix = compatToDenseMatrix(m);
 
   if (matrix.rows !== matrix.cols) {
     throw new Error('Determinant requires a square matrix');
@@ -573,7 +637,7 @@ export function isNumber_(x: unknown): x is number {
  * @returns `true` if `x` is a DenseMatrix or a SparseMatrix.
  */
 export function isMatrix(x: unknown): x is DenseMatrix | SparseMatrix {
-  return x instanceof DenseMatrix || x instanceof SparseMatrix;
+  return isCompatBridgeMatrix(x);
 }
 
 // =============================================================================
