@@ -23962,6 +23962,8 @@ modules:
       interfaces:
         - SampleNOptions
         - Distribution
+        - GammaDistOptions
+        - GammaDistNamedOptions
         - MultivariateDistribution
       functions:
         - normalDist
@@ -23970,6 +23972,8 @@ modules:
         - chiSquaredDist
         - exponentialDist
         - fDist
+        - gammaDist
+        - gammaDist
         - gammaDist
         - logNormalDist
         - poissonDist
@@ -44277,11 +44281,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1298
   totalModules: 82
-  totalLinesOfCode: 222198
+  totalLinesOfCode: 222268
   totalExports: 7116
   totalClasses: 61
-  totalInterfaces: 605
-  totalFunctions: 2410
+  totalInterfaces: 607
+  totalFunctions: 2412
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1650
