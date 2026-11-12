@@ -273,7 +273,11 @@ export function createEvaluate(
       }
     }
     const result = compiled.evaluate(scope);
-    return unsafe ? result : sanitizeEvaluateResult(result);
+    const scopeBindings =
+      scope instanceof Map
+        ? Object.fromEntries(scope.entries())
+        : (scope as Record<string, unknown> | undefined);
+    return unsafe ? result : sanitizeEvaluateResult(result, new WeakSet(), scopeBindings);
   }
 
   return evaluate;

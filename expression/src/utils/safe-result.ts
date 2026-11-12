@@ -31,14 +31,23 @@ function isAllowedObject(value: object): boolean {
   return false;
 }
 
-function isHostReturnValue(value: unknown): boolean {
+function isDisallowedHostObject(value: unknown): boolean {
   if (value === null || value === undefined) return false;
-  const t = typeof value;
-  if (t === 'number' || t === 'boolean' || t === 'string' || t === 'bigint') return false;
-  if (t === 'function' || t === 'symbol') return true;
-  if (t !== 'object') return true;
-  if (isAllowedObject(value)) return false;
-  return true;
+  if (typeof value !== 'object') return false;
+  return !isAllowedObject(value);
+}
+
+/** Block returning a caller scope binding by reference (#816), not math exports like `min`. */
+function isExfiltratedScopeBinding(value: unknown, scope?: Record<string, unknown>): boolean {
+  if (!scope || value === undefined || value === null) return false;
+  for (const key of Object.keys(scope)) {
+    if (scope[key] !== value) continue;
+    if (typeof value === 'function') {
+      return typeof process !== 'undefined' && (value as unknown) === (process as unknown);
+    }
+    return isDisallowedHostObject(value);
+  }
+  return false;
 }
 
 /**
@@ -47,9 +56,10 @@ function isHostReturnValue(value: unknown): boolean {
  */
 export function sanitizeEvaluateResult(
   value: unknown,
-  seen: WeakSet<object> = new WeakSet()
+  seen: WeakSet<object> = new WeakSet(),
+  scope?: Record<string, unknown>
 ): unknown {
-  if (isHostReturnValue(value)) {
+  if (isExfiltratedScopeBinding(value, scope)) {
     throw new Error(
       'Security: evaluate cannot return a host object. Scope values are not exfiltrated by identity.'
     );
@@ -57,6 +67,7 @@ export function sanitizeEvaluateResult(
   if (value === null || value === undefined) return value;
   const t = typeof value;
   if (t === 'number' || t === 'boolean' || t === 'string' || t === 'bigint') return value;
+  if (t === 'function' || t === 'symbol') return value;
   if (t !== 'object') return value;
 
   if (isComplex(value) || isFraction(value)) return value;
@@ -74,7 +85,7 @@ export function sanitizeEvaluateResult(
   if (Array.isArray(value)) {
     if (seen.has(value)) return value;
     seen.add(value);
-    return value.map((entry) => sanitizeEvaluateResult(entry, seen));
+    return value.map((entry) => sanitizeEvaluateResult(entry, seen, scope));
   }
 
   if (isPlainObject(value)) {
@@ -86,7 +97,7 @@ export function sanitizeEvaluateResult(
       setSafeProperty(
         out,
         key,
-        sanitizeEvaluateResult((value as Record<string, unknown>)[key], seen)
+        sanitizeEvaluateResult((value as Record<string, unknown>)[key], seen, scope)
       );
     }
     return out;

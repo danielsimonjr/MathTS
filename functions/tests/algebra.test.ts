@@ -375,7 +375,7 @@ describe('substitute', () => {
   });
 
   it('should substitute with expressions', () => {
-    expect(String(substitute('a*b + c', { a: '(x+1)' }))).toMatch(/\(x \+ 1\)\*b \+ c/);
+    expect(String(substitute('a*b + c', { a: '(x+1)' }))).toMatch(/\(x \+ 1\)\s*\*\s*b \+ c/);
   });
 
   it('should not replace partial matches', () => {

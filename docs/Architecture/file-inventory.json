@@ -4377,7 +4377,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 311
+      "loc": 315
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4923,7 +4923,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 97
+      "loc": 113
     },
     {
       "file": "expression/src/utils/scope.ts",
@@ -11384,7 +11384,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 662
+      "loc": 661
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",

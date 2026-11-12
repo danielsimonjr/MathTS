@@ -185,7 +185,6 @@ const PLAIN_NOT_SCALAR: Record<string, string> = {
   polyval: 'takes a coefficient array',
   replacer: 'JSON replacer; takes a key and a value',
   reviver: 'JSON reviver; takes a key and a value',
-  substitute: 'takes an expression and a scope',
   trapz: 'takes sample arrays',
   trapzF64: 'takes a Float64Array',
 };
