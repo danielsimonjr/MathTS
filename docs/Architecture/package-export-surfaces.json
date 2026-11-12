@@ -869,7 +869,16 @@
       "WasmManifest",
       "WasmModuleLoader"
     ],
-    "evaluator": ["compile", "CompiledExpression", "compileExpression", "createEvaluate", "Scope"],
+    "evaluator": [
+      "compile",
+      "CompiledExpression",
+      "compileExpression",
+      "compileExpressionWithDeps",
+      "createEvaluate",
+      "evaluate",
+      "parse",
+      "Scope"
+    ],
     "expression": [
       "absDocs",
       "accessFactory",
@@ -952,6 +961,7 @@
       "CompiledExpression",
       "compileDocs",
       "compileExpression",
+      "compileExpressionWithDeps",
       "compileInlineExpression",
       "complexDocs",
       "complexExpandDocs",
@@ -1045,6 +1055,7 @@
       "deepMap",
       "deepMapArray",
       "deepStrictEqual",
+      "defaultMathScope",
       "defaultTemplate",
       "degreeDocs",
       "derivativeDocs",
@@ -1094,7 +1105,9 @@
       "escapeLatex",
       "escapeMathML",
       "evalShortCircuitBinary",
+      "evaluate",
       "evaluateDocs",
+      "EvaluateOptions",
       "expandDocs",
       "expDocs",
       "expm1",
@@ -1337,6 +1350,7 @@
       "onesDocs",
       "orDocs",
       "parenthesizeLower",
+      "parse",
       "parseDocs",
       "parserDocs",
       "partialDerivativeDocs",
@@ -4780,6 +4794,7 @@
       "getPrecedence",
       "isAssociativeWith",
       "keywords",
+      "parse",
       "properties"
     ],
     "plot": [

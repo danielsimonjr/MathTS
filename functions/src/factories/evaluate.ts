@@ -10,7 +10,7 @@
 
 import {
   createEvaluate,
-  compileExpression as _compileExpression,
+  compileExpressionWithDeps as _compileExpression,
 } from '@danielsimonjr/mathts-expression';
 import {
   Complex,
