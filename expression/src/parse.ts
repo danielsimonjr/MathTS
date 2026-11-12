@@ -1943,9 +1943,10 @@ export const createParse = /* #__PURE__ */ factory(
 
         const numericType = safeNumberType(numberStr, config);
         const value = numeric(numberStr, numericType);
-        // Any non-finite IEEE result is an overflow. A decimal point must not
-        // sneak past (`1` followed by hundreds of zeros, then `.5` is Infinity).
-        // The identifiers Infinity and NaN are symbols, not numeric tokens.
+        // ±Infinity is an overflow. A decimal point must not sneak past
+        // (`1` followed by hundreds of zeros, then `.5` is Infinity).
+        // NaN is a different token result (radix suffixes such as `0xFFi16`
+        // and `0b1.1`); the identifiers Infinity and NaN are symbols.
         if (
           numericType === 'number' &&
           typeof value === 'number' &&
