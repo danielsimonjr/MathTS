@@ -7,7 +7,11 @@ import { create as mjCreate, all as mjAll } from 'mathjs';
 
 const mt = create(all);
 const mj = mjCreate(mjAll);
-const n = 5000;
+// 5_000 adds finishes inside one performance.now tick (~0.05 ms), so the
+// ratio is timer noise (measured 0.85 and 3.1 on the same build). A million
+// calls puts each side in the tens of milliseconds, where the ≤ 2.0 gate
+// reads the real path.
+const n = 1_000_000;
 
 function median(xs) {
   const s = [...xs].sort((a, b) => a - b);
