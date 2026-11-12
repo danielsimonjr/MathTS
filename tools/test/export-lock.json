@@ -2057,6 +2057,9 @@
       "TensorCholeskyResult": {
         "kind": "type"
       },
+      "TensorDtype": {
+        "kind": "type"
+      },
       "TensorEigOpts": {
         "kind": "type"
       },
@@ -2085,6 +2088,9 @@
         "kind": "type"
       },
       "TensorSolveResult": {
+        "kind": "type"
+      },
+      "TensorStorage": {
         "kind": "type"
       },
       "TensorSvdOpts": {
@@ -9303,6 +9309,9 @@
       "dwt": {
         "kind": "function"
       },
+      "fft": {
+        "kind": "function"
+      },
       "fourier": {
         "kind": "function"
       },
@@ -9322,6 +9331,9 @@
         "kind": "function"
       },
       "idst": {
+        "kind": "function"
+      },
+      "ifft": {
         "kind": "function"
       },
       "invFourier": {
