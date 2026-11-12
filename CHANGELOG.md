@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **DenseMatrix construction, scalar multiply, and size cap (dogfood G24, #810, #814, #815).** `DenseMatrix.zeros` and allocation preflight `rows×cols` against `DENSE_MATRIX_MAX_ELEMENTS` (1e8) before `Float64Array` construction. `new DenseMatrix([[1,2],[3,4]])` infers shape; jagged nested input throws a rectangular `TypeError`. `.multiply(number)` scales like mathjs; non-matrix RHS gets a clear `TypeError`. Tests: `matrix/tests/dogfood-g24-densematrix.test.ts`.
+
 - **Tensor construction and axis ops (dogfood G14, #795, #750, #749, #748).** `Tensor.fromNested` infers shape from rectangular nested arrays and throws `TypeError` on jagged input. `flip` accepts a single axis number. `stack` defaults `axis` to `0`. The `Tensor` constructor rejects non-`Float64Array` storage at runtime. Architecture verification: `totalTypeScriptFiles` 2361 → 2362, `totalLinesOfCode` 419585 → 419731; `tensor/dist/index.js` bundle budget 75569 → 76572; `autograd/dist/index.js` bundle budget 56170 → 59159 (from merged main). Tests: `tensor/tests/dogfood-g14.test.ts`.
 
 - **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.

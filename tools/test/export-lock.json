@@ -1453,6 +1453,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DENSE_MATRIX_MAX_ELEMENTS": {
+        "kind": "number"
+      },
       "DecompositionMatrixInput": {
         "kind": "type"
       },
@@ -1606,6 +1609,9 @@
       "add": {
         "kind": "function"
       },
+      "assertDenseMatrixSize": {
+        "kind": "function"
+      },
       "backendManager": {
         "kind": "object"
       },
@@ -1646,9 +1652,6 @@
         "kind": "function"
       },
       "decompositionInputToNestedArray": {
-        "kind": "function"
-      },
-      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "destroyGlobalGPU": {
@@ -1724,6 +1727,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {

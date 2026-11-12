@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2246,
+  "totalFiles": 2248,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1261,
+    "build-entry": 1262,
     "test-only": 0,
     "orphan": 0,
-    "test": 894,
+    "test": 895,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1287,
-    "tests": 894,
+    "src": 1288,
+    "tests": 895,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1015,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 121,
+    "@danielsimonjr/mathts-matrix": 123,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
@@ -13018,6 +13018,13 @@
       "loc": 151
     },
     {
+      "file": "matrix/src/types/dense/limits.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 29
+    },
+    {
       "file": "matrix/src/types/dense/reduction.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
@@ -13036,14 +13043,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 618
+      "loc": 669
     },
     {
       "file": "matrix/src/types/index.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 18
+      "loc": 22
     },
     {
       "file": "matrix/src/types/Matrix.ts",
@@ -13233,6 +13240,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 606
+    },
+    {
+      "file": "matrix/tests/dogfood-g24-densematrix.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 67
     },
     {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",

@@ -10,6 +10,7 @@
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import * as arithmetic from './dense/arithmetic.js';
 import * as reduction from './dense/reduction.js';
+import { assertDenseMatrixSize } from './dense/limits.js';
 import { contiguousDenseData } from './dense/storage.js';
 
 /**
@@ -51,24 +52,62 @@ export class DenseMatrix extends Matrix<number> {
    * @param data - Optional initial data (row-major order)
    */
   constructor(
-    rows: number,
-    cols: number,
+    rows: number | number[][],
+    cols?: number,
     data?: Float64Array | number[] | number[][],
     viewConfig?: { isView: boolean; offset: number; rowStride: number }
   ) {
     super();
 
-    if (!Number.isInteger(rows) || !Number.isInteger(cols)) {
-      throw new TypeError(
-        `Matrix dimensions must be integers, got ${String(rows)}×${String(cols)}`
-      );
-    }
-    if (rows < 0 || cols < 0) {
-      throw new Error('Matrix dimensions must be non-negative');
+    let nRows: number;
+    let nCols: number;
+    let dataArg = data;
+
+    if (Array.isArray(rows)) {
+      if (cols !== undefined || dataArg !== undefined) {
+        throw new TypeError(
+          'DenseMatrix(nested array) accepts one argument; use new DenseMatrix(rows, cols) for dimensions'
+        );
+      }
+      const nested = rows as number[][];
+      nRows = nested.length;
+      nCols = nested[0]?.length ?? 0;
+      for (let i = 0; i < nRows; i++) {
+        if (!Array.isArray(nested[i])) {
+          throw new TypeError(
+            `DenseMatrix nested array must be rectangular; row ${i} is not an array`
+          );
+        }
+        if (nested[i].length !== nCols) {
+          throw new TypeError(
+            `DenseMatrix nested array must be rectangular; row ${i} has length ${nested[i].length}, expected ${nCols}`
+          );
+        }
+      }
+      assertDenseMatrixSize(nRows, nCols);
+      dataArg = nested;
+      cols = nCols;
+      rows = nRows;
+    } else {
+      if (cols === undefined) {
+        throw new TypeError(
+          'DenseMatrix constructor is (rows, cols). Use DenseMatrix.fromArray(number[][]) or new DenseMatrix([[...]])'
+        );
+      }
+      nRows = rows;
+      nCols = cols;
     }
 
-    this.rows = rows;
-    this.cols = cols;
+    if (!Number.isInteger(nRows) || !Number.isInteger(nCols)) {
+      throw new TypeError(
+        `Matrix dimensions must be integers, got ${String(nRows)}×${String(nCols)}`
+      );
+    }
+
+    assertDenseMatrixSize(nRows, nCols);
+
+    this.rows = nRows;
+    this.cols = nCols;
 
     if (viewConfig) {
       // View into existing data
@@ -79,43 +118,48 @@ export class DenseMatrix extends Matrix<number> {
     } else {
       this.isView = false;
       this.offset = 0;
-      this.rowStride = cols;
+      this.rowStride = nCols;
 
-      if (data === undefined) {
+      const alloc = dataArg;
+      if (alloc === undefined) {
         // Zero-initialized matrix
-        this.data = new Float64Array(rows * cols);
-      } else if (data instanceof Float64Array) {
-        if (data.length !== rows * cols) {
-          throw new Error(`Data length ${data.length} does not match dimensions ${rows}×${cols}`);
+        this.data = new Float64Array(nRows * nCols);
+      } else if (alloc instanceof Float64Array) {
+        if (alloc.length !== nRows * nCols) {
+          throw new Error(
+            `Data length ${alloc.length} does not match dimensions ${nRows}×${nCols}`
+          );
         }
-        this.data = data;
-      } else if (Array.isArray(data)) {
-        if (Array.isArray(data[0])) {
+        this.data = alloc;
+      } else if (Array.isArray(alloc)) {
+        if (Array.isArray(alloc[0])) {
           // Nested array
-          const nested = data as number[][];
-          if (nested.length !== rows) {
-            throw new Error(`Expected ${rows} rows, got ${nested.length}`);
+          const nested = alloc as number[][];
+          if (nested.length !== nRows) {
+            throw new Error(`Expected ${nRows} rows, got ${nested.length}`);
           }
-          this.data = new Float64Array(rows * cols);
-          for (let i = 0; i < rows; i++) {
-            if (nested[i].length !== cols) {
-              throw new Error(`Row ${i} has ${nested[i].length} elements, expected ${cols}`);
+          this.data = new Float64Array(nRows * nCols);
+          for (let i = 0; i < nRows; i++) {
+            if (nested[i].length !== nCols) {
+              throw new Error(`Row ${i} has ${nested[i].length} elements, expected ${nCols}`);
             }
-            for (let j = 0; j < cols; j++) {
-              this.data[i * cols + j] = nested[i][j];
+            for (let j = 0; j < nCols; j++) {
+              this.data[i * nCols + j] = nested[i][j];
             }
           }
         } else {
           // Flat array
-          const flat = data as number[];
-          if (flat.length !== rows * cols) {
-            throw new Error(`Data length ${flat.length} does not match dimensions ${rows}×${cols}`);
+          const flat = alloc as number[];
+          if (flat.length !== nRows * nCols) {
+            throw new Error(
+              `Data length ${flat.length} does not match dimensions ${nRows}×${nCols}`
+            );
           }
           this.data = new Float64Array(flat);
         }
       } else {
         throw new TypeError(
-          `DenseMatrix data must be a Float64Array, number[] or number[][], got ${typeof data}`
+          `DenseMatrix data must be a Float64Array, number[] or number[][], got ${typeof alloc}`
         );
       }
     }
@@ -131,6 +175,7 @@ export class DenseMatrix extends Matrix<number> {
   static fromArray(arr: number[][]): DenseMatrix {
     const rows = arr.length;
     const cols = arr[0]?.length ?? 0;
+    assertDenseMatrixSize(rows, cols);
     return new DenseMatrix(rows, cols, arr);
   }
 
@@ -363,7 +408,15 @@ export class DenseMatrix extends Matrix<number> {
   /**
    * Matrix multiplication
    */
-  multiply(other: Matrix<number>): DenseMatrix {
+  multiply(other: Matrix<number> | number): DenseMatrix {
+    if (typeof other === 'number') {
+      return this.scale(other);
+    }
+    if (other == null || typeof (other as Matrix<number>).rows !== 'number') {
+      throw new TypeError(
+        `DenseMatrix.multiply expects a matrix operand (matrix product). For a scalar, use .scale(k) or .multiply(scalar).`
+      );
+    }
     this.checkMultiplyDimensions(other);
     return new DenseMatrix(this.rows, other.cols, arithmetic.multiply(this, other));
   }

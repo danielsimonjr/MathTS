@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1287
+  totalFiles: 1288
   totalModules: 82
-  totalExports: 7016
+  totalExports: 7020
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5548,6 +5548,9 @@ modules:
         - file: ./dense/reduction.js
           imports:
             - '* as reduction'
+        - file: ./dense/limits.js
+          imports:
+            - assertDenseMatrixSize
         - file: ./dense/storage.js
           imports:
             - contiguousDenseData
@@ -5630,6 +5633,19 @@ modules:
         - multiply
         - scale
         - transpose
+    matrix/src/types/dense/limits.ts:
+      description: Preflight limits for dense matrix allocation (DoS guard).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
+      functions:
+        - assertDenseMatrixSize
+      constants:
+        - DENSE_MATRIX_MAX_ELEMENTS
     matrix/src/types/dense/reduction.ts:
       description: Add all elements of a matrix.
       externalDependencies: []
@@ -5686,6 +5702,11 @@ modules:
             - DenseMatrix
             - isDenseMatrix
           reExport: true
+        - file: ./dense/limits.js
+          imports:
+            - DENSE_MATRIX_MAX_ELEMENTS
+            - assertDenseMatrixSize
+          reExport: true
         - file: ./SparseMatrix.js
           imports:
             - SparseMatrix
@@ -5706,6 +5727,8 @@ modules:
         - isMatrix
         - DenseMatrix
         - isDenseMatrix
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
         - SparseMatrix
         - isSparseMatrix
         - MatrixDimensions
@@ -5718,6 +5741,8 @@ modules:
         - isMatrix
         - DenseMatrix
         - isDenseMatrix
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
         - SparseMatrix
         - isSparseMatrix
         - MatrixDimensions
@@ -42285,6 +42310,7 @@ dependencyGraph:
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
         - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/dense/limits.ts
         - matrix/src/types/dense/reduction.ts
         - matrix/src/types/dense/storage.ts
         - matrix/src/types/index.ts
@@ -43601,17 +43627,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1287
+  totalTypeScriptFiles: 1288
   totalModules: 82
-  totalLinesOfCode: 218799
-  totalExports: 7016
+  totalLinesOfCode: 218883
+  totalExports: 7020
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2363
+  totalFunctions: 2364
   totalTypeGuards: 172
   totalEnums: 0
-  totalConstants: 1646
-  totalReExports: 3023
+  totalConstants: 1647
+  totalReExports: 3025
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
