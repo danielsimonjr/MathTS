@@ -7,6 +7,7 @@
  * (no adapter, unsupported environment, init failure) resolves to `null`.
  */
 
+import { resetWebGPUAvailabilityCache } from './detect.js';
 import { getGlobalGPUContext, type GPUContextOptions } from './GPUContext.js';
 
 let inFlightDevice: Promise<GPUDevice | null> | null = null;
@@ -49,4 +50,5 @@ export function getGpuDevice(options?: GPUContextOptions): Promise<GPUDevice | n
  */
 export function resetGpuDevice(): void {
   inFlightDevice = null;
+  resetWebGPUAvailabilityCache();
 }

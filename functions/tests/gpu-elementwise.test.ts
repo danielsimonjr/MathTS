@@ -88,6 +88,17 @@ describe('fuseUnaryChainAsync falls through to a correct CPU result', () => {
     expect(Array.from(got)).toEqual(Array.from(want));
   });
 
+  it('matches the CPU chain above the GPU threshold when no device exists', async () => {
+    enableGpu();
+    const xs = big();
+    const got = await fuseUnaryChainAsync(['sin', 'cos'], xs);
+    const want = fuseUnaryChain(['sin', 'cos'], xs);
+    for (let i = 0; i < xs.length; i++) {
+      if (got[i] !== want[i]) expect(got[i]).toBe(want[i]);
+    }
+    expect(got[1000]).toBeCloseTo(Math.cos(Math.sin(xs[1000])), 12);
+  });
+
   it('computes exp(sin(x)) left-to-right', async () => {
     const xs = Float64Array.from([0, 0.5, 1, 1.5]);
     const got = await fuseUnaryChainAsync(['sin', 'exp'], xs);

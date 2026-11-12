@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2251,
+  "totalFiles": 2254,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1262,
     "test-only": 0,
     "orphan": 0,
-    "test": 898,
+    "test": 901,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1288,
-    "tests": 898,
+    "tests": 901,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -29,7 +29,7 @@
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
     "@danielsimonjr/mathts-functions": 1018,
-    "@danielsimonjr/mathts-gpu": 17,
+    "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
     "@danielsimonjr/mathts-numbers": 4,
@@ -9893,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 81
+      "loc": 91
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -10831,7 +10831,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 110
     },
     {
       "file": "functions/tests/gpu-fft-bench.browser.test.ts",
@@ -12595,14 +12595,14 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 246
+      "loc": 297
     },
     {
       "file": "gpu/src/device.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 53
+      "loc": 55
     },
     {
       "file": "gpu/src/flag.ts",
@@ -12616,14 +12616,14 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 402
+      "loc": 446
     },
     {
       "file": "gpu/src/index.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 40
+      "loc": 46
     },
     {
       "file": "gpu/src/serialize.ts",
@@ -12651,21 +12651,21 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 299
+      "loc": 300
     },
     {
       "file": "gpu/tests/context.test.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 26
+      "loc": 28
     },
     {
       "file": "gpu/tests/detect.test.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 47
+      "loc": 51
     },
     {
       "file": "gpu/tests/device.test.ts",
@@ -12675,11 +12675,32 @@
       "loc": 25
     },
     {
+      "file": "gpu/tests/gpu-init-edges.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 153
+    },
+    {
+      "file": "gpu/tests/gpu-init-status.browser.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
+    },
+    {
       "file": "gpu/tests/helpers/stub-global.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "gpu/tests/issue-759-835-gpu-status.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 55
     },
     {
       "file": "gpu/tests/public-api-smoke.test.ts",
@@ -12784,7 +12805,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 358
+      "loc": 368
     },
     {
       "file": "matrix/src/backends/GPUMatrixBackend.ts",
@@ -13274,7 +13295,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 335
+      "loc": 345
     },
     {
       "file": "matrix/tests/gpu/integration.test.ts",
