@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1286,
+    "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7022
+    "totalExports": 7029
   },
   "entryPoints": [
     {
@@ -861,6 +861,7 @@
             "file": "./types/bignumber.js",
             "imports": [
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -1154,6 +1155,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -1350,6 +1352,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -2712,11 +2715,12 @@
           "BIGNUMBER_LN2",
           "BIGNUMBER_LN10",
           "isBigNumber",
+          "bignumber",
           "BigNumber"
         ],
         "classes": ["BigNumber"],
         "interfaces": ["BigNumberConfig"],
-        "functions": ["isBigNumber"],
+        "functions": ["isBigNumber", "bignumber"],
         "constants": [
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -5915,7 +5919,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["NestedArray"],
+            "imports": ["arraySize", "validate", "NestedArray"],
             "subpath": "internal"
           }
         ],
@@ -7395,13 +7399,13 @@
         "constants": ["createLsolveAll"]
       },
       "functions/src/algebra/solver/lusolve.ts": {
-        "description": "Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.",
+        "description": "Max |entry| when every entry is a finite number.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "../../utils/is.js",
-            "imports": ["isArray", "isMatrix"]
+            "imports": ["isArray", "isDenseMatrix", "isMatrix", "isSparseMatrix"]
           },
           {
             "file": "../../utils/factory.js",
@@ -7419,6 +7423,18 @@
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../../factories/matrix-bridge.js",
+            "imports": ["MathJSSparseMatrix"]
+          },
+          {
+            "file": "./pivot-tolerance.js",
+            "imports": ["LUSOLVE_SINGULAR_MESSAGE"]
+          },
+          {
+            "file": "./validate-u-pivots.js",
+            "imports": ["validateUpperTriangularPivots"]
           }
         ],
         "workspaceDependencies": [
@@ -7435,6 +7451,16 @@
         ],
         "exports": ["createLusolve"],
         "constants": ["createLusolve"]
+      },
+      "functions/src/algebra/solver/pivot-tolerance.ts": {
+        "description": "Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE", "isBadLuFactorPivot"],
+        "functions": ["isBadLuFactorPivot"],
+        "constants": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE"]
       },
       "functions/src/algebra/solver/usolve.ts": {
         "description": "Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro",
@@ -7457,6 +7483,10 @@
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./pivot-tolerance.js",
+            "imports": ["LUSOLVE_SINGULAR_MESSAGE"]
           }
         ],
         "workspaceDependencies": [],
@@ -7503,6 +7533,24 @@
         "workspaceDependencies": [],
         "exports": ["createSolveValidation"],
         "functions": ["createSolveValidation"]
+      },
+      "functions/src/algebra/solver/validate-u-pivots.ts": {
+        "description": "Reject non-finite coefficients and singular upper-triangular factors before",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isDenseMatrix", "isSparseMatrix"]
+          },
+          {
+            "file": "./pivot-tolerance.js",
+            "imports": ["isBadLuFactorPivot", "LUSOLVE_SINGULAR_MESSAGE"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["validateUpperTriangularPivots"],
+        "functions": ["validateUpperTriangularPivots"]
       },
       "functions/src/algebra/sparse/csAmd.ts": {
         "description": "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each",
@@ -38035,6 +38083,7 @@
               "FRACTION_THIRD",
               "FRACTION_QUARTER",
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -38068,6 +38117,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -38099,6 +38149,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -44772,9 +44823,11 @@
           "functions/src/algebra/solver/lsolve.ts",
           "functions/src/algebra/solver/lsolveAll.ts",
           "functions/src/algebra/solver/lusolve.ts",
+          "functions/src/algebra/solver/pivot-tolerance.ts",
           "functions/src/algebra/solver/usolve.ts",
           "functions/src/algebra/solver/usolveAll.ts",
           "functions/src/algebra/solver/utils/solveValidation.ts",
+          "functions/src/algebra/solver/validate-u-pivots.ts",
           "functions/src/algebra/sparse/csAmd.ts",
           "functions/src/algebra/sparse/csChol.ts",
           "functions/src/algebra/sparse/csCounts.ts",
@@ -46182,17 +46235,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1286,
+    "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 218556,
-    "totalExports": 7022,
+    "totalLinesOfCode": 219056,
+    "totalExports": 7029,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2365,
-    "totalTypeGuards": 171,
+    "totalFunctions": 2368,
+    "totalTypeGuards": 172,
     "totalEnums": 0,
-    "totalConstants": 1645,
-    "totalReExports": 3030,
+    "totalConstants": 1647,
+    "totalReExports": 3032,
     "totalTypeOnlyImports": 649,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

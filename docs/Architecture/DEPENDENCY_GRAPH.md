@@ -123,7 +123,7 @@ The codebase is organized into the following modules:
 - **tensor**: 4 files
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
-- **functions/algebra**: 45 files
+- **functions/algebra**: 47 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 34 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 51             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 551            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 553            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 483            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -592,7 +592,7 @@ graph LR
 | `./types/dual-rules.js`       | `DUAL_UNARY_RULES`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
 | `./constants.js`              | `PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
 | `./types/fraction.js`         | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
-| `./types/bignumber.js`        | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
+| `./types/bignumber.js`        | `BigNumber, bignumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./arithmetic/scalar.js`      | `addScalar, subtractScalar, multiplyScalar, divideScalar, pow, abs, fix, round, equal, isNumeric, number`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
 | `./types/unit.js`             | `Unit, isUnit, DimensionMismatchError, UnitParseError, AmbiguousUnitError, DIMENSIONLESS, dim`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./types/unit.js`             | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression, NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, REFUSED_UNIT_SPELLINGS, AMBIGUOUS_UNIT_SPELLINGS, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix` | Re-export             |
@@ -619,7 +619,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -951,7 +951,7 @@ graph LR
 - Classes: `BigNumber`
 - Interfaces: `BigNumberConfig`
 - Types: `RoundingMode`
-- Functions: `isBigNumber`
+- Functions: `isBigNumber`, `bignumber`
 - Constants: `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`
 
 ---
@@ -2172,11 +2172,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                        |
-| ------------------------------ | ----------------------------- |
-| `@danielsimonjr/mathts-core`   | `rowMajorStrides`             |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
-| `@danielsimonjr/mathts-core`   | `NestedArray`                 |
+| Package                        | Import                             |
+| ------------------------------ | ---------------------------------- |
+| `@danielsimonjr/mathts-core`   | `rowMajorStrides`                  |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager`      |
+| `@danielsimonjr/mathts-core`   | `arraySize, validate, NestedArray` |
 
 **Internal Dependencies:**
 
@@ -3042,7 +3042,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+### `functions/src/algebra/solver/lusolve.ts` - Max |entry| when every entry is a finite number.
 
 **Workspace Dependencies:**
 
@@ -3053,13 +3053,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/is.js`            | `isArray, isMatrix`     | Import             |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../sparse/csIpvec.js`         | `csIpvec`               | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| File                               | Imports                                            | Type               |
+| ---------------------------------- | -------------------------------------------------- | ------------------ |
+| `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix` | Import             |
+| `../../utils/factory.js`           | `factory`                                          | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation`                            | Import             |
+| `../sparse/csIpvec.js`             | `csIpvec`                                          | Import             |
+| `../../core/function/typed.js`     | `TypedFunction`                                    | Import (type-only) |
+| `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                               | Import             |
+| `./pivot-tolerance.js`             | `LUSOLVE_SINGULAR_MESSAGE`                         | Import             |
+| `./validate-u-pivots.js`           | `validateUpperTriangularPivots`                    | Import             |
 
 **Exports:**
 
@@ -3067,16 +3070,26 @@ graph LR
 
 ---
 
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+
+**Exports:**
+
+- Functions: `isBadLuFactorPivot`
+- Constants: `LU_PIVOT_TOL`, `LUSOLVE_SINGULAR_MESSAGE`
+
+---
+
 ### `functions/src/algebra/solver/usolve.ts` - Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| File                           | Imports                    | Type               |
+| ------------------------------ | -------------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`                  | Import             |
+| `./utils/solveValidation.js`   | `createSolveValidation`    | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`            | Import             |
+| `../../core/function/typed.js` | `TypedFunction`            | Import (type-only) |
+| `./pivot-tolerance.js`         | `LUSOLVE_SINGULAR_MESSAGE` | Import             |
 
 **Exports:**
 
@@ -3113,6 +3126,21 @@ graph LR
 **Exports:**
 
 - Functions: `createSolveValidation`
+
+---
+
+### `functions/src/algebra/solver/validate-u-pivots.ts` - Reject non-finite coefficients and singular upper-triangular factors before
+
+**Internal Dependencies:**
+
+| File                   | Imports                                        | Type   |
+| ---------------------- | ---------------------------------------------- | ------ |
+| `../../utils/is.js`    | `isDenseMatrix, isSparseMatrix`                | Import |
+| `./pivot-tolerance.js` | `isBadLuFactorPivot, LUSOLVE_SINGULAR_MESSAGE` | Import |
+
+**Exports:**
+
+- Functions: `validateUpperTriangularPivots`
 
 ---
 
@@ -7608,6 +7636,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `FsolveOptions`
+- Types: `FsolveField`
 - Functions: `fsolve`
 - Constants: `root`
 
@@ -17696,14 +17725,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                                                                                                                                                                                                                                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE, Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER, BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` |
-| `@danielsimonjr/mathts-core` | `IComplex, IFraction, IBigNumber, BigNumberConfig, RoundingMode`                                                                                                                                                                                                                                                                             |
+| Package                      | Import                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE, Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER, BigNumber, bignumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` |
+| `@danielsimonjr/mathts-core` | `IComplex, IFraction, IBigNumber, BigNumberConfig, RoundingMode`                                                                                                                                                                                                                                                                                        |
 
 **Exports:**
 
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `IComplex`, `IFraction`, `IBigNumber`, `BigNumberConfig`, `RoundingMode`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `IComplex`, `IFraction`, `IBigNumber`, `BigNumberConfig`, `RoundingMode`
 
 ---
 
@@ -19403,7 +19432,7 @@ graph LR
 | `functions/src/index`                                  | 135 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
-| `functions/src/utils/is`                               | 0 files      | 56 files   |
+| `functions/src/utils/is`                               | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -19611,7 +19640,7 @@ graph TD
         N107[polynomialRoot]
         N108[rationalize]
         N109[resolve]
-        N110[...35 more]
+        N110[...37 more]
     end
 
     subgraph Functions/arithmetic
@@ -20300,15 +20329,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1286   |
+| Total TypeScript Files  | 1288   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218556 |
-| Total Exports           | 7022   |
-| Total Re-exports        | 3030   |
+| Total Lines of Code     | 219056 |
+| Total Exports           | 7029   |
+| Total Re-exports        | 3032   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2365   |
-| Total Type Guards       | 171    |
+| Total Functions         | 2368   |
+| Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 649    |
 | Runtime Circular Deps   | 0      |

@@ -30,6 +30,7 @@ export {
 
   // BigNumber (arbitrary-precision decimals)
   BigNumber,
+  bignumber,
   isBigNumber,
   BIGNUMBER_ZERO,
   BIGNUMBER_ONE,
