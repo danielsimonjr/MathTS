@@ -16,7 +16,6 @@ import {
   expand,
   factor,
   collect,
-  substitute,
   variables,
   cancel,
   together,
@@ -38,6 +37,7 @@ import {
   functionExpand,
   resultant,
 } from '../src/typed/algebra.js';
+import { substitute } from '../src/factories/index.js';
 
 // =============================================================================
 // Polynomial Operations
