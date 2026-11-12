@@ -10,11 +10,11 @@
     "packages/workerpool/dist/worker.js": 21676,
     "core/dist/index.js": 223608,
     "core/dist/internal.js": 227150,
-    "matrix/dist/index.js": 197367,
+    "matrix/dist/index.js": 198192,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 85080,
     "autograd/dist/index.js": 69879,
-    "functions/dist/index.js": 1806066,
+    "functions/dist/index.js": 1830037,
     "functions/dist/wasm/mathts-as.wasm": 62501,
     "expression/dist/index.js": 352541,
     "parser/dist/index.js": 500,
@@ -34,7 +34,7 @@
     "assembly/build/mathts-debug.wasm": 122393,
     "compat/dist/index.js": 13091,
     "gpu/dist/index.js": 18082,
-    "plot/dist/index.js": 32588,
+    "plot/dist/index.js": 34284,
     "plot/dist/render-file.js": 5057
   },
   "entries": {
