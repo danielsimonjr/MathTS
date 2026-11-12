@@ -29,7 +29,7 @@ describe('G26 #735 create(all).add scalar parity vs mathjs', () => {
       mj.add(1, 2);
       mt.add(1, 2);
     }
-    for (let r = 0; r < 8; r++) {
+    for (let r = 0; r < 12; r++) {
       if (r % 2 === 0) {
         ra.push(timeLoop(() => mj.add(1, 2), n));
         rb.push(timeLoop(() => mt.add(1, 2), n));

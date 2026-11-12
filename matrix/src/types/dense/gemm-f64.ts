@@ -6,6 +6,9 @@ const BLOCKED_MIN_FLOPS = 48 * 48 * 48;
 /**
  * Dense matrix multiply C = A · B (row-major f64).
  */
+/**
+ * Options for {@link gemmF64}.
+ */
 export type GemmF64Options = {
   /** When true, skip `aik === 0` (matMul nested-array contract only). */
   skipZeroInA?: boolean;
