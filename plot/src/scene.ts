@@ -10,9 +10,24 @@ export type Prim =
       w: number;
       opacity?: number;
     }
-  | { k: 'circle'; cx: number; cy: number; r: number; fill: string; opacity?: number }
+  | {
+      k: 'circle';
+      cx: number;
+      cy: number;
+      r: number;
+      fill: string;
+      opacity?: number;
+      live?: string;
+    }
   | { k: 'rect'; x: number; y: number; w: number; h: number; fill: string }
-  | { k: 'polyline'; pts: Array<[number, number]>; stroke: string; w: number }
+  | {
+      k: 'polyline';
+      pts: Array<[number, number]>;
+      stroke: string;
+      w: number;
+      /** Stable id for in-place DOM updates (`update`). */
+      live?: string;
+    }
   | { k: 'polygon'; pts: Array<[number, number]>; fill: string; stroke: string }
   | {
       k: 'text';

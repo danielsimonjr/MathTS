@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1300
+  totalFiles: 1301
   totalModules: 82
-  totalExports: 7118
+  totalExports: 7123
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -42268,8 +42268,10 @@ modules:
             - emit
       workspaceDependencies: []
       exports:
+        - build2DScene
         - draw2D
       functions:
+        - build2DScene
         - draw2D
     plot/src/heatmap.ts:
       description: heatmap module
@@ -42336,6 +42338,10 @@ modules:
             - plot
             - toTikZ
           reExport: true
+        - file: ./update.js
+          imports:
+            - update
+          reExport: true
         - file: ./marks2d.js
           imports:
             - line
@@ -42387,6 +42393,7 @@ modules:
       exports:
         - plot
         - toTikZ
+        - update
         - line
         - scatter
         - bar
@@ -42410,6 +42417,7 @@ modules:
       reExported:
         - plot
         - toTikZ
+        - update
         - line
         - scatter
         - bar
@@ -42511,6 +42519,9 @@ modules:
             - Layer2D
             - PlotOptions
           typeOnly: true
+        - file: ./update.js
+          imports:
+            - update
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
@@ -42522,8 +42533,9 @@ modules:
         - plot
         - toTikZ
       functions:
-        - plot
         - toTikZ
+      constants:
+        - plot
     plot/src/render-core.ts:
       description: Shared rendering context, computed once per `draw2D` call and threaded
       externalDependencies: []
@@ -42558,6 +42570,9 @@ modules:
         - module: child_process
           imports:
             - spawn
+        - module: module
+          imports:
+            - createRequire
         - module: fs/promises
           imports:
             - writeFile
@@ -42572,9 +42587,14 @@ modules:
         - module: os
           imports:
             - tmpdir
+        - module: url
+          imports:
+            - fileURLToPath
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - resvgWasmImport
+        - renderPngWithResvgWasm
         - runTool
         - hasTool
         - renderToFile
@@ -42586,11 +42606,14 @@ modules:
       interfaces:
         - RenderOptions
       functions:
+        - renderPngWithResvgWasm
         - runTool
         - hasTool
         - renderToFile
         - latexArgs
         - latexToPdf
+      constants:
+        - resvgWasmImport
     plot/src/scale.ts:
       description: scale module
       externalDependencies: []
@@ -42688,6 +42711,35 @@ modules:
         - AxisSpec
         - PlotOptions
         - Layer2D
+    plot/src/update.ts:
+      description: Identity of everything except series coordinates. Equal keys mean the existing
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./frame.js
+          imports:
+            - build2DScene
+        - file: ./svg.js
+          imports:
+            - emitSVG
+        - file: ./scene.js
+          imports:
+            - Prim
+            - Scene
+          typeOnly: true
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - update
+      functions:
+        - update
+        - update
+        - update
+        - update
   plot/three:
     plot/src/three/points3d.ts:
       description: points3d module
@@ -44251,24 +44303,25 @@ dependencyGraph:
         - plot/src/svg.ts
         - plot/src/tikz.ts
         - plot/src/types.ts
+        - plot/src/update.ts
     - name: Plot/three
       files:
         - plot/src/three/points3d.ts
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1300
+  totalTypeScriptFiles: 1301
   totalModules: 82
-  totalLinesOfCode: 223151
-  totalExports: 7118
+  totalLinesOfCode: 223419
+  totalExports: 7123
   totalClasses: 61
   totalInterfaces: 610
-  totalFunctions: 2425
+  totalFunctions: 2430
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1653
-  totalReExports: 3058
-  totalTypeOnlyImports: 651
+  totalConstants: 1655
+  totalReExports: 3059
+  totalTypeOnlyImports: 653
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 1
   unusedFilesCount: 0

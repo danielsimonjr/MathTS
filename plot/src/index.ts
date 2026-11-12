@@ -6,6 +6,7 @@ export const VERSION: string = __PKG_VERSION__;
 
 export type { Data, PlotOptions, AxisSpec, Layer2D } from './types.js';
 export { plot, toTikZ } from './plot.js';
+export { update } from './update.js';
 export { line, scatter, bar, area, step, errorbar, quiver } from './marks2d.js';
 export { histogram } from './histogram.js';
 export { heatmap } from './heatmap.js';

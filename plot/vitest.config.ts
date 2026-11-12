@@ -13,6 +13,7 @@ const { version } = JSON.parse(
 export default defineConfig({
   define: { __PKG_VERSION__: JSON.stringify(version) },
   test: {
+    setupFiles: ['./tests/vitest-dom-setup.ts'],
     include: ['tests/**/*.test.ts'],
     // Calibrated for the CONCURRENT gate. `npm run test` runs EVERY package's
     // suite at once (turbo), each with its own worker pool, so vitest's 5000ms
