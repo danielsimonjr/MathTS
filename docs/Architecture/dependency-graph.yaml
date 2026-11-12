@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1287
   totalModules: 82
-  totalExports: 7030
+  totalExports: 7035
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -272,6 +272,7 @@ modules:
         - forEachMultiIndex
         - tensordotRange
         - matmulSequential
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -286,6 +287,8 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
@@ -319,10 +322,13 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
       constants:
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
     packages/workerpool/src/matmul-sequential.ts:
@@ -37209,6 +37215,7 @@ modules:
           imports:
             - assertSameLength
             - assertMatmulShape
+            - assertMatmulArgs
         - file: ./ops/bitwise.js
           imports:
             - bitAnd
@@ -37428,6 +37435,7 @@ modules:
           directory: packages/workerpool
           imports:
             - matmulSequential
+            - resolveDefaultWorkerScript
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -37443,6 +37451,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37535,6 +37544,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37636,9 +37646,11 @@ modules:
       workspaceDependencies: []
       exports:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
       functions:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
   parallel/operations:
     parallel/src/operations/elementwise.ts:
@@ -43641,15 +43653,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218912
-  totalExports: 7030
+  totalLinesOfCode: 219168
+  totalExports: 7035
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2371
+  totalFunctions: 2374
   totalTypeGuards: 172
   totalEnums: 0
-  totalConstants: 1646
-  totalReExports: 3029
+  totalConstants: 1647
+  totalReExports: 3030
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

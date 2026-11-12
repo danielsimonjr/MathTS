@@ -22,15 +22,14 @@ describe('MathWorkerPool.exec / execFunction pins (P6-6 _timedExec)', () => {
     return { executed: m.totalTasksExecuted, failed: m.totalTasksFailed };
   };
 
-  it('throws when pool is not initialized, before any metric is recorded', async () => {
-    const fresh = new MathWorkerPool();
-    await expect(fresh.execFunction((x: number) => x + 1, 1)).rejects.toThrow(
-      'WorkerPool not initialized. Call initialize() first.'
-    );
-    await expect(fresh.exec('mapChunk', [[1], '(x) => x'])).rejects.toThrow(
-      'WorkerPool not initialized. Call initialize() first.'
-    );
-    expect(counts(fresh)).toEqual({ executed: 0, failed: 0 });
+  it('lazy-initializes on first exec when initialize() was not called', async () => {
+    const fresh = new MathWorkerPool({ maxWorkers: 1, parallelThreshold: 1_000_000 });
+    expect(fresh.isReady()).toBe(false);
+    const out = await fresh.execFunction((x: number) => x + 1, 1);
+    expect(out).toBe(2);
+    expect(fresh.isReady()).toBe(true);
+    expect(counts(fresh).executed).toBeGreaterThanOrEqual(1);
+    await fresh.terminate(true);
   });
 
   it('returns the function result and counts one executed task', async () => {
