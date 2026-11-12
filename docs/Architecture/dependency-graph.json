@@ -6803,7 +6803,13 @@
             "imports": ["Tape", "TapedTensor"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-tensor",
+            "directory": "tensor",
+            "imports": ["Tensor"]
+          }
+        ],
         "exports": ["valueAndGrad", "grad", "derivative", "jacobian"],
         "functions": ["valueAndGrad", "grad", "derivative", "jacobian"]
       },
@@ -46426,7 +46432,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1292,
     "totalModules": 82,
-    "totalLinesOfCode": 221501,
+    "totalLinesOfCode": 221951,
     "totalExports": 7089,
     "totalClasses": 61,
     "totalInterfaces": 605,
