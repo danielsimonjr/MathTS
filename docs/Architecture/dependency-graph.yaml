@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1292
+  totalFiles: 1294
   totalModules: 82
-  totalExports: 7086
+  totalExports: 7091
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9291,6 +9291,9 @@ modules:
         - file: ./distribution-functions.js
           imports:
             - studentTCDF
+        - file: ./wasm/special/scalars.js
+          imports:
+            - betaincScalar
         - file: ./regression-extra.js
           imports:
             - fitLine
@@ -9298,6 +9301,10 @@ modules:
         - file: ./typed/distributions.js
           imports:
             - normalCDF
+        - file: ./kendall-exact.js
+          imports:
+            - kendallPExact
+            - kendallShouldUseExact
       workspaceDependencies: []
       exports:
         - rankdata
@@ -12552,6 +12559,18 @@ modules:
         - BiquadCoefficients
         - DtwOptions
         - DtwResult
+    functions/src/kendall-exact.ts:
+      description: Exact two-sided Kendall τ p-value (no ties), ported from
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - kendallPExact
+        - kendallShouldUseExact
+      functions:
+        - kendallPExact
+        - kendallShouldUseExact
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -20931,8 +20950,24 @@ modules:
         - createProd
       constants:
         - createProd
+    functions/src/statistics/quantile-numpy-methods.ts:
+      description: NumPy 2.x `method=` quantile definitions (Hyndman–Fan + legacy names).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - assertNumpyQuantileMethod
+        - quantileOfSorted
+        - parseQuantileThirdArg
+      interfaces:
+        - QuantileSeqOptions
+      functions:
+        - assertNumpyQuantileMethod
+        - quantileOfSorted
+        - parseQuantileThirdArg
     functions/src/statistics/quantileSeq.ts:
-      description: "Interpolation modes for the quantile, matching numpy's `method=`:"
+      description: Compute the prob order quantile of a matrix or a list with values.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -20955,6 +20990,13 @@ modules:
             - isFloatTyped
             - copyToNumberArray
             - FloatTyped
+        - file: ./quantile-numpy-methods.js
+          imports:
+            - assertNumpyQuantileMethod
+            - quantileOfSorted
+            - parseQuantileThirdArg
+            - NumpyQuantileMethod
+            - QuantileSeqOptions
       workspaceDependencies: []
       exports:
         - createQuantileSeq
@@ -24499,6 +24541,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./dist-objects.js
+          imports:
+            - normalDist
         - file: ../wasm/sort/wasm-bridge.js
           imports:
             - sortF64Dispatch
@@ -41946,6 +41991,7 @@ modules:
         - file: ./svg.js
           imports:
             - THEMES
+            - fmt
         - file: ./types.js
           imports:
             - PlotOptions
@@ -42738,6 +42784,7 @@ dependencyGraph:
         - functions/src/help.ts
         - functions/src/hypothesis-extra.ts
         - functions/src/index.ts
+        - functions/src/kendall-exact.ts
         - functions/src/linalg-extra.ts
         - functions/src/linalg-extra2.ts
         - functions/src/linalg-special-matrices.ts
@@ -43047,6 +43094,7 @@ dependencyGraph:
         - functions/src/statistics/nan-reductions.ts
         - functions/src/statistics/numeric-data.ts
         - functions/src/statistics/prod.ts
+        - functions/src/statistics/quantile-numpy-methods.ts
         - functions/src/statistics/quantileSeq.ts
         - functions/src/statistics/std.ts
         - functions/src/statistics/sum.ts
@@ -43904,13 +43952,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1292
+  totalTypeScriptFiles: 1294
   totalModules: 82
-  totalLinesOfCode: 221871
-  totalExports: 7086
+  totalLinesOfCode: 222293
+  totalExports: 7091
   totalClasses: 61
-  totalInterfaces: 605
-  totalFunctions: 2405
+  totalInterfaces: 606
+  totalFunctions: 2410
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1650

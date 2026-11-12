@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2267
+**Total files**: 2271
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1266 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1268 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      910 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      912 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2267** |                                                                                                                |
+| **Total**     | **2271** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1292 |
-| `tests`    |   910 |
+| `src`      |  1294 |
+| `tests`    |   912 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,14 +48,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   121 |
 | `@danielsimonjr/mathts-evaluator`      |     4 |
 | `@danielsimonjr/mathts-expression`     |   562 |
-| `@danielsimonjr/mathts-functions`      |  1025 |
+| `@danielsimonjr/mathts-functions`      |  1028 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   123 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    53 |
 | `@danielsimonjr/mathts-parser`         |     4 |
-| `@danielsimonjr/mathts-plot`           |    46 |
+| `@danielsimonjr/mathts-plot`           |    47 |
 | `@danielsimonjr/mathts-signal`         |     4 |
 | `@danielsimonjr/mathts-statistics`     |     4 |
 | `@danielsimonjr/mathts-tensor`         |    59 |
@@ -1003,6 +1003,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/help.ts`                                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/hypothesis-extra.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/index.ts`                                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/kendall-exact.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/linalg-extra.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/linalg-extra2.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/linalg-special-matrices.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1214,6 +1215,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/statistics/nan-reductions.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/numeric-data.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/prod.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/statistics/quantile-numpy-methods.ts`                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/quantileSeq.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/std.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/sum.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1483,6 +1485,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-g22-expression-sandbox.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g23-units-physics.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g25-ode.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g30-stats-scipy-parity.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dtw.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/effect-sizes.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/eigs-correctness.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2127,6 +2130,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `plot/src/types.ts`                                                               | @danielsimonjr/mathts-plot           | src      | build-entry |
 | `plot/tests/coerce.test.ts`                                                       | @danielsimonjr/mathts-plot           | tests    | test        |
 | `plot/tests/contour.test.ts`                                                      | @danielsimonjr/mathts-plot           | tests    | test        |
+| `plot/tests/dogfood-g30-heatmap.test.ts`                                          | @danielsimonjr/mathts-plot           | tests    | test        |
 | `plot/tests/golden-svg.test.ts`                                                   | @danielsimonjr/mathts-plot           | tests    | test        |
 | `plot/tests/heatmap.test.ts`                                                      | @danielsimonjr/mathts-plot           | tests    | test        |
 | `plot/tests/histogram.test.ts`                                                    | @danielsimonjr/mathts-plot           | tests    | test        |

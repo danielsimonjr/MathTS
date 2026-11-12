@@ -31,6 +31,7 @@
  */
 
 import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
+import { normalDist } from './dist-objects.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 import {
@@ -693,28 +694,43 @@ export function anova(groups: f64[][]): AnovaResult {
  */
 export async function kolmogorovSmirnovTest(
   sample: f64[],
-  cdfFn?: (x: f64) => f64,
+  cdfFn?: ((x: f64) => f64) | string,
   opts?: NoBootstrap
 ): Promise<KSTestResult>;
 export async function kolmogorovSmirnovTest(
   sample: f64[],
-  cdfFn?: (x: f64) => f64,
+  cdfFn?: ((x: f64) => f64) | string,
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult>;
 /** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export async function kolmogorovSmirnovTest(
   sample: f64[],
-  cdfFn?: (x: f64) => f64,
+  cdfFn?: ((x: f64) => f64) | string,
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult> {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
-  if (cdfFn !== undefined && cdfFn !== null && typeof cdfFn !== 'function') {
-    // One-sample test against a CDF *function* — guard the common mistake of
-    // passing a second sample array (this is not a two-sample KS test).
+  let resolvedCdf = cdfFn;
+  if (typeof resolvedCdf === 'string') {
+    const name = resolvedCdf.toLowerCase();
+    if (name === 'norm' || name === 'normal') {
+      const cdf = normalDist(0, 1).cdf;
+      resolvedCdf = (x: f64) => cdf(x);
+    } else {
+      throw new TypeError(
+        `kolmogorovSmirnovTest: unknown distribution name "${resolvedCdf}". ` +
+          `Use 'norm' / 'normal' or pass a CDF function, e.g. normalDist(0,1).cdf`
+      );
+    }
+  } else if (
+    resolvedCdf !== undefined &&
+    resolvedCdf !== null &&
+    typeof resolvedCdf !== 'function'
+  ) {
     throw new TypeError(
       'kolmogorovSmirnovTest: cdfFn must be a CDF function (this is a one-sample test)'
     );
   }
+  cdfFn = resolvedCdf;
 
   const n = sample.length;
   // Sort — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
@@ -1473,7 +1489,7 @@ export interface KS2Options {
  *
  * @param sample1 - first sample (non-empty)
  * @param sample2 - second sample (non-empty)
- * @param opts    - `{ method: 'auto' | 'exact' | 'asymp' }` (default 'asymp')
+ * @param opts    - `{ method: 'auto' | 'exact' | 'asymp' }` (default `auto`, SciPy-aligned)
  * @returns `{ statistic: D, pValue }`
  *
  * @example
@@ -1505,7 +1521,7 @@ export function kolmogorovSmirnov2Test(
     d = Math.max(d, Math.abs(i / n1 - j / n2));
   }
 
-  const method = opts?.method;
+  const method = opts?.method ?? 'auto';
   const useExact = method === 'exact' || (method === 'auto' && n1 * n2 <= 10000);
   if (useExact) {
     return { statistic: d, pValue: _ks2ExactPValue(n1, n2, d) };

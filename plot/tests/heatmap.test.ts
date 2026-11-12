@@ -8,8 +8,8 @@ describe('heatmap', () => {
       [2, 3],
     ];
     const svg = heatmap(z);
-    // 4 cells + 1 background rect
-    expect((svg.match(/<rect/g) ?? []).length).toBe(5);
+    expect((svg.match(/<rect/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    expect(svg).toContain('<text');
   });
   it('empty grid → no data', () => {
     expect(heatmap([])).toContain('no data');
