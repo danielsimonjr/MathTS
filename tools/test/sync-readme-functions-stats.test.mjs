@@ -8,6 +8,7 @@ import test from 'node:test';
 import { applyReadmeStats } from '../sync-readme-functions-stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = join(HERE, '..', '..');
 
 const sample = `# Title
 
@@ -21,6 +22,19 @@ quadrature and optimisation, number theory, signal processing, linear algebra an
 | \`@danielsimonjr/mathts-functions\`      | 9 exports in 27 categories; typed dispatch + \`evaluate()\` — see \`docs/reference/functions.md\` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
 | [\`docs/reference/functions.md\`](./docs/reference/functions.md)                         | Full typed-function export reference (9 exports) with Accel column |
 `;
+
+test('version-packages runs README function stats sync after changeset version', () => {
+  const rootPkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'));
+  const script = rootPkg.scripts['version-packages'];
+  assert.match(script, /changeset version/);
+  assert.match(script, /sync:readme-functions-stats/);
+  assert.match(script, /bun install --lockfile-only/);
+  const syncIdx = script.indexOf('sync:readme-functions-stats');
+  const versionIdx = script.indexOf('changeset version');
+  const lockIdx = script.indexOf('bun install --lockfile-only');
+  assert.ok(versionIdx < syncIdx, 'sync must run after changeset version');
+  assert.ok(syncIdx < lockIdx, 'lock refresh must run after README sync');
+});
 
 test('applyReadmeStats is deterministic and updates every count site', () => {
   const once = applyReadmeStats(sample, '0.84.0', 1380);
