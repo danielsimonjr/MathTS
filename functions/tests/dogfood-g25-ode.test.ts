@@ -72,11 +72,19 @@ describe('G25 dogfood — ODE API (#824 #698 #691)', () => {
   it('#698 a non-stiff SHO that only runs out of steps does not claim stiffness', () => {
     let msg = '';
     try {
-      solveODE((_t, y) => [y[1], -4 * y[0]], [0, 100], [1, 0], {
-        method: 'RK45',
-        tol: 1e-6,
-        maxIter: 30,
-      });
+      solveODE(
+        (_t, y) => {
+          const v = y as number[];
+          return [v[1], -4 * v[0]];
+        },
+        [0, 100],
+        [1, 0],
+        {
+          method: 'RK45',
+          tol: 1e-6,
+          maxIter: 30,
+        }
+      );
     } catch (e) {
       msg = (e as Error).message;
     }
