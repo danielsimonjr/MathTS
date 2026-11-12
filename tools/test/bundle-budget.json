@@ -34,8 +34,8 @@
     "assembly/build/mathts-debug.wasm": 122393,
     "compat/dist/index.js": 17093,
     "gpu/dist/index.js": 18082,
-    "plot/dist/index.js": 34284,
-    "plot/dist/render-file.js": 5057
+    "plot/dist/index.js": 37915,
+    "plot/dist/render-file.js": 6435
   },
   "entries": {
     "packages/typed-function/dist/index.js": {
