@@ -2434,6 +2434,9 @@
       "EARTH_RADIUS_KM": {
         "kind": "number"
       },
+      "EVALUATE_SCOPE_OMIT": {
+        "kind": "object"
+      },
       "EigOptions": {
         "kind": "type"
       },
@@ -2636,6 +2639,9 @@
         "kind": "type"
       },
       "HungarianResult": {
+        "kind": "type"
+      },
+      "ImportOptions": {
         "kind": "type"
       },
       "Interval": {
@@ -3832,6 +3838,9 @@
       "cov": {
         "kind": "function"
       },
+      "createInstanceEvaluator": {
+        "kind": "function"
+      },
       "createUnit": {
         "kind": "function"
       },
@@ -4952,6 +4961,9 @@
         "kind": "function"
       },
       "implicitDiff": {
+        "kind": "function"
+      },
+      "importFactory": {
         "kind": "function"
       },
       "impulseResponse": {
@@ -11016,6 +11028,9 @@
       },
       "COMPLEX_ZERO": {
         "kind": "object"
+      },
+      "CompatMatrixValue": {
+        "kind": "type"
       },
       "Complex": {
         "kind": "function"
