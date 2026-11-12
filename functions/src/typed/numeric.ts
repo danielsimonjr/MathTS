@@ -1138,6 +1138,7 @@ function _wholeStepCount(span: f64, dt: f64): f64 | null {
   return nearest >= 1 && Math.abs(q - nearest) <= 4 * Number.EPSILON * nearest ? nearest : null;
 }
 
+/** Options for {@link stiffODESolver} positional argument layout (#691). */
 export interface StiffODESolverOptions {
   /**
    * @deprecated Use `(f, tspan, y0)` — the same layout as `solveODE`. When `true`, keeps the
@@ -1198,8 +1199,11 @@ function _resolveStiffODEArgs(
  * function targets (71% error on `y'=-15y`; `null`/NaN on the stiff mode of `diag(-1,-1000)`).
  *
  * @param f - System function
- * @param tspan - Time span `[t0, t1]` (same order as `solveODE`)
- * @param y0 - Initial state
+ * @param arg1 - With default layout, time span `[t0, t1]` (same as `solveODE`); with
+ *   `{ legacyArgumentOrder: true }`, initial state `y0`
+ * @param arg2 - With default layout, initial state `y0`; with `{ legacyArgumentOrder: true }`,
+ *   time span `[t0, t1]`
+ * @param options - When omitted, `(f, tspan, y0)`; set `legacyArgumentOrder: true` for `(f, y0, tspan)`
  * @returns Solution
  */
 export function stiffODESolver(
