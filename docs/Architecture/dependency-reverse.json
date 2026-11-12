@@ -221,6 +221,11 @@
       "matrix/src/backends/index.ts"
     ],
     "matrix/src/backends/gpu/gpu-or-js.ts": ["matrix/src/backends/GPUMatrixBackend.ts"],
+    "matrix/src/types/dense/gemm-f64.ts": [
+      "matrix/src/backends/JSBackend.ts",
+      "matrix/src/operations/common.ts",
+      "matrix/src/types/dense/arithmetic.ts"
+    ],
     "matrix/src/types/dense/reduction.ts": [
       "matrix/src/backends/JSBackend.ts",
       "matrix/src/types/DenseMatrix.ts"
@@ -1029,7 +1034,8 @@
       "functions/src/typed/relational.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts"
+      "functions/src/utils/isPositive.ts",
+      "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/algebra/sparse/csSqr.ts": [
       "functions/src/algebra/decomposition/slu.ts",
@@ -2449,6 +2455,10 @@
       "functions/src/matrix/ones.ts",
       "functions/src/matrix/zeros.ts"
     ],
+    "functions/src/utils/sort-numbers.ts": [
+      "functions/src/matrix/sort.ts",
+      "functions/src/statistics/median.ts"
+    ],
     "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
     "functions/src/typed/numeric.ts": [
       "functions/src/ml/glm.ts",
@@ -2570,6 +2580,7 @@
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts"
     ],
+    "functions/src/utils/median-numbers.ts": ["functions/src/statistics/median.ts"],
     "functions/src/statistics/sum-indexed-guard.ts": ["functions/src/statistics/sum.ts"],
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",
@@ -2735,7 +2746,8 @@
     "functions/src/wasm/sort/wasm-bridge.ts": [
       "functions/src/typed/geometry.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/statistics.ts"
+      "functions/src/typed/statistics.ts",
+      "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/typed/centrality-restarts.ts": ["functions/src/typed/graph.ts"],
     "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],

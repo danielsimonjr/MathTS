@@ -48,6 +48,7 @@
     "@danielsimonjr/mathts-parallel": "^0.10.0"
   },
   "devDependencies": {
+    "ml-matrix": "^6.15.1",
     "@types/node": "^26.4.0",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",

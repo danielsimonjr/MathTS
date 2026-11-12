@@ -62,6 +62,21 @@ const defaultConfig: MathJSConfig = {
   randomSeed: null,
 };
 
+/** When false, wrapped calls skip `runWithConfig` (instance config unchanged since create). */
+function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig): boolean {
+  const keys = new Set([...Object.keys(baseline), ...Object.keys(current)]) as Set<
+    keyof MathJSConfig
+  >;
+  for (const key of keys) {
+    const a = current[key];
+    const b = baseline[key];
+    if (a !== b && !(a === undefined && b === undefined)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // =============================================================================
 // Math Instance
 // =============================================================================
@@ -190,6 +205,16 @@ export interface MathInstance {
   NaN: typeof shims.NaN;
 }
 
+/** Per-instance forwarder (unique identity, no config wrapper overhead). */
+function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
+  const bound = ((...args: unknown[]) => fn(...args)) as T;
+  copyFunctionSurface(fn, bound);
+  return bound;
+}
+
+/** Hot scalar ops skip lazy config wrappers (#735); still per-instance refs. */
+const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
+
 /**
  * Copies the name, length, prototype and own properties of `from` onto the wrapper `to`.
  * Keys that refuse redefinition stay as they are.
@@ -233,19 +258,24 @@ function copyFunctionSurface(
 
 function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  currentConfig: MathJSConfig
+  currentConfig: MathJSConfig,
+  configBaseline: MathJSConfig,
+  createdWithCustomConfig: boolean
 ): T {
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
-    return mathFunctions.runWithConfig(currentConfig, () => {
+    const invoke = (): unknown => {
       if (construct) {
-        // Use `fn` as newTarget when the caller wrote `new wrapper(...)` so
-        // the instance's [[Prototype]] is `fn.prototype` (instanceof works).
-        // Preserve a subclass newTarget (`class X extends wrapper`).
         return Reflect.construct(fn, args, construct === wrapped ? fn : construct);
       }
       return fn.apply(this, args);
-    });
+    };
+    const needsOverlay =
+      createdWithCustomConfig || instanceConfigUsesOverlay(currentConfig, configBaseline);
+    if (!needsOverlay) {
+      return invoke();
+    }
+    return mathFunctions.runWithConfig(currentConfig, invoke);
   };
   copyFunctionSurface(fn, wrapped);
   return wrapped as T;
@@ -274,11 +304,16 @@ export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  const currentConfig: MathJSConfig = {
+  const defaultsAtCreate: MathJSConfig = {
     ...mathFunctions.config(),
     ...defaultConfig,
+  };
+  const configBaseline: MathJSConfig = {
+    ...defaultsAtCreate,
     ...config,
   };
+  const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
+  const currentConfig: MathJSConfig = { ...configBaseline };
 
   const instance: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
@@ -300,9 +335,9 @@ export function create(
     sparse: shims.sparse,
 
     // Arithmetic
-    add: shims.add,
-    subtract: shims.subtract,
-    multiply: shims.multiply,
+    add: bindShim(shims.add),
+    subtract: bindShim(shims.subtract),
+    multiply: bindShim(shims.multiply),
     divide: shims.divide,
     pow: shims.pow,
     sqrt: shims.sqrt,
@@ -383,6 +418,7 @@ export function create(
     if (key === 'config' || key === 'chain') continue;
     const value = instance[key];
     if (typeof value !== 'function') continue;
+    if (HOT_SCALAR_SHIM_KEYS.has(key)) continue;
     // Lazy + memoized: the config-scoped wrapper is built on first access (a
     // typical program touches a few dozen of the ~1,100 exports), then the
     // accessor is replaced by a plain data property so `math.add === math.add`
@@ -410,7 +446,10 @@ export function create(
       enumerable: true,
       configurable: true,
       get() {
-        if (cached === undefined) replaceWith(wrapWithInstanceConfig(raw, currentConfig));
+        if (cached === undefined)
+          replaceWith(
+            wrapWithInstanceConfig(raw, currentConfig, configBaseline, createdWithCustomConfig)
+          );
         return cached;
       },
       set: replaceWith,
