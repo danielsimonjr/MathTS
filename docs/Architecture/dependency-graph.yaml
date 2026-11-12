@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1290
+  totalFiles: 1291
   totalModules: 82
-  totalExports: 7020
+  totalExports: 7045
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -272,6 +272,7 @@ modules:
         - forEachMultiIndex
         - tensordotRange
         - matmulSequential
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -286,6 +287,8 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
@@ -319,10 +322,13 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
       constants:
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
     packages/workerpool/src/matmul-sequential.ts:
@@ -3785,7 +3791,6 @@ modules:
             - BufferPool
             - ShaderManager
             - hasWebGPU
-            - detectGPUCapabilities
             - getRecommendedWorkgroupSize
             - GPUCapabilities
       exports:
@@ -5734,6 +5739,13 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+        - file: ./reshape-shape.js
+          imports:
+            - resolveReshapeShape
+        - file: ./operations/slice.js
+          imports:
+            - slice
+            - SliceRange
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5756,6 +5768,7 @@ modules:
       classes:
         - Tensor
       interfaces:
+        - TensorStorage
         - EinsumSpec
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
@@ -5868,6 +5881,8 @@ modules:
           imports:
             - NestedArray
             - EinsumSpec
+            - TensorStorage
+            - TensorDtype
           reExport: true
           typeOnly: true
         - file: ./named-index.js
@@ -5979,6 +5994,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6027,6 +6044,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6064,6 +6083,16 @@ modules:
         - IndexOpts
       functions:
         - idx
+    tensor/src/reshape-shape.ts:
+      description: reshape-shape module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - resolveReshapeShape
+      functions:
+        - resolveReshapeShape
   tensor/operations:
     tensor/src/operations/cholesky.ts:
       description: tensorCholesky — Cholesky decomposition for symmetric positive-definite
@@ -16584,6 +16613,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ./complex-to-interleaved.js
           imports:
             - complexToInterleaved
@@ -19792,9 +19822,11 @@ modules:
       exports:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
       functions:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
     functions/src/signal/fft-helpers.ts:
       description: numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`
       externalDependencies: []
@@ -25385,6 +25417,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
@@ -37159,6 +37192,8 @@ modules:
           imports:
             - parallelFFT
             - parallelIFFT
+            - parallelFFT
+            - parallelIFFT
             - parallelFFTMagnitude
             - parallelFFTPower
             - parallelConv
@@ -37194,6 +37229,8 @@ modules:
       exports:
         - parallelFFT
         - parallelIFFT
+        - fft
+        - ifft
         - parallelFFTMagnitude
         - parallelFFTPower
         - parallelConv
@@ -37271,6 +37308,7 @@ modules:
           imports:
             - assertSameLength
             - assertMatmulShape
+            - assertMatmulArgs
         - file: ./ops/bitwise.js
           imports:
             - bitAnd
@@ -37490,6 +37528,7 @@ modules:
           directory: packages/workerpool
           imports:
             - matmulSequential
+            - resolveDefaultWorkerScript
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -37505,6 +37544,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37597,6 +37637,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37698,9 +37739,11 @@ modules:
       workspaceDependencies: []
       exports:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
       functions:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
   parallel/operations:
     parallel/src/operations/elementwise.ts:
@@ -41356,13 +41399,16 @@ modules:
       internalDependencies:
         - file: ./detect.js
           imports:
-            - hasWebGPU
+            - hasWebGPUSurface
             - getGPUAdapter
-            - detectGPUCapabilities
+            - capabilitiesFromAdapter
+            - markWebGPUAdapterUnavailable
+            - resetWebGPUAvailabilityCache
             - GPUCapabilities
       workspaceDependencies: []
       exports:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
         - GPUContext
@@ -41373,6 +41419,7 @@ modules:
         - DeviceLostEvent
       functions:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
     gpu/src/ShaderManager.ts:
@@ -41398,9 +41445,16 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41409,9 +41463,16 @@ modules:
         - GPUAdapterInfo
         - GPUCapabilities
       functions:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41421,6 +41482,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./detect.js
+          imports:
+            - resetWebGPUAvailabilityCache
         - file: ./GPUContext.js
           imports:
             - getGlobalGPUContext
@@ -41457,9 +41521,13 @@ modules:
         - file: ./detect.js
           imports:
             - hasWebGPU
+            - hasWebGPUSurface
+            - resetWebGPUAvailabilityCache
             - isBrowser
             - getGPUAdapter
             - detectGPUCapabilities
+            - enableGpuUnavailableWarnings
+            - disableGpuUnavailableWarnings
             - isGPUSuitableForMatrixOps
             - getRecommendedWorkgroupSize
             - getMaxMatrixSize
@@ -41471,9 +41539,11 @@ modules:
             - GPUContext
             - getGlobalGPUContext
             - initializeGlobalGPU
+            - initializeGlobalGPUWithReason
             - destroyGlobalGPU
             - GPUContextOptions
             - GPUContextStatus
+            - GlobalGPUInitResult
             - DeviceLostEvent
           reExport: true
         - file: ./device.js
@@ -41506,9 +41576,13 @@ modules:
       workspaceDependencies: []
       exports:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41517,9 +41591,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -41535,9 +41611,13 @@ modules:
         - serializeGpu
       reExported:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41546,9 +41626,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -42205,12 +42287,15 @@ modules:
 dependencyGraph:
   circularDependencies:
     runtime:
+      - - tensor/src/Tensor.ts
+        - tensor/src/operations/slice.ts
+        - tensor/src/Tensor.ts
       - - functions/src/typed/algebra.ts
         - functions/src/cas/polynomial-canonical.ts
         - functions/src/typed/algebra.ts
     typeOnly: []
-    total: 1
-    runtimeCount: 1
+    total: 2
+    runtimeCount: 2
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -42358,6 +42443,7 @@ dependencyGraph:
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
+        - tensor/src/reshape-shape.ts
     - name: Tensor/operations
       files:
         - tensor/src/operations/cholesky.ts
@@ -43668,19 +43754,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1290
+  totalTypeScriptFiles: 1291
   totalModules: 82
-  totalLinesOfCode: 218979
-  totalExports: 7020
+  totalLinesOfCode: 219891
+  totalExports: 7045
   totalClasses: 61
-  totalInterfaces: 601
-  totalFunctions: 2367
+  totalInterfaces: 602
+  totalFunctions: 2380
   totalTypeGuards: 172
   totalEnums: 0
-  totalConstants: 1646
-  totalReExports: 3023
+  totalConstants: 1647
+  totalReExports: 3032
   totalTypeOnlyImports: 644
-  runtimeCircularDeps: 1
+  runtimeCircularDeps: 2
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

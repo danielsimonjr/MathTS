@@ -120,7 +120,7 @@ The codebase is organized into the following modules:
 - **matrix**: 4 files
 - **matrix/operations**: 19 files
 - **matrix/types**: 7 files
-- **tensor**: 4 files
+- **tensor**: 5 files
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
 - **functions/algebra**: 47 files
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 51             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 51             | 0               |
-| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
+| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 556            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
@@ -367,8 +367,8 @@ graph LR
 
 - Classes: `MathWorkerPool`
 - Interfaces: `WorkerpoolCapabilities`, `WasmFeatureStatus`, `WorkerPoolConfig`, `ParallelResult`, `PoolMetrics`, `EnhancedPoolStats`, `TaskOptions`
-- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `initializePool`, `terminatePool`, `getPoolStats`
-- Constants: `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
+- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `viteDepsWorkerFallback`, `resolveDefaultWorkerScript`, `initializePool`, `terminatePool`, `getPoolStats`
+- Constants: `MIN_WORKER_CHUNK`, `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
 - Re-exports: `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`, `tensordotRange`, `matmulSequential`
 
 ---
@@ -1311,9 +1311,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                     | Import                                                                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` |
+| Package                     | Import                                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, getRecommendedWorkgroupSize, GPUCapabilities` |
 
 **Internal Dependencies:**
 
@@ -2180,15 +2180,17 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports | Type   |
-| ------------------ | ------- | ------ |
-| `./named-index.js` | `Index` | Import |
+| File                    | Imports               | Type   |
+| ----------------------- | --------------------- | ------ |
+| `./named-index.js`      | `Index`               | Import |
+| `./reshape-shape.js`    | `resolveReshapeShape` | Import |
+| `./operations/slice.js` | `slice, SliceRange`   | Import |
 
 **Exports:**
 
 - Classes: `Tensor`
-- Interfaces: `EinsumSpec`
-- Types: `NestedArray`
+- Interfaces: `TensorStorage`, `EinsumSpec`
+- Types: `TensorDtype`, `NestedArray`
 
 ---
 
@@ -2212,48 +2214,48 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                      | Type                  |
-| ----------------------------- | -------------------------------------------- | --------------------- |
-| `./Tensor.js`                 | `Tensor`                                     | Re-export             |
-| `./named-index.js`            | `Index, idx`                                 | Re-export             |
-| `./operations/svd.js`         | `tensorSvd, tensorSvdWasm`                   | Re-export             |
-| `./operations/random.js`      | `randomTensor`                               | Re-export             |
-| `./contraction-sequence.js`   | `contractNetwork`                            | Re-export             |
-| `./operations/qr.js`          | `tensorQr`                                   | Re-export             |
-| `./operations/lu.js`          | `tensorLU`                                   | Re-export             |
-| `./operations/cholesky.js`    | `tensorCholesky`                             | Re-export             |
-| `./operations/eig.js`         | `tensorEig, tensorEigWasm`                   | Re-export             |
-| `./operations/pinv.js`        | `tensorPinv`                                 | Re-export             |
-| `./operations/solve.js`       | `tensorSolve`                                | Re-export             |
-| `./operations/kron.js`        | `tensorKron`                                 | Re-export             |
-| `./operations/slice.js`       | `slice`                                      | Re-export             |
-| `./operations/gather.js`      | `gather`                                     | Re-export             |
-| `./operations/stack.js`       | `stack`                                      | Re-export             |
-| `./operations/concatenate.js` | `concatenate`                                | Re-export             |
-| `./operations/scatter.js`     | `scatter`                                    | Re-export             |
-| `./operations/pad.js`         | `pad`                                        | Re-export             |
-| `./operations/roll.js`        | `roll`                                       | Re-export             |
-| `./operations/flip.js`        | `flip`                                       | Re-export             |
-| `./Tensor.js`                 | `NestedArray, EinsumSpec`                    | Re-export (type-only) |
-| `./named-index.js`            | `IndexOpts`                                  | Re-export (type-only) |
-| `./operations/svd.js`         | `TensorSvdOpts, TensorSvdResult`             | Re-export (type-only) |
-| `./operations/random.js`      | `RandomTensorOpts`                           | Re-export (type-only) |
-| `./contraction-sequence.js`   | `ContractNetworkOpts, ContractNetworkResult` | Re-export (type-only) |
-| `./operations/qr.js`          | `TensorQrOpts, TensorQrResult`               | Re-export (type-only) |
-| `./operations/lu.js`          | `TensorLUOpts, TensorLUResult`               | Re-export (type-only) |
-| `./operations/cholesky.js`    | `TensorCholeskyOpts, TensorCholeskyResult`   | Re-export (type-only) |
-| `./operations/eig.js`         | `TensorEigOpts, TensorEigResult`             | Re-export (type-only) |
-| `./operations/pinv.js`        | `TensorPinvOpts`                             | Re-export (type-only) |
-| `./operations/solve.js`       | `TensorSolveOpts, TensorSolveResult`         | Re-export (type-only) |
-| `./operations/kron.js`        | `TensorKronOpts`                             | Re-export (type-only) |
-| `./operations/slice.js`       | `SliceRange`                                 | Re-export (type-only) |
-| `./operations/stack.js`       | `StackOpts`                                  | Re-export (type-only) |
-| `./operations/scatter.js`     | `ScatterOpts`                                | Re-export (type-only) |
-| `./operations/pad.js`         | `PadOptions`                                 | Re-export (type-only) |
+| File                          | Imports                                               | Type                  |
+| ----------------------------- | ----------------------------------------------------- | --------------------- |
+| `./Tensor.js`                 | `Tensor`                                              | Re-export             |
+| `./named-index.js`            | `Index, idx`                                          | Re-export             |
+| `./operations/svd.js`         | `tensorSvd, tensorSvdWasm`                            | Re-export             |
+| `./operations/random.js`      | `randomTensor`                                        | Re-export             |
+| `./contraction-sequence.js`   | `contractNetwork`                                     | Re-export             |
+| `./operations/qr.js`          | `tensorQr`                                            | Re-export             |
+| `./operations/lu.js`          | `tensorLU`                                            | Re-export             |
+| `./operations/cholesky.js`    | `tensorCholesky`                                      | Re-export             |
+| `./operations/eig.js`         | `tensorEig, tensorEigWasm`                            | Re-export             |
+| `./operations/pinv.js`        | `tensorPinv`                                          | Re-export             |
+| `./operations/solve.js`       | `tensorSolve`                                         | Re-export             |
+| `./operations/kron.js`        | `tensorKron`                                          | Re-export             |
+| `./operations/slice.js`       | `slice`                                               | Re-export             |
+| `./operations/gather.js`      | `gather`                                              | Re-export             |
+| `./operations/stack.js`       | `stack`                                               | Re-export             |
+| `./operations/concatenate.js` | `concatenate`                                         | Re-export             |
+| `./operations/scatter.js`     | `scatter`                                             | Re-export             |
+| `./operations/pad.js`         | `pad`                                                 | Re-export             |
+| `./operations/roll.js`        | `roll`                                                | Re-export             |
+| `./operations/flip.js`        | `flip`                                                | Re-export             |
+| `./Tensor.js`                 | `NestedArray, EinsumSpec, TensorStorage, TensorDtype` | Re-export (type-only) |
+| `./named-index.js`            | `IndexOpts`                                           | Re-export (type-only) |
+| `./operations/svd.js`         | `TensorSvdOpts, TensorSvdResult`                      | Re-export (type-only) |
+| `./operations/random.js`      | `RandomTensorOpts`                                    | Re-export (type-only) |
+| `./contraction-sequence.js`   | `ContractNetworkOpts, ContractNetworkResult`          | Re-export (type-only) |
+| `./operations/qr.js`          | `TensorQrOpts, TensorQrResult`                        | Re-export (type-only) |
+| `./operations/lu.js`          | `TensorLUOpts, TensorLUResult`                        | Re-export (type-only) |
+| `./operations/cholesky.js`    | `TensorCholeskyOpts, TensorCholeskyResult`            | Re-export (type-only) |
+| `./operations/eig.js`         | `TensorEigOpts, TensorEigResult`                      | Re-export (type-only) |
+| `./operations/pinv.js`        | `TensorPinvOpts`                                      | Re-export (type-only) |
+| `./operations/solve.js`       | `TensorSolveOpts, TensorSolveResult`                  | Re-export (type-only) |
+| `./operations/kron.js`        | `TensorKronOpts`                                      | Re-export (type-only) |
+| `./operations/slice.js`       | `SliceRange`                                          | Re-export (type-only) |
+| `./operations/stack.js`       | `StackOpts`                                           | Re-export (type-only) |
+| `./operations/scatter.js`     | `ScatterOpts`                                         | Re-export (type-only) |
+| `./operations/pad.js`         | `PadOptions`                                          | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `Tensor`, `Index`, `idx`, `tensorSvd`, `tensorSvdWasm`, `randomTensor`, `contractNetwork`, `tensorQr`, `tensorLU`, `tensorCholesky`, `tensorEig`, `tensorEigWasm`, `tensorPinv`, `tensorSolve`, `tensorKron`, `slice`, `gather`, `stack`, `concatenate`, `scatter`, `pad`, `roll`, `flip`, `NestedArray`, `EinsumSpec`, `IndexOpts`, `TensorSvdOpts`, `TensorSvdResult`, `RandomTensorOpts`, `ContractNetworkOpts`, `ContractNetworkResult`, `TensorQrOpts`, `TensorQrResult`, `TensorLUOpts`, `TensorLUResult`, `TensorCholeskyOpts`, `TensorCholeskyResult`, `TensorEigOpts`, `TensorEigResult`, `TensorPinvOpts`, `TensorSolveOpts`, `TensorSolveResult`, `TensorKronOpts`, `SliceRange`, `StackOpts`, `ScatterOpts`, `PadOptions`
+- Re-exports: `Tensor`, `Index`, `idx`, `tensorSvd`, `tensorSvdWasm`, `randomTensor`, `contractNetwork`, `tensorQr`, `tensorLU`, `tensorCholesky`, `tensorEig`, `tensorEigWasm`, `tensorPinv`, `tensorSolve`, `tensorKron`, `slice`, `gather`, `stack`, `concatenate`, `scatter`, `pad`, `roll`, `flip`, `NestedArray`, `EinsumSpec`, `TensorStorage`, `TensorDtype`, `IndexOpts`, `TensorSvdOpts`, `TensorSvdResult`, `RandomTensorOpts`, `ContractNetworkOpts`, `ContractNetworkResult`, `TensorQrOpts`, `TensorQrResult`, `TensorLUOpts`, `TensorLUResult`, `TensorCholeskyOpts`, `TensorCholeskyResult`, `TensorEigOpts`, `TensorEigResult`, `TensorPinvOpts`, `TensorSolveOpts`, `TensorSolveResult`, `TensorKronOpts`, `SliceRange`, `StackOpts`, `ScatterOpts`, `PadOptions`
 
 ---
 
@@ -2264,6 +2266,14 @@ graph LR
 - Classes: `Index`
 - Interfaces: `IndexOpts`
 - Functions: `idx`
+
+---
+
+### `tensor/src/reshape-shape.ts` - reshape-shape module
+
+**Exports:**
+
+- Functions: `resolveReshapeShape`
 
 ---
 
@@ -6759,13 +6769,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                | Type               |
-| ----------------------------- | ---------------------- | ------------------ |
-| `../utils/array.js`           | `arraySize`            | Import             |
-| `../signal/fft-core-f64.js`   | `fftCoreFloat64`       | Import             |
-| `./complex-to-interleaved.js` | `complexToInterleaved` | Import             |
-| `../utils/factory.js`         | `factory`              | Import             |
-| `../core/function/typed.js`   | `TypedFunction`        | Import (type-only) |
+| File                          | Imports                           | Type               |
+| ----------------------------- | --------------------------------- | ------------------ |
+| `../utils/array.js`           | `arraySize`                       | Import             |
+| `../signal/fft-core-f64.js`   | `fftCoreFloat64, fftExactFloat64` | Import             |
+| `./complex-to-interleaved.js` | `complexToInterleaved`            | Import             |
+| `../utils/factory.js`         | `factory`                         | Import             |
+| `../core/function/typed.js`   | `TypedFunction`                   | Import (type-only) |
 
 **Exports:**
 
@@ -8864,7 +8874,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitReverse`, `fftCoreFloat64`
+- Functions: `bitReverse`, `fftCoreFloat64`, `fftExactFloat64`
 
 ---
 
@@ -11714,7 +11724,7 @@ graph LR
 
 | File                            | Imports                                                                                                                                    | Type   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
+| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
 | `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
@@ -17865,9 +17875,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
+| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
 
 **Exports:**
 
@@ -17892,7 +17902,7 @@ graph LR
 
 | File               | Imports                                                                    | Type   |
 | ------------------ | -------------------------------------------------------------------------- | ------ |
-| `./validate.js`    | `assertSameLength, assertMatmulShape`                                      | Import |
+| `./validate.js`    | `assertSameLength, assertMatmulShape, assertMatmulArgs`                    | Import |
 | `./ops/bitwise.js` | `bitAnd, bitOr, bitXor, bitNot, leftShift, rightArithShift, rightLogShift` | Import |
 
 **Exports:**
@@ -17942,10 +17952,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                |
-| ---------------------------------- | ------------------------------------- |
-| `@danielsimonjr/mathts-workerpool` | `matmulSequential`                    |
-| `@danielsimonjr/mathts-workerpool` | `PoolOptions, ExecOptions, PoolStats` |
+| Package                            | Import                                         |
+| ---------------------------------- | ---------------------------------------------- |
+| `@danielsimonjr/mathts-workerpool` | `matmulSequential, resolveDefaultWorkerScript` |
+| `@danielsimonjr/mathts-workerpool` | `PoolOptions, ExecOptions, PoolStats`          |
 
 **Internal Dependencies:**
 
@@ -17963,7 +17973,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `WorkerPool`, `matmulSequential`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `ThresholdByOp`, `DeprecatedThresholdOp`, `DispatchOptions`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`, `PoolOptions`, `ExecOptions`, `PoolStats`
+- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `WorkerPool`, `matmulSequential`, `resolveDefaultWorkerScript`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `ThresholdByOp`, `DeprecatedThresholdOp`, `DispatchOptions`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`, `PoolOptions`, `ExecOptions`, `PoolStats`
 
 ---
 
@@ -17981,7 +17991,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `assertSameLength`, `assertMatmulShape`
+- Functions: `assertSameLength`, `assertMatmulArgs`, `assertMatmulShape`
 
 ---
 
@@ -18971,16 +18981,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                            | Type   |
-| ------------- | ------------------------------------------------------------------ | ------ |
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+| File          | Imports                                                                                                                                 | Type   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./detect.js` | `hasWebGPUSurface, getGPUAdapter, capabilitiesFromAdapter, markWebGPUAdapterUnavailable, resetWebGPUAvailabilityCache, GPUCapabilities` | Import |
 
 **Exports:**
 
 - Classes: `GPUContext`
 - Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+- Types: `GPUContextStatus`, `GlobalGPUInitResult`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPUWithReason`, `initializeGlobalGPU`, `destroyGlobalGPU`
 
 ---
 
@@ -19004,7 +19014,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+- Functions: `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `markWebGPUAdapterUnavailable`, `markWebGPUAdapterAvailable`, `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `capabilitiesFromAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
 
 ---
 
@@ -19014,6 +19024,7 @@ graph LR
 
 | File              | Imports                                  | Type   |
 | ----------------- | ---------------------------------------- | ------ |
+| `./detect.js`     | `resetWebGPUAvailabilityCache`           | Import |
 | `./GPUContext.js` | `getGlobalGPUContext, GPUContextOptions` | Import |
 
 **Exports:**
@@ -19035,19 +19046,19 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                                                                                                                                                                 | Type      |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `./detect.js`        | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent`                                          | Re-export |
-| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                          | Re-export |
-| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                 | Re-export |
-| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                         | Re-export |
-| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                           | Re-export |
-| `./serialize.js`     | `serializeGpu`                                                                                                                                                          | Re-export |
+| File                 | Imports                                                                                                                                                                                                                                                                              | Type      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, enableGpuUnavailableWarnings, disableGpuUnavailableWarnings, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                                                                                   | Re-export |
+| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                                                                                       | Re-export |
+| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                                                                              | Re-export |
+| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                                                                                      | Re-export |
+| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                                                                                        | Re-export |
+| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                                                                                       | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
+- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
 
 ---
 
@@ -19447,7 +19458,7 @@ graph LR
 | `expression/src/node/Node`                             | 6 files      | 20 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
-| `tensor/src/Tensor`                                    | 1 file       | 20 files   |
+| `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `core/src/internal`                                    | 20 files     | 0 files    |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -19469,15 +19480,16 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**1 circular dependencies detected:**
+**2 circular dependencies detected:**
 
-- **Runtime cycles**: 1 (require attention)
+- **Runtime cycles**: 2 (require attention)
 - **Type-only cycles**: 0 (safe, no runtime impact)
 
 ### Runtime Circular Dependencies
 
 These cycles involve runtime imports and may cause issues:
 
+- tensor/src/Tensor.ts -> tensor/src/operations/slice.ts -> tensor/src/Tensor.ts
 - functions/src/typed/algebra.ts -> functions/src/cas/polynomial-canonical.ts -> functions/src/typed/algebra.ts
 
 ---
@@ -19610,647 +19622,648 @@ graph TD
         N79[contraction-sequence]
         N80[index]
         N81[named-index]
+        N82[reshape-shape]
     end
 
     subgraph Tensor/operations
-        N82[cholesky]
-        N83[concatenate]
-        N84[eig]
-        N85[flip]
-        N86[gather]
-        N87[kron]
-        N88[lu]
-        N89[pad]
-        N90[pinv]
-        N91[qr]
-        N92[...8 more]
+        N83[cholesky]
+        N84[concatenate]
+        N85[eig]
+        N86[flip]
+        N87[gather]
+        N88[kron]
+        N89[lu]
+        N90[pad]
+        N91[pinv]
+        N92[qr]
+        N93[...8 more]
     end
 
     subgraph Autograd
-        N93[dual-tensor]
-        N94[forward-grad]
-        N95[grad]
-        N96[index]
-        N97[reverse-grad]
-        N98[shape]
-        N99[tape]
+        N94[dual-tensor]
+        N95[forward-grad]
+        N96[grad]
+        N97[index]
+        N98[reverse-grad]
+        N99[shape]
+        N100[tape]
     end
 
     subgraph Functions/algebra
-        N100[lup]
-        N101[qr]
-        N102[schur]
-        N103[slu]
-        N104[derivative]
-        N105[leafCount]
-        N106[lyap]
-        N107[polynomialRoot]
-        N108[rationalize]
-        N109[resolve]
-        N110[...37 more]
+        N101[lup]
+        N102[qr]
+        N103[schur]
+        N104[slu]
+        N105[derivative]
+        N106[leafCount]
+        N107[lyap]
+        N108[polynomialRoot]
+        N109[rationalize]
+        N110[resolve]
+        N111[...37 more]
     end
 
     subgraph Functions/arithmetic
-        N111[abs]
-        N112[addScalar]
-        N113[cbrt]
-        N114[ceil]
-        N115[cube]
-        N116[divide]
-        N117[divideScalar]
-        N118[dotDivide]
-        N119[dotMultiply]
-        N120[dotPow]
-        N121[...29 more]
+        N112[abs]
+        N113[addScalar]
+        N114[cbrt]
+        N115[ceil]
+        N116[cube]
+        N117[divide]
+        N118[divideScalar]
+        N119[dotDivide]
+        N120[dotMultiply]
+        N121[dotPow]
+        N122[...29 more]
     end
 
     subgraph Functions/bitwise
-        N122[bitAnd]
-        N123[bitNot]
-        N124[bitOr]
-        N125[bitXor]
-        N126[leftShift]
-        N127[rightArithShift]
-        N128[rightLogShift]
-        N129[useMatrixForArrayScalar]
+        N123[bitAnd]
+        N124[bitNot]
+        N125[bitOr]
+        N126[bitXor]
+        N127[leftShift]
+        N128[rightArithShift]
+        N129[rightLogShift]
+        N130[useMatrixForArrayScalar]
     end
 
     subgraph Functions
-        N130[calculus-extra]
-        N131[cas-integration]
-        N132[clustering-extra]
-        N133[config-api]
-        N134[descriptive-stats]
-        N135[distribution-functions]
-        N136[fit-scalar]
-        N137[front-export]
-        N138[geometry-extra]
-        N139[grad-forward]
-        N140[...24 more]
+        N131[calculus-extra]
+        N132[cas-integration]
+        N133[clustering-extra]
+        N134[config-api]
+        N135[descriptive-stats]
+        N136[distribution-functions]
+        N137[fit-scalar]
+        N138[front-export]
+        N139[geometry-extra]
+        N140[grad-forward]
+        N141[...24 more]
     end
 
     subgraph Functions/cas
-        N141[antiderivative]
-        N142[layer3]
-        N143[polynomial-canonical]
-        N144[rat]
-        N145[rational-integrate]
-        N146[real-roots]
-        N147[render-coeff-times]
+        N142[antiderivative]
+        N143[layer3]
+        N144[polynomial-canonical]
+        N145[rat]
+        N146[rational-integrate]
+        N147[real-roots]
+        N148[render-coeff-times]
     end
 
     subgraph Functions/combinatorics
-        N148[bellNumbers]
-        N149[catalan]
-        N150[composition]
-        N151[stirlingS2]
+        N149[bellNumbers]
+        N150[catalan]
+        N151[composition]
+        N152[stirlingS2]
     end
 
     subgraph Functions/complex
-        N152[arg]
-        N153[conj]
-        N154[im]
-        N155[re]
+        N153[arg]
+        N154[conj]
+        N155[im]
+        N156[re]
     end
 
     subgraph Functions/core
-        N156[config]
-        N157[create]
-        N158[config]
-        N159[import]
-        N160[typed]
+        N157[config]
+        N158[create]
+        N159[config]
+        N160[import]
+        N161[typed]
     end
 
     subgraph Functions/error
-        N161[ArgumentsError]
-        N162[DimensionError]
-        N163[IndexError]
+        N162[ArgumentsError]
+        N163[DimensionError]
+        N164[IndexError]
     end
 
     subgraph Functions/expression
-        N164[operators]
+        N165[operators]
     end
 
     subgraph Functions/factories
-        N165[evaluate]
-        N166[index]
-        N167[matrix-bridge]
-        N168[scope]
+        N166[evaluate]
+        N167[index]
+        N168[matrix-bridge]
+        N169[scope]
     end
 
     subgraph Functions/geometry
-        N169[alpha-shape]
-        N170[circumcircle]
-        N171[curves]
-        N172[delaunay]
-        N173[distance]
-        N174[frustum]
-        N175[geometry-extra]
-        N176[halfspace-intersection]
-        N177[hull]
-        N178[intersect]
-        N179[...10 more]
+        N170[alpha-shape]
+        N171[circumcircle]
+        N172[curves]
+        N173[delaunay]
+        N174[distance]
+        N175[frustum]
+        N176[geometry-extra]
+        N177[halfspace-intersection]
+        N178[hull]
+        N179[intersect]
+        N180[...10 more]
     end
 
     subgraph Functions/gpu
-        N180[elementwise-gpu]
-        N181[fft-gpu]
-        N182[implicit]
+        N181[elementwise-gpu]
+        N182[fft-gpu]
+        N183[implicit]
     end
 
     subgraph Functions/graph
-        N183[community-coloring]
-        N184[optimization]
-        N185[traversal-centrality]
+        N184[community-coloring]
+        N185[optimization]
+        N186[traversal-centrality]
     end
 
     subgraph Functions/logical
-        N186[and]
-        N187[not]
-        N188[nullish]
-        N189[or]
-        N190[xor]
+        N187[and]
+        N188[not]
+        N189[nullish]
+        N190[or]
+        N191[xor]
     end
 
     subgraph Functions/matrix
-        N191[column]
-        N192[complex-to-interleaved]
-        N193[concat]
-        N194[count]
-        N195[cross]
-        N196[ctranspose]
-        N197[det]
-        N198[diag]
-        N199[diff]
-        N200[dot]
-        N201[...39 more]
+        N192[column]
+        N193[complex-to-interleaved]
+        N194[concat]
+        N195[count]
+        N196[cross]
+        N197[ctranspose]
+        N198[det]
+        N199[diag]
+        N200[diff]
+        N201[dot]
+        N202[...39 more]
     end
 
     subgraph Functions/ml
-        N202[dbscan-knn]
-        N203[glm]
-        N204[kde]
-        N205[logistic-regression]
-        N206[ols]
-        N207[regularized-regression]
+        N203[dbscan-knn]
+        N204[glm]
+        N205[kde]
+        N206[logistic-regression]
+        N207[ols]
+        N208[regularized-regression]
     end
 
     subgraph Functions/numbertheory
-        N208[arithmetic-functions]
-        N209[diophantine]
-        N210[extra]
-        N211[integer-matrices]
-        N212[modular]
-        N213[sequences]
+        N209[arithmetic-functions]
+        N210[diophantine]
+        N211[extra]
+        N212[integer-matrices]
+        N213[modular]
+        N214[sequences]
     end
 
     subgraph Functions/numeric
-        N214[adaptive-quad]
-        N215[bfgs]
-        N216[box-lcp]
-        N217[bspline]
-        N218[constrained]
-        N219[control-equations]
-        N220[eigsh]
-        N221[finite-differences]
-        N222[fsolve]
-        N223[gauss-legendre4]
-        N224[...22 more]
+        N215[adaptive-quad]
+        N216[bfgs]
+        N217[box-lcp]
+        N218[bspline]
+        N219[constrained]
+        N220[control-equations]
+        N221[eigsh]
+        N222[finite-differences]
+        N223[fsolve]
+        N224[gauss-legendre4]
+        N225[...22 more]
     end
 
     subgraph Functions/plain
-        N225[arithmetic]
-        N226[bitwise]
-        N227[combinations]
-        N228[constants]
-        N229[index]
-        N230[logical]
-        N231[probability]
-        N232[relational]
-        N233[trigonometry]
-        N234[utils]
+        N226[arithmetic]
+        N227[bitwise]
+        N228[combinations]
+        N229[constants]
+        N230[index]
+        N231[logical]
+        N232[probability]
+        N233[relational]
+        N234[trigonometry]
+        N235[utils]
     end
 
     subgraph Functions/probability
-        N235[bernoulli]
-        N236[bigint-binomial]
-        N237[combinations]
-        N238[combinationsWithRep]
-        N239[factorial]
-        N240[gamma]
-        N241[kldivergence]
-        N242[lgamma]
-        N243[multinomial]
-        N244[permutations]
-        N245[...6 more]
+        N236[bernoulli]
+        N237[bigint-binomial]
+        N238[combinations]
+        N239[combinationsWithRep]
+        N240[factorial]
+        N241[gamma]
+        N242[kldivergence]
+        N243[lgamma]
+        N244[multinomial]
+        N245[permutations]
+        N246[...6 more]
     end
 
     subgraph Functions/relational
-        N246[compare]
-        N247[compareNatural]
-        N248[compareText]
-        N249[compareUnits]
-        N250[deepEqual]
-        N251[equal]
-        N252[equalScalar]
-        N253[equalText]
-        N254[larger]
-        N255[largerEq]
-        N256[...3 more]
+        N247[compare]
+        N248[compareNatural]
+        N249[compareText]
+        N250[compareUnits]
+        N251[deepEqual]
+        N252[equal]
+        N253[equalScalar]
+        N254[equalText]
+        N255[larger]
+        N256[largerEq]
+        N257[...3 more]
     end
 
     subgraph Functions/set
-        N257[flatten-pair]
-        N258[setCartesian]
-        N259[setDifference]
-        N260[setDistinct]
-        N261[setIntersect]
-        N262[setIsSubset]
-        N263[setMultiplicity]
-        N264[setPowerset]
-        N265[setSize]
-        N266[setSymDifference]
-        N267[...1 more]
+        N258[flatten-pair]
+        N259[setCartesian]
+        N260[setDifference]
+        N261[setDistinct]
+        N262[setIntersect]
+        N263[setIsSubset]
+        N264[setMultiplicity]
+        N265[setPowerset]
+        N266[setSize]
+        N267[setSymDifference]
+        N268[...1 more]
     end
 
     subgraph Functions/signal
-        N268[conv]
-        N269[dtw]
-        N270[fft-core-f64]
-        N271[fft-helpers]
-        N272[fft]
-        N273[fir-smoothing]
-        N274[freqz]
-        N275[iir-design]
-        N276[lomb-scargle]
-        N277[remez-exchange]
-        N278[...7 more]
+        N269[conv]
+        N270[dtw]
+        N271[fft-core-f64]
+        N272[fft-helpers]
+        N273[fft]
+        N274[fir-smoothing]
+        N275[freqz]
+        N276[iir-design]
+        N277[lomb-scargle]
+        N278[remez-exchange]
+        N279[...7 more]
     end
 
     subgraph Functions/special
-        N279[angular-momentum]
-        N280[erf-extra]
-        N281[erf]
-        N282[exp-integrals]
-        N283[hypergeometric]
-        N284[jacobi-elliptic]
-        N285[mathieu]
-        N286[niche]
-        N287[polygamma-orthopoly]
-        N288[spherical-bessel]
-        N289[...4 more]
+        N280[angular-momentum]
+        N281[erf-extra]
+        N282[erf]
+        N283[exp-integrals]
+        N284[hypergeometric]
+        N285[jacobi-elliptic]
+        N286[mathieu]
+        N287[niche]
+        N288[polygamma-orthopoly]
+        N289[spherical-bessel]
+        N290[...4 more]
     end
 
     subgraph Functions/statistics
-        N290[corr]
-        N291[cumsum]
-        N292[extreme]
-        N293[mad]
-        N294[max]
-        N295[mean]
-        N296[median]
-        N297[min]
-        N298[mode]
-        N299[prod]
-        N300[...6 more]
+        N291[corr]
+        N292[cumsum]
+        N293[extreme]
+        N294[mad]
+        N295[max]
+        N296[mean]
+        N297[median]
+        N298[min]
+        N299[mode]
+        N300[prod]
+        N301[...6 more]
     end
 
     subgraph Functions/stats
-        N301[distances]
-        N302[distributions-extra]
-        N303[effect-sizes]
-        N304[fit-distribution]
-        N305[gaussian-process]
-        N306[inference-extra]
-        N307[inference-extra2]
-        N308[multivariate-sampling]
-        N309[mvn]
-        N310[nonparametric-extra]
-        N311[...5 more]
+        N302[distances]
+        N303[distributions-extra]
+        N304[effect-sizes]
+        N305[fit-distribution]
+        N306[gaussian-process]
+        N307[inference-extra]
+        N308[inference-extra2]
+        N309[multivariate-sampling]
+        N310[mvn]
+        N311[nonparametric-extra]
+        N312[...5 more]
     end
 
     subgraph Functions/string
-        N312[bin]
-        N313[format]
-        N314[hex]
-        N315[oct]
-        N316[print]
+        N313[bin]
+        N314[format]
+        N315[hex]
+        N316[oct]
+        N317[print]
     end
 
     subgraph Functions/trigonometry
-        N317[acos]
-        N318[acosh]
-        N319[acot]
-        N320[acoth]
-        N321[acsc]
-        N322[acsch]
-        N323[asec]
-        N324[asech]
-        N325[asin]
-        N326[asinh]
-        N327[...16 more]
+        N318[acos]
+        N319[acosh]
+        N320[acot]
+        N321[acoth]
+        N322[acsc]
+        N323[acsch]
+        N324[asec]
+        N325[asech]
+        N326[asin]
+        N327[asinh]
+        N328[...16 more]
     end
 
     subgraph Functions/type
-        N328[BigNumber]
-        N329[Chain]
-        N330[chain]
-        N331[Complex]
-        N332[Decimal]
-        N333[FibonacciHeap]
-        N334[ImmutableDenseMatrix]
-        N335[MatrixIndex]
-        N336[Spa]
-        N337[index]
-        N338[...22 more]
+        N329[BigNumber]
+        N330[Chain]
+        N331[chain]
+        N332[Complex]
+        N333[Decimal]
+        N334[FibonacciHeap]
+        N335[ImmutableDenseMatrix]
+        N336[MatrixIndex]
+        N337[Spa]
+        N338[index]
+        N339[...22 more]
     end
 
     subgraph Functions/typed
-        N339[aggregate-restart]
-        N340[algebra]
-        N341[arithmetic]
-        N342[bitwise]
-        N343[cas]
-        N344[centrality-restarts]
-        N345[combinatorics]
-        N346[complex-promotion]
-        N347[complex]
-        N348[dist-objects]
-        N349[...41 more]
+        N340[aggregate-restart]
+        N341[algebra]
+        N342[arithmetic]
+        N343[bitwise]
+        N344[cas]
+        N345[centrality-restarts]
+        N346[combinatorics]
+        N347[complex-promotion]
+        N348[complex]
+        N349[dist-objects]
+        N350[...41 more]
     end
 
     subgraph Functions/unit
-        N350[to]
-        N351[toBest]
+        N351[to]
+        N352[toBest]
     end
 
     subgraph Functions/utils
-        N352[array]
-        N353[bigint]
-        N354[bitwise]
-        N355[nearlyEqual]
-        N356[clone]
-        N357[collection]
-        N358[complex]
-        N359[customs]
-        N360[emitter]
-        N361[factory]
-        N362[...25 more]
+        N353[array]
+        N354[bigint]
+        N355[bitwise]
+        N356[nearlyEqual]
+        N357[clone]
+        N358[collection]
+        N359[complex]
+        N360[customs]
+        N361[emitter]
+        N362[factory]
+        N363[...25 more]
     end
 
     subgraph Functions/wasm
-        N363[WasmLoader]
-        N364[wasm-bridge]
-        N365[common]
-        N366[wasm-bridge]
-        N367[integrity]
-        N368[wasm-bridge]
-        N369[policy]
-        N370[wasm-bridge]
-        N371[resolve]
-        N372[wasm-bridge]
-        N373[...3 more]
+        N364[WasmLoader]
+        N365[wasm-bridge]
+        N366[common]
+        N367[wasm-bridge]
+        N368[integrity]
+        N369[wasm-bridge]
+        N370[policy]
+        N371[wasm-bridge]
+        N372[resolve]
+        N373[wasm-bridge]
+        N374[...3 more]
     end
 
     subgraph Expression
-        N374[Help]
-        N375[Parser]
-        N376[index]
-        N377[keywords]
-        N378[limits]
-        N379[operators]
-        N380[parse]
-        N381[scalar-builder]
-        N382[scalar-enumerate]
-        N383[scalar-structure]
-        N384[...1 more]
+        N375[Help]
+        N376[Parser]
+        N377[index]
+        N378[keywords]
+        N379[limits]
+        N380[operators]
+        N381[parse]
+        N382[scalar-builder]
+        N383[scalar-enumerate]
+        N384[scalar-structure]
+        N385[...1 more]
     end
 
     subgraph Expression/compiler
-        N385[compile]
-        N386[index]
+        N386[compile]
+        N387[index]
     end
 
     subgraph Expression/embeddedDocs
-        N387[Infinity]
-        N388[LN10]
-        N389[LN2]
-        N390[LOG10E]
-        N391[LOG2E]
-        N392[NaN]
-        N393[SQRT1_2]
-        N394[SQRT2]
-        N395[e]
-        N396[false]
-        N397[...388 more]
+        N388[Infinity]
+        N389[LN10]
+        N390[LN2]
+        N391[LOG10E]
+        N392[LOG2E]
+        N393[NaN]
+        N394[SQRT1_2]
+        N395[SQRT2]
+        N396[e]
+        N397[false]
+        N398[...388 more]
     end
 
     subgraph Expression/error
-        N398[DimensionError]
-        N399[IndexError]
+        N399[DimensionError]
+        N400[IndexError]
     end
 
     subgraph Expression/evaluator
-        N400[evaluate]
-        N401[index]
+        N401[evaluate]
+        N402[index]
     end
 
     subgraph Expression/function
-        N402[parser]
+        N403[parser]
     end
 
     subgraph Expression/node
-        N403[AccessorNode]
-        N404[ArrayNode]
-        N405[AssignmentNode]
-        N406[BlockNode]
-        N407[ConditionalNode]
-        N408[ConstantNode]
-        N409[FunctionAssignmentNode]
-        N410[FunctionNode]
-        N411[IndexNode]
-        N412[Node]
-        N413[...10 more]
+        N404[AccessorNode]
+        N405[ArrayNode]
+        N406[AssignmentNode]
+        N407[BlockNode]
+        N408[ConditionalNode]
+        N409[ConstantNode]
+        N410[FunctionAssignmentNode]
+        N411[FunctionNode]
+        N412[IndexNode]
+        N413[Node]
+        N414[...10 more]
     end
 
     subgraph Expression/transform
-        N414[and.transform]
-        N415[bitAnd.transform]
-        N416[bitOr.transform]
-        N417[column.transform]
-        N418[concat.transform]
-        N419[cumsum.transform]
-        N420[diff.transform]
-        N421[filter.transform]
-        N422[forEach.transform]
-        N423[index.transform]
-        N424[...23 more]
+        N415[and.transform]
+        N416[bitAnd.transform]
+        N417[bitOr.transform]
+        N418[column.transform]
+        N419[concat.transform]
+        N420[cumsum.transform]
+        N421[diff.transform]
+        N422[filter.transform]
+        N423[forEach.transform]
+        N424[index.transform]
+        N425[...23 more]
     end
 
     subgraph Expression/utils
-        N425[array]
-        N426[collection]
-        N427[customs]
-        N428[factory]
-        N429[is]
-        N430[latex]
-        N431[map]
-        N432[mathml]
-        N433[number]
-        N434[object]
-        N435[...3 more]
+        N426[array]
+        N427[collection]
+        N428[customs]
+        N429[factory]
+        N430[is]
+        N431[latex]
+        N432[map]
+        N433[mathml]
+        N434[number]
+        N435[object]
+        N436[...3 more]
     end
 
     subgraph Parser
-        N436[index]
-    end
-
-    subgraph Units
         N437[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N438[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N439[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N440[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N441[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N442[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N443[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N444[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N445[index]
     end
 
+    subgraph Signal
+        N446[index]
+    end
+
     subgraph Parallel
-        N446[ComputePool]
-        N447[ParallelMatrix]
-        N448[WorkerPool]
-        N449[gemm-rows]
-        N450[index]
-        N451[matrix.worker]
-        N452[validate]
+        N447[ComputePool]
+        N448[ParallelMatrix]
+        N449[WorkerPool]
+        N450[gemm-rows]
+        N451[index]
+        N452[matrix.worker]
+        N453[validate]
     end
 
     subgraph Parallel/operations
-        N453[elementwise]
-        N454[index]
-        N455[map]
-        N456[matmul]
-        N457[reduce]
+        N454[elementwise]
+        N455[index]
+        N456[map]
+        N457[matmul]
+        N458[reduce]
     end
 
     subgraph Parallel/ops
-        N458[bitwise]
+        N459[bitwise]
     end
 
     subgraph Parallel/strategies
-        N459[chunk]
-        N460[index]
-        N461[threshold]
+        N460[chunk]
+        N461[index]
+        N462[threshold]
     end
 
     subgraph Workbook
-        N462[cli]
-        N463[contract]
-        N464[doc]
-        N465[edit]
-        N466[executor]
-        N467[formatter]
-        N468[fs-atomic]
-        N469[graph]
-        N470[html]
-        N471[index]
-        N472[...15 more]
+        N463[cli]
+        N464[contract]
+        N465[doc]
+        N466[edit]
+        N467[executor]
+        N468[formatter]
+        N469[fs-atomic]
+        N470[graph]
+        N471[html]
+        N472[index]
+        N473[...15 more]
     end
 
     subgraph Assembly/algebra
-        N473[decomposition]
+        N474[decomposition]
     end
 
     subgraph Assembly
-        N474[elementwise]
-        N475[heap]
-        N476[index]
-        N477[poly]
-        N478[signal]
-        N479[sort]
-        N480[special]
-        N481[tridiag]
+        N475[elementwise]
+        N476[heap]
+        N477[index]
+        N478[poly]
+        N479[signal]
+        N480[sort]
+        N481[special]
+        N482[tridiag]
     end
 
     subgraph Assembly/ops
-        N482[approx]
-        N483[array]
-        N484[bitwise]
-        N485[complex-array]
-        N486[complex-ops]
-        N487[curvefit]
-        N488[f64-buffer]
-        N489[fft]
-        N490[linalg]
-        N491[matrix]
-        N492[...7 more]
+        N483[approx]
+        N484[array]
+        N485[bitwise]
+        N486[complex-array]
+        N487[complex-ops]
+        N488[curvefit]
+        N489[f64-buffer]
+        N490[fft]
+        N491[linalg]
+        N492[matrix]
+        N493[...7 more]
     end
 
     subgraph Assembly/types
-        N493[complex]
+        N494[complex]
     end
 
     subgraph Compat
-        N494[chain]
-        N495[index]
-        N496[shims]
+        N495[chain]
+        N496[index]
+        N497[shims]
     end
 
     subgraph Gpu
-        N497[BufferPool]
-        N498[GPUContext]
-        N499[ShaderManager]
-        N500[detect]
-        N501[device]
-        N502[flag]
-        N503[index]
-        N504[serialize]
+        N498[BufferPool]
+        N499[GPUContext]
+        N500[ShaderManager]
+        N501[detect]
+        N502[device]
+        N503[flag]
+        N504[index]
+        N505[serialize]
     end
 
     subgraph Plot
-        N505[coerce]
-        N506[contour]
-        N507[emit]
-        N508[frame]
-        N509[heatmap]
-        N510[histogram]
-        N511[index]
-        N512[marks2d]
-        N513[overlay]
-        N514[palette]
-        N515[...8 more]
+        N506[coerce]
+        N507[contour]
+        N508[emit]
+        N509[frame]
+        N510[heatmap]
+        N511[histogram]
+        N512[index]
+        N513[marks2d]
+        N514[overlay]
+        N515[palette]
+        N516[...8 more]
     end
 
     subgraph Plot/three
-        N516[points3d]
-        N517[project]
-        N518[surface]
+        N517[points3d]
+        N518[project]
+        N519[surface]
     end
 
     N4 --> N2
@@ -20338,18 +20351,18 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1290   |
+| Total TypeScript Files  | 1291   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218979 |
-| Total Exports           | 7020   |
-| Total Re-exports        | 3023   |
+| Total Lines of Code     | 219891 |
+| Total Exports           | 7045   |
+| Total Re-exports        | 3032   |
 | Total Classes           | 61     |
-| Total Interfaces        | 601    |
-| Total Functions         | 2367   |
+| Total Interfaces        | 602    |
+| Total Functions         | 2380   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |
-| Runtime Circular Deps   | 1      |
+| Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 0      |
 
 ---

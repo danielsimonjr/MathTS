@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1290,
+    "totalFiles": 1291,
     "totalModules": 82,
-    "totalExports": 7020
+    "totalExports": 7045
   },
   "entryPoints": [
     {
@@ -321,6 +321,7 @@
           "forEachMultiIndex",
           "tensordotRange",
           "matmulSequential",
+          "MIN_WORKER_CHUNK",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -335,6 +336,8 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats",
@@ -370,11 +373,13 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats"
         ],
-        "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+        "constants": ["MIN_WORKER_CHUNK", "DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
       "packages/workerpool/src/matmul-sequential.ts": {
         "description": "Sequential matrix multiplication: the one kernel for the inline branch of",
@@ -3923,7 +3928,6 @@
               "BufferPool",
               "ShaderManager",
               "hasWebGPU",
-              "detectGPUCapabilities",
               "getRecommendedWorkgroupSize",
               "GPUCapabilities"
             ]
@@ -5903,6 +5907,14 @@
           {
             "file": "./named-index.js",
             "imports": ["Index"]
+          },
+          {
+            "file": "./reshape-shape.js",
+            "imports": ["resolveReshapeShape"]
+          },
+          {
+            "file": "./operations/slice.js",
+            "imports": ["slice", "SliceRange"]
           }
         ],
         "workspaceDependencies": [
@@ -5925,7 +5937,7 @@
         ],
         "exports": ["Tensor"],
         "classes": ["Tensor"],
-        "interfaces": ["EinsumSpec"]
+        "interfaces": ["TensorStorage", "EinsumSpec"]
       },
       "tensor/src/contraction-sequence.ts": {
         "description": "contractNetwork — given an ordered list of Tensors (each carrying",
@@ -6053,7 +6065,7 @@
           },
           {
             "file": "./Tensor.js",
-            "imports": ["NestedArray", "EinsumSpec"],
+            "imports": ["NestedArray", "EinsumSpec", "TensorStorage", "TensorDtype"],
             "reExport": true,
             "typeOnly": true
           },
@@ -6175,6 +6187,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6224,6 +6238,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6258,6 +6274,15 @@
         "classes": ["Index"],
         "interfaces": ["IndexOpts"],
         "functions": ["idx"]
+      },
+      "tensor/src/reshape-shape.ts": {
+        "description": "reshape-shape module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["resolveReshapeShape"],
+        "functions": ["resolveReshapeShape"]
       }
     },
     "tensor/operations": {
@@ -17711,7 +17736,7 @@
           },
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "./complex-to-interleaved.js",
@@ -21052,8 +21077,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["bitReverse", "fftCoreFloat64"],
-        "functions": ["bitReverse", "fftCoreFloat64"]
+        "exports": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"],
+        "functions": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"]
       },
       "functions/src/signal/fft-helpers.ts": {
         "description": "numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`",
@@ -27034,7 +27059,7 @@
         "internalDependencies": [
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "../gpu/fft-gpu.js",
@@ -39285,6 +39310,8 @@
             "imports": [
               "parallelFFT",
               "parallelIFFT",
+              "parallelFFT",
+              "parallelIFFT",
               "parallelFFTMagnitude",
               "parallelFFTPower",
               "parallelConv",
@@ -39323,6 +39350,8 @@
         "exports": [
           "parallelFFT",
           "parallelIFFT",
+          "fft",
+          "ifft",
           "parallelFFTMagnitude",
           "parallelFFTPower",
           "parallelConv",
@@ -39402,7 +39431,7 @@
         "internalDependencies": [
           {
             "file": "./validate.js",
-            "imports": ["assertSameLength", "assertMatmulShape"]
+            "imports": ["assertSameLength", "assertMatmulShape", "assertMatmulArgs"]
           },
           {
             "file": "./ops/bitwise.js",
@@ -39644,7 +39673,7 @@
           {
             "package": "@danielsimonjr/mathts-workerpool",
             "directory": "packages/workerpool",
-            "imports": ["matmulSequential"]
+            "imports": ["matmulSequential", "resolveDefaultWorkerScript"]
           },
           {
             "package": "@danielsimonjr/mathts-workerpool",
@@ -39661,6 +39690,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39754,6 +39784,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39858,8 +39889,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["assertSameLength", "assertMatmulShape"],
-        "functions": ["assertSameLength", "assertMatmulShape"]
+        "exports": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"],
+        "functions": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"]
       }
     },
     "parallel/operations": {
@@ -43641,14 +43672,32 @@
         "internalDependencies": [
           {
             "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+            "imports": [
+              "hasWebGPUSurface",
+              "getGPUAdapter",
+              "capabilitiesFromAdapter",
+              "markWebGPUAdapterUnavailable",
+              "resetWebGPUAvailabilityCache",
+              "GPUCapabilities"
+            ]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "exports": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContext"
+        ],
         "classes": ["GPUContext"],
         "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+        "functions": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU"
+        ]
       },
       "gpu/src/ShaderManager.ts": {
         "description": "GPU Shader Manager (generic)",
@@ -43672,9 +43721,16 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43682,9 +43738,16 @@
         ],
         "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43696,6 +43759,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["resetWebGPUAvailabilityCache"]
+          },
           {
             "file": "./GPUContext.js",
             "imports": ["getGlobalGPUContext", "GPUContextOptions"]
@@ -43724,9 +43791,13 @@
             "file": "./detect.js",
             "imports": [
               "hasWebGPU",
+              "hasWebGPUSurface",
+              "resetWebGPUAvailabilityCache",
               "isBrowser",
               "getGPUAdapter",
               "detectGPUCapabilities",
+              "enableGpuUnavailableWarnings",
+              "disableGpuUnavailableWarnings",
               "isGPUSuitableForMatrixOps",
               "getRecommendedWorkgroupSize",
               "getMaxMatrixSize",
@@ -43741,9 +43812,11 @@
               "GPUContext",
               "getGlobalGPUContext",
               "initializeGlobalGPU",
+              "initializeGlobalGPUWithReason",
               "destroyGlobalGPU",
               "GPUContextOptions",
               "GPUContextStatus",
+              "GlobalGPUInitResult",
               "DeviceLostEvent"
             ],
             "reExport": true
@@ -43777,9 +43850,13 @@
         "workspaceDependencies": [],
         "exports": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43788,9 +43865,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -43807,9 +43886,13 @@
         ],
         "reExported": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43818,9 +43901,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -44480,6 +44565,7 @@
   "dependencyGraph": {
     "circularDependencies": {
       "runtime": [
+        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"],
         [
           "functions/src/typed/algebra.ts",
           "functions/src/cas/polynomial-canonical.ts",
@@ -44487,8 +44573,8 @@
         ]
       ],
       "typeOnly": [],
-      "total": 1,
-      "runtimeCount": 1,
+      "total": 2,
+      "runtimeCount": 2,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -44669,7 +44755,8 @@
           "tensor/src/Tensor.ts",
           "tensor/src/contraction-sequence.ts",
           "tensor/src/index.ts",
-          "tensor/src/named-index.ts"
+          "tensor/src/named-index.ts",
+          "tensor/src/reshape-shape.ts"
         ]
       },
       {
@@ -46142,19 +46229,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1290,
+    "totalTypeScriptFiles": 1291,
     "totalModules": 82,
-    "totalLinesOfCode": 218979,
-    "totalExports": 7020,
+    "totalLinesOfCode": 219891,
+    "totalExports": 7045,
     "totalClasses": 61,
-    "totalInterfaces": 601,
-    "totalFunctions": 2367,
+    "totalInterfaces": 602,
+    "totalFunctions": 2380,
     "totalTypeGuards": 172,
     "totalEnums": 0,
-    "totalConstants": 1646,
-    "totalReExports": 3023,
+    "totalConstants": 1647,
+    "totalReExports": 3032,
     "totalTypeOnlyImports": 644,
-    "runtimeCircularDeps": 1,
+    "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0

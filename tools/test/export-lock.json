@@ -140,6 +140,9 @@
       "ExecOptions": {
         "kind": "type"
       },
+      "MIN_WORKER_CHUNK": {
+        "kind": "number"
+      },
       "MathWorkerPool": {
         "kind": "function"
       },
@@ -221,6 +224,9 @@
       "matmulSequential": {
         "kind": "function"
       },
+      "resolveDefaultWorkerScript": {
+        "kind": "function"
+      },
       "tensordotRange": {
         "kind": "function"
       },
@@ -234,6 +240,9 @@
         "kind": "function"
       },
       "transferTypedArray": {
+        "kind": "function"
+      },
+      "viteDepsWorkerFallback": {
         "kind": "function"
       }
     },
@@ -1648,9 +1657,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1724,6 +1730,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -9625,6 +9634,9 @@
       "partitionRange": {
         "kind": "function"
       },
+      "resolveDefaultWorkerScript": {
+        "kind": "function"
+      },
       "resolveOpThreshold": {
         "kind": "function"
       },
@@ -11054,6 +11066,9 @@
       "GPU_MIN_ELEMENTS": {
         "kind": "number"
       },
+      "GlobalGPUInitResult": {
+        "kind": "type"
+      },
       "PipelineConfig": {
         "kind": "type"
       },
@@ -11072,7 +11087,13 @@
       "disableGpu": {
         "kind": "function"
       },
+      "disableGpuUnavailableWarnings": {
+        "kind": "function"
+      },
       "enableGpu": {
+        "kind": "function"
+      },
+      "enableGpuUnavailableWarnings": {
         "kind": "function"
       },
       "getGPUAdapter": {
@@ -11093,7 +11114,13 @@
       "hasWebGPU": {
         "kind": "function"
       },
+      "hasWebGPUSurface": {
+        "kind": "function"
+      },
       "initializeGlobalGPU": {
+        "kind": "function"
+      },
+      "initializeGlobalGPUWithReason": {
         "kind": "function"
       },
       "isBrowser": {
@@ -11106,6 +11133,9 @@
         "kind": "function"
       },
       "resetGpuDevice": {
+        "kind": "function"
+      },
+      "resetWebGPUAvailabilityCache": {
         "kind": "function"
       },
       "serializeGpu": {

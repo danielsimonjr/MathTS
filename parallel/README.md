@@ -14,6 +14,9 @@ npm install @danielsimonjr/mathts-parallel
 
 - `ComputePool` for chunked work over `Float64Array` data (parallel only when an op's
   threshold is met — most element-wise defaults are `'never'` / sequential).
+- Workers start on the first parallel dispatch (including `{ forceParallel: true }`);
+  `await pool.initialize()` is optional but still supported.
+- After `await pool.terminate()`, further pool calls throw `ComputePool has been terminated`.
 - `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, standalone `parallel*` helpers, and
   bitwise ops.
 - `WorkerPool`, the low-level pool that `execute(data, transferables?, timeoutMs?)` runs on:
@@ -24,6 +27,25 @@ npm install @danielsimonjr/mathts-parallel
   or `file://` URL string, not a `URL` object). Omit it and construction throws
   `TypeError` before any worker starts. For chunked numeric work prefer `ComputePool`,
   which wires the worker script for you.
+
+## Vite / browser workers
+
+The default worker URL is `new URL('./worker.js', import.meta.url)`. Vite's production
+build rewrites that into an emitted worker asset. In dev, the optimizer prebundles the
+package and that relative URL 404s as `/node_modules/.vite/deps/worker.js`; the resolver
+then loads `/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js`, which the dev
+server already serves. You can still pass an explicit URL:
+
+```ts
+import { ComputePool } from '@danielsimonjr/mathts-parallel';
+import workerUrl from '@danielsimonjr/mathts-workerpool/worker?url';
+
+const pool = new ComputePool({ workerScript: workerUrl, maxWorkers: 4 });
+await pool.sin(large, { forceParallel: true });
+```
+
+`resolveDefaultWorkerScript()` (re-exported from this package) applies that fallback when
+no `workerScript` is set. After `terminate()`, call `initialize()` to spawn workers again.
 
 ## License
 
