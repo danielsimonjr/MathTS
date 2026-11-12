@@ -7,26 +7,87 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { repoRoot } from './workspaces.mjs';
+import {
+  MATHTS_WORKSPACE_PREFIX,
+  repoRoot,
+  workspaceMathtsClosure,
+  workspacePackageDirsByName,
+} from './workspaces.mjs';
 
-const PACKS = ['core', 'matrix', 'parallel', 'packages/workerpool', 'functions', 'linalg'];
+/** Workspace dirs reached from what the temporary consumer imports. */
+const CONSUMER_SEED_DIRS = ['functions'];
 const WORKERPOOL_VENDOR = 'workerpool';
+
 const skipBuild = process.argv.includes('--skip-build');
 
+const packDirs = workspaceMathtsClosure(CONSUMER_SEED_DIRS);
+
 if (!skipBuild) {
-  execFileSync('npx', ['turbo', 'build', ...PACKS.flatMap((d) => ['--filter', `./${d}`])], {
+  execFileSync('npx', ['turbo', 'build', ...packDirs.flatMap((d) => ['--filter', `./${d}`])], {
     cwd: repoRoot,
     stdio: 'inherit',
   });
 }
+
+const nameByDir = new Map(
+  [...workspacePackageDirsByName().entries()].map(([name, dir]) => [dir, name])
+);
 
 const work = mkdtempSync(join(tmpdir(), 'mathts-no-node-'));
 const tarballs = join(work, 'tarballs');
 const consumer = join(work, 'consumer');
 mkdirSync(tarballs);
 
+/**
+ * @param {string} consumerDir
+ * @param {Set<string>} packedNames
+ */
+function lockEntryPackageName(pkgPath, meta) {
+  if (typeof meta?.name === 'string') return meta.name;
+  const scoped = /^node_modules\/(@danielsimonjr\/mathts-[^/]+)$/.exec(pkgPath);
+  return scoped ? scoped[1] : null;
+}
+
+function assertMathtsInstalledFromTarballs(consumerDir, packedNames) {
+  const lockPath = join(consumerDir, 'package-lock.json');
+  const lock = JSON.parse(readFileSync(lockPath, 'utf8'));
+  const problems = [];
+  /** @type {Map<string, string>} name -> resolved */
+  const installed = new Map();
+
+  for (const [pkgPath, meta] of Object.entries(lock.packages ?? {})) {
+    if (pkgPath === '' || meta === undefined) continue;
+    const name = lockEntryPackageName(pkgPath, meta);
+    if (name === null || !name.startsWith(MATHTS_WORKSPACE_PREFIX)) continue;
+    installed.set(name, meta.resolved ?? '');
+  }
+
+  for (const name of packedNames) {
+    const resolved = installed.get(name);
+    if (resolved === undefined) {
+      problems.push(`${name}: not present in package-lock after install`);
+      continue;
+    }
+    if (!resolved.startsWith('file:')) {
+      problems.push(`${name}: expected file: tarball (got ${resolved || '(missing resolved)'})`);
+    }
+  }
+
+  for (const [name, resolved] of installed) {
+    if (!resolved.startsWith('file:')) {
+      problems.push(`${name}: workspace package resolved from registry (${resolved})`);
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `consumer-typecheck-no-node: workspace packages must not come from the registry:\n${problems.join('\n')}`
+    );
+  }
+}
+
 try {
-  for (const dir of PACKS) {
+  for (const dir of packDirs) {
     execFileSync(
       'npm',
       ['pack', '--ignore-scripts', '--silent', '--pack-destination', tarballs],
@@ -44,6 +105,13 @@ try {
   const tgz = readdirSync(tarballs).filter((f) => f.endsWith('.tgz'));
   const wpTgz = tgz.find((f) => /workerpool-10/.test(f));
   if (!wpTgz) throw new Error('consumer-typecheck-no-node: missing patched workerpool pack');
+  const packedNames = new Set(
+    packDirs.map((dir) => {
+      const name = nameByDir.get(dir);
+      if (name === undefined) throw new Error(`consumer-typecheck-no-node: no package name for ${dir}`);
+      return name;
+    })
+  );
   const tsVersion = JSON.parse(
     readFileSync(join(repoRoot, 'node_modules/typescript/package.json'), 'utf8')
   ).version;
@@ -87,18 +155,21 @@ try {
     `import { det } from '@danielsimonjr/mathts-functions';\nconst d: number = det([[1, 2], [3, 4]]);\nexport { d };\n`
   );
 
+  const mathtsTgz = tgz.filter((f) => f !== wpTgz).map((f) => join(tarballs, f));
   execFileSync(
     'npm',
-      [
-        'install',
-        '--no-audit',
-        '--no-fund',
-        '--loglevel=error',
-        `typescript@${tsVersion}`,
-        ...tgz.filter((f) => f !== wpTgz).map((f) => join(tarballs, f)),
-      ],
+    [
+      'install',
+      '--no-audit',
+      '--no-fund',
+      '--loglevel=error',
+      `typescript@${tsVersion}`,
+      ...mathtsTgz,
+    ],
     { cwd: consumer, stdio: 'inherit' }
   );
+
+  assertMathtsInstalledFromTarballs(consumer, packedNames);
 
   let output = '';
   try {

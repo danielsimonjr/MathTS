@@ -25,3 +25,58 @@ export function workspaceDirs(root = repoRoot) {
       .sort();
   });
 }
+
+/** Published scope for in-repo workspace packages installed as tarballs in consumer harnesses. */
+export const MATHTS_WORKSPACE_PREFIX = '@danielsimonjr/mathts-';
+
+/**
+ * Map each workspace package name to its directory relative to the repo root.
+ * @param {string} [root]
+ * @returns {Map<string, string>}
+ */
+export function workspacePackageDirsByName(root = repoRoot) {
+  /** @type {Map<string, string>} */
+  const byName = new Map();
+  for (const dir of workspaceDirs(root)) {
+    const pkg = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8'));
+    if (typeof pkg.name === 'string') byName.set(pkg.name, dir);
+  }
+  return byName;
+}
+
+/**
+ * Workspace `dependencies` and `peerDependencies` on `@danielsimonjr/mathts-*`, transitively.
+ * @param {string[]} seedDirs workspace dirs the consumer imports (e.g. `functions`)
+ * @param {string} [root]
+ * @returns {string[]} sorted unique workspace dirs to pack
+ */
+export function workspaceMathtsClosure(seedDirs, root = repoRoot) {
+  const byName = workspacePackageDirsByName(root);
+  /** @type {Set<string>} */
+  const seen = new Set();
+  /** @type {string[]} */
+  const queue = [...seedDirs];
+
+  while (queue.length > 0) {
+    const dir = queue.shift();
+    if (dir === undefined || seen.has(dir)) continue;
+    seen.add(dir);
+    const pkgPath = join(root, dir, 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    for (const field of ['dependencies', 'peerDependencies']) {
+      const deps = pkg[field];
+      if (deps === null || deps === undefined || typeof deps !== 'object') continue;
+      for (const name of Object.keys(deps)) {
+        if (!name.startsWith(MATHTS_WORKSPACE_PREFIX)) continue;
+        const depDir = byName.get(name);
+        if (depDir === undefined) {
+          throw new Error(
+            `workspaceMathtsClosure: ${pkg.name} ${field} lists ${name} but it is not a workspace package`
+          );
+        }
+        if (!seen.has(depDir)) queue.push(depDir);
+      }
+    }
+  }
+  return [...seen].sort();
+}
