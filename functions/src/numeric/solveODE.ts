@@ -1,5 +1,6 @@
 import { numericJacobian } from './numeric-jacobian.js';
 import { hermiteCubic } from './hermite.js';
+import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from './ode-step-limit.js';
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { DenseMatrix, lu, luSolve, matMul as _matMul } from '@danielsimonjr/mathts-matrix';
@@ -474,7 +475,7 @@ function _linearlyImplicitDriver(
   const dir = tf >= t0 ? 1 : -1;
   const rtol = options.tol ? (options.tol as number) : 1e-4;
   const atol = rtol * 1e-3;
-  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
   const span = Math.abs(tf - t0);
 
   let t = t0;
@@ -491,9 +492,12 @@ function _linearlyImplicitDriver(
 
   const tOut: number[] = [t];
   const yOut: number[][] = [y.slice()];
-  let iter = 0;
+  let acceptedSteps = 0;
+  let attempts = 0;
+  const attemptCap = odeMaxAttempts(maxIter);
 
-  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
+  while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
+    attempts++;
     if (Math.abs(h) > Math.abs(tf - t)) h = tf - t;
     const F0 = _fArr(f, t, y);
     const J = _jacobianAt(f, t, y, F0, options);
@@ -511,6 +515,7 @@ function _linearlyImplicitDriver(
       y = yNew;
       tOut.push(t);
       yOut.push(y.slice());
+      acceptedSteps++;
     }
     h *= Math.min(
       control.growMax,
@@ -520,10 +525,30 @@ function _linearlyImplicitDriver(
     const minStepR = options.minStep as number | undefined;
     if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
     else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
-    iter++;
+    if (attempts >= attemptCap && (dir > 0 ? t < tf : t > tf)) {
+      throw odeMaxStepsError({
+        method: name,
+        maxIter,
+        acceptedSteps,
+        attempts,
+        tStart: t0,
+        tCurrent: t,
+        tFinal: tf,
+        lastStepMag: Math.abs(h),
+      });
+    }
   }
-  if (iter >= maxIter) {
-    throw new Error('Maximum number of iterations reached, try changing options');
+  if ((dir > 0 ? t < tf : t > tf) && acceptedSteps >= maxIter) {
+    throw odeMaxStepsError({
+      method: name,
+      maxIter,
+      acceptedSteps,
+      attempts,
+      tStart: t0,
+      tCurrent: t,
+      tFinal: tf,
+      lastStepMag: Math.abs(h),
+    });
   }
   return { t: tOut, y: yOut };
 }
@@ -909,7 +934,7 @@ export function bdfSolve(
   const dir = tf >= t0 ? 1 : -1;
   const rtol = options.tol ? (options.tol as number) : 1e-4;
   const atol = rtol * 1e-3;
-  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
   const maxStep = (options.maxStep as number | undefined) ?? Infinity;
   const newtonTol = _newtonTol(rtol);
 
@@ -932,10 +957,12 @@ export function bdfSolve(
 
   const tOut: number[] = [t];
   const yOut: number[][] = [y.slice()];
-  let iter = 0;
+  let acceptedSteps = 0;
+  let attempts = 0;
+  const attemptCap = odeMaxAttempts(maxIter);
 
-  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
-    iter++;
+  while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
+    attempts++;
     const minStep = _minStep(t);
     if (hAbs > maxStep) {
       _bdfChangeD(D, order, maxStep / hAbs);
@@ -1018,6 +1045,7 @@ export function bdfSolve(
         y = yNew;
         tOut.push(t);
         yOut.push(y.slice());
+        acceptedSteps++;
       }
     }
 
@@ -1052,10 +1080,32 @@ export function bdfSolve(
     hAbs *= factor;
     _bdfChangeD(D, order, factor);
     nEqualSteps = 0;
+
+    if (attempts >= attemptCap && (dir > 0 ? t < tf : t > tf)) {
+      throw odeMaxStepsError({
+        method: 'BDF',
+        maxIter,
+        acceptedSteps,
+        attempts,
+        tStart: t0,
+        tCurrent: t,
+        tFinal: tf,
+        lastStepMag: hAbs,
+      });
+    }
   }
 
-  if (iter >= maxIter) {
-    throw new Error('Maximum number of iterations reached, try changing options');
+  if ((dir > 0 ? t < tf : t > tf) && acceptedSteps >= maxIter) {
+    throw odeMaxStepsError({
+      method: 'BDF',
+      maxIter,
+      acceptedSteps,
+      attempts,
+      tStart: t0,
+      tCurrent: t,
+      tFinal: tf,
+      lastStepMag: hAbs,
+    });
   }
   return { t: tOut, y: yOut };
 }
@@ -1213,7 +1263,7 @@ export function radauSolve(
   const dir = tf >= t0 ? 1 : -1;
   const rtol = options.tol ? (options.tol as number) : 1e-4;
   const atol = rtol * 1e-3;
-  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
   const maxStep = (options.maxStep as number | undefined) ?? Infinity;
   const newtonTol = _newtonTol(rtol);
 
@@ -1227,10 +1277,12 @@ export function radauSolve(
 
   const tOut: number[] = [t];
   const yOut: number[][] = [y.slice()];
-  let iter = 0;
+  let acceptedSteps = 0;
+  let attempts = 0;
+  const attemptCap = odeMaxAttempts(maxIter);
 
-  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
-    iter++;
+  while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
+    attempts++;
     const minStep = _minStep(t);
     let hEntry: number;
     if (hAbs > maxStep) {
@@ -1316,11 +1368,34 @@ export function radauSolve(
     y = yNew;
     tOut.push(t);
     yOut.push(y.slice());
+    acceptedSteps++;
     hAbs *= factor;
+
+    if (attempts >= attemptCap && (dir > 0 ? t < tf : t > tf)) {
+      throw odeMaxStepsError({
+        method: 'Radau',
+        maxIter,
+        acceptedSteps,
+        attempts,
+        tStart: t0,
+        tCurrent: t,
+        tFinal: tf,
+        lastStepMag: hAbs,
+      });
+    }
   }
 
-  if (iter >= maxIter) {
-    throw new Error('Maximum number of iterations reached, try changing options');
+  if ((dir > 0 ? t < tf : t > tf) && acceptedSteps >= maxIter) {
+    throw odeMaxStepsError({
+      method: 'Radau',
+      maxIter,
+      acceptedSteps,
+      attempts,
+      tStart: t0,
+      tCurrent: t,
+      tFinal: tf,
+      lastStepMag: hAbs,
+    });
   }
   return { t: tOut, y: yOut };
 }
@@ -1412,8 +1487,8 @@ export const createSolveODE = /* #__PURE__ */ factory(
      *   - `maxStep`: maximum step size of the method
      *   - `minDelta` (0.2): minimum ratio of change for the step (RK23/RK45 only)
      *   - `maxDelta` (5): maximum ratio of change for the step (RK23/RK45 only)
-     *   - `maxIter`: maximum number of iterations (1e4 for RK23/RK45; 1e5 for Rosenbrock, which is
-     *     2nd order and so takes more steps at tight tolerances)
+     *   - `maxIter`: maximum **accepted** time steps (default 1e5 for all methods). Rejected
+     *     error-control attempts do not count toward this limit.
      *   - `events`: event detection (scipy `solve_ivp`-style). One event function `g(t, y)` or an
      *     array of them; the solver locates each zero crossing between accepted steps (cubic-Hermite
      *     interpolation + bisection) and reports it in `tEvents`/`yEvents`. An event may carry (as
@@ -1463,7 +1538,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     // dependency, and `stiffODESolver` (functions/src/typed/numeric.ts) needs to call the same
     // engine directly without depending on this factory instance.
 
-    function _rk(butcherTableau: ButcherTableau) {
+    function _rk(butcherTableau: ButcherTableau, rkMethod: 'RK23' | 'RK45') {
       // generates an adaptive runge kutta method from it's butcher tableau
 
       return function (
@@ -1507,7 +1582,8 @@ export const createSolveODE = /* #__PURE__ */ factory(
         const tol = options.tol ? options.tol : 1e-4; // define a tolerance (must be an option)
         const minDelta = options.minDelta ? options.minDelta : 0.2;
         const maxDelta = options.maxDelta ? options.maxDelta : 5;
-        const maxIter = options.maxIter ? options.maxIter : 10_000; // stop inifite evaluation if something goes wrong
+        const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
+        const attemptCap = odeMaxAttempts(maxIter);
         const [a, c, b, bp] = hasBigNumbers
           ? [
               bignumber(butcherTableau.a),
@@ -1562,15 +1638,39 @@ export const createSolveODE = /* #__PURE__ */ factory(
         }
 
         let n = 0;
-        let iter = 0;
+        let attempts = 0;
         const ongoing = _createOngoing(isForwards);
         const trimStep = _createTrimStep(isForwards);
-        // iterate unitil it reaches either the final time or maximum iterations
+        const tfNum = tf as number;
+        let lastStepMag = 0;
+        // iterate until the final time or the accepted-step cap
         while (ongoing(t[n], tf)) {
+          if (n >= maxIter) {
+            throw odeMaxStepsError({
+              method: rkMethod,
+              maxIter,
+              acceptedSteps: n,
+              attempts,
+              tStart: isNumber(t0) ? (t0 as number) : tfNum,
+              tCurrent: isNumber(t[n]) ? (t[n] as number) : tfNum,
+              tFinal: isNumber(tf) ? tfNum : tfNum,
+              lastStepMag,
+            });
+          }
           const k: unknown[] = [];
 
           // trim the time step so that it doesn't overshoot
           h = trimStep(t[n], tf, h);
+          if (typeof h === 'number' && typeof t[n] === 'number') {
+            const tNow = t[n] as number;
+            // A rejected step that shrinks h to 0 (or below one ulp of t) would
+            // otherwise spin until the attempt cap. Underflow is still an error.
+            if (h === 0 || tNow + h === tNow) {
+              throw new Error(
+                `solveODE ${rkMethod}: step size underflow at t=${tNow} (h=${h}); the step does not advance the independent variable.`
+              );
+            }
+          }
 
           // calculate the first value of k
           k.push(f(t[n] as MathNumericType, y[n] as MathNumericType | MathArray));
@@ -1609,9 +1709,22 @@ export const createSolveODE = /* #__PURE__ */ factory(
           } else if (minStep && smaller(abs(h), minStep)) {
             h = isForwards ? minStep : unaryMinus(minStep);
           }
-          iter++;
-          if (iter > maxIter) {
-            throw new Error('Maximum number of iterations reached, try changing options');
+          if (!hasBigNumbers && !tspan.some(isUnit)) {
+            lastStepMag = Math.abs(h as number);
+          }
+          attempts++;
+          if (attempts >= attemptCap && ongoing(t[n], tf)) {
+            const tCur = isNumber(t[n]) ? (t[n] as number) : tfNum;
+            throw odeMaxStepsError({
+              method: rkMethod,
+              maxIter,
+              acceptedSteps: n,
+              attempts,
+              tStart: isNumber(t0) ? (t0 as number) : tfNum,
+              tCurrent: tCur,
+              tFinal: tfNum,
+              lastStepMag,
+            });
           }
         }
         return { t, y };
@@ -1636,7 +1749,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
       const butcherTableau: ButcherTableau = { a, c, b, bp };
 
       // Solve an adaptive step size rk method
-      return _rk(butcherTableau)(f, tspan, y0, options);
+      return _rk(butcherTableau, 'RK23')(f, tspan, y0, options);
     }
 
     function _rk45(
@@ -1673,7 +1786,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
       const butcherTableau: ButcherTableau = { a, c, b, bp };
 
       // Solve an adaptive step size rk method
-      return _rk(butcherTableau)(f, tspan, y0, options);
+      return _rk(butcherTableau, 'RK45')(f, tspan, y0, options);
     }
 
     function _solveODE(
