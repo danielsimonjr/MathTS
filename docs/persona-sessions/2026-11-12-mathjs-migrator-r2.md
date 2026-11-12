@@ -26,15 +26,15 @@ I am still the production mathjs migrator: browsers, Node, Bun, Deno, bundlers. 
 
 ## Findings (round 2)
 
-| #   | Sev | Issue                                                      | Title                                                                   |
-| --- | --- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
-| 19  | P1  | [#888](https://github.com/danielsimonjr/MathTS/issues/888) | Regression: CJS `require()` (#736)                                      |
-| 20  | P1  | [#889](https://github.com/danielsimonjr/MathTS/issues/889) | `sin(0.5)` scalar ~18× slower (add fixed)                              |
-| 21  | P1  | [#890](https://github.com/danielsimonjr/MathTS/issues/890) | Regression: `tsc` GPUBuffer + workerpool (#726, #697)                   |
-| 22  | P1  | [#893](https://github.com/danielsimonjr/MathTS/issues/893) | Regression: esbuild browser bundle (#708)                               |
-| 23  | P2  | [#891](https://github.com/danielsimonjr/MathTS/issues/891) | matrix `toString` formatting                                           |
-| 24  | P2  | [#892](https://github.com/danielsimonjr/MathTS/issues/892) | Fraction mode `0.(3)` vs `1/3`                                         |
-| —   | P2  | [#742](https://github.com/danielsimonjr/MathTS/issues/742) | comment failed (token); 100 degC→degF still differs                    |
+| #   | Sev | Issue                                                      | Title                                                 |
+| --- | --- | ---------------------------------------------------------- | ----------------------------------------------------- |
+| 19  | P1  | [#888](https://github.com/danielsimonjr/MathTS/issues/888) | Regression: CJS `require()` (#736)                    |
+| 20  | P1  | [#889](https://github.com/danielsimonjr/MathTS/issues/889) | `sin(0.5)` scalar ~18× slower (add fixed)             |
+| 21  | P1  | [#890](https://github.com/danielsimonjr/MathTS/issues/890) | Regression: `tsc` GPUBuffer + workerpool (#726, #697) |
+| 22  | P1  | [#893](https://github.com/danielsimonjr/MathTS/issues/893) | Regression: esbuild browser bundle (#708)             |
+| 23  | P2  | [#891](https://github.com/danielsimonjr/MathTS/issues/891) | matrix `toString` formatting                          |
+| 24  | P2  | [#892](https://github.com/danielsimonjr/MathTS/issues/892) | Fraction mode `0.(3)` vs `1/3`                        |
+| —   | P2  | [#742](https://github.com/danielsimonjr/MathTS/issues/742) | comment failed (token); 100 degC→degF still differs   |
 
 GitHub comments on **#736, #708, #742** returned `Resource not accessible by integration`; repros are in #888/#893 and the 742 note above.
 
@@ -56,30 +56,30 @@ GitHub comments on **#736, #708, #742** returned `Resource not accessible by int
 
 ## Round-1 re-check table (closed issues #727–#744, #696–#708)
 
-| Issue | Title (short)                         | Fixed? |
-| ----- | ------------------------------------- | ------ |
-| #727  | `sin(90 deg)`                         | yes    |
-| #728  | `asin` Complex                        | yes    |
-| #729  | log/pow/nthRoot/acosh                 | yes    |
-| #730  | `math.import`                         | yes    |
-| #731  | `math.typed`                          | yes    |
-| #732  | `math.compile`                        | yes    |
-| #733  | subset/index                          | yes    |
-| #734  | JSON reviver                          | yes    |
-| #735  | scalar `add` perf                     | yes    |
-| #736  | CJS require                           | **no** → #888 |
-| #737  | add/sin typed unknown                 | partial (shims typed; `[name: string]: unknown` remains) |
-| #738  | migration guide gaps                  | yes (matrix matches npm 0.5.0) |
-| #739  | createUnit furlong                    | yes (still built-in; error matches mathjs) |
-| #740  | JS source maps                        | yes    |
-| #741  | sideEffects                           | yes (`true`) |
-| #742  | unit toString ULP                     | partial (degF still differs) |
-| #743  | fraction(0.1)                         | yes    |
-| #744  | size(zeros)                           | yes    |
-| #696  | package.json export                   | yes    |
-| #697  | workerpool types                      | **no** → #890 |
-| #707  | huge evaluate bundle                  | partial (Vite ~3.2 MB; still huge) |
-| #708  | esbuild / Node builtins               | **no** → #893 |
+| Issue | Title (short)           | Fixed?                                                   |
+| ----- | ----------------------- | -------------------------------------------------------- |
+| #727  | `sin(90 deg)`           | yes                                                      |
+| #728  | `asin` Complex          | yes                                                      |
+| #729  | log/pow/nthRoot/acosh   | yes                                                      |
+| #730  | `math.import`           | yes                                                      |
+| #731  | `math.typed`            | yes                                                      |
+| #732  | `math.compile`          | yes                                                      |
+| #733  | subset/index            | yes                                                      |
+| #734  | JSON reviver            | yes                                                      |
+| #735  | scalar `add` perf       | yes                                                      |
+| #736  | CJS require             | **no** → #888                                            |
+| #737  | add/sin typed unknown   | partial (shims typed; `[name: string]: unknown` remains) |
+| #738  | migration guide gaps    | yes (matrix matches npm 0.5.0)                           |
+| #739  | createUnit furlong      | yes (still built-in; error matches mathjs)               |
+| #740  | JS source maps          | yes                                                      |
+| #741  | sideEffects             | yes (`true`)                                             |
+| #742  | unit toString ULP       | partial (degF still differs)                             |
+| #743  | fraction(0.1)           | yes                                                      |
+| #744  | size(zeros)             | yes                                                      |
+| #696  | package.json export     | yes                                                      |
+| #697  | workerpool types        | **no** → #890                                            |
+| #707  | huge evaluate bundle    | partial (Vite ~3.2 MB; still huge)                       |
+| #708  | esbuild / Node builtins | **no** → #893                                            |
 
 ## Verdict
 
