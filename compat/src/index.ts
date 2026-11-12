@@ -385,7 +385,9 @@ export function create(
     ones: shims.ones,
     size: wrapWithInstanceConfig(
       mathFunctions.size as (...args: unknown[]) => unknown,
-      currentConfig
+      currentConfig,
+      configBaseline,
+      createdWithCustomConfig
     ),
 
     // Type checking

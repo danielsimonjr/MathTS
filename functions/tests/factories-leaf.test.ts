@@ -134,7 +134,9 @@ describe('Leaf factories', () => {
     });
 
     it('size([1,2,3]) = [3]', () => {
-      expect(size([1, 2, 3])).toEqual([3]);
+      const s = size([1, 2, 3]) as { toArray(): number[] };
+      expect(s.toArray()).toEqual([3]);
+      expect(String(s)).toBe('[3]');
     });
 
     it('squeeze removes singleton dimensions', () => {

@@ -77,7 +77,9 @@ export const createSize = /* #__PURE__ */ factory(
     }
 
     return typed(name, {
-      Matrix: (x: MatrixLike) => out(matrixDims(x)),
+      // Native DenseMatrix is not the factory Matrix type (no prototype `isMatrix`).
+      // It still has numeric `rows` / `cols`. Objects that are not matrices throw below.
+      'Matrix | Object': (x: MatrixLike) => out(matrixDims(x)),
 
       Array: (x: unknown) => out(arraySize(x as number[])),
 

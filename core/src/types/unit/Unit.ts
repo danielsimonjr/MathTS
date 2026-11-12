@@ -3352,19 +3352,6 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *
      * @return
      */
-    function definitionMatchesExistingUnit(name: string, defUnit: UnitInstance): boolean {
-      try {
-        const existing = new Unit(1, name);
-        const proposedSi = defUnit.clone();
-        proposedSi.toSI();
-        const existingSi = existing.clone();
-        existingSi.toSI();
-        return existingSi.equals(proposedSi);
-      } catch {
-        return false;
-      }
-    }
-
     Unit.createUnitSingle = function (
       name: string,
       obj?: unknown,
@@ -3378,7 +3365,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new TypeError("createUnitSingle expects first parameter to be of type 'string'");
       }
 
-      // Name checks: an existing unit or alias is refused above, and `assertUnitNameIsValid`
+      // Name checks: an existing unit or alias is refused after the definition is parsed,
+      // unless `options.override` is set. `assertUnitNameIsValid`
       // below refuses anything that is not an identifier ('42', '%', 'a-b'). A clash with a
       // function name such as `abs` or `cos` is not detectable here: this table has no access
       // to the host's function registry, so a unit with such a name is accepted.
@@ -3446,8 +3434,6 @@ export const createUnitClass = /* #__PURE__ */ factory(
       if (hasOwnProperty(UNITS, name)) {
         if (options?.override) {
           Unit.deleteUnit(name);
-        } else if (defUnit && definitionMatchesExistingUnit(name, defUnit)) {
-          return new Unit(1, name);
         } else {
           throw new Error(
             'Cannot create unit "' + name + '": a unit with that name already exists'
