@@ -569,7 +569,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 26
+      "loc": 27
     },
     {
       "file": "compat/tests/instance-config-isolation.test.ts",

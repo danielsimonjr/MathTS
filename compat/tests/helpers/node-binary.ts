@@ -2,7 +2,8 @@
  * Resolve a real Node.js binary when the test runner is Bun.
  *
  * `[run] bun = true` puts a Bun-backed `node` shim first on PATH, so a gate
- * that spawns `node` would time JavaScriptCore.
+ * that spawns `node` would time JavaScriptCore. This matches
+ * `tools/benchmark/ab/util.mjs`.
  */
 import { existsSync, realpathSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
