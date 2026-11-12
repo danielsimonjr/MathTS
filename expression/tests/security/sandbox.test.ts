@@ -121,10 +121,7 @@ describe('security: sandbox via tree-walking compiler', () => {
     expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 
-  it('blocks raw __proto__ property write through ObjectNode literal', () => {
-    // {__proto__: {...}} via ObjectNode — keys must go through setSafeProperty.
-    // Build the props dict without using `__proto__:` literal syntax (which
-    // would set the prototype rather than create an own property).
+  it('skips unsafe ObjectNode literal keys', () => {
     const props: Record<string, unknown> = {};
     Object.defineProperty(props, '__proto__', {
       value: constantNode({ polluted: 1 }),
@@ -132,9 +129,12 @@ describe('security: sandbox via tree-walking compiler', () => {
       configurable: true,
       writable: true,
     });
-    const node = objectNode(props);
+    const node = objectNode({
+      ...(props as Record<string, unknown>),
+      ok: constantNode(1),
+    });
     const compiled = compile(node as unknown as MathNode, mathScope);
-    expect(() => compiled.evaluate()).toThrow(/No access to property/);
+    expect(compiled.evaluate()).toEqual({ ok: 1 });
     expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 

@@ -9,6 +9,7 @@
 
 import { compile } from '../compiler/compile.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
+import { sanitizeEvaluateResult, trustedMathFunctions } from '../utils/safe-result.js';
 import type { CompiledExpression, Scope } from '../compiler/compile.js';
 import type { MathNode } from '../node/Node.js';
 
@@ -245,6 +246,7 @@ export function createEvaluate(
   }
 
   const cache = cacheFor(mathScope, parseFn);
+  const trusted = trustedMathFunctions(mathScope);
 
   function evaluateOne(
     expr: string,
@@ -271,7 +273,8 @@ export function createEvaluate(
         if (oldest !== undefined) cache.delete(oldest);
       }
     }
-    return compiled.evaluate(scope);
+    const result = compiled.evaluate(scope);
+    return unsafe ? result : sanitizeEvaluateResult(result, new WeakSet(), trusted);
   }
 
   return evaluate;
@@ -301,8 +304,16 @@ export function compileExpressionWithDeps(
   options?: EvaluateOptions
 ): CompiledExpression {
   const node = parseFn(expr);
-  if (!options || options.unsafe !== true) {
+  const unsafe = options?.unsafe === true;
+  if (!unsafe) {
     validateAst(node);
   }
-  return compile(node, mathScope);
+  const compiled = compile(node, mathScope);
+  if (unsafe) return compiled;
+  const trusted = trustedMathFunctions(mathScope);
+  return {
+    evaluate(scope?: Record<string, unknown> | Scope): unknown {
+      return sanitizeEvaluateResult(compiled.evaluate(scope), new WeakSet(), trusted);
+    },
+  };
 }
