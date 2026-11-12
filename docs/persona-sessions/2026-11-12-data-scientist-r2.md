@@ -51,48 +51,48 @@ I re-ran each closed dogfood issue in this persona lane on the registry tarballs
 
 ### 4. New findings (filed)
 
-| # | Sev | Issue | Title |
-|---|-----|-------|-------|
-| 1 | P1 | [#896](https://github.com/danielsimonjr/MathTS/issues/896) | `corrcoef([a,b])` layout ≠ NumPy → wrong n×n matrix |
-| 2 | P2 | [#897](https://github.com/danielsimonjr/MathTS/issues/897) | Welch/Bartlett throw when n&lt;256 vs SciPy clamp |
-| 3 | P2 | [#898](https://github.com/danielsimonjr/MathTS/issues/898) | `median()` still `unknown` in strict consumer |
-| 4 | P2 | [#899](https://github.com/danielsimonjr/MathTS/issues/899) | `sample(n)` silently ignores n |
-| 5 | P2 | [#900](https://github.com/danielsimonjr/MathTS/issues/900) | `shapiroWilkTest` Promise not shown in README |
-| 6 | P2 | [#901](https://github.com/danielsimonjr/MathTS/issues/901) | median 1e6 still ~4× NumPy (improved from ~16×) |
+| #   | Sev | Issue                                                      | Title                                               |
+| --- | --- | ---------------------------------------------------------- | --------------------------------------------------- |
+| 1   | P1  | [#896](https://github.com/danielsimonjr/MathTS/issues/896) | `corrcoef([a,b])` layout ≠ NumPy → wrong n×n matrix |
+| 2   | P2  | [#897](https://github.com/danielsimonjr/MathTS/issues/897) | Welch/Bartlett throw when n&lt;256 vs SciPy clamp   |
+| 3   | P2  | [#898](https://github.com/danielsimonjr/MathTS/issues/898) | `median()` still `unknown` in strict consumer       |
+| 4   | P2  | [#899](https://github.com/danielsimonjr/MathTS/issues/899) | `sample(n)` silently ignores n                      |
+| 5   | P2  | [#900](https://github.com/danielsimonjr/MathTS/issues/900) | `shapiroWilkTest` Promise not shown in README       |
+| 6   | P2  | [#901](https://github.com/danielsimonjr/MathTS/issues/901) | median 1e6 still ~4× NumPy (improved from ~16×)     |
 
 Intended labels on each issue (token cannot apply): `dogfood` + `bug|api|perf|docs|packaging` + `P0|P1|P2` + `persona:data-scientist`.
 
 ## Round-1 re-check table
 
-| Issue | Title (short) | Fixed? |
-|-------|----------------|--------|
-| [#766](https://github.com/danielsimonjr/MathTS/issues/766) | `studentTTest` popmean | yes |
-| [#767](https://github.com/danielsimonjr/MathTS/issues/767) | Float64Array reductions | yes |
-| [#768](https://github.com/danielsimonjr/MathTS/issues/768) | Welch empty PSD | yes (throws/clamp; see #897) |
-| [#769](https://github.com/danielsimonjr/MathTS/issues/769) | `variance({ddof})` | yes |
-| [#771](https://github.com/danielsimonjr/MathTS/issues/771) | nan* reductions | yes |
-| [#772](https://github.com/danielsimonjr/MathTS/issues/772) | gamma rate vs scale | yes (scale option + README) |
-| [#773](https://github.com/danielsimonjr/MathTS/issues/773) | SciPy `resample` | yes |
-| [#774](https://github.com/danielsimonjr/MathTS/issues/774) | signal `fft` export | yes |
-| [#775](https://github.com/danielsimonjr/MathTS/issues/775) | empty median/mode | yes |
-| [#776](https://github.com/danielsimonjr/MathTS/issues/776) | var at 1e308 | yes |
-| [#777](https://github.com/danielsimonjr/MathTS/issues/777) | Kendall exact p | yes |
-| [#778](https://github.com/danielsimonjr/MathTS/issues/778) | quantile `{method}` | yes |
-| [#779](https://github.com/danielsimonjr/MathTS/issues/779) | window arg order | yes |
-| [#780](https://github.com/danielsimonjr/MathTS/issues/780) | PNG tool hint | yes |
-| [#781](https://github.com/danielsimonjr/MathTS/issues/781) | `describe` quartiles | yes |
-| [#782](https://github.com/danielsimonjr/MathTS/issues/782) | `sample` vs `sampleN` docs | yes |
-| [#783](https://github.com/danielsimonjr/MathTS/issues/783) | KS string cdf | yes |
-| [#784](https://github.com/danielsimonjr/MathTS/issues/784) | heatmap colorbar | yes (opt-in `colorbar: true`) |
-| [#785](https://github.com/danielsimonjr/MathTS/issues/785) | `variance` typed | yes |
-| [#786](https://github.com/danielsimonjr/MathTS/issues/786) | pearson p=0 | yes |
+| Issue                                                      | Title (short)              | Fixed?                        |
+| ---------------------------------------------------------- | -------------------------- | ----------------------------- |
+| [#766](https://github.com/danielsimonjr/MathTS/issues/766) | `studentTTest` popmean     | yes                           |
+| [#767](https://github.com/danielsimonjr/MathTS/issues/767) | Float64Array reductions    | yes                           |
+| [#768](https://github.com/danielsimonjr/MathTS/issues/768) | Welch empty PSD            | yes (throws/clamp; see #897)  |
+| [#769](https://github.com/danielsimonjr/MathTS/issues/769) | `variance({ddof})`         | yes                           |
+| [#771](https://github.com/danielsimonjr/MathTS/issues/771) | nan* reductions            | yes                           |
+| [#772](https://github.com/danielsimonjr/MathTS/issues/772) | gamma rate vs scale        | yes (scale option + README)   |
+| [#773](https://github.com/danielsimonjr/MathTS/issues/773) | SciPy `resample`           | yes                           |
+| [#774](https://github.com/danielsimonjr/MathTS/issues/774) | signal `fft` export        | yes                           |
+| [#775](https://github.com/danielsimonjr/MathTS/issues/775) | empty median/mode          | yes                           |
+| [#776](https://github.com/danielsimonjr/MathTS/issues/776) | var at 1e308               | yes                           |
+| [#777](https://github.com/danielsimonjr/MathTS/issues/777) | Kendall exact p            | yes                           |
+| [#778](https://github.com/danielsimonjr/MathTS/issues/778) | quantile `{method}`        | yes                           |
+| [#779](https://github.com/danielsimonjr/MathTS/issues/779) | window arg order           | yes                           |
+| [#780](https://github.com/danielsimonjr/MathTS/issues/780) | PNG tool hint              | yes                           |
+| [#781](https://github.com/danielsimonjr/MathTS/issues/781) | `describe` quartiles       | yes                           |
+| [#782](https://github.com/danielsimonjr/MathTS/issues/782) | `sample` vs `sampleN` docs | yes                           |
+| [#783](https://github.com/danielsimonjr/MathTS/issues/783) | KS string cdf              | yes                           |
+| [#784](https://github.com/danielsimonjr/MathTS/issues/784) | heatmap colorbar           | yes (opt-in `colorbar: true`) |
+| [#785](https://github.com/danielsimonjr/MathTS/issues/785) | `variance` typed           | yes                           |
+| [#786](https://github.com/danielsimonjr/MathTS/issues/786) | pearson p=0                | yes                           |
 
 ## Summary
 
-| Verdict | Detail |
-|---------|--------|
-| Release quality | Round 1 fixes largely landed on npm; my clean-vector stats/signal/workbook path matches SciPy. |
-| Blockers left | `corrcoef` NumPy layout ([#896](https://github.com/danielsimonjr/MathTS/issues/896)) is the only P1 new hit. |
-| Papercuts | Short Welch throw ([#897](https://github.com/danielsimonjr/MathTS/issues/897)), typing/docs/async sampling ([#898](https://github.com/danielsimonjr/MathTS/issues/898)–[#900](https://github.com/danielsimonjr/MathTS/issues/900)), median perf ([#901](https://github.com/danielsimonjr/MathTS/issues/901)). |
+| Verdict         | Detail                                                                                                                                                                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Release quality | Round 1 fixes largely landed on npm; my clean-vector stats/signal/workbook path matches SciPy.                                                                                                                                                                                                                |
+| Blockers left   | `corrcoef` NumPy layout ([#896](https://github.com/danielsimonjr/MathTS/issues/896)) is the only P1 new hit.                                                                                                                                                                                                  |
+| Papercuts       | Short Welch throw ([#897](https://github.com/danielsimonjr/MathTS/issues/897)), typing/docs/async sampling ([#898](https://github.com/danielsimonjr/MathTS/issues/898)–[#900](https://github.com/danielsimonjr/MathTS/issues/900)), median perf ([#901](https://github.com/danielsimonjr/MathTS/issues/901)). |
 
 I did not patch product code this round (docs + issues only).
