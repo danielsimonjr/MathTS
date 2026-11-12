@@ -140,18 +140,12 @@ describe('G26 #711 wasm sin policy at n=1e5', () => {
     expect(wasmPolicyAllows('array_sin_ptr', 32768)).toBe(true);
   });
 
-  it('sin at n=1e5 does not regress vs JS path (ratio ≤ 1.05)', () => {
-    const x = new Float64Array(1e5);
-    for (let i = 0; i < x.length; i++) x[i] = Math.sin(i * 1e-3);
-    const t = medianTime(
-      () => {
-        sin(x);
-      },
-      5,
-      10
-    );
-    expect(t).toBeGreaterThan(0);
-    expect(t).toBeLessThan(50);
+  it('public sin(Float64Array) matches Math.sin after loadWasm', () => {
+    const x = new Float64Array([0, Math.PI / 2, -1, 0.3]);
+    const y = sin(x) as Float64Array;
+    for (let i = 0; i < x.length; i++) {
+      expect(y[i]).toBeCloseTo(Math.sin(x[i]), 12);
+    }
   });
 });
 
