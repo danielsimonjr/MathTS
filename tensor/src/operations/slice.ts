@@ -35,6 +35,20 @@ function axisSliceLength(start: number, stop: number, step: number): number {
 }
 
 /**
+ * NumPy `PySlice_GetIndicesEx` clipping. An omitted bound stays the sentinel
+ * (`0` / `dim` or `dim - 1` / `-1`). An explicit index wraps once, then clips
+ * so an out-of-range bound is an empty slice rather than an error.
+ */
+function clipBound(index: number, dim: number, step: number): number {
+  if (index < 0) {
+    index += dim;
+    if (index < 0) return step < 0 ? -1 : 0;
+  }
+  if (index >= dim) return step < 0 ? dim - 1 : dim;
+  return index;
+}
+
+/**
  * Extract a sub-tensor by per-axis `SliceRange` triples.
  *
  * @param t      - Input tensor of any rank.
@@ -58,31 +72,8 @@ export function slice(t: Tensor, ranges: (SliceRange | null)[]): Tensor {
     if (!Number.isInteger(step) || step === 0) {
       throw new RangeError(`slice: step must be a non-zero integer (axis ${axis}), got ${step}`);
     }
-    let start: number;
-    let stop: number;
-    if (step > 0) {
-      start = r?.start ?? 0;
-      stop = r?.stop ?? dim;
-    } else {
-      start = r?.start ?? dim - 1;
-      stop = r?.stop ?? -1;
-    }
-    if (start < 0) start = dim + start;
-    if (step > 0) {
-      if (stop < 0) stop = dim + stop;
-    } else if (stop < -1) {
-      stop = dim + stop;
-    }
-    if (start < 0 || start >= dim) {
-      throw new RangeError(
-        `slice: start ${r?.start} is out of range for axis ${axis} with dim ${dim}`
-      );
-    }
-    if (step > 0) {
-      stop = Math.max(0, Math.min(stop, dim));
-    } else {
-      stop = Math.max(-1, Math.min(stop, dim - 1));
-    }
+    const start = r?.start === undefined ? (step < 0 ? dim - 1 : 0) : clipBound(r.start, dim, step);
+    const stop = r?.stop === undefined ? (step < 0 ? -1 : dim) : clipBound(r.stop, dim, step);
     return { start, stop, step };
   });
 

@@ -111,7 +111,7 @@ describe('#762 slice negative step and Tensor.slice method', () => {
 
   it('negative step on a subrange', () => {
     const v = new Tensor([4], new Float64Array([0, 1, 2, 3]));
-    const s = slice(v, [{ start: 3, stop: -1, step: -1 }]);
+    const s = slice(v, [{ start: 3, step: -1 }]);
     expect([...s.contiguous().data]).toEqual([3, 2, 1, 0]);
   });
 });

@@ -17,10 +17,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1263 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1262 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      895 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      896 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1289 |
-| `tests`    |   895 |
+| `src`      |  1288 |
+| `tests`    |   896 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -2140,7 +2140,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `statistics/tests/statistics.test.ts`                                             | @danielsimonjr/mathts-statistics     | tests    | test        |
 | `statistics/tests/upt-d7-statistics-owner.test.ts`                                | @danielsimonjr/mathts-statistics     | tests    | test        |
 | `statistics/vitest.config.ts`                                                     | @danielsimonjr/mathts-statistics     | config   | config      |
-| `tensor/src/batched-matmul.ts`                                                    | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/contraction-sequence.ts`                                              | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/index.ts`                                                             | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/named-index.ts`                                                       | @danielsimonjr/mathts-tensor         | src      | build-entry |
@@ -2169,6 +2168,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tensor/tests/clones-batch-g-oracle.test.ts`                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/contraction-sequence.test.ts`                                       | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/dogfood-g14.test.ts`                                                | @danielsimonjr/mathts-tensor         | tests    | test        |
+| `tensor/tests/dogfood-g36-review.test.ts`                                         | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/dogfood-g36.test.ts`                                                | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/Index.test.ts`                                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/operations/cholesky.test.ts`                                        | @danielsimonjr/mathts-tensor         | tests    | test        |

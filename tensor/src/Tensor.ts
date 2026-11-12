@@ -19,7 +19,6 @@ import {
   type NestedArray as CoreNestedArray,
 } from '@danielsimonjr/mathts-core/internal';
 import { Index } from './named-index.js';
-import { batchedMatmul } from './batched-matmul.js';
 import { resolveReshapeShape } from './reshape-shape.js';
 import { slice as sliceTensor, type SliceRange } from './operations/slice.js';
 
@@ -215,6 +214,11 @@ export class Tensor {
     return Tensor.zeros(...shape);
   }
 
+  /**
+   * Half-open range, length `ceil((stop - start) / step)` like NumPy, then
+   * clamped at 0. A zero step throws. A step whose sign does not point from
+   * start toward stop is an empty tensor, not an error.
+   */
   static arange(start: number, stop?: number, step = 1): Tensor {
     let s = start;
     let e = stop;
@@ -222,9 +226,12 @@ export class Tensor {
       e = start;
       s = 0;
     }
+    if (!Number.isFinite(s) || !Number.isFinite(e) || !Number.isFinite(step)) {
+      throw new RangeError('Tensor.arange: start, stop, and step must be finite');
+    }
     if (step === 0) throw new RangeError('Tensor.arange: step must be non-zero');
-    const len =
-      step > 0 ? Math.max(0, Math.ceil((e - s) / step)) : Math.max(0, Math.ceil((s - e) / -step));
+    const quot = (e - s) / step;
+    const len = quot > 0 ? Math.ceil(quot) : 0;
     const out = new Float64Array(len);
     for (let i = 0; i < len; i++) {
       out[i] = s + i * step;
@@ -386,46 +393,91 @@ export class Tensor {
     return new Tensor([...this.shape], c.data.slice(), this.axisLabels);
   }
 
-  fill_(value: number): this {
-    if (!this.isContiguous()) {
-      throw new Error('Tensor.fill_: tensor must be contiguous (call contiguous() first)');
+  /** Visit each logical element and write `fn(current)` back through strides. */
+  private writeEach(fn: (current: number) => number): void {
+    const size = Tensor.sizeOf(this.shape);
+    const rank = this.shape.length;
+    if (size === 0) return;
+    if (this.isContiguous()) {
+      for (let i = 0; i < size; i++) this.data[i] = fn(this.data[i]!);
+      return;
     }
-    this.data.fill(value);
+    const coords = new Array<number>(rank).fill(0);
+    for (let flat = 0; flat < size; flat++) {
+      let idx = this.offset;
+      for (let k = 0; k < rank; k++) idx += coords[k]! * this.strides[k]!;
+      this.data[idx] = fn(this.data[idx]!);
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++coords[k]! < this.shape[k]!) break;
+        coords[k] = 0;
+      }
+    }
+  }
+
+  /**
+   * In-place binary op. `other` broadcasts into `this` (NumPy). A result shape
+   * other than `this.shape` throws; `this` is never expanded.
+   */
+  private inplaceBinary(
+    op: 'add_' | 'mul_',
+    other: Tensor | number,
+    combine: (current: number, rhs: number) => number
+  ): this {
+    if (typeof other === 'number') {
+      this.writeEach((v) => combine(v, other));
+      return this;
+    }
+    let outShape: number[];
+    try {
+      outShape = Tensor.broadcastShape(this.shape, other.shape);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`Tensor.${op}: ${detail}`);
+    }
+    if (outShape.length !== this.shape.length || outShape.some((dim, i) => dim !== this.shape[i])) {
+      throw new Error(
+        `Tensor.${op}: cannot broadcast [${other.shape}] into [${this.shape}] in place`
+      );
+    }
+    if (this.sameShape(other) && this.isContiguous() && other.isContiguous()) {
+      const b = other.data;
+      for (let i = 0; i < this.data.length; i++) this.data[i] = combine(this.data[i]!, b[i]!);
+      return this;
+    }
+    const rank = this.shape.length;
+    const otherRank = other.shape.length;
+    const coords = new Array<number>(rank).fill(0);
+    const size = Tensor.sizeOf(this.shape);
+    for (let flat = 0; flat < size; flat++) {
+      let selfIdx = this.offset;
+      let otherIdx = other.offset;
+      for (let k = 0; k < rank; k++) {
+        selfIdx += coords[k]! * this.strides[k]!;
+        const otherAxis = k - (rank - otherRank);
+        if (otherAxis >= 0 && other.shape[otherAxis] !== 1) {
+          otherIdx += coords[k]! * other.strides[otherAxis]!;
+        }
+      }
+      this.data[selfIdx] = combine(this.data[selfIdx]!, other.data[otherIdx]!);
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++coords[k]! < this.shape[k]!) break;
+        coords[k] = 0;
+      }
+    }
+    return this;
+  }
+
+  fill_(value: number): this {
+    this.writeEach(() => value);
     return this;
   }
 
   add_(other: Tensor | number, alpha = 1): this {
-    if (!this.isContiguous()) {
-      throw new Error('Tensor.add_: tensor must be contiguous (call contiguous() first)');
-    }
-    if (typeof other === 'number') {
-      for (let i = 0; i < this.data.length; i++) this.data[i] += alpha * other;
-      return this;
-    }
-    const o = other.contiguous();
-    if (!this.sameShape(o)) {
-      throw new Error(
-        `Tensor.add_: shape mismatch [${this.shape}] vs [${other.shape}] (broadcast not supported in-place)`
-      );
-    }
-    for (let i = 0; i < this.data.length; i++) this.data[i] += alpha * o.data[i]!;
-    return this;
+    return this.inplaceBinary('add_', other, (v, rhs) => v + alpha * rhs);
   }
 
   mul_(other: Tensor | number): this {
-    if (!this.isContiguous()) {
-      throw new Error('Tensor.mul_: tensor must be contiguous (call contiguous() first)');
-    }
-    if (typeof other === 'number') {
-      for (let i = 0; i < this.data.length; i++) this.data[i] *= other;
-      return this;
-    }
-    const o = other.contiguous();
-    if (!this.sameShape(o)) {
-      throw new Error(`Tensor.mul_: shape mismatch [${this.shape}] vs [${other.shape}]`);
-    }
-    for (let i = 0; i < this.data.length; i++) this.data[i] *= o.data[i]!;
-    return this;
+    return this.inplaceBinary('mul_', other, (v, rhs) => v * rhs);
   }
 
   /** Inner product of two rank-1 tensors (PyTorch `dot`). */
@@ -979,16 +1031,22 @@ export class Tensor {
       throw new Error(`Tensor.matmul: inner dimension mismatch ${k} != ${k2}`);
     }
 
-    if (rankA === 2 && rankB === 2) {
-      const a = this.contiguous().data;
-      const b = other.contiguous().data;
-      const c = backendManager.multiply(new DenseMatrix(m, k, a), new DenseMatrix(k, n, b));
-      return new Tensor([m, n], c.toFloat64Array());
-    }
-
     const aData = this.contiguous().data;
     const bData = other.contiguous().data;
-    const yData = batchedMatmul(aData, bData, this.shape, other.shape);
+    let batchSize = 1;
+    for (let b = 0; b < batchRank; b++) batchSize *= this.shape[b]!;
+    const yData = new Float64Array(batchSize * m * n);
+    const mk = m * k;
+    const kn = k * n;
+    const mn = m * n;
+    for (let batch = 0; batch < batchSize; batch++) {
+      const aSlab =
+        batchSize === 1 ? aData : new Float64Array(aData.subarray(batch * mk, batch * mk + mk));
+      const bSlab =
+        batchSize === 1 ? bData : new Float64Array(bData.subarray(batch * kn, batch * kn + kn));
+      const c = backendManager.multiply(new DenseMatrix(m, k, aSlab), new DenseMatrix(k, n, bSlab));
+      yData.set(c.toFloat64Array(), batch * mn);
+    }
     const batchShape = this.shape.slice(0, batchRank);
     return new Tensor([...batchShape, m, n], yData);
   }

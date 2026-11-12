@@ -5023,7 +5023,6 @@
       "zscore"
     ],
     "tensor": [
-      "batchedMatmul",
       "concatenate",
       "contractNetwork",
       "ContractNetworkOpts",

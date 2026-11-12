@@ -121,9 +121,11 @@ describe('slice', () => {
     expect(s.data.length).toBe(0);
   });
 
-  it('9. Out-of-range start throws RangeError', () => {
+  it('9. Out-of-range start is an empty slice, like NumPy', () => {
     const t = new Tensor([4], arr([1, 2, 3, 4]));
-    expect(() => slice(t, [{ start: 5 }])).toThrow(RangeError);
+    const s = slice(t, [{ start: 5 }]);
+    expect([...s.shape]).toEqual([0]);
+    expect([...s.contiguous().data]).toEqual([]);
   });
 
   it('10. Wrong ranges length throws Error', () => {

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1289
+  totalFiles: 1288
   totalModules: 82
-  totalExports: 7020
+  totalExports: 7019
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5734,9 +5734,6 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
-        - file: ./batched-matmul.js
-          imports:
-            - batchedMatmul
         - file: ./reshape-shape.js
           imports:
             - resolveReshapeShape
@@ -5768,16 +5765,6 @@ modules:
       interfaces:
         - TensorStorage
         - EinsumSpec
-    tensor/src/batched-matmul.ts:
-      description: Batched matrix multiply for row-major contiguous Float64Array payloads.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - batchedMatmul
-      functions:
-        - batchedMatmul
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
       externalDependencies: []
@@ -42331,7 +42318,6 @@ dependencyGraph:
     - name: Tensor
       files:
         - tensor/src/Tensor.ts
-        - tensor/src/batched-matmul.ts
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
@@ -43643,13 +43629,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1289
+  totalTypeScriptFiles: 1288
   totalModules: 82
-  totalLinesOfCode: 219109
-  totalExports: 7020
+  totalLinesOfCode: 219121
+  totalExports: 7019
   totalClasses: 61
   totalInterfaces: 602
-  totalFunctions: 2365
+  totalFunctions: 2364
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1646

@@ -3,17 +3,17 @@
   "totalFiles": 2249,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1263,
+    "build-entry": 1262,
     "test-only": 0,
     "orphan": 0,
-    "test": 895,
+    "test": 896,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1289,
-    "tests": 895,
+    "src": 1288,
+    "tests": 896,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -14537,13 +14537,6 @@
       "loc": 22
     },
     {
-      "file": "tensor/src/batched-matmul.ts",
-      "package": "@danielsimonjr/mathts-tensor",
-      "area": "src",
-      "disposition": "build-entry",
-      "loc": 40
-    },
-    {
       "file": "tensor/src/contraction-sequence.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
@@ -14667,7 +14660,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 114
+      "loc": 105
     },
     {
       "file": "tensor/src/operations/solve.ts",
@@ -14702,7 +14695,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1268
+      "loc": 1329
     },
     {
       "file": "tensor/tests/audit-ops.test.ts",
@@ -14738,6 +14731,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 202
+    },
+    {
+      "file": "tensor/tests/dogfood-g36-review.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 99
     },
     {
       "file": "tensor/tests/dogfood-g36.test.ts",
@@ -14856,7 +14856,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 180
+      "loc": 182
     },
     {
       "file": "tensor/tests/operations/solve.test.ts",

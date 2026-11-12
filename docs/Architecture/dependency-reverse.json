@@ -352,7 +352,6 @@
       "tensor/src/operations/solve.ts",
       "tensor/src/operations/stack.ts"
     ],
-    "tensor/src/batched-matmul.ts": ["tensor/src/Tensor.ts"],
     "tensor/src/reshape-shape.ts": ["tensor/src/Tensor.ts"],
     "tensor/src/operations/slice.ts": ["tensor/src/Tensor.ts", "tensor/src/index.ts"],
     "tensor/src/Tensor.ts": [
