@@ -16,7 +16,8 @@ npm install @danielsimonjr/mathts-parser
 
 ## What it exports
 
-- `createParse` — factory for the `parse` function (string → AST).
+- `parse` — ready-to-call parser (string → AST) with a default wired instance.
+- `createParse` — factory for the `parse` function when you inject your own scope.
 - `createParserClass` — factory for the `Parser` class (stateful, scope-aware).
 - `createParser` — factory for the `parser()` instance (a `Parser` with its own scope).
 - AST node constructors produced by parsing: `createNode`, `createConstantNode`,
@@ -25,12 +26,13 @@ npm install @danielsimonjr/mathts-parser
   `getAssociativity`, `isAssociativeWith`, `getOperator`.
 - The associated TypeScript types (AST node types, parser/operator types).
 
-These are MathTS **factory functions**: wire them into a MathTS instance via
-`create()` / `typed-function`, exactly as you would when importing them from
-`@danielsimonjr/mathts-expression`.
+`parse(expr)` is ready to call. It does not import `@danielsimonjr/mathts-functions`. `createParse` is still the factory: pass your own scope when you are not using the default instance.
+
+The default parser is the sandboxed arithmetic parser. A literal outside IEEE-754 range throws `SyntaxError: Numeric overflow`. Evaluating that tree with `evaluate` (from `@danielsimonjr/mathts-expression` or `@danielsimonjr/mathts-evaluator`) rejects assignment unless you pass `{ unsafe: true }`.
 
 ```ts
-import { createParse, createParserClass } from '@danielsimonjr/mathts-parser';
+import { parse, createParse } from '@danielsimonjr/mathts-parser';
+const ast = parse('2 + 3');
 ```
 
 ## License
