@@ -513,7 +513,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 728
+      "loc": 732
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -562,7 +562,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 112
+      "loc": 279
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -6337,7 +6337,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 587
+      "loc": 610
     },
     {
       "file": "functions/src/factories/index.ts",

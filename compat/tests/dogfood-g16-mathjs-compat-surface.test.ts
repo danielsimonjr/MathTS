@@ -108,4 +108,174 @@ describe('G16 dogfood — mathjs compat surface', () => {
     };
     expect(unsafeParsed.toString()).toBe('1 + 1');
   });
+
+  it('G22 — denylist stays unreachable after import (member, unicode, map/filter)', () => {
+    const mt = create(all);
+    const denied = [
+      'import',
+      'createUnit',
+      'evaluate',
+      'parse',
+      'compile',
+      'typed',
+      'simplify',
+      'derivative',
+      'help',
+      'chain',
+      'parser',
+      'resolve',
+    ];
+    const planted: Record<string, () => string> = {};
+    for (const name of denied) planted[name] = () => 'leaked-' + name;
+    mt.import(planted, { override: true });
+
+    for (const name of denied) {
+      // `chain` is also the surveyor's-chain unit. The expression language keeps
+      // that unit and must not resolve the imported function of the same name.
+      if (name === 'chain') {
+        const unit = mt.evaluate('chain');
+        expect(typeof unit, name).not.toBe('function');
+        expect(String(unit), name).toMatch(/chain/i);
+      } else {
+        expect(() => mt.evaluate(name), name).toThrow(/Undefined symbol/);
+      }
+      expect(() => mt.evaluate(`map([1], x ? ${name} : 0)`), 'map ' + name).toThrow(
+        /Undefined symbol/
+      );
+      expect(() => mt.evaluate(`filter([1], x ? ${name} : 0)`), 'filter ' + name).toThrow(
+        /Undefined symbol/
+      );
+      const escaped = [...name]
+        .map((ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'))
+        .join('');
+      const viaMember = mt.evaluate(`mathWithTransform["${escaped}"]`);
+      expect(viaMember, name).not.toBeTypeOf('function');
+      expect(viaMember, name).not.toBe('leaked-' + name);
+    }
+
+    const layers = (mt as unknown as { expression: { mathWithTransform: Record<string, unknown> } })
+      .expression.mathWithTransform;
+    for (const name of denied) {
+      expect(Object.prototype.hasOwnProperty.call(layers, name), name).toBe(false);
+    }
+  });
+
+  it('#730 import override, silent, and wrap match mathjs', () => {
+    const mt = create(all);
+    const mj = mjCreate(mjAll);
+
+    expect(() => mt.import({ sin: (x: number) => x + 1 })).toThrow(
+      /Cannot import "sin": already exists/
+    );
+    expect(() => mj.import({ sin: (x: number) => x + 1 })).toThrow(
+      /Cannot import "sin": already exists/
+    );
+
+    mt.import({ sin: (x: number) => x + 1 }, { silent: true });
+    mj.import({ sin: (x: number) => x + 1 }, { silent: true });
+    expect(mt.sin(0)).toBe(0);
+    expect(mj.sin(0)).toBe(0);
+
+    mt.import({ sin: (x: number) => x + 1 }, { override: true });
+    mj.import({ sin: (x: number) => x + 1 }, { override: true });
+    expect(mt.sin(0)).toBe(1);
+    expect(mj.sin(0)).toBe(1);
+
+    const mtWrap = create(all);
+    const mjWrap = mjCreate(mjAll);
+    const read = (x: { valueOf?: () => unknown } | number): unknown =>
+      x && typeof x === 'object' && typeof x.valueOf === 'function' ? x.valueOf() : x;
+    mtWrap.import({ read }, { wrap: true });
+    mjWrap.import({ read }, { wrap: true });
+    const mtUnit = mtWrap.unit(5, 'cm');
+    const mjUnit = mjWrap.unit(5, 'cm');
+    expect((mtWrap as unknown as { read: (x: unknown) => unknown }).read(mtUnit)).toEqual(
+      (mjWrap as unknown as { read: (x: unknown) => unknown }).read(mjUnit)
+    );
+  });
+
+  it('#731 typed rejects a missing signature the way mathjs does', () => {
+    const mt = create(all);
+    const mj = mjCreate(mjAll);
+    const fMt = mt.typed('onlyNum', { number: (x: number) => x + 1 }) as (x: unknown) => unknown;
+    const fMj = mj.typed('onlyNum', { number: (x: number) => x + 1 });
+    expect(fMt(2)).toBe(3);
+    expect(fMj(2)).toBe(3);
+    expect(() => fMt('a')).toThrow();
+    expect(() => fMj('a')).toThrow();
+    expect((mt.typed as { isTypedFunction(value: unknown): boolean }).isTypedFunction(fMt)).toBe(
+      true
+    );
+    expect(mj.typed.isTypedFunction(fMj)).toBe(true);
+  });
+
+  it('#732 compile is the same function as compileExpr', () => {
+    const mt = create(all);
+    expect(mt.compile).toBe((mt as unknown as { compileExpr: unknown }).compileExpr);
+  });
+
+  it('#733 subset assignment matches mathjs and leaves the original', () => {
+    const mt = create(all);
+    const mj = mjCreate(mjAll);
+    const A = mt.matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const B = mj.matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const outMt = mt.subset(A, mt.index(0, 1), 9) as { toArray(): number[][] };
+    const outMj = mj.subset(B, mj.index(0, 1), 9) as { toArray(): number[][] };
+    expect(outMt.toArray()).toEqual(outMj.toArray());
+    expect((A as { toArray(): number[][] }).toArray()).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+  });
+
+  it('#733 det(math.sparse) matches mathjs; native SparseMatrix still throws', () => {
+    const mt = create(all);
+    const mj = mjCreate(mjAll);
+    const data = [
+      [2, 0],
+      [0, 3],
+    ];
+    expect(mt.det(mt.sparse(data))).toBe(mj.det(mj.sparse(data)));
+    expect(mt.det(mt.matrix(data, 'sparse'))).toBe(6);
+  });
+
+  it('#734 reviver round-trips DenseMatrix, SparseMatrix, and BigNumber precision', () => {
+    const mt = create(all);
+    function roundtrip(v: unknown): unknown {
+      return JSON.parse(JSON.stringify(v), mt.reviver);
+    }
+    const dense = mt.matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const denseBack = roundtrip(dense) as { toArray(): number[][]; subset: unknown };
+    expect(denseBack.toArray()).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(typeof denseBack.subset).toBe('function');
+
+    const sparse = mt.sparse([
+      [1, 0],
+      [0, 4],
+    ]);
+    const sparseBack = roundtrip(sparse) as { toArray(): number[][]; get(i: number[]): number };
+    expect(sparseBack.toArray()).toEqual([
+      [1, 0],
+      [0, 4],
+    ]);
+    expect(sparseBack.get([1, 1])).toBe(4);
+
+    const digits = '1.23456789012345678901234567890123456789';
+    const big = mt.bignumber(digits);
+    const bigBack = roundtrip(big) as { toString(): string };
+    expect(bigBack.toString()).toBe((big as { toString(): string }).toString());
+    expect(bigBack.toString()).toBe(digits);
+  });
 });

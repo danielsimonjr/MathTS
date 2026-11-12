@@ -502,6 +502,29 @@ export function reviver(_key: string, value: unknown): unknown {
         return BigNumber.fromJSON({
           value: typeof tagged.value === 'string' ? tagged.value : String(tagged.value),
         });
+      case 'DenseMatrix': {
+        const Ctor = factoryScope.DenseMatrix as new (data: {
+          data: unknown;
+          size: number[];
+        }) => unknown;
+        const data = tagged.data;
+        const size = Array.isArray(tagged.size) ? (tagged.size as number[]) : [];
+        return new Ctor({ data, size });
+      }
+      case 'SparseMatrix': {
+        const Ctor = factoryScope.SparseMatrix as new (data: {
+          values: unknown;
+          index: unknown;
+          ptr: unknown;
+          size: unknown;
+        }) => unknown;
+        return new Ctor({
+          values: tagged.values,
+          index: tagged.index,
+          ptr: tagged.ptr,
+          size: tagged.size,
+        });
+      }
       case 'number':
         if (tagged.value === 'Infinity') return Infinity;
         if (tagged.value === '-Infinity') return -Infinity;

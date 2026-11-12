@@ -441,6 +441,10 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
  * Computes the determinant using LU decomposition.
  */
 export function det(m: CompatMatrixValue | number[][]): number {
+  // The matrix-package SparseMatrix was rejected before this compat surface
+  // routed math.matrix/math.sparse through the factory bridge. mathjs det()
+  // accepts math.sparse() (that bridge matrix, converted below via toArray).
+  // The native class stays rejected so existing callers keep the same error.
   if (m instanceof SparseMatrix) {
     throw new TypeError('Expected DenseMatrix or 2D array');
   }
