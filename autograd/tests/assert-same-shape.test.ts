@@ -26,10 +26,19 @@ describe('assertSameShape oracle (DualTensor / TapedTensor)', () => {
     expect(a.add(b).primal).toEqual(new Float64Array([4, 6]));
   });
 
-  it('DualTensor.add throws shape mismatch for [2] vs [2,1]', () => {
+  it('DualTensor.add broadcasts [2] + [2,1] to [2,2]', () => {
     const a = dual([2], [1, 2]);
-    const b = dual([2, 1], [1, 2]);
-    expect(() => a.add(b)).toThrowError(/^DualTensor\.add: shape mismatch \[2\] vs \[2,1\]/);
+    const b = dual([2, 1], [10, 20]);
+    const out = a.add(b);
+    expect(out.shape).toEqual([2, 2]);
+    expect(out.primal[0]).toBe(11);
+    expect(out.primal[3]).toBe(22);
+  });
+
+  it('DualTensor.add throws when shapes are not broadcastable', () => {
+    const a = dual([2, 3], [1, 2, 3, 4, 5, 6]);
+    const b = dual([2, 4], Array.from(new Float64Array(8)));
+    expect(() => a.add(b)).toThrow(/cannot be broadcast/);
   });
 
   it('equal shapes pass for TapedTensor.add', () => {
@@ -39,10 +48,20 @@ describe('assertSameShape oracle (DualTensor / TapedTensor)', () => {
     expect(a.add(b).primal).toEqual(new Float64Array([4, 6]));
   });
 
-  it('TapedTensor.add throws shape mismatch for [2] vs [2,1]', () => {
+  it('TapedTensor.add broadcasts [2] + [2,1] to [2,2]', () => {
     const tape = new Tape();
     const { leaf: a } = tapedLeaf(tape, [2], [1, 2]);
-    const { leaf: b } = tapedLeaf(tape, [2, 1], [1, 2]);
-    expect(() => a.add(b)).toThrowError(/^TapedTensor\.add: shape mismatch \[2\] vs \[2,1\]/);
+    const { leaf: b } = tapedLeaf(tape, [2, 1], [10, 20]);
+    const out = a.add(b);
+    expect(out.shape).toEqual([2, 2]);
+    expect(out.primal[0]).toBe(11);
+    expect(out.primal[3]).toBe(22);
+  });
+
+  it('TapedTensor.add throws when shapes are not broadcastable', () => {
+    const tape = new Tape();
+    const { leaf: a } = tapedLeaf(tape, [2, 3], [1, 2, 3, 4, 5, 6]);
+    const { leaf: b } = tapedLeaf(tape, [2, 4], Array.from(new Float64Array(8)));
+    expect(() => a.add(b)).toThrow(/cannot be broadcast/);
   });
 });

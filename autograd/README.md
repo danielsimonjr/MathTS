@@ -16,6 +16,8 @@ npm install @danielsimonjr/mathts-autograd
 - Reverse mode via `Tape`, `TapedTensor`, `grad`, `valueAndGrad`, `jacobian`,
   `derivative`, `reverseGrad` (see `docs/api/autograd.md`).
 - Gradients of tensor-valued expressions for optimization / ML workloads.
+- `TapedTensor.add` / `mul` and `DualTensor.add` / `mul` follow the same NumPy-style
+  broadcasting rules as `Tensor`, including scalar `add(n)` without a second tape.
 
 ## License
 
