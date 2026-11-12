@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2271,
+  "totalFiles": 2272,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1269,
     "test-only": 0,
     "orphan": 0,
-    "test": 911,
+    "test": 912,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1295,
-    "tests": 911,
+    "tests": 912,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 17,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 4,
-    "(root)": 55,
+    "(root)": 56,
     "@danielsimonjr/mathts-expression": 562,
     "@danielsimonjr/mathts-functions": 1029,
     "@danielsimonjr/mathts-gpu": 20,
@@ -15139,6 +15139,13 @@
       "loc": 67
     },
     {
+      "file": "tests/docs/readme-fences.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 87
+    },
+    {
       "file": "tests/integration/examples-smoke.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -15479,7 +15486,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 100
+      "loc": 101
     },
     {
       "file": "workbook/src/cli.ts",

@@ -15,6 +15,22 @@ package does not re-export `compile` / `evaluate`; it still depends on
 npm install @danielsimonjr/mathts-ast
 ```
 
+## Example
+
+```ts
+import {
+  createConstantNode,
+  createSymbolNode,
+  createOperatorNode,
+} from '@danielsimonjr/mathts-ast';
+
+const expr = createOperatorNode('+', [
+  createConstantNode(2),
+  createOperatorNode('*', [createSymbolNode('x'), createConstantNode(3)]),
+]);
+console.log(expr.toString()); // 2 + x * 3
+```
+
 ## What it exports
 
 The 16 AST node constructor factories: `createNode`, `createConstantNode`,

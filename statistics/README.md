@@ -42,7 +42,8 @@ npm install @danielsimonjr/mathts-statistics
 - **Regression & resampling** — `linearRegression`, `polyFit`, `linregress`, `pearsonr`,
   `spearman`, `spearmanr`, `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`,
   `permutationTest`, `mahalanobis`, `hotellingT2`, `kmeans`, `spectralClustering`.
-- **Probability distributions** — distribution objects with `.pdf/.cdf/.quantile/.mean/.variance/.sample`
+- **Probability distributions** — distribution objects with `.pdf`, `.cdf`, `.quantile`, `.mean`,
+  `.variance`, `.sample` (one draw), and `.sampleN(n, { seed })` (batch, optionally seeded)
   (`normalDist`, `gammaDist`, `betaDist`, `binomialDist`, `poissonDist`, `exponentialDist`,
   `chiSquaredDist`, `fDist`, `tDist`, `logNormalDist`, `uniformDist`, `weibullDist`,
   `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`,
@@ -66,6 +67,7 @@ import {
   kendallTau,
   hypergeometricDist,
   kolmogorovSmirnov2Test,
+  normalDist,
 } from '@danielsimonjr/mathts-statistics';
 
 anova([
@@ -75,6 +77,11 @@ anova([
 kendallTau([1, 2, 3, 4, 5], [2, 1, 4, 3, 5]); // 0.6
 hypergeometricDist(50, 5, 10).pdf(1); // 0.4313371972
 kolmogorovSmirnov2Test([1, 2, 3], [2, 3, 4]); // { statistic, pValue }
+
+const d = normalDist(0, 1);
+d.sample(); // one U(…) draw mapped to N(0,1)
+const batch = await d.sampleN(5, { seed: 1 }); // Float64Array length 5, reproducible
+console.log(batch.length);
 ```
 
 ## License

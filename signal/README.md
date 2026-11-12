@@ -14,6 +14,16 @@ Matrix where supported).
 npm install @danielsimonjr/mathts-signal
 ```
 
+## Example
+
+```ts
+import { parallelFFT } from '@danielsimonjr/mathts-signal';
+
+const x = new Float64Array([0, 1, 0, -1]);
+const { real, imag } = parallelFFT(x);
+console.log(real.length, imag.length);
+```
+
 ## What it exports
 
 `fft`, `ifft` (aliases of `parallelFFT` / `parallelIFFT`). Both return `{ real: Float64Array, imag: Float64Array, originalLength: number }` for `fft`: `real` and `imag` are the zero-padded power-of-two spectrum (`real.length === nextPowerOf2(originalLength)`), not a length-n NumPy vector. The length-n `Complex[]` transform is factory `fft` from `@danielsimonjr/mathts-functions`. `ifft` of that object inverts the padded spectrum; the first `originalLength` samples of `.real` recover a real series. Also `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fourier`, `invFourier`, `hilbertTransform`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample` (two-arg SciPy Fourier length resample, or three-arg linear rate change), `medfilt`, `windowFunction` (`(length, type)` or SciPy `(type, length)`; symmetric taps, SciPy `sym=True` / `get_window`, period `n - 1`), `convolve`, `correlate`, `welchPSD`, `bartlettPSD` (throw `RangeError` when the signal is shorter than `frameLength`; an empty signal returns an empty spectrum), `multiTaperPSD`, `goertzel`, `chirpZTransform` (plus the `typedSignal` bundle).

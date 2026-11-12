@@ -135,9 +135,17 @@ The main `.` entry returns SVG/TikZ strings only. For file output, import the is
 Node subpath (shells out to `rsvg-convert` / `resvg` or `pdflatex` / `tectonic` on PATH):
 
 ```ts
-import { renderToFile, latexToPdf } from '@danielsimonjr/mathts-plot/render';
+import { line } from '@danielsimonjr/mathts-plot';
+import { renderToFile } from '@danielsimonjr/mathts-plot/render';
 
-await renderToFile(svgString, 'plot.png', { density: 144 });
+const svgString = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares' });
+
+// Requires rsvg-convert (librsvg) or resvg on PATH for PNG; SVG-only workflows can skip this.
+try {
+  await renderToFile(svgString, 'plot.png', { density: 144 });
+} catch (error) {
+  console.warn('PNG export skipped:', (error as Error).message);
+}
 ```
 
 See `docs/api/plot.md` for `RenderOptions`, `PlotRenderError`, and `hasTool`.
