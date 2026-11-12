@@ -55,16 +55,8 @@ function gemmIkj(
     const ri = i * m;
     for (let k = k0; k < k1; k++) {
       const aik = ad[ai + k];
+      if (aik === 0) continue;
       const bk = k * m;
-      if (aik === 0) {
-        for (let j = j0; j < j1; j++) {
-          const bij = bd[bk + j];
-          if (bij !== 0 && !Number.isFinite(bij)) {
-            result[ri + j] += aik * bij;
-          }
-        }
-        continue;
-      }
       let j = j0;
       for (; j + 3 < j1; j += 4) {
         result[ri + j] += aik * bd[bk + j];
