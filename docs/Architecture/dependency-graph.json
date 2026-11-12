@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1292,
+    "totalFiles": 1293,
     "totalModules": 82,
-    "totalExports": 7095
+    "totalExports": 7099
   },
   "entryPoints": [
     {
@@ -19287,6 +19287,22 @@
         "interfaces": ["NumericJacobianStepRule", "NumericJacobianOptions"],
         "functions": ["numericJacobian", "centralDifferenceGradient"]
       },
+      "functions/src/numeric/ode-step-limit.ts": {
+        "description": "Default cap on **accepted** steps for every ODE driver.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "ODE_DEFAULT_MAX_ACCEPTED_STEPS",
+          "odeAcceptedBudget",
+          "odeMaxStepsError",
+          "odeMaxAttempts"
+        ],
+        "interfaces": ["ODEStepLimitContext"],
+        "functions": ["odeAcceptedBudget", "odeMaxStepsError", "odeMaxAttempts"],
+        "constants": ["ODE_DEFAULT_MAX_ACCEPTED_STEPS"]
+      },
       "functions/src/numeric/open-root-finders.ts": {
         "description": "Open (non-bracketing) scalar root-finders.",
         "externalDependencies": [],
@@ -19393,6 +19409,10 @@
           {
             "file": "./hermite.js",
             "imports": ["hermiteCubic"]
+          },
+          {
+            "file": "./ode-step-limit.js",
+            "imports": ["odeAcceptedBudget", "odeMaxAttempts", "odeMaxStepsError"]
           },
           {
             "file": "../utils/is.js",
@@ -26941,6 +26961,7 @@
           "FindRootOptions",
           "MinimizeOptions",
           "ODESolution",
+          "StiffODESolverOptions",
           "LinprogOptions",
           "LinprogResult"
         ],
@@ -45453,6 +45474,7 @@
           "functions/src/numeric/monte-carlo.ts",
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
+          "functions/src/numeric/ode-step-limit.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/propagate-uncertainty.ts",
           "functions/src/numeric/quadrature-extra.ts",
@@ -46529,16 +46551,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1292,
+    "totalTypeScriptFiles": 1293,
     "totalModules": 82,
-    "totalLinesOfCode": 222000,
-    "totalExports": 7095,
+    "totalLinesOfCode": 222218,
+    "totalExports": 7099,
     "totalClasses": 61,
-    "totalInterfaces": 604,
-    "totalFunctions": 2407,
+    "totalInterfaces": 606,
+    "totalFunctions": 2410,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1650,
+    "totalConstants": 1651,
     "totalReExports": 3054,
     "totalTypeOnlyImports": 650,
     "runtimeCircularDeps": 1,
