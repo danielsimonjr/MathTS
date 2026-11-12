@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-plot
 
+## Unreleased
+
+### Minor Changes
+
+- Add `update` and `plot.update` to patch single-layer line charts in an existing DOM container for live dashboards.
+- `./render` PNG export falls back to optional peer `@resvg/resvg-wasm` when `rsvg-convert` / `resvg` are not on PATH; error messages name the npm package when it is missing.
+
 ## 0.4.32
 
 ### Patch Changes

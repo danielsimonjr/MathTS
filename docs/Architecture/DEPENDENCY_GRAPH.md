@@ -187,7 +187,7 @@ The codebase is organized into the following modules:
 - **assembly/types**: 1 file
 - **compat**: 3 files
 - **gpu**: 8 files
-- **plot**: 18 files
+- **plot**: 19 files
 - **plot/three**: 3 files
 
 ---
@@ -221,7 +221,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 21             | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
 ### Package Dependency Diagram
 
@@ -19222,7 +19222,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `draw2D`
+- Functions: `build2DScene`, `draw2D`
 
 ---
 
@@ -19274,6 +19274,7 @@ graph LR
 | File                  | Imports                                            | Type                  |
 | --------------------- | -------------------------------------------------- | --------------------- |
 | `./plot.js`           | `plot, toTikZ`                                     | Re-export             |
+| `./update.js`         | `update`                                           | Re-export             |
 | `./marks2d.js`        | `line, scatter, bar, area, step, errorbar, quiver` | Re-export             |
 | `./histogram.js`      | `histogram`                                        | Re-export             |
 | `./heatmap.js`        | `heatmap`                                          | Re-export             |
@@ -19287,7 +19288,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `plot`, `toTikZ`, `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`, `histogram`, `heatmap`, `contour`, `overlay`, `surface`, `scatter3d`, `curve3d`, `viridis`, `Data`, `PlotOptions`, `AxisSpec`, `Layer2D`
+- Re-exports: `plot`, `toTikZ`, `update`, `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`, `histogram`, `heatmap`, `contour`, `overlay`, `surface`, `scatter3d`, `curve3d`, `viridis`, `Data`, `PlotOptions`, `AxisSpec`, `Layer2D`
 
 ---
 
@@ -19346,10 +19347,12 @@ graph LR
 | `./contour.js`       | `contour`              | Import             |
 | `./three/surface.js` | `surface`              | Import             |
 | `./types.js`         | `Layer2D, PlotOptions` | Import (type-only) |
+| `./update.js`        | `update`               | Import             |
 
 **Exports:**
 
-- Functions: `plot`, `toTikZ`
+- Functions: `toTikZ`
+- Constants: `plot`
 
 ---
 
@@ -19378,15 +19381,18 @@ graph LR
 | Module          | Import                                     |
 | --------------- | ------------------------------------------ |
 | `child_process` | `spawn`                                    |
+| `module`        | `createRequire`                            |
 | `fs/promises`   | `writeFile, rm, rename, mkdtemp, readFile` |
 | `path`          | `extname, join`                            |
 | `os`            | `tmpdir`                                   |
+| `url`           | `fileURLToPath`                            |
 
 **Exports:**
 
 - Classes: `PlotRenderError`
 - Interfaces: `RenderOptions`
-- Functions: `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
+- Functions: `renderPngWithResvgWasm`, `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
+- Constants: `resvgWasmImport`
 
 ---
 
@@ -19444,6 +19450,23 @@ graph LR
 
 - Interfaces: `AxisSpec`, `PlotOptions`, `Layer2D`
 - Types: `Data`
+
+---
+
+### `plot/src/update.ts` - Update an existing plot DOM subtree in place for live dashboards (same container between frames).
+
+**Internal Dependencies:**
+
+| File         | Imports                | Type               |
+| ------------ | ---------------------- | ------------------ |
+| `./frame.js` | `build2DScene`         | Import             |
+| `./svg.js`   | `emitSVG`              | Import             |
+| `./scene.js` | `Prim`                 | Import (type-only) |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `update`, `update`, `update`, `update`
 
 ---
 
@@ -20333,7 +20356,7 @@ graph TD
         N514[marks2d]
         N515[overlay]
         N516[palette]
-        N517[...8 more]
+        N517[...9 more]
     end
 
     subgraph Plot/three
@@ -20427,17 +20450,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1295   |
+| Total TypeScript Files  | 1296   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 222141 |
-| Total Exports           | 7090   |
-| Total Re-exports        | 3045   |
+| Total Lines of Code     | 222367 |
+| Total Exports           | 7095   |
+| Total Re-exports        | 3046   |
 | Total Classes           | 61     |
 | Total Interfaces        | 607    |
-| Total Functions         | 2411   |
+| Total Functions         | 2416   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 645    |
+| Type-only Imports       | 647    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 0      |
 

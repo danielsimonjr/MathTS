@@ -11265,6 +11265,9 @@
       "toTikZ": {
         "kind": "function"
       },
+      "update": {
+        "kind": "function"
+      },
       "viridis": {
         "kind": "function"
       }
@@ -11285,8 +11288,14 @@
       "latexToPdf": {
         "kind": "function"
       },
+      "renderPngWithResvgWasm": {
+        "kind": "function"
+      },
       "renderToFile": {
         "kind": "function"
+      },
+      "resvgWasmImport": {
+        "kind": "object"
       },
       "runTool": {
         "kind": "function"

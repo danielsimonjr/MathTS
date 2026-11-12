@@ -150,11 +150,11 @@ await renderToFile(svg, 'chart.png');
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-plot` (18 exports).
+> `@danielsimonjr/mathts-plot` (19 exports).
 
-### Functions (17)
+### Functions (18)
 
-`area`, `bar`, `contour`, `curve3d`, `errorbar`, `heatmap`, `histogram`, `line`, `overlay`, `plot`, `quiver`, `scatter`, `scatter3d`, `step`, `surface`, `toTikZ`, `viridis`
+`area`, `bar`, `contour`, `curve3d`, `errorbar`, `heatmap`, `histogram`, `line`, `overlay`, `plot`, `quiver`, `scatter`, `scatter3d`, `step`, `surface`, `toTikZ`, `update`, `viridis`
 
 ### Constants & values (1)
 

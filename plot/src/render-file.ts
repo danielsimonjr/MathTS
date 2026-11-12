@@ -5,9 +5,11 @@
  * so `node:child_process`/`node:fs` never enter the browser-safe main bundle.
  */
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { writeFile, rm, rename, mkdtemp, readFile } from 'node:fs/promises';
 import { extname, join as joinPath } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 /** Thrown when an external tool is missing or a conversion fails. Deliberate
  *  exception to plot's never-throw rule: I/O and missing tools must surface. */
@@ -36,6 +38,55 @@ interface RunResult {
 }
 
 const ALLOWED_TOOLS = ['rsvg-convert', 'resvg', 'pdflatex', 'xelatex', 'lualatex', 'tectonic'];
+const RESVG_WASM_PKG = '@resvg/resvg-wasm';
+
+/** Lazy import indirection so tests can simulate a missing optional peer. */
+export const resvgWasmImport = {
+  async importModule(): Promise<typeof import('@resvg/resvg-wasm')> {
+    return import('@resvg/resvg-wasm');
+  },
+};
+
+let resvgWasmInitialized = false;
+
+/** Render SVG → PNG bytes via the optional `@resvg/resvg-wasm` peer (Node). */
+export async function renderPngWithResvgWasm(
+  svg: string,
+  opts: Pick<RenderOptions, 'density' | 'background'> = {}
+): Promise<Uint8Array> {
+  let mod: typeof import('@resvg/resvg-wasm');
+  try {
+    mod = await resvgWasmImport.importModule();
+  } catch {
+    throw new PlotRenderError(
+      `No SVG converter found for .png. Install rsvg-convert (librsvg) or resvg on PATH, or install optional peer ${RESVG_WASM_PKG}.`,
+      RESVG_WASM_PKG
+    );
+  }
+  const require = createRequire(fileURLToPath(import.meta.url));
+  let wasmPath: string;
+  try {
+    wasmPath = require.resolve(`${RESVG_WASM_PKG}/index_bg.wasm`);
+  } catch {
+    throw new PlotRenderError(
+      `No SVG converter found for .png. Install rsvg-convert (librsvg) or resvg on PATH, or install optional peer ${RESVG_WASM_PKG}.`,
+      RESVG_WASM_PKG
+    );
+  }
+  if (!resvgWasmInitialized) {
+    await mod.initWasm(await readFile(wasmPath));
+    resvgWasmInitialized = true;
+  }
+  const resvg = new mod.Resvg(svg, {
+    dpi: opts.density ?? 96,
+    ...(opts.background ? { background: opts.background } : {}),
+  });
+  try {
+    return resvg.render().asPng();
+  } finally {
+    resvg.free();
+  }
+}
 
 /** Spawn a command, feeding optional stdin, collecting stdout/stderr. Rejects
  *  with PlotRenderError(ENOENT) if the binary is not found. */
@@ -138,6 +189,11 @@ export async function renderToFile(
       );
     }
     await rename(tmpOut, outPath);
+    return;
+  }
+  if (format === 'png') {
+    const png = await renderPngWithResvgWasm(svg, opts);
+    await writeFile(outPath, png);
     return;
   }
   throw new PlotRenderError(
