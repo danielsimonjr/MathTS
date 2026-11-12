@@ -52,6 +52,14 @@ const defaultConfig: BigNumberConfig = {
 let globalConfig: BigNumberConfig = { ...defaultConfig };
 
 /**
+ * Distinguishes internal `(sign, coefficient, exponent)` construction from a
+ * user call. A second numeric argument (`new BigNumber(1, 2)`) must not be
+ * treated as a coefficient — decimal.js uses that slot as a radix, and this
+ * class does not.
+ */
+const INTERNAL: unique symbol = Symbol('BigNumber.internal');
+
+/**
  * BigNumber class for arbitrary precision decimal arithmetic
  *
  * Internally stores: sign * coefficient * 10^exponent
@@ -76,18 +84,62 @@ export class BigNumber implements MathTSValue {
   private readonly _isNaN: boolean = false;
   private readonly _isInfinite: boolean = false;
 
-  private constructor(
+  /**
+   * Create a BigNumber from one number, string, bigint, or existing instance.
+   *
+   * `new BigNumber(1)` and `BigNumber.from(1)` produce the same value.
+   * `new BigNumber(existing)` copies; `BigNumber.from(existing)` returns the same instance.
+   * Extra arguments throw — there is no public `(sign, coefficient)` form.
+   */
+  constructor(value?: number | string | bigint | BigNumber) {
+    if ((arguments[0] as unknown) === INTERNAL) {
+      this._sign = arguments[1] as 1 | -1 | 0;
+      this._coefficient = arguments[2] as bigint;
+      this._exponent = (arguments[3] as number | undefined) ?? 0;
+      this._isNaN = (arguments[4] as boolean | undefined) ?? false;
+      this._isInfinite = (arguments[5] as boolean | undefined) ?? false;
+      return;
+    }
+
+    if (arguments.length > 1) {
+      throw new TypeError(
+        `BigNumber accepts one argument (received ${arguments.length}). ` +
+          'Use new BigNumber(value), BigNumber.from(value), or bignumber(value).'
+      );
+    }
+
+    const input = value === undefined ? 0 : value;
+    if (input === null || (typeof input === 'object' && !(input instanceof BigNumber))) {
+      throw new TypeError(
+        'BigNumber requires a number, string, bigint, or another BigNumber ' +
+          `(received ${input === null ? 'null' : typeof input})`
+      );
+    }
+    const created = BigNumber.from(input as number | string | bigint | BigNumber);
+    this._sign = created._sign;
+    this._coefficient = created._coefficient;
+    this._exponent = created._exponent;
+    this._isNaN = created._isNaN;
+    this._isInfinite = created._isInfinite;
+  }
+
+  /** One allocation for arithmetic. Not reachable as `new BigNumber(sign, coefficient)`. */
+  static #allocate(
     sign: 1 | -1 | 0,
     coefficient: bigint,
-    exponent: number,
+    exponent: number = 0,
     isNaN: boolean = false,
     isInfinite: boolean = false
-  ) {
-    this._sign = sign;
-    this._coefficient = coefficient;
-    this._exponent = exponent;
-    this._isNaN = isNaN;
-    this._isInfinite = isInfinite;
+  ): BigNumber {
+    const Ctor = BigNumber as unknown as new (
+      token: typeof INTERNAL,
+      sign: 1 | -1 | 0,
+      coefficient: bigint,
+      exponent?: number,
+      isNaN?: boolean,
+      isInfinite?: boolean
+    ) => BigNumber;
+    return new Ctor(INTERNAL, sign, coefficient, exponent, isNaN, isInfinite);
   }
 
   // ============================================================
@@ -95,17 +147,39 @@ export class BigNumber implements MathTSValue {
   // ============================================================
 
   /**
+   * Create a BigNumber from a number, string, bigint, or existing instance (mathjs / Decimal.js style).
+   */
+  static from(value: number | string | bigint | BigNumber): BigNumber {
+    if (value instanceof BigNumber) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return BigNumber.parse(value);
+    }
+    if (typeof value === 'bigint') {
+      return BigNumber.fromBigInt(value);
+    }
+    if (typeof value === 'number') {
+      return BigNumber.fromNumber(value);
+    }
+    throw new TypeError(
+      'BigNumber.from requires a number, string, bigint, or BigNumber ' +
+        `(received ${typeof value})`
+    );
+  }
+
+  /**
    * Create a BigNumber from a number
    */
   static fromNumber(n: number): BigNumber {
     if (Number.isNaN(n)) {
-      return new BigNumber(0, 0n, 0, true, false);
+      return BigNumber.#allocate(0, 0n, 0, true, false);
     }
     if (!Number.isFinite(n)) {
-      return new BigNumber(n > 0 ? 1 : -1, 0n, 0, false, true);
+      return BigNumber.#allocate(n > 0 ? 1 : -1, 0n, 0, false, true);
     }
     if (n === 0) {
-      return new BigNumber(0, 0n, 0);
+      return BigNumber.#allocate(0, 0n, 0);
     }
 
     // Safe integers are exact — skip the toString → parse round-trip.
@@ -122,17 +196,30 @@ export class BigNumber implements MathTSValue {
    * Create a BigNumber from a string
    */
   static parse(str: string): BigNumber {
+    if (typeof str !== 'string') {
+      throw new TypeError(
+        `BigNumber.parse requires a string (received ${str === null ? 'null' : typeof str})`
+      );
+    }
+    const original = str;
     str = str.trim().toLowerCase();
+    if (str.length === 0) {
+      throw new SyntaxError('BigNumber cannot parse an empty string');
+    }
 
     // Handle special values
     if (str === 'nan') {
-      return new BigNumber(0, 0n, 0, true, false);
+      return BigNumber.#allocate(0, 0n, 0, true, false);
     }
     if (str === 'infinity' || str === '+infinity') {
-      return new BigNumber(1, 0n, 0, false, true);
+      return BigNumber.#allocate(1, 0n, 0, false, true);
     }
     if (str === '-infinity') {
-      return new BigNumber(-1, 0n, 0, false, true);
+      return BigNumber.#allocate(-1, 0n, 0, false, true);
+    }
+
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/.test(str)) {
+      throw new SyntaxError(`BigNumber cannot parse '${original}'`);
     }
 
     // Parse sign
@@ -149,6 +236,9 @@ export class BigNumber implements MathTSValue {
     const eIndex = str.indexOf('e');
     if (eIndex !== -1) {
       exponentPart = parseInt(str.slice(eIndex + 1), 10);
+      if (!Number.isSafeInteger(exponentPart)) {
+        throw new RangeError(`BigNumber exponent is out of range in '${original}'`);
+      }
       str = str.slice(0, eIndex);
     }
 
@@ -168,7 +258,7 @@ export class BigNumber implements MathTSValue {
     coefficient = coefficient.replace(/^0+/, '') || '0';
 
     if (coefficient === '0') {
-      return new BigNumber(0, 0n, 0);
+      return BigNumber.#allocate(0, 0n, 0);
     }
 
     // Remove trailing zeros and adjust exponent
@@ -187,7 +277,7 @@ export class BigNumber implements MathTSValue {
 
     const finalExponent = exponentPart - decimalPlaces + trailingZeros;
 
-    return new BigNumber(sign, BigInt(coefficient), finalExponent);
+    return BigNumber.#allocate(sign, BigInt(coefficient), finalExponent);
   }
 
   /**
@@ -195,7 +285,7 @@ export class BigNumber implements MathTSValue {
    */
   static fromBigInt(n: bigint): BigNumber {
     if (n === 0n) {
-      return new BigNumber(0, 0n, 0);
+      return BigNumber.#allocate(0, 0n, 0);
     }
     const sign: 1 | -1 = n < 0n ? -1 : 1;
     let coef = n < 0n ? -n : n;
@@ -205,7 +295,7 @@ export class BigNumber implements MathTSValue {
       coef /= 10n;
       exp++;
     }
-    return new BigNumber(sign, coef, exp);
+    return BigNumber.#allocate(sign, coef, exp);
   }
 
   /**
@@ -535,10 +625,10 @@ export class BigNumber implements MathTSValue {
   add(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
 
-    if (this._isNaN || b._isNaN) return new BigNumber(0, 0n, 0, true);
+    if (this._isNaN || b._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite && b._isInfinite) {
       if (this._sign === b._sign) return this;
-      return new BigNumber(0, 0n, 0, true); // Infinity - Infinity = NaN
+      return BigNumber.#allocate(0, 0n, 0, true); // Infinity - Infinity = NaN
     }
     if (this._isInfinite) return this;
     if (b._isInfinite) return b;
@@ -583,13 +673,13 @@ export class BigNumber implements MathTSValue {
   multiply(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
 
-    if (this._isNaN || b._isNaN) return new BigNumber(0, 0n, 0, true);
+    if (this._isNaN || b._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite || b._isInfinite) {
-      if (this._sign === 0 || b._sign === 0) return new BigNumber(0, 0n, 0, true); // 0 * Infinity = NaN
+      if (this._sign === 0 || b._sign === 0) return BigNumber.#allocate(0, 0n, 0, true); // 0 * Infinity = NaN
       const sign: 1 | -1 = (this._sign * b._sign) as 1 | -1;
-      return new BigNumber(sign, 0n, 0, false, true);
+      return BigNumber.#allocate(sign, 0n, 0, false, true);
     }
-    if (this._sign === 0 || b._sign === 0) return new BigNumber(0, 0n, 0);
+    if (this._sign === 0 || b._sign === 0) return BigNumber.#allocate(0, 0n, 0);
 
     const sign: 1 | -1 = (this._sign * b._sign) as 1 | -1;
     const coefficient = this._coefficient * b._coefficient;
@@ -618,18 +708,18 @@ export class BigNumber implements MathTSValue {
   divide(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
 
-    if (this._isNaN || b._isNaN) return new BigNumber(0, 0n, 0, true);
-    if (this._isInfinite && b._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._isNaN || b._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
+    if (this._isInfinite && b._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (b._sign === 0) {
-      if (this._sign === 0) return new BigNumber(0, 0n, 0, true);
-      return new BigNumber(this._sign, 0n, 0, false, true);
+      if (this._sign === 0) return BigNumber.#allocate(0, 0n, 0, true);
+      return BigNumber.#allocate(this._sign, 0n, 0, false, true);
     }
     if (this._isInfinite) {
       const sign: 1 | -1 = (this._sign * b._sign) as 1 | -1;
-      return new BigNumber(sign, 0n, 0, false, true);
+      return BigNumber.#allocate(sign, 0n, 0, false, true);
     }
-    if (b._isInfinite) return new BigNumber(0, 0n, 0);
-    if (this._sign === 0) return new BigNumber(0, 0n, 0);
+    if (b._isInfinite) return BigNumber.#allocate(0, 0n, 0);
+    if (this._sign === 0) return BigNumber.#allocate(0, 0n, 0);
 
     const sign: 1 | -1 = (this._sign * b._sign) as 1 | -1;
     const precision = globalConfig.precision;
@@ -671,7 +761,7 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     const newSign: 1 | -1 = this._sign === 1 ? -1 : 1;
-    return new BigNumber(newSign, this._coefficient, this._exponent, false, this._isInfinite);
+    return BigNumber.#allocate(newSign, this._coefficient, this._exponent, false, this._isInfinite);
   }
 
   /**
@@ -680,7 +770,7 @@ export class BigNumber implements MathTSValue {
   abs(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
-    return new BigNumber(1, this._coefficient, this._exponent, false, this._isInfinite);
+    return BigNumber.#allocate(1, this._coefficient, this._exponent, false, this._isInfinite);
   }
 
   /**
@@ -692,7 +782,7 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN) return this;
     if (exp === 0) return BigNumber.fromNumber(1);
     if (this._sign === 0) {
-      if (exp < 0) return new BigNumber(1, 0n, 0, false, true); // 0^(-n) = Infinity
+      if (exp < 0) return BigNumber.#allocate(1, 0n, 0, false, true); // 0^(-n) = Infinity
       return this;
     }
     if (exp < 0) {
@@ -720,7 +810,7 @@ export class BigNumber implements MathTSValue {
    */
   sqrt(): BigNumber {
     if (this._isNaN) return this;
-    if (this._sign === -1) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === -1) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
     if (this._isInfinite) return this;
 
@@ -939,8 +1029,8 @@ export class BigNumber implements MathTSValue {
    */
   mod(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
-    if (this._isNaN || b._isNaN || b._sign === 0) return new BigNumber(0, 0n, 0, true);
-    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._isNaN || b._isNaN || b._sign === 0) return BigNumber.#allocate(0, 0n, 0, true);
+    if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (b._isInfinite) return this;
     if (this._sign === 0) return this;
 
@@ -959,7 +1049,7 @@ export class BigNumber implements MathTSValue {
    */
   sin(): BigNumber {
     if (this._isNaN) return this;
-    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
 
     // Range reduction: bring x into [-PI, PI]
@@ -973,7 +1063,7 @@ export class BigNumber implements MathTSValue {
    */
   cos(): BigNumber {
     if (this._isNaN) return this;
-    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return BigNumber.fromNumber(1);
 
     const x = this._reduceAngle();
@@ -986,7 +1076,7 @@ export class BigNumber implements MathTSValue {
    */
   tan(): BigNumber {
     if (this._isNaN) return this;
-    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
 
     const x = this._reduceAngle();
@@ -1001,7 +1091,7 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN) return this;
     // Domain: [-1, 1]
     const one = BigNumber.fromNumber(1);
-    if (this.abs().compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+    if (this.abs().compareTo(one) > 0) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
 
     // For |x| close to 1: asin(x) = PI/2 - 2*asin(sqrt((1-x)/2)) * sign(x)
@@ -1022,7 +1112,7 @@ export class BigNumber implements MathTSValue {
   acos(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
-    if (this.abs().compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+    if (this.abs().compareTo(one) > 0) return BigNumber.#allocate(0, 0n, 0, true);
 
     // acos(x) = PI/2 - asin(x)
     return BIGNUMBER_PI.divide(2).subtract(this.asin());
@@ -1069,7 +1159,7 @@ export class BigNumber implements MathTSValue {
    * Returns angle in (-PI, PI]
    */
   atan2(x: BigNumber): BigNumber {
-    if (this._isNaN || x._isNaN) return new BigNumber(0, 0n, 0, true);
+    if (this._isNaN || x._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
 
     // atan2(0, 0) = 0
     if (this._sign === 0 && x._sign === 0) return BigNumber.fromNumber(0);
@@ -1112,7 +1202,7 @@ export class BigNumber implements MathTSValue {
    */
   cosh(): BigNumber {
     if (this._isNaN) return this;
-    if (this._isInfinite) return new BigNumber(1, 0n, 0, false, true); // +Infinity
+    if (this._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true); // +Infinity
     if (this._sign === 0) return BigNumber.fromNumber(1);
 
     const ex = this.exp();
@@ -1152,7 +1242,7 @@ export class BigNumber implements MathTSValue {
   acosh(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
-    if (this.compareTo(one) < 0) return new BigNumber(0, 0n, 0, true);
+    if (this.compareTo(one) < 0) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite) return this;
 
     return this.add(this.multiply(this).subtract(one).sqrt()).ln();
@@ -1167,11 +1257,11 @@ export class BigNumber implements MathTSValue {
     const one = BigNumber.fromNumber(1);
     const absVal = this.abs();
 
-    if (absVal.compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+    if (absVal.compareTo(one) > 0) return BigNumber.#allocate(0, 0n, 0, true);
     if (absVal.equals(one)) {
       return this._sign === 1
-        ? new BigNumber(1, 0n, 0, false, true)
-        : new BigNumber(-1, 0n, 0, false, true);
+        ? BigNumber.#allocate(1, 0n, 0, false, true)
+        : BigNumber.#allocate(-1, 0n, 0, false, true);
     }
     if (this._sign === 0) return this;
 
@@ -1236,8 +1326,8 @@ export class BigNumber implements MathTSValue {
    */
   ln(): BigNumber {
     if (this._isNaN) return this;
-    if (this._sign === -1) return new BigNumber(0, 0n, 0, true);
-    if (this._sign === 0) return new BigNumber(-1, 0n, 0, false, true);
+    if (this._sign === -1) return BigNumber.#allocate(0, 0n, 0, true);
+    if (this._sign === 0) return BigNumber.#allocate(-1, 0n, 0, false, true);
     if (this._isInfinite) return this;
 
     const one = BigNumber.fromNumber(1);
@@ -1379,8 +1469,8 @@ export class BigNumber implements MathTSValue {
     const one = BigNumber.fromNumber(1);
     const negOne = BigNumber.fromNumber(-1);
 
-    if (this.compareTo(negOne) < 0) return new BigNumber(0, 0n, 0, true);
-    if (this.equals(negOne)) return new BigNumber(-1, 0n, 0, false, true);
+    if (this.compareTo(negOne) < 0) return BigNumber.#allocate(0, 0n, 0, true);
+    if (this.equals(negOne)) return BigNumber.#allocate(-1, 0n, 0, false, true);
     if (this._sign === 0) return this;
 
     return one.add(this).ln();
@@ -1390,8 +1480,8 @@ export class BigNumber implements MathTSValue {
    * Hypotenuse: sqrt(this^2 + other^2)
    */
   hypot(other: BigNumber): BigNumber {
-    if (this._isNaN || other._isNaN) return new BigNumber(0, 0n, 0, true);
-    if (this._isInfinite || other._isInfinite) return new BigNumber(1, 0n, 0, false, true);
+    if (this._isNaN || other._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
+    if (this._isInfinite || other._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true);
 
     return this.multiply(this).add(other.multiply(other)).sqrt();
   }
@@ -1524,7 +1614,7 @@ export class BigNumber implements MathTSValue {
   }
 
   clone(): BigNumber {
-    return new BigNumber(
+    return BigNumber.#allocate(
       this._sign,
       this._coefficient,
       this._exponent,
@@ -1557,7 +1647,7 @@ export class BigNumber implements MathTSValue {
 
   private normalize(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {
     if (coefficient === 0n) {
-      return new BigNumber(0, 0n, 0);
+      return BigNumber.#allocate(0, 0n, 0);
     }
 
     // Remove trailing zeros
@@ -1568,13 +1658,23 @@ export class BigNumber implements MathTSValue {
       exp++;
     }
 
-    return new BigNumber(sign, coef, exp);
+    return BigNumber.#allocate(sign, coef, exp);
   }
 }
 
 /**
  * Common BigNumber constants
  */
+/**
+ * mathjs-compatible factory — same dispatch as {@link BigNumber.from}.
+ */
+export function bignumber(value?: number | string | bigint | BigNumber): BigNumber {
+  if (value === undefined) {
+    return BigNumber.fromNumber(0);
+  }
+  return BigNumber.from(value);
+}
+
 export const BIGNUMBER_ZERO = BigNumber.fromNumber(0);
 export const BIGNUMBER_ONE = BigNumber.fromNumber(1);
 export const BIGNUMBER_NEG_ONE = BigNumber.fromNumber(-1);

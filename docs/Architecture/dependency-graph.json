@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7016
+    "totalExports": 7019
   },
   "entryPoints": [
     {
@@ -861,6 +861,7 @@
             "file": "./types/bignumber.js",
             "imports": [
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -1154,6 +1155,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -1350,6 +1352,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -2712,11 +2715,12 @@
           "BIGNUMBER_LN2",
           "BIGNUMBER_LN10",
           "isBigNumber",
+          "bignumber",
           "BigNumber"
         ],
         "classes": ["BigNumber"],
         "interfaces": ["BigNumberConfig"],
-        "functions": ["isBigNumber"],
+        "functions": ["isBigNumber", "bignumber"],
         "constants": [
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -5915,7 +5919,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["NestedArray"],
+            "imports": ["arraySize", "validate", "NestedArray"],
             "subpath": "internal"
           }
         ],
@@ -37936,6 +37940,7 @@
               "FRACTION_THIRD",
               "FRACTION_QUARTER",
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -37969,6 +37974,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -38000,6 +38006,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -46073,15 +46080,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218655,
-    "totalExports": 7016,
+    "totalLinesOfCode": 218885,
+    "totalExports": 7019,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2365,
+    "totalFunctions": 2366,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1646,
-    "totalReExports": 3021,
+    "totalReExports": 3023,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

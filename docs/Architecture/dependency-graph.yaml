@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1287
   totalModules: 82
-  totalExports: 7016
+  totalExports: 7019
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -807,6 +807,7 @@ modules:
         - file: ./types/bignumber.js
           imports:
             - BigNumber
+            - bignumber
             - isBigNumber
             - BIGNUMBER_ZERO
             - BIGNUMBER_ONE
@@ -1079,6 +1080,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -1274,6 +1276,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -2610,6 +2613,7 @@ modules:
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
         - isBigNumber
+        - bignumber
         - BigNumber
       classes:
         - BigNumber
@@ -2617,6 +2621,7 @@ modules:
         - BigNumberConfig
       functions:
         - isBigNumber
+        - bignumber
       constants:
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -5742,6 +5747,8 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - arraySize
+            - validate
             - NestedArray
           subpath: internal
       exports:
@@ -35895,6 +35902,7 @@ modules:
             - FRACTION_THIRD
             - FRACTION_QUARTER
             - BigNumber
+            - bignumber
             - isBigNumber
             - BIGNUMBER_ZERO
             - BIGNUMBER_ONE
@@ -35928,6 +35936,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -35958,6 +35967,7 @@ modules:
         - FRACTION_THIRD
         - FRACTION_QUARTER
         - BigNumber
+        - bignumber
         - isBigNumber
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -43602,15 +43612,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218655
-  totalExports: 7016
+  totalLinesOfCode: 218885
+  totalExports: 7019
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2365
+  totalFunctions: 2366
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1646
-  totalReExports: 3021
+  totalReExports: 3023
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
