@@ -25444,7 +25444,13 @@
           "invGaussDist",
           "multivariateNormal"
         ],
-        "interfaces": ["SampleNOptions", "Distribution", "MultivariateDistribution"],
+        "interfaces": [
+          "SampleNOptions",
+          "Distribution",
+          "GammaDistOptions",
+          "GammaDistNamedOptions",
+          "MultivariateDistribution"
+        ],
         "functions": [
           "normalDist",
           "betaDist",
@@ -25452,6 +25458,8 @@
           "chiSquaredDist",
           "exponentialDist",
           "fDist",
+          "gammaDist",
+          "gammaDist",
           "gammaDist",
           "logNormalDist",
           "poissonDist",
@@ -46528,11 +46536,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1296,
     "totalModules": 82,
-    "totalLinesOfCode": 222396,
+    "totalLinesOfCode": 222466,
     "totalExports": 7097,
     "totalClasses": 61,
-    "totalInterfaces": 607,
-    "totalFunctions": 2411,
+    "totalInterfaces": 609,
+    "totalFunctions": 2413,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1651,

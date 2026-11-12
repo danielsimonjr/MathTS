@@ -11193,8 +11193,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `SampleNOptions`, `Distribution`, `MultivariateDistribution`
-- Functions: `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`
+- Interfaces: `SampleNOptions`, `Distribution`, `GammaDistOptions`, `GammaDistNamedOptions`, `MultivariateDistribution`
+- Functions: `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `gammaDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`
 - Constants: `DIST_WORKER_THRESHOLD`
 
 ---
@@ -20468,12 +20468,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1296   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 222396 |
+| Total Lines of Code     | 222466 |
 | Total Exports           | 7097   |
 | Total Re-exports        | 3049   |
 | Total Classes           | 61     |
-| Total Interfaces        | 607    |
-| Total Functions         | 2411   |
+| Total Interfaces        | 609    |
+| Total Functions         | 2413   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 646    |

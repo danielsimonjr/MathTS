@@ -2536,6 +2536,12 @@
       "GPU_REDUCE_OPS": {
         "kind": "object"
       },
+      "GammaDistNamedOptions": {
+        "kind": "type"
+      },
+      "GammaDistOptions": {
+        "kind": "type"
+      },
       "GaussLegendre4Options": {
         "kind": "type"
       },
