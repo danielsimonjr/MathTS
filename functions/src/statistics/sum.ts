@@ -2,6 +2,7 @@ import { containsCollections, deepForEach, reduce } from '../utils/collection.js
 import { pairwiseSum } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { rejectMisusedIndexedSum } from './sum-indexed-guard.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 
@@ -82,6 +83,7 @@ export const createSum = /* #__PURE__ */ factory(
 
       // sum(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
+        rejectMisusedIndexedSum(args);
         if (containsCollections(args)) {
           throw new TypeError('Scalar values expected in function sum');
         }

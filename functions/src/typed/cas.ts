@@ -30,12 +30,14 @@ import {
 // Real polynomial/rational CAS engines — casExpand/casFactor delegate to these
 // (they were formerly crude string-manipulation stubs).
 import { expand as algebraExpand, factor as algebraFactor } from './algebra.js';
-import { derivativeOfAdditiveTerms } from './string-derivative.js';
 
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
 // cubic, real + complex) instead of duplicating the formulas here.
-import { polynomialRoot } from '../factories/index.js';
+import { polynomialRoot, derivative as factoryDerivative } from '../factories/index.js';
+import { antiderivativeReciprocal } from '../cas/antiderivative.js';
+import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
+import { quad } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
 
@@ -301,7 +303,21 @@ const assumptions: Map<string, Set<string>> = new Map();
  * integrate('sin(x)', 'x')       // => '-cos(x)'
  * integrate('x^2', 'x', 0, 1)   // => 0.3333...
  */
-export function integrate(expr: string, varName: string, a?: f64, b?: f64): string | f64 {
+export function integrate(
+  expr: string | ((x: f64) => f64),
+  varNameOrA?: string | f64,
+  a?: f64,
+  b?: f64
+): string | f64 {
+  if (typeof expr === 'function') {
+    if (typeof varNameOrA !== 'number' || typeof a !== 'number') {
+      throw new TypeError(
+        'integrate(fn, a, b) requires numeric bounds; integrate(expr, var) is symbolic — use quad(fn, a, b) for numeric quadrature'
+      );
+    }
+    return quad(expr, varNameOrA, a).value;
+  }
+  const varName = varNameOrA as string;
   const trimmed = expr.trim();
 
   // Definite integral via numerical integration (Simpson's rule)
@@ -361,8 +377,8 @@ export function integrate(expr: string, varName: string, a?: f64, b?: f64): stri
   // exp(x) -> exp(x)
   if (trimmed === `exp(${varName})`) return `exp(${varName})`;
 
-  // 1/x -> ln(x)
-  if (trimmed === `1/${varName}`) return `log(${varName})`;
+  // 1/x -> log(abs(x)) (shared with symbolicIntegral)
+  if (trimmed === `1/${varName}`) return antiderivativeReciprocal(varName);
 
   // Fall back: return integral notation
   return `integral(${trimmed}, ${varName})`;
@@ -1234,7 +1250,12 @@ function numericRealRoots(expr: string, varName: string): f64[] {
  * @param varName  - Variable to solve for.
  * @returns Distinct roots: real numbers (sorted) then Complex.
  */
-export function solve(equation: string, varName: string): Array<f64 | Complex> {
+export function solve(equation: unknown, varName: string): Array<f64 | Complex | string> {
+  if (typeof equation !== 'string') {
+    throw new TypeError(
+      'solve(equation, variable) is symbolic; for linear systems A x = b use linsolve or lusolve'
+    );
+  }
   // Normalize "lhs = rhs" to a root-finding expression "lhs - (rhs)".
   let expr = equation;
   if (equation.includes('=')) {
@@ -1259,6 +1280,25 @@ export function solve(equation: string, varName: string): Array<f64 | Complex> {
     if (degree === 0) {
       // Constant: identity (c0 ≈ 0) or no solution — no isolated roots.
       return [];
+    }
+
+    // Prefer exact radical forms for low-degree polynomials (e.g. x^2 - 2 → ±sqrt(2)).
+    if (degree === 2) {
+      const radicals = toRadicals(expr);
+      if (radicals.length > 0) {
+        if (radicals.some((r) => r.includes('sqrt'))) return radicals;
+        if (radicals.length === 2) {
+          const nums = radicals.map((r) => Number(r));
+          if (nums.every((n) => Number.isFinite(n))) return nums.sort((a, b) => a - b);
+        }
+      }
+    }
+    if (degree === 1) {
+      const radicals = toRadicals(expr);
+      if (radicals.length === 1) {
+        const n = Number(radicals[0]);
+        if (Number.isFinite(n)) return [n];
+      }
     }
 
     let raw: unknown[];
@@ -1965,9 +2005,31 @@ export function toRadicals(expr: string): string[] {
   // Verify it's quadratic
   if (Math.abs(a * 4 + b * 2 + c - f2) < 1e-6) {
     const disc = b * b - 4 * a * c;
-    if (disc < 0) return []; // Complex roots
+    if (disc < 0) return []; // Complex roots — caller uses polynomialRoot
+
+    if (Math.abs(disc) < 1e-12) {
+      return [formatCoeff(-b / (2 * a))];
+    }
+
+    if (Math.abs(b) < 1e-12 && Math.abs(a - 1) < 1e-12 && c < 0) {
+      const n = -c;
+      if (Number.isInteger(n) && n > 0) {
+        const sr = Math.sqrt(n);
+        if (sr !== Math.floor(sr)) {
+          return [`-sqrt(${n})`, `sqrt(${n})`];
+        }
+      }
+    }
 
     const sqrtDisc = Math.sqrt(disc);
+    if (Number.isInteger(disc)) {
+      const sdisc = Math.sqrt(disc);
+      if (sdisc === Math.floor(sdisc)) {
+        const r1 = (-b + sdisc) / (2 * a);
+        const r2 = (-b - sdisc) / (2 * a);
+        return [formatCoeff(r1), formatCoeff(r2)].sort((x, y) => Number(x) - Number(y));
+      }
+    }
     const sqrtDiscStr = Number.isInteger(disc) ? `sqrt(${disc})` : formatCoeff(sqrtDisc);
 
     if (Math.abs(disc) < 1e-12) {
@@ -2554,6 +2616,9 @@ function _casSimplifyOne(expr: string): string {
   // Simple single-variable, single-power pass.
   r = _combineLikeTerms(r);
 
+  const canonical = tryPolynomialCanonicalForm(r);
+  if (canonical) r = canonical;
+
   return r || '0';
 }
 
@@ -2638,8 +2703,12 @@ function _combineLikeTerms(expr: string): string {
  * @internal
  */
 function _casDerivativeOne(expr: string, variable: string): string {
-  if (expr.indexOf(variable) === -1) return '0';
-  return derivativeOfAdditiveTerms(expr, variable);
+  const d: unknown = factoryDerivative(expr, variable);
+  if (typeof d === 'string') return d;
+  if (d != null && typeof (d as { toString: () => string }).toString === 'function') {
+    return (d as { toString: () => string }).toString();
+  }
+  return String(d);
 }
 
 // ---------------------------------------------------------------------------

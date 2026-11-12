@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-functions
 
+## [Unreleased]
+
+### Minor Changes
+
+- CAS (G21): polynomial `simplify` / `factor` collapse repeated linear factors to powers (e.g. `(x+1)^2`). `integrate('1/x')` and `symbolicIntegral('1/x')` both use `log(abs(x))`. `casDerivative` matches `derivative`. `solve('x^2-2')` returns symbolic `±sqrt(2)`. `integrate(fn, a, b)` uses `quad` for JS functions.
+
+### Breaking Changes
+
+- `solve([[A]], b)` throws with a message naming `linsolve` (was `[]`). Some `solve` results are symbolic strings instead of floats.
+- `sum(body, lo, hi, index)` misuse (e.g. `sum(i,1,3,i)` with imaginary unit `i`) throws; use `summation(expr, index, lo, hi)`.
+
 ## 0.84.0
 
 ### Minor Changes

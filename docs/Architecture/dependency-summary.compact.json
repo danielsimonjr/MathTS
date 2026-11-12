@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1287, "e": 7016, "re": 3023 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1290, "e": 7020, "re": 3023 },
   "s": {
-    "loc": 218799,
+    "loc": 218979,
     "cls": 61,
     "int": 601,
-    "fn": 2363,
+    "fn": 2367,
     "tg": 172,
     "en": 0,
     "co": 1646,
     "toi": 644
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": { "rt": 1, "to": 0, "rtp": ["algebra→polynomial-canonical→algebra"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -577,8 +577,9 @@
       ]
     },
     "functions/cas": {
-      "f": 5,
+      "f": 7,
       "exp": [
+        "antiderivativeReciprocal",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -586,14 +587,15 @@
         "residueIntegral",
         "rothsteinTrager",
         "integrateLayer3",
+        "collapseIdenticalFactors",
+        "tryPolynomialCanonicalForm",
         "RAT_ZERO",
         "ratNormalize",
         "ratAdd",
         "ratSub",
         "ratMul",
         "ratDiv",
-        "ratFromBigint",
-        "surdFromRat"
+        "ratFromBigint"
       ],
       "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
@@ -1015,7 +1017,7 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "createCorr",
         "createCumSum",
@@ -1029,6 +1031,7 @@
         "createProd",
         "createQuantileSeq",
         "createStd",
+        "rejectMisusedIndexedSum",
         "createSum",
         "improveErrorMessage",
         "createVariance"
