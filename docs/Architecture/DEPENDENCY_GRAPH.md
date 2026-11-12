@@ -7294,7 +7294,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/size.ts` - Calculate the size of a matrix or scalar. Always returns an Array containing numbers.
+### `functions/src/matrix/size.ts` - Native `DenseMatrix` / `SparseMatrix` are not the factory Matrix type (no
 
 **Internal Dependencies:**
 
@@ -20730,7 +20730,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1308   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 223963 |
+| Total Lines of Code     | 224063 |
 | Total Exports           | 7155   |
 | Total Re-exports        | 3111   |
 | Total Classes           | 61     |

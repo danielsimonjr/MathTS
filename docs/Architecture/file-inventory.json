@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2313,
+  "totalFiles": 2314,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1282,
     "test-only": 0,
     "orphan": 0,
-    "test": 940,
+    "test": 941,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1308,
-    "tests": 940,
+    "tests": 941,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
-    "@danielsimonjr/mathts-compat": 21,
+    "@danielsimonjr/mathts-compat": 22,
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 57,
@@ -499,7 +499,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 504
+      "loc": 515
     },
     {
       "file": "compat/src/instance-api.ts",
@@ -570,6 +570,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "compat/tests/dogfood-g32b.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 78
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -877,7 +884,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 753
+      "loc": 781
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -968,7 +975,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3622
+      "loc": 3632
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -6435,7 +6442,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1109
+      "loc": 1117
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -7009,7 +7016,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 55
+      "loc": 95
     },
     {
       "file": "functions/src/matrix/slice-2d.ts",
@@ -8738,7 +8745,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 141
+      "loc": 144
     },
     {
       "file": "functions/src/type/unit/function/splitUnit.ts",

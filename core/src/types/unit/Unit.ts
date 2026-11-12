@@ -3324,7 +3324,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         let lastNotFound: unknown;
         for (const key of pending) {
           try {
-            created.set(key, Unit.createUnitSingle(key, obj[key]));
+            created.set(key, Unit.createUnitSingle(key, obj[key], options));
           } catch (ex) {
             if (ex instanceof UnitParseError && /not found\./.test(ex.message)) {
               stillPending.push(key);
@@ -3378,7 +3378,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *
      * @return
      */
-    Unit.createUnitSingle = function (name: string, obj?: unknown): UnitInstance {
+    Unit.createUnitSingle = function (
+      name: string,
+      obj?: unknown,
+      options?: CreateUnitOptions
+    ): UnitInstance {
       if (typeof obj === 'undefined' || obj === null) {
         obj = {};
       }
@@ -3387,12 +3391,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new TypeError("createUnitSingle expects first parameter to be of type 'string'");
       }
 
-      // Check collisions with existing units
-      if (hasOwnProperty(UNITS, name)) {
-        throw new Error('Cannot create unit "' + name + '": a unit with that name already exists');
-      }
-
-      // Name checks: an existing unit or alias is refused above, and `assertUnitNameIsValid`
+      // Name checks: an existing unit or alias is refused after the definition is parsed,
+      // unless `options.override` is set. `assertUnitNameIsValid`
       // below refuses anything that is not an identifier ('42', '%', 'a-b'). A clash with a
       // function name such as `abs` or `cos` is not detectable here: this table has no access
       // to the host's function registry, so a unit with such a name is accepted.
@@ -3455,6 +3455,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
         }
       } else if (definition && (definition as { type?: unknown }).type === 'Unit') {
         defUnit = (definition as UnitInstance).clone();
+      }
+
+      if (hasOwnProperty(UNITS, name)) {
+        if (options?.override) {
+          Unit.deleteUnit(name);
+        } else {
+          throw new Error(
+            'Cannot create unit "' + name + '": a unit with that name already exists'
+          );
+        }
       }
 
       aliases = aliases || [];
