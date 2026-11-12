@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2256,
+  "totalFiles": 2259,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1262,
+    "build-entry": 1264,
     "test-only": 0,
     "orphan": 0,
-    "test": 903,
+    "test": 904,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1288,
-    "tests": 903,
+    "src": 1290,
+    "tests": 904,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1016,
+    "@danielsimonjr/mathts-functions": 1019,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
@@ -751,7 +751,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 385
+      "loc": 421
     },
     {
       "file": "core/src/numeric/strides.ts",
@@ -1129,7 +1129,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 214
+      "loc": 221
     },
     {
       "file": "core/tests/switch.test.ts",
@@ -6575,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1012
+      "loc": 1013
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7968,7 +7968,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 136
+      "loc": 145
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -7989,7 +7989,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 90
+      "loc": 91
     },
     {
       "file": "functions/src/statistics/max.ts",
@@ -8010,7 +8010,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 164
+      "loc": 257
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8024,7 +8024,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 96
+      "loc": 97
+    },
+    {
+      "file": "functions/src/statistics/nan-reductions.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 17
+    },
+    {
+      "file": "functions/src/statistics/numeric-data.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 320
     },
     {
       "file": "functions/src/statistics/prod.ts",
@@ -8038,7 +8052,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 349
+      "loc": 356
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -8640,7 +8654,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1765
+      "loc": 2052
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9887,6 +9901,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 221
+    },
+    {
+      "file": "functions/tests/dogfood-g19-stats-nan-ddof.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 196
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -14562,7 +14583,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 292
+      "loc": 296
     },
     {
       "file": "statistics/tests/statistics.test.ts",

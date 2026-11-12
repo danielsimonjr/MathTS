@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1288,
+    "totalFiles": 1290,
     "totalModules": 82,
-    "totalExports": 7041
+    "totalExports": 7063
   },
   "entryPoints": [
     {
@@ -10332,6 +10332,11 @@
             "reExport": true
           },
           {
+            "file": "./statistics/nan-reductions.js",
+            "imports": ["nanmedian"],
+            "reExport": true
+          },
+          {
             "file": "./numeric-extra.js",
             "imports": [
               "clamp",
@@ -11775,6 +11780,7 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "nanmedian",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -12520,6 +12526,7 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "nanmedian",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -21695,6 +21702,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["typedArrayPairToNumbers"]
           }
         ],
         "workspaceDependencies": [
@@ -21790,10 +21801,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21805,6 +21812,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["flattenForStatistics", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
@@ -21892,10 +21903,6 @@
             "imports": ["containsCollections"]
           },
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21911,6 +21918,18 @@
           {
             "file": "../utils/typed-impl.js",
             "imports": ["findTypedImpl"]
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": [
+              "flattenForStatistics",
+              "finiteNumbers",
+              "isFloatTyped",
+              "numberGrid",
+              "reduceNumericMatrix",
+              "FloatTyped",
+              "StatReduceOptions"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -21963,10 +21982,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21974,11 +21989,75 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["flattenForStatistics", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["createMode"],
         "constants": ["createMode"]
+      },
+      "functions/src/statistics/nan-reductions.ts": {
+        "description": "nan-reductions module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/index.js",
+            "imports": ["median"]
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["finiteNumbers", "reduceNumericMatrix", "NumericVectorInput"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["nanmedian"],
+        "functions": ["nanmedian"]
+      },
+      "functions/src/statistics/numeric-data.ts": {
+        "description": "Shared numeric-vector handling for statistics reductions (G19).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isFloatTyped",
+          "copyToNumberArray",
+          "flattenForStatistics",
+          "finiteNumbers",
+          "isVarianceNorm",
+          "parseStatOptions",
+          "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
+          "isConstantArrayLike",
+          "typedArrayPairToNumbers"
+        ],
+        "functions": [
+          "isFloatTyped",
+          "copyToNumberArray",
+          "flattenForStatistics",
+          "finiteNumbers",
+          "isVarianceNorm",
+          "parseStatOptions",
+          "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
+          "isConstantArrayLike",
+          "typedArrayPairToNumbers"
+        ]
       },
       "functions/src/statistics/prod.ts": {
         "description": "Compute the product of a matrix or a list with values.",
@@ -22037,6 +22116,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["isFloatTyped", "copyToNumberArray", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
@@ -24613,6 +24696,20 @@
             "imports": ["f64Unary"]
           },
           {
+            "file": "../statistics/numeric-data.js",
+            "imports": [
+              "finiteNumbers",
+              "flattenNumeric",
+              "normalizationFromSecondArg",
+              "normalizationFromStringAndOptions",
+              "numberGrid",
+              "reduceNumericMatrix",
+              "StatReduceOptions",
+              "NumericVectorInput",
+              "VarianceRequest"
+            ]
+          },
+          {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
@@ -24724,6 +24821,9 @@
           "std",
           "dot",
           "typedArithmetic",
+          "nanmean",
+          "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -24734,6 +24834,9 @@
           "getComputePool"
         ],
         "functions": [
+          "nanmean",
+          "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -38591,7 +38694,11 @@
               "sem",
               "zscore",
               "cov",
-              "corrcoef"
+              "corrcoef",
+              "nanmean",
+              "nanmedian",
+              "nanvariance",
+              "nanstd"
             ]
           },
           {
@@ -38868,6 +38975,10 @@
           "zscore",
           "cov",
           "corrcoef",
+          "nanmean",
+          "nanmedian",
+          "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -39067,6 +39178,10 @@
           "zscore",
           "cov",
           "corrcoef",
+          "nanmean",
+          "nanmedian",
+          "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -45227,6 +45342,8 @@
           "functions/src/statistics/median.ts",
           "functions/src/statistics/min.ts",
           "functions/src/statistics/mode.ts",
+          "functions/src/statistics/nan-reductions.ts",
+          "functions/src/statistics/numeric-data.ts",
           "functions/src/statistics/prod.ts",
           "functions/src/statistics/quantileSeq.ts",
           "functions/src/statistics/std.ts",
@@ -46165,17 +46282,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1288,
+    "totalTypeScriptFiles": 1290,
     "totalModules": 82,
-    "totalLinesOfCode": 220088,
-    "totalExports": 7041,
+    "totalLinesOfCode": 220864,
+    "totalExports": 7063,
     "totalClasses": 61,
     "totalInterfaces": 602,
-    "totalFunctions": 2376,
-    "totalTypeGuards": 172,
+    "totalFunctions": 2393,
+    "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1647,
-    "totalReExports": 3032,
+    "totalReExports": 3037,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,

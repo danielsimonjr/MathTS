@@ -5587,6 +5587,18 @@
       "nakagamiPDF": {
         "kind": "function"
       },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanstd": {
+        "kind": "function"
+      },
+      "nanvariance": {
+        "kind": "function"
+      },
       "narayana": {
         "kind": "function"
       },

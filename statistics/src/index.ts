@@ -45,6 +45,10 @@ export {
   zscore,
   cov,
   corrcoef,
+  nanmean,
+  nanmedian,
+  nanvariance,
+  nanstd,
 } from '@danielsimonjr/mathts-functions';
 
 // ---------------------------------------------------------------------------
