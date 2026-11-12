@@ -292,10 +292,10 @@ const assumptions: Map<string, Set<string>> = new Map();
  * antiderivative. For definite integrals (a, b provided), falls back to
  * numerical integration using Simpson's rule.
  *
- * @param expr - Expression string to integrate
- * @param varName - Variable of integration
- * @param a - Optional lower bound (definite integral)
- * @param b - Optional upper bound (definite integral)
+ * @param expr - Expression string or integrand function (see overload)
+ * @param varNameOrA - Integration variable (symbolic) or lower bound (numeric `integrate(fn, a, b)`)
+ * @param a - Lower bound for definite integral, or upper bound when first argument is a function
+ * @param b - Upper bound for definite integral
  * @returns Symbolic antiderivative string or numerical result
  *
  * @example
