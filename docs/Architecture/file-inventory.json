@@ -14191,7 +14191,7 @@
       "package": "@danielsimonjr/mathts-parser",
       "area": "tests",
       "disposition": "test",
-      "loc": 62
+      "loc": 63
     },
     {
       "file": "parser/tests/parser.test.ts",
