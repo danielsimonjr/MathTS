@@ -5049,7 +5049,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 95
     },
     {
       "file": "expression/tests/errorTransform.test.ts",

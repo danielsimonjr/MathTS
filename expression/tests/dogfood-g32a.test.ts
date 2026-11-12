@@ -85,7 +85,10 @@ describe('dogfood G32a regressions', () => {
   });
 
   it('#818 object literal skips forbidden keys', () => {
-    const out = evaluate('{ secret: 42, constructor: 1, __proto__: 2 }') as Record<string, unknown>;
+    const out = evaluate('{ secret: 42, constructor: 1, __proto__: 2 }') as unknown as Record<
+      string,
+      unknown
+    >;
     expect(out).toEqual({ secret: 42 });
   });
 });
