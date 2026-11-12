@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "totalFiles": 2240,
   "byDisposition": {
     "reachable": 26,
@@ -14541,7 +14541,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 99
+      "loc": 101
     },
     {
       "file": "tensor/src/operations/gather.ts",
@@ -14632,7 +14632,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 147
     },
     {
       "file": "tensor/src/operations/svd.ts",
@@ -14646,7 +14646,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1020
+      "loc": 1022
     },
     {
       "file": "tensor/tests/audit-ops.test.ts",
@@ -14681,7 +14681,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 202
     },
     {
       "file": "tensor/tests/Index.test.ts",

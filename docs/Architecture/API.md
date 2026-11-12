@@ -391,7 +391,7 @@ time, not match time), `toString`. Factory `idx(dim, name?, opts?)`.
 `readonly shape`, `readonly data: Float64Array`, `readonly axisLabels?: Index[]`.
 `constructor(shape, data, axisLabels?)`.
 
-- **Statics**: `sizeOf(shape)`, `rowMajorStrides(shape)`, `fromNested(data, shape)`,
+- **Statics**: `sizeOf(shape)`, `rowMajorStrides(shape)`, `fromNested(data, shape?)`,
   `identity(n)`, `fromDenseMatrix(m)`, `broadcastShape(a, b)` (NumPy right-align),
   `einsum(spec, ...operands)`.
 - **Element/data ops**: `add`/`sub`/`mul(other: Tensor|number)`, `scale(k)`, `normInf`,

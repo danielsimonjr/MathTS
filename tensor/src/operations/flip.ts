@@ -41,9 +41,6 @@ export function flip(t: Tensor, axes: number | readonly number[]): Tensor {
 
   let axisList: readonly number[];
   if (typeof axes === 'number') {
-    if (!Number.isInteger(axes)) {
-      throw new TypeError('flip: axes must be a number or an array of integers');
-    }
     axisList = [axes];
   } else if (
     axes != null &&
@@ -51,12 +48,17 @@ export function flip(t: Tensor, axes: number | readonly number[]): Tensor {
   ) {
     axisList = axes;
   } else {
-    throw new TypeError('flip: axes must be a number or an array of integers');
+    throw new TypeError('flip: axes must be an array of integers');
   }
 
-  // Normalise and deduplicate axes.
+  // Normalise and deduplicate axes. A non-integer must not fall through:
+  // `1.5 < 0` is false and `1.5 >= rank` is false for rank > 1, so the old
+  // range check stored 1.5 and then never matched an integer axis index.
   const normAxesSet = new Set<number>();
   for (const ax of axisList) {
+    if (typeof ax !== 'number' || !Number.isInteger(ax)) {
+      throw new TypeError('flip: axes must be an array of integers');
+    }
     const a = ax < 0 ? rank + ax : ax;
     if (a < 0 || a >= rank) {
       throw new Error(`flip: axis ${ax} is out of range for rank ${rank}`);

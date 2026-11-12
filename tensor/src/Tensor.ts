@@ -42,8 +42,10 @@ export interface EinsumSpec {
 /**
  * Dense N-dimensional array of float64 values in row-major (C) order.
  * The constructor keeps a reference to `data` and does not copy it.
- * The constructor throws when `data.length` is not the product of `shape`,
- * or when `axisLabels` is given and its length is not the rank.
+ * `data` must already be a `Float64Array` (`TypeError: data must be a Float64Array`
+ * otherwise — Float32Array, Int32Array, plain arrays, and array-likes are rejected,
+ * not converted). The constructor throws when `data.length` is not the product of
+ * `shape`, or when `axisLabels` is given and its length is not the rank.
  */
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
