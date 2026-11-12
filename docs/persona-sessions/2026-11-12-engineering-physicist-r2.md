@@ -23,33 +23,33 @@ GitHub comments/labels 403 for this token; label lines are in each issue body.
 
 ## Round-1 re-check (#822–#836)
 
-| Issue | Fixed? | Notes |
-| ----- | ------ | ----- |
-| #822 | yes | CFL violation throws; optional `allowUnstable` |
-| #823 | yes | Complex × Unit |
-| #824 | yes | SHO t=100; long orbits need `maxIter` (documented error) |
-| #825 | yes | dB/dBm/Np; README documents `B` = byte |
-| #826 | yes | `DimensionMismatchError`; `Unit.add` |
-| #827 | yes | `.uncertainty` on constants |
-| #828 | **no** | `evaluate('G')` still placeholder Unit → **#908** |
-| #829 | yes | No dev worker 404 in r2 harness |
-| #830 | yes | Strict TS consumer passes |
-| #831 | yes | Tensor cross/dot |
-| #832 | yes | `integrate` callable |
-| #833 | yes | BC validation |
-| #834 | yes | `sin(Unit deg)` |
-| #835 | partial | Headless: no adapter (not “has true, init false”) |
-| #836 | yes | `plot.update` for live SVG |
+| Issue | Fixed?  | Notes                                                    |
+| ----- | ------- | -------------------------------------------------------- |
+| #822  | yes     | CFL violation throws; optional `allowUnstable`           |
+| #823  | yes     | Complex × Unit                                           |
+| #824  | yes     | SHO t=100; long orbits need `maxIter` (documented error) |
+| #825  | yes     | dB/dBm/Np; README documents `B` = byte                   |
+| #826  | yes     | `DimensionMismatchError`; `Unit.add`                     |
+| #827  | yes     | `.uncertainty` on constants                              |
+| #828  | **no**  | `evaluate('G')` still placeholder Unit → **#908**        |
+| #829  | yes     | No dev worker 404 in r2 harness                          |
+| #830  | yes     | Strict TS consumer passes                                |
+| #831  | yes     | Tensor cross/dot                                         |
+| #832  | yes     | `integrate` callable                                     |
+| #833  | yes     | BC validation                                            |
+| #834  | yes     | `sin(Unit deg)`                                          |
+| #835  | partial | Headless: no adapter (not “has true, init false”)        |
+| #836  | yes     | `plot.update` for live SVG                               |
 
 ## Findings (round 2)
 
-| # | Sev | Issue | Title |
-| --- | --- | ----- | ----- |
-| 1 | P1 | [#908](https://github.com/danielsimonjr/MathTS/issues/908) | Regression: `evaluate("G")` still symbolic Unit (#828) |
-| 2 | P1 | [#909](https://github.com/danielsimonjr/MathTS/issues/909) | `evaluate("c")` / `evaluate("hbar")` unbound vs `physicsScope` |
-| 3 | P1 | [#910](https://github.com/danielsimonjr/MathTS/issues/910) | `propagateUncertainty` throws on Unit CODATA constants |
-| 4 | P2 | [#911](https://github.com/danielsimonjr/MathTS/issues/911) | `multiply(Unit, number[])` throws |
-| 5 | P1 | [#912](https://github.com/danielsimonjr/MathTS/issues/912) | Vite production build fails with `mathts-parallel` |
+| #   | Sev | Issue                                                      | Title                                                          |
+| --- | --- | ---------------------------------------------------------- | -------------------------------------------------------------- |
+| 1   | P1  | [#908](https://github.com/danielsimonjr/MathTS/issues/908) | Regression: `evaluate("G")` still symbolic Unit (#828)         |
+| 2   | P1  | [#909](https://github.com/danielsimonjr/MathTS/issues/909) | `evaluate("c")` / `evaluate("hbar")` unbound vs `physicsScope` |
+| 3   | P1  | [#910](https://github.com/danielsimonjr/MathTS/issues/910) | `propagateUncertainty` throws on Unit CODATA constants         |
+| 4   | P2  | [#911](https://github.com/danielsimonjr/MathTS/issues/911) | `multiply(Unit, number[])` throws                              |
+| 5   | P1  | [#912](https://github.com/danielsimonjr/MathTS/issues/912) | Vite production build fails with `mathts-parallel`             |
 
 Intended labels: `dogfood`, `bug|api|packaging`, `P0|P1|P2`, `persona:engineering-physicist`.
 
