@@ -6,7 +6,7 @@
  *   node tools/sync-readme-functions-stats.mjs          # rewrite markers
  *   node tools/sync-readme-functions-stats.mjs --check   # exit 1 when stale
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -58,7 +58,7 @@ const withTable = next.replace(
 );
 const refLine = `| [\`docs/reference/functions.md\`](./docs/reference/functions.md)                         | Full typed-function export reference (${exportTotal.toLocaleString('en-US')} exports) with Accel column |`;
 const finalText = withTable.replace(
-  /^\| \[\`docs\/reference\/functions\.md\`\].*exports\) with Accel column \|$/m,
+  /^\| \[`docs\/reference\/functions\.md`\].*exports\) with Accel column \|$/m,
   refLine
 );
 writeFileSync(README, finalText);

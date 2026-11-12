@@ -4,8 +4,8 @@
  * Fails when a static or literal dynamic import pulls an unresolved Node built-in.
  */
 import { buildSync } from 'esbuild';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { repoRoot } from './workspaces.mjs';
 
