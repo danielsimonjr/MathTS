@@ -626,8 +626,8 @@ export interface GammaDistNamedOptions {
  * SciPy uses **scale** where `scale = 1/rate`. For SciPy parity pass
  * `{ scale }` as the second argument, or `{ shape, scale }` alone.
  *
- * @param shape - Shape parameter (positive)
- * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` for SciPy scale
+ * @param shapeOrOptions - Shape (positive), or `{ shape, scale }` for SciPy-style construction
+ * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` when the first argument is a number
  * @returns Distribution object
  *
  * @example
