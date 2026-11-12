@@ -183,6 +183,13 @@ describe('sumSquaredDeviations', () => {
     expect(Number.isNaN(sumSquaredDeviations([1, 2, Infinity]))).toBe(true);
     expect(Number.isNaN(sumSquaredDeviations([Infinity, Infinity]))).toBe(true);
   });
+
+  it('shifts by the first sample so a 1e308 pedestal does not overflow a finite variance', () => {
+    expect(sumSquaredDeviations([1e308, 1e308, 1e308])).toBe(0);
+    // 1e150 is lost against 1e308; a representable gap overflows the sum of squares to Infinity.
+    expect(sumSquaredDeviations([1e308, 1e308, 1e308 + 1e150])).toBe(0);
+    expect(sumSquaredDeviations([1e308, 1e308, 1e307])).toBe(Infinity);
+  });
 });
 
 describe('neumaierCumsum', () => {

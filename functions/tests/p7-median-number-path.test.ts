@@ -22,7 +22,7 @@ describe('P7-7 median / partitionSelect number path', () => {
     expect(v).toBe(5);
   });
 
-  it('empty median throws', () => {
-    expect(() => median([])).toThrow(/empty/);
+  it('empty median returns NaN (NumPy/pandas empty policy)', () => {
+    expect(median([])).toBeNaN();
   });
 });
