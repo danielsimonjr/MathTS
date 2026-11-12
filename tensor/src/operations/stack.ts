@@ -37,9 +37,12 @@ export interface StackOpts {
  * Stack same-shape tensors along a new axis.
  *
  * @param tensors - Array of tensors, all with the same shape. Must be non-empty.
- * @param axis    - Position of the new axis in the output. Supports negative
- *                  indexing relative to the output rank. E.g. `axis=0` inserts
- *                  a new leading axis; `axis=-1` appends a new trailing axis.
+ * @param axis    - Position of the new axis in the output. Defaults to `0`
+ *                  (NumPy `np.stack`). Supports negative indexing relative to
+ *                  the output rank. E.g. `axis=0` inserts a new leading axis;
+ *                  `axis=-1` appends a new trailing axis. A non-integer throws.
+ *                  Inputs whose shapes differ throw — `stack` never returns a
+ *                  zero-filled tensor for a bad call.
  * @param opts    - Optional `newAxisLabel` for the inserted axis.
  * @returns A tensor of rank `inputRank + 1` with `shape[axis] === tensors.length`.
  *
@@ -50,9 +53,12 @@ export interface StackOpts {
  * // Stack two row-vectors [a, b, c] and [d, e, f] → 2×3 matrix:
  * const matrix = stack([v1, v2], 0);
  */
-export function stack(tensors: Tensor[], axis: number, opts?: StackOpts): Tensor {
+export function stack(tensors: Tensor[], axis = 0, opts?: StackOpts): Tensor {
   if (tensors.length === 0) {
     throw new Error('stack: tensors array must be non-empty');
+  }
+  if (!Number.isInteger(axis)) {
+    throw new TypeError('stack: axis must be an integer');
   }
 
   const first = tensors[0];

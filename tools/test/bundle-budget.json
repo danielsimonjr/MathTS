@@ -12,7 +12,7 @@
     "core/dist/internal.js": 222016,
     "matrix/dist/index.js": 195514,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
-    "tensor/dist/index.js": 75569,
+    "tensor/dist/index.js": 76572,
     "autograd/dist/index.js": 59159,
     "functions/dist/index.js": 1777450,
     "functions/dist/wasm/mathts-as.wasm": 62501,

@@ -20,8 +20,9 @@ import { Index } from '../named-index.js';
  * Reverse element order along the specified axes.
  *
  * @param t    - Input tensor of any rank.
- * @param axes - The axes to flip. Supports negative indexing. Duplicates are
- *               ignored. An empty array returns a copy of `t`.
+ * @param axes - The axes to flip (a single axis number or an array). Supports
+ *               negative indexing. Duplicates are ignored. An empty array
+ *               returns a copy of `t`.
  * @returns A new `Tensor` with the same shape as `t`, with axis labels
  *          preserved from `t`.
  *
@@ -34,13 +35,30 @@ import { Index } from '../named-index.js';
  * // Flip both axes simultaneously:
  * const rotated180 = flip(matrix, [0, 1]);
  */
-export function flip(t: Tensor, axes: readonly number[]): Tensor {
+export function flip(t: Tensor, axes: number | readonly number[]): Tensor {
   const rank = t.shape.length;
   const totalSize = t.shape.reduce((a, b) => a * b, 1);
 
-  // Normalise and deduplicate axes.
+  let axisList: readonly number[];
+  if (typeof axes === 'number') {
+    axisList = [axes];
+  } else if (
+    axes != null &&
+    typeof (axes as { [Symbol.iterator]?: unknown })[Symbol.iterator] === 'function'
+  ) {
+    axisList = axes;
+  } else {
+    throw new TypeError('flip: axes must be an array of integers');
+  }
+
+  // Normalise and deduplicate axes. A non-integer must not fall through:
+  // `1.5 < 0` is false and `1.5 >= rank` is false for rank > 1, so the old
+  // range check stored 1.5 and then never matched an integer axis index.
   const normAxesSet = new Set<number>();
-  for (const ax of axes) {
+  for (const ax of axisList) {
+    if (typeof ax !== 'number' || !Number.isInteger(ax)) {
+      throw new TypeError('flip: axes must be an array of integers');
+    }
     const a = ax < 0 ? rank + ax : ax;
     if (a < 0 || a >= rank) {
       throw new Error(`flip: axis ${ax} is out of range for rank ${rank}`);

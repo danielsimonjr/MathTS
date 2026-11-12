@@ -5741,6 +5741,8 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - arraySize
+            - validate
             - NestedArray
           subpath: internal
       exports:
@@ -43631,7 +43633,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218759
+  totalLinesOfCode: 218810
   totalExports: 7027
   totalClasses: 61
   totalInterfaces: 601
