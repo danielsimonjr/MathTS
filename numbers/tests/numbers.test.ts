@@ -51,6 +51,7 @@ const EXPECTED_RUNTIME_EXPORTS = [
   'BIGNUMBER_TEN',
   'BIGNUMBER_ZERO',
   'BigNumber',
+  'bignumber',
   'COMPLEX_NEG_ONE',
   'COMPLEX_ONE',
   'COMPLEX_ZERO',

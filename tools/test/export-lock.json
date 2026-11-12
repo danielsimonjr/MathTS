@@ -583,6 +583,9 @@
       "addScalar": {
         "kind": "function"
       },
+      "bignumber": {
+        "kind": "function"
+      },
       "binaryExactScale": {
         "kind": "function"
       },
@@ -8002,6 +8005,9 @@
       },
       "RoundingMode": {
         "kind": "type"
+      },
+      "bignumber": {
+        "kind": "function"
       },
       "isBigNumber": {
         "kind": "function"
