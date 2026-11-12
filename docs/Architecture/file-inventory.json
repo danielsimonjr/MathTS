@@ -702,7 +702,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 278
+      "loc": 273
     },
     {
       "file": "core/src/internal.ts",
@@ -6323,7 +6323,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1757
+      "loc": 1754
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
