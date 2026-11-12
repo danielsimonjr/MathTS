@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
 import { DenseMatrix, matMul, svd } from '../src/index.js';
 import { Matrix as MLMatrix, SVD as MLSvd } from 'ml-matrix';
 import { nodeBinary } from './helpers/node-binary.js';
@@ -12,7 +12,7 @@ import { nodeBinary } from './helpers/node-binary.js';
 describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
   it('n=1000 ABBA median ≤ 1.15× ml-matrix mmul (isolated Node gate)', () => {
     const gate = fileURLToPath(new URL('./helpers/gemm-perf-gate.mjs', import.meta.url));
-    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const raw = execIsolatedPerfGate(nodeBinary(), gate);
     const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
     expect(checksum).toBeGreaterThan(0);
     expect(ratio).toBeLessThan(1.15);

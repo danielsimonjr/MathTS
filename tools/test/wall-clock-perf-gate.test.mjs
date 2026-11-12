@@ -4,7 +4,7 @@
  *   node --test tools/test/wall-clock-perf-gate.test.mjs
  */
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execIsolatedPerfGate, isolatedPerfGateChildEnv } from './perf-gate-spawn.mjs';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -81,6 +81,28 @@ describe('wall-clock-perf-gate statistics', () => {
   test('measuredCandidateInjectionFactor is exact for uniform scale', () => {
     assert.equal(measuredCandidateInjectionFactor([30, 60], [10, 20]), 3);
   });
+
+  test('isolatedPerfGateChildEnv strips coverage and vitest worker state', () => {
+    process.env.NODE_V8_COVERAGE = '/tmp/cov';
+    process.env.NODE_V8_COVERAGE_DIR = '/tmp/cov-dir';
+    process.env.VITEST = 'true';
+    process.env.VITEST_WORKER_ID = '7';
+    process.env.UNRELATED = 'keep';
+    try {
+      const env = isolatedPerfGateChildEnv();
+      assert.equal(env.NODE_V8_COVERAGE, undefined);
+      assert.equal(env.NODE_V8_COVERAGE_DIR, undefined);
+      assert.equal(env.VITEST, undefined);
+      assert.equal(env.VITEST_WORKER_ID, undefined);
+      assert.equal(env.UNRELATED, 'keep');
+    } finally {
+      delete process.env.NODE_V8_COVERAGE;
+      delete process.env.NODE_V8_COVERAGE_DIR;
+      delete process.env.VITEST;
+      delete process.env.VITEST_WORKER_ID;
+      delete process.env.UNRELATED;
+    }
+  });
 });
 
 const G26_GATES = [
@@ -120,11 +142,10 @@ describe('G26 isolated gates fail under injected 3× candidate slowdown', () => 
         0,
         `built dist required for ${gate.name}: ${missing.join(', ')}`
       );
-      const line = execFileSync(process.execPath, [scriptPath], {
+      const line = execIsolatedPerfGate(process.execPath, scriptPath, {
         cwd: repoRoot,
-        encoding: 'utf8',
-        env: { ...process.env, PERF_GATE_CANDIDATE_TIME_SCALE: '3' },
-      }).trim();
+        extraEnv: { PERF_GATE_CANDIDATE_TIME_SCALE: '3' },
+      });
       const payload = JSON.parse(line);
       const { ratio, candidateInjectionFactor } = payload;
       assert.ok(Number.isFinite(ratio), `${gate.name} ratio ${ratio}`);

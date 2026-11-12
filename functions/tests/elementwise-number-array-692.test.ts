@@ -1,8 +1,8 @@
 /** Fixes #692 — unary element-wise ops share one Array | Matrix dispatch. */
 
 import { describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
 import { nodeBinary } from './helpers/node-binary.js';
 import { BigNumber, Complex, Fraction, Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
@@ -140,7 +140,7 @@ describe('#692 elementwise sin on number[]', () => {
   });
 
   it('sin(Float64Array 1e6) within 1.2× a Math.sin loop (isolated Node gate)', () => {
-    const line = execFileSync(nodeBinary(), [PERF_GATE], { encoding: 'utf8' }).trim();
+    const line = execIsolatedPerfGate(nodeBinary(), PERF_GATE);
     const { ratio, loopMs, sinMs, gateWouldPass } = JSON.parse(line) as {
       ratio: number;
       loopMs: number;
