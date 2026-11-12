@@ -48,6 +48,7 @@ export {
   nanmean,
   nanmedian,
   nanvariance,
+  nanstd,
 } from '@danielsimonjr/mathts-functions';
 
 // ---------------------------------------------------------------------------

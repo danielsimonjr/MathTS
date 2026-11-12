@@ -744,7 +744,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 385
+      "loc": 421
     },
     {
       "file": "core/src/numeric/strides.ts",
@@ -1122,7 +1122,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 214
+      "loc": 221
     },
     {
       "file": "core/tests/switch.test.ts",
@@ -8003,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 193
+      "loc": 257
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8024,14 +8024,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 10
+      "loc": 17
     },
     {
       "file": "functions/src/statistics/numeric-data.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 135
+      "loc": 320
     },
     {
       "file": "functions/src/statistics/prod.ts",
@@ -8647,7 +8647,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1825
+      "loc": 2052
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9893,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 94
+      "loc": 196
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -14534,7 +14534,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 295
+      "loc": 296
     },
     {
       "file": "statistics/tests/statistics.test.ts",

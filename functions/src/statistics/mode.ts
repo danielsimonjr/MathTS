@@ -49,7 +49,7 @@ export const createMode = /* #__PURE__ */ factory(
       'Array | Matrix': _mode,
       'Float64Array | Float32Array': _mode,
 
-      '...': function (args: unknown[]): unknown[] {
+      '...': function (args: unknown[]): unknown {
         return _mode(args);
       },
     });
@@ -60,11 +60,11 @@ export const createMode = /* #__PURE__ */ factory(
      * @return {Array} mode
      * @private
      */
-    function _mode(values: unknown[] | MatrixType | FloatTyped): unknown[] {
+    function _mode(values: unknown[] | MatrixType | FloatTyped): unknown {
       const flat = flattenForStatistics(values);
       const num = flat.length;
       if (num === 0) {
-        return [];
+        return NaN;
       }
 
       const count: Record<string, number> = {};

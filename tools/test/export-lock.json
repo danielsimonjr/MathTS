@@ -5578,6 +5578,9 @@
       "nanmedian": {
         "kind": "function"
       },
+      "nanstd": {
+        "kind": "function"
+      },
       "nanvariance": {
         "kind": "function"
       },
@@ -9042,6 +9045,9 @@
         "kind": "function"
       },
       "nanmedian": {
+        "kind": "function"
+      },
+      "nanstd": {
         "kind": "function"
       },
       "nanvariance": {

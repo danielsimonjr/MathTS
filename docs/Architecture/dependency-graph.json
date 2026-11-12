@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1289,
     "totalModules": 82,
-    "totalExports": 7031
+    "totalExports": 7038
   },
   "entryPoints": [
     {
@@ -21894,6 +21894,8 @@
               "flattenForStatistics",
               "finiteNumbers",
               "isFloatTyped",
+              "numberGrid",
+              "reduceNumericMatrix",
               "FloatTyped",
               "StatReduceOptions"
             ]
@@ -21977,7 +21979,7 @@
           },
           {
             "file": "./numeric-data.js",
-            "imports": ["finiteNumbers", "NumericVectorInput"]
+            "imports": ["finiteNumbers", "reduceNumericMatrix", "NumericVectorInput"]
           }
         ],
         "workspaceDependencies": [],
@@ -22000,8 +22002,13 @@
           "copyToNumberArray",
           "flattenForStatistics",
           "finiteNumbers",
+          "isVarianceNorm",
           "parseStatOptions",
           "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
           "isConstantArrayLike",
           "typedArrayPairToNumbers"
         ],
@@ -22010,8 +22017,13 @@
           "copyToNumberArray",
           "flattenForStatistics",
           "finiteNumbers",
+          "isVarianceNorm",
           "parseStatOptions",
           "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
           "isConstantArrayLike",
           "typedArrayPairToNumbers"
         ]
@@ -24656,10 +24668,14 @@
             "file": "../statistics/numeric-data.js",
             "imports": [
               "finiteNumbers",
-              "isConstantArrayLike",
+              "flattenNumeric",
               "normalizationFromSecondArg",
+              "normalizationFromStringAndOptions",
+              "numberGrid",
+              "reduceNumericMatrix",
               "StatReduceOptions",
-              "NumericVectorInput"
+              "NumericVectorInput",
+              "VarianceRequest"
             ]
           },
           {
@@ -24776,6 +24792,7 @@
           "typedArithmetic",
           "nanmean",
           "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -24788,6 +24805,7 @@
         "functions": [
           "nanmean",
           "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -38648,7 +38666,8 @@
               "corrcoef",
               "nanmean",
               "nanmedian",
-              "nanvariance"
+              "nanvariance",
+              "nanstd"
             ]
           },
           {
@@ -38928,6 +38947,7 @@
           "nanmean",
           "nanmedian",
           "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -39130,6 +39150,7 @@
           "nanmean",
           "nanmedian",
           "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -46169,15 +46190,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1289,
     "totalModules": 82,
-    "totalLinesOfCode": 219055,
-    "totalExports": 7031,
+    "totalLinesOfCode": 219575,
+    "totalExports": 7038,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2374,
-    "totalTypeGuards": 174,
+    "totalFunctions": 2380,
+    "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1646,
-    "totalReExports": 3027,
+    "totalReExports": 3028,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

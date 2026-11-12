@@ -21,14 +21,14 @@ npm install @danielsimonjr/mathts-statistics
 
 ## Conventions (NumPy / pandas)
 
-- **`variance` / `std` / `cov` and `ddof`:** pass `{ ddof: 0 }` for population variance (divide by `n`) or `{ ddof: 1 }` for sample variance (divide by `n − 1`, the default). The mathjs strings `'uncorrected' | 'unbiased' | 'biased'` remain accepted on `variance` and `std`.
-- **Missing data:** `mean(x, { skipNaN: true })` omits non-finite values. Convenience helpers: `nanmean`, `nanmedian`, `nanvariance` (default sample `ddof=1`).
-- **Empty input:** `mean`, `median`, `variance`, `std`, and `mad` return `NaN` (no throw). `mode([])` returns `[]`.
+- **`variance` / `std` / `cov` and `ddof`:** `{ ddof: k }` divides by `n - k` (NumPy). `k` is any non-negative integer: `0` is population, `1` is sample (the default), `2` divides by `n - 2`. When `k >= n` the result is `NaN`. The mathjs strings `'uncorrected' | 'unbiased' | 'biased'` remain accepted. Passing a string and `{ ddof }` that name different divisors throws `TypeError`. The string `'unbiased'` on a single finite value stays mathjs's `0`; `{ ddof: 1 }` on that input is `NaN`.
+- **Missing data:** `mean` / `median` / `variance` / `std` propagate `NaN` by default. `{ skipNaN: true }` or `{ skipna: true }` omits `NaN` and keeps `±Infinity` (`numpy.nanmean`). The same option works with a dimension: `mean(A, dim, { skipna: true })`. Helpers: `nanmean`, `nanmedian`, `nanvariance`, `nanstd` (default sample `ddof=1`). An all-NaN input is `NaN`.
+- **Empty input:** `mean`, `median`, `mode`, `variance`, and `std` return `NaN` (no throw). `mode` of a non-empty sample is still an array of modes.
 
 ## What's included
 
 - **Descriptive statistics** — `mean`, `median`, `mode`, `variance`, `std`, `nanmean`, `nanmedian`,
-  `nanvariance`, `quantileSeq`, `mad` (median absolute deviation), `iqr`, `sem`, `zscore`, `moment`,
+  `nanvariance`, `nanstd`, `quantileSeq`, `mad` (median absolute deviation), `iqr`, `sem`, `zscore`, `moment`,
   `skewness`, `kurtosis`, `gmean`,
   `hmean`, `cov`, `corr`, `corrcoef`, `rankdata`, `ptp`, `trimmedMean`, `variation`, `describe`,
   `logsumexp`, `softmax`, `detrend`, `movingAverage`, `ewma`, `acf`, and the correlation helpers

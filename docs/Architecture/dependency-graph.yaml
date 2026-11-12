@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1289
   totalModules: 82
-  totalExports: 7031
+  totalExports: 7038
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -20672,6 +20672,8 @@ modules:
             - flattenForStatistics
             - finiteNumbers
             - isFloatTyped
+            - numberGrid
+            - reduceNumericMatrix
             - FloatTyped
             - StatReduceOptions
       workspaceDependencies: []
@@ -20745,6 +20747,7 @@ modules:
         - file: ./numeric-data.js
           imports:
             - finiteNumbers
+            - reduceNumericMatrix
             - NumericVectorInput
       workspaceDependencies: []
       exports:
@@ -20765,8 +20768,13 @@ modules:
         - copyToNumberArray
         - flattenForStatistics
         - finiteNumbers
+        - isVarianceNorm
         - parseStatOptions
         - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
         - isConstantArrayLike
         - typedArrayPairToNumbers
       functions:
@@ -20774,8 +20782,13 @@ modules:
         - copyToNumberArray
         - flattenForStatistics
         - finiteNumbers
+        - isVarianceNorm
         - parseStatOptions
         - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
         - isConstantArrayLike
         - typedArrayPairToNumbers
     functions/src/statistics/prod.ts:
@@ -23142,10 +23155,14 @@ modules:
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
-            - isConstantArrayLike
+            - flattenNumeric
             - normalizationFromSecondArg
+            - normalizationFromStringAndOptions
+            - numberGrid
+            - reduceNumericMatrix
             - StatReduceOptions
             - NumericVectorInput
+            - VarianceRequest
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23257,6 +23274,7 @@ modules:
         - typedArithmetic
         - nanmean
         - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -23268,6 +23286,7 @@ modules:
       functions:
         - nanmean
         - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -36555,6 +36574,7 @@ modules:
             - nanmean
             - nanmedian
             - nanvariance
+            - nanstd
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -36798,6 +36818,7 @@ modules:
         - nanmean
         - nanmedian
         - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -36999,6 +37020,7 @@ modules:
         - nanmean
         - nanmedian
         - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -43689,15 +43711,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1289
   totalModules: 82
-  totalLinesOfCode: 219055
-  totalExports: 7031
+  totalLinesOfCode: 219575
+  totalExports: 7038
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2374
-  totalTypeGuards: 174
+  totalFunctions: 2380
+  totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1646
-  totalReExports: 3027
+  totalReExports: 3028
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
