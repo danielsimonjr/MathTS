@@ -365,19 +365,18 @@ describe('MathJSSparseMatrix', () => {
   });
 
   describe('static _forEachRow', () => {
-    it('iterates entries in a given row', () => {
+    it('walks one CSC column as (row, value), matching mathjs lup', () => {
       // Matrix: [[1, 2, 3], [4, 5, 6]]
       const values = [1, 4, 2, 5, 3, 6];
       const index = [0, 1, 0, 1, 0, 1];
       const ptr = [0, 2, 4, 6];
-      const row0: [number, number][] = [];
-      MathJSSparseMatrix._forEachRow(0, values, index, ptr, (col, val) => {
-        row0.push([col, val as number]);
+      const col0: [number, number][] = [];
+      MathJSSparseMatrix._forEachRow(0, values, index, ptr, (row, val) => {
+        col0.push([row, val as number]);
       });
-      expect(row0).toEqual([
+      expect(col0).toEqual([
         [0, 1],
-        [1, 2],
-        [2, 3],
+        [1, 4],
       ]);
     });
   });
