@@ -16,15 +16,15 @@ Re-evaluate MathTS for a latency-sensitive Node and browser product after the A-
 
 Published versions exercised:
 
-| package | version |
-|---------|---------|
-| functions | 0.85.0 |
-| matrix | 0.10.1 |
-| core | 0.27.0 |
-| linalg | 0.2.6 |
-| tensor | 0.4.0 |
-| parallel | 0.10.1 |
-| expression | 0.13.0 |
+| package             | version         |
+| ------------------- | --------------- |
+| functions           | 0.85.0          |
+| matrix              | 0.10.1          |
+| core                | 0.27.0          |
+| linalg              | 0.2.6           |
+| tensor              | 0.4.0           |
+| parallel            | 0.10.1          |
+| expression          | 0.13.0          |
 | signal / statistics | 0.1.87 / 0.4.15 |
 
 ## What I tried, in order
@@ -38,19 +38,19 @@ Published versions exercised:
 
 ## Round-1 re-check
 
-| Issue | Title (short) | Fixed? |
-|------:|---------------|--------|
-| 704 | `svd(DenseMatrix)` silent empty | **yes** — rank>0, non-empty `S` |
-| 705 | `lu(number[][])` throws | **yes** |
-| 706 | `fft` rejects Float64Array | **yes** — `fft` + `parallelFFT` accept typed arrays |
-| 707 | Named `{evaluate}` bundle ~1.13 MB | **partial / no** — subpath exists but still ~1.18 MB ([#930](https://github.com/danielsimonjr/MathTS/issues/930)) |
-| 708 | Browser esbuild neutral (Node builtins) | **no** — workerpool `child_process`/`worker_threads`/`os` ([#893](https://github.com/danielsimonjr/MathTS/issues/893) open; comment blocked) |
-| 709 | `ComputePool.matmul` arity error dumps MB JSON | **yes** — short error |
-| 710 | `ComputePool.sin` parallelized false at 1e6 | **no** — same behavior ([#931](https://github.com/danielsimonjr/MathTS/issues/931)) |
-| 711 | `loadWasm()` does not speed `sin` | **yes (marginal)** — ~1.2–1.3× after load on n=1e5 |
-| 712 | `sort`/`median` cliffs | **yes** — sort ≈ native sort; median 36 ms vs 118 ms r1 |
-| 692 | `sin` rejects `number[]` | **yes** |
-| 693 | `DenseMatrix.multiply` slower than ml-matrix | **yes** — 1024: **457 ms vs 689 ms** (MathTS faster) |
+| Issue | Title (short)                                  | Fixed?                                                                                                                                       |
+| ----: | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+|   704 | `svd(DenseMatrix)` silent empty                | **yes** — rank>0, non-empty `S`                                                                                                              |
+|   705 | `lu(number[][])` throws                        | **yes**                                                                                                                                      |
+|   706 | `fft` rejects Float64Array                     | **yes** — `fft` + `parallelFFT` accept typed arrays                                                                                          |
+|   707 | Named `{evaluate}` bundle ~1.13 MB             | **partial / no** — subpath exists but still ~1.18 MB ([#930](https://github.com/danielsimonjr/MathTS/issues/930))                            |
+|   708 | Browser esbuild neutral (Node builtins)        | **no** — workerpool `child_process`/`worker_threads`/`os` ([#893](https://github.com/danielsimonjr/MathTS/issues/893) open; comment blocked) |
+|   709 | `ComputePool.matmul` arity error dumps MB JSON | **yes** — short error                                                                                                                        |
+|   710 | `ComputePool.sin` parallelized false at 1e6    | **no** — same behavior ([#931](https://github.com/danielsimonjr/MathTS/issues/931))                                                          |
+|   711 | `loadWasm()` does not speed `sin`              | **yes (marginal)** — ~1.2–1.3× after load on n=1e5                                                                                           |
+|   712 | `sort`/`median` cliffs                         | **yes** — sort ≈ native sort; median 36 ms vs 118 ms r1                                                                                      |
+|   692 | `sin` rejects `number[]`                       | **yes**                                                                                                                                      |
+|   693 | `DenseMatrix.multiply` slower than ml-matrix   | **yes** — 1024: **457 ms vs 689 ms** (MathTS faster)                                                                                         |
 
 ## Findings (round 2)
 
@@ -63,17 +63,17 @@ Published versions exercised:
 
 ## Headline table vs round 1 (median ms unless noted)
 
-| Workload | Round 2 (0.85.0) | Round 1 (0.84.0) | Notes |
-|----------|------------------:|-----------------:|-------|
-| Cold import functions | 429 | 396 | Still heavy |
-| Bundle `{evaluate}` bytes | 1,192,739 | 1,131,967 | Slight growth; expression **254,686** |
-| matmul 1024 DenseMatrix | **457** | 1216 | Major win vs ml-matrix 689 (was 671) |
-| lu+solve 500 | 60.2 | 49.5 | Still ≫ faster than mathjs 511 |
-| median 1e6 | **36.2** | 117.8 | Fixed tier |
-| sort 1e5 | **6.49** | 24.7 (r1 issue) | Near `Float64Array.sort` |
-| FFT 2^16 public `fft` | 8.50 | 8.59 | Still loses to fft.js 5.36 |
-| FFT 2^16 `parallelFFT` | **2.92** | 4.97 | Improved |
-| `svd(DenseMatrix)` 500 | 10474 | silent empty | Correct, slow ([#932](https://github.com/danielsimonjr/MathTS/issues/932)) |
+| Workload                  | Round 2 (0.85.0) | Round 1 (0.84.0) | Notes                                                                      |
+| ------------------------- | ---------------: | ---------------: | -------------------------------------------------------------------------- |
+| Cold import functions     |              429 |              396 | Still heavy                                                                |
+| Bundle `{evaluate}` bytes |        1,192,739 |        1,131,967 | Slight growth; expression **254,686**                                      |
+| matmul 1024 DenseMatrix   |          **457** |             1216 | Major win vs ml-matrix 689 (was 671)                                       |
+| lu+solve 500              |             60.2 |             49.5 | Still ≫ faster than mathjs 511                                             |
+| median 1e6                |         **36.2** |            117.8 | Fixed tier                                                                 |
+| sort 1e5                  |         **6.49** |  24.7 (r1 issue) | Near `Float64Array.sort`                                                   |
+| FFT 2^16 public `fft`     |             8.50 |             8.59 | Still loses to fft.js 5.36                                                 |
+| FFT 2^16 `parallelFFT`    |         **2.92** |             4.97 | Improved                                                                   |
+| `svd(DenseMatrix)` 500    |            10474 |     silent empty | Correct, slow ([#932](https://github.com/danielsimonjr/MathTS/issues/932)) |
 
 ## Doc cross-check
 

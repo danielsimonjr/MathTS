@@ -964,54 +964,37 @@
     "@danielsimonjr/mathts-core": {
       "version": "0.27.0",
       "diskBytes": 1384407,
-      "deps": [
-        "typed-function"
-      ]
+      "deps": ["typed-function"]
     },
     "@danielsimonjr/mathts-linalg": {
       "version": "0.2.6",
       "diskBytes": 9325,
-      "deps": [
-        "@danielsimonjr/mathts-core",
-        "@danielsimonjr/mathts-matrix"
-      ]
+      "deps": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-matrix"]
     },
     "@danielsimonjr/mathts-tensor": {
       "version": "0.4.0",
       "diskBytes": 418003,
-      "deps": [
-        "@danielsimonjr/mathts-core",
-        "@danielsimonjr/mathts-matrix"
-      ]
+      "deps": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-matrix"]
     },
     "@danielsimonjr/mathts-signal": {
       "version": "0.1.87",
       "diskBytes": 8485,
-      "deps": [
-        "@danielsimonjr/mathts-functions"
-      ]
+      "deps": ["@danielsimonjr/mathts-functions"]
     },
     "@danielsimonjr/mathts-statistics": {
       "version": "0.4.15",
       "diskBytes": 26986,
-      "deps": [
-        "@danielsimonjr/mathts-functions"
-      ]
+      "deps": ["@danielsimonjr/mathts-functions"]
     },
     "@danielsimonjr/mathts-parallel": {
       "version": "0.10.1",
       "diskBytes": 329447,
-      "deps": [
-        "@danielsimonjr/mathts-workerpool",
-        "@danielsimonjr/mathts-core"
-      ]
+      "deps": ["@danielsimonjr/mathts-workerpool", "@danielsimonjr/mathts-core"]
     },
     "@danielsimonjr/mathts-expression": {
       "version": "0.13.0",
       "diskBytes": 2599619,
-      "deps": [
-        "@danielsimonjr/mathts-core"
-      ]
+      "deps": ["@danielsimonjr/mathts-core"]
     },
     "mathjs": {
       "version": "15.2.0",
@@ -1031,10 +1014,7 @@
     "ml-matrix": {
       "version": "6.15.1",
       "diskBytes": 1113749,
-      "deps": [
-        "is-any-array",
-        "ml-array-rescale"
-      ]
+      "deps": ["is-any-array", "ml-array-rescale"]
     },
     "fft.js": {
       "version": "4.0.4",
@@ -1067,14 +1047,8 @@
     {
       "name": "svd.DenseMatrix.empty",
       "S": [
-        0.2988055227688024,
-        0.008993381665610603,
-        2.0198437060562683e-17,
-        1.5324656430058163e-17,
-        8.236706810210435e-18,
-        2.8196343207733628e-18,
-        1.8107868506588714e-18,
-        5.801428023886806e-19
+        0.2988055227688024, 0.008993381665610603, 2.0198437060562683e-17, 1.5324656430058163e-17,
+        8.236706810210435e-18, 2.8196343207733628e-18, 1.8107868506588714e-18, 5.801428023886806e-19
       ],
       "rank": 2,
       "silentEmpty": false
