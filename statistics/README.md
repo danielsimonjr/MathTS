@@ -41,7 +41,7 @@ npm install @danielsimonjr/mathts-statistics
   `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`,
   `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`), plus free CDF/quantile
   functions, `studentizedRangeCDF` / `studentizedRangeQuantile`, and `entropy` / `jsDivergence`.
-- **Hypothesis tests** — `studentTTest` (one/two-sample), `studentTTestPaired`, `anova`, `anova2`,
+- **Hypothesis tests** — `studentTTest` (one-sample vs `popmean` or two-sample Welch), `studentTTestPaired`, `anova`, `anova2`,
   `chiSquareTest`, `kolmogorovSmirnovTest` + `kolmogorovSmirnov2Test`, `mannWhitneyTest`,
   `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `fTest`,
   `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `tukeyHSD`, `andersonDarlingTest`,
