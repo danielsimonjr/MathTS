@@ -14,6 +14,25 @@ Task queueing and worker threads come from the npm alias `workerpool` → `npm:@
 npm install @danielsimonjr/mathts-workerpool
 ```
 
+## Example
+
+```ts
+import {
+  MathWorkerPool,
+  initializePool,
+  terminatePool,
+  getPoolStats,
+} from '@danielsimonjr/mathts-workerpool';
+
+const pool = await initializePool({ maxWorkers: 2 });
+const stats = getPoolStats();
+console.log(pool instanceof MathWorkerPool, stats.totalWorkers >= 0);
+await terminatePool();
+```
+
+For application parallel math, prefer `@danielsimonjr/mathts-parallel` (`ComputePool` wires the
+worker script for you).
+
 ## Main exports (`.`)
 
 | Name                                                                                       | Role                                                                    |
@@ -25,12 +44,13 @@ npm install @danielsimonjr/mathts-workerpool
 | `getCapabilities`, `canUseWasm`, `canUseSharedMemory`                                      | Environment probes                                                      |
 | `transferFloat64`, `transferTypedArray`, `transferArrayBuffer`, `createSharedFloat64Array` | Zero-copy transfers                                                     |
 | `getPoolStats`                                                                             | Pool statistics                                                         |
+| `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`                                        | Typed-array chunking helpers (also used by `mathts-parallel`)           |
+| `tensordotRange`, `matmulSequential`                                                       | Worker-side numeric kernels                                             |
 
 Subpath `@danielsimonjr/mathts-workerpool/worker` exposes the worker script bundle.
 
-`@internal` exports (for `@danielsimonjr/mathts-parallel`, not part of the stable public API):
-`chunkTyped`, `chunkPairTyped`, and `forEachMultiIndex` — slice-based typed-array chunking and
-row-major multi-index iteration shared with `dist/worker.js`.
+These low-level helpers are on the root export surface for integrators (`parallel` imports them).
+Treat them as stable public API; semver applies.
 
 ## License
 

@@ -15,6 +15,22 @@ package does not re-export `compile` / `evaluate`; it still depends on
 npm install @danielsimonjr/mathts-ast
 ```
 
+## Example
+
+```ts
+import { createConstantNode, createNode } from '@danielsimonjr/mathts-ast';
+
+// The `create*` exports are mathjs-style factories. Pass the dependencies they
+// declare; they return the node class. They are not called with child nodes.
+const Node = createNode({ mathWithTransform: {} });
+const ConstantNode = createConstantNode({
+  Node,
+  isBounded: (value: unknown) => typeof value === 'number' && Number.isFinite(value),
+});
+const two = new ConstantNode(2);
+console.log(two.toString()); // 2
+```
+
 ## What it exports
 
 The 16 AST node constructor factories: `createNode`, `createConstantNode`,

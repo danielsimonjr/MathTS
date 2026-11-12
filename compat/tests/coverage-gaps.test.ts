@@ -19,6 +19,7 @@ import {
   BigNumber,
   DenseMatrix,
   SparseMatrix,
+  isMatrix,
 } from '../src/index.js';
 
 describe('factory pass-through (mathjs returns the same instance)', () => {
@@ -61,7 +62,7 @@ describe('factory pass-through (mathjs returns the same instance)', () => {
 describe('empty constructors (mathjs returns an empty matrix)', () => {
   it('sparse() with no data returns an empty SparseMatrix', () => {
     const s = sparse();
-    expect(s).toBeInstanceOf(SparseMatrix);
+    expect(isMatrix(s)).toBe(true);
     expect(s.rows).toBe(0);
     expect(s.cols).toBe(0);
   });

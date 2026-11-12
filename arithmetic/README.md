@@ -14,9 +14,30 @@ Matrix where supported).
 npm install @danielsimonjr/mathts-arithmetic
 ```
 
+## Example
+
+```ts
+import { add, multiply, sqrt } from '@danielsimonjr/mathts-arithmetic';
+import { Complex } from '@danielsimonjr/mathts-numbers';
+
+add(1, 2); // 3
+multiply(new Complex(1, 2), new Complex(3, 4)); // -5 + 10i
+sqrt(9); // 3
+```
+
+For hyperbolic functions use `@danielsimonjr/mathts-trigonometry` (`sinh`, `cosh`, …). For
+`mean` / `variance` / `std` use `@danielsimonjr/mathts-statistics`. This package still
+re-exports those names on the `typedArithmetic` bundle for one-import scripts, but the domain
+packages above are the supported entry points.
+
 ## What it exports
 
-`add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot` (plus the `typedArithmetic` bundle).
+Core arithmetic: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`,
+`sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`,
+`log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`,
+`equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max` (plus the
+`typedArithmetic` bundle, which also carries adjacent reducers and hyperbolic names from the
+functions typed graph).
 
 ## License
 
