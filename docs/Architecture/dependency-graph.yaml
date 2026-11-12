@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1294
   totalModules: 82
-  totalExports: 7078
+  totalExports: 7086
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -23291,6 +23291,8 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+            - f64UnaryDispatched
+            - unaryCollection
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
@@ -23306,9 +23308,6 @@ modules:
           imports:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
-        - file: ../wasm/elementwise/wasm-bridge.js
-          imports:
-            - elementwiseUnaryDispatch
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
@@ -23319,7 +23318,10 @@ modules:
             - log10Real
             - log2Real
             - log1pReal
+            - staysRealLog
+            - staysRealLog1p
             - sqrtReal
+            - staysRealSqrt
             - powReal
             - nthRootReal
       workspaceDependencies:
@@ -23757,26 +23759,38 @@ modules:
             - Fraction
       exports:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
       functions:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
     functions/src/typed/complex.ts:
@@ -23958,12 +23972,26 @@ modules:
       description: Shared element-wise kernel for the synchronous typed Float64Array signatures.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
+      internalDependencies:
+        - file: ../wasm/elementwise/wasm-bridge.js
+          imports:
+            - elementwiseUnaryDispatch
+            - WasmElementwiseOp
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - f64Unary
+        - f64UnaryDispatched
+        - unaryCollection
+      interfaces:
+        - UnaryRealSpec
       functions:
         - f64Unary
+        - f64UnaryDispatched
+        - unaryCollection
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -25996,16 +26024,17 @@ modules:
           imports:
             - acscReal
             - asecReal
-            - isPredictableMode
+            - staysRealAbsAtLeastOne
+            - staysRealAcosh
+            - staysRealUnitInterval
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+            - f64UnaryDispatched
+            - unaryCollection
         - file: ./trig-angle-unit.js
           imports:
             - trigFromAngleUnit
-        - file: ../wasm/elementwise/wasm-bridge.js
-          imports:
-            - elementwiseUnaryDispatch
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -43918,11 +43947,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1294
   totalModules: 82
-  totalLinesOfCode: 221179
-  totalExports: 7078
+  totalLinesOfCode: 221403
+  totalExports: 7086
   totalClasses: 61
-  totalInterfaces: 602
-  totalFunctions: 2398
+  totalInterfaces: 603
+  totalFunctions: 2406
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1649

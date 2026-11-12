@@ -11,6 +11,10 @@
 - `solve([[A]], b)` throws with a message naming `linsolve` (was `[]`). Some `solve` results are symbolic strings instead of floats.
 - `sum(body, lo, hi, index)` misuse (e.g. `sum(i,1,3,i)` with imaginary unit `i`) throws; use `summation(expr, index, lo, hi)`.
 
+### Patch Changes
+
+- Synchronous unary element-wise functions (`sin`, `cos`, `tan`, `abs`, `exp`, `log`, …) accept flat `number[]` and return `number[]` with the same values as the `Float64Array` path (Fixes #692).
+
 ## 0.84.0
 
 ### Minor Changes
