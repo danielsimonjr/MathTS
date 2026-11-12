@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2266,
+  "totalFiles": 2268,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1265,
+    "build-entry": 1266,
     "test-only": 0,
     "orphan": 0,
-    "test": 910,
+    "test": 911,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1291,
-    "tests": 910,
+    "src": 1292,
+    "tests": 911,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1024,
+    "@danielsimonjr/mathts-functions": 1026,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 123,
@@ -7236,6 +7236,13 @@
       "loc": 154
     },
     {
+      "file": "functions/src/numeric/ode-step-limit.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 60
+    },
+    {
       "file": "functions/src/numeric/open-root-finders.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7282,7 +7289,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1823
+      "loc": 1936
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -8885,7 +8892,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2308
+      "loc": 2353
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9924,6 +9931,13 @@
       "loc": 140
     },
     {
+      "file": "functions/tests/dogfood-g25-ode.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 153
+    },
+    {
       "file": "functions/tests/dtw.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10327,7 +10341,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 98
+      "loc": 147
     },
     {
       "file": "functions/tests/gap-2026-11-matrix-reexports.test.ts",
@@ -11902,7 +11916,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 65
+      "loc": 69
     },
     {
       "file": "functions/tests/solveode-stiff-driver-pin.test.ts",

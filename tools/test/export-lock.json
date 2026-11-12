@@ -3049,6 +3049,9 @@
       "StftResult": {
         "kind": "type"
       },
+      "StiffODESolverOptions": {
+        "kind": "type"
+      },
       "StringOptions": {
         "kind": "type"
       },
