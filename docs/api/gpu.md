@@ -52,12 +52,12 @@ new GPUContext(options?: GPUContextOptions)
 
 #### Properties (getters)
 
-| Property       | Type                      | Description                                                         |
-| -------------- | ------------------------- | ------------------------------------------------------------------- |
-| `status`       | `GPUContextStatus`        | `'uninitialized' \| 'initializing' \| 'ready' \| 'error' \| 'lost'` |
-| `isReady`      | `boolean`                 | Whether the device is ready                                         |
-| `capabilities` | `GPUCapabilities \| null` | Detected adapter capabilities (once initialized)                    |
-| `lastError`    | `Error \| null`           | Last error encountered                                              |
+| Property       | Type                      | Description                                                                          |
+| -------------- | ------------------------- | ------------------------------------------------------------------------------------ |
+| `status`       | `GPUContextStatus`        | `'uninitialized' \| 'initializing' \| 'ready' \| 'unavailable' \| 'error' \| 'lost'` |
+| `isReady`      | `boolean`                 | Whether the device is ready                                                          |
+| `capabilities` | `GPUCapabilities \| null` | Detected adapter capabilities (once initialized)                                     |
+| `lastError`    | `Error \| null`           | Last error encountered                                                               |
 
 #### Methods
 
@@ -160,15 +160,17 @@ import {
 } from '@danielsimonjr/mathts-gpu';
 ```
 
-| Function                      | Signature                                                             | Description                            |
-| ----------------------------- | --------------------------------------------------------------------- | -------------------------------------- |
-| `hasWebGPU`                   | `() => boolean`                                                       | Is WebGPU present in this runtime      |
-| `isBrowser`                   | `() => boolean`                                                       | Browser vs Node detection              |
-| `getGPUAdapter`               | `(options?: GPURequestAdapterOptions) => Promise<GPUAdapter \| null>` | Request an adapter                     |
-| `detectGPUCapabilities`       | `(preferHighPerformance?: boolean) => Promise<GPUCapabilities>`       | Probe adapter limits/features          |
-| `isGPUSuitableForMatrixOps`   | `(capabilities, minBufferSize?) => boolean`                           | Heuristic suitability check            |
-| `getRecommendedWorkgroupSize` | `(capabilities) => [number, number, number]`                          | Suggested workgroup dims               |
-| `getMaxMatrixSize`            | `(capabilities, bytesPerElement?) => number`                          | Largest matrix that fits buffer limits |
+| Function                       | Signature                                                             | Description                                    |
+| ------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------- |
+| `hasWebGPU`                    | `() => boolean`                                                       | Adapter available (false after a failed probe) |
+| `hasWebGPUSurface`             | `() => boolean`                                                       | `navigator.gpu` present (API only)             |
+| `resetWebGPUAvailabilityCache` | `() => void`                                                          | Clear adapter probe cache (tests)              |
+| `isBrowser`                    | `() => boolean`                                                       | Browser vs Node detection                      |
+| `getGPUAdapter`                | `(options?: GPURequestAdapterOptions) => Promise<GPUAdapter \| null>` | Request an adapter                             |
+| `detectGPUCapabilities`        | `(preferHighPerformance?: boolean) => Promise<GPUCapabilities>`       | Probe adapter limits/features                  |
+| `isGPUSuitableForMatrixOps`    | `(capabilities?, minBufferSize?) => boolean`                          | Heuristic suitability check (no args → false)  |
+| `getRecommendedWorkgroupSize`  | `(capabilities) => [number, number, number]`                          | Suggested workgroup dims                       |
+| `getMaxMatrixSize`             | `(capabilities, bytesPerElement?) => number`                          | Largest matrix that fits buffer limits         |
 
 ## Global Context & Device Singleton
 
@@ -182,13 +184,14 @@ import {
 } from '@danielsimonjr/mathts-gpu';
 ```
 
-| Function              | Signature                                                     | Description                                                         |
-| --------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `getGlobalGPUContext` | `() => GPUContext`                                            | Shared process-wide context                                         |
-| `initializeGlobalGPU` | `(options?: GPUContextOptions) => Promise<boolean>`           | Initialize the global context                                       |
-| `destroyGlobalGPU`    | `() => void`                                                  | Destroy the global context                                          |
-| `getGpuDevice`        | `(options?: GPUContextOptions) => Promise<GPUDevice \| null>` | Shared device singleton — coalesces concurrent calls, never rejects |
-| `resetGpuDevice`      | `() => void`                                                  | Clear the cached device (after device-lost or between tests)        |
+| Function                        | Signature                                                       | Description                                                         |
+| ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `getGlobalGPUContext`           | `() => GPUContext`                                              | Shared process-wide context                                         |
+| `initializeGlobalGPU`           | `(options?: GPUContextOptions) => Promise<boolean>`             | Initialize the global context                                       |
+| `initializeGlobalGPUWithReason` | `(options?: GPUContextOptions) => Promise<GlobalGPUInitResult>` | `{ ok: true }` or `{ ok: false, reason: 'unavailable' \| 'error' }` |
+| `destroyGlobalGPU`              | `() => void`                                                    | Destroy the global context                                          |
+| `getGpuDevice`                  | `(options?: GPUContextOptions) => Promise<GPUDevice \| null>`   | Shared device singleton — coalesces concurrent calls, never rejects |
+| `resetGpuDevice`                | `() => void`                                                    | Clear the cached device (after device-lost or between tests)        |
 
 ## Opt-in GPU Routing
 
@@ -230,7 +233,7 @@ another, or return a zero-initialized "success" for a call that actually failed.
 | Type                | Key fields                                                                                                                                                                                               |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GPUContextOptions` | `preferHighPerformance?`, `requiredFeatures?`, `requiredLimits?`, `label?`                                                                                                                               |
-| `GPUContextStatus`  | `'uninitialized' \| 'initializing' \| 'ready' \| 'error' \| 'lost'`                                                                                                                                      |
+| `GPUContextStatus`  | `'uninitialized' \| 'initializing' \| 'ready' \| 'unavailable' \| 'error' \| 'lost'`                                                                                                                     |
 | `GPUAdapterInfo`    | `vendor`, `architecture`, `device`, `description`                                                                                                                                                        |
 | `GPUCapabilities`   | `supported`, `adapterInfo`, `maxBufferSize`, `maxWorkgroupSize`, `maxStorageBufferBindingSize`, `maxComputeInvocationsPerWorkgroup`, `maxComputeWorkgroupsPerDimension`, `isFallbackAdapter`, `features` |
 | `DeviceLostEvent`   | `reason`, `message`                                                                                                                                                                                      |

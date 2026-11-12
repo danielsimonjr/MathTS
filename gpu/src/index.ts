@@ -7,6 +7,8 @@
 
 export {
   hasWebGPU,
+  hasWebGPUSurface,
+  resetWebGPUAvailabilityCache,
   isBrowser,
   getGPUAdapter,
   detectGPUCapabilities,
@@ -21,9 +23,11 @@ export {
   GPUContext,
   getGlobalGPUContext,
   initializeGlobalGPU,
+  initializeGlobalGPUWithReason,
   destroyGlobalGPU,
   type GPUContextOptions,
   type GPUContextStatus,
+  type GlobalGPUInitResult,
   type DeviceLostEvent,
 } from './GPUContext.js';
 

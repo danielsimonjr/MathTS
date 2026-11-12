@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **GPU init reports `unavailable` instead of `error` when no adapter is present (G15 / #759, #835).** Node and adapter-less Chromium no longer surface `GPUContext.status === 'error'` after a quiet fallback. `hasWebGPU()` turns false after a failed probe, `isGPUSuitableForMatrixOps()` accepts zero arguments, and `initializeGlobalGPUWithReason()` returns `{ ok, reason }`.
 - **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.
 - **Dense decompositions accept the same matrix shapes (G05 dogfood).** `svd`, `svdWasm`, `lu`, `qr` (and `lq`/`rq`/`ql`/`qrPivoted`), `cholesky`, `eig`, and `matrixSchur` share one input normalizer. A `DenseMatrix` is no longer read as an empty array (`{ U: [], S: [], V: [], rank: 0 }` from `svd` / `svdWasm`). Nested `number[][]`, a square row-major `Float64Array` (length 0 is 0×0), and `{ data, rows, cols }` are accepted. A packed descriptor is rejected when it also carries `L`/`U`/`p`/`P`, so it cannot be solved as an LU factor. Ragged and unknown inputs throw `TypeError`. `lusolve` accepts a square `Float64Array` and the same packed descriptor, and still treats `{ L, U, p }` as a decomposition.
 

@@ -1645,9 +1645,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1721,6 +1718,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -11048,6 +11048,9 @@
       "GPU_MIN_ELEMENTS": {
         "kind": "number"
       },
+      "GlobalGPUInitResult": {
+        "kind": "type"
+      },
       "PipelineConfig": {
         "kind": "type"
       },
@@ -11087,7 +11090,13 @@
       "hasWebGPU": {
         "kind": "function"
       },
+      "hasWebGPUSurface": {
+        "kind": "function"
+      },
       "initializeGlobalGPU": {
+        "kind": "function"
+      },
+      "initializeGlobalGPUWithReason": {
         "kind": "function"
       },
       "isBrowser": {
@@ -11100,6 +11109,9 @@
         "kind": "function"
       },
       "resetGpuDevice": {
+        "kind": "function"
+      },
+      "resetWebGPUAvailabilityCache": {
         "kind": "function"
       },
       "serializeGpu": {

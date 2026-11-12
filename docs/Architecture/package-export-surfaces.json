@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4148,6 +4148,7 @@
       "getGpuDevice",
       "getMaxMatrixSize",
       "getRecommendedWorkgroupSize",
+      "GlobalGPUInitResult",
       "GPU_MIN_ELEMENTS",
       "GPUAdapterInfo",
       "GPUCapabilities",
@@ -4155,12 +4156,17 @@
       "GPUContextOptions",
       "GPUContextStatus",
       "hasWebGPU",
+      "hasWebGPUSurface",
       "initializeGlobalGPU",
+      "initializeGlobalGPUWithReason",
       "isBrowser",
       "isGpuEnabled",
       "isGPUSuitableForMatrixOps",
+      "markWebGPUAdapterAvailable",
+      "markWebGPUAdapterUnavailable",
       "PipelineConfig",
       "resetGpuDevice",
+      "resetWebGPUAvailabilityCache",
       "serializeGpu",
       "ShaderManager",
       "ShaderSource"

@@ -57,14 +57,51 @@ const NO_WEBGPU_CAPABILITIES: GPUCapabilities = {
   features: [],
 };
 
+/** After a failed adapter request, `hasWebGPU()` reports false (quiet fallback). */
+let webgpuAdapterAvailable: boolean | null = null;
+
 /**
- * Check if WebGPU is available in the current environment
+ * Whether the WebGPU API surface is present (`navigator.gpu`), without proving an adapter.
  */
-export function hasWebGPU(): boolean {
+export function hasWebGPUSurface(): boolean {
   if (typeof navigator === 'undefined') {
     return false;
   }
   return 'gpu' in navigator;
+}
+
+/**
+ * Clear cached adapter availability (tests and device reset).
+ */
+export function resetWebGPUAvailabilityCache(): void {
+  webgpuAdapterAvailable = null;
+}
+
+/**
+ * Record that `requestAdapter()` returned no adapter so feature detection stays honest.
+ */
+export function markWebGPUAdapterUnavailable(): void {
+  webgpuAdapterAvailable = false;
+}
+
+/**
+ * Record a successful adapter request (used after init or explicit probe).
+ */
+export function markWebGPUAdapterAvailable(): void {
+  webgpuAdapterAvailable = true;
+}
+
+/**
+ * Check if WebGPU is available in the current environment
+ */
+export function hasWebGPU(): boolean {
+  if (!hasWebGPUSurface()) {
+    return false;
+  }
+  if (webgpuAdapterAvailable === false) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -81,7 +118,7 @@ export function isBrowser(): boolean {
 export async function getGPUAdapter(
   options?: GPURequestAdapterOptions
 ): Promise<GPUAdapter | null> {
-  if (!hasWebGPU()) {
+  if (!hasWebGPUSurface()) {
     return null;
   }
 
@@ -101,7 +138,7 @@ export async function getGPUAdapter(
 export async function detectGPUCapabilities(
   preferHighPerformance: boolean = true
 ): Promise<GPUCapabilities> {
-  if (!hasWebGPU()) {
+  if (!hasWebGPUSurface()) {
     return NO_WEBGPU_CAPABILITIES;
   }
 
@@ -114,8 +151,11 @@ export async function detectGPUCapabilities(
     });
 
     if (!adapter) {
+      markWebGPUAdapterUnavailable();
       return NO_WEBGPU_CAPABILITIES;
     }
+
+    markWebGPUAdapterAvailable();
 
     // Get adapter info
     const info = adapter.info || ({} as GPUAdapterInfo);
@@ -159,29 +199,28 @@ export async function detectGPUCapabilities(
  * @param minBufferSize - Minimum required buffer size (default 256MB)
  */
 export function isGPUSuitableForMatrixOps(
-  capabilities: GPUCapabilities,
+  capabilities?: GPUCapabilities,
   minBufferSize: number = 256 * 1024 * 1024
 ): boolean {
-  if (!capabilities.supported) {
+  const caps = capabilities ?? NO_WEBGPU_CAPABILITIES;
+  if (!caps.supported) {
     return false;
   }
 
   // Check minimum buffer size
-  if (capabilities.maxBufferSize < minBufferSize) {
+  if (caps.maxBufferSize < minBufferSize) {
     return false;
   }
 
   // Check workgroup size (need at least 256 for efficient compute)
   const maxWorkgroupElements =
-    capabilities.maxWorkgroupSize[0] *
-    capabilities.maxWorkgroupSize[1] *
-    capabilities.maxWorkgroupSize[2];
+    caps.maxWorkgroupSize[0] * caps.maxWorkgroupSize[1] * caps.maxWorkgroupSize[2];
   if (maxWorkgroupElements < 256) {
     return false;
   }
 
   // Check storage buffer size (need at least 128MB for large matrices)
-  if (capabilities.maxStorageBufferBindingSize < 128 * 1024 * 1024) {
+  if (caps.maxStorageBufferBindingSize < 128 * 1024 * 1024) {
     return false;
   }
 

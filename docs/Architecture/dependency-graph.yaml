@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-11'
+  lastUpdated: '2026-11-12'
   totalFiles: 1285
   totalModules: 82
-  totalExports: 7009
+  totalExports: 7018
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -41238,13 +41238,17 @@ modules:
       internalDependencies:
         - file: ./detect.js
           imports:
-            - hasWebGPU
+            - hasWebGPUSurface
             - getGPUAdapter
             - detectGPUCapabilities
+            - markWebGPUAdapterUnavailable
+            - markWebGPUAdapterAvailable
+            - resetWebGPUAvailabilityCache
             - GPUCapabilities
       workspaceDependencies: []
       exports:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
         - GPUContext
@@ -41255,6 +41259,7 @@ modules:
         - DeviceLostEvent
       functions:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
     gpu/src/ShaderManager.ts:
@@ -41280,6 +41285,10 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
@@ -41291,6 +41300,10 @@ modules:
         - GPUAdapterInfo
         - GPUCapabilities
       functions:
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
@@ -41303,6 +41316,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./detect.js
+          imports:
+            - resetWebGPUAvailabilityCache
         - file: ./GPUContext.js
           imports:
             - getGlobalGPUContext
@@ -41339,6 +41355,8 @@ modules:
         - file: ./detect.js
           imports:
             - hasWebGPU
+            - hasWebGPUSurface
+            - resetWebGPUAvailabilityCache
             - isBrowser
             - getGPUAdapter
             - detectGPUCapabilities
@@ -41353,9 +41371,11 @@ modules:
             - GPUContext
             - getGlobalGPUContext
             - initializeGlobalGPU
+            - initializeGlobalGPUWithReason
             - destroyGlobalGPU
             - GPUContextOptions
             - GPUContextStatus
+            - GlobalGPUInitResult
             - DeviceLostEvent
           reExport: true
         - file: ./device.js
@@ -41388,6 +41408,8 @@ modules:
       workspaceDependencies: []
       exports:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
@@ -41399,9 +41421,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -41417,6 +41441,8 @@ modules:
         - serializeGpu
       reExported:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
@@ -41428,9 +41454,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -43544,15 +43572,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1285
   totalModules: 82
-  totalLinesOfCode: 218299
-  totalExports: 7009
+  totalLinesOfCode: 218403
+  totalExports: 7018
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2360
+  totalFunctions: 2365
   totalTypeGuards: 171
   totalEnums: 0
   totalConstants: 1644
-  totalReExports: 3021
+  totalReExports: 3025
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

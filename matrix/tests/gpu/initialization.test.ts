@@ -207,8 +207,8 @@ describe('GPU Context', () => {
       const success = await context.initialize();
 
       expect(success).toBe(false);
-      expect(context.status).toBe('error');
-      expect(context.lastError).toBeDefined();
+      expect(context.status).toBe('unavailable');
+      expect(context.lastError).toBeNull();
     });
   });
 

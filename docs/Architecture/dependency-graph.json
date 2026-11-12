@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-11",
+    "lastUpdated": "2026-11-12",
     "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7009
+    "totalExports": 7018
   },
   "entryPoints": [
     {
@@ -43528,14 +43528,33 @@
         "internalDependencies": [
           {
             "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+            "imports": [
+              "hasWebGPUSurface",
+              "getGPUAdapter",
+              "detectGPUCapabilities",
+              "markWebGPUAdapterUnavailable",
+              "markWebGPUAdapterAvailable",
+              "resetWebGPUAvailabilityCache",
+              "GPUCapabilities"
+            ]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "exports": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContext"
+        ],
         "classes": ["GPUContext"],
         "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+        "functions": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU"
+        ]
       },
       "gpu/src/ShaderManager.ts": {
         "description": "GPU Shader Manager (generic)",
@@ -43559,6 +43578,10 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
@@ -43569,6 +43592,10 @@
         ],
         "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
@@ -43583,6 +43610,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["resetWebGPUAvailabilityCache"]
+          },
           {
             "file": "./GPUContext.js",
             "imports": ["getGlobalGPUContext", "GPUContextOptions"]
@@ -43611,6 +43642,8 @@
             "file": "./detect.js",
             "imports": [
               "hasWebGPU",
+              "hasWebGPUSurface",
+              "resetWebGPUAvailabilityCache",
               "isBrowser",
               "getGPUAdapter",
               "detectGPUCapabilities",
@@ -43628,9 +43661,11 @@
               "GPUContext",
               "getGlobalGPUContext",
               "initializeGlobalGPU",
+              "initializeGlobalGPUWithReason",
               "destroyGlobalGPU",
               "GPUContextOptions",
               "GPUContextStatus",
+              "GlobalGPUInitResult",
               "DeviceLostEvent"
             ],
             "reExport": true
@@ -43664,6 +43699,8 @@
         "workspaceDependencies": [],
         "exports": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
@@ -43675,9 +43712,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -43694,6 +43733,8 @@
         ],
         "reExported": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
@@ -43705,9 +43746,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -46020,15 +46063,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 218299,
-    "totalExports": 7009,
+    "totalLinesOfCode": 218403,
+    "totalExports": 7018,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2360,
+    "totalFunctions": 2365,
     "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1644,
-    "totalReExports": 3021,
+    "totalReExports": 3025,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

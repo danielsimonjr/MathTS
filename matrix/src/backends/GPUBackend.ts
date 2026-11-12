@@ -133,8 +133,13 @@ export class GPUBackend {
       // Initialize context
       const success = await this.context.initialize(options);
       if (!success) {
-        this._status = 'error';
-        this._lastError = this.context.lastError;
+        if (this.context.status === 'unavailable') {
+          this._status = 'unsupported';
+          this._lastError = null;
+        } else {
+          this._status = 'error';
+          this._lastError = this.context.lastError;
+        }
         return false;
       }
 
