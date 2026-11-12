@@ -18,7 +18,7 @@ import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 math.add(1, 2); // 3
 math.evaluate('sin(pi/2)'); // 1
-math.complex(2, 3); // Complex { re: 2, im: 3 }
+math.complex(2, 3); // 2 + 3i
 ```
 
 ## What it provides

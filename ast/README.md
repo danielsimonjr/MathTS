@@ -18,17 +18,17 @@ npm install @danielsimonjr/mathts-ast
 ## Example
 
 ```ts
-import {
-  createConstantNode,
-  createSymbolNode,
-  createOperatorNode,
-} from '@danielsimonjr/mathts-ast';
+import { createConstantNode, createNode } from '@danielsimonjr/mathts-ast';
 
-const expr = createOperatorNode('+', [
-  createConstantNode(2),
-  createOperatorNode('*', [createSymbolNode('x'), createConstantNode(3)]),
-]);
-console.log(expr.toString()); // 2 + x * 3
+// The `create*` exports are mathjs-style factories. Pass the dependencies they
+// declare; they return the node class. They are not called with child nodes.
+const Node = createNode({ mathWithTransform: {} });
+const ConstantNode = createConstantNode({
+  Node,
+  isBounded: (value: unknown) => typeof value === 'number' && Number.isFinite(value),
+});
+const two = new ConstantNode(2);
+console.log(two.toString()); // 2
 ```
 
 ## What it exports

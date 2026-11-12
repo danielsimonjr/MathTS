@@ -27,9 +27,9 @@ const A = DenseMatrix.fromArray([
 
 const { L, U } = lu(A);
 const { U: uSvd, S } = svd(A);
-const { eigenvalues } = eig(A.toArray());
+const { values } = eig(A.toArray());
 
-console.log(L.get(0, 0), U.get(1, 1), S[0], eigenvalues[0]);
+console.log(L.get(0, 0), U.get(1, 1), S[0], values[0].re);
 ```
 
 Nested `number[][]` also work for `lu`, `svd`, `eig`, and the other dense routines documented below.

@@ -21,7 +21,7 @@ const t = Tensor.fromNested([
   [1, 2],
   [3, 4],
 ]);
-console.log(t.shape, t.sum());
+console.log(t.shape, t.sum().toNested()); // [2, 2] 10
 ```
 
 ## What it provides

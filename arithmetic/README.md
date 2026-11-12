@@ -21,7 +21,7 @@ import { add, multiply, sqrt } from '@danielsimonjr/mathts-arithmetic';
 import { Complex } from '@danielsimonjr/mathts-numbers';
 
 add(1, 2); // 3
-multiply(new Complex(1, 2), new Complex(0, 1)); // Complex(0, 1)
+multiply(new Complex(1, 2), new Complex(3, 4)); // -5 + 10i
 sqrt(9); // 3
 ```
 

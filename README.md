@@ -104,8 +104,8 @@ import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Scalar dispatch — synchronous
 add(1, 2); // 3
-add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
-add(new Fraction(1, 3), new Fraction(1, 6)); // Fraction(1/2)
+add(new Complex(1, 2), new Complex(3, 4)); // 4 + 6i
+add(new Fraction(1, 3), new Fraction(1, 6)); // 1/2
 add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
 sin(Math.PI / 2); // 1
 
@@ -364,8 +364,9 @@ cd functions && bunx vitest run
 ## Status
 
 MathTS is an actively developed monorepo of 24 workspace packages (22 published for application use).
-The dependency graph has **0 runtime circular dependencies** (verified by
-`tools/create-dependency-graph`, which regenerates the reports below).
+The dependency graph has **2 runtime circular dependencies** (verified by
+`tools/create-dependency-graph` and `repo-tools check`; see
+`docs/Architecture/DEPENDENCY_GRAPH.md`).
 
 Recent milestones (see [`ROADMAP.md`](./ROADMAP.md) "Recently shipped" and the package changelogs):
 
