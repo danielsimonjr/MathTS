@@ -54,12 +54,6 @@ export const createMedian = /* #__PURE__ */ factory(
       }
       return true;
     }
-    /**
-     * Recursively calculate the median of an n-dimensional array
-     * @param {Array | Matrix} array - Input array or matrix
-     * @return {number | BigNumber | Complex | Unit} median
-     * @private
-     */
     function medianOfNumbers(xs: ArrayLike<number>, skipNaN: boolean): unknown {
       const data = skipNaN ? finiteNumbers(xs, true) : xs;
       if (data.length === 0) return NaN;
@@ -104,6 +98,12 @@ export const createMedian = /* #__PURE__ */ factory(
       }
     }
 
+    /**
+     * Recursively calculate the median of an n-dimensional array
+     * @param {Array | Matrix} array - Input array or matrix
+     * @return {number | BigNumber | Complex | Unit} median
+     * @private
+     */
     function _median(array: unknown[] | MatrixType | FloatTyped): unknown {
       try {
         const flat = flattenForStatistics(array);
