@@ -13,6 +13,52 @@ import * as reduction from './dense/reduction.js';
 import { assertDenseMatrixSize } from './dense/limits.js';
 import { contiguousDenseData } from './dense/storage.js';
 
+/** Rectangular numeric matrix literal: reject empty, jagged, and non-numeric cells. */
+function readNestedMatrix(nested: readonly unknown[]): {
+  rows: number;
+  cols: number;
+  data: number[][];
+} {
+  if (nested.length === 0) {
+    throw new TypeError(
+      'DenseMatrix nested array must be a non-empty rectangular array of numbers'
+    );
+  }
+  const rows = nested.length;
+  const first = nested[0];
+  if (!Array.isArray(first) || first.length === 0) {
+    throw new TypeError(
+      'DenseMatrix nested array must be a non-empty rectangular array of numbers'
+    );
+  }
+  const cols = first.length;
+  const data: number[][] = [];
+  for (let i = 0; i < rows; i++) {
+    const row = nested[i];
+    if (!Array.isArray(row)) {
+      throw new TypeError(`DenseMatrix nested array must be rectangular; row ${i} is not an array`);
+    }
+    if (row.length !== cols) {
+      throw new TypeError(
+        `DenseMatrix nested array must be rectangular; row ${i} has length ${row.length}, expected ${cols}`
+      );
+    }
+    const numeric: number[] = [];
+    for (let j = 0; j < cols; j++) {
+      const value = row[j];
+      if (typeof value !== 'number') {
+        throw new TypeError(
+          `DenseMatrix nested array must contain numbers; row ${i} column ${j} is ${typeof value}`
+        );
+      }
+      numeric.push(value);
+    }
+    data.push(numeric);
+  }
+  assertDenseMatrixSize(rows, cols);
+  return { rows, cols, data };
+}
+
 /**
  * Dense matrix implementation using Float64Array
  *
@@ -69,23 +115,10 @@ export class DenseMatrix extends Matrix<number> {
           'DenseMatrix(nested array) accepts one argument; use new DenseMatrix(rows, cols) for dimensions'
         );
       }
-      const nested = rows as number[][];
-      nRows = nested.length;
-      nCols = nested[0]?.length ?? 0;
-      for (let i = 0; i < nRows; i++) {
-        if (!Array.isArray(nested[i])) {
-          throw new TypeError(
-            `DenseMatrix nested array must be rectangular; row ${i} is not an array`
-          );
-        }
-        if (nested[i].length !== nCols) {
-          throw new TypeError(
-            `DenseMatrix nested array must be rectangular; row ${i} has length ${nested[i].length}, expected ${nCols}`
-          );
-        }
-      }
-      assertDenseMatrixSize(nRows, nCols);
-      dataArg = nested;
+      const nested = readNestedMatrix(rows);
+      nRows = nested.rows;
+      nCols = nested.cols;
+      dataArg = nested.data;
       cols = nCols;
       rows = nRows;
     } else {
@@ -96,15 +129,8 @@ export class DenseMatrix extends Matrix<number> {
       }
       nRows = rows;
       nCols = cols;
+      assertDenseMatrixSize(nRows, nCols);
     }
-
-    if (!Number.isInteger(nRows) || !Number.isInteger(nCols)) {
-      throw new TypeError(
-        `Matrix dimensions must be integers, got ${String(nRows)}×${String(nCols)}`
-      );
-    }
-
-    assertDenseMatrixSize(nRows, nCols);
 
     this.rows = nRows;
     this.cols = nCols;
@@ -173,10 +199,8 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix from a nested array
    */
   static fromArray(arr: number[][]): DenseMatrix {
-    const rows = arr.length;
-    const cols = arr[0]?.length ?? 0;
-    assertDenseMatrixSize(rows, cols);
-    return new DenseMatrix(rows, cols, arr);
+    const nested = readNestedMatrix(arr);
+    return new DenseMatrix(nested.rows, nested.cols, nested.data);
   }
 
   /**
@@ -197,6 +221,7 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix filled with ones
    */
   static ones(rows: number, cols: number): DenseMatrix {
+    assertDenseMatrixSize(rows, cols);
     const data = new Float64Array(rows * cols).fill(1);
     return new DenseMatrix(rows, cols, data);
   }
@@ -205,6 +230,7 @@ export class DenseMatrix extends Matrix<number> {
    * Create an identity matrix
    */
   static identity(n: number): DenseMatrix {
+    assertDenseMatrixSize(n, n);
     const data = new Float64Array(n * n);
     for (let i = 0; i < n; i++) {
       data[i * n + i] = 1;
@@ -217,6 +243,7 @@ export class DenseMatrix extends Matrix<number> {
    */
   static diag(values: number[]): DenseMatrix {
     const n = values.length;
+    assertDenseMatrixSize(n, n);
     const data = new Float64Array(n * n);
     for (let i = 0; i < n; i++) {
       data[i * n + i] = values[i];
@@ -228,6 +255,7 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix filled with a constant value
    */
   static fill(rows: number, cols: number, value: number): DenseMatrix {
+    assertDenseMatrixSize(rows, cols);
     const data = new Float64Array(rows * cols).fill(value);
     return new DenseMatrix(rows, cols, data);
   }
@@ -236,6 +264,7 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix with random values in [0, 1)
    */
   static random(rows: number, cols: number): DenseMatrix {
+    assertDenseMatrixSize(rows, cols);
     const data = new Float64Array(rows * cols);
     for (let i = 0; i < data.length; i++) {
       data[i] = Math.random();
@@ -418,6 +447,7 @@ export class DenseMatrix extends Matrix<number> {
       );
     }
     this.checkMultiplyDimensions(other);
+    assertDenseMatrixSize(this.rows, other.cols);
     return new DenseMatrix(this.rows, other.cols, arithmetic.multiply(this, other));
   }
 

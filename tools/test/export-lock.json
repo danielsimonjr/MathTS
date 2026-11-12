@@ -421,6 +421,9 @@
       "MATHTS_TYPES": {
         "kind": "object"
       },
+      "MAX_UNIT_STRING_LENGTH": {
+        "kind": "number"
+      },
       "MathTSConfig": {
         "kind": "type"
       },
@@ -824,6 +827,9 @@
         "kind": "function"
       },
       "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "unitReadingSearchSteps": {
         "kind": "function"
       },
       "unitRowExactOffset": {
@@ -2063,6 +2069,9 @@
       "TensorCholeskyResult": {
         "kind": "type"
       },
+      "TensorDtype": {
+        "kind": "type"
+      },
       "TensorEigOpts": {
         "kind": "type"
       },
@@ -2091,6 +2100,9 @@
         "kind": "type"
       },
       "TensorSolveResult": {
+        "kind": "type"
+      },
+      "TensorStorage": {
         "kind": "type"
       },
       "TensorSvdOpts": {
@@ -4427,7 +4439,7 @@
         "kind": "function"
       },
       "fineStructure": {
-        "kind": "number"
+        "kind": "object"
       },
       "finiteDifferenceCoefficients": {
         "kind": "function"
@@ -5587,6 +5599,18 @@
       "nakagamiPDF": {
         "kind": "function"
       },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanstd": {
+        "kind": "function"
+      },
+      "nanvariance": {
+        "kind": "function"
+      },
       "narayana": {
         "kind": "function"
       },
@@ -6323,7 +6347,7 @@
         "kind": "object"
       },
       "sackurTetrode": {
-        "kind": "number"
+        "kind": "object"
       },
       "savgol": {
         "kind": "function"
@@ -7070,7 +7094,7 @@
         "kind": "function"
       },
       "weakMixingAngle": {
-        "kind": "number"
+        "kind": "object"
       },
       "weibullDist": {
         "kind": "function"
@@ -9042,6 +9066,18 @@
         "kind": "function"
       },
       "multivariateNormal": {
+        "kind": "function"
+      },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanstd": {
+        "kind": "function"
+      },
+      "nanvariance": {
         "kind": "function"
       },
       "negativeBinomialDist": {

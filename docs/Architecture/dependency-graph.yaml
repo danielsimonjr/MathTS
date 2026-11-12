@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1288
+  totalFiles: 1291
   totalModules: 82
-  totalExports: 7042
+  totalExports: 7074
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -847,6 +847,8 @@ modules:
             - AmbiguousUnitError
             - DIMENSIONLESS
             - dim
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./types/unit.js
           imports:
@@ -1114,6 +1116,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -1310,6 +1314,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -2851,6 +2857,10 @@ modules:
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
+        - file: ./unit-types.js
+          imports:
+            - LogarithmicUnitKind
+          typeOnly: true
         - file: ./errors.js
           imports:
             - AmbiguousUnitError
@@ -2890,11 +2900,13 @@ modules:
             - unitPrefixExactScale
       workspaceDependencies: []
       exports:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
         - unitReadingSearchSteps
       functions:
         - unitReadingSearchSteps
       constants:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
     core/src/types/unit/dependencies.ts:
       description: The dependency object injected into the relocated mathjs `Unit` factory
@@ -3045,6 +3057,8 @@ modules:
         - file: ./Unit.js
           imports:
             - createUnitClass
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./dependencies.js
           imports:
@@ -3143,6 +3157,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3219,6 +3235,8 @@ modules:
         - UnitPrefix
       reExported:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3458,6 +3476,8 @@ modules:
             - Unit
             - createUnitClass
             - unitDependencies
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./unit/index.js
           imports:
@@ -3556,6 +3576,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -3621,6 +3643,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -5764,6 +5788,13 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+        - file: ./reshape-shape.js
+          imports:
+            - resolveReshapeShape
+        - file: ./operations/slice.js
+          imports:
+            - slice
+            - SliceRange
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5786,6 +5817,7 @@ modules:
       classes:
         - Tensor
       interfaces:
+        - TensorStorage
         - EinsumSpec
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
@@ -5898,6 +5930,8 @@ modules:
           imports:
             - NestedArray
             - EinsumSpec
+            - TensorStorage
+            - TensorDtype
           reExport: true
           typeOnly: true
         - file: ./named-index.js
@@ -6009,6 +6043,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6057,6 +6093,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6094,6 +6132,16 @@ modules:
         - IndexOpts
       functions:
         - idx
+    tensor/src/reshape-shape.ts:
+      description: reshape-shape module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - resolveReshapeShape
+      functions:
+        - resolveReshapeShape
   tensor/operations:
     tensor/src/operations/cholesky.ts:
       description: tensorCholesky — Cholesky decomposition for symmetric positive-definite
@@ -9721,6 +9769,10 @@ modules:
             - describe
             - histogram
           reExport: true
+        - file: ./statistics/nan-reductions.js
+          imports:
+            - nanmedian
+          reExport: true
         - file: ./numeric-extra.js
           imports:
             - clamp
@@ -11100,6 +11152,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -11844,6 +11897,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -20511,6 +20565,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - typedArrayPairToNumbers
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20589,9 +20646,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20602,6 +20656,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMad
@@ -20677,9 +20735,6 @@ modules:
         - file: ../utils/collection.js
           imports:
             - containsCollections
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20693,6 +20748,15 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - finiteNumbers
+            - isFloatTyped
+            - numberGrid
+            - reduceNumericMatrix
+            - FloatTyped
+            - StatReduceOptions
       workspaceDependencies: []
       exports:
         - createMedian
@@ -20737,9 +20801,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20747,11 +20808,70 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMode
       constants:
         - createMode
+    functions/src/statistics/nan-reductions.ts:
+      description: nan-reductions module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - median
+        - file: ./numeric-data.js
+          imports:
+            - finiteNumbers
+            - reduceNumericMatrix
+            - NumericVectorInput
+      workspaceDependencies: []
+      exports:
+        - nanmedian
+      functions:
+        - nanmedian
+    functions/src/statistics/numeric-data.ts:
+      description: Shared numeric-vector handling for statistics reductions (G19).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - flatten
+      workspaceDependencies: []
+      exports:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
+      functions:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
     functions/src/statistics/prod.ts:
       description: Compute the product of a matrix or a list with values.
       externalDependencies: []
@@ -20802,6 +20922,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - isFloatTyped
+            - copyToNumberArray
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createQuantileSeq
@@ -23108,6 +23233,17 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+        - file: ../statistics/numeric-data.js
+          imports:
+            - finiteNumbers
+            - flattenNumeric
+            - normalizationFromSecondArg
+            - normalizationFromStringAndOptions
+            - numberGrid
+            - reduceNumericMatrix
+            - StatReduceOptions
+            - NumericVectorInput
+            - VarianceRequest
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23217,6 +23353,9 @@ modules:
         - std
         - dot
         - typedArithmetic
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -23226,6 +23365,9 @@ modules:
         - shouldParallelize
         - getComputePool
       functions:
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -36511,6 +36653,10 @@ modules:
             - zscore
             - cov
             - corrcoef
+            - nanmean
+            - nanmedian
+            - nanvariance
+            - nanstd
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -36751,6 +36897,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -36949,6 +37099,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -42226,10 +42380,13 @@ modules:
         - DEPTH_EPS
 dependencyGraph:
   circularDependencies:
-    runtime: []
+    runtime:
+      - - tensor/src/Tensor.ts
+        - tensor/src/operations/slice.ts
+        - tensor/src/Tensor.ts
     typeOnly: []
-    total: 0
-    runtimeCount: 0
+    total: 1
+    runtimeCount: 1
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -42378,6 +42535,7 @@ dependencyGraph:
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
+        - tensor/src/reshape-shape.ts
     - name: Tensor/operations
       files:
         - tensor/src/operations/cholesky.ts
@@ -42827,6 +42985,8 @@ dependencyGraph:
         - functions/src/statistics/median.ts
         - functions/src/statistics/min.ts
         - functions/src/statistics/mode.ts
+        - functions/src/statistics/nan-reductions.ts
+        - functions/src/statistics/numeric-data.ts
         - functions/src/statistics/prod.ts
         - functions/src/statistics/quantileSeq.ts
         - functions/src/statistics/std.ts
@@ -43685,19 +43845,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1288
+  totalTypeScriptFiles: 1291
   totalModules: 82
-  totalLinesOfCode: 219478
-  totalExports: 7042
+  totalLinesOfCode: 220906
+  totalExports: 7074
   totalClasses: 61
-  totalInterfaces: 601
-  totalFunctions: 2376
-  totalTypeGuards: 172
+  totalInterfaces: 602
+  totalFunctions: 2394
+  totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1648
-  totalReExports: 3032
-  totalTypeOnlyImports: 644
-  runtimeCircularDeps: 0
+  totalConstants: 1649
+  totalReExports: 3045
+  totalTypeOnlyImports: 645
+  runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0
