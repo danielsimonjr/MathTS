@@ -255,6 +255,7 @@ export interface UnitInstance {
   hasBase(base: BaseUnitDef | string | undefined): boolean;
   equalBase(other: { dimensions: number[] }): boolean;
   equals(other: UnitInstance): boolean;
+  add(other: UnitInstance): UnitInstance;
   multiply(other: UnitInstance | Numeric): UnitInstance | Numeric;
   divideInto(numerator: Numeric): UnitInstance | Numeric;
   divide(other: UnitInstance | Numeric): UnitInstance | Numeric;
