@@ -9963,7 +9963,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 151
+      "loc": 169
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -13393,7 +13393,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 105
     },
     {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",

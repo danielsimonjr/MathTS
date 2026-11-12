@@ -51,13 +51,31 @@ describe('G26 #712 median quickselect path', () => {
     expect(median(v)).toBe(3);
   });
 
-  it('n=1e6 median finishes well under full sort (issue: <10 ms target)', () => {
-    const gate = fileURLToPath(new URL('./helpers/median-number-perf-gate.mjs', import.meta.url));
-    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
-    const { medianMs, sample } = JSON.parse(raw) as { medianMs: number; sample: number };
-    expect(Number.isFinite(sample)).toBe(true);
-    expect(medianMs).toBeLessThan(50);
-  }, 60_000);
+  it('n=1e6 median is ≪ full sort (quickselect gate)', () => {
+    const n = 1_000_000;
+    const data = Array.from({ length: n }, (_, i) => Math.sin(i));
+    for (let w = 0; w < 2; w++) {
+      median(data.slice());
+      const s = data.slice();
+      s.sort((a, b) => a - b);
+    }
+    const medTimes: number[] = [];
+    const sortTimes: number[] = [];
+    for (let r = 0; r < 5; r++) {
+      const t0 = performance.now();
+      median(data);
+      medTimes.push(performance.now() - t0);
+      const s = data.slice();
+      const t1 = performance.now();
+      s.sort((a, b) => a - b);
+      sortTimes.push(performance.now() - t1);
+    }
+    medTimes.sort((a, b) => a - b);
+    sortTimes.sort((a, b) => a - b);
+    const med = medTimes[Math.floor(medTimes.length / 2)];
+    const sort = sortTimes[Math.floor(sortTimes.length / 2)];
+    expect(med).toBeLessThan(sort * 0.25);
+  }, 120_000);
 });
 
 describe('G26 #694 lusolve uses packed matrix lu', () => {

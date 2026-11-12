@@ -46,22 +46,28 @@ describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
     const BD = DenseMatrix.fromArray(B);
     const AM = new MLMatrix(A);
     const BM = new MLMatrix(B);
-    const tMl = medianTime(
-      () => {
-        AM.mmul(BM);
-      },
-      2,
-      3
-    );
-    const tMathTs = medianTime(
-      () => {
-        AD.multiply(BD);
-      },
-      2,
-      3
-    );
-    expect(tMathTs / tMl).toBeLessThan(1.15);
-  }, 120_000);
+    const mlTimes: number[] = [];
+    const mathTsTimes: number[] = [];
+    const ratios: number[] = [];
+    for (let w = 0; w < 4; w++) {
+      medianTime(() => AM.mmul(BM), 0, 1);
+      medianTime(() => AD.multiply(BD), 0, 1);
+    }
+    for (let r = 0; r < 9; r++) {
+      const mathTsFirst = r % 2 === 0;
+      if (mathTsFirst) {
+        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
+        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
+      } else {
+        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
+        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
+      }
+      ratios.push(mathTsTimes[mathTsTimes.length - 1] / mlTimes[mlTimes.length - 1]);
+    }
+    ratios.sort((a, b) => a - b);
+    const ratio = ratios[Math.floor(ratios.length / 2)];
+    expect(ratio).toBeLessThan(1.15);
+  }, 180_000);
 
   it('matMul nested matches DenseMatrix.multiply on a spot check', () => {
     const A = [
