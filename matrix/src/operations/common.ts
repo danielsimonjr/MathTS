@@ -226,7 +226,7 @@ export function matMul(A: number[][], B: number[][]): number[][] {
     const off = k * n;
     for (let j = 0; j < n; j++) bd[off + j] = row[j];
   }
-  const flat = gemmF64(ad, bd, m, p, n);
+  const flat = gemmF64(ad, bd, m, p, n, undefined, { skipZeroInA: true });
   const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
   for (let i = 0; i < m; i++) {
     const row = C[i];

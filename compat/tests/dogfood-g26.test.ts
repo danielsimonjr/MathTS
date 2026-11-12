@@ -25,7 +25,7 @@ describe('G26 #735 create(all).add scalar parity vs mathjs', () => {
     const ra: number[] = [];
     const rb: number[] = [];
     const n = 5000;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 20; i++) {
       mj.add(1, 2);
       mt.add(1, 2);
     }

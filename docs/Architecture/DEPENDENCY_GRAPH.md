@@ -2131,6 +2131,7 @@ graph LR
 
 **Exports:**
 
+- Types: `GemmF64Options`
 - Functions: `gemmF64`
 - Constants: `GEMM_BLOCK`
 
@@ -20397,7 +20398,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1294   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221234 |
+| Total Lines of Code     | 221242 |
 | Total Exports           | 7081   |
 | Total Re-exports        | 3045   |
 | Total Classes           | 61     |
