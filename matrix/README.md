@@ -76,7 +76,12 @@ slower than JS (2026-07).
 
 ## Matrix Types
 
-- `DenseMatrix` - Standard dense storage (row-major)
+- `DenseMatrix` - Standard dense storage (row-major). You can pass a nested 2-D array
+  to the constructor (`new DenseMatrix([[1,2],[3,4]])`) or use `DenseMatrix.fromArray`.
+  Allocation is capped at `DENSE_MATRIX_MAX_ELEMENTS` (**1e8** stored doubles, ~800 MiB)
+  so huge `rows×cols` products throw `RangeError: DenseMatrix too large` before V8 tries
+  to allocate an invalid `Float64Array`. Scalar scaling matches mathjs: `A.multiply(2)` or
+  `A.scale(2)`; matrix product is `A.multiply(B)` with another matrix.
 - `SparseMatrix` - CSR format for sparse data
 
 ## Status

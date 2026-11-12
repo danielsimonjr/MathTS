@@ -13,5 +13,6 @@ export type {
 } from './Matrix.js';
 
 export { DenseMatrix, isDenseMatrix } from './DenseMatrix.js';
+export { DENSE_MATRIX_MAX_ELEMENTS, assertDenseMatrixSize } from './dense/limits.js';
 
 export { SparseMatrix, isSparseMatrix } from './SparseMatrix.js';
