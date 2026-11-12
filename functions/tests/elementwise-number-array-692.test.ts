@@ -141,14 +141,16 @@ describe('#692 elementwise sin on number[]', () => {
 
   it('sin(Float64Array 1e6) within 1.2× a Math.sin loop (isolated Node gate)', () => {
     const line = execFileSync(nodeBinary(), [PERF_GATE], { encoding: 'utf8' }).trim();
-    const { ratio, loopMs, sinMs } = JSON.parse(line) as {
+    const { ratio, loopMs, sinMs, gateWouldPass } = JSON.parse(line) as {
       ratio: number;
       loopMs: number;
       sinMs: number;
+      gateWouldPass: boolean;
     };
     expect(Number.isFinite(ratio)).toBe(true);
     expect(sinMs).toBeGreaterThan(0);
     expect(loopMs).toBeGreaterThan(0);
-    expect(ratio).toBeLessThanOrEqual(1.2);
+    expect(gateWouldPass).toBe(true);
+    expect(ratio).toBeLessThan(1.2);
   });
 });

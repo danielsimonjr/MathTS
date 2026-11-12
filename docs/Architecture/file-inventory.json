@@ -10187,7 +10187,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 155
+      "loc": 157
     },
     {
       "file": "functions/tests/elementwise-wasm.browser.test.ts",

@@ -25,9 +25,13 @@ function runSin() {
 }
 
 const { ratio, baselineMs, candidateMs } = wallClockAbRatio(runLoop, runSin, {
-  skipSymmetricWarmup: true,
   fullWarmupPairs: 4,
-  sample: { samplePairs: 21, gcBetween: false },
+  warmup: { minPairs: 8, maxPairs: 24 },
+  sample: {
+    samplePairs: 31,
+    leadingDiscard: 4,
+    gcBetween: typeof globalThis.gc === 'function',
+  },
 });
 
 process.stdout.write(
