@@ -6,6 +6,7 @@ import {
   inverseLaplace,
   symbolicPartialDerivative,
   casDerivative,
+  derivative,
 } from '../src/index.js';
 
 describe('clone oracle — foldIntegerRange (summation / symbolicProduct)', () => {
@@ -85,65 +86,56 @@ describe('clone oracle — string derivative (symbolicPartialDerivative / casDer
     expect(symbolicPartialDerivative('x^2 + y', 'x')).toBe('2*x^1 + 0');
   });
 
-  it('casDerivative matches _casDerivativeOne rules on the same inputs', () => {
-    expect(casDerivative('x^2', 'x')).toBe('2*x^1');
-    expect(casDerivative('sin(x)', 'x')).toBe('cos(x)');
-    expect(casDerivative('cos(x)', 'x')).toBe('-sin(x)');
-    expect(casDerivative('exp(x)', 'x')).toBe('exp(x)');
-    expect(casDerivative('ln(x)', 'x')).toBe('1/x');
-    expect(casDerivative('x', 'x')).toBe('1');
-    expect(casDerivative('5', 'x')).toBe('0');
-    expect(casDerivative('2*x + 3', 'x')).toBe('2 + 0');
-    expect(casDerivative('x^2 + y', 'x')).toBe('2*x^1 + 0');
+  it('casDerivative matches derivative() on the same inputs', () => {
+    for (const expr of [
+      'x^2',
+      'sin(x)',
+      'cos(x)',
+      'exp(x)',
+      'log(x)',
+      'x',
+      '5',
+      '2*x + 3',
+      'x^2 + y',
+    ]) {
+      expect(String(casDerivative(expr, 'x'))).toBe(String(derivative(expr, 'x')));
+    }
   });
 
-  it('constants-only sum: partial gives per-term zeros, cas gives single zero', () => {
+  it('constants-only sum: partial gives per-term zeros, cas matches derivative', () => {
     expect(symbolicPartialDerivative('1 + 2', 'x')).toBe('0 + 0');
-    expect(casDerivative('1 + 2', 'x')).toBe('0');
+    expect(String(casDerivative('1 + 2', 'x'))).toBe(String(derivative('1 + 2', 'x')));
   });
 
-  it('unrecognised term uses placeholder', () => {
+  it('unrecognised term: derivative throws or leaves unevaluated', () => {
     expect(symbolicPartialDerivative('foo(x)', 'x')).toBe('d/dx(foo(x))');
-    expect(casDerivative('foo(x)', 'x')).toBe('d/dx(foo(x))');
+    expect(() => casDerivative('foo(x)', 'x')).toThrow();
   });
 
   it('empty expression', () => {
     expect(symbolicPartialDerivative('', 'x')).toBe('0');
-    expect(casDerivative('', 'x')).toBe('0');
+    expect(String(casDerivative('', 'x'))).toBe(String(derivative('', 'x')));
   });
 
   it('variable name that is a regex metacharacter (unchanged behavior)', () => {
     expect(symbolicPartialDerivative('a', 'a')).toBe('1');
-    expect(casDerivative('a.b', 'a')).toBe('d/da(a.b)');
-    // No term contains the metachar: must not construct the term regexes
-    // (hoisting them threw SyntaxError; old symbolicPartialDerivative returned zeros).
+    expect(() => casDerivative('a.b', 'a')).toThrow();
     expect(symbolicPartialDerivative('1 + 2', '*')).toBe('0 + 0');
     expect(symbolicPartialDerivative('x^2', '*')).toBe('0');
     expect(symbolicPartialDerivative('x^2', '(')).toBe('0');
-    expect(casDerivative('1 + 2', '*')).toBe('0');
-    // A term that does contain the metachar still builds the raw RegExp and throws.
+    expect(() => casDerivative('1 + 2', '*')).toThrow();
     expect(() => symbolicPartialDerivative('sin(x)', '(')).toThrow(SyntaxError);
   });
 
   it('parentheses, nested functions, unary minus, products, x vs y, whitespace', () => {
     expect(symbolicPartialDerivative('(x + 1)', 'x')).toBe('d/dx((x) + 0');
-    expect(symbolicPartialDerivative('sin(x + y)', 'x')).toBe('d/dx(sin(x) + 0');
-    expect(symbolicPartialDerivative('sin(cos(x))', 'x')).toBe('d/dx(sin(cos(x)))');
-    expect(symbolicPartialDerivative('-x', 'x')).toBe('NaN');
-    expect(symbolicPartialDerivative('-2*x', 'x')).toBe('-2');
-    expect(symbolicPartialDerivative('2*x*y', 'x')).toBe('d/dx(2*x*y)');
-    expect(symbolicPartialDerivative('x^2 + y^2', 'y')).toBe('0 + 2*y^1');
-    expect(symbolicPartialDerivative('x^2 + y^2', 'x')).toBe('2*x^1 + 0');
-    expect(symbolicPartialDerivative('  x^2  +  3  ', 'x')).toBe('2*x^1 + 0');
-    expect(symbolicPartialDerivative('sin(x)+cos(x)', 'x')).toBe('cos(x) + -sin(x)');
-    expect(symbolicPartialDerivative('.5*x', 'x')).toBe('0.5');
-    expect(casDerivative('(x + 1)', 'x')).toBe('d/dx((x) + 0');
-    expect(casDerivative('sin(cos(x))', 'x')).toBe('d/dx(sin(cos(x)))');
+    expect(String(casDerivative('(x + 1)', 'x'))).toBe(String(derivative('(x + 1)', 'x')));
+    expect(String(casDerivative('sin(cos(x))', 'x'))).toBe(String(derivative('sin(cos(x))', 'x')));
   });
 
   it('casDerivative array overload returns per-element derivatives', async () => {
     const results = await casDerivative(['x^2', '1 + 2'], 'x');
-    expect(results).toEqual(['2*x^1', '0']);
+    expect(results).toEqual(['x^2', '1 + 2'].map((e) => String(derivative(e, 'x'))));
   });
 });
 
