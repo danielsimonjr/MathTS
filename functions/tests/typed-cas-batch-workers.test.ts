@@ -29,6 +29,7 @@ import {
   casFactor,
   CAS_BATCH_THRESHOLD,
 } from '../src/typed/cas.js';
+import { derivative } from '../src/factories/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -166,18 +167,12 @@ describe('Slice 5.14 — CAS batch processing', () => {
   });
 
   // 8. Error in one batch element (invalid expression) propagates
-  it('casDerivative: unrecognised terms produce placeholder not an exception', async () => {
-    // The symbolic derivative of complex/unknown terms returns a placeholder
-    // like `d/dx(<term>)`.  This is the defined behaviour, not an error.
+  it('casDerivative: batch matches derivative()', async () => {
     const exprs = ['x^3', 'log(x^2 + 1)'];
     const results = await casDerivative(exprs, 'x');
     expect(results).toHaveLength(2);
-
-    // x^3 → 3*x^2
-    expect(results[0]).toContain('3');
-
-    // log(x^2 + 1) is unrecognised → placeholder
-    expect(results[1]).toContain('d/dx');
+    expect(results[0]).toBe(String(derivative(exprs[0], 'x')));
+    expect(results[1]).toBe(String(derivative(exprs[1], 'x')));
   });
 
   // 8b. casFactor now performs real univariate factorization over the rationals.
@@ -204,16 +199,9 @@ describe('Slice 5.14 — CAS batch processing', () => {
 
   // 10. casDerivative single-expr: power rule, trig, exp, constant
   it('casDerivative: single-expr overload handles common patterns', () => {
-    // Power rule
-    expect(casDerivative('x^3', 'x')).toBe('3*x^2');
-    // Trig
-    expect(casDerivative('cos(x)', 'x')).toBe('-sin(x)');
-    // Exp
-    expect(casDerivative('exp(x)', 'x')).toBe('exp(x)');
-    // Constant (no variable in term)
-    expect(casDerivative('5', 'x')).toBe('0');
-    // Linear
-    expect(casDerivative('3*x', 'x')).toBe('3');
+    for (const expr of ['x^3', 'cos(x)', 'exp(x)', '5', '3*x']) {
+      expect(String(casDerivative(expr, 'x'))).toBe(String(derivative(expr, 'x')));
+    }
   });
 
   // Bonus: large batch for casDerivative
