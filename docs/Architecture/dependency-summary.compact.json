@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1288, "e": 7024, "re": 3026 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1288, "e": 7027, "re": 3026 },
   "s": {
-    "loc": 219374,
+    "loc": 219601,
     "cls": 61,
     "int": 602,
-    "fn": 2367,
+    "fn": 2368,
     "tg": 172,
     "en": 0,
     "co": 1647,
@@ -971,6 +971,7 @@
         "dtw",
         "bitReverse",
         "fftCoreFloat64",
+        "fftExactFloat64",
         "rfft",
         "irfft",
         "fftshift",
@@ -978,8 +979,7 @@
         "fftfreq",
         "rfftfreq",
         "fftn",
-        "complex",
-        "complexConj"
+        "complex"
       ],
       "int": [
         "DtwOptions",
@@ -1601,6 +1601,8 @@
       "exp": [
         "parallelFFT",
         "parallelIFFT",
+        "fft",
+        "ifft",
         "parallelFFTMagnitude",
         "parallelFFTPower",
         "parallelConv",
@@ -1616,9 +1618,7 @@
         "idst",
         "dwt",
         "fourier",
-        "invFourier",
-        "hilbertTransform",
-        "periodogram"
+        "invFourier"
       ]
     },
     "parallel": {

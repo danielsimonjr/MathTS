@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7024
+    "totalExports": 7027
   },
   "entryPoints": [
     {
@@ -17706,7 +17706,7 @@
           },
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "./complex-to-interleaved.js",
@@ -21047,8 +21047,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["bitReverse", "fftCoreFloat64"],
-        "functions": ["bitReverse", "fftCoreFloat64"]
+        "exports": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"],
+        "functions": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"]
       },
       "functions/src/signal/fft-helpers.ts": {
         "description": "numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`",
@@ -26998,7 +26998,7 @@
         "internalDependencies": [
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "../gpu/fft-gpu.js",
@@ -39249,6 +39249,8 @@
             "imports": [
               "parallelFFT",
               "parallelIFFT",
+              "parallelFFT",
+              "parallelIFFT",
               "parallelFFTMagnitude",
               "parallelFFTPower",
               "parallelConv",
@@ -39287,6 +39289,8 @@
         "exports": [
           "parallelFFT",
           "parallelIFFT",
+          "fft",
+          "ifft",
           "parallelFFTMagnitude",
           "parallelFFTPower",
           "parallelConv",
@@ -46104,11 +46108,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 219374,
-    "totalExports": 7024,
+    "totalLinesOfCode": 219601,
+    "totalExports": 7027,
     "totalClasses": 61,
     "totalInterfaces": 602,
-    "totalFunctions": 2367,
+    "totalFunctions": 2368,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1647,
