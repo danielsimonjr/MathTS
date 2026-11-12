@@ -60,6 +60,24 @@ export const EVALUATE_SCOPE_OMIT = new Set([
   'chain',
   'parser',
   'resolve',
+  // Node constructors live on factoryScope for the parser closure. They must
+  // not be names the safe expression language can resolve (same denylist as
+  // the expression package's default evaluate).
+  'ConstantNode',
+  'SymbolNode',
+  'OperatorNode',
+  'FunctionNode',
+  'AssignmentNode',
+  'FunctionAssignmentNode',
+  'BlockNode',
+  'ArrayNode',
+  'ObjectNode',
+  'IndexNode',
+  'AccessorNode',
+  'ParenthesisNode',
+  'RangeNode',
+  'RelationalNode',
+  'ConditionalNode',
 ]);
 
 function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, unknown> {

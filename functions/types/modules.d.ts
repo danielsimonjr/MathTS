@@ -11,9 +11,3 @@ declare module 'seedrandom' {
   const seedrandom: (seed?: string | number, options?: object) => () => number;
   export default seedrandom;
 }
-
-declare module 'javascript-natural-sort' {
-  /** Natural-order comparator suitable for Array.prototype.sort. */
-  const naturalSort: (a: unknown, b: unknown) => number;
-  export default naturalSort;
-}

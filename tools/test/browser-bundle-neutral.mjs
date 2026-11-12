@@ -4,14 +4,10 @@
  * Fails when a static or literal dynamic import pulls an unresolved Node built-in.
  */
 import { buildSync } from 'esbuild';
-import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { repoRoot } from './workspaces.mjs';
-
-// workerpool's npm entry still embeds Node paths; browser apps load `dist/workerpool.js`
-// and ship `dist/worker.js` separately. Bundling stays honest about that boundary.
-const BROWSER_EXTERNALS = ['workerpool', 'workerpool/wasm'];
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(HERE, 'fixtures');
@@ -55,10 +51,17 @@ for (const { label, importLine, outfile } of CASES) {
       absWorkingDir: repoRoot,
       logLevel: 'silent',
       conditions: ['browser', 'import', 'default'],
-      mainFields: ['browser', 'module', 'main'],
-      external: BROWSER_EXTERNALS,
     });
     const bytes = statSync(outfile).size;
+    const bundled = readFileSync(outfile, 'utf8');
+    const staticNode = bundled.match(
+      /(?:from|import)\s*["'](?:node:|fs|crypto|util|path|os|module|worker_threads)["']/
+    );
+    if (staticNode) {
+      failed++;
+      console.error(`FAIL ${label}: static Node builtin in bundle (${staticNode[0]})`);
+      continue;
+    }
     console.log(`ok   ${label}: neutral bundle ${bytes} bytes`);
   } catch (err) {
     failed++;

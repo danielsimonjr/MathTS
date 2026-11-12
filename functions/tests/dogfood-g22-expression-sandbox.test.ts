@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { evaluate, parse, compileExpr } from '../src/factories/evaluate.js';
+import { evaluate as evaluateSubpath } from '../src/subpath-evaluate.js';
 
 describe('G22 dogfood — expression lexer, sandbox, overflow', () => {
   it('#720 evaluate("π") matches Math.PI and sin(π/2)', () => {
@@ -39,6 +40,24 @@ describe('G22 dogfood — expression lexer, sandbox, overflow', () => {
     expect(() => evaluate('compile')).toThrow(/Undefined symbol "compile"/);
     expect(() => evaluate('import')).toThrow(/Undefined symbol "import"/);
     expect(() => evaluate('createUnit')).toThrow(/Undefined symbol "createUnit"/);
+    expect(evaluateSubpath).toBe(evaluate);
+    for (const name of [
+      'resolve',
+      'simplify',
+      'derivative',
+      'ConstantNode',
+      'SymbolNode',
+      'FunctionNode',
+      'OperatorNode',
+    ]) {
+      expect(() => evaluate(name), name).toThrow(new RegExp(`Undefined symbol "${name}"`));
+      expect(() => evaluateSubpath(name), name).toThrow(new RegExp(`Undefined symbol "${name}"`));
+    }
+    // `chain` is also the length unit, so the bare symbol stays a Unit.
+    // The chain *function* stays forbidden.
+    expect(typeof evaluate('chain')).not.toBe('function');
+    expect(() => evaluate('chain(1)')).toThrow(/forbidden function "chain"/);
+    expect(() => evaluateSubpath('chain(1)')).toThrow(/forbidden function "chain"/);
     expect(() => evaluate('evaluate')).toThrow(/Undefined symbol "evaluate"/);
     expect(() => evaluate('Function')).toThrow(/Undefined symbol "Function"/);
     expect(() => evaluate('constructor')).toThrow(/Undefined symbol "constructor"/);

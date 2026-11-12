@@ -94,6 +94,16 @@ jobs:
       - name: Browser-safety (no node leaks from browser entries)
         run: bun run check:browser-safety
 
+      # esbuild platform=neutral of the published entries (#708). The source scan
+      # above does not bundle dependencies; this step does.
+      - name: Neutral browser bundles
+        run: node tools/test/browser-bundle-neutral.mjs
+
+      - name: README function stats
+        run: |
+          node --test tools/test/sync-readme-functions-stats.test.mjs
+          node tools/sync-readme-functions-stats.mjs --check
+
       - name: Bundle size and tree-shake record
         run: |
           node --test tools/test/check-bundle-budget.test.mjs

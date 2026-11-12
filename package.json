@@ -150,5 +150,8 @@
     "js-yaml": "^5.5.0",
     "shell-quote": "^1.11.0",
     "source-map-js": "^1.2.2"
+  },
+  "patchedDependencies": {
+    "@danielsimonjr/workerpool@10.2.2": "patches/@danielsimonjr%2Fworkerpool@10.2.2.patch"
   }
 }
