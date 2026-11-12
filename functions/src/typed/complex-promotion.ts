@@ -17,12 +17,18 @@ export function isPredictableMode(): boolean {
   return liveConfig().predictable;
 }
 
+/**
+ * Real log stays a number for NaN, non-negative inputs (including 0 → −∞),
+ * and every input when `predictable` is set. Shared by the scalar and the
+ * element-wise collection fast path.
+ */
+export function staysRealLog(x: number): boolean {
+  return Number.isNaN(x) || x >= 0 || isPredictableMode();
+}
+
 /** Natural log for a real scalar — promotes to Complex when allowed. */
 export function logReal(x: number): number | Complex {
-  if (x === 0) {
-    return -Infinity;
-  }
-  if (x > 0 || isPredictableMode()) {
+  if (staysRealLog(x)) {
     return Math.log(x);
   }
   return new Complex(x, 0).log();
@@ -40,20 +46,25 @@ export function logRealBase(x: number, base: number): number | Complex {
   return cx.divide(cb);
 }
 
-/** Base-10 log. Positive inputs never read config. */
+/** Base-10 log. Non-negative inputs and NaN never read config. */
 export function log10Real(x: number): number | Complex {
-  if (x >= 0 || isPredictableMode()) {
+  if (staysRealLog(x)) {
     return Math.log10(x);
   }
   return (logReal(x) as Complex).divide(new Complex(Math.LN10, 0));
 }
 
-/** Base-2 log. Positive inputs never read config. */
+/** Base-2 log. Non-negative inputs and NaN never read config. */
 export function log2Real(x: number): number | Complex {
-  if (x >= 0 || isPredictableMode()) {
+  if (staysRealLog(x)) {
     return Math.log2(x);
   }
   return (logReal(x) as Complex).divide(new Complex(Math.LN2, 0));
+}
+
+/** Real domain of log1p: NaN, `x >= -1`, or predictable mode. */
+export function staysRealLog1p(x: number): boolean {
+  return Number.isNaN(x) || x >= -1 || isPredictableMode();
 }
 
 /**
@@ -61,16 +72,21 @@ export function log2Real(x: number): number | Complex {
  * Values below that are the principal log of `1+x`.
  */
 export function log1pReal(x: number): number | Complex {
-  if (x >= -1 || isPredictableMode()) {
+  if (staysRealLog1p(x)) {
     return Math.log1p(x);
   }
   const re = x + 1;
   return new Complex(Math.log(Math.abs(re)), Math.atan2(0, re));
 }
 
-/** Square root. Non-negative inputs never read config. */
+/** Real square root: NaN, non-negative, or predictable mode. NaN stays NaN. */
+export function staysRealSqrt(x: number): boolean {
+  return Number.isNaN(x) || x >= 0 || isPredictableMode();
+}
+
+/** Square root. Non-negative inputs and NaN never read config. */
 export function sqrtReal(x: number): number | Complex {
-  if (x >= 0 || isPredictableMode()) {
+  if (staysRealSqrt(x)) {
     return Math.sqrt(x);
   }
   return new Complex(0, Math.sqrt(-x));
@@ -121,9 +137,24 @@ export function nthRootReal(a: number, root: number): number {
   return nthRootNumber(a, root);
 }
 
+/** Inverse sine/cosine/tangent-h: NaN and |x| <= 1 stay real. */
+export function staysRealUnitInterval(x: number): boolean {
+  return Number.isNaN(x) || (x >= -1 && x <= 1) || isPredictableMode();
+}
+
+/** Inverse hyperbolic cosine: NaN and x >= 1 stay real. */
+export function staysRealAcosh(x: number): boolean {
+  return Number.isNaN(x) || x >= 1 || isPredictableMode();
+}
+
+/** acsc/asec: NaN and |x| >= 1 stay real. */
+export function staysRealAbsAtLeastOne(x: number): boolean {
+  return Number.isNaN(x) || x <= -1 || x >= 1 || isPredictableMode();
+}
+
 /** acsc(x) = asin(1/x). Real for |x| >= 1; those inputs never read config. */
 export function acscReal(x: number): number | Complex {
-  if (x <= -1 || x >= 1 || isPredictableMode()) {
+  if (staysRealAbsAtLeastOne(x)) {
     return Math.asin(1 / x);
   }
   return new Complex(1 / x, 0).asin();
@@ -131,7 +162,7 @@ export function acscReal(x: number): number | Complex {
 
 /** asec(x) = acos(1/x). Real for |x| >= 1; those inputs never read config. */
 export function asecReal(x: number): number | Complex {
-  if (x <= -1 || x >= 1 || isPredictableMode()) {
+  if (staysRealAbsAtLeastOne(x)) {
     return Math.acos(1 / x);
   }
   return new Complex(1 / x, 0).acos();

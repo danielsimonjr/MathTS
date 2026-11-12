@@ -8633,7 +8633,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1787
+      "loc": 1801
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8668,7 +8668,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 139
+      "loc": 170
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -8703,7 +8703,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 72
+      "loc": 157
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -8948,7 +8948,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 341
+      "loc": 349
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -9907,7 +9907,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 73
+      "loc": 153
     },
     {
       "file": "functions/tests/elementwise-wasm.browser.test.ts",

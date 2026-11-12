@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1287
   totalModules: 82
-  totalExports: 7019
+  totalExports: 7024
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -23074,10 +23074,9 @@ modules:
             - euclidSnap
         - file: ./f64-kernels.js
           imports:
-            - assertFlatNumberVector
             - f64Unary
             - f64UnaryDispatched
-            - numberArrayUnary
+            - unaryCollection
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23092,7 +23091,10 @@ modules:
             - log10Real
             - log2Real
             - log1pReal
+            - staysRealLog
+            - staysRealLog1p
             - sqrtReal
+            - staysRealSqrt
             - powReal
             - nthRootReal
       workspaceDependencies:
@@ -23517,26 +23519,38 @@ modules:
             - Fraction
       exports:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
       functions:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
     functions/src/typed/complex.ts:
@@ -23723,17 +23737,21 @@ modules:
           imports:
             - elementwiseUnaryDispatch
             - WasmElementwiseOp
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - f64Unary
-        - assertFlatNumberVector
         - f64UnaryDispatched
-        - numberArrayUnary
+        - unaryCollection
+      interfaces:
+        - UnaryRealSpec
       functions:
         - f64Unary
-        - assertFlatNumberVector
         - f64UnaryDispatched
-        - numberArrayUnary
+        - unaryCollection
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -25765,12 +25783,14 @@ modules:
           imports:
             - acscReal
             - asecReal
-            - isPredictableMode
+            - staysRealAbsAtLeastOne
+            - staysRealAcosh
+            - staysRealUnitInterval
         - file: ./f64-kernels.js
           imports:
             - f64Unary
             - f64UnaryDispatched
-            - numberArrayUnary
+            - unaryCollection
         - file: ./trig-angle-unit.js
           imports:
             - trigFromAngleUnit
@@ -43612,11 +43632,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218885
-  totalExports: 7019
+  totalLinesOfCode: 219023
+  totalExports: 7024
   totalClasses: 61
-  totalInterfaces: 601
-  totalFunctions: 2366
+  totalInterfaces: 602
+  totalFunctions: 2371
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1646

@@ -5,7 +5,7 @@
  * Supports Complex, BigNumber, and Float64Array types.
  *
  * Every Float64Array signature in this file is synchronous and returns a new Float64Array.
- * Matching `Array` signatures accept flat `number[]` and return `number[]` (see `f64-kernels`).
+ * One shared `Array | Matrix` signature (`unaryCollection`) re-enters this function per leaf.
  * sin, cos, tan, csc, sec, cot, atan and atanh ask the WASM tier first, after `loadWasm()`
  * loads the tier. For worker threads, use `parallelMap` or `computePool.applyKernel`
  * from `@danielsimonjr/mathts-parallel`.
@@ -16,8 +16,14 @@
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
-import { acscReal, asecReal, isPredictableMode } from './complex-promotion.js';
-import { f64Unary, f64UnaryDispatched, numberArrayUnary } from './f64-kernels.js';
+import {
+  acscReal,
+  asecReal,
+  staysRealAbsAtLeastOne,
+  staysRealAcosh,
+  staysRealUnitInterval,
+} from './complex-promotion.js';
+import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
 
 // =============================================================================
@@ -42,7 +48,7 @@ export const sin = mathTyped('sin', {
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'sin', Math.sin, (z) => z.sin()),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'sin', Math.sin),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'sin', 'sin', Math.sin),
+  'Array | Matrix': unaryCollection({ real: Math.sin, wasmKernel: 'sin' }),
 });
 
 /**
@@ -56,7 +62,7 @@ export const cos = mathTyped('cos', {
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'cos', Math.cos, (z) => z.cos()),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'cos', Math.cos),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'cos', 'cos', Math.cos),
+  'Array | Matrix': unaryCollection({ real: Math.cos, wasmKernel: 'cos' }),
 });
 
 /**
@@ -70,7 +76,7 @@ export const tan = mathTyped('tan', {
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'tan', Math.tan, (z) => z.tan()),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'tan', Math.tan),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'tan', 'tan', Math.tan),
+  'Array | Matrix': unaryCollection({ real: Math.tan, wasmKernel: 'tan' }),
 });
 
 /**
@@ -90,7 +96,7 @@ export const csc = mathTyped('csc', {
 
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'csc', (x) => 1 / Math.sin(x)),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'csc', 'csc', (x) => 1 / Math.sin(x)),
+  'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.sin(x), wasmKernel: 'csc' }),
 });
 
 /**
@@ -110,7 +116,7 @@ export const sec = mathTyped('sec', {
 
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'sec', (x) => 1 / Math.cos(x)),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'sec', 'sec', (x) => 1 / Math.cos(x)),
+  'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.cos(x), wasmKernel: 'sec' }),
 });
 
 /**
@@ -130,7 +136,7 @@ export const cot = mathTyped('cot', {
 
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'cot', (x) => 1 / Math.tan(x)),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'cot', 'cot', (x) => 1 / Math.tan(x)),
+  'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.tan(x), wasmKernel: 'cot' }),
 });
 
 // =============================================================================
@@ -142,17 +148,15 @@ export const cot = mathTyped('cot', {
  */
 export const asin = mathTyped('asin', {
   number: (a: number) => {
-    if ((a >= -1 && a <= 1) || isPredictableMode()) {
-      return Math.asin(a);
-    }
+    if (staysRealUnitInterval(a)) return Math.asin(a);
     return new Complex(a, 0).asin();
   },
   Complex: (a: Complex) => a.asin(),
   BigNumber: (a: BigNumber) => a.asin(),
 
-  // Values outside the real domain give NaN, as Math.asin does.
+  // Values outside the real domain give NaN, as Math.asin does, on Float64Array.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asin),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'asin', undefined, Math.asin),
+  'Array | Matrix': unaryCollection({ real: Math.asin, inRealDomain: staysRealUnitInterval }),
 });
 
 /**
@@ -160,17 +164,14 @@ export const asin = mathTyped('asin', {
  */
 export const acos = mathTyped('acos', {
   number: (a: number) => {
-    if ((a >= -1 && a <= 1) || isPredictableMode()) {
-      return Math.acos(a);
-    }
+    if (staysRealUnitInterval(a)) return Math.acos(a);
     return new Complex(a, 0).acos();
   },
   Complex: (a: Complex) => a.acos(),
   BigNumber: (a: BigNumber) => a.acos(),
 
-  // Values outside the real domain give NaN, as Math.acos does.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acos),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'acos', undefined, Math.acos),
+  'Array | Matrix': unaryCollection({ real: Math.acos, inRealDomain: staysRealUnitInterval }),
 });
 
 /**
@@ -182,7 +183,7 @@ export const atan = mathTyped('atan', {
   BigNumber: (a: BigNumber) => a.atan(),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atan', Math.atan),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'atan', 'atan', Math.atan),
+  'Array | Matrix': unaryCollection({ real: Math.atan, wasmKernel: 'atan' }),
 });
 
 /**
@@ -201,6 +202,10 @@ export const acsc = mathTyped('acsc', {
   Complex: (a: Complex) => a.inverse().asin(),
   // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
+  'Array | Matrix': unaryCollection({
+    real: (x) => Math.asin(1 / x),
+    inRealDomain: staysRealAbsAtLeastOne,
+  }),
 });
 
 /**
@@ -211,6 +216,10 @@ export const asec = mathTyped('asec', {
   Complex: (a: Complex) => a.inverse().acos(),
   // BigNumber: asec(a) = acos(1/a).
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),
+  'Array | Matrix': unaryCollection({
+    real: (x) => Math.acos(1 / x),
+    inRealDomain: staysRealAbsAtLeastOne,
+  }),
 });
 
 /**
@@ -221,6 +230,7 @@ export const acot = mathTyped('acot', {
   Complex: (a: Complex) => a.inverse().atan(),
   // BigNumber: acot(a) = atan(1/a).
   BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).atan(),
+  'Array | Matrix': unaryCollection({ real: (x) => Math.atan(1 / x) }),
 });
 
 // =============================================================================
@@ -236,7 +246,7 @@ export const asinh = mathTyped('asinh', {
   BigNumber: (a: BigNumber) => a.asinh(),
 
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asinh),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'asinh', undefined, Math.asinh),
+  'Array | Matrix': unaryCollection({ real: Math.asinh }),
 });
 
 /**
@@ -244,9 +254,7 @@ export const asinh = mathTyped('asinh', {
  */
 export const acosh = mathTyped('acosh', {
   number: (a: number) => {
-    if (a >= 1 || isPredictableMode()) {
-      return Math.acosh(a);
-    }
+    if (staysRealAcosh(a)) return Math.acosh(a);
     if (a <= -1) {
       return new Complex(Math.log(Math.sqrt(a * a - 1) - a), Math.PI);
     }
@@ -255,9 +263,8 @@ export const acosh = mathTyped('acosh', {
   Complex: (a: Complex) => a.acosh(),
   BigNumber: (a: BigNumber) => a.acosh(),
 
-  // Values outside the real domain give NaN, as Math.acosh does.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acosh),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'acosh', undefined, Math.acosh),
+  'Array | Matrix': unaryCollection({ real: Math.acosh, inRealDomain: staysRealAcosh }),
 });
 
 /**
@@ -265,17 +272,18 @@ export const acosh = mathTyped('acosh', {
  */
 export const atanh = mathTyped('atanh', {
   number: (a: number) => {
-    if ((a <= 1 && a >= -1) || isPredictableMode()) {
-      return Math.atanh(a);
-    }
+    if (staysRealUnitInterval(a)) return Math.atanh(a);
     return new Complex(a, 0).atanh();
   },
   Complex: (a: Complex) => a.atanh(),
   BigNumber: (a: BigNumber) => a.atanh(),
 
-  // Values outside the real domain give NaN, as Math.atanh does.
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atanh', Math.atanh),
-  Array: (a: unknown[]) => numberArrayUnary(a, 'atanh', 'atanh', Math.atanh),
+  'Array | Matrix': unaryCollection({
+    real: Math.atanh,
+    wasmKernel: 'atanh',
+    inRealDomain: staysRealUnitInterval,
+  }),
 });
 
 // =============================================================================

@@ -2,4 +2,4 @@
 '@danielsimonjr/mathts-functions': patch
 ---
 
-Accept flat `number[]` vectors on synchronous unary element-wise trig and arithmetic `Float64Array` overloads (`sin`, `cos`, `abs`, `exp`, …). Nested arrays and matrices still throw the mathjs-style `map(M, fn)` hint.
+Unary element-wise functions (`sin`, `cos`, `exp`, `log`, `sqrt`, `abs`, and the other synchronous trig and arithmetic unaries) accept `number[]`, nested arrays, and Matrix through one shared `Array | Matrix` signature. Flat numeric vectors still use the Float64Array kernel. Mixed elements dispatch per leaf, and `sqrt`/`log` of a negative promote to Complex the same way the scalar does. A Matrix result stays that matrix class while every value is a real number.

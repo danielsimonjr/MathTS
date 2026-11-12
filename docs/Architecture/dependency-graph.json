@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7019
+    "totalExports": 7024
   },
   "entryPoints": [
     {
@@ -24579,12 +24579,7 @@
           },
           {
             "file": "./f64-kernels.js",
-            "imports": [
-              "assertFlatNumberVector",
-              "f64Unary",
-              "f64UnaryDispatched",
-              "numberArrayUnary"
-            ]
+            "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
           },
           {
             "file": "../factories/matrix-bridge.js",
@@ -24602,7 +24597,10 @@
               "log10Real",
               "log2Real",
               "log1pReal",
+              "staysRealLog",
+              "staysRealLog1p",
               "sqrtReal",
+              "staysRealSqrt",
               "powReal",
               "nthRootReal"
             ]
@@ -25053,27 +25051,39 @@
         ],
         "exports": [
           "isPredictableMode",
+          "staysRealLog",
           "logReal",
           "logRealBase",
           "log10Real",
           "log2Real",
+          "staysRealLog1p",
           "log1pReal",
+          "staysRealSqrt",
           "sqrtReal",
           "powReal",
           "nthRootReal",
+          "staysRealUnitInterval",
+          "staysRealAcosh",
+          "staysRealAbsAtLeastOne",
           "acscReal",
           "asecReal"
         ],
         "functions": [
           "isPredictableMode",
+          "staysRealLog",
           "logReal",
           "logRealBase",
           "log10Real",
           "log2Real",
+          "staysRealLog1p",
           "log1pReal",
+          "staysRealSqrt",
           "sqrtReal",
           "powReal",
           "nthRootReal",
+          "staysRealUnitInterval",
+          "staysRealAcosh",
+          "staysRealAbsAtLeastOne",
           "acscReal",
           "asecReal"
         ]
@@ -25260,14 +25270,16 @@
             "imports": ["elementwiseUnaryDispatch", "WasmElementwiseOp"]
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["f64Unary", "assertFlatNumberVector", "f64UnaryDispatched", "numberArrayUnary"],
-        "functions": [
-          "f64Unary",
-          "assertFlatNumberVector",
-          "f64UnaryDispatched",
-          "numberArrayUnary"
-        ]
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"],
+        "interfaces": ["UnaryRealSpec"],
+        "functions": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -27445,11 +27457,17 @@
         "internalDependencies": [
           {
             "file": "./complex-promotion.js",
-            "imports": ["acscReal", "asecReal", "isPredictableMode"]
+            "imports": [
+              "acscReal",
+              "asecReal",
+              "staysRealAbsAtLeastOne",
+              "staysRealAcosh",
+              "staysRealUnitInterval"
+            ]
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary", "f64UnaryDispatched", "numberArrayUnary"]
+            "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
           },
           {
             "file": "./trig-angle-unit.js",
@@ -46080,11 +46098,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218885,
-    "totalExports": 7019,
+    "totalLinesOfCode": 219023,
+    "totalExports": 7024,
     "totalClasses": 61,
-    "totalInterfaces": 601,
-    "totalFunctions": 2366,
+    "totalInterfaces": 602,
+    "totalFunctions": 2371,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1646,
