@@ -441,6 +441,9 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
  * Computes the determinant using LU decomposition.
  */
 export function det(m: CompatMatrixValue | number[][]): number {
+  if (m instanceof SparseMatrix) {
+    throw new TypeError('Expected DenseMatrix or 2D array');
+  }
   const matrix = compatToDenseMatrix(m);
 
   if (matrix.rows !== matrix.cols) {
