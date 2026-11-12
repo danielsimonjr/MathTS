@@ -5021,6 +5021,7 @@
       "zscore"
     ],
     "tensor": [
+      "batchedMatmul",
       "concatenate",
       "contractNetwork",
       "ContractNetworkOpts",
@@ -5037,6 +5038,7 @@
       "randomTensor",
       "RandomTensorOpts",
       "reshapeByRowAxes",
+      "resolveReshapeShape",
       "roll",
       "scatter",
       "ScatterOpts",
@@ -5048,6 +5050,7 @@
       "tensorCholesky",
       "TensorCholeskyOpts",
       "TensorCholeskyResult",
+      "TensorDtype",
       "tensorEig",
       "TensorEigOpts",
       "TensorEigResult",
@@ -5065,6 +5068,7 @@
       "tensorSolve",
       "TensorSolveOpts",
       "TensorSolveResult",
+      "TensorStorage",
       "tensorSvd",
       "TensorSvdOpts",
       "TensorSvdResult",

@@ -19,6 +19,17 @@ import {
   type NestedArray as CoreNestedArray,
 } from '@danielsimonjr/mathts-core/internal';
 import { Index } from './named-index.js';
+import { batchedMatmul } from './batched-matmul.js';
+import { resolveReshapeShape } from './reshape-shape.js';
+import { slice as sliceTensor, type SliceRange } from './operations/slice.js';
+
+/** Optional row-major view metadata (default: offset 0, C-contiguous strides). */
+export interface TensorStorage {
+  readonly offset?: number;
+  readonly strides?: ReadonlyArray<number>;
+}
+
+export type TensorDtype = 'float64';
 
 /**
  * Consolidated onto `@danielsimonjr/mathts-core`'s generic `NestedArray<T>`,
@@ -50,17 +61,39 @@ export interface EinsumSpec {
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
   readonly data: Float64Array;
+  /** Byte offset in elements from the start of `data` for the logical index [0,…,0]. */
+  readonly offset: number;
+  /** Per-axis strides in elements (defaults to row-major when omitted at construction). */
+  readonly strides: number[];
   /** Optional per-axis Index labels. When set, enables `contract`, `replaceIndex`, `axisOf`. */
   readonly axisLabels?: ReadonlyArray<Index>;
 
-  constructor(shape: ReadonlyArray<number>, data: Float64Array, axisLabels?: ReadonlyArray<Index>) {
+  constructor(
+    shape: ReadonlyArray<number>,
+    data: Float64Array,
+    axisLabels?: ReadonlyArray<Index>,
+    storage?: TensorStorage
+  ) {
     if (!(data instanceof Float64Array)) {
       throw new TypeError('Tensor: data must be a Float64Array');
     }
-    if (data.length !== Tensor.sizeOf(shape)) {
+    const size = Tensor.sizeOf(shape);
+    const offset = storage?.offset ?? 0;
+    const strides =
+      storage?.strides !== undefined ? [...storage.strides] : Tensor.rowMajorStrides(shape);
+    if (strides.length !== shape.length) {
       throw new Error(
-        `Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`
+        `Tensor: strides length ${strides.length} does not match rank ${shape.length}`
       );
+    }
+    if (storage?.strides === undefined && offset === 0) {
+      if (data.length !== size) {
+        throw new Error(
+          `Tensor: data length ${data.length} does not match shape [${shape}] (size ${size})`
+        );
+      }
+    } else {
+      Tensor.validateStorageBounds(shape, data.length, offset, strides);
     }
     if (axisLabels !== undefined && axisLabels.length !== shape.length) {
       throw new Error(
@@ -69,8 +102,34 @@ export class Tensor {
     }
     this.shape = shape;
     this.data = data;
+    this.offset = offset;
+    this.strides = strides;
     if (axisLabels !== undefined) {
       this.axisLabels = [...axisLabels];
+    }
+  }
+
+  /** All public tensors currently use float64 storage (#760). */
+  get dtype(): TensorDtype {
+    return 'float64';
+  }
+
+  private static validateStorageBounds(
+    shape: ReadonlyArray<number>,
+    dataLength: number,
+    offset: number,
+    strides: ReadonlyArray<number>
+  ): void {
+    if (Tensor.sizeOf(shape) === 0) return;
+    if (shape.length === 0) return;
+    let maxIndex = offset;
+    for (let k = 0; k < shape.length; k++) {
+      maxIndex += (shape[k]! - 1) * strides[k]!;
+    }
+    if (maxIndex < 0 || maxIndex >= dataLength) {
+      throw new Error(
+        `Tensor: storage view extends past data buffer (max index ${maxIndex}, length ${dataLength})`
+      );
     }
   }
 
@@ -127,6 +186,77 @@ export class Tensor {
     const out = new Float64Array(n * n);
     for (let i = 0; i < n; i++) out[i * n + i] = 1;
     return new Tensor([n, n], out);
+  }
+
+  static zeros(...shape: number[]): Tensor {
+    if (shape.length === 0) throw new TypeError('Tensor.zeros: requires at least one dimension');
+    const size = Tensor.sizeOf(shape);
+    return new Tensor(shape, new Float64Array(size));
+  }
+
+  static ones(...shape: number[]): Tensor {
+    if (shape.length === 0) throw new TypeError('Tensor.ones: requires at least one dimension');
+    const size = Tensor.sizeOf(shape);
+    const out = new Float64Array(size);
+    out.fill(1);
+    return new Tensor(shape, out);
+  }
+
+  static full(shape: ReadonlyArray<number>, value: number): Tensor {
+    const size = Tensor.sizeOf(shape);
+    const out = new Float64Array(size);
+    out.fill(value);
+    return new Tensor([...shape], out);
+  }
+
+  /** Uninitialized buffer (zero-filled in JS; documented f64-only). */
+  static empty(...shape: number[]): Tensor {
+    return Tensor.zeros(...shape);
+  }
+
+  static arange(start: number, stop?: number, step = 1): Tensor {
+    let s = start;
+    let e = stop;
+    if (e === undefined) {
+      e = start;
+      s = 0;
+    }
+    if (step === 0) throw new RangeError('Tensor.arange: step must be non-zero');
+    const len =
+      step > 0 ? Math.max(0, Math.ceil((e - s) / step)) : Math.max(0, Math.ceil((s - e) / -step));
+    const out = new Float64Array(len);
+    for (let i = 0; i < len; i++) {
+      out[i] = s + i * step;
+    }
+    return new Tensor([len], out);
+  }
+
+  /** True when storage is a dense C-contiguous slab (no parent-buffer view aliasing). */
+  isContiguous(): boolean {
+    if (this.offset !== 0) return false;
+    const want = Tensor.rowMajorStrides(this.shape);
+    const stridesMatch =
+      this.strides.length === want.length && this.strides.every((st, i) => st === want[i]);
+    return stridesMatch && this.data.length === Tensor.sizeOf(this.shape);
+  }
+
+  /** Return a row-major C-contiguous copy when this tensor is a non-contiguous view. */
+  contiguous(): Tensor {
+    if (this.isContiguous()) return this;
+    const size = Tensor.sizeOf(this.shape);
+    const out = new Float64Array(size);
+    const rank = this.shape.length;
+    const coords = new Array<number>(rank).fill(0);
+    for (let flat = 0; flat < size; flat++) {
+      let idx = this.offset;
+      for (let k = 0; k < rank; k++) idx += coords[k]! * this.strides[k]!;
+      out[flat] = this.data[idx]!;
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++coords[k]! < this.shape[k]!) break;
+        coords[k] = 0;
+      }
+    }
+    return new Tensor([...this.shape], out, this.axisLabels);
   }
 
   toNested(): NestedArray {
@@ -251,7 +381,90 @@ export class Tensor {
 
   /** Deep copy: independent data buffer; shape and axisLabels are carried over. */
   clone(): Tensor {
-    return new Tensor([...this.shape], this.data.slice(), this.axisLabels);
+    const c = this.contiguous();
+    return new Tensor([...this.shape], c.data.slice(), this.axisLabels);
+  }
+
+  fill_(value: number): this {
+    if (!this.isContiguous()) {
+      throw new Error('Tensor.fill_: tensor must be contiguous (call contiguous() first)');
+    }
+    this.data.fill(value);
+    return this;
+  }
+
+  add_(other: Tensor | number, alpha = 1): this {
+    if (!this.isContiguous()) {
+      throw new Error('Tensor.add_: tensor must be contiguous (call contiguous() first)');
+    }
+    if (typeof other === 'number') {
+      for (let i = 0; i < this.data.length; i++) this.data[i] += alpha * other;
+      return this;
+    }
+    const o = other.contiguous();
+    if (!this.sameShape(o)) {
+      throw new Error(
+        `Tensor.add_: shape mismatch [${this.shape}] vs [${other.shape}] (broadcast not supported in-place)`
+      );
+    }
+    for (let i = 0; i < this.data.length; i++) this.data[i] += alpha * o.data[i]!;
+    return this;
+  }
+
+  mul_(other: Tensor | number): this {
+    if (!this.isContiguous()) {
+      throw new Error('Tensor.mul_: tensor must be contiguous (call contiguous() first)');
+    }
+    if (typeof other === 'number') {
+      for (let i = 0; i < this.data.length; i++) this.data[i] *= other;
+      return this;
+    }
+    const o = other.contiguous();
+    if (!this.sameShape(o)) {
+      throw new Error(`Tensor.mul_: shape mismatch [${this.shape}] vs [${other.shape}]`);
+    }
+    for (let i = 0; i < this.data.length; i++) this.data[i] *= o.data[i]!;
+    return this;
+  }
+
+  /** Inner product of two rank-1 tensors (PyTorch `dot`). */
+  dot(other: Tensor): number {
+    if (this.shape.length !== 1 || other.shape.length !== 1) {
+      throw new Error('Tensor.dot: both operands must be rank-1');
+    }
+    if (this.shape[0] !== other.shape[0]) {
+      throw new Error(`Tensor.dot: length mismatch ${this.shape[0]} vs ${other.shape[0]}`);
+    }
+    const a = this.contiguous().data;
+    const b = other.contiguous().data;
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) sum += a[i]! * b[i]!;
+    return sum;
+  }
+
+  /** 3-vector cross product (PyTorch `cross` for length-3 vectors). */
+  cross(other: Tensor): Tensor {
+    if (this.shape.length !== 1 || other.shape.length !== 1 || this.shape[0] !== 3) {
+      throw new Error('Tensor.cross: both operands must be rank-1 vectors of length 3');
+    }
+    if (other.shape[0] !== 3) {
+      throw new Error('Tensor.cross: both operands must be rank-1 vectors of length 3');
+    }
+    const a = this.contiguous().data;
+    const b = other.contiguous().data;
+    const out = new Float64Array([
+      a[1]! * b[2]! - a[2]! * b[1]!,
+      a[2]! * b[0]! - a[0]! * b[2]!,
+      a[0]! * b[1]! - a[1]! * b[0]!,
+    ]);
+    return new Tensor([3], out);
+  }
+
+  /**
+   * Extract a sub-tensor by per-axis slice ranges (NumPy-style); see {@link sliceTensor}.
+   */
+  slice(ranges: (SliceRange | null)[]): Tensor {
+    return sliceTensor(this, ranges);
   }
 
   scale(k: number): Tensor {
@@ -687,10 +900,12 @@ export class Tensor {
   }
 
   reshape(shape: ReadonlyArray<number>): Tensor {
-    if (Tensor.sizeOf(shape) !== this.data.length) {
-      throw new Error(`Tensor.reshape: size mismatch [${this.shape}] -> [${shape}]`);
+    const currentSize = Tensor.sizeOf(this.shape);
+    const resolved = resolveReshapeShape(currentSize, shape);
+    if (!this.isContiguous()) {
+      return this.contiguous().reshape(resolved);
     }
-    return new Tensor([...shape], this.data.slice());
+    return new Tensor(resolved, this.data, this.axisLabels);
   }
 
   transpose(perm?: ReadonlyArray<number>): Tensor {
@@ -733,22 +948,52 @@ export class Tensor {
     return new Tensor(outShape, out);
   }
 
-  matMul(other: Tensor): Tensor {
-    if (this.shape.length !== 2 || other.shape.length !== 2) {
-      throw new Error(`Tensor.matMul: both operands must be rank-2`);
+  /** Batched matrix multiply; `matMul` is an alias (#753). */
+  matmul(other: Tensor): Tensor {
+    const rankA = this.shape.length;
+    const rankB = other.shape.length;
+    if (rankA < 2 || rankB < 2) {
+      throw new Error(
+        `Tensor.matmul: both operands must have rank ≥ 2 (got ${rankA} and ${rankB})`
+      );
     }
-    const [m, k] = this.shape;
-    const [k2, n] = other.shape;
-    if (k !== k2) throw new Error(`Tensor.matMul: inner dimension mismatch ${k} != ${k2}`);
-    // Dogfood matrix's backend-selected matmul instead of a local triple loop: WASM
-    // (SIMD f64x2, ~4.7x at 512²) once `wasmBackend.initialize()` has run, else matrix's
-    // cache-friendly JS ikj — both faster than the old naive ijk. DenseMatrix wraps our
-    // Float64Array without copying (matmul reads only). See tools/benchmarks/matmul-wasm.mjs.
-    const c = backendManager.multiply(
-      new DenseMatrix(m, k, this.data),
-      new DenseMatrix(k, n, other.data)
-    );
-    return new Tensor([m, n], c.toFloat64Array());
+    if (rankA !== rankB) {
+      throw new Error(
+        `Tensor.matmul: batch rank mismatch; operands must have the same rank (${rankA} vs ${rankB})`
+      );
+    }
+    const batchRank = rankA - 2;
+    for (let b = 0; b < batchRank; b++) {
+      if (this.shape[b] !== other.shape[b]) {
+        throw new Error(
+          `Tensor.matmul: batch dimension ${b} mismatch (${this.shape[b]} vs ${other.shape[b]})`
+        );
+      }
+    }
+    const m = this.shape[rankA - 2]!;
+    const k = this.shape[rankA - 1]!;
+    const k2 = other.shape[rankB - 2]!;
+    const n = other.shape[rankB - 1]!;
+    if (k !== k2) {
+      throw new Error(`Tensor.matmul: inner dimension mismatch ${k} != ${k2}`);
+    }
+
+    if (rankA === 2 && rankB === 2) {
+      const a = this.contiguous().data;
+      const b = other.contiguous().data;
+      const c = backendManager.multiply(new DenseMatrix(m, k, a), new DenseMatrix(k, n, b));
+      return new Tensor([m, n], c.toFloat64Array());
+    }
+
+    const aData = this.contiguous().data;
+    const bData = other.contiguous().data;
+    const yData = batchedMatmul(aData, bData, this.shape, other.shape);
+    const batchShape = this.shape.slice(0, batchRank);
+    return new Tensor([...batchShape, m, n], yData);
+  }
+
+  matMul(other: Tensor): Tensor {
+    return this.matmul(other);
   }
 
   static einsum(spec: EinsumSpec, ...operands: Tensor[]): Tensor {

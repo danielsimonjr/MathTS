@@ -4,8 +4,8 @@
  * Mirrors NumPy / JAX basic slicing semantics:
  *   - Negative indices wrap around: -1 refers to the last element.
  *   - `null` range for an axis means "take the entire axis".
- *   - `step` must be >= 1 (reverse-step slicing is deferred).
- *   - Output shape for axis i: Math.ceil((stop - start) / step).
+ *   - `step` may be negative (full reverse uses default start/stop like NumPy).
+ *   - Output is a zero-copy view when possible (non-unit step produces strided views).
  *
  * Axis-label semantics: labels from the input axes are preserved in the
  * output. A slice is still the same logical axis — just smaller — so the
@@ -19,12 +19,19 @@ import { Index } from '../named-index.js';
 
 /** Defines the start, stop, and step of a slice along one axis. */
 export interface SliceRange {
-  /** Default 0. Supports negative indexing: -1 means shape[axis]-1. */
+  /** Default 0 (step > 0) or dim - 1 (step < 0). Supports negative indexing. */
   start?: number;
-  /** Default = shape[axis]. Supports negative indexing. */
+  /** Default = shape[axis] (step > 0) or -1 (step < 0). Supports negative indexing. */
   stop?: number;
-  /** Default 1. Must be >= 1 (no reverse step). */
+  /** Default 1. Non-zero integers; may be negative. */
   step?: number;
+}
+
+function axisSliceLength(start: number, stop: number, step: number): number {
+  if (step > 0) {
+    return start >= stop ? 0 : Math.ceil((stop - start) / step);
+  }
+  return start <= stop ? 0 : Math.ceil((start - stop) / -step);
 }
 
 /**
@@ -34,15 +41,7 @@ export interface SliceRange {
  * @param ranges - Array of length `t.shape.length`. Each element is either a
  *                 `SliceRange` or `null` (which means "take the entire axis").
  *                 Must have the same length as `t.shape`.
- * @returns A new `Tensor` whose shape[i] = ceil((stop_i - start_i) / step_i),
- *          carrying preserved axis labels (same name/tags, updated dim).
- *
- * @throws {RangeError} If `step` is not a positive integer.
- * @throws {Error}      If `ranges.length !== t.shape.length`.
- *
- * @example
- * // Extract rows 1–3 (exclusive), all columns from a 5×4 tensor:
- * const sub = slice(t, [{ start: 1, stop: 3 }, null]);
+ * @returns A new `Tensor` view (or empty tensor) with updated shape/stride.
  */
 export function slice(t: Tensor, ranges: (SliceRange | null)[]): Tensor {
   const rank = t.shape.length;
@@ -51,71 +50,64 @@ export function slice(t: Tensor, ranges: (SliceRange | null)[]): Tensor {
     throw new Error(`slice: ranges length ${ranges.length} does not match tensor rank ${rank}`);
   }
 
-  // Resolve ranges to concrete [start, stop, step] triples.
+  const inStrides = t.strides.length === rank ? t.strides : Tensor.rowMajorStrides(t.shape);
+
   const resolved = ranges.map((r, axis) => {
-    const dim = t.shape[axis];
+    const dim = t.shape[axis]!;
     const step = r?.step ?? 1;
-    if (!Number.isInteger(step) || step < 1) {
-      throw new RangeError(`slice: step must be a positive integer (axis ${axis}), got ${step}`);
+    if (!Number.isInteger(step) || step === 0) {
+      throw new RangeError(`slice: step must be a non-zero integer (axis ${axis}), got ${step}`);
     }
-    let start = r?.start ?? 0;
-    let stop = r?.stop ?? dim;
-    // Normalise negative indices.
+    let start: number;
+    let stop: number;
+    if (step > 0) {
+      start = r?.start ?? 0;
+      stop = r?.stop ?? dim;
+    } else {
+      start = r?.start ?? dim - 1;
+      stop = r?.stop ?? -1;
+    }
     if (start < 0) start = dim + start;
-    if (stop < 0) stop = dim + stop;
-    // Clamp stop to valid range; validate start.
-    if (start < 0 || start > dim) {
+    if (step > 0) {
+      if (stop < 0) stop = dim + stop;
+    } else if (stop < -1) {
+      stop = dim + stop;
+    }
+    if (start < 0 || start >= dim) {
       throw new RangeError(
         `slice: start ${r?.start} is out of range for axis ${axis} with dim ${dim}`
       );
     }
-    stop = Math.max(0, Math.min(stop, dim));
+    if (step > 0) {
+      stop = Math.max(0, Math.min(stop, dim));
+    } else {
+      stop = Math.max(-1, Math.min(stop, dim - 1));
+    }
     return { start, stop, step };
   });
 
-  // Compute output shape.
-  const outShape = resolved.map(({ start, stop, step }) =>
-    start >= stop ? 0 : Math.ceil((stop - start) / step)
-  );
-
+  const outShape = resolved.map(({ start, stop, step }) => axisSliceLength(start, stop, step));
   const outSize = outShape.reduce((a, b) => a * b, 1);
-  const outData = new Float64Array(outSize);
 
-  if (outSize > 0) {
-    const inStrides = Tensor.rowMajorStrides(t.shape);
-    const outStrides = Tensor.rowMajorStrides(outShape);
-
-    // Iterate over all output positions using a multi-index counter.
-    const outIdx = new Array<number>(rank).fill(0);
-    for (let flatOut = 0; flatOut < outSize; flatOut++) {
-      // Decode flatOut into outIdx.
-      let rem = flatOut;
-      for (let k = 0; k < rank; k++) {
-        outIdx[k] = Math.floor(rem / outStrides[k]);
-        rem -= outIdx[k] * outStrides[k];
-      }
-
-      // Map output multi-index → input multi-index.
-      let flatIn = 0;
-      for (let k = 0; k < rank; k++) {
-        const inK = resolved[k].start + outIdx[k] * resolved[k].step;
-        flatIn += inK * inStrides[k];
-      }
-
-      outData[flatOut] = t.data[flatIn];
-    }
+  if (outSize === 0) {
+    return new Tensor(outShape, new Float64Array(0));
   }
 
-  // Axis labels: preserve input labels with updated dims.
+  let offset = t.offset;
+  const outStrides = new Array<number>(rank);
+  for (let k = 0; k < rank; k++) {
+    const { start, step } = resolved[k]!;
+    offset += start * inStrides[k]!;
+    outStrides[k] = inStrides[k]! * step;
+  }
+
   let outLabels: ReadonlyArray<Index> | undefined;
   if (t.axisLabels !== undefined) {
     outLabels = t.axisLabels.map((lbl, k) => {
-      const newDim = outShape[k];
-      // Create a new Index with the same name and tags, but updated dimension.
-      // dim must be >= 1; for empty-slice axes use a placeholder dim of 1.
+      const newDim = outShape[k]!;
       return new Index(Math.max(1, newDim), { name: lbl.name, tags: [...lbl.tags] });
     });
   }
 
-  return new Tensor(outShape, outData, outLabels);
+  return new Tensor(outShape, t.data, outLabels, { offset, strides: outStrides });
 }

@@ -352,6 +352,9 @@
       "tensor/src/operations/solve.ts",
       "tensor/src/operations/stack.ts"
     ],
+    "tensor/src/batched-matmul.ts": ["tensor/src/Tensor.ts"],
+    "tensor/src/reshape-shape.ts": ["tensor/src/Tensor.ts"],
+    "tensor/src/operations/slice.ts": ["tensor/src/Tensor.ts", "tensor/src/index.ts"],
     "tensor/src/Tensor.ts": [
       "tensor/src/contraction-sequence.ts",
       "tensor/src/index.ts",
@@ -384,7 +387,6 @@
     "tensor/src/operations/pinv.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/solve.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/kron.ts": ["tensor/src/index.ts"],
-    "tensor/src/operations/slice.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/gather.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/stack.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/concatenate.ts": ["tensor/src/index.ts"],

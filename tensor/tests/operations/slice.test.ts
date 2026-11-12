@@ -38,6 +38,11 @@ function maxAbsDiff(a: Float64Array, b: Float64Array): number {
   return max;
 }
 
+/** Logical flattened elements (slice may return a strided view). */
+function flat(t: ReturnType<typeof slice>): number[] {
+  return [...t.contiguous().data];
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -59,7 +64,7 @@ describe('slice', () => {
     const s = slice(t, [{ start: 1, stop: 3 }, null]);
     expect([...s.shape]).toEqual([2, 4]);
     // rows 1 and 2: values 4..7, 8..11
-    expect([...s.data]).toEqual([4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(flat(s)).toEqual([4, 5, 6, 7, 8, 9, 10, 11]);
   });
 
   it('3. Multi-axis subset: rows 0–2, cols 1–3', () => {
@@ -72,14 +77,14 @@ describe('slice', () => {
     ]);
     expect([...s.shape]).toEqual([2, 2]);
     // row 0: [0,1,2,3] → cols 1,2 → [1,2]; row 1: [4,5,6,7] → [5,6]
-    expect([...s.data]).toEqual([1, 2, 5, 6]);
+    expect(flat(s)).toEqual([1, 2, 5, 6]);
   });
 
   it('4. Step > 1 on a 1-D vector', () => {
     const t = new Tensor([10], arr([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
     const s = slice(t, [{ start: 0, stop: 10, step: 2 }]);
     expect([...s.shape]).toEqual([5]);
-    expect([...s.data]).toEqual([0, 2, 4, 6, 8]);
+    expect(flat(s)).toEqual([0, 2, 4, 6, 8]);
   });
 
   it('5. Step > 1 on a 2-D matrix (every other row, every other col)', () => {
@@ -90,7 +95,7 @@ describe('slice', () => {
     const s = slice(t, [{ step: 2 }, { step: 2 }]);
     // rows 0, 2 and cols 0, 2 → values at (0,0)=0,(0,2)=2,(2,0)=8,(2,2)=10
     expect([...s.shape]).toEqual([2, 2]);
-    expect([...s.data]).toEqual([0, 2, 8, 10]);
+    expect(flat(s)).toEqual([0, 2, 8, 10]);
   });
 
   it('6. Negative start index (-2 means last-2)', () => {
@@ -98,7 +103,7 @@ describe('slice', () => {
     const s = slice(t, [{ start: -2 }]);
     // -2 → index 4, stop defaults to 6
     expect([...s.shape]).toEqual([2]);
-    expect([...s.data]).toEqual([50, 60]);
+    expect(flat(s)).toEqual([50, 60]);
   });
 
   it('7. Negative stop index', () => {
@@ -106,7 +111,7 @@ describe('slice', () => {
     const s = slice(t, [{ start: 0, stop: -1 }]);
     // stop -1 → index 5
     expect([...s.shape]).toEqual([5]);
-    expect([...s.data]).toEqual([10, 20, 30, 40, 50]);
+    expect(flat(s)).toEqual([10, 20, 30, 40, 50]);
   });
 
   it('8. Empty result when start === stop', () => {
@@ -146,7 +151,7 @@ describe('slice', () => {
     expect([...s.shape]).toEqual([2, 2, 2]);
     // t[0,0,2]=2, t[0,0,3]=3, t[0,1,2]=6, t[0,1,3]=7
     // t[1,0,2]=14, t[1,0,3]=15, t[1,1,2]=18, t[1,1,3]=19
-    expect([...s.data]).toEqual([2, 3, 6, 7, 14, 15, 18, 19]);
+    expect(flat(s)).toEqual([2, 3, 6, 7, 14, 15, 18, 19]);
   });
 
   it('13. Step with negative start', () => {
@@ -154,14 +159,14 @@ describe('slice', () => {
     // start=-8 → index 2, stop defaults to 10, step=3 → [2,5,8]
     const s = slice(t, [{ start: -8, step: 3 }]);
     expect([...s.shape]).toEqual([3]);
-    expect([...s.data]).toEqual([2, 5, 8]);
+    expect(flat(s)).toEqual([2, 5, 8]);
   });
 
   it('14. Slice of a rank-1 tensor (single-element result)', () => {
     const t = new Tensor([5], arr([10, 20, 30, 40, 50]));
     const s = slice(t, [{ start: 2, stop: 3 }]);
     expect([...s.shape]).toEqual([1]);
-    expect([...s.data]).toEqual([30]);
+    expect(flat(s)).toEqual([30]);
   });
 
   it('15. Non-zero start with step > 1', () => {
@@ -169,6 +174,6 @@ describe('slice', () => {
     // start=1, stop=7, step=2 → indices 1,3,5 → values 1,3,5
     const s = slice(t, [{ start: 1, stop: 7, step: 2 }]);
     expect([...s.shape]).toEqual([3]);
-    expect([...s.data]).toEqual([1, 3, 5]);
+    expect(flat(s)).toEqual([1, 3, 5]);
   });
 });

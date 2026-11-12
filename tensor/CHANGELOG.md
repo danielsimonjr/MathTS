@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-tensor
 
+## Unreleased
+
+### Minor Changes
+
+- Add `zeros`, `ones`, `full`, `empty`, `arange` factories; `dtype` getter (`'float64'`); batched `matmul` / `matMul` alias; in-place `add_`, `mul_`, `fill_`; `cross` / `dot` for rank-1 vectors; `Tensor.slice` with negative `step`; `reshape(-1)` and contiguous reshape views.
+
 ## 0.3.5
 
 ### Patch Changes
