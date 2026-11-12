@@ -91,10 +91,9 @@ describe('G23 dogfood (#828 physics scope)', () => {
 
 describe('G23 dogfood (#827 CODATA uncertainties)', () => {
   it('attaches absolute uncertainties on measured CODATA Unit constants', () => {
-    const em = electronMass as { uncertainty: number; unc: number };
-    expect(em.uncertainty).toBeCloseTo(2.8e-40, 45);
-    expect(em.unc).toBeCloseTo(2.8e-40, 45);
-    expect((gravitationConstant as { uncertainty: number }).uncertainty).toBeCloseTo(1.5e-15, 18);
-    expect((speedOfLight as { uncertainty?: number }).uncertainty).toBeUndefined();
+    expect(electronMass.uncertainty).toBeCloseTo(2.8e-40, 45);
+    expect(electronMass.unc).toBeCloseTo(2.8e-40, 45);
+    expect(gravitationConstant.uncertainty).toBeCloseTo(1.5e-15, 18);
+    expect(speedOfLight.uncertainty).toBeUndefined();
   });
 });

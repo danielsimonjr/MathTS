@@ -1312,9 +1312,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                     | Import                                                                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` |
+| Package                     | Import                                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, getRecommendedWorkgroupSize, GPUCapabilities` |
 
 **Internal Dependencies:**
 
@@ -18930,16 +18930,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                            | Type   |
-| ------------- | ------------------------------------------------------------------ | ------ |
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+| File          | Imports                                                                                                                                 | Type   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./detect.js` | `hasWebGPUSurface, getGPUAdapter, capabilitiesFromAdapter, markWebGPUAdapterUnavailable, resetWebGPUAvailabilityCache, GPUCapabilities` | Import |
 
 **Exports:**
 
 - Classes: `GPUContext`
 - Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+- Types: `GPUContextStatus`, `GlobalGPUInitResult`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPUWithReason`, `initializeGlobalGPU`, `destroyGlobalGPU`
 
 ---
 
@@ -18963,7 +18963,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+- Functions: `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `markWebGPUAdapterUnavailable`, `markWebGPUAdapterAvailable`, `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `capabilitiesFromAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
 
 ---
 
@@ -18973,6 +18973,7 @@ graph LR
 
 | File              | Imports                                  | Type   |
 | ----------------- | ---------------------------------------- | ------ |
+| `./detect.js`     | `resetWebGPUAvailabilityCache`           | Import |
 | `./GPUContext.js` | `getGlobalGPUContext, GPUContextOptions` | Import |
 
 **Exports:**
@@ -18994,19 +18995,19 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                                                                                                                                                                 | Type      |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `./detect.js`        | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent`                                          | Re-export |
-| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                          | Re-export |
-| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                 | Re-export |
-| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                         | Re-export |
-| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                           | Re-export |
-| `./serialize.js`     | `serializeGpu`                                                                                                                                                          | Re-export |
+| File                 | Imports                                                                                                                                                                                                                                                                              | Type      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, enableGpuUnavailableWarnings, disableGpuUnavailableWarnings, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                                                                                   | Re-export |
+| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                                                                                       | Re-export |
+| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                                                                              | Re-export |
+| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                                                                                      | Re-export |
+| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                                                                                        | Re-export |
+| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                                                                                       | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
+- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
 
 ---
 
@@ -20287,12 +20288,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 219433 |
-| Total Exports           | 7031   |
-| Total Re-exports        | 3030   |
+| Total Lines of Code     | 219550 |
+| Total Exports           | 7045   |
+| Total Re-exports        | 3036   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2367   |
+| Total Functions         | 2375   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 645    |

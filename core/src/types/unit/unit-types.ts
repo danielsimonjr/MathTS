@@ -239,6 +239,10 @@ export interface UnitInstance {
   skipAutomaticSimplification: boolean;
   type: 'Unit';
   isUnit: boolean;
+  /** CODATA absolute uncertainty, when present on a physical constant. */
+  uncertainty?: number;
+  /** Alias for {@link uncertainty} on physical constants. */
+  unc?: number;
   constructor: UnitConstructor;
 
   clone(): UnitInstance;

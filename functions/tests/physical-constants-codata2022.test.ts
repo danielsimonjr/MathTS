@@ -110,10 +110,9 @@ describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
   });
 
   it('electronMass and gravitationConstant carry CODATA 2022 absolute uncertainties', () => {
-    const em = F.electronMass as { uncertainty: number; unc: number };
-    expect(em.uncertainty).toBeCloseTo(2.8e-40, 45);
-    expect(em.unc).toBe(em.uncertainty);
-    expect((F.gravitationConstant as { uncertainty: number }).uncertainty).toBeCloseTo(1.5e-15, 18);
-    expect((F.speedOfLight as { uncertainty?: number }).uncertainty).toBeUndefined();
+    expect(F.electronMass.uncertainty).toBeCloseTo(2.8e-40, 45);
+    expect(F.electronMass.unc).toBe(F.electronMass.uncertainty);
+    expect(F.gravitationConstant.uncertainty).toBeCloseTo(1.5e-15, 18);
+    expect(F.speedOfLight.uncertainty).toBeUndefined();
   });
 });

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GPUContext } from '../src/GPUContext.js';
+import { resetWebGPUAvailabilityCache } from '../src/detect.js';
 import { stubGlobal, unstubAllGlobals } from './helpers/stub-global.js';
 
 interface DeviceLostInfo {
@@ -9,6 +10,7 @@ interface DeviceLostInfo {
 
 describe('GPUContext (mocked WebGPU)', () => {
   beforeEach(() => {
+    resetWebGPUAvailabilityCache();
     // Stub WebGPU constants. unstubAllGlobals() in afterEach restores the
     // original descriptors (or deletes the names when there were none).
     stubGlobal('GPUBufferUsage', {
@@ -190,9 +192,8 @@ describe('GPUContext (mocked WebGPU)', () => {
     const success = await ctx.initialize();
 
     expect(success).toBe(false);
-    expect(ctx.status).toBe('error');
-    expect(ctx.lastError).toBeDefined();
-    expect(ctx.lastError?.message).toMatch(/adapter/i);
+    expect(ctx.status).toBe('unavailable');
+    expect(ctx.lastError).toBeNull();
   });
 
   it('handles device failure gracefully', async () => {
