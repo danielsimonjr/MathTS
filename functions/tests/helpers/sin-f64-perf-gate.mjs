@@ -24,15 +24,19 @@ function runSin() {
   checksum += out[out.length - 1];
 }
 
-const { ratio, baselineMs, candidateMs } = wallClockAbRatio(runLoop, runSin, {
-  fullWarmupPairs: 4,
-  warmup: { minPairs: 8, maxPairs: 24 },
-  sample: {
-    samplePairs: 31,
-    leadingDiscard: 4,
-    gcBetween: typeof globalThis.gc === 'function',
-  },
-});
+const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAbRatio(
+  runLoop,
+  runSin,
+  {
+    fullWarmupPairs: 4,
+    warmup: { minPairs: 8, maxPairs: 24 },
+    sample: {
+      samplePairs: 31,
+      leadingDiscard: 4,
+      gcBetween: typeof globalThis.gc === 'function',
+    },
+  }
+);
 
 process.stdout.write(
   JSON.stringify({
@@ -41,5 +45,6 @@ process.stdout.write(
     sinMs: candidateMs,
     checksum,
     gateWouldPass: gatePasses(ratio, 1.2),
+    candidateInjectionFactor,
   }) + '\n'
 );

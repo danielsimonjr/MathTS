@@ -48,13 +48,27 @@ export function candidateTimeScale() {
  * Wall-clock milliseconds for one gate arm (candidate arm honors PERF_GATE_CANDIDATE_TIME_SCALE).
  * @param {() => void} fn
  * @param {'baseline' | 'candidate'} arm
+ * @returns {{ wall: number, raw: number }}
  */
 export function timeMs(fn, arm) {
   const t0 = performance.now();
   fn();
-  let dt = performance.now() - t0;
-  if (arm === 'candidate') dt *= candidateTimeScale();
-  return dt;
+  const raw = performance.now() - t0;
+  let wall = raw;
+  if (arm === 'candidate') wall *= candidateTimeScale();
+  return { wall, raw };
+}
+
+/**
+ * Ratio of median scaled candidate samples to median raw wall times (self-test injection probe).
+ * @param {number[]} scaledMs
+ * @param {number[]} rawMs
+ */
+export function measuredCandidateInjectionFactor(scaledMs, rawMs) {
+  const rawMed = median(rawMs);
+  const scaledMed = median(scaledMs);
+  if (!Number.isFinite(rawMed) || rawMed <= 0) return NaN;
+  return scaledMed / rawMed;
 }
 
 /**
@@ -110,6 +124,7 @@ export function abbaTimedRatio(baseline, candidate, opts = {}) {
   const leadingDiscard = opts.leadingDiscard ?? 0;
   const baselineMs = [];
   const candidateMs = [];
+  const candidateRawMs = [];
   const roundRatios = [];
 
   for (let r = 0; r < samplePairs; r++) {
@@ -123,19 +138,24 @@ export function abbaTimedRatio(baseline, candidate, opts = {}) {
       c = timeMs(candidate, 'candidate');
       b = timeMs(baseline, 'baseline');
     }
-    baselineMs.push(b);
-    candidateMs.push(c);
-    if (b > 0) roundRatios.push(c / b);
+    baselineMs.push(b.wall);
+    candidateMs.push(c.wall);
+    candidateRawMs.push(c.raw);
+    if (b.wall > 0) roundRatios.push(c.wall / b.wall);
   }
 
   const baseSlice = baselineMs.slice(leadingDiscard);
   const candSlice = candidateMs.slice(leadingDiscard);
+  const candRawSlice = candidateRawMs.slice(leadingDiscard);
   const ratioSlice = roundRatios.slice(leadingDiscard);
   const ratioOfMedians = median(candSlice) / Math.max(median(baseSlice), Number.EPSILON);
-  const ratioOfTrimmed =
-    trimmedMean(candSlice) / Math.max(trimmedMean(baseSlice), Number.EPSILON);
+  const ratioOfTrimmed = trimmedMean(candSlice) / Math.max(trimmedMean(baseSlice), Number.EPSILON);
   const ratioOfRoundMedians = median(ratioSlice);
   const ratio = ratioOfRoundMedians;
+
+  const scale = candidateTimeScale();
+  const candidateInjectionFactor =
+    scale === 1 ? 1 : measuredCandidateInjectionFactor(candSlice, candRawSlice);
 
   return {
     ratio,
@@ -144,6 +164,8 @@ export function abbaTimedRatio(baseline, candidate, opts = {}) {
     ratioOfRoundMedians,
     baselineMs: median(baselineMs),
     candidateMs: median(candidateMs),
+    candidateRawMs: median(candidateRawMs),
+    candidateInjectionFactor,
     roundRatios,
   };
 }

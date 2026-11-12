@@ -13,6 +13,7 @@ import {
   abbaTimedRatio,
   gatePasses,
   median,
+  measuredCandidateInjectionFactor,
   symmetricWarmup,
   trimmedMean,
   wallClockAbRatio,
@@ -51,6 +52,34 @@ describe('wall-clock-perf-gate statistics', () => {
     });
     assert.ok(ratio < 1.15, `expected ~1.0, got ${ratio}`);
     assert.equal(gatePasses(ratio, 1.15), true);
+  });
+
+  test('PERF_GATE_CANDIDATE_TIME_SCALE applies to the same ABBA samples', () => {
+    const prev = process.env.PERF_GATE_CANDIDATE_TIME_SCALE;
+    process.env.PERF_GATE_CANDIDATE_TIME_SCALE = '3';
+    try {
+      const fn = () => busyMs(5);
+      const { candidateInjectionFactor } = wallClockAbRatio(fn, fn, {
+        skipSymmetricWarmup: true,
+        fullWarmupPairs: 2,
+        sample: { samplePairs: 12, gcBetween: false },
+      });
+      assert.ok(
+        candidateInjectionFactor >= 2.5,
+        `expected injected scale on sampled candidate ms, got ${candidateInjectionFactor}`
+      );
+      assert.ok(
+        Math.abs(candidateInjectionFactor - 3) < 0.01,
+        `expected ~3.0 injection factor, got ${candidateInjectionFactor}`
+      );
+    } finally {
+      if (prev === undefined) delete process.env.PERF_GATE_CANDIDATE_TIME_SCALE;
+      else process.env.PERF_GATE_CANDIDATE_TIME_SCALE = prev;
+    }
+  });
+
+  test('measuredCandidateInjectionFactor is exact for uniform scale', () => {
+    assert.equal(measuredCandidateInjectionFactor([30, 60], [10, 20]), 3);
   });
 });
 
@@ -91,20 +120,23 @@ describe('G26 isolated gates fail under injected 3× candidate slowdown', () => 
         0,
         `built dist required for ${gate.name}: ${missing.join(', ')}`
       );
-      const run = (scale) => {
-        const line = execFileSync(process.execPath, [scriptPath], {
-          cwd: repoRoot,
-          encoding: 'utf8',
-          env: { ...process.env, PERF_GATE_CANDIDATE_TIME_SCALE: String(scale) },
-        }).trim();
-        const { ratio } = JSON.parse(line);
-        assert.ok(Number.isFinite(ratio), `${gate.name} scale ${scale} ratio ${ratio}`);
-        return ratio;
-      };
-      const base = run(1);
-      const scaled = run(3);
-      assert.ok(scaled / base >= 2.5, `${gate.name} 3× injection: base ${base} scaled ${scaled}`);
-      assert.equal(gatePasses(scaled, gate.limit), false);
+      const line = execFileSync(process.execPath, [scriptPath], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: { ...process.env, PERF_GATE_CANDIDATE_TIME_SCALE: '3' },
+      }).trim();
+      const payload = JSON.parse(line);
+      const { ratio, candidateInjectionFactor } = payload;
+      assert.ok(Number.isFinite(ratio), `${gate.name} ratio ${ratio}`);
+      assert.ok(
+        Number.isFinite(candidateInjectionFactor),
+        `${gate.name} candidateInjectionFactor ${candidateInjectionFactor}`
+      );
+      assert.ok(
+        candidateInjectionFactor >= 2.5,
+        `${gate.name} 3× injection factor ${candidateInjectionFactor} (same ABBA pass)`
+      );
+      assert.equal(gatePasses(ratio, gate.limit), false);
     });
   }
 });
