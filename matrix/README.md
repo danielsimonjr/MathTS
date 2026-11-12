@@ -65,6 +65,11 @@ const c = backendManager.multiply(a, a);
 | Backend  | How you reach it                                                                       | Role                                                           |
 | -------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | **JS**   | `DenseMatrix` methods; `lu`/`qr`/`cholesky`/`eig`/`svd`                                | Default                                                        |
+
+Dense `svd` stays on a pure JavaScript Golub–Reinsch implementation (the WASM eigen/SVD
+kernels were retired after measuring slower than JS). On Node 22, a 500×500 SPD matrix is
+typically ~1.05–1.15× `ml-matrix` wall time with residuals matching to ~1e-14 (see dogfood
+#699); use `ml-matrix` or an external solver if you need every last percent of SVD throughput.
 | **WASM** | `backendManager.multiply`, `wasmBackend.multiply`, `Tensor.matMul`                     | SIMD GEMM (+ unused-by-public decomp methods on `WASMBackend`) |
 | **GPU**  | `gpuMatrixBackend.multiplyAsync`; `@danielsimonjr/mathts-functions` with `enableGpu()` | f32 opt-in; **not** registered on `BackendManager`             |
 

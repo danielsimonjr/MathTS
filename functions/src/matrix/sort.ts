@@ -1,6 +1,7 @@
 import { arraySize as size } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
+import { sortNumbersDescendingInPlace, sortNumbersInPlace } from '../utils/sort-numbers.js';
 
 import { TypedFunction, Matrix } from '../types.js';
 
@@ -56,6 +57,13 @@ export const createSort = /* #__PURE__ */ factory(
     }
 
     function sortNumberArray(arr: unknown[], cmp: NumberCompare, descending: boolean): unknown[] {
+      const defaultCmp = getNumberCompare();
+      if (defaultCmp && cmp === defaultCmp) {
+        const nums = arr as number[];
+        if (descending) sortNumbersDescendingInPlace(nums);
+        else sortNumbersInPlace(nums, false);
+        return arr;
+      }
       const c = descending ? (a: number, b: number) => -cmp(a, b) : cmp;
       arr.sort(c as (a: unknown, b: unknown) => number);
       return arr;

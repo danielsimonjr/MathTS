@@ -1,6 +1,8 @@
 import {
   decompositionInputToNestedArray,
   isPackedMatrixDescriptor,
+  lu,
+  luSolve,
 } from '@danielsimonjr/mathts-matrix';
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
@@ -95,14 +97,49 @@ export const createLusolve = /* #__PURE__ */ factory(
       typeof createSolveValidation
     >[0]) as unknown as SolveValidationFunction;
 
+    function rhsToNumberVector(
+      b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
+      n: number
+    ): number[] {
+      if (isDenseMatrix(b)) {
+        const dense = b as DenseMatrix;
+        if (dense._size.length === 1) {
+          return (dense._data as number[]).map((v) => v);
+        }
+        return dense._data.map((row) => (row as number[])[0]);
+      }
+      if (isArray(b)) {
+        const arr = b as unknown[];
+        if (arr.length !== n) {
+          throw new RangeError('Dimension mismatch. Matrix columns must match vector length.');
+        }
+        if (arr.length > 0 && Array.isArray(arr[0])) {
+          return (arr as unknown[][]).map((row) => row[0] as number);
+        }
+        return arr as number[];
+      }
+      throw new TypeError('Invalid right-hand side for lusolve');
+    }
+
     function lusolveFromNested(
       nested: number[][],
       b: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       const eq = equilibrateDense(nested, b);
-      const aMatrix = matrix(eq.a as unknown[][]);
-      const d = lup(aMatrix);
-      return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
+      const aRows = eq.a as number[][];
+      const bVec = rhsToNumberVector(eq.b as typeof b, aRows.length);
+      let fac;
+      try {
+        fac = lu(aRows);
+      } catch (err) {
+        if (err instanceof Error && /singular/i.test(err.message)) {
+          throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        }
+        throw err;
+      }
+      validateUpperTriangularPivots(fac.U);
+      const x = luSolve(fac, bVec);
+      return matrix(x.map((v) => [v]) as unknown[][]) as DenseMatrix;
     }
 
     function isLUPDecomposition(value: unknown): value is LUPDecomposition {

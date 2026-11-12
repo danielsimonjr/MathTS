@@ -61,6 +61,25 @@ const defaultConfig: MathJSConfig = {
   randomSeed: null,
 };
 
+/** Defaults merged the way `create()` builds `currentConfig`. */
+function resolvedCreateDefaults(): MathJSConfig {
+  return { ...mathFunctions.config(), ...defaultConfig };
+}
+
+/** When false, scalar calls skip `runWithConfig` (same effective config as defaults). */
+function instanceConfigUsesOverlay(cfg: MathJSConfig): boolean {
+  const base = resolvedCreateDefaults();
+  const keys = new Set([...Object.keys(base), ...Object.keys(cfg)]) as Set<keyof MathJSConfig>;
+  for (const key of keys) {
+    const a = cfg[key];
+    const b = base[key];
+    if (a !== b && !(a === undefined && b === undefined)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // =============================================================================
 // Math Instance
 // =============================================================================
@@ -209,17 +228,19 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
   currentConfig: MathJSConfig
 ): T {
+  const needsOverlay = instanceConfigUsesOverlay(currentConfig);
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
-    return mathFunctions.runWithConfig(currentConfig, () => {
+    const invoke = (): unknown => {
       if (construct) {
-        // Use `fn` as newTarget when the caller wrote `new wrapper(...)` so
-        // the instance's [[Prototype]] is `fn.prototype` (instanceof works).
-        // Preserve a subclass newTarget (`class X extends wrapper`).
         return Reflect.construct(fn, args, construct === wrapped ? fn : construct);
       }
       return fn.apply(this, args);
-    });
+    };
+    if (!needsOverlay) {
+      return invoke();
+    }
+    return mathFunctions.runWithConfig(currentConfig, invoke);
   };
   copyFunctionSurface(fn, wrapped);
   return wrapped as T;
