@@ -36,9 +36,11 @@ describe('renderToFile', () => {
     ).rejects.toBeInstanceOf(PlotRenderError);
   });
   it('#780 names @resvg/resvg-wasm when PATH converters are absent and wasm is unavailable', async () => {
-    const importSpy = vi.spyOn(renderFile.resvgWasmImport, 'importModule').mockRejectedValue(
-      Object.assign(new Error('Cannot find module'), { code: 'ERR_MODULE_NOT_FOUND' })
-    );
+    const importSpy = vi
+      .spyOn(renderFile.resvgWasmImport, 'importModule')
+      .mockRejectedValue(
+        Object.assign(new Error('Cannot find module'), { code: 'ERR_MODULE_NOT_FOUND' })
+      );
     try {
       await renderPngWithResvgWasm(SVG);
       throw new Error('should have thrown');

@@ -43,9 +43,14 @@ function renderLine(layer: Layer2D, f: Frame, i: number): Prim[] {
   const live = `line-${i}`;
   return [
     { k: 'polyline', pts, stroke: color, w: 2, live: `${live}-path` },
-    ...pts.map(
-      (p, j): Prim => ({ k: 'circle', cx: p[0], cy: p[1], r: 2.5, fill: color, live: `${live}-pt-${j}` })
-    ),
+    ...pts.map((p, j): Prim => ({
+      k: 'circle',
+      cx: p[0],
+      cy: p[1],
+      r: 2.5,
+      fill: color,
+      live: `${live}-pt-${j}`,
+    })),
   ];
 }
 

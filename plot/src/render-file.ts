@@ -42,6 +42,7 @@ const RESVG_WASM_PKG = '@resvg/resvg-wasm';
 
 /** Lazy import indirection so tests can simulate a missing optional peer. */
 export const resvgWasmImport = {
+  /** Dynamic import of `@resvg/resvg-wasm`; throws when the optional peer is not installed. */
   async importModule(): Promise<typeof import('@resvg/resvg-wasm')> {
     return import('@resvg/resvg-wasm');
   },

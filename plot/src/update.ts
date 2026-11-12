@@ -52,8 +52,11 @@ function findPlotSvg(el: Element): Element | null {
 }
 
 function parseSvgRoot(markup: string): Element {
-  const DOMParserCtor = (globalThis as { DOMParser?: { new (): { parseFromString: (s: string, t: string) => Document } } })
-    .DOMParser;
+  const DOMParserCtor = (
+    globalThis as {
+      DOMParser?: { new (): { parseFromString: (s: string, t: string) => Document } };
+    }
+  ).DOMParser;
   if (!DOMParserCtor) {
     throw new TypeError('update: DOMParser is required to mount plot SVG');
   }
