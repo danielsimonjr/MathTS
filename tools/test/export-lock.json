@@ -2057,9 +2057,6 @@
       "TensorCholeskyResult": {
         "kind": "type"
       },
-      "TensorDtype": {
-        "kind": "type"
-      },
       "TensorEigOpts": {
         "kind": "type"
       },
@@ -2088,9 +2085,6 @@
         "kind": "type"
       },
       "TensorSolveResult": {
-        "kind": "type"
-      },
-      "TensorStorage": {
         "kind": "type"
       },
       "TensorSvdOpts": {
