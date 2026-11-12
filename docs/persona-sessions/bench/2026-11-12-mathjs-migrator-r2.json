@@ -1,0 +1,122 @@
+{
+  "persona": "mathjs-migrator",
+  "round": 2,
+  "date": "2026-11-12",
+  "oracle": "mathjs@13.2.3",
+  "subject": "@danielsimonjr/mathts-compat@0.5.0",
+  "engine": "Node v22.23.4",
+  "bun": "1.2.18",
+  "deno": "2.4.4",
+  "os": "linux 6.12.113 x86_64",
+  "cpu": "Intel(R) Xeon(R) Processor, 4 vCPU",
+  "packages": {
+    "compat": "0.5.0",
+    "core": "0.27.0",
+    "functions": "0.85.0",
+    "units": "0.7.6",
+    "arithmetic": "0.1.87",
+    "trigonometry": "0.1.87",
+    "numbers": "0.1.29",
+    "matrix": "0.10.1",
+    "expression": "0.13.0",
+    "parallel": "0.10.1",
+    "gpu": "0.3.0"
+  },
+  "scratch": "/tmp/mathts-migrator-r2",
+  "method": "Single process, both libraries. 5 warmup calls each, then 8 interleaved ABBA rounds. Median wall time of rounds. n=5000 unless noted.",
+  "cases": [
+    {
+      "name": "add(1,2)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.101137,
+      "mathts_ms": 0.115536,
+      "ratio_mathts_over_mathjs": 1.142
+    },
+    {
+      "name": "multiply(3,4)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.122033,
+      "mathts_ms": 0.138975,
+      "ratio_mathts_over_mathjs": 1.139
+    },
+    {
+      "name": "sin(0.5)",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 0.037993,
+      "mathts_ms": 6.682222,
+      "ratio_mathts_over_mathjs": 175.878
+    },
+    {
+      "name": "evaluate('1+2')",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 8.435493,
+      "mathts_ms": 9.944506,
+      "ratio_mathts_over_mathjs": 1.179
+    },
+    {
+      "name": "unit(5,'cm').to('inch').toString()",
+      "n": 2000,
+      "rounds": 8,
+      "mathjs_ms": 19.966833,
+      "mathts_ms": 21.226211,
+      "ratio_mathts_over_mathjs": 1.063
+    },
+    {
+      "name": "det([[1,2],[3,4]])",
+      "n": 5000,
+      "rounds": 8,
+      "mathjs_ms": 3.95428,
+      "mathts_ms": 5.939007,
+      "ratio_mathts_over_mathjs": 1.502
+    },
+    {
+      "name": "chain(3).add(4).multiply(2).done()",
+      "n": 2000,
+      "rounds": 8,
+      "mathjs_ms": 1.341148,
+      "mathts_ms": 0.802435,
+      "ratio_mathts_over_mathjs": 0.598
+    }
+  ],
+  "isolated_sin_5000": {
+    "mathjs_ms": 0.600438,
+    "mathts_ms": 11.101746,
+    "ratio": 18.49
+  },
+  "parity_sample": {
+    "total_cases": 41,
+    "same": 37,
+    "different": 4,
+    "diff_labels": [
+      "pow(-8,1/3) complex string epsilon",
+      "Fraction config 1/3+1/6 toString",
+      "100 degC to degF string",
+      "500 mL toString"
+    ]
+  },
+  "bundle": {
+    "vite_6_create_all_evaluate": {
+      "entry_js_bytes": 3209410,
+      "entry_js_kb": 3209.41,
+      "gzip_kb": 677.6,
+      "wasm_chunk_kb": 26.75,
+      "note": "Vite externalizes Node builtins (fs, crypto, worker_threads, os, v8, path)."
+    },
+    "esbuild_browser": {
+      "status": "failed",
+      "errors": ["worker_threads", "os", "child_process"],
+      "issue": 893
+    }
+  },
+  "packaging": {
+    "cjs_require": "ERR_PACKAGE_PATH_NOT_EXPORTED",
+    "index_js_map": true,
+    "sideEffects": true,
+    "exports_package_json": true,
+    "tsc_skipLibCheck_false": "fail GPUBuffer + workerpool"
+  }
+}
