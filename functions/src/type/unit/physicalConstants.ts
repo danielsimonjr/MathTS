@@ -51,7 +51,8 @@ export const createSpeedOfLight = /* #__PURE__ */ unitFactory(
 export const createGravitationConstant = /* #__PURE__ */ unitFactory(
   'gravitationConstant',
   '6.67430e-11',
-  'm^3 kg^-1 s^-2'
+  'm^3 kg^-1 s^-2',
+  '1.5e-15'
 );
 export const createPlanckConstant = /* #__PURE__ */ unitFactory(
   'planckConstant',
@@ -139,7 +140,8 @@ export const createClassicalElectronRadius = /* #__PURE__ */ unitFactory(
 export const createElectronMass = /* #__PURE__ */ unitFactory(
   'electronMass',
   '9.1093837139e-31',
-  'kg'
+  'kg',
+  '2.8e-40'
 );
 export const createFermiCoupling = /* #__PURE__ */ unitFactory(
   'fermiCoupling',
@@ -278,7 +280,34 @@ export const createPlanckTemperature = /* #__PURE__ */ unitFactory(
  * @param unitStr - The unit string (e.g., 'm s^-1')
  * @returns A factory function that creates the physical constant
  */
-function unitFactory(name: string, valueStr: string, unitStr: string) {
+function attachUncertainty(
+  unit: UnitInstance,
+  uncertaintyAbsolute: string | undefined
+): UnitInstance {
+  if (uncertaintyAbsolute === undefined) return unit;
+  const unc = parseFloat(uncertaintyAbsolute);
+  Object.defineProperty(unit, 'uncertainty', {
+    value: unc,
+    enumerable: true,
+    writable: false,
+    configurable: true,
+  });
+  Object.defineProperty(unit, 'unc', {
+    get(): number {
+      return unc;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+  return unit;
+}
+
+function unitFactory(
+  name: string,
+  valueStr: string,
+  unitStr: string,
+  uncertaintyAbsolute?: string
+) {
   const dependencies = ['config', 'Unit', 'BigNumber'];
 
   return factory(
@@ -293,7 +322,7 @@ function unitFactory(name: string, valueStr: string, unitStr: string) {
 
       const unit = new Unit(value, unitStr);
       unit.fixPrefix = true;
-      return unit;
+      return attachUncertainty(unit, uncertaintyAbsolute);
     }
   );
 }

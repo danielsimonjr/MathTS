@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Units parse, log units, physics scope, and CODATA uncertainties (dogfood G23, #811, #825, #812, #828, #827).** `Unit.parse` caps string length at 10k and skips factorial factor search on tokens longer than 64 characters. `dB`, `dBm`, `dBW`, and `Np` parse as logarithmic units (`B` stays byte). Units README documents that `.value` is SI and `.toNumber('deg')` returns the display magnitude. `physicsScope` and `{ physics: true }` bind `e0`, `G`, `c`, and `hbar` without overriding Euler `e` (**breaking:** bare `e` is no longer elementary charge in physics mode). CODATA physical constants expose `.uncertainty` / `.unc`. Tests: `functions/tests/dogfood-g23-units-physics.test.ts`.
+
 - **Tensor construction and axis ops (dogfood G14, #795, #750, #749, #748).** `Tensor.fromNested` infers shape from rectangular nested arrays and throws `TypeError` on jagged input. `flip` accepts a single axis number. `stack` defaults `axis` to `0`. The `Tensor` constructor rejects non-`Float64Array` storage at runtime. Architecture verification: `totalTypeScriptFiles` 2361 → 2362, `totalLinesOfCode` 419585 → 419731; `tensor/dist/index.js` bundle budget 75569 → 76572; `autograd/dist/index.js` bundle budget 56170 → 59159 (from merged main). Tests: `tensor/tests/dogfood-g14.test.ts`.
 
 - **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.

@@ -412,6 +412,9 @@
       "MATHTS_TYPES": {
         "kind": "object"
       },
+      "MAX_UNIT_STRING_LENGTH": {
+        "kind": "number"
+      },
       "MathTSConfig": {
         "kind": "type"
       },
@@ -815,6 +818,9 @@
         "kind": "function"
       },
       "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "unitReadingSearchSteps": {
         "kind": "function"
       },
       "unitRowExactOffset": {
@@ -1648,9 +1654,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1724,6 +1727,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {

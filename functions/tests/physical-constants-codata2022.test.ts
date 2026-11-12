@@ -22,7 +22,7 @@ import * as F from '../src/factories/index.js';
 // scipy.constants (CODATA-2022) values — copied verbatim from python repr, do not hand-edit.
 const CODATA_2022: Record<string, number> = {
   speedOfLight: 299792458.0,
-  gravitationConstant: 6.6743e-11,
+  gravitationConstant: 6.6743e-11, // CODATA 2022 prints 6.67430(15); double rounds to 6.6743e-11
   planckConstant: 6.62607015e-34,
   reducedPlanckConstant: 1.0545718176461565e-34,
   magneticConstant: 1.25663706127e-6,
@@ -107,5 +107,13 @@ describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
   it('vacuumImpedance is μ0·c (Z0) to the 12 digits CODATA publishes', () => {
     const product = numericOf(F.magneticConstant) * numericOf(F.speedOfLight);
     expect(Number(product.toPrecision(12))).toBe(numericOf(F.vacuumImpedance));
+  });
+
+  it('electronMass and gravitationConstant carry CODATA 2022 absolute uncertainties', () => {
+    const em = F.electronMass as { uncertainty: number; unc: number };
+    expect(em.uncertainty).toBeCloseTo(2.8e-40, 45);
+    expect(em.unc).toBe(em.uncertainty);
+    expect((F.gravitationConstant as { uncertainty: number }).uncertainty).toBeCloseTo(1.5e-15, 18);
+    expect((F.speedOfLight as { uncertainty?: number }).uncertainty).toBeUndefined();
   });
 });

@@ -61,6 +61,10 @@ export interface BaseUnitDef {
  * optional. A built-in unit's `value` is its exact scale (`exact`) rounded
  * once; a unit made with `createUnit` has no `exact` and converts by floats.
  */
+/** Logarithmic unit kinds (decibel / neper families). */
+export type LogarithmicUnitKind =
+  'decibel-power' | 'decibel-amplitude' | 'neper' | 'decibel-re-1mw' | 'decibel-re-1w';
+
 export interface UnitDef {
   name: string;
   base?: BaseUnitDef;
@@ -71,6 +75,8 @@ export interface UnitDef {
   reciprocal?: boolean;
   /** Turns counted by one of this unit. A cycle-counting unit (Hz, rpm) has 1; absent means 0. */
   cycles?: number;
+  /** Converts log-domain readings (dB, Np, …) to a linear SI magnitude. */
+  logarithmic?: LogarithmicUnitKind;
   /** The exact scale to SI, from the unit table. Absent for a `createUnit` unit and for VAR. */
   exact?: ExactScale;
   /** The exact `offset`, present whenever `exact` is. */

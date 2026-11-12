@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7016
+    "totalExports": 7023
   },
   "entryPoints": [
     {
@@ -900,7 +900,9 @@
               "UnitParseError",
               "AmbiguousUnitError",
               "DIMENSIONLESS",
-              "dim"
+              "dim",
+              "unitReadingSearchSteps",
+              "MAX_UNIT_STRING_LENGTH"
             ],
             "reExport": true
           },
@@ -1183,6 +1185,8 @@
           "AmbiguousUnitError",
           "DIMENSIONLESS",
           "dim",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
           "LN2_EXACT_SCALE",
@@ -1380,6 +1384,8 @@
           "AmbiguousUnitError",
           "DIMENSIONLESS",
           "dim",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
           "LN2_EXACT_SCALE",
@@ -2937,6 +2943,11 @@
             "typeOnly": true
           },
           {
+            "file": "./unit-types.js",
+            "imports": ["LogarithmicUnitKind"],
+            "typeOnly": true
+          },
+          {
             "file": "./errors.js",
             "imports": ["AmbiguousUnitError", "DimensionMismatchError", "UnitParseError"]
           },
@@ -2981,9 +2992,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createUnitClass", "unitReadingSearchSteps"],
+        "exports": ["MAX_UNIT_STRING_LENGTH", "createUnitClass", "unitReadingSearchSteps"],
         "functions": ["unitReadingSearchSteps"],
-        "constants": ["createUnitClass"]
+        "constants": ["MAX_UNIT_STRING_LENGTH", "createUnitClass"]
       },
       "core/src/types/unit/dependencies.ts": {
         "description": "The dependency object injected into the relocated mathjs `Unit` factory",
@@ -3144,7 +3155,7 @@
           },
           {
             "file": "./Unit.js",
-            "imports": ["createUnitClass"],
+            "imports": ["createUnitClass", "unitReadingSearchSteps", "MAX_UNIT_STRING_LENGTH"],
             "reExport": true
           },
           {
@@ -3252,6 +3263,8 @@
         "workspaceDependencies": [],
         "exports": [
           "createUnitClass",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "unitDependencies",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
@@ -3329,6 +3342,8 @@
         ],
         "reExported": [
           "createUnitClass",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "unitDependencies",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
@@ -3567,7 +3582,13 @@
         "internalDependencies": [
           {
             "file": "./unit/index.js",
-            "imports": ["Unit", "createUnitClass", "unitDependencies"],
+            "imports": [
+              "Unit",
+              "createUnitClass",
+              "unitDependencies",
+              "unitReadingSearchSteps",
+              "MAX_UNIT_STRING_LENGTH"
+            ],
             "reExport": true
           },
           {
@@ -3676,6 +3697,8 @@
           "Unit",
           "createUnitClass",
           "unitDependencies",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
           "LN2_EXACT_SCALE",
@@ -3742,6 +3765,8 @@
           "Unit",
           "createUnitClass",
           "unitDependencies",
+          "unitReadingSearchSteps",
+          "MAX_UNIT_STRING_LENGTH",
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
           "LN2_EXACT_SCALE",
@@ -46073,16 +46098,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218799,
-    "totalExports": 7016,
+    "totalLinesOfCode": 218965,
+    "totalExports": 7023,
     "totalClasses": 61,
     "totalInterfaces": 601,
     "totalFunctions": 2363,
     "totalTypeGuards": 172,
     "totalEnums": 0,
-    "totalConstants": 1646,
-    "totalReExports": 3023,
-    "totalTypeOnlyImports": 644,
+    "totalConstants": 1647,
+    "totalReExports": 3029,
+    "totalTypeOnlyImports": 645,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

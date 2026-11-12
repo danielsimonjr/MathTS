@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1287
   totalModules: 82
-  totalExports: 7016
+  totalExports: 7023
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -841,6 +841,8 @@ modules:
             - AmbiguousUnitError
             - DIMENSIONLESS
             - dim
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./types/unit.js
           imports:
@@ -1108,6 +1110,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -1304,6 +1308,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -2845,6 +2851,10 @@ modules:
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
+        - file: ./unit-types.js
+          imports:
+            - LogarithmicUnitKind
+          typeOnly: true
         - file: ./errors.js
           imports:
             - AmbiguousUnitError
@@ -2884,11 +2894,13 @@ modules:
             - unitPrefixExactScale
       workspaceDependencies: []
       exports:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
         - unitReadingSearchSteps
       functions:
         - unitReadingSearchSteps
       constants:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
     core/src/types/unit/dependencies.ts:
       description: The dependency object injected into the relocated mathjs `Unit` factory
@@ -3039,6 +3051,8 @@ modules:
         - file: ./Unit.js
           imports:
             - createUnitClass
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./dependencies.js
           imports:
@@ -3137,6 +3151,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3213,6 +3229,8 @@ modules:
         - UnitPrefix
       reExported:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3452,6 +3470,8 @@ modules:
             - Unit
             - createUnitClass
             - unitDependencies
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./unit/index.js
           imports:
@@ -3550,6 +3570,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -3615,6 +3637,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -43603,16 +43627,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218799
-  totalExports: 7016
+  totalLinesOfCode: 218965
+  totalExports: 7023
   totalClasses: 61
   totalInterfaces: 601
   totalFunctions: 2363
   totalTypeGuards: 172
   totalEnums: 0
-  totalConstants: 1646
-  totalReExports: 3023
-  totalTypeOnlyImports: 644
+  totalConstants: 1647
+  totalReExports: 3029
+  totalTypeOnlyImports: 645
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
