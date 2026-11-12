@@ -3,6 +3,8 @@ import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
+import { arrayHasNaN } from '../utils/sort-numbers.js';
+import { medianNumbers } from '../utils/median-numbers.js';
 import {
   flattenForStatistics,
   finiteNumbers,
@@ -113,6 +115,11 @@ export const createMedian = /* #__PURE__ */ factory(
           return NaN;
         }
 
+        const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
+        if (cmpNum && !arrayHasNaN(flat as number[])) {
+          return medianNumbers(flat as number[]);
+        }
+
         if (num % 2 === 0) {
           // even: return the average of the two middle values
           const mid = num / 2 - 1;
@@ -120,13 +127,8 @@ export const createMedian = /* #__PURE__ */ factory(
 
           // array now partitioned at mid + 1, take max of left part
           let left = flat[mid];
-          const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
           for (let i = 0; i < mid; ++i) {
-            if (cmpNum) {
-              if (cmpNum(flat[i] as number, left as number) > 0) {
-                left = flat[i];
-              }
-            } else if ((compare as (a: unknown, b: unknown) => number)(flat[i], left) > 0) {
+            if ((compare as (a: unknown, b: unknown) => number)(flat[i], left) > 0) {
               left = flat[i];
             }
           }

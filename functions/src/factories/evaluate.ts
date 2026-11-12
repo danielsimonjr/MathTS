@@ -60,6 +60,21 @@ export const EVALUATE_SCOPE_OMIT = new Set([
   'chain',
   'parser',
   'resolve',
+  'ConstantNode',
+  'SymbolNode',
+  'OperatorNode',
+  'FunctionNode',
+  'AssignmentNode',
+  'FunctionAssignmentNode',
+  'BlockNode',
+  'ArrayNode',
+  'ObjectNode',
+  'IndexNode',
+  'AccessorNode',
+  'ParenthesisNode',
+  'RangeNode',
+  'RelationalNode',
+  'ConditionalNode',
 ]);
 
 function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, unknown> {

@@ -21,5 +21,7 @@ cells:
     expect((byId.user.output as { secret: number }).secret).toBe(42);
     expect(byId.steal.status).toBe('success');
     expect(byId.steal.output).toBe(42);
+    expect(Object.prototype.constructor).toBe(Object);
+    expect((Object.prototype as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });

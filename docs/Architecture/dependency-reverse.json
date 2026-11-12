@@ -220,6 +220,11 @@
       "matrix/src/backends/index.ts"
     ],
     "matrix/src/backends/gpu/gpu-or-js.ts": ["matrix/src/backends/GPUMatrixBackend.ts"],
+    "matrix/src/types/dense/gemm-f64.ts": [
+      "matrix/src/backends/JSBackend.ts",
+      "matrix/src/operations/common.ts",
+      "matrix/src/types/dense/arithmetic.ts"
+    ],
     "matrix/src/types/dense/reduction.ts": [
       "matrix/src/backends/JSBackend.ts",
       "matrix/src/types/DenseMatrix.ts"
@@ -1031,7 +1036,8 @@
       "functions/src/typed/relational.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts"
+      "functions/src/utils/isPositive.ts",
+      "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/algebra/sparse/csSqr.ts": [
       "functions/src/algebra/decomposition/slu.ts",
@@ -2441,6 +2447,10 @@
       "functions/src/matrix/ones.ts",
       "functions/src/matrix/zeros.ts"
     ],
+    "functions/src/utils/sort-numbers.ts": [
+      "functions/src/matrix/sort.ts",
+      "functions/src/statistics/median.ts"
+    ],
     "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
     "functions/src/typed/numeric.ts": [
       "functions/src/ml/glm.ts",
@@ -2555,6 +2565,7 @@
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts"
     ],
+    "functions/src/utils/median-numbers.ts": ["functions/src/statistics/median.ts"],
     "functions/src/statistics/sum-indexed-guard.ts": ["functions/src/statistics/sum.ts"],
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",
@@ -2671,7 +2682,8 @@
     "functions/src/wasm/sort/wasm-bridge.ts": [
       "functions/src/typed/geometry.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/statistics.ts"
+      "functions/src/typed/statistics.ts",
+      "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/typed/centrality-restarts.ts": ["functions/src/typed/graph.ts"],
     "functions/src/typed/statistics.ts": ["functions/src/typed/index.ts"],
@@ -2752,7 +2764,9 @@
       "expression/src/transform/utils/dimToZeroBase.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts",
       "expression/src/transform/utils/prepareTransformArgs.ts",
-      "expression/src/transform/utils/shortCircuitBinary.ts"
+      "expression/src/transform/utils/shortCircuitBinary.ts",
+      "expression/src/utils/customs.ts",
+      "expression/src/utils/safe-result.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -4464,7 +4478,8 @@
       "plot/src/render-core.ts",
       "plot/src/three/points3d.ts",
       "plot/src/three/surface.ts",
-      "plot/src/tikz.ts"
+      "plot/src/tikz.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/coerce.ts": [
       "plot/src/contour.ts",
@@ -4489,7 +4504,8 @@
       "plot/src/heatmap.ts",
       "plot/src/render-core.ts",
       "plot/src/three/points3d.ts",
-      "plot/src/three/surface.ts"
+      "plot/src/three/surface.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/scene.ts": [
       "plot/src/contour.ts",
@@ -4500,7 +4516,8 @@
       "plot/src/svg.ts",
       "plot/src/three/points3d.ts",
       "plot/src/three/surface.ts",
-      "plot/src/tikz.ts"
+      "plot/src/tikz.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/emit.ts": [
       "plot/src/contour.ts",
@@ -4511,8 +4528,14 @@
     ],
     "plot/src/tikz.ts": ["plot/src/emit.ts"],
     "plot/src/render-core.ts": ["plot/src/frame.ts"],
-    "plot/src/frame.ts": ["plot/src/histogram.ts", "plot/src/marks2d.ts", "plot/src/overlay.ts"],
+    "plot/src/frame.ts": [
+      "plot/src/histogram.ts",
+      "plot/src/marks2d.ts",
+      "plot/src/overlay.ts",
+      "plot/src/update.ts"
+    ],
     "plot/src/plot.ts": ["plot/src/index.ts"],
+    "plot/src/update.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/marks2d.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/histogram.ts": ["plot/src/index.ts"],
     "plot/src/heatmap.ts": ["plot/src/index.ts"],

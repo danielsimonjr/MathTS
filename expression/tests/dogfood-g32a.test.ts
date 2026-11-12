@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parse, evaluate } from '@danielsimonjr/mathts-functions';
+import { parse, evaluate, compileExpr } from '@danielsimonjr/mathts-functions';
 
 describe('dogfood G32a regressions', () => {
   it('#817 parse accepts block and line comments', () => {
@@ -21,6 +21,59 @@ describe('dogfood G32a regressions', () => {
       /host object/
     );
     expect(() => evaluate('p', { p: process } as Record<string, unknown>)).toThrow(/host object/);
+    expect(() => evaluate('globalThis', { globalThis } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() => evaluate('Function', { Function } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() => evaluate('proto', { proto: Object.prototype } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() =>
+      evaluate('proto', { proto: Function.prototype } as Record<string, unknown>)
+    ).toThrow(/host object/);
+    expect(() => evaluate('f()', { f: () => process } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() => evaluate('f()', { f: () => Function } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() => evaluate('f()', { f: () => globalThis } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    expect(() => evaluate('p.cwd()', { p: process } as Record<string, unknown>)).toThrow(
+      /No access to method/
+    );
+    expect(() => evaluate('p.binding("fs")', { p: process } as Record<string, unknown>)).toThrow(
+      /No access/
+    );
+    expect(() => evaluate('p.env', { p: process } as Record<string, unknown>)).toThrow(/No access/);
+    expect(() => evaluate('p[0]', { p: process } as Record<string, unknown>)).toThrow(
+      /No access to host object/
+    );
+    expect(() => compileExpr('process').evaluate({ process } as Record<string, unknown>)).toThrow(
+      /host object/
+    );
+    // Math exports stay; a spoofed brand cannot hide a host reference.
+    expect(typeof evaluate('min')).toBe('function');
+    expect(() =>
+      evaluate('f()', {
+        f: () => ({ constructor: { name: 'DenseMatrix' }, leak: process }),
+      } as Record<string, unknown>)
+    ).toThrow(/host object/);
+    const leaked = (): string => 'leaked';
+    const inherited = Object.create({ parse: leaked }) as Record<string, unknown>;
+    expect(evaluate('parse', inherited)).toBe(leaked);
+    expect(() => evaluate('parse("1+1")')).toThrow(/forbidden function "parse"/);
+    expect(() => evaluate('typed')).toThrow(/Undefined symbol "typed"/);
+    expect(() => evaluate('createUnit')).toThrow(/Undefined symbol "createUnit"/);
+    expect(() => evaluate('resolve')).toThrow(/Undefined symbol "resolve"/);
+    // `chain` the function is denylisted; the surveyor's-chain unit stays.
+    expect(typeof evaluate('chain')).not.toBe('function');
+    expect(() => evaluate('simplify')).toThrow(/Undefined symbol "simplify"/);
+    expect(() => evaluate('derivative')).toThrow(/Undefined symbol "derivative"/);
+    expect(() => evaluate('FunctionNode')).toThrow(/Undefined symbol "FunctionNode"/);
   });
 
   it('#722 nesting limit 125 parses', () => {

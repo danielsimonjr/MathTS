@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1299
+  totalFiles: 1303
   totalModules: 82
-  totalExports: 7112
+  totalExports: 7128
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3883,6 +3883,9 @@ modules:
           imports:
             - DenseMatrix
             - denseContiguousData
+        - file: ../types/dense/gemm-f64.js
+          imports:
+            - gemmF64
         - file: ../types/dense/reduction.js
           imports:
             - '* as reduction'
@@ -4928,7 +4931,10 @@ modules:
       description: Shared decomposition helpers (number[][] dense algebra)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../types/dense/gemm-f64.js
+          imports:
+            - gemmF64
       workspaceDependencies: []
       exports:
         - eye
@@ -5647,6 +5653,9 @@ modules:
         - file: ./storage.js
           imports:
             - contiguousDenseData
+        - file: ./gemm-f64.js
+          imports:
+            - gemmF64
       workspaceDependencies: []
       exports:
         - add
@@ -5662,6 +5671,19 @@ modules:
         - multiply
         - scale
         - transpose
+    matrix/src/types/dense/gemm-f64.ts:
+      description: Options for {@link gemmF64}.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - GEMM_BLOCK
+        - gemmF64
+      functions:
+        - gemmF64
+      constants:
+        - GEMM_BLOCK
     matrix/src/types/dense/limits.ts:
       description: Preflight limits for dense matrix allocation (DoS guard).
       externalDependencies: []
@@ -7243,6 +7265,8 @@ modules:
           imports:
             - decompositionInputToNestedArray
             - isPackedMatrixDescriptor
+            - lu
+            - luSolve
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -17361,6 +17385,10 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ../utils/sort-numbers.js
+          imports:
+            - sortNumbersDescendingInPlace
+            - sortNumbersInPlace
         - file: ../types.js
           imports:
             - TypedFunction
@@ -20862,6 +20890,12 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ../utils/sort-numbers.js
+          imports:
+            - arrayHasNaN
+        - file: ../utils/median-numbers.js
+          imports:
+            - medianNumbers
         - file: ./numeric-data.js
           imports:
             - flattenForStatistics
@@ -26945,6 +26979,16 @@ modules:
         - createMap
         - assignMap
         - isObjectWrappingMap
+    functions/src/utils/median-numbers.ts:
+      description: Median of a flat finite `number[]` via quickselect (O(n) average).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - medianNumbers
+      functions:
+        - medianNumbers
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
       externalDependencies: []
@@ -27269,6 +27313,28 @@ modules:
         - product
       functions:
         - product
+    functions/src/utils/sort-numbers.ts:
+      description: Sort a plain `number[]` in place (ascending). Uses native `Float64Array.sort`
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/sort/wasm-bridge.js
+          imports:
+            - cmpNanLast
+        - file: ./number.js
+          imports:
+            - nearlyEqual
+      workspaceDependencies: []
+      exports:
+        - defaultNumberCompare
+        - arrayHasNaN
+        - sortNumbersInPlace
+        - sortNumbersDescendingInPlace
+      functions:
+        - defaultNumberCompare
+        - arrayHasNaN
+        - sortNumbersInPlace
+        - sortNumbersDescendingInPlace
     functions/src/utils/string.ts:
       description: Generic-value string formatting (`format`, `stringify`, `compareText`).
       externalDependencies: []
@@ -27694,11 +27760,13 @@ modules:
       workspaceDependencies: []
       exports:
         - WASM_SORT_THRESHOLD
+        - cmpNanLast
         - sortF64JS
         - argsortF64JS
         - sortF64Dispatch
         - argsortF64Dispatch
       functions:
+        - cmpNanLast
         - sortF64JS
         - argsortF64JS
         - sortF64Dispatch
@@ -28575,6 +28643,7 @@ modules:
             - setSafeProperty
             - getSafeMethod
             - isSafeProperty
+            - assertSandboxReceiver
         - file: ../limits.js
           imports:
             - MAX_COMPILE_DEPTH
@@ -33985,6 +34054,7 @@ modules:
         - file: ../utils/safe-result.js
           imports:
             - sanitizeEvaluateResult
+            - trustedMathFunctions
         - file: ../compiler/compile.js
           imports:
             - CompiledExpression
@@ -35566,13 +35636,21 @@ modules:
         - reduce
         - scatter
     expression/src/utils/customs.ts:
-      description: Get a property of a plain object
+      description: Values the expression sandbox may read or call methods on.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - hasOwnProperty
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isComplex
+            - isFraction
+            - isMatrix
+            - isResultSet
+            - isUnit
       workspaceDependencies: []
       exports:
         - getSafeProperty
@@ -35581,6 +35659,8 @@ modules:
         - getSafeMethod
         - isSafeMethod
         - isPlainObject
+        - isSandboxReceiver
+        - assertSandboxReceiver
     expression/src/utils/factory.ts:
       description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
@@ -36003,25 +36083,29 @@ modules:
       constants:
         - printTemplate
     expression/src/utils/safe-result.ts:
-      description: Refuse to return host objects (e.g. scope-injected `process`) from safe evaluate.
+      description: Functions copied onto the math namespace (`sin`, `min`, …). Safe evaluate may
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isComplex
+            - isFraction
+            - isMatrix
+            - isResultSet
+            - isUnit
         - file: ./customs.js
           imports:
             - isPlainObject
             - isSafeProperty
             - setSafeProperty
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
-          directory: core
-          imports:
-            - isComplex
-            - isFraction
-            - Unit
+      workspaceDependencies: []
       exports:
+        - trustedMathFunctions
         - sanitizeEvaluateResult
       functions:
+        - trustedMathFunctions
         - sanitizeEvaluateResult
     expression/src/utils/scope.ts:
       description: Create a new scope which can access the parent scope,
@@ -42253,8 +42337,10 @@ modules:
             - emit
       workspaceDependencies: []
       exports:
+        - build2DScene
         - draw2D
       functions:
+        - build2DScene
         - draw2D
     plot/src/heatmap.ts:
       description: heatmap module
@@ -42321,6 +42407,10 @@ modules:
             - plot
             - toTikZ
           reExport: true
+        - file: ./update.js
+          imports:
+            - update
+          reExport: true
         - file: ./marks2d.js
           imports:
             - line
@@ -42372,6 +42462,7 @@ modules:
       exports:
         - plot
         - toTikZ
+        - update
         - line
         - scatter
         - bar
@@ -42395,6 +42486,7 @@ modules:
       reExported:
         - plot
         - toTikZ
+        - update
         - line
         - scatter
         - bar
@@ -42496,6 +42588,9 @@ modules:
             - Layer2D
             - PlotOptions
           typeOnly: true
+        - file: ./update.js
+          imports:
+            - update
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
@@ -42507,8 +42602,9 @@ modules:
         - plot
         - toTikZ
       functions:
-        - plot
         - toTikZ
+      constants:
+        - plot
     plot/src/render-core.ts:
       description: Shared rendering context, computed once per `draw2D` call and threaded
       externalDependencies: []
@@ -42543,6 +42639,9 @@ modules:
         - module: child_process
           imports:
             - spawn
+        - module: module
+          imports:
+            - createRequire
         - module: fs/promises
           imports:
             - writeFile
@@ -42557,9 +42656,14 @@ modules:
         - module: os
           imports:
             - tmpdir
+        - module: url
+          imports:
+            - fileURLToPath
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - resvgWasmImport
+        - renderPngWithResvgWasm
         - runTool
         - hasTool
         - renderToFile
@@ -42571,11 +42675,14 @@ modules:
       interfaces:
         - RenderOptions
       functions:
+        - renderPngWithResvgWasm
         - runTool
         - hasTool
         - renderToFile
         - latexArgs
         - latexToPdf
+      constants:
+        - resvgWasmImport
     plot/src/scale.ts:
       description: scale module
       externalDependencies: []
@@ -42673,6 +42780,35 @@ modules:
         - AxisSpec
         - PlotOptions
         - Layer2D
+    plot/src/update.ts:
+      description: Identity of everything except series coordinates. Equal keys mean the existing
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./frame.js
+          imports:
+            - build2DScene
+        - file: ./svg.js
+          imports:
+            - emitSVG
+        - file: ./scene.js
+          imports:
+            - Prim
+            - Scene
+          typeOnly: true
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - update
+      functions:
+        - update
+        - update
+        - update
+        - update
   plot/three:
     plot/src/three/points3d.ts:
       description: points3d module
@@ -42913,6 +43049,7 @@ dependencyGraph:
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
         - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/dense/gemm-f64.ts
         - matrix/src/types/dense/limits.ts
         - matrix/src/types/dense/reduction.ts
         - matrix/src/types/dense/storage.ts
@@ -43553,6 +43690,7 @@ dependencyGraph:
         - functions/src/utils/isPrime.ts
         - functions/src/utils/isZero.ts
         - functions/src/utils/map.ts
+        - functions/src/utils/median-numbers.ts
         - functions/src/utils/node.ts
         - functions/src/utils/noop.ts
         - functions/src/utils/number.ts
@@ -43562,6 +43700,7 @@ dependencyGraph:
         - functions/src/utils/parseNumber.ts
         - functions/src/utils/print.ts
         - functions/src/utils/product.ts
+        - functions/src/utils/sort-numbers.ts
         - functions/src/utils/string.ts
         - functions/src/utils/switch.ts
         - functions/src/utils/typeOf.ts
@@ -44235,24 +44374,25 @@ dependencyGraph:
         - plot/src/svg.ts
         - plot/src/tikz.ts
         - plot/src/types.ts
+        - plot/src/update.ts
     - name: Plot/three
       files:
         - plot/src/three/points3d.ts
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1299
+  totalTypeScriptFiles: 1303
   totalModules: 82
-  totalLinesOfCode: 222988
-  totalExports: 7112
+  totalLinesOfCode: 223699
+  totalExports: 7128
   totalClasses: 61
   totalInterfaces: 610
-  totalFunctions: 2418
+  totalFunctions: 2431
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1654
-  totalReExports: 3058
-  totalTypeOnlyImports: 653
+  totalConstants: 1657
+  totalReExports: 3059
+  totalTypeOnlyImports: 655
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 1
   unusedFilesCount: 0

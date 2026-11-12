@@ -18,6 +18,7 @@ import {
   setSafeProperty,
   getSafeMethod,
   isSafeProperty,
+  assertSandboxReceiver,
 } from '../utils/customs.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
 import type { MathNode } from '../node/Node.js';
@@ -754,6 +755,9 @@ function compileAccessorNode(
     // The indexed OBJECT is the context for the index evaluation — the
     // IndexNode's `end` symbol resolves against its size (mathjs parity).
     const index = evalIndex(scope, args, object);
+    // Strings are primitive indexing, not host objects. Everything else must
+    // be a math value or a plain collection before a numeric index or subset.
+    if (typeof object !== 'string') assertSandboxReceiver(object);
     // Use math.subset if available for matrix indexing
     if (math.subset) {
       return (math.subset as MathFunction)(object, index);

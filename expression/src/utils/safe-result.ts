@@ -1,107 +1,152 @@
-import { isComplex, isFraction, Unit } from '@danielsimonjr/mathts-core';
+import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } from './is.js';
 import { isPlainObject, isSafeProperty, setSafeProperty } from './customs.js';
 
-const RETURNABLE_OBJECT_MARKERS = new Set([
-  'Complex',
-  'Fraction',
-  'Unit',
-  'DenseMatrix',
-  'SparseMatrix',
-  'BigNumber',
-  'Tensor',
-  'Chain',
-  'MathJSDenseMatrix',
-]);
+/**
+ * Functions copied onto the math namespace (`sin`, `min`, …). Safe evaluate may
+ * return these by identity. Every other native function is a host capability
+ * (`Function`, `eval`, `process.binding`).
+ */
+export function trustedMathFunctions(math: Record<string, unknown>): Set<unknown> {
+  const trusted = new Set<unknown>();
+  for (const key of Object.keys(math)) {
+    const value = math[key];
+    if (typeof value === 'function') trusted.add(value);
+  }
+  return trusted;
+}
 
-function isAllowedObject(value: object): boolean {
-  if (Array.isArray(value)) return true;
-  if (isPlainObject(value)) return true;
-  if (isComplex(value) || isFraction(value)) return true;
+function isNativeFunction(value: unknown): boolean {
+  if (typeof value !== 'function') return false;
   try {
-    if (value instanceof Unit) return true;
+    return Function.prototype.toString.call(value).includes('[native code]');
   } catch {
-    // ignore
-  }
-  const tagged = value as { type?: unknown; mathjs?: unknown; constructor?: { name?: string } };
-  if (typeof tagged.type === 'string' && RETURNABLE_OBJECT_MARKERS.has(tagged.type)) return true;
-  if (typeof tagged.mathjs === 'string' && RETURNABLE_OBJECT_MARKERS.has(tagged.mathjs))
     return true;
-  const name = tagged.constructor?.name;
-  if (name && RETURNABLE_OBJECT_MARKERS.has(name)) return true;
-  return false;
-}
-
-function isDisallowedHostObject(value: unknown): boolean {
-  if (value === null || value === undefined) return false;
-  if (typeof value !== 'object') return false;
-  return !isAllowedObject(value);
-}
-
-/** Block returning a caller scope binding by reference (#816), not math exports like `min`. */
-function isExfiltratedScopeBinding(value: unknown, scope?: Record<string, unknown>): boolean {
-  if (!scope || value === undefined || value === null) return false;
-  for (const key of Object.keys(scope)) {
-    if (scope[key] !== value) continue;
-    if (typeof value === 'function') {
-      return typeof process !== 'undefined' && (value as unknown) === (process as unknown);
-    }
-    return isDisallowedHostObject(value);
   }
-  return false;
+}
+
+function isGlobalFunction(value: Function): boolean {
+  if (value === Function.prototype) return true;
+  const name = value.name;
+  if (!name) return false;
+  try {
+    return (globalThis as Record<string, unknown>)[name] === value;
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Refuse to return host objects (e.g. scope-injected `process`) from safe evaluate.
- * Clones plain objects/arrays so nested host references cannot leak.
+ * Node/host values: `process`, `globalThis`, constructors, and prototypes.
+ * Plain objects, arrays, and math brands are not host values.
+ */
+function isHostIdentity(value: object): boolean {
+  if (value === globalThis) return true;
+  if (typeof process !== 'undefined' && value === (process as unknown as object)) return true;
+  if (value === Object.prototype || value === Array.prototype) return true;
+  if (typeof value === 'function') return isGlobalFunction(value);
+  const proto = Object.getPrototypeOf(value) as { constructor?: unknown } | null;
+  const ctor = proto?.constructor;
+  if (typeof ctor !== 'function' || ctor === Object || ctor === Array) return false;
+  const name = ctor.name;
+  if (!name) return false;
+  try {
+    return (globalThis as Record<string, unknown>)[name] === ctor;
+  } catch {
+    return true;
+  }
+}
+
+function isMathBrand(value: object): boolean {
+  if (
+    isComplex(value) ||
+    isFraction(value) ||
+    isBigNumber(value) ||
+    isMatrix(value) ||
+    isUnit(value) ||
+    isResultSet(value)
+  ) {
+    return true;
+  }
+  if (
+    value instanceof Float64Array ||
+    value instanceof Float32Array ||
+    value instanceof Int32Array
+  ) {
+    return true;
+  }
+  return (value as { isTensor?: boolean }).isTensor === true;
+}
+
+function isDataObject(value: object): boolean {
+  if (value === Object.prototype) return false;
+  if (isPlainObject(value)) return true;
+  return Object.getPrototypeOf(value) === null;
+}
+
+/**
+ * Refuse to hand a host object back from safe evaluate.
+ * Math-namespace functions stay (they are the public API). User functions that
+ * are not native stay too: a scope whose prototype carries `parse` is the G22
+ * case and must still return that function. Nested host references throw.
  */
 export function sanitizeEvaluateResult(
   value: unknown,
   seen: WeakSet<object> = new WeakSet(),
-  scope?: Record<string, unknown>
+  trusted: Set<unknown> = new Set()
 ): unknown {
-  if (isExfiltratedScopeBinding(value, scope)) {
-    throw new Error(
-      'Security: evaluate cannot return a host object. Scope values are not exfiltrated by identity.'
-    );
-  }
   if (value === null || value === undefined) return value;
   const t = typeof value;
   if (t === 'number' || t === 'boolean' || t === 'string' || t === 'bigint') return value;
-  if (t === 'function' || t === 'symbol') return value;
+  if (t === 'symbol') {
+    throw new Error(
+      'Security: evaluate cannot return a host object. Scope values are not exfiltrated by identity.'
+    );
+  }
+  if (t === 'function') {
+    if (trusted.has(value)) return value;
+    if (isNativeFunction(value) || isGlobalFunction(value as Function)) {
+      throw new Error(
+        'Security: evaluate cannot return a host object. Scope values are not exfiltrated by identity.'
+      );
+    }
+    return value;
+  }
   if (t !== 'object') return value;
 
-  if (isComplex(value) || isFraction(value)) return value;
-  try {
-    if (value instanceof Unit) return value;
-  } catch {
-    // Unit may be undefined in some browser builds
-  }
-  if (!isAllowedObject(value)) {
+  const obj = value as object;
+  if (isHostIdentity(obj) || (!isDataObject(obj) && !Array.isArray(obj) && !isMathBrand(obj))) {
     throw new Error(
       'Security: evaluate cannot return a host object. Scope values are not exfiltrated by identity.'
     );
   }
 
-  if (Array.isArray(value)) {
-    if (seen.has(value)) return value;
-    seen.add(value);
-    return value.map((entry) => sanitizeEvaluateResult(entry, seen, scope));
+  if (seen.has(obj)) return value;
+  seen.add(obj);
+
+  if (Array.isArray(obj)) {
+    return obj.map((entry) => sanitizeEvaluateResult(entry, seen, trusted));
   }
 
-  if (isPlainObject(value)) {
-    if (seen.has(value)) return value;
-    seen.add(value);
+  if (ArrayBuffer.isView(obj)) return value;
+
+  if (isDataObject(obj)) {
     const out: Record<string, unknown> = {};
-    for (const key of Object.keys(value)) {
+    for (const key of Object.keys(obj)) {
       if (!isSafeProperty(out, key)) continue;
       setSafeProperty(
         out,
         key,
-        sanitizeEvaluateResult((value as Record<string, unknown>)[key], seen, scope)
+        sanitizeEvaluateResult((obj as Record<string, unknown>)[key], seen, trusted)
       );
     }
     return out;
   }
 
+  for (const key of Object.keys(obj)) {
+    const child = (obj as Record<string, unknown>)[key];
+    if (child !== null && (typeof child === 'object' || typeof child === 'function')) {
+      sanitizeEvaluateResult(child, seen, trusted);
+    }
+  }
   return value;
 }
