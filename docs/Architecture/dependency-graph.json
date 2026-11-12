@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7012
+    "totalExports": 7014
   },
   "entryPoints": [
     {
@@ -321,6 +321,7 @@
           "forEachMultiIndex",
           "tensordotRange",
           "matmulSequential",
+          "MIN_WORKER_CHUNK",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -335,6 +336,7 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
           "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
@@ -371,12 +373,13 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
           "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats"
         ],
-        "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+        "constants": ["MIN_WORKER_CHUNK", "DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
       "packages/workerpool/src/matmul-sequential.ts": {
         "description": "Sequential matrix multiplication: the one kernel for the inline branch of",
@@ -46024,14 +46027,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 218509,
-    "totalExports": 7012,
+    "totalLinesOfCode": 218555,
+    "totalExports": 7014,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2362,
+    "totalFunctions": 2363,
     "totalTypeGuards": 171,
     "totalEnums": 0,
-    "totalConstants": 1644,
+    "totalConstants": 1645,
     "totalReExports": 3022,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,

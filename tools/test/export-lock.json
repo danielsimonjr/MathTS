@@ -140,6 +140,9 @@
       "ExecOptions": {
         "kind": "type"
       },
+      "MIN_WORKER_CHUNK": {
+        "kind": "number"
+      },
       "MathWorkerPool": {
         "kind": "function"
       },
@@ -237,6 +240,9 @@
         "kind": "function"
       },
       "transferTypedArray": {
+        "kind": "function"
+      },
+      "viteDepsWorkerFallback": {
         "kind": "function"
       }
     },

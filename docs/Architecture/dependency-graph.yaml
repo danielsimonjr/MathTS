@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1285
   totalModules: 82
-  totalExports: 7012
+  totalExports: 7014
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -272,6 +272,7 @@ modules:
         - forEachMultiIndex
         - tensordotRange
         - matmulSequential
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -286,6 +287,7 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
         - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
@@ -320,11 +322,13 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
         - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
       constants:
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
     packages/workerpool/src/matmul-sequential.ts:
@@ -43552,14 +43556,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1285
   totalModules: 82
-  totalLinesOfCode: 218509
-  totalExports: 7012
+  totalLinesOfCode: 218555
+  totalExports: 7014
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2362
+  totalFunctions: 2363
   totalTypeGuards: 171
   totalEnums: 0
-  totalConstants: 1644
+  totalConstants: 1645
   totalReExports: 3022
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0

@@ -30,8 +30,11 @@ npm install @danielsimonjr/mathts-parallel
 
 ## Vite / browser workers
 
-Vite must not resolve the worker through a prebundled `import.meta.url` on the package
-entry (that 404s as `/node_modules/.vite/deps/worker.js`). Pass an explicit worker URL:
+The default worker URL is `new URL('./worker.js', import.meta.url)`. Vite's production
+build rewrites that into an emitted worker asset. In dev, the optimizer prebundles the
+package and that relative URL 404s as `/node_modules/.vite/deps/worker.js`; the resolver
+then loads `/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js`, which the dev
+server already serves. You can still pass an explicit URL:
 
 ```ts
 import { ComputePool } from '@danielsimonjr/mathts-parallel';
@@ -41,9 +44,8 @@ const pool = new ComputePool({ workerScript: workerUrl, maxWorkers: 4 });
 await pool.sin(large, { forceParallel: true });
 ```
 
-`resolveDefaultWorkerScript()` (re-exported from this package) uses
-`import.meta.resolve('@danielsimonjr/mathts-workerpool/worker')` in modern browsers when
-no `workerScript` is set.
+`resolveDefaultWorkerScript()` (re-exported from this package) applies that fallback when
+no `workerScript` is set. After `terminate()`, call `initialize()` to spawn workers again.
 
 ## License
 

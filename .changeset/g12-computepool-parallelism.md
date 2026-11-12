@@ -3,4 +3,4 @@
 '@danielsimonjr/mathts-workerpool': patch
 ---
 
-ComputePool lazy-inits workers on parallel dispatch, throws after `terminate()`, validates `matmul` arity, and documents Vite worker URLs. Workerpool caps chunk count near `maxWorkers` for large arrays, resolves the worker script via `import.meta.resolve` in browsers, and auto-inits on `exec`.
+ComputePool lazy-inits workers on parallel dispatch, throws after `terminate()` on every compute method, and rejects a swapped `matmul` call before stringifying buffers. Workerpool sizes large-array chunks from `maxWorkers` with a 65,536-element floor, resolves `new URL('./worker.js', import.meta.url)`, and rewrites Vite's prebundled `/.vite/deps/worker.js` to the package worker. An in-flight `initialize()` cannot leave workers running after `terminate()`.

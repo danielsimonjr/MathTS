@@ -367,8 +367,8 @@ graph LR
 
 - Classes: `MathWorkerPool`
 - Interfaces: `WorkerpoolCapabilities`, `WasmFeatureStatus`, `WorkerPoolConfig`, `ParallelResult`, `PoolMetrics`, `EnhancedPoolStats`, `TaskOptions`
-- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `resolveDefaultWorkerScript`, `initializePool`, `terminatePool`, `getPoolStats`
-- Constants: `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
+- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `viteDepsWorkerFallback`, `resolveDefaultWorkerScript`, `initializePool`, `terminatePool`, `getPoolStats`
+- Constants: `MIN_WORKER_CHUNK`, `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
 - Re-exports: `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`, `tensordotRange`, `matmulSequential`
 
 ---
@@ -20257,12 +20257,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1285   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218509 |
-| Total Exports           | 7012   |
+| Total Lines of Code     | 218555 |
+| Total Exports           | 7014   |
 | Total Re-exports        | 3022   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2362   |
+| Total Functions         | 2363   |
 | Total Type Guards       | 171    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |

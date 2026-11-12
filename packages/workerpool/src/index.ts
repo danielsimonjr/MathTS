@@ -351,6 +351,27 @@ export interface WorkerPoolConfig {
 }
 
 /**
+ * Sibling `worker.js` URL, unless Vite's dep optimizer rewrote `import.meta.url`
+ * into `/.vite/deps/` (that relative URL 404s). Dev then uses the package file
+ * the Vite server serves from `node_modules`.
+ */
+export function viteDepsWorkerFallback(sibling: URL): string {
+  if (sibling.href.includes('/.vite/deps/')) {
+    return new URL('/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js', sibling).href;
+  }
+  return sibling.href;
+}
+
+/**
+ * Below this many elements per chunk, a forced element-wise dispatch at n=1e6
+ * measured slower than sequential once chunk count reached 32 (ratio 1.25 on
+ * 4 cores; 16 chunks was 0.95). Applied only when the configured chunk size
+ * would exceed `maxWorkers` and the input is long enough for at least two
+ * minimum chunks — small test pools keep their configured chunk size.
+ */
+export const MIN_WORKER_CHUNK = 65_536;
+
+/**
  * Resolve the path to the built worker script (`dist/worker.js`).
  *
  * The worker thread must run the registered MathTS kernels (`sumChunk`,
@@ -364,20 +385,14 @@ export interface WorkerPoolConfig {
 export async function resolveDefaultWorkerScript(): Promise<string | undefined> {
   const isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
 
-  // Browser / bundlers: resolve the package worker entry so Vite does not rewrite
-  // `new URL('./worker.js', import.meta.url)` against a prebundled deps chunk (404).
+  // Browser / bundlers: the literal `new URL('./worker.js', import.meta.url)` is what
+  // Vite's production build rewrites into an emitted worker asset. In dev, the
+  // optimizer prebundles this module and that URL becomes
+  // `/node_modules/.vite/deps/worker.js` (404). Point that case at the package
+  // file the dev server already serves.
   if (!isNode) {
     try {
-      const resolve = (import.meta as ImportMeta & { resolve?: (specifier: string) => string })
-        .resolve;
-      if (typeof resolve === 'function') {
-        return resolve('@danielsimonjr/mathts-workerpool/worker');
-      }
-    } catch {
-      // fall through to sibling URL
-    }
-    try {
-      return new URL('./worker.js', import.meta.url).href;
+      return viteDepsWorkerFallback(new URL('./worker.js', import.meta.url));
     } catch {
       return undefined;
     }
@@ -508,6 +523,11 @@ export class MathWorkerPool {
   private config: WorkerPoolConfig;
   private initialized = false;
   private initPromise: Promise<void> | null = null;
+  /**
+   * Bumped by `terminate()` so an in-flight `initialize()` cannot assign a pool
+   * (and leak workers) after shutdown, and a later `initialize()` still can.
+   */
+  private lifecycle = 0;
 
   // Metrics tracking
   private _totalTasksExecuted = 0;
@@ -542,8 +562,9 @@ export class MathWorkerPool {
   }
 
   private async _initialize(): Promise<void> {
+    const life = this.lifecycle;
     if (!this.config.enabled) {
-      this.initialized = true;
+      if (this.lifecycle === life) this.initialized = true;
       return;
     }
 
@@ -561,13 +582,14 @@ export class MathWorkerPool {
     // Use the explicit worker script if provided, otherwise resolve the
     // built kernel worker so named-method dispatch (sumChunk, ...) works.
     const workerScript = this.config.workerScript ?? (await resolveDefaultWorkerScript());
+    if (this.lifecycle !== life) return;
 
-    if (workerScript) {
-      this.pool = createPool(workerScript, options);
-    } else {
-      this.pool = createPool(null, options);
+    const pool = workerScript ? createPool(workerScript, options) : createPool(null, options);
+    if (this.lifecycle !== life) {
+      await pool.terminate(true);
+      return;
     }
-
+    this.pool = pool;
     this.initialized = true;
 
     // If eager init, warm up workers by running a no-op on each
@@ -2346,13 +2368,13 @@ export class MathWorkerPool {
    * Terminate the worker pool
    */
   async terminate(force = false): Promise<void> {
-    if (this.pool) {
-      await this.pool.terminate(force);
-      this.pool = null;
-    }
+    this.lifecycle += 1;
+    const pool = this.pool;
+    this.pool = null;
     this.initialized = false;
     this.initPromise = null;
     this.ready = Promise.resolve();
+    if (pool) await pool.terminate(force);
   }
 
   /**
@@ -2376,12 +2398,19 @@ export class MathWorkerPool {
    */
   private workerChunkSize(dataLength: number, options?: TaskOptions): number {
     if (options?.chunkSize !== undefined) return options.chunkSize;
+    if (dataLength <= 0) return 1;
     const workers = Math.max(1, this.config.maxWorkers);
     const configChunks = Math.ceil(dataLength / this.config.chunkSize);
+    // Keep the configured size while the chunk count stays near the worker count.
+    // Past that (100 chunks at n=1e6 with chunkSize 10_000) grow chunks.
     if (configChunks <= workers * 2) {
       return this.config.chunkSize;
     }
-    return Math.max(1, Math.ceil(dataLength / workers));
+    const byWorkers = Math.ceil(dataLength / workers);
+    if (byWorkers < MIN_WORKER_CHUNK && dataLength >= MIN_WORKER_CHUNK * 2) {
+      return MIN_WORKER_CHUNK;
+    }
+    return byWorkers;
   }
 
   private chunkFloat64Array(data: Float64Array, options?: TaskOptions): Float64Array[] {

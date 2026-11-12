@@ -4590,6 +4590,7 @@
       "mathWorkerPool",
       "MathWorkerPool",
       "matmulSequential",
+      "MIN_WORKER_CHUNK",
       "pool",
       "Pool",
       "resolveDefaultWorkerScript",
@@ -4599,6 +4600,7 @@
       "transferArrayBuffer",
       "transferFloat64",
       "transferTypedArray",
+      "viteDepsWorkerFallback",
       "worker"
     ],
     "parallel": [
