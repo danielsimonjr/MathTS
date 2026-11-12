@@ -81,6 +81,7 @@ export function concatenate(tensors: Tensor[], axis: number): Tensor {
   let joinOffset = 0;
   for (let ti = 0; ti < tensors.length; ti++) {
     const t = tensors[ti];
+    const inData = t.contiguous().data;
     const inShape = t.shape;
     const inSize = inShape.reduce((a, b) => a * b, 1);
     const inStrides = Tensor.rowMajorStrides(inShape);
@@ -101,7 +102,7 @@ export function concatenate(tensors: Tensor[], axis: number): Tensor {
         flatOut += outK * outStrides[k];
       }
 
-      outData[flatOut] = t.data[flatIn];
+      outData[flatOut] = inData[flatIn]!;
     }
 
     joinOffset += inShape[ax];
