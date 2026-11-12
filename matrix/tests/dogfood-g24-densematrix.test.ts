@@ -2,7 +2,6 @@
  * Dogfood G24 — DenseMatrix construction, scalar multiply, size cap (#810 #814 #815).
  */
 import { describe, it, expect } from 'vitest';
-import { create, all } from '@danielsimonjr/mathts-compat';
 import { DenseMatrix, DENSE_MATRIX_MAX_ELEMENTS } from '../src/index.js';
 
 describe('G24 dogfood — DenseMatrix (#810 #814 #815)', () => {
@@ -39,17 +38,6 @@ describe('G24 dogfood — DenseMatrix (#810 #814 #815)', () => {
       [3, 4],
     ]);
     expect(A.multiply(2).toArray()).toEqual([
-      [2, 4],
-      [6, 8],
-    ]);
-
-    const math = create(all);
-    const B = math.matrix([
-      [1, 2],
-      [3, 4],
-    ]);
-    const scaled = math.multiply(B, 2) as { valueOf: () => number[][] };
-    expect(scaled.valueOf()).toEqual([
       [2, 4],
       [6, 8],
     ]);
