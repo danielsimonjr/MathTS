@@ -13743,7 +13743,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1855
+      "loc": 1854
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -13876,7 +13876,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 108
+      "loc": 119
     },
     {
       "file": "parallel/tests/ComputePool.test.ts",

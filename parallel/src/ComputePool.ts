@@ -508,12 +508,11 @@ export class ComputePool {
   }
 
   /**
-   * Initialize the worker pool
+   * Initialize the worker pool. After {@link terminate}, compute methods throw until
+   * `initialize()` is called again (workers are respawned).
    */
   async initialize(): Promise<void> {
-    if (this.terminated) {
-      throw new Error('ComputePool has been terminated');
-    }
+    this.terminated = false;
     await this.workerPool.initialize();
   }
 

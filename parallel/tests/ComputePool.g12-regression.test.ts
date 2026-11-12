@@ -21,6 +21,17 @@ describe('G12 ComputePool regressions', () => {
       await pool.terminate(true);
       await expect(pool.sin(Float64Array.of(0, 1))).rejects.toThrow(/terminated/i);
     });
+
+    it('initialize after terminate respawns workers', async () => {
+      const pool = new ComputePool({ maxWorkers: 2 });
+      await pool.initialize();
+      await pool.terminate(true);
+      await pool.initialize();
+      expect(pool.isReady()).toBe(true);
+      const r = await pool.sin(Float64Array.of(0, 1), { forceParallel: true });
+      expect(r.parallelized).toBe(true);
+      await pool.terminate(true);
+    });
   });
 
   describe('#710 sin threshold', () => {
