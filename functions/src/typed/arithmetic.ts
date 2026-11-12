@@ -24,6 +24,17 @@ import {
   pairwiseDot,
   sumSquaredDeviations,
 } from '@danielsimonjr/mathts-core';
+import {
+  finiteNumbers,
+  flattenNumeric,
+  normalizationFromSecondArg,
+  normalizationFromStringAndOptions,
+  numberGrid,
+  reduceNumericMatrix,
+  type StatReduceOptions,
+  type NumericVectorInput,
+  type VarianceRequest,
+} from '../statistics/numeric-data.js';
 // Bucket-C "temperature split": rich-type (BigNumber/Fraction/Complex) POLICY cases
 // delegate to core's oracle-pinned scalar primitives instead of re-implementing the
 // policy here (where the copies had DIVERGED into three live bugs). Hot number/bigint
@@ -1466,15 +1477,76 @@ export const sum = mathTyped('sum', {
  * Synchronous pairwise mean. Returns a number for `number[]`, `Float32Array` and `Float64Array`.
  * The worker-pool mean is `parallelStatMean` and returns a Promise.
  */
+function meanOfNumeric(xs: ArrayLike<number>): f64 {
+  const n = xs.length;
+  if (n === 0) return NaN;
+  return pairwiseSum(xs) / n;
+}
+
+/** Nested numeric arrays flatten, matching mathjs `mean`/`variance` over every element. */
+function vectorForReduction(input: unknown, skipNaN: boolean): ArrayLike<number> {
+  if (!skipNaN && Array.isArray(input) && (input.length === 0 || typeof input[0] === 'number')) {
+    return input as number[];
+  }
+  if (!skipNaN && (input instanceof Float64Array || input instanceof Float32Array)) {
+    return input;
+  }
+  if (Array.isArray(input) && input.length > 0 && Array.isArray(input[0])) {
+    return flattenNumeric(input, skipNaN);
+  }
+  if (numberGrid(input)) return flattenNumeric(input, skipNaN);
+  return skipNaN ? finiteNumbers(input as ArrayLike<number>, true) : (input as ArrayLike<number>);
+}
+
+function meanPrepared(input: unknown, opts?: StatReduceOptions): f64 {
+  const skipNaN = opts ? normalizationFromSecondArg(opts).skipNaN : false;
+  return meanOfNumeric(vectorForReduction(input, skipNaN));
+}
+
+function meanAlong(
+  input: unknown,
+  dim: number | { valueOf(): number },
+  opts?: StatReduceOptions
+): number | number[] {
+  const skipNaN = opts ? normalizationFromSecondArg(opts).skipNaN : false;
+  return reduceNumericMatrix(input, dim, skipNaN, meanOfNumeric);
+}
+
 export const mean = mathTyped('mean', {
-  Array: (arr: f64[]): f64 => {
-    if (arr.length === 0) return NaN;
-    return pairwiseSum(arr) / arr.length; // pairwise: see the note on `sum`
+  Array: (arr: f64[]): f64 => meanPrepared(arr),
+  'Array, Object': (arr: f64[], opts: StatReduceOptions): f64 => meanPrepared(arr, opts),
+  'Array, number | BigNumber': (
+    arr: f64[],
+    dim: number | { valueOf(): number }
+  ): number | number[] => meanAlong(arr, dim),
+  'Array, number | BigNumber, Object': (
+    arr: f64[],
+    dim: number | { valueOf(): number },
+    opts: StatReduceOptions
+  ): number | number[] => meanAlong(arr, dim, opts),
+
+  Float64Array: (a: Float64Array): f64 => meanOfNumeric(a),
+  'Float64Array, Object': (a: Float64Array, opts: StatReduceOptions): f64 => {
+    const { skipNaN } = normalizationFromSecondArg(opts);
+    return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
+  },
+  Float32Array: (a: Float32Array): f64 => meanOfNumeric(a),
+  'Float32Array, Object': (a: Float32Array, opts: StatReduceOptions): f64 => {
+    const { skipNaN } = normalizationFromSecondArg(opts);
+    return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
   },
 
-  // Synchronous pairwise mean on typed arrays (no worker pool).
-  Float64Array: (a: Float64Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
-  Float32Array: (a: Float32Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
+  Matrix: (m: unknown): f64 => meanPrepared(m),
+  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 => meanPrepared(m, opts),
+  'Matrix, number | BigNumber': (
+    m: unknown,
+    dim: number | { valueOf(): number }
+  ): number | number[] => meanAlong(m, dim),
+  'Matrix, number | BigNumber, Object': (
+    m: unknown,
+    dim: number | { valueOf(): number },
+    opts: StatReduceOptions
+  ): number | number[] => meanAlong(m, dim, opts),
 });
 
 /**
@@ -1494,17 +1566,40 @@ function varianceFromM2(m2: f64, n: i32, norm: VarNormalization): f64 {
     case 'uncorrected':
       return m2 / n;
     case 'unbiased':
-    default:
-      // mathjs returns 0 (not NaN) for a single value under unbiased.
+      // mathjs returns 0 (not NaN) for a single value under the unbiased string.
       return n > 1 ? m2 / (n - 1) : 0;
+    default:
+      throw new TypeError(
+        `Unknown normalization "${String(norm)}". Choose "unbiased" (default), "uncorrected", or "biased".`
+      );
   }
 }
 
-function m2OfArray(arr: f64[]): f64 {
-  // M2 = Σ(xᵢ − x̄)². Uses core's corrected two-pass (pairwise mean + (Σd)²/n correction), which
-  // is machine-precision even on large-mean data. Welford's online form (what was here) drifted to
-  // ~1e-7 relative error on 1e9-pedestal input, where this — and NumPy's two-pass — stay ~1e-13-16.
-  return sumSquaredDeviations(arr);
+/** NumPy divisor `n - ddof`. `NaN` when `ddof >= n` (degrees of freedom exhausted). */
+function varianceFromDdof(m2: f64, n: i32, ddof: number): f64 {
+  if (n === 0 || n <= ddof) return NaN;
+  return m2 / (n - ddof);
+}
+
+function varianceOf(xs: ArrayLike<number>, request: VarianceRequest): f64 {
+  const n = xs.length;
+  const m2 = n < 2 ? 0 : sumSquaredDeviations(xs);
+  return request.kind === 'ddof'
+    ? varianceFromDdof(m2, n, request.ddof)
+    : varianceFromM2(m2, n, request.norm);
+}
+
+function variancePrepared(input: unknown, request: VarianceRequest, skipNaN: boolean): f64 {
+  return varianceOf(vectorForReduction(input, skipNaN), request);
+}
+
+function varianceAlong(
+  input: unknown,
+  dim: number | { valueOf(): number },
+  request: VarianceRequest,
+  skipNaN: boolean
+): number | number[] {
+  return reduceNumericMatrix(input, dim, skipNaN, (xs) => varianceOf(xs, request));
 }
 
 /**
@@ -1515,40 +1610,232 @@ function m2OfArray(arr: f64[]): f64 {
  * 'unbiased' | 'uncorrected' (population) | 'biased'. See VarNormalization.
  */
 export const variance = mathTyped('variance', {
-  Array: (arr: f64[]): f64 => varianceFromM2(m2OfArray(arr), arr.length, 'unbiased'),
-  'Array, string': (arr: f64[], norm: string): f64 =>
-    varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization),
+  Array: (arr: f64[]): f64 => variancePrepared(arr, { kind: 'norm', norm: 'unbiased' }, false),
+  'Array, string': (arr: f64[], norm: string): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(norm);
+    return variancePrepared(arr, request, skipNaN);
+  },
+  'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return variancePrepared(arr, request, skipNaN);
+  },
+  'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return variancePrepared(arr, request, skipNaN);
+  },
+  'Array, number | BigNumber': (
+    arr: f64[],
+    dim: number | { valueOf(): number }
+  ): number | number[] => varianceAlong(arr, dim, { kind: 'norm', norm: 'unbiased' }, false),
+  'Array, number | BigNumber, string': (
+    arr: f64[],
+    dim: number | { valueOf(): number },
+    norm: string
+  ): number | number[] => {
+    const { request } = normalizationFromSecondArg(norm);
+    return varianceAlong(arr, dim, request, false);
+  },
+  'Array, number | BigNumber, Object': (
+    arr: f64[],
+    dim: number | { valueOf(): number },
+    arg: StatReduceOptions
+  ): number | number[] => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return varianceAlong(arr, dim, request, skipNaN);
+  },
 
-  // Synchronous typed-array variance (no worker pool).
-  Float64Array: (a: Float64Array): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
-  Float32Array: (a: Float32Array): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
-  'Float64Array, string': (a: Float64Array, norm: string): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
-  'Float32Array, string': (a: Float32Array, norm: string): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
+  Float64Array: (a: Float64Array): f64 => varianceOf(a, { kind: 'norm', norm: 'unbiased' }),
+  Float32Array: (a: Float32Array): f64 => varianceOf(a, { kind: 'norm', norm: 'unbiased' }),
+  'Float64Array, string': (a: Float64Array, norm: string): f64 => {
+    const { request } = normalizationFromSecondArg(norm);
+    return varianceOf(a, request);
+  },
+  'Float32Array, string': (a: Float32Array, norm: string): f64 => {
+    const { request } = normalizationFromSecondArg(norm);
+    return varianceOf(a, request);
+  },
+  'Float64Array, Object': (a: Float64Array, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return varianceOf(skipNaN ? finiteNumbers(a, true) : a, request);
+  },
+  'Float32Array, Object': (a: Float32Array, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return varianceOf(skipNaN ? finiteNumbers(a, true) : a, request);
+  },
+  'Float64Array, string, Object': (a: Float64Array, norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return varianceOf(skipNaN ? finiteNumbers(a, true) : a, request);
+  },
+  'Float32Array, string, Object': (a: Float32Array, norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return varianceOf(skipNaN ? finiteNumbers(a, true) : a, request);
+  },
+
+  Matrix: (m: unknown): f64 => variancePrepared(m, { kind: 'norm', norm: 'unbiased' }, false),
+  'Matrix, string': (m: unknown, norm: string): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(norm);
+    return variancePrepared(m, request, skipNaN);
+  },
+  'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return variancePrepared(m, request, skipNaN);
+  },
+  'Matrix, string, Object': (m: unknown, norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return variancePrepared(m, request, skipNaN);
+  },
+  'Matrix, number | BigNumber': (
+    m: unknown,
+    dim: number | { valueOf(): number }
+  ): number | number[] => varianceAlong(m, dim, { kind: 'norm', norm: 'unbiased' }, false),
+  'Matrix, number | BigNumber, string': (
+    m: unknown,
+    dim: number | { valueOf(): number },
+    norm: string
+  ): number | number[] => {
+    const { request } = normalizationFromSecondArg(norm);
+    return varianceAlong(m, dim, request, false);
+  },
+  'Matrix, number | BigNumber, Object': (
+    m: unknown,
+    dim: number | { valueOf(): number },
+    arg: StatReduceOptions
+  ): number | number[] => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return varianceAlong(m, dim, request, skipNaN);
+  },
 });
 
 /**
  * Standard deviation. The Float64Array signature is synchronous — sqrt of {@link variance};
  * defaults to **unbiased** and accepts the same normalization argument.
  */
-export const std = mathTyped('std', {
-  Array: (arr: f64[]): f64 => Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, 'unbiased')),
-  'Array, string': (arr: f64[], norm: string): f64 =>
-    Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization)),
+function stdOf(value: number | number[]): number | number[] {
+  return Array.isArray(value) ? value.map((v) => Math.sqrt(v)) : Math.sqrt(value);
+}
 
-  // Synchronous typed-array std (no worker pool).
+export const std = mathTyped('std', {
+  Array: (arr: f64[]): f64 =>
+    Math.sqrt(variancePrepared(arr, { kind: 'norm', norm: 'unbiased' }, false)),
+  'Array, string': (arr: f64[], norm: string): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(norm);
+    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+  },
+  'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+  },
+  'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+  },
+  'Array, number | BigNumber': (
+    arr: f64[],
+    dim: number | { valueOf(): number }
+  ): number | number[] => stdOf(varianceAlong(arr, dim, { kind: 'norm', norm: 'unbiased' }, false)),
+  'Array, number | BigNumber, string': (
+    arr: f64[],
+    dim: number | { valueOf(): number },
+    norm: string
+  ): number | number[] => {
+    const { request } = normalizationFromSecondArg(norm);
+    return stdOf(varianceAlong(arr, dim, request, false));
+  },
+  'Array, number | BigNumber, Object': (
+    arr: f64[],
+    dim: number | { valueOf(): number },
+    arg: StatReduceOptions
+  ): number | number[] => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return stdOf(varianceAlong(arr, dim, request, skipNaN));
+  },
+
   Float64Array: (a: Float64Array): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
+    Math.sqrt(varianceOf(a, { kind: 'norm', norm: 'unbiased' })),
   Float32Array: (a: Float32Array): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
-  'Float64Array, string': (a: Float64Array, norm: string): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
-  'Float32Array, string': (a: Float32Array, norm: string): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
+    Math.sqrt(varianceOf(a, { kind: 'norm', norm: 'unbiased' })),
+  'Float64Array, string': (a: Float64Array, norm: string): f64 => {
+    const { request } = normalizationFromSecondArg(norm);
+    return Math.sqrt(varianceOf(a, request));
+  },
+  'Float32Array, string': (a: Float32Array, norm: string): f64 => {
+    const { request } = normalizationFromSecondArg(norm);
+    return Math.sqrt(varianceOf(a, request));
+  },
+  'Float64Array, Object': (a: Float64Array, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
+  },
+  'Float32Array, Object': (a: Float32Array, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
+  },
+  'Float64Array, string, Object': (a: Float64Array, norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
+  },
+  'Float32Array, string, Object': (a: Float32Array, norm: string, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
+    return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
+  },
+
+  Matrix: (m: unknown): f64 =>
+    Math.sqrt(variancePrepared(m, { kind: 'norm', norm: 'unbiased' }, false)),
+  'Matrix, string': (m: unknown, norm: string): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(norm);
+    return Math.sqrt(variancePrepared(m, request, skipNaN));
+  },
+  'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return Math.sqrt(variancePrepared(m, request, skipNaN));
+  },
+  'Matrix, number | BigNumber': (
+    m: unknown,
+    dim: number | { valueOf(): number }
+  ): number | number[] => stdOf(varianceAlong(m, dim, { kind: 'norm', norm: 'unbiased' }, false)),
+  'Matrix, number | BigNumber, string': (
+    m: unknown,
+    dim: number | { valueOf(): number },
+    norm: string
+  ): number | number[] => {
+    const { request } = normalizationFromSecondArg(norm);
+    return stdOf(varianceAlong(m, dim, request, false));
+  },
+  'Matrix, number | BigNumber, Object': (
+    m: unknown,
+    dim: number | { valueOf(): number },
+    arg: StatReduceOptions
+  ): number | number[] => {
+    const { request, skipNaN } = normalizationFromSecondArg(arg);
+    return stdOf(varianceAlong(m, dim, request, skipNaN));
+  },
 });
+
+/** `mean` with NaN omitted (`numpy.nanmean`). A `dim` reduces along that axis. */
+export function nanmean(x: NumericVectorInput | number[][], dim?: number): number | number[] {
+  if (dim === undefined) return mean(x, { skipNaN: true }) as number;
+  return mean(x, dim, { skipNaN: true }) as number | number[];
+}
+
+/** `variance` with NaN omitted (`numpy.nanvar`, default sample `ddof=1`). */
+export function nanvariance(
+  x: NumericVectorInput | number[][],
+  ddof: number = 1,
+  dim?: number
+): number | number[] {
+  if (dim === undefined) return variance(x, { skipNaN: true, ddof }) as number;
+  return variance(x, dim, { skipNaN: true, ddof }) as number | number[];
+}
+
+/** `std` with NaN omitted (`numpy.nanstd`, default sample `ddof=1`). */
+export function nanstd(
+  x: NumericVectorInput | number[][],
+  ddof: number = 1,
+  dim?: number
+): number | number[] {
+  if (dim === undefined) return std(x, { skipNaN: true, ddof }) as number;
+  return std(x, dim, { skipNaN: true, ddof }) as number | number[];
+}
 
 /**
  * Dot product. The Float64Array signature is synchronous.

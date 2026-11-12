@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1287,
+    "totalFiles": 1290,
     "totalModules": 82,
-    "totalExports": 7024
+    "totalExports": 7063
   },
   "entryPoints": [
     {
@@ -3928,7 +3928,6 @@
               "BufferPool",
               "ShaderManager",
               "hasWebGPU",
-              "detectGPUCapabilities",
               "getRecommendedWorkgroupSize",
               "GPUCapabilities"
             ]
@@ -5908,6 +5907,14 @@
           {
             "file": "./named-index.js",
             "imports": ["Index"]
+          },
+          {
+            "file": "./reshape-shape.js",
+            "imports": ["resolveReshapeShape"]
+          },
+          {
+            "file": "./operations/slice.js",
+            "imports": ["slice", "SliceRange"]
           }
         ],
         "workspaceDependencies": [
@@ -5930,7 +5937,7 @@
         ],
         "exports": ["Tensor"],
         "classes": ["Tensor"],
-        "interfaces": ["EinsumSpec"]
+        "interfaces": ["TensorStorage", "EinsumSpec"]
       },
       "tensor/src/contraction-sequence.ts": {
         "description": "contractNetwork — given an ordered list of Tensors (each carrying",
@@ -6058,7 +6065,7 @@
           },
           {
             "file": "./Tensor.js",
-            "imports": ["NestedArray", "EinsumSpec"],
+            "imports": ["NestedArray", "EinsumSpec", "TensorStorage", "TensorDtype"],
             "reExport": true,
             "typeOnly": true
           },
@@ -6180,6 +6187,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6229,6 +6238,8 @@
           "flip",
           "NestedArray",
           "EinsumSpec",
+          "TensorStorage",
+          "TensorDtype",
           "IndexOpts",
           "TensorSvdOpts",
           "TensorSvdResult",
@@ -6263,6 +6274,15 @@
         "classes": ["Index"],
         "interfaces": ["IndexOpts"],
         "functions": ["idx"]
+      },
+      "tensor/src/reshape-shape.ts": {
+        "description": "reshape-shape module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["resolveReshapeShape"],
+        "functions": ["resolveReshapeShape"]
       }
     },
     "tensor/operations": {
@@ -10306,6 +10326,11 @@
             "reExport": true
           },
           {
+            "file": "./statistics/nan-reductions.js",
+            "imports": ["nanmedian"],
+            "reExport": true
+          },
+          {
             "file": "./numeric-extra.js",
             "imports": [
               "clamp",
@@ -11749,6 +11774,7 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "nanmedian",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -12494,6 +12520,7 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "nanmedian",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -21669,6 +21696,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["typedArrayPairToNumbers"]
           }
         ],
         "workspaceDependencies": [
@@ -21764,10 +21795,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21779,6 +21806,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["flattenForStatistics", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
@@ -21866,10 +21897,6 @@
             "imports": ["containsCollections"]
           },
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21885,6 +21912,18 @@
           {
             "file": "../utils/typed-impl.js",
             "imports": ["findTypedImpl"]
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": [
+              "flattenForStatistics",
+              "finiteNumbers",
+              "isFloatTyped",
+              "numberGrid",
+              "reduceNumericMatrix",
+              "FloatTyped",
+              "StatReduceOptions"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -21937,10 +21976,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/array.js",
-            "imports": ["flatten"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -21948,11 +21983,75 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["flattenForStatistics", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["createMode"],
         "constants": ["createMode"]
+      },
+      "functions/src/statistics/nan-reductions.ts": {
+        "description": "nan-reductions module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/index.js",
+            "imports": ["median"]
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["finiteNumbers", "reduceNumericMatrix", "NumericVectorInput"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["nanmedian"],
+        "functions": ["nanmedian"]
+      },
+      "functions/src/statistics/numeric-data.ts": {
+        "description": "Shared numeric-vector handling for statistics reductions (G19).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isFloatTyped",
+          "copyToNumberArray",
+          "flattenForStatistics",
+          "finiteNumbers",
+          "isVarianceNorm",
+          "parseStatOptions",
+          "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
+          "isConstantArrayLike",
+          "typedArrayPairToNumbers"
+        ],
+        "functions": [
+          "isFloatTyped",
+          "copyToNumberArray",
+          "flattenForStatistics",
+          "finiteNumbers",
+          "isVarianceNorm",
+          "parseStatOptions",
+          "normalizationFromSecondArg",
+          "normalizationFromStringAndOptions",
+          "numberGrid",
+          "flattenNumeric",
+          "reduceNumericMatrix",
+          "isConstantArrayLike",
+          "typedArrayPairToNumbers"
+        ]
       },
       "functions/src/statistics/prod.ts": {
         "description": "Compute the product of a matrix or a list with values.",
@@ -22011,6 +22110,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./numeric-data.js",
+            "imports": ["isFloatTyped", "copyToNumberArray", "FloatTyped"]
           }
         ],
         "workspaceDependencies": [],
@@ -24587,6 +24690,20 @@
             "imports": ["f64Unary"]
           },
           {
+            "file": "../statistics/numeric-data.js",
+            "imports": [
+              "finiteNumbers",
+              "flattenNumeric",
+              "normalizationFromSecondArg",
+              "normalizationFromStringAndOptions",
+              "numberGrid",
+              "reduceNumericMatrix",
+              "StatReduceOptions",
+              "NumericVectorInput",
+              "VarianceRequest"
+            ]
+          },
+          {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
@@ -24698,6 +24815,9 @@
           "std",
           "dot",
           "typedArithmetic",
+          "nanmean",
+          "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -24708,6 +24828,9 @@
           "getComputePool"
         ],
         "functions": [
+          "nanmean",
+          "nanvariance",
+          "nanstd",
           "matmul",
           "transpose",
           "matvec",
@@ -38573,7 +38696,11 @@
               "sem",
               "zscore",
               "cov",
-              "corrcoef"
+              "corrcoef",
+              "nanmean",
+              "nanmedian",
+              "nanvariance",
+              "nanstd"
             ]
           },
           {
@@ -38850,6 +38977,10 @@
           "zscore",
           "cov",
           "corrcoef",
+          "nanmean",
+          "nanmedian",
+          "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -39049,6 +39180,10 @@
           "zscore",
           "cov",
           "corrcoef",
+          "nanmean",
+          "nanmedian",
+          "nanvariance",
+          "nanstd",
           "parallelStatSum",
           "parallelStatMean",
           "parallelStatVariance",
@@ -43598,14 +43733,32 @@
         "internalDependencies": [
           {
             "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+            "imports": [
+              "hasWebGPUSurface",
+              "getGPUAdapter",
+              "capabilitiesFromAdapter",
+              "markWebGPUAdapterUnavailable",
+              "resetWebGPUAvailabilityCache",
+              "GPUCapabilities"
+            ]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "exports": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContext"
+        ],
         "classes": ["GPUContext"],
         "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+        "functions": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU"
+        ]
       },
       "gpu/src/ShaderManager.ts": {
         "description": "GPU Shader Manager (generic)",
@@ -43629,9 +43782,16 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43639,9 +43799,16 @@
         ],
         "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43653,6 +43820,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["resetWebGPUAvailabilityCache"]
+          },
           {
             "file": "./GPUContext.js",
             "imports": ["getGlobalGPUContext", "GPUContextOptions"]
@@ -43681,9 +43852,13 @@
             "file": "./detect.js",
             "imports": [
               "hasWebGPU",
+              "hasWebGPUSurface",
+              "resetWebGPUAvailabilityCache",
               "isBrowser",
               "getGPUAdapter",
               "detectGPUCapabilities",
+              "enableGpuUnavailableWarnings",
+              "disableGpuUnavailableWarnings",
               "isGPUSuitableForMatrixOps",
               "getRecommendedWorkgroupSize",
               "getMaxMatrixSize",
@@ -43698,9 +43873,11 @@
               "GPUContext",
               "getGlobalGPUContext",
               "initializeGlobalGPU",
+              "initializeGlobalGPUWithReason",
               "destroyGlobalGPU",
               "GPUContextOptions",
               "GPUContextStatus",
+              "GlobalGPUInitResult",
               "DeviceLostEvent"
             ],
             "reExport": true
@@ -43734,9 +43911,13 @@
         "workspaceDependencies": [],
         "exports": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43745,9 +43926,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -43764,9 +43947,13 @@
         ],
         "reExported": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43775,9 +43962,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -44436,10 +44625,12 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [],
+      "runtime": [
+        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"]
+      ],
       "typeOnly": [],
-      "total": 0,
-      "runtimeCount": 0,
+      "total": 1,
+      "runtimeCount": 1,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -44620,7 +44811,8 @@
           "tensor/src/Tensor.ts",
           "tensor/src/contraction-sequence.ts",
           "tensor/src/index.ts",
-          "tensor/src/named-index.ts"
+          "tensor/src/named-index.ts",
+          "tensor/src/reshape-shape.ts"
         ]
       },
       {
@@ -45152,6 +45344,8 @@
           "functions/src/statistics/median.ts",
           "functions/src/statistics/min.ts",
           "functions/src/statistics/mode.ts",
+          "functions/src/statistics/nan-reductions.ts",
+          "functions/src/statistics/numeric-data.ts",
           "functions/src/statistics/prod.ts",
           "functions/src/statistics/quantileSeq.ts",
           "functions/src/statistics/std.ts",
@@ -46090,19 +46284,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1287,
+    "totalTypeScriptFiles": 1290,
     "totalModules": 82,
-    "totalLinesOfCode": 219326,
-    "totalExports": 7024,
+    "totalLinesOfCode": 220534,
+    "totalExports": 7063,
     "totalClasses": 61,
-    "totalInterfaces": 603,
-    "totalFunctions": 2369,
-    "totalTypeGuards": 172,
+    "totalInterfaces": 604,
+    "totalFunctions": 2395,
+    "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1647,
-    "totalReExports": 3024,
+    "totalReExports": 3037,
     "totalTypeOnlyImports": 644,
-    "runtimeCircularDeps": 0,
+    "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0

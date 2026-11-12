@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1287
+  totalFiles: 1290
   totalModules: 82
-  totalExports: 7024
+  totalExports: 7063
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3791,7 +3791,6 @@ modules:
             - BufferPool
             - ShaderManager
             - hasWebGPU
-            - detectGPUCapabilities
             - getRecommendedWorkgroupSize
             - GPUCapabilities
       exports:
@@ -5740,6 +5739,13 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+        - file: ./reshape-shape.js
+          imports:
+            - resolveReshapeShape
+        - file: ./operations/slice.js
+          imports:
+            - slice
+            - SliceRange
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5762,6 +5768,7 @@ modules:
       classes:
         - Tensor
       interfaces:
+        - TensorStorage
         - EinsumSpec
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
@@ -5874,6 +5881,8 @@ modules:
           imports:
             - NestedArray
             - EinsumSpec
+            - TensorStorage
+            - TensorDtype
           reExport: true
           typeOnly: true
         - file: ./named-index.js
@@ -5985,6 +5994,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6033,6 +6044,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6070,6 +6083,16 @@ modules:
         - IndexOpts
       functions:
         - idx
+    tensor/src/reshape-shape.ts:
+      description: reshape-shape module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - resolveReshapeShape
+      functions:
+        - resolveReshapeShape
   tensor/operations:
     tensor/src/operations/cholesky.ts:
       description: tensorCholesky — Cholesky decomposition for symmetric positive-definite
@@ -9697,6 +9720,10 @@ modules:
             - describe
             - histogram
           reExport: true
+        - file: ./statistics/nan-reductions.js
+          imports:
+            - nanmedian
+          reExport: true
         - file: ./numeric-extra.js
           imports:
             - clamp
@@ -11076,6 +11103,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -11820,6 +11848,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -20487,6 +20516,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - typedArrayPairToNumbers
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20565,9 +20597,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20578,6 +20607,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMad
@@ -20653,9 +20686,6 @@ modules:
         - file: ../utils/collection.js
           imports:
             - containsCollections
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20669,6 +20699,15 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - finiteNumbers
+            - isFloatTyped
+            - numberGrid
+            - reduceNumericMatrix
+            - FloatTyped
+            - StatReduceOptions
       workspaceDependencies: []
       exports:
         - createMedian
@@ -20713,9 +20752,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20723,11 +20759,70 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMode
       constants:
         - createMode
+    functions/src/statistics/nan-reductions.ts:
+      description: nan-reductions module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - median
+        - file: ./numeric-data.js
+          imports:
+            - finiteNumbers
+            - reduceNumericMatrix
+            - NumericVectorInput
+      workspaceDependencies: []
+      exports:
+        - nanmedian
+      functions:
+        - nanmedian
+    functions/src/statistics/numeric-data.ts:
+      description: Shared numeric-vector handling for statistics reductions (G19).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - flatten
+      workspaceDependencies: []
+      exports:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
+      functions:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
     functions/src/statistics/prod.ts:
       description: Compute the product of a matrix or a list with values.
       externalDependencies: []
@@ -20778,6 +20873,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - isFloatTyped
+            - copyToNumberArray
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createQuantileSeq
@@ -23084,6 +23184,17 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+        - file: ../statistics/numeric-data.js
+          imports:
+            - finiteNumbers
+            - flattenNumeric
+            - normalizationFromSecondArg
+            - normalizationFromStringAndOptions
+            - numberGrid
+            - reduceNumericMatrix
+            - StatReduceOptions
+            - NumericVectorInput
+            - VarianceRequest
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23193,6 +23304,9 @@ modules:
         - std
         - dot
         - typedArithmetic
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -23202,6 +23316,9 @@ modules:
         - shouldParallelize
         - getComputePool
       functions:
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -36491,6 +36608,10 @@ modules:
             - zscore
             - cov
             - corrcoef
+            - nanmean
+            - nanmedian
+            - nanvariance
+            - nanstd
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -36731,6 +36852,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -36929,6 +37054,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -41319,13 +41448,16 @@ modules:
       internalDependencies:
         - file: ./detect.js
           imports:
-            - hasWebGPU
+            - hasWebGPUSurface
             - getGPUAdapter
-            - detectGPUCapabilities
+            - capabilitiesFromAdapter
+            - markWebGPUAdapterUnavailable
+            - resetWebGPUAvailabilityCache
             - GPUCapabilities
       workspaceDependencies: []
       exports:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
         - GPUContext
@@ -41336,6 +41468,7 @@ modules:
         - DeviceLostEvent
       functions:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
     gpu/src/ShaderManager.ts:
@@ -41361,9 +41494,16 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41372,9 +41512,16 @@ modules:
         - GPUAdapterInfo
         - GPUCapabilities
       functions:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41384,6 +41531,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./detect.js
+          imports:
+            - resetWebGPUAvailabilityCache
         - file: ./GPUContext.js
           imports:
             - getGlobalGPUContext
@@ -41420,9 +41570,13 @@ modules:
         - file: ./detect.js
           imports:
             - hasWebGPU
+            - hasWebGPUSurface
+            - resetWebGPUAvailabilityCache
             - isBrowser
             - getGPUAdapter
             - detectGPUCapabilities
+            - enableGpuUnavailableWarnings
+            - disableGpuUnavailableWarnings
             - isGPUSuitableForMatrixOps
             - getRecommendedWorkgroupSize
             - getMaxMatrixSize
@@ -41434,9 +41588,11 @@ modules:
             - GPUContext
             - getGlobalGPUContext
             - initializeGlobalGPU
+            - initializeGlobalGPUWithReason
             - destroyGlobalGPU
             - GPUContextOptions
             - GPUContextStatus
+            - GlobalGPUInitResult
             - DeviceLostEvent
           reExport: true
         - file: ./device.js
@@ -41469,9 +41625,13 @@ modules:
       workspaceDependencies: []
       exports:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41480,9 +41640,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -41498,9 +41660,13 @@ modules:
         - serializeGpu
       reExported:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41509,9 +41675,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -42167,10 +42335,13 @@ modules:
         - DEPTH_EPS
 dependencyGraph:
   circularDependencies:
-    runtime: []
+    runtime:
+      - - tensor/src/Tensor.ts
+        - tensor/src/operations/slice.ts
+        - tensor/src/Tensor.ts
     typeOnly: []
-    total: 0
-    runtimeCount: 0
+    total: 1
+    runtimeCount: 1
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -42318,6 +42489,7 @@ dependencyGraph:
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
+        - tensor/src/reshape-shape.ts
     - name: Tensor/operations
       files:
         - tensor/src/operations/cholesky.ts
@@ -42767,6 +42939,8 @@ dependencyGraph:
         - functions/src/statistics/median.ts
         - functions/src/statistics/min.ts
         - functions/src/statistics/mode.ts
+        - functions/src/statistics/nan-reductions.ts
+        - functions/src/statistics/numeric-data.ts
         - functions/src/statistics/prod.ts
         - functions/src/statistics/quantileSeq.ts
         - functions/src/statistics/std.ts
@@ -43625,19 +43799,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1287
+  totalTypeScriptFiles: 1290
   totalModules: 82
-  totalLinesOfCode: 219326
-  totalExports: 7024
+  totalLinesOfCode: 220534
+  totalExports: 7063
   totalClasses: 61
-  totalInterfaces: 603
-  totalFunctions: 2369
-  totalTypeGuards: 172
+  totalInterfaces: 604
+  totalFunctions: 2395
+  totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1647
-  totalReExports: 3024
+  totalReExports: 3037
   totalTypeOnlyImports: 644
-  runtimeCircularDeps: 0
+  runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

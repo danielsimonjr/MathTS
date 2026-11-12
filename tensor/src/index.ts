@@ -1,5 +1,5 @@
 export { Tensor } from './Tensor.js';
-export type { NestedArray, EinsumSpec } from './Tensor.js';
+export type { NestedArray, EinsumSpec, TensorStorage, TensorDtype } from './Tensor.js';
 
 // ITensor-parity additions (see docs/roadmap/ITENSOR_PARITY.md)
 //   Phase 1: named-Index value type + Tensor.contract / replaceIndex / axisOf

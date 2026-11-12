@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2250,
+  "totalFiles": 2259,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1261,
+    "build-entry": 1264,
     "test-only": 0,
     "orphan": 0,
-    "test": 898,
+    "test": 904,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1287,
-    "tests": 898,
+    "src": 1290,
+    "tests": 904,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,8 +28,8 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1017,
-    "@danielsimonjr/mathts-gpu": 17,
+    "@danielsimonjr/mathts-functions": 1020,
+    "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
     "@danielsimonjr/mathts-numbers": 4,
@@ -40,7 +40,7 @@
     "@danielsimonjr/mathts-plot": 46,
     "@danielsimonjr/mathts-signal": 4,
     "@danielsimonjr/mathts-statistics": 4,
-    "@danielsimonjr/mathts-tensor": 56,
+    "@danielsimonjr/mathts-tensor": 59,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
     "@danielsimonjr/mathts-workbook": 66
@@ -744,7 +744,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 385
+      "loc": 421
     },
     {
       "file": "core/src/numeric/strides.ts",
@@ -1122,7 +1122,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 214
+      "loc": 221
     },
     {
       "file": "core/tests/switch.test.ts",
@@ -6568,7 +6568,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1012
+      "loc": 1013
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7961,7 +7961,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 136
+      "loc": 145
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -7982,7 +7982,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 90
+      "loc": 91
     },
     {
       "file": "functions/src/statistics/max.ts",
@@ -8003,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 164
+      "loc": 257
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8017,7 +8017,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 96
+      "loc": 97
+    },
+    {
+      "file": "functions/src/statistics/nan-reductions.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 17
+    },
+    {
+      "file": "functions/src/statistics/numeric-data.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 320
     },
     {
       "file": "functions/src/statistics/prod.ts",
@@ -8031,7 +8045,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 349
+      "loc": 356
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -8633,7 +8647,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1765
+      "loc": 2052
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9882,6 +9896,13 @@
       "loc": 221
     },
     {
+      "file": "functions/tests/dogfood-g19-stats-nan-ddof.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 196
+    },
+    {
       "file": "functions/tests/dtw.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10824,7 +10845,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 110
     },
     {
       "file": "functions/tests/gpu-fft-bench.browser.test.ts",
@@ -12588,14 +12609,14 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 246
+      "loc": 297
     },
     {
       "file": "gpu/src/device.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 53
+      "loc": 55
     },
     {
       "file": "gpu/src/flag.ts",
@@ -12609,14 +12630,14 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 402
+      "loc": 446
     },
     {
       "file": "gpu/src/index.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 40
+      "loc": 46
     },
     {
       "file": "gpu/src/serialize.ts",
@@ -12644,21 +12665,21 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 299
+      "loc": 300
     },
     {
       "file": "gpu/tests/context.test.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 26
+      "loc": 28
     },
     {
       "file": "gpu/tests/detect.test.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 47
+      "loc": 51
     },
     {
       "file": "gpu/tests/device.test.ts",
@@ -12668,11 +12689,32 @@
       "loc": 25
     },
     {
+      "file": "gpu/tests/gpu-init-edges.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 153
+    },
+    {
+      "file": "gpu/tests/gpu-init-status.browser.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
+    },
+    {
       "file": "gpu/tests/helpers/stub-global.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "gpu/tests/issue-759-835-gpu-status.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 55
     },
     {
       "file": "gpu/tests/public-api-smoke.test.ts",
@@ -12777,7 +12819,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 358
+      "loc": 368
     },
     {
       "file": "matrix/src/backends/GPUMatrixBackend.ts",
@@ -13267,7 +13309,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 335
+      "loc": 345
     },
     {
       "file": "matrix/tests/gpu/integration.test.ts",
@@ -14541,7 +14583,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 292
+      "loc": 296
     },
     {
       "file": "statistics/tests/statistics.test.ts",
@@ -14597,7 +14639,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 124
+      "loc": 125
     },
     {
       "file": "tensor/src/operations/eig.ts",
@@ -14688,7 +14730,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 122
+      "loc": 105
     },
     {
       "file": "tensor/src/operations/solve.ts",
@@ -14712,11 +14754,18 @@
       "loc": 180
     },
     {
+      "file": "tensor/src/reshape-shape.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 31
+    },
+    {
       "file": "tensor/src/Tensor.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1022
+      "loc": 1326
     },
     {
       "file": "tensor/tests/audit-ops.test.ts",
@@ -14752,6 +14801,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 202
+    },
+    {
+      "file": "tensor/tests/dogfood-g36-review.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 99
+    },
+    {
+      "file": "tensor/tests/dogfood-g36.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 130
     },
     {
       "file": "tensor/tests/Index.test.ts",
@@ -14863,7 +14926,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 175
+      "loc": 182
     },
     {
       "file": "tensor/tests/operations/solve.test.ts",
