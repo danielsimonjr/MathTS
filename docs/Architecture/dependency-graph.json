@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7024
+    "totalExports": 7029
   },
   "entryPoints": [
     {
@@ -321,6 +321,7 @@
           "forEachMultiIndex",
           "tensordotRange",
           "matmulSequential",
+          "MIN_WORKER_CHUNK",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -335,6 +336,8 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats",
@@ -370,11 +373,13 @@
           "initWorkerWasm",
           "isWorkerWasmAvailable",
           "getWasmFeatures",
+          "viteDepsWorkerFallback",
+          "resolveDefaultWorkerScript",
           "initializePool",
           "terminatePool",
           "getPoolStats"
         ],
-        "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+        "constants": ["MIN_WORKER_CHUNK", "DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
       "packages/workerpool/src/matmul-sequential.ts": {
         "description": "Sequential matrix multiplication: the one kernel for the inline branch of",
@@ -39365,7 +39370,7 @@
         "internalDependencies": [
           {
             "file": "./validate.js",
-            "imports": ["assertSameLength", "assertMatmulShape"]
+            "imports": ["assertSameLength", "assertMatmulShape", "assertMatmulArgs"]
           },
           {
             "file": "./ops/bitwise.js",
@@ -39607,7 +39612,7 @@
           {
             "package": "@danielsimonjr/mathts-workerpool",
             "directory": "packages/workerpool",
-            "imports": ["matmulSequential"]
+            "imports": ["matmulSequential", "resolveDefaultWorkerScript"]
           },
           {
             "package": "@danielsimonjr/mathts-workerpool",
@@ -39624,6 +39629,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39717,6 +39723,7 @@
           "resolveOpThreshold",
           "WorkerPool",
           "matmulSequential",
+          "resolveDefaultWorkerScript",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -39821,8 +39828,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["assertSameLength", "assertMatmulShape"],
-        "functions": ["assertSameLength", "assertMatmulShape"]
+        "exports": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"],
+        "functions": ["assertSameLength", "assertMatmulArgs", "assertMatmulShape"]
       }
     },
     "parallel/operations": {
@@ -46098,15 +46105,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 219023,
-    "totalExports": 7024,
+    "totalLinesOfCode": 219279,
+    "totalExports": 7029,
     "totalClasses": 61,
     "totalInterfaces": 602,
-    "totalFunctions": 2371,
+    "totalFunctions": 2374,
     "totalTypeGuards": 172,
     "totalEnums": 0,
-    "totalConstants": 1646,
-    "totalReExports": 3023,
+    "totalConstants": 1647,
+    "totalReExports": 3024,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
