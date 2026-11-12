@@ -5,5 +5,6 @@ import { parse } from '../src/index.js';
 describe('#715 mathts-parser standalone parse', () => {
   it('parse("2+2") without createParse bootstrap', () => {
     expect(() => parse('2+2')).not.toThrow();
+    expect(parse('2+2')).toBeDefined();
   });
 });

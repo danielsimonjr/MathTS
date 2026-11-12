@@ -14226,7 +14226,7 @@
       "package": "@danielsimonjr/mathts-parser",
       "area": "tests",
       "disposition": "test",
-      "loc": 10
+      "loc": 11
     },
     {
       "file": "parser/tests/facade-sync.test.ts",
