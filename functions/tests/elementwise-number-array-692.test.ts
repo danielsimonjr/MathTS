@@ -1,6 +1,4 @@
-/**
- * Fixes #692 — synchronous unary element-wise ops accept flat number[] vectors.
- */
+/** Fixes #692 — synchronous unary element-wise ops accept flat number[] vectors. */
 
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
