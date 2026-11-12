@@ -1,5 +1,6 @@
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
+import { expand as algebraExpand } from '../typed/algebra.js';
 import type {
   MathNode,
   ConstantNode,
@@ -260,6 +261,9 @@ export const createRationalize = /* #__PURE__ */ factory(
         }
       } else {
         if (nVars === 1) {
+          if (/\^/.test(expr.toString())) {
+            expr = _parse(algebraExpand(expr.toString()));
+          }
           expr = polyToCanonical(expr, coefficients);
         }
         if (detailed) {
@@ -733,6 +737,8 @@ export const createRationalize = /* #__PURE__ */ factory(
             o.noFil = i; // number of son
             recurPol((node as OperatorNode).args[i], node, o);
           } // for in children
+        } else if (tp === 'ParenthesisNode') {
+          recurPol((node as ParenthesisNode).content, noPai, o);
         } else if (tp === 'SymbolNode') {
           // ***** SymbolName *****
           if ((node as SymbolNode).name !== varname && varname !== '') {
