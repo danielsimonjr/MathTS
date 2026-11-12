@@ -1323,18 +1323,12 @@ export function correlate(a: number[], b: number[]): number[] {
 // Slice 5.6 — Spectral windowing WASM dispatch
 // =============================================================================
 
-/**
- * Pack a one-sided PSD array and normalized frequency grid for Welch/Bartlett exports.
- *
- * @param signal - Input samples (coerced to Float64Array by callers)
- * @param frameLength - FFT frame length used as the frequency normalizer
- * @param compute - Kernel that returns the PSD buffer for the given samples and frame
- */
 function assertPsdFrameLength(
   signalLength: i32,
   frameLength: i32,
   name: 'welchPSD' | 'bartlettPSD'
 ): void {
+  if (signalLength === 0) return;
   if (signalLength < frameLength) {
     throw new RangeError(
       `${name}: signal length (${signalLength}) is shorter than frameLength (${frameLength})`
@@ -1342,6 +1336,13 @@ function assertPsdFrameLength(
   }
 }
 
+/**
+ * Pack a one-sided PSD array and normalized frequency grid for Welch/Bartlett exports.
+ *
+ * @param signal - Input samples (coerced to Float64Array by callers)
+ * @param frameLength - FFT frame length used as the frequency normalizer
+ * @param compute - Kernel that returns the PSD buffer for the given samples and frame
+ */
 function packPsd(
   signal: Float64Array,
   frameLength: i32,
