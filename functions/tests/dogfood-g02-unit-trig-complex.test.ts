@@ -147,8 +147,8 @@ describe('G02 — angle units rad/deg/grad/cycle on forward trig', () => {
     // mathjs sin(unit(i*π/2, rad)) === 2.3012989023072947i
     const z = sin(new Unit(new Complex(0, Math.PI / 2), 'rad'));
     expect(isComplex(z)).toBe(true);
-    expect((z as Complex).re).toBeCloseTo(0, 12);
-    expect((z as Complex).im).toBeCloseTo(2.3012989023072947, 12);
+    expect((z as unknown as Complex).re).toBeCloseTo(0, 12);
+    expect((z as unknown as Complex).im).toBeCloseTo(2.3012989023072947, 12);
   });
 });
 

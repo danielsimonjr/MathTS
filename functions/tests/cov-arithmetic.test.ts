@@ -337,7 +337,7 @@ describe('arithmetic — Float64Array sequential fallbacks (below threshold)', (
   });
 
   it('log10/log2/log1p/expm1 sequential', async () => {
-    const l10 = await (log10(Float64Array.from([1, 10, 100])) as Promise<Float64Array>);
+    const l10 = log10(Float64Array.from([1, 10, 100]));
     expect(Array.from(l10).map((v) => Math.round(v))).toEqual([0, 1, 2]);
     const l2 = await (log2(Float64Array.from([1, 2, 8])) as Promise<Float64Array>);
     expect(Array.from(l2).map((v) => Math.round(v))).toEqual([0, 1, 3]);

@@ -29,7 +29,7 @@ describe('G01 #729 complex promotion (functions)', () => {
   });
 
   it("evaluate('log(-1)') promotes", () => {
-    const z = evaluate('log(-1)') as Complex;
+    const z = evaluate('log(-1)') as unknown as Complex;
     expect(z.im).toBeCloseTo(Math.PI, 12);
   });
 

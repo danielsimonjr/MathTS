@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2293,
+  "totalFiles": 2302,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1275,
+    "build-entry": 1276,
     "test-only": 0,
     "orphan": 0,
-    "test": 927,
+    "test": 935,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1301,
-    "tests": 927,
+    "src": 1302,
+    "tests": 935,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 56,
     "@danielsimonjr/mathts-expression": 564,
-    "@danielsimonjr/mathts-functions": 1034,
+    "@danielsimonjr/mathts-functions": 1043,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -513,7 +513,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 746
+      "loc": 761
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -576,7 +576,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 71
+      "loc": 78
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -919,7 +919,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 107
+      "loc": 110
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -6400,7 +6400,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1756
+      "loc": 1754
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -6645,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1016
+      "loc": 1017
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -8738,7 +8738,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2088
+      "loc": 2108
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8993,6 +8993,13 @@
       "loc": 458
     },
     {
+      "file": "functions/src/typed/public-type-exports.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 8
+    },
+    {
       "file": "functions/src/typed/relational.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -9053,7 +9060,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 349
+      "loc": 350
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -9994,6 +10001,13 @@
       "loc": 251
     },
     {
+      "file": "functions/tests/dogfood-g17-public-types.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 50
+    },
+    {
       "file": "functions/tests/dogfood-g18-signal-api.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10789,7 +10803,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 116
     },
     {
       "file": "functions/tests/gap-wave-a.test.ts",
@@ -12241,6 +12255,55 @@
       "loc": 55
     },
     {
+      "file": "functions/tests/type-consumer-g17/issue-700-det.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 18
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-726-evaluate.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 10
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-726-gpu.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 7
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-737-migrator.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 13
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-785-variance.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 10
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-830-unit.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 7
+    },
+    {
+      "file": "functions/tests/type-consumer-g17/issue-g34-containers.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
+    },
+    {
       "file": "functions/tests/typed-algebra-wasm.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -12798,7 +12861,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 46
+      "loc": 44
     },
     {
       "file": "gpu/src/serialize.ts",

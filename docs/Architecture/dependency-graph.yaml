@@ -2,7 +2,7 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1301
+  totalFiles: 1302
   totalModules: 82
   totalExports: 7123
 entryPoints:
@@ -74,7 +74,7 @@ entryPoints:
     description: mathjs Compatibility Layer
   - file: gpu/src/index.ts
     type: main
-    description: / <reference types="@webgpu/types" />
+    description: One serialization queue for ALL GPU dispatches (the error scope is a per-device stack).
   - file: plot/src/index.ts
     type: main
     description: Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
@@ -3473,6 +3473,10 @@ modules:
       internalDependencies:
         - file: ./unit/index.js
           imports:
+            - UnitInstance
+          typeOnly: true
+        - file: ./unit/index.js
+          imports:
             - Unit
             - createUnitClass
             - unitDependencies
@@ -3706,6 +3710,8 @@ modules:
         - SiDimensionVector
         - SiDimensionOptions
         - SiDimensionExponent
+      interfaces:
+        - Unit
     core/src/types/wasm-loader.ts:
       description: Shared type-only shapes for the two independent WASM loader implementations
       externalDependencies: []
@@ -11075,6 +11081,11 @@ modules:
             - DtwResult
           reExport: true
           typeOnly: true
+        - file: ./typed/public-type-exports.js
+          imports:
+            - '*'
+          reExport: true
+          typeOnly: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -12597,6 +12608,7 @@ modules:
         - BiquadCoefficients
         - DtwOptions
         - DtwResult
+        - type * from ./typed/public-type-exports.js
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -14185,6 +14197,10 @@ modules:
           imports:
             - add
             - multiply
+        - file: ../typed/public-type-exports.js
+          imports:
+            - PublicDet
+          typeOnly: true
         - file: ../arithmetic/abs.js
           imports:
             - createAbs
@@ -23393,6 +23409,18 @@ modules:
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
+        - file: ./public-type-exports.js
+          imports:
+            - PublicAbs
+            - PublicAdd
+            - PublicExp
+            - PublicLog
+            - PublicLog10
+            - PublicMean
+            - PublicSqrt
+            - PublicStd
+            - PublicVariance
+          typeOnly: true
         - file: ./complex-promotion.js
           imports:
             - logReal
@@ -25597,6 +25625,20 @@ modules:
         - randomInt
         - pickRandom
         - typedProbability
+    functions/src/typed/public-type-exports.ts:
+      description: Re-export generated public call signatures for typed exports.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/public-overloads.generated.js
+          imports:
+            - '*'
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports: []
+      reExported:
+        - type * from ../../types/public-overloads.generated.js
     functions/src/typed/relational.ts:
       description: Typed Relational Functions
       externalDependencies:
@@ -26119,6 +26161,12 @@ modules:
             - f64Unary
             - f64UnaryDispatched
             - unaryCollection
+        - file: ./public-type-exports.js
+          imports:
+            - PublicCos
+            - PublicSin
+            - PublicTan
+          typeOnly: true
         - file: ./trig-angle-unit.js
           imports:
             - trigFromAngleUnit
@@ -41707,6 +41755,18 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
+            - PublicAbs
+            - PublicAdd
+            - PublicCos
+            - PublicExp
+            - PublicLog
+            - PublicMean
+            - PublicSin
+            - PublicSqrt
+            - PublicTan
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
             - add
             - subtract
             - multiply
@@ -42005,7 +42065,7 @@ modules:
       constants:
         - GPU_MIN_ELEMENTS
     gpu/src/index.ts:
-      description: / <reference types="@webgpu/types" />
+      description: One serialization queue for ALL GPU dispatches (the error scope is a per-device stack).
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -43580,6 +43640,7 @@ dependencyGraph:
         - functions/src/typed/parallel-map.ts
         - functions/src/typed/polynomial-ideal.ts
         - functions/src/typed/probability.ts
+        - functions/src/typed/public-type-exports.ts
         - functions/src/typed/relational.ts
         - functions/src/typed/set.ts
         - functions/src/typed/signal.ts
@@ -44310,18 +44371,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1301
+  totalTypeScriptFiles: 1302
   totalModules: 82
-  totalLinesOfCode: 223511
+  totalLinesOfCode: 223555
   totalExports: 7123
   totalClasses: 61
-  totalInterfaces: 610
+  totalInterfaces: 611
   totalFunctions: 2430
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1655
-  totalReExports: 3059
-  totalTypeOnlyImports: 653
+  totalReExports: 3061
+  totalTypeOnlyImports: 659
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 1
   unusedFilesCount: 0
