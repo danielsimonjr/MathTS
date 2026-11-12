@@ -9,8 +9,10 @@ The expression engine for MathTS: a parser (string → AST), an AST node set, a 
 ## Install
 
 ```sh
-npm install @danielsimonjr/mathts-expression
+npm install @danielsimonjr/mathts-expression @danielsimonjr/mathts-functions
 ```
+
+`parse` and `evaluate` are exported by `@danielsimonjr/mathts-functions`. The expression package is the parser and the AST.
 
 ## What it provides
 

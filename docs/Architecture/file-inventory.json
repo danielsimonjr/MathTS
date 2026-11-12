@@ -4538,7 +4538,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2067
+      "loc": 2065
     },
     {
       "file": "expression/src/Parser.ts",
@@ -6316,7 +6316,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 453
+      "loc": 484
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -9886,7 +9886,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 107
     },
     {
       "file": "functions/tests/dtw.test.ts",

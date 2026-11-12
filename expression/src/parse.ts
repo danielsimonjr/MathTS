@@ -1943,12 +1943,10 @@ export const createParse = /* #__PURE__ */ factory(
 
         const numericType = safeNumberType(numberStr, config);
         const value = numeric(numberStr, numericType);
-        if (
-          numericType === 'number' &&
-          typeof value === 'number' &&
-          !Number.isFinite(value) &&
-          (/[eE]/.test(numberStr) || /^[+-]?\d+$/.test(numberStr))
-        ) {
+        // Any non-finite IEEE result is an overflow. A decimal point must not
+        // sneak past (`1` followed by hundreds of zeros, then `.5` is Infinity).
+        // The identifiers Infinity and NaN are symbols, not numeric tokens.
+        if (numericType === 'number' && typeof value === 'number' && !Number.isFinite(value)) {
           throw new SyntaxError(
             `Numeric overflow: "${numberStr.length > 48 ? numberStr.slice(0, 48) + '…' : numberStr}" is out of IEEE-754 range`
           );

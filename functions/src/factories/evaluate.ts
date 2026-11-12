@@ -38,8 +38,27 @@ import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
 import * as typedFns from '../typed/index.js';
 
-/** Compiler / dispatch internals must not appear as live symbols in the safe evaluate scope. */
-const EVALUATE_SCOPE_OMIT = new Set(['parse', 'typed', 'compile', 'parser']);
+/**
+ * Symbols that build or evaluate other expressions, or that are the typed-function
+ * dispatcher. They stay out of every namespace the safe expression language can
+ * resolve, including the one `Node.compile` and map/filter callbacks close over.
+ * A denylist that only covers the object passed to `createEvaluate` is not enough:
+ * those callbacks compile against `mathWithTransform`.
+ */
+const EVALUATE_SCOPE_OMIT = new Set([
+  'import',
+  'createUnit',
+  'evaluate',
+  'parse',
+  'compile',
+  'typed',
+  'simplify',
+  'derivative',
+  'help',
+  'chain',
+  'parser',
+  'resolve',
+]);
 
 function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...scope };
@@ -53,7 +72,7 @@ function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, u
 // Step 1: Build the full math scope
 // ---------------------------------------------------------------------------
 
-const mathScope: Record<string, unknown> = omitEvaluateInternals({
+const fullMathScope: Record<string, unknown> = {
   // Core scope (typed, config, Complex, BigNumber, etc.)
   ...factoryScope,
 
@@ -81,7 +100,9 @@ const mathScope: Record<string, unknown> = omitEvaluateInternals({
   null: null,
   true: true,
   false: false,
-});
+};
+
+const mathScope: Record<string, unknown> = omitEvaluateInternals(fullMathScope);
 
 // ---------------------------------------------------------------------------
 // Step 1b: Expression-language transforms (wired 2026-07-05)
@@ -121,8 +142,12 @@ const mathScope: Record<string, unknown> = omitEvaluateInternals({
     'sum',
     'variance',
   ]) {
-    if (typeof mwt[key] === 'function') mathScope[key] = mwt[key];
+    if (typeof mwt[key] === 'function' && !EVALUATE_SCOPE_OMIT.has(key)) {
+      mathScope[key] = mwt[key];
+    }
   }
+  // Same object Node.compile and inline map/filter callbacks close over.
+  for (const key of EVALUATE_SCOPE_OMIT) delete mwt[key];
 }
 
 // ---------------------------------------------------------------------------
@@ -154,11 +179,17 @@ function configFingerprint(): string {
   return key;
 }
 
-/** Trusted-input scope: same as the safe scope plus `parse` for re-parsing sub-expressions. */
-const unsafeMathScope: Record<string, unknown> = {
-  ...mathScope,
-  parse,
-};
+/**
+ * Trusted-input scope: the safe scope plus the compiler/dispatch symbols
+ * `{ unsafe: true }` is allowed to call by name. Callback re-entry still uses
+ * the stripped `mathWithTransform`, so a safe `map` callback cannot load them.
+ */
+const unsafeMathScope: Record<string, unknown> = { ...mathScope };
+for (const key of EVALUATE_SCOPE_OMIT) {
+  if (Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
+    unsafeMathScope[key] = fullMathScope[key];
+  }
+}
 
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
@@ -345,7 +376,7 @@ export function evaluate(
 export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
   const compiled = _compileExpression(
     parse,
-    mathScope,
+    options?.unsafe === true ? unsafeMathScope : mathScope,
     expr,
     options?.unsafe === true ? { unsafe: true } : undefined
   );
