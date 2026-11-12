@@ -1,3 +1,5 @@
+import { gemmF64 } from '../types/dense/gemm-f64.js';
+
 /**
  * Shared decomposition helpers (number[][] dense algebra)
  *
@@ -212,13 +214,24 @@ export function matMul(A: number[][], B: number[][]): number[][] {
   const m = A.length;
   const p = A[0].length;
   const n = B[0].length;
+  const ad = new Float64Array(m * p);
+  const bd = new Float64Array(p * n);
+  for (let i = 0; i < m; i++) {
+    const row = A[i];
+    const off = i * p;
+    for (let k = 0; k < p; k++) ad[off + k] = row[k];
+  }
+  for (let k = 0; k < p; k++) {
+    const row = B[k];
+    const off = k * n;
+    for (let j = 0; j < n; j++) bd[off + j] = row[j];
+  }
+  const flat = gemmF64(ad, bd, m, p, n, undefined, { skipZeroInA: true });
   const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
   for (let i = 0; i < m; i++) {
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
-    }
+    const row = C[i];
+    const off = i * n;
+    for (let j = 0; j < n; j++) row[j] = flat[off + j];
   }
   return C;
 }

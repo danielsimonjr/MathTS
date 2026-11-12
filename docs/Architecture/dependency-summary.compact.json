@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1299, "e": 7115, "re": 3058 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1302, "e": 7123, "re": 3058 },
   "s": {
-    "loc": 223247,
+    "loc": 223587,
     "cls": 61,
     "int": 611,
-    "fn": 2423,
+    "fn": 2430,
     "tg": 175,
     "en": 0,
-    "co": 1652,
+    "co": 1653,
     "toi": 651
   },
   "c": { "rt": 2, "to": 1, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -354,7 +354,7 @@
       ]
     },
     "matrix/types": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "isDenseMatrix",
         "registerSparseMatrixFactory",
@@ -369,13 +369,13 @@
         "multiply",
         "scale",
         "transpose",
+        "GEMM_BLOCK",
+        "gemmF64",
         "DENSE_MATRIX_MAX_ELEMENTS",
         "assertDenseMatrixSize",
         "sum",
         "mean",
-        "min",
-        "max",
-        "norm"
+        "min"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
@@ -1192,7 +1192,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 35,
+      "f": 37,
       "exp": [
         "arraySize",
         "validate",
@@ -1944,7 +1944,7 @@
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/array.ts", "i": 0, "o": 47 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 45 },
+    { "p": "utils/number.ts", "i": 0, "o": 46 },
     { "p": "utils/collection.ts", "i": 0, "o": 41 }
   ]
 }
