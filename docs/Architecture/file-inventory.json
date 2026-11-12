@@ -13981,7 +13981,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 535
+      "loc": 539
     },
     {
       "file": "parallel/src/strategies/chunk.ts",

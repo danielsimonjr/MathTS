@@ -66,9 +66,13 @@ function resolveMatrixWorkerScript(): string {
 
   // Node: worker_threads needs a real file on disk. When this module runs
   // from src/ (tests, ts loader) the worker lives in ../dist/; when it runs
-  // from dist/ it is a sibling.
-  // Prefer the worker beside the built module; WorkerPool accepts a `file://` href.
-  return new URL('./matrix.worker.js', import.meta.url).href;
+  // from dist/ it is a sibling. Avoid sync `node:fs` here so browser bundles
+  // never see a static Node builtin on this entry.
+  const fromSrc = /\/src(?:\/|$)/.test(new URL(import.meta.url).pathname);
+  const workerUrl = fromSrc
+    ? new URL('../dist/matrix.worker.js', import.meta.url)
+    : new URL('./matrix.worker.js', import.meta.url);
+  return workerUrl.href;
 }
 
 /**
