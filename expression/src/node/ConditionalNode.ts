@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isBigNumber, isComplex, isNode, isUnit, typeOf } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { getPrecedence } from '../operators.js';
@@ -297,5 +298,6 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
     return ConditionalNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

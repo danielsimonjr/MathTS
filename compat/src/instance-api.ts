@@ -62,6 +62,10 @@ export function wireMathjsInstanceApi(
     (...args: unknown[]) => mathTyped(...(args as Parameters<typeof mathTyped>)),
     {
       isTypedFunction: typedFunction.isTypedFunction,
+      // The declared type is typeof mathTyped, so the registry method is delegated too.
+      // The parse factory registers its string-to-Node conversion through it.
+      addConversion: (...args: Parameters<typeof mathTyped.addConversion>) =>
+        mathTyped.addConversion(...args),
     }
   ) as WiredCompatInstance['typed'];
 

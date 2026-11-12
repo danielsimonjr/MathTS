@@ -2881,6 +2881,8 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts",
+      "expression/src/node/default-node.ts",
+      "expression/src/parse-defaults.ts",
       "expression/src/parse.ts",
       "expression/src/transform/and.transform.ts",
       "expression/src/transform/bitAnd.transform.ts",
@@ -2909,6 +2911,12 @@
       "expression/src/transform/utils/transformCallback.ts",
       "expression/src/transform/variance.transform.ts"
     ],
+    "expression/src/evaluator/evaluate.ts": [
+      "expression/src/Help.ts",
+      "expression/src/Parser.ts",
+      "expression/src/default-instance.ts",
+      "expression/src/evaluator/index.ts"
+    ],
     "expression/src/utils/map.ts": [
       "expression/src/Parser.ts",
       "expression/src/compiler/compile.ts",
@@ -2916,10 +2924,23 @@
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/utils/scope.ts"
     ],
-    "expression/src/parse.ts": ["expression/src/default-instance.ts", "expression/src/index.ts"],
+    "expression/src/default-math-scope.ts": [
+      "expression/src/default-instance.ts",
+      "expression/src/evaluator/evaluate.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/default-node.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/compiler/compile.ts": [
+      "expression/src/compiler/index.ts",
+      "expression/src/default-instance.ts",
+      "expression/src/default-math-scope.ts",
+      "expression/src/evaluator/evaluate.ts"
+    ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
       "expression/src/default-instance.ts",
+      "expression/src/default-math-scope.ts",
       "expression/src/evaluator/evaluate.ts",
       "expression/src/index.ts",
       "expression/src/node/AccessorNode.ts",
@@ -2937,80 +2958,12 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts",
+      "expression/src/node/default-node.ts",
       "expression/src/parse.ts",
       "expression/src/utils/latex.ts"
     ],
-    "expression/src/node/AccessorNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/ArrayNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/AssignmentNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/BlockNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/ConditionalNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/ConstantNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/FunctionAssignmentNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/FunctionNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/IndexNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/ObjectNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/OperatorNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/ParenthesisNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/RangeNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/RelationalNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/node/SymbolNode.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/index.ts"
-    ],
-    "expression/src/compiler/compile.ts": [
-      "expression/src/compiler/index.ts",
-      "expression/src/default-instance.ts",
-      "expression/src/evaluator/evaluate.ts"
-    ],
-    "expression/src/evaluator/evaluate.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/evaluator/index.ts"
-    ],
     "expression/src/transform/utils/compileInlineExpression.ts": [
-      "expression/src/default-instance.ts",
+      "expression/src/default-math-scope.ts",
       "expression/src/transform/map.transform.ts",
       "expression/src/transform/utils/prepareTransformArgs.ts"
     ],
@@ -3032,7 +2985,8 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts"
     ],
-    "expression/src/Parser.ts": ["expression/src/index.ts"],
+    "expression/src/parse.ts": ["expression/src/evaluator/evaluate.ts", "expression/src/index.ts"],
+    "expression/src/Parser.ts": ["expression/src/function/parser.ts", "expression/src/index.ts"],
     "expression/src/Help.ts": ["expression/src/index.ts"],
     "expression/src/compiler/index.ts": ["expression/src/index.ts"],
     "expression/src/evaluator/index.ts": ["expression/src/index.ts"],
@@ -3056,6 +3010,67 @@
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts"
     ],
+    "expression/src/node/AccessorNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/ArrayNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/AssignmentNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/BlockNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/ConditionalNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/ConstantNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/FunctionAssignmentNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/FunctionNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/IndexNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/ObjectNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/OperatorNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/ParenthesisNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/RangeNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/RelationalNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/parse-defaults.ts"
+    ],
+    "expression/src/node/SymbolNode.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/parse-defaults.ts"
+    ],
     "expression/src/node/utils/stringSubset.ts": [
       "expression/src/index.ts",
       "expression/src/node/AssignmentNode.ts",
@@ -3072,6 +3087,24 @@
       "expression/src/scalar-enumerate.ts"
     ],
     "expression/src/scalar-enumerate.ts": ["expression/src/index.ts"],
+    "expression/src/node/default-node.ts": [
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/parse-defaults.ts"
+    ],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/utils/customs.ts": [
@@ -3094,6 +3127,7 @@
       "expression/src/evaluator/evaluate.ts",
       "expression/src/parse.ts"
     ],
+    "expression/src/parse-defaults.ts": ["expression/src/parse.ts"],
     "expression/src/embeddedDocs/physicalConstants/index.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
     ],

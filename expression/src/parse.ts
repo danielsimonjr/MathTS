@@ -14,6 +14,7 @@ import { hasOwnProperty } from './utils/object.js';
 import { isSafeProperty, setSafeProperty } from './utils/customs.js';
 import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
 import type { MathNode } from './node/Node.js';
+import { parseDefaults } from './parse-defaults.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
  *  constructors accept heterogeneous positional args and all yield a MathNode. */
@@ -2086,9 +2087,19 @@ export const createParse = /* #__PURE__ */ factory(
       return error;
     }
 
-    // Now that we can parse, automatically convert strings to Nodes by parsing
-    typed.addConversion({ from: 'string', to: 'Node', convert: parse });
+    // Now that we can parse, automatically convert strings to Nodes by parsing.
+    // The typed instance may be shared: a second parse factory run on it finds
+    // the conversion already registered. Keep the first one (#937).
+    try {
+      typed.addConversion({ from: 'string', to: 'Node', convert: parse });
+    } catch (error: unknown) {
+      if (!(error instanceof Error) || !error.message.includes('already a conversion')) {
+        throw error;
+      }
+    }
 
     return parse;
-  }
+  },
+  undefined,
+  parseDefaults
 );

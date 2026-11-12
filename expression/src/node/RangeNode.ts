@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isNode, isSymbolNode } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { getPrecedence } from '../operators.js';
@@ -341,5 +342,6 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
     return RangeNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

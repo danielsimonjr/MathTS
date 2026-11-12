@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { getPrecedence } from '../operators.js';
 import { escape } from '../utils/string.js';
 import { getSafeProperty } from '../utils/customs.js';
@@ -288,5 +289,6 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
     return RelationalNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

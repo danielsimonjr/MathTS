@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { format } from '../utils/string.js';
 import { typeOf } from '../utils/is.js';
 import { escapeLatex } from '../utils/latex.js';
@@ -195,5 +196,6 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
     return ConstantNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { escape } from '../utils/string.js';
 import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
@@ -238,5 +239,6 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
     return SymbolNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

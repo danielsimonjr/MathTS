@@ -11,6 +11,7 @@ import { keywords } from '../keywords.js';
 import { deepStrictEqual } from '../utils/object.js';
 import { factory } from '../utils/factory.js';
 import { createMap } from '../utils/map.js';
+import { getDefaultMathScope } from '../default-math-scope.js';
 
 // Type definitions
 type Scope = Map<string, unknown>;
@@ -508,7 +509,9 @@ export const createNode = /* #__PURE__ */ factory(
 
     return Node;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  (_supplied, missing) =>
+    missing.includes('mathWithTransform') ? { mathWithTransform: getDefaultMathScope() } : {}
 );
 
 // Export the Node type for use in other modules

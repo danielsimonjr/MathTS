@@ -10,6 +10,9 @@ import { hasOwnProperty } from '../utils/object.js';
 import { getSafeProperty, getSafeMethod, isSafeProperty, isSafeMethod } from '../utils/customs.js';
 import { createSubScope } from '../utils/scope.js';
 import { factory } from '../utils/factory.js';
+import type { DefaultDependencies } from '../utils/factory.js';
+import { nodeDefaults } from './default-node.js';
+import { createSymbolNode } from './SymbolNode.js';
 import { defaultTemplate, latexFunctions } from '../utils/latex.js';
 import { toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
@@ -17,6 +20,21 @@ import { mapChildArray } from './Node.js';
 
 const name = 'FunctionNode';
 const dependencies = ['math', 'Node', 'SymbolNode'];
+
+/**
+ * FunctionNode also needs a SymbolNode class. The default is built on the same
+ * `Node` base as the other defaults, and on the caller's `math` and `Node` when
+ * the caller supplied them.
+ */
+const functionNodeDefaults: DefaultDependencies = (supplied, missing) => {
+  const fill = nodeDefaults(supplied, missing);
+  if (missing.includes('SymbolNode')) {
+    const math = (supplied?.math ?? fill.math) as Record<string, unknown>;
+    const Node = supplied?.Node ?? fill.Node;
+    fill.SymbolNode = createSymbolNode({ math, Node } as Parameters<typeof createSymbolNode>[0]);
+  }
+  return fill;
+};
 
 /**
  * Sandbox-safe "is this member undefined?" test for `obj?.method()`. It never
@@ -656,5 +674,6 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
     return FunctionNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  functionNodeDefaults
 );

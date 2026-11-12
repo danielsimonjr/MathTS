@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isArrayNode, isNode } from '../utils/is.js';
 import { map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
@@ -228,5 +229,6 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
     return ArrayNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import {
   isAccessorNode,
   isArrayNode,
@@ -303,5 +304,6 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
     return AccessorNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );
