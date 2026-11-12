@@ -2927,6 +2927,7 @@
     "expression/src/default-math-scope.ts": [
       "expression/src/default-instance.ts",
       "expression/src/evaluator/evaluate.ts",
+      "expression/src/index.ts",
       "expression/src/node/Node.ts",
       "expression/src/node/default-node.ts",
       "expression/src/parse-defaults.ts"

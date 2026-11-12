@@ -1118,6 +1118,8 @@
       "expmDocs",
       "exponentialCDFDocs",
       "exponentialPDFDocs",
+      "EXPRESSION_SCOPE_OMIT",
+      "expressionView",
       "expToTrigDocs",
       "extend",
       "factorDocs",

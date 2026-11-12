@@ -17,10 +17,12 @@ import { compileInlineExpression } from './transform/utils/compileInlineExpressi
 import type { MathNode } from './node/Node.js';
 
 /**
- * Names that build or evaluate other expressions. They are never copied onto
- * the default math scope (the same denylist `functions` evaluate strips).
+ * Names that build or evaluate other expressions, or that are the typed-function
+ * dispatcher or a node constructor. An expression must never resolve them. This
+ * is the single source of the expression denylist: `functions` evaluate, compat
+ * import and the parse defaults all read it.
  */
-const SAFE_SCOPE_OMIT: readonly string[] = [
+export const EXPRESSION_SCOPE_OMIT: ReadonlySet<string> = new Set([
   'import',
   'createUnit',
   'evaluate',
@@ -33,8 +35,6 @@ const SAFE_SCOPE_OMIT: readonly string[] = [
   'chain',
   'parser',
   'resolve',
-  'config',
-  'numeric',
   'ConstantNode',
   'SymbolNode',
   'OperatorNode',
@@ -50,7 +50,42 @@ const SAFE_SCOPE_OMIT: readonly string[] = [
   'RangeNode',
   'RelationalNode',
   'ConditionalNode',
-];
+]);
+
+/** Names kept off the default math scope: the denylist plus the parser dependencies. */
+const SAFE_SCOPE_OMIT: readonly string[] = [...EXPRESSION_SCOPE_OMIT, 'config', 'numeric'];
+
+const expressionViews = new WeakMap<object, Record<string, unknown>>();
+
+/**
+ * A live view of a caller's math scope in which the names of
+ * `EXPRESSION_SCOPE_OMIT` do not exist. Every other read goes to the caller's
+ * scope, so later changes to that scope stay visible. One view per scope, so
+ * node classes built for one scope share one `Node` base.
+ */
+export function expressionView(scope: Record<string, unknown>): Record<string, unknown> {
+  let view = expressionViews.get(scope);
+  if (view !== undefined) return view;
+  const hidden = (key: string | symbol): boolean =>
+    typeof key === 'string' && EXPRESSION_SCOPE_OMIT.has(key);
+  // The proxy target is an empty object, so the traps can hide a property of the
+  // caller's scope without breaking a proxy invariant.
+  view = new Proxy({} as Record<string, unknown>, {
+    get: (_t, key) => (hidden(key) ? undefined : Reflect.get(scope, key)),
+    has: (_t, key) => !hidden(key) && Reflect.has(scope, key),
+    set: (_t, key, value) => !hidden(key) && Reflect.set(scope, key, value),
+    deleteProperty: (_t, key) => !hidden(key) && Reflect.deleteProperty(scope, key),
+    ownKeys: () => Reflect.ownKeys(scope).filter((key) => !hidden(key)),
+    getOwnPropertyDescriptor: (_t, key) => {
+      if (hidden(key)) return undefined;
+      const descriptor = Reflect.getOwnPropertyDescriptor(scope, key);
+      return descriptor === undefined ? undefined : { ...descriptor, configurable: true };
+    },
+    getPrototypeOf: () => Reflect.getPrototypeOf(scope),
+  });
+  expressionViews.set(scope, view);
+  return view;
+}
 
 /** Minimal math scope for arithmetic expressions (no matrix/functions barrel). */
 export const defaultMathScope: Record<string, unknown> = {

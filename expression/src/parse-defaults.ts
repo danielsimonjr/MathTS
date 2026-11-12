@@ -6,7 +6,9 @@
  * The scope the caller passes to `createParse` is also the math scope of the
  * node constructors built here: a symbol resolves against the caller's scope
  * (`createParse(create(all))`), not against a fixed namespace. With no caller
- * scope, the shared default math scope is used.
+ * scope, the shared default math scope is used. The nodes see the caller's
+ * scope through `expressionView`: the names that `math.evaluate` denies
+ * (`import`, `createUnit`, `parse`, ...) do not exist for them either.
  *
  * Host-owned runtime functions (`subset`, `matrix`, `size`) come from the
  * caller's scope. The default scope has none of them, so only the default scope
@@ -20,7 +22,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { getDefaultMathScope } from './default-math-scope.js';
+import { expressionView, getDefaultMathScope } from './default-math-scope.js';
 import { nodeBaseFor } from './node/default-node.js';
 import { createAccessorNode } from './node/AccessorNode.js';
 import { createArrayNode } from './node/ArrayNode.js';
@@ -76,20 +78,23 @@ function isBounded(value: unknown): boolean {
  * constructor that the caller supplied itself.
  */
 export const parseDefaults: DefaultDependencies = (supplied, missing) => {
-  const math: Record<string, unknown> = supplied ?? getDefaultMathScope();
   const isDefaultScope = supplied === undefined;
+  /** The scope the dependencies are read from. */
+  const source: Record<string, unknown> = supplied ?? getDefaultMathScope();
+  /** The scope the nodes resolve names against: the denylist is hidden. */
+  const math = isDefaultScope ? source : expressionView(source);
   /** A host function from the scope. Only the default scope falls back to a stub. */
   const host = (name: string, stub: unknown): unknown =>
-    math[name] ?? (isDefaultScope ? stub : undefined);
+    source[name] ?? (isDefaultScope ? stub : undefined);
 
-  const typed: unknown = math.typed ?? mathTyped;
+  const typed: unknown = source.typed ?? mathTyped;
   /** The caller's `Node` base class, else the base shared by every default node of this scope. */
   let nodeBase: unknown;
-  const getNode = (): unknown => (nodeBase ??= math.Node ?? nodeBaseFor(math));
+  const getNode = (): unknown => (nodeBase ??= source.Node ?? nodeBaseFor(math));
   /** A caller-supplied `SymbolNode` is shared with `FunctionNode`, so both use one class. */
   let symbolNode: unknown;
   const getSymbolNode = (): unknown =>
-    (symbolNode ??= math.SymbolNode ?? createSymbolNode({ math, Node: getNode() }));
+    (symbolNode ??= source.SymbolNode ?? createSymbolNode({ math, Node: getNode() }));
 
   const builders: Record<string, () => unknown> = {
     typed: () => typed,
@@ -104,10 +109,10 @@ export const parseDefaults: DefaultDependencies = (supplied, missing) => {
         matrix: host('matrix', () => ({})),
         Node: getNode(),
       }),
-    BlockNode: () => createBlockNode({ ResultSet: math.ResultSet ?? ResultSet, Node: getNode() }),
+    BlockNode: () => createBlockNode({ ResultSet: source.ResultSet ?? ResultSet, Node: getNode() }),
     ConditionalNode: () => createConditionalNode({ Node: getNode() }),
     ConstantNode: () =>
-      createConstantNode({ Node: getNode(), isBounded: math.isBounded ?? isBounded }),
+      createConstantNode({ Node: getNode(), isBounded: source.isBounded ?? isBounded }),
     FunctionAssignmentNode: () => createFunctionAssignmentNode({ typed, Node: getNode() }),
     FunctionNode: () => createFunctionNode({ math, Node: getNode(), SymbolNode: getSymbolNode() }),
     IndexNode: () => createIndexNode({ Node: getNode(), size: host('size', () => []) }),
