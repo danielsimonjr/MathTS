@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Tensor, randomTensor } from '@danielsimonjr/mathts-tensor';
-import { Tape, TapedTensor, grad, jacobian } from '../src/index.js';
+import { Tape, TapedTensor, grad, jacobian, valueAndGrad } from '../src/index.js';
 
 const fdScalar = (f: (x: number) => number, x: number, eps = 1e-6) =>
   (f(x + eps) - f(x - eps)) / (2 * eps);
@@ -47,6 +47,12 @@ describe('#764 graph seal after backward prevents tape growth', () => {
 });
 
 describe('#755 detach and noGrad', () => {
+  it('data getter returns the primal buffer', () => {
+    const tape = new Tape();
+    const x = TapedTensor.fromTensorAsInput(new Tensor([2], new Float64Array([1, 2])), tape);
+    expect(x.data).toBe(x.primal);
+  });
+
   it('detach breaks gradient to the source', () => {
     const tape = new Tape();
     const x = TapedTensor.fromTensorAsInput(new Tensor([2], new Float64Array([1, 2])), tape);
@@ -191,6 +197,15 @@ describe('#763 reshape and grad on ranked tensors', () => {
     const t = new Tensor([2, 2], new Float64Array([1, 2, 3, 4]));
     const g = grad((x) => x.square().sum())(t);
     expect([...g]).toEqual([2, 4, 6, 8]);
+  });
+
+  it('grad accepts scalar number and plain number[] inputs', () => {
+    expect([...grad((x) => x.square())(4)]).toEqual([8]);
+    expect([...grad((x) => x.sum())([1, 2, 3])]).toEqual([1, 1, 1]);
+  });
+
+  it('valueAndGrad rejects non-scalar outputs', () => {
+    expect(() => valueAndGrad((x) => x.mul(x), new Float64Array([1, 2]))).toThrow(/scalar/);
   });
 
   it('jacobian on [2,2] input returns 4 rows', () => {

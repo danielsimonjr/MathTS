@@ -359,7 +359,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 328
+      "loc": 343
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
