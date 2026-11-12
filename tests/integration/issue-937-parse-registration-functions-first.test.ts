@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 
 /** The first import of @danielsimonjr/mathts-functions takes several seconds cold. */
 const COLD_IMPORT_TIMEOUT_MS = 60_000;
@@ -27,6 +28,19 @@ describe('#937 parse after functions is loaded first', () => {
       const { createParse } = await import('@danielsimonjr/mathts-parser');
       expect(() => createParse()).not.toThrow();
       expect(() => createParse()).not.toThrow();
+    },
+    COLD_IMPORT_TIMEOUT_MS
+  );
+
+  it(
+    '#937 the string-to-Node converter builds functions nodes after the default parse ran',
+    async () => {
+      const fns = await import('@danielsimonjr/mathts-functions');
+      const { parse } = await import('@danielsimonjr/mathts-parser');
+      const thinNode = parse('x');
+      const converted = mathTyped.convert('x', 'Node');
+      expect(converted).toBeInstanceOf(fns.parse('x').constructor);
+      expect(converted).not.toBeInstanceOf(thinNode.constructor);
     },
     COLD_IMPORT_TIMEOUT_MS
   );

@@ -87,8 +87,10 @@ parse(expr: string[], options?): MathNode[]  // also accepts Array | Matrix
 
 Tokenizer helpers are hung off `parse`: `parse.isAlpha`,
 `.isValidLatinOrGreek`, `.isValidMathSymbol`, `.isWhitespace`,
-`.isDecimalMark`, `.isDigitDot`, `.isDigit`. The parser also registers
-`typed.addConversion({from: 'string', to: 'Node', convert: parse})`.
+`.isDecimalMark`, `.isDigitDot`, `.isDigit`. The parse factory registers no
+conversion on `typed`. The owner of the typed functions that take a `Node`
+registers it: `typed.addConversion({from: 'string', to: 'Node', convert: parse})`.
+`functions` does this for the shared `mathTyped`.
 
 ## AST Node Hierarchy
 

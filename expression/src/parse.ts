@@ -44,7 +44,6 @@ interface ParseFunction {
 /** The injected typed-function builder used to assemble `parse`. */
 interface TypedFunction {
   (name: string, signatures: Record<string, unknown>): ParseFunction;
-  addConversion(conversion: { from: string; to: string; convert: unknown }): void;
 }
 
 /** Factory dependencies for createParse (typed builder, numeric parser,
@@ -2087,16 +2086,10 @@ export const createParse = /* #__PURE__ */ factory(
       return error;
     }
 
-    // Now that we can parse, automatically convert strings to Nodes by parsing.
-    // The typed instance may be shared: a second parse factory run on it finds
-    // the conversion already registered. Keep the first one (#937).
-    try {
-      typed.addConversion({ from: 'string', to: 'Node', convert: parse });
-    } catch (error: unknown) {
-      if (!(error instanceof Error) || !error.message.includes('already a conversion')) {
-        throw error;
-      }
-    }
+    // This factory does not register a string-to-Node conversion. `typed` is often the
+    // process-wide `mathTyped`, which holds one converter per type pair, and a converter
+    // belongs to the node classes of the typed functions that take a `Node`. The owner of
+    // those typed functions registers it, built on its own parse (#937).
 
     return parse;
   },

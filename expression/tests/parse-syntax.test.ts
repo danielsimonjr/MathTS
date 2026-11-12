@@ -35,27 +35,6 @@ import { createRelationalNode } from '../src/node/RelationalNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 
-// Register the Node type with typed-function so parse.ts's addConversion works.
-try {
-  (
-    mathTyped as unknown as {
-      addType: (
-        type: { name: string; test: (x: unknown) => boolean },
-        beforePrevious: boolean
-      ) => void;
-    }
-  ).addType(
-    {
-      name: 'Node',
-      test: (x: unknown): boolean =>
-        typeof x === 'object' && x !== null && (x as { isNode?: unknown }).isNode === true,
-    },
-    false
-  );
-} catch {
-  // Already registered (module-level singleton) — ignore.
-}
-
 const config = { number: 'number' as const, numberFallback: 'number' as const };
 
 /** Minimal numeric: handles plain decimals + radix prefixes the tokenizer emits. */

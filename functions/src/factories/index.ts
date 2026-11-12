@@ -1058,6 +1058,21 @@ const _parseScope: Record<string, unknown> = {
 const _parse = createParse(_parseScope as Parameters<typeof createParse>[0]);
 factoryScope.parse = _parse;
 
+// A string passed to a typed function that takes a Node (simplify, derivative, ...) becomes a
+// Node through this parse. These functions match nodes with `instanceof` against the node classes
+// built above, so the converter must come from this scope, not from another parse. The shared
+// typed instance holds one converter per type pair and `createParse` registers none (#937).
+// typed-function binds a converter when a function is built, so register before those functions
+// are built. `override` lets a second load of this module in one process replace the first.
+(
+  factoryScope.typed as {
+    addConversion(
+      conversion: { from: string; to: string; convert: unknown },
+      options?: { override?: boolean }
+    ): void;
+  }
+).addConversion({ from: 'string', to: 'Node', convert: _parse }, { override: true });
+
 // Math constants needed by some factories
 factoryScope.pi = Math.PI;
 factoryScope.tau = 2 * Math.PI;
