@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'type-consumer-g17');
 
+/** Issue repro fixtures; keep in sync with dogfood G17 plan. */
 describe('dogfood G17 public TypeScript types', () => {
   it('gen-public-overloads matches committed generated declarations', () => {
     const out = execFileSync('node', ['scripts/gen-public-overloads.mjs', '--check'], {
