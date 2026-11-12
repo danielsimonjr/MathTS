@@ -16,7 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
+import { fftCoreFloat64, fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { mapBinaryF64 } from './parallel-map.js';
@@ -184,9 +184,16 @@ async function fourStepFFT(
 // =============================================================================
 
 /**
- * Parallel FFT with typed-function dispatch
+ * Parallel FFT with typed-function dispatch.
  *
- * Supports: number[], Float64Array, Complex[]
+ * Supports: number[], Float64Array.
+ *
+ * Return shape (both signatures): `{ real: Float64Array, imag: Float64Array, originalLength: number }`.
+ * `real` and `imag` have length `nextPowerOf2(n)` (zero-padded when `n` is not a power of two).
+ * `originalLength` is the input length `n`. This is not NumPy's length-n `np.fft.fft`; the
+ * factory `fft` in `functions/src/matrix/fft.ts` is the length-n `Complex[]` transform.
+ * `parallelIFFT` of this object inverts the padded spectrum, so the first `originalLength`
+ * samples of `.real` recover a real input.
  */
 export const parallelFFT = mathTyped('parallelFFT', {
   // FFT of number array
@@ -1104,34 +1111,33 @@ function resampleFftToLength(x: number[], num: i32): number[] {
 
   const realIn = new Float64Array(n_x);
   const imagIn = new Float64Array(n_x);
-  for (let i: i32 = 0; i < n_x; i++) realIn[i] = x[i];
-  const spec = fftCoreFloat64(realIn, imagIn, false);
+  for (let i: i32 = 0; i < n_x; i++) realIn[i] = x[i]!;
+  const spec = fftExactFloat64(realIn, imagIn, false);
 
   const halfRe = new Float64Array(m2);
   const halfIm = new Float64Array(m2);
   for (let k: i32 = 0; k < m2; k++) {
-    halfRe[k] = spec.real[k] / s_fac;
-    halfIm[k] = spec.imag[k] / s_fac;
+    halfRe[k] = spec.real[k]! / s_fac;
+    halfIm[k] = spec.imag[k]! / s_fac;
   }
   if (m % 2 === 0 && num !== n_x) {
     const k: i32 = Math.floor(m / 2);
-    halfRe[k] *= num < n_x ? 2 : 0.5;
-    halfIm[k] *= num < n_x ? 2 : 0.5;
+    halfRe[k] = halfRe[k]! * (num < n_x ? 2 : 0.5);
+    halfIm[k] = halfIm[k]! * (num < n_x ? 2 : 0.5);
   }
 
-  const nFft: i32 = nextPowerOf2(num);
-  const fullRe = new Float64Array(nFft);
-  const fullIm = new Float64Array(nFft);
+  const fullRe = new Float64Array(num);
+  const fullIm = new Float64Array(num);
   for (let k: i32 = 0; k < m2; k++) {
-    fullRe[k] = halfRe[k];
-    fullIm[k] = halfIm[k];
+    fullRe[k] = halfRe[k]!;
+    fullIm[k] = halfIm[k]!;
   }
   for (let k: i32 = 1; k <= Math.floor((num - 1) / 2); k++) {
-    fullRe[num - k] = fullRe[k];
-    fullIm[num - k] = -fullIm[k];
+    fullRe[num - k] = fullRe[k]!;
+    fullIm[num - k] = -fullIm[k]!;
   }
 
-  const outSpec = fftCoreFloat64(fullRe, fullIm, true);
+  const outSpec = fftExactFloat64(fullRe, fullIm, true);
   const result: number[] = new Array(num);
   for (let i: i32 = 0; i < num; i++) result[i] = outSpec.real[i];
   return result;
@@ -1223,6 +1229,10 @@ export function medfilt(x: number[], n: i32 = 3): number[] {
  *
  * Accepts `(length, type)` or SciPy-style `(type, length)`.
  *
+ * Coefficients are the **symmetric** window (`scipy.signal.windows.*` with `sym=True`,
+ * and `scipy.signal.get_window(type, n)`): the cosine period is `n - 1`, so the first
+ * and last taps match. The periodic form (`sym=False`, period `n`) is not this function.
+ *
  * @param n - Window length
  * @param type - Window type: 'hamming' | 'hann' | 'blackman' | 'rectangular' | 'bartlett'
  * @returns Window coefficients
@@ -1251,6 +1261,19 @@ export function windowFunction(n: i32 | string, type?: string | i32): number[] {
 function windowFunctionCore(n: i32, type: string): number[] {
   const w: number[] = new Array(n);
   const N1: f64 = n - 1;
+  if (n === 1) {
+    if (type === 'bartlett') return [0];
+    if (
+      type === 'hamming' ||
+      type === 'hann' ||
+      type === 'hanning' ||
+      type === 'blackman' ||
+      type === 'rectangular' ||
+      type === 'rect'
+    ) {
+      return [1];
+    }
+  }
 
   switch (type) {
     case 'hamming':

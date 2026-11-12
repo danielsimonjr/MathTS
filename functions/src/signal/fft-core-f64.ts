@@ -107,3 +107,79 @@ export function fftCoreFloat64(
 
   return { real, imag };
 }
+
+function nextPow2AtLeast(n: i32): i32 {
+  let p: i32 = 1;
+  while (p < n) p <<= 1;
+  return p;
+}
+
+/**
+ * Length-n DFT on flat buffers. Power-of-two lengths use the radix-2 core.
+ * Every other length uses Bluestein's algorithm (chirp-z) so the result is the
+ * same transform as NumPy `np.fft.fft` / `np.fft.ifft`, not a zero-padded radix-2.
+ *
+ * `inverse` applies the 1/n scale. n = 0 returns empty buffers. n = 1 is the input.
+ */
+export function fftExactFloat64(
+  realIn: Float64Array,
+  imagIn: Float64Array,
+  inverse: boolean = false
+): { real: Float64Array; imag: Float64Array } {
+  const n: i32 = realIn.length;
+  if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0) };
+  if (n === 1) {
+    const real = new Float64Array([realIn[0] ?? 0]);
+    const imag = new Float64Array([imagIn[0] ?? 0]);
+    return { real, imag };
+  }
+  if (n > 0 && (n & (n - 1)) === 0) return fftCoreFloat64(realIn, imagIn, inverse);
+
+  const sign: f64 = inverse ? 1 : -1;
+  const convLen: i32 = nextPow2AtLeast(2 * n - 1);
+  const yRe = new Float64Array(convLen);
+  const yIm = new Float64Array(convLen);
+  const hRe = new Float64Array(convLen);
+  const hIm = new Float64Array(convLen);
+
+  for (let k: i32 = 0; k < n; k++) {
+    const ang: f64 = (sign * Math.PI * k * k) / n;
+    const cRe: f64 = Math.cos(ang);
+    const cIm: f64 = Math.sin(ang);
+    const xRe: f64 = realIn[k] ?? 0;
+    const xIm: f64 = imagIn[k] ?? 0;
+    // y = x * chirp, h = conj(chirp). kn = (k² + n² - (k-n)²) / 2.
+    yRe[k] = xRe * cRe - xIm * cIm;
+    yIm[k] = xRe * cIm + xIm * cRe;
+    hRe[k] = cRe;
+    hIm[k] = -cIm;
+    if (k > 0) {
+      hRe[convLen - k] = cRe;
+      hIm[convLen - k] = -cIm;
+    }
+  }
+
+  const Y = fftCoreFloat64(yRe, yIm, false);
+  const H = fftCoreFloat64(hRe, hIm, false);
+  const prodRe = new Float64Array(convLen);
+  const prodIm = new Float64Array(convLen);
+  for (let i: i32 = 0; i < convLen; i++) {
+    prodRe[i] = Y.real[i]! * H.real[i]! - Y.imag[i]! * H.imag[i]!;
+    prodIm[i] = Y.real[i]! * H.imag[i]! + Y.imag[i]! * H.real[i]!;
+  }
+  const conv = fftCoreFloat64(prodRe, prodIm, true);
+
+  const real = new Float64Array(n);
+  const imag = new Float64Array(n);
+  const scale: f64 = inverse ? 1 / n : 1;
+  for (let k: i32 = 0; k < n; k++) {
+    const ang: f64 = (sign * Math.PI * k * k) / n;
+    const cRe: f64 = Math.cos(ang);
+    const cIm: f64 = Math.sin(ang);
+    const re: f64 = conv.real[k]! * cRe - conv.imag[k]! * cIm;
+    const im: f64 = conv.real[k]! * cIm + conv.imag[k]! * cRe;
+    real[k] = re * scale;
+    imag[k] = im * scale;
+  }
+  return { real, imag };
+}

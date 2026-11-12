@@ -12,7 +12,8 @@ npm install @danielsimonjr/mathts-tensor
 
 ## What it provides
 
-- `Tensor` construction from nested arrays / flat data + shape.
+- `Tensor` construction: `Tensor.fromNested([[1, 2], [3, 4]])` infers shape, or
+  `new Tensor(shape, new Float64Array(...))` (constructor requires `Float64Array`).
 - Elementwise ops, reshaping, broadcasting, reductions, contraction, and `matMul`
   (routes through `backendManager.multiply` for WASM GEMM when gated).
 - Tensor decompositions and `tensorSvdWasm` / `tensorEigWasm` (async JS delegates).

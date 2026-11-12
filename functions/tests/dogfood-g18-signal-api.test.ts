@@ -24,12 +24,53 @@ const NUMPY_FFT_8_IMAG = [
   0, 9.65685424949238, 4, 1.65685424949238, 0, -1.65685424949238, -4, -9.65685424949238,
 ];
 
+function naiveDft(x: number[]): { re: number; im: number }[] {
+  const n = x.length;
+  const out: { re: number; im: number }[] = [];
+  for (let k = 0; k < n; k++) {
+    let re = 0;
+    let im = 0;
+    for (let t = 0; t < n; t++) {
+      const ang = (-2 * Math.PI * k * t) / n;
+      re += x[t]! * Math.cos(ang);
+      im += x[t]! * Math.sin(ang);
+    }
+    out.push({ re, im });
+  }
+  return out;
+}
+
 describe('#706 factory fft accepts Float64Array', () => {
   it('fft(new Float64Array([1,0,0,0])) does not throw and returns Complex[]', () => {
     const out = factoryFft(new Float64Array([1, 0, 0, 0])) as { re: number; im: number }[];
     expect(out).toHaveLength(4);
     expect(out[0].re).toBeCloseTo(1, 12);
     expect(out[0].im).toBeCloseTo(0, 12);
+  });
+
+  it('matches np.fft.fft for n=0, n=1, odd, and non-power-of-two lengths', () => {
+    const empty = factoryFft(new Float64Array(0)) as unknown[];
+    expect(empty).toEqual([]);
+
+    const one = factoryFft(new Float64Array([3.5])) as { re: number; im: number }[];
+    expect(one).toHaveLength(1);
+    expect(one[0].re).toBeCloseTo(3.5, 12);
+    expect(one[0].im).toBeCloseTo(0, 12);
+
+    for (const x of [
+      [1, 2, 3, 4, 5, 6, 7, 8],
+      [1, 2, 3],
+      [1, -2, 0.5, 4, -1],
+      [0.2, -1, 3, 0, 2, 1],
+    ]) {
+      const out = factoryFft(new Float64Array(x)) as { re: number; im: number }[];
+      const ref = naiveDft(x);
+      expect(out).toHaveLength(x.length);
+      for (let k = 0; k < x.length; k++) {
+        expect(out[k].re).toBeCloseTo(ref[k]!.re, 8);
+        expect(out[k].im).toBeCloseTo(ref[k]!.im, 8);
+      }
+    }
   });
 });
 
@@ -39,9 +80,29 @@ describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
     const F = (await parallelFFT(x)) as { real: Float64Array; imag: Float64Array };
     expect(F.real[0]).toBeCloseTo(NUMPY_FFT_8_REAL[0]!, 10);
     expect(F.imag[1]).toBeCloseTo(NUMPY_FFT_8_IMAG[1]!, 10);
+    expect(F.real).toBeInstanceOf(Float64Array);
+    expect(F.imag).toBeInstanceOf(Float64Array);
+    expect(F.real.length).toBe(8);
+    expect(F.imag.length).toBe(8);
     const back = (await parallelIFFT(F)) as { real: Float64Array; imag: Float64Array };
     for (let i = 0; i < x.length; i++) {
       expect(back.real[i]).toBeCloseTo(x[i]!, 15);
+    }
+  });
+
+  it('non-power-of-two input reports originalLength and a padded spectrum that still round-trips', async () => {
+    const x = new Float64Array([1, 2, 3]);
+    const F = (await parallelFFT(x)) as {
+      real: Float64Array;
+      imag: Float64Array;
+      originalLength: number;
+    };
+    expect(F.originalLength).toBe(3);
+    expect(F.real.length).toBe(4);
+    expect(F.imag.length).toBe(4);
+    const back = (await parallelIFFT(F)) as { real: Float64Array };
+    for (let i = 0; i < x.length; i++) {
+      expect(back.real[i]).toBeCloseTo(x[i]!, 12);
     }
   });
 });
@@ -61,6 +122,48 @@ describe('#768 welchPSD short signal', () => {
   });
 });
 
+/**
+ * SciPy `signal.resample` Fourier method for a real vector (no window).
+ * Spectrum copy follows `scipy/signal/_signaltools.py`: keep `min(n, num)//2+1`
+ * bins, double or halve the Nyquist bin when that length is even, mirror the
+ * negative frequencies, then scale by `n/num` is applied because SciPy's
+ * `irfft`/`ifft` pair uses the unnormalized forward transform and divides by
+ * the output length — equivalent to dividing the copied spectrum by `num/n`.
+ */
+function scipyResampleReference(x: number[], num: number): number[] {
+  const n = x.length;
+  const X = naiveDft(x);
+  const Yre = new Array(num).fill(0);
+  const Yim = new Array(num).fill(0);
+  const N = Math.min(num, n);
+  const nyq = Math.floor(N / 2) + 1;
+  const scale = n / num;
+  for (let k = 0; k < nyq; k++) {
+    Yre[k] = X[k]!.re / scale;
+    Yim[k] = X[k]!.im / scale;
+  }
+  if (N % 2 === 0 && num !== n) {
+    const k = Math.floor(N / 2);
+    const factor = num < n ? 2 : 0.5;
+    Yre[k] *= factor;
+    Yim[k] *= factor;
+  }
+  for (let k = 1; k <= Math.floor((num - 1) / 2); k++) {
+    Yre[num - k] = Yre[k];
+    Yim[num - k] = -Yim[k];
+  }
+  const out = new Array(num).fill(0);
+  for (let t = 0; t < num; t++) {
+    let re = 0;
+    for (let k = 0; k < num; k++) {
+      const ang = (2 * Math.PI * k * t) / num;
+      re += Yre[k] * Math.cos(ang) - Yim[k] * Math.sin(ang);
+    }
+    out[t] = re / num;
+  }
+  return out;
+}
+
 describe('#773 resample SciPy two-arg', () => {
   it('resample([1..8], 4) matches scipy.signal.resample (no RangeError)', () => {
     const x = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -68,6 +171,32 @@ describe('#773 resample SciPy two-arg', () => {
     expect(y).toHaveLength(4);
     for (let i = 0; i < 4; i++) {
       expect(y[i]).toBeCloseTo(SCIPY_RESAMPLE_8_TO_4[i]!, 10);
+    }
+  });
+
+  it('the Fourier reference reproduces the published SciPy 8→4 vector', () => {
+    const ref = scipyResampleReference([1, 2, 3, 4, 5, 6, 7, 8], 4);
+    for (let i = 0; i < 4; i++) {
+      expect(ref[i]).toBeCloseTo(SCIPY_RESAMPLE_8_TO_4[i]!, 8);
+    }
+  });
+
+  it('matches SciPy Fourier resample for upsample and downsample, even and odd lengths', () => {
+    const cases: [number[], number][] = [
+      [[1, 2, 3, 4], 8],
+      [[1, 2, 3, 4, 5], 3],
+      [[1, 2, 3, 4, 5], 9],
+      [[1, 2, 3, 4, 5, 6, 7, 8], 5],
+      [[1, 0, -1, 0, 1, 0], 4],
+      [[1, 0, -1, 0, 1, 0], 8],
+    ];
+    for (const [x, num] of cases) {
+      const y = resample(x, num);
+      const expected = scipyResampleReference(x, num);
+      expect(y).toHaveLength(num);
+      for (let i = 0; i < num; i++) {
+        expect(y[i]).toBeCloseTo(expected[i]!, 8);
+      }
     }
   });
 

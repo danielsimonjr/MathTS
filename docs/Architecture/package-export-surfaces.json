@@ -513,6 +513,7 @@
       "BASE_UNITS",
       "BaseUnitDef",
       "BEST_PREFIXES",
+      "bignumber",
       "BigNumber",
       "BIGNUMBER_E",
       "BIGNUMBER_LN10",
@@ -2612,6 +2613,7 @@
       "fft2",
       "fft2d",
       "fftCoreFloat64",
+      "fftExactFloat64",
       "fftfreq",
       "fftFrequencies",
       "fftGpuDispatch",
@@ -4495,6 +4497,7 @@
       "zeros"
     ],
     "numbers": [
+      "bignumber",
       "BigNumber",
       "BIGNUMBER_E",
       "BIGNUMBER_LN10",

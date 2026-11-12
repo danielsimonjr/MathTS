@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7015
+    "totalExports": 7019
   },
   "entryPoints": [
     {
@@ -861,6 +861,7 @@
             "file": "./types/bignumber.js",
             "imports": [
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -1154,6 +1155,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -1350,6 +1352,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -2712,11 +2715,12 @@
           "BIGNUMBER_LN2",
           "BIGNUMBER_LN10",
           "isBigNumber",
+          "bignumber",
           "BigNumber"
         ],
         "classes": ["BigNumber"],
         "interfaces": ["BigNumberConfig"],
-        "functions": ["isBigNumber"],
+        "functions": ["isBigNumber", "bignumber"],
         "constants": [
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -5915,7 +5919,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["NestedArray"],
+            "imports": ["arraySize", "validate", "NestedArray"],
             "subpath": "internal"
           }
         ],
@@ -17676,7 +17680,7 @@
           },
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "./complex-to-interleaved.js",
@@ -21017,8 +21021,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["bitReverse", "fftCoreFloat64"],
-        "functions": ["bitReverse", "fftCoreFloat64"]
+        "exports": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"],
+        "functions": ["bitReverse", "fftCoreFloat64", "fftExactFloat64"]
       },
       "functions/src/signal/fft-helpers.ts": {
         "description": "numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`",
@@ -26968,7 +26972,7 @@
         "internalDependencies": [
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64"]
+            "imports": ["fftCoreFloat64", "fftExactFloat64"]
           },
           {
             "file": "../gpu/fft-gpu.js",
@@ -37929,6 +37933,7 @@
               "FRACTION_THIRD",
               "FRACTION_QUARTER",
               "BigNumber",
+              "bignumber",
               "isBigNumber",
               "BIGNUMBER_ZERO",
               "BIGNUMBER_ONE",
@@ -37962,6 +37967,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -37993,6 +37999,7 @@
           "FRACTION_THIRD",
           "FRACTION_QUARTER",
           "BigNumber",
+          "bignumber",
           "isBigNumber",
           "BIGNUMBER_ZERO",
           "BIGNUMBER_ONE",
@@ -46070,15 +46077,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218781,
-    "totalExports": 7015,
+    "totalLinesOfCode": 219026,
+    "totalExports": 7019,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2362,
+    "totalFunctions": 2364,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1646,
-    "totalReExports": 3021,
+    "totalReExports": 3023,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
