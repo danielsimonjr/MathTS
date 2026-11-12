@@ -3359,7 +3359,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         proposedSi.toSI();
         const existingSi = existing.clone();
         existingSi.toSI();
-        return proposedSi.equalBase(existingSi);
+        return existingSi.equals(proposedSi);
       } catch {
         return false;
       }

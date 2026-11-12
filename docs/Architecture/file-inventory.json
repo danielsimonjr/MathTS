@@ -499,7 +499,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 465
+      "loc": 468
     },
     {
       "file": "compat/src/instance-api.ts",
@@ -569,7 +569,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 46
+      "loc": 49
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -954,7 +954,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3618
+      "loc": 3620
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -6967,7 +6967,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 87
+      "loc": 91
     },
     {
       "file": "functions/src/matrix/slice-2d.ts",
