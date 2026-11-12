@@ -522,7 +522,7 @@ const nested = [
   [1, 2],
   [3, 4],
 ];
-Tensor.fromNested(nested, [2, 2]); // from nested arrays (shape required)
+Tensor.fromNested(nested); // infers shape [2, 2]; explicit shape still accepted
 Tensor.identity(3); // [[1,0,0],[0,1,0],[0,0,1]]
 const m = DenseMatrix.fromArray(nested);
 Tensor.fromDenseMatrix(m); // from a DenseMatrix

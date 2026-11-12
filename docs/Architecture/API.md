@@ -391,7 +391,7 @@ time, not match time), `toString`. Factory `idx(dim, name?, opts?)`.
 `readonly shape`, `readonly data: Float64Array`, `readonly axisLabels?: Index[]`.
 `constructor(shape, data, axisLabels?)`.
 
-- **Statics**: `sizeOf(shape)`, `rowMajorStrides(shape)`, `fromNested(data, shape)`,
+- **Statics**: `sizeOf(shape)`, `rowMajorStrides(shape)`, `fromNested(data, shape?)`,
   `identity(n)`, `fromDenseMatrix(m)`, `broadcastShape(a, b)` (NumPy right-align),
   `einsum(spec, ...operands)`.
 - **Element/data ops**: `add`/`sub`/`mul(other: Tensor|number)`, `scale(k)`, `normInf`,
@@ -1179,4 +1179,4 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
 | totalExports         | 9109  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2367  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2368  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
