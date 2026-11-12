@@ -294,12 +294,19 @@
         "@danielsimonjr/mathts-functions": "^0.84.0",
       },
       "devDependencies": {
+        "@resvg/resvg-wasm": "^2.6.2",
         "@types/node": "^26.4.0",
         "@xmldom/xmldom": "^0.9.12",
         "tsdown": "^0.23.0",
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
       },
+      "peerDependencies": {
+        "@resvg/resvg-wasm": "^2.6.2",
+      },
+      "optionalPeers": [
+        "@resvg/resvg-wasm",
+      ],
     },
     "signal": {
       "name": "@danielsimonjr/mathts-signal",
@@ -602,6 +609,8 @@
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 
     "@quansync/fs": ["@quansync/fs@1.1.0", "", { "dependencies": { "quansync": "^1.0.0" } }, "sha512-qAPG/t3HqML1TlN7sY/pTbEjzFVAKsMjNNMGheyDosro+kT4iw2KCUoHcVdmliwWjorm4elZbgNQyU2eD97eDg=="],
+
+    "@resvg/resvg-wasm": ["@resvg/resvg-wasm@2.6.2", "", {}, "sha512-FqALmHI8D4o6lk/LRWDnhw95z5eO+eAa6ORjVg09YRR7BkcM6oPHU9uyC0gtQG5vpFLvgpeU4+zEAz2H8APHNw=="],
 
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.14", "", { "os": "android", "cpu": "arm" }, "sha512-aWR+XKH9+rW7m5fWq/5360J3mHycrx/o6xZM2DQFdJnTMdyP7/WzxPjhtLbVWdKo2y612/4U1bWqb3HQhiF7vg=="],
 

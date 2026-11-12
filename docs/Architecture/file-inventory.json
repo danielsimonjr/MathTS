@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2290,
+  "totalFiles": 2294,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1274,
+    "build-entry": 1275,
     "test-only": 0,
     "orphan": 0,
-    "test": 925,
+    "test": 928,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1300,
-    "tests": 925,
+    "src": 1301,
+    "tests": 928,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -37,7 +37,7 @@
     "@danielsimonjr/mathts-workerpool": 24,
     "@danielsimonjr/mathts-parallel": 53,
     "@danielsimonjr/mathts-parser": 5,
-    "@danielsimonjr/mathts-plot": 46,
+    "@danielsimonjr/mathts-plot": 50,
     "@danielsimonjr/mathts-signal": 4,
     "@danielsimonjr/mathts-statistics": 4,
     "@danielsimonjr/mathts-tensor": 59,
@@ -14464,7 +14464,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 194
+      "loc": 199
     },
     {
       "file": "plot/src/heatmap.ts",
@@ -14485,7 +14485,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 17
+      "loc": 18
     },
     {
       "file": "plot/src/marks2d.ts",
@@ -14513,21 +14513,21 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 107
+      "loc": 112
     },
     {
       "file": "plot/src/render-core.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 196
+      "loc": 204
     },
     {
       "file": "plot/src/render-file.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 215
+      "loc": 284
     },
     {
       "file": "plot/src/scale.ts",
@@ -14541,14 +14541,14 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 35
+      "loc": 50
     },
     {
       "file": "plot/src/svg.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 239
+      "loc": 254
     },
     {
       "file": "plot/src/three/points3d.ts",
@@ -14586,6 +14586,13 @@
       "loc": 43
     },
     {
+      "file": "plot/src/update.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 150
+    },
+    {
       "file": "plot/tests/coerce.test.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
@@ -14598,6 +14605,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 31
+    },
+    {
+      "file": "plot/tests/dom-helpers.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 13
     },
     {
       "file": "plot/tests/golden-svg.test.ts",
@@ -14642,6 +14656,13 @@
       "loc": 15
     },
     {
+      "file": "plot/tests/plot-update-836.test.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 118
+    },
+    {
       "file": "plot/tests/plot.test.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
@@ -14674,7 +14695,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
       "disposition": "test",
-      "loc": 67
+      "loc": 100
     },
     {
       "file": "plot/tests/scaffold.test.ts",
@@ -14747,6 +14768,13 @@
       "loc": 99
     },
     {
+      "file": "plot/tests/vitest-dom-setup.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 6
+    },
+    {
       "file": "plot/tsdown.config.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "config",
@@ -14758,7 +14786,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "config",
       "disposition": "config",
-      "loc": 37
+      "loc": 38
     },
     {
       "file": "signal/src/index.ts",
