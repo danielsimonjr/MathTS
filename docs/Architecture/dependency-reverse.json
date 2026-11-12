@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1171,10 +1171,8 @@
       "functions/src/set/setSymDifference.ts",
       "functions/src/set/setUnion.ts",
       "functions/src/statistics/cumsum.ts",
-      "functions/src/statistics/mad.ts",
       "functions/src/statistics/mean.ts",
-      "functions/src/statistics/median.ts",
-      "functions/src/statistics/mode.ts",
+      "functions/src/statistics/numeric-data.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/type/matrix/utils/broadcast.ts",
       "functions/src/typed/set.ts",
@@ -1698,6 +1696,7 @@
       "functions/src/scalar-search.ts",
       "functions/src/signal-filter-extra.ts",
       "functions/src/signal/fft-helpers.ts",
+      "functions/src/statistics/nan-reductions.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/linalg-extra.ts": [
@@ -1858,6 +1857,7 @@
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
     "functions/src/grad-forward.ts": ["functions/src/index.ts"],
+    "functions/src/statistics/nan-reductions.ts": ["functions/src/index.ts"],
     "functions/src/numeric-extra.ts": ["functions/src/index.ts"],
     "functions/src/hypothesis-extra.ts": ["functions/src/index.ts"],
     "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
@@ -2495,6 +2495,15 @@
     "functions/src/typed/probability.ts": [
       "functions/src/special/zeta-extra.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/statistics/numeric-data.ts": [
+      "functions/src/statistics/corr.ts",
+      "functions/src/statistics/mad.ts",
+      "functions/src/statistics/median.ts",
+      "functions/src/statistics/mode.ts",
+      "functions/src/statistics/nan-reductions.ts",
+      "functions/src/statistics/quantileSeq.ts",
+      "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [

@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1285, "e": 7009, "re": 3021 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1287, "e": 7024, "re": 3025 },
   "s": {
-    "loc": 218299,
+    "loc": 218549,
     "cls": 61,
     "int": 601,
-    "fn": 2360,
-    "tg": 171,
+    "fn": 2371,
+    "tg": 173,
     "en": 0,
     "co": 1644,
     "toi": 644
@@ -1015,7 +1015,7 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 15,
+      "f": 17,
       "exp": [
         "createCorr",
         "createCumSum",
@@ -1026,12 +1026,17 @@
         "createMedian",
         "createMin",
         "createMode",
+        "nanmedian",
+        "isFloatTyped",
+        "copyToNumberArray",
+        "flattenForStatistics",
+        "finiteNumbers",
+        "parseStatOptions",
+        "normalizationFromSecondArg",
+        "isConstantArrayLike",
+        "typedArrayPairToNumbers",
         "createProd",
-        "createQuantileSeq",
-        "createStd",
-        "createSum",
-        "improveErrorMessage",
-        "createVariance"
+        "createQuantileSeq"
       ]
     },
     "functions/stats": {
@@ -1895,8 +1900,8 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 246, "o": 13 },
-    { "p": "src/index.ts", "i": 208, "o": 0 },
+    { "p": "factories/index.ts", "i": 246, "o": 14 },
+    { "p": "src/index.ts", "i": 209, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
@@ -1904,7 +1909,7 @@
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
-    { "p": "utils/array.ts", "i": 0, "o": 49 },
+    { "p": "utils/array.ts", "i": 0, "o": 47 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 45 },
     { "p": "utils/collection.ts", "i": 0, "o": 41 }

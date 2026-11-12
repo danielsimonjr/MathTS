@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-11'
-  totalFiles: 1285
+  lastUpdated: '2026-11-12'
+  totalFiles: 1287
   totalModules: 82
-  totalExports: 7009
+  totalExports: 7024
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9637,6 +9637,10 @@ modules:
             - describe
             - histogram
           reExport: true
+        - file: ./statistics/nan-reductions.js
+          imports:
+            - nanmedian
+          reExport: true
         - file: ./numeric-extra.js
           imports:
             - clamp
@@ -11016,6 +11020,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -11760,6 +11765,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -20424,6 +20430,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - typedArrayPairToNumbers
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20502,9 +20511,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20515,6 +20521,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMad
@@ -20590,9 +20600,6 @@ modules:
         - file: ../utils/collection.js
           imports:
             - containsCollections
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20606,6 +20613,13 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - finiteNumbers
+            - isFloatTyped
+            - FloatTyped
+            - StatReduceOptions
       workspaceDependencies: []
       exports:
         - createMedian
@@ -20650,9 +20664,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20660,11 +20671,59 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMode
       constants:
         - createMode
+    functions/src/statistics/nan-reductions.ts:
+      description: nan-reductions module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - median
+        - file: ./numeric-data.js
+          imports:
+            - finiteNumbers
+            - NumericVectorInput
+      workspaceDependencies: []
+      exports:
+        - nanmedian
+      functions:
+        - nanmedian
+    functions/src/statistics/numeric-data.ts:
+      description: Shared numeric-vector handling for statistics reductions (G19).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - flatten
+      workspaceDependencies: []
+      exports:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
+      functions:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
     functions/src/statistics/prod.ts:
       description: Compute the product of a matrix or a list with values.
       externalDependencies: []
@@ -20715,6 +20774,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - isFloatTyped
+            - copyToNumberArray
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createQuantileSeq
@@ -23021,6 +23085,13 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+        - file: ../statistics/numeric-data.js
+          imports:
+            - finiteNumbers
+            - isConstantArrayLike
+            - normalizationFromSecondArg
+            - StatReduceOptions
+            - NumericVectorInput
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23130,6 +23201,8 @@ modules:
         - std
         - dot
         - typedArithmetic
+        - nanmean
+        - nanvariance
         - matmul
         - transpose
         - matvec
@@ -23139,6 +23212,8 @@ modules:
         - shouldParallelize
         - getComputePool
       functions:
+        - nanmean
+        - nanvariance
         - matmul
         - transpose
         - matvec
@@ -36420,6 +36495,9 @@ modules:
             - zscore
             - cov
             - corrcoef
+            - nanmean
+            - nanmedian
+            - nanvariance
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -36660,6 +36738,9 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -36858,6 +36939,9 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -42684,6 +42768,8 @@ dependencyGraph:
         - functions/src/statistics/median.ts
         - functions/src/statistics/min.ts
         - functions/src/statistics/mode.ts
+        - functions/src/statistics/nan-reductions.ts
+        - functions/src/statistics/numeric-data.ts
         - functions/src/statistics/prod.ts
         - functions/src/statistics/quantileSeq.ts
         - functions/src/statistics/std.ts
@@ -43542,17 +43628,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1285
+  totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218299
-  totalExports: 7009
+  totalLinesOfCode: 218549
+  totalExports: 7024
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2360
-  totalTypeGuards: 171
+  totalFunctions: 2371
+  totalTypeGuards: 173
   totalEnums: 0
   totalConstants: 1644
-  totalReExports: 3021
+  totalReExports: 3025
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

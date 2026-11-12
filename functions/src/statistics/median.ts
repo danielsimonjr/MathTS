@@ -1,9 +1,15 @@
 import { containsCollections } from '../utils/collection.js';
-import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
+import {
+  flattenForStatistics,
+  finiteNumbers,
+  isFloatTyped,
+  type FloatTyped,
+  type StatReduceOptions,
+} from './numeric-data.js';
 
 // Type definitions for median
 interface MatrixType {
@@ -52,13 +58,13 @@ export const createMedian = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Complex | Unit} median
      * @private
      */
-    function _median(array: unknown[] | MatrixType): unknown {
+    function _median(array: unknown[] | MatrixType | FloatTyped): unknown {
       try {
-        const flat = flatten((array as MatrixType).valueOf()) as unknown[];
+        const flat = flattenForStatistics(array);
 
         const num = flat.length;
         if (num === 0) {
-          throw new Error('Cannot calculate median of an empty array');
+          return NaN;
         }
 
         if (num % 2 === 0) {
@@ -137,6 +143,29 @@ export const createMedian = /* #__PURE__ */ factory(
     return typed(name, {
       // median([a, b, c, d, ...])
       'Array | Matrix': _median,
+      'Float64Array | Float32Array': _median,
+      'Array | Matrix, Object': (array: unknown[] | MatrixType, opts: StatReduceOptions) => {
+        if (opts.skipNaN) {
+          const finite = finiteNumbers(
+            isFloatTyped(array) ? array : (flattenForStatistics(array) as number[]),
+            true
+          );
+          if (finite.length === 0) return NaN;
+          return _median(finite);
+        }
+        return _median(array);
+      },
+      'Float64Array | Float32Array, Object': (
+        array: FloatTyped,
+        opts: StatReduceOptions
+      ): unknown => {
+        if (opts.skipNaN) {
+          const finite = finiteNumbers(array, true);
+          if (finite.length === 0) return NaN;
+          return _median(finite);
+        }
+        return _median(array);
+      },
 
       // median([a, b, c, d, ...], dim)
       'Array | Matrix, number | BigNumber': function (

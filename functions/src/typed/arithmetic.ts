@@ -24,6 +24,13 @@ import {
   pairwiseDot,
   sumSquaredDeviations,
 } from '@danielsimonjr/mathts-core';
+import {
+  finiteNumbers,
+  isConstantArrayLike,
+  normalizationFromSecondArg,
+  type StatReduceOptions,
+  type NumericVectorInput,
+} from '../statistics/numeric-data.js';
 // Bucket-C "temperature split": rich-type (BigNumber/Fraction/Complex) POLICY cases
 // delegate to core's oracle-pinned scalar primitives instead of re-implementing the
 // policy here (where the copies had DIVERGED into three live bugs). Hot number/bigint
@@ -1466,15 +1473,33 @@ export const sum = mathTyped('sum', {
  * Synchronous pairwise mean. Returns a number for `number[]`, `Float32Array` and `Float64Array`.
  * The worker-pool mean is `parallelStatMean` and returns a Promise.
  */
+function meanOfNumeric(xs: ArrayLike<number>): f64 {
+  const n = xs.length;
+  if (n === 0) return NaN;
+  return pairwiseSum(xs) / n;
+}
+
+function varianceCore(xs: ArrayLike<number>, norm: VarNormalization): f64 {
+  return varianceFromM2(m2OfArrayLike(xs), xs.length, norm);
+}
+
 export const mean = mathTyped('mean', {
-  Array: (arr: f64[]): f64 => {
-    if (arr.length === 0) return NaN;
-    return pairwiseSum(arr) / arr.length; // pairwise: see the note on `sum`
+  Array: (arr: f64[]): f64 => meanOfNumeric(arr),
+  'Array, Object': (arr: f64[], opts: StatReduceOptions): f64 => {
+    const { skipNaN } = normalizationFromSecondArg(opts);
+    return meanOfNumeric(skipNaN ? finiteNumbers(arr, true) : arr);
   },
 
-  // Synchronous pairwise mean on typed arrays (no worker pool).
-  Float64Array: (a: Float64Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
-  Float32Array: (a: Float32Array): f64 => (a.length === 0 ? NaN : pairwiseSum(a) / a.length),
+  Float64Array: (a: Float64Array): f64 => meanOfNumeric(a),
+  'Float64Array, Object': (a: Float64Array, opts: StatReduceOptions): f64 => {
+    const { skipNaN } = normalizationFromSecondArg(opts);
+    return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
+  },
+  Float32Array: (a: Float32Array): f64 => meanOfNumeric(a),
+  'Float32Array, Object': (a: Float32Array, opts: StatReduceOptions): f64 => {
+    const { skipNaN } = normalizationFromSecondArg(opts);
+    return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
+  },
 });
 
 /**
@@ -1500,10 +1525,12 @@ function varianceFromM2(m2: f64, n: i32, norm: VarNormalization): f64 {
   }
 }
 
-function m2OfArray(arr: f64[]): f64 {
-  // M2 = Σ(xᵢ − x̄)². Uses core's corrected two-pass (pairwise mean + (Σd)²/n correction), which
-  // is machine-precision even on large-mean data. Welford's online form (what was here) drifted to
-  // ~1e-7 relative error on 1e9-pedestal input, where this — and NumPy's two-pass — stay ~1e-13-16.
+function m2OfArrayLike(arr: ArrayLike<number>): f64 {
+  const n = arr.length;
+  if (n < 2) return 0;
+  // Identical huge magnitudes overflow the mean to ±Infinity; variance is still 0.
+  if (isConstantArrayLike(arr)) return 0;
+  // M2 = Σ(xᵢ − x̄)² — core corrected two-pass (pairwise mean + (Σd)²/n correction).
   return sumSquaredDeviations(arr);
 }
 
@@ -1515,19 +1542,30 @@ function m2OfArray(arr: f64[]): f64 {
  * 'unbiased' | 'uncorrected' (population) | 'biased'. See VarNormalization.
  */
 export const variance = mathTyped('variance', {
-  Array: (arr: f64[]): f64 => varianceFromM2(m2OfArray(arr), arr.length, 'unbiased'),
-  'Array, string': (arr: f64[], norm: string): f64 =>
-    varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization),
+  Array: (arr: f64[]): f64 => varianceCore(arr, 'unbiased'),
+  'Array, string': (arr: f64[], norm: string): f64 => varianceCore(arr, norm as VarNormalization),
+  'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(arr, true) : arr;
+    return varianceCore(data, norm);
+  },
 
-  // Synchronous typed-array variance (no worker pool).
-  Float64Array: (a: Float64Array): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
-  Float32Array: (a: Float32Array): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased'),
+  Float64Array: (a: Float64Array): f64 => varianceCore(a, 'unbiased'),
+  Float32Array: (a: Float32Array): f64 => varianceCore(a, 'unbiased'),
   'Float64Array, string': (a: Float64Array, norm: string): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
+    varianceCore(a, norm as VarNormalization),
   'Float32Array, string': (a: Float32Array, norm: string): f64 =>
-    varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization),
+    varianceCore(a, norm as VarNormalization),
+  'Float64Array, Object': (a: Float64Array, arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(a, true) : a;
+    return varianceCore(data, norm);
+  },
+  'Float32Array, Object': (a: Float32Array, arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(a, true) : a;
+    return varianceCore(data, norm);
+  },
 });
 
 /**
@@ -1535,20 +1573,42 @@ export const variance = mathTyped('variance', {
  * defaults to **unbiased** and accepts the same normalization argument.
  */
 export const std = mathTyped('std', {
-  Array: (arr: f64[]): f64 => Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, 'unbiased')),
+  Array: (arr: f64[]): f64 => Math.sqrt(varianceCore(arr, 'unbiased')),
   'Array, string': (arr: f64[], norm: string): f64 =>
-    Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization)),
+    Math.sqrt(varianceCore(arr, norm as VarNormalization)),
+  'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(arr, true) : arr;
+    return Math.sqrt(varianceCore(data, norm));
+  },
 
-  // Synchronous typed-array std (no worker pool).
-  Float64Array: (a: Float64Array): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
-  Float32Array: (a: Float32Array): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, 'unbiased')),
+  Float64Array: (a: Float64Array): f64 => Math.sqrt(varianceCore(a, 'unbiased')),
+  Float32Array: (a: Float32Array): f64 => Math.sqrt(varianceCore(a, 'unbiased')),
   'Float64Array, string': (a: Float64Array, norm: string): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
+    Math.sqrt(varianceCore(a, norm as VarNormalization)),
   'Float32Array, string': (a: Float32Array, norm: string): f64 =>
-    Math.sqrt(varianceFromM2(sumSquaredDeviations(a), a.length, norm as VarNormalization)),
+    Math.sqrt(varianceCore(a, norm as VarNormalization)),
+  'Float64Array, Object': (a: Float64Array, arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(a, true) : a;
+    return Math.sqrt(varianceCore(data, norm));
+  },
+  'Float32Array, Object': (a: Float32Array, arg: StatReduceOptions): f64 => {
+    const { norm, skipNaN } = normalizationFromSecondArg(arg);
+    const data = skipNaN ? finiteNumbers(a, true) : a;
+    return Math.sqrt(varianceCore(data, norm));
+  },
 });
+
+/** `mean` with non-finite values omitted (`numpy.nanmean`). */
+export function nanmean(x: NumericVectorInput): number {
+  return mean(x, { skipNaN: true }) as number;
+}
+
+/** `variance` with non-finite values omitted (`numpy.nanvar`, default sample `ddof=1`). */
+export function nanvariance(x: NumericVectorInput, ddof: 0 | 1 = 1): number {
+  return variance(x, { skipNaN: true, ddof }) as number;
+}
 
 /**
  * Dot product. The Float64Array signature is synchronous.

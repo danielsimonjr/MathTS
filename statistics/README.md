@@ -19,10 +19,17 @@ just green.
 npm install @danielsimonjr/mathts-statistics
 ```
 
+## Conventions (NumPy / pandas)
+
+- **`variance` / `std` / `cov` and `ddof`:** pass `{ ddof: 0 }` for population variance (divide by `n`) or `{ ddof: 1 }` for sample variance (divide by `n − 1`, the default). The mathjs strings `'uncorrected' | 'unbiased' | 'biased'` remain accepted on `variance` and `std`.
+- **Missing data:** `mean(x, { skipNaN: true })` omits non-finite values. Convenience helpers: `nanmean`, `nanmedian`, `nanvariance` (default sample `ddof=1`).
+- **Empty input:** `mean`, `median`, `variance`, `std`, and `mad` return `NaN` (no throw). `mode([])` returns `[]`.
+
 ## What's included
 
-- **Descriptive statistics** — `mean`, `median`, `mode`, `variance`, `std`, `quantileSeq`, `mad`
-  (median absolute deviation), `iqr`, `sem`, `zscore`, `moment`, `skewness`, `kurtosis`, `gmean`,
+- **Descriptive statistics** — `mean`, `median`, `mode`, `variance`, `std`, `nanmean`, `nanmedian`,
+  `nanvariance`, `quantileSeq`, `mad` (median absolute deviation), `iqr`, `sem`, `zscore`, `moment`,
+  `skewness`, `kurtosis`, `gmean`,
   `hmean`, `cov`, `corr`, `corrcoef`, `rankdata`, `ptp`, `trimmedMean`, `variation`, `describe`,
   `logsumexp`, `softmax`, `detrend`, `movingAverage`, `ewma`, `acf`, and the correlation helpers
   `pearsonr`, `spearman`, `spearmanr`, `kendalltau` / `kendallTau`.

@@ -1645,9 +1645,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1721,6 +1718,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -5569,6 +5569,15 @@
       "nakagamiPDF": {
         "kind": "function"
       },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanvariance": {
+        "kind": "function"
+      },
       "narayana": {
         "kind": "function"
       },
@@ -9021,6 +9030,15 @@
         "kind": "function"
       },
       "multivariateNormal": {
+        "kind": "function"
+      },
+      "nanmean": {
+        "kind": "function"
+      },
+      "nanmedian": {
+        "kind": "function"
+      },
+      "nanvariance": {
         "kind": "function"
       },
       "negativeBinomialDist": {
