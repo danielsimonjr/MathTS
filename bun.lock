@@ -86,6 +86,7 @@
         "@danielsimonjr/mathts-functions": "^0.84.0",
         "@danielsimonjr/mathts-matrix": "^0.10.0",
         "@danielsimonjr/mathts-parallel": "^0.10.0",
+        "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
