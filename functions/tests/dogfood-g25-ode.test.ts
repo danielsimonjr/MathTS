@@ -53,8 +53,46 @@ describe('G25 dogfood — ODE API (#824 #698 #691)', () => {
       msg = (e as Error).message;
     }
     expect(msg).toMatch(/solveODE RK45/);
-    expect(msg).toMatch(/maxIter/);
+    expect(msg).toMatch(/maxIter=5000/);
     expect(msg).toMatch(/stiff|BDF|Radau|Rosenbrock/);
+  });
+
+  it('#698 RK23 Robertson error also names the method and the stiff solvers', () => {
+    let msg = '';
+    try {
+      solveODE(robertson, [0, 40], [1, 0, 0], { method: 'RK23', tol: 1e-6, maxIter: 5000 });
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg).toMatch(/solveODE RK23/);
+    expect(msg).toMatch(/maxIter=5000/);
+    expect(msg).toMatch(/stiff|BDF|Radau|Rosenbrock/);
+  });
+
+  it('#698 a non-stiff SHO that only runs out of steps does not claim stiffness', () => {
+    let msg = '';
+    try {
+      solveODE((_t, y) => [y[1], -4 * y[0]], [0, 100], [1, 0], {
+        method: 'RK45',
+        tol: 1e-6,
+        maxIter: 30,
+      });
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg).toMatch(/solveODE RK45/);
+    expect(msg).toMatch(/maxIter=30/);
+    expect(msg).not.toMatch(/stiff|BDF|Radau|Rosenbrock/);
+  });
+
+  it('#824 step size underflow errors instead of spinning', () => {
+    expect(() =>
+      solveODE((_t, y) => [1e20 * (y as number[])[0]], [0, 1], [1], {
+        method: 'RK45',
+        tol: 1e-8,
+        maxIter: 100_000,
+      })
+    ).toThrow(/step size underflow/);
   });
 
   it('#698 Radau Robertson matches Hairer reference', () => {
@@ -83,8 +121,24 @@ describe('G25 dogfood — ODE API (#824 #698 #691)', () => {
     }
   });
 
-  it('#691 auto-detect keeps historical (y0, tspan) call shape', () => {
+  it('#691 auto-detect keeps historical (y0, tspan) when only one argument is a pair', () => {
     const sol = stiffODESolver(robertson, [1, 0, 0], [0, 40]);
-    expect(sol.t.length).toBeGreaterThan(10);
+    const yN = sol.y[sol.y.length - 1];
+    for (let i = 0; i < 3; i++) {
+      expect(yN[i]).toBeCloseTo(HAIRER_T40[i], 5);
+    }
+  });
+
+  it('#691 a 2-state y0 that looks like a tspan uses (f, tspan, y0)', () => {
+    const sho = (_t: number, y: number[]) => [y[1], -4 * y[0]];
+    const sol = stiffODESolver(sho, [0, Math.PI / 2], [1, 0]);
+    expect(sol.t[sol.t.length - 1]).toBeCloseTo(Math.PI / 2, 8);
+    expect(sol.y[sol.y.length - 1][0]).toBeCloseTo(-1, 4);
+    const legacy = stiffODESolver(sho, [1, 0], [0, Math.PI / 2], { legacyArgumentOrder: true });
+    expect(legacy.t[legacy.t.length - 1]).toBeCloseTo(Math.PI / 2, 8);
+    expect(legacy.y[legacy.y.length - 1][0]).toBeCloseTo(-1, 4);
+    // The same numbers without the flag are not guessed as the old order.
+    const asWritten = stiffODESolver(sho, [1, 0], [0, Math.PI / 2]);
+    expect(asWritten.t[asWritten.t.length - 1]).toBeCloseTo(0, 6);
   });
 });

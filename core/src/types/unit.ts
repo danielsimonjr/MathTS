@@ -23,7 +23,13 @@
 // The merged Unit (a ready-instantiated class) + its factory. `UnitInstance` is the
 // instance type — use it in type position (`(u: UnitInstance)`), since the merged
 // `Unit` is a value (an instantiated constructor), not a class name that doubles as a type.
-export { Unit, createUnitClass, unitDependencies } from './unit/index.js';
+export {
+  Unit,
+  createUnitClass,
+  unitDependencies,
+  unitReadingSearchSteps,
+  MAX_UNIT_STRING_LENGTH,
+} from './unit/index.js';
 export type { UnitInstance, UnitReadingFactor } from './unit/index.js';
 
 // Exact unit scales and the one built-in unit table.

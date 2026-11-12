@@ -1151,10 +1151,6 @@ function _isNumericTspan(v: number[]): boolean {
   return v.length === 2 && v.every((x) => typeof x === 'number' && Number.isFinite(x));
 }
 
-function _isOrderedTimeSpan(v: number[]): boolean {
-  return _isNumericTspan(v) && v[0] !== v[1];
-}
-
 function _resolveStiffODEArgs(
   arg1: number[],
   arg2: number[],
@@ -1168,21 +1164,15 @@ function _resolveStiffODEArgs(
   }
   const a1T = _isNumericTspan(arg1);
   const a2T = _isNumericTspan(arg2);
-  if (a1T && !a2T) {
-    return { tspan: arg1 as [f64, f64], y0: arg2 };
-  }
+  // A 2-element state looks like a time span. Guessing from which pair is
+  // ordered misfires (y0 = [1, 0] versus tspan = [0, 1], or y0 = [1, 1] versus
+  // a zero-length span). Only one pair is unambiguous: that pair is tspan.
+  // Both pairs follow the documented order, (tspan, y0).
   if (a2T && !a1T) {
     return { y0: arg1, tspan: arg2 as [f64, f64] };
   }
-  if (a1T && a2T) {
-    const a1Ordered = _isOrderedTimeSpan(arg1);
-    const a2Ordered = _isOrderedTimeSpan(arg2);
-    if (a2Ordered && !a1Ordered) {
-      return { y0: arg1, tspan: arg2 as [f64, f64] };
-    }
-    if (a1Ordered && !a2Ordered) {
-      return { tspan: arg1 as [f64, f64], y0: arg2 };
-    }
+  if (a1T) {
+    return { tspan: arg1 as [f64, f64], y0: arg2 };
   }
   throw new TypeError(
     'stiffODESolver(f, tspan, y0): pass [t0, t1] then the state vector (same order as solveODE). For the old (f, y0, tspan) layout use { legacyArgumentOrder: true }.'
@@ -1203,7 +1193,10 @@ function _resolveStiffODEArgs(
  *   `{ legacyArgumentOrder: true }`, initial state `y0`
  * @param arg2 - With default layout, initial state `y0`; with `{ legacyArgumentOrder: true }`,
  *   time span `[t0, t1]`
- * @param options - When omitted, `(f, tspan, y0)`; set `legacyArgumentOrder: true` for `(f, y0, tspan)`
+ * @param options - When omitted, `(f, tspan, y0)`. A state that is not a length-2
+ *   numeric pair is still read as the old `(f, y0, tspan)` call. When both
+ *   arguments are length-2 pairs, the documented order is used and the old
+ *   order is not guessed. Set `legacyArgumentOrder: true` for `(f, y0, tspan)`.
  * @returns Solution
  */
 export function stiffODESolver(
