@@ -4,6 +4,7 @@
  */
 
 import { runScalarBatchTask, type ScalarBatchTask } from './scalar-batch-task.js';
+import { importModule } from '@danielsimonjr/mathts-core/internal';
 
 interface WorkerMessage<T = unknown> {
   id: string;
@@ -38,7 +39,8 @@ function handleMessage(message: WorkerMessage): void {
 }
 
 if (isNode) {
-  void import('worker_threads').then(({ parentPort }) => {
+  void importModule('node:worker_threads').then((mod) => {
+    const { parentPort } = mod as typeof import('node:worker_threads');
     if (!parentPort) {
       throw new Error('scalar-batch.worker: missing parentPort');
     }

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2265,
+  "totalFiles": 2269,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1265,
+    "build-entry": 1268,
     "test-only": 0,
     "orphan": 0,
-    "test": 909,
+    "test": 910,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1291,
-    "tests": 909,
+    "src": 1294,
+    "tests": 910,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
     "@danielsimonjr/mathts-compat": 17,
-    "@danielsimonjr/mathts-core": 121,
+    "@danielsimonjr/mathts-core": 122,
     "@danielsimonjr/mathts-evaluator": 4,
-    "(root)": 55,
+    "(root)": 56,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1023,
+    "@danielsimonjr/mathts-functions": 1025,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 123,
@@ -716,7 +716,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 214
+      "loc": 215
     },
     {
       "file": "core/src/is.ts",
@@ -731,6 +731,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 368
+    },
+    {
+      "file": "core/src/node-module-import.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 9
     },
     {
       "file": "core/src/number.ts",
@@ -961,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 439
+      "loc": 442
     },
     {
       "file": "core/tests/alloc-as-header-pin.test.ts",
@@ -7618,7 +7625,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 53
+      "loc": 55
     },
     {
       "file": "functions/src/scalar-compile.ts",
@@ -8223,6 +8230,13 @@
       "loc": 84
     },
     {
+      "file": "functions/src/subpath-evaluate.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 19
+    },
+    {
       "file": "functions/src/timeseries-extra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -8718,6 +8732,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 17
+    },
+    {
+      "file": "functions/src/typed/expression-eval-barrel.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 98
     },
     {
       "file": "functions/src/typed/f64-kernels.ts",
@@ -12924,7 +12945,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 982
+      "loc": 983
     },
     {
       "file": "matrix/src/backends/WasmLoader.ts",
@@ -13897,7 +13918,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 266
+      "loc": 268
     },
     {
       "file": "parallel/src/operations/elementwise.ts",
@@ -13946,7 +13967,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 551
+      "loc": 535
     },
     {
       "file": "parallel/src/strategies/chunk.ts",
@@ -13981,7 +14002,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 433
+      "loc": 437
     },
     {
       "file": "parallel/tests/benchmark.test.ts",
@@ -15095,6 +15116,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "tests/integration/dogfood-g27-packaging.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 78
     },
     {
       "file": "tests/integration/examples-smoke.test.ts",

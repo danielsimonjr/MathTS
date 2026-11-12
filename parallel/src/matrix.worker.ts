@@ -250,8 +250,10 @@ function sumTask(task: SumPayload): number {
 // be rewritten by the bundler into a shim that throws
 // "Dynamic require of \"worker_threads\" is not supported" at runtime.
 if (isNode) {
-  // Node.js worker_threads
-  void import('node:worker_threads').then(({ parentPort }) => {
+  // Node.js worker_threads — variable specifier so neutral/browser bundlers skip resolve.
+  const wt = 'node:worker_threads';
+  void import(wt).then((mod) => {
+    const { parentPort } = mod as typeof import('node:worker_threads');
     if (parentPort) {
       nodeParentPort = parentPort;
       parentPort.on('message', handleMessage);

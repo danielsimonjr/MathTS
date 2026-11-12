@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1291,
+    "totalFiles": 1294,
     "totalModules": 82,
-    "totalExports": 7082
+    "totalExports": 7108
   },
   "entryPoints": [
     {
@@ -1672,6 +1672,11 @@
             "reExport": true
           },
           {
+            "file": "./node-module-import.js",
+            "imports": ["importModule"],
+            "reExport": true
+          },
+          {
             "file": "./shared.js",
             "imports": ["MemoizedFunction"],
             "reExport": true,
@@ -1806,6 +1811,7 @@
           "defaultWasmLocation",
           "WasmModuleLoader",
           "allocAsHeader",
+          "importModule",
           "format",
           "toEngineering",
           "toExponential",
@@ -1925,6 +1931,7 @@
           "defaultWasmLocation",
           "WasmModuleLoader",
           "allocAsHeader",
+          "importModule",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -2057,6 +2064,15 @@
         ],
         "classes": ["ObjectWrappingMap", "PartitionedMap"],
         "functions": ["createEmptyMap", "createMap", "toObject", "assign", "isObjectWrappingMap"]
+      },
+      "core/src/node-module-import.ts": {
+        "description": "Runtime `import()` with a non-literal module specifier so browser bundlers",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["importModule"],
+        "functions": ["importModule"]
       },
       "core/src/number.ts": {
         "description": "Split value representation with sign, coefficients, and exponent",
@@ -2251,6 +2267,10 @@
             "file": "./types/wasm-loader.js",
             "imports": ["LoadingMetrics", "WasmManifest"],
             "typeOnly": true
+          },
+          {
+            "file": "./node-module-import.js",
+            "imports": ["importModule"]
           }
         ],
         "workspaceDependencies": [],
@@ -13575,7 +13595,14 @@
             "imports": ["runScalarBatchTask", "ScalarBatchTask"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["importModule"],
+            "subpath": "internal"
+          }
+        ],
         "exports": []
       },
       "functions/src/scalar-compile.ts": {
@@ -13968,6 +13995,53 @@
           "butter"
         ],
         "constants": ["sinc", "cAdd", "cSub", "cMul", "cDiv", "cScale"]
+      },
+      "functions/src/subpath-evaluate.ts": {
+        "description": "Focused entry: `import { evaluate } from '@danielsimonjr/mathts-functions/evaluate'`.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "evaluate",
+              "compileExpr",
+              "parse",
+              "parser",
+              "physicsScope",
+              "reviver",
+              "replacer"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./factories/evaluate.js",
+            "imports": ["PhysicsEvaluateOptions"],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "evaluate",
+          "compileExpr",
+          "parse",
+          "parser",
+          "physicsScope",
+          "reviver",
+          "replacer",
+          "PhysicsEvaluateOptions"
+        ],
+        "reExported": [
+          "evaluate",
+          "compileExpr",
+          "parse",
+          "parser",
+          "physicsScope",
+          "reviver",
+          "replacer",
+          "PhysicsEvaluateOptions"
+        ]
       },
       "functions/src/timeseries-extra.ts": {
         "description": "Time-series basics (Wave D) — a near-absent domain in the gap analysis.",
@@ -14810,7 +14884,7 @@
             "imports": ["* as activatedFactories"]
           },
           {
-            "file": "../typed/index.js",
+            "file": "../typed/expression-eval-barrel.js",
             "imports": ["* as typedFns"]
           }
         ],
@@ -25441,6 +25515,280 @@
         "workspaceDependencies": [],
         "exports": ["euclidSnap"],
         "functions": ["euclidSnap"]
+      },
+      "functions/src/typed/expression-eval-barrel.ts": {
+        "description": "Typed surface for `factories/evaluate.ts` and the `@danielsimonjr/mathts-functions/evaluate`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./arithmetic.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./trigonometry.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./statistics.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./signal.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./bitwise.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./logical.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./complex.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./set.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./special.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./fused.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./distributions.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./algebra.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./integration.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./interpolation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./numeric.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./combinatorics.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./graph.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./dist-objects.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./hypothesis.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./matrix-ops.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./relational.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./string.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./probability.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./unit.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./arithmetic.js",
+            "imports": ["typedArithmetic"],
+            "reExport": true
+          },
+          {
+            "file": "./trigonometry.js",
+            "imports": ["typedTrigonometry"],
+            "reExport": true
+          },
+          {
+            "file": "./statistics.js",
+            "imports": ["typedStatistics"],
+            "reExport": true
+          },
+          {
+            "file": "./signal.js",
+            "imports": ["typedSignal"],
+            "reExport": true
+          },
+          {
+            "file": "./bitwise.js",
+            "imports": ["typedBitwise"],
+            "reExport": true
+          },
+          {
+            "file": "./logical.js",
+            "imports": ["typedLogical"],
+            "reExport": true
+          },
+          {
+            "file": "./complex.js",
+            "imports": ["typedComplex"],
+            "reExport": true
+          },
+          {
+            "file": "./set.js",
+            "imports": ["typedSet"],
+            "reExport": true
+          },
+          {
+            "file": "./special.js",
+            "imports": ["typedSpecial"],
+            "reExport": true
+          },
+          {
+            "file": "./distributions.js",
+            "imports": ["typedDistributions"],
+            "reExport": true
+          },
+          {
+            "file": "./worker-kernels.js",
+            "imports": ["workerKernel"],
+            "reExport": true
+          },
+          {
+            "file": "./algebra.js",
+            "imports": ["typedAlgebra"],
+            "reExport": true
+          },
+          {
+            "file": "./relational.js",
+            "imports": ["typedRelational"],
+            "reExport": true
+          },
+          {
+            "file": "./string.js",
+            "imports": ["typedString"],
+            "reExport": true
+          },
+          {
+            "file": "./probability.js",
+            "imports": ["typedProbability"],
+            "reExport": true
+          },
+          {
+            "file": "./unit.js",
+            "imports": ["typedUnit"],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "typedArithmetic",
+          "typedTrigonometry",
+          "typedStatistics",
+          "typedSignal",
+          "typedBitwise",
+          "typedLogical",
+          "typedComplex",
+          "typedSet",
+          "typedSpecial",
+          "typedDistributions",
+          "workerKernel",
+          "typedAlgebra",
+          "typedRelational",
+          "typedString",
+          "typedProbability",
+          "typedUnit"
+        ],
+        "reExported": [
+          "* from ./arithmetic.js",
+          "* from ./trigonometry.js",
+          "* from ./statistics.js",
+          "* from ./signal.js",
+          "* from ./bitwise.js",
+          "* from ./logical.js",
+          "* from ./complex.js",
+          "* from ./set.js",
+          "* from ./special.js",
+          "* from ./fused.js",
+          "* from ./distributions.js",
+          "* from ./geometry.js",
+          "* from ./algebra.js",
+          "* from ./integration.js",
+          "* from ./interpolation.js",
+          "* from ./numeric.js",
+          "* from ./combinatorics.js",
+          "* from ./graph.js",
+          "* from ./dist-objects.js",
+          "* from ./hypothesis.js",
+          "* from ./matrix-ops.js",
+          "* from ./relational.js",
+          "* from ./string.js",
+          "* from ./probability.js",
+          "* from ./unit.js",
+          "typedArithmetic",
+          "typedTrigonometry",
+          "typedStatistics",
+          "typedSignal",
+          "typedBitwise",
+          "typedLogical",
+          "typedComplex",
+          "typedSet",
+          "typedSpecial",
+          "typedDistributions",
+          "workerKernel",
+          "typedAlgebra",
+          "typedRelational",
+          "typedString",
+          "typedProbability",
+          "typedUnit"
+        ]
       },
       "functions/src/typed/f64-kernels.ts": {
         "description": "Shared element-wise kernel for the synchronous typed Float64Array signatures.",
@@ -39646,7 +39994,14 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["importModule"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["WorkerPool"],
         "classes": ["WorkerPool"]
       },
@@ -44743,6 +45098,7 @@
           "core/src/internal.ts",
           "core/src/is.ts",
           "core/src/map.ts",
+          "core/src/node-module-import.ts",
           "core/src/number.ts",
           "core/src/object.ts",
           "core/src/shared.ts",
@@ -45066,6 +45422,7 @@
           "functions/src/scalar-node-bridge.ts",
           "functions/src/scalar-search.ts",
           "functions/src/signal-filter-extra.ts",
+          "functions/src/subpath-evaluate.ts",
           "functions/src/timeseries-extra.ts",
           "functions/src/types.ts"
         ]
@@ -45539,6 +45896,7 @@
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
           "functions/src/typed/euclid.ts",
+          "functions/src/typed/expression-eval-barrel.ts",
           "functions/src/typed/f64-kernels.ts",
           "functions/src/typed/factorization/finite-field.ts",
           "functions/src/typed/factorization/hensel.ts",
@@ -46356,18 +46714,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1291,
+    "totalTypeScriptFiles": 1294,
     "totalModules": 82,
-    "totalLinesOfCode": 221653,
-    "totalExports": 7082,
+    "totalLinesOfCode": 221776,
+    "totalExports": 7108,
     "totalClasses": 61,
     "totalInterfaces": 603,
-    "totalFunctions": 2402,
+    "totalFunctions": 2403,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1649,
-    "totalReExports": 3045,
-    "totalTypeOnlyImports": 645,
+    "totalReExports": 3095,
+    "totalTypeOnlyImports": 646,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

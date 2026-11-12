@@ -1194,6 +1194,9 @@
       "identify": {
         "kind": "function"
       },
+      "importModule": {
+        "kind": "function"
+      },
       "initial": {
         "kind": "function"
       },
@@ -7172,6 +7175,32 @@
         "kind": "function"
       },
       "zscore": {
+        "kind": "function"
+      }
+    },
+    "./evaluate": {
+      "PhysicsEvaluateOptions": {
+        "kind": "type"
+      },
+      "compileExpr": {
+        "kind": "function"
+      },
+      "evaluate": {
+        "kind": "function"
+      },
+      "parse": {
+        "kind": "function"
+      },
+      "parser": {
+        "kind": "function"
+      },
+      "physicsScope": {
+        "kind": "function"
+      },
+      "replacer": {
+        "kind": "function"
+      },
+      "reviver": {
         "kind": "function"
       }
     }

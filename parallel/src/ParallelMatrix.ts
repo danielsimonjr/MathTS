@@ -67,24 +67,8 @@ function resolveMatrixWorkerScript(): string {
   // Node: worker_threads needs a real file on disk. When this module runs
   // from src/ (tests, ts loader) the worker lives in ../dist/; when it runs
   // from dist/ it is a sibling.
-  const candidates = [
-    new URL('../dist/matrix.worker.js', import.meta.url),
-    new URL('./matrix.worker.js', import.meta.url),
-  ];
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { existsSync } = require('node:fs') as typeof import('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { fileURLToPath } = require('node:url') as typeof import('node:url');
-    for (const url of candidates) {
-      const filePath = fileURLToPath(url);
-      if (existsSync(filePath)) return filePath;
-    }
-  } catch {
-    // Resolution failed — fall through to the first candidate as a best
-    // effort; WorkerPool will surface a clear error if it does not exist.
-  }
-  return candidates[0].href;
+  // Prefer the worker beside the built module; WorkerPool accepts a `file://` href.
+  return new URL('./matrix.worker.js', import.meta.url).href;
 }
 
 /**

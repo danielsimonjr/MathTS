@@ -6,7 +6,7 @@ Pure functions returning self-contained SVG strings — no browser, no canvas, n
 dependencies beyond the MathTS bedrock (`core`/`functions`/`expression`). Every function
 coerces its input and never throws on bad data: empty, `NaN`, or `Infinity` inputs render a
 "no data" placeholder SVG instead of crashing. See
-`docs/superpowers/specs/2026-07-07-plotting-design.md` for the design.
+[plotting design spec](https://github.com/danielsimonjr/MathTS/blob/main/docs/superpowers/specs/2026-07-07-plotting-design.md) for the design.
 
 ## Install
 
@@ -140,7 +140,7 @@ import { renderToFile, latexToPdf } from '@danielsimonjr/mathts-plot/render';
 await renderToFile(svgString, 'plot.png', { density: 144 });
 ```
 
-See `docs/api/plot.md` for `RenderOptions`, `PlotRenderError`, and `hasTool`.
+See the [plot API index](https://github.com/danielsimonjr/MathTS/blob/main/docs/api/plot.md) for `RenderOptions`, `PlotRenderError`, and `hasTool`.
 
 Notes:
 

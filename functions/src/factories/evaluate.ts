@@ -36,7 +36,7 @@ interface Scope {
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
-import * as typedFns from '../typed/index.js';
+import * as typedFns from '../typed/expression-eval-barrel.js';
 
 /**
  * Symbols that build or evaluate other expressions, or that are the typed-function

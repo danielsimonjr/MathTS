@@ -3,6 +3,8 @@
  * Supports both Node.js (worker_threads) and browser (Web Workers)
  */
 
+import { importModule } from '@danielsimonjr/mathts-core/internal';
+
 interface WorkerTask<T = unknown, R = unknown> {
   id: string;
   data: T;
@@ -107,10 +109,12 @@ export class WorkerPool {
   }
 
   /** `worker_threads`, imported once per pool and shared by every concurrent spawn. */
-  private workerThreadsModule?: Promise<typeof import('worker_threads')>;
+  private workerThreadsModule?: Promise<typeof import('node:worker_threads')>;
 
-  private nodeWorkerThreads(): Promise<typeof import('worker_threads')> {
-    this.workerThreadsModule ??= import('worker_threads');
+  private nodeWorkerThreads(): Promise<typeof import('node:worker_threads')> {
+    this.workerThreadsModule ??= importModule('node:worker_threads') as Promise<
+      typeof import('node:worker_threads')
+    >;
     return this.workerThreadsModule;
   }
 

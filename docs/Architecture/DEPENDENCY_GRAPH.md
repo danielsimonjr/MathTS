@@ -110,7 +110,7 @@ The codebase is organized into the following modules:
 - **packages/typed-function**: 1 file
 - **packages/workerpool**: 10 files
 - **core/arithmetic**: 1 file
-- **core**: 19 files
+- **core**: 20 files
 - **core/error**: 3 files
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
@@ -126,7 +126,7 @@ The codebase is organized into the following modules:
 - **functions/algebra**: 47 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
-- **functions**: 34 files
+- **functions**: 35 files
 - **functions/cas**: 5 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 51 files
+- **functions/typed**: 52 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
@@ -200,11 +200,11 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 51             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 52             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 52             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 555            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 557            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -647,6 +647,7 @@ graph LR
 | `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
 | `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
+| `./node-module-import.js`    | `importModule`                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, ConvertOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
@@ -655,7 +656,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -682,6 +683,14 @@ graph LR
 
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
 - Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
+
+---
+
+### `core/src/node-module-import.ts` - Runtime `import()` with a non-literal module specifier so browser bundlers
+
+**Exports:**
+
+- Functions: `importModule`
 
 ---
 
@@ -764,9 +773,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                        | Type               |
-| ------------------------ | ------------------------------ | ------------------ |
-| `./types/wasm-loader.js` | `LoadingMetrics, WasmManifest` | Import (type-only) |
+| File                      | Imports                        | Type               |
+| ------------------------- | ------------------------------ | ------------------ |
+| `./types/wasm-loader.js`  | `LoadingMetrics, WasmManifest` | Import (type-only) |
+| `./node-module-import.js` | `importModule`                 | Import             |
 
 **Exports:**
 
@@ -5067,6 +5077,12 @@ graph LR
 
 ### `functions/src/scalar-batch.worker.ts` - Worker entry for parallel {@link evaluateScalarPopulation} (M14). Built as its own
 
+**Workspace Dependencies:**
+
+| Package                      | Import         |
+| ---------------------------- | -------------- |
+| `@danielsimonjr/mathts-core` | `importModule` |
+
 **Internal Dependencies:**
 
 | File                     | Imports                               | Type   |
@@ -5244,6 +5260,21 @@ graph LR
 - Types: `FilterBtype`
 - Functions: `firwin`, `lfilter`, `lfilterZi`, `filtfilt`, `polyFromRoots`, `zpkToTf`, `analogToDigital`, `butter`
 - Constants: `sinc`, `cAdd`, `cSub`, `cMul`, `cDiv`, `cScale`
+
+---
+
+### `functions/src/subpath-evaluate.ts` - Focused entry: `import { evaluate } from '@danielsimonjr/mathts-functions/evaluate'`.
+
+**Internal Dependencies:**
+
+| File                      | Imports                                                                 | Type                  |
+| ------------------------- | ----------------------------------------------------------------------- | --------------------- |
+| `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer` | Re-export             |
+| `./factories/evaluate.js` | `PhysicsEvaluateOptions`                                                | Re-export (type-only) |
+
+**Exports:**
+
+- Re-exports: `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `PhysicsEvaluateOptions`
 
 ---
 
@@ -5698,11 +5729,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                   | Type   |
-| ------------------- | ------------------------- | ------ |
-| `./scope.js`        | `factoryScope`            | Import |
-| `./index.js`        | `* as activatedFactories` | Import |
-| `../typed/index.js` | `* as typedFns`           | Import |
+| File                                 | Imports                   | Type   |
+| ------------------------------------ | ------------------------- | ------ |
+| `./scope.js`                         | `factoryScope`            | Import |
+| `./index.js`                         | `* as activatedFactories` | Import |
+| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import |
 
 **Exports:**
 
@@ -11173,6 +11204,60 @@ graph LR
 **Exports:**
 
 - Functions: `euclidSnap`
+
+---
+
+### `functions/src/typed/expression-eval-barrel.ts` - Typed surface for `factories/evaluate.ts` and the `@danielsimonjr/mathts-functions/evaluate`
+
+**Internal Dependencies:**
+
+| File                  | Imports              | Type      |
+| --------------------- | -------------------- | --------- |
+| `./arithmetic.js`     | `*`                  | Re-export |
+| `./trigonometry.js`   | `*`                  | Re-export |
+| `./statistics.js`     | `*`                  | Re-export |
+| `./signal.js`         | `*`                  | Re-export |
+| `./bitwise.js`        | `*`                  | Re-export |
+| `./logical.js`        | `*`                  | Re-export |
+| `./complex.js`        | `*`                  | Re-export |
+| `./set.js`            | `*`                  | Re-export |
+| `./special.js`        | `*`                  | Re-export |
+| `./fused.js`          | `*`                  | Re-export |
+| `./distributions.js`  | `*`                  | Re-export |
+| `./geometry.js`       | `*`                  | Re-export |
+| `./algebra.js`        | `*`                  | Re-export |
+| `./integration.js`    | `*`                  | Re-export |
+| `./interpolation.js`  | `*`                  | Re-export |
+| `./numeric.js`        | `*`                  | Re-export |
+| `./combinatorics.js`  | `*`                  | Re-export |
+| `./graph.js`          | `*`                  | Re-export |
+| `./dist-objects.js`   | `*`                  | Re-export |
+| `./hypothesis.js`     | `*`                  | Re-export |
+| `./matrix-ops.js`     | `*`                  | Re-export |
+| `./relational.js`     | `*`                  | Re-export |
+| `./string.js`         | `*`                  | Re-export |
+| `./probability.js`    | `*`                  | Re-export |
+| `./unit.js`           | `*`                  | Re-export |
+| `./arithmetic.js`     | `typedArithmetic`    | Re-export |
+| `./trigonometry.js`   | `typedTrigonometry`  | Re-export |
+| `./statistics.js`     | `typedStatistics`    | Re-export |
+| `./signal.js`         | `typedSignal`        | Re-export |
+| `./bitwise.js`        | `typedBitwise`       | Re-export |
+| `./logical.js`        | `typedLogical`       | Re-export |
+| `./complex.js`        | `typedComplex`       | Re-export |
+| `./set.js`            | `typedSet`           | Re-export |
+| `./special.js`        | `typedSpecial`       | Re-export |
+| `./distributions.js`  | `typedDistributions` | Re-export |
+| `./worker-kernels.js` | `workerKernel`       | Re-export |
+| `./algebra.js`        | `typedAlgebra`       | Re-export |
+| `./relational.js`     | `typedRelational`    | Re-export |
+| `./string.js`         | `typedString`        | Re-export |
+| `./probability.js`    | `typedProbability`   | Re-export |
+| `./unit.js`           | `typedUnit`          | Re-export |
+
+**Exports:**
+
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `workerKernel`, `typedAlgebra`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
@@ -17955,6 +18040,12 @@ graph LR
 
 ### `parallel/src/WorkerPool.ts` - WorkerPool manages a pool of Web Workers for parallel computation
 
+**Workspace Dependencies:**
+
+| Package                      | Import         |
+| ---------------------------- | -------------- |
+| `@danielsimonjr/mathts-core` | `importModule` |
+
 **Exports:**
 
 - Classes: `WorkerPool`
@@ -19471,29 +19562,29 @@ graph LR
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 32 files     | 0 files    |
-| `functions/src/typed/index`                            | 29 files     | 2 files    |
+| `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `matrix/src/types/DenseMatrix`                         | 5 files      | 22 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
+| `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/node/Node`                             | 6 files      | 20 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
+| `core/src/internal`                                    | 21 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
-| `core/src/internal`                                    | 20 files     | 0 files    |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 9 files      | 10 files   |
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 17 files     | 1 file     |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
-| `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
-| `functions/src/typed/special`                          | 7 files      | 9 files    |
-| `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
-| `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
+| `functions/src/typed/special`                          | 7 files      | 10 files   |
+| `functions/src/typed/arithmetic`                       | 6 files      | 10 files   |
 
 ---
 
@@ -19552,7 +19643,7 @@ graph TD
         N19[factory]
         N20[index]
         N21[internal]
-        N22[...9 more]
+        N22[...10 more]
     end
 
     subgraph Core/error
@@ -19720,7 +19811,7 @@ graph TD
         N139[front-export]
         N140[geometry-extra]
         N141[grad-forward]
-        N142[...24 more]
+        N142[...25 more]
     end
 
     subgraph Functions/cas
@@ -20008,7 +20099,7 @@ graph TD
         N346[complex-promotion]
         N347[complex]
         N348[dist-objects]
-        N349[...41 more]
+        N349[...42 more]
     end
 
     subgraph Functions/unit
@@ -20370,17 +20461,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1291   |
+| Total TypeScript Files  | 1294   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221653 |
-| Total Exports           | 7082   |
-| Total Re-exports        | 3045   |
+| Total Lines of Code     | 221776 |
+| Total Exports           | 7108   |
+| Total Re-exports        | 3095   |
 | Total Classes           | 61     |
 | Total Interfaces        | 603    |
-| Total Functions         | 2402   |
+| Total Functions         | 2403   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 645    |
+| Type-only Imports       | 646    |
 | Runtime Circular Deps   | 1      |
 | Type-only Circular Deps | 0      |
 

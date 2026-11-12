@@ -646,6 +646,7 @@
       "identify",
       "IFraction",
       "IMatrix",
+      "importModule",
       "IndexError",
       "initial",
       "initTypedWasm",

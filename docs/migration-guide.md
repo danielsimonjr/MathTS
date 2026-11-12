@@ -5,6 +5,10 @@ and want to move to `@danielsimonjr/mathts-*`.
 
 ## TL;DR
 
+- MathTS publishes **ESM only**. Packages declare `"type": "module"` and `exports`
+  with an `import` condition only — there is no `require` entry and no CommonJS
+  build. Use `import` / `await import()` from Node, Bun, or bundlers; legacy CJS
+  apps need a small ESM wrapper or dynamic `import()`.
 - The compat shim (`@danielsimonjr/mathts-compat`) provides `create(all)` so
   the most common mathjs patterns work unchanged: `math.add`, `math.complex`,
   `math.matrix`, `math.evaluate`, `math.simplify`, `math.det`, `math.eigs`.
