@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1291
+  totalFiles: 1290
   totalModules: 82
-  totalExports: 7045
+  totalExports: 7070
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -847,6 +847,8 @@ modules:
             - AmbiguousUnitError
             - DIMENSIONLESS
             - dim
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./types/unit.js
           imports:
@@ -1114,6 +1116,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -1310,6 +1314,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -2851,6 +2857,10 @@ modules:
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
+        - file: ./unit-types.js
+          imports:
+            - LogarithmicUnitKind
+          typeOnly: true
         - file: ./errors.js
           imports:
             - AmbiguousUnitError
@@ -2890,11 +2900,13 @@ modules:
             - unitPrefixExactScale
       workspaceDependencies: []
       exports:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
         - unitReadingSearchSteps
       functions:
         - unitReadingSearchSteps
       constants:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
     core/src/types/unit/dependencies.ts:
       description: The dependency object injected into the relocated mathjs `Unit` factory
@@ -3045,6 +3057,8 @@ modules:
         - file: ./Unit.js
           imports:
             - createUnitClass
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./dependencies.js
           imports:
@@ -3143,6 +3157,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3219,6 +3235,8 @@ modules:
         - UnitPrefix
       reExported:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3458,6 +3476,8 @@ modules:
             - Unit
             - createUnitClass
             - unitDependencies
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./unit/index.js
           imports:
@@ -3556,6 +3576,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -3621,6 +3643,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -6855,9 +6879,6 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../typed/algebra.js
-          imports:
-            - expand
         - file: ../utils/node.js
           imports:
             - MathNode
@@ -6991,9 +7012,6 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../cas/polynomial-canonical.js
-          imports:
-            - tryPolynomialCanonicalForm
         - file: ./simplify/util.js
           imports:
             - createUtil
@@ -9726,6 +9744,10 @@ modules:
             - describe
             - histogram
           reExport: true
+        - file: ./statistics/nan-reductions.js
+          imports:
+            - nanmedian
+          reExport: true
         - file: ./numeric-extra.js
           imports:
             - clamp
@@ -11105,6 +11127,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -11849,6 +11872,7 @@ modules:
         - trimmedMean
         - describe
         - histogram
+        - nanmedian
         - clamp
         - sigmoid
         - logsumexp
@@ -13276,16 +13300,6 @@ modules:
         - Unit
         - MatrixConstructor
   functions/cas:
-    functions/src/cas/antiderivative.ts:
-      description: Shared symbolic antiderivatives for CAS integrate paths (G21).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - antiderivativeReciprocal
-      functions:
-        - antiderivativeReciprocal
     functions/src/cas/layer3.ts:
       description: Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
       externalDependencies: []
@@ -13338,23 +13352,6 @@ modules:
         - residueIntegral
         - rothsteinTrager
         - integrateLayer3
-    functions/src/cas/polynomial-canonical.ts:
-      description: Canonical polynomial forms for CAS simplify / factor (G21).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../typed/algebra.js
-          imports:
-            - expand
-            - factor
-            - variables
-      workspaceDependencies: []
-      exports:
-        - collapseIdenticalFactors
-        - tryPolynomialCanonicalForm
-      functions:
-        - collapseIdenticalFactors
-        - tryPolynomialCanonicalForm
     functions/src/cas/rat.ts:
       description: Exact rational arithmetic (lowest-terms, positive denominator).
       externalDependencies: []
@@ -20543,6 +20540,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - typedArrayPairToNumbers
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20621,9 +20621,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20634,6 +20631,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMad
@@ -20709,9 +20710,6 @@ modules:
         - file: ../utils/collection.js
           imports:
             - containsCollections
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20725,6 +20723,15 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - finiteNumbers
+            - isFloatTyped
+            - numberGrid
+            - reduceNumericMatrix
+            - FloatTyped
+            - StatReduceOptions
       workspaceDependencies: []
       exports:
         - createMedian
@@ -20769,9 +20776,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/array.js
-          imports:
-            - flatten
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20779,11 +20783,70 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - flattenForStatistics
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createMode
       constants:
         - createMode
+    functions/src/statistics/nan-reductions.ts:
+      description: nan-reductions module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - median
+        - file: ./numeric-data.js
+          imports:
+            - finiteNumbers
+            - reduceNumericMatrix
+            - NumericVectorInput
+      workspaceDependencies: []
+      exports:
+        - nanmedian
+      functions:
+        - nanmedian
+    functions/src/statistics/numeric-data.ts:
+      description: Shared numeric-vector handling for statistics reductions (G19).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - flatten
+      workspaceDependencies: []
+      exports:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
+      functions:
+        - isFloatTyped
+        - copyToNumberArray
+        - flattenForStatistics
+        - finiteNumbers
+        - isVarianceNorm
+        - parseStatOptions
+        - normalizationFromSecondArg
+        - normalizationFromStringAndOptions
+        - numberGrid
+        - flattenNumeric
+        - reduceNumericMatrix
+        - isConstantArrayLike
+        - typedArrayPairToNumbers
     functions/src/statistics/prod.ts:
       description: Compute the product of a matrix or a list with values.
       externalDependencies: []
@@ -20834,6 +20897,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./numeric-data.js
+          imports:
+            - isFloatTyped
+            - copyToNumberArray
+            - FloatTyped
       workspaceDependencies: []
       exports:
         - createQuantileSeq
@@ -20859,20 +20927,6 @@ modules:
         - createStd
       constants:
         - createStd
-    functions/src/statistics/sum-indexed-guard.ts:
-      description: 'Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721).'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
-          directory: core
-          imports:
-            - Complex
-      exports:
-        - rejectMisusedIndexedSum
-      functions:
-        - rejectMisusedIndexedSum
     functions/src/statistics/sum.ts:
       description: Check if an array is a flat array of plain numbers
       externalDependencies: []
@@ -20889,9 +20943,6 @@ modules:
         - file: ./utils/improveErrorMessage.js
           imports:
             - improveErrorMessage
-        - file: ./sum-indexed-guard.js
-          imports:
-            - rejectMisusedIndexedSum
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -23068,10 +23119,6 @@ modules:
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
-        - file: ../cas/polynomial-canonical.js
-          imports:
-            - collapseIdenticalFactors
-            - tryPolynomialCanonicalForm
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -23161,6 +23208,17 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+        - file: ../statistics/numeric-data.js
+          imports:
+            - finiteNumbers
+            - flattenNumeric
+            - normalizationFromSecondArg
+            - normalizationFromStringAndOptions
+            - numberGrid
+            - reduceNumericMatrix
+            - StatReduceOptions
+            - NumericVectorInput
+            - VarianceRequest
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -23270,6 +23328,9 @@ modules:
         - std
         - dot
         - typedArithmetic
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -23279,6 +23340,9 @@ modules:
         - shouldParallelize
         - getComputePool
       functions:
+        - nanmean
+        - nanvariance
+        - nanstd
         - matmul
         - transpose
         - matvec
@@ -23401,19 +23465,12 @@ modules:
           imports:
             - expand
             - factor
+        - file: ./string-derivative.js
+          imports:
+            - derivativeOfAdditiveTerms
         - file: ../factories/index.js
           imports:
             - polynomialRoot
-            - derivative
-        - file: ../cas/antiderivative.js
-          imports:
-            - antiderivativeReciprocal
-        - file: ../cas/polynomial-canonical.js
-          imports:
-            - tryPolynomialCanonicalForm
-        - file: ../numeric/adaptive-quad.js
-          imports:
-            - quad
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -36571,6 +36628,10 @@ modules:
             - zscore
             - cov
             - corrcoef
+            - nanmean
+            - nanmedian
+            - nanvariance
+            - nanstd
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -36811,6 +36872,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -37009,6 +37074,10 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - nanmean
+        - nanmedian
+        - nanvariance
+        - nanstd
         - parallelStatSum
         - parallelStatMean
         - parallelStatVariance
@@ -42290,12 +42359,9 @@ dependencyGraph:
       - - tensor/src/Tensor.ts
         - tensor/src/operations/slice.ts
         - tensor/src/Tensor.ts
-      - - functions/src/typed/algebra.ts
-        - functions/src/cas/polynomial-canonical.ts
-        - functions/src/typed/algebra.ts
     typeOnly: []
-    total: 2
-    runtimeCount: 2
+    total: 1
+    runtimeCount: 1
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -42611,9 +42677,7 @@ dependencyGraph:
         - functions/src/types.ts
     - name: Functions/cas
       files:
-        - functions/src/cas/antiderivative.ts
         - functions/src/cas/layer3.ts
-        - functions/src/cas/polynomial-canonical.ts
         - functions/src/cas/rat.ts
         - functions/src/cas/rational-integrate.ts
         - functions/src/cas/real-roots.ts
@@ -42895,10 +42959,11 @@ dependencyGraph:
         - functions/src/statistics/median.ts
         - functions/src/statistics/min.ts
         - functions/src/statistics/mode.ts
+        - functions/src/statistics/nan-reductions.ts
+        - functions/src/statistics/numeric-data.ts
         - functions/src/statistics/prod.ts
         - functions/src/statistics/quantileSeq.ts
         - functions/src/statistics/std.ts
-        - functions/src/statistics/sum-indexed-guard.ts
         - functions/src/statistics/sum.ts
         - functions/src/statistics/utils/improveErrorMessage.ts
         - functions/src/statistics/variance.ts
@@ -43754,19 +43819,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1291
+  totalTypeScriptFiles: 1290
   totalModules: 82
-  totalLinesOfCode: 219891
-  totalExports: 7045
+  totalLinesOfCode: 220790
+  totalExports: 7070
   totalClasses: 61
   totalInterfaces: 602
-  totalFunctions: 2380
-  totalTypeGuards: 172
+  totalFunctions: 2393
+  totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1647
-  totalReExports: 3032
-  totalTypeOnlyImports: 644
-  runtimeCircularDeps: 2
+  totalConstants: 1648
+  totalReExports: 3043
+  totalTypeOnlyImports: 645
+  runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

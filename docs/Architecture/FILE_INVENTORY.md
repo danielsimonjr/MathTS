@@ -17,10 +17,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1265 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1264 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      903 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      904 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1291 |
-| `tests`    |   903 |
+| `src`      |  1290 |
+| `tests`    |   904 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -939,9 +939,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/bitwise/useMatrixForArrayScalar.ts`                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/calculus-extra.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas-integration.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
-| `functions/src/cas/antiderivative.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/layer3.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
-| `functions/src/cas/polynomial-canonical.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/rat.ts`                                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/rational-integrate.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/real-roots.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1211,10 +1209,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/statistics/median.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/min.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/mode.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/statistics/nan-reductions.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/statistics/numeric-data.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/prod.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/quantileSeq.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/std.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
-| `functions/src/statistics/sum-indexed-guard.ts`                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/sum.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/utils/improveErrorMessage.ts`                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/variance.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1478,7 +1477,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-g09-student-ttest-popmean.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g10-pde-cfl-bc.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g18-signal-api.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/dogfood-g21-cas.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g19-stats-nan-ddof.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g23-units-physics.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dtw.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/effect-sizes.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/eigs-correctness.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |

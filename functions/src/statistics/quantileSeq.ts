@@ -2,6 +2,7 @@ import { isNumber, isBigNumber } from '../utils/is.js';
 import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { isFloatTyped, copyToNumberArray, type FloatTyped } from './numeric-data.js';
 
 // Type definitions for quantileSeq
 interface MatrixType {
@@ -129,6 +130,10 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         data: unknown[] | MatrixType,
         p: number | BigNumberType
       ): unknown => _quantileSeqProbNumber(data, p, false),
+      'Float64Array | Float32Array, number | BigNumber': (
+        data: FloatTyped,
+        p: number | BigNumberType
+      ): unknown => _quantileSeqProbNumber(data, p, false),
       'Array | Matrix, number | BigNumber, number': (
         data: unknown[] | MatrixType,
         prob: number | BigNumberType,
@@ -193,13 +198,15 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     }
 
     function _quantileSeqProbNumber(
-      data: unknown[] | MatrixType,
+      data: unknown[] | MatrixType | FloatTyped,
       probOrN: number | BigNumberType,
       sorted: boolean,
       mode: QuantileMode = 'linear'
     ): unknown {
       let probArr: unknown[];
-      const dataArr = (data as MatrixType).valueOf() as unknown[];
+      const dataArr = isFloatTyped(data)
+        ? (copyToNumberArray(data) as unknown[])
+        : ((data as MatrixType).valueOf() as unknown[]);
       if (smaller(probOrN, 0)) {
         throw new Error('N/prob must be non-negative');
       }
