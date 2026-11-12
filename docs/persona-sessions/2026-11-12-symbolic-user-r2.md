@@ -21,33 +21,33 @@ Re-verify round-1 issues #714–#726. Re-run grammar corpus, CAS vs SymPy, sandb
 
 ### 2. Grammar corpus (functions `parse` / `evaluate`)
 
-| Area | Result |
-| --- | --- |
-| Precedence `2+3*4`, right-assoc `2^3^2`, unary `-2^2`, `2*-3` | OK, matches mathjs semantics |
-| Implicit `2(3+4)`, `2x`, `x y` | OK with scope |
-| `5!`, matrices `[[1,2],[3,4]]` | OK; TeX bmatrix |
-| `π`, `sin(π/2)` | **Fixed** — evaluate resolves π (#720) |
-| `√2` | Parses as postfix **`2√`**; numeric value correct but AST/TeX wrong → [#885](https://github.com/danielsimonjr/MathTS/issues/885) |
-| `1e` | **Fixed** — `SyntaxError` not implicit `e` (#723) |
-| Malformed `1+*2`, `(` imbalance, `x[1` | Char-indexed errors |
-| Nesting | **125** parentheses evaluates; **126** throws limit (#722 fixed vs docs) |
-| `x=3`, `f(x)=x^2` evaluate | Blocked unless `{ unsafe: true }`; README now documents (#725 docs fix) |
-| `sum(i,1,3,i)` | **Throws** with guidance to use `summation()` API — not wrong `4+2i` (#721 fixed) |
-| `sum(k,1,3,k)` in expression | Undefined symbols (mathjs same — not a product bug) |
+| Area                                                          | Result                                                                                                                           |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Precedence `2+3*4`, right-assoc `2^3^2`, unary `-2^2`, `2*-3` | OK, matches mathjs semantics                                                                                                     |
+| Implicit `2(3+4)`, `2x`, `x y`                                | OK with scope                                                                                                                    |
+| `5!`, matrices `[[1,2],[3,4]]`                                | OK; TeX bmatrix                                                                                                                  |
+| `π`, `sin(π/2)`                                               | **Fixed** — evaluate resolves π (#720)                                                                                           |
+| `√2`                                                          | Parses as postfix **`2√`**; numeric value correct but AST/TeX wrong → [#885](https://github.com/danielsimonjr/MathTS/issues/885) |
+| `1e`                                                          | **Fixed** — `SyntaxError` not implicit `e` (#723)                                                                                |
+| Malformed `1+*2`, `(` imbalance, `x[1`                        | Char-indexed errors                                                                                                              |
+| Nesting                                                       | **125** parentheses evaluates; **126** throws limit (#722 fixed vs docs)                                                         |
+| `x=3`, `f(x)=x^2` evaluate                                    | Blocked unless `{ unsafe: true }`; README now documents (#725 docs fix)                                                          |
+| `sum(i,1,3,i)`                                                | **Throws** with guidance to use `summation()` API — not wrong `4+2i` (#721 fixed)                                                |
+| `sum(k,1,3,k)` in expression                                  | Undefined symbols (mathjs same — not a product bug)                                                                              |
 
 ### 3. CAS vs SymPy 1.14
 
-| op | MathTS 0.85.0 | SymPy 1.14 | Notes |
-| --- | --- | --- | --- |
-| `simplify('x^2+2*x+1')` | `(x + 1) ^ 2` / `(x+1)^2` | `(x+1)**2` | **Fixed** (#716) |
-| `expand('(x+1)^2')` | `1 + 2*x + 1*x^2` | `x**2 + 2*x + 1` | [#887](https://github.com/danielsimonjr/MathTS/issues/887) P2 |
-| `factor` | `(x+1)^2` | same | Fixed |
-| `derivative` / `casDerivative` | `cos(x)*x+sin(x)` | match | **Fixed** (#718) |
-| `integrate('1/x')` / `symbolicIntegral` | both `log(abs(x))` style | `log(x)` vs abs variant | **Aligned** (#717) |
-| `solve('x^2-2')` | `±sqrt(2)` symbolic | `±sqrt(2)` | **Fixed** (was #719) |
-| `solve('sin(x)=0')` | **63 floats** | `{0, π}` principal | **Not fixed** → [#884](https://github.com/danielsimonjr/MathTS/issues/884) |
-| `substitute('x^2+y',{x:2})` | `4 + y` | `4+y` | **Fixed** (#724) |
-| `rationalize('1/x+1/y')` | `(y+x)/(x*y)` | match | OK |
+| op                                      | MathTS 0.85.0             | SymPy 1.14              | Notes                                                                      |
+| --------------------------------------- | ------------------------- | ----------------------- | -------------------------------------------------------------------------- |
+| `simplify('x^2+2*x+1')`                 | `(x + 1) ^ 2` / `(x+1)^2` | `(x+1)**2`              | **Fixed** (#716)                                                           |
+| `expand('(x+1)^2')`                     | `1 + 2*x + 1*x^2`         | `x**2 + 2*x + 1`        | [#887](https://github.com/danielsimonjr/MathTS/issues/887) P2              |
+| `factor`                                | `(x+1)^2`                 | same                    | Fixed                                                                      |
+| `derivative` / `casDerivative`          | `cos(x)*x+sin(x)`         | match                   | **Fixed** (#718)                                                           |
+| `integrate('1/x')` / `symbolicIntegral` | both `log(abs(x))` style  | `log(x)` vs abs variant | **Aligned** (#717)                                                         |
+| `solve('x^2-2')`                        | `±sqrt(2)` symbolic       | `±sqrt(2)`              | **Fixed** (was #719)                                                       |
+| `solve('sin(x)=0')`                     | **63 floats**             | `{0, π}` principal      | **Not fixed** → [#884](https://github.com/danielsimonjr/MathTS/issues/884) |
+| `substitute('x^2+y',{x:2})`             | `4 + y`                   | `4+y`                   | **Fixed** (#724)                                                           |
+| `rationalize('1/x+1/y')`                | `(y+x)/(x*y)`             | match                   | OK                                                                         |
 
 ### 4. Compile, sandbox, precision
 
@@ -66,31 +66,31 @@ See JSON. Headlines: scoped **evaluate ~0.28×** mathjs median; **parse ~1.0×**
 
 ## Round-1 re-check (#714–#726)
 
-| # | Fixed? | Round-2 note |
-| --- | --- | --- |
-| 714 `new BigNumber(1)` | **yes** | `toString()` → `1` |
-| 715 parser/evaluator factories | **partial** | `parse`/`evaluate`/`compileExpression` wired; zero-arg `createParse`/`createEvaluate` fail → #883 |
-| 716 simplify/factor | **yes** | `(x+1)^2` |
-| 717 integrate 1/x | **yes** | both log(abs(x)) |
-| 718 casDerivative | **yes** | same as derivative |
-| 719 solve | **partial** | `x^2-2` symbolic; `sin(x)=0` still numeric → #884 |
-| 720 unicode π | **yes** | eval 3.14…; `sin(π/2)=1` |
-| 721 sum(i,1,3,i) | **yes** | throws with actionable message |
-| 722 nesting 125 | **yes** | 125 ok, 126 limit |
-| 723 `1e` | **yes** | syntax error |
-| 724 substitute fold | **yes** | `4 + y` |
-| 725 assignment docs | **yes** | README documents `{ unsafe: true }` |
-| 726 GPU types / evaluate unknown | **mostly** | no GPUBuffer in repro; workerpool still #886 |
+| #                                | Fixed?      | Round-2 note                                                                                      |
+| -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| 714 `new BigNumber(1)`           | **yes**     | `toString()` → `1`                                                                                |
+| 715 parser/evaluator factories   | **partial** | `parse`/`evaluate`/`compileExpression` wired; zero-arg `createParse`/`createEvaluate` fail → #883 |
+| 716 simplify/factor              | **yes**     | `(x+1)^2`                                                                                         |
+| 717 integrate 1/x                | **yes**     | both log(abs(x))                                                                                  |
+| 718 casDerivative                | **yes**     | same as derivative                                                                                |
+| 719 solve                        | **partial** | `x^2-2` symbolic; `sin(x)=0` still numeric → #884                                                 |
+| 720 unicode π                    | **yes**     | eval 3.14…; `sin(π/2)=1`                                                                          |
+| 721 sum(i,1,3,i)                 | **yes**     | throws with actionable message                                                                    |
+| 722 nesting 125                  | **yes**     | 125 ok, 126 limit                                                                                 |
+| 723 `1e`                         | **yes**     | syntax error                                                                                      |
+| 724 substitute fold              | **yes**     | `4 + y`                                                                                           |
+| 725 assignment docs              | **yes**     | README documents `{ unsafe: true }`                                                               |
+| 726 GPU types / evaluate unknown | **mostly**  | no GPUBuffer in repro; workerpool still #886                                                      |
 
 ## Findings (round 2)
 
-| # | Sev | Issue |
-| --- | --- | --- |
-| 1 | P1 | [#883](https://github.com/danielsimonjr/MathTS/issues/883) Regression: zero-arg `createParse`/`createEvaluate` |
-| 2 | P1 | [#884](https://github.com/danielsimonjr/MathTS/issues/884) Regression: `solve('sin(x)=0')` 63 roots |
-| 3 | P1 | [#885](https://github.com/danielsimonjr/MathTS/issues/885) Unicode `√2` → AST `2√` |
-| 4 | P2 | [#886](https://github.com/danielsimonjr/MathTS/issues/886) Regression: workerpool types without `@types/node` |
-| 5 | P2 | [#887](https://github.com/danielsimonjr/MathTS/issues/887) `expand` term order / `1*x^2` |
+| #   | Sev | Issue                                                                                                          |
+| --- | --- | -------------------------------------------------------------------------------------------------------------- |
+| 1   | P1  | [#883](https://github.com/danielsimonjr/MathTS/issues/883) Regression: zero-arg `createParse`/`createEvaluate` |
+| 2   | P1  | [#884](https://github.com/danielsimonjr/MathTS/issues/884) Regression: `solve('sin(x)=0')` 63 roots            |
+| 3   | P1  | [#885](https://github.com/danielsimonjr/MathTS/issues/885) Unicode `√2` → AST `2√`                             |
+| 4   | P2  | [#886](https://github.com/danielsimonjr/MathTS/issues/886) Regression: workerpool types without `@types/node`  |
+| 5   | P2  | [#887](https://github.com/danielsimonjr/MathTS/issues/887) `expand` term order / `1*x^2`                       |
 
 ## Summary & verdict
 
