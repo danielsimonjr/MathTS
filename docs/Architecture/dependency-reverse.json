@@ -1857,6 +1857,10 @@
     ],
     "functions/src/geometry/frustum.ts": ["functions/src/index.ts"],
     "functions/src/config-api.ts": ["functions/src/index.ts"],
+    "functions/src/core/function/import.ts": [
+      "functions/src/core/create.ts",
+      "functions/src/index.ts"
+    ],
     "functions/src/wasm/WasmLoader.ts": [
       "functions/src/index.ts",
       "functions/src/wasm/bitwise/wasm-bridge.ts",
@@ -2148,7 +2152,6 @@
     ],
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
-    "functions/src/core/function/import.ts": ["functions/src/core/create.ts"],
     "functions/src/arithmetic/abs.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/addScalar.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/cube.ts": ["functions/src/factories/index.ts"],
@@ -4426,6 +4429,8 @@
     ],
     "compat/src/shims.ts": ["compat/src/index.ts"],
     "compat/src/chain.ts": ["compat/src/index.ts"],
+    "compat/src/instance-api.ts": ["compat/src/index.ts"],
+    "compat/src/index.ts": ["compat/src/instance-api.ts"],
     "gpu/src/GPUContext.ts": [
       "gpu/src/BufferPool.ts",
       "gpu/src/ShaderManager.ts",
