@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1292                  |
-| Total Test Files                       | 887                   |
+| Total Test Files                       | 888                   |
 | Source Files with Tests                | 534                   |
 | Source Files without Tests             | 758                   |
 | Coverage (raw, direct-import)          | **41.3%**             |
@@ -1635,6 +1635,7 @@ The following 758 source files are not directly imported by any test file:
 | `tests/effect-sizes.test.ts`                             | 1 files             |
 | `tests/eigs-correctness.test.ts`                         | 0 files             |
 | `tests/eigsh.test.ts`                                    | 172 files           |
+| `tests/elementwise-number-array-692.test.ts`             | 0 files             |
 | `tests/elementwise-wasm.browser.test.ts`                 | 3 files             |
 | `tests/embedded-docs-completeness.test.ts`               | 172 files           |
 | `tests/erf-extra.test.ts`                                | 2 files             |

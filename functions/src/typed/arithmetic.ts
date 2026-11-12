@@ -16,7 +16,7 @@
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
-import { f64Unary } from './f64-kernels.js';
+import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import {
   pairwiseSum,
   neumaierSum,
@@ -52,7 +52,6 @@ import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/math
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
-import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import {
   logReal,
@@ -60,7 +59,10 @@ import {
   log10Real,
   log2Real,
   log1pReal,
+  staysRealLog,
+  staysRealLog1p,
   sqrtReal,
+  staysRealSqrt,
   powReal,
   nthRootReal,
 } from './complex-promotion.js';
@@ -669,6 +671,7 @@ export const unaryMinus = mathTyped('unaryMinus', {
 
   // Float64Array negation (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => -x),
+  'Array | Matrix': unaryCollection({ real: (x) => -x }),
 });
 
 /**
@@ -681,6 +684,7 @@ export const unaryPlus = mathTyped('unaryPlus', {
   Fraction: (a: Fraction): Fraction => a,
   BigNumber: (a: BigNumber): BigNumber => a,
   Float64Array: (a: Float64Array): Float64Array => a, // Identity, no copy needed
+  'Array | Matrix': unaryCollection({ real: (x) => +x }),
 });
 
 /**
@@ -696,8 +700,8 @@ export const abs = mathTyped('abs', {
   Unit: (a: Unit): Unit => asUnit(a).abs() as unknown as Unit,
 
   // Float64Array abs (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('abs', a) ?? f64Unary(a, (x) => Math.abs(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'abs', (x) => Math.abs(x)),
+  'Array | Matrix': unaryCollection({ real: Math.abs, wasmKernel: 'abs' }),
 });
 
 /**
@@ -716,6 +720,7 @@ export const sign = mathTyped('sign', {
 
   // Float64Array sign (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.sign(x)),
+  'Array | Matrix': unaryCollection({ real: Math.sign }),
 });
 
 // =============================================================================
@@ -791,6 +796,7 @@ export const sqrt = mathTyped('sqrt', {
 
   // Float64Array sqrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.sqrt(x)),
+  'Array | Matrix': unaryCollection({ real: Math.sqrt, inRealDomain: staysRealSqrt }),
 });
 
 /**
@@ -806,6 +812,7 @@ export const square = mathTyped('square', {
 
   // Float64Array square (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => x * x),
+  'Array | Matrix': unaryCollection({ real: (x) => x * x }),
 });
 
 /**
@@ -821,6 +828,7 @@ export const cube = mathTyped('cube', {
 
   // Float64Array cube (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => x * x * x),
+  'Array | Matrix': unaryCollection({ real: (x) => x * x * x }),
 });
 
 /**
@@ -857,6 +865,7 @@ export const cbrt = mathTyped('cbrt', {
 
   // Float64Array cbrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cbrt(x)),
+  'Array | Matrix': unaryCollection({ real: Math.cbrt }),
 });
 
 /**
@@ -883,8 +892,8 @@ export const exp = mathTyped('exp', {
   Dual: (a: Dual): Dual => a.exp(),
 
   // Float64Array exp (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('exp', a) ?? f64Unary(a, (x) => Math.exp(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'exp', (x) => Math.exp(x)),
+  'Array | Matrix': unaryCollection({ real: Math.exp, wasmKernel: 'exp' }),
 });
 
 /**
@@ -898,8 +907,12 @@ export const log = mathTyped('log', {
   'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
 
   // Float64Array log (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log', a) ?? f64Unary(a, (x) => Math.log(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'log', (x) => Math.log(x)),
+  'Array | Matrix': unaryCollection({
+    real: Math.log,
+    wasmKernel: 'log',
+    inRealDomain: staysRealLog,
+  }),
 });
 
 /**
@@ -912,7 +925,12 @@ export const log10 = mathTyped('log10', {
 
   // Float64Array log10 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log10', a) ?? f64Unary(a, (x) => Math.log10(x)),
+    f64UnaryDispatched(a, 'log10', (x) => Math.log10(x)),
+  'Array | Matrix': unaryCollection({
+    real: Math.log10,
+    wasmKernel: 'log10',
+    inRealDomain: staysRealLog,
+  }),
 });
 
 /**
@@ -925,7 +943,12 @@ export const log2 = mathTyped('log2', {
 
   // Float64Array log2 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log2', a) ?? f64Unary(a, (x) => Math.log2(x)),
+    f64UnaryDispatched(a, 'log2', (x) => Math.log2(x)),
+  'Array | Matrix': unaryCollection({
+    real: Math.log2,
+    wasmKernel: 'log2',
+    inRealDomain: staysRealLog,
+  }),
 });
 
 /**
@@ -936,7 +959,12 @@ export const log1p = mathTyped('log1p', {
 
   // Float64Array log1p (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log1p', a) ?? f64Unary(a, (x) => Math.log1p(x)),
+    f64UnaryDispatched(a, 'log1p', (x) => Math.log1p(x)),
+  'Array | Matrix': unaryCollection({
+    real: Math.log1p,
+    wasmKernel: 'log1p',
+    inRealDomain: staysRealLog1p,
+  }),
 });
 
 /**
@@ -947,7 +975,8 @@ export const expm1 = mathTyped('expm1', {
 
   // Float64Array expm1 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('expm1', a) ?? f64Unary(a, (x) => Math.expm1(x)),
+    f64UnaryDispatched(a, 'expm1', (x) => Math.expm1(x)),
+  'Array | Matrix': unaryCollection({ real: Math.expm1, wasmKernel: 'expm1' }),
 });
 
 // =============================================================================
@@ -972,6 +1001,7 @@ export const round = mathTyped('round', {
 
   // Float64Array round, synchronous (nearest integer, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.round(x)),
+  'Array | Matrix': unaryCollection({ real: Math.round }),
 });
 
 /**
@@ -985,6 +1015,7 @@ export const floor = mathTyped('floor', {
 
   // Float64Array floor (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.floor(x)),
+  'Array | Matrix': unaryCollection({ real: Math.floor }),
 });
 
 /**
@@ -998,6 +1029,7 @@ export const ceil = mathTyped('ceil', {
 
   // Float64Array ceil (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.ceil(x)),
+  'Array | Matrix': unaryCollection({ real: Math.ceil }),
 });
 
 /**
@@ -1013,6 +1045,7 @@ export const fix = mathTyped('fix', {
 
   // Float64Array fix, synchronous (truncate toward zero, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.trunc(x)),
+  'Array | Matrix': unaryCollection({ real: Math.trunc }),
 });
 
 // =============================================================================
@@ -1265,7 +1298,8 @@ export const sinh = mathTyped('sinh', {
 
   // Float64Array sinh (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('sinh', a) ?? f64Unary(a, (x) => Math.sinh(x)),
+    f64UnaryDispatched(a, 'sinh', (x) => Math.sinh(x)),
+  'Array | Matrix': unaryCollection({ real: Math.sinh, wasmKernel: 'sinh' }),
 });
 
 /**
@@ -1278,6 +1312,7 @@ export const cosh = mathTyped('cosh', {
 
   // Float64Array cosh (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cosh(x)),
+  'Array | Matrix': unaryCollection({ real: Math.cosh }),
 });
 
 /**
@@ -1290,7 +1325,8 @@ export const tanh = mathTyped('tanh', {
 
   // Float64Array tanh (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('tanh', a) ?? f64Unary(a, (x) => Math.tanh(x)),
+    f64UnaryDispatched(a, 'tanh', (x) => Math.tanh(x)),
+  'Array | Matrix': unaryCollection({ real: Math.tanh, wasmKernel: 'tanh' }),
 });
 
 // =============================================================================

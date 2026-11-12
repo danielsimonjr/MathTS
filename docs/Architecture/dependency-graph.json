@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1292,
     "totalModules": 82,
-    "totalExports": 7081
+    "totalExports": 7089
   },
   "entryPoints": [
     {
@@ -24754,7 +24754,7 @@
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary"]
+            "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
           },
           {
             "file": "../statistics/numeric-data.js",
@@ -24775,10 +24775,6 @@
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
           {
-            "file": "../wasm/elementwise/wasm-bridge.js",
-            "imports": ["elementwiseUnaryDispatch"]
-          },
-          {
             "file": "./invalid-scalar-guards.js",
             "imports": ["withBinaryScalarGuards"]
           },
@@ -24790,7 +24786,10 @@
               "log10Real",
               "log2Real",
               "log1pReal",
+              "staysRealLog",
+              "staysRealLog1p",
               "sqrtReal",
+              "staysRealSqrt",
               "powReal",
               "nthRootReal"
             ]
@@ -25247,27 +25246,39 @@
         ],
         "exports": [
           "isPredictableMode",
+          "staysRealLog",
           "logReal",
           "logRealBase",
           "log10Real",
           "log2Real",
+          "staysRealLog1p",
           "log1pReal",
+          "staysRealSqrt",
           "sqrtReal",
           "powReal",
           "nthRootReal",
+          "staysRealUnitInterval",
+          "staysRealAcosh",
+          "staysRealAbsAtLeastOne",
           "acscReal",
           "asecReal"
         ],
         "functions": [
           "isPredictableMode",
+          "staysRealLog",
           "logReal",
           "logRealBase",
           "log10Real",
           "log2Real",
+          "staysRealLog1p",
           "log1pReal",
+          "staysRealSqrt",
           "sqrtReal",
           "powReal",
           "nthRootReal",
+          "staysRealUnitInterval",
+          "staysRealAcosh",
+          "staysRealAbsAtLeastOne",
           "acscReal",
           "asecReal"
         ]
@@ -25448,10 +25459,22 @@
         "description": "Shared element-wise kernel for the synchronous typed Float64Array signatures.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["f64Unary"],
-        "functions": ["f64Unary"]
+        "internalDependencies": [
+          {
+            "file": "../wasm/elementwise/wasm-bridge.js",
+            "imports": ["elementwiseUnaryDispatch", "WasmElementwiseOp"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"],
+        "interfaces": ["UnaryRealSpec"],
+        "functions": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -27629,19 +27652,21 @@
         "internalDependencies": [
           {
             "file": "./complex-promotion.js",
-            "imports": ["acscReal", "asecReal", "isPredictableMode"]
+            "imports": [
+              "acscReal",
+              "asecReal",
+              "staysRealAbsAtLeastOne",
+              "staysRealAcosh",
+              "staysRealUnitInterval"
+            ]
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary"]
+            "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
           },
           {
             "file": "./trig-angle-unit.js",
             "imports": ["trigFromAngleUnit"]
-          },
-          {
-            "file": "../wasm/elementwise/wasm-bridge.js",
-            "imports": ["elementwiseUnaryDispatch"]
           }
         ],
         "workspaceDependencies": [
@@ -46401,11 +46426,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1292,
     "totalModules": 82,
-    "totalLinesOfCode": 221274,
-    "totalExports": 7081,
+    "totalLinesOfCode": 221498,
+    "totalExports": 7089,
     "totalClasses": 61,
-    "totalInterfaces": 604,
-    "totalFunctions": 2396,
+    "totalInterfaces": 605,
+    "totalFunctions": 2404,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1650,
