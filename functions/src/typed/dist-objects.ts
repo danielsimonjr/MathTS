@@ -625,6 +625,8 @@ export interface GammaDistNamedOptions {
  * The positional second argument is the **rate** (R / exponential convention).
  * SciPy uses **scale** where `scale = 1/rate`. For SciPy parity pass
  * `{ scale }` as the second argument, or `{ shape, scale }` alone.
+ * Passing `rate` and `scale` together throws. Shape, rate, and scale must be
+ * finite and strictly positive (`NaN`, `±Infinity`, and non-positive values throw).
  *
  * @param shapeOrOptions - Shape (positive), or `{ shape, scale }` for SciPy-style construction
  * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` when the first argument is a number
@@ -640,6 +642,12 @@ export interface GammaDistNamedOptions {
  * gammaDist(2, { scale: 2 }).pdf(1); // 0.15163266492815836
  * gammaDist(2, { scale: 2 }).mean; // 4
  */
+function _gammaPositiveFinite(name: string, value: f64): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`gammaDist: ${name} must be finite and strictly positive`);
+  }
+}
+
 export function gammaDist(shape: f64, rateOrOptions?: f64 | GammaDistOptions): Distribution;
 export function gammaDist(options: GammaDistNamedOptions): Distribution;
 export function gammaDist(
@@ -649,20 +657,31 @@ export function gammaDist(
   let shape: f64;
   let rate: f64;
   if (typeof shapeOrOptions === 'object' && shapeOrOptions !== null && 'shape' in shapeOrOptions) {
+    if (arguments.length > 1 || 'rate' in shapeOrOptions) {
+      throw new Error('gammaDist: pass rate or scale, not both');
+    }
     shape = shapeOrOptions.shape;
     const scale = shapeOrOptions.scale;
-    if (shape <= 0 || scale <= 0) throw new Error('gammaDist: shape and scale must be positive');
+    _gammaPositiveFinite('shape', shape);
+    _gammaPositiveFinite('scale', scale);
     rate = 1 / scale;
   } else {
     shape = shapeOrOptions as f64;
-    if (typeof rateOrOptions === 'object' && rateOrOptions !== null && 'scale' in rateOrOptions) {
+    _gammaPositiveFinite('shape', shape);
+    if (typeof rateOrOptions === 'object' && rateOrOptions !== null) {
+      if ('rate' in rateOrOptions) {
+        throw new Error('gammaDist: pass rate or scale, not both');
+      }
+      if (!('scale' in rateOrOptions)) {
+        throw new Error('gammaDist: expected a positive rate or { scale }');
+      }
       const scale = rateOrOptions.scale;
-      if (scale <= 0) throw new Error('gammaDist: scale must be positive');
+      _gammaPositiveFinite('scale', scale);
       rate = 1 / scale;
     } else {
       rate = rateOrOptions as f64;
+      _gammaPositiveFinite('rate', rate);
     }
-    if (shape <= 0 || rate <= 0) throw new Error('gammaDist: shape and rate must be positive');
   }
   const scale = 1 / rate;
   return {

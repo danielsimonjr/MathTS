@@ -421,6 +421,9 @@
       "MATHTS_TYPES": {
         "kind": "object"
       },
+      "MAX_UNIT_STRING_LENGTH": {
+        "kind": "number"
+      },
       "MathTSConfig": {
         "kind": "type"
       },
@@ -824,6 +827,9 @@
         "kind": "function"
       },
       "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "unitReadingSearchSteps": {
         "kind": "function"
       },
       "unitRowExactOffset": {
@@ -1462,6 +1468,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DENSE_MATRIX_MAX_ELEMENTS": {
+        "kind": "number"
+      },
       "DecompositionMatrixInput": {
         "kind": "type"
       },
@@ -1613,6 +1622,9 @@
         "kind": "function"
       },
       "add": {
+        "kind": "function"
+      },
+      "assertDenseMatrixSize": {
         "kind": "function"
       },
       "backendManager": {
@@ -4433,7 +4445,7 @@
         "kind": "function"
       },
       "fineStructure": {
-        "kind": "number"
+        "kind": "object"
       },
       "finiteDifferenceCoefficients": {
         "kind": "function"
@@ -6341,7 +6353,7 @@
         "kind": "object"
       },
       "sackurTetrode": {
-        "kind": "number"
+        "kind": "object"
       },
       "savgol": {
         "kind": "function"
@@ -7088,7 +7100,7 @@
         "kind": "function"
       },
       "weakMixingAngle": {
-        "kind": "number"
+        "kind": "object"
       },
       "weibullDist": {
         "kind": "function"

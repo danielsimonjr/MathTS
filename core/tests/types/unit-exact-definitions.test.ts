@@ -258,6 +258,10 @@ const DEFINITIONS: Record<string, Def> = {
   B: r(q(8)),
   bytes: r(q(8)), // bit: its own BIT dimension (storage), not ln 2 nat
   nat: r(q(1)),
+  dB: r(q(1)),
+  dBm: r(q(1)),
+  dBW: r(q(1)),
+  Np: r(q(1)),
   percent: r(q(1, 100)),
   ppm: r(q(1, 10n ** 6n)),
   ppb: r(q(1, 10n ** 9n)),
