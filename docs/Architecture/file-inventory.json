@@ -10341,7 +10341,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 148
+      "loc": 151
     },
     {
       "file": "functions/tests/gap-2026-11-matrix-reexports.test.ts",
