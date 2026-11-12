@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1308,
+    "totalFiles": 1310,
     "totalModules": 82,
-    "totalExports": 7155
+    "totalExports": 7160
   },
   "entryPoints": [
     {
@@ -8074,6 +8074,34 @@
         "exports": ["csUnflip"],
         "functions": ["csUnflip"]
       },
+      "functions/src/algebra/substitute.ts": {
+        "description": "substitute module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isNode"]
+          },
+          {
+            "file": "../utils/node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createSubstitute"],
+        "constants": ["createSubstitute"]
+      },
       "functions/src/algebra/sylvester.ts": {
         "description": "Solves the real-valued Sylvester equation AX+XB=C for X, where A, B and C are",
         "externalDependencies": [],
@@ -15778,6 +15806,10 @@
             "imports": ["createResolve"]
           },
           {
+            "file": "../algebra/substitute.js",
+            "imports": ["createSubstitute"]
+          },
+          {
             "file": "../algebra/simplifyConstant.js",
             "imports": ["createSimplifyConstant"]
           },
@@ -16308,6 +16340,7 @@
           "leafCount",
           "resolve",
           "simplifyConstant",
+          "substitute",
           "simplifyUtil",
           "splitUnit",
           "fft",
@@ -16566,6 +16599,7 @@
           "leafCount",
           "resolve",
           "simplifyConstant",
+          "substitute",
           "simplifyUtil",
           "splitUnit",
           "fft",
@@ -24941,7 +24975,6 @@
           "discriminant",
           "differences",
           "variables",
-          "substitute",
           "expand",
           "factor",
           "collect",
@@ -24979,7 +25012,6 @@
           "discriminant",
           "differences",
           "variables",
-          "substitute",
           "expand",
           "factor",
           "collect",
@@ -30809,7 +30841,7 @@
           },
           {
             "file": "./utils/customs.js",
-            "imports": ["setSafeProperty"]
+            "imports": ["isSafeProperty", "setSafeProperty"]
           },
           {
             "file": "./limits.js",
@@ -30931,7 +30963,13 @@
           },
           {
             "file": "../utils/customs.js",
-            "imports": ["getSafeProperty", "setSafeProperty", "getSafeMethod"]
+            "imports": [
+              "getSafeProperty",
+              "setSafeProperty",
+              "getSafeMethod",
+              "isSafeProperty",
+              "assertSandboxReceiver"
+            ]
           },
           {
             "file": "../limits.js",
@@ -36348,6 +36386,10 @@
             "imports": ["MAX_COMPILE_DEPTH"]
           },
           {
+            "file": "../utils/safe-result.js",
+            "imports": ["sanitizeEvaluateResult", "trustedMathFunctions"]
+          },
+          {
             "file": "../compiler/compile.js",
             "imports": ["CompiledExpression", "Scope"],
             "typeOnly": true
@@ -38094,13 +38136,24 @@
         "reExported": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
       },
       "expression/src/utils/customs.ts": {
-        "description": "Get a property of a plain object",
+        "description": "Values the expression sandbox may read or call methods on.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./object.js",
             "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./is.js",
+            "imports": [
+              "isBigNumber",
+              "isComplex",
+              "isFraction",
+              "isMatrix",
+              "isResultSet",
+              "isUnit"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -38110,7 +38163,9 @@
           "isSafeProperty",
           "getSafeMethod",
           "isSafeMethod",
-          "isPlainObject"
+          "isPlainObject",
+          "isSandboxReceiver",
+          "assertSandboxReceiver"
         ]
       },
       "expression/src/utils/factory.ts": {
@@ -38569,6 +38624,31 @@
         "workspaceDependencies": [],
         "exports": ["printTemplate"],
         "constants": ["printTemplate"]
+      },
+      "expression/src/utils/safe-result.ts": {
+        "description": "Functions copied onto the math namespace (`sin`, `min`, …). Safe evaluate may",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./is.js",
+            "imports": [
+              "isBigNumber",
+              "isComplex",
+              "isFraction",
+              "isMatrix",
+              "isResultSet",
+              "isUnit"
+            ]
+          },
+          {
+            "file": "./customs.js",
+            "imports": ["isPlainObject", "isSafeProperty", "setSafeProperty"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["trustedMathFunctions", "sanitizeEvaluateResult"],
+        "functions": ["trustedMathFunctions", "sanitizeEvaluateResult"]
       },
       "expression/src/utils/scope.ts": {
         "description": "Create a new scope which can access the parent scope,",
@@ -45935,6 +46015,7 @@
           "functions/src/algebra/sparse/csSymperm.ts",
           "functions/src/algebra/sparse/csTdfs.ts",
           "functions/src/algebra/sparse/csUnflip.ts",
+          "functions/src/algebra/substitute.ts",
           "functions/src/algebra/sylvester.ts",
           "functions/src/algebra/symbolicEqual.ts"
         ]
@@ -47132,6 +47213,7 @@
           "expression/src/utils/number.ts",
           "expression/src/utils/object.ts",
           "expression/src/utils/print.ts",
+          "expression/src/utils/safe-result.ts",
           "expression/src/utils/scope.ts",
           "expression/src/utils/string.ts"
         ]
@@ -47340,18 +47422,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1308,
+    "totalTypeScriptFiles": 1310,
     "totalModules": 82,
-    "totalLinesOfCode": 224137,
-    "totalExports": 7155,
+    "totalLinesOfCode": 224402,
+    "totalExports": 7160,
     "totalClasses": 61,
     "totalInterfaces": 613,
-    "totalFunctions": 2436,
+    "totalFunctions": 2437,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1656,
+    "totalConstants": 1658,
     "totalReExports": 3111,
-    "totalTypeOnlyImports": 660,
+    "totalTypeOnlyImports": 662,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 0,

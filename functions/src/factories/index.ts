@@ -1077,6 +1077,7 @@ factoryScope.math = factoryScope;
 import { createNodeOperations } from '../arithmetic/utils/nodeOperations.js';
 import { createLeafCount } from '../algebra/leafCount.js';
 import { createResolve } from '../algebra/resolve.js';
+import { createSubstitute } from '../algebra/substitute.js';
 import { createSimplifyConstant } from '../algebra/simplifyConstant.js';
 import { createUtil as createSimplifyUtil } from '../algebra/simplify/util.js';
 import { createSplitUnit } from '../type/unit/function/splitUnit.js';
@@ -1098,6 +1099,9 @@ export const simplifyConstant = createSimplifyConstant(
   factoryScope as Parameters<typeof createSimplifyConstant>[0]
 );
 factoryScope.simplifyConstant = simplifyConstant;
+
+export const substitute = createSubstitute(factoryScope as Parameters<typeof createSubstitute>[0]);
+factoryScope.substitute = substitute;
 
 export const simplifyUtil = createSimplifyUtil(
   factoryScope as Parameters<typeof createSimplifyUtil>[0]

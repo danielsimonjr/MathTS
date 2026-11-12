@@ -7,7 +7,10 @@ import { create as mjCreate, all as mjAll } from 'mathjs';
 
 const mt = create(all);
 const mj = mjCreate(mjAll);
-const n = 5000;
+// 5_000 adds finish in tens of microseconds, inside performance.now()
+// noise, so a quiet machine and a busy one disagree by more than the
+// 2.0 gate. A million calls puts each sample in the millisecond range.
+const n = 1_000_000;
 
 function median(xs) {
   const s = [...xs].sort((a, b) => a - b);
