@@ -7636,6 +7636,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `FsolveOptions`
+- Types: `FsolveField`
 - Functions: `fsolve`
 - Constants: `root`
 
@@ -20285,7 +20286,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218620 |
+| Total Lines of Code     | 218701 |
 | Total Exports           | 7013   |
 | Total Re-exports        | 3021   |
 | Total Classes           | 61     |
