@@ -102,6 +102,8 @@ export {
   AmbiguousUnitError,
   DIMENSIONLESS,
   dim,
+  unitReadingSearchSteps,
+  MAX_UNIT_STRING_LENGTH,
 } from './types/unit.js';
 export type { Dimensions, UnitDef, UnitInstance, UnitReadingFactor } from './types/unit.js';
 export {
