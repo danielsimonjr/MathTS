@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "paths": {
+      "@danielsimonjr/mathts-compat": ["../../../compat/dist/index.d.ts"],
+      "@danielsimonjr/mathts-functions": ["../../dist/index.d.ts"],
+      "@danielsimonjr/mathts-trigonometry": ["../../../trigonometry/dist/index.d.ts"],
+      "@danielsimonjr/mathts-statistics": ["../../../statistics/dist/index.d.ts"],
+      "@danielsimonjr/mathts-units": ["../../../units/dist/index.d.ts"],
+      "@danielsimonjr/mathts-core": ["../../../core/dist/index.d.ts"],
+      "@danielsimonjr/mathts-matrix": ["../../../matrix/dist/index.d.ts"],
+      "@danielsimonjr/mathts-gpu": ["../../../gpu/dist/index.d.ts"],
+      "@danielsimonjr/mathts-parallel": ["../../../parallel/dist/index.d.ts"],
+      "@danielsimonjr/mathts-expression": ["../../../expression/dist/index.d.ts"]
+    }
+  },
+  "files": [
+    "issue-737-migrator.ts",
+    "issue-785-variance.ts",
+    "issue-726-evaluate.ts",
+    "issue-700-det.ts",
+    "issue-726-gpu.ts",
+    "issue-830-unit.ts",
+    "issue-g34-containers.ts"
+  ]
+}

@@ -376,24 +376,24 @@ export function evaluate(
   expr: string,
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
-): unknown;
+): number;
 export function evaluate(
   exprs: string[],
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
-): unknown[];
+): number[];
 /** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export function evaluate(
   exprOrExprs: string | string[],
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
-): unknown | unknown[] {
+): number | number[] {
   const physics = assertPhysicsOptions(options);
   const bound = physics === undefined ? scope : physicsScope(scope, physics);
   const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
   const runner = options?.unsafe === true ? _evaluateUnsafe : _evaluate;
-  if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
-  return runner(exprOrExprs, bound, inner);
+  if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner) as number[];
+  return runner(exprOrExprs, bound, inner) as number;
 }
 
 /**

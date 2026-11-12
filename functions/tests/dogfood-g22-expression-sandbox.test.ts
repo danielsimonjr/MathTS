@@ -71,7 +71,7 @@ describe('G22 dogfood — expression lexer, sandbox, overflow', () => {
     expect(parsed.isOperatorNode).toBe(true);
     expect(parsed.toString()).toBe('1 + 1');
     expect(typeof evaluate('typed', {}, { unsafe: true })).toBe('function');
-    const typedSin = evaluate('typed({"number": sin})', {}, { unsafe: true }) as (
+    const typedSin = evaluate('typed({"number": sin})', {}, { unsafe: true }) as unknown as (
       x: number
     ) => number;
     expect(typedSin(0)).toBe(0);
@@ -103,7 +103,7 @@ describe('G22 dogfood — expression lexer, sandbox, overflow', () => {
   it('#808 documented safe functions still evaluate', () => {
     expect(evaluate('sqrt(4)')).toBe(2);
     expect(evaluate('sin(pi / 2)')).toBeCloseTo(1, 12);
-    const mapped = evaluate('map([1, 2, 3], x * 2)') as { toArray(): number[] };
+    const mapped = evaluate('map([1, 2, 3], x * 2)') as unknown as { toArray(): number[] };
     expect(mapped.toArray()).toEqual([2, 4, 6]);
   });
 
