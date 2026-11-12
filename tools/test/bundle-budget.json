@@ -10,13 +10,13 @@
     "packages/workerpool/dist/worker.js": 21676,
     "core/dist/index.js": 223608,
     "core/dist/internal.js": 227150,
-    "matrix/dist/index.js": 197367,
+    "matrix/dist/index.js": 198192,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 85080,
     "autograd/dist/index.js": 59159,
-    "functions/dist/index.js": 1806066,
+    "functions/dist/index.js": 1817333,
     "functions/dist/wasm/mathts-as.wasm": 62501,
-    "expression/dist/index.js": 346947,
+    "expression/dist/index.js": 347348,
     "parser/dist/index.js": 500,
     "units/dist/index.js": 975,
     "numbers/dist/index.js": 388,
@@ -25,14 +25,14 @@
     "linalg/dist/index.js": 335,
     "arithmetic/dist/index.js": 376,
     "trigonometry/dist/index.js": 192,
-    "statistics/dist/index.js": 2477,
+    "statistics/dist/index.js": 2518,
     "signal/dist/index.js": 526,
     "parallel/dist/index.js": 49859,
     "workbook/dist/index.js": 49407,
     "assembly/build/mathts.js": 93112,
     "assembly/build/mathts.wasm": 62501,
     "assembly/build/mathts-debug.wasm": 122393,
-    "compat/dist/index.js": 13091,
+    "compat/dist/index.js": 87927,
     "gpu/dist/index.js": 18082,
     "plot/dist/index.js": 32588,
     "plot/dist/render-file.js": 5057
@@ -130,7 +130,7 @@
     },
     "compat/dist/index.js": {
       "export": "BigNumber",
-      "treeShake": true
+      "treeShake": false
     },
     "gpu/dist/index.js": {
       "export": "BufferPool",
