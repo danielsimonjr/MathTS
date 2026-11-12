@@ -55,16 +55,16 @@ export interface BaseUnitDef {
   key?: string;
 }
 
+/** Logarithmic unit kinds (decibel / neper families). */
+export type LogarithmicUnitKind =
+  'decibel-power' | 'decibel-amplitude' | 'neper' | 'decibel-re-1mw' | 'decibel-re-1w';
+
 /**
  * A unit definition entry in the UNITS table. `dimensions` and `base.key` are
  * populated after the literal is created (see the module-init loops), hence
  * optional. A built-in unit's `value` is its exact scale (`exact`) rounded
  * once; a unit made with `createUnit` has no `exact` and converts by floats.
  */
-/** Logarithmic unit kinds (decibel / neper families). */
-export type LogarithmicUnitKind =
-  'decibel-power' | 'decibel-amplitude' | 'neper' | 'decibel-re-1mw' | 'decibel-re-1w';
-
 export interface UnitDef {
   name: string;
   base?: BaseUnitDef;

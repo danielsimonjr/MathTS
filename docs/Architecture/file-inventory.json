@@ -919,7 +919,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 333
+      "loc": 337
     },
     {
       "file": "core/src/types/unit/Unit.ts",
@@ -8612,7 +8612,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 348
+      "loc": 350
     },
     {
       "file": "functions/src/typed/aggregate-restart.ts",

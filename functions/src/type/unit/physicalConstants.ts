@@ -272,14 +272,7 @@ export const createPlanckTemperature = /* #__PURE__ */ unitFactory(
   'K'
 );
 
-/**
- * Helper function to create a factory function which creates a physical constant,
- * a Unit with either a number value or a BigNumber value depending on the configuration
- * @param name - The name of the physical constant
- * @param valueStr - The string representation of the constant's value
- * @param unitStr - The unit string (e.g., 'm s^-1')
- * @returns A factory function that creates the physical constant
- */
+/** Attach an optional CODATA absolute uncertainty to a physical-constant unit. */
 function attachUncertainty(
   unit: UnitInstance,
   uncertaintyAbsolute: string | undefined
@@ -302,6 +295,15 @@ function attachUncertainty(
   return unit;
 }
 
+/**
+ * Helper function to create a factory function which creates a physical constant,
+ * a Unit with either a number value or a BigNumber value depending on the configuration
+ * @param name - The name of the physical constant
+ * @param valueStr - The string representation of the constant's value
+ * @param unitStr - The unit string (e.g., 'm s^-1')
+ * @param uncertaintyAbsolute - Optional CODATA absolute uncertainty for the constant
+ * @returns A factory function that creates the physical constant
+ */
 function unitFactory(
   name: string,
   valueStr: string,
