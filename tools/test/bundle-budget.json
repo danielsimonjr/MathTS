@@ -17,7 +17,7 @@
     "functions/dist/index.js": 1841894,
     "functions/dist/subpath-evaluate.js": 1187625,
     "functions/dist/wasm/mathts-as.wasm": 62501,
-    "expression/dist/index.js": 347348,
+    "expression/dist/index.js": 352541,
     "parser/dist/index.js": 500,
     "units/dist/index.js": 975,
     "numbers/dist/index.js": 388,

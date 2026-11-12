@@ -9,16 +9,29 @@ The expression engine for MathTS: a parser (string → AST), an AST node set, a 
 ## Install
 
 ```sh
-npm install @danielsimonjr/mathts-expression @danielsimonjr/mathts-functions
+npm install @danielsimonjr/mathts-expression
 ```
 
-`parse` and `evaluate` are exported by `@danielsimonjr/mathts-functions`. The expression package is the parser and the AST.
+Ready-to-call `parse`, `evaluate`, and `compileExpression(expr)` use a small arithmetic scope (`add`, `sin`, `sqrt`, `pi`, `π`, …). They do not import `@danielsimonjr/mathts-functions`, and importing this package does not build that scope. The first call does. Install `@danielsimonjr/mathts-functions` when you need matrices, units, statistics, or `simplify`.
+
+```ts
+import { parse, evaluate, compileExpression } from '@danielsimonjr/mathts-expression';
+
+evaluate('2+3'); // 5
+compileExpression('2+3')(); // 5
+parse('2+2'); // operator node
+```
+
+That scope is the same safe mode as `functions` `evaluate`: `parse`, `typed`, `compile`, `import`, `createUnit`, `resolve`, `chain`, `simplify`, and `derivative` are not reachable, including from a nested expression. `evaluate('a = 1')` throws unless you pass `{ unsafe: true }` (trusted input only). A numeric literal outside IEEE-754 range throws `SyntaxError: Numeric overflow`. `1e308` and the identifier `Infinity` stay.
+
+`createParse` / `compileExpression(parseFn, mathScope, expr)` stay factories. Pass your own parse function and scope; this package does not replace that form.
 
 ## What it provides
 
+- `parse` / `evaluate` / `compileExpression(expr)` — arithmetic, sandboxed, no factory bootstrap.
 - `createParse` / `createParserClass` / `createParser` — parse to an AST.
 - 16 AST node constructors (`createConstantNode`, `createOperatorNode`, …).
-- `compile` / `createEvaluate` / `compileExpression` — evaluate expressions.
+- `compile` / `createEvaluate` / `compileExpression(parseFn, mathScope, expr)` — evaluate expressions against a scope you supply.
 - `createScalarBuilder` — build a scalar node tree (`number`, `symbol`, `op`, `call`, `from`). `ln` lowers to natural `log` and `log` lowers to `log10`. A formula string is rejected. Evaluate with `evaluateScalar` from `@danielsimonjr/mathts-functions`.
 - `scalarCanonical` / `scalarCanonicalKey` / `scalarSize` / `scalarDepth` / `scalarComplexity` / `scalarSymbols` — structural toolkit for an existing `ScalarNode`. The canonical key flattens `+` and `*`, rewrites `-` and `/`, and does not fold `2^3` to `8`.
 - `enumerateScalars` / `scalarGrammarAccepts` — deterministic size-ordered enumeration of scalar trees from a grammar, with deduplication by `scalarCanonicalKey`. It is a generator that returns an `EnumerationStop` reason (`exhausted-space`, `candidate-limit`, `time-limit`, `cancelled`). `budget.maxCandidates`, `budget.maxWallClockMs`, and an `AbortSignal` end it; the wall clock and the signal are checked every 128 candidates considered, so a grammar that yields few trees still stops promptly.
