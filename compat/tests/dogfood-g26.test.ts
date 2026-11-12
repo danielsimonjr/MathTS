@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { create, all } from '../src/index.js';
 import { create as mjCreate, all as mjAll } from 'mathjs';
-import { nodeBinary } from '../../functions/tests/helpers/node-binary.js';
+import { nodeBinary } from './helpers/node-binary.js';
 
 describe('G26 #735 create(all).add scalar parity vs mathjs', () => {
   it('add(1,2) matches mathjs', () => {

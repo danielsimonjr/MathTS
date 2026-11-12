@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2284,
+  "totalFiles": 2285,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1273,
     "test-only": 0,
     "orphan": 0,
-    "test": 920,
+    "test": 921,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1299,
-    "tests": 920,
+    "tests": 921,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
-    "@danielsimonjr/mathts-compat": 18,
+    "@danielsimonjr/mathts-compat": 19,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 55,
@@ -563,6 +563,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 63
+    },
+    {
+      "file": "compat/tests/helpers/node-binary.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 26
     },
     {
       "file": "compat/tests/instance-config-isolation.test.ts",
