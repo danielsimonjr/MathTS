@@ -52,6 +52,8 @@ import {
   round as _round,
   floor as _floor,
   ceil as _ceil,
+  matrix as _factoryMatrix,
+  sparse as _factorySparse,
 } from '@danielsimonjr/mathts-functions';
 
 import {
@@ -128,6 +130,20 @@ export function bignumber(value?: number | string | BigNumber): BigNumber {
   return BigNumber.fromNumber(value);
 }
 
+/** Matrix values returned from the compat `matrix` shim (native or mathjs bridge). */
+export type CompatMatrixValue =
+  | DenseMatrix
+  | SparseMatrix
+  | {
+      isMatrix: boolean;
+      toArray(): unknown;
+      subset(...args: unknown[]): unknown;
+      get(...args: unknown[]): unknown;
+      transpose(): CompatMatrixValue;
+      rows: number;
+      cols: number;
+    };
+
 /**
  * Create a matrix (mathjs-compatible)
  * @example
@@ -136,29 +152,31 @@ export function bignumber(value?: number | string | BigNumber): BigNumber {
  */
 export function matrix(
   data?: number[][] | DenseMatrix | SparseMatrix,
-  format?: 'dense' | 'sparse'
-): DenseMatrix | SparseMatrix {
-  if (data === undefined) {
-    return DenseMatrix.zeros(0, 0);
+  format?: 'dense' | 'sparse' | string
+): CompatMatrixValue {
+  if (data === undefined && format === undefined) {
+    return _factoryMatrix() as CompatMatrixValue;
   }
   if (data instanceof DenseMatrix || data instanceof SparseMatrix) {
+    if (format === 'sparse' && data instanceof DenseMatrix) {
+      return _factorySparse(data.toArray()) as CompatMatrixValue;
+    }
     return data;
   }
-  const dense = DenseMatrix.fromArray(data);
-  if (format === 'sparse') {
-    return SparseMatrix.fromDense(dense);
+  if (data === undefined) {
+    return _factoryMatrix(undefined, format) as CompatMatrixValue;
   }
-  return dense;
+  return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
 }
 
 /**
  * Create a sparse matrix (mathjs-compatible)
  */
-export function sparse(data?: number[][]): SparseMatrix {
+export function sparse(data?: number[][]): CompatMatrixValue {
   if (data === undefined) {
-    return SparseMatrix.zeros(0, 0);
+    return _factorySparse() as CompatMatrixValue;
   }
-  return SparseMatrix.fromDense(DenseMatrix.fromArray(data));
+  return _factorySparse(data) as CompatMatrixValue;
 }
 
 // =============================================================================
@@ -365,13 +383,14 @@ export function arg(c: Complex): number {
  * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
  * plain nested array for array input, a Matrix for Matrix input).
  */
-export function transpose(
-  m: DenseMatrix | SparseMatrix | number[][]
-): DenseMatrix | SparseMatrix | number[][] {
+export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][] {
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m).transpose().toArray();
   }
-  return m.transpose();
+  if (m instanceof DenseMatrix || m instanceof SparseMatrix) {
+    return m.transpose();
+  }
+  return (m as { transpose(): CompatMatrixValue }).transpose();
 }
 
 /**
@@ -559,7 +578,16 @@ export function isNumber_(x: unknown): x is number {
  * @returns `true` if `x` is a DenseMatrix or a SparseMatrix.
  */
 export function isMatrix(x: unknown): x is DenseMatrix | SparseMatrix {
-  return x instanceof DenseMatrix || x instanceof SparseMatrix;
+  if (x instanceof DenseMatrix || x instanceof SparseMatrix) {
+    return true;
+  }
+  if (typeof x === 'object' && x !== null) {
+    const proto = Object.getPrototypeOf(x) as { isMatrix?: boolean } | null;
+    if (proto?.isMatrix === true) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // =============================================================================

@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1290, "e": 7070, "re": 3043 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1291, "e": 7077, "re": 3047 },
   "s": {
-    "loc": 220863,
+    "loc": 221119,
     "cls": 61,
-    "int": 602,
-    "fn": 2393,
+    "int": 604,
+    "fn": 2395,
     "tg": 175,
     "en": 0,
-    "co": 1648,
-    "toi": 645
+    "co": 1649,
+    "toi": 646
   },
-  "c": { "rt": 1, "to": 0, "rtp": ["Tensor→slice→Tensor"] },
+  "c": { "rt": 1, "to": 1, "rtp": ["Tensor→slice→Tensor"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -633,6 +633,7 @@
     "functions/factories": {
       "f": 4,
       "exp": [
+        "EVALUATE_SCOPE_OMIT",
         "parse",
         "physicsScope",
         "evaluate",
@@ -640,6 +641,7 @@
         "parser",
         "replacer",
         "reviver",
+        "createInstanceEvaluator",
         "scalarToNode",
         "nodeToScalar",
         "simplifyScalar",
@@ -650,9 +652,7 @@
         "multiplyScalar",
         "subtractScalar",
         "filter",
-        "flatten",
-        "forEach",
-        "getMatrixDataType"
+        "flatten"
       ],
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"],
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
@@ -1814,7 +1814,7 @@
       "cls": ["Complex"]
     },
     "compat": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "createChain",
         "Complex",
@@ -1834,10 +1834,17 @@
         "computePool",
         "all",
         "create",
-        "add",
-        "subtract"
+        "wireMathjsInstanceApi",
+        "add"
       ],
-      "int": ["ChainMethods", "ChainUnwrap", "MathJSConfig", "MathInstance"]
+      "int": [
+        "ChainMethods",
+        "ChainUnwrap",
+        "MathJSConfig",
+        "MathInstance",
+        "CompatExpressionLayers",
+        "WiredCompatInstance"
+      ]
     },
     "gpu": {
       "f": 8,
@@ -1908,7 +1915,7 @@
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 14 },
-    { "p": "src/index.ts", "i": 209, "o": 0 },
+    { "p": "src/index.ts", "i": 210, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
