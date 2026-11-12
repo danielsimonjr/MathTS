@@ -8,7 +8,11 @@
 import { existsSync, realpathSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
 
-/** Path to a Node binary that is not the Bun shim. */
+/**
+ * Executable path for a real Node.js (never Bun's `node` shim).
+ *
+ * @returns Absolute path to the Node binary used for isolated perf gates.
+ */
 export function nodeBinary(): string {
   if (process.env.PERF_NODE) return process.env.PERF_NODE;
   if (!process.versions.bun) return process.execPath;

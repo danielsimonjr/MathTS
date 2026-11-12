@@ -10922,7 +10922,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 23
+      "loc": 27
     },
     {
       "file": "functions/tests/helpers/wasm-spy.ts",
