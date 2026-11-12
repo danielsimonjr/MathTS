@@ -331,6 +331,10 @@
       "matrix/src/types/index.ts"
     ],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
+    "matrix/src/types/dense/limits.ts": [
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/types/index.ts"
+    ],
     "matrix/src/types/dense/storage.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/dense/arithmetic.ts",
