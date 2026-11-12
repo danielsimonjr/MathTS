@@ -33,7 +33,7 @@ function timeSin() {
   return performance.now() - t0;
 }
 
-for (let w = 0; w < 8; w++) {
+for (let w = 0; w < 16; w++) {
   if (w % 2 === 0) {
     timeSin();
     timeLoop();
@@ -46,7 +46,7 @@ for (let w = 0; w < 8; w++) {
 const loopTimes = [];
 const sinTimes = [];
 const ratios = [];
-for (let r = 0; r < 11; r++) {
+for (let r = 0; r < 21; r++) {
   const loopFirst = r % 2 === 0;
   let loopMs;
   let sinMs;

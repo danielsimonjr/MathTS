@@ -16,7 +16,7 @@ interface UnitValue {
 
 describe('evaluate unit symbols', () => {
   it('evaluates 1 km as unit(1, "km")', () => {
-    const got = evaluate('1 km') as UnitValue;
+    const got = evaluate('1 km') as unknown as UnitValue;
     const expected = unit(1, 'km') as UnitValue;
     expect(got.toNumber('m')).toBe(expected.toNumber('m'));
     expect(got.toNumber('m')).toBe(1000);
@@ -24,7 +24,7 @@ describe('evaluate unit symbols', () => {
   });
 
   it('evaluates a bare unit symbol as a valueless unit', () => {
-    const got = evaluate('km') as UnitValue;
+    const got = evaluate('km') as unknown as UnitValue;
     const expected = unit('km') as UnitValue;
     expect(got.value).toBeNull();
     expect(got.toString()).toBe(expected.toString());
@@ -48,7 +48,7 @@ describe('evaluate unit symbols', () => {
   });
 
   it('converts with the to operator (5 km to m)', () => {
-    const got = evaluate('5 km to m') as UnitValue;
+    const got = evaluate('5 km to m') as unknown as UnitValue;
     expect(got.toNumber('m')).toBe(5000);
     expect(got.toString()).toMatch(/5000\s*m/);
   });

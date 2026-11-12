@@ -10,6 +10,7 @@
 
 import { factoryScope } from './scope.js';
 import { add, multiply } from '../typed/arithmetic.js';
+import type { PublicDet } from '../typed/public-type-exports.js';
 
 // ---------------------------------------------------------------------------
 // Tier 1: all imports
@@ -460,10 +461,7 @@ factoryScope.det = factoryDet;
 // to the factory for small / non-numeric / non-square inputs. Internal factory
 // consumers (e.g. inv) keep using `factoryScope.det` unchanged.
 export const det = ((m: unknown) =>
-  acceleratedDet(
-    m,
-    factoryDet as unknown as (x: unknown) => unknown
-  )) as unknown as typeof factoryDet;
+  acceleratedDet(m, factoryDet as unknown as (x: unknown) => unknown)) as PublicDet;
 
 // reshape needs isInteger — provide a simple stub
 factoryScope.isInteger = (x: unknown) => typeof x === 'number' && Number.isInteger(x);

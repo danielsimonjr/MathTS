@@ -101,7 +101,7 @@ describe('#692 elementwise sin on number[]', () => {
     expect(sines[0]).toBeCloseTo(0, 12);
     expect(sines[1]).toEqual(sin(z));
     expect(sines[1]).toBeInstanceOf(Complex);
-    expect(sines[2]).toBeCloseTo(sin(angle) as number, 12);
+    expect(sines[2]).toBeCloseTo(sin(angle) as unknown as number, 12);
   });
 
   it('DenseMatrix and SparseMatrix of numbers come back as the same class', () => {
