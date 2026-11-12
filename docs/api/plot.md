@@ -20,7 +20,8 @@ entry is pure-computation and browser-safe (it passes
 `npm run check:browser-safety`). TikZ output ships from this same `.` entry via
 `toTikZ()` / `format: 'tikz'` — **there is no `./tex` subpath**. PNG/PDF file
 output and LaTeX compilation live only in the Node-only `./render` subpath and
-require external tools on PATH; `plot` bundles no image/PDF renderer by design.
+require external tools on PATH, or the optional peer `@resvg/resvg-wasm` for PNG.
+`plot` does not bundle an image/PDF renderer.
 
 ```typescript
 import { plot, line, scatter, surface, toTikZ } from '@danielsimonjr/mathts-plot';
@@ -99,22 +100,24 @@ All `(x, y, opts?) => string` unless noted:
 ## `./render` — Node-only File Output
 
 A deliberately isolated Node-only bridge so `node:child_process` / `node:fs`
-never reach the browser bundle. Both `renderToFile` and `latexToPdf` shell out
-to external tools that must be pre-installed on PATH — no bundled renderer.
+never reach the browser bundle. `latexToPdf` shells out to a LaTeX engine on
+PATH. `renderToFile` tries `rsvg-convert` and `resvg` on PATH, then lazily
+imports the optional peer `@resvg/resvg-wasm` for PNG. That package is not a
+required dependency; when it is absent the error names `@resvg/resvg-wasm`.
 
 ```typescript
 import { renderToFile, latexToPdf, PlotRenderError } from '@danielsimonjr/mathts-plot/render';
 ```
 
-| Export            | Signature                                           | Description                                                   |
-| ----------------- | --------------------------------------------------- | ------------------------------------------------------------- |
-| `renderToFile`    | `(svg, outPath, opts?: RenderOptions) => ...`       | SVG → PNG/PDF via `rsvg-convert` or `resvg`                   |
-| `latexToPdf`      | `(texSource, outPath, opts?: RenderOptions) => ...` | TikZ/LaTeX → PDF via `pdflatex` or `tectonic`                 |
-| `runTool`         | `(...) => ...`                                      | Low-level external-tool invocation                            |
-| `hasTool`         | `(...) => boolean`                                  | Probe whether a tool is on PATH                               |
-| `latexArgs`       | `(...) => ...`                                      | Build LaTeX engine args                                       |
-| `PlotRenderError` | `extends Error` — `readonly missingTool?: string`   | Plot's one deliberate exception (missing tool or I/O failure) |
-| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background? }`      | Render options                                                |
+| Export            | Signature                                           | Description                                                           |
+| ----------------- | --------------------------------------------------- | --------------------------------------------------------------------- |
+| `renderToFile`    | `(svg, outPath, opts?: RenderOptions) => ...`       | SVG → PNG/PDF via PATH tools, or PNG via optional `@resvg/resvg-wasm` |
+| `latexToPdf`      | `(texSource, outPath, opts?: RenderOptions) => ...` | TikZ/LaTeX → PDF via `pdflatex` or `tectonic`                         |
+| `runTool`         | `(...) => ...`                                      | Low-level external-tool invocation                                    |
+| `hasTool`         | `(...) => boolean`                                  | Probe whether a tool is on PATH                                       |
+| `latexArgs`       | `(...) => ...`                                      | Build LaTeX engine args                                               |
+| `PlotRenderError` | `extends Error` — `readonly missingTool?: string`   | Plot's one deliberate exception (missing tool or I/O failure)         |
+| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background? }`      | Render options                                                        |
 
 > `PlotRenderError` is exported **only** from `./render`, never from the main
 > `.` entry.
@@ -139,7 +142,7 @@ const curveSvg = plot('sin(x)', { from: 0, to: 6.28, samples: 200 });
 // TikZ from the same entry point
 const tikz = toTikZ([0, 1, 2, 3], [0, 1, 4, 9]);
 
-// Node-only PNG/PDF (requires rsvg-convert or resvg on PATH):
+// Node-only PNG (PATH converter, or optional peer @resvg/resvg-wasm):
 import { renderToFile } from '@danielsimonjr/mathts-plot/render';
 await renderToFile(svg, 'chart.png');
 ```

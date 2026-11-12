@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2282,
+  "totalFiles": 2283,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1272,
     "test-only": 0,
     "orphan": 0,
-    "test": 919,
+    "test": 920,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1298,
-    "tests": 919,
+    "tests": 920,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 19,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 5,
-    "(root)": 55,
+    "(root)": 56,
     "@danielsimonjr/mathts-expression": 564,
     "@danielsimonjr/mathts-functions": 1030,
     "@danielsimonjr/mathts-gpu": 20,
@@ -13813,7 +13813,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2523
+      "loc": 2521
     },
     {
       "file": "packages/workerpool/src/matmul-sequential.ts",
@@ -14513,7 +14513,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 129
+      "loc": 150
     },
     {
       "file": "plot/tests/coerce.test.ts",
@@ -14583,7 +14583,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
       "disposition": "test",
-      "loc": 44
+      "loc": 118
     },
     {
       "file": "plot/tests/plot.test.ts",
@@ -14618,7 +14618,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
       "disposition": "test",
-      "loc": 101
+      "loc": 100
     },
     {
       "file": "plot/tests/scaffold.test.ts",
@@ -15216,6 +15216,13 @@
       "loc": 67
     },
     {
+      "file": "tests/docs/readme-fences.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 87
+    },
+    {
       "file": "tests/integration/examples-smoke.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -15556,7 +15563,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 100
+      "loc": 101
     },
     {
       "file": "workbook/src/cli.ts",

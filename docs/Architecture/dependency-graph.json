@@ -44970,7 +44970,7 @@
         "interfaces": ["AxisSpec", "PlotOptions", "Layer2D"]
       },
       "plot/src/update.ts": {
-        "description": "Update an existing plot DOM subtree in place for live dashboards (same container between frames).",
+        "description": "Identity of everything except series coordinates. Equal keys mean the existing",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -44984,7 +44984,7 @@
           },
           {
             "file": "./scene.js",
-            "imports": ["Prim"],
+            "imports": ["Prim", "Scene"],
             "typeOnly": true
           },
           {
@@ -46768,7 +46768,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1298,
     "totalModules": 82,
-    "totalLinesOfCode": 223060,
+    "totalLinesOfCode": 223079,
     "totalExports": 7115,
     "totalClasses": 61,
     "totalInterfaces": 610,

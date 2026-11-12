@@ -13,6 +13,17 @@ The implementation is re-exported, not duplicated.
 npm install @danielsimonjr/mathts-numbers
 ```
 
+## Example
+
+```ts
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-numbers';
+
+const z = new Complex(3, 4);
+console.log(z.abs()); // 5
+console.log(new Fraction(1, 3).add(new Fraction(1, 6)).toString()); // 1/2
+console.log(BigNumber.from('0.1').add(BigNumber.from('0.2')).toString()); // 0.3
+```
+
 ## What it exports
 
 - `Complex` + `isComplex` + `I`, `COMPLEX_ZERO/ONE/NEG_ONE`.

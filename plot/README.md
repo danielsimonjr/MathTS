@@ -34,13 +34,14 @@ const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares', xLabel: 'x', yL
 ### Live updates (`update` / `plot.update`)
 
 ```ts
-import { line, update } from '@danielsimonjr/mathts-plot';
+import { update } from '@danielsimonjr/mathts-plot';
 
 const chart = document.getElementById('chart')!;
-chart.innerHTML = line([0, 1, 2], [0, 1, 0], { title: 'SHO' });
-// Later frames: patch the same <svg> root (no full innerHTML replace)
-update(chart, [0, 1, 2], [0, 1, 0.5]);
-// plot.update is the same function
+update(chart, [0, 1, 2], [0, 1, 0], { title: 'SHO' });
+// Later frames with the same axes, title, and point count patch the polyline.
+update(chart, [0, 1, 2], [0, 1, 0.5], { title: 'SHO' });
+// A different layer type, point count, or data range replaces the plot SVG
+// inside `chart` (the container stays). plot.update is the same function.
 ```
 
 ### `overlay` — combine several layers on shared, auto-scaled axes
@@ -151,9 +152,17 @@ PATH, then the optional peer **`@resvg/resvg-wasm`** (lazy-loaded WASM; not requ
 time). LaTeX PDF still uses `pdflatex` / `tectonic` on PATH.
 
 ```ts
-import { renderToFile, latexToPdf } from '@danielsimonjr/mathts-plot/render';
+import { line } from '@danielsimonjr/mathts-plot';
+import { renderToFile } from '@danielsimonjr/mathts-plot/render';
 
-await renderToFile(svgString, 'plot.png', { density: 144 });
+const svgString = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares' });
+
+// PNG: PATH rsvg-convert / resvg, then optional @resvg/resvg-wasm. SVG write needs neither.
+try {
+  await renderToFile(svgString, 'plot.png', { density: 144 });
+} catch (error) {
+  console.warn('PNG export skipped:', (error as Error).message);
+}
 ```
 
 Install the optional WASM renderer when PATH has no librsvg/resvg:

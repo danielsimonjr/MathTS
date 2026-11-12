@@ -2,13 +2,8 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import {
-  renderToFile,
-  latexToPdf,
-  latexArgs,
-  PlotRenderError,
-  renderPngWithResvgWasm,
-} from '../src/render-file.js';
+import { line } from '../src/index.js';
+import { renderToFile, latexToPdf, latexArgs, PlotRenderError } from '../src/render-file.js';
 import * as renderFile from '../src/render-file.js';
 
 let dir: string;
@@ -36,13 +31,15 @@ describe('renderToFile', () => {
     ).rejects.toBeInstanceOf(PlotRenderError);
   });
   it('#780 names @resvg/resvg-wasm when PATH converters are absent and wasm is unavailable', async () => {
+    const toolSpy = vi.spyOn(renderFile, 'hasTool').mockResolvedValue(false);
     const importSpy = vi
       .spyOn(renderFile.resvgWasmImport, 'importModule')
       .mockRejectedValue(
         Object.assign(new Error('Cannot find module'), { code: 'ERR_MODULE_NOT_FOUND' })
       );
     try {
-      await renderPngWithResvgWasm(SVG);
+      const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares' });
+      await renderToFile(svg, join(dir, 'line-missing.png'), { density: 72 });
       throw new Error('should have thrown');
     } catch (e) {
       expect(e).toBeInstanceOf(PlotRenderError);
@@ -50,13 +47,15 @@ describe('renderToFile', () => {
       expect((e as PlotRenderError).missingTool).toBe('@resvg/resvg-wasm');
     } finally {
       importSpy.mockRestore();
+      toolSpy.mockRestore();
     }
   });
 
   it('#780 renderToFile writes PNG via resvg-wasm when PATH tools are absent', async () => {
     const toolSpy = vi.spyOn(renderFile, 'hasTool').mockResolvedValue(false);
-    const out = join(dir, 'wasm-line.png');
-    await renderToFile(SVG, out);
+    const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares' });
+    const out = join(dir, 'line.png');
+    await renderToFile(svg, out, { density: 72 });
     toolSpy.mockRestore();
     expect(existsSync(out)).toBe(true);
     expect(statSync(out).size).toBeGreaterThan(50);

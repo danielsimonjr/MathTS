@@ -1,10 +1,13 @@
 import { build2DScene } from './frame.js';
 import { emitSVG } from './svg.js';
-import type { Prim } from './scene.js';
+import type { Prim, Scene } from './scene.js';
 import type { Layer2D, PlotOptions } from './types.js';
 
 const PLOT_ROOT = 'data-mathts-plot';
 const LIVE = 'data-mathts-live';
+
+/** Axes and live-node identity for the SVG we last mounted or patched. Not retained after the node is discarded. */
+const frameOf = new WeakMap<Element, string>();
 
 function isLayerArray(v: unknown): v is Layer2D[] {
   return (
@@ -83,6 +86,24 @@ function canPatchLive(layers: Layer2D[], svg: Element): boolean {
   return findDescendant(svg, (e) => e.getAttribute(LIVE) === 'line-0-path') !== null;
 }
 
+/**
+ * Identity of everything except series coordinates. Equal keys mean the existing
+ * SVG's axes, title, colors, and point nodes are still the right chart.
+ */
+function frameKey(scene: Scene): string {
+  const parts: string[] = [`${scene.width}x${scene.height}:${scene.bg}`];
+  for (const p of scene.prims) {
+    if (p.k === 'polyline' && p.live) {
+      parts.push(`live:${p.live}:${p.stroke}:${p.w}`);
+    } else if (p.k === 'circle' && p.live) {
+      parts.push(`live:${p.live}:${p.fill}:${p.r ?? ''}`);
+    } else if (!('live' in p) || !p.live) {
+      parts.push(JSON.stringify(p));
+    }
+  }
+  return parts.join('\n');
+}
+
 function fmt(n: number): string {
   return String(Math.round(n * 100) / 100);
 }
@@ -105,8 +126,10 @@ function patchLivePrimitives(svg: Element, prims: Prim[]): void {
 
 /**
  * Update an existing plot DOM subtree in place for live dashboards (same container between frames).
- * On first call, mounts a plot SVG under `el`. Later single-layer `line` calls patch polylines/points
- * without replacing the SVG root; other cases remount the plot SVG in the container.
+ * On first call, mounts a plot SVG under `el`. A later single-layer line call patches
+ * polyline and point nodes when the axes, size, title, and point count are unchanged.
+ * A different layer type, a shorter or longer series, or a new data range replaces the
+ * plot SVG in the container so stale nodes are not left behind and points stay on the axes.
  */
 export function update(el: Element, y: Layer2D['y'], opts?: PlotOptions): void;
 export function update(el: Element, x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): void;
@@ -115,14 +138,12 @@ export function update(el: Element, a: unknown, b?: unknown, c?: PlotOptions): v
   const { layers, opts } = resolveLiveLayers(a, b, c);
   const scene = build2DScene(layers, opts);
   const markup = emitSVG(scene);
+  const key = frameKey(scene);
   const svg = findPlotSvg(el);
-  if (!svg) {
-    mountSvg(el, markup);
-    return;
-  }
-  if (canPatchLive(layers, svg)) {
+  if (svg && canPatchLive(layers, svg) && frameOf.get(svg) === key) {
     patchLivePrimitives(svg, scene.prims);
     return;
   }
-  mountSvg(el, markup);
+  const mounted = mountSvg(el, markup);
+  frameOf.set(mounted, key);
 }

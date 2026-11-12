@@ -19533,7 +19533,7 @@ graph LR
 
 ---
 
-### `plot/src/update.ts` - Update an existing plot DOM subtree in place for live dashboards (same container between frames).
+### `plot/src/update.ts` - Identity of everything except series coordinates. Equal keys mean the existing
 
 **Internal Dependencies:**
 
@@ -19541,7 +19541,7 @@ graph LR
 | ------------ | ---------------------- | ------------------ |
 | `./frame.js` | `build2DScene`         | Import             |
 | `./svg.js`   | `emitSVG`              | Import             |
-| `./scene.js` | `Prim`                 | Import (type-only) |
+| `./scene.js` | `Prim, Scene`          | Import (type-only) |
 | `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
 
 **Exports:**
@@ -20539,7 +20539,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1298   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 223060 |
+| Total Lines of Code     | 223079 |
 | Total Exports           | 7115   |
 | Total Re-exports        | 3059   |
 | Total Classes           | 61     |
