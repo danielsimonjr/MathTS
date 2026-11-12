@@ -48,6 +48,7 @@ export function identityMappings(lineCount) {
 }
 
 /**
+ * Collect every `.js` file under a build directory.
  * @param {string} dir
  * @param {string[]} out
  */
