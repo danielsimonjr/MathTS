@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1295, "e": 7094, "re": 3045 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1298, "e": 7098, "re": 3045 },
   "s": {
-    "loc": 222153,
+    "loc": 222353,
     "cls": 61,
     "int": 605,
-    "fn": 2412,
+    "fn": 2416,
     "tg": 175,
     "en": 0,
     "co": 1651,
     "toi": 645
   },
-  "c": { "rt": 1, "to": 0, "rtp": ["Tensor→slice→Tensor"] },
+  "c": { "rt": 2, "to": 0, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -583,8 +583,9 @@
       ]
     },
     "functions/cas": {
-      "f": 5,
+      "f": 7,
       "exp": [
+        "antiderivativeReciprocal",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -592,14 +593,15 @@
         "residueIntegral",
         "rothsteinTrager",
         "integrateLayer3",
+        "collapseIdenticalFactors",
+        "tryPolynomialCanonicalForm",
         "RAT_ZERO",
         "ratNormalize",
         "ratAdd",
         "ratSub",
         "ratMul",
         "ratDiv",
-        "ratFromBigint",
-        "surdFromRat"
+        "ratFromBigint"
       ],
       "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
@@ -1021,7 +1023,7 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "createCorr",
         "createCumSum",

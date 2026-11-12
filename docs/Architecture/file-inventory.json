@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2275,
+  "totalFiles": 2279,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1269,
+    "build-entry": 1272,
     "test-only": 0,
     "orphan": 0,
-    "test": 915,
+    "test": 916,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1295,
-    "tests": 915,
+    "src": 1298,
+    "tests": 916,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1029,
+    "@danielsimonjr/mathts-functions": 1033,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -5532,7 +5532,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 796
+      "loc": 802
     },
     {
       "file": "functions/src/algebra/resolve.ts",
@@ -5546,7 +5546,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1370
+      "loc": 1377
     },
     {
       "file": "functions/src/algebra/simplify/util.ts",
@@ -6144,11 +6144,25 @@
       "loc": 411
     },
     {
+      "file": "functions/src/cas/antiderivative.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 9
+    },
+    {
       "file": "functions/src/cas/layer3.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
       "loc": 453
+    },
+    {
+      "file": "functions/src/cas/polynomial-canonical.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 77
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -8076,11 +8090,18 @@
       "loc": 122
     },
     {
+      "file": "functions/src/statistics/sum-indexed-guard.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 23
+    },
+    {
       "file": "functions/src/statistics/sum.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 159
+      "loc": 161
     },
     {
       "file": "functions/src/statistics/utils/improveErrorMessage.ts",
@@ -8661,7 +8682,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1834
+      "loc": 1841
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -8682,7 +8703,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2855
+      "loc": 2924
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -9522,7 +9543,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 786
+      "loc": 787
     },
     {
       "file": "functions/tests/chi2-f-survival.test.ts",
@@ -9564,7 +9585,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 186
+      "loc": 178
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
@@ -9669,7 +9690,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 640
+      "loc": 626
     },
     {
       "file": "functions/tests/cov-dist-objects.test.ts",
@@ -9936,6 +9957,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 196
+    },
+    {
+      "file": "functions/tests/dogfood-g21-cas.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 117
     },
     {
       "file": "functions/tests/dogfood-g22-expression-sandbox.test.ts",
@@ -12217,7 +12245,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 247
+      "loc": 235
     },
     {
       "file": "functions/tests/typed-cas-fit-wasm.test.ts",
