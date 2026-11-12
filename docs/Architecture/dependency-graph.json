@@ -5920,7 +5920,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["NestedArray"],
+            "imports": ["arraySize", "validate", "NestedArray"],
             "subpath": "internal"
           }
         ],
@@ -46073,7 +46073,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218906,
+    "totalLinesOfCode": 218957,
     "totalExports": 7018,
     "totalClasses": 61,
     "totalInterfaces": 601,
