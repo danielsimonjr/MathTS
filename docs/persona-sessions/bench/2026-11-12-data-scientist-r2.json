@@ -1,0 +1,51 @@
+{
+  "persona": "data-scientist",
+  "round": 2,
+  "date": "2026-11-12",
+  "environment": {
+    "node": "22.23.4",
+    "os": "linux x86_64",
+    "scratchDir": "/tmp/mathts-ds-r2",
+    "oracle": { "scipy": "1.18.1", "numpy": "2.5.4" },
+    "packages": {
+      "@danielsimonjr/mathts-statistics": "0.4.15",
+      "@danielsimonjr/mathts-signal": "0.1.87",
+      "@danielsimonjr/mathts-plot": "0.4.33",
+      "@danielsimonjr/mathts-workbook": "0.5.19",
+      "@danielsimonjr/mathts-numbers": "0.1.29",
+      "@danielsimonjr/mathts-arithmetic": "0.1.87",
+      "@danielsimonjr/mathts-functions": "0.85.0",
+      "@danielsimonjr/mathts-core": "0.27.0"
+    }
+  },
+  "descriptive_vs_numpy": {
+    "mean": { "mathts": 5.5, "numpy": 5.5 },
+    "median": { "mathts": 5.5, "numpy": 5.5 },
+    "variance_ddof1": { "mathts": 9.166666666666666, "numpy": 9.166666666666666 },
+    "std": { "mathts": 3.0276503540974917, "numpy": 3.0276503540974917 },
+    "quantile_q25_linear": { "mathts": 3.25, "numpy": 3.25 },
+    "skewness": { "mathts": 0, "scipy": 0 },
+    "kurtosis_excess": { "mathts": -1.2242424242424244, "scipy": -1.2242424242424244 }
+  },
+  "perf_median_1e6_ms": {
+    "mathts": 35.54537766666666,
+    "numpy": 8.953353666669273,
+    "ratio": 3.969
+  },
+  "signal": {
+    "welch512_peak_freq": { "mathts": 0.03125, "scipy": 0.03125 },
+    "welch512_pmax": { "mathts": 42.322857257081736, "scipy": 42.66666666666668 },
+    "resample_8_to_4": {
+      "mathts": [2.5, 3.085786437626905, 4.5, 7.914213562373095],
+      "scipy": [2.5, 3.085786437626905, 4.5, 7.914213562373095]
+    },
+    "convolve_full": { "mathts": [0, 1, 2.5, 4, 1.5], "numpy": [0, 1, 2.5, 4, 1.5] }
+  },
+  "round1_recheck_summary": {
+    "checked": 20,
+    "fixed_yes": 20,
+    "fixed_no": 0,
+    "notes": "All R1 persona:data-scientist issues #766-#786 re-verified on published npm; partial UX remains for gamma positional rate, heatmap colorbar without {colorbar:true}, sample(n) footgun"
+  },
+  "new_issues": [896, 897, 898, 899, 900, 901]
+}
