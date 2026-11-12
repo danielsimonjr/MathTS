@@ -1,5 +1,5 @@
 diff --git a/src/js/WorkerHandler.js b/src/js/WorkerHandler.js
-index 327255e..0bc6368 100644
+index 327255eba8df73f75a313e108cd7b4255c326b16..0bc63687471baa65b8e4f8c092b7321eb4da3ea7 100644
 --- a/src/js/WorkerHandler.js
 +++ b/src/js/WorkerHandler.js
 @@ -1,3 +1,6 @@
@@ -37,7 +37,7 @@ index 327255e..0bc6368 100644
      }
    }
 diff --git a/src/js/capabilities.js b/src/js/capabilities.js
-index 6235e5f..862a258 100644
+index 6235e5f74c91e4b39042da20dbb819190bc057cf..862a258b261de0db3c6948affe2b996d7fa87cc4 100644
 --- a/src/js/capabilities.js
 +++ b/src/js/capabilities.js
 @@ -1,3 +1,6 @@
@@ -57,7 +57,7 @@ index 6235e5f..862a258 100644
        return heapStats.heap_size_limit || heapStats.total_available_size || 2 * 1024 * 1024 * 1024;
      } catch (e) {
 diff --git a/src/js/environment.js b/src/js/environment.js
-index e60521b..7da64d5 100644
+index e60521bcdd232264866696b6b5a2413a7c07a49a..7da64d5984682b4403164968ffe08d1694e8f3ef 100644
 --- a/src/js/environment.js
 +++ b/src/js/environment.js
 @@ -1,3 +1,6 @@
@@ -84,7 +84,7 @@ index e60521b..7da64d5 100644
 +  : nodeBuiltin('os'.slice()).cpus().length;
  
 diff --git a/src/js/worker-url.js b/src/js/worker-url.js
-index 1b08932..8b8bb27 100644
+index 1b08932321553511f01d29d3806894d39e37a096..8b8bb27a497db616ca5df8b253e4f6c3ded9d4f3 100644
 --- a/src/js/worker-url.js
 +++ b/src/js/worker-url.js
 @@ -1,3 +1,6 @@
@@ -104,7 +104,7 @@ index 1b08932..8b8bb27 100644
          return path.resolve(process.cwd(), urlString);
        }
 diff --git a/src/js/worker.js b/src/js/worker.js
-index 7e4ed3d..696d7f8 100644
+index 7e4ed3dcf772dcaa912b0b8f3c3c4f06eafd3202..696d7f8fbdc101a13c68fa1680130602211f5458 100644
 --- a/src/js/worker.js
 +++ b/src/js/worker.js
 @@ -1,3 +1,6 @@
@@ -133,7 +133,7 @@ index 7e4ed3d..696d7f8 100644
      if (typeof error === 'object' && error !== null && error.code === 'MODULE_NOT_FOUND') {
        // no worker_threads, fallback to sub-process based workers
 diff --git a/types/Pool.d.ts b/types/Pool.d.ts
-index 008030b..b3e862c 100644
+index 008030bcd843feb0f5a21f22c532373eae6bc75d..0d0c39c6f894fea9f2e51bda0e3c142bb478fa56 100644
 --- a/types/Pool.d.ts
 +++ b/types/Pool.d.ts
 @@ -1,3 +1,4 @@
@@ -141,8 +141,17 @@ index 008030b..b3e862c 100644
  export = Pool;
  /**
   * A pool to manage workers, which can be created using the function workerpool.pool.
+@@ -83,7 +84,7 @@ declare class Pool {
+     /** @private - Circuit breaker state */
+     private _circuitState;
+     _circuitErrorCount: number;
+-    _circuitResetTimer: NodeJS.Timeout;
++    _circuitResetTimer: ReturnType<typeof setTimeout>;
+     _circuitHalfOpenSuccess: number;
+     _circuitOptions: {
+         enabled: any;
 diff --git a/types/WorkerHandler.d.ts b/types/WorkerHandler.d.ts
-index ef9147b..775a202 100644
+index ef9147bb2e06f589f935ce2a530df053ad31703e..775a20248dc2040ae15264c0f41e0d2edc8ea2e5 100644
 --- a/types/WorkerHandler.d.ts
 +++ b/types/WorkerHandler.d.ts
 @@ -1,3 +1,4 @@
@@ -152,10 +161,10 @@ index ef9147b..775a202 100644
   * A WorkerHandler controls a single worker. This worker can be a child process
 diff --git a/types/consumer-node-shim.d.ts b/types/consumer-node-shim.d.ts
 new file mode 100644
-index 0000000..bf3021a
+index 0000000000000000000000000000000000000000..b0e26fe72eae960fc81551b098bc3b362e512f4a
 --- /dev/null
 +++ b/types/consumer-node-shim.d.ts
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,38 @@
 +/**
 + * Minimal Node typings bundled with @danielsimonjr/workerpool so strict consumers
 + * can typecheck workerpool's declarations with skipLibCheck: false and no @types/node.
@@ -194,15 +203,8 @@ index 0000000..bf3021a
 +    [key: string]: unknown;
 +  }
 +}
-+
-+declare namespace NodeJS {
-+  type Timeout = ReturnType<typeof setTimeout>;
-+  interface ReadableStream {
-+    on(event: string, listener: (...args: unknown[]) => void): this;
-+  }
-+}
 diff --git a/types/index.d.ts b/types/index.d.ts
-index 2ff749e..6e2ca64 100644
+index 2ff749eebf357fd0f06416125f1c099827fb999d..6e2ca642fc698f822aeaa2617d9c4e72413dcef8 100644
 --- a/types/index.d.ts
 +++ b/types/index.d.ts
 @@ -1,3 +1,4 @@
@@ -211,7 +213,7 @@ index 2ff749e..6e2ca64 100644
  export function enhancedPool(script: any, options: any): Pool;
  export type WorkerPool = import("./Pool");
 diff --git a/types/types.d.ts b/types/types.d.ts
-index 8ec6b50..f2ef6b3 100644
+index 8ec6b50bfd1348e46dd15b682e074647329019e1..f2ef6b32474a6c8a9354f1351c76f32cbed2cbd8 100644
 --- a/types/types.d.ts
 +++ b/types/types.d.ts
 @@ -1,3 +1,4 @@
@@ -220,7 +222,7 @@ index 8ec6b50..f2ef6b3 100644
      /**
       * The `forkArgs` option of this pool
 diff --git a/types/worker-url.d.ts b/types/worker-url.d.ts
-index 24a8adc..1b62652 100644
+index 24a8adcf4f6eaeaa2c4820b2c2de5e67534e7588..1b6265201fd563dfb768be3c944cce1f29d2d6c2 100644
 --- a/types/worker-url.d.ts
 +++ b/types/worker-url.d.ts
 @@ -1,3 +1,4 @@
