@@ -39,8 +39,11 @@ const consumer = join(work, 'consumer');
 mkdirSync(tarballs);
 
 /**
- * @param {string} consumerDir
- * @param {Set<string>} packedNames
+ * Resolves the npm package name for a `package-lock.json` `packages` entry.
+ * Lockfile v3 often omits `name`; derive it from `node_modules/@danielsimonjr/mathts-*` keys when needed.
+ * @param {string} pkgPath - lock `packages` key (for example `node_modules/@danielsimonjr/mathts-core`)
+ * @param {{ name?: string }} meta - lockfile row metadata
+ * @returns {string | null} package name, or null when the row is not a direct mathts install path
  */
 function lockEntryPackageName(pkgPath, meta) {
   if (typeof meta?.name === 'string') return meta.name;
@@ -48,6 +51,12 @@ function lockEntryPackageName(pkgPath, meta) {
   return scoped ? scoped[1] : null;
 }
 
+/**
+ * Fails when any `@danielsimonjr/mathts-*` dependency would have come from the npm registry.
+ * @param {string} consumerDir - temporary consumer project root (holds `package-lock.json`)
+ * @param {Set<string>} packedNames - workspace package names installed as local tarballs
+ * @returns {void}
+ */
 function assertMathtsInstalledFromTarballs(consumerDir, packedNames) {
   const lockPath = join(consumerDir, 'package-lock.json');
   const lock = JSON.parse(readFileSync(lockPath, 'utf8'));

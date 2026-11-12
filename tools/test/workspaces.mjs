@@ -31,8 +31,9 @@ export const MATHTS_WORKSPACE_PREFIX = '@danielsimonjr/mathts-';
 
 /**
  * Map each workspace package name to its directory relative to the repo root.
- * @param {string} [root]
- * @returns {Map<string, string>}
+ *
+ * @param {string} [root] - repository root; defaults to this checkout
+ * @returns {Map<string, string>} package name to workspace directory path
  */
 export function workspacePackageDirsByName(root = repoRoot) {
   /** @type {Map<string, string>} */
@@ -45,10 +46,11 @@ export function workspacePackageDirsByName(root = repoRoot) {
 }
 
 /**
- * Workspace `dependencies` and `peerDependencies` on `@danielsimonjr/mathts-*`, transitively.
- * @param {string[]} seedDirs workspace dirs the consumer imports (e.g. `functions`)
- * @param {string} [root]
- * @returns {string[]} sorted unique workspace dirs to pack
+ * Collects the transitive closure of workspace `dependencies` and `peerDependencies` on `@danielsimonjr/mathts-*`.
+ *
+ * @param {string[]} seedDirs - workspace dirs the consumer imports (for example `functions`)
+ * @param {string} [root] - repository root; defaults to this checkout
+ * @returns {string[]} sorted unique workspace directories to pack and install as tarballs
  */
 export function workspaceMathtsClosure(seedDirs, root = repoRoot) {
   const byName = workspacePackageDirsByName(root);
