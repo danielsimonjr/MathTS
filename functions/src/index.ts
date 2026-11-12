@@ -185,6 +185,7 @@ export {
   describe,
   histogram,
 } from './descriptive-stats.js';
+export { nanmedian } from './statistics/nan-reductions.js';
 export type {
   LinRegressResult,
   CorrelationTestResult,
