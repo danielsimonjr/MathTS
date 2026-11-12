@@ -116,7 +116,8 @@ describe.skipIf(!loaded)('elementwiseChainDispatch actually engages WASM in the 
   });
 
   it('single-op dispatch also engages WASM and matches the oracle', () => {
-    const n = 65_536;
+    // array_sin_ptr WASM band is 16_384 ≤ n < 65_536 (G26 #711); n=65_536 is JS-only.
+    const n = 32_768;
     const xs = sample(n);
     const got = elementwiseUnaryDispatch('sin', xs);
     expect(got, 'elementwiseUnaryDispatch returned null — WASM did not engage').not.toBeNull();

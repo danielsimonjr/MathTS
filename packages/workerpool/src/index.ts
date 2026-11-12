@@ -2514,9 +2514,7 @@ export function getPoolStats(): PoolStats {
 export { Transfer };
 export type { Pool, PoolOptions, ExecOptions, PoolStats };
 
-/** @internal */
 export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
-/** @internal */
 export { forEachMultiIndex } from './multi-index.js';
 export { tensordotRange } from './tensordot-range.js';
 export { matmulSequential } from './matmul-sequential.js';

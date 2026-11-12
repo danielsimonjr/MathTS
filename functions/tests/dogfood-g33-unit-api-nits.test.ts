@@ -7,22 +7,26 @@ import { add } from '@danielsimonjr/mathts-functions';
 
 describe('G33 dogfood (#826 DimensionMismatchError on unit add)', () => {
   it('matches issue repro: to() vs add() and Unit.add', () => {
+    let toError: unknown;
     try {
       new Unit(1, 'm').to('s');
     } catch (e) {
-      expect((e as Error).name).toBe('DimensionMismatchError');
-      expect(e).toBeInstanceOf(DimensionMismatchError);
+      toError = e;
     }
+    expect((toError as Error).name).toBe('DimensionMismatchError');
+    expect(toError).toBeInstanceOf(DimensionMismatchError);
 
+    let addError: unknown;
     try {
       add(new Unit(1, 'm'), new Unit(1, 's'));
     } catch (e) {
-      expect((e as Error).name).toBe('DimensionMismatchError');
-      expect(e).toBeInstanceOf(DimensionMismatchError);
-      expect((e as Error).message.split('\n')[0]).toBe(
-        'Cannot add/subtract units with different dimensions'
-      );
+      addError = e;
     }
+    expect((addError as Error).name).toBe('DimensionMismatchError');
+    expect(addError).toBeInstanceOf(DimensionMismatchError);
+    expect((addError as Error).message.split('\n')[0]).toBe(
+      'Cannot add/subtract units with different dimensions'
+    );
 
     expect(typeof new Unit(1, 'm').add).toBe('function');
     const sum = add(new Unit(1, 'm'), new Unit(2, 'm'));

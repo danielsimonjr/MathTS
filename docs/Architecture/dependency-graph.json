@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1297,
+    "totalFiles": 1300,
     "totalModules": 82,
-    "totalExports": 7110
+    "totalExports": 7118
   },
   "entryPoints": [
     {
@@ -4027,6 +4027,10 @@
             "imports": ["DenseMatrix", "denseContiguousData"]
           },
           {
+            "file": "../types/dense/gemm-f64.js",
+            "imports": ["gemmF64"]
+          },
+          {
             "file": "../types/dense/reduction.js",
             "imports": ["* as reduction"]
           },
@@ -5138,7 +5142,12 @@
         "description": "Shared decomposition helpers (number[][] dense algebra)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/dense/gemm-f64.js",
+            "imports": ["gemmF64"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "eye",
@@ -5825,11 +5834,25 @@
           {
             "file": "./storage.js",
             "imports": ["contiguousDenseData"]
+          },
+          {
+            "file": "./gemm-f64.js",
+            "imports": ["gemmF64"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"],
         "functions": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"]
+      },
+      "matrix/src/types/dense/gemm-f64.ts": {
+        "description": "Options for {@link gemmF64}.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["GEMM_BLOCK", "gemmF64"],
+        "functions": ["gemmF64"],
+        "constants": ["GEMM_BLOCK"]
       },
       "matrix/src/types/dense/limits.ts": {
         "description": "Preflight limits for dense matrix allocation (DoS guard).",
@@ -7528,7 +7551,12 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["decompositionInputToNestedArray", "isPackedMatrixDescriptor"]
+            "imports": [
+              "decompositionInputToNestedArray",
+              "isPackedMatrixDescriptor",
+              "lu",
+              "luSolve"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -18537,6 +18565,10 @@
             "imports": ["findTypedImpl"]
           },
           {
+            "file": "../utils/sort-numbers.js",
+            "imports": ["sortNumbersDescendingInPlace", "sortNumbersInPlace"]
+          },
+          {
             "file": "../types.js",
             "imports": ["TypedFunction", "Matrix"]
           }
@@ -22040,6 +22072,14 @@
           {
             "file": "../utils/typed-impl.js",
             "imports": ["findTypedImpl"]
+          },
+          {
+            "file": "../utils/sort-numbers.js",
+            "imports": ["arrayHasNaN"]
+          },
+          {
+            "file": "../utils/median-numbers.js",
+            "imports": ["medianNumbers"]
           },
           {
             "file": "./numeric-data.js",
@@ -28664,6 +28704,15 @@
           "isObjectWrappingMap"
         ]
       },
+      "functions/src/utils/median-numbers.ts": {
+        "description": "Median of a flat finite `number[]` via quickselect (O(n) average).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["medianNumbers"],
+        "functions": ["medianNumbers"]
+      },
       "functions/src/utils/node.ts": {
         "description": "Type definitions for Math.js AST nodes",
         "externalDependencies": [],
@@ -29011,6 +29060,34 @@
         "workspaceDependencies": [],
         "exports": ["product"],
         "functions": ["product"]
+      },
+      "functions/src/utils/sort-numbers.ts": {
+        "description": "Sort a plain `number[]` in place (ascending). Uses native `Float64Array.sort`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/sort/wasm-bridge.js",
+            "imports": ["cmpNanLast"]
+          },
+          {
+            "file": "./number.js",
+            "imports": ["nearlyEqual"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "defaultNumberCompare",
+          "arrayHasNaN",
+          "sortNumbersInPlace",
+          "sortNumbersDescendingInPlace"
+        ],
+        "functions": [
+          "defaultNumberCompare",
+          "arrayHasNaN",
+          "sortNumbersInPlace",
+          "sortNumbersDescendingInPlace"
+        ]
       },
       "functions/src/utils/string.ts": {
         "description": "Generic-value string formatting (`format`, `stringify`, `compareText`).",
@@ -29428,12 +29505,19 @@
         "workspaceDependencies": [],
         "exports": [
           "WASM_SORT_THRESHOLD",
+          "cmpNanLast",
           "sortF64JS",
           "argsortF64JS",
           "sortF64Dispatch",
           "argsortF64Dispatch"
         ],
-        "functions": ["sortF64JS", "argsortF64JS", "sortF64Dispatch", "argsortF64Dispatch"],
+        "functions": [
+          "cmpNanLast",
+          "sortF64JS",
+          "argsortF64JS",
+          "sortF64Dispatch",
+          "argsortF64Dispatch"
+        ],
         "constants": ["WASM_SORT_THRESHOLD"]
       },
       "functions/src/wasm/special/scalars.ts": {
@@ -45219,6 +45303,7 @@
           "matrix/src/types/Matrix.ts",
           "matrix/src/types/SparseMatrix.ts",
           "matrix/src/types/dense/arithmetic.ts",
+          "matrix/src/types/dense/gemm-f64.ts",
           "matrix/src/types/dense/limits.ts",
           "matrix/src/types/dense/reduction.ts",
           "matrix/src/types/dense/storage.ts",
@@ -45961,6 +46046,7 @@
           "functions/src/utils/isPrime.ts",
           "functions/src/utils/isZero.ts",
           "functions/src/utils/map.ts",
+          "functions/src/utils/median-numbers.ts",
           "functions/src/utils/node.ts",
           "functions/src/utils/noop.ts",
           "functions/src/utils/number.ts",
@@ -45970,6 +46056,7 @@
           "functions/src/utils/parseNumber.ts",
           "functions/src/utils/print.ts",
           "functions/src/utils/product.ts",
+          "functions/src/utils/sort-numbers.ts",
           "functions/src/utils/string.ts",
           "functions/src/utils/switch.ts",
           "functions/src/utils/typeOf.ts",
@@ -46714,16 +46801,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1297,
+    "totalTypeScriptFiles": 1300,
     "totalModules": 82,
-    "totalLinesOfCode": 222849,
-    "totalExports": 7110,
+    "totalLinesOfCode": 223187,
+    "totalExports": 7118,
     "totalClasses": 61,
     "totalInterfaces": 610,
-    "totalFunctions": 2418,
+    "totalFunctions": 2425,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1652,
+    "totalConstants": 1653,
     "totalReExports": 3058,
     "totalTypeOnlyImports": 651,
     "runtimeCircularDeps": 2,
