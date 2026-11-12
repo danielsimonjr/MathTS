@@ -40,11 +40,23 @@ interface RunResult {
 const ALLOWED_TOOLS = ['rsvg-convert', 'resvg', 'pdflatex', 'xelatex', 'lualatex', 'tectonic'];
 const RESVG_WASM_PKG = '@resvg/resvg-wasm';
 
+/** Minimal surface from optional peer `@resvg/resvg-wasm` (not a type dependency). */
+interface ResvgWasmPeer {
+  initWasm(data: Buffer | Uint8Array): Promise<void>;
+  Resvg: new (
+    svg: string,
+    options?: { dpi?: number; background?: string }
+  ) => {
+    render(): { asPng(): Uint8Array };
+    free(): void;
+  };
+}
+
 /** Lazy import indirection so tests can simulate a missing optional peer. */
 export const resvgWasmImport = {
   /** Dynamic import of `@resvg/resvg-wasm`; throws when the optional peer is not installed. */
-  async importModule(): Promise<typeof import('@resvg/resvg-wasm')> {
-    return import('@resvg/resvg-wasm');
+  async importModule(): Promise<ResvgWasmPeer> {
+    return import(RESVG_WASM_PKG) as Promise<ResvgWasmPeer>;
   },
 };
 
@@ -55,7 +67,7 @@ export async function renderPngWithResvgWasm(
   svg: string,
   opts: Pick<RenderOptions, 'density' | 'background'> = {}
 ): Promise<Uint8Array> {
-  let mod: typeof import('@resvg/resvg-wasm');
+  let mod: ResvgWasmPeer;
   try {
     mod = await resvgWasmImport.importModule();
   } catch {
