@@ -313,28 +313,40 @@ function _fPValue(f: f64, d1: f64, d2: f64): f64 {
 /**
  * Student's t-test.
  *
- * One-sample: test if sample mean differs from 0 (or provide second argument as null).
- * Two-sample: Welch's t-test (unequal variances) comparing two independent samples.
+ * One-sample: test whether the sample mean differs from a hypothesized mean (`popmean`).
+ * Omit the second argument or pass `null` to test against μ = 0; pass a finite number for
+ * SciPy `ttest_1samp(x, popmean)`.
+ * Two-sample: Welch's t-test (unequal variances) when the second argument is a sample array.
  *
- * @param sample1 - First sample
- * @param sample2 - Second sample (omit for one-sample test)
+ * @param sample1 - First sample (plain array or `Float64Array`)
+ * @param sample2 - Second sample array (two-sample Welch), or hypothesized mean `popmean` (one-sample)
  * @returns Test result with statistic, pValue, degreesOfFreedom
  *
  * @example
- * studentTTest([1, 2, 3, 4, 5]) // one-sample test
- * studentTTest([1, 2, 3], [4, 5, 6]) // two-sample test
+ * studentTTest([1, 2, 3, 4, 5]) // one-sample vs 0
+ * studentTTest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5.5) // one-sample vs 5.5
+ * studentTTest([1, 2, 3], [4, 5, 6]) // two-sample Welch
  */
-export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
+export function studentTTest(sample1: f64[], sample2?: f64[] | number | null): TTestResult {
   if (sample1.length < 2) throw new Error('studentTTest: sample1 must have at least 2 elements');
 
   if (sample2 === undefined || sample2 === null) {
-    // One-sample t-test (test against mu=0)
-    const n = sample1.length;
-    const m = _mean(sample1);
-    const s = Math.sqrt(_variance(sample1));
-    const t = m / (s / Math.sqrt(n));
-    const df = n - 1;
-    return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
+    return _oneSampleTTest(sample1, 0);
+  }
+
+  if (typeof sample2 === 'number') {
+    if (!Number.isFinite(sample2)) {
+      throw new TypeError(
+        'studentTTest: popmean (second argument) must be a finite number for a one-sample test'
+      );
+    }
+    return _oneSampleTTest(sample1, sample2);
+  }
+
+  if (!Array.isArray(sample2) && !ArrayBuffer.isView(sample2)) {
+    throw new TypeError(
+      'studentTTest: second argument must be a sample array (two-sample) or a finite number (popmean)'
+    );
   }
 
   if (sample2.length < 2) throw new Error('studentTTest: sample2 must have at least 2 elements');
@@ -354,6 +366,16 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
   const den = (v1 / n1) ** 2 / (n1 - 1) + (v2 / n2) ** 2 / (n2 - 1);
   const df = num / den;
 
+  return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
+}
+
+/** One-sample Student's t against hypothesized mean `mu` (SciPy `ttest_1samp`, two-sided). */
+function _oneSampleTTest(sample: f64[], mu: f64): TTestResult {
+  const n = sample.length;
+  const m = _mean(sample);
+  const s = Math.sqrt(_variance(sample));
+  const t = (m - mu) / (s / Math.sqrt(n));
+  const df = n - 1;
   return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
 }
 

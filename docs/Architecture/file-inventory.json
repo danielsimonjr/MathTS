@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2241,
+  "totalFiles": 2242,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1259,
     "test-only": 0,
     "orphan": 0,
-    "test": 891,
+    "test": 892,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1285,
-    "tests": 891,
+    "tests": 892,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1011,
+    "@danielsimonjr/mathts-functions": 1012,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
@@ -8794,7 +8794,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2102
+      "loc": 2124
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -9838,6 +9838,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 56
+    },
+    {
+      "file": "functions/tests/dogfood-g09-student-ttest-popmean.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 157
     },
     {
       "file": "functions/tests/dogfood-g10-pde-cfl-bc.test.ts",
