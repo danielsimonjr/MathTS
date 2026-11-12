@@ -7,11 +7,18 @@ import * as evaluator from '../src/index.js';
  * `expression`. If expression adds another compile/evaluate entry point, add it
  * to the facade and to this pinned list.
  */
-const PINNED = ['compile', 'compileExpression', 'createEvaluate'];
+const PINNED = [
+  'compile',
+  'compileExpression',
+  'compileExpressionWithDeps',
+  'createEvaluate',
+  'evaluate',
+  'parse',
+];
 
 describe('@danielsimonjr/mathts-evaluator facade sync with expression', () => {
   it('re-exports exactly the pinned compile/evaluate list', () => {
-    expect(Object.keys(evaluator).sort()).toEqual(PINNED);
+    expect(Object.keys(evaluator).sort()).toEqual([...PINNED].sort());
   });
 
   it('re-exports the same function objects (no copies)', () => {
