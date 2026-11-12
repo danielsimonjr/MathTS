@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2279,
+  "totalFiles": 2280,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1272,
     "test-only": 0,
     "orphan": 0,
-    "test": 916,
+    "test": 917,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1298,
-    "tests": 916,
+    "tests": 917,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1033,
+    "@danielsimonjr/mathts-functions": 1034,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -6309,7 +6309,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 115
+      "loc": 122
     },
     {
       "file": "functions/src/error/ArgumentsError.ts",
@@ -8738,7 +8738,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1361
+      "loc": 1424
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -9991,7 +9991,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 169
+      "loc": 163
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -10391,6 +10391,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 160
+    },
+    {
+      "file": "functions/tests/gamma-dist-scale-772.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 159
     },
     {
       "file": "functions/tests/gap-2026-11-matrix-reexports.test.ts",
