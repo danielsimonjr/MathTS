@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { solveODE, stiffODESolver } from '../src/index.js';
 
-const robertson = (t: number, y: number[]) => {
+const robertson = (_t: number, y: number[]) => {
   const [y1, y2, y3] = y;
   return [-0.04 * y1 + 1e4 * y2 * y3, 0.04 * y1 - 1e4 * y2 * y3 - 3e7 * y2 * y2, 3e7 * y2 * y2];
 };
@@ -13,18 +13,34 @@ const HAIRER_T40 = [0.7158270684, 9.185534764e-6, 0.284163746];
 
 describe('G25 dogfood — ODE API (#824 #698 #691)', () => {
   it('#824 SHO [0,100] tol 1e-8 completes without raising maxIter', () => {
-    const sol = solveODE((t, y) => [y[1], -4 * y[0]], [0, 100], [1, 0], {
-      method: 'RK45',
-      tol: 1e-8,
-    }) as { t: number[] };
+    const sol = solveODE(
+      (_t: unknown, y: unknown) => {
+        const v = y as number[];
+        return [v[1], -4 * v[0]];
+      },
+      [0, 100],
+      [1, 0],
+      {
+        method: 'RK45',
+        tol: 1e-8,
+      }
+    ) as { t: number[] };
     expect(sol.t.at(-1)).toBeCloseTo(100, 8);
   });
 
   it('#824 SHO [0,100] tol 1e-10 completes (accepted-step maxIter)', () => {
-    const sol = solveODE((t, y) => [y[1], -4 * y[0]], [0, 100], [1, 0], {
-      method: 'RK45',
-      tol: 1e-10,
-    }) as { t: number[] };
+    const sol = solveODE(
+      (_t: unknown, y: unknown) => {
+        const v = y as number[];
+        return [v[1], -4 * v[0]];
+      },
+      [0, 100],
+      [1, 0],
+      {
+        method: 'RK45',
+        tol: 1e-10,
+      }
+    ) as { t: number[] };
     expect(sol.t.at(-1)).toBeCloseTo(100, 8);
   });
 
