@@ -46,12 +46,20 @@ describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
     const BD = DenseMatrix.fromArray(B);
     const AM = new MLMatrix(A);
     const BM = new MLMatrix(B);
-    const tMl = medianTime(() => {
-      AM.mmul(BM);
-    }, 2, 3);
-    const tMathTs = medianTime(() => {
-      AD.multiply(BD);
-    }, 2, 3);
+    const tMl = medianTime(
+      () => {
+        AM.mmul(BM);
+      },
+      2,
+      3
+    );
+    const tMathTs = medianTime(
+      () => {
+        AD.multiply(BD);
+      },
+      2,
+      3
+    );
     expect(tMathTs / tMl).toBeLessThan(1.15);
   }, 120_000);
 
