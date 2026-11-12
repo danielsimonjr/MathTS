@@ -1,12 +1,26 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { ComputePool } from '../src/ComputePool.js';
 import { ParallelMatrix } from '../src/ParallelMatrix.js';
-import { assertMatmulShape, assertSameLength } from '../src/validate.js';
+import { assertMatmulArgs, assertMatmulShape, assertSameLength } from '../src/validate.js';
 
 const ramp = (n: number, f: (i: number) => number = (i) => i) =>
   Float64Array.from({ length: n }, (_, i) => f(i));
 
 describe('validate helpers', () => {
+  it('#709 assertMatmulArgs rejects swapped matrix args with a short message', () => {
+    const n = 4;
+    const A = new Float64Array(n * n);
+    const B = new Float64Array(n * n);
+    expect(() => assertMatmulArgs(A, B, n, n, n)).toThrow(/aRows: Float64Array/);
+    let msg = '';
+    try {
+      assertMatmulArgs(A, B, n, n, n);
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg.length).toBeLessThan(200);
+  });
+
   it('assertSameLength uses one message shape', () => {
     expect(() => assertSameLength('add', 3, 2)).toThrow('add: lengths must match (3 vs 2)');
     expect(() => assertSameLength('add', 2, 2)).not.toThrow();
