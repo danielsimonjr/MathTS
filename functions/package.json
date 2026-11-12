@@ -16,12 +16,14 @@
     "./evaluate": {
       "import": "./dist/subpath-evaluate.js",
       "types": "./dist/subpath-evaluate.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "types",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node scripts/gen-public-overloads.mjs && tsdown src/index.ts src/subpath-evaluate.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm && tsc -p tsconfig.dts.json && node scripts/copy-public-types.mjs && node scripts/copy-wasm.mjs",
@@ -46,7 +48,8 @@
         "annotation": true,
         "jsdoc": false
       }
-    }
+    },
+    "sourcemap": true
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.26.0",
@@ -86,5 +89,10 @@
     "algebra",
     "trigonometry",
     "statistics"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": true
 }

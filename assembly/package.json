@@ -15,10 +15,12 @@
     },
     "./debug": {
       "import": "./build/mathts-debug.wasm"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "build/"
+    "build/",
+    "LICENSE"
   ],
   "scripts": {
     "asbuild:debug": "asc src/index.ts --target debug",
@@ -60,5 +62,7 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "sideEffects": true
 }

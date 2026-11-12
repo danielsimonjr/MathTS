@@ -16,11 +16,13 @@
     "./render": {
       "import": "./dist/render-file.js",
       "types": "./dist/render-file.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown && tsc -p tsconfig.dts.json",
@@ -77,5 +79,10 @@
     "heatmap",
     "visualization",
     "headless"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": true
 }

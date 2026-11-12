@@ -12,11 +12,13 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json",
@@ -39,7 +41,8 @@
         "annotation": true,
         "jsdoc": false
       }
-    }
+    },
+    "sourcemap": true
   },
   "dependencies": {
     "@danielsimonjr/mathts-functions": "^0.84.0"
@@ -65,5 +68,10 @@
     "add",
     "multiply",
     "numeric"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": false
 }

@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1306                  |
-| Total Test Files                       | 906                   |
+| Total Test Files                       | 907                   |
 | Source Files with Tests                | 542                   |
 | Source Files without Tests             | 764                   |
 | Coverage (raw, direct-import)          | **41.5%**             |
@@ -2255,6 +2255,7 @@ The following 764 source files are not directly imported by any test file:
 | `benchmark/wasm-comparison.test.ts`                      | 0 files             |
 | `docs/readme-fences.test.ts`                             | 0 files             |
 | `integration/dogfood-g27-packaging.test.ts`              | 0 files             |
+| `integration/dogfood-g29-packaging.test.ts`              | 0 files             |
 | `integration/examples-smoke.test.ts`                     | 0 files             |
 | `integration/export-index-completeness.test.ts`          | 88 files            |
 | `integration/functions.test.ts`                          | 0 files             |

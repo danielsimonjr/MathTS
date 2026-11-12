@@ -318,6 +318,12 @@ jobs:
         if: matrix.node-version == '22.x'
         run: node tools/test/consumer-typecheck.mjs --skip-build --module-resolution=NodeNext
 
+      - name: Packaging metadata and no-node consumer typecheck (G29)
+        if: matrix.node-version == '22.x'
+        run: |
+          node tools/sync-package-packaging.mjs --check
+          node tools/test/consumer-typecheck-no-node.mjs --skip-build
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
