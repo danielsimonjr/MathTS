@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1287
+  totalFiles: 1288
   totalModules: 82
-  totalExports: 7038
+  totalExports: 7041
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5739,6 +5739,13 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+        - file: ./reshape-shape.js
+          imports:
+            - resolveReshapeShape
+        - file: ./operations/slice.js
+          imports:
+            - slice
+            - SliceRange
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5761,6 +5768,7 @@ modules:
       classes:
         - Tensor
       interfaces:
+        - TensorStorage
         - EinsumSpec
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
@@ -5873,6 +5881,8 @@ modules:
           imports:
             - NestedArray
             - EinsumSpec
+            - TensorStorage
+            - TensorDtype
           reExport: true
           typeOnly: true
         - file: ./named-index.js
@@ -5984,6 +5994,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6032,6 +6044,8 @@ modules:
         - flip
         - NestedArray
         - EinsumSpec
+        - TensorStorage
+        - TensorDtype
         - IndexOpts
         - TensorSvdOpts
         - TensorSvdResult
@@ -6069,6 +6083,16 @@ modules:
         - IndexOpts
       functions:
         - idx
+    tensor/src/reshape-shape.ts:
+      description: reshape-shape module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - resolveReshapeShape
+      functions:
+        - resolveReshapeShape
   tensor/operations:
     tensor/src/operations/cholesky.ts:
       description: tensorCholesky — Cholesky decomposition for symmetric positive-definite
@@ -42201,10 +42225,13 @@ modules:
         - DEPTH_EPS
 dependencyGraph:
   circularDependencies:
-    runtime: []
+    runtime:
+      - - tensor/src/Tensor.ts
+        - tensor/src/operations/slice.ts
+        - tensor/src/Tensor.ts
     typeOnly: []
-    total: 0
-    runtimeCount: 0
+    total: 1
+    runtimeCount: 1
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -42352,6 +42379,7 @@ dependencyGraph:
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
+        - tensor/src/reshape-shape.ts
     - name: Tensor/operations
       files:
         - tensor/src/operations/cholesky.ts
@@ -43659,19 +43687,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1287
+  totalTypeScriptFiles: 1288
   totalModules: 82
-  totalLinesOfCode: 219463
-  totalExports: 7038
+  totalLinesOfCode: 219782
+  totalExports: 7041
   totalClasses: 61
-  totalInterfaces: 601
-  totalFunctions: 2375
+  totalInterfaces: 602
+  totalFunctions: 2376
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1647
-  totalReExports: 3030
+  totalReExports: 3032
   totalTypeOnlyImports: 644
-  runtimeCircularDeps: 0
+  runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0
