@@ -513,6 +513,7 @@
       "BASE_UNITS",
       "BaseUnitDef",
       "BEST_PREFIXES",
+      "bignumber",
       "BigNumber",
       "BIGNUMBER_E",
       "BIGNUMBER_LN10",
@@ -4506,6 +4507,7 @@
       "zeros"
     ],
     "numbers": [
+      "bignumber",
       "BigNumber",
       "BIGNUMBER_E",
       "BIGNUMBER_LN10",
