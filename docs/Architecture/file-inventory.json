@@ -8017,7 +8017,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 258
+      "loc": 259
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -9249,7 +9249,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 52
+      "loc": 56
     },
     {
       "file": "functions/src/utils/string.ts",
@@ -9991,7 +9991,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 133
+      "loc": 134
     },
     {
       "file": "functions/tests/embedded-docs-completeness.test.ts",
@@ -13141,7 +13141,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 82
+      "loc": 90
     },
     {
       "file": "matrix/src/types/dense/limits.ts",

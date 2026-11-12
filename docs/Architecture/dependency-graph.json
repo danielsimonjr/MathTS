@@ -5845,7 +5845,7 @@
         "functions": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"]
       },
       "matrix/src/types/dense/gemm-f64.ts": {
-        "description": "Dense matrix multiply C = A · B (row-major f64).",
+        "description": "Options for {@link gemmF64}.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -22000,6 +22000,10 @@
             "imports": ["findTypedImpl"]
           },
           {
+            "file": "../utils/sort-numbers.js",
+            "imports": ["arrayHasNaN"]
+          },
+          {
             "file": "../utils/median-numbers.js",
             "imports": ["medianNumbers"]
           },
@@ -28943,7 +28947,7 @@
         "internalDependencies": [
           {
             "file": "../wasm/sort/wasm-bridge.js",
-            "imports": ["cmpNanLast", "sortF64JS"]
+            "imports": ["cmpNanLast"]
           }
         ],
         "workspaceDependencies": [],
@@ -46427,7 +46431,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1294,
     "totalModules": 82,
-    "totalLinesOfCode": 221919,
+    "totalLinesOfCode": 221932,
     "totalExports": 7089,
     "totalClasses": 61,
     "totalInterfaces": 603,

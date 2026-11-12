@@ -3,6 +3,7 @@ import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
+import { arrayHasNaN } from '../utils/sort-numbers.js';
 import { medianNumbers } from '../utils/median-numbers.js';
 import {
   flattenForStatistics,
@@ -115,7 +116,7 @@ export const createMedian = /* #__PURE__ */ factory(
         }
 
         const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
-        if (cmpNum) {
+        if (cmpNum && !arrayHasNaN(flat as number[])) {
           return medianNumbers(flat as number[]);
         }
 

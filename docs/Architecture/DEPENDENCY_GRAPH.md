@@ -2127,7 +2127,7 @@ graph LR
 
 ---
 
-### `matrix/src/types/dense/gemm-f64.ts` - Dense matrix multiply C = A · B (row-major f64).
+### `matrix/src/types/dense/gemm-f64.ts` - Options for {@link gemmF64}.
 
 **Exports:**
 
@@ -9440,6 +9440,7 @@ graph LR
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`                                                                                               | Import             |
 | `../core/function/typed.js`      | `TypedFunction`                                                                                                     | Import (type-only) |
 | `../utils/typed-impl.js`         | `findTypedImpl`                                                                                                     | Import             |
+| `../utils/sort-numbers.js`       | `arrayHasNaN`                                                                                                       | Import             |
 | `../utils/median-numbers.js`     | `medianNumbers`                                                                                                     | Import             |
 | `./numeric-data.js`              | `flattenForStatistics, finiteNumbers, isFloatTyped, numberGrid, reduceNumericMatrix, FloatTyped, StatReduceOptions` | Import             |
 
@@ -12444,9 +12445,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                 | Type   |
-| ----------------------------- | ----------------------- | ------ |
-| `../wasm/sort/wasm-bridge.js` | `cmpNanLast, sortF64JS` | Import |
+| File                          | Imports      | Type   |
+| ----------------------------- | ------------ | ------ |
+| `../wasm/sort/wasm-bridge.js` | `cmpNanLast` | Import |
 
 **Exports:**
 
@@ -20415,7 +20416,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1294   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221919 |
+| Total Lines of Code     | 221932 |
 | Total Exports           | 7089   |
 | Total Re-exports        | 3045   |
 | Total Classes           | 61     |

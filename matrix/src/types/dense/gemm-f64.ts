@@ -4,9 +4,6 @@ export const GEMM_BLOCK = 96;
 const BLOCKED_MIN_FLOPS = 48 * 48 * 48;
 
 /**
- * Dense matrix multiply C = A · B (row-major f64).
- */
-/**
  * Options for {@link gemmF64}.
  */
 export type GemmF64Options = {
@@ -14,6 +11,17 @@ export type GemmF64Options = {
   skipZeroInA?: boolean;
 };
 
+/**
+ * Dense matrix multiply C = A · B (row-major f64).
+ *
+ * @param ad - Row-major A (n×p)
+ * @param bd - Row-major B (p×m)
+ * @param n - Row count of A / C
+ * @param p - Inner dimension
+ * @param m - Column count of B / C
+ * @param result - Optional output buffer (zeroed when provided)
+ * @param options - See {@link GemmF64Options}
+ */
 export function gemmF64(
   ad: Float64Array,
   bd: Float64Array,

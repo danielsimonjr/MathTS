@@ -25,12 +25,12 @@ describe('G26 #712 sort on number[]', () => {
     expect(sort([3, 1, 2])).toEqual([1, 2, 3]);
   });
 
-  it('NaN sorts last like the f64 kernel', () => {
+  it('NaN follows factory compare order (P7-9 parity)', () => {
     const a = [3, Number.NaN, 1];
     sort(a);
-    expect(a[2]).toBeNaN();
     expect(a[0]).toBe(1);
-    expect(a[1]).toBe(3);
+    expect(Number.isNaN(a[1])).toBe(true);
+    expect(a[2]).toBe(3);
   });
 
   it('n=1e5 sort is within 1.5× native Float64Array.sort (issue #712)', () => {

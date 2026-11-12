@@ -5672,7 +5672,7 @@ modules:
         - scale
         - transpose
     matrix/src/types/dense/gemm-f64.ts:
-      description: Dense matrix multiply C = A · B (row-major f64).
+      description: Options for {@link gemmF64}.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -20780,6 +20780,9 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ../utils/sort-numbers.js
+          imports:
+            - arrayHasNaN
         - file: ../utils/median-numbers.js
           imports:
             - medianNumbers
@@ -27177,7 +27180,6 @@ modules:
         - file: ../wasm/sort/wasm-bridge.js
           imports:
             - cmpNanLast
-            - sortF64JS
       workspaceDependencies: []
       exports:
         - arrayHasNaN
@@ -43944,7 +43946,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1294
   totalModules: 82
-  totalLinesOfCode: 221919
+  totalLinesOfCode: 221932
   totalExports: 7089
   totalClasses: 61
   totalInterfaces: 603

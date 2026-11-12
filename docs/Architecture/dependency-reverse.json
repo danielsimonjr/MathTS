@@ -2429,7 +2429,10 @@
       "functions/src/matrix/ones.ts",
       "functions/src/matrix/zeros.ts"
     ],
-    "functions/src/utils/sort-numbers.ts": ["functions/src/matrix/sort.ts"],
+    "functions/src/utils/sort-numbers.ts": [
+      "functions/src/matrix/sort.ts",
+      "functions/src/statistics/median.ts"
+    ],
     "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
     "functions/src/typed/numeric.ts": [
       "functions/src/ml/glm.ts",

@@ -60,8 +60,8 @@ export const createSort = /* #__PURE__ */ factory(
       const defaultCmp = getNumberCompare();
       if (defaultCmp && cmp === defaultCmp) {
         const nums = arr as number[];
-        if (descending) sortNumbersDescendingInPlace(nums);
-        else sortNumbersInPlace(nums, false);
+        if (descending) sortNumbersDescendingInPlace(nums, defaultCmp!);
+        else sortNumbersInPlace(nums, false, defaultCmp!);
         return arr;
       }
       const c = descending ? (a: number, b: number) => -cmp(a, b) : cmp;
