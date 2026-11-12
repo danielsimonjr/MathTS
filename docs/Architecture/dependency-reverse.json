@@ -1698,6 +1698,7 @@
     ],
     "functions/src/typed/polynomial-ideal.ts": [
       "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/algebra.ts",
       "functions/src/typed/cas.ts",

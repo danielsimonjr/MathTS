@@ -10,21 +10,13 @@ export function rejectMisusedIndexedSum(args: unknown[]): void {
   if (typeof lo !== 'number' || typeof hi !== 'number') return;
   if (!Number.isFinite(lo) || !Number.isFinite(hi)) return;
 
-  const same = (a: unknown, b: unknown): boolean => {
-    if (a === b) return true;
-    if (a instanceof Complex && b instanceof Complex) return a.equals(b);
-    return false;
-  };
-  if (!same(body, tail)) return;
+  // Only the imaginary unit is the textbook footgun (`sum(i, 1, 3, i)`).
+  // Equal numbers (`sum(2, 1, 4, 2)`) and a scope variable named `i` are real variadic sums.
+  const isImaginaryUnit = (v: unknown): boolean =>
+    v instanceof Complex && Math.abs(v.re) < 1e-12 && Math.abs(v.im - 1) < 1e-12;
+  if (!isImaginaryUnit(body) || !isImaginaryUnit(tail)) return;
 
-  const isImaginaryUnit =
-    body instanceof Complex && Math.abs(body.re) < 1e-12 && Math.abs(body.im - 1) < 1e-12;
-  if (isImaginaryUnit) {
-    throw new TypeError(
-      "sum: dummy index 'i' is the imaginary unit; use summation(expr, index, lo, hi) instead"
-    );
-  }
   throw new TypeError(
-    'sum: indexed summation sum(expr, index, lo, hi) is not supported; use summation(expr, index, lo, hi)'
+    "sum: dummy index 'i' is the imaginary unit; use summation(expr, index, lo, hi) instead"
   );
 }
