@@ -30,7 +30,10 @@ export {
   unitReadingSearchSteps,
   MAX_UNIT_STRING_LENGTH,
 } from './unit/index.js';
+import type { UnitInstance } from './unit/index.js';
 export type { UnitInstance, UnitReadingFactor } from './unit/index.js';
+/** Merged with the {@link Unit} value so `Unit` works in type position (TS2749). */
+export interface Unit extends UnitInstance {}
 
 // Exact unit scales and the one built-in unit table.
 export {

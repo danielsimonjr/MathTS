@@ -59,10 +59,8 @@ describe('Unit arithmetic — dimensional analysis', () => {
   });
 
   it('abs of a negative unit: |−5 cm| = 5 cm', () => {
-    expect((abs(u('-5 cm')) as { toNumeric(u: string): number }).toNumeric('cm')).toBeCloseTo(
-      5,
-      12
-    );
+    const absUnit = abs as (value: unknown) => { toNumeric(unit: string): number };
+    expect(absUnit(u('-5 cm')).toNumeric('cm')).toBeCloseTo(5, 12);
   });
 
   it('adding incompatible dimensions throws (5 cm + 2 s)', () => {

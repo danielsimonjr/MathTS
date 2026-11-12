@@ -70,13 +70,5 @@
     "typescript",
     "wasm",
     "webgpu"
-  ],
-  "peerDependencies": {
-    "@webgpu/types": "^0.1.72"
-  },
-  "peerDependenciesMeta": {
-    "@webgpu/types": {
-      "optional": true
-    }
-  }
+  ]
 }

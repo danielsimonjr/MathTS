@@ -34,9 +34,7 @@
       "@danielsimonjr/mathts-gpu": "^0.2.1",
       "@danielsimonjr/mathts-parallel": "^0.10.0"
     },
-    "peerDependencies": {
-      "@webgpu/types": "^0.1.72"
-    },
+    "peerDependencies": {},
     "optionalDependencies": {}
   },
   "tensor/package.json": {
@@ -193,9 +191,7 @@
   },
   "gpu/package.json": {
     "dependencies": {},
-    "peerDependencies": {
-      "@webgpu/types": "^0.1.72"
-    },
+    "peerDependencies": {},
     "optionalDependencies": {}
   },
   "plot/package.json": {

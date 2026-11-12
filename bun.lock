@@ -175,12 +175,6 @@
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
       },
-      "peerDependencies": {
-        "@webgpu/types": "^0.1.72",
-      },
-      "optionalPeers": [
-        "@webgpu/types",
-      ],
     },
     "linalg": {
       "name": "@danielsimonjr/mathts-linalg",
@@ -212,12 +206,6 @@
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
       },
-      "peerDependencies": {
-        "@webgpu/types": "^0.1.72",
-      },
-      "optionalPeers": [
-        "@webgpu/types",
-      ],
     },
     "numbers": {
       "name": "@danielsimonjr/mathts-numbers",

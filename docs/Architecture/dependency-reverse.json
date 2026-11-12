@@ -2084,6 +2084,12 @@
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
     ],
+    "functions/src/typed/public-type-exports.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/index.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
       "functions/src/linalg-extra2.ts",

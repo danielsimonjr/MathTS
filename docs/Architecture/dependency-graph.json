@@ -3,7 +3,7 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1303,
+    "totalFiles": 1304,
     "totalModules": 82,
     "totalExports": 7128
   },
@@ -121,7 +121,7 @@
     {
       "file": "gpu/src/index.ts",
       "type": "main",
-      "description": "/ <reference types=\"@webgpu/types\" />"
+      "description": "One serialization queue for ALL GPU dispatches (the error scope is a per-device stack)."
     },
     {
       "file": "plot/src/index.ts",
@@ -3587,6 +3587,11 @@
         "internalDependencies": [
           {
             "file": "./unit/index.js",
+            "imports": ["UnitInstance"],
+            "typeOnly": true
+          },
+          {
+            "file": "./unit/index.js",
             "imports": [
               "Unit",
               "createUnitClass",
@@ -3833,7 +3838,8 @@
           "SiDimensionVector",
           "SiDimensionOptions",
           "SiDimensionExponent"
-        ]
+        ],
+        "interfaces": ["Unit"]
       },
       "core/src/types/wasm-loader.ts": {
         "description": "Shared type-only shapes for the two independent WASM loader implementations",
@@ -11751,6 +11757,12 @@
             "imports": ["DtwOptions", "DtwResult"],
             "reExport": true,
             "typeOnly": true
+          },
+          {
+            "file": "./typed/public-type-exports.js",
+            "imports": ["*"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [
@@ -13283,7 +13295,8 @@
           "DiscretizeMethod",
           "BiquadCoefficients",
           "DtwOptions",
-          "DtwResult"
+          "DtwResult",
+          "type * from ./typed/public-type-exports.js"
         ]
       },
       "functions/src/kendall-exact.ts": {
@@ -14972,6 +14985,11 @@
           {
             "file": "../typed/arithmetic.js",
             "imports": ["add", "multiply"]
+          },
+          {
+            "file": "../typed/public-type-exports.js",
+            "imports": ["PublicDet"],
+            "typeOnly": true
           },
           {
             "file": "../arithmetic/abs.js",
@@ -24940,6 +24958,21 @@
             "imports": ["withBinaryScalarGuards"]
           },
           {
+            "file": "./public-type-exports.js",
+            "imports": [
+              "PublicAbs",
+              "PublicAdd",
+              "PublicExp",
+              "PublicLog",
+              "PublicLog10",
+              "PublicMean",
+              "PublicSqrt",
+              "PublicStd",
+              "PublicVariance"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "./complex-promotion.js",
             "imports": [
               "logReal",
@@ -27278,6 +27311,22 @@
           "typedProbability"
         ]
       },
+      "functions/src/typed/public-type-exports.ts": {
+        "description": "Re-export generated public call signatures for typed exports.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/public-overloads.generated.js",
+            "imports": ["*"],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "reExported": ["type * from ../../types/public-overloads.generated.js"]
+      },
       "functions/src/typed/relational.ts": {
         "description": "Typed Relational Functions",
         "externalDependencies": [
@@ -27845,6 +27894,11 @@
           {
             "file": "./f64-kernels.js",
             "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
+          },
+          {
+            "file": "./public-type-exports.js",
+            "imports": ["PublicCos", "PublicSin", "PublicTan"],
+            "typeOnly": true
           },
           {
             "file": "./trig-angle-unit.js",
@@ -44077,6 +44131,21 @@
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
             "imports": [
+              "PublicAbs",
+              "PublicAdd",
+              "PublicCos",
+              "PublicExp",
+              "PublicLog",
+              "PublicMean",
+              "PublicSin",
+              "PublicSqrt",
+              "PublicTan"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": [
               "add",
               "subtract",
               "multiply",
@@ -44376,7 +44445,7 @@
         "constants": ["GPU_MIN_ELEMENTS"]
       },
       "gpu/src/index.ts": {
-        "description": "/ <reference types=\"@webgpu/types\" />",
+        "description": "One serialization queue for ALL GPU dispatches (the error scope is a per-device stack).",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -46097,6 +46166,7 @@
           "functions/src/typed/parallel-map.ts",
           "functions/src/typed/polynomial-ideal.ts",
           "functions/src/typed/probability.ts",
+          "functions/src/typed/public-type-exports.ts",
           "functions/src/typed/relational.ts",
           "functions/src/typed/set.ts",
           "functions/src/typed/signal.ts",
@@ -46896,18 +46966,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1303,
+    "totalTypeScriptFiles": 1304,
     "totalModules": 82,
-    "totalLinesOfCode": 223855,
+    "totalLinesOfCode": 223899,
     "totalExports": 7128,
     "totalClasses": 61,
-    "totalInterfaces": 611,
+    "totalInterfaces": 612,
     "totalFunctions": 2435,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1655,
-    "totalReExports": 3059,
-    "totalTypeOnlyImports": 653,
+    "totalReExports": 3061,
+    "totalTypeOnlyImports": 659,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 0,
