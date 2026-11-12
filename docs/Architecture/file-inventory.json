@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2276,
+  "totalFiles": 2278,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1270,
     "test-only": 0,
     "orphan": 0,
-    "test": 915,
+    "test": 917,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1296,
-    "tests": 915,
+    "tests": 917,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
     "@danielsimonjr/mathts-compat": 17,
-    "@danielsimonjr/mathts-core": 121,
+    "@danielsimonjr/mathts-core": 122,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 564,
-    "@danielsimonjr/mathts-functions": 1030,
+    "@danielsimonjr/mathts-functions": 1031,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 123,
@@ -926,14 +926,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 333
+      "loc": 334
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3596
+      "loc": 3622
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1319,6 +1319,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 86
+    },
+    {
+      "file": "core/tests/types/unit-non-finite-constructor.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 20
     },
     {
       "file": "core/tests/types/unit-supplementary.test.ts",
@@ -8703,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2088
+      "loc": 2097
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9985,6 +9992,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 153
+    },
+    {
+      "file": "functions/tests/dogfood-g33-unit-api-nits.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 42
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -11342,7 +11356,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 662
+      "loc": 663
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",
