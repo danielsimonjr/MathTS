@@ -1,0 +1,79 @@
+{
+  "persona": "ml-engineer",
+  "round": 2,
+  "date": "2026-11-12",
+  "node": "v22.23.4",
+  "os": "linux 6.12.113+",
+  "scratchProject": "/tmp/mathts-ml-engineer-r2",
+  "npmVersions": {
+    "tensor": "0.4.0",
+    "autograd": "0.5.0",
+    "gpu": "0.3.0",
+    "parallel": "0.10.1",
+    "workerpool": "0.4.1",
+    "matrix": "0.10.1",
+    "linalg": "0.2.6",
+    "core": "0.27.0"
+  },
+  "round1Recheck": {
+    "747": "yes",
+    "748": "yes",
+    "749": "yes",
+    "750": "yes",
+    "751": "yes",
+    "752": "yes",
+    "753": "yes",
+    "754": "yes",
+    "755": "yes",
+    "756": "yes",
+    "757": "yes",
+    "758": "no",
+    "759": "yes",
+    "760": "partial",
+    "761": "yes",
+    "762": "no",
+    "763": "yes",
+    "764": "yes",
+    "765": "yes"
+  },
+  "finiteDiffRelMax": {
+    "square": 1.09e-11,
+    "sin": 2.26e-11,
+    "relu": 6.55e-12,
+    "gelu": 1.1e-11
+  },
+  "training": {
+    "xor_relu_mlp_2500_steps": {
+      "stepMs": 0.0435,
+      "predictions": [-4.35e-16, 1.0, 1.0, -1.04e-15]
+    },
+    "linreg_400_steps": {
+      "stepMs": 0.0589,
+      "w": 3.0,
+      "b": 2.0,
+      "mse": 3.32e-24
+    },
+    "spiral_relu_mlp_4000_steps": {
+      "accuracy": 1.0
+    }
+  },
+  "parallel": {
+    "sin_n_500000": {
+      "seqMs": 0.0073,
+      "parMs": 38.89,
+      "ratio": 5338,
+      "note": "Harness timed sync call without await; see sin_n_1000000 below"
+    },
+    "sin_n_1000000_forceParallel": {
+      "seqMsMedian5": 27.4,
+      "parMsMedian5": 75.2,
+      "ratio": 2.75
+    },
+    "DEFAULT_THRESHOLD_BY_OP_sin": "never"
+  },
+  "gpu": {
+    "GPUContext.status": "unavailable",
+    "hasWebGPU": false
+  },
+  "newIssues": [902, 903, 904, 905]
+}
