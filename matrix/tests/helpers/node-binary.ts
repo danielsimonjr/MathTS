@@ -4,7 +4,10 @@
 import { existsSync, realpathSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
 
-/** @returns Absolute path to the Node binary used for isolated perf gates. */
+/**
+ * Resolves the Node binary used for isolated perf gates.
+ * @returns Absolute path to the Node binary.
+ */
 export function nodeBinary(): string {
   if (process.env.PERF_NODE) return process.env.PERF_NODE;
   if (!process.versions.bun) return process.execPath;

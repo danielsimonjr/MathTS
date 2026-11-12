@@ -13687,7 +13687,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 19
+      "loc": 22
     },
     {
       "file": "matrix/tests/helpers/stub-global.ts",

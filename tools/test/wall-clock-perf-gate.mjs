@@ -6,7 +6,10 @@
  * under package test helpers.
  */
 
-/** @param {number[]} xs */
+/**
+ * Median of a numeric sample.
+ * @param {number[]} xs
+ */
 export function median(xs) {
   if (xs.length === 0) return NaN;
   const s = [...xs].sort((a, b) => a - b);
@@ -42,6 +45,7 @@ export function candidateTimeScale() {
 }
 
 /**
+ * Wall-clock milliseconds for one gate arm (candidate arm honors PERF_GATE_CANDIDATE_TIME_SCALE).
  * @param {() => void} fn
  * @param {'baseline' | 'candidate'} arm
  */
@@ -168,7 +172,11 @@ export function wallClockAbRatio(baseline, candidate, opts = {}) {
   return abbaTimedRatio(baseline, candidate, opts.sample);
 }
 
-/** @param {number} ratio @param {number} limit exclusive upper bound */
+/**
+ * Whether a measured ratio is strictly below the gate limit.
+ * @param {number} ratio
+ * @param {number} limit exclusive upper bound
+ */
 export function gatePasses(ratio, limit) {
   return Number.isFinite(ratio) && ratio < limit;
 }
