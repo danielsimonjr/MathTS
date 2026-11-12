@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1288
   totalModules: 82
-  totalExports: 7027
+  totalExports: 7041
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3791,7 +3791,6 @@ modules:
             - BufferPool
             - ShaderManager
             - hasWebGPU
-            - detectGPUCapabilities
             - getRecommendedWorkgroupSize
             - GPUCapabilities
       exports:
@@ -41339,13 +41338,16 @@ modules:
       internalDependencies:
         - file: ./detect.js
           imports:
-            - hasWebGPU
+            - hasWebGPUSurface
             - getGPUAdapter
-            - detectGPUCapabilities
+            - capabilitiesFromAdapter
+            - markWebGPUAdapterUnavailable
+            - resetWebGPUAvailabilityCache
             - GPUCapabilities
       workspaceDependencies: []
       exports:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
         - GPUContext
@@ -41356,6 +41358,7 @@ modules:
         - DeviceLostEvent
       functions:
         - getGlobalGPUContext
+        - initializeGlobalGPUWithReason
         - initializeGlobalGPU
         - destroyGlobalGPU
     gpu/src/ShaderManager.ts:
@@ -41381,9 +41384,16 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41392,9 +41402,16 @@ modules:
         - GPUAdapterInfo
         - GPUCapabilities
       functions:
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
+        - markWebGPUAdapterUnavailable
+        - markWebGPUAdapterAvailable
         - hasWebGPU
         - isBrowser
         - getGPUAdapter
+        - capabilitiesFromAdapter
         - detectGPUCapabilities
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
@@ -41404,6 +41421,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./detect.js
+          imports:
+            - resetWebGPUAvailabilityCache
         - file: ./GPUContext.js
           imports:
             - getGlobalGPUContext
@@ -41440,9 +41460,13 @@ modules:
         - file: ./detect.js
           imports:
             - hasWebGPU
+            - hasWebGPUSurface
+            - resetWebGPUAvailabilityCache
             - isBrowser
             - getGPUAdapter
             - detectGPUCapabilities
+            - enableGpuUnavailableWarnings
+            - disableGpuUnavailableWarnings
             - isGPUSuitableForMatrixOps
             - getRecommendedWorkgroupSize
             - getMaxMatrixSize
@@ -41454,9 +41478,11 @@ modules:
             - GPUContext
             - getGlobalGPUContext
             - initializeGlobalGPU
+            - initializeGlobalGPUWithReason
             - destroyGlobalGPU
             - GPUContextOptions
             - GPUContextStatus
+            - GlobalGPUInitResult
             - DeviceLostEvent
           reExport: true
         - file: ./device.js
@@ -41489,9 +41515,13 @@ modules:
       workspaceDependencies: []
       exports:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41500,9 +41530,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -41518,9 +41550,13 @@ modules:
         - serializeGpu
       reExported:
         - hasWebGPU
+        - hasWebGPUSurface
+        - resetWebGPUAvailabilityCache
         - isBrowser
         - getGPUAdapter
         - detectGPUCapabilities
+        - enableGpuUnavailableWarnings
+        - disableGpuUnavailableWarnings
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
@@ -41529,9 +41565,11 @@ modules:
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
+        - initializeGlobalGPUWithReason
         - destroyGlobalGPU
         - GPUContextOptions
         - GPUContextStatus
+        - GlobalGPUInitResult
         - DeviceLostEvent
         - getGpuDevice
         - resetGpuDevice
@@ -43651,15 +43689,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1288
   totalModules: 82
-  totalLinesOfCode: 219601
-  totalExports: 7027
+  totalLinesOfCode: 219714
+  totalExports: 7041
   totalClasses: 61
   totalInterfaces: 602
-  totalFunctions: 2368
+  totalFunctions: 2376
   totalTypeGuards: 172
   totalEnums: 0
   totalConstants: 1647
-  totalReExports: 3026
+  totalReExports: 3032
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
