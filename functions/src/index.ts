@@ -20,6 +20,7 @@ export * from './typed/cas.js';
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
 export { config, runWithConfig } from './config-api.js'; // GC12: runtime config accessor
+export { importFactory, type ImportOptions } from './core/function/import.js';
 
 // Opt-in AssemblyScript tier. Nothing loads the WASM binary on its own; until
 // `await loadWasm()` resolves true, every function runs its JavaScript path.
@@ -36,6 +37,8 @@ export { to, toBest } from './typed/unit.js';
 export {
   evaluate,
   compileExpr,
+  createInstanceEvaluator,
+  EVALUATE_SCOPE_OMIT,
   parse,
   parser,
   physicsScope,

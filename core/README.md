@@ -5,8 +5,11 @@ Core types, utilities, and configuration for MathTS.
 ## Installation
 
 ```bash
-npm install @danielsimonjr/mathts-core
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-matrix
 ```
+
+The Usage sample below uses `DenseMatrix` from `@danielsimonjr/mathts-matrix`. If you only need
+type guards and numeric types, `mathts-core` alone is enough.
 
 ## Usage
 
@@ -52,6 +55,8 @@ console.log(isMatrix(m)); // true
 - `createSeededRng(seed)` / `SeededRng` — forkable Mulberry32 stream (`next`, `nextInt`, `normal`, `fork`); number seeds match `mulberry32`, strings are FNV-1a UTF-8 (not cryptographically secure)
 
   ```ts
+  import { createSeededRng } from '@danielsimonjr/mathts-core';
+
   const rng = createSeededRng(42);
   rng.next(); // 0.6011037519201636
   rng.fork('a').next(); // 0.668102843221277

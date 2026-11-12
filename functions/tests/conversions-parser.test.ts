@@ -12,7 +12,14 @@ import {
   reviver,
   replacer,
 } from '../src/index.js';
-import { Complex, isComplex } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber,
+  Complex,
+  Unit,
+  isBigNumber,
+  isComplex,
+  isUnit,
+} from '@danielsimonjr/mathts-core';
 
 /** EXPANSION_PLAN W9 — type-conversion exports, stateful parser, JSON helpers. */
 describe('type-conversion exports', () => {
@@ -72,5 +79,19 @@ describe('JSON reviver / replacer', () => {
     expect(back.a).toBe(Infinity);
     expect(back.c).toBe(-Infinity);
     expect(Number.isNaN(back.b)).toBe(true);
+  });
+
+  it('round-trips Unit and BigNumber (#734)', () => {
+    const u = new Unit(5, 'cm');
+    const uJson = JSON.stringify(u, replacer);
+    const uBack = JSON.parse(uJson, reviver);
+    expect(isUnit(uBack)).toBe(true);
+    expect(String(uBack)).toBe('5 cm');
+
+    const b = BigNumber.parse('0.1');
+    const bJson = JSON.stringify(b, replacer);
+    const bBack = JSON.parse(bJson, reviver);
+    expect(isBigNumber(bBack)).toBe(true);
+    expect(String(bBack)).toBe('0.1');
   });
 });

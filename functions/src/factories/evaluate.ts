@@ -13,6 +13,7 @@ import {
   compileExpressionWithDeps as _compileExpression,
 } from '@danielsimonjr/mathts-expression';
 import {
+  BigNumber,
   Complex,
   Fraction,
   I,
@@ -45,7 +46,8 @@ import * as typedFns from '../typed/index.js';
  * A denylist that only covers the object passed to `createEvaluate` is not enough:
  * those callbacks compile against `mathWithTransform`.
  */
-const EVALUATE_SCOPE_OMIT = new Set([
+/** Symbols kept out of the safe expression namespace (also enforced on compat import). */
+export const EVALUATE_SCOPE_OMIT = new Set([
   'import',
   'createUnit',
   'evaluate',
@@ -494,6 +496,35 @@ export function reviver(_key: string, value: unknown): unknown {
         return Complex.fromJSON(tagged as unknown as { re: number; im: number });
       case 'Fraction':
         return Fraction.fromJSON(tagged as unknown as { n: string; d: string });
+      case 'Unit':
+        return Unit.fromJSON(tagged as unknown as Parameters<typeof Unit.fromJSON>[0]);
+      case 'BigNumber':
+        return BigNumber.fromJSON({
+          value: typeof tagged.value === 'string' ? tagged.value : String(tagged.value),
+        });
+      case 'DenseMatrix': {
+        const Ctor = factoryScope.DenseMatrix as new (data: {
+          data: unknown;
+          size: number[];
+        }) => unknown;
+        const data = tagged.data;
+        const size = Array.isArray(tagged.size) ? (tagged.size as number[]) : [];
+        return new Ctor({ data, size });
+      }
+      case 'SparseMatrix': {
+        const Ctor = factoryScope.SparseMatrix as new (data: {
+          values: unknown;
+          index: unknown;
+          ptr: unknown;
+          size: unknown;
+        }) => unknown;
+        return new Ctor({
+          values: tagged.values,
+          index: tagged.index,
+          ptr: tagged.ptr,
+          size: tagged.size,
+        });
+      }
       case 'number':
         if (tagged.value === 'Infinity') return Infinity;
         if (tagged.value === '-Infinity') return -Infinity;
@@ -502,4 +533,77 @@ export function reviver(_key: string, value: unknown): unknown {
     }
   }
   return value;
+}
+
+function scrubImportedExpressionScope(imported: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...imported };
+  for (const key of EVALUATE_SCOPE_OMIT) {
+    delete out[key];
+  }
+  return out;
+}
+
+function buildScopedMathNamespace(imported: Record<string, unknown>): Record<string, unknown> {
+  return omitEvaluateInternals({ ...mathScope, ...scrubImportedExpressionScope(imported) });
+}
+
+function buildUnsafeScopedMathNamespace(
+  imported: Record<string, unknown>
+): Record<string, unknown> {
+  const scoped = buildScopedMathNamespace(imported);
+  for (const key of EVALUATE_SCOPE_OMIT) {
+    if (Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
+      scoped[key] = fullMathScope[key];
+    }
+  }
+  return scoped;
+}
+
+/**
+ * Evaluate/compile pair that closes over per-instance imports (compat `math.import`).
+ * Denylisted symbols cannot be reached from safe evaluate, even if import tries to
+ * override them.
+ */
+export function createInstanceEvaluator(importedExpressionScope: Record<string, unknown>): {
+  evaluate: typeof evaluate;
+  compile: typeof compileExpr;
+} {
+  const safeScope = buildScopedMathNamespace(importedExpressionScope);
+  const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope);
+  const safeEvaluate = createEvaluate(parse, safeScope, configFingerprint);
+  const unsafeEvaluate = createEvaluate(parse, unsafeScope, configFingerprint);
+
+  function evaluateBound(
+    exprOrExprs: string | string[],
+    scope?: Record<string, unknown> | Scope,
+    options?: PhysicsEvaluateOptions
+  ): unknown | unknown[] {
+    const physics = assertPhysicsOptions(options);
+    const bound = physics === undefined ? scope : physicsScope(scope, physics);
+    const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
+    const runner = options?.unsafe === true ? unsafeEvaluate : safeEvaluate;
+    if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
+    return runner(exprOrExprs, bound, inner);
+  }
+
+  function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
+    const compiled = _compileExpression(
+      parse,
+      options?.unsafe === true ? unsafeScope : safeScope,
+      expr,
+      options?.unsafe === true ? { unsafe: true } : undefined
+    );
+    const physics = assertPhysicsOptions(options);
+    if (physics === undefined) return compiled;
+    return {
+      evaluate(scope?: Record<string, unknown> | Scope): unknown {
+        return compiled.evaluate(physicsScope(scope, physics));
+      },
+    };
+  }
+
+  return {
+    evaluate: evaluateBound as typeof evaluate,
+    compile: compileBound as typeof compileExpr,
+  };
 }

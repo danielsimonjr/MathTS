@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1298,
+    "totalFiles": 1299,
     "totalModules": 82,
-    "totalExports": 7105
+    "totalExports": 7112
   },
   "entryPoints": [
     {
@@ -10269,6 +10269,11 @@
             "reExport": true
           },
           {
+            "file": "./core/function/import.js",
+            "imports": ["importFactory", "ImportOptions"],
+            "reExport": true
+          },
+          {
             "file": "./wasm/WasmLoader.js",
             "imports": ["loadWasm", "isWasmLoaded"],
             "reExport": true
@@ -10283,6 +10288,8 @@
             "imports": [
               "evaluate",
               "compileExpr",
+              "createInstanceEvaluator",
+              "EVALUATE_SCOPE_OMIT",
               "parse",
               "parser",
               "physicsScope",
@@ -11780,12 +11787,16 @@
         "exports": [
           "config",
           "runWithConfig",
+          "importFactory",
+          "ImportOptions",
           "loadWasm",
           "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
           "compileExpr",
+          "createInstanceEvaluator",
+          "EVALUATE_SCOPE_OMIT",
           "parse",
           "parser",
           "physicsScope",
@@ -12526,12 +12537,16 @@
           "* from ./geometry/frustum.js",
           "config",
           "runWithConfig",
+          "importFactory",
+          "ImportOptions",
           "loadWasm",
           "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
           "compileExpr",
+          "createInstanceEvaluator",
+          "EVALUATE_SCOPE_OMIT",
           "parse",
           "parser",
           "physicsScope",
@@ -14887,6 +14902,7 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": [
+              "BigNumber",
               "Complex",
               "Fraction",
               "I",
@@ -14903,13 +14919,15 @@
           }
         ],
         "exports": [
+          "EVALUATE_SCOPE_OMIT",
           "parse",
           "physicsScope",
           "evaluate",
           "compileExpr",
           "parser",
           "replacer",
-          "reviver"
+          "reviver",
+          "createInstanceEvaluator"
         ],
         "interfaces": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"],
         "functions": [
@@ -14920,9 +14938,10 @@
           "compileExpr",
           "parser",
           "replacer",
-          "reviver"
+          "reviver",
+          "createInstanceEvaluator"
         ],
-        "constants": ["parse"]
+        "constants": ["EVALUATE_SCOPE_OMIT", "parse"]
       },
       "functions/src/factories/index.ts": {
         "description": "Activated mathjs leaf factory functions.",
@@ -43824,6 +43843,10 @@
             "imports": ["createChain", "Chain"]
           },
           {
+            "file": "./instance-api.js",
+            "imports": ["wireMathjsInstanceApi"]
+          },
+          {
             "file": "./shims.js",
             "imports": ["*"],
             "reExport": true
@@ -43905,6 +43928,50 @@
         "functions": ["create"],
         "constants": ["all"]
       },
+      "compat/src/instance-api.ts": {
+        "description": "mathjs instance methods on `create(all)`: import, typed, compile, and",
+        "externalDependencies": [
+          {
+            "package": "typed-function",
+            "imports": ["typedFunction"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./index.js",
+            "imports": ["MathJSConfig"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": [
+              "createInstanceEvaluator",
+              "EVALUATE_SCOPE_OMIT",
+              "reviver",
+              "replacer",
+              "runWithConfig",
+              "PhysicsEvaluateOptions"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": ["importFactory", "ImportOptions"]
+          }
+        ],
+        "exports": ["wireMathjsInstanceApi"],
+        "interfaces": ["CompatExpressionLayers", "WiredCompatInstance"],
+        "functions": ["wireMathjsInstanceApi"]
+      },
       "compat/src/shims.ts": {
         "description": "mathjs Compatibility Shims",
         "externalDependencies": [],
@@ -43965,7 +44032,9 @@
               "lcm",
               "round",
               "floor",
-              "ceil"
+              "ceil",
+              "matrix",
+              "sparse"
             ]
           },
           {
@@ -45027,10 +45096,10 @@
           "functions/src/typed/algebra.ts"
         ]
       ],
-      "typeOnly": [],
-      "total": 2,
+      "typeOnly": [["compat/src/index.ts", "compat/src/instance-api.ts", "compat/src/index.ts"]],
+      "total": 3,
       "runtimeCount": 2,
-      "typeOnlyCount": 0
+      "typeOnlyCount": 1
     },
     "layers": [
       {
@@ -46642,7 +46711,12 @@
       },
       {
         "name": "Compat",
-        "files": ["compat/src/chain.ts", "compat/src/index.ts", "compat/src/shims.ts"]
+        "files": [
+          "compat/src/chain.ts",
+          "compat/src/index.ts",
+          "compat/src/instance-api.ts",
+          "compat/src/shims.ts"
+        ]
       },
       {
         "name": "Gpu",
@@ -46691,20 +46765,20 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1298,
+    "totalTypeScriptFiles": 1299,
     "totalModules": 82,
-    "totalLinesOfCode": 222637,
-    "totalExports": 7105,
+    "totalLinesOfCode": 222968,
+    "totalExports": 7112,
     "totalClasses": 61,
-    "totalInterfaces": 608,
-    "totalFunctions": 2416,
+    "totalInterfaces": 610,
+    "totalFunctions": 2418,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1653,
-    "totalReExports": 3054,
-    "totalTypeOnlyImports": 652,
+    "totalConstants": 1654,
+    "totalReExports": 3058,
+    "totalTypeOnlyImports": 653,
     "runtimeCircularDeps": 2,
-    "typeOnlyCircularDeps": 0,
+    "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0
   }
