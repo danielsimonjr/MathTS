@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { join } from 'node:path';
 import { repoRoot, workspaceMathtsClosure } from './workspaces.mjs';
 
 describe('workspaceMathtsClosure', () => {
