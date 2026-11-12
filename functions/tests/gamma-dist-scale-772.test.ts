@@ -130,6 +130,7 @@ describe('#772 gammaDist rate vs SciPy scale', () => {
     expect(() =>
       gammaDist({ shape: 2, scale: 2, rate: 1 } as { shape: number; scale: number })
     ).toThrow(/not both/);
+    // @ts-expect-error options form must not take a second positional rate
     expect(() => gammaDist({ shape: 2, scale: 2 }, 1)).toThrow(/not both/);
   });
 

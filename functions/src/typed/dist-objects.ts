@@ -619,6 +619,12 @@ export interface GammaDistNamedOptions {
   scale: f64;
 }
 
+function _gammaPositiveFinite(name: string, value: f64): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`gammaDist: ${name} must be finite and strictly positive`);
+  }
+}
+
 /**
  * Create a Gamma distribution object.
  *
@@ -642,12 +648,6 @@ export interface GammaDistNamedOptions {
  * gammaDist(2, { scale: 2 }).pdf(1); // 0.15163266492815836
  * gammaDist(2, { scale: 2 }).mean; // 4
  */
-function _gammaPositiveFinite(name: string, value: f64): void {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new Error(`gammaDist: ${name} must be finite and strictly positive`);
-  }
-}
-
 export function gammaDist(shape: f64, rateOrOptions?: f64 | GammaDistOptions): Distribution;
 export function gammaDist(options: GammaDistNamedOptions): Distribution;
 export function gammaDist(
