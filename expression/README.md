@@ -44,8 +44,9 @@ typeset natively by modern browsers — no external dependencies.
 
 ```ts
 import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
+import { parse, evaluate } from '@danielsimonjr/mathts-functions';
 
-const node = parse('c = 1 / sqrt(eps0 * mu0)'); // parse from the functions package
+const node = parse('c = 1 / sqrt(eps0 * mu0)');
 node.toString(); // 'c = 1 / sqrt(eps0 * mu0)'
 node.toTex(); // ' c=\\frac{1}{\\sqrt{ eps0\\cdot mu0}}'
 node.toMathML(); // '<mrow><mi>c</mi><mo>=</mo><mfrac>…</mfrac></mrow>'
@@ -53,6 +54,8 @@ mathMLDocument(node); // '<math xmlns="…" display="block">…</math>'  (render
 ```
 
 `mathMLError(src)` produces a `<math><merror>` element for a parse failure.
+
+The wired `evaluate` from `@danielsimonjr/mathts-functions` runs a **safe sandbox** by default: assignments and function definitions (`x = 3`, `f(x) = x^2`) are rejected unless you pass `{ unsafe: true }` (trusted input only). Parsing and `toTex()` still work on those strings.
 
 ## License
 

@@ -38,11 +38,22 @@ import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
 import * as typedFns from '../typed/index.js';
 
+/** Compiler / dispatch internals must not appear as live symbols in the safe evaluate scope. */
+const EVALUATE_SCOPE_OMIT = new Set(['parse', 'typed', 'compile', 'parser']);
+
+function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...scope };
+  for (const key of EVALUATE_SCOPE_OMIT) {
+    delete out[key];
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Step 1: Build the full math scope
 // ---------------------------------------------------------------------------
 
-const mathScope: Record<string, unknown> = {
+const mathScope: Record<string, unknown> = omitEvaluateInternals({
   // Core scope (typed, config, Complex, BigNumber, etc.)
   ...factoryScope,
 
@@ -52,8 +63,9 @@ const mathScope: Record<string, unknown> = {
   // Typed functions (add, subtract, multiply, divide, pow, sin, cos, etc.)
   ...(typedFns as Record<string, unknown>),
 
-  // Math constants
+  // Math constants (Unicode aliases for notebook input)
   pi: Math.PI,
+  π: Math.PI,
   e: Math.E,
   tau: 2 * Math.PI,
   phi: PHI,
@@ -69,7 +81,7 @@ const mathScope: Record<string, unknown> = {
   null: null,
   true: true,
   false: false,
-};
+});
 
 // ---------------------------------------------------------------------------
 // Step 1b: Expression-language transforms (wired 2026-07-05)
@@ -142,7 +154,14 @@ function configFingerprint(): string {
   return key;
 }
 
+/** Trusted-input scope: same as the safe scope plus `parse` for re-parsing sub-expressions. */
+const unsafeMathScope: Record<string, unknown> = {
+  ...mathScope,
+  parse,
+};
+
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
+const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
 
 /**
  * Exact elementary charge (CODATA / 2019 SI), in coulombs.
@@ -299,8 +318,9 @@ export function evaluate(
   const physics = assertPhysicsOptions(options);
   const bound = physics === undefined ? scope : physicsScope(scope, physics);
   const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
-  if (Array.isArray(exprOrExprs)) return _evaluate(exprOrExprs, bound, inner);
-  return _evaluate(exprOrExprs, bound, inner);
+  const runner = options?.unsafe === true ? _evaluateUnsafe : _evaluate;
+  if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
+  return runner(exprOrExprs, bound, inner);
 }
 
 /**

@@ -156,6 +156,7 @@ const UNARY_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
   '+': 'unaryPlus',
   '~': 'bitNot',
   not: 'not',
+  '√': 'sqrt',
 });
 
 const POSTFIX_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
@@ -445,6 +446,13 @@ export const createParse = /* #__PURE__ */ factory(
       const c1 = currentCharacter(state);
       const c2 = currentString(state, 2);
       const c3 = currentString(state, 3);
+
+      if (c1 === '√') {
+        state.tokenType = TOKENTYPE.DELIMITER;
+        state.token = '√';
+        next(state);
+        return;
+      }
 
       let delim = '';
       if (c3.length === 3 && DELIMITERS[c3]) {
@@ -1935,6 +1943,16 @@ export const createParse = /* #__PURE__ */ factory(
 
         const numericType = safeNumberType(numberStr, config);
         const value = numeric(numberStr, numericType);
+        if (
+          numericType === 'number' &&
+          typeof value === 'number' &&
+          !Number.isFinite(value) &&
+          (/[eE]/.test(numberStr) || /^[+-]?\d+$/.test(numberStr))
+        ) {
+          throw new SyntaxError(
+            `Numeric overflow: "${numberStr.length > 48 ? numberStr.slice(0, 48) + '…' : numberStr}" is out of IEEE-754 range`
+          );
+        }
 
         return new ConstantNode(value);
       }
