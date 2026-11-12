@@ -55,17 +55,14 @@ describe('M7 — welchPSD / bartlettPSD result shell', () => {
     expect(b.frequencies).toEqual([]);
   });
 
-  it('frameLength larger than signal (current dispatch behavior)', () => {
+  it('frameLength larger than signal throws (dogfood #768)', () => {
     const signal = [1, 2, 3];
-    const frameLength = 16;
-    const w = welchPSD(signal, { frameLength });
-    expect(w.psd).toEqual([]);
-    expect(w.frequencies).toEqual([]);
-    expect(w.frameLength).toBe(frameLength);
+    expect(() => welchPSD(signal, { frameLength: 16 })).toThrow(/shorter than frameLength/);
+    expect(() => bartlettPSD(signal, { frameLength: 16 })).toThrow(/shorter than frameLength/);
   });
 
   it('number[] and Float64Array inputs match', () => {
-    const arr = [0.5, -0.5, 0.25, -0.25, 0.125];
+    const arr = [0.5, -0.5, 0.25, -0.25, 0.125, 0, 0, 0];
     const typed = Float64Array.from(arr);
     const fromArr = welchPSD(arr, { frameLength: 8, overlap: 0, window: 'rect' });
     const fromTyped = welchPSD(typed, { frameLength: 8, overlap: 0, window: 'rect' });
