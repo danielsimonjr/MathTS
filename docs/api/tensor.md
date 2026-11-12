@@ -48,15 +48,15 @@ new Tensor(shape: number[], data: Float64Array, axisLabels?: Index[])
 
 #### Static Methods
 
-| Method            | Signature                                             | Description                       |
-| ----------------- | ----------------------------------------------------- | --------------------------------- |
-| `sizeOf`          | `(shape: number[]) => number`                         | Total element count               |
-| `rowMajorStrides` | `(shape: number[]) => number[]`                       | Strides for a row-major layout    |
-| `fromNested`      | `(data: NestedArray, shape: number[]) => Tensor`      | Build from nested arrays          |
-| `identity`        | `(n: number) => Tensor`                               | Rank-2 identity                   |
-| `fromDenseMatrix` | `(m: DenseMatrix) => Tensor`                          | Rank-2 bridge from `matrix`       |
-| `broadcastShape`  | `(a: number[], b: number[]) => number[]`              | NumPy right-align broadcast rules |
-| `einsum`          | `(spec: EinsumSpec, ...operands: Tensor[]) => Tensor` | Einstein summation                |
+| Method            | Signature                                             | Description                                           |
+| ----------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| `sizeOf`          | `(shape: number[]) => number`                         | Total element count                                   |
+| `rowMajorStrides` | `(shape: number[]) => number[]`                       | Strides for a row-major layout                        |
+| `fromNested`      | `(data: NestedArray, shape?: number[]) => Tensor`     | Build from nested arrays; shape inferred when omitted |
+| `identity`        | `(n: number) => Tensor`                               | Rank-2 identity                                       |
+| `fromDenseMatrix` | `(m: DenseMatrix) => Tensor`                          | Rank-2 bridge from `matrix`                           |
+| `broadcastShape`  | `(a: number[], b: number[]) => number[]`              | NumPy right-align broadcast rules                     |
+| `einsum`          | `(spec: EinsumSpec, ...operands: Tensor[]) => Tensor` | Einstein summation                                    |
 
 #### Conversion
 
