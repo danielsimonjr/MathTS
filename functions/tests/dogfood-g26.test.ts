@@ -96,19 +96,21 @@ describe('G26 #694 lusolve uses packed matrix lu', () => {
       M[i][i] += n;
     }
     const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
+    // Three samples of one n=1000 factorization sit inside the noise of the
+    // 1.2 gate (a quiet run measured 1.06; a loaded runner reported 1.41).
     const tFac = medianTime(
       () => {
         luSolve(lu(M), b);
       },
-      2,
-      3
+      3,
+      9
     );
     const tSolve = medianTime(
       () => {
         lusolve(M, b);
       },
-      2,
-      3
+      3,
+      9
     );
     expect(tSolve / tFac).toBeLessThan(1.2);
   }, 120_000);
