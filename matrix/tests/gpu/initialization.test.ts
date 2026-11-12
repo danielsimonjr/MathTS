@@ -272,6 +272,16 @@ describe('GPU Backend', () => {
 
       expect(success).toBe(false);
       expect(backend.status).toBe('unsupported');
+      expect(backend.lastError).toBeNull();
+    });
+
+    it('concurrent initialize calls share one result and do not throw', async () => {
+      const backend = new GPUBackend();
+      const [a, b] = await Promise.all([backend.initialize(), backend.initialize()]);
+      expect(a).toBe(false);
+      expect(b).toBe(false);
+      expect(backend.status).toBe('unsupported');
+      expect(backend.lastError).toBeNull();
     });
 
     it('should not use GPU when not ready', () => {

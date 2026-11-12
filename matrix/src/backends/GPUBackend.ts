@@ -11,7 +11,6 @@ import {
   BufferPool,
   ShaderManager,
   hasWebGPU,
-  detectGPUCapabilities,
   getRecommendedWorkgroupSize,
   type GPUCapabilities,
 } from '@danielsimonjr/mathts-gpu';
@@ -58,6 +57,7 @@ export class GPUBackend {
   private threshold: number;
   private workgroupSize: [number, number, number] = [16, 16, 1];
   private useGlobalContext: boolean;
+  private _initPromise: Promise<boolean> | null = null;
 
   constructor(options: GPUBackendOptions = {}) {
     this.threshold = options.threshold ?? DEFAULT_THRESHOLD;
@@ -99,31 +99,30 @@ export class GPUBackend {
     if (this._status === 'ready') {
       return true;
     }
-
-    if (this._status === 'initializing') {
-      throw new Error('Already initializing');
+    if (this._initPromise) {
+      return this._initPromise;
     }
+    this._initPromise = this._initializeOnce(options);
+    try {
+      return await this._initPromise;
+    } finally {
+      this._initPromise = null;
+    }
+  }
 
+  private async _initializeOnce(options: GPUBackendOptions): Promise<boolean> {
     this._status = 'initializing';
 
     try {
-      // Check WebGPU support
+      // No API surface, or a previous probe already found no adapter.
+      // That is the quiet path: unsupported, with no synthetic Error.
       if (!hasWebGPU()) {
         this._status = 'unsupported';
-        this._lastError = new Error('WebGPU is not supported');
+        this._lastError = null;
         return false;
       }
 
-      // Detect capabilities
-      this._capabilities = await detectGPUCapabilities(options.preferHighPerformance ?? true);
-
-      if (!this._capabilities.supported) {
-        this._status = 'unsupported';
-        this._lastError = new Error('WebGPU adapter not available');
-        return false;
-      }
-
-      // Get or create context
+      // Get or create context. One adapter request lives in GPUContext.
       if (this.useGlobalContext) {
         this.context = getGlobalGPUContext();
       } else {
@@ -151,7 +150,13 @@ export class GPUBackend {
       registerBuiltinShaders(this.shaderManager);
       this.shaderManager.precompileRegistered();
 
-      // Get recommended workgroup size
+      this._capabilities = this.context.capabilities;
+      if (!this._capabilities?.supported) {
+        this._status = 'unsupported';
+        this._lastError = null;
+        return false;
+      }
+
       this.workgroupSize = getRecommendedWorkgroupSize(this._capabilities);
 
       this._status = 'ready';

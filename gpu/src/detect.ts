@@ -60,6 +60,23 @@ const NO_WEBGPU_CAPABILITIES: GPUCapabilities = {
 /** After a failed adapter request, `hasWebGPU()` reports false (quiet fallback). */
 let webgpuAdapterAvailable: boolean | null = null;
 
+/** Opt-in console warning when the adapter is missing. Off so Node stays quiet. */
+let warnOnUnavailable = false;
+let warnedUnavailable = false;
+
+/**
+ * Log once when WebGPU is missing. Default is silent; status stays the record.
+ */
+export function enableGpuUnavailableWarnings(): void {
+  warnOnUnavailable = true;
+}
+
+/** Turn the unavailable warning back off and allow a future warning. */
+export function disableGpuUnavailableWarnings(): void {
+  warnOnUnavailable = false;
+  warnedUnavailable = false;
+}
+
 /**
  * Whether the WebGPU API surface is present (`navigator.gpu`), without proving an adapter.
  */
@@ -82,6 +99,12 @@ export function resetWebGPUAvailabilityCache(): void {
  */
 export function markWebGPUAdapterUnavailable(): void {
   webgpuAdapterAvailable = false;
+  if (warnOnUnavailable && !warnedUnavailable) {
+    warnedUnavailable = true;
+    console.warn(
+      'WebGPU adapter unavailable; staying on the CPU path (GPUContext.status "unavailable").'
+    );
+  }
 }
 
 /**
@@ -122,13 +145,38 @@ export async function getGPUAdapter(
     return null;
   }
 
-  try {
-    const gpu = navigator.gpu;
-    const adapter = await gpu.requestAdapter(options);
-    return adapter;
-  } catch {
-    return null;
-  }
+  // A rejection is a real failure (invalid options, security error). Only a
+  // resolved `null` means "no adapter" — callers must not treat those alike.
+  const adapter = await navigator.gpu.requestAdapter(options);
+  if (adapter) markWebGPUAdapterAvailable();
+  else markWebGPUAdapterUnavailable();
+  return adapter;
+}
+
+export function capabilitiesFromAdapter(adapter: GPUAdapter): GPUCapabilities {
+  const info = adapter.info;
+  const limits = adapter.limits;
+  return {
+    supported: true,
+    adapterInfo: {
+      vendor: info?.vendor || 'unknown',
+      architecture: info?.architecture || 'unknown',
+      device: info?.device || 'unknown',
+      description: info?.description || 'unknown',
+    },
+    maxBufferSize: limits.maxBufferSize,
+    maxWorkgroupSize: [
+      limits.maxComputeWorkgroupSizeX,
+      limits.maxComputeWorkgroupSizeY,
+      limits.maxComputeWorkgroupSizeZ,
+    ],
+    maxStorageBufferBindingSize: limits.maxStorageBufferBindingSize,
+    maxComputeInvocationsPerWorkgroup: limits.maxComputeInvocationsPerWorkgroup,
+    maxComputeWorkgroupsPerDimension: limits.maxComputeWorkgroupsPerDimension,
+    isFallbackAdapter:
+      (adapter as unknown as { isFallbackAdapter?: boolean }).isFallbackAdapter ?? false,
+    features: Array.from(adapter.features),
+  };
 }
 
 /**
@@ -142,59 +190,19 @@ export async function detectGPUCapabilities(
     return NO_WEBGPU_CAPABILITIES;
   }
 
-  try {
-    const gpu = navigator.gpu;
-
-    // Request adapter with preferred power preference
-    const adapter = await gpu.requestAdapter({
-      powerPreference: preferHighPerformance ? 'high-performance' : 'low-power',
-    });
-
-    if (!adapter) {
-      markWebGPUAdapterUnavailable();
-      return NO_WEBGPU_CAPABILITIES;
-    }
-
-    markWebGPUAdapterAvailable();
-
-    // Get adapter info
-    const info = adapter.info || ({} as GPUAdapterInfo);
-    const adapterInfo: GPUAdapterInfo = {
-      vendor: info.vendor || 'unknown',
-      architecture: info.architecture || 'unknown',
-      device: info.device || 'unknown',
-      description: info.description || 'unknown',
-    };
-
-    // Get limits
-    const limits = adapter.limits;
-
-    // Get features
-    const features = Array.from(adapter.features);
-
-    return {
-      supported: true,
-      adapterInfo,
-      maxBufferSize: limits.maxBufferSize,
-      maxWorkgroupSize: [
-        limits.maxComputeWorkgroupSizeX,
-        limits.maxComputeWorkgroupSizeY,
-        limits.maxComputeWorkgroupSizeZ,
-      ],
-      maxStorageBufferBindingSize: limits.maxStorageBufferBindingSize,
-      maxComputeInvocationsPerWorkgroup: limits.maxComputeInvocationsPerWorkgroup,
-      maxComputeWorkgroupsPerDimension: limits.maxComputeWorkgroupsPerDimension,
-      isFallbackAdapter:
-        (adapter as unknown as { isFallbackAdapter?: boolean }).isFallbackAdapter ?? false,
-      features,
-    };
-  } catch {
-    return NO_WEBGPU_CAPABILITIES;
-  }
+  const adapter = await getGPUAdapter({
+    powerPreference: preferHighPerformance ? 'high-performance' : 'low-power',
+  });
+  if (!adapter) return NO_WEBGPU_CAPABILITIES;
+  return capabilitiesFromAdapter(adapter);
 }
 
 /**
  * Check if GPU is suitable for matrix operations
+ * Synchronous. Pass the object from `detectGPUCapabilities()`. Omitted
+ * capabilities are the unsupported sentinel, so a zero-arg call returns false
+ * instead of throwing — it does not probe the GPU.
+ *
  * @param capabilities - GPU capabilities to check
  * @param minBufferSize - Minimum required buffer size (default 256MB)
  */

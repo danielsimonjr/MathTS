@@ -1311,9 +1311,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                     | Import                                                                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` |
+| Package                     | Import                                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, getRecommendedWorkgroupSize, GPUCapabilities` |
 
 **Internal Dependencies:**
 
@@ -7636,6 +7636,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `FsolveOptions`
+- Types: `FsolveField`
 - Functions: `fsolve`
 - Constants: `root`
 
@@ -18928,9 +18929,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                                                                                                                           | Type   |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `./detect.js` | `hasWebGPUSurface, getGPUAdapter, detectGPUCapabilities, markWebGPUAdapterUnavailable, markWebGPUAdapterAvailable, resetWebGPUAvailabilityCache, GPUCapabilities` | Import |
+| File          | Imports                                                                                                                                 | Type   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./detect.js` | `hasWebGPUSurface, getGPUAdapter, capabilitiesFromAdapter, markWebGPUAdapterUnavailable, resetWebGPUAvailabilityCache, GPUCapabilities` | Import |
 
 **Exports:**
 
@@ -18961,7 +18962,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `markWebGPUAdapterUnavailable`, `markWebGPUAdapterAvailable`, `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+- Functions: `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `markWebGPUAdapterUnavailable`, `markWebGPUAdapterAvailable`, `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `capabilitiesFromAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
 
 ---
 
@@ -18993,19 +18994,19 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                                                                                                                                                                                                                 | Type      |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                      | Re-export |
-| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                          | Re-export |
-| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                 | Re-export |
-| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                         | Re-export |
-| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                           | Re-export |
-| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                          | Re-export |
+| File                 | Imports                                                                                                                                                                                                                                                                              | Type      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, enableGpuUnavailableWarnings, disableGpuUnavailableWarnings, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                                                                                   | Re-export |
+| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                                                                                       | Re-export |
+| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                                                                              | Re-export |
+| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                                                                                      | Re-export |
+| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                                                                                        | Re-export |
+| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                                                                                       | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
+- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
 
 ---
 
@@ -20286,12 +20287,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218668 |
-| Total Exports           | 7022   |
-| Total Re-exports        | 3025   |
+| Total Lines of Code     | 218759 |
+| Total Exports           | 7027   |
+| Total Re-exports        | 3027   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2367   |
+| Total Functions         | 2370   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |

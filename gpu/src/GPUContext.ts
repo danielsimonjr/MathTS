@@ -7,9 +7,8 @@
 import {
   hasWebGPUSurface,
   getGPUAdapter,
-  detectGPUCapabilities,
+  capabilitiesFromAdapter,
   markWebGPUAdapterUnavailable,
-  markWebGPUAdapterAvailable,
   resetWebGPUAvailabilityCache,
   type GPUCapabilities,
 } from './detect.js';
@@ -143,27 +142,21 @@ export class GPUContext {
     }
 
     try {
-      // Detect capabilities
-      this._capabilities = await detectGPUCapabilities(options.preferHighPerformance ?? true);
-
-      if (!this._capabilities.supported) {
-        markWebGPUAdapterUnavailable();
-        this._markUnavailable();
-        return false;
-      }
-
-      // Get adapter
+      // One adapter request. A second request could resolve null and flip a
+      // live adapter to "unavailable". Default power preference matches
+      // detectGPUCapabilities (high-performance unless explicitly low-power).
+      const preferHigh = options.preferHighPerformance !== false;
       this.adapter = await getGPUAdapter({
-        powerPreference: options.preferHighPerformance ? 'high-performance' : 'low-power',
+        powerPreference: preferHigh ? 'high-performance' : 'low-power',
       });
 
       if (!this.adapter) {
-        markWebGPUAdapterUnavailable();
+        this._capabilities = null;
         this._markUnavailable();
         return false;
       }
 
-      markWebGPUAdapterAvailable();
+      this._capabilities = capabilitiesFromAdapter(this.adapter);
 
       // Request device with required features and limits
       const deviceDescriptor: GPUDeviceDescriptor = {
@@ -183,6 +176,7 @@ export class GPUContext {
       // Setup device lost handler
       this.device.lost.then((info) => {
         this._status = 'lost';
+        this._lastError = new Error(info.message || 'GPU device lost');
         const event: DeviceLostEvent = {
           reason: info.reason,
           message: info.message,
@@ -196,11 +190,12 @@ export class GPUContext {
         this._lastError = new Error(`GPU Error: ${event.error.message}`);
       };
 
+      this._lastError = null;
       this._status = 'ready';
       return true;
     } catch (error) {
       this._status = 'error';
-      this._lastError = error as Error;
+      this._lastError = error instanceof Error ? error : new Error(String(error));
       return false;
     }
   }

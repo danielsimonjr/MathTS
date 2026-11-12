@@ -12,6 +12,8 @@ export {
   isBrowser,
   getGPUAdapter,
   detectGPUCapabilities,
+  enableGpuUnavailableWarnings,
+  disableGpuUnavailableWarnings,
   isGPUSuitableForMatrixOps,
   getRecommendedWorkgroupSize,
   getMaxMatrixSize,

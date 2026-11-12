@@ -34,9 +34,11 @@ describe('#835 WebGPU init status in Chromium', () => {
     if (!init) {
       expect(status).toBe('unavailable');
       expect(hasWebGPU()).toBe(false);
+      expect(ctx.lastError).toBeNull();
     } else {
       expect(status).toBe('ready');
       expect(hasWebGPU()).toBe(true);
+      expect(ctx.getDevice()).toBeTruthy();
     }
 
     const withReason = await initializeGlobalGPUWithReason();

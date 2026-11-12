@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1287,
     "totalModules": 82,
-    "totalExports": 7022
+    "totalExports": 7027
   },
   "entryPoints": [
     {
@@ -3919,7 +3919,6 @@
               "BufferPool",
               "ShaderManager",
               "hasWebGPU",
-              "detectGPUCapabilities",
               "getRecommendedWorkgroupSize",
               "GPUCapabilities"
             ]
@@ -43575,9 +43574,8 @@
             "imports": [
               "hasWebGPUSurface",
               "getGPUAdapter",
-              "detectGPUCapabilities",
+              "capabilitiesFromAdapter",
               "markWebGPUAdapterUnavailable",
-              "markWebGPUAdapterAvailable",
               "resetWebGPUAvailabilityCache",
               "GPUCapabilities"
             ]
@@ -43622,6 +43620,8 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "hasWebGPUSurface",
           "resetWebGPUAvailabilityCache",
           "markWebGPUAdapterUnavailable",
@@ -43629,6 +43629,7 @@
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43636,6 +43637,8 @@
         ],
         "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "hasWebGPUSurface",
           "resetWebGPUAvailabilityCache",
           "markWebGPUAdapterUnavailable",
@@ -43643,6 +43646,7 @@
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43691,6 +43695,8 @@
               "isBrowser",
               "getGPUAdapter",
               "detectGPUCapabilities",
+              "enableGpuUnavailableWarnings",
+              "disableGpuUnavailableWarnings",
               "isGPUSuitableForMatrixOps",
               "getRecommendedWorkgroupSize",
               "getMaxMatrixSize",
@@ -43748,6 +43754,8 @@
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43782,6 +43790,8 @@
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -46109,15 +46119,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1287,
     "totalModules": 82,
-    "totalLinesOfCode": 218668,
-    "totalExports": 7022,
+    "totalLinesOfCode": 218759,
+    "totalExports": 7027,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2367,
+    "totalFunctions": 2370,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1646,
-    "totalReExports": 3025,
+    "totalReExports": 3027,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

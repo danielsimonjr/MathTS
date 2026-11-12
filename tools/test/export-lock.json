@@ -11069,7 +11069,13 @@
       "disableGpu": {
         "kind": "function"
       },
+      "disableGpuUnavailableWarnings": {
+        "kind": "function"
+      },
       "enableGpu": {
+        "kind": "function"
+      },
+      "enableGpuUnavailableWarnings": {
         "kind": "function"
       },
       "getGPUAdapter": {

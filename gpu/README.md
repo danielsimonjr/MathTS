@@ -14,7 +14,11 @@ resolves `false` without throwing. When no adapter is available (Node, or
 Chromium without a GPU), `GPUContext.status` is `'unavailable'` (not `'error'`),
 `lastError` stays `null`, and `hasWebGPU()` becomes `false` after the first
 failed probe so feature detection matches `initializeGlobalGPU()`. Use
-`initializeGlobalGPUWithReason()` when you need `{ ok, reason }`.
+`initializeGlobalGPUWithReason()` when you need `{ ok, reason }`. A rejected
+`requestAdapter` or `requestDevice` stays `status: 'error'` with `lastError`
+set — that is not a quiet fallback. `enableGpuUnavailableWarnings()` logs the
+unavailable case once; it is off by default. `isGPUSuitableForMatrixOps()` is
+synchronous and returns false when capabilities are omitted.
 
 Tracked by CDG/DGT (`create-dependency-graph`) as a leaf: `matrix → gpu` and
 `functions → gpu` (functions re-exports `enableGpu` / `GPU_MIN_ELEMENTS` and hosts
