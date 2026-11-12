@@ -41,6 +41,7 @@
  */
 
 import type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
+import { importModule } from './node-module-import.js';
 export type { WasmManifest };
 
 const ALGO = 'sha384';
@@ -55,7 +56,9 @@ export async function sha384OfBuffer(buffer: ArrayBuffer | Uint8Array): Promise<
 
   let digest: Uint8Array;
   if (isNode) {
-    const { createHash } = await import('crypto');
+    const { createHash } = (await importModule('node:crypto')) as {
+      createHash: (algo: string) => { update: (b: Uint8Array) => void; digest: () => Buffer };
+    };
     const hash = createHash(ALGO);
     hash.update(bytes);
     digest = new Uint8Array(hash.digest());
@@ -87,8 +90,8 @@ export async function loadWasmManifest(wasmPath: string): Promise<WasmManifest |
 
   try {
     if (isNode) {
-      const fs = await import('fs');
-      const { promisify } = await import('util');
+      const fs = (await importModule('node:fs')) as typeof import('node:fs');
+      const { promisify } = (await importModule('node:util')) as typeof import('node:util');
       const readFile = promisify(fs.readFile);
       const text = await readFile(manifestPath, 'utf8');
       return JSON.parse(text) as WasmManifest;
@@ -172,9 +175,9 @@ export async function resolvePackagedWasm(
   const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
   if (!isNode) return null;
 
-  const { fileURLToPath } = await import('node:url');
-  const { dirname, join } = await import('node:path');
-  const { existsSync } = await import('node:fs');
+  const { fileURLToPath } = (await importModule('node:url')) as typeof import('node:url');
+  const { dirname, join } = (await importModule('node:path')) as typeof import('node:path');
+  const { existsSync } = (await importModule('node:fs')) as typeof import('node:fs');
 
   let dir = dirname(fileURLToPath(metaUrl));
   for (let depth = 0; depth < 8; depth++) {
@@ -208,9 +211,9 @@ export async function defaultWasmLocation(
   if (opts?.browser) {
     return new URL(`./wasm/${wasmFile}`, metaUrl).href;
   }
-  const { fileURLToPath } = await import('node:url');
-  const { dirname, join } = await import('node:path');
-  const { existsSync } = await import('node:fs');
+  const { fileURLToPath } = (await importModule('node:url')) as typeof import('node:url');
+  const { dirname, join } = (await importModule('node:path')) as typeof import('node:path');
+  const { existsSync } = (await importModule('node:fs')) as typeof import('node:fs');
 
   let dir = dirname(fileURLToPath(metaUrl));
   for (let depth = 0; depth < 8; depth++) {
@@ -312,8 +315,8 @@ export abstract class WasmModuleLoader<TModule> {
     const startTime = performance.now();
 
     if (this.isNode) {
-      const fs = await import('fs');
-      const { promisify } = await import('util');
+      const fs = (await importModule('node:fs')) as typeof import('node:fs');
+      const { promisify } = (await importModule('node:util')) as typeof import('node:util');
       const readFile = promisify(fs.readFile);
       const buffer = await readFile(path);
       await verifyWasmIntegrity(buffer, path);
@@ -342,8 +345,8 @@ export abstract class WasmModuleLoader<TModule> {
   }
 
   protected async loadNodeWasm(path: string, totalStart: number): Promise<TModule> {
-    const fs = await import('fs');
-    const { promisify } = await import('util');
+    const fs = (await importModule('node:fs')) as typeof import('node:fs');
+    const { promisify } = (await importModule('node:util')) as typeof import('node:util');
     const readFile = promisify(fs.readFile);
 
     const readStart = performance.now();

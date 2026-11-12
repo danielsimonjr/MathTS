@@ -13,7 +13,11 @@ npm install @danielsimonjr/mathts-functions
 ## What it provides
 
 - Hundreds of typed functions (`add`, `sin`, `svd`-aware ops, `parallelFFT`, …).
-- A wired `parse` / `evaluate` against the full activated math scope.
+- A wired `parse` / `evaluate` against the full activated math scope. For
+  browser bundles that need only expression evaluation, import
+  `evaluate` / `parse` / `compileExpr` from
+  `@danielsimonjr/mathts-functions/evaluate` instead of the main barrel (smaller
+  `platform: 'neutral'` esbuild output; the barrel still re-exports every symbol).
 - `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw. `compileScalarGradient` reuses that tape to return exact ∂f/∂parameter for each row. `fitScalarParameters` fits those constants to data via `levenbergMarquardt`, `bfgs`, or `nelderMead` (multi-restart search with optional bounds).
 - `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; the default remains forward-difference `numericJacobian`. Stiff `solveODE`, `solveDAE`, and `solveBVP` use the same helper (forward differences; ODE/DAE use `step: { rel: 1e-7, floor: 1e-8 }`, BVP shooting uses `h: 1e-7`).
 - `minimize` (Nelder–Mead) delegates to `nelderMead` with an absolute simplex step; `nelderMead` keeps relative defaults for `fitScalarParameters`.

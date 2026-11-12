@@ -418,8 +418,9 @@ export class WASMBackend implements MatrixBackend {
     const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
     let instance: WebAssembly.Instance;
     if (isNode) {
-      const fs = await import('fs');
-      const { promisify } = await import('util');
+      const { importModule } = await import('@danielsimonjr/mathts-core/internal');
+      const fs = (await importModule('node:fs')) as typeof import('node:fs');
+      const { promisify } = (await importModule('node:util')) as typeof import('node:util');
       const readFile = promisify(fs.readFile);
       const buffer = await readFile(path);
       // SHA-384 integrity check against sibling wasm-manifest.json.

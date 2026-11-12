@@ -44,8 +44,8 @@ h1 span { color: var(--accent); }
 <div class="container">
 <header>
   <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Probability Distributions</div>
-  <h1><span>Probability Distributions</span> (88)</h1>
-  
+  <h1><span>Probability Distributions</span> (91)</h1>
+  <p class="cat-desc">The <code>Float64Array</code> signatures are synchronous. To use worker threads, call <code>computePool.applyKernel(x, workerKernel(name, ...params))</code>. The worker result is equal to the synchronous result bit for bit. See the migration guide.</p>
 </header>
 
 <input type="text" class="search-box" id="search" placeholder="Filter Probability Distributions..." oninput="filterFuncs()">
@@ -56,7 +56,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">bernoulliPMF(k, p)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="betaCDF" data-name="betacdf">
   <div class="func-name">betaCDF</div>
@@ -105,7 +104,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">binomialPMF(k, n, p)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="cauchyCDF" data-name="cauchycdf">
   <div class="func-name">cauchyCDF</div>
@@ -153,6 +151,14 @@ h1 span { color: var(--accent); }
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">chiSquaredQuantile(p, df)</div>
+  </div>
+</div>
+<div class="func-card" id="chiSquaredSF" data-name="chisquaredsf">
+  <div class="func-name">chiSquaredSF</div>
+  <div class="func-desc">Chi-squared survival P(X &gt; x), computed directly in the tail</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chiSquaredSF(x, df)</div>
   </div>
 </div>
 <div class="func-card" id="circmean" data-name="circmean">
@@ -220,7 +226,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">exponentialCDF(x, lambda)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="exponentialDist" data-name="exponentialdist">
   <div class="func-name">exponentialDist</div>
@@ -237,7 +242,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">exponentialPDF(x, lambda)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="fCDF" data-name="fcdf">
   <div class="func-name">fCDF</div>
@@ -261,6 +265,14 @@ h1 span { color: var(--accent); }
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">fQuantile(p, d1, d2)</div>
+  </div>
+</div>
+<div class="func-card" id="fSF" data-name="fsf">
+  <div class="func-name">fSF</div>
+  <div class="func-desc">F-distribution survival P(X &gt; x), computed directly in the tail</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fSF(x, d1, d2)</div>
   </div>
 </div>
 <div class="func-card" id="gammaCDF" data-name="gammacdf">
@@ -310,7 +322,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">geometricPMF(k, p)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="gevCDF" data-name="gevcdf">
   <div class="func-name">gevCDF</div>
@@ -508,7 +519,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">normalCDF(x[, mu, sigma])</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="normalDist" data-name="normaldist">
   <div class="func-name">normalDist</div>
@@ -525,7 +535,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">normalPDF(x[, mu, sigma])</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="normalQuantile" data-name="normalquantile">
   <div class="func-name">normalQuantile</div>
@@ -575,7 +584,6 @@ h1 span { color: var(--accent); }
     <div class="func-section-title">Syntax</div>
     <div class="example">poissonPMF(k, lambda)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="random" data-name="random">
   <div class="func-name">random</div>
@@ -693,6 +701,14 @@ h1 span { color: var(--accent); }
     <div class="example">studentTQuantile(p, df)</div>
   </div>
 </div>
+<div class="func-card" id="studentTTwoSidedP" data-name="studentttwosidedp">
+  <div class="func-name">studentTTwoSidedP</div>
+  <div class="func-desc">Two-sided Student-t p-value, computed in the tail as <code>I_{df/(df+t²)}(df/2, 1/2)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTTwoSidedP(t, df)</div>
+  </div>
+</div>
 <div class="func-card" id="tDist" data-name="tdist">
   <div class="func-name">tDist</div>
   <div class="func-desc">Student's t-distribution</div>
@@ -780,7 +796,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-12 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>

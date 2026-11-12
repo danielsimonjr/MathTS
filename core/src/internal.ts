@@ -211,3 +211,4 @@ export {
 } from './wasm-loader.js';
 
 export { allocAsHeader } from './wasm-as-header.js';
+export { importModule } from './node-module-import.js';

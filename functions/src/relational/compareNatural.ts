@@ -1,4 +1,4 @@
-import naturalSort from 'javascript-natural-sort';
+import { naturalSort } from './natural-sort.js';
 import { isDenseMatrix, isSparseMatrix, typeOf } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';

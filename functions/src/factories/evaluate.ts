@@ -37,7 +37,7 @@ interface Scope {
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
-import * as typedFns from '../typed/index.js';
+import * as typedFns from '../typed/expression-eval-barrel.js';
 
 /**
  * Symbols that build or evaluate other expressions, or that are the typed-function
@@ -60,6 +60,9 @@ export const EVALUATE_SCOPE_OMIT = new Set([
   'chain',
   'parser',
   'resolve',
+  // Node constructors live on factoryScope for the parser closure. They must
+  // not be names the safe expression language can resolve (same denylist as
+  // the expression package's default evaluate).
   'ConstantNode',
   'SymbolNode',
   'OperatorNode',

@@ -21,7 +21,7 @@
  * @packageDocumentation
  */
 
-import naturalSort from 'javascript-natural-sort';
+import { naturalSort } from '../relational/natural-sort.js';
 import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
 
