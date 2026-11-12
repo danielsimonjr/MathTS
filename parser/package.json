@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-parser",
   "version": "0.1.34",
-  "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
+  "description": "Standalone expression parser for MathTS \u2014 the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -21,8 +21,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs",
-    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs\"",
+    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs && node ../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs && node ../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "bun test --coverage",
@@ -30,7 +30,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs"
+    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && node ../tools/append-re-export-types.mjs && node ../tools/ensure-js-sourcemaps.mjs"
   },
   "tsdown": {
     "fixedExtension": false,

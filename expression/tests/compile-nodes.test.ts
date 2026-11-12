@@ -325,9 +325,7 @@ describe('compile - ObjectNode (sandbox keys)', () => {
     expect(compile(node, mathScope).evaluate()).toEqual({ k: 3 });
   });
 
-  it('rejects "__proto__" object keys (sandbox)', () => {
-    // A literal `{__proto__: ...}` sets the prototype rather than an own key,
-    // so define it as a real own enumerable property to exercise the sandbox.
+  it('skips unsafe object keys (sandbox)', () => {
     const properties: Record<string, MockNode> = {};
     Object.defineProperty(properties, '__proto__', {
       value: constantNode({ polluted: 1 }),
@@ -335,8 +333,13 @@ describe('compile - ObjectNode (sandbox keys)', () => {
       configurable: true,
       writable: true,
     });
-    const node = objectNode(properties);
-    expect(() => compile(node, mathScope).evaluate()).toThrow('No access to property "__proto__"');
+    const node = objectNode({
+      ...properties,
+      safe: constantNode(42),
+      constructor: constantNode(1),
+    });
+    expect(compile(node, mathScope).evaluate()).toEqual({ safe: 42 });
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });
 

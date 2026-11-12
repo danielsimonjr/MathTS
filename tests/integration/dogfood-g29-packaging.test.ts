@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -15,6 +15,21 @@ const PUBLIC_DIRS = workspaceDirs(REPO).filter((dir) => {
   const pkg = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8'));
   return !pkg.private;
 });
+
+/** Packages whose own module evaluation does not register or mutate globals. */
+const SIDE_EFFECT_FREE = new Set([
+  'parser',
+  'ast',
+  'evaluator',
+  'units',
+  'numbers',
+  'linalg',
+  'arithmetic',
+  'trigonometry',
+  'statistics',
+  'signal',
+  'gpu',
+]);
 
 describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
   it('sync-package-packaging check passes', () => {
@@ -31,32 +46,71 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
         encoding: 'utf8',
       });
       const [entry] = JSON.parse(out) as { filename: string; files: { path: string }[] }[];
-      const manifest = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8')) as {
+      const full = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8')) as {
+        name: string;
         homepage?: string;
         bugs?: { url?: string };
         sideEffects?: boolean;
+        repository?: { directory?: string };
         exports?: Record<string, unknown>;
       };
-      expect(manifest.homepage, dir).toMatch(/^https:\/\/github\.com\/danielsimonjr\/MathTS/);
-      expect(manifest.bugs?.url, dir).toBe('https://github.com/danielsimonjr/MathTS/issues');
-      expect(manifest.exports?.['./package.json'], dir).toBe('./package.json');
-      expect(typeof manifest.sideEffects, dir).toBe('boolean');
+      expect(full.homepage, dir).toMatch(/^https:\/\/github\.com\/danielsimonjr\/MathTS/);
+      expect(full.bugs?.url, dir).toBe('https://github.com/danielsimonjr/MathTS/issues');
+      expect(full.repository?.directory, dir).toBe(dir);
+      expect(full.exports?.['./package.json'], dir).toBe('./package.json');
+      const base = dir.split('/').pop() ?? dir;
+      expect(full.sideEffects, dir).toBe(SIDE_EFFECT_FREE.has(base) ? false : true);
       expect(entry.filename).toMatch(/\.tgz$/);
-      expect(entry.files.some((f) => f.path === 'LICENSE')).toBe(true);
+      const packed = new Set(entry.files.map((f) => f.path));
+      expect(packed.has('LICENSE'), dir).toBe(true);
+      const jsFiles = [...packed].filter((p) => p.endsWith('.js') && !p.endsWith('.d.ts'));
+      for (const js of jsFiles) {
+        expect(packed.has(`${js}.map`), `${dir} ${js}`).toBe(true);
+      }
+      execFileSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          `import { createRequire } from 'node:module';
+           const req = createRequire(import.meta.url);
+           const meta = req(${JSON.stringify(`${full.name}/package.json`)});
+           if (typeof meta.version !== 'string') process.exit(1);`,
+        ],
+        { cwd: REPO, stdio: 'pipe' }
+      );
     }
-  }, 120_000);
+  }, 180_000);
 
-  it('#740 core dist ships index.js.map after build', () => {
-    const mapPath = join(REPO, 'core/dist/index.js.map');
-    if (!existsSync(mapPath)) {
-      execFileSync('npx', ['turbo', 'build', '--filter=@danielsimonjr/mathts-core'], {
-        cwd: REPO,
-        stdio: 'pipe',
-      });
+  it('#740 every shipped JS file has a map whose sources are relative', () => {
+    for (const dir of PUBLIC_DIRS) {
+      const roots = ['dist', 'build']
+        .map((name) => join(REPO, dir, name))
+        .filter((path) => existsSync(path));
+      expect(roots.length, dir).toBeGreaterThan(0);
+      const jsFiles: string[] = [];
+      const walk = (path: string) => {
+        for (const name of readdirSync(path)) {
+          const child = join(path, name);
+          if (statSync(child).isDirectory()) walk(child);
+          else if (name.endsWith('.js')) jsFiles.push(child);
+        }
+      };
+      for (const root of roots) walk(root);
+      expect(jsFiles.length, dir).toBeGreaterThan(0);
+      for (const js of jsFiles) {
+        const text = readFileSync(js, 'utf8');
+        expect(text, js).toMatch(/sourceMappingURL=/);
+        const mapPath = `${js}.map`;
+        expect(existsSync(mapPath), mapPath).toBe(true);
+        const map = JSON.parse(readFileSync(mapPath, 'utf8')) as { sources?: string[] };
+        expect(map.sources?.length, mapPath).toBeGreaterThan(0);
+        for (const source of map.sources ?? []) {
+          expect(source.startsWith('/'), `${mapPath} ${source}`).toBe(false);
+          expect(source.includes('file:'), `${mapPath} ${source}`).toBe(false);
+        }
+      }
     }
-    expect(existsSync(mapPath)).toBe(true);
-    const js = readFileSync(join(REPO, 'core/dist/index.js'), 'utf8');
-    expect(js).toMatch(/sourceMappingURL=/);
   });
 
   it('#697 consumer typecheck without @types/node', () => {

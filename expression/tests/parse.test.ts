@@ -629,8 +629,10 @@ describe('parse – object literals', () => {
     expect(node.properties['key'].value).toBe(42);
   });
 
-  it('rejects {__proto__: 1} (prototype pollution at parse time)', () => {
-    expect(() => parse('{__proto__: 1}')).toThrow(/No access to property/);
+  it('skips unsafe keys in {__proto__: 1} at parse time', () => {
+    const node = parse('{safe: 1, __proto__: 1}') as unknown as ParsedNode;
+    expect(node.properties.safe).toBeDefined();
+    expect(Object.hasOwn(node.properties, '__proto__')).toBe(false);
     expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });
@@ -708,8 +710,10 @@ describe('parse – error handling', () => {
     expect(() => parse('(1 + 2')).toThrow(SyntaxError);
   });
 
-  it('throws for invalid operator "//"', () => {
-    expect(() => parse('1 // 2')).toThrow();
+  it('treats // as a line comment (#817)', () => {
+    const node = parse('1 // trailing comment') as unknown as ParsedNode;
+    expect(nodeType(node)).toBe('ConstantNode');
+    expect(node.value).toBe(1);
   });
 
   it('throws for bad assignment LHS "1 + 2 = 3"', () => {

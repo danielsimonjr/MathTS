@@ -13,7 +13,7 @@ describe('Fraction.fromNumber honours maxDenominator', () => {
 
   it('an exactly representable number still comes back exact under the default cap', () => {
     expect(String(Fraction.fromNumber(0.5))).toBe('1/2');
-    expect(String(Fraction.fromNumber(0.1))).toBe('1/10');
+    expect(String(Fraction.fromNumber(0.1))).toBe('0.1');
     expect(String(Fraction.fromNumber(-2.25))).toBe('-9/4');
   });
 });

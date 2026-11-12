@@ -21,8 +21,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json",
-    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -30,7 +30,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs"
   },
   "tsdown": {
     "fixedExtension": false,

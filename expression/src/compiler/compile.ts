@@ -13,7 +13,13 @@
  */
 
 import { ObjectWrappingMap } from '../utils/map.js';
-import { getSafeProperty, setSafeProperty, getSafeMethod } from '../utils/customs.js';
+import {
+  getSafeProperty,
+  setSafeProperty,
+  getSafeMethod,
+  isSafeProperty,
+  assertSandboxReceiver,
+} from '../utils/customs.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
 import type { MathNode } from '../node/Node.js';
 
@@ -606,8 +612,9 @@ function compileObjectNode(
   return function evalObjectNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const result: Record<string, unknown> = {};
     for (const prop of evalProps) {
-      // Sandbox: object-literal keys go through setSafeProperty so
-      // payloads like `{__proto__: {polluted: 1}}` are rejected.
+      // Sandbox: skip reserved keys (`constructor`, `__proto__`, …) instead of
+      // failing the whole literal; safe keys still use setSafeProperty.
+      if (!isSafeProperty(result, prop.key)) continue;
       setSafeProperty(result, prop.key, prop.evaluate(scope, args, context));
     }
     return result;
@@ -748,6 +755,9 @@ function compileAccessorNode(
     // The indexed OBJECT is the context for the index evaluation — the
     // IndexNode's `end` symbol resolves against its size (mathjs parity).
     const index = evalIndex(scope, args, object);
+    // Strings are primitive indexing, not host objects. Everything else must
+    // be a math value or a plain collection before a numeric index or subset.
+    if (typeof object !== 'string') assertSandboxReceiver(object);
     // Use math.subset if available for matrix indexing
     if (math.subset) {
       return (math.subset as MathFunction)(object, index);
