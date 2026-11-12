@@ -404,8 +404,7 @@ export class TapedTensor {
     for (let i = 0; i < out.length; i++) {
       const x = xData[i];
       const t = tData[i];
-      const maxNegX = x > 0 ? -x : Math.log(1 + Math.exp(x));
-      out[i] = (1 - t) * x + maxNegX + Math.log1p(Math.exp(-Math.abs(x)));
+      out[i] = Math.max(x, 0) - t * x + Math.log1p(Math.exp(-Math.abs(x)));
     }
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const { id } = this.tape.record([this.id], out.length, (outputGrad) => {

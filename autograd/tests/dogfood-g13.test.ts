@@ -112,7 +112,7 @@ describe('#754 activations', () => {
     let b1 = new Float64Array([0.1, -0.2, 0.05, -0.1]);
     let w2 = new Float64Array([0.7, -0.5, 0.3, -0.2]);
     let b2 = new Float64Array([0.0]);
-    const lr = 0.8;
+    const lr = 0.3;
 
     const trainStep = (xi: number[], target: number) => {
       const tape = new Tape();
@@ -128,7 +128,7 @@ describe('#754 activations', () => {
       const leafB2 = new TapedTensor([1, 1], new Float64Array(b2), tape, idB2);
       const h = leafX.matmul(leafW1).add(leafB1).relu();
       const logits = h.matmul(leafW2).add(leafB2);
-      const loss = logits.sigmoid().binaryCrossEntropy(Float64Array.of(target));
+      const loss = logits.binaryCrossEntropy(Float64Array.of(target)).sum();
       tape.backward(loss.id, Float64Array.of(1));
       w1 = new Float64Array(w1.map((v, i) => v - lr * tape.getInputGrad(idW1)![i]));
       b1 = new Float64Array(b1.map((v, i) => v - lr * tape.getInputGrad(idB1)![i]));
@@ -257,10 +257,7 @@ describe('crossEntropy and BCE', () => {
     const loss = leaf.binaryCrossEntropy(Float64Array.of(target));
     tape.backward(loss.id, Float64Array.of(1), { retainGraph: true });
     const ana = tape.getInputGrad(id)![0];
-    const bce = (x: number) => {
-      const maxNegX = x > 0 ? -x : Math.log(1 + Math.exp(x));
-      return (1 - target) * x + maxNegX + Math.log1p(Math.exp(-Math.abs(x)));
-    };
+    const bce = (x: number) => Math.max(x, 0) - target * x + Math.log1p(Math.exp(-Math.abs(x)));
     expect(ana).toBeCloseTo(fdScalar(bce, x0), 5);
   });
 });
