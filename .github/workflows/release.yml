@@ -127,7 +127,8 @@ jobs:
           pr-title: 'chore: release packages'
           commit-message: 'chore: release packages'
           # `changeset version` bumps package.json but not bun.lock, so every release left the
-          # workspace versions in bun.lock one release behind. This script refreshes the lock too.
+          # workspace versions in bun.lock one release behind. This script also syncs README
+          # function stats (CI gate) and refreshes the lock.
           # v2 name. `version` is a HARD ERROR in v2, like pr-title/commit-message above.
           version-script: bun run version-packages
         env:
