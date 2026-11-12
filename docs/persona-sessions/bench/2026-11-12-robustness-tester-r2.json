@@ -73,9 +73,17 @@
   },
   "newIssues": [
     { "number": 921, "title": "Regression: Unit.value for deg is still radians (#812)" },
-    { "number": 922, "title": "parse() accepts Unicode mathematical digit 𝟙 but evaluate() throws" },
+    {
+      "number": 922,
+      "title": "parse() accepts Unicode mathematical digit 𝟙 but evaluate() throws"
+    },
     { "number": 923, "title": "mod(10,0) returns silent NaN" },
     { "number": 924, "title": "createParse(create(all)) missing AST constructor dependencies" }
   ],
-  "relatedOpen": [{ "number": 883, "title": "Regression: createParse()/createEvaluate() zero-arg still throw (#715)" }]
+  "relatedOpen": [
+    {
+      "number": 883,
+      "title": "Regression: createParse()/createEvaluate() zero-arg still throw (#715)"
+    }
+  ]
 }

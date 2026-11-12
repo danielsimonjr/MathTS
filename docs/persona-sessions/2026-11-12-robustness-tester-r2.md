@@ -67,32 +67,32 @@ remain broken (open #883, confirmed here).
 
 ## Round-1 re-check table
 
-| Issue | Fixed on npm? |
-| ----- | ------------- |
-| [#806](https://github.com/danielsimonjr/MathTS/issues/806) WorkerPool missing script | yes |
-| [#807](https://github.com/danielsimonjr/MathTS/issues/807) addScalar null `.im` crash | yes |
-| [#808](https://github.com/danielsimonjr/MathTS/issues/808) parse/typed leak | yes |
-| [#809](https://github.com/danielsimonjr/MathTS/issues/809) silent Infinity literals | yes (SyntaxError) |
-| [#810](https://github.com/danielsimonjr/MathTS/issues/810) huge zeros | yes (element cap) |
-| [#811](https://github.com/danielsimonjr/MathTS/issues/811) unit string DoS | yes (sublinear ratio) |
-| [#812](https://github.com/danielsimonjr/MathTS/issues/812) deg `.value` radians | **no** → #921 |
-| [#813](https://github.com/danielsimonjr/MathTS/issues/813) add null/string | yes (stricter types) |
-| [#814](https://github.com/danielsimonjr/MathTS/issues/814) DenseMatrix 2D ctor | yes |
-| [#815](https://github.com/danielsimonjr/MathTS/issues/815) multiply scalar | yes |
-| [#816](https://github.com/danielsimonjr/MathTS/issues/816) host scope exfiltration | yes |
-| [#817](https://github.com/danielsimonjr/MathTS/issues/817) block comments | yes |
-| [#818](https://github.com/danielsimonjr/MathTS/issues/818) workbook constructor key | yes |
-| [#819](https://github.com/danielsimonjr/MathTS/issues/819) Unit NaN | yes |
-| [#820](https://github.com/danielsimonjr/MathTS/issues/820) chunkTyped export docs | yes (README table) |
+| Issue                                                                                 | Fixed on npm?         |
+| ------------------------------------------------------------------------------------- | --------------------- |
+| [#806](https://github.com/danielsimonjr/MathTS/issues/806) WorkerPool missing script  | yes                   |
+| [#807](https://github.com/danielsimonjr/MathTS/issues/807) addScalar null `.im` crash | yes                   |
+| [#808](https://github.com/danielsimonjr/MathTS/issues/808) parse/typed leak           | yes                   |
+| [#809](https://github.com/danielsimonjr/MathTS/issues/809) silent Infinity literals   | yes (SyntaxError)     |
+| [#810](https://github.com/danielsimonjr/MathTS/issues/810) huge zeros                 | yes (element cap)     |
+| [#811](https://github.com/danielsimonjr/MathTS/issues/811) unit string DoS            | yes (sublinear ratio) |
+| [#812](https://github.com/danielsimonjr/MathTS/issues/812) deg `.value` radians       | **no** → #921         |
+| [#813](https://github.com/danielsimonjr/MathTS/issues/813) add null/string            | yes (stricter types)  |
+| [#814](https://github.com/danielsimonjr/MathTS/issues/814) DenseMatrix 2D ctor        | yes                   |
+| [#815](https://github.com/danielsimonjr/MathTS/issues/815) multiply scalar            | yes                   |
+| [#816](https://github.com/danielsimonjr/MathTS/issues/816) host scope exfiltration    | yes                   |
+| [#817](https://github.com/danielsimonjr/MathTS/issues/817) block comments             | yes                   |
+| [#818](https://github.com/danielsimonjr/MathTS/issues/818) workbook constructor key   | yes                   |
+| [#819](https://github.com/danielsimonjr/MathTS/issues/819) Unit NaN                   | yes                   |
+| [#820](https://github.com/danielsimonjr/MathTS/issues/820) chunkTyped export docs     | yes (README table)    |
 
 ## Findings (round 2)
 
-| # | Sev | Title | Labels (intended) |
-| --- | --- | --- | --- |
-| [921](https://github.com/danielsimonjr/MathTS/issues/921) | P1 | Regression: Unit.value for deg still radians (#812) | dogfood, bug, P1, persona:robustness-tester |
-| [922](https://github.com/danielsimonjr/MathTS/issues/922) | P2 | parse accepts 𝟙 but evaluate throws | dogfood, api, P2, persona:robustness-tester |
-| [923](https://github.com/danielsimonjr/MathTS/issues/923) | P2 | mod(10,0) silent NaN | dogfood, api, P2, persona:robustness-tester |
-| [924](https://github.com/danielsimonjr/MathTS/issues/924) | P1 | createParse(create(all)) missing AST deps | dogfood, api, P1, persona:robustness-tester |
+| #                                                         | Sev | Title                                               | Labels (intended)                           |
+| --------------------------------------------------------- | --- | --------------------------------------------------- | ------------------------------------------- |
+| [921](https://github.com/danielsimonjr/MathTS/issues/921) | P1  | Regression: Unit.value for deg still radians (#812) | dogfood, bug, P1, persona:robustness-tester |
+| [922](https://github.com/danielsimonjr/MathTS/issues/922) | P2  | parse accepts 𝟙 but evaluate throws                 | dogfood, api, P2, persona:robustness-tester |
+| [923](https://github.com/danielsimonjr/MathTS/issues/923) | P2  | mod(10,0) silent NaN                                | dogfood, api, P2, persona:robustness-tester |
+| [924](https://github.com/danielsimonjr/MathTS/issues/924) | P1  | createParse(create(all)) missing AST deps           | dogfood, api, P1, persona:robustness-tester |
 
 Also verified open [#883](https://github.com/danielsimonjr/MathTS/issues/883) (zero-arg
 `createParse` / `createEvaluate`); did not duplicate.
