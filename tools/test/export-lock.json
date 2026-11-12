@@ -1468,6 +1468,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DENSE_MATRIX_MAX_ELEMENTS": {
+        "kind": "number"
+      },
       "DecompositionMatrixInput": {
         "kind": "type"
       },
@@ -1619,6 +1622,9 @@
         "kind": "function"
       },
       "add": {
+        "kind": "function"
+      },
+      "assertDenseMatrixSize": {
         "kind": "function"
       },
       "backendManager": {

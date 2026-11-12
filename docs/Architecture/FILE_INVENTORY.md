@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2262
+**Total files**: 2264
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1265 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1266 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      906 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      907 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2262** |                                                                                                                |
+| **Total**     | **2264** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1291 |
-| `tests`    |   906 |
+| `src`      |  1292 |
+| `tests`    |   907 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |  1021 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   121 |
+| `@danielsimonjr/mathts-matrix`         |   123 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    53 |
 | `@danielsimonjr/mathts-parser`         |     4 |
@@ -1934,6 +1934,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/parallel-matrix.ts`                                                   | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/typed-operations.ts`                                                  | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/dense/arithmetic.ts`                                            | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/types/dense/limits.ts`                                                | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/dense/reduction.ts`                                             | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/dense/storage.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/DenseMatrix.ts`                                                 | @danielsimonjr/mathts-matrix         | src      | build-entry |
@@ -1965,6 +1966,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/dense-js-backend-reach.test.ts`                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dense-multiply-zero-inf.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/DenseMatrix.test.ts`                                                | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/dogfood-g24-densematrix.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-complex-eigenvectors-oracle.test.ts`                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gap-linalg-extension-oracle.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gpu/initialization.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
