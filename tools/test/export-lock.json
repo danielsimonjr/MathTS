@@ -4427,7 +4427,7 @@
         "kind": "function"
       },
       "fineStructure": {
-        "kind": "number"
+        "kind": "object"
       },
       "finiteDifferenceCoefficients": {
         "kind": "function"
@@ -6323,7 +6323,7 @@
         "kind": "object"
       },
       "sackurTetrode": {
-        "kind": "number"
+        "kind": "object"
       },
       "savgol": {
         "kind": "function"
@@ -7070,7 +7070,7 @@
         "kind": "function"
       },
       "weakMixingAngle": {
-        "kind": "number"
+        "kind": "object"
       },
       "weibullDist": {
         "kind": "function"

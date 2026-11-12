@@ -117,6 +117,12 @@ describe('logarithmic units (dB, dBm, Np)', () => {
     expect(new Unit(1, 'Np').toNumber()).toBeCloseTo(1, 12);
     expect(new Unit(1, 'Np').value).toBeCloseTo(Math.E, 12);
     expect(new Unit(10, 'dB').value).toBeCloseTo(10, 12);
+    expect(new Unit(0, 'dBm').toNumber('mW')).toBeCloseTo(1, 12);
+    expect(new Unit(1, 'Np').to('dB').toNumber()).toBeCloseTo(20 / Math.LN10, 12);
+    expect(String(new Unit(1, 'dB'))).toBe('1 dB');
+    expect(new Unit(1, 'km').to('m').value).toBe(1000);
+    expect(new Unit(1, 'm^2').toNumber('m^2')).toBe(1);
+    expect(String(new Unit(1, 'kg/s'))).toBe('1 kg / s');
   });
 
   it('keeps byte B separate from bel (dB is the decibel unit)', () => {

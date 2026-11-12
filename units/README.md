@@ -16,6 +16,7 @@ npm install @danielsimonjr/mathts-units
 
 - `Unit` -- dimensional quantity class (`new Unit(5, 'km')`), with `.to()`, `.toBest()`, `.value`, `.type`.
 - **`.value` is the SI magnitude** (radians for angles, meters per second after `.to('m/s')`, etc.). For a number in the unit's current display, use `.toNumber('deg')`, `.toJSON().value`, or `String(u)`.
+- **Logarithmic units.** `dB` and `dBW` are power quantities (`10 log10` of a power ratio). `dBm` is power referred to 1 mW (`0 dBm` = 1 mW). `Np` is a field quantity (`ln` of an amplitude ratio), so `1 Np` = `20/ln(10)` dB. `B` is the byte (8 bit), not the bel.
 - `isUnit` / `isUnitValue` -- type guards.
 - `DimensionMismatchError`, `UnitParseError` -- error types.
 - Registry: `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`.

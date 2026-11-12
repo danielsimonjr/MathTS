@@ -19,6 +19,9 @@ import {
   electronMass,
   speedOfLight,
   elementaryCharge,
+  planckConstant,
+  fineStructure,
+  rydberg,
 } from '../src/factories/index.js';
 import { evaluate, physicsScope } from '../src/factories/evaluate.js';
 
@@ -50,6 +53,28 @@ describe('G23 dogfood (#811 Unit.parse DoS)', () => {
     const s4 = measure(4000);
     expect(s4).toBeLessThan(s2 * 8 + 50);
   });
+
+  it('miss-path time grows roughly linearly in the token length', () => {
+    const median = (n: number): number => {
+      const token = 'm'.repeat(n);
+      const samples: number[] = [];
+      for (let i = 0; i < 7; i++) {
+        const t0 = performance.now();
+        Unit.isValuelessUnit(token);
+        samples.push(performance.now() - t0);
+      }
+      samples.sort((a, b) => a - b);
+      return samples[3];
+    };
+    // Warm the unit index, then compare 4× length. A quadratic suffix scan is about 16×.
+    median(2000);
+    const t2 = median(2000);
+    const t8 = median(8000);
+    expect(t8).toBeLessThan(t2 * 4 + 1);
+    expect(() => Unit.parse('m'.repeat(MAX_UNIT_STRING_LENGTH + 1))).toThrow(
+      `Unit string exceeds maximum length of ${MAX_UNIT_STRING_LENGTH}`
+    );
+  });
 });
 
 describe('G23 dogfood (#825 dB / dBm / Np)', () => {
@@ -60,6 +85,11 @@ describe('G23 dogfood (#825 dB / dBm / Np)', () => {
     expect(new Unit(10, 'dB').value).toBeCloseTo(10, 10);
     expect(new Unit(3, 'dB').toNumber()).toBeCloseTo(3, 10);
     expect(new Unit(1, 'B').toNumber('bit')).toBe(8);
+    // Power quantity: 0 dBm is 1 mW. Field quantity: 1 Np is 20/ln(10) dB.
+    expect(new Unit(0, 'dBm').toNumber('mW')).toBeCloseTo(1, 12);
+    expect(new Unit(0, 'dBm').value).toBeCloseTo(1e-3, 15);
+    expect(new Unit(1, 'Np').to('dB').toNumber()).toBeCloseTo(20 / Math.LN10, 12);
+    expect(String(new Unit(1, 'dB'))).toBe('1 dB');
   });
 });
 
@@ -86,6 +116,9 @@ describe('G23 dogfood (#828 physics scope)', () => {
     );
     expect(asUnit(evaluate('G', undefined)).formatUnits()).toBe('G');
     expect(asUnit(evaluate('G', scope)).toNumber()).toBeCloseTo(gravitationConstant.toNumber(), 12);
+    expect(evaluate('pi', scope)).toBeCloseTo(Math.PI);
+    expect(evaluate('sin(0)', scope)).toBe(0);
+    expect(evaluate('i', scope)).toEqual(evaluate('i'));
   });
 });
 
@@ -94,6 +127,13 @@ describe('G23 dogfood (#827 CODATA uncertainties)', () => {
     expect(electronMass.uncertainty).toBeCloseTo(2.8e-40, 45);
     expect(electronMass.unc).toBeCloseTo(2.8e-40, 45);
     expect(gravitationConstant.uncertainty).toBeCloseTo(1.5e-15, 18);
-    expect(speedOfLight.uncertainty).toBeUndefined();
+    expect(gravitationConstant.unc).toBe(1.5e-15);
+    expect(speedOfLight.unc).toBe(0);
+    expect(planckConstant.unc).toBe(0);
+    expect(elementaryCharge.unc).toBe(0);
+    expect(rydberg.unc).toBe(1.2e-5);
+    const alpha = fineStructure as unknown as { unc: number };
+    expect(Number(fineStructure)).toBeCloseTo(7.2973525643e-3, 16);
+    expect(alpha.unc).toBe(1.1e-12);
   });
 });

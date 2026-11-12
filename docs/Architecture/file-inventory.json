@@ -912,21 +912,21 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 725
+      "loc": 728
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 337
+      "loc": 333
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3544
+      "loc": 3596
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1318,7 +1318,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 274
+      "loc": 280
     },
     {
       "file": "core/tests/types/unit-symbol-oracle.test.ts",
@@ -8612,7 +8612,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 350
+      "loc": 438
     },
     {
       "file": "functions/src/typed/aggregate-restart.ts",
@@ -9886,7 +9886,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 100
+      "loc": 140
     },
     {
       "file": "functions/tests/dtw.test.ts",
@@ -11433,7 +11433,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 119
+      "loc": 130
     },
     {
       "file": "functions/tests/physical-constants.test.ts",

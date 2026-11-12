@@ -453,6 +453,9 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   percent: { base: 'NONE', prefixes: 'NONE', scale: '1e-2' },
   ppm: { base: 'NONE', prefixes: 'NONE', scale: '1e-6' },
   ppb: { base: 'NONE', prefixes: 'NONE', scale: '1e-9' },
+  // dB / dBW are power quantities (10 log10 of a power ratio). dBm is power
+  // referred to 1 mW (0 dBm = 1 mW). Np is a field quantity (ln of an amplitude
+  // ratio): 1 Np = 20/ln(10) dB. `B` above stays the byte, not the bel.
   dB: { base: 'NONE', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-power' },
   dBm: { base: 'POWER', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-re-1mw' },
   dBW: { base: 'POWER', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-re-1w' },

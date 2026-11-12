@@ -82,7 +82,14 @@ const NON_CODATA: Record<string, number> = {
 /** Extract the numeric magnitude from a Unit-valued or number-valued constant. */
 function numericOf(value: unknown): number {
   if (typeof value === 'number') return value;
-  return (value as { toNumeric(): number }).toNumeric();
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as { toNumeric?: unknown }).toNumeric === 'function'
+  ) {
+    return (value as { toNumeric(): number }).toNumeric();
+  }
+  return Number(value);
 }
 
 describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
@@ -113,6 +120,10 @@ describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
     expect(F.electronMass.uncertainty).toBeCloseTo(2.8e-40, 45);
     expect(F.electronMass.unc).toBe(F.electronMass.uncertainty);
     expect(F.gravitationConstant.uncertainty).toBeCloseTo(1.5e-15, 18);
-    expect(F.speedOfLight.uncertainty).toBeUndefined();
+    expect(F.speedOfLight.unc).toBe(0);
+    expect(F.planckConstant.unc).toBe(0);
+    expect(F.elementaryCharge.unc).toBe(0);
+    expect(F.rydberg.unc).toBe(1.2e-5);
+    expect((F.fineStructure as unknown as { unc: number }).unc).toBe(1.1e-12);
   });
 });
