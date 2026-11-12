@@ -1,0 +1,104 @@
+{
+  "persona": "engineering-physicist",
+  "round": 2,
+  "date": "2026-11-12",
+  "release": "cb254e81",
+  "node": "v22.23.4",
+  "os": "linux x86_64",
+  "scratch": "/tmp/mathts-ep-r2",
+  "packages": {
+    "@danielsimonjr/mathts-core": "0.27.0",
+    "@danielsimonjr/mathts-functions": "0.85.0",
+    "@danielsimonjr/mathts-units": "0.7.6",
+    "@danielsimonjr/mathts-numbers": "0.1.29",
+    "@danielsimonjr/mathts-trigonometry": "0.1.87",
+    "@danielsimonjr/mathts-tensor": "0.4.0",
+    "@danielsimonjr/mathts-gpu": "0.3.0",
+    "@danielsimonjr/mathts-plot": "0.4.33",
+    "@danielsimonjr/mathts-workbook": "0.5.19",
+    "@danielsimonjr/mathts-parallel": "0.10.1",
+    "@danielsimonjr/mathts-matrix": "0.10.1",
+    "@danielsimonjr/mathts-expression": "0.13.0"
+  },
+  "round1_recheck": {
+    "822": true,
+    "823": true,
+    "824": true,
+    "825": true,
+    "826": true,
+    "827": true,
+    "828": false,
+    "829": true,
+    "830": true,
+    "831": true,
+    "832": true,
+    "833": true,
+    "834": true,
+    "835": "partial_headless",
+    "836": true
+  },
+  "cases": [
+    {
+      "name": "sho_rk45_energy",
+      "steps": 539,
+      "max_abs_err_vs_cos": 4.14e-13,
+      "energy_drift": -1.66e-12
+    },
+    {
+      "name": "heat_solvePDE_cfl80",
+      "result": "RangeError CFL (no silent wrong field)",
+      "allowUnstable_mid": -0.8580749614731571
+    },
+    {
+      "name": "heat_solveParabolicPDE",
+      "max_err": 0.0006200682391124257
+    },
+    {
+      "name": "sho_t_100_default_maxIter",
+      "result": "completes"
+    },
+    {
+      "name": "kepler_t_10000_default_maxIter",
+      "result": "throw at maxIter=100000",
+      "last_t": 1549.73
+    },
+    {
+      "name": "kepler_t_100_energy",
+      "max_energy_drift": 1.2e-9,
+      "steps": 6454
+    },
+    {
+      "name": "rlc_60Hz_numeric",
+      "Z": "10 - 2648.812473680615i"
+    },
+    {
+      "name": "rlc_unitful_jwC",
+      "Z": "(i) uF"
+    },
+    {
+      "name": "playwright_vite_dev",
+      "nav_ms": 1343,
+      "ode_ms": 18.6,
+      "plot_ms": 5,
+      "sin_deg_unit": 1,
+      "worker_404": [],
+      "gpu": { "hasWebGPU": false, "init": false, "status": "unavailable" },
+      "raf_p50_ms": 16.6
+    },
+    {
+      "name": "vite_build_parallel_import",
+      "result": "fail_top_level_await"
+    },
+    {
+      "name": "codata_uncertainties",
+      "electronMass_unc": 2.8e-40,
+      "present": true
+    },
+    {
+      "name": "tensor_cross_dot",
+      "cross_z": 1,
+      "dot_ex_ey": 0
+    }
+  ],
+  "new_issues": [908, 909, 910, 911, 912]
+}

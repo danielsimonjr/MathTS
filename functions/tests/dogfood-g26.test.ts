@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
+import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
 import { nodeBinary } from './helpers/node-binary.js';
 import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index.js';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
@@ -25,7 +25,7 @@ describe('G26 #712 sort on number[]', () => {
 
   it('n=1e5 sort is within 1.5× native Float64Array.sort (issue #712)', () => {
     const gate = fileURLToPath(new URL('./helpers/sort-number-perf-gate.mjs', import.meta.url));
-    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const raw = execIsolatedPerfGate(nodeBinary(), gate);
     const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
     expect(Number.isFinite(checksum)).toBe(true);
     expect(ratio).toBeLessThan(1.5);
@@ -68,7 +68,7 @@ describe('G26 #712 median quickselect path', () => {
 describe('G26 #694 lusolve uses packed matrix lu', () => {
   it('n=1000 ABBA median ≤ 1.2× matrix lu+luSolve (isolated Node gate)', () => {
     const gate = fileURLToPath(new URL('./helpers/lusolve-perf-gate.mjs', import.meta.url));
-    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const raw = execIsolatedPerfGate(nodeBinary(), gate);
     const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
     expect(Number.isFinite(checksum)).toBe(true);
     expect(ratio).toBeLessThan(1.2);
