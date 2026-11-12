@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1287
   totalModules: 82
-  totalExports: 7023
+  totalExports: 7031
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -272,6 +272,7 @@ modules:
         - forEachMultiIndex
         - tensordotRange
         - matmulSequential
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -286,6 +287,8 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
@@ -319,10 +322,13 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - viteDepsWorkerFallback
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
       constants:
+        - MIN_WORKER_CHUNK
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
     packages/workerpool/src/matmul-sequential.ts:
@@ -16575,6 +16581,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ./complex-to-interleaved.js
           imports:
             - complexToInterleaved
@@ -19783,9 +19790,11 @@ modules:
       exports:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
       functions:
         - bitReverse
         - fftCoreFloat64
+        - fftExactFloat64
     functions/src/signal/fft-helpers.ts:
       description: numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`
       externalDependencies: []
@@ -25348,6 +25357,7 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+            - fftExactFloat64
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
@@ -37122,6 +37132,8 @@ modules:
           imports:
             - parallelFFT
             - parallelIFFT
+            - parallelFFT
+            - parallelIFFT
             - parallelFFTMagnitude
             - parallelFFTPower
             - parallelConv
@@ -37157,6 +37169,8 @@ modules:
       exports:
         - parallelFFT
         - parallelIFFT
+        - fft
+        - ifft
         - parallelFFTMagnitude
         - parallelFFTPower
         - parallelConv
@@ -37234,6 +37248,7 @@ modules:
           imports:
             - assertSameLength
             - assertMatmulShape
+            - assertMatmulArgs
         - file: ./ops/bitwise.js
           imports:
             - bitAnd
@@ -37453,6 +37468,7 @@ modules:
           directory: packages/workerpool
           imports:
             - matmulSequential
+            - resolveDefaultWorkerScript
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -37468,6 +37484,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37560,6 +37577,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37661,9 +37679,11 @@ modules:
       workspaceDependencies: []
       exports:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
       functions:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
   parallel/operations:
     parallel/src/operations/elementwise.ts:
@@ -43627,15 +43647,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1287
   totalModules: 82
-  totalLinesOfCode: 218965
-  totalExports: 7023
+  totalLinesOfCode: 219433
+  totalExports: 7031
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2363
+  totalFunctions: 2367
   totalTypeGuards: 172
   totalEnums: 0
-  totalConstants: 1647
-  totalReExports: 3029
+  totalConstants: 1648
+  totalReExports: 3030
   totalTypeOnlyImports: 645
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

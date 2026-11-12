@@ -16,7 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
+import { fftCoreFloat64, fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { mapBinaryF64 } from './parallel-map.js';
@@ -184,9 +184,16 @@ async function fourStepFFT(
 // =============================================================================
 
 /**
- * Parallel FFT with typed-function dispatch
+ * Parallel FFT with typed-function dispatch.
  *
- * Supports: number[], Float64Array, Complex[]
+ * Supports: number[], Float64Array.
+ *
+ * Return shape (both signatures): `{ real: Float64Array, imag: Float64Array, originalLength: number }`.
+ * `real` and `imag` have length `nextPowerOf2(n)` (zero-padded when `n` is not a power of two).
+ * `originalLength` is the input length `n`. This is not NumPy's length-n `np.fft.fft`; the
+ * factory `fft` in `functions/src/matrix/fft.ts` is the length-n `Complex[]` transform.
+ * `parallelIFFT` of this object inverts the padded spectrum, so the first `originalLength`
+ * samples of `.real` recover a real input.
  */
 export const parallelFFT = mathTyped('parallelFFT', {
   // FFT of number array
@@ -1085,14 +1092,61 @@ function _convolve(x: number[], h: number[]): number[] {
 // =============================================================================
 
 /**
- * Resample a signal to a new sample rate using linear interpolation.
+ * Fourier resample to a target length (SciPy `signal.resample` for real inputs).
  *
- * @param x - Input signal
- * @param newRate - Target sample rate
- * @param oldRate - Original sample rate
- * @returns Resampled signal
+ * @param x - Input signal (treated as one period)
+ * @param num - Target number of samples
  */
-export function resample(x: number[], newRate: f64, oldRate: f64): number[] {
+function resampleFftToLength(x: number[], num: i32): number[] {
+  const n_x: i32 = x.length;
+  if (n_x === 0) return [];
+  if (num === n_x) return x.slice();
+  if (num < 1 || !Number.isInteger(num)) {
+    throw new TypeError('resample(x, num): num must be a positive integer');
+  }
+
+  const s_fac: f64 = n_x / num;
+  const m: i32 = Math.min(num, n_x);
+  const m2: i32 = Math.floor(m / 2) + 1;
+
+  const realIn = new Float64Array(n_x);
+  const imagIn = new Float64Array(n_x);
+  for (let i: i32 = 0; i < n_x; i++) realIn[i] = x[i]!;
+  const spec = fftExactFloat64(realIn, imagIn, false);
+
+  const halfRe = new Float64Array(m2);
+  const halfIm = new Float64Array(m2);
+  for (let k: i32 = 0; k < m2; k++) {
+    halfRe[k] = spec.real[k]! / s_fac;
+    halfIm[k] = spec.imag[k]! / s_fac;
+  }
+  if (m % 2 === 0 && num !== n_x) {
+    const k: i32 = Math.floor(m / 2);
+    halfRe[k] = halfRe[k]! * (num < n_x ? 2 : 0.5);
+    halfIm[k] = halfIm[k]! * (num < n_x ? 2 : 0.5);
+  }
+
+  const fullRe = new Float64Array(num);
+  const fullIm = new Float64Array(num);
+  for (let k: i32 = 0; k < m2; k++) {
+    fullRe[k] = halfRe[k]!;
+    fullIm[k] = halfIm[k]!;
+  }
+  for (let k: i32 = 1; k <= Math.floor((num - 1) / 2); k++) {
+    fullRe[num - k] = fullRe[k]!;
+    fullIm[num - k] = -fullIm[k]!;
+  }
+
+  const outSpec = fftExactFloat64(fullRe, fullIm, true);
+  const result: number[] = new Array(num);
+  for (let i: i32 = 0; i < num; i++) result[i] = outSpec.real[i];
+  return result;
+}
+
+/**
+ * Linear resample by changing sample rate (not SciPy `signal.resample`).
+ */
+function resampleLinear(x: number[], newRate: f64, oldRate: f64): number[] {
   const ratio: f64 = oldRate / newRate;
   const newLen: i32 = Math.round(x.length / ratio);
   const result: number[] = new Array(newLen);
@@ -1106,6 +1160,34 @@ export function resample(x: number[], newRate: f64, oldRate: f64): number[] {
   }
 
   return result;
+}
+
+/**
+ * Resample a signal.
+ *
+ * - `resample(x, num)` — SciPy Fourier method to `num` samples (real input).
+ * - `resample(x, newRate, oldRate)` — linear interpolation between sample rates.
+ *
+ * @param x - Input signal
+ * @param newRate - Target length (2-arg) or target sample rate (3-arg)
+ * @param oldRate - Original sample rate (linear mode only)
+ * @returns Resampled signal
+ */
+export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
+  if (oldRate === undefined) {
+    if (!Number.isFinite(newRate) || !Number.isInteger(newRate) || newRate < 1) {
+      throw new TypeError(
+        'resample(x, num): num must be a positive integer (SciPy Fourier resample), or pass resample(x, newRate, oldRate) for linear rate interpolation'
+      );
+    }
+    return resampleFftToLength(x, newRate);
+  }
+  if (!Number.isFinite(oldRate) || oldRate <= 0 || !Number.isFinite(newRate) || newRate <= 0) {
+    throw new TypeError(
+      'resample(x, newRate, oldRate): both rates must be finite positive numbers'
+    );
+  }
+  return resampleLinear(x, newRate, oldRate);
 }
 
 // =============================================================================
@@ -1145,13 +1227,53 @@ export function medfilt(x: number[], n: i32 = 3): number[] {
 /**
  * Generate a window function of given type and length.
  *
+ * Accepts `(length, type)` or SciPy-style `(type, length)`.
+ *
+ * Coefficients are the **symmetric** window (`scipy.signal.windows.*` with `sym=True`,
+ * and `scipy.signal.get_window(type, n)`): the cosine period is `n - 1`, so the first
+ * and last taps match. The periodic form (`sym=False`, period `n`) is not this function.
+ *
  * @param n - Window length
  * @param type - Window type: 'hamming' | 'hann' | 'blackman' | 'rectangular' | 'bartlett'
  * @returns Window coefficients
  */
-export function windowFunction(n: i32, type: string): number[] {
+export function windowFunction(n: i32 | string, type?: string | i32): number[] {
+  let length: i32;
+  let winType: string;
+  if (typeof n === 'string') {
+    winType = n;
+    if (typeof type !== 'number' || !Number.isInteger(type) || type < 1) {
+      throw new TypeError(
+        'windowFunction(type, length): length must be a positive integer (or call windowFunction(length, type))'
+      );
+    }
+    length = type;
+  } else {
+    length = n;
+    if (typeof type !== 'string' || type.length === 0) {
+      throw new TypeError('windowFunction(length, type): type must be a non-empty string');
+    }
+    winType = type;
+  }
+  return windowFunctionCore(length, winType);
+}
+
+function windowFunctionCore(n: i32, type: string): number[] {
   const w: number[] = new Array(n);
   const N1: f64 = n - 1;
+  if (n === 1) {
+    if (type === 'bartlett') return [0];
+    if (
+      type === 'hamming' ||
+      type === 'hann' ||
+      type === 'hanning' ||
+      type === 'blackman' ||
+      type === 'rectangular' ||
+      type === 'rect'
+    ) {
+      return [1];
+    }
+  }
 
   switch (type) {
     case 'hamming':
@@ -1224,6 +1346,19 @@ export function correlate(a: number[], b: number[]): number[] {
 // Slice 5.6 — Spectral windowing WASM dispatch
 // =============================================================================
 
+function assertPsdFrameLength(
+  signalLength: i32,
+  frameLength: i32,
+  name: 'welchPSD' | 'bartlettPSD'
+): void {
+  if (signalLength === 0) return;
+  if (signalLength < frameLength) {
+    throw new RangeError(
+      `${name}: signal length (${signalLength}) is shorter than frameLength (${frameLength})`
+    );
+  }
+}
+
 /**
  * Pack a one-sided PSD array and normalized frequency grid for Welch/Bartlett exports.
  *
@@ -1262,6 +1397,7 @@ export function welchPSD(
   const overlap: i32 = opts?.overlap ?? Math.floor(frameLength / 2);
   const window = opts?.window ?? 'hann';
 
+  assertPsdFrameLength(samples.length, frameLength, 'welchPSD');
   return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
 }
 
@@ -1281,6 +1417,7 @@ export function bartlettPSD(
   const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
   const frameLength: i32 = opts?.frameLength ?? 256;
 
+  assertPsdFrameLength(samples.length, frameLength, 'bartlettPSD');
   return packPsd(samples, frameLength, (s, fl) => bartlettPSDDispatch(s, fl));
 }
 

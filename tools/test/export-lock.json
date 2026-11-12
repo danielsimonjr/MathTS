@@ -140,6 +140,9 @@
       "ExecOptions": {
         "kind": "type"
       },
+      "MIN_WORKER_CHUNK": {
+        "kind": "number"
+      },
       "MathWorkerPool": {
         "kind": "function"
       },
@@ -221,6 +224,9 @@
       "matmulSequential": {
         "kind": "function"
       },
+      "resolveDefaultWorkerScript": {
+        "kind": "function"
+      },
       "tensordotRange": {
         "kind": "function"
       },
@@ -234,6 +240,9 @@
         "kind": "function"
       },
       "transferTypedArray": {
+        "kind": "function"
+      },
+      "viteDepsWorkerFallback": {
         "kind": "function"
       }
     },
@@ -9300,6 +9309,9 @@
       "dwt": {
         "kind": "function"
       },
+      "fft": {
+        "kind": "function"
+      },
       "fourier": {
         "kind": "function"
       },
@@ -9319,6 +9331,9 @@
         "kind": "function"
       },
       "idst": {
+        "kind": "function"
+      },
+      "ifft": {
         "kind": "function"
       },
       "invFourier": {
@@ -9629,6 +9644,9 @@
         "kind": "function"
       },
       "partitionRange": {
+        "kind": "function"
+      },
+      "resolveDefaultWorkerScript": {
         "kind": "function"
       },
       "resolveOpThreshold": {

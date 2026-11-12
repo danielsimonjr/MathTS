@@ -367,8 +367,8 @@ graph LR
 
 - Classes: `MathWorkerPool`
 - Interfaces: `WorkerpoolCapabilities`, `WasmFeatureStatus`, `WorkerPoolConfig`, `ParallelResult`, `PoolMetrics`, `EnhancedPoolStats`, `TaskOptions`
-- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `initializePool`, `terminatePool`, `getPoolStats`
-- Constants: `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
+- Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `viteDepsWorkerFallback`, `resolveDefaultWorkerScript`, `initializePool`, `terminatePool`, `getPoolStats`
+- Constants: `MIN_WORKER_CHUNK`, `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
 - Re-exports: `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`, `tensordotRange`, `matmulSequential`
 
 ---
@@ -6736,13 +6736,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                | Type               |
-| ----------------------------- | ---------------------- | ------------------ |
-| `../utils/array.js`           | `arraySize`            | Import             |
-| `../signal/fft-core-f64.js`   | `fftCoreFloat64`       | Import             |
-| `./complex-to-interleaved.js` | `complexToInterleaved` | Import             |
-| `../utils/factory.js`         | `factory`              | Import             |
-| `../core/function/typed.js`   | `TypedFunction`        | Import (type-only) |
+| File                          | Imports                           | Type               |
+| ----------------------------- | --------------------------------- | ------------------ |
+| `../utils/array.js`           | `arraySize`                       | Import             |
+| `../signal/fft-core-f64.js`   | `fftCoreFloat64, fftExactFloat64` | Import             |
+| `./complex-to-interleaved.js` | `complexToInterleaved`            | Import             |
+| `../utils/factory.js`         | `factory`                         | Import             |
+| `../core/function/typed.js`   | `TypedFunction`                   | Import (type-only) |
 
 **Exports:**
 
@@ -8841,7 +8841,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitReverse`, `fftCoreFloat64`
+- Functions: `bitReverse`, `fftCoreFloat64`, `fftExactFloat64`
 
 ---
 
@@ -11673,7 +11673,7 @@ graph LR
 
 | File                            | Imports                                                                                                                                    | Type   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
+| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
 | `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
@@ -17824,9 +17824,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
+| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
 
 **Exports:**
 
@@ -17851,7 +17851,7 @@ graph LR
 
 | File               | Imports                                                                    | Type   |
 | ------------------ | -------------------------------------------------------------------------- | ------ |
-| `./validate.js`    | `assertSameLength, assertMatmulShape`                                      | Import |
+| `./validate.js`    | `assertSameLength, assertMatmulShape, assertMatmulArgs`                    | Import |
 | `./ops/bitwise.js` | `bitAnd, bitOr, bitXor, bitNot, leftShift, rightArithShift, rightLogShift` | Import |
 
 **Exports:**
@@ -17901,10 +17901,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                |
-| ---------------------------------- | ------------------------------------- |
-| `@danielsimonjr/mathts-workerpool` | `matmulSequential`                    |
-| `@danielsimonjr/mathts-workerpool` | `PoolOptions, ExecOptions, PoolStats` |
+| Package                            | Import                                         |
+| ---------------------------------- | ---------------------------------------------- |
+| `@danielsimonjr/mathts-workerpool` | `matmulSequential, resolveDefaultWorkerScript` |
+| `@danielsimonjr/mathts-workerpool` | `PoolOptions, ExecOptions, PoolStats`          |
 
 **Internal Dependencies:**
 
@@ -17922,7 +17922,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `WorkerPool`, `matmulSequential`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `ThresholdByOp`, `DeprecatedThresholdOp`, `DispatchOptions`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`, `PoolOptions`, `ExecOptions`, `PoolStats`
+- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `WorkerPool`, `matmulSequential`, `resolveDefaultWorkerScript`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `ThresholdByOp`, `DeprecatedThresholdOp`, `DispatchOptions`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`, `PoolOptions`, `ExecOptions`, `PoolStats`
 
 ---
 
@@ -17940,7 +17940,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `assertSameLength`, `assertMatmulShape`
+- Functions: `assertSameLength`, `assertMatmulArgs`, `assertMatmulShape`
 
 ---
 
@@ -20287,12 +20287,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1287   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218965 |
-| Total Exports           | 7023   |
-| Total Re-exports        | 3029   |
+| Total Lines of Code     | 219433 |
+| Total Exports           | 7031   |
+| Total Re-exports        | 3030   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2363   |
+| Total Functions         | 2367   |
 | Total Type Guards       | 172    |
 | Total Enums             | 0      |
 | Type-only Imports       | 645    |
