@@ -263,7 +263,11 @@ const applyArithmetic = (
 // silently dropped the 3rd+ operand (add(1,2,3) returned 3), which also broke
 // internal callers like polynomialRoot's cubic branch. Fold over every arg.
 const makeArithmetic =
-  (scalarFn: (a: unknown, b: unknown) => unknown, matrixFn: (a: unknown, b: unknown) => unknown) =>
+  (
+    scalarFn: (a: unknown, b: unknown) => unknown,
+    matrixFn: (a: unknown, b: unknown) => unknown,
+    fastNumberPair?: (a: number, b: number) => number
+  ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
       throw new TypeError('Too few arguments (expected at least 1)');
@@ -271,13 +275,22 @@ const makeArithmetic =
     if (args.length === 1) {
       return args[0];
     }
+    if (
+      args.length === 2 &&
+      fastNumberPair &&
+      typeof args[0] === 'number' &&
+      typeof args[1] === 'number'
+    ) {
+      return fastNumberPair(args[0], args[1]);
+    }
     return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
   };
 
 type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
   _add as (a: unknown, b: unknown) => unknown,
-  _matAdd as (a: unknown, b: unknown) => unknown
+  _matAdd as (a: unknown, b: unknown) => unknown,
+  (a, b) => a + b
 ) as PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
@@ -285,7 +298,8 @@ export const subtract = makeArithmetic(
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
   _multiply as (a: unknown, b: unknown) => unknown,
-  _matMultiply as (a: unknown, b: unknown) => unknown
+  _matMultiply as (a: unknown, b: unknown) => unknown,
+  (a, b) => a * b
 ) as typeof _multiply;
 export const divide: TypedFunction = _divide;
 export const pow: TypedFunction = _pow;

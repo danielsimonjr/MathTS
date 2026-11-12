@@ -42,7 +42,7 @@ export const WASM_SORT_THRESHOLD = 16384;
 // ---------------------------------------------------------------------------
 
 /** NaN-last comparator matching the original `cmp_f64_nan_last`. */
-function cmpNanLast(a: number, b: number): number {
+export function cmpNanLast(a: number, b: number): number {
   if (a < b) return -1;
   if (a > b) return 1;
   if (a === b) return 0;

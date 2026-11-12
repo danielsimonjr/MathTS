@@ -150,6 +150,5 @@ describe('#692 elementwise sin on number[]', () => {
     expect(sinMs).toBeGreaterThan(0);
     expect(loopMs).toBeGreaterThan(0);
     expect(ratio).toBeLessThanOrEqual(1.2);
-    expect(sinMs).toBeLessThanOrEqual(1.2 * loopMs);
   });
 });

@@ -8,6 +8,7 @@
  */
 
 import { DenseMatrix, denseContiguousData } from '../types/DenseMatrix.js';
+import { gemmF64 } from '../types/dense/gemm-f64.js';
 import * as reduction from '../types/dense/reduction.js';
 import type { MatrixBackend, BackendType } from './Backend.js';
 
@@ -143,20 +144,7 @@ export class JSBackend implements MatrixBackend {
     const k = a.cols;
     const ad = denseContiguousData(a);
     const bd = denseContiguousData(b);
-    const result = new Float64Array(m * n);
-
-    // i-k-j loop: row-major flat reads (matches dense/arithmetic.ts)
-    for (let i = 0; i < m; i++) {
-      const ai = i * k;
-      const ri = i * n;
-      for (let p = 0; p < k; p++) {
-        const aip = ad[ai + p];
-        const bp = p * n;
-        for (let j = 0; j < n; j++) {
-          result[ri + j] += aip * bd[bp + j];
-        }
-      }
-    }
+    const result = gemmF64(ad, bd, m, k, n);
 
     return new DenseMatrix(m, n, result);
   }

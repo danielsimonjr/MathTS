@@ -16,7 +16,7 @@ Authoritative bands: `functions/src/wasm/policy.ts` (`wasmPolicyAllows`). Measur
 | -------------------------------------------------- | -------------------------------- |
 | `array_abs_ptr`                                    | n ≥ 1_024                        |
 | `array_log10_ptr`                                  | n ≥ 1_024                        |
-| `array_sin_ptr`                                    | 1_024 ≤ n < 131_072              |
+| `array_sin_ptr`                                    | 16_384 ≤ n < 65_536 (G26 #711)   |
 | `array_log1p_ptr`                                  | 1_024 ≤ n < 16_384               |
 | `array_cos_ptr`                                    | n ≥ 16_384                       |
 | `array_atanh_ptr`                                  | n ≥ 16_384                       |
