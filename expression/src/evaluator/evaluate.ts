@@ -35,6 +35,7 @@ const FORBIDDEN_FUNCTIONS: ReadonlySet<string> = new Set([
   'evaluate',
   'parse',
   'compile',
+  'typed',
   'simplify',
   'derivative',
   'help',
