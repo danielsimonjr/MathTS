@@ -38,7 +38,9 @@ if (!write && !check) {
 }
 
 /**
+ * Whether a workspace package may declare `sideEffects: false`.
  * @param {string} dir workspace directory
+ * @returns {boolean}
  */
 function expectedSideEffects(dir) {
   const base = dir.includes('/') ? dir.split('/').pop() : dir;
@@ -46,7 +48,9 @@ function expectedSideEffects(dir) {
 }
 
 /**
+ * True when the package manifest lists LICENSE in `files`.
  * @param {Record<string, unknown>} filesField
+ * @returns {boolean}
  */
 function filesIncludesLicense(filesField) {
   const files = Array.isArray(filesField) ? filesField : [];
@@ -54,7 +58,9 @@ function filesIncludesLicense(filesField) {
 }
 
 /**
+ * True when the package exports its own package.json subpath.
  * @param {Record<string, unknown>} pkg
+ * @returns {boolean}
  */
 function exportsHasPackageJson(pkg) {
   const exp = pkg.exports;
@@ -63,7 +69,10 @@ function exportsHasPackageJson(pkg) {
   return entry === './package.json' || (typeof entry === 'object' && entry?.default === './package.json');
 }
 
-/** @returns {string[]} */
+/**
+ * Packaging fields that still differ from the G29 expected shape.
+ * @returns {string[]}
+ */
 function collectProblems(dir, pkg) {
   const problems = [];
   if (pkg.private) return problems;
