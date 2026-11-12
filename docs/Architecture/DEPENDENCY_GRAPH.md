@@ -10992,15 +10992,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                                                                                                                                                                 | Type   |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `./euclid.js`                        | `euclidSnap`                                                                                                                                                                            | Import |
-| `./f64-kernels.js`                   | `f64Unary`                                                                                                                                                                              | Import |
-| `../statistics/numeric-data.js`      | `finiteNumbers, flattenNumeric, normalizationFromSecondArg, normalizationFromStringAndOptions, numberGrid, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest` | Import |
-| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                 | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                              | Import |
-| `./invalid-scalar-guards.js`         | `withBinaryScalarGuards`                                                                                                                                                                | Import |
-| `./complex-promotion.js`             | `logReal, logRealBase, log10Real, log2Real, log1pReal, sqrtReal, powReal, nthRootReal`                                                                                                  | Import |
+| File                            | Imports                                                                                                                                                                                 | Type   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./euclid.js`                   | `euclidSnap`                                                                                                                                                                            | Import |
+| `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                                         | Import |
+| `../statistics/numeric-data.js` | `finiteNumbers, flattenNumeric, normalizationFromSecondArg, normalizationFromStringAndOptions, numberGrid, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest` | Import |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                 | Import |
+| `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                                                                                                                                | Import |
+| `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, sqrtReal, staysRealSqrt, powReal, nthRootReal`                                                     | Import |
 
 **Exports:**
 
@@ -11107,7 +11106,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isPredictableMode`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `log1pReal`, `sqrtReal`, `powReal`, `nthRootReal`, `acscReal`, `asecReal`
+- Functions: `isPredictableMode`, `staysRealLog`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `staysRealLog1p`, `log1pReal`, `staysRealSqrt`, `sqrtReal`, `powReal`, `nthRootReal`, `staysRealUnitInterval`, `staysRealAcosh`, `staysRealAbsAtLeastOne`, `acscReal`, `asecReal`
 
 ---
 
@@ -11184,9 +11183,22 @@ graph LR
 
 ### `functions/src/typed/f64-kernels.ts` - Shared element-wise kernel for the synchronous typed Float64Array signatures.
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                                 | Imports                                       | Type   |
+| ------------------------------------ | --------------------------------------------- | ------ |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch, WasmElementwiseOp` | Import |
+
 **Exports:**
 
-- Functions: `f64Unary`
+- Interfaces: `UnaryRealSpec`
+- Functions: `f64Unary`, `f64UnaryDispatched`, `unaryCollection`
 
 ---
 
@@ -11862,12 +11874,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                 | Type   |
-| ------------------------------------ | --------------------------------------- | ------ |
-| `./complex-promotion.js`             | `acscReal, asecReal, isPredictableMode` | Import |
-| `./f64-kernels.js`                   | `f64Unary`                              | Import |
-| `./trig-angle-unit.js`               | `trigFromAngleUnit`                     | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
+| File                     | Imports                                                                             | Type   |
+| ------------------------ | ----------------------------------------------------------------------------------- | ------ |
+| `./complex-promotion.js` | `acscReal, asecReal, staysRealAbsAtLeastOne, staysRealAcosh, staysRealUnitInterval` | Import |
+| `./f64-kernels.js`       | `f64Unary, f64UnaryDispatched, unaryCollection`                                     | Import |
+| `./trig-angle-unit.js`   | `trigFromAngleUnit`                                                                 | Import |
 
 **Exports:**
 
@@ -19485,9 +19496,9 @@ graph LR
 | `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
-| `functions/src/typed/arithmetic`                       | 7 files      | 9 files    |
 | `functions/src/typed/special`                          | 7 files      | 9 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
+| `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 
 ---
 
@@ -20366,12 +20377,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1292   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221197 |
-| Total Exports           | 7078   |
+| Total Lines of Code     | 221421 |
+| Total Exports           | 7086   |
 | Total Re-exports        | 3045   |
 | Total Classes           | 61     |
-| Total Interfaces        | 604    |
-| Total Functions         | 2397   |
+| Total Interfaces        | 605    |
+| Total Functions         | 2405   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 645    |
