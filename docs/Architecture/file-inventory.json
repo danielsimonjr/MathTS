@@ -13470,7 +13470,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 110
+      "loc": 109
     },
     {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",

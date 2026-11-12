@@ -37,46 +37,37 @@ function randSpd(n: number, seed: number): number[][] {
   return A;
 }
 
-const nodeMajor = Number((process.versions.node ?? '0').split('.')[0] ?? 0);
-// #693 AC is measured on Node 22; v22 runners in this repo are noisier vs ml-matrix under
-// parallel vitest — keep the gate on Node 20 (+ Bun) until GEMM closes the remaining gap.
-const gemmPerfIt = nodeMajor === 22 ? it.skip : it;
-
 describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
-  gemmPerfIt(
-    'n=1000 median ≤ 1.15× ml-matrix mmul (issue AC)',
-    () => {
-      const n = 1000;
-      const A = randSpd(n, 42);
-      const B = randSpd(n, 99);
-      const AD = DenseMatrix.fromArray(A);
-      const BD = DenseMatrix.fromArray(B);
-      const AM = new MLMatrix(A);
-      const BM = new MLMatrix(B);
-      const mlTimes: number[] = [];
-      const mathTsTimes: number[] = [];
-      const ratios: number[] = [];
-      for (let w = 0; w < 4; w++) {
-        medianTime(() => AM.mmul(BM), 0, 1);
-        medianTime(() => AD.multiply(BD), 0, 1);
+  it('n=1000 median ≤ 1.15× ml-matrix mmul (issue AC)', () => {
+    const n = 1000;
+    const A = randSpd(n, 42);
+    const B = randSpd(n, 99);
+    const AD = DenseMatrix.fromArray(A);
+    const BD = DenseMatrix.fromArray(B);
+    const AM = new MLMatrix(A);
+    const BM = new MLMatrix(B);
+    const mlTimes: number[] = [];
+    const mathTsTimes: number[] = [];
+    const ratios: number[] = [];
+    for (let w = 0; w < 4; w++) {
+      medianTime(() => AM.mmul(BM), 0, 1);
+      medianTime(() => AD.multiply(BD), 0, 1);
+    }
+    for (let r = 0; r < 9; r++) {
+      const mathTsFirst = r % 2 === 0;
+      if (mathTsFirst) {
+        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
+        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
+      } else {
+        mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
+        mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
       }
-      for (let r = 0; r < 9; r++) {
-        const mathTsFirst = r % 2 === 0;
-        if (mathTsFirst) {
-          mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
-          mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
-        } else {
-          mlTimes.push(medianTime(() => AM.mmul(BM), 0, 1));
-          mathTsTimes.push(medianTime(() => AD.multiply(BD), 0, 1));
-        }
-        ratios.push(mathTsTimes[mathTsTimes.length - 1] / mlTimes[mlTimes.length - 1]);
-      }
-      ratios.sort((a, b) => a - b);
-      const ratio = ratios[Math.floor(ratios.length / 2)];
-      expect(ratio).toBeLessThan(1.15);
-    },
-    180_000
-  );
+      ratios.push(mathTsTimes[mathTsTimes.length - 1] / mlTimes[mlTimes.length - 1]);
+    }
+    ratios.sort((a, b) => a - b);
+    const ratio = ratios[Math.floor(ratios.length / 2)];
+    expect(ratio).toBeLessThan(1.15);
+  }, 180_000);
 
   it('matMul nested matches DenseMatrix.multiply on a spot check', () => {
     const A = [

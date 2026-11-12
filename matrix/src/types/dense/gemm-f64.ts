@@ -1,5 +1,5 @@
 /** Micro-GEMM block size (L1-friendly tiles on typical CPUs). */
-export const GEMM_BLOCK = 48;
+export const GEMM_BLOCK = 96;
 
 const BLOCKED_MIN_FLOPS = 48 * 48 * 48;
 
