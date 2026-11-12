@@ -135,7 +135,7 @@ export function abbaTimedRatio(baseline, candidate, opts = {}) {
   const ratioOfTrimmed =
     trimmedMean(candSlice) / Math.max(trimmedMean(baseSlice), Number.EPSILON);
   const ratioOfRoundMedians = median(ratioSlice);
-  const ratio = Math.max(ratioOfMedians, ratioOfTrimmed);
+  const ratio = ratioOfRoundMedians;
 
   return {
     ratio,
