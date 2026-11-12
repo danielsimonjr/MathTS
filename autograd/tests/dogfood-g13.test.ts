@@ -226,6 +226,91 @@ describe('#754 softmax / CE finite differences', () => {
   });
 });
 
+describe('crossEntropy and BCE', () => {
+  it('crossEntropy scalar loss matches finite differences', () => {
+    const logits = new Float64Array([1, 2, 0.5]);
+    const shape = [3];
+    const tape = new Tape();
+    const { id } = tape.allocate(3);
+    const leaf = new TapedTensor(shape, logits, tape, id);
+    const loss = leaf.crossEntropy([1]);
+    tape.backward(loss.id, Float64Array.of(1), { retainGraph: true });
+    const ana = tape.getInputGrad(id)!;
+    const target = 1;
+    const num = fdVector((d) => {
+      let max = -Infinity;
+      for (let i = 0; i < 3; i++) if (d[i] > max) max = d[i];
+      let s = 0;
+      for (let i = 0; i < 3; i++) s += Math.exp(d[i] - max);
+      const logSum = max + Math.log(s);
+      return logSum - d[target];
+    }, logits);
+    for (let i = 0; i < 3; i++) expect(ana[i]).toBeCloseTo(num[i], 5);
+  });
+
+  it('binaryCrossEntropy matches finite differences', () => {
+    const x0 = 0.8;
+    const target = 0.3;
+    const tape = new Tape();
+    const { id } = tape.allocate(1);
+    const leaf = new TapedTensor([1], Float64Array.of(x0), tape, id);
+    const loss = leaf.binaryCrossEntropy(Float64Array.of(target));
+    tape.backward(loss.id, Float64Array.of(1), { retainGraph: true });
+    const ana = tape.getInputGrad(id)![0];
+    const bce = (x: number) => {
+      const maxNegX = x > 0 ? -x : Math.log(1 + Math.exp(x));
+      return (1 - target) * x + maxNegX + Math.log1p(Math.exp(-Math.abs(x)));
+    };
+    expect(ana).toBeCloseTo(fdScalar(bce, x0), 5);
+  });
+});
+
+describe('retainGraph and 2-D softmax', () => {
+  it('retainGraph keeps the tape open for another forward', () => {
+    const tape = new Tape();
+    const x = TapedTensor.fromTensorAsInput(new Tensor([1], new Float64Array([3])), tape);
+    const y = x.square();
+    tape.backward(y.id, Float64Array.of(1), { retainGraph: true });
+    const z = x.mul(x);
+    expect(z.primal[0]).toBe(9);
+  });
+
+  it('softmax along axis 0 on a 2×2 tensor sums to 1 per column group', () => {
+    const tape = new Tape();
+    const { id } = tape.allocate(4);
+    const leaf = new TapedTensor([2, 2], new Float64Array([0, 1, 2, 3]), tape, id);
+    const probs = leaf.softmax(0);
+    const p = probs.primal;
+    expect(p[0] + p[2]).toBeCloseTo(1, 10);
+    expect(p[1] + p[3]).toBeCloseTo(1, 10);
+  });
+
+  it('2-D crossEntropy reduces batch', () => {
+    const tape = new Tape();
+    const { id } = tape.allocate(6);
+    const leaf = new TapedTensor([2, 3], new Float64Array([1, 2, 0, 0.5, 1, 2]), tape, id);
+    const loss = leaf.crossEntropy([0, 2], 1).sum();
+    tape.backward(loss.id, Float64Array.of(1), { retainGraph: true });
+    expect(tape.getInputGrad(id)!.some((v) => v !== 0)).toBe(true);
+  });
+});
+
+describe('Tape.recording and validation', () => {
+  it('recording is false inside noGrad', () => {
+    const tape = new Tape();
+    expect(tape.recording).toBe(true);
+    tape.noGrad(() => expect(tape.recording).toBe(false));
+    expect(tape.recording).toBe(true);
+  });
+
+  it('softmax rejects an out-of-range axis', () => {
+    const tape = new Tape();
+    const { id } = tape.allocate(4);
+    const leaf = new TapedTensor([2, 2], new Float64Array(4), tape, id);
+    expect(() => leaf.softmax(-1)).toThrow(/axis/);
+  });
+});
+
 describe('gelu FD', () => {
   it('matches central difference', () => {
     const x0 = 1.2;

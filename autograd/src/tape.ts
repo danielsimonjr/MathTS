@@ -110,7 +110,7 @@ export class Tape {
     }
   }
 
-  /** @returns whether this tape is inside a {@link noGrad} region. */
+  /** True when {@link noGrad} is not active and ops record nodes on this tape. */
   get recording(): boolean {
     return this.noGradDepth === 0;
   }
