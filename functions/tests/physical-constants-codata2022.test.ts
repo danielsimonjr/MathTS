@@ -22,7 +22,7 @@ import * as F from '../src/factories/index.js';
 // scipy.constants (CODATA-2022) values — copied verbatim from python repr, do not hand-edit.
 const CODATA_2022: Record<string, number> = {
   speedOfLight: 299792458.0,
-  gravitationConstant: 6.6743e-11,
+  gravitationConstant: 6.6743e-11, // CODATA 2022 prints 6.67430(15); double rounds to 6.6743e-11
   planckConstant: 6.62607015e-34,
   reducedPlanckConstant: 1.0545718176461565e-34,
   magneticConstant: 1.25663706127e-6,
@@ -82,7 +82,14 @@ const NON_CODATA: Record<string, number> = {
 /** Extract the numeric magnitude from a Unit-valued or number-valued constant. */
 function numericOf(value: unknown): number {
   if (typeof value === 'number') return value;
-  return (value as { toNumeric(): number }).toNumeric();
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as { toNumeric?: unknown }).toNumeric === 'function'
+  ) {
+    return (value as { toNumeric(): number }).toNumeric();
+  }
+  return Number(value);
 }
 
 describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
@@ -107,5 +114,16 @@ describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
   it('vacuumImpedance is μ0·c (Z0) to the 12 digits CODATA publishes', () => {
     const product = numericOf(F.magneticConstant) * numericOf(F.speedOfLight);
     expect(Number(product.toPrecision(12))).toBe(numericOf(F.vacuumImpedance));
+  });
+
+  it('electronMass and gravitationConstant carry CODATA 2022 absolute uncertainties', () => {
+    expect(F.electronMass.uncertainty).toBeCloseTo(2.8e-40, 45);
+    expect(F.electronMass.unc).toBe(F.electronMass.uncertainty);
+    expect(F.gravitationConstant.uncertainty).toBeCloseTo(1.5e-15, 18);
+    expect(F.speedOfLight.unc).toBe(0);
+    expect(F.planckConstant.unc).toBe(0);
+    expect(F.elementaryCharge.unc).toBe(0);
+    expect(F.rydberg.unc).toBe(1.2e-5);
+    expect((F.fineStructure as unknown as { unc: number }).unc).toBe(1.1e-12);
   });
 });
