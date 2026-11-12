@@ -2452,6 +2452,7 @@
       "functions/src/numeric/solveDDE.ts",
       "functions/src/numeric/solveODE.ts"
     ],
+    "functions/src/numeric/ode-step-limit.ts": ["functions/src/numeric/solveODE.ts"],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",
       "functions/src/plain/number/probability.ts",

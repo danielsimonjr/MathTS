@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1292
+  totalFiles: 1293
   totalModules: 82
-  totalExports: 7089
+  totalExports: 7093
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18157,6 +18157,25 @@ modules:
       functions:
         - numericJacobian
         - centralDifferenceGradient
+    functions/src/numeric/ode-step-limit.ts:
+      description: Default cap on **accepted** steps for every ODE driver.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - ODE_DEFAULT_MAX_ACCEPTED_STEPS
+        - odeAcceptedBudget
+        - odeMaxStepsError
+        - odeMaxAttempts
+      interfaces:
+        - ODEStepLimitContext
+      functions:
+        - odeAcceptedBudget
+        - odeMaxStepsError
+        - odeMaxAttempts
+      constants:
+        - ODE_DEFAULT_MAX_ACCEPTED_STEPS
     functions/src/numeric/open-root-finders.ts:
       description: Open (non-bracketing) scalar root-finders.
       externalDependencies: []
@@ -18283,6 +18302,11 @@ modules:
         - file: ./hermite.js
           imports:
             - hermiteCubic
+        - file: ./ode-step-limit.js
+          imports:
+            - odeAcceptedBudget
+            - odeMaxAttempts
+            - odeMaxStepsError
         - file: ../utils/is.js
           imports:
             - isUnit
@@ -25338,6 +25362,7 @@ modules:
         - FindRootOptions
         - MinimizeOptions
         - ODESolution
+        - StiffODESolverOptions
         - LinprogOptions
         - LinprogResult
       functions:
@@ -42970,6 +42995,7 @@ dependencyGraph:
         - functions/src/numeric/monte-carlo.ts
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/numeric-jacobian.ts
+        - functions/src/numeric/ode-step-limit.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/propagate-uncertainty.ts
         - functions/src/numeric/quadrature-extra.ts
@@ -43945,16 +43971,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1292
+  totalTypeScriptFiles: 1293
   totalModules: 82
-  totalLinesOfCode: 221978
-  totalExports: 7089
+  totalLinesOfCode: 222196
+  totalExports: 7093
   totalClasses: 61
-  totalInterfaces: 605
-  totalFunctions: 2404
+  totalInterfaces: 607
+  totalFunctions: 2407
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1650
+  totalConstants: 1651
   totalReExports: 3049
   totalTypeOnlyImports: 646
   runtimeCircularDeps: 1
