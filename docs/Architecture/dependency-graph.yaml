@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1294
   totalModules: 82
-  totalExports: 7089
+  totalExports: 7090
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27180,12 +27180,17 @@ modules:
         - file: ../wasm/sort/wasm-bridge.js
           imports:
             - cmpNanLast
+        - file: ./number.js
+          imports:
+            - nearlyEqual
       workspaceDependencies: []
       exports:
+        - defaultNumberCompare
         - arrayHasNaN
         - sortNumbersInPlace
         - sortNumbersDescendingInPlace
       functions:
+        - defaultNumberCompare
         - arrayHasNaN
         - sortNumbersInPlace
         - sortNumbersDescendingInPlace
@@ -43946,11 +43951,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1294
   totalModules: 82
-  totalLinesOfCode: 221932
-  totalExports: 7089
+  totalLinesOfCode: 221935
+  totalExports: 7090
   totalClasses: 61
   totalInterfaces: 603
-  totalFunctions: 2408
+  totalFunctions: 2409
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1650

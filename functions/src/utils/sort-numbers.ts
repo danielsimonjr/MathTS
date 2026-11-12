@@ -1,4 +1,10 @@
 import { cmpNanLast } from '../wasm/sort/wasm-bridge.js';
+import { nearlyEqual } from './number.js';
+
+/** Default factory `compare` for plain numbers (`config.relTol` = 1e-12). */
+export function defaultNumberCompare(x: number, y: number): number {
+  return nearlyEqual(x, y, 1e-12, 0) ? 0 : x > y ? 1 : -1;
+}
 
 /** Returns true when any entry is NaN (needs NaN-last ordering). */
 export function arrayHasNaN(arr: readonly number[]): boolean {
@@ -22,10 +28,7 @@ export function sortNumbersInPlace(
 ): void {
   if (arr.length === 0) return;
   if (arrayHasNaN(arr)) {
-    const cmp = defaultCompare;
-    if (!cmp) {
-      throw new Error('sortNumbersInPlace: default compare required when array contains NaN');
-    }
+    const cmp = defaultCompare ?? defaultNumberCompare;
     const c = descending ? (a: number, b: number) => -cmp(a, b) : cmp;
     arr.sort(c);
     return;

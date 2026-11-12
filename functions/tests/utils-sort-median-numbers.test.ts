@@ -9,10 +9,10 @@ describe('sortNumbersInPlace', () => {
     expect(a).toEqual([1, 2, 3]);
   });
 
-  it('NaN last', () => {
+  it('NaN follows default compare (finite values first)', () => {
     const a = [NaN, 2, 1];
     sortNumbersInPlace(a);
-    expect(a[2]).toBeNaN();
+    expect(a).toEqual([1, 2, NaN]);
   });
 });
 

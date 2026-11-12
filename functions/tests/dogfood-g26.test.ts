@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
+import { nodeBinary } from './helpers/node-binary.js';
 import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index.js';
 import { lu, luSolve } from '@danielsimonjr/mathts-matrix';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
@@ -34,23 +37,11 @@ describe('G26 #712 sort on number[]', () => {
   });
 
   it('n=1e5 sort is within 1.5× native Float64Array.sort (issue #712)', () => {
-    const src = Array.from({ length: 1e5 }, (_, i) => Math.sin(i));
-    const tNative = medianTime(
-      () => {
-        const f = new Float64Array(src);
-        f.sort();
-      },
-      3,
-      8
-    );
-    const tSort = medianTime(
-      () => {
-        sort(src.slice());
-      },
-      3,
-      8
-    );
-    expect(tSort / tNative).toBeLessThan(1.5);
+    const gate = fileURLToPath(new URL('./helpers/sort-number-perf-gate.mjs', import.meta.url));
+    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
+    expect(Number.isFinite(checksum)).toBe(true);
+    expect(ratio).toBeLessThan(1.5);
   });
 });
 

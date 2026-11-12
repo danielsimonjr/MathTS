@@ -9249,7 +9249,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 56
+      "loc": 59
     },
     {
       "file": "functions/src/utils/string.ts",
@@ -9949,7 +9949,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 164
+      "loc": 155
     },
     {
       "file": "functions/tests/dtw.test.ts",

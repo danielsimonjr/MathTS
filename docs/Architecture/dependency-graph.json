@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1294,
     "totalModules": 82,
-    "totalExports": 7089
+    "totalExports": 7090
   },
   "entryPoints": [
     {
@@ -28948,11 +28948,25 @@
           {
             "file": "../wasm/sort/wasm-bridge.js",
             "imports": ["cmpNanLast"]
+          },
+          {
+            "file": "./number.js",
+            "imports": ["nearlyEqual"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["arrayHasNaN", "sortNumbersInPlace", "sortNumbersDescendingInPlace"],
-        "functions": ["arrayHasNaN", "sortNumbersInPlace", "sortNumbersDescendingInPlace"]
+        "exports": [
+          "defaultNumberCompare",
+          "arrayHasNaN",
+          "sortNumbersInPlace",
+          "sortNumbersDescendingInPlace"
+        ],
+        "functions": [
+          "defaultNumberCompare",
+          "arrayHasNaN",
+          "sortNumbersInPlace",
+          "sortNumbersDescendingInPlace"
+        ]
       },
       "functions/src/utils/string.ts": {
         "description": "Generic-value string formatting (`format`, `stringify`, `compareText`).",
@@ -46431,11 +46445,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1294,
     "totalModules": 82,
-    "totalLinesOfCode": 221932,
-    "totalExports": 7089,
+    "totalLinesOfCode": 221935,
+    "totalExports": 7090,
     "totalClasses": 61,
     "totalInterfaces": 603,
-    "totalFunctions": 2408,
+    "totalFunctions": 2409,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1650,

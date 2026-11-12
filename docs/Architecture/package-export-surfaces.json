@@ -2359,6 +2359,7 @@
       "DEFAULT_CONFIG",
       "DEFAULT_MUTATION_WEIGHTS",
       "DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS",
+      "defaultNumberCompare",
       "defaultWasmLocation",
       "degree",
       "degreeIn",

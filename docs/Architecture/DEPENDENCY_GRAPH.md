@@ -12445,13 +12445,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports      | Type   |
-| ----------------------------- | ------------ | ------ |
-| `../wasm/sort/wasm-bridge.js` | `cmpNanLast` | Import |
+| File                          | Imports       | Type   |
+| ----------------------------- | ------------- | ------ |
+| `../wasm/sort/wasm-bridge.js` | `cmpNanLast`  | Import |
+| `./number.js`                 | `nearlyEqual` | Import |
 
 **Exports:**
 
-- Functions: `arrayHasNaN`, `sortNumbersInPlace`, `sortNumbersDescendingInPlace`
+- Functions: `defaultNumberCompare`, `arrayHasNaN`, `sortNumbersInPlace`, `sortNumbersDescendingInPlace`
 
 ---
 
@@ -19509,7 +19510,7 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
-| `functions/src/utils/number`                           | 0 files      | 45 files   |
+| `functions/src/utils/number`                           | 0 files      | 46 files   |
 | `functions/src/utils/collection`                       | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -20416,12 +20417,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1294   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221932 |
-| Total Exports           | 7089   |
+| Total Lines of Code     | 221935 |
+| Total Exports           | 7090   |
 | Total Re-exports        | 3045   |
 | Total Classes           | 61     |
 | Total Interfaces        | 603    |
-| Total Functions         | 2408   |
+| Total Functions         | 2409   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 645    |

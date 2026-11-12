@@ -1033,7 +1033,8 @@
       "functions/src/typed/relational.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts"
+      "functions/src/utils/isPositive.ts",
+      "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/algebra/sparse/csSqr.ts": [
       "functions/src/algebra/decomposition/slu.ts",
