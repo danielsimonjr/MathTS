@@ -20,6 +20,7 @@ const BEGIN = '<!-- BEGIN GENERATED FUNCTIONS STATS (tools/sync-readme-functions
 const END = '<!-- END GENERATED FUNCTIONS STATS -->';
 
 /**
+ * Rewrite the generated stats block, the package table row, and the reference-index row.
  * @param {string} text
  * @param {string} version
  * @param {number} exportTotal
