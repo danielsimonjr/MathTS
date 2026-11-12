@@ -1465,13 +1465,10 @@ function _ks2ExactPValue(n1: number, n2: number, D: f64): f64 {
 /** Options for {@link kolmogorovSmirnov2Test}. */
 export interface KS2Options {
   /**
-   * `'asymp'` (default): large-sample `kstwobign` asymptotic p-value —
-   * unchanged from the original implementation, so omitting `opts` entirely
-   * preserves the exact prior behavior.
-   * `'exact'`: exact lattice-path p-value (Kim & Jennrich), matching
-   * `scipy.stats.ks_2samp(..., method='exact')`.
-   * `'auto'`: exact when n1*n2 <= 10000, else asymptotic (scipy's own
-   * threshold for switching to the asymptotic approximation).
+   * `'auto'` (default): exact lattice-path p-value when n₁·n₂ ≤ 10000, else
+   * the asymptotic approximation. Matches SciPy `ks_2samp` `method='auto'`.
+   * `'exact'`: always the lattice-path p-value (Kim & Jennrich).
+   * `'asymp'`: large-sample `kstwobign` survival only.
    */
   method?: 'auto' | 'exact' | 'asymp';
 }
@@ -1480,10 +1477,10 @@ export interface KS2Options {
  * Two-sample Kolmogorov–Smirnov test: are two samples drawn from the same
  * continuous distribution? The statistic is the maximum gap between the two
  * empirical CDFs, D = maxₓ |F₁(x) − F₂(x)|. By default the p-value is the
- * large-sample asymptotic Q(√(n₁n₂/(n₁+n₂))·D) (the `kstwobign` survival
- * function, matching scipy's asymptotic method) — this default is unchanged
- * from before Phase 4. Pass `{ method: 'exact' }` to opt into the exact
- * lattice-path p-value instead (`scipy.stats.ks_2samp(..., method='exact')`).
+ * SciPy `method='auto'` p-value: the exact lattice-path count when
+ * n₁·n₂ ≤ 10000, otherwise the large-sample `kstwobign` survival
+ * Q(√(n₁n₂/(n₁+n₂))·D). Pass `{ method: 'asymp' }` for the asymptotic
+ * p-value only, or `{ method: 'exact' }` to force the lattice path.
  * Distinct from the one-sample {@link kolmogorovSmirnovTest}, which compares
  * one sample to a CDF *function*.
  *
@@ -1493,8 +1490,8 @@ export interface KS2Options {
  * @returns `{ statistic: D, pValue }`
  *
  * @example
- * kolmogorovSmirnov2Test([0.1, 0.4, 0.6], [0.3, 0.5, 0.9]) // { statistic, pValue } (asymptotic)
- * kolmogorovSmirnov2Test(a, b, { method: 'exact' }) // exact lattice-path p-value
+ * kolmogorovSmirnov2Test([0.1, 0.4, 0.6], [0.3, 0.5, 0.9]) // { statistic, pValue } (auto)
+ * kolmogorovSmirnov2Test(a, b, { method: 'asymp' }) // kstwobign only
  */
 export function kolmogorovSmirnov2Test(
   sample1: f64[],
@@ -1527,7 +1524,7 @@ export function kolmogorovSmirnov2Test(
     return { statistic: d, pValue: _ks2ExactPValue(n1, n2, d) };
   }
 
-  // Default ('asymp', or opts omitted entirely) — unchanged prior behavior.
+  // 'asymp', or 'auto' once n₁·n₂ exceeds SciPy's exact-method cutoff.
   const en = Math.sqrt((n1 * n2) / (n1 + n2));
   return { statistic: d, pValue: _kstwobignSf(en * d) };
 }

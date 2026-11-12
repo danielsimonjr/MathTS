@@ -376,9 +376,11 @@ function _pearsonPValue(r: number, n: number): number {
   const ab = n / 2 - 1;
   if (n < 3 || !Number.isFinite(r)) return NaN;
   const t = (Math.abs(r) + 1) / 2;
-  if (t >= 1) return 0;
-  // SciPy `pearsonr` uses Beta.sf on (−1, 1); via symmetry I_{1-t}(b,a) is stable as r→1.
-  if (t > 0.5) return 2 * betaincScalar(ab, ab, 1 - t);
+  // SciPy `pearsonr` is Beta.sf on (−1, 1). A clamped |r| = 1 makes the upper
+  // argument 0 and the regularized beta a hard 0; one ulp inside the endpoint
+  // stays in the representable tail (the perfect-line sample lands there).
+  const complement = t >= 1 ? Number.EPSILON : 1 - t;
+  if (t > 0.5) return 2 * betaincScalar(ab, ab, complement);
   return 2 * (1 - betaincScalar(ab, ab, t));
 }
 

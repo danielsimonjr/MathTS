@@ -37,8 +37,9 @@ const ALL_METHODS: readonly NumpyQuantileMethod[] = [
 /** Legacy mathjs / R names mapped to NumPy method names. */
 const ALIASES: Record<string, NumpyQuantileMethod> = {
   interpolated_inverted_cdf: 'interpolated_inverted_cdf',
-  exclusive: 'interpolated_inverted_cdf',
+  // Excel PERCENTILE.INC / PERCENTILE.EXC (Hyndman–Fan types 7 and 6).
   inclusive: 'linear',
+  exclusive: 'weibull',
 };
 
 /** Parse a quantile `method` string (NumPy names and mathjs/R aliases) or throw. */
@@ -107,12 +108,15 @@ function discreteInvertedCdf(n: number, p: number): number {
 }
 
 function closestObservation(n: number, p: number): number {
+  // NumPy `_closest_observation`: index = n*p - 1.5; take floor only when the
+  // fractional part is 0 and floor(index) is even, otherwise ceil. Negative
+  // indexes clip to 0 (`_discret_interpolation_to_boundaries`).
   const index = n * p - 1 - 0.5;
   const prev = Math.floor(index);
   const gamma = index - prev;
-  if (gamma === 0 && Math.floor(index) % 2 === 1) return prev;
-  const next = prev + 1;
-  return gamma < 0.5 ? prev : next;
+  let idx = gamma === 0 && prev % 2 === 0 ? prev : prev + 1;
+  if (idx < 0) idx = 0;
+  return idx;
 }
 
 function fixGamma(method: NumpyQuantileMethod, gamma: number, virtualIndex: number): number {

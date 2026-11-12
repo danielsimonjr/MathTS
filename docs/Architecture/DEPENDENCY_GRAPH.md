@@ -11075,14 +11075,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                               |
-| -------------------------------- | -------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual`                      |
-| `@danielsimonjr/mathts-core`     | `pairwiseSum, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations` |
-| `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                             |
-| `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                        |
-| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, backendManager, singularValues`                        |
-| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                         |
+| Package                          | Import                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError` |
+| `@danielsimonjr/mathts-core`     | `pairwiseSum, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations`    |
+| `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                |
+| `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                           |
+| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, backendManager, singularValues`                           |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                            |
 
 **Internal Dependencies:**
 
@@ -20627,7 +20627,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1304   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 223899 |
+| Total Lines of Code     | 223938 |
 | Total Exports           | 7128   |
 | Total Re-exports        | 3061   |
 | Total Classes           | 61     |
