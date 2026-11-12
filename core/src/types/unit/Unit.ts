@@ -501,6 +501,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
         );
       }
 
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        throw new TypeError('Unit value must be finite');
+      }
+
       this.fixPrefix = fixPrefixDefault; // if true, function format will not search for the
       // best prefix but leave it as initially provided.
       // fixPrefix is set true by the method Unit.to
@@ -1719,6 +1723,28 @@ export const createUnitClass = /* #__PURE__ */ factory(
      */
     Unit.prototype.equals = function (this: UnitInstance, other: UnitInstance): boolean {
       return this.equalBase(other) && equal(this.value, other.value);
+    };
+
+    /**
+     * Add another unit with the same base dimensions.
+     * @memberof Unit
+     * @param other
+     * @return sum of this unit and the other
+     */
+    Unit.prototype.add = function (this: UnitInstance, other: UnitInstance): UnitInstance {
+      if (!isUnit(other)) {
+        throw new TypeError('Second parameter in Unit.add must be a Unit');
+      }
+      if (!this.equalBase(other)) {
+        throw new DimensionMismatchError('Cannot add/subtract units with different dimensions');
+      }
+      if (this.value == null || other.value == null) {
+        throw new Error('Cannot add/subtract a valueless unit');
+      }
+      const res = this.clone();
+      res.value = addScalar(this.value, other.value);
+      res._exactSI = undefined;
+      return res;
     };
 
     /**

@@ -23518,6 +23518,7 @@ modules:
             - Fraction
             - BigNumber
             - Dual
+            - DimensionMismatchError
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -44686,7 +44687,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1306
   totalModules: 82
-  totalLinesOfCode: 223662
+  totalLinesOfCode: 223698
   totalExports: 7150
   totalClasses: 61
   totalInterfaces: 612
