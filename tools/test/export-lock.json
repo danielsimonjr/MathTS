@@ -221,6 +221,9 @@
       "matmulSequential": {
         "kind": "function"
       },
+      "resolveDefaultWorkerScript": {
+        "kind": "function"
+      },
       "tensordotRange": {
         "kind": "function"
       },
@@ -1645,9 +1648,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1721,6 +1721,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -9617,6 +9620,9 @@
         "kind": "function"
       },
       "partitionRange": {
+        "kind": "function"
+      },
+      "resolveDefaultWorkerScript": {
         "kind": "function"
       },
       "resolveOpThreshold": {

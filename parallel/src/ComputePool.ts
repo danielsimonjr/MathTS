@@ -25,7 +25,7 @@ import {
   type PoolStats,
 } from '@danielsimonjr/mathts-workerpool';
 
-import { assertSameLength, assertMatmulShape } from './validate.js';
+import { assertSameLength, assertMatmulShape, assertMatmulArgs } from './validate.js';
 import {
   bitAnd as bitAndOp,
   bitOr as bitOrOp,
@@ -230,6 +230,11 @@ export interface ComputePoolConfig {
   workerIdleTimeout: number;
   /** Default task timeout in milliseconds */
   taskTimeout: number;
+  /**
+   * Worker script URL or filesystem path. In Vite, pass
+   * `import workerUrl from '@danielsimonjr/mathts-workerpool/worker?url'`.
+   */
+  workerScript?: string;
 }
 
 /**
@@ -388,8 +393,8 @@ export const DEFAULT_POOL_CONFIG: ComputePoolConfig = {
  * Per-call dispatch override accepted by the `ComputePool` operations.
  *
  * - `forceSequential` computes inline whatever the size or threshold.
- * - `forceParallel` skips the threshold checks and dispatches to the workers. It still needs
- *   a ready pool: on a pool that was not initialized (or is disabled) the call runs inline.
+ * - `forceParallel` skips the threshold checks and dispatches to the workers. Workers are
+ *   started lazily on the first parallel dispatch unless the pool was terminated or disabled.
  *
  * `forceSequential` wins when both are set.
  */
@@ -460,6 +465,7 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
     workerType: config.workerType,
     idleTimeout: config.workerIdleTimeout,
     taskTimeout: config.taskTimeout,
+    workerScript: config.workerScript,
   };
 }
 
@@ -488,6 +494,9 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
 export class ComputePool {
   private workerPool: MathWorkerPool;
   private config: ComputePoolConfig;
+  /** Set after `terminate()`; further compute calls throw. */
+  private terminated = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor(config: Partial<ComputePoolConfig> = {}) {
     this.config = {
@@ -502,7 +511,37 @@ export class ComputePool {
    * Initialize the worker pool
    */
   async initialize(): Promise<void> {
+    if (this.terminated) {
+      throw new Error('ComputePool has been terminated');
+    }
     await this.workerPool.initialize();
+  }
+
+  private assertActive(): void {
+    if (this.terminated) {
+      throw new Error('ComputePool has been terminated');
+    }
+  }
+
+  /**
+   * Lazy-init workers before the first parallel dispatch (including `forceParallel`).
+   */
+  private async ensureInitializedForParallel(
+    elementCount: number,
+    op: OpName | undefined,
+    force?: DispatchOptions
+  ): Promise<void> {
+    this.assertActive();
+    if (!this.shouldParallelize(elementCount, op, force)) return;
+    if (this.workerPool.isReady()) return;
+    if (this.initPromise) {
+      await this.initPromise;
+      return;
+    }
+    this.initPromise = this.workerPool.initialize().finally(() => {
+      this.initPromise = null;
+    });
+    await this.initPromise;
   }
 
   /**
@@ -521,18 +560,19 @@ export class ComputePool {
    * backward-compatibility with existing callers that don't know the op name).
    */
   shouldParallelize(elementCount: number, op?: OpName, force?: DispatchOptions): boolean {
+    if (this.terminated) return false;
     if (isDeterministic()) return false;
     if (force?.forceSequential) return false;
-    if (force?.forceParallel) return this.config.enabled && this.workerPool.isReady();
+    if (force?.forceParallel) return this.config.enabled;
     const byOp = this.config.thresholdByOp;
     if (op !== undefined && byOp !== undefined && op in byOp) {
       const raw = byOp[op];
       if (raw !== undefined) {
         const threshold = resolveOpThreshold(raw);
-        return this.config.enabled && elementCount >= threshold && this.workerPool.isReady();
+        return this.config.enabled && elementCount >= threshold;
       }
     }
-    return this.workerPool.shouldParallelize(elementCount);
+    return this.config.enabled && elementCount >= this.config.thresholdElements;
   }
 
   /**
@@ -561,10 +601,12 @@ export class ComputePool {
       force?: DispatchOptions;
     }
   ): Promise<ParallelResult<number>> {
+    this.assertActive();
     assertSameLength(options.op, a.length, b.length);
     if (!this.shouldParallelize(a.length, options.op, options.force)) {
       return this.seqResult(options.sequential(a, b));
     }
+    await this.ensureInitializedForParallel(a.length, options.op, options.force);
     return toParallelResult(await options.worker(a, b));
   }
 
@@ -628,6 +670,8 @@ export class ComputePool {
    * Execute a method in the worker pool
    */
   async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
+    this.assertActive();
+    await this.workerPool.initialize();
     return this.workerPool.exec<T>(method, params, options);
   }
 
@@ -642,25 +686,33 @@ export class ComputePool {
    * Parallel sum of array elements
    */
   async sum(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    this.assertActive();
     if (!this.shouldParallelize(data.length, 'sum', force)) {
       // PAIRWISE, not `s += data[i]`. Naive accumulation grows error as O(n)*eps; pairwise as
       // O(log n)*eps. On 1e6 elements that is 1.3e-11 vs 2.9e-16 — we were ~46,000x less accurate
       // than NumPy's `np.sum`, and `mean`/`std`/`variance` all inherit it.
       return this.seqResult(pairwiseSum(data));
     }
-    return toParallelResult(await this.workerPool.sum(data, this.forceTask(force)));
+    await this.ensureInitializedForParallel(data.length, 'sum', force);
+    return toParallelResult(
+      await this.workerPool.sum(data, await this.forceTask(data.length, 'sum', force))
+    );
   }
 
   /**
    * Parallel product of array elements
    */
   async prod(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    this.assertActive();
     if (!this.shouldParallelize(data.length, 'prod', force)) {
       let p = 1;
       for (let i = 0; i < data.length; i++) p *= data[i];
       return this.seqResult(p);
     }
-    return toParallelResult(await this.workerPool.prod(data, this.forceTask(force)));
+    await this.ensureInitializedForParallel(data.length, 'prod', force);
+    return toParallelResult(
+      await this.workerPool.prod(data, await this.forceTask(data.length, 'prod', force))
+    );
   }
 
   /**
@@ -671,11 +723,13 @@ export class ComputePool {
     b: Float64Array,
     force?: DispatchOptions
   ): Promise<ParallelResult<number>> {
+    this.assertActive();
     return this.gatedBinary(a, b, {
       op: 'dot',
       force,
       sequential: pairwiseDot,
-      worker: (x, y) => this.workerPool.dot(x, y, this.forceTask(force)),
+      worker: async (x, y) =>
+        this.workerPool.dot(x, y, await this.forceTask(x.length, 'dot', force)),
     });
   }
 
@@ -688,7 +742,12 @@ export class ComputePool {
    * parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
    * `shouldParallelize` requires a ready pool, so `forceParallel` never reaches an idle one.
    */
-  private poolOptions(elementCount: number, op: OpName, force?: DispatchOptions): TaskOptions {
+  private async poolOptions(
+    elementCount: number,
+    op: OpName,
+    force?: DispatchOptions
+  ): Promise<TaskOptions> {
+    await this.ensureInitializedForParallel(elementCount, op, force);
     return this.shouldParallelize(elementCount, op, force)
       ? { forceParallel: true }
       : { forceSequential: true };
@@ -698,15 +757,16 @@ export class ComputePool {
    * Task options that carry only the caller's force flags, for methods that already gated
    * in `ComputePool` (the pool then makes the same decision) or that have no per-op threshold.
    */
-  private forceTask(force?: DispatchOptions): TaskOptions | undefined {
+  private async forceTask(
+    elementCount: number,
+    op: OpName | undefined,
+    force?: DispatchOptions
+  ): Promise<TaskOptions | undefined> {
     if (force === undefined) return undefined;
     if (force.forceSequential) return { forceSequential: true };
     if (force.forceParallel) {
-      // Only ask the workers when the pool can take it; otherwise the call would throw
-      // 'not initialized' instead of running inline.
-      return this.shouldParallelize(0, undefined, force)
-        ? { forceParallel: true }
-        : { forceSequential: true };
+      await this.ensureInitializedForParallel(elementCount, op, force);
+      return this.config.enabled ? { forceParallel: true } : { forceSequential: true };
     }
     return undefined;
   }
@@ -720,11 +780,12 @@ export class ComputePool {
     op: 'add' | 'subtract' | 'multiply' | 'divide',
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
+    this.assertActive();
     const result = await this.workerPool.elementwise(
       a,
       b,
       op,
-      this.poolOptions(a.length, op, force)
+      await this.poolOptions(a.length, op, force)
     );
     return toParallelResult(result);
   }
@@ -737,10 +798,11 @@ export class ComputePool {
     scalar: number,
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
+    this.assertActive();
     const result = await this.workerPool.scale(
       data,
       scalar,
-      this.poolOptions(data.length, 'scale', force)
+      await this.poolOptions(data.length, 'scale', force)
     );
     return toParallelResult(result);
   }
@@ -762,6 +824,8 @@ export class ComputePool {
     bCols: number,
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
+    this.assertActive();
+    assertMatmulArgs(a, aRows, aCols, b, bCols);
     assertMatmulShape('matmul', a.length, aRows, aCols, b.length, aCols, bCols);
     const result = await this.workerPool.matmul(
       a,
@@ -769,7 +833,7 @@ export class ComputePool {
       aCols,
       b,
       bCols,
-      this.poolOptions(aRows * bCols, 'matmul', force)
+      await this.poolOptions(aRows * bCols, 'matmul', force)
     );
     return toParallelResult(result);
   }
@@ -793,7 +857,13 @@ export class ComputePool {
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.transpose(data, rows, cols, this.forceTask(force));
+    await this.ensureInitializedForParallel(data.length, 'transpose', force);
+    const result = await this.workerPool.transpose(
+      data,
+      rows,
+      cols,
+      await this.forceTask(data.length, 'transpose', force)
+    );
     return toParallelResult(result);
   }
 
@@ -805,7 +875,13 @@ export class ComputePool {
     fn: (item: T) => R,
     force?: DispatchOptions
   ): Promise<ParallelResult<R[]>> {
-    const result = await this.workerPool.map(data, fn, this.forceTask(force));
+    this.assertActive();
+    await this.ensureInitializedForParallel(data.length, undefined, force);
+    const result = await this.workerPool.map(
+      data,
+      fn,
+      await this.forceTask(data.length, undefined, force)
+    );
     return toParallelResult(result);
   }
 
@@ -818,7 +894,14 @@ export class ComputePool {
     initial: R,
     force?: DispatchOptions
   ): Promise<ParallelResult<R>> {
-    const result = await this.workerPool.reduce(data, fn, initial, this.forceTask(force));
+    this.assertActive();
+    await this.ensureInitializedForParallel(data.length, undefined, force);
+    const result = await this.workerPool.reduce(
+      data,
+      fn,
+      initial,
+      await this.forceTask(data.length, undefined, force)
+    );
     return toParallelResult(result);
   }
 
@@ -830,7 +913,13 @@ export class ComputePool {
     predicate: (item: T) => boolean,
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
-    const result = await this.workerPool.filter(data, predicate, this.forceTask(force));
+    this.assertActive();
+    await this.ensureInitializedForParallel(data.length, undefined, force);
+    const result = await this.workerPool.filter(
+      data,
+      predicate,
+      await this.forceTask(data.length, undefined, force)
+    );
     return toParallelResult(result);
   }
 
@@ -867,7 +956,10 @@ export class ComputePool {
       }
       return this.seqResult({ min, max, minIdx, maxIdx });
     }
-    return toParallelResult(await this.workerPool.minMax(data, this.forceTask(force)));
+    await this.ensureInitializedForParallel(data.length, 'minMax', force);
+    return toParallelResult(
+      await this.workerPool.minMax(data, await this.forceTask(data.length, 'minMax', force))
+    );
   }
 
   /**
@@ -877,6 +969,7 @@ export class ComputePool {
     data: Float64Array,
     force?: DispatchOptions
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
+    this.assertActive();
     if (!this.shouldParallelize(data.length, 'variance', force)) {
       const n = data.length;
       // Corrected two-pass (pairwise mean + (Σd)²/n correction). A naive mean and an uncorrected
@@ -885,20 +978,27 @@ export class ComputePool {
       const variance = n > 0 ? sumSquaredDeviations(data) / n : 0; // population (matches the worker)
       return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
     }
-    return toParallelResult(await this.workerPool.variance(data, this.forceTask(force)));
+    await this.ensureInitializedForParallel(data.length, 'variance', force);
+    return toParallelResult(
+      await this.workerPool.variance(data, await this.forceTask(data.length, 'variance', force))
+    );
   }
 
   /**
    * Compute norm (Euclidean length) in parallel
    */
   async norm(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    this.assertActive();
     if (!this.shouldParallelize(data.length, 'norm', force)) {
       // LAPACK dnrm2 scaling, not `sqrt(sum(x*x))`: squaring before adding overflows to Infinity
       // around 1e200 and FLUSHES TO ZERO around 1e-200 (a silently wrong answer, worse than the
       // overflow). NumPy has this bug — `np.linalg.norm([1e200]*4)` is `inf`. We don't.
       return this.seqResult(norm2(data));
     }
-    return toParallelResult(await this.workerPool.norm(data, this.forceTask(force)));
+    await this.ensureInitializedForParallel(data.length, 'norm', force);
+    return toParallelResult(
+      await this.workerPool.norm(data, await this.forceTask(data.length, 'norm', force))
+    );
   }
 
   /**
@@ -909,11 +1009,13 @@ export class ComputePool {
     b: Float64Array,
     force?: DispatchOptions
   ): Promise<ParallelResult<number>> {
+    this.assertActive();
     return this.gatedBinary(a, b, {
       op: 'distance',
       force,
       sequential: scaledDistance,
-      worker: (x, y) => this.workerPool.distance(x, y, this.forceTask(force)),
+      worker: async (x, y) =>
+        this.workerPool.distance(x, y, await this.forceTask(x.length, 'distance', force)),
     });
   }
 
@@ -956,7 +1058,14 @@ export class ComputePool {
       }
       return this.seqResult(counts);
     }
-    const result = await this.workerPool.histogram(data, bins, min, max, this.forceTask(force));
+    await this.ensureInitializedForParallel(data.length, 'histogram', force);
+    const result = await this.workerPool.histogram(
+      data,
+      bins,
+      min,
+      max,
+      await this.forceTask(data.length, 'histogram', force)
+    );
     return toParallelResult(result);
   }
 
@@ -972,7 +1081,12 @@ export class ComputePool {
     fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square',
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.unary(data, fn, this.poolOptions(data.length, fn, force));
+    this.assertActive();
+    const result = await this.workerPool.unary(
+      data,
+      fn,
+      await this.poolOptions(data.length, fn, force)
+    );
     return toParallelResult(result);
   }
 
@@ -1182,7 +1296,10 @@ export class ComputePool {
   }
 
   /**
-   * Parallel sine
+   * Parallel sine.
+   *
+   * Default `thresholdByOp.sin` is `'never'` (measured transfer overhead). Without
+   * `{ forceParallel: true }` this runs sequentially in-process even after `initialize()`.
    */
   async sin(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
     return this.unary(data, 'sin', force);
@@ -1245,7 +1362,14 @@ export class ComputePool {
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.matvec(matrix, rows, cols, vector, this.forceTask(force));
+    await this.ensureInitializedForParallel(matrix.length, 'matvec', force);
+    const result = await this.workerPool.matvec(
+      matrix,
+      rows,
+      cols,
+      vector,
+      await this.forceTask(matrix.length, 'matvec', force)
+    );
     return toParallelResult(result);
   }
 
@@ -1257,6 +1381,7 @@ export class ComputePool {
     b: Float64Array,
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
+    this.assertActive();
     if (!this.shouldParallelize(a.length * b.length, 'outer', force)) {
       const out = new Float64Array(a.length * b.length);
       for (let i = 0; i < a.length; i++) {
@@ -1264,7 +1389,12 @@ export class ComputePool {
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.outer(a, b, this.forceTask(force));
+    await this.ensureInitializedForParallel(a.length * b.length, 'outer', force);
+    const result = await this.workerPool.outer(
+      a,
+      b,
+      await this.forceTask(a.length * b.length, 'outer', force)
+    );
     return toParallelResult(result);
   }
 
@@ -1280,7 +1410,13 @@ export class ComputePool {
     predicate: (item: T) => boolean,
     force?: DispatchOptions
   ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
-    const result = await this.workerPool.find(data, predicate, this.forceTask(force));
+    this.assertActive();
+    await this.ensureInitializedForParallel(data.length, undefined, force);
+    const result = await this.workerPool.find(
+      data,
+      predicate,
+      await this.forceTask(data.length, undefined, force)
+    );
     return toParallelResult(result);
   }
 
@@ -1292,7 +1428,13 @@ export class ComputePool {
     compare?: (a: T, b: T) => number,
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
-    const result = await this.workerPool.sort(data, compare, this.forceTask(force));
+    this.assertActive();
+    await this.ensureInitializedForParallel(data.length, undefined, force);
+    const result = await this.workerPool.sort(
+      data,
+      compare,
+      await this.forceTask(data.length, undefined, force)
+    );
     return toParallelResult(result);
   }
 
@@ -1657,6 +1799,7 @@ export class ComputePool {
    * Terminate the worker pool
    */
   async terminate(force = false): Promise<void> {
+    this.terminated = true;
     await this.workerPool.terminate(force);
   }
 

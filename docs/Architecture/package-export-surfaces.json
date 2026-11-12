@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4592,6 +4592,7 @@
       "matmulSequential",
       "pool",
       "Pool",
+      "resolveDefaultWorkerScript",
       "tensordotRange",
       "terminatePool",
       "Transfer",
@@ -4601,6 +4602,7 @@
       "worker"
     ],
     "parallel": [
+      "assertMatmulArgs",
       "assertMatmulShape",
       "assertSameLength",
       "bitAnd",
@@ -4686,6 +4688,7 @@
       "PoolOptions",
       "PoolStats",
       "ReduceOptions",
+      "resolveDefaultWorkerScript",
       "resolveOpThreshold",
       "rightArithShift",
       "rightLogShift",

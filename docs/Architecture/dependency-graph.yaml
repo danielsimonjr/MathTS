@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-11'
+  lastUpdated: '2026-11-12'
   totalFiles: 1285
   totalModules: 82
-  totalExports: 7009
+  totalExports: 7012
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -286,6 +286,7 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
@@ -319,6 +320,7 @@ modules:
         - initWorkerWasm
         - isWorkerWasmAvailable
         - getWasmFeatures
+        - resolveDefaultWorkerScript
         - initializePool
         - terminatePool
         - getPoolStats
@@ -37153,6 +37155,7 @@ modules:
           imports:
             - assertSameLength
             - assertMatmulShape
+            - assertMatmulArgs
         - file: ./ops/bitwise.js
           imports:
             - bitAnd
@@ -37372,6 +37375,7 @@ modules:
           directory: packages/workerpool
           imports:
             - matmulSequential
+            - resolveDefaultWorkerScript
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -37387,6 +37391,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37479,6 +37484,7 @@ modules:
         - resolveOpThreshold
         - WorkerPool
         - matmulSequential
+        - resolveDefaultWorkerScript
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -37580,9 +37586,11 @@ modules:
       workspaceDependencies: []
       exports:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
       functions:
         - assertSameLength
+        - assertMatmulArgs
         - assertMatmulShape
   parallel/operations:
     parallel/src/operations/elementwise.ts:
@@ -43544,15 +43552,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1285
   totalModules: 82
-  totalLinesOfCode: 218064
-  totalExports: 7009
+  totalLinesOfCode: 218281
+  totalExports: 7012
   totalClasses: 61
   totalInterfaces: 601
-  totalFunctions: 2360
+  totalFunctions: 2362
   totalTypeGuards: 171
   totalEnums: 0
   totalConstants: 1644
-  totalReExports: 3021
+  totalReExports: 3022
   totalTypeOnlyImports: 644
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

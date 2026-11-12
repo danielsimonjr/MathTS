@@ -361,11 +361,21 @@ export interface WorkerPoolConfig {
  * @returns Worker script path (Node) or URL (browser), or undefined if it
  *          cannot be located (callers then fall back to the generic worker).
  */
-async function resolveDefaultWorkerScript(): Promise<string | undefined> {
+export async function resolveDefaultWorkerScript(): Promise<string | undefined> {
   const isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
 
-  // Browser: let the consuming bundler rewrite the worker URL.
+  // Browser / bundlers: resolve the package worker entry so Vite does not rewrite
+  // `new URL('./worker.js', import.meta.url)` against a prebundled deps chunk (404).
   if (!isNode) {
+    try {
+      const resolve = (import.meta as ImportMeta & { resolve?: (specifier: string) => string })
+        .resolve;
+      if (typeof resolve === 'function') {
+        return resolve('@danielsimonjr/mathts-workerpool/worker');
+      }
+    } catch {
+      // fall through to sibling URL
+    }
     try {
       return new URL('./worker.js', import.meta.url).href;
     } catch {
@@ -740,6 +750,9 @@ export class MathWorkerPool {
     execOptions: ExecOptions | undefined,
     options: TaskOptions | undefined
   ): Promise<T> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
     if (!this.pool) {
       throw new Error('WorkerPool not initialized. Call initialize() first.');
     }
@@ -793,7 +806,7 @@ export class MathWorkerPool {
   ): Promise<ParallelResult<number>> {
     return this.runParallel(data.length, options, {
       sequential: spec.sequential,
-      chunks: () => this.chunkFloat64Array(data, options?.chunkSize),
+      chunks: () => this.chunkFloat64Array(data, options),
       // The chunk is a slice this method owns, so its buffer moves to the worker uncopied.
       send: (chunk) =>
         this.exec<P>(spec.task, [chunk.buffer, 0, chunk.length], { transfer: [chunk.buffer] }),
@@ -854,7 +867,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options);
     const stats = this.stats();
 
     const partialDots = await Promise.all(
@@ -916,7 +929,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -964,7 +977,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1043,7 +1056,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkPairs = this.chunkPairInt32Array(a, b, options?.chunkSize);
+    const chunkPairs = this.chunkPairInt32Array(a, b, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1112,7 +1125,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkInt32Array(a, options?.chunkSize);
+    const chunks = this.chunkInt32Array(a, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1154,7 +1167,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkInt32Array(a, options?.chunkSize);
+    const chunks = this.chunkInt32Array(a, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1374,21 +1387,24 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const stats = this.stats();
 
+    let chunkOffset = 0;
     const results = await Promise.all(
-      chunks.map((chunk, idx) =>
-        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>(
+      chunks.map((chunk) => {
+        const base = chunkOffset;
+        chunkOffset += chunk.length;
+        return this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>(
           'minMaxChunk',
           [chunk.buffer, 0, chunk.length],
           { transfer: [chunk.buffer] }
         ).then((result) => ({
           ...result,
-          minIdx: result.minIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
-          maxIdx: result.maxIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
-        }))
-      )
+          minIdx: result.minIdx + base,
+          maxIdx: result.maxIdx + base,
+        }));
+      })
     );
 
     // Reduce to find global min/max
@@ -1444,7 +1460,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1516,7 +1532,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options);
     const stats = this.stats();
 
     const partialDistances = await Promise.all(
@@ -1590,7 +1606,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1642,7 +1658,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1697,7 +1713,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options);
     const stats = this.stats();
 
     const results = await Promise.all(
@@ -1946,7 +1962,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const chunks = this.chunkFloat64Array(data, options);
     const statsInfo = this.stats();
 
     const results = await Promise.all(
@@ -2139,7 +2155,7 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
+    const chunkSize = this.workerChunkSize(data.length, options);
     const chunks = this.chunkArray(data, chunkSize);
     const stats = this.stats();
 
@@ -2184,10 +2200,9 @@ export class MathWorkerPool {
     compare?: (a: T, b: T) => number,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
     return this.runParallel(data.length, options, {
       sequential: () => [...data].sort(compare),
-      chunks: () => this.chunkArray(data, chunkSize),
+      chunks: () => this.chunkArray(data, this.workerChunkSize(data.length, options)),
       send: (chunk) => this.exec<T[]>('sortChunk', [chunk, compare?.toString()]),
       combine: (parts) => this.kWayMerge(parts, compare),
     });
@@ -2273,10 +2288,9 @@ export class MathWorkerPool {
     fnString: string,
     sequential: () => R[]
   ): Promise<ParallelResult<R[]>> {
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
     return this.runParallel(data.length, options, {
       sequential,
-      chunks: () => this.chunkArray(data, chunkSize),
+      chunks: () => this.chunkArray(data, this.workerChunkSize(data.length, options)),
       send: (chunk) => this.exec<R[]>(method, [chunk, fnString]),
       combine: (parts) => parts.flat(),
     });
@@ -2302,11 +2316,10 @@ export class MathWorkerPool {
     initial: R,
     options?: TaskOptions
   ): Promise<ParallelResult<R>> {
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
     const fnString = fn.toString();
     return this.runParallel(data.length, options, {
       sequential: () => data.reduce(fn, initial),
-      chunks: () => this.chunkArray(data, chunkSize),
+      chunks: () => this.chunkArray(data, this.workerChunkSize(data.length, options)),
       send: (chunk) => this.exec<R>('reduceChunk', [chunk, fnString, initial]),
       combine: (parts) => parts.reduce((acc, partial) => fn(acc, partial as unknown as T), initial),
     });
@@ -2356,28 +2369,43 @@ export class MathWorkerPool {
   // Helper Methods
   // =========================================================================
 
-  private chunkFloat64Array(data: Float64Array, customChunkSize?: number): Float64Array[] {
-    return chunkTyped(data, customChunkSize ?? this.config.chunkSize);
+  /**
+   * Chunk size for worker tasks. Uses `config.chunkSize` while that yields at most
+   * `maxWorkers` chunks; beyond that, grows chunks so count stays ~`maxWorkers`
+   * (fixes 100-chunk `sin` at n=1e6 with chunkSize 10_000).
+   */
+  private workerChunkSize(dataLength: number, options?: TaskOptions): number {
+    if (options?.chunkSize !== undefined) return options.chunkSize;
+    const workers = Math.max(1, this.config.maxWorkers);
+    const configChunks = Math.ceil(dataLength / this.config.chunkSize);
+    if (configChunks <= workers * 2) {
+      return this.config.chunkSize;
+    }
+    return Math.max(1, Math.ceil(dataLength / workers));
+  }
+
+  private chunkFloat64Array(data: Float64Array, options?: TaskOptions): Float64Array[] {
+    return chunkTyped(data, this.workerChunkSize(data.length, options));
   }
 
   private chunkPairFloat64Array(
     a: Float64Array,
     b: Float64Array,
-    customChunkSize?: number
+    options?: TaskOptions
   ): [Float64Array, Float64Array][] {
-    return chunkPairTyped(a, b, customChunkSize ?? this.config.chunkSize);
+    return chunkPairTyped(a, b, this.workerChunkSize(a.length, options));
   }
 
-  private chunkInt32Array(data: Int32Array, customChunkSize?: number): Int32Array[] {
-    return chunkTyped(data, customChunkSize ?? this.config.chunkSize);
+  private chunkInt32Array(data: Int32Array, options?: TaskOptions): Int32Array[] {
+    return chunkTyped(data, this.workerChunkSize(data.length, options));
   }
 
   private chunkPairInt32Array(
     a: Int32Array,
     b: Int32Array,
-    customChunkSize?: number
+    options?: TaskOptions
   ): [Int32Array, Int32Array][] {
-    return chunkPairTyped(a, b, customChunkSize ?? this.config.chunkSize);
+    return chunkPairTyped(a, b, this.workerChunkSize(a.length, options));
   }
 
   private combineInt32Buffers(buffers: ArrayBuffer[], totalLength: number): Int32Array {
