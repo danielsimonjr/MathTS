@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1290
+  totalFiles: 1293
   totalModules: 82
-  totalExports: 7070
+  totalExports: 7077
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3883,6 +3883,9 @@ modules:
           imports:
             - DenseMatrix
             - denseContiguousData
+        - file: ../types/dense/gemm-f64.js
+          imports:
+            - gemmF64
         - file: ../types/dense/reduction.js
           imports:
             - '* as reduction'
@@ -4928,7 +4931,10 @@ modules:
       description: Shared decomposition helpers (number[][] dense algebra)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../types/dense/gemm-f64.js
+          imports:
+            - gemmF64
       workspaceDependencies: []
       exports:
         - eye
@@ -5644,6 +5650,9 @@ modules:
         - file: ./storage.js
           imports:
             - contiguousDenseData
+        - file: ./gemm-f64.js
+          imports:
+            - gemmF64
       workspaceDependencies: []
       exports:
         - add
@@ -5659,6 +5668,19 @@ modules:
         - multiply
         - scale
         - transpose
+    matrix/src/types/dense/gemm-f64.ts:
+      description: Dense matrix multiply C = A · B (row-major f64).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - GEMM_BLOCK
+        - gemmF64
+      functions:
+        - gemmF64
+      constants:
+        - GEMM_BLOCK
     matrix/src/types/dense/reduction.ts:
       description: Add all elements of a matrix.
       externalDependencies: []
@@ -7208,6 +7230,8 @@ modules:
           imports:
             - decompositionInputToNestedArray
             - isPackedMatrixDescriptor
+            - lu
+            - luSolve
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -17246,6 +17270,10 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ../utils/sort-numbers.js
+          imports:
+            - sortNumbersDescendingInPlace
+            - sortNumbersInPlace
         - file: ../types.js
           imports:
             - TypedFunction
@@ -20723,6 +20751,9 @@ modules:
         - file: ../utils/typed-impl.js
           imports:
             - findTypedImpl
+        - file: ../utils/median-numbers.js
+          imports:
+            - medianNumbers
         - file: ./numeric-data.js
           imports:
             - flattenForStatistics
@@ -26746,6 +26777,16 @@ modules:
         - createMap
         - assignMap
         - isObjectWrappingMap
+    functions/src/utils/median-numbers.ts:
+      description: Median of a flat finite `number[]` via quickselect (O(n) average).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - medianNumbers
+      functions:
+        - medianNumbers
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
       externalDependencies: []
@@ -27070,6 +27111,24 @@ modules:
         - product
       functions:
         - product
+    functions/src/utils/sort-numbers.ts:
+      description: Sort a plain `number[]` in place (ascending). Uses native `Float64Array.sort`
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/sort/wasm-bridge.js
+          imports:
+            - cmpNanLast
+            - sortF64JS
+      workspaceDependencies: []
+      exports:
+        - arrayHasNaN
+        - sortNumbersInPlace
+        - sortNumbersDescendingInPlace
+      functions:
+        - arrayHasNaN
+        - sortNumbersInPlace
+        - sortNumbersDescendingInPlace
     functions/src/utils/string.ts:
       description: Generic-value string formatting (`format`, `stringify`, `compareText`).
       externalDependencies: []
@@ -27495,11 +27554,13 @@ modules:
       workspaceDependencies: []
       exports:
         - WASM_SORT_THRESHOLD
+        - cmpNanLast
         - sortF64JS
         - argsortF64JS
         - sortF64Dispatch
         - argsortF64Dispatch
       functions:
+        - cmpNanLast
         - sortF64JS
         - argsortF64JS
         - sortF64Dispatch
@@ -42500,6 +42561,7 @@ dependencyGraph:
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
         - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/dense/gemm-f64.ts
         - matrix/src/types/dense/reduction.ts
         - matrix/src/types/dense/storage.ts
         - matrix/src/types/index.ts
@@ -43134,6 +43196,7 @@ dependencyGraph:
         - functions/src/utils/isPrime.ts
         - functions/src/utils/isZero.ts
         - functions/src/utils/map.ts
+        - functions/src/utils/median-numbers.ts
         - functions/src/utils/node.ts
         - functions/src/utils/noop.ts
         - functions/src/utils/number.ts
@@ -43143,6 +43206,7 @@ dependencyGraph:
         - functions/src/utils/parseNumber.ts
         - functions/src/utils/print.ts
         - functions/src/utils/product.ts
+        - functions/src/utils/sort-numbers.ts
         - functions/src/utils/string.ts
         - functions/src/utils/switch.ts
         - functions/src/utils/typeOf.ts
@@ -43819,16 +43883,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1290
+  totalTypeScriptFiles: 1293
   totalModules: 82
-  totalLinesOfCode: 220790
-  totalExports: 7070
+  totalLinesOfCode: 221035
+  totalExports: 7077
   totalClasses: 61
   totalInterfaces: 602
-  totalFunctions: 2393
+  totalFunctions: 2399
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1648
+  totalConstants: 1649
   totalReExports: 3043
   totalTypeOnlyImports: 645
   runtimeCircularDeps: 1

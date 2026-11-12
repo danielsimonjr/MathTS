@@ -2,9 +2,10 @@
  * Dogfood relay G26 — sort, median, lusolve packed, wasm sin policy (#712 #694 #711).
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { performance } from 'node:perf_hooks';
 import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index.js';
+import { lu, luSolve } from '@danielsimonjr/mathts-matrix';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
 
 function medianTime(fn: () => void, warmup: number, reps: number): number {
@@ -34,13 +35,21 @@ describe('G26 #712 sort on number[]', () => {
 
   it('n=1e5 sort is within 1.5× native Float64Array.sort (issue #712)', () => {
     const src = Array.from({ length: 1e5 }, (_, i) => Math.sin(i));
-    const tNative = medianTime(() => {
-      const f = new Float64Array(src);
-      f.sort();
-    }, 3, 8);
-    const tSort = medianTime(() => {
-      sort(src.slice());
-    }, 3, 8);
+    const tNative = medianTime(
+      () => {
+        const f = new Float64Array(src);
+        f.sort();
+      },
+      3,
+      8
+    );
+    const tSort = medianTime(
+      () => {
+        sort(src.slice());
+      },
+      3,
+      8
+    );
     expect(tSort / tNative).toBeLessThan(1.5);
   });
 });
@@ -53,31 +62,51 @@ describe('G26 #712 median quickselect path', () => {
 
   it('n=1e6 median finishes well under full sort (issue: <10 ms target)', () => {
     const b = Array.from({ length: 1e6 }, (_, i) => Math.sin(i));
-    const t = medianTime(() => {
-      median(b);
-    }, 2, 6);
+    const t = medianTime(
+      () => {
+        median(b);
+      },
+      2,
+      6
+    );
     expect(t).toBeLessThan(50);
   }, 60_000);
 });
 
 describe('G26 #694 lusolve uses packed matrix lu', () => {
-  const spd = (n: number, seed: number): number[][] => {
-    let s = seed;
+  it('n=1000 median ≤ 1.2× matrix lu+luSolve (issue AC)', () => {
+    const n = 1000;
+    let s = 42;
     const rnd = () => {
       s = (s * 1664525 + 1013904223) >>> 0;
       return s / 0xffffffff;
     };
-    const A = Array.from({ length: n }, () => Array(n).fill(0));
+    const M = Array.from({ length: n }, () => Array(n).fill(0));
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         const v = rnd();
-        A[i][j] += v;
-        A[j][i] += v;
+        M[i][j] += v;
+        M[j][i] += v;
       }
-      A[i][i] += n;
+      M[i][i] += n;
     }
-    return A;
-  };
+    const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
+    const tFac = medianTime(
+      () => {
+        luSolve(lu(M), b);
+      },
+      2,
+      3
+    );
+    const tSolve = medianTime(
+      () => {
+        lusolve(M, b);
+      },
+      2,
+      3
+    );
+    expect(tSolve / tFac).toBeLessThan(1.2);
+  }, 120_000);
 
   it('2×2 closed form', () => {
     const x = lusolve(
@@ -109,9 +138,13 @@ describe('G26 #711 wasm sin policy at n=1e5', () => {
   it('sin at n=1e5 does not regress vs JS path (ratio ≤ 1.05)', () => {
     const x = new Float64Array(1e5);
     for (let i = 0; i < x.length; i++) x[i] = Math.sin(i * 1e-3);
-    const t = medianTime(() => {
-      sin(x);
-    }, 5, 10);
+    const t = medianTime(
+      () => {
+        sin(x);
+      },
+      5,
+      10
+    );
     expect(t).toBeGreaterThan(0);
     expect(t).toBeLessThan(50);
   });

@@ -116,7 +116,7 @@ export const createMedian = /* #__PURE__ */ factory(
 
         const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
         if (cmpNum) {
-          return medianNumbers(flat);
+          return medianNumbers(flat as number[]);
         }
 
         if (num % 2 === 0) {

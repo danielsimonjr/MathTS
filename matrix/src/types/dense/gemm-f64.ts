@@ -1,18 +1,10 @@
 /** Micro-GEMM block size (L1-friendly tiles on typical CPUs). */
-export const GEMM_BLOCK = 64;
+export const GEMM_BLOCK = 96;
 
-/** Minimum flop count before using blocked multiplication (naive wins below). */
-const BLOCKED_GEMM_MIN_FLOPS = 32 * 32 * 32;
+const BLOCKED_MIN_FLOPS = 48 * 48 * 48;
 
 /**
- * Dense matrix multiply C = A · B with optional zero×non-finite semantics.
- *
- * @param ad - Row-major A (n × p)
- * @param bd - Row-major B (p × m)
- * @param n - Rows of A and C
- * @param p - Cols of A / rows of B
- * @param m - Cols of B and C
- * @param result - Optional output buffer (zeroed when provided)
+ * Dense matrix multiply C = A · B (row-major f64).
  */
 export function gemmF64(
   ad: Float64Array,
@@ -25,9 +17,8 @@ export function gemmF64(
   const out = result ?? new Float64Array(n * m);
   if (result) out.fill(0);
 
-  const useBlocked = n * p * m >= BLOCKED_GEMM_MIN_FLOPS;
-  if (!useBlocked) {
-    gemmF64Inner(ad, bd, out, n, p, m, 0, n, 0, m, 0, p);
+  if (n * p * m < BLOCKED_MIN_FLOPS) {
+    gemmIkj(ad, bd, out, n, p, m, 0, n, 0, m, 0, p);
     return out;
   }
 
@@ -38,18 +29,18 @@ export function gemmF64(
       const j1 = Math.min(j0 + B, m);
       for (let k0 = 0; k0 < p; k0 += B) {
         const k1 = Math.min(k0 + B, p);
-        gemmF64Inner(ad, bd, out, n, p, m, i0, i1, j0, j1, k0, k1);
+        gemmIkj(ad, bd, out, n, p, m, i0, i1, j0, j1, k0, k1);
       }
     }
   }
   return out;
 }
 
-function gemmF64Inner(
+function gemmIkj(
   ad: Float64Array,
   bd: Float64Array,
   result: Float64Array,
-  n: number,
+  _n: number,
   p: number,
   m: number,
   i0: number,
@@ -74,7 +65,14 @@ function gemmF64Inner(
         }
         continue;
       }
-      for (let j = j0; j < j1; j++) result[ri + j] += aik * bd[bk + j];
+      let j = j0;
+      for (; j + 3 < j1; j += 4) {
+        result[ri + j] += aik * bd[bk + j];
+        result[ri + j + 1] += aik * bd[bk + j + 1];
+        result[ri + j + 2] += aik * bd[bk + j + 2];
+        result[ri + j + 3] += aik * bd[bk + j + 3];
+      }
+      for (; j < j1; j++) result[ri + j] += aik * bd[bk + j];
     }
   }
 }

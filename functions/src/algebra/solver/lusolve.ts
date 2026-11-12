@@ -104,7 +104,7 @@ export const createLusolve = /* #__PURE__ */ factory(
       if (isDenseMatrix(b)) {
         const dense = b as DenseMatrix;
         if (dense._size.length === 1) {
-          return (dense._data as number[]).map((v) => v);
+          return (dense._data as unknown as number[]).map((v) => v as number);
         }
         return dense._data.map((row) => (row as number[])[0]);
       }
@@ -137,7 +137,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
         throw err;
       }
-      validateUpperTriangularPivots(fac.U);
+      validateUpperTriangularPivots(fac.U.toArray());
       const x = luSolve(fac, bVec);
       return matrix(x.map((v) => [v]) as unknown[][]) as DenseMatrix;
     }

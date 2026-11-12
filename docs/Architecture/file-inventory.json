@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2259,
+  "totalFiles": 2267,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1264,
+    "build-entry": 1267,
     "test-only": 0,
     "orphan": 0,
-    "test": 904,
+    "test": 909,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1290,
-    "tests": 904,
+    "src": 1293,
+    "tests": 909,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,15 +23,15 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 27,
-    "@danielsimonjr/mathts-compat": 17,
+    "@danielsimonjr/mathts-compat": 18,
     "@danielsimonjr/mathts-core": 121,
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1020,
+    "@danielsimonjr/mathts-functions": 1024,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 121,
+    "@danielsimonjr/mathts-matrix": 124,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
@@ -492,14 +492,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 437
+      "loc": 458
     },
     {
       "file": "compat/src/shims.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 668
+      "loc": 682
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -542,6 +542,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 77
+    },
+    {
+      "file": "compat/tests/dogfood-g26.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -5581,7 +5588,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 394
+      "loc": 431
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -6918,7 +6925,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 181
+      "loc": 189
     },
     {
       "file": "functions/src/matrix/sparse-csc-tail.ts",
@@ -8003,7 +8010,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 257
+      "loc": 258
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -9161,6 +9168,13 @@
       "loc": 40
     },
     {
+      "file": "functions/src/utils/median-numbers.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 52
+    },
+    {
       "file": "functions/src/utils/node.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -9222,6 +9236,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 20
+    },
+    {
+      "file": "functions/src/utils/sort-numbers.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 52
     },
     {
       "file": "functions/src/utils/string.ts",
@@ -9291,7 +9312,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 109
+      "loc": 110
     },
     {
       "file": "functions/src/wasm/poly/wasm-bridge.ts",
@@ -9904,6 +9925,13 @@
     },
     {
       "file": "functions/tests/dogfood-g23-units-physics.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 140
+    },
+    {
+      "file": "functions/tests/dogfood-g26.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
@@ -12472,6 +12500,13 @@
       "loc": 165
     },
     {
+      "file": "functions/tests/utils-sort-median-numbers.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 25
+    },
+    {
       "file": "functions/tests/variance-normalization-consistency.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -12840,7 +12875,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 282
+      "loc": 270
     },
     {
       "file": "matrix/src/backends/ParallelBackend.ts",
@@ -12938,7 +12973,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 365
+      "loc": 378
     },
     {
       "file": "matrix/src/operations/condest.ts",
@@ -13071,7 +13106,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 130
+    },
+    {
+      "file": "matrix/src/types/dense/gemm-f64.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 79
     },
     {
       "file": "matrix/src/types/dense/reduction.ts",
@@ -13291,6 +13333,13 @@
       "loc": 606
     },
     {
+      "file": "matrix/tests/dogfood-g26.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 91
+    },
+    {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -13303,6 +13352,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 265
+    },
+    {
+      "file": "matrix/tests/gemm-f64.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 19
     },
     {
       "file": "matrix/tests/gpu/initialization.test.ts",
