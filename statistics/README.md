@@ -48,6 +48,10 @@ npm install @danielsimonjr/mathts-statistics
   `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`,
   `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`), plus free CDF/quantile
   functions, `studentizedRangeCDF` / `studentizedRangeQuantile`, and `entropy` / `jsDivergence`.
+  **`gammaDist` parameterization:** the positional second argument is **rate** (`scale = 1/rate`).
+  SciPy `stats.gamma(a=2, scale=2)` maps to `gammaDist(2, { scale: 2 })` or `gammaDist({ shape: 2, scale: 2 })`;
+  `gammaDist(2, 2)` is rate `2` (SciPy `scale=0.5`, pdf(1) ≈ 0.541). Passing `rate` and `scale`
+  together throws. Shape, rate, and scale must be finite and strictly positive.
 - **Hypothesis tests** — `studentTTest` (one-sample vs `popmean` or two-sample Welch), `studentTTestPaired`, `anova`, `anova2`,
   `chiSquareTest`, `kolmogorovSmirnovTest` + `kolmogorovSmirnov2Test`, `mannWhitneyTest`,
   `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `fTest`,

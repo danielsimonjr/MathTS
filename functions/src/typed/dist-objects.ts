@@ -607,19 +607,82 @@ export function fDist(d1: f64, d2: f64): Distribution {
 // gammaDist
 // =============================================================================
 
+/** Options for {@link gammaDist} using SciPy's scale parameterization (`scale = 1/rate`). */
+export interface GammaDistOptions {
+  /** SciPy `stats.gamma(..., scale=)` — the mean is `shape * scale`. */
+  scale: f64;
+}
+
+/** Named shape + scale (SciPy-style) construction. */
+export interface GammaDistNamedOptions {
+  shape: f64;
+  scale: f64;
+}
+
+function _gammaPositiveFinite(name: string, value: f64): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`gammaDist: ${name} must be finite and strictly positive`);
+  }
+}
+
 /**
  * Create a Gamma distribution object.
  *
- * @param shape - Shape parameter (positive)
- * @param rate - Rate parameter (positive, default 1)
+ * The positional second argument is the **rate** (R / exponential convention).
+ * SciPy uses **scale** where `scale = 1/rate`. For SciPy parity pass
+ * `{ scale }` as the second argument, or `{ shape, scale }` alone.
+ * Passing `rate` and `scale` together throws. Shape, rate, and scale must be
+ * finite and strictly positive (`NaN`, `±Infinity`, and non-positive values throw).
+ *
+ * @param shapeOrOptions - Shape (positive), or `{ shape, scale }` for SciPy-style construction
+ * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` when the first argument is a number
  * @returns Distribution object
  *
  * @example
- * const d = gammaDist(2, 1);
- * d.mean // 2
+ * // Rate parameterization (default)
+ * const d = gammaDist(2, 2);
+ * d.pdf(1); // 0.541… (same as SciPy scale=0.5, rate=2)
+ *
+ * @example
+ * // SciPy scale=2
+ * gammaDist(2, { scale: 2 }).pdf(1); // 0.15163266492815836
+ * gammaDist(2, { scale: 2 }).mean; // 4
  */
-export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
-  if (shape <= 0 || rate <= 0) throw new Error('gammaDist: shape and rate must be positive');
+export function gammaDist(shape: f64, rateOrOptions?: f64 | GammaDistOptions): Distribution;
+export function gammaDist(options: GammaDistNamedOptions): Distribution;
+export function gammaDist(
+  shapeOrOptions: f64 | GammaDistNamedOptions,
+  rateOrOptions: f64 | GammaDistOptions = 1
+): Distribution {
+  let shape: f64;
+  let rate: f64;
+  if (typeof shapeOrOptions === 'object' && shapeOrOptions !== null && 'shape' in shapeOrOptions) {
+    if (arguments.length > 1 || 'rate' in shapeOrOptions) {
+      throw new Error('gammaDist: pass rate or scale, not both');
+    }
+    shape = shapeOrOptions.shape;
+    const scale = shapeOrOptions.scale;
+    _gammaPositiveFinite('shape', shape);
+    _gammaPositiveFinite('scale', scale);
+    rate = 1 / scale;
+  } else {
+    shape = shapeOrOptions as f64;
+    _gammaPositiveFinite('shape', shape);
+    if (typeof rateOrOptions === 'object' && rateOrOptions !== null) {
+      if ('rate' in rateOrOptions) {
+        throw new Error('gammaDist: pass rate or scale, not both');
+      }
+      if (!('scale' in rateOrOptions)) {
+        throw new Error('gammaDist: expected a positive rate or { scale }');
+      }
+      const scale = rateOrOptions.scale;
+      _gammaPositiveFinite('scale', scale);
+      rate = 1 / scale;
+    } else {
+      rate = rateOrOptions as f64;
+      _gammaPositiveFinite('rate', rate);
+    }
+  }
   const scale = 1 / rate;
   return {
     pdf: (x: f64) => {
