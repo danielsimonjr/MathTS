@@ -196,7 +196,7 @@ const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint
 
 /**
  * Exact elementary charge (CODATA / 2019 SI), in coulombs.
- * Physics mode binds bare `e` to a Unit of this many coulombs.
+ * Physics scopes bind `e0`, not bare `e`.
  */
 const ELEMENTARY_CHARGE_COULOMB = 1.602176634e-19;
 
@@ -206,10 +206,10 @@ function elementaryChargeUnit(): UnitInstance {
 }
 
 /**
- * How physics mode binds bare `e`.
+ * How {@link physicsScope} binds elementary charge (`e0`).
  *
  * `unit` is a `Unit` of `1.602176634e-19 C`. `scalar` is that same SI
- * magnitude as a plain number, so `1 - e^2` is ordinary arithmetic.
+ * magnitude as a plain number, so `1 - e0^2` is ordinary arithmetic.
  */
 export type PhysicsCharge = 'unit' | 'scalar';
 
@@ -223,18 +223,16 @@ export interface PhysicsEvaluateOptions {
    */
   unsafe?: boolean;
   /**
-   * Opt-in physics reading of bare `e`.
+   * Opt-in physics constant bindings (CODATA units on `e0`, `G`, `c`, `hbar`, …).
    *
-   * When `true`, `e` is the elementary charge. The default binding is the
-   * Unit `1.602176634e-19 C`. Pass `charge: 'scalar'` for the plain SI
-   * magnitude, so a dimensionless formula such as `1 - e^2` can subtract.
-   * `E` stays unbound so a formula can use it for energy. Euler's number is
-   * only `exp(x)`, for example `exp(1)`. An explicit scope binding for `e`
-   * still wins. Default `false`: `e` is Euler's number.
+   * Bare `e` stays Euler's number; use `e0` or `elementaryCharge` for the
+   * elementary charge. Pass `charge: 'scalar'` so `e0` is the plain SI
+   * magnitude for dimensionless formulas such as `1 - e0^2`.
+   * Default `false`: only the usual math scope applies.
    */
   physics?: boolean;
   /**
-   * Binding of bare `e` when {@link physics} is `true`. Default `'unit'`.
+   * Binding of `e0` when {@link physics} is `true`. Default `'unit'`.
    * Setting this without `physics: true` throws.
    */
   charge?: PhysicsCharge;
@@ -242,7 +240,7 @@ export interface PhysicsEvaluateOptions {
 
 /** Options for {@link physicsScope}. */
 export interface PhysicsScopeOptions {
-  /** Default `'unit'`. `'scalar'` binds the SI magnitude instead of a Unit. */
+  /** Default `'unit'`. `'scalar'` binds the SI magnitude instead of a Unit on `e0`. */
   charge?: PhysicsCharge;
 }
 
@@ -259,35 +257,59 @@ function physicsBinding(charge: PhysicsCharge | undefined): UnitInstance | numbe
   return charge === 'scalar' ? ELEMENTARY_CHARGE_COULOMB : elementaryChargeUnit();
 }
 
+const PHYSICS_SCOPE_KEYS = ['e0', 'elementaryCharge', 'G', 'c', 'hbar'] as const;
+
+type PhysicsScopeKey = (typeof PHYSICS_SCOPE_KEYS)[number];
+
+function defaultPhysicsBindings(
+  charge: PhysicsCharge | undefined
+): Record<PhysicsScopeKey, unknown> {
+  const factories = activatedFactories as Record<string, unknown>;
+  return {
+    e0: physicsBinding(charge),
+    elementaryCharge: factories.elementaryCharge,
+    G: factories.gravitationConstant,
+    c: factories.speedOfLight,
+    hbar: factories.reducedPlanckConstant,
+  };
+}
+
+function mergePhysicsIntoRecord(
+  scope: Record<string, unknown>,
+  bindings: Record<PhysicsScopeKey, unknown>
+): Record<string, unknown> {
+  return { ...bindings, ...scope };
+}
+
 /**
- * Scope in which bare `e` is the elementary charge.
+ * Scope with CODATA physics constants (`e0`, `G`, `c`, `hbar`, …).
  *
+ * Bare `e` is **not** rebound — it remains Euler's number on the math scope.
  * Pass the result as `evaluate`'s scope, or use `{ physics: true }`.
- * Entries already present on `scope` win, including an explicit `e`.
- * `{ charge: 'scalar' }` binds the SI magnitude instead of a Unit.
+ * Explicit entries on `scope` win for each constant key.
  */
 export function physicsScope(
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsScopeOptions
 ): Record<string, unknown> | Scope {
-  const charge = physicsBinding(options?.charge);
-  if (scope == null) return { e: charge };
+  const bindings = defaultPhysicsBindings(options?.charge);
+  if (scope == null) return { ...bindings };
   if (isMapScope(scope)) {
-    if (scope.has('e')) return scope;
     return {
       has(key: string): boolean {
-        return key === 'e' || scope.has(key);
+        return (bindings as Record<string, unknown>)[key] !== undefined || scope.has(key);
       },
       get(key: string): unknown {
-        return key === 'e' ? charge : scope.get(key);
+        if (scope.has(key)) return scope.get(key);
+        const bound = (bindings as Record<string, unknown>)[key];
+        return bound === undefined ? scope.get(key) : bound;
       },
       set(key: string, value: unknown): void {
         scope.set(key, value);
       },
     };
   }
-  if (Object.prototype.hasOwnProperty.call(scope, 'e')) return scope;
-  return { e: charge, ...scope };
+  return mergePhysicsIntoRecord(scope, bindings);
 }
 
 /**
@@ -315,7 +337,7 @@ function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOpt
  *
  * @param expr - Expression string (e.g., '2 + 3', 'sin(pi/2)', 'x^2')
  * @param scope - Optional variable bindings (e.g., { x: 3 })
- * @param options - Optional flags. `{ physics: true }` reads bare `e` as the elementary charge.
+ * @param options - Optional flags. `{ physics: true }` adds CODATA physics constants.
  * @returns The result of evaluating the expression
  *
  * @example
@@ -324,9 +346,9 @@ function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOpt
  * evaluate('sin(pi / 2)');                        // 1
  * evaluate('x^2 + 1', { x: 3 });                  // 10
  * evaluate('e');                                  // Euler's number
- * evaluate('e', undefined, { physics: true });    // 1.602176634e-19 C
- * evaluate('e', undefined, { physics: true, charge: 'scalar' }); // 1.602176634e-19
- * evaluate('1 - e^2', undefined, { physics: true, charge: 'scalar' }); // near 1
+ * evaluate('e0', undefined, { physics: true });   // 1.602176634e-19 C
+ * evaluate('e0', undefined, { physics: true, charge: 'scalar' }); // 1.602176634e-19
+ * evaluate('1 - e0^2', undefined, { physics: true, charge: 'scalar' }); // near 1
  * evaluate('exp(1)', undefined, { physics: true }); // Euler's number
  * ```
  */
@@ -361,7 +383,7 @@ export function evaluate(
  * many times with different variable bindings.
  *
  * @param expr - Expression string to compile
- * @param options - Optional flags. `{ physics: true }` reads bare `e` as the elementary charge.
+ * @param options - Optional flags. `{ physics: true }` adds CODATA physics constants.
  * @returns CompiledExpression with an evaluate(scope?) method
  *
  * @example
@@ -369,8 +391,8 @@ export function evaluate(
  * const compiled = compileExpr('x^2 + y');
  * compiled.evaluate({ x: 2, y: 1 }); // 5
  * compiled.evaluate({ x: 3, y: 2 }); // 11
- * compileExpr('e', { physics: true }).evaluate(); // 1.602176634e-19 C
- * compileExpr('1 - e^2', { physics: true, charge: 'scalar' }).evaluate(); // near 1
+ * compileExpr('e0', { physics: true }).evaluate(); // 1.602176634e-19 C
+ * compileExpr('1 - e0^2', { physics: true, charge: 'scalar' }).evaluate(); // near 1
  * ```
  */
 export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
