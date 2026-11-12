@@ -228,8 +228,8 @@ describe('parse — numbers', () => {
     expect(() => parse('1.2.3')).toThrow(/Unexpected part/);
   });
 
-  it('treats a bare "2e" as implicit multiplication 2 * e', () => {
-    expect(str('2e')).toBe('2 e');
+  it('throws SyntaxError on incomplete exponent "2e" (#723)', () => {
+    expect(() => parse('2e')).toThrow(SyntaxError);
   });
 });
 

@@ -5259,7 +5259,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 794
+      "loc": 796
     },
     {
       "file": "expression/tests/Parser-extra.test.ts",
