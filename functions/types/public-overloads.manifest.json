@@ -1,0 +1,25 @@
+{
+  "exports": [
+    {
+      "name": "add",
+      "source": "src/typed/arithmetic.ts"
+    },
+    {
+      "name": "sin",
+      "source": "src/typed/trigonometry.ts"
+    },
+    {
+      "name": "variance",
+      "source": "src/typed/arithmetic.ts"
+    },
+    {
+      "name": "mean",
+      "source": "src/typed/arithmetic.ts"
+    },
+    {
+      "name": "det",
+      "source": "src/matrix/det.ts",
+      "mathTypedPattern": "typed(name,"
+    }
+  ]
+}

@@ -25,6 +25,7 @@ import {
   SQRT1_2 as CORE_SQRT1_2,
 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
+import type { PublicAdd, PublicSin } from '@danielsimonjr/mathts-functions';
 
 import {
   add as _add,
@@ -212,7 +213,7 @@ const makeArithmetic =
 export const add = makeArithmetic(
   _add as (a: unknown, b: unknown) => unknown,
   _matAdd as (a: unknown, b: unknown) => unknown
-) as typeof _add;
+) as PublicAdd;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown
@@ -232,7 +233,7 @@ export const log: TypedFunction = _log;
 // Trigonometric Function Shims
 // =============================================================================
 
-export const sin: TypedFunction = _sin;
+export const sin = _sin as PublicSin;
 export const cos: TypedFunction = _cos;
 export const tan: TypedFunction = _tan;
 
@@ -247,7 +248,7 @@ export const atan2: TypedFunction = _atan2;
 // =============================================================================
 
 export const sum: TypedFunction = _sum;
-export const mean: TypedFunction = _mean;
+export const mean: TypedFunction = _mean as TypedFunction;
 
 // std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
 // functions-package versions now also default to unbiased and accept a
@@ -584,7 +585,7 @@ export const NaN_ = NaN;
 // Export all shims
 // =============================================================================
 
-export const shims = {
+const _shims = {
   // Type creation
   complex,
   fraction,
@@ -665,3 +666,6 @@ export const shims = {
   Infinity: Infinity_,
   NaN: NaN_,
 };
+
+export const shims: Omit<typeof _shims, 'add' | 'sin'> & { add: PublicAdd; sin: PublicSin } =
+  _shims;

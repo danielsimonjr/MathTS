@@ -53,6 +53,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
+import type { PublicAdd, PublicMean, PublicVariance } from './public-type-exports.js';
 import {
   logReal,
   logRealBase,
@@ -414,7 +415,7 @@ export const add = withBinaryScalarGuards(
       return result;
     },
   })
-);
+) as PublicAdd;
 addForNumberPath.fn = add;
 
 // =============================================================================
@@ -1583,7 +1584,7 @@ export const mean = mathTyped('mean', {
     dim: number | { valueOf(): number },
     opts: StatReduceOptions
   ): number | number[] => meanAlong(m, dim, opts),
-});
+}) as PublicMean;
 
 /**
  * Variance normalization, matching mathjs's `variance(array, normalization)`:
@@ -1740,7 +1741,7 @@ export const variance = mathTyped('variance', {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return varianceAlong(m, dim, request, skipNaN);
   },
-});
+}) as PublicVariance;
 
 /**
  * Standard deviation. The Float64Array signature is synchronous — sqrt of {@link variance};

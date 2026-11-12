@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1291,
+    "totalFiles": 1292,
     "totalModules": 82,
-    "totalExports": 7082
+    "totalExports": 7098
   },
   "entryPoints": [
     {
@@ -3587,6 +3587,11 @@
         "internalDependencies": [
           {
             "file": "./unit/index.js",
+            "imports": ["UnitInstance"],
+            "typeOnly": true
+          },
+          {
+            "file": "./unit/index.js",
             "imports": [
               "Unit",
               "createUnitClass",
@@ -3833,7 +3838,8 @@
           "SiDimensionVector",
           "SiDimensionOptions",
           "SiDimensionExponent"
-        ]
+        ],
+        "interfaces": ["Unit"]
       },
       "core/src/types/wasm-loader.ts": {
         "description": "Shared type-only shapes for the two independent WASM loader implementations",
@@ -11180,6 +11186,21 @@
             "reExport": true
           },
           {
+            "file": "./typed/public-type-exports.js",
+            "imports": [
+              "PublicAdd",
+              "PublicSin",
+              "PublicVariance",
+              "PublicMean",
+              "PublicDet",
+              "PublicEvaluate",
+              "AddCallable",
+              "SinCallable"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./factories/evaluate.js",
             "imports": ["PhysicsEvaluateOptions"],
             "reExport": true,
@@ -12282,6 +12303,14 @@
           "catmullRom",
           "arcLength",
           "curvature",
+          "PublicAdd",
+          "PublicSin",
+          "PublicVariance",
+          "PublicMean",
+          "PublicDet",
+          "PublicEvaluate",
+          "AddCallable",
+          "SinCallable",
           "PhysicsEvaluateOptions",
           "SolveODESolution",
           "ODEMatrixSolution",
@@ -13028,6 +13057,14 @@
           "catmullRom",
           "arcLength",
           "curvature",
+          "PublicAdd",
+          "PublicSin",
+          "PublicVariance",
+          "PublicMean",
+          "PublicDet",
+          "PublicEvaluate",
+          "AddCallable",
+          "SinCallable",
           "PhysicsEvaluateOptions",
           "SolveODESolution",
           "ODEMatrixSolution",
@@ -14867,6 +14904,11 @@
           {
             "file": "../typed/arithmetic.js",
             "imports": ["add", "multiply"]
+          },
+          {
+            "file": "../typed/public-type-exports.js",
+            "imports": ["PublicDet"],
+            "typeOnly": true
           },
           {
             "file": "../arithmetic/abs.js",
@@ -24760,6 +24802,11 @@
             "imports": ["withBinaryScalarGuards"]
           },
           {
+            "file": "./public-type-exports.js",
+            "imports": ["PublicAdd", "PublicMean", "PublicVariance"],
+            "typeOnly": true
+          },
+          {
             "file": "./complex-promotion.js",
             "imports": [
               "logReal",
@@ -27077,6 +27124,49 @@
           "typedProbability"
         ]
       },
+      "functions/src/typed/public-type-exports.ts": {
+        "description": "Re-export generated public call signatures for typed exports.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/public-overloads.generated.js",
+            "imports": [
+              "PublicAdd",
+              "PublicSin",
+              "PublicVariance",
+              "PublicMean",
+              "PublicDet",
+              "PublicEvaluate",
+              "AddCallable",
+              "SinCallable"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "PublicAdd",
+          "PublicSin",
+          "PublicVariance",
+          "PublicMean",
+          "PublicDet",
+          "PublicEvaluate",
+          "AddCallable",
+          "SinCallable"
+        ],
+        "reExported": [
+          "PublicAdd",
+          "PublicSin",
+          "PublicVariance",
+          "PublicMean",
+          "PublicDet",
+          "PublicEvaluate",
+          "AddCallable",
+          "SinCallable"
+        ]
+      },
       "functions/src/typed/relational.ts": {
         "description": "Typed Relational Functions",
         "externalDependencies": [
@@ -27644,6 +27734,11 @@
           {
             "file": "./f64-kernels.js",
             "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
+          },
+          {
+            "file": "./public-type-exports.js",
+            "imports": ["PublicSin"],
+            "typeOnly": true
           },
           {
             "file": "./trig-angle-unit.js",
@@ -43611,6 +43706,11 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
+            "imports": ["PublicAdd", "PublicSin"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
             "imports": [
               "add",
               "subtract",
@@ -45560,6 +45660,7 @@
           "functions/src/typed/parallel-map.ts",
           "functions/src/typed/polynomial-ideal.ts",
           "functions/src/typed/probability.ts",
+          "functions/src/typed/public-type-exports.ts",
           "functions/src/typed/relational.ts",
           "functions/src/typed/set.ts",
           "functions/src/typed/signal.ts",
@@ -46350,18 +46451,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1291,
+    "totalTypeScriptFiles": 1292,
     "totalModules": 82,
-    "totalLinesOfCode": 221203,
-    "totalExports": 7082,
+    "totalLinesOfCode": 221245,
+    "totalExports": 7098,
     "totalClasses": 61,
-    "totalInterfaces": 603,
+    "totalInterfaces": 604,
     "totalFunctions": 2402,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1649,
-    "totalReExports": 3045,
-    "totalTypeOnlyImports": 645,
+    "totalReExports": 3061,
+    "totalTypeOnlyImports": 651,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

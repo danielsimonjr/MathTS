@@ -2042,6 +2042,12 @@
     ],
     "functions/src/geometry/polygon-ops.ts": ["functions/src/index.ts"],
     "functions/src/geometry/curves.ts": ["functions/src/index.ts"],
+    "functions/src/typed/public-type-exports.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/index.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/numeric/solveODE.ts": [
       "functions/src/factories/index.ts",
       "functions/src/index.ts",

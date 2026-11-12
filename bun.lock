@@ -167,6 +167,9 @@
     "gpu": {
       "name": "@danielsimonjr/mathts-gpu",
       "version": "0.2.1",
+      "dependencies": {
+        "@webgpu/types": "^0.1.72",
+      },
       "devDependencies": {
         "@types/node": "^26.4.0",
         "@webgpu/types": "^0.1.72",

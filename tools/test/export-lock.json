@@ -2221,6 +2221,9 @@
       "AStarResult": {
         "kind": "type"
       },
+      "AddCallable": {
+        "kind": "type"
+      },
       "AdfullerResult": {
         "kind": "type"
       },
@@ -2881,6 +2884,24 @@
       "ProportionZResult": {
         "kind": "type"
       },
+      "PublicAdd": {
+        "kind": "type"
+      },
+      "PublicDet": {
+        "kind": "type"
+      },
+      "PublicEvaluate": {
+        "kind": "type"
+      },
+      "PublicMean": {
+        "kind": "type"
+      },
+      "PublicSin": {
+        "kind": "type"
+      },
+      "PublicVariance": {
+        "kind": "type"
+      },
       "QLResult": {
         "kind": "type"
       },
@@ -3011,6 +3032,9 @@
         "kind": "type"
       },
       "SimulatedAnnealingOptions": {
+        "kind": "type"
+      },
+      "SinCallable": {
         "kind": "type"
       },
       "SolveDAEOptions": {

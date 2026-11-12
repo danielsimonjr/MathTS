@@ -20,7 +20,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm && tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs",
+    "build": "node scripts/gen-public-overloads.mjs && tsdown src/index.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm && tsc -p tsconfig.dts.json && node scripts/copy-public-types.mjs && node scripts/copy-wasm.mjs",
     "dev": "tsdown src/index.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs\"",
     "test": "vitest run",
     "test:diff": "node tests/diff-special.test.mjs && node tests/diff-elementwise.test.mjs && node tests/diff-fusion.test.mjs",
@@ -31,7 +31,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm --minify && tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs"
+    "build:prod": "node scripts/gen-public-overloads.mjs && tsdown src/index.ts src/scalar-batch-parallel.ts src/scalar-batch.worker.ts --format esm --minify && tsc -p tsconfig.dts.json && node scripts/copy-public-types.mjs && node scripts/copy-wasm.mjs"
   },
   "tsdown": {
     "fixedExtension": false,

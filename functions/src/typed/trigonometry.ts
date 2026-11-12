@@ -24,6 +24,7 @@ import {
   staysRealUnitInterval,
 } from './complex-promotion.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
+import type { PublicSin } from './public-type-exports.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
 
 // =============================================================================
@@ -49,7 +50,7 @@ export const sin = mathTyped('sin', {
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'sin', Math.sin),
   'Array | Matrix': unaryCollection({ real: Math.sin, wasmKernel: 'sin' }),
-});
+}) as PublicSin;
 
 /**
  * Cosine function

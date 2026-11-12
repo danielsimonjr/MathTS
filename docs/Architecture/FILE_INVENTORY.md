@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2264
+**Total files**: 2272
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1265 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1266 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      908 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      915 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2264** |                                                                                                                |
+| **Total**     | **2272** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1291 |
-| `tests`    |   908 |
+| `src`      |  1292 |
+| `tests`    |   915 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   121 |
 | `@danielsimonjr/mathts-evaluator`      |     4 |
 | `@danielsimonjr/mathts-expression`     |   562 |
-| `@danielsimonjr/mathts-functions`      |  1023 |
+| `@danielsimonjr/mathts-functions`      |  1031 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   123 |
@@ -1335,6 +1335,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/parallel-map.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/polynomial-ideal.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/probability.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/typed/public-type-exports.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/relational.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/set.ts`                                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/signal.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1476,6 +1477,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-g05-lusolve-packed.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g09-student-ttest-popmean.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g10-pde-cfl-bc.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g17-public-types.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g18-signal-api.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g19-stats-nan-ddof.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g22-expression-sandbox.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1793,6 +1795,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/tier-parity-registry.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/timeseries.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/type-breadth-gc16.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-700-det.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-726-evaluate.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-726-gpu.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-737-migrator.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-785-variance.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/type-consumer-g17/issue-830-unit.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-algebra-wasm.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-arithmetic-elementwise.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-arithmetic-float64-sync-wasm-tier.test.ts`                 | @danielsimonjr/mathts-functions      | tests    | test        |
