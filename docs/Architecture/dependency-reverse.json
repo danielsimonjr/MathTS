@@ -1110,12 +1110,26 @@
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
     ],
+    "functions/src/typed/algebra.ts": [
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
+      "functions/src/cas/real-roots.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/utils/map.ts": [
       "functions/src/algebra/resolve.ts",
       "functions/src/algebra/simplify.ts",
       "functions/src/core/create.ts"
     ],
     "functions/src/algebra/simplify/wildcards.ts": ["functions/src/algebra/simplify.ts"],
+    "functions/src/cas/polynomial-canonical.ts": [
+      "functions/src/algebra/simplify.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/algebra/simplify/util.ts": [
       "functions/src/algebra/simplify.ts",
       "functions/src/algebra/simplifyConstant.ts",
@@ -1689,15 +1703,9 @@
       "functions/src/subpath-evaluate.ts",
       "functions/src/typed/cas.ts"
     ],
-    "functions/src/typed/algebra.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/cas/real-roots.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
-    ],
     "functions/src/typed/polynomial-ideal.ts": [
       "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/algebra.ts",
       "functions/src/typed/cas.ts",
@@ -1917,6 +1925,7 @@
       "functions/src/index.ts",
       "functions/src/numeric/quadrature-extra.ts",
       "functions/src/stats/distributions-extra.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/typed/numeric.ts"
     ],
     "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
@@ -2554,6 +2563,7 @@
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts"
     ],
+    "functions/src/statistics/sum-indexed-guard.ts": ["functions/src/statistics/sum.ts"],
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/typed/dist-objects.ts"
@@ -2600,10 +2610,7 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
     ],
-    "functions/src/typed/string-derivative.ts": [
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts"
-    ],
+    "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/distributions.ts",
@@ -2616,6 +2623,7 @@
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
+    "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",
       "functions/src/typed/graph.ts"
