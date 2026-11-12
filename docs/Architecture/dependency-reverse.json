@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -2569,12 +2569,6 @@
       "functions/src/typed/special.ts",
       "functions/src/typed/trigonometry.ts"
     ],
-    "functions/src/wasm/elementwise/wasm-bridge.ts": [
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/fused.ts",
-      "functions/src/typed/special.ts",
-      "functions/src/typed/trigonometry.ts"
-    ],
     "functions/src/typed/invalid-scalar-guards.ts": ["functions/src/typed/arithmetic.ts"],
     "functions/src/typed/complex-promotion.ts": [
       "functions/src/typed/arithmetic.ts",
@@ -2598,6 +2592,11 @@
     "functions/src/typed/worker-kernels.ts": [
       "functions/src/typed/distributions.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/special.ts"
+    ],
+    "functions/src/wasm/elementwise/wasm-bridge.ts": [
+      "functions/src/typed/f64-kernels.ts",
+      "functions/src/typed/fused.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [

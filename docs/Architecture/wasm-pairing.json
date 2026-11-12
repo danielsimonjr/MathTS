@@ -1,20 +1,13 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "total": 216,
-  "acceleratedCount": 40,
+  "acceleratedCount": 23,
   "parallelOnlyCount": 17,
-  "jsOnlyCount": 159,
+  "jsOnlyCount": 176,
   "bundledBackend": "assemblyscript",
-  "wasmEffectiveCount": 38,
+  "wasmEffectiveCount": 21,
   "jsFallbackCount": 0,
   "accelerated": [
-    {
-      "name": "abs",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
     {
       "name": "airyAi",
       "file": "special.ts",
@@ -27,20 +20,6 @@
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["airyBiDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "atan",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "atanh",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
@@ -114,27 +93,6 @@
       "effectiveBackend": "wasm"
     },
     {
-      "name": "cos",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "cot",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "csc",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
       "name": "ellipticE",
       "file": "special.ts",
       "routing": "wasm",
@@ -177,52 +135,10 @@
       "effectiveBackend": "wasm"
     },
     {
-      "name": "exp",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "expm1",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
       "name": "lgamma",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["lgammaDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "log",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "log10",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "log1p",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "log2",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     },
     {
@@ -251,41 +167,6 @@
       "file": "statistics.ts",
       "routing": "wasm",
       "dispatch": ["sortF64Dispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "sec",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "sin",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "sinh",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "tan",
-      "file": "trigonometry.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "tanh",
-      "file": "arithmetic.ts",
-      "routing": "wasm",
-      "dispatch": ["elementwiseUnaryDispatch"],
       "effectiveBackend": "wasm"
     }
   ],
@@ -411,6 +292,7 @@
     }
   ],
   "jsOnly": [
+    "abs",
     "acos",
     "acosh",
     "acot",
@@ -420,7 +302,9 @@
     "asec",
     "asin",
     "asinh",
+    "atan",
     "atan2",
+    "atanh",
     "bernoulli",
     "bernoulliPMF",
     "besselI",
@@ -447,8 +331,11 @@
     "compareUnits",
     "cond",
     "conj",
+    "cos",
     "cosIntegral",
     "cosh",
+    "cot",
+    "csc",
     "cube",
     "deepEqual",
     "digamma",
@@ -463,7 +350,9 @@
     "equalText",
     "erfi",
     "eulerPhi",
+    "exp",
     "expIntegralEi",
+    "expm1",
     "exponentialCDF",
     "exponentialPDF",
     "fallingFactorial",
@@ -493,6 +382,10 @@
     "lcm",
     "leftShift",
     "legendreP",
+    "log",
+    "log10",
+    "log1p",
+    "log2",
     "logIntegral",
     "lowRankApprox",
     "lucas",
@@ -538,6 +431,7 @@
     "rightLogShift",
     "risingFactorial",
     "round",
+    "sec",
     "setCartesian",
     "setDifference",
     "setDistinct",
@@ -549,8 +443,10 @@
     "setSymDifference",
     "setUnion",
     "sign",
+    "sin",
     "sinIntegral",
     "singularValues",
+    "sinh",
     "smaller",
     "smallerEq",
     "sqrt",
@@ -560,6 +456,8 @@
     "subfactorial",
     "subtract",
     "sum",
+    "tan",
+    "tanh",
     "to",
     "toBest",
     "toDegrees",
@@ -573,9 +471,9 @@
   ],
   "byFile": {
     "arithmetic.ts": {
-      "wasm": 9,
+      "wasm": 0,
       "parallel": 3,
-      "jsOnly": 31
+      "jsOnly": 40
     },
     "bitwise.ts": {
       "wasm": 0,
@@ -643,9 +541,9 @@
       "jsOnly": 5
     },
     "trigonometry.ts": {
-      "wasm": 8,
+      "wasm": 0,
       "parallel": 0,
-      "jsOnly": 11
+      "jsOnly": 19
     },
     "unit.ts": {
       "wasm": 0,

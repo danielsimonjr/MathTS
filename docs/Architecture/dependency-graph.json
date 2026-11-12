@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-11",
+    "lastUpdated": "2026-11-12",
     "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7009
+    "totalExports": 7012
   },
   "entryPoints": [
     {
@@ -24531,15 +24531,16 @@
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary"]
+            "imports": [
+              "assertFlatNumberVector",
+              "f64Unary",
+              "f64UnaryDispatched",
+              "numberArrayUnary"
+            ]
           },
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
-          },
-          {
-            "file": "../wasm/elementwise/wasm-bridge.js",
-            "imports": ["elementwiseUnaryDispatch"]
           },
           {
             "file": "./invalid-scalar-guards.js",
@@ -25205,10 +25206,20 @@
         "description": "Shared element-wise kernel for the synchronous typed Float64Array signatures.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/elementwise/wasm-bridge.js",
+            "imports": ["elementwiseUnaryDispatch", "WasmElementwiseOp"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["f64Unary"],
-        "functions": ["f64Unary"]
+        "exports": ["f64Unary", "assertFlatNumberVector", "f64UnaryDispatched", "numberArrayUnary"],
+        "functions": [
+          "f64Unary",
+          "assertFlatNumberVector",
+          "f64UnaryDispatched",
+          "numberArrayUnary"
+        ]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -27390,15 +27401,11 @@
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary"]
+            "imports": ["f64Unary", "f64UnaryDispatched", "numberArrayUnary"]
           },
           {
             "file": "./trig-angle-unit.js",
             "imports": ["trigFromAngleUnit"]
-          },
-          {
-            "file": "../wasm/elementwise/wasm-bridge.js",
-            "imports": ["elementwiseUnaryDispatch"]
           }
         ],
         "workspaceDependencies": [
@@ -46020,11 +46027,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 218299,
-    "totalExports": 7009,
+    "totalLinesOfCode": 218393,
+    "totalExports": 7012,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2360,
+    "totalFunctions": 2363,
     "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1644,

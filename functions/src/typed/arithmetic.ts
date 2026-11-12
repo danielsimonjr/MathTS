@@ -16,7 +16,12 @@
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
-import { f64Unary } from './f64-kernels.js';
+import {
+  assertFlatNumberVector,
+  f64Unary,
+  f64UnaryDispatched,
+  numberArrayUnary,
+} from './f64-kernels.js';
 import {
   pairwiseSum,
   neumaierSum,
@@ -41,7 +46,6 @@ import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/math
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
-import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import {
   logReal,
@@ -658,6 +662,7 @@ export const unaryMinus = mathTyped('unaryMinus', {
 
   // Float64Array negation (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => -x),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'unaryMinus', undefined, (x) => -x),
 });
 
 /**
@@ -670,6 +675,7 @@ export const unaryPlus = mathTyped('unaryPlus', {
   Fraction: (a: Fraction): Fraction => a,
   BigNumber: (a: BigNumber): BigNumber => a,
   Float64Array: (a: Float64Array): Float64Array => a, // Identity, no copy needed
+  Array: (a: unknown[]) => assertFlatNumberVector(a, 'unaryPlus'),
 });
 
 /**
@@ -685,8 +691,8 @@ export const abs = mathTyped('abs', {
   Unit: (a: Unit): Unit => asUnit(a).abs() as unknown as Unit,
 
   // Float64Array abs (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('abs', a) ?? f64Unary(a, (x) => Math.abs(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'abs', (x) => Math.abs(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'abs', 'abs', (x) => Math.abs(x)),
 });
 
 /**
@@ -705,6 +711,7 @@ export const sign = mathTyped('sign', {
 
   // Float64Array sign (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.sign(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'sign', undefined, Math.sign),
 });
 
 // =============================================================================
@@ -780,6 +787,7 @@ export const sqrt = mathTyped('sqrt', {
 
   // Float64Array sqrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.sqrt(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'sqrt', undefined, Math.sqrt),
 });
 
 /**
@@ -795,6 +803,7 @@ export const square = mathTyped('square', {
 
   // Float64Array square (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => x * x),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'square', undefined, (x) => x * x),
 });
 
 /**
@@ -810,6 +819,7 @@ export const cube = mathTyped('cube', {
 
   // Float64Array cube (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => x * x * x),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'cube', undefined, (x) => x * x * x),
 });
 
 /**
@@ -846,6 +856,7 @@ export const cbrt = mathTyped('cbrt', {
 
   // Float64Array cbrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cbrt(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'cbrt', undefined, Math.cbrt),
 });
 
 /**
@@ -872,8 +883,8 @@ export const exp = mathTyped('exp', {
   Dual: (a: Dual): Dual => a.exp(),
 
   // Float64Array exp (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('exp', a) ?? f64Unary(a, (x) => Math.exp(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'exp', (x) => Math.exp(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'exp', 'exp', Math.exp),
 });
 
 /**
@@ -887,8 +898,8 @@ export const log = mathTyped('log', {
   'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
 
   // Float64Array log (synchronous)
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log', a) ?? f64Unary(a, (x) => Math.log(x)),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'log', (x) => Math.log(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'log', 'log', Math.log),
 });
 
 /**
@@ -901,7 +912,8 @@ export const log10 = mathTyped('log10', {
 
   // Float64Array log10 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log10', a) ?? f64Unary(a, (x) => Math.log10(x)),
+    f64UnaryDispatched(a, 'log10', (x) => Math.log10(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'log10', 'log10', Math.log10),
 });
 
 /**
@@ -914,7 +926,8 @@ export const log2 = mathTyped('log2', {
 
   // Float64Array log2 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log2', a) ?? f64Unary(a, (x) => Math.log2(x)),
+    f64UnaryDispatched(a, 'log2', (x) => Math.log2(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'log2', 'log2', Math.log2),
 });
 
 /**
@@ -925,7 +938,8 @@ export const log1p = mathTyped('log1p', {
 
   // Float64Array log1p (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('log1p', a) ?? f64Unary(a, (x) => Math.log1p(x)),
+    f64UnaryDispatched(a, 'log1p', (x) => Math.log1p(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'log1p', 'log1p', Math.log1p),
 });
 
 /**
@@ -936,7 +950,8 @@ export const expm1 = mathTyped('expm1', {
 
   // Float64Array expm1 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('expm1', a) ?? f64Unary(a, (x) => Math.expm1(x)),
+    f64UnaryDispatched(a, 'expm1', (x) => Math.expm1(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'expm1', 'expm1', Math.expm1),
 });
 
 // =============================================================================
@@ -961,6 +976,7 @@ export const round = mathTyped('round', {
 
   // Float64Array round, synchronous (nearest integer, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.round(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'round', undefined, Math.round),
 });
 
 /**
@@ -974,6 +990,7 @@ export const floor = mathTyped('floor', {
 
   // Float64Array floor (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.floor(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'floor', undefined, Math.floor),
 });
 
 /**
@@ -987,6 +1004,7 @@ export const ceil = mathTyped('ceil', {
 
   // Float64Array ceil (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.ceil(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'ceil', undefined, Math.ceil),
 });
 
 /**
@@ -1002,6 +1020,7 @@ export const fix = mathTyped('fix', {
 
   // Float64Array fix, synchronous (truncate toward zero, matching the 'number' overload)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.trunc(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'fix', undefined, Math.trunc),
 });
 
 // =============================================================================
@@ -1254,7 +1273,8 @@ export const sinh = mathTyped('sinh', {
 
   // Float64Array sinh (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('sinh', a) ?? f64Unary(a, (x) => Math.sinh(x)),
+    f64UnaryDispatched(a, 'sinh', (x) => Math.sinh(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'sinh', 'sinh', Math.sinh),
 });
 
 /**
@@ -1267,6 +1287,7 @@ export const cosh = mathTyped('cosh', {
 
   // Float64Array cosh (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cosh(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'cosh', undefined, Math.cosh),
 });
 
 /**
@@ -1279,7 +1300,8 @@ export const tanh = mathTyped('tanh', {
 
   // Float64Array tanh (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('tanh', a) ?? f64Unary(a, (x) => Math.tanh(x)),
+    f64UnaryDispatched(a, 'tanh', (x) => Math.tanh(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'tanh', 'tanh', Math.tanh),
 });
 
 // =============================================================================

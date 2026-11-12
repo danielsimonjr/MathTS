@@ -10897,14 +10897,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                                                                | Type   |
-| ------------------------------------ | -------------------------------------------------------------------------------------- | ------ |
-| `./euclid.js`                        | `euclidSnap`                                                                           | Import |
-| `./f64-kernels.js`                   | `f64Unary`                                                                             | Import |
-| `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix`                                                | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                             | Import |
-| `./invalid-scalar-guards.js`         | `withBinaryScalarGuards`                                                               | Import |
-| `./complex-promotion.js`             | `logReal, logRealBase, log10Real, log2Real, log1pReal, sqrtReal, powReal, nthRootReal` | Import |
+| File                            | Imports                                                                                | Type   |
+| ------------------------------- | -------------------------------------------------------------------------------------- | ------ |
+| `./euclid.js`                   | `euclidSnap`                                                                           | Import |
+| `./f64-kernels.js`              | `assertFlatNumberVector, f64Unary, f64UnaryDispatched, numberArrayUnary`               | Import |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                | Import |
+| `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                               | Import |
+| `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, sqrtReal, powReal, nthRootReal` | Import |
 
 **Exports:**
 
@@ -11088,9 +11087,15 @@ graph LR
 
 ### `functions/src/typed/f64-kernels.ts` - Shared element-wise kernel for the synchronous typed Float64Array signatures.
 
+**Internal Dependencies:**
+
+| File                                 | Imports                                       | Type   |
+| ------------------------------------ | --------------------------------------------- | ------ |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch, WasmElementwiseOp` | Import |
+
 **Exports:**
 
-- Functions: `f64Unary`
+- Functions: `f64Unary`, `assertFlatNumberVector`, `f64UnaryDispatched`, `numberArrayUnary`
 
 ---
 
@@ -11766,12 +11771,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                 | Type   |
-| ------------------------------------ | --------------------------------------- | ------ |
-| `./complex-promotion.js`             | `acscReal, asecReal, isPredictableMode` | Import |
-| `./f64-kernels.js`                   | `f64Unary`                              | Import |
-| `./trig-angle-unit.js`               | `trigFromAngleUnit`                     | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
+| File                     | Imports                                          | Type   |
+| ------------------------ | ------------------------------------------------ | ------ |
+| `./complex-promotion.js` | `acscReal, asecReal, isPredictableMode`          | Import |
+| `./f64-kernels.js`       | `f64Unary, f64UnaryDispatched, numberArrayUnary` | Import |
+| `./trig-angle-unit.js`   | `trigFromAngleUnit`                              | Import |
 
 **Exports:**
 
@@ -20257,12 +20261,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1285   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218299 |
-| Total Exports           | 7009   |
+| Total Lines of Code     | 218393 |
+| Total Exports           | 7012   |
 | Total Re-exports        | 3021   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |
-| Total Functions         | 2360   |
+| Total Functions         | 2363   |
 | Total Type Guards       | 171    |
 | Total Enums             | 0      |
 | Type-only Imports       | 644    |

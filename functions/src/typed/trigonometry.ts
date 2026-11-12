@@ -5,6 +5,7 @@
  * Supports Complex, BigNumber, and Float64Array types.
  *
  * Every Float64Array signature in this file is synchronous and returns a new Float64Array.
+ * Matching `Array` signatures accept flat `number[]` and return `number[]` (see `f64-kernels`).
  * sin, cos, tan, csc, sec, cot, atan and atanh ask the WASM tier first, after `loadWasm()`
  * loads the tier. For worker threads, use `parallelMap` or `computePool.applyKernel`
  * from `@danielsimonjr/mathts-parallel`.
@@ -16,9 +17,8 @@ import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core'
 import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
 import { acscReal, asecReal, isPredictableMode } from './complex-promotion.js';
-import { f64Unary } from './f64-kernels.js';
+import { f64Unary, f64UnaryDispatched, numberArrayUnary } from './f64-kernels.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
-import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -41,8 +41,8 @@ export const sin = mathTyped('sin', {
   Dual: (a: Dual): Dual => a.sin(),
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'sin', Math.sin, (z) => z.sin()),
 
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('sin', a) ?? f64Unary(a, Math.sin),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'sin', Math.sin),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'sin', 'sin', Math.sin),
 });
 
 /**
@@ -55,8 +55,8 @@ export const cos = mathTyped('cos', {
   Dual: (a: Dual): Dual => a.cos(),
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'cos', Math.cos, (z) => z.cos()),
 
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('cos', a) ?? f64Unary(a, Math.cos),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'cos', Math.cos),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'cos', 'cos', Math.cos),
 });
 
 /**
@@ -69,8 +69,8 @@ export const tan = mathTyped('tan', {
   Dual: (a: Dual): Dual => a.tan(),
   Unit: (a: UnitInstance) => trigFromAngleUnit(a, 'tan', Math.tan, (z) => z.tan()),
 
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('tan', a) ?? f64Unary(a, Math.tan),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'tan', Math.tan),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'tan', 'tan', Math.tan),
 });
 
 /**
@@ -89,7 +89,8 @@ export const csc = mathTyped('csc', {
     ),
 
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('csc', a) ?? f64Unary(a, (x) => 1 / Math.sin(x)),
+    f64UnaryDispatched(a, 'csc', (x) => 1 / Math.sin(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'csc', 'csc', (x) => 1 / Math.sin(x)),
 });
 
 /**
@@ -108,7 +109,8 @@ export const sec = mathTyped('sec', {
     ),
 
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('sec', a) ?? f64Unary(a, (x) => 1 / Math.cos(x)),
+    f64UnaryDispatched(a, 'sec', (x) => 1 / Math.cos(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'sec', 'sec', (x) => 1 / Math.cos(x)),
 });
 
 /**
@@ -127,7 +129,8 @@ export const cot = mathTyped('cot', {
     ),
 
   Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('cot', a) ?? f64Unary(a, (x) => 1 / Math.tan(x)),
+    f64UnaryDispatched(a, 'cot', (x) => 1 / Math.tan(x)),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'cot', 'cot', (x) => 1 / Math.tan(x)),
 });
 
 // =============================================================================
@@ -149,6 +152,7 @@ export const asin = mathTyped('asin', {
 
   // Values outside the real domain give NaN, as Math.asin does.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asin),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'asin', undefined, Math.asin),
 });
 
 /**
@@ -166,6 +170,7 @@ export const acos = mathTyped('acos', {
 
   // Values outside the real domain give NaN, as Math.acos does.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acos),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'acos', undefined, Math.acos),
 });
 
 /**
@@ -176,8 +181,8 @@ export const atan = mathTyped('atan', {
   Complex: (a: Complex) => a.atan(),
   BigNumber: (a: BigNumber) => a.atan(),
 
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('atan', a) ?? f64Unary(a, Math.atan),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atan', Math.atan),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'atan', 'atan', Math.atan),
 });
 
 /**
@@ -231,6 +236,7 @@ export const asinh = mathTyped('asinh', {
   BigNumber: (a: BigNumber) => a.asinh(),
 
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asinh),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'asinh', undefined, Math.asinh),
 });
 
 /**
@@ -251,6 +257,7 @@ export const acosh = mathTyped('acosh', {
 
   // Values outside the real domain give NaN, as Math.acosh does.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acosh),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'acosh', undefined, Math.acosh),
 });
 
 /**
@@ -267,8 +274,8 @@ export const atanh = mathTyped('atanh', {
   BigNumber: (a: BigNumber) => a.atanh(),
 
   // Values outside the real domain give NaN, as Math.atanh does.
-  Float64Array: (a: Float64Array): Float64Array =>
-    elementwiseUnaryDispatch('atanh', a) ?? f64Unary(a, Math.atanh),
+  Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atanh', Math.atanh),
+  Array: (a: unknown[]) => numberArrayUnary(a, 'atanh', 'atanh', Math.atanh),
 });
 
 // =============================================================================
