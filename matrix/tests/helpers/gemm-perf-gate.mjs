@@ -34,7 +34,7 @@ const BM = new MLMatrix(B);
 
 let checksum = 0;
 
-const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
+const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAbRatio(
   () => {
     AM.mmul(BM);
     checksum += 1;
@@ -57,5 +57,6 @@ process.stdout.write(
     mlMs: baselineMs,
     checksum,
     gateWouldPass: gatePasses(ratio, 1.15),
+    candidateInjectionFactor,
   }) + '\n'
 );

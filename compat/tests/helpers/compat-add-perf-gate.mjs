@@ -7,6 +7,7 @@ import { create as mjCreate, all as mjAll } from 'mathjs';
 import {
   candidateTimeScale,
   gatePasses,
+  measuredCandidateInjectionFactor,
   median,
 } from '../../../tools/test/wall-clock-perf-gate.mjs';
 
@@ -20,9 +21,10 @@ const slowScale = candidateTimeScale();
 function timeLoop(body, arm) {
   const t0 = performance.now();
   for (let i = 0; i < n; i++) body();
-  let dt = performance.now() - t0;
-  if (arm === 'candidate') dt *= slowScale;
-  return dt;
+  const raw = performance.now() - t0;
+  let wall = raw;
+  if (arm === 'candidate') wall *= slowScale;
+  return { wall, raw };
 }
 
 for (let w = 0; w < 50; w++) {
@@ -32,6 +34,7 @@ for (let w = 0; w < 50; w++) {
 
 const mjTimes = [];
 const mtTimes = [];
+const mtRawTimes = [];
 const roundRatios = [];
 for (let r = 0; r < 16; r++) {
   let mjMs;
@@ -43,12 +46,15 @@ for (let r = 0; r < 16; r++) {
     mtMs = timeLoop(() => mt.add(1, 2), 'candidate');
     mjMs = timeLoop(() => mj.add(1, 2), 'baseline');
   }
-  mjTimes.push(mjMs);
-  mtTimes.push(mtMs);
-  if (mjMs > 0) roundRatios.push(mtMs / mjMs);
+  mjTimes.push(mjMs.wall);
+  mtTimes.push(mtMs.wall);
+  mtRawTimes.push(mtMs.raw);
+  if (mjMs.wall > 0) roundRatios.push(mtMs.wall / mjMs.wall);
 }
 
 const ratio = median(roundRatios);
+const candidateInjectionFactor =
+  slowScale === 1 ? 1 : measuredCandidateInjectionFactor(mtTimes, mtRawTimes);
 process.stdout.write(
   JSON.stringify({
     ratio,
@@ -56,5 +62,6 @@ process.stdout.write(
     mjMs: median(mjTimes),
     parity: mt.add(1, 2),
     gateWouldPass: gatePasses(ratio, 2.0),
+    candidateInjectionFactor,
   }) + '\n'
 );

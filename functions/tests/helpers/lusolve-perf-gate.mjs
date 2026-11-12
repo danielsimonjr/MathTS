@@ -25,7 +25,7 @@ const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
 
 let checksum = 0;
 
-const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
+const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAbRatio(
   () => {
     const x = luSolve(lu(M), b);
     checksum += (x[0]?.[0] ?? 0) + (x[n - 1]?.[0] ?? 0);
@@ -48,5 +48,6 @@ process.stdout.write(
     facMs: baselineMs,
     checksum,
     gateWouldPass: gatePasses(ratio, 1.2),
+    candidateInjectionFactor,
   }) + '\n'
 );
