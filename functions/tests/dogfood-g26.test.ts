@@ -52,15 +52,11 @@ describe('G26 #712 median quickselect path', () => {
   });
 
   it('n=1e6 median finishes well under full sort (issue: <10 ms target)', () => {
-    const b = Array.from({ length: 1e6 }, (_, i) => Math.sin(i));
-    const t = medianTime(
-      () => {
-        median(b);
-      },
-      2,
-      6
-    );
-    expect(t).toBeLessThan(50);
+    const gate = fileURLToPath(new URL('./helpers/median-number-perf-gate.mjs', import.meta.url));
+    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const { medianMs, sample } = JSON.parse(raw) as { medianMs: number; sample: number };
+    expect(Number.isFinite(sample)).toBe(true);
+    expect(medianMs).toBeLessThan(50);
   }, 60_000);
 });
 

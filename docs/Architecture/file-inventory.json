@@ -9963,7 +9963,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 155
+      "loc": 151
     },
     {
       "file": "functions/tests/dtw.test.ts",
