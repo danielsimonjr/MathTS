@@ -10,11 +10,11 @@
     "packages/workerpool/dist/worker.js": 21676,
     "core/dist/index.js": 223608,
     "core/dist/internal.js": 227150,
-    "matrix/dist/index.js": 199047,
+    "matrix/dist/index.js": 198192,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 85080,
     "autograd/dist/index.js": 69879,
-    "functions/dist/index.js": 1832926,
+    "functions/dist/index.js": 1833442,
     "functions/dist/wasm/mathts-as.wasm": 62501,
     "expression/dist/index.js": 357939,
     "parser/dist/index.js": 507,
@@ -32,10 +32,10 @@
     "assembly/build/mathts.js": 93112,
     "assembly/build/mathts.wasm": 62501,
     "assembly/build/mathts-debug.wasm": 122393,
-    "compat/dist/index.js": 17093,
+    "compat/dist/index.js": 15888,
     "gpu/dist/index.js": 18082,
-    "plot/dist/index.js": 35721,
-    "plot/dist/render-file.js": 6435
+    "plot/dist/index.js": 32588,
+    "plot/dist/render-file.js": 5057
   },
   "entries": {
     "packages/typed-function/dist/index.js": {
@@ -138,7 +138,7 @@
     },
     "plot/dist/index.js": {
       "export": "area",
-      "treeShake": false
+      "treeShake": true
     },
     "plot/dist/render-file.js": {
       "export": "PlotRenderError",
