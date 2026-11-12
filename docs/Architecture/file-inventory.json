@@ -555,7 +555,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 45
+      "loc": 27
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
