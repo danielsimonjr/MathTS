@@ -44,10 +44,14 @@ for (const [label, solve, legacy] of METHODS) {
       });
     }
 
-    it('reports maxIter exhaustion with the unchanged message', () => {
-      const message = 'Maximum number of iterations reached, try changing options';
-      expect(() => run(legacy, STIFF_MAXITER_CASE)).toThrow(message);
-      expect(() => run(solve, STIFF_MAXITER_CASE)).toThrow(message);
+    it('reports maxIter exhaustion with method name and maxIter in the message', () => {
+      const name = label === 'rosenbrockSolve' ? 'Rosenbrock' : 'RODAS';
+      expect(() => run(legacy, STIFF_MAXITER_CASE)).toThrow(
+        'Maximum number of iterations reached, try changing options'
+      );
+      expect(() => run(solve, STIFF_MAXITER_CASE)).toThrow(
+        new RegExp(`solveODE ${name}: exceeded maxIter=`)
+      );
     });
 
     it('carries its own name in the validation errors', () => {
