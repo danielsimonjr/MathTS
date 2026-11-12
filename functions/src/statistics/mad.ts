@@ -1,7 +1,7 @@
-import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { flattenForStatistics, type FloatTyped } from './numeric-data.js';
 
 // Type definitions for mad
 interface MatrixType {
@@ -50,6 +50,7 @@ export const createMad = /* #__PURE__ */ factory(
     return typed(name, {
       // mad([a, b, c, d, ...])
       'Array | Matrix': _mad,
+      'Float64Array | Float32Array': _mad,
 
       // mad(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
@@ -63,11 +64,11 @@ export const createMad = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Complex | Unit} The median absolute deviation
      * @private
      */
-    function _mad(array: unknown[] | MatrixType): unknown {
-      const flat = flatten((array as MatrixType).valueOf()) as unknown[];
+    function _mad(array: unknown[] | MatrixType | FloatTyped): unknown {
+      const flat = flattenForStatistics(array);
 
       if (flat.length === 0) {
-        throw new Error('Cannot calculate median absolute deviation (mad) of an empty array');
+        return NaN;
       }
 
       try {
