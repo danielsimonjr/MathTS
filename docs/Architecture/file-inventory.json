@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2247,
+  "totalFiles": 2250,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1261,
     "test-only": 0,
     "orphan": 0,
-    "test": 895,
+    "test": 898,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1287,
-    "tests": 895,
+    "tests": 898,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,17 +28,17 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1016,
+    "@danielsimonjr/mathts-functions": 1017,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
-    "@danielsimonjr/mathts-parallel": 52,
+    "@danielsimonjr/mathts-parallel": 53,
     "@danielsimonjr/mathts-parser": 4,
     "@danielsimonjr/mathts-plot": 46,
-    "@danielsimonjr/mathts-signal": 3,
+    "@danielsimonjr/mathts-signal": 4,
     "@danielsimonjr/mathts-statistics": 4,
     "@danielsimonjr/mathts-tensor": 56,
     "@danielsimonjr/mathts-trigonometry": 3,
@@ -4538,7 +4538,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2065
+      "loc": 2067
     },
     {
       "file": "expression/src/Parser.ts",
@@ -6729,7 +6729,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 321
+      "loc": 333
     },
     {
       "file": "functions/src/matrix/filter.ts",
@@ -7758,7 +7758,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 110
+      "loc": 186
     },
     {
       "file": "functions/src/signal/fft-helpers.ts",
@@ -8906,7 +8906,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1450
+      "loc": 1587
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -9543,7 +9543,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 177
+      "loc": 174
     },
     {
       "file": "functions/tests/clones-same-algorithm.test.ts",
@@ -9873,6 +9873,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 251
+    },
+    {
+      "file": "functions/tests/dogfood-g18-signal-api.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 221
     },
     {
       "file": "functions/tests/dogfood-g22-expression-sandbox.test.ts",
@@ -13638,7 +13645,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2466
+      "loc": 2523
     },
     {
       "file": "packages/workerpool/src/matmul-sequential.ts",
@@ -13701,7 +13708,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 98
     },
     {
       "file": "packages/workerpool/tests/fft-core.test.ts",
@@ -13785,7 +13792,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1712
+      "loc": 1871
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -13883,7 +13890,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 42
+      "loc": 82
     },
     {
       "file": "parallel/src/WorkerPool.ts",
@@ -13914,6 +13921,13 @@
       "loc": 276
     },
     {
+      "file": "parallel/tests/ComputePool.g12-regression.test.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 229
+    },
+    {
       "file": "parallel/tests/ComputePool.test.ts",
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
@@ -13932,7 +13946,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 229
+      "loc": 232
     },
     {
       "file": "parallel/tests/gemm-rows-oracle.test.ts",
@@ -14093,7 +14107,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 228
+      "loc": 242
     },
     {
       "file": "parallel/tests/WorkerPool.constructor.test.ts",
@@ -14499,14 +14513,21 @@
       "package": "@danielsimonjr/mathts-signal",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 47
+      "loc": 49
+    },
+    {
+      "file": "signal/tests/dogfood-g18-exports.test.ts",
+      "package": "@danielsimonjr/mathts-signal",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
     },
     {
       "file": "signal/tests/signal.test.ts",
       "package": "@danielsimonjr/mathts-signal",
       "area": "tests",
       "disposition": "test",
-      "loc": 17
+      "loc": 26
     },
     {
       "file": "signal/vitest.config.ts",
