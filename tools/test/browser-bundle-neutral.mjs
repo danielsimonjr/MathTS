@@ -37,10 +37,26 @@ const CASES = [
   },
 ];
 
+/**
+ * Keep esbuild entry imports referenced so oxlint does not flag generated fixtures.
+ * @param {string} importLine
+ */
+function neutralEntrySource(importLine) {
+  const named = importLine.match(/import\s*\{([^}]+)\}\s*from/);
+  if (named) {
+    const bindings = named[1].split(',').map((part) => {
+      const bits = part.trim().split(/\s+as\s+/i);
+      return bits[bits.length - 1].trim();
+    });
+    return `${importLine}\nvoid ${bindings.join(' + ')};\n`;
+  }
+  return `${importLine}\n`;
+}
+
 let failed = 0;
 for (const { label, importLine, outfile } of CASES) {
   const entry = join(FIXTURES, `neutral-${label}.mjs`);
-  writeFileSync(entry, `${importLine}\nvoid 0;\n`);
+  writeFileSync(entry, neutralEntrySource(importLine));
   try {
     buildSync({
       entryPoints: [entry],

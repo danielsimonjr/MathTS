@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2318,
+  "totalFiles": 2319,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1284,
     "test-only": 0,
     "orphan": 0,
-    "test": 943,
+    "test": 944,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1310,
-    "tests": 943,
+    "tests": 944,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 22,
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
-    "(root)": 57,
+    "(root)": 58,
     "@danielsimonjr/mathts-expression": 566,
     "@danielsimonjr/mathts-functions": 1052,
     "@danielsimonjr/mathts-gpu": 20,
@@ -1493,7 +1493,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "config",
       "disposition": "config",
-      "loc": 26
+      "loc": 27
     },
     {
       "file": "core/vitest.config.ts",
@@ -14933,7 +14933,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "config",
       "disposition": "config",
-      "loc": 26
+      "loc": 27
     },
     {
       "file": "plot/vitest.config.ts",
@@ -15459,6 +15459,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 90
+    },
+    {
+      "file": "tests/integration/dogfood-g29-packaging.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 128
     },
     {
       "file": "tests/integration/examples-smoke.test.ts",
@@ -16263,7 +16270,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "config",
       "disposition": "config",
-      "loc": 26
+      "loc": 27
     },
     {
       "file": "workbook/vitest.config.ts",

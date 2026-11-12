@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-plot",
   "version": "0.4.32",
-  "description": "Headless SVG 2D/3D plotting for MathTS — dependency-light, expression-aware, built on core/functions/expression",
+  "description": "Headless SVG 2D/3D plotting for MathTS \u2014 dependency-light, expression-aware, built on core/functions/expression",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -16,16 +16,18 @@
     "./render": {
       "import": "./dist/render-file.js",
       "types": "./dist/render-file.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown && tsc -p tsconfig.dts.json",
-    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json",
-    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
+    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -77,5 +79,10 @@
     "heatmap",
     "visualization",
     "headless"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": true
 }

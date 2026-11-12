@@ -16,15 +16,17 @@
     "./internal": {
       "import": "./dist/internal.js",
       "types": "./dist/internal.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown && tsc -p tsconfig.dts.json",
-    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -32,7 +34,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs"
   },
   "dependencies": {
     "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"
@@ -56,5 +58,10 @@
     "math",
     "typescript",
     "core"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": true
 }

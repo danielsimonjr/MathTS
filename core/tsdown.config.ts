@@ -21,5 +21,6 @@ export default defineConfig({
   // tsup (esbuild) dropped JSDoc from the JS output; tsc already carries it into the .d.ts.
   outputOptions: { comments: { legal: true, annotation: true, jsdoc: false } },
   clean: true,
+  sourcemap: true,
   define: { __PKG_VERSION__: JSON.stringify(version) },
 });

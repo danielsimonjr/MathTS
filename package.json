@@ -72,6 +72,8 @@
     "docs:graph:test": "bun test ./tools/query-dependency-graph/query-dependency-graph.test.mjs",
     "check:browser-safety": "node tools/query-dependency-graph/query-dependency-graph.mjs --check-browser-safety",
     "check:browser-bundle-neutral": "node tools/test/browser-bundle-neutral.mjs",
+    "check:packaging": "node tools/sync-package-packaging.mjs --check",
+    "sync:packaging": "node tools/sync-package-packaging.mjs --write",
     "sync:readme-functions-stats": "node tools/sync-readme-functions-stats.mjs",
     "check:duplicates": "node tools/create-dependency-graph/check-duplicates.mjs",
     "check:duplicates:fast": "node tools/create-dependency-graph/check-duplicates.mjs --no-regen",

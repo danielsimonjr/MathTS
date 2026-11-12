@@ -12,15 +12,17 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json",
-    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "bun test --coverage",
@@ -28,7 +30,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs"
   },
   "tsdown": {
     "fixedExtension": false,
@@ -39,7 +41,8 @@
         "annotation": true,
         "jsdoc": false
       }
-    }
+    },
+    "sourcemap": true
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.26.0"
@@ -66,5 +69,10 @@
     "physics",
     "conversion",
     "si"
-  ]
+  ],
+  "homepage": "https://github.com/danielsimonjr/MathTS#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "sideEffects": false
 }
