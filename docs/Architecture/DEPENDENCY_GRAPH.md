@@ -2665,6 +2665,12 @@ graph LR
 
 ### `autograd/src/grad.ts` - GC15 — ergonomic, number-friendly autodiff bridge.
 
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-tensor` | `Tensor` |
+
 **Internal Dependencies:**
 
 | File        | Imports             | Type   |
@@ -20308,7 +20314,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1288   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 219714 |
+| Total Lines of Code     | 220090 |
 | Total Exports           | 7041   |
 | Total Re-exports        | 3032   |
 | Total Classes           | 61     |

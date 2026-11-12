@@ -49,14 +49,29 @@ export class Tape {
   private nodes: TapeNode[] = [];
   private inputGradSlots = new Map<number, Float64Array>();
 
+  /** Set after {@link backward}; new ops must call {@link reset} first. */
+  private graphSealed = false;
+
+  /** Nesting depth for {@link noGrad} — ops do not append tape nodes while &gt; 0. */
+  private noGradDepth = 0;
+
   // S3 fix: disjoint ID namespaces. Inputs use negative IDs, ops use
   // non-negative IDs. Eliminates the v0.4.0-review collision where
   // id = nodes.length + 1000 would collide with op ids past 1000 entries.
   private nextOpId = 0;
   private nextInputId = -1; // negatives = inputs; non-negatives = ops
 
+  private assertGraphOpen(what: string): void {
+    if (this.graphSealed) {
+      throw new Error(
+        `${what}: tape graph was consumed by backward(); call Tape.reset() before recording a new forward pass`
+      );
+    }
+  }
+
   /** Allocate a fresh id for an input or intermediate. */
   allocate(size: number): { id: number; gradSlot: Float64Array } {
+    this.assertGraphOpen('Tape.allocate');
     const id = this.nextInputId--;
     const gradSlot = new Float64Array(size);
     this.inputGradSlots.set(id, gradSlot);
@@ -68,6 +83,13 @@ export class Tape {
     outputSize: number,
     backward: BackwardFn
   ): { id: number; gradSlot: Float64Array } {
+    if (this.noGradDepth > 0) {
+      const id = this.nextInputId--;
+      const gradSlot = new Float64Array(outputSize);
+      this.inputGradSlots.set(id, gradSlot);
+      return { id, gradSlot };
+    }
+    this.assertGraphOpen('Tape.record');
     const outputGradSlot = new Float64Array(outputSize);
     const id = this.nextOpId++;
     this.nodes.push({ inputIds, backward, outputGradSlot });
@@ -75,10 +97,40 @@ export class Tape {
     return { id, gradSlot: outputGradSlot };
   }
 
-  /** Seed the final output's gradient slot, then replay in reverse. */
-  backward(outputId: number, outputGrad: Float64Array): void {
+  /**
+   * Run `fn` without recording new tape nodes (inference / frozen subgraph).
+   * Gradients do not flow through values created inside the callback.
+   */
+  noGrad<T>(fn: () => T): T {
+    this.noGradDepth++;
+    try {
+      return fn();
+    } finally {
+      this.noGradDepth--;
+    }
+  }
+
+  /** @returns whether this tape is inside a {@link noGrad} region. */
+  get recording(): boolean {
+    return this.noGradDepth === 0;
+  }
+
+  /**
+   * Seed the final output's gradient slot, then replay in reverse.
+   *
+   * Input gradient slots accumulate across calls. Intermediate op output slots
+   * are cleared before each replay so a second backward does not read stale
+   * cotangents left from the previous pass (which would triple accumulated input
+   * gradients on chains such as square → sum).
+   */
+  backward(outputId: number, outputGrad: Float64Array, opts?: { retainGraph?: boolean }): void {
     const slot = this.inputGradSlots.get(outputId);
     if (!slot) throw new Error(`Tape.backward: unknown outputId ${outputId}`);
+
+    for (const node of this.nodes) {
+      node.outputGradSlot.fill(0);
+    }
+
     // E19 fix: overwrite the seed (slot starts at 0). The previous += was
     // wasteful and could double-count if backward() were re-invoked.
     slot.set(outputGrad);
@@ -89,17 +141,26 @@ export class Tape {
     for (let n = start; n >= 0; n--) {
       this.nodes[n].backward(this.nodes[n].outputGradSlot);
     }
+
+    if (opts?.retainGraph !== true) {
+      this.graphSealed = true;
+    }
   }
 
   /**
    * Drop every recorded node, closure and gradient slot and restart id allocation.
    * TapedTensors created before the reset are invalid afterwards: do not use them.
+   *
+   * Reusing a tape across training steps without `reset()` (or `new Tape()`)
+   * after each `backward()` will leak memory because each forward pass appends
+   * nodes until the graph is sealed; call `reset()` before the next forward.
    */
   reset(): void {
     this.nodes = [];
     this.inputGradSlots.clear();
     this.nextOpId = 0;
     this.nextInputId = -1;
+    this.graphSealed = false;
     this.epoch++;
   }
 
@@ -163,6 +224,199 @@ export class TapedTensor {
   static fromTensorAsInput(t: Tensor, tape: Tape): TapedTensor {
     const { id } = tape.allocate(t.data.length);
     return new TapedTensor(t.shape, new Float64Array(t.data), tape, id, t.axisLabels);
+  }
+
+  /**
+   * Break the autograd edge: returns a new leaf with the same primal values.
+   * Gradients do not flow back into the tensor this was detached from.
+   */
+  detach(): TapedTensor {
+    const { id } = this.tape.allocate(this.primal.length);
+    return new TapedTensor(
+      this.shape,
+      new Float64Array(this.primal),
+      this.tape,
+      id,
+      this.axisLabels
+    );
+  }
+
+  /**
+   * Reshape with the same total size as `Tensor.reshape`.
+   * Backward reshapes the upstream gradient back to the input shape.
+   */
+  reshape(shape: ReadonlyArray<number>): TapedTensor {
+    const inShape = [...this.shape];
+    const outT = this.toPrimalTensor().reshape(shape);
+    const outShape = [...outT.shape];
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const gOut = new Tensor(outShape, new Float64Array(outputGrad));
+      const gIn = gOut.reshape(inShape);
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += gIn.data[i];
+      }
+    });
+    return new TapedTensor(outShape, new Float64Array(outT.data), this.tape, id, outT.axisLabels);
+  }
+
+  /** Elementwise ReLU; subgradient 0 at x = 0. */
+  relu(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      const x = this.primal[i];
+      out[i] = x > 0 ? x : 0;
+    }
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        if (primalData[i] > 0) thisGradSlot[i] += outputGrad[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * GELU (tanh approximation). Adjoint checked with finite differences in tests.
+   */
+  gelu(): TapedTensor {
+    const c = Math.sqrt(2 / Math.PI);
+    const out = new Float64Array(this.primal.length);
+    const innerTan = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      const x = this.primal[i];
+      const u = c * (x + 0.044715 * x * x * x);
+      const t = Math.tanh(u);
+      innerTan[i] = t;
+      out[i] = 0.5 * x * (1 + t);
+    }
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const x = primalData[i];
+        const t = innerTan[i];
+        const sech2 = 1 - t * t;
+        const duDx = c * (1 + 3 * 0.044715 * x * x);
+        const dyDx = 0.5 * (1 + t) + 0.5 * x * sech2 * duDx;
+        thisGradSlot[i] += outputGrad[i] * dyDx;
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /** Logistic sigmoid σ(x). */
+  sigmoid(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      const x = this.primal[i];
+      out[i] = x >= 0 ? 1 / (1 + Math.exp(-x)) : Math.exp(x) / (1 + Math.exp(x));
+    }
+    const yData = new Float64Array(out);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const y = yData[i];
+        thisGradSlot[i] += outputGrad[i] * y * (1 - y);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Softmax along `axis` (default: last axis). Uses the max-shift for stability.
+   */
+  softmax(axis?: number): TapedTensor {
+    const rank = this.shape.length;
+    if (rank === 0) throw new Error('TapedTensor.softmax: scalar input');
+    const ax = axis ?? rank - 1;
+    if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
+      throw new Error(`TapedTensor.softmax: axis ${ax} out of range for rank ${rank}`);
+    }
+    const outT = _softmaxForward(this.toPrimalTensor(), ax);
+    const out = new Float64Array(outT.data);
+    const outShape = [...outT.shape];
+    const inShape = [...this.shape];
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      const gradIn = _softmaxBackward(out, outShape, new Float64Array(outputGrad), ax);
+      const gTensor = new Tensor(inShape, gradIn);
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += gTensor.data[i];
+      }
+    });
+    return new TapedTensor(outShape, out, this.tape, id, outT.axisLabels);
+  }
+
+  /**
+   * Cross-entropy loss (log-softmax + NLL) along `axis` for class indices in `targets`.
+   * `targets` has the same shape as this tensor with the class axis removed.
+   */
+  crossEntropy(targets: ReadonlyArray<number>, axis?: number): TapedTensor {
+    const rank = this.shape.length;
+    if (rank === 0) throw new Error('TapedTensor.crossEntropy: scalar logits');
+    const ax = axis ?? rank - 1;
+    const classes = this.shape[ax];
+    const outT = _crossEntropyForward(this.toPrimalTensor(), targets, ax);
+    const outShape = [...outT.shape];
+    const prob = _softmaxForward(this.toPrimalTensor(), ax);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const gradLogits = _crossEntropyBackward(
+        new Float64Array(prob.data),
+        prob.shape,
+        targets,
+        ax,
+        classes,
+        outputGrad
+      );
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += gradLogits[i];
+      }
+    });
+    return new TapedTensor(outShape, new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * Binary cross-entropy with logits: BCEWithLogits(this, targets).
+   * `targets` in [0,1], same shape as this.
+   */
+  binaryCrossEntropy(targets: TapedTensor | Float64Array | ReadonlyArray<number>): TapedTensor {
+    if (targets instanceof TapedTensor) {
+      assertSameTape(this, targets);
+      if (!sameTensorShape(this.shape, targets.shape)) {
+        throw new Error('TapedTensor.binaryCrossEntropy: target shape mismatch');
+      }
+    }
+    const targetData =
+      targets instanceof TapedTensor
+        ? targets.primal
+        : targets instanceof Float64Array
+          ? targets
+          : Float64Array.from(targets);
+    if (targetData.length !== this.primal.length) {
+      throw new Error('TapedTensor.binaryCrossEntropy: target shape mismatch');
+    }
+    const out = new Float64Array(this.primal.length);
+    const xData = new Float64Array(this.primal);
+    const tData = new Float64Array(targetData);
+    for (let i = 0; i < out.length; i++) {
+      const x = xData[i];
+      const t = tData[i];
+      const maxNegX = x > 0 ? -x : Math.log(1 + Math.exp(x));
+      out[i] = (1 - t) * x + maxNegX + Math.log1p(Math.exp(-Math.abs(x)));
+    }
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const x = xData[i];
+        const t = tData[i];
+        const sig = x >= 0 ? 1 / (1 + Math.exp(-x)) : Math.exp(x) / (1 + Math.exp(x));
+        thisGradSlot[i] += outputGrad[i] * (sig - t);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
   }
 
   toPrimalTensor(): Tensor {
@@ -2566,6 +2820,120 @@ function _batchedMatmulGradA(
  * `aShape` is [...batch, m, k], `yShape` is [...batch, m, n].
  * Returns dB with shape [...batch, k, n].
  */
+/** Group flat indices sharing all coordinates except `axis`. */
+function _axisGroups(
+  shape: ReadonlyArray<number>,
+  axis: number
+): ReadonlyArray<ReadonlyArray<number>> {
+  const rank = shape.length;
+  const inCoords = new Array<number>(rank).fill(0);
+  const map = new Map<string, number[]>();
+  for (let n = 0; n < Tensor.sizeOf(shape); n++) {
+    const keyParts: number[] = [];
+    for (let k = 0; k < rank; k++) {
+      if (k !== axis) keyParts.push(inCoords[k]);
+    }
+    const key = keyParts.join(',');
+    const bucket = map.get(key);
+    if (bucket === undefined) map.set(key, [n]);
+    else bucket.push(n);
+    for (let k = rank - 1; k >= 0; k--) {
+      if (++inCoords[k] < shape[k]) break;
+      inCoords[k] = 0;
+    }
+  }
+  return [...map.values()];
+}
+
+/** Stable softmax forward on one axis; returns probabilities with the same shape as `t`. */
+function _softmaxForward(t: Tensor, axis: number): Tensor {
+  const shape = [...t.shape];
+  const out = new Float64Array(t.data.length);
+  for (const group of _axisGroups(shape, axis)) {
+    let maxVal = -Infinity;
+    for (const idx of group) {
+      const v = t.data[idx];
+      if (v > maxVal) maxVal = v;
+    }
+    let sum = 0;
+    for (const idx of group) {
+      const e = Math.exp(t.data[idx] - maxVal);
+      out[idx] = e;
+      sum += e;
+    }
+    for (const idx of group) out[idx] /= sum;
+  }
+  return new Tensor(shape, out, t.axisLabels);
+}
+
+/**
+ * Softmax VJP: grad_input_i = y_i * (grad_out_i - sum_j grad_out_j * y_j) along `axis`.
+ */
+function _softmaxBackward(
+  y: Float64Array,
+  shape: ReadonlyArray<number>,
+  gradOut: Float64Array,
+  axis: number
+): Float64Array {
+  const gradIn = new Float64Array(y.length);
+  for (const group of _axisGroups(shape, axis)) {
+    let dot = 0;
+    for (const idx of group) dot += gradOut[idx] * y[idx];
+    for (const idx of group) {
+      gradIn[idx] = y[idx] * (gradOut[idx] - dot);
+    }
+  }
+  return gradIn;
+}
+
+function _crossEntropyForward(
+  logits: Tensor,
+  targets: ReadonlyArray<number>,
+  axis: number
+): Tensor {
+  const shape = [...logits.shape];
+  const outShape = shape.filter((_, k) => k !== axis);
+  if (outShape.length === 0) outShape.push(1);
+  const out = new Float64Array(Tensor.sizeOf(outShape));
+  const groups = _axisGroups(shape, axis);
+  for (let g = 0; g < groups.length; g++) {
+    const group = groups[g];
+    let maxVal = -Infinity;
+    for (const idx of group) {
+      if (logits.data[idx] > maxVal) maxVal = logits.data[idx];
+    }
+    let logSum = 0;
+    for (const idx of group) logSum += Math.exp(logits.data[idx] - maxVal);
+    logSum = maxVal + Math.log(logSum);
+    const cls = targets[g];
+    const logitIdx = group[cls];
+    out[g] = logSum - logits.data[logitIdx];
+  }
+  return new Tensor(outShape, out);
+}
+
+function _crossEntropyBackward(
+  prob: Float64Array,
+  shape: ReadonlyArray<number>,
+  targets: ReadonlyArray<number>,
+  axis: number,
+  classes: number,
+  upstream: Float64Array
+): Float64Array {
+  const grad = new Float64Array(prob.length);
+  const groups = _axisGroups(shape, axis);
+  for (let g = 0; g < groups.length; g++) {
+    const group = groups[g];
+    const scale = upstream[g];
+    const cls = targets[g];
+    for (let c = 0; c < classes; c++) {
+      const idx = group[c];
+      grad[idx] = scale * (prob[idx] - (c === cls ? 1 : 0));
+    }
+  }
+  return grad;
+}
+
 function _batchedMatmulGradB(
   aData: Float64Array,
   dYData: Float64Array,
