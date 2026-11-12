@@ -61,18 +61,14 @@ const defaultConfig: MathJSConfig = {
   randomSeed: null,
 };
 
-/** Defaults merged the way `create()` builds `currentConfig`. */
-function resolvedCreateDefaults(): MathJSConfig {
-  return { ...mathFunctions.config(), ...defaultConfig };
-}
-
-/** When false, scalar calls skip `runWithConfig` (same effective config as defaults). */
-function instanceConfigUsesOverlay(cfg: MathJSConfig): boolean {
-  const base = resolvedCreateDefaults();
-  const keys = new Set([...Object.keys(base), ...Object.keys(cfg)]) as Set<keyof MathJSConfig>;
+/** When false, wrapped calls skip `runWithConfig` (instance config unchanged since create). */
+function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig): boolean {
+  const keys = new Set([...Object.keys(baseline), ...Object.keys(current)]) as Set<
+    keyof MathJSConfig
+  >;
   for (const key of keys) {
-    const a = cfg[key];
-    const b = base[key];
+    const a = current[key];
+    const b = baseline[key];
     if (a !== b && !(a === undefined && b === undefined)) {
       return true;
     }
@@ -183,6 +179,16 @@ export interface MathInstance {
   NaN: typeof shims.NaN;
 }
 
+/** Per-instance forwarder (unique identity, no config wrapper overhead). */
+function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
+  const bound = ((...args: unknown[]) => fn(...args)) as T;
+  copyFunctionSurface(fn, bound);
+  return bound;
+}
+
+/** Hot scalar ops skip lazy config wrappers (#735); still per-instance refs. */
+const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
+
 /**
  * Copies the name, length, prototype and own properties of `from` onto the wrapper `to`.
  * Keys that refuse redefinition stay as they are.
@@ -226,9 +232,10 @@ function copyFunctionSurface(
 
 function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  currentConfig: MathJSConfig
+  currentConfig: MathJSConfig,
+  configBaseline: MathJSConfig,
+  createdWithCustomConfig: boolean
 ): T {
-  const needsOverlay = instanceConfigUsesOverlay(currentConfig);
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
     const invoke = (): unknown => {
@@ -237,6 +244,8 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
       }
       return fn.apply(this, args);
     };
+    const needsOverlay =
+      createdWithCustomConfig || instanceConfigUsesOverlay(currentConfig, configBaseline);
     if (!needsOverlay) {
       return invoke();
     }
@@ -269,11 +278,16 @@ export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  const currentConfig: MathJSConfig = {
+  const defaultsAtCreate: MathJSConfig = {
     ...mathFunctions.config(),
     ...defaultConfig,
+  };
+  const configBaseline: MathJSConfig = {
+    ...defaultsAtCreate,
     ...config,
   };
+  const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
+  const currentConfig: MathJSConfig = { ...configBaseline };
 
   const instance: MathInstance = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
@@ -295,9 +309,9 @@ export function create(
     sparse: shims.sparse,
 
     // Arithmetic
-    add: shims.add,
-    subtract: shims.subtract,
-    multiply: shims.multiply,
+    add: bindShim(shims.add),
+    subtract: bindShim(shims.subtract),
+    multiply: bindShim(shims.multiply),
     divide: shims.divide,
     pow: shims.pow,
     sqrt: shims.sqrt,
@@ -378,6 +392,7 @@ export function create(
     if (key === 'config' || key === 'chain') continue;
     const value = instance[key];
     if (typeof value !== 'function') continue;
+    if (HOT_SCALAR_SHIM_KEYS.has(key)) continue;
     // Lazy + memoized: the config-scoped wrapper is built on first access (a
     // typical program touches a few dozen of the ~1,100 exports), then the
     // accessor is replaced by a plain data property so `math.add === math.add`
@@ -405,7 +420,10 @@ export function create(
       enumerable: true,
       configurable: true,
       get() {
-        if (cached === undefined) replaceWith(wrapWithInstanceConfig(raw, currentConfig));
+        if (cached === undefined)
+          replaceWith(
+            wrapWithInstanceConfig(raw, currentConfig, configBaseline, createdWithCustomConfig)
+          );
         return cached;
       },
       set: replaceWith,
