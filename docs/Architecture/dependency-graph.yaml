@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-12'
-  totalFiles: 1295
+  totalFiles: 1296
   totalModules: 82
-  totalExports: 7090
+  totalExports: 7103
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14091,7 +14091,7 @@ modules:
           directory: expression
           imports:
             - createEvaluate
-            - compileExpression
+            - compileExpressionWithDeps
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -27915,6 +27915,108 @@ modules:
         - createParserClass
       constants:
         - createParserClass
+    expression/src/default-instance.ts:
+      description: Default wired `parse` / `evaluate` for thin packages and one-liner use.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./parse.js
+          imports:
+            - createParse
+        - file: ./node/Node.js
+          imports:
+            - createNode
+        - file: ./node/AccessorNode.js
+          imports:
+            - createAccessorNode
+        - file: ./node/ArrayNode.js
+          imports:
+            - createArrayNode
+        - file: ./node/AssignmentNode.js
+          imports:
+            - createAssignmentNode
+        - file: ./node/BlockNode.js
+          imports:
+            - createBlockNode
+        - file: ./node/ConditionalNode.js
+          imports:
+            - createConditionalNode
+        - file: ./node/ConstantNode.js
+          imports:
+            - createConstantNode
+        - file: ./node/FunctionAssignmentNode.js
+          imports:
+            - createFunctionAssignmentNode
+        - file: ./node/FunctionNode.js
+          imports:
+            - createFunctionNode
+        - file: ./node/IndexNode.js
+          imports:
+            - createIndexNode
+        - file: ./node/ObjectNode.js
+          imports:
+            - createObjectNode
+        - file: ./node/OperatorNode.js
+          imports:
+            - createOperatorNode
+        - file: ./node/ParenthesisNode.js
+          imports:
+            - createParenthesisNode
+        - file: ./node/RangeNode.js
+          imports:
+            - createRangeNode
+        - file: ./node/RelationalNode.js
+          imports:
+            - createRelationalNode
+        - file: ./node/SymbolNode.js
+          imports:
+            - createSymbolNode
+        - file: ./compiler/compile.js
+          imports:
+            - compile
+        - file: ./evaluator/evaluate.js
+          imports:
+            - createEvaluate
+            - compileExpressionWithDeps
+        - file: ./transform/utils/compileInlineExpression.js
+          imports:
+            - compileInlineExpression
+        - file: ./compiler/compile.js
+          imports:
+            - CompiledExpression
+          typeOnly: true
+        - file: ./evaluator/evaluate.js
+          imports:
+            - EvaluateOptions
+          typeOnly: true
+        - file: ./node/Node.js
+          imports:
+            - MathNode
+          typeOnly: true
+        - file: ./compiler/compile.js
+          imports:
+            - Scope
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+      exports:
+        - defaultMathScope
+        - parse
+        - evaluate
+        - compileExpression
+      interfaces:
+        - CallableCompiledExpression
+      functions:
+        - parse
+        - evaluate
+        - compileExpression
+        - compileExpression
+        - compileExpression
+      constants:
+        - defaultMathScope
     expression/src/index.ts:
       description: Expression parsing and evaluation for MathTS.
       externalDependencies: []
@@ -27963,6 +28065,10 @@ modules:
         - file: ./embeddedDocs/embeddedDocs.js
           imports:
             - embeddedDocs
+          reExport: true
+        - file: ./default-instance.js
+          imports:
+            - defaultMathScope
           reExport: true
         - file: ./utils/mathml.js
           imports:
@@ -28100,6 +28206,7 @@ modules:
       exports:
         - createParser
         - embeddedDocs
+        - defaultMathScope
         - mathMLDocument
         - mathMLError
         - escapeMathML
@@ -28161,6 +28268,7 @@ modules:
         - '* from ./transform/index.js'
         - createParser
         - embeddedDocs
+        - defaultMathScope
         - mathMLDocument
         - mathMLError
         - escapeMathML
@@ -33837,29 +33945,48 @@ modules:
       workspaceDependencies: []
       exports:
         - createEvaluate
-        - compileExpression
+        - compileExpressionWithDeps
       interfaces:
         - EvaluateOptions
       functions:
         - createEvaluate
-        - compileExpression
+        - compileExpressionWithDeps
     expression/src/evaluator/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./evaluate.js
           imports:
             - createEvaluate
-            - compileExpression
+            - compileExpressionWithDeps
           reExport: true
+        - file: ../default-instance.js
+          imports:
+            - compileExpression
+            - evaluate
+            - parse
+          reExport: true
+        - file: ./evaluate.js
+          imports:
+            - EvaluateOptions
+          reExport: true
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createEvaluate
+        - compileExpressionWithDeps
         - compileExpression
+        - evaluate
+        - parse
+        - EvaluateOptions
       reExported:
         - createEvaluate
+        - compileExpressionWithDeps
         - compileExpression
+        - evaluate
+        - parse
+        - EvaluateOptions
   expression/function:
     expression/src/function/parser.ts:
       description: >-
@@ -35875,6 +36002,7 @@ modules:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
           imports:
+            - parse
             - createParse
             - createParserClass
             - createParser
@@ -35901,6 +36029,7 @@ modules:
             - isAssociativeWith
             - getOperator
       exports:
+        - parse
         - createParse
         - createParserClass
         - createParser
@@ -35927,6 +36056,7 @@ modules:
         - isAssociativeWith
         - getOperator
       reExported:
+        - parse
         - createParse
         - createParserClass
         - createParser
@@ -36349,6 +36479,9 @@ modules:
             - compile
             - createEvaluate
             - compileExpression
+            - compileExpressionWithDeps
+            - evaluate
+            - parse
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
           imports:
@@ -36358,12 +36491,18 @@ modules:
         - compile
         - createEvaluate
         - compileExpression
+        - compileExpressionWithDeps
+        - evaluate
+        - parse
         - CompiledExpression
         - Scope
       reExported:
         - compile
         - createEvaluate
         - compileExpression
+        - compileExpressionWithDeps
+        - evaluate
+        - parse
         - CompiledExpression
         - Scope
   linalg:
@@ -43326,6 +43465,7 @@ dependencyGraph:
       files:
         - expression/src/Help.ts
         - expression/src/Parser.ts
+        - expression/src/default-instance.ts
         - expression/src/index.ts
         - expression/src/keywords.ts
         - expression/src/limits.ts
@@ -43979,18 +44119,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1295
+  totalTypeScriptFiles: 1296
   totalModules: 82
-  totalLinesOfCode: 222139
-  totalExports: 7090
+  totalLinesOfCode: 222486
+  totalExports: 7103
   totalClasses: 61
-  totalInterfaces: 607
-  totalFunctions: 2411
+  totalInterfaces: 608
+  totalFunctions: 2416
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1650
-  totalReExports: 3045
-  totalTypeOnlyImports: 645
+  totalConstants: 1651
+  totalReExports: 3054
+  totalTypeOnlyImports: 650
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

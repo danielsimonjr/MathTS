@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { MathNode } from '../src/node/Node.js';
-import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js';
+import { createEvaluate, compileExpressionWithDeps } from '../src/evaluator/evaluate.js';
 
 /**
  * These tests use a minimal mock parser that handles simple expressions.
@@ -172,12 +172,12 @@ describe('compileExpression', () => {
   const parse = createMockParser();
 
   it('should compile and evaluate a simple expression', () => {
-    const compiled = compileExpression(parse, mathScope, '2+3');
+    const compiled = compileExpressionWithDeps(parse, mathScope, '2+3');
     expect(compiled.evaluate()).toBe(5);
   });
 
   it('should allow re-evaluating with different scopes', () => {
-    const compiled = compileExpression(parse, mathScope, 'x+1');
+    const compiled = compileExpressionWithDeps(parse, mathScope, 'x+1');
     expect(compiled.evaluate({ x: 4 })).toBe(5);
     expect(compiled.evaluate({ x: 9 })).toBe(10);
     expect(compiled.evaluate({ x: 99 })).toBe(100);
