@@ -25,8 +25,9 @@ describe('simplify on nodes built by another parse (#937)', () => {
   ];
 
   it.each(cases)('simplify(%s) is %s for a foreign node', (expr, expected) => {
-    expect(simplify(foreignParse(expr)).toString()).toBe(expected);
-    expect(simplify(parse(expr)).toString()).toBe(expected);
+    // simplify returns unknown, like every typed function; its Node result prints with String.
+    expect(String(simplify(foreignParse(expr)))).toBe(expected);
+    expect(String(simplify(parse(expr)))).toBe(expected);
   });
 
   it('symbolicEqual accepts a foreign node on either side', () => {
