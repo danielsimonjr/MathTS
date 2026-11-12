@@ -25,6 +25,7 @@ export interface CompatExpressionLayers {
   mathWithTransform: Record<string, unknown>;
 }
 
+/** mathjs instance API attached by {@link wireMathjsInstanceApi}. */
 export interface WiredCompatInstance {
   import: (functions: unknown, options?: ImportOptions) => void;
   typed: typeof mathTyped & { isTypedFunction: (value: unknown) => boolean };

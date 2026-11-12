@@ -144,6 +144,38 @@ export type CompatMatrixValue =
       cols: number;
     };
 
+/** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
+function isCompatBridgeMatrix(x: unknown): boolean {
+  if (x instanceof DenseMatrix || x instanceof SparseMatrix) {
+    return true;
+  }
+  if (typeof x === 'object' && x !== null) {
+    const proto = Object.getPrototypeOf(x) as { isMatrix?: boolean } | null;
+    return proto?.isMatrix === true;
+  }
+  return false;
+}
+
+/** Normalize compat/matrix inputs to a native `DenseMatrix` for linear algebra shims. */
+function compatToDenseMatrix(m: unknown): DenseMatrix {
+  if (m instanceof DenseMatrix) {
+    return m;
+  }
+  if (m instanceof SparseMatrix) {
+    return DenseMatrix.fromArray(m.toArray() as number[][]);
+  }
+  if (Array.isArray(m)) {
+    return DenseMatrix.fromArray(m as number[][]);
+  }
+  if (typeof m === 'object' && m !== null && 'toArray' in m) {
+    const arr = (m as { toArray(): unknown }).toArray();
+    if (Array.isArray(arr)) {
+      return DenseMatrix.fromArray(arr as number[][]);
+    }
+  }
+  throw new TypeError('Expected DenseMatrix or 2D array');
+}
+
 /**
  * Create a matrix (mathjs-compatible)
  * @example
@@ -186,16 +218,20 @@ export function sparse(data?: number[][]): CompatMatrixValue {
 // add/subtract/multiply must be matrix-aware for mathjs parity: the
 // functions-package versions are scalar-only and throw on number[][]. Delegate
 // 2-D array / DenseMatrix operands to the matrix package, scalars to functions.
-type MatrixLike = number[][] | DenseMatrix;
+type MatrixLike = number[][] | DenseMatrix | CompatMatrixValue;
 
 const isMatrixLike = (x: unknown): x is MatrixLike =>
-  x instanceof DenseMatrix ||
+  isCompatBridgeMatrix(x) ||
   (Array.isArray(x) && x.length > 0 && Array.isArray((x as unknown[])[0]));
 
-const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
-  x instanceof DenseMatrix ? x : DenseMatrix.fromArray(x as number[][]);
+const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 
-const unwrap = (r: unknown): unknown => (r instanceof DenseMatrix ? r.toArray() : r);
+const unwrap = (r: unknown): unknown =>
+  isCompatBridgeMatrix(r) && !(r instanceof DenseMatrix)
+    ? (r as { toArray(): unknown }).toArray()
+    : r instanceof DenseMatrix
+      ? r.toArray()
+      : r;
 
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
@@ -275,7 +311,10 @@ export const mean: TypedFunction = _mean;
 type Normalization = 'unbiased' | 'uncorrected' | 'biased';
 
 function toNumericArray(data: unknown): number[] {
-  if (data instanceof DenseMatrix) return data.toArray().flat(Infinity) as number[];
+  if (isCompatBridgeMatrix(data)) {
+    const flat = (data as { toArray(): unknown }).toArray();
+    return (Array.isArray(flat) ? flat : [flat]).flat(Infinity) as number[];
+  }
   if (Array.isArray(data)) return (data as unknown[]).flat(Infinity) as number[];
   return [data as number];
 }
@@ -390,7 +429,10 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
   if (m instanceof DenseMatrix || m instanceof SparseMatrix) {
     return m.transpose();
   }
-  return (m as { transpose(): CompatMatrixValue }).transpose();
+  if (isCompatBridgeMatrix(m)) {
+    return (m as { transpose(): CompatMatrixValue }).transpose();
+  }
+  throw new TypeError('Expected matrix or 2D array');
 }
 
 /**
@@ -398,12 +440,8 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
  *
  * Computes the determinant using LU decomposition.
  */
-export function det(m: DenseMatrix | number[][]): number {
-  const matrix = Array.isArray(m) ? DenseMatrix.fromArray(m) : m;
-
-  if (!(matrix instanceof DenseMatrix)) {
-    throw new TypeError('Expected DenseMatrix or 2D array');
-  }
+export function det(m: CompatMatrixValue | number[][]): number {
+  const matrix = compatToDenseMatrix(m);
 
   if (matrix.rows !== matrix.cols) {
     throw new Error('Determinant requires a square matrix');
@@ -578,16 +616,7 @@ export function isNumber_(x: unknown): x is number {
  * @returns `true` if `x` is a DenseMatrix or a SparseMatrix.
  */
 export function isMatrix(x: unknown): x is DenseMatrix | SparseMatrix {
-  if (x instanceof DenseMatrix || x instanceof SparseMatrix) {
-    return true;
-  }
-  if (typeof x === 'object' && x !== null) {
-    const proto = Object.getPrototypeOf(x) as { isMatrix?: boolean } | null;
-    if (proto?.isMatrix === true) {
-      return true;
-    }
-  }
-  return false;
+  return isCompatBridgeMatrix(x);
 }
 
 // =============================================================================

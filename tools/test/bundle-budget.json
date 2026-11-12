@@ -32,7 +32,7 @@
     "assembly/build/mathts.js": 93112,
     "assembly/build/mathts.wasm": 62501,
     "assembly/build/mathts-debug.wasm": 122393,
-    "compat/dist/index.js": 87927,
+    "compat/dist/index.js": 88457,
     "gpu/dist/index.js": 18082,
     "plot/dist/index.js": 32588,
     "plot/dist/render-file.js": 5057
