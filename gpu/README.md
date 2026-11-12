@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-gpu
 
+## Install
+
+```sh
+npm install @danielsimonjr/mathts-gpu
+```
+
+## Example (Node without a GPU adapter)
+
+```ts
+import { getGpuDevice, GPUContext } from '@danielsimonjr/mathts-gpu';
+
+const device = await getGpuDevice();
+console.log(device); // null in Node
+
+const ctx = new GPUContext();
+const ok = await ctx.initialize();
+console.log(ok, ctx.status); // false, 'unavailable' when no adapter is present
+```
+
+## Overview
+
 The shared WebGPU foundation for MathTS: `GPUContext` (device/adapter
 lifecycle), a shared `getGpuDevice()` singleton, `BufferPool`, `detect`
 (capability probing), and a **generic** `ShaderManager` (compile/cache/pipeline
