@@ -138,7 +138,7 @@
     },
     "plot/dist/index.js": {
       "export": "area",
-      "treeShake": true
+      "treeShake": false
     },
     "plot/dist/render-file.js": {
       "export": "PlotRenderError",
