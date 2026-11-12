@@ -29,6 +29,7 @@ export interface TensorStorage {
   readonly strides?: ReadonlyArray<number>;
 }
 
+/** Storage dtype tag for {@link Tensor}; always `'float64'` today (#760). */
 export type TensorDtype = 'float64';
 
 /**
