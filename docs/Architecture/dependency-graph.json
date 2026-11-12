@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-11",
-    "totalFiles": 1285,
+    "lastUpdated": "2026-11-12",
+    "totalFiles": 1286,
     "totalModules": 82,
-    "totalExports": 7009
+    "totalExports": 7022
   },
   "entryPoints": [
     {
@@ -14684,7 +14684,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["createEvaluate", "compileExpression"]
+            "imports": ["createEvaluate", "compileExpressionWithDeps"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -29340,6 +29340,121 @@
         "exports": ["createParserClass"],
         "constants": ["createParserClass"]
       },
+      "expression/src/default-instance.ts": {
+        "description": "Default wired `parse` / `evaluate` for thin packages and one-liner use.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./parse.js",
+            "imports": ["createParse"]
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["createNode"]
+          },
+          {
+            "file": "./node/AccessorNode.js",
+            "imports": ["createAccessorNode"]
+          },
+          {
+            "file": "./node/ArrayNode.js",
+            "imports": ["createArrayNode"]
+          },
+          {
+            "file": "./node/AssignmentNode.js",
+            "imports": ["createAssignmentNode"]
+          },
+          {
+            "file": "./node/BlockNode.js",
+            "imports": ["createBlockNode"]
+          },
+          {
+            "file": "./node/ConditionalNode.js",
+            "imports": ["createConditionalNode"]
+          },
+          {
+            "file": "./node/ConstantNode.js",
+            "imports": ["createConstantNode"]
+          },
+          {
+            "file": "./node/FunctionAssignmentNode.js",
+            "imports": ["createFunctionAssignmentNode"]
+          },
+          {
+            "file": "./node/FunctionNode.js",
+            "imports": ["createFunctionNode"]
+          },
+          {
+            "file": "./node/IndexNode.js",
+            "imports": ["createIndexNode"]
+          },
+          {
+            "file": "./node/ObjectNode.js",
+            "imports": ["createObjectNode"]
+          },
+          {
+            "file": "./node/OperatorNode.js",
+            "imports": ["createOperatorNode"]
+          },
+          {
+            "file": "./node/ParenthesisNode.js",
+            "imports": ["createParenthesisNode"]
+          },
+          {
+            "file": "./node/RangeNode.js",
+            "imports": ["createRangeNode"]
+          },
+          {
+            "file": "./node/RelationalNode.js",
+            "imports": ["createRelationalNode"]
+          },
+          {
+            "file": "./node/SymbolNode.js",
+            "imports": ["createSymbolNode"]
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["createEvaluate", "compileExpressionWithDeps"]
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["CompiledExpression"],
+            "typeOnly": true
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["EvaluateOptions"],
+            "typeOnly": true
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["Scope"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["defaultMathScope", "parse", "evaluate", "compileExpression"],
+        "functions": [
+          "parse",
+          "evaluate",
+          "compileExpression",
+          "compileExpression",
+          "compileExpression"
+        ],
+        "constants": ["defaultMathScope"]
+      },
       "expression/src/index.ts": {
         "description": "Expression parsing and evaluation for MathTS.",
         "externalDependencies": [],
@@ -29398,6 +29513,11 @@
           {
             "file": "./embeddedDocs/embeddedDocs.js",
             "imports": ["embeddedDocs"],
+            "reExport": true
+          },
+          {
+            "file": "./default-instance.js",
+            "imports": ["defaultMathScope"],
             "reExport": true
           },
           {
@@ -29561,6 +29681,7 @@
         "exports": [
           "createParser",
           "embeddedDocs",
+          "defaultMathScope",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -29623,6 +29744,7 @@
           "* from ./transform/index.js",
           "createParser",
           "embeddedDocs",
+          "defaultMathScope",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -35317,24 +35439,49 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEvaluate", "compileExpression"],
+        "exports": ["createEvaluate", "compileExpressionWithDeps"],
         "interfaces": ["EvaluateOptions"],
-        "functions": ["createEvaluate", "compileExpression"]
+        "functions": ["createEvaluate", "compileExpressionWithDeps"]
       },
       "expression/src/evaluator/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./evaluate.js",
-            "imports": ["createEvaluate", "compileExpression"],
+            "imports": ["createEvaluate", "compileExpressionWithDeps"],
             "reExport": true
+          },
+          {
+            "file": "../default-instance.js",
+            "imports": ["compileExpression", "evaluate", "parse"],
+            "reExport": true
+          },
+          {
+            "file": "./evaluate.js",
+            "imports": ["EvaluateOptions"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEvaluate", "compileExpression"],
-        "reExported": ["createEvaluate", "compileExpression"]
+        "exports": [
+          "createEvaluate",
+          "compileExpressionWithDeps",
+          "compileExpression",
+          "evaluate",
+          "parse",
+          "EvaluateOptions"
+        ],
+        "reExported": [
+          "createEvaluate",
+          "compileExpressionWithDeps",
+          "compileExpression",
+          "evaluate",
+          "parse",
+          "EvaluateOptions"
+        ]
       }
     },
     "expression/function": {
@@ -37545,6 +37692,7 @@
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
             "imports": [
+              "parse",
               "createParse",
               "createParserClass",
               "createParser",
@@ -37574,6 +37722,7 @@
           }
         ],
         "exports": [
+          "parse",
           "createParse",
           "createParserClass",
           "createParser",
@@ -37601,6 +37750,7 @@
           "getOperator"
         ],
         "reExported": [
+          "parse",
           "createParse",
           "createParserClass",
           "createParser",
@@ -38044,7 +38194,14 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["compile", "createEvaluate", "compileExpression"]
+            "imports": [
+              "compile",
+              "createEvaluate",
+              "compileExpression",
+              "compileExpressionWithDeps",
+              "evaluate",
+              "parse"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-expression",
@@ -38056,6 +38213,9 @@
           "compile",
           "createEvaluate",
           "compileExpression",
+          "compileExpressionWithDeps",
+          "evaluate",
+          "parse",
           "CompiledExpression",
           "Scope"
         ],
@@ -38063,6 +38223,9 @@
           "compile",
           "createEvaluate",
           "compileExpression",
+          "compileExpressionWithDeps",
+          "evaluate",
+          "parse",
           "CompiledExpression",
           "Scope"
         ]
@@ -45309,6 +45472,7 @@
         "files": [
           "expression/src/Help.ts",
           "expression/src/Parser.ts",
+          "expression/src/default-instance.ts",
           "expression/src/index.ts",
           "expression/src/keywords.ts",
           "expression/src/limits.ts",
@@ -46018,18 +46182,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1285,
+    "totalTypeScriptFiles": 1286,
     "totalModules": 82,
-    "totalLinesOfCode": 218299,
-    "totalExports": 7009,
+    "totalLinesOfCode": 218556,
+    "totalExports": 7022,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2360,
+    "totalFunctions": 2365,
     "totalTypeGuards": 171,
     "totalEnums": 0,
-    "totalConstants": 1644,
-    "totalReExports": 3021,
-    "totalTypeOnlyImports": 644,
+    "totalConstants": 1645,
+    "totalReExports": 3030,
+    "totalTypeOnlyImports": 649,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

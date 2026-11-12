@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Parser and evaluator packages work standalone (dogfood G20, #715, #796).** Default-wired `parse`, `evaluate`, and `compileExpression(expr)` on `@danielsimonjr/mathts-expression` and thin re-exports. Tests: `expression/tests/dogfood-g20-parser-evaluator.test.ts`, `parser/tests/dogfood-715.test.ts`, `evaluator/tests/dogfood-796.test.ts`.
 - **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.
 - **Dense decompositions accept the same matrix shapes (G05 dogfood).** `svd`, `svdWasm`, `lu`, `qr` (and `lq`/`rq`/`ql`/`qrPivoted`), `cholesky`, `eig`, and `matrixSchur` share one input normalizer. A `DenseMatrix` is no longer read as an empty array (`{ U: [], S: [], V: [], rank: 0 }` from `svd` / `svdWasm`). Nested `number[][]`, a square row-major `Float64Array` (length 0 is 0×0), and `{ data, rows, cols }` are accepted. A packed descriptor is rejected when it also carries `L`/`U`/`p`/`P`, so it cannot be solved as an LU factor. Ragged and unknown inputs throw `TypeError`. `lusolve` accepts a square `Float64Array` and the same packed descriptor, and still treats `{ L, U, p }` as a decomposition.
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js';
+import { createEvaluate, compileExpressionWithDeps } from '../src/evaluator/evaluate.js';
 import type { MathNode } from '../src/node/Node.js';
 
 /**
@@ -116,7 +116,7 @@ describe('compileExpression - validation', () => {
     function parse(_expr: string) {
       return { isAssignmentNode: true };
     }
-    expect(() => compileExpression(asParser(parse), mathScope, 'x = 1')).toThrow(
+    expect(() => compileExpressionWithDeps(asParser(parse), mathScope, 'x = 1')).toThrow(
       /Security: assignment/
     );
   });
@@ -125,7 +125,7 @@ describe('compileExpression - validation', () => {
     function parse(_expr: string) {
       return { isConstantNode: true, value: 3 };
     }
-    const compiled = compileExpression(asParser(parse), mathScope, '3', { unsafe: true });
+    const compiled = compileExpressionWithDeps(asParser(parse), mathScope, '3', { unsafe: true });
     expect(compiled.evaluate()).toBe(3);
   });
 });

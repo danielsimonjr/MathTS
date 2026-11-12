@@ -16,7 +16,8 @@ npm install @danielsimonjr/mathts-parser
 
 ## What it exports
 
-- `createParse` — factory for the `parse` function (string → AST).
+- `parse` — ready-to-call parser (string → AST) with a default wired instance.
+- `createParse` — factory for the `parse` function when you inject your own scope.
 - `createParserClass` — factory for the `Parser` class (stateful, scope-aware).
 - `createParser` — factory for the `parser()` instance (a `Parser` with its own scope).
 - AST node constructors produced by parsing: `createNode`, `createConstantNode`,
@@ -30,7 +31,8 @@ These are MathTS **factory functions**: wire them into a MathTS instance via
 `@danielsimonjr/mathts-expression`.
 
 ```ts
-import { createParse, createParserClass } from '@danielsimonjr/mathts-parser';
+import { parse } from '@danielsimonjr/mathts-parser';
+const ast = parse('2 + 3');
 ```
 
 ## License

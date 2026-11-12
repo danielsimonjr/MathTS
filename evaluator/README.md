@@ -16,17 +16,17 @@ npm install @danielsimonjr/mathts-evaluator
 
 ## What it exports
 
+- `evaluate` — evaluate an expression string with the default wired math scope (`evaluate('2+3')` → `5`).
+- `compileExpression` — compile a string with the same default wiring (`compileExpression('2+3').evaluate()` → `5`).
 - `compile` -- compile a parsed AST node against a math scope into an executable form.
 - `createEvaluate` -- build an `evaluate(expr, scope?)` function from a `parse` function + math scope.
-- `compileExpression` -- compile an expression string directly.
 - Types: `CompiledExpression`, `Scope`.
 
 ```ts
-import { createEvaluate } from '@danielsimonjr/mathts-evaluator';
-import { createParse } from '@danielsimonjr/mathts-parser';
-// wire createParse into your math scope, then:
-// const evaluate = createEvaluate(parse, mathScope);
-// evaluate('2 + 3'); // 5
+import { evaluate, compileExpression } from '@danielsimonjr/mathts-evaluator';
+
+evaluate('2 + 3'); // 5
+compileExpression('2+3').evaluate(); // 5
 ```
 
 ## License

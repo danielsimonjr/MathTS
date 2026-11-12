@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
     "runtimeDuplicates": 0,
@@ -8,7 +8,7 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 15,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 229
+      "ALLOWLISTED": 230
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -1616,6 +1616,35 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "evaluate",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/default-instance.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
+        },
+        {
+          "file": "functions/src/factories/evaluate.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
         },
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -3468,27 +3497,6 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "evaluate",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/factories/evaluate.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/factorization/integer-poly.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
       "name": "expfit",
       "category": "function",
       "definers": [
@@ -5022,6 +5030,28 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "parse",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/default-instance.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
+        },
+        {
+          "file": "functions/src/factories/evaluate.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

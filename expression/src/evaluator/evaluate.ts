@@ -292,7 +292,8 @@ export function createEvaluate(
  * compiled.evaluate({ x: 3, y: 2 }); // 11
  * ```
  */
-export function compileExpression(
+/** Factory form: explicit parse function and math scope. */
+export function compileExpressionWithDeps(
   parseFn: (expr: string) => MathNode,
   mathScope: Record<string, unknown>,
   expr: string,

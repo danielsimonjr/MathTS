@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-11", "f": 1285, "e": 7009, "re": 3021 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1286, "e": 7022, "re": 3030 },
   "s": {
-    "loc": 218299,
+    "loc": 218556,
     "cls": 61,
     "int": 601,
-    "fn": 2360,
+    "fn": 2365,
     "tg": 171,
     "en": 0,
-    "co": 1644,
-    "toi": 644
+    "co": 1645,
+    "toi": 649
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1242,10 +1242,14 @@
       "int": ["WasmModule", "RawWasm", "WasmBand"]
     },
     "expression": {
-      "f": 11,
+      "f": 12,
       "exp": [
         "createHelpClass",
         "createParserClass",
+        "defaultMathScope",
+        "parse",
+        "evaluate",
+        "compileExpression",
         "createParser",
         "embeddedDocs",
         "mathMLDocument",
@@ -1258,12 +1262,7 @@
         "createAssignmentNode",
         "createBlockNode",
         "createConditionalNode",
-        "createConstantNode",
-        "createFunctionAssignmentNode",
-        "createFunctionNode",
-        "createIndexNode",
-        "createObjectNode",
-        "createOperatorNode"
+        "createConstantNode"
       ],
       "cls": ["ScalarBuildError"],
       "int": [
@@ -1307,7 +1306,14 @@
     "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
     "expression/evaluator": {
       "f": 2,
-      "exp": ["createEvaluate", "compileExpression"],
+      "exp": [
+        "createEvaluate",
+        "compileExpressionWithDeps",
+        "compileExpression",
+        "evaluate",
+        "parse",
+        "EvaluateOptions"
+      ],
       "int": ["EvaluateOptions"]
     },
     "expression/function": { "f": 1, "exp": ["createParser"] },
@@ -1393,6 +1399,7 @@
     "parser": {
       "f": 1,
       "exp": [
+        "parse",
         "createParse",
         "createParserClass",
         "createParser",
@@ -1411,8 +1418,7 @@
         "createParenthesisNode",
         "createRangeNode",
         "createRelationalNode",
-        "createSymbolNode",
-        "keywords"
+        "createSymbolNode"
       ]
     },
     "units": {
@@ -1488,7 +1494,16 @@
     },
     "evaluator": {
       "f": 1,
-      "exp": ["compile", "createEvaluate", "compileExpression", "CompiledExpression", "Scope"]
+      "exp": [
+        "compile",
+        "createEvaluate",
+        "compileExpression",
+        "compileExpressionWithDeps",
+        "evaluate",
+        "parse",
+        "CompiledExpression",
+        "Scope"
+      ]
     },
     "linalg": {
       "f": 1,
