@@ -7,9 +7,13 @@
 
 export {
   hasWebGPU,
+  hasWebGPUSurface,
+  resetWebGPUAvailabilityCache,
   isBrowser,
   getGPUAdapter,
   detectGPUCapabilities,
+  enableGpuUnavailableWarnings,
+  disableGpuUnavailableWarnings,
   isGPUSuitableForMatrixOps,
   getRecommendedWorkgroupSize,
   getMaxMatrixSize,
@@ -21,9 +25,11 @@ export {
   GPUContext,
   getGlobalGPUContext,
   initializeGlobalGPU,
+  initializeGlobalGPUWithReason,
   destroyGlobalGPU,
   type GPUContextOptions,
   type GPUContextStatus,
+  type GlobalGPUInitResult,
   type DeviceLostEvent,
 } from './GPUContext.js';
 

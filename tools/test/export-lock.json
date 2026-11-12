@@ -11096,6 +11096,9 @@
       "GPU_MIN_ELEMENTS": {
         "kind": "number"
       },
+      "GlobalGPUInitResult": {
+        "kind": "type"
+      },
       "PipelineConfig": {
         "kind": "type"
       },
@@ -11114,7 +11117,13 @@
       "disableGpu": {
         "kind": "function"
       },
+      "disableGpuUnavailableWarnings": {
+        "kind": "function"
+      },
       "enableGpu": {
+        "kind": "function"
+      },
+      "enableGpuUnavailableWarnings": {
         "kind": "function"
       },
       "getGPUAdapter": {
@@ -11135,7 +11144,13 @@
       "hasWebGPU": {
         "kind": "function"
       },
+      "hasWebGPUSurface": {
+        "kind": "function"
+      },
       "initializeGlobalGPU": {
+        "kind": "function"
+      },
+      "initializeGlobalGPUWithReason": {
         "kind": "function"
       },
       "isBrowser": {
@@ -11148,6 +11163,9 @@
         "kind": "function"
       },
       "resetGpuDevice": {
+        "kind": "function"
+      },
+      "resetWebGPUAvailabilityCache": {
         "kind": "function"
       },
       "serializeGpu": {

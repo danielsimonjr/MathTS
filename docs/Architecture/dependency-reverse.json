@@ -4364,7 +4364,7 @@
       "gpu/src/device.ts",
       "gpu/src/index.ts"
     ],
-    "gpu/src/detect.ts": ["gpu/src/GPUContext.ts", "gpu/src/index.ts"],
+    "gpu/src/detect.ts": ["gpu/src/GPUContext.ts", "gpu/src/device.ts", "gpu/src/index.ts"],
     "gpu/src/device.ts": ["gpu/src/index.ts"],
     "gpu/src/flag.ts": ["gpu/src/index.ts"],
     "gpu/src/BufferPool.ts": ["gpu/src/index.ts"],
