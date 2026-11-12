@@ -84,7 +84,11 @@ export function linregressFromFit(fit: LineFit, n: number): LinregressResult {
   const df = n - 2;
   // Residual mean square → slope standard error; t-test for slope = 0.
   const stdErr = Math.sqrt(rss / df / sxx);
-  const t = slope / stdErr;
+  // SciPy `linregress` uses r-based t with a denominator guard (`TINY`), not slope/stdErr
+  // (which is 0 on an exact fit and would flush p to 0).
+  const TINY = 1e-20;
+  const r = Math.max(-1, Math.min(1, rValue));
+  const t = r * Math.sqrt(df / ((1 - r + TINY) * (1 + r + TINY)));
   const pValue = studentTTwoSidedP(t, df);
   return { slope, intercept, rValue, rSquared: rValue * rValue, pValue, stdErr };
 }

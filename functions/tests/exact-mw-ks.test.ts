@@ -7,10 +7,8 @@ import { mannWhitneyTest, kolmogorovSmirnov2Test } from '../src/index.js';
  * scipy 1.17.1):
  *   - mannwhitneyu([1,2,3,4],[5,6,7,8], method='exact') -> p=0.02857142857142857
  *   - mannwhitneyu([1,2,3],[4,5,6], method='exact')     -> p=0.1
- * `kolmogorovSmirnov2Test`'s default stays the asymptotic `kstwobign` value
- * (unchanged from before Task 2b — see gap-stats-completeness.test.ts, which
- * is NOT modified by this change); `{ method: 'exact' }` opts into the
- * lattice-path exact p-value.
+ * `kolmogorovSmirnov2Test` default is SciPy `method='auto'` (exact when n₁·n₂ ≤ 10000).
+ * Pass `{ method: 'asymp' }` for the kstwobign asymptotic only.
  */
 describe('exact MW (default) + KS (opt-in)', () => {
   it('MW exact default: [1,2,3,4] vs [5,6,7,8] -> p=0.02857', async () => {
@@ -31,17 +29,16 @@ describe('exact MW (default) + KS (opt-in)', () => {
     expect(r.pValue).toBeLessThanOrEqual(1);
   });
 
-  it('KS default result is unchanged (asymptotic); exact is opt-in and differs sensibly', () => {
+  it('KS default matches scipy auto exact; asymptotic is opt-in', () => {
     const a = [1, 2, 3, 4, 5];
     const b = [1.5, 2.5, 3.5, 6, 7];
     const def = kolmogorovSmirnov2Test(a, b);
-    const exact = kolmogorovSmirnov2Test(a, b, { method: 'exact' });
-    expect(def.statistic).toBeCloseTo(exact.statistic, 10);
-    // scipy: ks_2samp(a, b, method='asymp').pvalue via kstwobign  ~ 0.8186211744710058
-    expect(def.pValue).toBeCloseTo(0.8186211744710058, 8);
-    // scipy: ks_2samp(a, b, method='exact').pvalue = 0.873015873015873
-    expect(exact.pValue).toBeCloseTo(0.873015873015873, 8);
-    expect(def.pValue).not.toBeCloseTo(exact.pValue, 3);
+    const asymp = kolmogorovSmirnov2Test(a, b, { method: 'asymp' });
+    expect(def.statistic).toBeCloseTo(asymp.statistic, 10);
+    // scipy ks_2samp default (auto/exact)
+    expect(def.pValue).toBeCloseTo(0.873015873015873, 8);
+    expect(asymp.pValue).toBeCloseTo(0.8186211744710057, 8);
+    expect(def.pValue).not.toBeCloseTo(asymp.pValue, 3);
   });
 
   it('KS exact matches scipy on the pinned n=8,8 case (asymptotic pin untouched)', () => {

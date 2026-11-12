@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1308,
+    "totalFiles": 1310,
     "totalModules": 82,
-    "totalExports": 7155
+    "totalExports": 7160
   },
   "entryPoints": [
     {
@@ -9962,12 +9962,20 @@
             "imports": ["studentTCDF"]
           },
           {
+            "file": "./wasm/special/scalars.js",
+            "imports": ["betaincScalar"]
+          },
+          {
             "file": "./regression-extra.js",
             "imports": ["fitLine", "linregressFromFit"]
           },
           {
             "file": "./typed/distributions.js",
             "imports": ["normalCDF"]
+          },
+          {
+            "file": "./kendall-exact.js",
+            "imports": ["kendallPExact", "kendallShouldUseExact"]
           }
         ],
         "workspaceDependencies": [],
@@ -13338,6 +13346,15 @@
           "DtwResult",
           "type * from ./typed/public-type-exports.js"
         ]
+      },
+      "functions/src/kendall-exact.ts": {
+        "description": "Exact two-sided Kendall τ p-value (no ties), ported from",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["kendallPExact", "kendallShouldUseExact"],
+        "functions": ["kendallPExact", "kendallShouldUseExact"]
       },
       "functions/src/linalg-extra.ts": {
         "description": "Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).",
@@ -22392,8 +22409,18 @@
         "exports": ["createProd"],
         "constants": ["createProd"]
       },
+      "functions/src/statistics/quantile-numpy-methods.ts": {
+        "description": "NumPy 2.x `method=` quantile definitions (Hyndman–Fan + legacy names).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["assertNumpyQuantileMethod", "quantileOfSorted", "parseQuantileThirdArg"],
+        "interfaces": ["QuantileSeqOptions"],
+        "functions": ["assertNumpyQuantileMethod", "quantileOfSorted", "parseQuantileThirdArg"]
+      },
       "functions/src/statistics/quantileSeq.ts": {
-        "description": "Interpolation modes for the quantile, matching numpy's `method=`:",
+        "description": "Compute the prob order quantile of a matrix or a list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -22417,6 +22444,16 @@
           {
             "file": "./numeric-data.js",
             "imports": ["isFloatTyped", "copyToNumberArray", "FloatTyped"]
+          },
+          {
+            "file": "./quantile-numpy-methods.js",
+            "imports": [
+              "assertNumpyQuantileMethod",
+              "quantileOfSorted",
+              "parseQuantileThirdArg",
+              "NumpyQuantileMethod",
+              "QuantileSeqOptions"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -26594,6 +26631,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./dist-objects.js",
+            "imports": ["normalDist"]
+          },
           {
             "file": "../wasm/sort/wasm-bridge.js",
             "imports": ["sortF64Dispatch", "WASM_SORT_THRESHOLD"]
@@ -45147,7 +45188,7 @@
           },
           {
             "file": "./svg.js",
-            "imports": ["THEMES"]
+            "imports": ["THEMES", "fmt"]
           },
           {
             "file": "./types.js",
@@ -46052,6 +46093,7 @@
           "functions/src/help.ts",
           "functions/src/hypothesis-extra.ts",
           "functions/src/index.ts",
+          "functions/src/kendall-exact.ts",
           "functions/src/linalg-extra.ts",
           "functions/src/linalg-extra2.ts",
           "functions/src/linalg-special-matrices.ts",
@@ -46429,6 +46471,7 @@
           "functions/src/statistics/nan-reductions.ts",
           "functions/src/statistics/numeric-data.ts",
           "functions/src/statistics/prod.ts",
+          "functions/src/statistics/quantile-numpy-methods.ts",
           "functions/src/statistics/quantileSeq.ts",
           "functions/src/statistics/std.ts",
           "functions/src/statistics/sum-indexed-guard.ts",
@@ -47379,13 +47422,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1308,
+    "totalTypeScriptFiles": 1310,
     "totalModules": 82,
-    "totalLinesOfCode": 224063,
-    "totalExports": 7155,
+    "totalLinesOfCode": 224502,
+    "totalExports": 7160,
     "totalClasses": 61,
-    "totalInterfaces": 612,
-    "totalFunctions": 2432,
+    "totalInterfaces": 613,
+    "totalFunctions": 2437,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1658,

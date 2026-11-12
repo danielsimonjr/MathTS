@@ -3,6 +3,13 @@ import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { isFloatTyped, copyToNumberArray, type FloatTyped } from './numeric-data.js';
+import {
+  assertNumpyQuantileMethod,
+  quantileOfSorted,
+  parseQuantileThirdArg,
+  type NumpyQuantileMethod,
+  type QuantileSeqOptions,
+} from './quantile-numpy-methods.js';
 
 // Type definitions for quantileSeq
 interface MatrixType {
@@ -33,27 +40,25 @@ interface QuantileSeqDependencies {
   mapSlices: TypedFunction;
 }
 
-/**
- * Interpolation modes for the quantile, matching numpy's `method=`:
- * `linear` (default), `lower`, `higher`, `nearest`, `midpoint`.
- */
-type QuantileMode = 'linear' | 'lower' | 'higher' | 'nearest' | 'midpoint';
-const QUANTILE_MODES: readonly QuantileMode[] = [
-  'linear',
-  'lower',
-  'higher',
-  'nearest',
-  'midpoint',
-];
+type QuantileMode = NumpyQuantileMethod;
 
 function _assertMode(mode: string): QuantileMode {
-  if (!QUANTILE_MODES.includes(mode as QuantileMode)) {
-    throw new Error(
-      `Unknown quantile interpolation mode "${mode}". ` +
-        `Expected one of: ${QUANTILE_MODES.join(', ')}`
-    );
+  return assertNumpyQuantileMethod(mode);
+}
+
+function _resolveSortedAndMode(
+  third?: boolean | string | QuantileSeqOptions,
+  fourth?: string
+): { sorted: boolean; mode: QuantileMode } {
+  if (typeof third === 'boolean') {
+    return { sorted: third, mode: fourth ? _assertMode(fourth) : 'linear' };
   }
-  return mode as QuantileMode;
+  if (typeof third === 'string') {
+    return { sorted: false, mode: _assertMode(third) };
+  }
+  const parsed = parseQuantileThirdArg(third);
+  if (parsed) return parsed;
+  return { sorted: false, mode: 'linear' };
 }
 
 const name = 'quantileSeq';
@@ -144,7 +149,12 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         data: unknown[] | MatrixType,
         prob: number | BigNumberType,
         mode: string
-      ): unknown => _quantileSeqProbNumber(data, prob, false, _assertMode(mode)),
+      ): unknown => _quantileSeqProbNumber(data, prob, mode),
+      'Array | Matrix, number | BigNumber, Object': (
+        data: unknown[] | MatrixType,
+        prob: number | BigNumberType,
+        options: QuantileSeqOptions
+      ): unknown => _quantileSeqProbNumber(data, prob, options),
       'Array | Matrix, number | BigNumber, boolean': _quantileSeqProbNumber,
       'Array | Matrix, number | BigNumber, boolean, number': (
         data: unknown[] | MatrixType,
@@ -157,7 +167,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         prob: number | BigNumberType,
         sorted: boolean,
         mode: string
-      ): unknown => _quantileSeqProbNumber(data, prob, sorted, _assertMode(mode)),
+      ): unknown => _quantileSeqProbNumber(data, prob, sorted, mode),
       'Array | Matrix, Array | Matrix': (
         data: unknown[] | MatrixType,
         p: unknown[] | MatrixType
@@ -200,9 +210,10 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     function _quantileSeqProbNumber(
       data: unknown[] | MatrixType | FloatTyped,
       probOrN: number | BigNumberType,
-      sorted: boolean,
-      mode: QuantileMode = 'linear'
+      third?: boolean | string | QuantileSeqOptions,
+      fourth?: string
     ): unknown {
+      const { sorted, mode } = _resolveSortedAndMode(third, fourth);
       let probArr: unknown[];
       const dataArr = isFloatTyped(data)
         ? (copyToNumberArray(data) as unknown[])
@@ -289,6 +300,12 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       const len = flat.length;
       if (len === 0) {
         throw new Error('Cannot calculate quantile of an empty sequence');
+      }
+
+      if (isNumber(prob) && flat.every((v) => isNumber(v))) {
+        const nums = flat as number[];
+        const sortedNums = sorted ? nums : nums.slice().sort((a, b) => a - b);
+        return quantileOfSorted(sortedNums, prob, mode);
       }
 
       const index = isNumber(prob) ? prob * (len - 1) : (prob as BigNumberType).times(len - 1);

@@ -22,25 +22,24 @@ import {
  *
  * Wave 1 — two-sample Kolmogorov–Smirnov. D pinned to `scipy.stats.ks_2samp`
  * (exact statistic); p-value pinned to the asymptotic Kolmogorov distribution
- * `scipy.stats.distributions.kstwobign.sf(√(n₁n₂/(n₁+n₂))·D)` (scipy's small-n
- * `ks_2samp` p is an exact combinatorial value, version-specific; the asymptotic
- * is the stable, standard oracle).
+ * SciPy `ks_2samp` default `method='auto'` uses the exact lattice-path p when
+ * n₁·n₂ ≤ 10000 (same default here since G30 / #783).
  */
 describe('Wave 1: kolmogorovSmirnov2Test vs scipy.ks_2samp', () => {
-  it('D matches scipy exactly, p matches kstwobign (n=8,8)', () => {
+  it('D and p match scipy auto exact (n=8,8)', () => {
     const a = [0.1, 0.2, 0.35, 0.4, 0.55, 0.6, 0.7, 0.85];
     const b = [0.3, 0.45, 0.5, 0.65, 0.75, 0.8, 0.9, 0.95];
     const r = kolmogorovSmirnov2Test(a, b);
     expect(r.statistic).toBeCloseTo(0.375, 10);
-    expect(r.pValue).toBeCloseTo(0.6271670418, 8);
+    expect(r.pValue).toBeCloseTo(0.6601398601398599, 8);
   });
 
-  it('D and p match scipy (n=10,10, shifted)', () => {
+  it('D and p match scipy auto exact (n=10,10, shifted)', () => {
     const a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const b = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
     const r = kolmogorovSmirnov2Test(a, b);
     expect(r.statistic).toBeCloseTo(0.5, 10);
-    expect(r.pValue).toBeCloseTo(0.1640791977, 8);
+    expect(r.pValue).toBeCloseTo(0.16782134274394334, 8);
   });
 
   it('identical samples give D=0, p=1', () => {
@@ -211,10 +210,10 @@ describe('Wave B/C/D: regression, correlation tests, descriptive vs scipy', () =
     expect(s.pValue).toBeCloseTo(0.0068071874, 9);
   });
 
-  it('kendalltau coefficient matches scipy; p via normal approximation', () => {
+  it('kendalltau coefficient and p match scipy auto (exact at n=7)', () => {
     const k = kendalltau([1, 2, 3, 4, 5, 6, 7], [2, 1, 4, 3, 6, 5, 7]);
     expect(k.coefficient).toBeCloseTo(0.7142857143, 9);
-    expect(k.pValue).toBeCloseTo(0.0242706404, 9); // normal-approx (scipy exact = 0.03016)
+    expect(k.pValue).toBeCloseTo(0.0301587302, 9); // scipy.stats.kendalltau exact at n=7
   });
 
   it('ptp / variation / trimmedMean / describe / histogram match numpy/scipy', () => {
