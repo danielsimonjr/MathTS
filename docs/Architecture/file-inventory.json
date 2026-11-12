@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-12",
-  "totalFiles": 2249,
+  "totalFiles": 2250,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1262,
     "test-only": 0,
     "orphan": 0,
-    "test": 896,
+    "test": 897,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1288,
-    "tests": 896,
+    "tests": 897,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -35,7 +35,7 @@
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
-    "@danielsimonjr/mathts-parallel": 52,
+    "@danielsimonjr/mathts-parallel": 53,
     "@danielsimonjr/mathts-parser": 4,
     "@danielsimonjr/mathts-plot": 46,
     "@danielsimonjr/mathts-signal": 3,
@@ -13631,7 +13631,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2466
+      "loc": 2523
     },
     {
       "file": "packages/workerpool/src/matmul-sequential.ts",
@@ -13694,7 +13694,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 98
     },
     {
       "file": "packages/workerpool/tests/fft-core.test.ts",
@@ -13778,7 +13778,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1712
+      "loc": 1871
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -13876,7 +13876,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 42
+      "loc": 82
     },
     {
       "file": "parallel/src/WorkerPool.ts",
@@ -13907,6 +13907,13 @@
       "loc": 276
     },
     {
+      "file": "parallel/tests/ComputePool.g12-regression.test.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 229
+    },
+    {
       "file": "parallel/tests/ComputePool.test.ts",
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
@@ -13925,7 +13932,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 229
+      "loc": 232
     },
     {
       "file": "parallel/tests/gemm-rows-oracle.test.ts",
@@ -14086,7 +14093,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 228
+      "loc": 242
     },
     {
       "file": "parallel/tests/WorkerPool.constructor.test.ts",
@@ -14695,7 +14702,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1329
+      "loc": 1326
     },
     {
       "file": "tensor/tests/audit-ops.test.ts",

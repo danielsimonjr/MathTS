@@ -213,15 +213,18 @@ describe('operations: forceParallel / forceSequential are honored', () => {
     });
   });
 
-  it('forceParallel on a pool that was never initialized runs inline instead of throwing', async () => {
+  it('forceParallel on a pool that was never initialized lazy-inits workers', async () => {
     const idle = new ComputePool({ maxWorkers: 2 });
+    expect(idle.isReady()).toBe(false);
     const r = await parallelAdd(Float64Array.of(1, 2), Float64Array.of(3, 4), {
       pool: idle,
       forceParallel: true,
     });
-    expect(r.parallelized).toBe(false);
+    expect(r.parallelized).toBe(true);
     expect(Array.from(r.result)).toEqual([4, 6]);
+    expect(idle.isReady()).toBe(true);
     const s = await idle.sum(Float64Array.of(1, 2, 3), { forceParallel: true });
+    expect(s.parallelized).toBe(true);
     expect(s.result).toBe(6);
     await idle.terminate();
   });
