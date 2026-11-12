@@ -12,6 +12,18 @@ Rank-N dense tensors for MathTS, backed by a single `Float64Array` with shape/st
 npm install @danielsimonjr/mathts-tensor
 ```
 
+## Example
+
+```ts
+import { Tensor } from '@danielsimonjr/mathts-tensor';
+
+const t = Tensor.fromNested([
+  [1, 2],
+  [3, 4],
+]);
+console.log(t.shape, t.sum().toNested()); // [2, 2] 10
+```
+
 ## What it provides
 
 - `Tensor` construction: `Tensor.fromNested([[1, 2], [3, 4]])` infers shape, or

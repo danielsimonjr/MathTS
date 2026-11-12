@@ -10,6 +10,18 @@ WebWorker / worker-thread parallelization for MathTS, built on `@danielsimonjr/m
 npm install @danielsimonjr/mathts-parallel
 ```
 
+## Example
+
+```ts
+import { computePool } from '@danielsimonjr/mathts-parallel';
+
+await computePool.initialize();
+const data = new Float64Array([1, 2, 3, 4, 5]);
+const { result: total } = await computePool.sum(data);
+console.log(total);
+await computePool.terminate();
+```
+
 ## What it provides
 
 - `ComputePool` for chunked work over `Float64Array` data (parallel only when an op's

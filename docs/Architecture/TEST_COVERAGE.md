@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1298                  |
-| Total Test Files                       | 896                   |
+| Total Test Files                       | 897                   |
 | Source Files with Tests                | 536                   |
 | Source Files without Tests             | 762                   |
 | Coverage (raw, direct-import)          | **41.3%**             |
@@ -2237,6 +2237,7 @@ The following 762 source files are not directly imported by any test file:
 | `benchmark/parallel-report.test.ts`                      | 0 files             |
 | `benchmark/performance.test.ts`                          | 0 files             |
 | `benchmark/wasm-comparison.test.ts`                      | 0 files             |
+| `docs/readme-fences.test.ts`                             | 0 files             |
 | `integration/examples-smoke.test.ts`                     | 0 files             |
 | `integration/export-index-completeness.test.ts`          | 87 files            |
 | `integration/functions.test.ts`                          | 0 files             |
