@@ -69,7 +69,9 @@ export const fSF = (x: number, d1: number, d2: number): number => {
  * this free function keeps the plain-scalar NaN contract.
  */
 export const gammaCDF = (x: number, shape: number, rate = 1): number =>
-  nanIn(x, shape, rate) ? NaN : gammaD(shape, rate).cdf(x);
+  !Number.isFinite(shape) || !Number.isFinite(rate) || Number.isNaN(x)
+    ? NaN
+    : gammaD(shape, rate).cdf(x);
 export const gammaQuantile = (p: number, shape: number, rate = 1): number =>
   nanIn(p, shape, rate) ? NaN : gammaD(shape, rate).quantile(p);
 
