@@ -1,5 +1,5 @@
 /**
- * Dogfood relay G33 — exact repros for #826.
+ * Dogfood relay G33 — exact repros for #826 (DimensionMismatchError on unit add).
  */
 import { describe, it, expect } from 'vitest';
 import { Unit, DimensionMismatchError } from '@danielsimonjr/mathts-units';
