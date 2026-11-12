@@ -85,18 +85,26 @@ describe('G26 isolated gates fail under injected 3× candidate slowdown', () => 
   for (const gate of G26_GATES) {
     test(gate.name, () => {
       const scriptPath = join(repoRoot, gate.script);
-      if (!gate.needs.every((p) => existsSync(join(repoRoot, p)))) {
-        return;
-      }
-      const line = execFileSync(process.execPath, [scriptPath], {
-        cwd: repoRoot,
-        encoding: 'utf8',
-        env: { ...process.env, PERF_GATE_CANDIDATE_TIME_SCALE: '3' },
-      }).trim();
-      const { ratio } = JSON.parse(line);
-      assert.ok(Number.isFinite(ratio));
-      assert.equal(gatePasses(ratio, gate.limit), false);
-      assert.ok(ratio >= gate.limit * 0.85, `ratio ${ratio} should reflect ~3× slowdown`);
+      const missing = gate.needs.filter((p) => !existsSync(join(repoRoot, p)));
+      assert.equal(
+        missing.length,
+        0,
+        `built dist required for ${gate.name}: ${missing.join(', ')}`
+      );
+      const run = (scale) => {
+        const line = execFileSync(process.execPath, [scriptPath], {
+          cwd: repoRoot,
+          encoding: 'utf8',
+          env: { ...process.env, PERF_GATE_CANDIDATE_TIME_SCALE: String(scale) },
+        }).trim();
+        const { ratio } = JSON.parse(line);
+        assert.ok(Number.isFinite(ratio), `${gate.name} scale ${scale} ratio ${ratio}`);
+        return ratio;
+      };
+      const base = run(1);
+      const scaled = run(3);
+      assert.ok(scaled / base >= 2.5, `${gate.name} 3× injection: base ${base} scaled ${scaled}`);
+      assert.equal(gatePasses(scaled, gate.limit), false);
     });
   }
 });
