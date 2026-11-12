@@ -4526,7 +4526,8 @@
       "plot/src/render-core.ts",
       "plot/src/three/points3d.ts",
       "plot/src/three/surface.ts",
-      "plot/src/tikz.ts"
+      "plot/src/tikz.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/coerce.ts": [
       "plot/src/contour.ts",
@@ -4551,7 +4552,8 @@
       "plot/src/heatmap.ts",
       "plot/src/render-core.ts",
       "plot/src/three/points3d.ts",
-      "plot/src/three/surface.ts"
+      "plot/src/three/surface.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/scene.ts": [
       "plot/src/contour.ts",
@@ -4562,7 +4564,8 @@
       "plot/src/svg.ts",
       "plot/src/three/points3d.ts",
       "plot/src/three/surface.ts",
-      "plot/src/tikz.ts"
+      "plot/src/tikz.ts",
+      "plot/src/update.ts"
     ],
     "plot/src/emit.ts": [
       "plot/src/contour.ts",
@@ -4573,8 +4576,14 @@
     ],
     "plot/src/tikz.ts": ["plot/src/emit.ts"],
     "plot/src/render-core.ts": ["plot/src/frame.ts"],
-    "plot/src/frame.ts": ["plot/src/histogram.ts", "plot/src/marks2d.ts", "plot/src/overlay.ts"],
+    "plot/src/frame.ts": [
+      "plot/src/histogram.ts",
+      "plot/src/marks2d.ts",
+      "plot/src/overlay.ts",
+      "plot/src/update.ts"
+    ],
     "plot/src/plot.ts": ["plot/src/index.ts"],
+    "plot/src/update.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/marks2d.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/histogram.ts": ["plot/src/index.ts"],
     "plot/src/heatmap.ts": ["plot/src/index.ts"],

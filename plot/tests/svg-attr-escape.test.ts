@@ -18,11 +18,11 @@ import type { Scene } from '../src/scene.js';
 const H = `#f00" data-pwn="1"><pwn/><x a='1'`;
 
 const ALLOWED: Record<string, readonly string[]> = {
-  svg: ['xmlns', 'viewBox', 'width', 'role'],
+  svg: ['xmlns', 'viewBox', 'width', 'role', 'data-mathts-plot'],
   rect: ['x', 'y', 'width', 'height', 'fill'],
   line: ['x1', 'y1', 'x2', 'y2', 'stroke', 'stroke-width', 'stroke-opacity'],
-  circle: ['cx', 'cy', 'r', 'fill', 'fill-opacity'],
-  polyline: ['points', 'fill', 'stroke', 'stroke-width'],
+  circle: ['cx', 'cy', 'r', 'fill', 'fill-opacity', 'data-mathts-live'],
+  polyline: ['points', 'fill', 'stroke', 'stroke-width', 'data-mathts-live'],
   polygon: ['points', 'fill', 'stroke'],
   text: ['x', 'y', 'transform', 'text-anchor', 'font-family', 'font-size', 'fill'],
 };
