@@ -1,2 +1,2 @@
 import { Complex } from '@danielsimonjr/mathts-core';
-void 0;
+void Complex;
