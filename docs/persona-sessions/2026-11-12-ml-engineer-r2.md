@@ -4,16 +4,16 @@ I am a PyTorch / JAX / TensorFlow.js engineer trying to train small models in Ty
 
 Installed versions (verified with `npm ls`):
 
-| Package | Version |
-| ------- | ------- |
-| `@danielsimonjr/mathts-tensor` | 0.4.0 |
-| `@danielsimonjr/mathts-autograd` | 0.5.0 |
-| `@danielsimonjr/mathts-gpu` | 0.3.0 |
-| `@danielsimonjr/mathts-parallel` | 0.10.1 |
-| `@danielsimonjr/mathts-workerpool` | 0.4.1 |
-| `@danielsimonjr/mathts-matrix` | 0.10.1 |
-| `@danielsimonjr/mathts-linalg` | 0.2.6 |
-| `@danielsimonjr/mathts-core` | 0.27.0 |
+| Package                            | Version |
+| ---------------------------------- | ------- |
+| `@danielsimonjr/mathts-tensor`     | 0.4.0   |
+| `@danielsimonjr/mathts-autograd`   | 0.5.0   |
+| `@danielsimonjr/mathts-gpu`        | 0.3.0   |
+| `@danielsimonjr/mathts-parallel`   | 0.10.1  |
+| `@danielsimonjr/mathts-workerpool` | 0.4.1   |
+| `@danielsimonjr/mathts-matrix`     | 0.10.1  |
+| `@danielsimonjr/mathts-linalg`     | 0.2.6   |
+| `@danielsimonjr/mathts-core`       | 0.27.0  |
 
 Oracle: PyTorch/NumPy broadcasting, finite-difference gradients, and convergence on XOR / spiral / linear regression. I did **not** fix code in the repo this round.
 
@@ -29,27 +29,27 @@ Oracle: PyTorch/NumPy broadcasting, finite-difference gradients, and convergence
 
 ## Round-1 re-check
 
-| Issue | Fixed? | Notes |
-| ----- | ------ | ----- |
-| [#747](https://github.com/danielsimonjr/MathTS/issues/747) | yes | `X.matmul(W).add(b)` on tape works; bias grad non-zero |
-| [#748](https://github.com/danielsimonjr/MathTS/issues/748) | yes | `Float32Array` ctor rejected at runtime |
-| [#749](https://github.com/danielsimonjr/MathTS/issues/749) | yes | Omitted `axis` now matches `stack(..., 0)` → `[2,2]`, data correct |
-| [#750](https://github.com/danielsimonjr/MathTS/issues/750) | yes | `flip(t, 0)` works |
-| [#751](https://github.com/danielsimonjr/MathTS/issues/751) | yes | `Tensor.zeros` / `ones` / `arange` |
-| [#752](https://github.com/danielsimonjr/MathTS/issues/752) | yes | `reshape([-1, 2])`; view shares buffer |
-| [#753](https://github.com/danielsimonjr/MathTS/issues/753) | yes | Batched `TapedTensor.matmul` OK |
-| [#754](https://github.com/danielsimonjr/MathTS/issues/754) | yes | `relu`, `gelu`, `softmax` on tape |
-| [#755](https://github.com/danielsimonjr/MathTS/issues/755) | yes | `detach`, `noGrad`, scalar `add(1)` |
-| [#756](https://github.com/danielsimonjr/MathTS/issues/756) | yes | Second backward accumulates 2× |
-| [#757](https://github.com/danielsimonjr/MathTS/issues/757) | yes | `initialize()` then `terminate()` rejects work |
-| [#758](https://github.com/danielsimonjr/MathTS/issues/758) | **no** | Regressed; see [#903](https://github.com/danielsimonjr/MathTS/issues/903) |
-| [#759](https://github.com/danielsimonjr/MathTS/issues/759) | yes | `GPUContext.status === 'unavailable'` in Node |
-| [#760](https://github.com/danielsimonjr/MathTS/issues/760) | partial | `dtype: 'float64'` only — still no f32 training |
-| [#761](https://github.com/danielsimonjr/MathTS/issues/761) | yes | `add_` in-place without aliasing untouched clone |
-| [#762](https://github.com/danielsimonjr/MathTS/issues/762) | **no** | Negative `slice` step still identity; [#902](https://github.com/danielsimonjr/MathTS/issues/902) |
-| [#763](https://github.com/danielsimonjr/MathTS/issues/763) | yes | Taped `reshape` + rank-2 `grad` |
-| [#764](https://github.com/danielsimonjr/MathTS/issues/764) | yes | `Tape.reset()` documented; no RSS regression run |
-| [#765](https://github.com/danielsimonjr/MathTS/issues/765) | yes | README matches relay (ReLU, BCE, limitations table) |
+| Issue                                                      | Fixed?  | Notes                                                                                            |
+| ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| [#747](https://github.com/danielsimonjr/MathTS/issues/747) | yes     | `X.matmul(W).add(b)` on tape works; bias grad non-zero                                           |
+| [#748](https://github.com/danielsimonjr/MathTS/issues/748) | yes     | `Float32Array` ctor rejected at runtime                                                          |
+| [#749](https://github.com/danielsimonjr/MathTS/issues/749) | yes     | Omitted `axis` now matches `stack(..., 0)` → `[2,2]`, data correct                               |
+| [#750](https://github.com/danielsimonjr/MathTS/issues/750) | yes     | `flip(t, 0)` works                                                                               |
+| [#751](https://github.com/danielsimonjr/MathTS/issues/751) | yes     | `Tensor.zeros` / `ones` / `arange`                                                               |
+| [#752](https://github.com/danielsimonjr/MathTS/issues/752) | yes     | `reshape([-1, 2])`; view shares buffer                                                           |
+| [#753](https://github.com/danielsimonjr/MathTS/issues/753) | yes     | Batched `TapedTensor.matmul` OK                                                                  |
+| [#754](https://github.com/danielsimonjr/MathTS/issues/754) | yes     | `relu`, `gelu`, `softmax` on tape                                                                |
+| [#755](https://github.com/danielsimonjr/MathTS/issues/755) | yes     | `detach`, `noGrad`, scalar `add(1)`                                                              |
+| [#756](https://github.com/danielsimonjr/MathTS/issues/756) | yes     | Second backward accumulates 2×                                                                   |
+| [#757](https://github.com/danielsimonjr/MathTS/issues/757) | yes     | `initialize()` then `terminate()` rejects work                                                   |
+| [#758](https://github.com/danielsimonjr/MathTS/issues/758) | **no**  | Regressed; see [#903](https://github.com/danielsimonjr/MathTS/issues/903)                        |
+| [#759](https://github.com/danielsimonjr/MathTS/issues/759) | yes     | `GPUContext.status === 'unavailable'` in Node                                                    |
+| [#760](https://github.com/danielsimonjr/MathTS/issues/760) | partial | `dtype: 'float64'` only — still no f32 training                                                  |
+| [#761](https://github.com/danielsimonjr/MathTS/issues/761) | yes     | `add_` in-place without aliasing untouched clone                                                 |
+| [#762](https://github.com/danielsimonjr/MathTS/issues/762) | **no**  | Negative `slice` step still identity; [#902](https://github.com/danielsimonjr/MathTS/issues/902) |
+| [#763](https://github.com/danielsimonjr/MathTS/issues/763) | yes     | Taped `reshape` + rank-2 `grad`                                                                  |
+| [#764](https://github.com/danielsimonjr/MathTS/issues/764) | yes     | `Tape.reset()` documented; no RSS regression run                                                 |
+| [#765](https://github.com/danielsimonjr/MathTS/issues/765) | yes     | README matches relay (ReLU, BCE, limitations table)                                              |
 
 ## New findings (round 2)
 
@@ -79,12 +79,12 @@ Export exists (post-#696) but Node 22 needs `import … with { type: 'json' }`.
 
 ## Summary table (round-2 issues)
 
-| # | Sev | Topic |
-| --- | --- | ----- |
-| [#902](https://github.com/danielsimonjr/MathTS/issues/902) | P1 | Slice negative step regression |
-| [#903](https://github.com/danielsimonjr/MathTS/issues/903) | P1 | `forceParallel` sin perf regression |
-| [#904](https://github.com/danielsimonjr/MathTS/issues/904) | P2 | `Tensor.matmul` vs `TapedTensor` |
-| [#905](https://github.com/danielsimonjr/MathTS/issues/905) | P2 | `package.json` import attribute |
+| #                                                          | Sev | Topic                               |
+| ---------------------------------------------------------- | --- | ----------------------------------- |
+| [#902](https://github.com/danielsimonjr/MathTS/issues/902) | P1  | Slice negative step regression      |
+| [#903](https://github.com/danielsimonjr/MathTS/issues/903) | P1  | `forceParallel` sin perf regression |
+| [#904](https://github.com/danielsimonjr/MathTS/issues/904) | P2  | `Tensor.matmul` vs `TapedTensor`    |
+| [#905](https://github.com/danielsimonjr/MathTS/issues/905) | P2  | `package.json` import attribute     |
 
 Timings: `docs/persona-sessions/bench/2026-11-12-ml-engineer-r2.json`.
 
