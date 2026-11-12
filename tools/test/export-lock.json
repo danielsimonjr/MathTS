@@ -1645,9 +1645,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1721,6 +1718,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -9288,6 +9288,9 @@
       "dwt": {
         "kind": "function"
       },
+      "fft": {
+        "kind": "function"
+      },
       "fourier": {
         "kind": "function"
       },
@@ -9307,6 +9310,9 @@
         "kind": "function"
       },
       "idst": {
+        "kind": "function"
+      },
+      "ifft": {
         "kind": "function"
       },
       "invFourier": {

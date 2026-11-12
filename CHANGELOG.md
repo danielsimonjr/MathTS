@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FFT / signal API (dogfood G18, #706, #774, #768, #773, #779).** Factory `fft` accepts `Float64Array` via `fft-core-f64`. `@danielsimonjr/mathts-signal` re-exports `fft`/`ifft` as aliases of `parallelFFT`/`parallelIFFT`. `welchPSD` and `bartlettPSD` throw when the signal is shorter than the default or requested `frameLength` instead of returning an empty spectrum. `resample(x, num)` uses the SciPy Fourier method; `resample(x, newRate, oldRate)` keeps linear rate interpolation. `windowFunction` accepts SciPy-style `(type, length)` argument order. Tests: `functions/tests/dogfood-g18-signal-api.test.ts`, `signal/tests/dogfood-g18-exports.test.ts`.
+
 - **Architecture verification counts follow the shared decomposition normalizer.** `totalTypeScriptFiles` 2347 → 2350, `totalExports` 9075 → 9085, `totalLinesOfCode` 417149 → 417579. `matrix/dist/index.js` bundle budget 191858 → 195380 bytes.
 - **Dense decompositions accept the same matrix shapes (G05 dogfood).** `svd`, `svdWasm`, `lu`, `qr` (and `lq`/`rq`/`ql`/`qrPivoted`), `cholesky`, `eig`, and `matrixSchur` share one input normalizer. A `DenseMatrix` is no longer read as an empty array (`{ U: [], S: [], V: [], rank: 0 }` from `svd` / `svdWasm`). Nested `number[][]`, a square row-major `Float64Array` (length 0 is 0×0), and `{ data, rows, cols }` are accepted. A packed descriptor is rejected when it also carries `L`/`U`/`p`/`P`, so it cannot be solved as an LU factor. Ragged and unknown inputs throw `TypeError`. `lusolve` accepts a square `Float64Array` and the same packed descriptor, and still treats `{ L, U, p }` as a decomposition.
 

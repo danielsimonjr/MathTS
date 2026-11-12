@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-11",
+    "lastUpdated": "2026-11-12",
     "totalFiles": 1285,
     "totalModules": 82,
-    "totalExports": 7009
+    "totalExports": 7011
   },
   "entryPoints": [
     {
@@ -39172,6 +39172,8 @@
             "imports": [
               "parallelFFT",
               "parallelIFFT",
+              "parallelFFT",
+              "parallelIFFT",
               "parallelFFTMagnitude",
               "parallelFFTPower",
               "parallelConv",
@@ -39210,6 +39212,8 @@
         "exports": [
           "parallelFFT",
           "parallelIFFT",
+          "fft",
+          "ifft",
           "parallelFFTMagnitude",
           "parallelFFTPower",
           "parallelConv",
@@ -46020,8 +46024,8 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 218299,
-    "totalExports": 7009,
+    "totalLinesOfCode": 218427,
+    "totalExports": 7011,
     "totalClasses": 61,
     "totalInterfaces": 601,
     "totalFunctions": 2360,

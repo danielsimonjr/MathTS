@@ -17794,9 +17794,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
+| Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
 
 **Exports:**
 
@@ -20257,8 +20257,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1285   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 218299 |
-| Total Exports           | 7009   |
+| Total Lines of Code     | 218427 |
+| Total Exports           | 7011   |
 | Total Re-exports        | 3021   |
 | Total Classes           | 61     |
 | Total Interfaces        | 601    |

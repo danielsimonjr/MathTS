@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4792,6 +4792,7 @@
       "dct",
       "dst",
       "dwt",
+      "fft",
       "fourier",
       "goertzel",
       "groupDelay",
@@ -4799,6 +4800,7 @@
       "hilbertTransform",
       "idct",
       "idst",
+      "ifft",
       "invFourier",
       "lowpassFilter",
       "medfilt",

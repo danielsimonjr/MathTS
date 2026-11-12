@@ -140,6 +140,21 @@ export const createFft = /* #__PURE__ */ factory(
       Matrix: function (matrix: Matrix): Matrix {
         return matrix.create(_ndFft(matrix.valueOf()) as unknown[], matrix._datatype);
       },
+      Float64Array: function (arr: Float64Array): unknown[] {
+        const n = arr.length;
+        if (n === 0) return [];
+        if (isPowerOf2(n)) {
+          const imag = new Float64Array(n);
+          const out = fftCoreFloat64(arr, imag, false);
+          const packed = new Float64Array(n * 2);
+          for (let i = 0; i < n; i++) {
+            packed[i * 2] = out.real[i];
+            packed[i * 2 + 1] = out.imag[i];
+          }
+          return interleavedToComplex(packed, n, complex) as unknown[];
+        }
+        return _fft(Array.from(arr) as ComplexArray);
+      },
     });
 
     /**
