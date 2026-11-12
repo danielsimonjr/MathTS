@@ -12567,7 +12567,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 293
+      "loc": 297
     },
     {
       "file": "gpu/src/device.ts",

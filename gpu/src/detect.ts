@@ -153,6 +153,10 @@ export async function getGPUAdapter(
   return adapter;
 }
 
+/**
+ * Read limits and adapter info into the public capabilities object.
+ * Shared by detection and `GPUContext` so init requests the adapter once.
+ */
 export function capabilitiesFromAdapter(adapter: GPUAdapter): GPUCapabilities {
   const info = adapter.info;
   const limits = adapter.limits;
