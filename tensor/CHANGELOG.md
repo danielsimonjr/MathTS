@@ -1,5 +1,33 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.4.0
+
+### Minor Changes
+
+- a75b3d0: **Breaking (runtime):** `new Tensor(shape, data)` now throws `TypeError` unless `data` is a `Float64Array` (no silent acceptance of `Float32Array`, plain arrays, or array-likes).
+  
+  **Added:** `Tensor.fromNested(nested)` infers rectangular shape when the shape argument is omitted.
+  
+  **Fixed:** `flip(t, axis)` accepts a single axis number like NumPy/PyTorch; `stack(tensors)` defaults `axis` to `0` like `np.stack`.
+
+### Patch Changes
+
+- 0c40e8e: Add tensor factories (`zeros`, `ones`, `full`, `arange`), `reshape(-1)` with contiguous views, `dtype: 'float64'`, batched `matmul`/`matMul` alias, in-place `add_`/`mul_`/`fill_`, `Tensor.slice` with negative step, and `cross`/`dot` for 3-vectors.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [b5f036d]
+- Updated dependencies [43e2715]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [72df4ec]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-matrix@0.10.1
+
 ## Unreleased
 
 ### Minor Changes

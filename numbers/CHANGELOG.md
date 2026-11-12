@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-numbers
 
+## 0.1.29
+
+### Patch Changes
+
+- e7939a7: `new BigNumber(x)` and `BigNumber.from(x)` now construct working instances (fixes runtime/type mismatch from a private constructor erased in JS). Export `bignumber` from core and `@danielsimonjr/mathts-numbers`. A second constructor argument throws; `new BigNumber(existing)` copies and `BigNumber.from(existing)` keeps the same instance. Internal values use a private token so `new BigNumber(1, 2)` cannot set the coefficient.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [b5f036d]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [a07bf29]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+
 ## 0.1.28
 
 ### Patch Changes

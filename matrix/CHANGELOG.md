@@ -1,5 +1,29 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.10.1
+
+### Patch Changes
+
+- adcebad: Packaging (G27): neutral esbuild bundles no longer resolve Node builtins (workerpool requires are indirect; natural sort is in-repo ESM). `@danielsimonjr/mathts-functions/evaluate` is the same safe evaluate as the root and a smaller bundle. Safe evaluate keeps parse, typed, createUnit, resolve, simplify, derivative, and node constructors unreachable. ESM-only migration note, GitHub blob URLs in package READMEs, and a deterministic README stats check.
+- 43e2715: G26 dogfood: faster number sort/median, blocked GEMM, packed `lusolve`, compat scalar fast path, wasm sin policy band, SVD README note.
+- 72df4ec: DenseMatrix: preflight `DENSE_MATRIX_MAX_ELEMENTS` (1e8), nested-array constructor, and scalar `.multiply(k)` matching mathjs.
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- 93c6e56: Normalize decomposition inputs: `svd`, `lu`, `qr`, `cholesky`, `eig`, and `matrixSchur` accept `DenseMatrix`, nested arrays, square `Float64Array`, and `{ data, rows, cols }`; ragged and unknown inputs throw `TypeError`. `lusolve` accepts square packed `Float64Array` and that descriptor, and still accepts an `{ L, U, p }` decomposition.
+- Updated dependencies [ef236dc]
+- Updated dependencies [adcebad]
+- Updated dependencies [ea94cc4]
+- Updated dependencies [e4900c1]
+- Updated dependencies [17f64da]
+- Updated dependencies [8d727a1]
+- Updated dependencies [b5f036d]
+- Updated dependencies [7247de3]
+- Updated dependencies [e7939a7]
+- Updated dependencies [a07bf29]
+- Updated dependencies [ca97716]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-parallel@0.10.1
+  - @danielsimonjr/mathts-gpu@0.3.0
+
 ## 0.10.0
 
 ### Minor Changes

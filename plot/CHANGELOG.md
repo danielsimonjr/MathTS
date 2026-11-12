@@ -1,5 +1,41 @@
 # @danielsimonjr/mathts-plot
 
+## 0.4.33
+
+### Patch Changes
+
+- a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
+- 78b3b3b: Add `update` / `plot.update` for in-place live line-chart DOM updates, and optional PNG export via peer `@resvg/resvg-wasm` in `./render` when PATH converters are absent.
+- 5a0b2e1: SciPy/NumPy parity for dogfood stats leftovers (G30): stable Pearson/linregress p-values, Kendall exact small-n default, NumPy quantile methods, `describe` quartiles, KS norm names and scipy `auto` two-sample p-values, heatmap colorbar/labels.
+- Updated dependencies [ef236dc]
+- Updated dependencies [a85e335]
+- Updated dependencies [adcebad]
+- Updated dependencies [17f64da]
+- Updated dependencies [e47134f]
+- Updated dependencies [0421fec]
+- Updated dependencies [b5f036d]
+- Updated dependencies [e817055]
+- Updated dependencies [43e2715]
+- Updated dependencies [d3313ec]
+- Updated dependencies [6c0194b]
+- Updated dependencies [0badf5b]
+- Updated dependencies [e51c0d5]
+- Updated dependencies [7247de3]
+- Updated dependencies [25f7ffa]
+- Updated dependencies [e7939a7]
+- Updated dependencies [5e692c5]
+- Updated dependencies [fd3cbef]
+- Updated dependencies [c4daa21]
+- Updated dependencies [a07bf29]
+- Updated dependencies [93c6e56]
+- Updated dependencies [064c834]
+- Updated dependencies [39e08ef]
+- Updated dependencies [ca97716]
+- Updated dependencies [5a0b2e1]
+  - @danielsimonjr/mathts-core@0.27.0
+  - @danielsimonjr/mathts-functions@0.85.0
+  - @danielsimonjr/mathts-expression@0.13.0
+
 ## Unreleased
 
 ### Minor Changes
