@@ -43,7 +43,8 @@ const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAb
     sample: {
       samplePairs: 31,
       leadingDiscard: 4,
-      gcBetween: typeof globalThis.gc === 'function',
+      // Child is always spawned with --expose-gc (see perf-gate-spawn.mjs).
+      gcBetween: true,
     },
   }
 );
