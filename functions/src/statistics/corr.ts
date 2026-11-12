@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { pairwiseSum, pairwiseDot } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
+import { typedArrayPairToNumbers } from './numeric-data.js';
 
 // Type definitions for corr
 interface MatrixType {
@@ -60,6 +61,14 @@ export const createCorr = /* #__PURE__ */ factory(
     return typed(name, {
       'Array, Array': function (A: unknown[], B: unknown[]): unknown {
         return _corr(A, B);
+      },
+      'Float64Array, Float64Array': function (A: Float64Array, B: Float64Array): unknown {
+        const [a, b] = typedArrayPairToNumbers(A, B);
+        return correlation(a, b);
+      },
+      'Float32Array, Float32Array': function (A: Float32Array, B: Float32Array): unknown {
+        const [a, b] = typedArrayPairToNumbers(A, B);
+        return correlation(a, b);
       },
       'Matrix, Matrix': function (A: MatrixType, B: MatrixType): unknown {
         const res = _corr(A.toArray(), B.toArray());

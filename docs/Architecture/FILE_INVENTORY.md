@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2253
+**Total files**: 2262
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1262 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1265 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      900 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      906 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2253** |                                                                                                                |
+| **Total**     | **2262** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1288 |
-| `tests`    |   900 |
+| `src`      |  1291 |
+| `tests`    |   906 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,8 +48,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   121 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   564 |
-| `@danielsimonjr/mathts-functions`      |  1016 |
-| `@danielsimonjr/mathts-gpu`            |    17 |
+| `@danielsimonjr/mathts-functions`      |  1019 |
+| `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   121 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
@@ -58,7 +58,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-plot`           |    46 |
 | `@danielsimonjr/mathts-signal`         |     4 |
 | `@danielsimonjr/mathts-statistics`     |     4 |
-| `@danielsimonjr/mathts-tensor`         |    56 |
+| `@danielsimonjr/mathts-tensor`         |    59 |
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
@@ -1212,6 +1212,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/statistics/median.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/min.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/mode.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/statistics/nan-reductions.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/statistics/numeric-data.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/prod.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/quantileSeq.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/std.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1478,6 +1480,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-g09-student-ttest-popmean.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g10-pde-cfl-bc.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g18-signal-api.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-g19-stats-nan-ddof.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dtw.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/effect-sizes.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/eigs-correctness.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1875,7 +1878,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `gpu/tests/context.test.ts`                                                       | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/detect.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/device.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
+| `gpu/tests/gpu-init-edges.test.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
+| `gpu/tests/gpu-init-status.browser.test.ts`                                       | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/helpers/stub-global.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
+| `gpu/tests/issue-759-835-gpu-status.test.ts`                                      | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/public-api-smoke.test.ts`                                              | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/shader-manager.test.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/vitest.config.ts`                                                            | @danielsimonjr/mathts-gpu            | config   | config      |
@@ -2168,12 +2174,15 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tensor/src/operations/solve.ts`                                                  | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/stack.ts`                                                  | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/svd.ts`                                                    | @danielsimonjr/mathts-tensor         | src      | build-entry |
+| `tensor/src/reshape-shape.ts`                                                     | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/Tensor.ts`                                                            | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/tests/audit-ops.test.ts`                                                  | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/broadcasting.test.ts`                                               | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/clones-batch-g-oracle.test.ts`                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/contraction-sequence.test.ts`                                       | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/dogfood-g14.test.ts`                                                | @danielsimonjr/mathts-tensor         | tests    | test        |
+| `tensor/tests/dogfood-g36-review.test.ts`                                         | @danielsimonjr/mathts-tensor         | tests    | test        |
+| `tensor/tests/dogfood-g36.test.ts`                                                | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/Index.test.ts`                                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/operations/cholesky.test.ts`                                        | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/operations/concatenate.test.ts`                                     | @danielsimonjr/mathts-tensor         | tests    | test        |

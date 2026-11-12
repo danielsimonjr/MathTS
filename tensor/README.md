@@ -4,6 +4,8 @@ Rank-n tensor for [MathTS](https://github.com/danielsimonjr/mathts).
 
 Rank-N dense tensors for MathTS, backed by a single `Float64Array` with shape/stride metadata. Built on `@danielsimonjr/mathts-matrix`.
 
+> **Float64 only:** Tensors always use `Float64Array` storage. There is no `float32` dtype on this type yet; the `dtype` getter reports `'float64'`. Use `Tensor.zeros` / `ones` / `full` / `arange` for construction.
+
 ## Install
 
 ```sh
