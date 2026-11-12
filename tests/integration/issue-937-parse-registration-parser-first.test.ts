@@ -20,13 +20,25 @@ describe('#937 functions after parse is loaded first', () => {
   );
 
   it(
-    '#937 functions simplify still accepts a string after parse ran first',
+    '#937 functions derivative accepts a string after parse ran first',
+    async () => {
+      parse('2+3');
+      const { derivative } = await import('@danielsimonjr/mathts-functions');
+      expect(derivative('x^2', 'x').toString()).toBe('2 * x');
+    },
+    COLD_IMPORT_TIMEOUT_MS
+  );
+
+  // Open design point: the shared string-to-Node converter belongs to the first
+  // parse that registers it. When the thin default parse runs first, it owns the
+  // converter, and simplify returns 'x + x' instead of '2 * x'. This assertion
+  // fails until the converter owner is decided.
+  it(
+    '#937 functions simplify matches functions-alone result after parse ran first',
     async () => {
       parse('2+3');
       const { simplify } = await import('@danielsimonjr/mathts-functions');
-      // The string converts to a Node: simplify accepts it and returns a Node.
-      const result = simplify('x + x') as { isNode?: boolean };
-      expect(result.isNode).toBe(true);
+      expect(simplify('x + x').toString()).toBe('2 * x');
     },
     COLD_IMPORT_TIMEOUT_MS
   );
