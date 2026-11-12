@@ -6577,7 +6577,11 @@ modules:
           imports:
             - Tape
             - TapedTensor
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
       exports:
         - valueAndGrad
         - grad
@@ -43876,7 +43880,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1291
   totalModules: 82
-  totalLinesOfCode: 221203
+  totalLinesOfCode: 221653
   totalExports: 7082
   totalClasses: 61
   totalInterfaces: 603
