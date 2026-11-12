@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { nodeBinary } from './helpers/node-binary.mjs';
+import { nodeBinary } from './helpers/node-binary.js';
 import { BigNumber, Complex, Fraction, Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import {

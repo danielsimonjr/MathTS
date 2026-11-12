@@ -6,9 +6,11 @@ import { existsSync, realpathSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
 
 /**
- * @returns {string}
+ * Executable path for a real Node.js (never Bun’s `node` shim).
+ *
+ * @returns Absolute path to the Node binary used for isolated perf gates.
  */
-export function nodeBinary() {
+export function nodeBinary(): string {
   if (process.env.PERF_NODE) return process.env.PERF_NODE;
   if (!process.versions.bun) return process.execPath;
   for (const dir of (process.env.PATH ?? '').split(delimiter)) {
@@ -17,7 +19,5 @@ export function nodeBinary() {
     const base = realpathSync(candidate).split('/').pop() ?? '';
     if (!/^bun/i.test(base)) return candidate;
   }
-  throw new Error(
-    '#692 perf gate needs a real Node.js on PATH (or PERF_NODE=/path/to/node)'
-  );
+  throw new Error('#692 perf gate needs a real Node.js on PATH (or PERF_NODE=/path/to/node)');
 }
