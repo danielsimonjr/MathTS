@@ -13246,7 +13246,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 67
+      "loc": 68
     },
     {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",

@@ -48,7 +48,8 @@ describe('G24 dogfood — DenseMatrix (#810 #814 #815)', () => {
       [1, 2],
       [3, 4],
     ]);
-    expect(math.multiply(B, 2).valueOf()).toEqual([
+    const scaled = math.multiply(B, 2) as { valueOf: () => number[][] };
+    expect(scaled.valueOf()).toEqual([
       [2, 4],
       [6, 8],
     ]);
