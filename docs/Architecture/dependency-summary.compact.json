@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1296, "e": 7103, "re": 3054 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1297, "e": 7110, "re": 3058 },
   "s": {
-    "loc": 222486,
+    "loc": 222811,
     "cls": 61,
-    "int": 608,
-    "fn": 2416,
+    "int": 610,
+    "fn": 2418,
     "tg": 175,
     "en": 0,
-    "co": 1651,
-    "toi": 650
+    "co": 1652,
+    "toi": 651
   },
-  "c": { "rt": 2, "to": 0, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
+  "c": { "rt": 2, "to": 1, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -635,6 +635,7 @@
     "functions/factories": {
       "f": 4,
       "exp": [
+        "EVALUATE_SCOPE_OMIT",
         "parse",
         "physicsScope",
         "evaluate",
@@ -642,6 +643,7 @@
         "parser",
         "replacer",
         "reviver",
+        "createInstanceEvaluator",
         "scalarToNode",
         "nodeToScalar",
         "simplifyScalar",
@@ -652,9 +654,7 @@
         "multiplyScalar",
         "subtractScalar",
         "filter",
-        "flatten",
-        "forEach",
-        "getMatrixDataType"
+        "flatten"
       ],
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"],
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
@@ -1832,7 +1832,7 @@
       "cls": ["Complex"]
     },
     "compat": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "createChain",
         "Complex",
@@ -1852,10 +1852,17 @@
         "computePool",
         "all",
         "create",
-        "add",
-        "subtract"
+        "wireMathjsInstanceApi",
+        "add"
       ],
-      "int": ["ChainMethods", "ChainUnwrap", "MathJSConfig", "MathInstance"]
+      "int": [
+        "ChainMethods",
+        "ChainUnwrap",
+        "MathJSConfig",
+        "MathInstance",
+        "CompatExpressionLayers",
+        "WiredCompatInstance"
+      ]
     },
     "gpu": {
       "f": 8,
@@ -1926,7 +1933,7 @@
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 14 },
-    { "p": "src/index.ts", "i": 209, "o": 0 },
+    { "p": "src/index.ts", "i": 210, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
