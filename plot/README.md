@@ -7,8 +7,9 @@ entry. Snapshot functions (`line`, `plot`, …) only need the MathTS bedrock (`c
 `expression`). For live simulation dashboards, use `update(el, x, y, opts?)` or `plot.update` to
 patch line charts in an existing DOM container instead of replacing `innerHTML` every frame.
 Every function coerces its input and never throws on bad data: empty, `NaN`, or `Infinity` inputs
-render a "no data" placeholder SVG instead of crashing. See
-`docs/superpowers/specs/2026-07-07-plotting-design.md` for the design.
+render a "no data" placeholder SVG instead of crashing. See the
+[plotting design spec](https://github.com/danielsimonjr/MathTS/blob/main/docs/superpowers/specs/2026-07-07-plotting-design.md)
+for the design.
 
 ## Install
 
@@ -171,7 +172,7 @@ Install the optional WASM renderer when PATH has no librsvg/resvg:
 npm install @resvg/resvg-wasm
 ```
 
-See `docs/api/plot.md` for `RenderOptions`, `PlotRenderError`, and `hasTool`.
+See the [plot API index](https://github.com/danielsimonjr/MathTS/blob/main/docs/api/plot.md) for `RenderOptions`, `PlotRenderError`, and `hasTool`.
 
 Notes:
 

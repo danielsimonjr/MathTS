@@ -44,7 +44,7 @@ h1 span { color: var(--accent); }
 <div class="container">
 <header>
   <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Geometry</div>
-  <h1><span>Geometry</span> (80)</h1>
+  <h1><span>Geometry</span> (83)</h1>
   <p class="cat-desc">Geometric operations on 2D/3D/nD coordinate arrays.</p>
 </header>
 
@@ -545,10 +545,26 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="quaternionFromAxisAngle" data-name="quaternionfromaxisangle">
   <div class="func-name">quaternionFromAxisAngle</div>
-  <div class="func-desc">Unit quaternion for a rotation of <code>angle</code> radians about <code>axis</code></div>
+  <div class="func-desc">Unit quaternion for <code>angle</code> radians about <code>axis</code>; throws on a zero or non-finite axis</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionFromAxisAngle(axis, angle)</div>
+  </div>
+</div>
+<div class="func-card" id="quaternionFromEuler" data-name="quaternionfromeuler">
+  <div class="func-name">quaternionFromEuler</div>
+  <div class="func-desc">Unit quaternion for ZYX intrinsic Euler angles (radians); inverse of <code>quaternionToEuler</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quaternionFromEuler([roll, pitch, yaw])</div>
+  </div>
+</div>
+<div class="func-card" id="quaternionFromRotationMatrix" data-name="quaternionfromrotationmatrix">
+  <div class="func-name">quaternionFromRotationMatrix</div>
+  <div class="func-desc">Unit quaternion of a 3×3 rotation matrix (method of Shepperd); <code>q</code> and <code>−q</code> are one rotation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quaternionFromRotationMatrix(m)</div>
   </div>
 </div>
 <div class="func-card" id="quaternionInverse" data-name="quaternioninverse">
@@ -561,7 +577,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="quaternionLog" data-name="quaternionlog">
   <div class="func-name">quaternionLog</div>
-  <div class="func-desc">Logarithm <code>(0, θ·û)</code>; zero quaternion for the identity</div>
+  <div class="func-desc">Logarithm <code>(ln|q|, θ·û)</code>; zero quaternion for the identity</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionLog(q)</div>
@@ -593,7 +609,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="quaternionRotate" data-name="quaternionrotate">
   <div class="func-name">quaternionRotate</div>
-  <div class="func-desc">Rotate 3-vector <code>v</code> by unit quaternion <code>q</code></div>
+  <div class="func-desc">Rotate 3-vector <code>v</code> by the rotation of <code>q</code> (<code>q·v·q⁻¹</code>)</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionRotate(q, v)</div>
@@ -601,15 +617,23 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="quaternionSlerp" data-name="quaternionslerp">
   <div class="func-name">quaternionSlerp</div>
-  <div class="func-desc">Spherical linear interpolation between two unit quaternions</div>
+  <div class="func-desc">Shortest-arc spherical interpolation; normalizes the inputs, returns a unit quaternion</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionSlerp(q1, q2, t)</div>
   </div>
 </div>
+<div class="func-card" id="quaternionToAxisAngle" data-name="quaterniontoaxisangle">
+  <div class="func-name">quaternionToAxisAngle</div>
+  <div class="func-desc"><code>{ axis, angle }</code> of the rotation: unit axis, angle in <code>[0, π]</code>; axis <code>[1, 0, 0]</code> at <code>0</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quaternionToAxisAngle(q)</div>
+  </div>
+</div>
 <div class="func-card" id="quaternionToEuler" data-name="quaterniontoeuler">
   <div class="func-name">quaternionToEuler</div>
-  <div class="func-desc">ZYX intrinsic Euler angles <code>[roll, pitch, yaw]</code> (radians)</div>
+  <div class="func-desc">ZYX intrinsic Euler angles <code>[roll, pitch, yaw]</code> (radians); roll is <code>0</code> at gimbal lock</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionToEuler(q)</div>
@@ -617,7 +641,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="quaternionToRotationMatrix" data-name="quaterniontorotationmatrix">
   <div class="func-name">quaternionToRotationMatrix</div>
-  <div class="func-desc">3×3 rotation matrix for a unit quaternion</div>
+  <div class="func-desc">3×3 rotation matrix of <code>q</code>; the matrix acts on column vectors</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">quaternionToRotationMatrix(q)</div>
@@ -713,7 +737,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-12 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>

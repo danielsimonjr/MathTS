@@ -47,10 +47,10 @@ h1 span { color: var(--accent); }
   <h1><span>MathTS</span> Function Reference</h1>
   <p class="subtitle">Complete API reference for all mathematical functions in the TypeScript rewrite of mathjs — signatures, accepted types, and the acceleration tier (WASM, WebWorker, WebGPU) each one uses.</p>
   <div class="stats">
-    <div class="stat"><div class="stat-value">1,166</div><div class="stat-label">Functions</div></div>
-    <div class="stat"><div class="stat-value">27</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-value">1,223</div><div class="stat-label">Functions</div></div>
+    <div class="stat"><div class="stat-value">28</div><div class="stat-label">Categories</div></div>
     <div class="stat"><div class="stat-value">7,049</div><div class="stat-label">Tests Passing</div></div>
-    <div class="stat"><div class="stat-value">v0.72.0</div><div class="stat-label">functions Version</div></div>
+    <div class="stat"><div class="stat-value">v0.84.0</div><div class="stat-label">functions Version</div></div>
   </div>
   <div class="install">
     <code>npm install @danielsimonjr/mathts-functions</code>
@@ -100,7 +100,7 @@ h1 span { color: var(--accent); }
   <div class="cat-card" data-names="airyAi airyBi barnesG bernoulliPolynomial besselI besselJ besselJ0 besselJ1 besselJZeros besselK besselY besselY0 besselY1 beta betainc carlsonRC carlsonRD carlsonRF carlsonRJ chebyshevT clebschGordan coshIntegral cosIntegral coulombF coulombFG coulombG dawson digamma dirichletEta ellipticE ellipticEIncomplete ellipticF ellipticK ellipticPi erf erfc erfcinv erfcScalar erfcx erfi erfinv eulerPolynomial expIntegralE1 expIntegralEi expn ferrersP fresnelC fresnelS gamma gammainc gammaincp gegenbauerC hankelH1 hankelH2 hermiteH hurwitzZeta hyp0f1 hyp1f1 hyp2f1 jacobiCN jacobiDN jacobiP jacobiSN kelvinBei kelvinBer laguerreL lambertW legendreP lerchPhi lgamma loadWasm logIntegral mathieuA mathieuB mathieuCe mathieuSe parabolicCylinderD pFq polygamma polylog riemannSiegelZ siegelZ sinhIntegral sinIntegral sphericalBesselI sphericalBesselJ sphericalBesselK sphericalBesselY sphericalHarmonic spheroidalAngular spheroidalCharacteristic spheroidalLambda spheroidalRadial struveH struveL trigamma wigner3j wigner6j zeta">
     <a href="functions/special-functions.html">
       <div class="cat-title">Special Functions <span class="cat-count">99</span></div>
-      <div class="cat-desc"></div>
+      <div class="cat-desc">The <code>Float64Array</code> signatures are synchronous. To use worker threads, call <code>computePool.applyKernel(x, workerKernel(name, ...params))</code>. The worker result is…</div>
       <div class="cat-funcs">airyAi, airyBi, barnesG, bernoulliPolynomial, besselI, besselJ, besselJ0, besselJ1, besselJZeros, besselK, besselY, besselY0, ... (+87 more)</div>
     </a>
   </div>
@@ -118,11 +118,11 @@ h1 span { color: var(--accent); }
       <div class="cat-funcs">acf, adfuller, bootstrapCI, cohensD, corr, corrcoef, cov, cummax, cummin, cumprod, cumsum, cumtrapz, ... (+98 more)</div>
     </a>
   </div>
-  <div class="cat-card" data-names="bernoulliPMF betaCDF betaDist betaPDF betaQuantile binomialDist binomialPMF cauchyCDF cauchyPDF cauchyQuantile chiSquaredCDF chiSquaredDist chiSquaredQuantile circmean circstd circvar dirichletPdf dirichletSample discreteUniformDist entropy exponentialCDF exponentialDist exponentialPDF fCDF fDist fQuantile gammaCDF gammaDist gammaPDF gammaQuantile gaussianKDE geometricPMF gevCDF gevPDF gumbelDist hypergeometricDist inverseGammaCDF inverseGammaPDF invGaussDist jsDivergence kldivergence laplaceCDF laplacePDF laplaceQuantile logisticCDF logisticPDF logisticQuantile logNormalDist multivariateNormal nakagamiPDF negativeBinomialDist noncentralChi2CDF noncentralChi2PDF noncentralFCDF noncentralTCDF normalCDF normalDist normalPDF normalQuantile owensT paretoDist pickRandom poissonDist poissonPMF random randomInt rayleighDist ricePDF seedProbabilityRng skellamPMF skewNormalCDF skewNormalPDF string studentizedRangeCDF studentizedRangeQuantile studentTCDF studentTPDF studentTQuantile tDist triangularDist truncatedNormalCDF truncatedNormalMean truncatedNormalPDF uniformDist vonMisesPDF weibullDist wishartSample zipfPMF">
+  <div class="cat-card" data-names="bernoulliPMF betaCDF betaDist betaPDF betaQuantile binomialDist binomialPMF cauchyCDF cauchyPDF cauchyQuantile chiSquaredCDF chiSquaredDist chiSquaredQuantile chiSquaredSF circmean circstd circvar dirichletPdf dirichletSample discreteUniformDist entropy exponentialCDF exponentialDist exponentialPDF fCDF fDist fQuantile fSF gammaCDF gammaDist gammaPDF gammaQuantile gaussianKDE geometricPMF gevCDF gevPDF gumbelDist hypergeometricDist inverseGammaCDF inverseGammaPDF invGaussDist jsDivergence kldivergence laplaceCDF laplacePDF laplaceQuantile logisticCDF logisticPDF logisticQuantile logNormalDist multivariateNormal nakagamiPDF negativeBinomialDist noncentralChi2CDF noncentralChi2PDF noncentralFCDF noncentralTCDF normalCDF normalDist normalPDF normalQuantile owensT paretoDist pickRandom poissonDist poissonPMF random randomInt rayleighDist ricePDF seedProbabilityRng skellamPMF skewNormalCDF skewNormalPDF string studentizedRangeCDF studentizedRangeQuantile studentTCDF studentTPDF studentTQuantile studentTTwoSidedP tDist triangularDist truncatedNormalCDF truncatedNormalMean truncatedNormalPDF uniformDist vonMisesPDF weibullDist wishartSample zipfPMF">
     <a href="functions/probability-distributions.html">
-      <div class="cat-title">Probability Distributions <span class="cat-count">88</span></div>
-      <div class="cat-desc"></div>
-      <div class="cat-funcs">bernoulliPMF, betaCDF, betaDist, betaPDF, betaQuantile, binomialDist, binomialPMF, cauchyCDF, cauchyPDF, cauchyQuantile, chiSquaredCDF, chiSquaredDist, ... (+76 more)</div>
+      <div class="cat-title">Probability Distributions <span class="cat-count">91</span></div>
+      <div class="cat-desc">The <code>Float64Array</code> signatures are synchronous. To use worker threads, call <code>computePool.applyKernel(x, workerKernel(name, ...params))</code>. The worker result is…</div>
+      <div class="cat-funcs">bernoulliPMF, betaCDF, betaDist, betaPDF, betaQuantile, binomialDist, binomialPMF, cauchyCDF, cauchyPDF, cauchyQuantile, chiSquaredCDF, chiSquaredDist, ... (+79 more)</div>
     </a>
   </div>
   <div class="cat-card" data-names="bicgstab blockDiag care cg characteristicPolynomial cholesky choleskyDowndate choleskyUpdate circulant companion cond condest cosm cross csAmd csChol csCounts csLu csSpsolve csSqr csSymperm ctranspose dare det dftMatrix diag disableGpu dlyap eigs eigsh eigvals elementwiseChainGpuDispatch elementwiseChainReduceGpuDispatch enableGpu expm fftGpuDispatch fiedlerMatrix fractionalMatrixPower funm fuseUnaryChainAsync fuseUnaryChainReduceAsync generalizedEig gmres gpuAdd gpuMatmul gpuScale gpuTranspose hadamardMatrix hankelMatrix helmertMatrix hessenbergForm hilbertMatrix incompleteCholesky incompleteLU inv invHilbertMatrix isGpuEnabled jordanForm khatriRao kron laplacianMatrix ldl leslieMatrix linsolve logdet lowRankApprox lq lsolve lsolveAll lup lusolve lyap matrixExpm matrixLog matrixLogm matrixPinv matrixRank matrixSqrtm minres norm2 normFro orth parallelFFT parallelIFFT pascalMatrix pinv polarDecomposition powerIteration ql qr qrPivoted qz rank rationalNullspace reduce resetGpuElementwise resetGpuFft rotate rotationMatrix rowReduce rq schur signm singularValues sinm slu solveBanded sqrtm subspaceAngles svd svds sylvester thomasSolve toeplitz toeplitzSolve trace transpose tril triu usolve usolveAll vander">
@@ -153,11 +153,11 @@ h1 span { color: var(--accent); }
       <div class="cat-funcs">assume, asymptotic, casDerivative, casExpand, casFactor, casSimplify, clearAssumptions, curl, directionalDerivative, divergence, fourierSeries, getAssumptions, ... (+24 more)</div>
     </a>
   </div>
-  <div class="cat-card" data-names="clenshawCurtis dblquad gaussHermiteIntegrate gaussLaguerreIntegrate gaussQuad monteCarloIntegrate nintegrate quad romberg rootsChebyshevT rootsChebyshevU rootsHermite rootsJacobi rootsLaguerre rootsLegendre simpson simpsonF64 simpsons tanhSinh tplquad trapz trapzF64">
+  <div class="cat-card" data-names="clenshawCurtis dblquad gaussHermiteIntegrate gaussLaguerreIntegrate gaussQuad monteCarloIntegrate nintegrate parallelGaussQuad parallelRomberg quad romberg rootsChebyshevT rootsChebyshevU rootsHermite rootsJacobi rootsLaguerre rootsLegendre simpson simpsonF64 simpsons tanhSinh tplquad trapz trapzF64">
     <a href="functions/numerical-integration.html">
-      <div class="cat-title">Numerical Integration <span class="cat-count">22</span></div>
+      <div class="cat-title">Numerical Integration <span class="cat-count">24</span></div>
       <div class="cat-desc"></div>
-      <div class="cat-funcs">clenshawCurtis, dblquad, gaussHermiteIntegrate, gaussLaguerreIntegrate, gaussQuad, monteCarloIntegrate, nintegrate, quad, romberg, rootsChebyshevT, rootsChebyshevU, rootsHermite, ... (+10 more)</div>
+      <div class="cat-funcs">clenshawCurtis, dblquad, gaussHermiteIntegrate, gaussLaguerreIntegrate, gaussQuad, monteCarloIntegrate, nintegrate, parallelGaussQuad, parallelRomberg, quad, romberg, rootsChebyshevT, ... (+12 more)</div>
     </a>
   </div>
   <div class="cat-card" data-names="bezierCurve bspline bsplineEval bsplineFit chebyshevApprox chebyshevFit cspline cubicSpline curvefit expfit griddata hermiteInterp interpn interpolate lagrangeInterp legendreFit linearInterp loess logfit newtonInterp padeApproximant pchip pchipInterp polyFit powerfit rbfInterpolate">
@@ -181,11 +181,11 @@ h1 span { color: var(--accent); }
       <div class="cat-funcs">autoCorrelation, bandpassFilter, bartlettPSD, bilinear, blackmanHarrisWindow, bohmanWindow, butter, buttord, cheby1, cheby2, chirp, chirpZTransform, ... (+91 more)</div>
     </a>
   </div>
-  <div class="cat-card" data-names="alphaShape angle2D angle3D arcLength area barycentricCoordinates boundingBox catmullRom centroid chebyshevDistance closestPair conj convexHull convexHull2D convexHull3D coordinateTransform cross3D curvature delaunay delaunayTriangulation distance distance2D distance3D distanceMatrix distanceND distancePointToLine2D dot3D douglasPeucker earClipping frechetDistance halfspaceIntersection hausdorffDistance haversine inCircle intersect intersectLines2D intersectSegments2D kdTree kdTreeKNN kdTreeNearest kdTreeRadius manhattanDistance massProperties minimumEnclosingCircle minkowskiDistance minkowskiSum nearestNeighbor orient2D orient3D pointInPolygon pointInTriangle polygonArea polygonClip polygonIsConvex polygonPerimeter procrustes projectVector quaternionConjugate quaternionExp quaternionFromAxisAngle quaternionInverse quaternionLog quaternionMultiply quaternionNormalize quaternionPow quaternionRotate quaternionSlerp quaternionToEuler quaternionToRotationMatrix rayPlaneIntersect rayTriangleIntersect reflectVector rotateVector2D rotateVector3D segmentSegmentClosest slerp sphericalVoronoi triangleArea voronoi voronoiDiagram">
+  <div class="cat-card" data-names="alphaShape angle2D angle3D arcLength area barycentricCoordinates boundingBox catmullRom centroid chebyshevDistance closestPair conj convexHull convexHull2D convexHull3D coordinateTransform cross3D curvature delaunay delaunayTriangulation distance distance2D distance3D distanceMatrix distanceND distancePointToLine2D dot3D douglasPeucker earClipping frechetDistance halfspaceIntersection hausdorffDistance haversine inCircle intersect intersectLines2D intersectSegments2D kdTree kdTreeKNN kdTreeNearest kdTreeRadius manhattanDistance massProperties minimumEnclosingCircle minkowskiDistance minkowskiSum nearestNeighbor orient2D orient3D pointInPolygon pointInTriangle polygonArea polygonClip polygonIsConvex polygonPerimeter procrustes projectVector quaternionConjugate quaternionExp quaternionFromAxisAngle quaternionFromEuler quaternionFromRotationMatrix quaternionInverse quaternionLog quaternionMultiply quaternionNormalize quaternionPow quaternionRotate quaternionSlerp quaternionToAxisAngle quaternionToEuler quaternionToRotationMatrix rayPlaneIntersect rayTriangleIntersect reflectVector rotateVector2D rotateVector3D segmentSegmentClosest slerp sphericalVoronoi triangleArea voronoi voronoiDiagram">
     <a href="functions/geometry.html">
-      <div class="cat-title">Geometry <span class="cat-count">80</span></div>
+      <div class="cat-title">Geometry <span class="cat-count">83</span></div>
       <div class="cat-desc">Geometric operations on 2D/3D/nD coordinate arrays.</div>
-      <div class="cat-funcs">alphaShape, angle2D, angle3D, arcLength, area, barycentricCoordinates, boundingBox, catmullRom, centroid, chebyshevDistance, closestPair, conj, ... (+68 more)</div>
+      <div class="cat-funcs">alphaShape, angle2D, angle3D, arcLength, area, barycentricCoordinates, boundingBox, catmullRom, centroid, chebyshevDistance, closestPair, conj, ... (+71 more)</div>
     </a>
   </div>
   <div class="cat-card" data-names="adjacencyMatrix astar bellmanFord betweennessCentrality bfs closenessCentrality connectedComponents dfs eigenvectorCentrality floydWarshall graphColoring graphDistance harmonicCentrality hungarian isConnected isIsomorphic katzCentrality louvainCommunities maxClique maxFlow minCut minimumSpanningTree pageRank shortestPath stronglyConnectedComponents topologicalSort">
@@ -195,11 +195,11 @@ h1 span { color: var(--accent); }
       <div class="cat-funcs">adjacencyMatrix, astar, bellmanFord, betweennessCentrality, bfs, closenessCentrality, connectedComponents, dfs, eigenvectorCentrality, floydWarshall, graphColoring, graphDistance, ... (+14 more)</div>
     </a>
   </div>
-  <div class="cat-card" data-names="andersonDarlingTest anova anova2 bartlettTest binomialTest chi2Contingency chiSquareTest cochranQ dagostinoTest fisherExact friedmanTest fTest gTest hotellingT2 jarqueBera kendallTauTest kolmogorovSmirnov2Test kolmogorovSmirnovTest kruskalWallis leveneTest mannWhitneyTest mcnemar moodMedianTest multipleComparison multipleTest permutationTest powerDivergence principalComponentAnalysis proportionZTest runsTest shapiroWilkTest signTest studentTTest studentTTestPaired tukeyHSD wilcoxon">
+  <div class="cat-card" data-names="andersonDarlingTest anova anova2 bartlettTest binomialTest chi2Contingency chiSquareTest cochranQ cohensKappa dagostinoTest fisherExact friedmanTest fTest gTest hotellingT2 jarqueBera kendallTauTest kolmogorovSmirnov2Test kolmogorovSmirnovTest kruskalWallis leveneTest mannWhitneyTest mcnemar moodMedianTest multipleComparison multipleTest newcombePairedInterval permutationTest powerDivergence principalComponentAnalysis proportionZTest runsTest shapiroWilkTest signTest studentTTest studentTTestPaired tukeyHSD wilcoxon wilsonInterval">
     <a href="functions/hypothesis-tests.html">
-      <div class="cat-title">Hypothesis Tests <span class="cat-count">36</span></div>
+      <div class="cat-title">Hypothesis Tests <span class="cat-count">39</span></div>
       <div class="cat-desc">All return structured result objects.</div>
-      <div class="cat-funcs">andersonDarlingTest, anova, anova2, bartlettTest, binomialTest, chi2Contingency, chiSquareTest, cochranQ, dagostinoTest, fisherExact, friedmanTest, fTest, ... (+24 more)</div>
+      <div class="cat-funcs">andersonDarlingTest, anova, anova2, bartlettTest, binomialTest, chi2Contingency, chiSquareTest, cochranQ, cohensKappa, dagostinoTest, fisherExact, friedmanTest, ... (+27 more)</div>
     </a>
   </div>
   <div class="cat-card" data-names="setCartesian setDifference setDisjoint setDistinct setEqual setIntersect setIsSubset setIsSuperset setMultiplicity setPowerset setSize setSymDifference setUnion">
@@ -251,10 +251,17 @@ h1 span { color: var(--accent); }
       <div class="cat-funcs">getComputePool, initializePool, initializeSignal, initializeStatistics, isGpuChainSupported, isWasmLoaded, shouldParallelize, terminatePool, terminateSignal, terminateStatistics</div>
     </a>
   </div>
+  <div class="cat-card" data-names="eigSym3 frustumContainsPoint frustumFromMatrix frustumIntersectsAabb frustumIntersectsSphere mat3Inverse mat3Multiply mat3MulVec mat3ToQuat mat3Transpose mat4Compose mat4Decompose mat4Determinant mat4Invert mat4LookAt mat4Multiply mat4Orthographic mat4Perspective nanmean nanmedian nanstd nanvariance parallelAxis quatConjugate quatIntegrate quatMultiply quatNormalize quatRotate rotateTensor solveBoxLcp vec2Add vec2Dot vec2Length vec2Normalize vec2Scale vec2ScaleAndAdd vec2Sub vec3Add vec3Cross vec3Dot vec3Length vec3Normalize vec3Scale vec3ScaleAndAdd vec3Sub workerKernel">
+    <a href="functions/other-exports-uncategorized.html">
+      <div class="cat-title">Other exports (uncategorized) <span class="cat-count">46</span></div>
+      <div class="cat-desc"></div>
+      <div class="cat-funcs">eigSym3, frustumContainsPoint, frustumFromMatrix, frustumIntersectsAabb, frustumIntersectsSphere, mat3Inverse, mat3Multiply, mat3MulVec, mat3ToQuat, mat3Transpose, mat4Compose, mat4Decompose, ... (+34 more)</div>
+    </a>
+  </div>
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-12 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 
