@@ -7,6 +7,12 @@
  * `compileExpression` call.
  *
  * Uses a minimal arithmetic math scope (not the full functions barrel).
+ * That scope is the safe namespace: `parse`, `typed`, `compile`, `import`,
+ * `createUnit`, `resolve`, `chain`, `simplify`, `derivative`, and the node
+ * constructors are not properties of it. `evaluate` / one-arg
+ * `compileExpression` therefore cannot resolve them, including from a nested
+ * expression (`map`'s callback is compiled against the same object).
+ * Assignment and function definitions still require `{ unsafe: true }`.
  *
  * @packageDocumentation
  */
@@ -29,11 +35,57 @@ import { createParenthesisNode } from './node/ParenthesisNode.js';
 import { createRangeNode } from './node/RangeNode.js';
 import { createRelationalNode } from './node/RelationalNode.js';
 import { createSymbolNode } from './node/SymbolNode.js';
+import { compile } from './compiler/compile.js';
 import { createEvaluate, compileExpressionWithDeps } from './evaluator/evaluate.js';
+import { compileInlineExpression } from './transform/utils/compileInlineExpression.js';
 import type { CompiledExpression } from './compiler/compile.js';
 import type { EvaluateOptions } from './evaluator/evaluate.js';
 import type { MathNode } from './node/Node.js';
 import type { Scope } from './compiler/compile.js';
+
+/**
+ * A compiled expression from the ready-to-call `compileExpression(expr)`.
+ * Call it or use `.evaluate()`. Both read an optional scope.
+ */
+export interface CallableCompiledExpression extends CompiledExpression {
+  (scope?: Record<string, unknown> | Scope): unknown;
+}
+
+/**
+ * Names that build or evaluate other expressions. They are never copied onto
+ * the default math scope (the same denylist `functions` evaluate strips).
+ */
+const SAFE_SCOPE_OMIT: readonly string[] = [
+  'import',
+  'createUnit',
+  'evaluate',
+  'parse',
+  'compile',
+  'typed',
+  'simplify',
+  'derivative',
+  'help',
+  'chain',
+  'parser',
+  'resolve',
+  'config',
+  'numeric',
+  'ConstantNode',
+  'SymbolNode',
+  'OperatorNode',
+  'FunctionNode',
+  'AssignmentNode',
+  'FunctionAssignmentNode',
+  'BlockNode',
+  'ArrayNode',
+  'ObjectNode',
+  'IndexNode',
+  'AccessorNode',
+  'ParenthesisNode',
+  'RangeNode',
+  'RelationalNode',
+  'ConditionalNode',
+];
 
 /** Minimal math scope for arithmetic expressions (no matrix/functions barrel). */
 export const defaultMathScope: Record<string, unknown> = {
@@ -53,6 +105,7 @@ export const defaultMathScope: Record<string, unknown> = {
   exp: Math.exp,
   log: Math.log,
   pi: Math.PI,
+  π: Math.PI,
   e: Math.E,
   Infinity: Infinity,
   NaN: NaN,
@@ -140,26 +193,17 @@ function ensureDefaultInstance(): void {
     SymbolNode: _SymbolNode,
   });
 
-  Object.assign(boundMathScope, {
-    typed: mathTyped,
-    config,
-    numeric,
-    ConstantNode: _ConstantNode,
-    SymbolNode: _SymbolNode,
-    OperatorNode: _OperatorNode,
-    FunctionNode: _FunctionNode,
-    AssignmentNode: _AssignmentNode,
-    FunctionAssignmentNode: _FunctionAssignmentNode,
-    BlockNode: _BlockNode,
-    ArrayNode: _ArrayNode,
-    ObjectNode: _ObjectNode,
-    IndexNode: _IndexNode,
-    AccessorNode: _AccessorNode,
-    ParenthesisNode: _ParenthesisNode,
-    RangeNode: _RangeNode,
-    RelationalNode: _RelationalNode,
-    ConditionalNode: _ConditionalNode,
-  });
+  // Parser dependencies stay in this closure. They are not copied onto
+  // boundMathScope: that object is mathWithTransform (node.compile / map
+  // callbacks) and the namespace createEvaluate resolves symbols against.
+  for (const key of SAFE_SCOPE_OMIT) {
+    delete boundMathScope[key];
+  }
+
+  // Callbacks compile against this same object, so a nested expression cannot
+  // see the symbols deleted above. Arrays only: the default scope has no matrix.
+  boundMathScope.map = createCallbackTransform('map', false);
+  boundMathScope.filter = createCallbackTransform('filter', true);
 
   boundParse = createParse({
     typed: mathTyped,
@@ -214,7 +258,10 @@ function isEvaluateOptions(x: unknown): x is EvaluateOptions {
  * Compile an expression string with the default parse + math scope,
  * or forward to the factory form when given explicit dependencies.
  */
-export function compileExpression(expr: string, options?: EvaluateOptions): CompiledExpression;
+export function compileExpression(
+  expr: string,
+  options?: EvaluateOptions
+): CallableCompiledExpression;
 export function compileExpression(
   parseFn: (expr: string) => MathNode,
   mathScopeIn: Record<string, unknown>,
@@ -226,14 +273,16 @@ export function compileExpression(
   second?: Record<string, unknown> | EvaluateOptions,
   third?: string,
   options?: EvaluateOptions
-): CompiledExpression {
+): CallableCompiledExpression | CompiledExpression {
   if (typeof first === 'string') {
     ensureDefaultInstance();
-    return compileExpressionWithDeps(
-      boundParse,
-      boundMathScope,
-      first,
-      isEvaluateOptions(second) ? second : options
+    return asCallable(
+      compileExpressionWithDeps(
+        boundParse,
+        boundMathScope,
+        first,
+        isEvaluateOptions(second) ? second : options
+      )
     );
   }
   return compileExpressionWithDeps(
@@ -242,4 +291,45 @@ export function compileExpression(
     third as string,
     options
   );
+}
+
+/**
+ * `map` / `filter` for the default scope. `rawArgs` so the callback expression
+ * is compiled against `math` (the stripped scope), not evaluated as a value.
+ */
+function createCallbackTransform(kind: 'map' | 'filter', keepOnTruthy: boolean) {
+  const transform = (args: MathNode[], math: Record<string, unknown>, scope: Scope): unknown => {
+    if (args.length < 2) {
+      throw new TypeError(`${kind} expects an array and a callback expression`);
+    }
+    const collection = compile(args[0] as MathNode, math).evaluate(scope);
+    if (!Array.isArray(collection)) {
+      throw new TypeError(`${kind} on the default evaluator expects an array`);
+    }
+    const callback = compileInlineExpression(
+      args[1] as unknown as Parameters<typeof compileInlineExpression>[0],
+      math,
+      scope as unknown as Map<string, unknown>
+    );
+    const out: unknown[] = [];
+    for (const item of collection) {
+      const value: unknown = callback(item);
+      if (keepOnTruthy) {
+        if (value) out.push(item);
+      } else {
+        out.push(value);
+      }
+    }
+    return out;
+  };
+  transform.rawArgs = true;
+  return transform;
+}
+
+/** `compileExpression('2+3')()` and `.evaluate()` share one compiled body. */
+function asCallable(compiled: CompiledExpression): CallableCompiledExpression {
+  const call = (scope?: Record<string, unknown> | Scope): unknown => compiled.evaluate(scope);
+  const fn = call as CallableCompiledExpression;
+  fn.evaluate = (scope?: Record<string, unknown> | Scope): unknown => compiled.evaluate(scope);
+  return fn;
 }

@@ -26,12 +26,12 @@ npm install @danielsimonjr/mathts-parser
   `getAssociativity`, `isAssociativeWith`, `getOperator`.
 - The associated TypeScript types (AST node types, parser/operator types).
 
-These are MathTS **factory functions**: wire them into a MathTS instance via
-`create()` / `typed-function`, exactly as you would when importing them from
-`@danielsimonjr/mathts-expression`.
+`parse(expr)` is ready to call. It does not import `@danielsimonjr/mathts-functions`. `createParse` is still the factory: pass your own scope when you are not using the default instance.
+
+The default parser is the sandboxed arithmetic parser. A literal outside IEEE-754 range throws `SyntaxError: Numeric overflow`. Evaluating that tree with `evaluate` (from `@danielsimonjr/mathts-expression` or `@danielsimonjr/mathts-evaluator`) rejects assignment unless you pass `{ unsafe: true }`.
 
 ```ts
-import { parse } from '@danielsimonjr/mathts-parser';
+import { parse, createParse } from '@danielsimonjr/mathts-parser';
 const ast = parse('2 + 3');
 ```
 

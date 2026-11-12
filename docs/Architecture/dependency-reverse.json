@@ -2900,14 +2900,19 @@
       "expression/src/default-instance.ts",
       "expression/src/index.ts"
     ],
-    "expression/src/evaluator/evaluate.ts": [
-      "expression/src/default-instance.ts",
-      "expression/src/evaluator/index.ts"
-    ],
     "expression/src/compiler/compile.ts": [
       "expression/src/compiler/index.ts",
       "expression/src/default-instance.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/src/evaluator/evaluate.ts": [
+      "expression/src/default-instance.ts",
+      "expression/src/evaluator/index.ts"
+    ],
+    "expression/src/transform/utils/compileInlineExpression.ts": [
+      "expression/src/default-instance.ts",
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/utils/prepareTransformArgs.ts"
     ],
     "expression/src/types.ts": [
       "expression/src/index.ts",
@@ -4257,10 +4262,6 @@
     "expression/src/transform/subset.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/utils/compileInlineExpression.ts": [
-      "expression/src/transform/map.transform.ts",
-      "expression/src/transform/utils/prepareTransformArgs.ts"
-    ],
     "expression/src/transform/utils/dimToZeroBase.ts": [
       "expression/src/transform/mapSlices.transform.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts"

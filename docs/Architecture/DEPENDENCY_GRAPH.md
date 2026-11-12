@@ -157,7 +157,7 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 13 files
-- **expression**: 11 files
+- **expression**: 12 files
 - **expression/compiler**: 2 files
 - **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 555            | 0               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 483            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5693,7 +5693,7 @@ graph LR
 
 | Package                            | Import                                                                                    |
 | ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpression`                                                       |
+| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpressionWithDeps`                                               |
 | `@danielsimonjr/mathts-core`       | `Complex, Fraction, I, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E, Unit, UnitInstance` |
 
 **Internal Dependencies:**
@@ -12729,6 +12729,51 @@ graph LR
 
 ---
 
+### `expression/src/default-instance.ts` - Default wired `parse` / `evaluate` for thin packages and one-liner use.
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                                           | Imports                                     | Type               |
+| ---------------------------------------------- | ------------------------------------------- | ------------------ |
+| `./parse.js`                                   | `createParse`                               | Import             |
+| `./node/Node.js`                               | `createNode`                                | Import             |
+| `./node/AccessorNode.js`                       | `createAccessorNode`                        | Import             |
+| `./node/ArrayNode.js`                          | `createArrayNode`                           | Import             |
+| `./node/AssignmentNode.js`                     | `createAssignmentNode`                      | Import             |
+| `./node/BlockNode.js`                          | `createBlockNode`                           | Import             |
+| `./node/ConditionalNode.js`                    | `createConditionalNode`                     | Import             |
+| `./node/ConstantNode.js`                       | `createConstantNode`                        | Import             |
+| `./node/FunctionAssignmentNode.js`             | `createFunctionAssignmentNode`              | Import             |
+| `./node/FunctionNode.js`                       | `createFunctionNode`                        | Import             |
+| `./node/IndexNode.js`                          | `createIndexNode`                           | Import             |
+| `./node/ObjectNode.js`                         | `createObjectNode`                          | Import             |
+| `./node/OperatorNode.js`                       | `createOperatorNode`                        | Import             |
+| `./node/ParenthesisNode.js`                    | `createParenthesisNode`                     | Import             |
+| `./node/RangeNode.js`                          | `createRangeNode`                           | Import             |
+| `./node/RelationalNode.js`                     | `createRelationalNode`                      | Import             |
+| `./node/SymbolNode.js`                         | `createSymbolNode`                          | Import             |
+| `./compiler/compile.js`                        | `compile`                                   | Import             |
+| `./evaluator/evaluate.js`                      | `createEvaluate, compileExpressionWithDeps` | Import             |
+| `./transform/utils/compileInlineExpression.js` | `compileInlineExpression`                   | Import             |
+| `./compiler/compile.js`                        | `CompiledExpression`                        | Import (type-only) |
+| `./evaluator/evaluate.js`                      | `EvaluateOptions`                           | Import (type-only) |
+| `./node/Node.js`                               | `MathNode`                                  | Import (type-only) |
+| `./compiler/compile.js`                        | `Scope`                                     | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `CallableCompiledExpression`
+- Functions: `parse`, `evaluate`, `compileExpression`, `compileExpression`, `compileExpression`
+- Constants: `defaultMathScope`
+
+---
+
 ### `expression/src/index.ts` - Expression parsing and evaluation for MathTS.
 
 **Internal Dependencies:**
@@ -12746,6 +12791,7 @@ graph LR
 | `./transform/index.js`             | `*`                                                                                                                                     | Re-export             |
 | `./function/parser.js`             | `createParser`                                                                                                                          | Re-export             |
 | `./embeddedDocs/embeddedDocs.js`   | `embeddedDocs`                                                                                                                          | Re-export             |
+| `./default-instance.js`            | `defaultMathScope`                                                                                                                      | Re-export             |
 | `./utils/mathml.js`                | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol`                                                                             | Re-export             |
 | `./node/Node.js`                   | `createNode`                                                                                                                            | Re-export             |
 | `./node/AccessorNode.js`           | `createAccessorNode`                                                                                                                    | Re-export             |
@@ -12775,7 +12821,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `getStringSubset`, `setStringSubset`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `enumerateScalars`, `scalarGrammarAccepts`, `MathNode`, `StringOptions`, `IndexLike`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`, `ScalarComplexityWeights`, `EnumerationBudget`, `EnumerationStop`, `ScalarGrammar`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `defaultMathScope`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `getStringSubset`, `setStringSubset`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `enumerateScalars`, `scalarGrammarAccepts`, `MathNode`, `StringOptions`, `IndexLike`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`, `ScalarComplexityWeights`, `EnumerationBudget`, `EnumerationStop`, `ScalarGrammar`
 
 ---
 
@@ -16571,21 +16617,23 @@ graph LR
 **Exports:**
 
 - Interfaces: `EvaluateOptions`
-- Functions: `createEvaluate`, `compileExpression`
+- Functions: `createEvaluate`, `compileExpressionWithDeps`
 
 ---
 
-### `expression/src/evaluator/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
+### `expression/src/evaluator/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)
 
 **Internal Dependencies:**
 
-| File            | Imports                             | Type      |
-| --------------- | ----------------------------------- | --------- |
-| `./evaluate.js` | `createEvaluate, compileExpression` | Re-export |
+| File                     | Imports                                     | Type                  |
+| ------------------------ | ------------------------------------------- | --------------------- |
+| `./evaluate.js`          | `createEvaluate, compileExpressionWithDeps` | Re-export             |
+| `../default-instance.js` | `compileExpression, evaluate, parse`        | Re-export             |
+| `./evaluate.js`          | `EvaluateOptions`                           | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `createEvaluate`, `compileExpression`
+- Re-exports: `createEvaluate`, `compileExpressionWithDeps`, `compileExpression`, `evaluate`, `parse`, `EvaluateOptions`
 
 ---
 
@@ -17716,13 +17764,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `createParse, createParserClass, createParser, createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, keywords, properties, getPrecedence, getAssociativity, isAssociativeWith, getOperator` |
+| Package                            | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-expression` | `parse, createParse, createParserClass, createParser, createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, keywords, properties, getPrecedence, getAssociativity, isAssociativeWith, getOperator` |
 
 **Exports:**
 
-- Re-exports: `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
+- Re-exports: `parse`, `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
 
 ---
 
@@ -17790,14 +17838,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                       |
-| ---------------------------------- | -------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `compile, createEvaluate, compileExpression` |
-| `@danielsimonjr/mathts-expression` | `CompiledExpression, Scope`                  |
+| Package                            | Import                                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `compile, createEvaluate, compileExpression, compileExpressionWithDeps, evaluate, parse` |
+| `@danielsimonjr/mathts-expression` | `CompiledExpression, Scope`                                                              |
 
 **Exports:**
 
-- Re-exports: `compile`, `createEvaluate`, `compileExpression`, `CompiledExpression`, `Scope`
+- Re-exports: `compile`, `createEvaluate`, `compileExpression`, `compileExpressionWithDeps`, `evaluate`, `parse`, `CompiledExpression`, `Scope`
 
 ---
 
@@ -19470,16 +19518,17 @@ graph LR
 | `functions/src/utils/collection`                       | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
-| `expression/src/index`                                 | 32 files     | 0 files    |
+| `expression/src/index`                                 | 33 files     | 0 files    |
 | `functions/src/typed/index`                            | 29 files     | 2 files    |
 | `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `matrix/src/types/DenseMatrix`                         | 5 files      | 22 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
-| `expression/src/node/Node`                             | 6 files      | 20 files   |
+| `expression/src/node/Node`                             | 6 files      | 21 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
+| `expression/src/default-instance`                      | 20 files     | 2 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `core/src/internal`                                    | 20 files     | 0 files    |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -19493,7 +19542,6 @@ graph LR
 | `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
 | `functions/src/typed/special`                          | 7 files      | 9 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
-| `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 
 ---
 
@@ -20047,15 +20095,15 @@ graph TD
     subgraph Expression
         N374[Help]
         N375[Parser]
-        N376[index]
-        N377[keywords]
-        N378[limits]
-        N379[operators]
-        N380[parse]
-        N381[scalar-builder]
-        N382[scalar-enumerate]
-        N383[scalar-structure]
-        N384[...1 more]
+        N376[default-instance]
+        N377[index]
+        N378[keywords]
+        N379[limits]
+        N380[operators]
+        N381[parse]
+        N382[scalar-builder]
+        N383[scalar-enumerate]
+        N384[...2 more]
     end
 
     subgraph Expression/compiler
@@ -20370,17 +20418,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1291   |
+| Total TypeScript Files  | 1292   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 221653 |
-| Total Exports           | 7082   |
-| Total Re-exports        | 3045   |
+| Total Lines of Code     | 222000 |
+| Total Exports           | 7095   |
+| Total Re-exports        | 3054   |
 | Total Classes           | 61     |
-| Total Interfaces        | 603    |
-| Total Functions         | 2402   |
+| Total Interfaces        | 604    |
+| Total Functions         | 2407   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 645    |
+| Type-only Imports       | 650    |
 | Runtime Circular Deps   | 1      |
 | Type-only Circular Deps | 0      |
 
