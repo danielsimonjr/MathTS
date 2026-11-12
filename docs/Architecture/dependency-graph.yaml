@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-12'
   totalFiles: 1291
   totalModules: 82
-  totalExports: 7076
+  totalExports: 7082
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -847,6 +847,8 @@ modules:
             - AmbiguousUnitError
             - DIMENSIONLESS
             - dim
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./types/unit.js
           imports:
@@ -1114,6 +1116,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -1310,6 +1314,8 @@ modules:
         - AmbiguousUnitError
         - DIMENSIONLESS
         - dim
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -2851,6 +2857,10 @@ modules:
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
+        - file: ./unit-types.js
+          imports:
+            - LogarithmicUnitKind
+          typeOnly: true
         - file: ./errors.js
           imports:
             - AmbiguousUnitError
@@ -2890,11 +2900,13 @@ modules:
             - unitPrefixExactScale
       workspaceDependencies: []
       exports:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
         - unitReadingSearchSteps
       functions:
         - unitReadingSearchSteps
       constants:
+        - MAX_UNIT_STRING_LENGTH
         - createUnitClass
     core/src/types/unit/dependencies.ts:
       description: The dependency object injected into the relocated mathjs `Unit` factory
@@ -3045,6 +3057,8 @@ modules:
         - file: ./Unit.js
           imports:
             - createUnitClass
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./dependencies.js
           imports:
@@ -3143,6 +3157,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3219,6 +3235,8 @@ modules:
         - UnitPrefix
       reExported:
         - createUnitClass
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - unitDependencies
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
@@ -3458,6 +3476,8 @@ modules:
             - Unit
             - createUnitClass
             - unitDependencies
+            - unitReadingSearchSteps
+            - MAX_UNIT_STRING_LENGTH
           reExport: true
         - file: ./unit/index.js
           imports:
@@ -3556,6 +3576,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -3621,6 +3643,8 @@ modules:
         - Unit
         - createUnitClass
         - unitDependencies
+        - unitReadingSearchSteps
+        - MAX_UNIT_STRING_LENGTH
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -5553,6 +5577,9 @@ modules:
         - file: ./dense/reduction.js
           imports:
             - '* as reduction'
+        - file: ./dense/limits.js
+          imports:
+            - assertDenseMatrixSize
         - file: ./dense/storage.js
           imports:
             - contiguousDenseData
@@ -5635,6 +5662,19 @@ modules:
         - multiply
         - scale
         - transpose
+    matrix/src/types/dense/limits.ts:
+      description: Preflight limits for dense matrix allocation (DoS guard).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
+      functions:
+        - assertDenseMatrixSize
+      constants:
+        - DENSE_MATRIX_MAX_ELEMENTS
     matrix/src/types/dense/reduction.ts:
       description: Add all elements of a matrix.
       externalDependencies: []
@@ -5691,6 +5731,11 @@ modules:
             - DenseMatrix
             - isDenseMatrix
           reExport: true
+        - file: ./dense/limits.js
+          imports:
+            - DENSE_MATRIX_MAX_ELEMENTS
+            - assertDenseMatrixSize
+          reExport: true
         - file: ./SparseMatrix.js
           imports:
             - SparseMatrix
@@ -5711,6 +5756,8 @@ modules:
         - isMatrix
         - DenseMatrix
         - isDenseMatrix
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
         - SparseMatrix
         - isSparseMatrix
         - MatrixDimensions
@@ -5723,6 +5770,8 @@ modules:
         - isMatrix
         - DenseMatrix
         - isDenseMatrix
+        - DENSE_MATRIX_MAX_ELEMENTS
+        - assertDenseMatrixSize
         - SparseMatrix
         - isSparseMatrix
         - MatrixDimensions
@@ -6528,7 +6577,11 @@ modules:
           imports:
             - Tape
             - TapedTensor
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
       exports:
         - valueAndGrad
         - grad
@@ -14001,7 +14054,7 @@ modules:
           directory: expression
           imports:
             - createEvaluate
-            - compileExpressionWithDeps
+            - compileExpression
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -23184,6 +23237,8 @@ modules:
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+            - f64UnaryDispatched
+            - unaryCollection
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
@@ -23199,9 +23254,6 @@ modules:
           imports:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
-        - file: ../wasm/elementwise/wasm-bridge.js
-          imports:
-            - elementwiseUnaryDispatch
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
@@ -23212,7 +23264,10 @@ modules:
             - log10Real
             - log2Real
             - log1pReal
+            - staysRealLog
+            - staysRealLog1p
             - sqrtReal
+            - staysRealSqrt
             - powReal
             - nthRootReal
       workspaceDependencies:
@@ -23643,26 +23698,38 @@ modules:
             - Fraction
       exports:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
       functions:
         - isPredictableMode
+        - staysRealLog
         - logReal
         - logRealBase
         - log10Real
         - log2Real
+        - staysRealLog1p
         - log1pReal
+        - staysRealSqrt
         - sqrtReal
         - powReal
         - nthRootReal
+        - staysRealUnitInterval
+        - staysRealAcosh
+        - staysRealAbsAtLeastOne
         - acscReal
         - asecReal
     functions/src/typed/complex.ts:
@@ -23844,12 +23911,26 @@ modules:
       description: Shared element-wise kernel for the synchronous typed Float64Array signatures.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
+      internalDependencies:
+        - file: ../wasm/elementwise/wasm-bridge.js
+          imports:
+            - elementwiseUnaryDispatch
+            - WasmElementwiseOp
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - f64Unary
+        - f64UnaryDispatched
+        - unaryCollection
+      interfaces:
+        - UnaryRealSpec
       functions:
         - f64Unary
+        - f64UnaryDispatched
+        - unaryCollection
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -25882,16 +25963,17 @@ modules:
           imports:
             - acscReal
             - asecReal
-            - isPredictableMode
+            - staysRealAbsAtLeastOne
+            - staysRealAcosh
+            - staysRealUnitInterval
         - file: ./f64-kernels.js
           imports:
             - f64Unary
+            - f64UnaryDispatched
+            - unaryCollection
         - file: ./trig-angle-unit.js
           imports:
             - trigFromAngleUnit
-        - file: ../wasm/elementwise/wasm-bridge.js
-          imports:
-            - elementwiseUnaryDispatch
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -27739,100 +27821,6 @@ modules:
         - createParserClass
       constants:
         - createParserClass
-    expression/src/default-instance.ts:
-      description: Default wired `parse` / `evaluate` for thin packages and one-liner use.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./parse.js
-          imports:
-            - createParse
-        - file: ./node/Node.js
-          imports:
-            - createNode
-        - file: ./node/AccessorNode.js
-          imports:
-            - createAccessorNode
-        - file: ./node/ArrayNode.js
-          imports:
-            - createArrayNode
-        - file: ./node/AssignmentNode.js
-          imports:
-            - createAssignmentNode
-        - file: ./node/BlockNode.js
-          imports:
-            - createBlockNode
-        - file: ./node/ConditionalNode.js
-          imports:
-            - createConditionalNode
-        - file: ./node/ConstantNode.js
-          imports:
-            - createConstantNode
-        - file: ./node/FunctionAssignmentNode.js
-          imports:
-            - createFunctionAssignmentNode
-        - file: ./node/FunctionNode.js
-          imports:
-            - createFunctionNode
-        - file: ./node/IndexNode.js
-          imports:
-            - createIndexNode
-        - file: ./node/ObjectNode.js
-          imports:
-            - createObjectNode
-        - file: ./node/OperatorNode.js
-          imports:
-            - createOperatorNode
-        - file: ./node/ParenthesisNode.js
-          imports:
-            - createParenthesisNode
-        - file: ./node/RangeNode.js
-          imports:
-            - createRangeNode
-        - file: ./node/RelationalNode.js
-          imports:
-            - createRelationalNode
-        - file: ./node/SymbolNode.js
-          imports:
-            - createSymbolNode
-        - file: ./evaluator/evaluate.js
-          imports:
-            - createEvaluate
-            - compileExpressionWithDeps
-        - file: ./compiler/compile.js
-          imports:
-            - CompiledExpression
-          typeOnly: true
-        - file: ./evaluator/evaluate.js
-          imports:
-            - EvaluateOptions
-          typeOnly: true
-        - file: ./node/Node.js
-          imports:
-            - MathNode
-          typeOnly: true
-        - file: ./compiler/compile.js
-          imports:
-            - Scope
-          typeOnly: true
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
-          directory: core
-          imports:
-            - mathTyped
-      exports:
-        - defaultMathScope
-        - parse
-        - evaluate
-        - compileExpression
-      functions:
-        - parse
-        - evaluate
-        - compileExpression
-        - compileExpression
-        - compileExpression
-      constants:
-        - defaultMathScope
     expression/src/index.ts:
       description: Expression parsing and evaluation for MathTS.
       externalDependencies: []
@@ -27881,10 +27869,6 @@ modules:
         - file: ./embeddedDocs/embeddedDocs.js
           imports:
             - embeddedDocs
-          reExport: true
-        - file: ./default-instance.js
-          imports:
-            - defaultMathScope
           reExport: true
         - file: ./utils/mathml.js
           imports:
@@ -28022,7 +28006,6 @@ modules:
       exports:
         - createParser
         - embeddedDocs
-        - defaultMathScope
         - mathMLDocument
         - mathMLError
         - escapeMathML
@@ -28084,7 +28067,6 @@ modules:
         - '* from ./transform/index.js'
         - createParser
         - embeddedDocs
-        - defaultMathScope
         - mathMLDocument
         - mathMLError
         - escapeMathML
@@ -33761,48 +33743,29 @@ modules:
       workspaceDependencies: []
       exports:
         - createEvaluate
-        - compileExpressionWithDeps
+        - compileExpression
       interfaces:
         - EvaluateOptions
       functions:
         - createEvaluate
-        - compileExpressionWithDeps
+        - compileExpression
     expression/src/evaluator/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./evaluate.js
           imports:
             - createEvaluate
-            - compileExpressionWithDeps
-          reExport: true
-        - file: ../default-instance.js
-          imports:
             - compileExpression
-            - evaluate
-            - parse
           reExport: true
-        - file: ./evaluate.js
-          imports:
-            - EvaluateOptions
-          reExport: true
-          typeOnly: true
       workspaceDependencies: []
       exports:
         - createEvaluate
-        - compileExpressionWithDeps
         - compileExpression
-        - evaluate
-        - parse
-        - EvaluateOptions
       reExported:
         - createEvaluate
-        - compileExpressionWithDeps
         - compileExpression
-        - evaluate
-        - parse
-        - EvaluateOptions
   expression/function:
     expression/src/function/parser.ts:
       description: >-
@@ -35818,7 +35781,6 @@ modules:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
           imports:
-            - parse
             - createParse
             - createParserClass
             - createParser
@@ -35845,7 +35807,6 @@ modules:
             - isAssociativeWith
             - getOperator
       exports:
-        - parse
         - createParse
         - createParserClass
         - createParser
@@ -35872,7 +35833,6 @@ modules:
         - isAssociativeWith
         - getOperator
       reExported:
-        - parse
         - createParse
         - createParserClass
         - createParser
@@ -36295,9 +36255,6 @@ modules:
             - compile
             - createEvaluate
             - compileExpression
-            - compileExpressionWithDeps
-            - evaluate
-            - parse
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
           imports:
@@ -36307,18 +36264,12 @@ modules:
         - compile
         - createEvaluate
         - compileExpression
-        - compileExpressionWithDeps
-        - evaluate
-        - parse
         - CompiledExpression
         - Scope
       reExported:
         - compile
         - createEvaluate
         - compileExpression
-        - compileExpressionWithDeps
-        - evaluate
-        - parse
         - CompiledExpression
         - Scope
   linalg:
@@ -42607,6 +42558,7 @@ dependencyGraph:
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
         - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/dense/limits.ts
         - matrix/src/types/dense/reduction.ts
         - matrix/src/types/dense/storage.ts
         - matrix/src/types/index.ts
@@ -43273,7 +43225,6 @@ dependencyGraph:
       files:
         - expression/src/Help.ts
         - expression/src/Parser.ts
-        - expression/src/default-instance.ts
         - expression/src/index.ts
         - expression/src/keywords.ts
         - expression/src/limits.ts
@@ -43929,16 +43880,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1291
   totalModules: 82
-  totalLinesOfCode: 220747
-  totalExports: 7076
+  totalLinesOfCode: 221653
+  totalExports: 7082
   totalClasses: 61
-  totalInterfaces: 602
-  totalFunctions: 2398
+  totalInterfaces: 603
+  totalFunctions: 2402
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1648
-  totalReExports: 3046
-  totalTypeOnlyImports: 649
+  totalConstants: 1649
+  totalReExports: 3045
+  totalTypeOnlyImports: 645
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

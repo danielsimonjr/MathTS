@@ -15,6 +15,8 @@ npm install @danielsimonjr/mathts-units
 ## What it exports
 
 - `Unit` -- dimensional quantity class (`new Unit(5, 'km')`), with `.to()`, `.toBest()`, `.value`, `.type`.
+- **`.value` is the SI magnitude** (radians for angles, meters per second after `.to('m/s')`, etc.). For a number in the unit's current display, use `.toNumber('deg')`, `.toJSON().value`, or `String(u)`.
+- **Logarithmic units.** `dB` and `dBW` are power quantities (`10 log10` of a power ratio). `dBm` is power referred to 1 mW (`0 dBm` = 1 mW). `Np` is a field quantity (`ln` of an amplitude ratio), so `1 Np` = `20/ln(10)` dB. `B` is the byte (8 bit), not the bel.
 - `isUnit` / `isUnitValue` -- type guards.
 - `DimensionMismatchError`, `UnitParseError` -- error types.
 - Registry: `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`.
@@ -24,7 +26,10 @@ npm install @danielsimonjr/mathts-units
 
 ```ts
 import { Unit } from '@danielsimonjr/mathts-units';
+// After .to('m/s'), .value is SI (m/s):
 new Unit(100, 'km/h').to('m/s').value; // 27.777...
+// For 180° in degrees, not radians, use .toNumber('deg'):
+new Unit(180, 'deg').toNumber('deg'); // 180
 ```
 
 ## License

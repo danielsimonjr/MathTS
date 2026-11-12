@@ -103,6 +103,9 @@ export interface UnitRow {
    * means the unit is not a cycle count (`cycle` is already 2π radians).
    */
   readonly cycles?: true;
+  /** Log-domain unit (dB, dBm, Np, …): stored internally as a linear SI magnitude. */
+  readonly logarithmic?:
+    'decibel-power' | 'decibel-amplitude' | 'neper' | 'decibel-re-1mw' | 'decibel-re-1w';
 }
 
 /** One prefix: the factor `radix^power`, and whether `toBest` may pick it. */
@@ -450,6 +453,13 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   percent: { base: 'NONE', prefixes: 'NONE', scale: '1e-2' },
   ppm: { base: 'NONE', prefixes: 'NONE', scale: '1e-6' },
   ppb: { base: 'NONE', prefixes: 'NONE', scale: '1e-9' },
+  // dB / dBW are power quantities (10 log10 of a power ratio). dBm is power
+  // referred to 1 mW (0 dBm = 1 mW). Np is a field quantity (ln of an amplitude
+  // ratio): 1 Np = 20/ln(10) dB. `B` above stays the byte, not the bel.
+  dB: { base: 'NONE', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-power' },
+  dBm: { base: 'POWER', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-re-1mw' },
+  dBW: { base: 'POWER', prefixes: 'NONE', scale: '1', logarithmic: 'decibel-re-1w' },
+  Np: { base: 'NONE', prefixes: 'NONE', scale: '1', logarithmic: 'neper' },
 
   // IAU 2012 B2 astronomical unit, also spelled `au` (alias). The Bohr radius is
   // the constant bohrRadius, not a unit of this name.
@@ -641,21 +651,15 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
 });
 
 /**
- * Unit spellings the parser refuses. Each maps a spelling to the reason it is
- * not a unit of fixed scale: the logarithmic units (dB, dBm, dBW, Np) convert
- * no multiplicative scale, and Mach is a ratio to the local speed of sound.
- * Where the parser would report a unit as not found, a spelling here gets a
- * `UnitParseError` with this reason instead.
+ * Unit spellings the parser refuses. Mach is a ratio to the local speed of
+ * sound (no single fixed scale). Where the parser would report a unit as not
+ * found, a spelling here gets a `UnitParseError` with this reason instead.
  *
  * A lookup MUST use `Object.hasOwn` or a null-prototype object, so a spelling
  * like `__proto__` or `toString` never reads off `Object.prototype` as a
  * refused reason.
  */
 export const REFUSED_UNIT_SPELLINGS: Readonly<Record<string, string>> = Object.freeze({
-  dB: 'dB is a logarithmic unit; give the quantity in its linear unit, or a reference level',
-  dBm: 'dBm is a logarithmic unit (decibels over 1 mW); give watts',
-  dBW: 'dBW is a logarithmic unit (decibels over 1 W); give watts',
-  Np: 'Np is a logarithmic unit (the neper); give the quantity in its linear unit, or a reference level',
   Mach: 'Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
   mach: 'mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
 });
