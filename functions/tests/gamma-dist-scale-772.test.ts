@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { gammaDist } from '../src/typed/dist-objects.js';
+import { gammaCDF } from '../src/distribution-functions.js';
 
 /**
  * SciPy `scipy.stats.gamma(a, scale=scale)` reference values (SciPy 1.17).
@@ -146,5 +147,12 @@ describe('#772 gammaDist rate vs SciPy scale', () => {
       expect(() => gammaDist({ shape: v, scale: 1 })).toThrow(/shape/);
       expect(() => gammaDist({ shape: 2, scale: v })).toThrow(/scale/);
     }
+  });
+
+  it('gammaCDF stays NaN for a non-finite shape or rate', () => {
+    expect(gammaCDF(0.5, NaN)).toBeNaN();
+    expect(gammaCDF(0.5, Infinity)).toBeNaN();
+    expect(gammaCDF(0.5, 2, NaN)).toBeNaN();
+    expect(gammaCDF(1, 2, 2)).toBeCloseTo(gammaDist(2, 2).cdf(1), 12);
   });
 });

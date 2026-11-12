@@ -63,8 +63,13 @@ export const fSF = (x: number, d1: number, d2: number): number => {
   return betaincScalar(d2 / 2, d1 / 2, d2 / (d2 + d1 * x));
 };
 
-/** Gamma CDF / quantile (shape `k`, rate `θ⁻¹`). */
-export const gammaCDF = (x: number, shape: number, rate = 1): number => gammaD(shape, rate).cdf(x);
+/**
+ * Gamma CDF / quantile (shape `k`, rate `θ⁻¹`).
+ * A non-finite shape or rate returns NaN. `gammaDist` itself throws on those
+ * parameters; this free function keeps the plain-scalar NaN contract.
+ */
+export const gammaCDF = (x: number, shape: number, rate = 1): number =>
+  !Number.isFinite(shape) || !Number.isFinite(rate) ? NaN : gammaD(shape, rate).cdf(x);
 export const gammaQuantile = (p: number, shape: number, rate = 1): number =>
   nanIn(p, shape, rate) ? NaN : gammaD(shape, rate).quantile(p);
 

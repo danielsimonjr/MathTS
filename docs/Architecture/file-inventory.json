@@ -6288,7 +6288,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 115
+      "loc": 120
     },
     {
       "file": "functions/src/error/ArgumentsError.ts",
@@ -10341,7 +10341,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 151
+      "loc": 159
     },
     {
       "file": "functions/tests/gap-2026-11-matrix-reexports.test.ts",
