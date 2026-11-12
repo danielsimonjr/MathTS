@@ -6,6 +6,7 @@ import {
   isConstantExpression,
 } from './simplify/wildcards.js';
 import { factory } from '../utils/factory.js';
+import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { createUtil } from './simplify/util.js';
 import { hasOwnProperty } from '../utils/object.js';
 import { createEmptyMap, createMap } from '../utils/map.js';
@@ -802,6 +803,12 @@ export const createSimplify = /* #__PURE__ */ factory(
           unflattenl(res as MathNode & { args?: MathNode[] }, options.context);
         }
         str = res.toString({ parenthesis: 'all' });
+      }
+      if (/\^\s*2\b/.test(str) && /[+-]/.test(str)) {
+        const canonical = tryPolynomialCanonicalForm(str);
+        if (canonical && canonical !== str) {
+          return parse(canonical);
+        }
       }
       return res;
     }

@@ -33,6 +33,10 @@ import {
 import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
+import {
+  collapseIdenticalFactors,
+  tryPolynomialCanonicalForm,
+} from '../cas/polynomial-canonical.js';
 
 // =============================================================================
 // Type Aliases
@@ -1083,14 +1087,14 @@ export function factor(expr: string): string {
           } else if (remainder[0] !== 1) {
             factors.unshift(String(remainder[0]));
           }
-          return factors.join('*');
+          return collapseIdenticalFactors(factors.join('*'));
         }
         // No rational root remained: attempt a full higher-degree
         // factorization over ℤ/ℚ (e.g. x^4 + 3x^2 + 2 → (x^2+1)(x^2+2)).
         // The engine returns null for Q-irreducible inputs, so those fall
         // through to the legacy content-extraction path unchanged.
         const routed = factorPolynomialUnivariate(expr, v);
-        if (routed !== null) return routed;
+        if (routed !== null) return collapseIdenticalFactors(routed);
       }
     } catch (err) {
       // Not a pure single-variable integer polynomial, or no rational root
@@ -1648,6 +1652,9 @@ export function fullSimplify(expr: string): string {
 
   // Try numeric reduction
   result = reduce(result);
+
+  const canonical = tryPolynomialCanonicalForm(result);
+  if (canonical) result = canonical;
 
   return result;
 }

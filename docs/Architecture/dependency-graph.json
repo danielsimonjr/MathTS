@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1293,
+    "totalFiles": 1296,
     "totalModules": 82,
-    "totalExports": 7086
+    "totalExports": 7090
   },
   "entryPoints": [
     {
@@ -7167,6 +7167,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../typed/algebra.js",
+            "imports": ["expand"]
+          },
+          {
             "file": "../utils/node.js",
             "imports": [
               "MathNode",
@@ -7305,6 +7309,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["tryPolynomialCanonicalForm"]
           },
           {
             "file": "./simplify/util.js",
@@ -14064,6 +14072,15 @@
       }
     },
     "functions/cas": {
+      "functions/src/cas/antiderivative.ts": {
+        "description": "Shared symbolic antiderivatives for CAS integrate paths (G21).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["antiderivativeReciprocal"],
+        "functions": ["antiderivativeReciprocal"]
+      },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
         "externalDependencies": [],
@@ -14121,6 +14138,24 @@
           "rothsteinTrager",
           "integrateLayer3"
         ]
+      },
+      "functions/src/cas/polynomial-canonical.ts": {
+        "description": "Canonical polynomial forms for CAS simplify / factor (G21).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/algebra.js",
+            "imports": ["expand", "factor", "variables"]
+          },
+          {
+            "file": "../typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression", "polyToDenseCoefficients"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"],
+        "functions": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"]
       },
       "functions/src/cas/rat.ts": {
         "description": "Exact rational arithmetic (lowest-terms, positive denominator).",
@@ -22235,6 +22270,21 @@
         "exports": ["createStd"],
         "constants": ["createStd"]
       },
+      "functions/src/statistics/sum-indexed-guard.ts": {
+        "description": "Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex"]
+          }
+        ],
+        "exports": ["rejectMisusedIndexedSum"],
+        "functions": ["rejectMisusedIndexedSum"]
+      },
       "functions/src/statistics/sum.ts": {
         "description": "Check if an array is a flat array of plain numbers",
         "externalDependencies": [],
@@ -22251,6 +22301,10 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
+          },
+          {
+            "file": "./sum-indexed-guard.js",
+            "imports": ["rejectMisusedIndexedSum"]
           },
           {
             "file": "../core/function/typed.js",
@@ -24686,6 +24740,10 @@
           {
             "file": "./string-derivative.js",
             "imports": ["derivativeOfAdditiveTerms"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"]
           }
         ],
         "workspaceDependencies": [],
@@ -25069,12 +25127,20 @@
             "imports": ["expand", "factor"]
           },
           {
-            "file": "./string-derivative.js",
-            "imports": ["derivativeOfAdditiveTerms"]
+            "file": "../factories/index.js",
+            "imports": ["polynomialRoot", "derivative"]
           },
           {
-            "file": "../factories/index.js",
-            "imports": ["polynomialRoot"]
+            "file": "../cas/antiderivative.js",
+            "imports": ["antiderivativeReciprocal"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["tryPolynomialCanonicalForm"]
+          },
+          {
+            "file": "../numeric/adaptive-quad.js",
+            "imports": ["quad"]
           },
           {
             "file": "../numeric/numeric-jacobian.js",
@@ -44787,11 +44853,16 @@
   "dependencyGraph": {
     "circularDependencies": {
       "runtime": [
-        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"]
+        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"],
+        [
+          "functions/src/typed/algebra.ts",
+          "functions/src/cas/polynomial-canonical.ts",
+          "functions/src/typed/algebra.ts"
+        ]
       ],
       "typeOnly": [],
-      "total": 1,
-      "runtimeCount": 1,
+      "total": 2,
+      "runtimeCount": 2,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -45163,7 +45234,9 @@
       {
         "name": "Functions/cas",
         "files": [
+          "functions/src/cas/antiderivative.ts",
           "functions/src/cas/layer3.ts",
+          "functions/src/cas/polynomial-canonical.ts",
           "functions/src/cas/rat.ts",
           "functions/src/cas/rational-integrate.ts",
           "functions/src/cas/real-roots.ts",
@@ -45512,6 +45585,7 @@
           "functions/src/statistics/prod.ts",
           "functions/src/statistics/quantileSeq.ts",
           "functions/src/statistics/std.ts",
+          "functions/src/statistics/sum-indexed-guard.ts",
           "functions/src/statistics/sum.ts",
           "functions/src/statistics/utils/improveErrorMessage.ts",
           "functions/src/statistics/variance.ts"
@@ -46448,19 +46522,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1293,
+    "totalTypeScriptFiles": 1296,
     "totalModules": 82,
-    "totalLinesOfCode": 221915,
-    "totalExports": 7086,
+    "totalLinesOfCode": 222115,
+    "totalExports": 7090,
     "totalClasses": 61,
     "totalInterfaces": 606,
-    "totalFunctions": 2405,
+    "totalFunctions": 2409,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1650,
     "totalReExports": 3047,
     "totalTypeOnlyImports": 651,
-    "runtimeCircularDeps": 1,
+    "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0
