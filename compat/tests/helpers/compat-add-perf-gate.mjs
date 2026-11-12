@@ -1,53 +1,60 @@
 /**
  * Isolated Node gate for #735: create(all).add(1,2) vs mathjs.
- * stdout: one JSON line { ratio, mathTsMs, mjMs }.
+ * stdout: one JSON line { ratio, mathTsMs, mjMs, parity }.
  */
 import { create, all } from '../../dist/index.js';
 import { create as mjCreate, all as mjAll } from 'mathjs';
+import {
+  candidateTimeScale,
+  gatePasses,
+  median,
+} from '../../../tools/test/wall-clock-perf-gate.mjs';
 
 const mt = create(all);
 const mj = mjCreate(mjAll);
-// 5_000 adds finish in tens of microseconds, inside performance.now()
-// noise, so a quiet machine and a busy one disagree by more than the
-// 2.0 gate. A million calls puts each sample in the millisecond range.
+// 5_000 adds finish inside the performance.now() quantum. A million calls
+// puts each sample in the millisecond range. Bound stays < 2.0.
 const n = 1_000_000;
+const slowScale = candidateTimeScale();
 
-function median(xs) {
-  const s = [...xs].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
-}
-
-function timeLoop(fn) {
+function timeLoop(body, arm) {
   const t0 = performance.now();
-  for (let i = 0; i < n; i++) fn();
-  return performance.now() - t0;
+  for (let i = 0; i < n; i++) body();
+  let dt = performance.now() - t0;
+  if (arm === 'candidate') dt *= slowScale;
+  return dt;
 }
 
-// Extra warmup under CI turbo contention (G26 #735 gate was ~2.05 at 12 ABBA rounds).
 for (let w = 0; w < 50; w++) {
   mj.add(1, 2);
   mt.add(1, 2);
 }
 
-const ra = [];
-const rb = [];
+const mjTimes = [];
+const mtTimes = [];
+const roundRatios = [];
 for (let r = 0; r < 16; r++) {
+  let mjMs;
+  let mtMs;
   if (r % 2 === 0) {
-    ra.push(timeLoop(() => mj.add(1, 2)));
-    rb.push(timeLoop(() => mt.add(1, 2)));
+    mjMs = timeLoop(() => mj.add(1, 2), 'baseline');
+    mtMs = timeLoop(() => mt.add(1, 2), 'candidate');
   } else {
-    rb.push(timeLoop(() => mt.add(1, 2)));
-    ra.push(timeLoop(() => mj.add(1, 2)));
+    mtMs = timeLoop(() => mt.add(1, 2), 'candidate');
+    mjMs = timeLoop(() => mj.add(1, 2), 'baseline');
   }
+  mjTimes.push(mjMs);
+  mtTimes.push(mtMs);
+  if (mjMs > 0) roundRatios.push(mtMs / mjMs);
 }
 
-const ratio = median(rb) / median(ra);
+const ratio = median(roundRatios);
 process.stdout.write(
   JSON.stringify({
     ratio,
-    mathTsMs: median(rb),
-    mjMs: median(ra),
+    mathTsMs: median(mtTimes),
+    mjMs: median(mjTimes),
     parity: mt.add(1, 2),
+    gateWouldPass: gatePasses(ratio, 2.0),
   }) + '\n'
 );

@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { nodeBinary } from './helpers/node-binary.js';
 import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index.js';
-import { lu, luSolve } from '@danielsimonjr/mathts-matrix';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
 
 describe('G26 #712 sort on number[]', () => {
@@ -67,52 +66,12 @@ describe('G26 #712 median quickselect path', () => {
 });
 
 describe('G26 #694 lusolve uses packed matrix lu', () => {
-  it('n=1000 median ≤ 1.2× matrix lu+luSolve (issue AC)', () => {
-    const n = 1000;
-    let s = 42;
-    const rnd = () => {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return s / 0xffffffff;
-    };
-    const M = Array.from({ length: n }, () => Array(n).fill(0));
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        const v = rnd();
-        M[i][j] += v;
-        M[j][i] += v;
-      }
-      M[i][i] += n;
-    }
-    const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
-    const fac = () => {
-      luSolve(lu(M), b);
-    };
-    const solve = () => {
-      lusolve(M, b);
-    };
-    // Both arms, before the timed ABBA loop. A 7-sample median on Node 22
-    // read 1.23 under CI load while Node 20 stayed under 1.2. The bound stays 1.2.
-    for (let i = 0; i < 6; i++) {
-      fac();
-      solve();
-    }
-    const facTimes: number[] = [];
-    const solveTimes: number[] = [];
-    for (let i = 0; i < 15; i++) {
-      const order = i % 2 === 0 ? [fac, solve] : [solve, fac];
-      for (const fn of order) {
-        const t0 = performance.now();
-        fn();
-        const dt = performance.now() - t0;
-        if (fn === fac) facTimes.push(dt);
-        else solveTimes.push(dt);
-      }
-    }
-    facTimes.sort((a, c) => a - c);
-    solveTimes.sort((a, c) => a - c);
-    const tFac = facTimes[Math.floor(facTimes.length / 2)] ?? 0;
-    const tSolve = solveTimes[Math.floor(solveTimes.length / 2)] ?? 0;
-    expect(tSolve / tFac).toBeLessThan(1.2);
+  it('n=1000 ABBA median ≤ 1.2× matrix lu+luSolve (isolated Node gate)', () => {
+    const gate = fileURLToPath(new URL('./helpers/lusolve-perf-gate.mjs', import.meta.url));
+    const raw = execFileSync(nodeBinary(), [gate], { encoding: 'utf8' }).trim();
+    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
+    expect(Number.isFinite(checksum)).toBe(true);
+    expect(ratio).toBeLessThan(1.2);
   }, 120_000);
 
   it('2×2 closed form', () => {

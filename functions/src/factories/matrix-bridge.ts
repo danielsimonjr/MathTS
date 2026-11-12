@@ -13,13 +13,13 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
-// Pre-initialise the shared backend manager so the accelerated `multiply` /
-// `transpose` instance methods can reach WASM/GPU once init resolves. Until
-// then they route to the synchronous JS backend — correct, just not yet
-// accelerated. Fire-and-forget: failures fall back to JS silently.
-void backendManager.initialize().catch(() => {
-  /* JS backend remains available */
-});
+// Do not call `backendManager.initialize()` at import time. That compiles and
+// instantiates the AssemblyScript module on every process that loads the
+// factory graph, including each `bun test --isolate` worker. On Bun 1.4.2 the
+// instantiate callback races the test runner (`JSWebAssemblyInstance::finalizeCreation`
+// null unwrap, SIGSEGV, reported as exit 137) while peak RSS stays ~0.37 GB.
+// `multiply` / `transpose` stay on the synchronous JS backend until a caller
+// initializes the manager explicitly.
 
 /** The subset of the mathjs `Index` API the bridge matrices consume. */
 interface MatrixIndexLike {

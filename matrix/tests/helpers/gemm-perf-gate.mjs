@@ -1,9 +1,10 @@
 /**
  * Isolated Node gate for #693: DenseMatrix.multiply vs ml-matrix mmul at n=1000.
- * stdout: one JSON line { ratio, mathTsMs, mlMs }.
+ * stdout: one JSON line { ratio, mathTsMs, mlMs, checksum }.
  */
 import { DenseMatrix } from '../../dist/index.js';
 import { Matrix as MLMatrix } from 'ml-matrix';
+import { gatePasses, wallClockAbRatio } from '../../../tools/test/wall-clock-perf-gate.mjs';
 
 function randSpd(n, seed) {
   let s = seed;
@@ -31,61 +32,30 @@ const BD = DenseMatrix.fromArray(B);
 const AM = new MLMatrix(A);
 const BM = new MLMatrix(B);
 
-function median(samples) {
-  const s = [...samples].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
-}
-
-function timeMl() {
-  const t0 = performance.now();
-  AM.mmul(BM);
-  return performance.now() - t0;
-}
-
-function timeMathTs() {
-  const t0 = performance.now();
-  AD.multiply(BD);
-  return performance.now() - t0;
-}
-
-for (let w = 0; w < 6; w++) {
-  if (w % 2 === 0) {
-    timeMathTs();
-    timeMl();
-  } else {
-    timeMl();
-    timeMathTs();
-  }
-}
-
-const mathTsTimes = [];
-const mlTimes = [];
-const ratios = [];
 let checksum = 0;
-for (let r = 0; r < 9; r++) {
-  const mathTsFirst = r % 2 === 0;
-  let mathTsMs;
-  let mlMs;
-  if (mathTsFirst) {
-    mathTsMs = timeMathTs();
-    mlMs = timeMl();
-  } else {
-    mlMs = timeMl();
-    mathTsMs = timeMathTs();
-  }
-  mathTsTimes.push(mathTsMs);
-  mlTimes.push(mlMs);
-  ratios.push(mathTsMs / mlMs);
-  checksum += mathTsMs + mlMs;
-}
 
-const ratio = median(ratios);
+const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
+  () => {
+    AM.mmul(BM);
+    checksum += 1;
+  },
+  () => {
+    AD.multiply(BD);
+    checksum += 1;
+  },
+  {
+    skipSymmetricWarmup: true,
+    fullWarmupPairs: 4,
+    sample: { samplePairs: 9, gcBetween: false },
+  }
+);
+
 process.stdout.write(
   JSON.stringify({
     ratio,
-    mathTsMs: median(mathTsTimes),
-    mlMs: median(mlTimes),
+    mathTsMs: candidateMs,
+    mlMs: baselineMs,
     checksum,
+    gateWouldPass: gatePasses(ratio, 1.15),
   }) + '\n'
 );
