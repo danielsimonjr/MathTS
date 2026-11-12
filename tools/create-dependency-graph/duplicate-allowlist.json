@@ -582,6 +582,11 @@
       "names": ["substitute"],
       "filesGlob": ["functions/src/typed/factorization/kronecker.ts"],
       "reason": "same name, different function (distinct-by-domain): functions/src/typed/factorization/kronecker.ts's substitute(p: MultiPoly, bases): IntPoly performs Kronecker substitution xₖ↦x^{bₖ}, collapsing a multivariate bigint poly to its univariate image; functions/src/typed/algebra.ts's substitute (left canonical) is the CAS string/AST variable substitution. Surfaced as TRUE_DUPLICATE only once factor() wired the Layer-2 engine into the live graph (2026-07-20). 2026-07 factorization Layer-2 slice."
+    },
+    {
+      "names": ["parse", "evaluate"],
+      "filesGlob": ["expression/src/default-instance.ts", "functions/src/factories/evaluate.ts"],
+      "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
     }
   ]
 }

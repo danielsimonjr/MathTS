@@ -16,17 +16,22 @@ npm install @danielsimonjr/mathts-evaluator
 
 ## What it exports
 
+- `evaluate` — evaluate an expression string with the default wired math scope (`evaluate('2+3')` → `5`).
+- `compileExpression(expr)` — compile a string with the same default wiring. `compileExpression('2+3')()` and `compileExpression('2+3').evaluate()` are both `5`.
+- `compileExpression(parseFn, mathScope, expr)` — the factory form. It still takes the parse function and scope you pass.
 - `compile` -- compile a parsed AST node against a math scope into an executable form.
 - `createEvaluate` -- build an `evaluate(expr, scope?)` function from a `parse` function + math scope.
-- `compileExpression` -- compile an expression string directly.
+- `parse` — the same ready-to-call parser as `@danielsimonjr/mathts-parser`.
 - Types: `CompiledExpression`, `Scope`.
 
+This package does not import `@danielsimonjr/mathts-functions`. The default scope is arithmetic (`+`, `sin`, `sqrt`, `π`, …). It is the safe mode: `parse`, `typed`, `createUnit`, `resolve`, `chain`, `simplify`, and `derivative` are not reachable from an expression, including a nested `map` / `filter` callback expression. `evaluate('a = 1')` throws unless you pass `{ unsafe: true }`. An out-of-range numeric literal throws `SyntaxError: Numeric overflow`.
+
 ```ts
-import { createEvaluate } from '@danielsimonjr/mathts-evaluator';
-import { createParse } from '@danielsimonjr/mathts-parser';
-// wire createParse into your math scope, then:
-// const evaluate = createEvaluate(parse, mathScope);
-// evaluate('2 + 3'); // 5
+import { evaluate, compileExpression } from '@danielsimonjr/mathts-evaluator';
+
+evaluate('2 + 3'); // 5
+compileExpression('2+3')(); // 5
+compileExpression('2+3').evaluate(); // 5
 ```
 
 ## License

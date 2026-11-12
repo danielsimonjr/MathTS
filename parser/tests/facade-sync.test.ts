@@ -12,6 +12,7 @@ const PINNED = [
   'createParse',
   'createParser',
   'createParserClass',
+  'parse',
   // node factories
   'createAccessorNode',
   'createArrayNode',

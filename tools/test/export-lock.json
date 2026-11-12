@@ -2533,6 +2533,12 @@
       "GPU_REDUCE_OPS": {
         "kind": "object"
       },
+      "GammaDistNamedOptions": {
+        "kind": "type"
+      },
+      "GammaDistOptions": {
+        "kind": "type"
+      },
       "GaussLegendre4Options": {
         "kind": "type"
       },
@@ -7190,6 +7196,9 @@
       "EnumerationStop": {
         "kind": "type"
       },
+      "EvaluateOptions": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -7248,6 +7257,9 @@
         "kind": "function"
       },
       "compileExpression": {
+        "kind": "function"
+      },
+      "compileExpressionWithDeps": {
         "kind": "function"
       },
       "createAccessorNode": {
@@ -7391,6 +7403,9 @@
       "createVarianceTransform": {
         "kind": "function"
       },
+      "defaultMathScope": {
+        "kind": "object"
+      },
       "embeddedDocs": {
         "kind": "object"
       },
@@ -7398,6 +7413,9 @@
         "kind": "function"
       },
       "escapeMathML": {
+        "kind": "function"
+      },
+      "evaluate": {
         "kind": "function"
       },
       "forEachScalar": {
@@ -7428,6 +7446,9 @@
         "kind": "function"
       },
       "mathMLError": {
+        "kind": "function"
+      },
+      "parse": {
         "kind": "function"
       },
       "properties": {
@@ -7476,6 +7497,9 @@
       "EnumerationStop": {
         "kind": "type"
       },
+      "EvaluateOptions": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -7534,6 +7558,9 @@
         "kind": "type"
       },
       "compileExpression": {
+        "kind": "type"
+      },
+      "compileExpressionWithDeps": {
         "kind": "type"
       },
       "createAccessorNode": {
@@ -7677,6 +7704,9 @@
       "createVarianceTransform": {
         "kind": "type"
       },
+      "defaultMathScope": {
+        "kind": "type"
+      },
       "embeddedDocs": {
         "kind": "type"
       },
@@ -7684,6 +7714,9 @@
         "kind": "type"
       },
       "escapeMathML": {
+        "kind": "type"
+      },
+      "evaluate": {
         "kind": "type"
       },
       "forEachScalar": {
@@ -7714,6 +7747,9 @@
         "kind": "type"
       },
       "mathMLError": {
+        "kind": "type"
+      },
+      "parse": {
         "kind": "type"
       },
       "properties": {
@@ -8064,6 +8100,9 @@
       "EnumerationStop": {
         "kind": "type"
       },
+      "EvaluateOptions": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -8122,6 +8161,9 @@
         "kind": "type"
       },
       "compileExpression": {
+        "kind": "type"
+      },
+      "compileExpressionWithDeps": {
         "kind": "type"
       },
       "createAccessorNode": {
@@ -8265,6 +8307,9 @@
       "createVarianceTransform": {
         "kind": "type"
       },
+      "defaultMathScope": {
+        "kind": "type"
+      },
       "embeddedDocs": {
         "kind": "type"
       },
@@ -8272,6 +8317,9 @@
         "kind": "type"
       },
       "escapeMathML": {
+        "kind": "type"
+      },
+      "evaluate": {
         "kind": "type"
       },
       "forEachScalar": {
@@ -8302,6 +8350,9 @@
         "kind": "type"
       },
       "mathMLError": {
+        "kind": "type"
+      },
+      "parse": {
         "kind": "type"
       },
       "properties": {

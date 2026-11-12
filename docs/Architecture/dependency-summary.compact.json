@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1294, "e": 7091, "re": 3045 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-12", "f": 1298, "e": 7108, "re": 3054 },
   "s": {
-    "loc": 222293,
+    "loc": 222919,
     "cls": 61,
-    "int": 606,
-    "fn": 2410,
+    "int": 609,
+    "fn": 2421,
     "tg": 175,
     "en": 0,
-    "co": 1650,
-    "toi": 645
+    "co": 1651,
+    "toi": 650
   },
-  "c": { "rt": 1, "to": 0, "rtp": ["Tensor→slice→Tensor"] },
+  "c": { "rt": 2, "to": 0, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -583,8 +583,9 @@
       ]
     },
     "functions/cas": {
-      "f": 5,
+      "f": 7,
       "exp": [
+        "antiderivativeReciprocal",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -592,14 +593,15 @@
         "residueIntegral",
         "rothsteinTrager",
         "integrateLayer3",
+        "collapseIdenticalFactors",
+        "tryPolynomialCanonicalForm",
         "RAT_ZERO",
         "ratNormalize",
         "ratAdd",
         "ratSub",
         "ratMul",
         "ratDiv",
-        "ratFromBigint",
-        "surdFromRat"
+        "ratFromBigint"
       ],
       "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
@@ -1021,7 +1023,7 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 18,
+      "f": 19,
       "exp": [
         "createCorr",
         "createCumSum",
@@ -1178,14 +1180,14 @@
       "int": [
         "SampleNOptions",
         "Distribution",
+        "GammaDistOptions",
+        "GammaDistNamedOptions",
         "MultivariateDistribution",
         "UnaryRealSpec",
         "MultiPoly",
         "UnivariateTerm",
         "SquareFreeFactor",
-        "KDTreeNode",
-        "CentralityRestartOptions",
-        "PageRankOptions"
+        "KDTreeNode"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
@@ -1254,10 +1256,14 @@
       "int": ["WasmModule", "RawWasm", "WasmBand"]
     },
     "expression": {
-      "f": 11,
+      "f": 12,
       "exp": [
         "createHelpClass",
         "createParserClass",
+        "defaultMathScope",
+        "parse",
+        "evaluate",
+        "compileExpression",
         "createParser",
         "embeddedDocs",
         "mathMLDocument",
@@ -1270,15 +1276,11 @@
         "createAssignmentNode",
         "createBlockNode",
         "createConditionalNode",
-        "createConstantNode",
-        "createFunctionAssignmentNode",
-        "createFunctionNode",
-        "createIndexNode",
-        "createObjectNode",
-        "createOperatorNode"
+        "createConstantNode"
       ],
       "cls": ["ScalarBuildError"],
       "int": [
+        "CallableCompiledExpression",
         "OperatorProperty",
         "ScalarBuilder",
         "ScalarGrammar",
@@ -1319,7 +1321,14 @@
     "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
     "expression/evaluator": {
       "f": 2,
-      "exp": ["createEvaluate", "compileExpression"],
+      "exp": [
+        "createEvaluate",
+        "compileExpressionWithDeps",
+        "compileExpression",
+        "evaluate",
+        "parse",
+        "EvaluateOptions"
+      ],
       "int": ["EvaluateOptions"]
     },
     "expression/function": { "f": 1, "exp": ["createParser"] },
@@ -1405,6 +1414,7 @@
     "parser": {
       "f": 1,
       "exp": [
+        "parse",
         "createParse",
         "createParserClass",
         "createParser",
@@ -1423,8 +1433,7 @@
         "createParenthesisNode",
         "createRangeNode",
         "createRelationalNode",
-        "createSymbolNode",
-        "keywords"
+        "createSymbolNode"
       ]
     },
     "units": {
@@ -1500,7 +1509,16 @@
     },
     "evaluator": {
       "f": 1,
-      "exp": ["compile", "createEvaluate", "compileExpression", "CompiledExpression", "Scope"]
+      "exp": [
+        "compile",
+        "createEvaluate",
+        "compileExpression",
+        "compileExpressionWithDeps",
+        "evaluate",
+        "parse",
+        "CompiledExpression",
+        "Scope"
+      ]
     },
     "linalg": {
       "f": 1,

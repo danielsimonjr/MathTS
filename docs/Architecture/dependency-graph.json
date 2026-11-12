@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-12",
-    "totalFiles": 1294,
+    "totalFiles": 1298,
     "totalModules": 82,
-    "totalExports": 7091
+    "totalExports": 7108
   },
   "entryPoints": [
     {
@@ -7161,6 +7161,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../typed/algebra.js",
+            "imports": ["expand"]
+          },
+          {
             "file": "../utils/node.js",
             "imports": [
               "MathNode",
@@ -7299,6 +7303,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["tryPolynomialCanonicalForm"]
           },
           {
             "file": "./simplify/util.js",
@@ -14068,6 +14076,15 @@
       }
     },
     "functions/cas": {
+      "functions/src/cas/antiderivative.ts": {
+        "description": "Shared symbolic antiderivatives for CAS integrate paths (G21).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["antiderivativeReciprocal"],
+        "functions": ["antiderivativeReciprocal"]
+      },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
         "externalDependencies": [],
@@ -14125,6 +14142,24 @@
           "rothsteinTrager",
           "integrateLayer3"
         ]
+      },
+      "functions/src/cas/polynomial-canonical.ts": {
+        "description": "Canonical polynomial forms for CAS simplify / factor (G21).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/algebra.js",
+            "imports": ["expand", "factor", "variables"]
+          },
+          {
+            "file": "../typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression", "polyToDenseCoefficients"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"],
+        "functions": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"]
       },
       "functions/src/cas/rat.ts": {
         "description": "Exact rational arithmetic (lowest-terms, positive denominator).",
@@ -14835,7 +14870,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["createEvaluate", "compileExpression"]
+            "imports": ["createEvaluate", "compileExpressionWithDeps"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -22254,6 +22289,21 @@
         "exports": ["createStd"],
         "constants": ["createStd"]
       },
+      "functions/src/statistics/sum-indexed-guard.ts": {
+        "description": "Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex"]
+          }
+        ],
+        "exports": ["rejectMisusedIndexedSum"],
+        "functions": ["rejectMisusedIndexedSum"]
+      },
       "functions/src/statistics/sum.ts": {
         "description": "Check if an array is a flat array of plain numbers",
         "externalDependencies": [],
@@ -22270,6 +22320,10 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
+          },
+          {
+            "file": "./sum-indexed-guard.js",
+            "imports": ["rejectMisusedIndexedSum"]
           },
           {
             "file": "../core/function/typed.js",
@@ -24705,6 +24759,10 @@
           {
             "file": "./string-derivative.js",
             "imports": ["derivativeOfAdditiveTerms"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["collapseIdenticalFactors", "tryPolynomialCanonicalForm"]
           }
         ],
         "workspaceDependencies": [],
@@ -25073,12 +25131,20 @@
             "imports": ["expand", "factor"]
           },
           {
-            "file": "./string-derivative.js",
-            "imports": ["derivativeOfAdditiveTerms"]
+            "file": "../factories/index.js",
+            "imports": ["polynomialRoot", "derivative"]
           },
           {
-            "file": "../factories/index.js",
-            "imports": ["polynomialRoot"]
+            "file": "../cas/antiderivative.js",
+            "imports": ["antiderivativeReciprocal"]
+          },
+          {
+            "file": "../cas/polynomial-canonical.js",
+            "imports": ["tryPolynomialCanonicalForm"]
+          },
+          {
+            "file": "../numeric/adaptive-quad.js",
+            "imports": ["quad"]
           },
           {
             "file": "../numeric/numeric-jacobian.js",
@@ -25396,7 +25462,13 @@
           "invGaussDist",
           "multivariateNormal"
         ],
-        "interfaces": ["SampleNOptions", "Distribution", "MultivariateDistribution"],
+        "interfaces": [
+          "SampleNOptions",
+          "Distribution",
+          "GammaDistOptions",
+          "GammaDistNamedOptions",
+          "MultivariateDistribution"
+        ],
         "functions": [
           "normalDist",
           "betaDist",
@@ -25404,6 +25476,8 @@
           "chiSquaredDist",
           "exponentialDist",
           "fDist",
+          "gammaDist",
+          "gammaDist",
           "gammaDist",
           "logNormalDist",
           "poissonDist",
@@ -29657,6 +29731,130 @@
         "exports": ["createParserClass"],
         "constants": ["createParserClass"]
       },
+      "expression/src/default-instance.ts": {
+        "description": "Default wired `parse` / `evaluate` for thin packages and one-liner use.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./parse.js",
+            "imports": ["createParse"]
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["createNode"]
+          },
+          {
+            "file": "./node/AccessorNode.js",
+            "imports": ["createAccessorNode"]
+          },
+          {
+            "file": "./node/ArrayNode.js",
+            "imports": ["createArrayNode"]
+          },
+          {
+            "file": "./node/AssignmentNode.js",
+            "imports": ["createAssignmentNode"]
+          },
+          {
+            "file": "./node/BlockNode.js",
+            "imports": ["createBlockNode"]
+          },
+          {
+            "file": "./node/ConditionalNode.js",
+            "imports": ["createConditionalNode"]
+          },
+          {
+            "file": "./node/ConstantNode.js",
+            "imports": ["createConstantNode"]
+          },
+          {
+            "file": "./node/FunctionAssignmentNode.js",
+            "imports": ["createFunctionAssignmentNode"]
+          },
+          {
+            "file": "./node/FunctionNode.js",
+            "imports": ["createFunctionNode"]
+          },
+          {
+            "file": "./node/IndexNode.js",
+            "imports": ["createIndexNode"]
+          },
+          {
+            "file": "./node/ObjectNode.js",
+            "imports": ["createObjectNode"]
+          },
+          {
+            "file": "./node/OperatorNode.js",
+            "imports": ["createOperatorNode"]
+          },
+          {
+            "file": "./node/ParenthesisNode.js",
+            "imports": ["createParenthesisNode"]
+          },
+          {
+            "file": "./node/RangeNode.js",
+            "imports": ["createRangeNode"]
+          },
+          {
+            "file": "./node/RelationalNode.js",
+            "imports": ["createRelationalNode"]
+          },
+          {
+            "file": "./node/SymbolNode.js",
+            "imports": ["createSymbolNode"]
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["compile"]
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["createEvaluate", "compileExpressionWithDeps"]
+          },
+          {
+            "file": "./transform/utils/compileInlineExpression.js",
+            "imports": ["compileInlineExpression"]
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["CompiledExpression"],
+            "typeOnly": true
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["EvaluateOptions"],
+            "typeOnly": true
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["Scope"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["defaultMathScope", "parse", "evaluate", "compileExpression"],
+        "interfaces": ["CallableCompiledExpression"],
+        "functions": [
+          "parse",
+          "evaluate",
+          "compileExpression",
+          "compileExpression",
+          "compileExpression"
+        ],
+        "constants": ["defaultMathScope"]
+      },
       "expression/src/index.ts": {
         "description": "Expression parsing and evaluation for MathTS.",
         "externalDependencies": [],
@@ -29715,6 +29913,11 @@
           {
             "file": "./embeddedDocs/embeddedDocs.js",
             "imports": ["embeddedDocs"],
+            "reExport": true
+          },
+          {
+            "file": "./default-instance.js",
+            "imports": ["defaultMathScope"],
             "reExport": true
           },
           {
@@ -29878,6 +30081,7 @@
         "exports": [
           "createParser",
           "embeddedDocs",
+          "defaultMathScope",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -29940,6 +30144,7 @@
           "* from ./transform/index.js",
           "createParser",
           "embeddedDocs",
+          "defaultMathScope",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -35634,24 +35839,49 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEvaluate", "compileExpression"],
+        "exports": ["createEvaluate", "compileExpressionWithDeps"],
         "interfaces": ["EvaluateOptions"],
-        "functions": ["createEvaluate", "compileExpression"]
+        "functions": ["createEvaluate", "compileExpressionWithDeps"]
       },
       "expression/src/evaluator/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./evaluate.js",
-            "imports": ["createEvaluate", "compileExpression"],
+            "imports": ["createEvaluate", "compileExpressionWithDeps"],
             "reExport": true
+          },
+          {
+            "file": "../default-instance.js",
+            "imports": ["compileExpression", "evaluate", "parse"],
+            "reExport": true
+          },
+          {
+            "file": "./evaluate.js",
+            "imports": ["EvaluateOptions"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEvaluate", "compileExpression"],
-        "reExported": ["createEvaluate", "compileExpression"]
+        "exports": [
+          "createEvaluate",
+          "compileExpressionWithDeps",
+          "compileExpression",
+          "evaluate",
+          "parse",
+          "EvaluateOptions"
+        ],
+        "reExported": [
+          "createEvaluate",
+          "compileExpressionWithDeps",
+          "compileExpression",
+          "evaluate",
+          "parse",
+          "EvaluateOptions"
+        ]
       }
     },
     "expression/function": {
@@ -37862,6 +38092,7 @@
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
             "imports": [
+              "parse",
               "createParse",
               "createParserClass",
               "createParser",
@@ -37891,6 +38122,7 @@
           }
         ],
         "exports": [
+          "parse",
           "createParse",
           "createParserClass",
           "createParser",
@@ -37918,6 +38150,7 @@
           "getOperator"
         ],
         "reExported": [
+          "parse",
           "createParse",
           "createParserClass",
           "createParser",
@@ -38364,7 +38597,14 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["compile", "createEvaluate", "compileExpression"]
+            "imports": [
+              "compile",
+              "createEvaluate",
+              "compileExpression",
+              "compileExpressionWithDeps",
+              "evaluate",
+              "parse"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-expression",
@@ -38376,6 +38616,9 @@
           "compile",
           "createEvaluate",
           "compileExpression",
+          "compileExpressionWithDeps",
+          "evaluate",
+          "parse",
           "CompiledExpression",
           "Scope"
         ],
@@ -38383,6 +38626,9 @@
           "compile",
           "createEvaluate",
           "compileExpression",
+          "compileExpressionWithDeps",
+          "evaluate",
+          "parse",
           "CompiledExpression",
           "Scope"
         ]
@@ -44759,11 +45005,16 @@
   "dependencyGraph": {
     "circularDependencies": {
       "runtime": [
-        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"]
+        ["tensor/src/Tensor.ts", "tensor/src/operations/slice.ts", "tensor/src/Tensor.ts"],
+        [
+          "functions/src/typed/algebra.ts",
+          "functions/src/cas/polynomial-canonical.ts",
+          "functions/src/typed/algebra.ts"
+        ]
       ],
       "typeOnly": [],
-      "total": 1,
-      "runtimeCount": 1,
+      "total": 2,
+      "runtimeCount": 2,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -45136,7 +45387,9 @@
       {
         "name": "Functions/cas",
         "files": [
+          "functions/src/cas/antiderivative.ts",
           "functions/src/cas/layer3.ts",
+          "functions/src/cas/polynomial-canonical.ts",
           "functions/src/cas/rat.ts",
           "functions/src/cas/rational-integrate.ts",
           "functions/src/cas/real-roots.ts",
@@ -45486,6 +45739,7 @@
           "functions/src/statistics/quantile-numpy-methods.ts",
           "functions/src/statistics/quantileSeq.ts",
           "functions/src/statistics/std.ts",
+          "functions/src/statistics/sum-indexed-guard.ts",
           "functions/src/statistics/sum.ts",
           "functions/src/statistics/utils/improveErrorMessage.ts",
           "functions/src/statistics/variance.ts"
@@ -45712,6 +45966,7 @@
         "files": [
           "expression/src/Help.ts",
           "expression/src/Parser.ts",
+          "expression/src/default-instance.ts",
           "expression/src/index.ts",
           "expression/src/keywords.ts",
           "expression/src/limits.ts",
@@ -46421,19 +46676,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1294,
+    "totalTypeScriptFiles": 1298,
     "totalModules": 82,
-    "totalLinesOfCode": 222293,
-    "totalExports": 7091,
+    "totalLinesOfCode": 222919,
+    "totalExports": 7108,
     "totalClasses": 61,
-    "totalInterfaces": 606,
-    "totalFunctions": 2410,
+    "totalInterfaces": 609,
+    "totalFunctions": 2421,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1650,
-    "totalReExports": 3045,
-    "totalTypeOnlyImports": 645,
-    "runtimeCircularDeps": 1,
+    "totalConstants": 1651,
+    "totalReExports": 3054,
+    "totalTypeOnlyImports": 650,
+    "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0

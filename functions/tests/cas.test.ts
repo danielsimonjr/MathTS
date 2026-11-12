@@ -70,8 +70,8 @@ describe('CAS: Calculus', () => {
       expect(integrate('exp(x)', 'x')).toBe('exp(x)');
     });
 
-    it('should integrate 1/x -> log(x)', () => {
-      expect(integrate('1/x', 'x')).toBe('log(x)');
+    it('should integrate 1/x -> log(abs(x))', () => {
+      expect(integrate('1/x', 'x')).toBe('log(abs(x))');
     });
 
     it('should integrate a constant', () => {
@@ -739,7 +739,8 @@ describe('CAS: Advanced', () => {
 });
 
 describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
-  const isComplexRoot = (r: number | Complex) => r && typeof r === 'object' && 'im' in r;
+  const isComplexRoot = (r: number | Complex | string) =>
+    typeof r !== 'string' && r && typeof r === 'object' && 'im' in r;
   it('accepts equation form with = sign', () => {
     const roots = solve('x^2 - 4 = 0', 'x');
     expect(roots).toContain(-2);
