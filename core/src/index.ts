@@ -64,6 +64,7 @@ export {
 // BigNumber (arbitrary precision decimals)
 export {
   BigNumber,
+  bignumber,
   isBigNumber,
   BIGNUMBER_ZERO,
   BIGNUMBER_ONE,
