@@ -2,7 +2,7 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-11",
+    "lastUpdated": "2026-11-12",
     "totalFiles": 1285,
     "totalModules": 82,
     "totalExports": 7009
@@ -25098,7 +25098,13 @@
           "invGaussDist",
           "multivariateNormal"
         ],
-        "interfaces": ["SampleNOptions", "Distribution", "MultivariateDistribution"],
+        "interfaces": [
+          "SampleNOptions",
+          "Distribution",
+          "GammaDistOptions",
+          "GammaDistNamedOptions",
+          "MultivariateDistribution"
+        ],
         "functions": [
           "normalDist",
           "betaDist",
@@ -25106,6 +25112,8 @@
           "chiSquaredDist",
           "exponentialDist",
           "fDist",
+          "gammaDist",
+          "gammaDist",
           "gammaDist",
           "logNormalDist",
           "poissonDist",
@@ -46020,11 +46028,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1285,
     "totalModules": 82,
-    "totalLinesOfCode": 218299,
+    "totalLinesOfCode": 218343,
     "totalExports": 7009,
     "totalClasses": 61,
-    "totalInterfaces": 601,
-    "totalFunctions": 2360,
+    "totalInterfaces": 603,
+    "totalFunctions": 2362,
     "totalTypeGuards": 171,
     "totalEnums": 0,
     "totalConstants": 1644,

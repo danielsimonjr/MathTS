@@ -1645,9 +1645,6 @@
       "decompositionInputToNestedArray": {
         "kind": "function"
       },
-      "isPackedMatrixDescriptor": {
-        "kind": "function"
-      },
       "destroyGlobalGPU": {
         "kind": "function"
       },
@@ -1721,6 +1718,9 @@
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isPackedMatrixDescriptor": {
         "kind": "function"
       },
       "isSharedMemoryAvailable": {
@@ -2502,6 +2502,12 @@
       },
       "GPU_REDUCE_OPS": {
         "kind": "object"
+      },
+      "GammaDistNamedOptions": {
+        "kind": "type"
+      },
+      "GammaDistOptions": {
+        "kind": "type"
       },
       "GaussLegendre4Options": {
         "kind": "type"
