@@ -36,6 +36,10 @@ describe('detect (headless Node)', () => {
     expect(isGPUSuitableForMatrixOps(NO_CAPS)).toBe(false);
   });
 
+  it('#759 isGPUSuitableForMatrixOps with zero args does not throw', () => {
+    expect(isGPUSuitableForMatrixOps()).toBe(false);
+  });
+
   it('getRecommendedWorkgroupSize returns [1,1,1] for unsupported caps', () => {
     expect(getRecommendedWorkgroupSize(NO_CAPS)).toEqual([1, 1, 1]);
   });

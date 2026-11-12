@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-12",
     "totalFiles": 1288,
     "totalModules": 82,
-    "totalExports": 7028
+    "totalExports": 7042
   },
   "entryPoints": [
     {
@@ -3928,7 +3928,6 @@
               "BufferPool",
               "ShaderManager",
               "hasWebGPU",
-              "detectGPUCapabilities",
               "getRecommendedWorkgroupSize",
               "GPUCapabilities"
             ]
@@ -43613,14 +43612,32 @@
         "internalDependencies": [
           {
             "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+            "imports": [
+              "hasWebGPUSurface",
+              "getGPUAdapter",
+              "capabilitiesFromAdapter",
+              "markWebGPUAdapterUnavailable",
+              "resetWebGPUAvailabilityCache",
+              "GPUCapabilities"
+            ]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "exports": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContext"
+        ],
         "classes": ["GPUContext"],
         "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+        "functions": [
+          "getGlobalGPUContext",
+          "initializeGlobalGPUWithReason",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU"
+        ]
       },
       "gpu/src/ShaderManager.ts": {
         "description": "GPU Shader Manager (generic)",
@@ -43644,9 +43661,16 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43654,9 +43678,16 @@
         ],
         "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
+          "markWebGPUAdapterUnavailable",
+          "markWebGPUAdapterAvailable",
           "hasWebGPU",
           "isBrowser",
           "getGPUAdapter",
+          "capabilitiesFromAdapter",
           "detectGPUCapabilities",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
@@ -43668,6 +43699,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["resetWebGPUAvailabilityCache"]
+          },
           {
             "file": "./GPUContext.js",
             "imports": ["getGlobalGPUContext", "GPUContextOptions"]
@@ -43696,9 +43731,13 @@
             "file": "./detect.js",
             "imports": [
               "hasWebGPU",
+              "hasWebGPUSurface",
+              "resetWebGPUAvailabilityCache",
               "isBrowser",
               "getGPUAdapter",
               "detectGPUCapabilities",
+              "enableGpuUnavailableWarnings",
+              "disableGpuUnavailableWarnings",
               "isGPUSuitableForMatrixOps",
               "getRecommendedWorkgroupSize",
               "getMaxMatrixSize",
@@ -43713,9 +43752,11 @@
               "GPUContext",
               "getGlobalGPUContext",
               "initializeGlobalGPU",
+              "initializeGlobalGPUWithReason",
               "destroyGlobalGPU",
               "GPUContextOptions",
               "GPUContextStatus",
+              "GlobalGPUInitResult",
               "DeviceLostEvent"
             ],
             "reExport": true
@@ -43749,9 +43790,13 @@
         "workspaceDependencies": [],
         "exports": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43760,9 +43805,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -43779,9 +43826,13 @@
         ],
         "reExported": [
           "hasWebGPU",
+          "hasWebGPUSurface",
+          "resetWebGPUAvailabilityCache",
           "isBrowser",
           "getGPUAdapter",
           "detectGPUCapabilities",
+          "enableGpuUnavailableWarnings",
+          "disableGpuUnavailableWarnings",
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
@@ -43790,9 +43841,11 @@
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
+          "initializeGlobalGPUWithReason",
           "destroyGlobalGPU",
           "GPUContextOptions",
           "GPUContextStatus",
+          "GlobalGPUInitResult",
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
@@ -46108,15 +46161,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1288,
     "totalModules": 82,
-    "totalLinesOfCode": 219365,
-    "totalExports": 7028,
+    "totalLinesOfCode": 219478,
+    "totalExports": 7042,
     "totalClasses": 61,
     "totalInterfaces": 601,
-    "totalFunctions": 2368,
+    "totalFunctions": 2376,
     "totalTypeGuards": 172,
     "totalEnums": 0,
     "totalConstants": 1648,
-    "totalReExports": 3026,
+    "totalReExports": 3032,
     "totalTypeOnlyImports": 644,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

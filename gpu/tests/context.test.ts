@@ -10,6 +10,8 @@ describe('GPUContext (headless Node)', () => {
   it('initialize resolves false in Node without throwing', async () => {
     const ctx = new GPUContext();
     await expect(ctx.initialize()).resolves.toBe(false);
+    expect(ctx.status).toBe('unavailable');
+    expect(ctx.lastError).toBeNull();
   });
 
   it('concurrent initialize calls share one result and never throw', async () => {
