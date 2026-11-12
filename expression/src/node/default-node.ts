@@ -30,10 +30,12 @@ export function nodeBaseFor(math: Record<string, unknown>): NodeBase {
 
 /**
  * Defaults for the dependencies this package owns: `Node` (the shared base),
- * `math` (the default math scope) and `typed` (the shared typed instance).
+ * `math` (the default math scope) and `typed` (the shared typed instance). The
+ * `Node` base follows the caller's `math` when the caller supplied it, so
+ * `.compile()` resolves names against that scope.
  */
-export const nodeDefaults: DefaultDependencies = (_supplied, missing) => {
-  const math = getDefaultMathScope();
+export const nodeDefaults: DefaultDependencies = (supplied, missing) => {
+  const math = (supplied?.math as Record<string, unknown> | undefined) ?? getDefaultMathScope();
   const owned: Record<string, unknown> = {
     Node: nodeBaseFor(math),
     math,

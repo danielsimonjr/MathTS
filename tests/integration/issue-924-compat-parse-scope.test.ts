@@ -20,4 +20,15 @@ describe('#924 createParse with a compat math instance', () => {
     const node = createParse(math)('factorial(5)');
     expect(node.compile().evaluate({})).toBe(120);
   });
+
+  it('#924 createParse(create(all)) uses the isBounded of the compat scope', () => {
+    const math = create(all) as unknown as Record<string, unknown>;
+    expect(createParse(math)('2+3').toTex()).toBe('2+3');
+  });
+
+  it('#924 a caller scope without a host function fails at construction, not with a stub', () => {
+    // The scope the caller passes is the math scope of the nodes. `subset` is a host
+    // function: only the default scope (no caller scope) gets a neutral stand-in.
+    expect(() => createParse({})).toThrow(/subset/);
+  });
 });

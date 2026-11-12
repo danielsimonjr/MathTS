@@ -199,7 +199,10 @@ export interface EvaluateFunction {
  * Create an evaluate function bound to a math scope and parse function.
  *
  * Both arguments are optional. A missing `parseFn` is the default parse, and a
- * missing `mathScope` is the default math scope.
+ * missing `mathScope` is the default math scope. The two are independent: the
+ * expression resolves its symbols and functions against `mathScope`, whatever
+ * built the parse tree. A parse function built on a custom scope needs that
+ * scope here too: `createEvaluate(createParse(math), math)`.
  *
  * @param parseFn - The parse function (from createParse factory). Optional.
  * @param mathScope - Math namespace with functions and constants. Optional.

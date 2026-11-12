@@ -3,14 +3,18 @@
  *
  * The parse factory needs a typed instance, a numeric parser, a config, and the
  * AST node constructors. These defaults build the missing ones for a math scope.
- * The node constructors are bound to that scope: a symbol resolves against the
- * caller's `math`, not against a fixed namespace. When the caller gives no scope,
- * the shared default math scope is used.
+ * The scope the caller passes to `createParse` is also the math scope of the
+ * node constructors built here: a symbol resolves against the caller's scope
+ * (`createParse(create(all))`), not against a fixed namespace. With no caller
+ * scope, the shared default math scope is used.
  *
- * Host-owned runtime functions (`subset`, `matrix`, `size`) come from the scope
- * when it has them. Otherwise a neutral stub stands in, as the default parse always
- * did. Those stubs only build parse trees; they do not change evaluation results
- * for the default scope.
+ * Host-owned runtime functions (`subset`, `matrix`, `size`) come from the
+ * caller's scope. The default scope has none of them, so only the default scope
+ * gets neutral stubs, as the default parse always had. A stub only lets the
+ * parse tree be built; it does not change evaluation results. A caller scope
+ * without one of them gets the factory's "missing dependency" error.
+ * `isBounded` and `ResultSet` come from the caller's scope when it has them.
+ * Otherwise the built-in ones below stand in: they behave like the real ones.
  *
  * @packageDocumentation
  */
@@ -35,11 +39,21 @@ import { createRelationalNode } from './node/RelationalNode.js';
 import { createSymbolNode } from './node/SymbolNode.js';
 import type { DefaultDependencies } from './utils/factory.js';
 
-/** Result container that a block of statements returns. */
+/** Result container that a block of statements returns. It has the shape of the `ResultSet` type. */
 class ResultSet {
   entries: unknown[];
   constructor(entries: unknown[]) {
     this.entries = entries;
+  }
+  /** The type guard `isResultSet` reads this flag from the constructor prototype. */
+  get isResultSet(): true {
+    return true;
+  }
+  valueOf(): unknown[] {
+    return this.entries;
+  }
+  toString(): string {
+    return '[' + this.entries.map(String).join(', ') + ']';
   }
 }
 
@@ -49,79 +63,66 @@ function numeric(value: string, _type: string): number {
 
 const config = { number: 'number' as const, numberFallback: 'number' as const };
 
-function isBounded(_v: unknown): boolean {
-  return false;
-}
-
-/** Register the `Node` type once. A second registration is a no-op. */
-function registerNodeType(): void {
-  try {
-    (
-      mathTyped as unknown as {
-        addType: (t: { name: string; test: (x: unknown) => boolean }, b: boolean) => void;
-      }
-    ).addType(
-      {
-        name: 'Node',
-        test: (x: unknown): boolean =>
-          typeof x === 'object' && x !== null && (x as { isNode?: unknown }).isNode === true,
-      },
-      false
-    );
-  } catch {
-    // Already registered by an earlier call.
-  }
+/** A number or BigNumber constant is bounded when it is finite; `toTex` prints the others as infinity. */
+function isBounded(value: unknown): boolean {
+  return Number.isFinite(Number(value));
 }
 
 /**
  * Build the parse dependencies that `missing` names, for the scope the caller
  * supplied (or the default math scope). The caller's values are never replaced:
- * the factory only asks for names the caller left out.
+ * the factory only asks for names the caller left out. Each dependency is built
+ * only when it is named, so a missing host function does not block a node
+ * constructor that the caller supplied itself.
  */
 export const parseDefaults: DefaultDependencies = (supplied, missing) => {
   const math: Record<string, unknown> = supplied ?? getDefaultMathScope();
-  registerNodeType();
+  const isDefaultScope = supplied === undefined;
+  /** A host function from the scope. Only the default scope falls back to a stub. */
+  const host = (name: string, stub: unknown): unknown =>
+    math[name] ?? (isDefaultScope ? stub : undefined);
 
-  const Node: unknown = supplied?.Node ?? nodeBaseFor(math);
-  const SymbolNode = createSymbolNode({ math, Node });
-  const owned: Record<string, unknown> = {
-    typed: mathTyped,
-    numeric,
-    config,
-    AccessorNode: createAccessorNode({
-      subset: math.subset ?? ((obj: unknown) => obj),
-      Node,
-    }),
-    ArrayNode: createArrayNode({ Node }),
-    AssignmentNode: createAssignmentNode({
-      subset: math.subset ?? ((_obj: unknown, _idx: unknown, val: unknown) => val),
-      matrix: math.matrix ?? (() => ({})),
-      Node,
-    }),
-    BlockNode: createBlockNode({ ResultSet, Node }),
-    ConditionalNode: createConditionalNode({ Node }),
-    ConstantNode: createConstantNode({ Node, isBounded }),
-    FunctionAssignmentNode: createFunctionAssignmentNode({
-      typed: mathTyped,
-      Node,
-    }),
-    FunctionNode: createFunctionNode({
-      math,
-      Node,
-      SymbolNode,
-    }),
-    IndexNode: createIndexNode({ Node, size: math.size ?? (() => []) }),
-    ObjectNode: createObjectNode({ Node }),
-    OperatorNode: createOperatorNode({ Node }),
-    ParenthesisNode: createParenthesisNode({ Node }),
-    RangeNode: createRangeNode({ Node }),
-    RelationalNode: createRelationalNode({ Node }),
-    SymbolNode,
+  const typed: unknown = math.typed ?? mathTyped;
+  /** The caller's `Node` base class, else the base shared by every default node of this scope. */
+  let nodeBase: unknown;
+  const getNode = (): unknown => (nodeBase ??= math.Node ?? nodeBaseFor(math));
+  /** A caller-supplied `SymbolNode` is shared with `FunctionNode`, so both use one class. */
+  let symbolNode: unknown;
+  const getSymbolNode = (): unknown =>
+    (symbolNode ??= math.SymbolNode ?? createSymbolNode({ math, Node: getNode() }));
+
+  const builders: Record<string, () => unknown> = {
+    typed: () => typed,
+    numeric: () => numeric,
+    config: () => config,
+    AccessorNode: () =>
+      createAccessorNode({ subset: host('subset', (obj: unknown) => obj), Node: getNode() }),
+    ArrayNode: () => createArrayNode({ Node: getNode() }),
+    AssignmentNode: () =>
+      createAssignmentNode({
+        subset: host('subset', (_obj: unknown, _idx: unknown, val: unknown) => val),
+        matrix: host('matrix', () => ({})),
+        Node: getNode(),
+      }),
+    BlockNode: () => createBlockNode({ ResultSet: math.ResultSet ?? ResultSet, Node: getNode() }),
+    ConditionalNode: () => createConditionalNode({ Node: getNode() }),
+    ConstantNode: () =>
+      createConstantNode({ Node: getNode(), isBounded: math.isBounded ?? isBounded }),
+    FunctionAssignmentNode: () => createFunctionAssignmentNode({ typed, Node: getNode() }),
+    FunctionNode: () => createFunctionNode({ math, Node: getNode(), SymbolNode: getSymbolNode() }),
+    IndexNode: () => createIndexNode({ Node: getNode(), size: host('size', () => []) }),
+    ObjectNode: () => createObjectNode({ Node: getNode() }),
+    OperatorNode: () => createOperatorNode({ Node: getNode() }),
+    ParenthesisNode: () => createParenthesisNode({ Node: getNode() }),
+    RangeNode: () => createRangeNode({ Node: getNode() }),
+    RelationalNode: () => createRelationalNode({ Node: getNode() }),
+    SymbolNode: getSymbolNode,
   };
 
   const fill: Record<string, unknown> = {};
   for (const key of missing) {
-    if (owned[key] !== undefined) fill[key] = owned[key];
+    const build = builders[key];
+    if (build !== undefined) fill[key] = build();
   }
   return fill;
 };
