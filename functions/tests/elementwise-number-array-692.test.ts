@@ -3,6 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { nodeBinary } from './helpers/node-binary.mjs';
 import { BigNumber, Complex, Fraction, Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import {
@@ -138,9 +139,8 @@ describe('#692 elementwise sin on number[]', () => {
     expect(cos(xs) as number[]).toEqual(xs.map((x) => Math.cos(x)));
   });
 
-  it('sin(Float64Array 1e6) within 1.2× a Math.sin loop on Node 22', () => {
-    const node = process.env.PERF_NODE ?? 'node';
-    const line = execFileSync(node, [PERF_GATE], { encoding: 'utf8' }).trim();
+  it('sin(Float64Array 1e6) within 1.2× a Math.sin loop (isolated Node gate)', () => {
+    const line = execFileSync(nodeBinary(), [PERF_GATE], { encoding: 'utf8' }).trim();
     const { ratio, loopMs, sinMs } = JSON.parse(line) as {
       ratio: number;
       loopMs: number;
@@ -149,11 +149,7 @@ describe('#692 elementwise sin on number[]', () => {
     expect(Number.isFinite(ratio)).toBe(true);
     expect(sinMs).toBeGreaterThan(0);
     expect(loopMs).toBeGreaterThan(0);
-    // #692 states the 1.2× budget for Node 22. Node 20's Math.sin loop is a
-    // different engine baseline; the ratio stays 1.2 and is not raised.
-    if (Number(process.versions.node.split('.')[0]) >= 22) {
-      expect(ratio).toBeLessThanOrEqual(1.2);
-      expect(sinMs).toBeLessThanOrEqual(1.2 * loopMs);
-    }
+    expect(ratio).toBeLessThanOrEqual(1.2);
+    expect(sinMs).toBeLessThanOrEqual(1.2 * loopMs);
   });
 });
