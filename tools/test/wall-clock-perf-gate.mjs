@@ -149,10 +149,12 @@ export function abbaTimedRatio(baseline, candidate, opts = {}) {
  *
  * @param {() => void} baseline
  * @param {() => void} candidate
- * @param {{ warmup?: Parameters<typeof symmetricWarmup>[2], sample?: Parameters<typeof abbaTimedRatio>[2], fullWarmupPairs?: number }} [opts]
+ * @param {{ warmup?: Parameters<typeof symmetricWarmup>[2], sample?: Parameters<typeof abbaTimedRatio>[2], fullWarmupPairs?: number, skipSymmetricWarmup?: boolean }} [opts]
  */
 export function wallClockAbRatio(baseline, candidate, opts = {}) {
-  symmetricWarmup(baseline, candidate, opts.warmup);
+  if (!opts.skipSymmetricWarmup) {
+    symmetricWarmup(baseline, candidate, opts.warmup);
+  }
   const fullPairs = opts.fullWarmupPairs ?? 4;
   for (let p = 0; p < fullPairs; p++) {
     if (p % 2 === 0) {

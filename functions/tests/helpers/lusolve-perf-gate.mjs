@@ -35,8 +35,9 @@ const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
     checksum += (x[0]?.[0] ?? 0) + (x[n - 1]?.[0] ?? 0);
   },
   {
-    warmup: { minPairs: 12, maxPairs: 40 },
-    sample: { samplePairs: 18, gcBetween: true },
+    skipSymmetricWarmup: true,
+    fullWarmupPairs: 4,
+    sample: { samplePairs: 9, gcBetween: false },
   }
 );
 
