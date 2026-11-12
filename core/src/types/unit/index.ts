@@ -10,7 +10,7 @@ import { createUnitClass } from './Unit.js';
 import { unitDependencies } from './dependencies.js';
 import type { UnitConstructor } from './unit-types.js';
 
-export { createUnitClass } from './Unit.js';
+export { createUnitClass, unitReadingSearchSteps, MAX_UNIT_STRING_LENGTH } from './Unit.js';
 export { unitDependencies } from './dependencies.js';
 export type {
   BigNumberValue,

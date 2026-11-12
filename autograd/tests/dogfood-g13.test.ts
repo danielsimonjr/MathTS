@@ -44,6 +44,18 @@ describe('#764 graph seal after backward prevents tape growth', () => {
     tape.reset();
     expect(() => TapedTensor.fromTensorAsInput(param, tape)).not.toThrow();
   });
+
+  it('pre-reset tensors throw and do not write into a reused id', () => {
+    const tape = new Tape();
+    const stale = TapedTensor.fromTensorAsInput(new Tensor([2], new Float64Array([1, 2])), tape);
+    tape.reset();
+    const fresh = TapedTensor.fromTensorAsInput(new Tensor([2], new Float64Array([3, 4])), tape);
+    expect(() => stale.square()).toThrow(/reset/);
+    expect(() => stale.detach()).toThrow(/reset/);
+    const y = fresh.square().sum();
+    tape.backward(y.id, Float64Array.of(1));
+    expect([...tape.getInputGrad(fresh.id)!]).toEqual([6, 8]);
+  });
 });
 
 describe('#755 detach and noGrad', () => {
@@ -84,10 +96,28 @@ describe('#754 activations', () => {
   it('exports relu, softmax, gelu, sigmoid on prototype', () => {
     expect(typeof TapedTensor.prototype.relu).toBe('function');
     expect(typeof TapedTensor.prototype.softmax).toBe('function');
+    expect(typeof TapedTensor.prototype.logSoftmax).toBe('function');
     expect(typeof TapedTensor.prototype.gelu).toBe('function');
     expect(typeof TapedTensor.prototype.sigmoid).toBe('function');
     expect(typeof TapedTensor.prototype.crossEntropy).toBe('function');
     expect(typeof TapedTensor.prototype.binaryCrossEntropy).toBe('function');
+  });
+
+  it('sigmoid gradient matches finite differences on both sides of 0', () => {
+    const x = new Float64Array([1.5, -0.7, 0]);
+    const tape = new Tape();
+    const { id } = tape.allocate(3);
+    const leaf = new TapedTensor([3], x, tape, id);
+    const out = leaf.sigmoid().sum();
+    tape.backward(out.id, Float64Array.of(1), { retainGraph: true });
+    const ana = tape.getInputGrad(id)!;
+    const sig = (v: number) => (v >= 0 ? 1 / (1 + Math.exp(-v)) : Math.exp(v) / (1 + Math.exp(v)));
+    const num = fdVector((d) => {
+      let s = 0;
+      for (let i = 0; i < d.length; i++) s += sig(d[i]);
+      return s;
+    }, x);
+    for (let i = 0; i < 3; i++) expect(ana[i]).toBeCloseTo(num[i], 5);
   });
 
   it('relu gradient matches finite differences', () => {
@@ -216,13 +246,14 @@ describe('#763 reshape and grad on ranked tensors', () => {
 });
 
 describe('#754 softmax / CE finite differences', () => {
-  it('softmax last-axis gradient', () => {
+  it('softmax weighted sum matches finite differences', () => {
     const x = new Float64Array([1, 2, 3]);
-    const shape = [3];
+    const w = new Float64Array([1, -2, 0.5]);
     const tape = new Tape();
     const { id } = tape.allocate(3);
-    const leaf = new TapedTensor(shape, x, tape, id);
-    const out = leaf.softmax().sum();
+    const leaf = new TapedTensor([3], x, tape, id);
+    const weights = new TapedTensor([3], w, tape, tape.allocate(3).id);
+    const out = leaf.softmax().mul(weights).sum();
     tape.backward(out.id, Float64Array.of(1), { retainGraph: true });
     const ana = tape.getInputGrad(id)!;
     const num = fdVector((d) => {
@@ -234,10 +265,45 @@ describe('#754 softmax / CE finite differences', () => {
         s += ex[i];
       }
       let sum = 0;
-      for (let i = 0; i < d.length; i++) sum += ex[i] / s;
+      for (let i = 0; i < d.length; i++) sum += (ex[i] / s) * w[i];
       return sum;
     }, x);
     for (let i = 0; i < 3; i++) expect(ana[i]).toBeCloseTo(num[i], 5);
+  });
+
+  it('softmax of large logits stays finite and sums to 1', () => {
+    const tape = new Tape();
+    const { id } = tape.allocate(2);
+    const leaf = new TapedTensor([2], new Float64Array([1000, 1001]), tape, id);
+    const p = leaf.softmax().primal;
+    expect(Number.isFinite(p[0])).toBe(true);
+    expect(Number.isFinite(p[1])).toBe(true);
+    expect(p[0] + p[1]).toBeCloseTo(1, 10);
+    expect(p[1]).toBeGreaterThan(p[0]);
+  });
+
+  it('logSoftmax matches finite differences and stays finite', () => {
+    const x = new Float64Array([1000, 1001, 999]);
+    const w = new Float64Array([0.2, -0.4, 0.7]);
+    const tape = new Tape();
+    const { id } = tape.allocate(3);
+    const leaf = new TapedTensor([3], x, tape, id);
+    const weights = new TapedTensor([3], w, tape, tape.allocate(3).id);
+    const y = leaf.logSoftmax();
+    expect(y.primal.every((v) => Number.isFinite(v))).toBe(true);
+    const out = y.mul(weights).sum();
+    tape.backward(out.id, Float64Array.of(1), { retainGraph: true });
+    const ana = tape.getInputGrad(id)!;
+    const num = fdVector((d) => {
+      const m = Math.max(...d);
+      let s = 0;
+      for (let i = 0; i < d.length; i++) s += Math.exp(d[i] - m);
+      const lse = m + Math.log(s);
+      let sum = 0;
+      for (let i = 0; i < d.length; i++) sum += (d[i] - lse) * w[i];
+      return sum;
+    }, x);
+    for (let i = 0; i < 3; i++) expect(ana[i]).toBeCloseTo(num[i], 4);
   });
 });
 
@@ -320,6 +386,7 @@ describe('Tape.recording and validation', () => {
     const { id } = tape.allocate(4);
     const leaf = new TapedTensor([2, 2], new Float64Array(4), tape, id);
     expect(() => leaf.softmax(-1)).toThrow(/axis/);
+    expect(() => leaf.logSoftmax(5)).toThrow(/axis/);
   });
 });
 

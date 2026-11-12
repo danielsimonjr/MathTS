@@ -109,15 +109,30 @@ describe('supplementary built-in units', () => {
   });
 });
 
+describe('logarithmic units (dB, dBm, Np)', () => {
+  it('parses decibel and neper spellings without refusing them', () => {
+    expect(String(new Unit(10, 'dB'))).toBe('10 dB');
+    expect(new Unit(10, 'dB').toNumber()).toBeCloseTo(10, 12);
+    expect(new Unit(0, 'dBm').toNumber('W')).toBeCloseTo(1e-3, 15);
+    expect(new Unit(1, 'Np').toNumber()).toBeCloseTo(1, 12);
+    expect(new Unit(1, 'Np').value).toBeCloseTo(Math.E, 12);
+    expect(new Unit(10, 'dB').value).toBeCloseTo(10, 12);
+    expect(new Unit(0, 'dBm').toNumber('mW')).toBeCloseTo(1, 12);
+    expect(new Unit(1, 'Np').to('dB').toNumber()).toBeCloseTo(20 / Math.LN10, 12);
+    expect(String(new Unit(1, 'dB'))).toBe('1 dB');
+    expect(new Unit(1, 'km').to('m').value).toBe(1000);
+    expect(new Unit(1, 'm^2').toNumber('m^2')).toBe(1);
+    expect(String(new Unit(1, 'kg/s'))).toBe('1 kg / s');
+  });
+
+  it('keeps byte B separate from bel (dB is the decibel unit)', () => {
+    expect(new Unit(1, 'B').toNumber('bit')).toBe(8);
+    expect(() => new Unit(1, 'B').to('dB')).toThrow();
+  });
+});
+
 describe('refused unit spellings', () => {
   const REFUSE_REASONS: readonly [string, string][] = [
-    ['dB', 'dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'],
-    ['dBm', 'dBm is a logarithmic unit (decibels over 1 mW); give watts'],
-    ['dBW', 'dBW is a logarithmic unit (decibels over 1 W); give watts'],
-    [
-      'Np',
-      'Np is a logarithmic unit (the neper); give the quantity in its linear unit, or a reference level',
-    ],
     [
       'Mach',
       'Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
@@ -136,14 +151,11 @@ describe('refused unit spellings', () => {
   });
 
   it('refuses a spelling inside a compound unit', () => {
-    expect(() => new Unit(1, 'dB/m')).toThrow(
-      'Unit "dB" is refused: dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'
+    expect(() => new Unit(1, 'Mach/m')).toThrow(
+      'Unit "Mach" is refused: Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number'
     );
     expect(() => new Unit(1, 'mach/s')).toThrow(
       'Unit "mach" is refused: mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number'
-    );
-    expect(() => new Unit(1, 's/dB')).toThrow(
-      'Unit "dB" is refused: dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'
     );
   });
 

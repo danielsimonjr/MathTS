@@ -271,14 +271,100 @@ export const createPlanckTemperature = /* #__PURE__ */ unitFactory(
 );
 
 /**
+ * Absolute CODATA 2022 uncertainties (NIST allascii). Exact constants are 0.
+ * `coulomb` / `coulombConstant` follow ε₀ (k = 1/(4πε₀)), so the relative
+ * uncertainty is ε₀'s. `planckCharge` follows α via e/√α (e exact), half of α's
+ * relative uncertainty. `efimovFactor` is not a CODATA entry.
+ */
+const CODATA_2022_UNCERTAINTY: Record<string, string> = {
+  speedOfLight: '0',
+  gravitationConstant: '1.5e-15',
+  planckConstant: '0',
+  reducedPlanckConstant: '0',
+  magneticConstant: '2.0e-16',
+  electricConstant: '1.4e-21',
+  vacuumImpedance: '5.9e-8',
+  coulomb: '1.421087146347029',
+  coulombConstant: '1.421087146347029',
+  elementaryCharge: '0',
+  bohrMagneton: '2.9e-33',
+  conductanceQuantum: '0',
+  inverseConductanceQuantum: '0',
+  magneticFluxQuantum: '0',
+  nuclearMagneton: '1.6e-36',
+  klitzing: '0',
+  josephson: '0',
+  bohrRadius: '8.2e-21',
+  classicalElectronRadius: '1.3e-24',
+  electronMass: '2.8e-40',
+  fermiCoupling: '6e-12',
+  fineStructure: '1.1e-12',
+  hartreeEnergy: '4.8e-30',
+  protonMass: '5.2e-37',
+  deuteronMass: '1.0e-36',
+  neutronMass: '8.5e-37',
+  quantumOfCirculation: '1.1e-10',
+  rydberg: '1.2e-5',
+  thomsonCrossSection: '6.2e-38',
+  weakMixingAngle: '0.00023',
+  atomicMass: '5.2e-37',
+  avogadro: '0',
+  boltzmann: '0',
+  faraday: '0',
+  firstRadiation: '0',
+  spectralRadiance: '0',
+  loschmidt: '0',
+  gasConstant: '0',
+  molarPlanckConstant: '0',
+  molarVolume: '0',
+  sackurTetrode: '4.7e-10',
+  secondRadiation: '0',
+  stefanBoltzmann: '0',
+  wienDisplacement: '0',
+  molarMass: '3.1e-13',
+  molarMassC12: '3.7e-12',
+  gravity: '0',
+  planckLength: '1.8e-40',
+  planckMass: '2.4e-13',
+  planckTime: '6.0e-48',
+  planckCharge: '1.413595289577848e-28',
+  planckTemperature: '1.6e30',
+};
+
+/** Attach a CODATA absolute uncertainty to a physical-constant unit. */
+function attachUncertainty(unit: UnitInstance, uncertaintyAbsolute: string): UnitInstance {
+  const unc = parseFloat(uncertaintyAbsolute);
+  Object.defineProperty(unit, 'uncertainty', {
+    value: unc,
+    enumerable: true,
+    writable: false,
+    configurable: true,
+  });
+  Object.defineProperty(unit, 'unc', {
+    get(): number {
+      return unc;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+  return unit;
+}
+
+/**
  * Helper function to create a factory function which creates a physical constant,
  * a Unit with either a number value or a BigNumber value depending on the configuration
  * @param name - The name of the physical constant
  * @param valueStr - The string representation of the constant's value
  * @param unitStr - The unit string (e.g., 'm s^-1')
+ * @param uncertaintyAbsolute - Optional CODATA absolute uncertainty for the constant
  * @returns A factory function that creates the physical constant
  */
-function unitFactory(name: string, valueStr: string, unitStr: string) {
+function unitFactory(
+  name: string,
+  valueStr: string,
+  unitStr: string,
+  uncertaintyAbsolute?: string
+) {
   const dependencies = ['config', 'Unit', 'BigNumber'];
 
   return factory(
@@ -293,7 +379,8 @@ function unitFactory(name: string, valueStr: string, unitStr: string) {
 
       const unit = new Unit(value, unitStr);
       unit.fixPrefix = true;
-      return unit;
+      const unc = uncertaintyAbsolute ?? CODATA_2022_UNCERTAINTY[name];
+      return unc === undefined ? unit : attachUncertainty(unit, unc);
     }
   );
 }
@@ -305,6 +392,28 @@ function unitFactory(name: string, valueStr: string, unitStr: string) {
  * @param value - The numeric value of the constant
  * @returns A factory function that creates the numeric constant
  */
+/** Dimensionless CODATA value that still participates in arithmetic via valueOf. */
+class CodataScalar {
+  readonly unc: number;
+  readonly uncertainty: number;
+  constructor(
+    private readonly magnitude: number,
+    unc: number
+  ) {
+    this.unc = unc;
+    this.uncertainty = unc;
+  }
+  valueOf(): number {
+    return this.magnitude;
+  }
+  toJSON(): number {
+    return this.magnitude;
+  }
+  [Symbol.toPrimitive](hint: string): number | string {
+    return hint === 'string' ? String(this.magnitude) : this.magnitude;
+  }
+}
+
 function numberFactory(name: string, value: number | string) {
   const dependencies = ['config', 'BigNumber'];
 
@@ -312,7 +421,17 @@ function numberFactory(name: string, value: number | string) {
     name,
     dependencies,
     ({ config, BigNumber }: NumberFactoryDependencies): number | string | Decimal => {
-      return config.number === 'BigNumber' ? new BigNumber(value) : value;
+      const numeric = config.number === 'BigNumber' ? new BigNumber(value) : value;
+      const uncText = CODATA_2022_UNCERTAINTY[name];
+      if (uncText === undefined) return numeric;
+      const unc = parseFloat(uncText);
+      if (typeof numeric === 'number') {
+        // Published type stays `number` (valueOf). `.unc` is the CODATA uncertainty.
+        return new CodataScalar(numeric, unc) as unknown as number;
+      }
+      Object.defineProperty(numeric, 'unc', { value: unc, enumerable: true });
+      Object.defineProperty(numeric, 'uncertainty', { value: unc, enumerable: true });
+      return numeric;
     }
   );
 }

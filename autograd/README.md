@@ -15,7 +15,7 @@ npm install @danielsimonjr/mathts-autograd
 - **Forward mode** via `DualTensor` (dual numbers wired through `core`).
 - **Reverse mode** via `Tape`, `TapedTensor`, `reverseGrad`.
 - **JAX-style helpers**: `grad`, `valueAndGrad`, `derivative`, `jacobian` (see `docs/api/autograd.md`).
-- **ML-shaped ops on the tape**: `relu`, `gelu`, `sigmoid`, `softmax`, `crossEntropy`, `binaryCrossEntropy`, plus `reshape` and reductions with `keepDims`.
+- **ML-shaped ops on the tape**: `relu`, `gelu`, `sigmoid`, `softmax`, `logSoftmax`, `crossEntropy`, `binaryCrossEntropy`, plus `reshape` and reductions with `keepDims`.
 - **`detach()`** and **`Tape.noGrad()`** to stop gradients through a subgraph.
 
 ## Current limitations (read before assuming “PyTorch in TS”)

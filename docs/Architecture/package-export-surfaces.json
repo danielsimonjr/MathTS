@@ -722,6 +722,7 @@
       "mathTyped",
       "MatrixBackend",
       "MatrixDimensions",
+      "MAX_UNIT_STRING_LENGTH",
       "memoize",
       "MemoizedFunction",
       "mulberry32",

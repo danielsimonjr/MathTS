@@ -421,6 +421,9 @@
       "MATHTS_TYPES": {
         "kind": "object"
       },
+      "MAX_UNIT_STRING_LENGTH": {
+        "kind": "number"
+      },
       "MathTSConfig": {
         "kind": "type"
       },
@@ -824,6 +827,9 @@
         "kind": "function"
       },
       "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "unitReadingSearchSteps": {
         "kind": "function"
       },
       "unitRowExactOffset": {
@@ -4427,7 +4433,7 @@
         "kind": "function"
       },
       "fineStructure": {
-        "kind": "number"
+        "kind": "object"
       },
       "finiteDifferenceCoefficients": {
         "kind": "function"
@@ -6335,7 +6341,7 @@
         "kind": "object"
       },
       "sackurTetrode": {
-        "kind": "number"
+        "kind": "object"
       },
       "savgol": {
         "kind": "function"
@@ -7082,7 +7088,7 @@
         "kind": "function"
       },
       "weakMixingAngle": {
-        "kind": "number"
+        "kind": "object"
       },
       "weibullDist": {
         "kind": "function"
