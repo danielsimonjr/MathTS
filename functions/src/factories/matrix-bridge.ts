@@ -1013,22 +1013,22 @@ export class MathJSSparseMatrix {
   }
 
   /**
-   * Iterate over entries in row j across all columns. Used by LUP decomposition.
+   * Walk CSC column `j`, invoking `callback(row, value)`.
+   * The mathjs name is `_forEachRow`; `lup` uses it as a column scan
+   * (`callback` is `(row, value)`). A row-wise scan makes sparse LU drop
+   * the elimination and hide a singular pivot.
    */
   static _forEachRow(
     j: number,
     values: unknown[],
     index: number[],
     ptr: number[],
-    callback: (col: number, value: unknown) => void
+    callback: (row: number, value: unknown) => void
   ): void {
-    const n = ptr.length - 1; // number of columns
-    for (let c = 0; c < n; c++) {
-      for (let k = ptr[c]; k < ptr[c + 1]; k++) {
-        if (index[k] === j) {
-          callback(c, values ? values[k] : 1);
-        }
-      }
+    const first = ptr[j];
+    const last = ptr[j + 1];
+    for (let k = first; k < last; k++) {
+      callback(index[k], values ? values[k] : 1);
     }
   }
 }

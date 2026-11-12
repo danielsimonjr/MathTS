@@ -67,7 +67,7 @@ describe('S2R parity — solveDAE (FD ∂g/∂z and Newton matrix)', () => {
 
 describe('S2R parity — fsolve (line search uses core norm2)', () => {
   it('[x^2-y, x+y-2] from [0.5,0.5]', () => {
-    const x = fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]);
+    const x = fsolve((v: number[]) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]);
     expect(x[0]).toBeCloseTo(1, 10);
     expect(x[1]).toBeCloseTo(1, 10);
     expect(x[0]).toBeCloseTo(1.000000000019661, 8);

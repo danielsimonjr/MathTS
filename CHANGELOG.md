@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`lusolve` throws on singular and non-finite LU factors (issue 688).** Consistent rank-deficient systems no longer return a particular solution with free variables forced to zero in `usolve`. The pivot floor is `1e-15` times the largest absolute entry of the factor (the same cutoff `linsolve` uses on a unit-scale matrix). Numeric systems smaller than 1 are equilibrated first. Direct `usolve` throws on an exact zero pivot even when the right-hand side is zero, and still propagates NaN and ±Infinity. Sparse LU scans CSC columns, so a singular sparse matrix grows a zero pivot. Test: `functions/tests/dogfood-688-lusolve-singular.test.ts`.
+
 - **`studentTTest(x, popmean)` honors SciPy `ttest_1samp` (dogfood G09, #766).** A finite numeric second argument is the hypothesized mean for a one-sample test, not a second sample. `studentTTest([1..10], 5.5)` returns statistic 0, p-value 1, df 9. Invalid second arguments throw instead of returning NaN. Test: `functions/tests/dogfood-g09-student-ttest-popmean.test.ts`.
 - **`solvePDE` CFL and `solveParabolicPDE` boundary shape (dogfood G10, #822, #833).** Explicit Euler in `solvePDE` throws `RangeError` when `r = α Δt/Δx²` is outside `[0, 0.5]`; pass `{ allowUnstable: true }` to opt into a finite unstable step. Non-finite `r` still throws. `solveParabolicPDE` rejects bare numbers, Robin, and non-finite boundary/coefficient samples with `TypeError` before or on the first BDF right-hand side instead of hanging. Tests: `functions/tests/dogfood-g10-pde-cfl-bc.test.ts`.
 
