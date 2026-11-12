@@ -6,6 +6,10 @@ and want to move to `@danielsimonjr/mathts-*`. Parity checks in this repo use
 
 ## TL;DR
 
+- MathTS publishes **ESM only**. Packages declare `"type": "module"` and `exports`
+  with an `import` condition only — there is no `require` entry and no CommonJS
+  build. Use `import` / `await import()` from Node, Bun, or bundlers; legacy CJS
+  apps need a small ESM wrapper or dynamic `import()`.
 - The compat shim (`@danielsimonjr/mathts-compat`) implements much of the mathjs
   `create(all)` surface (`math.add`, `math.import`, `math.typed`, `math.compile`,
   `math.evaluate`, `math.subset`, JSON `reviver`, …) but is **not** a silent

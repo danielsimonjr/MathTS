@@ -71,6 +71,8 @@
     "docs:deps:test": "bun test ./tools/create-dependency-graph/",
     "docs:graph:test": "bun test ./tools/query-dependency-graph/query-dependency-graph.test.mjs",
     "check:browser-safety": "node tools/query-dependency-graph/query-dependency-graph.mjs --check-browser-safety",
+    "check:browser-bundle-neutral": "node tools/test/browser-bundle-neutral.mjs",
+    "sync:readme-functions-stats": "node tools/sync-readme-functions-stats.mjs",
     "check:duplicates": "node tools/create-dependency-graph/check-duplicates.mjs",
     "check:duplicates:fast": "node tools/create-dependency-graph/check-duplicates.mjs --no-regen",
     "docs:functions": "bun --tsconfig-override=tsconfig.base.json tools/generate-functions-reference.mjs",
@@ -148,5 +150,8 @@
     "js-yaml": "^5.5.0",
     "shell-quote": "^1.11.0",
     "source-map-js": "^1.2.2"
+  },
+  "patchedDependencies": {
+    "@danielsimonjr/workerpool@10.2.2": "patches/@danielsimonjr%2Fworkerpool@10.2.2.patch"
   }
 }

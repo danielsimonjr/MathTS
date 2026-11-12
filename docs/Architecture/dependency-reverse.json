@@ -133,6 +133,7 @@
     "core/src/map.ts": ["core/src/internal.ts"],
     "core/src/wasm-loader.ts": ["core/src/internal.ts"],
     "core/src/wasm-as-header.ts": ["core/src/internal.ts"],
+    "core/src/node-module-import.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",
@@ -1121,6 +1122,7 @@
       "functions/src/cas/polynomial-canonical.ts",
       "functions/src/cas/real-roots.ts",
       "functions/src/typed/cas.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/utils/map.ts": [
@@ -1704,6 +1706,7 @@
       "functions/src/help.ts",
       "functions/src/index.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
+      "functions/src/subpath-evaluate.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/typed/polynomial-ideal.ts": [
@@ -1752,6 +1755,7 @@
       "functions/src/scalar-eval.ts",
       "functions/src/stats/fit-distribution.ts",
       "functions/src/timeseries-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/distribution-functions.ts": [
@@ -1778,12 +1782,14 @@
       "functions/src/hypothesis-extra.ts",
       "functions/src/stats/distributions-extra.ts",
       "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
       "functions/src/stats/inference-extra2.ts",
       "functions/src/stats/mvn.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/wasm/special/scalars.ts": [
@@ -1828,6 +1834,7 @@
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
       "functions/src/scalar-eval.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/descriptive-stats.ts": [
@@ -1841,14 +1848,12 @@
       "functions/src/stats/distributions-extra.ts",
       "functions/src/stats/fit-distribution.ts",
       "functions/src/typed/dist-objects.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/fused.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/index.ts"
     ],
-    "functions/src/typed/index.ts": [
-      "functions/src/factories/evaluate.ts",
-      "functions/src/index.ts"
-    ],
+    "functions/src/typed/index.ts": ["functions/src/index.ts"],
     "functions/src/typed/cas.ts": ["functions/src/index.ts"],
     "functions/src/geometry/kernels.generated.ts": [
       "functions/src/geometry/frustum.ts",
@@ -1875,7 +1880,11 @@
       "functions/src/wasm/poly/wasm-bridge.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
-    "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
+    "functions/src/typed/unit.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/scalar-eval.ts": [
       "functions/src/index.ts",
       "functions/src/numeric-equivalence.ts",
@@ -2093,6 +2102,7 @@
       "functions/src/stats/gaussian-process.ts",
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/stats/mvn.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/scalar-batch-task.ts": [
@@ -2164,6 +2174,7 @@
     ],
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
+    "functions/src/typed/expression-eval-barrel.ts": ["functions/src/factories/evaluate.ts"],
     "functions/src/arithmetic/abs.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/addScalar.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/cube.ts": ["functions/src/factories/index.ts"],
@@ -2404,10 +2415,12 @@
       "functions/src/geometry/hull.ts",
       "functions/src/geometry/polygon-ops.ts",
       "functions/src/geometry/spherical-voronoi.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/set.ts": [
       "functions/src/geometry/geometry-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/gpu/implicit.ts": [
@@ -2462,6 +2475,7 @@
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/nnls.ts",
       "functions/src/typed/cas.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/probability/util/seededRNG.ts": [
@@ -2515,6 +2529,10 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts"
     ],
+    "functions/src/relational/natural-sort.ts": [
+      "functions/src/relational/compareNatural.ts",
+      "functions/src/typed/relational.ts"
+    ],
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
     "functions/src/set/flatten-pair.ts": [
       "functions/src/set/setSymDifference.ts",
@@ -2530,6 +2548,7 @@
       "functions/src/signal/spectral-peaks.ts",
       "functions/src/signal/wavelets.ts",
       "functions/src/signal/windows-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/signal/wavelet-filters.ts": [
@@ -2538,6 +2557,7 @@
     ],
     "functions/src/typed/probability.ts": [
       "functions/src/special/zeta-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/statistics/numeric-data.ts": [
@@ -2644,8 +2664,57 @@
     ],
     "functions/src/typed/worker-kernels.ts": [
       "functions/src/typed/distributions.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts",
       "functions/src/typed/special.ts"
+    ],
+    "functions/src/typed/statistics.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/bitwise.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/logical.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/complex.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/fused.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/integration.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/interpolation.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/combinatorics.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/graph.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/hypothesis.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/relational.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/string.ts": [
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/f64-kernels.ts",
@@ -2687,19 +2756,7 @@
       "functions/src/utils/sort-numbers.ts"
     ],
     "functions/src/typed/centrality-restarts.ts": ["functions/src/typed/graph.ts"],
-    "functions/src/typed/statistics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/combinatorics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/bitwise.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/logical.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/complex.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/fused.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/interpolation.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/graph.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/hypothesis.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/relational.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
     "functions/src/gpu/fft-gpu.ts": [
       "functions/src/typed/index.ts",
       "functions/src/typed/signal.ts"
