@@ -10,7 +10,7 @@
     "packages/workerpool/dist/worker.js": 21676,
     "core/dist/index.js": 217618,
     "core/dist/internal.js": 222016,
-    "matrix/dist/index.js": 195380,
+    "matrix/dist/index.js": 197367,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 76566,
     "autograd/dist/index.js": 59159,
