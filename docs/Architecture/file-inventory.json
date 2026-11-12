@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-11",
-  "totalFiles": 2240,
+  "generated": "2026-11-12",
+  "totalFiles": 2243,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1259,
+    "build-entry": 1261,
     "test-only": 0,
     "orphan": 0,
-    "test": 890,
+    "test": 891,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1285,
-    "tests": 890,
+    "src": 1287,
+    "tests": 891,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 4,
     "(root)": 55,
     "@danielsimonjr/mathts-expression": 562,
-    "@danielsimonjr/mathts-functions": 1012,
+    "@danielsimonjr/mathts-functions": 1015,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 121,
@@ -5574,14 +5574,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 394
+    },
+    {
+      "file": "functions/src/algebra/solver/pivot-tolerance.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 21
     },
     {
       "file": "functions/src/algebra/solver/usolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 365
+      "loc": 362
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -5596,6 +5603,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 193
+    },
+    {
+      "file": "functions/src/algebra/solver/validate-u-pivots.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 111
     },
     {
       "file": "functions/src/algebra/sparse/csAmd.ts",
@@ -9798,6 +9812,13 @@
       "loc": 51
     },
     {
+      "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 239
+    },
+    {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11832,7 +11853,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 465
+      "loc": 464
     },
     {
       "file": "functions/tests/special-accuracy.test.ts",
