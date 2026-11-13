@@ -25,5 +25,10 @@ describe('create(all).typed has the mathTyped surface', () => {
     const double = typed('double', { number: (x: number) => 2 * x }) as (x: number) => number;
     expect(double(3)).toBe(6);
     expect(typed.isTypedFunction(double)).toBe(true);
+    // A registry member works through the instance, not only exists.
+    const found = typed.find(double as Parameters<typeof typed.find>[0], ['number']) as (
+      x: number
+    ) => number;
+    expect(found(4)).toBe(8);
   });
 });
