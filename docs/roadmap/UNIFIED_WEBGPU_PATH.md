@@ -124,7 +124,7 @@ explicit edges:
 
 ```ts
 const ga = await GpuArray.upload(cpuFloat64Array, shape); // one upload
-const r = await gpuMatmul(gpuAdd(ga, bias), weights); // stays on device
+const r = await gpuMatmul(await gpuAdd(ga, bias), weights); // stays on device
 const out = await r.toFloat64Array(); // one download
 ```
 
