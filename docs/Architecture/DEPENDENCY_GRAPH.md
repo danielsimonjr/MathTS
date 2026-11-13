@@ -1796,17 +1796,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                      | Type               |
-| -------------------------- | ---------------------------- | ------------------ |
-| `../types/DenseMatrix.js`  | `DenseMatrix, isDenseMatrix` | Import             |
-| `../types/SparseMatrix.js` | `SparseMatrix`               | Import (type-only) |
-| `./densify.js`             | `densifyForSolver`           | Import             |
+| File                        | Imports                      | Type               |
+| --------------------------- | ---------------------------- | ------------------ |
+| `../types/DenseMatrix.js`   | `DenseMatrix, isDenseMatrix` | Import             |
+| `../types/SparseMatrix.js`  | `SparseMatrix`               | Import (type-only) |
+| `./densify.js`              | `densifyForSolver`           | Import             |
+| `../types/dense/storage.js` | `denseReader`                | Import             |
 
 **Exports:**
 
-- Interfaces: `PackedMatrixDescriptor`
+- Interfaces: `PackedMatrixDescriptor`, `DecompositionSource`
 - Types: `DecompositionMatrixInput`
-- Functions: `isPackedMatrixDescriptor`, `decompositionInputToNestedArray`, `decompositionInputToDenseMatrix`
+- Functions: `isPackedMatrixDescriptor`, `decompositionInputToNestedArray`, `decompositionSource`, `decompositionInputToDenseMatrix`
 
 ---
 
@@ -2074,7 +2075,7 @@ graph LR
 | File                      | Imports                                                         | Type   |
 | ------------------------- | --------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                   | Import |
-| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`     | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                 | Import |
 | `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 
 **Exports:**
@@ -2107,7 +2108,7 @@ graph LR
 | File                      | Imports                                                                      | Type   |
 | ------------------------- | ---------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
-| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`                  | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                              | Import |
 | `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 | `./givens.js`             | `applyGivensRight, givensRotation`                                           | Import |
 
@@ -2140,10 +2141,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports                                                     | Type   |
-| ---------------- | ----------------------------------------------------------- | ------ |
-| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
-| `./svd.js`       | `svd, SVDResult, SVDOptions`                                | Import |
+| File             | Imports                                         | Type   |
+| ---------------- | ----------------------------------------------- | ------ |
+| `./as-packed.js` | `decompositionSource, DecompositionMatrixInput` | Import |
+| `./svd.js`       | `svdOfSource, SVDResult, SVDOptions`            | Import |
 
 **Exports:**
 
@@ -2155,16 +2156,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports                                                                      | Type   |
-| ---------------- | ---------------------------------------------------------------------------- | ------ |
-| `./common.js`    | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
-| `./givens.js`    | `applyGivensCols, givensRotation`                                            | Import |
-| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput`                  | Import |
+| File             | Imports                                                              | Type   |
+| ---------------- | -------------------------------------------------------------------- | ------ |
+| `./common.js`    | `eye, householder, applyHouseholderLeft, applyHouseholderRight`      | Import |
+| `./givens.js`    | `applyGivensCols, givensRotation`                                    | Import |
+| `./as-packed.js` | `decompositionSource, DecompositionMatrixInput, DecompositionSource` | Import |
 
 **Exports:**
 
 - Interfaces: `SVDResult`, `SVDOptions`
-- Functions: `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`
+- Functions: `svd`, `svdOfSource`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`
 
 ---
 
@@ -2284,8 +2285,9 @@ graph LR
 
 **Exports:**
 
+- Interfaces: `DenseReader`
 - Types: `DenseStorage`
-- Functions: `contiguousDenseData`
+- Functions: `denseReader`, `contiguousDenseData`
 
 ---
 
@@ -21175,12 +21177,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1329   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 228798 |
-| Total Exports           | 7258   |
+| Total Lines of Code     | 228903 |
+| Total Exports           | 7261   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
-| Total Interfaces        | 658    |
-| Total Functions         | 2475   |
+| Total Interfaces        | 660    |
+| Total Functions         | 2478   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |

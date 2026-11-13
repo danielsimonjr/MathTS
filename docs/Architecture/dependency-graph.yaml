@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-13'
   totalFiles: 1329
   totalModules: 82
-  totalExports: 7258
+  totalExports: 7261
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5008,16 +5008,22 @@ modules:
         - file: ./densify.js
           imports:
             - densifyForSolver
+        - file: ../types/dense/storage.js
+          imports:
+            - denseReader
       workspaceDependencies: []
       exports:
         - isPackedMatrixDescriptor
         - decompositionInputToNestedArray
+        - decompositionSource
         - decompositionInputToDenseMatrix
       interfaces:
         - PackedMatrixDescriptor
+        - DecompositionSource
       functions:
         - isPackedMatrixDescriptor
         - decompositionInputToNestedArray
+        - decompositionSource
         - decompositionInputToDenseMatrix
     matrix/src/operations/cholesky.ts:
       description: Cholesky Decomposition (DenseMatrix primitive)
@@ -5622,7 +5628,7 @@ modules:
             - DenseMatrix
         - file: ./as-packed.js
           imports:
-            - decompositionInputToDenseMatrix
+            - decompositionSource
             - DecompositionMatrixInput
         - file: ./common.js
           imports:
@@ -5668,7 +5674,7 @@ modules:
             - DenseMatrix
         - file: ./as-packed.js
           imports:
-            - decompositionInputToDenseMatrix
+            - decompositionSource
             - DecompositionMatrixInput
         - file: ./common.js
           imports:
@@ -5728,11 +5734,11 @@ modules:
       internalDependencies:
         - file: ./as-packed.js
           imports:
-            - decompositionInputToNestedArray
+            - decompositionSource
             - DecompositionMatrixInput
         - file: ./svd.js
           imports:
-            - svd
+            - svdOfSource
             - SVDResult
             - SVDOptions
       workspaceDependencies: []
@@ -5748,7 +5754,6 @@ modules:
         - file: ./common.js
           imports:
             - eye
-            - cloneMatrix
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
@@ -5758,11 +5763,13 @@ modules:
             - givensRotation
         - file: ./as-packed.js
           imports:
-            - decompositionInputToNestedArray
+            - decompositionSource
             - DecompositionMatrixInput
+            - DecompositionSource
       workspaceDependencies: []
       exports:
         - svd
+        - svdOfSource
         - singularValues
         - pinv
         - lowRankApprox
@@ -5774,6 +5781,7 @@ modules:
         - SVDOptions
       functions:
         - svd
+        - svdOfSource
         - singularValues
         - pinv
         - lowRankApprox
@@ -5954,8 +5962,12 @@ modules:
           typeOnly: true
       workspaceDependencies: []
       exports:
+        - denseReader
         - contiguousDenseData
+      interfaces:
+        - DenseReader
       functions:
+        - denseReader
         - contiguousDenseData
     matrix/src/types/index.ts:
       description: Matrix Type Exports
@@ -45731,11 +45743,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1329
   totalModules: 82
-  totalLinesOfCode: 228798
-  totalExports: 7258
+  totalLinesOfCode: 228903
+  totalExports: 7261
   totalClasses: 62
-  totalInterfaces: 658
-  totalFunctions: 2475
+  totalInterfaces: 660
+  totalFunctions: 2478
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1668

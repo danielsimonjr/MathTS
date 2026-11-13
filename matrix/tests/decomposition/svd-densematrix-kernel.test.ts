@@ -9,27 +9,70 @@
 
 import { describe, it, expect } from 'vitest';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
-import { svd, pinv, lowRankApprox, cond } from '../../src/operations/svd.js';
+import { svd, pinv, lowRankApprox, cond, normFro } from '../../src/operations/svd.js';
 import { pinv as pinvDense } from '../../src/operations/pinv.js';
 import { qrPivoted } from '../../src/operations/qr-pivoted.js';
 import { matrixSchur } from '../../src/operations/schur.js';
 
-type ToArrayHost = { toArray: () => number[][] };
+/** Properties a kernel may read from a DenseMatrix: raw storage fields, plus the typeof check of the storage guard. */
+const ALLOWED_READS = new Set([
+  'data',
+  'isView',
+  'offset',
+  'rowStride',
+  'rows',
+  'cols',
+  'toFlatFloat64Array',
+]);
 
-/** Run `fn` and count how many times `DenseMatrix.prototype.toArray` was called. */
-function countToArrayCalls<T>(fn: () => T): { result: T; calls: number } {
-  const proto = DenseMatrix.prototype as unknown as ToArrayHost;
-  const original = proto.toArray;
-  let calls = 0;
-  proto.toArray = function (this: DenseMatrix): number[][] {
-    calls++;
-    return original.call(this);
-  };
-  try {
-    return { result: fn(), calls };
-  } finally {
-    proto.toArray = original;
+/**
+ * Run `fn` on a Proxy of `dm`. Every function on the DenseMatrix prototype chain is
+ * counted, and every property read on the instance is recorded. A kernel that reads
+ * storage directly makes no method call and reads only allowed fields.
+ */
+function probe<T>(
+  dm: DenseMatrix,
+  fn: (m: DenseMatrix) => T
+): { result: T; methodCalls: string[]; reads: string[] } {
+  const methodCalls: string[] = [];
+  const reads = new Set<string>();
+  const restore: Array<() => void> = [];
+  for (let proto = DenseMatrix.prototype as object; proto && proto !== Object.prototype;) {
+    for (const name of Object.getOwnPropertyNames(proto)) {
+      if (name === 'constructor') continue;
+      const desc = Object.getOwnPropertyDescriptor(proto, name);
+      const original = desc?.value;
+      if (typeof original !== 'function' || !desc?.configurable) continue;
+      const host = proto;
+      Object.defineProperty(host, name, {
+        ...desc,
+        value: function (this: unknown, ...args: unknown[]) {
+          methodCalls.push(name);
+          return original.apply(this, args);
+        },
+      });
+      restore.push(() => Object.defineProperty(host, name, desc));
+    }
+    proto = Object.getPrototypeOf(proto);
   }
+  const proxy = new Proxy(dm, {
+    get(target, prop) {
+      if (typeof prop === 'string') reads.add(prop);
+      return Reflect.get(target, prop, target);
+    },
+  });
+  try {
+    const result = fn(proxy);
+    return { result, methodCalls, reads: [...reads] };
+  } finally {
+    for (const r of restore.reverse()) r();
+  }
+}
+
+/** Assert that a probed run touched storage only, through allowed fields. */
+function expectStorageOnly(p: { methodCalls: string[]; reads: string[] }): void {
+  expect(p.methodCalls).toEqual([]);
+  expect(p.reads.filter((r) => !ALLOWED_READS.has(r))).toEqual([]);
 }
 
 /** Deterministic pseudo-random matrix (LCG), so every run uses the same values. */
@@ -64,9 +107,9 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const dm = DenseMatrix.fromArray(nested);
     const reference = svd(nested.map((row) => row.slice()));
 
-    const { result, calls } = countToArrayCalls(() => svd(dm));
+    const { result, ...trace } = probe(dm, (m) => svd(m));
 
-    expect(calls).toBe(0);
+    expectStorageOnly(trace);
     expectBitIdentical(result, reference);
   });
 
@@ -75,9 +118,9 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const dm = DenseMatrix.fromArray(nested);
     const reference = svd(nested.map((row) => row.slice()));
 
-    const { result, calls } = countToArrayCalls(() => svd(dm));
+    const { result, ...trace } = probe(dm, (m) => svd(m));
 
-    expect(calls).toBe(0);
+    expectStorageOnly(trace);
     expectBitIdentical(result, reference);
   });
 
@@ -88,9 +131,9 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const viewNested = view.toArray();
     const reference = svd(viewNested.map((row) => row.slice()));
 
-    const { result, calls } = countToArrayCalls(() => svd(view));
+    const { result, ...trace } = probe(view, (m) => svd(m));
 
-    expect(calls).toBe(0);
+    expectStorageOnly(trace);
     expectBitIdentical(result, reference);
   });
 
@@ -100,9 +143,9 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const dm = DenseMatrix.fromArray(nested);
     const reference = svd(nested.map((row) => row.slice()));
 
-    const { result, calls } = countToArrayCalls(() => svd(dm));
+    const { result, ...trace } = probe(dm, (m) => svd(m));
 
-    expect(calls).toBe(0);
+    expectStorageOnly(trace);
     expectBitIdentical(result, reference);
   });
 
@@ -123,9 +166,9 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const dm = DenseMatrix.fromArray(nested);
     const reference = pinv(nested.map((row) => row.slice()));
 
-    const { result, calls } = countToArrayCalls(() => pinv(dm));
+    const { result, ...trace } = probe(dm, (m) => pinv(m));
 
-    expect(calls).toBe(0);
+    expectStorageOnly(trace);
     expect(result).toEqual(reference);
   });
 
@@ -138,12 +181,12 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     );
     const refCond = cond(nested.map((row) => row.slice()));
 
-    const approx = countToArrayCalls(() => lowRankApprox(dm, 3));
-    const condition = countToArrayCalls(() => cond(dm));
+    const approx = probe(dm, (m) => lowRankApprox(m, 3));
+    const condition = probe(dm, (m) => cond(m));
 
-    expect(approx.calls).toBe(0);
+    expectStorageOnly(approx);
     expect(approx.result).toEqual(refApprox);
-    expect(condition.calls).toBe(0);
+    expectStorageOnly(condition);
     expect(condition.result).toBe(refCond);
   });
 
@@ -156,15 +199,54 @@ describe('svd(DenseMatrix) kernel path (#932)', () => {
     const refSchur = matrixSchur(square.map((row) => row.slice()));
     const sq = DenseMatrix.fromArray(square);
 
-    const p = countToArrayCalls(() => pinvDense(dm));
-    const q = countToArrayCalls(() => qrPivoted(dm));
-    const s = countToArrayCalls(() => matrixSchur(sq));
+    const p = probe(dm, (m) => pinvDense(m));
+    const q = probe(dm, (m) => qrPivoted(m));
+    const s = probe(sq, (m) => matrixSchur(m));
 
-    expect(p.calls).toBe(0);
+    expectStorageOnly(p);
     expect(p.result.toArray()).toEqual(refPinv);
-    expect(q.calls).toBe(0);
+    expectStorageOnly(q);
     expect(q.result.R.toArray()).toEqual(refQr.R.toArray());
-    expect(s.calls).toBe(0);
+    expectStorageOnly(s);
     expect(s.result.T.toArray()).toEqual(refSchur.T.toArray());
+  });
+
+  it('normFro(DenseMatrix) and a view: storage only, bit-identical to nested', () => {
+    const nested = seededNested(30, 12, 97);
+    const dm = DenseMatrix.fromArray(nested);
+    const view = dm.slice({ rowStart: 4, rowEnd: 22 });
+    const viewNested = view.toArray();
+
+    const full = probe(dm, (m) => normFro(m));
+    const part = probe(view, (m) => normFro(m));
+
+    expectStorageOnly(full);
+    expectStorageOnly(part);
+    expect(full.result).toBe(normFro(nested.map((row) => row.slice())));
+    expect(part.result).toBe(normFro(viewNested));
+  });
+
+  it('the probe detects a conversion (control)', () => {
+    const dm = DenseMatrix.fromArray(seededNested(4, 4, 5));
+    const traced = probe(dm, (m) => m.toArray());
+    expect(traced.methodCalls).toContain('toArray');
+  });
+
+  it('routed functions do not modify a DenseMatrix or its parent storage', () => {
+    const nested = seededNested(12, 12, 101);
+    const parent = DenseMatrix.fromArray(nested);
+    const view = parent.slice({ rowStart: 2, rowEnd: 10 });
+    const before = parent.toArray();
+    for (const input of [parent, view]) {
+      svd(input);
+      pinv(input);
+      lowRankApprox(input, 2);
+      cond(input);
+      normFro(input);
+      qrPivoted(input);
+      pinvDense(input);
+    }
+    matrixSchur(parent);
+    expect(parent.toArray()).toEqual(before);
   });
 });

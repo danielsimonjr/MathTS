@@ -28,13 +28,57 @@ function isDenseStorage(m: unknown): m is DenseStorage {
   );
 }
 
+/** Read-only operations on a `DenseMatrix`. It exposes no storage, so a caller cannot write to the matrix. */
+export interface DenseReader {
+  readonly rows: number;
+  readonly cols: number;
+  /** A fresh row-major nested copy, transposed when `transpose` is true. */
+  copyRows(transpose: boolean): number[][];
+  /** The sum of squares of all entries, summed in row-major order. */
+  sumOfSquares(): number;
+}
+
 /**
- * The storage of a `DenseMatrix` for in-package kernels, or `null` for any other
- * matrix type. Callers read `data` through `offset` and `rowStride`, so a view is
- * read in place. Callers must not write to it.
+ * A read-only reader for a `DenseMatrix`, or `null` for any other matrix type.
+ * It reads through `offset` and `rowStride`, so a view is read in place.
  */
-export function denseStorage(matrix: Matrix<number>): DenseStorage | null {
-  return isDenseStorage(matrix) ? matrix : null;
+export function denseReader(matrix: Matrix<number>): DenseReader | null {
+  if (!isDenseStorage(matrix)) return null;
+  const { rows, cols, data, offset, rowStride } = matrix;
+  return {
+    rows,
+    cols,
+    copyRows(transpose: boolean): number[][] {
+      if (!transpose) {
+        const out = new Array<number[]>(rows);
+        for (let i = 0; i < rows; i++) {
+          const base = offset + i * rowStride;
+          const row = new Array<number>(cols);
+          for (let j = 0; j < cols; j++) row[j] = data[base + j];
+          out[i] = row;
+        }
+        return out;
+      }
+      const out = new Array<number[]>(cols);
+      for (let j = 0; j < cols; j++) {
+        const row = new Array<number>(rows);
+        for (let i = 0; i < rows; i++) row[i] = data[offset + i * rowStride + j];
+        out[j] = row;
+      }
+      return out;
+    },
+    sumOfSquares(): number {
+      let sum = 0;
+      for (let i = 0; i < rows; i++) {
+        const base = offset + i * rowStride;
+        for (let j = 0; j < cols; j++) {
+          const v = data[base + j];
+          sum += v * v;
+        }
+      }
+      return sum;
+    },
+  };
 }
 
 /**

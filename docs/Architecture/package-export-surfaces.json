@@ -4433,7 +4433,7 @@
       "DENSE_MATRIX_MAX_ELEMENTS",
       "denseContiguousData",
       "DenseMatrix",
-      "denseStorage",
+      "denseReader",
       "densifyForSolver",
       "DensifyOptions",
       "destroyGlobalGPU",
