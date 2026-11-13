@@ -4,13 +4,23 @@
  */
 
 import { importModule } from '@danielsimonjr/mathts-core/internal';
+import type { TransferableLike } from '@danielsimonjr/mathts-workerpool';
+
+/**
+ * A worker of the pool: the global `Worker` class instance when the compiling project has the
+ * DOM or Node worker types, and a minimal handle when it has not. The published declarations
+ * must load without either (`skipLibCheck: false`, no `@types/node`, no DOM lib).
+ */
+export type PoolWorker = typeof globalThis extends { Worker: { prototype: infer W } }
+  ? W
+  : { postMessage(message: unknown, transfer?: TransferableLike[]): void; terminate(): unknown };
 
 interface WorkerTask<T = unknown, R = unknown> {
   id: string;
   data: T;
   resolve: (value: R) => void;
   reject: (error: Error) => void;
-  transferables?: Transferable[];
+  transferables?: TransferableLike[];
   /**
    * Timer handle used to enforce execute()'s timeoutMs parameter.
    * Cleared on resolve/reject.
@@ -20,7 +30,7 @@ interface WorkerTask<T = unknown, R = unknown> {
    * The worker currently executing this task. Set by executeTask so the
    * timeout handler can terminate the right worker.
    */
-  worker?: Worker;
+  worker?: PoolWorker;
 }
 
 interface WorkerMessage<T = unknown> {
@@ -45,8 +55,8 @@ let taskCounter = 0;
  * `terminate` rejects all queued and active tasks and stops all workers.
  */
 export class WorkerPool {
-  private workers: Worker[] = [];
-  private availableWorkers: Worker[] = [];
+  private workers: PoolWorker[] = [];
+  private availableWorkers: PoolWorker[] = [];
   // FIFO queue. `shift()` is O(n) but queues here hold a handful of chunk tasks (one
   // per worker per operation), so an index-based ring buffer would not pay for itself.
   private taskQueue: WorkerTask[] = [];
@@ -56,7 +66,7 @@ export class WorkerPool {
   private isNode: boolean;
   private terminated = false;
   /** Workers that have delivered at least one message (so their script loads). */
-  private readyWorkers = new WeakSet<Worker>();
+  private readyWorkers = new WeakSet<PoolWorker>();
   /** Consecutive crashes of workers that never became ready. */
   private startupFailures = 0;
 
@@ -118,8 +128,8 @@ export class WorkerPool {
     return this.workerThreadsModule;
   }
 
-  protected async createWorker(): Promise<Worker> {
-    let worker: Worker;
+  protected async createWorker(): Promise<PoolWorker> {
+    let worker: PoolWorker;
 
     if (this.isNode) {
       // Node.js worker_threads
@@ -144,7 +154,7 @@ export class WorkerPool {
         this.handleWorkerError(worker, { message: error.message } as ErrorEvent);
       });
 
-      worker = nodeWorker as unknown as Worker;
+      worker = nodeWorker as unknown as PoolWorker;
     } else {
       // Browser Web Worker
       worker = new Worker(this.workerScript, { type: 'module' });
@@ -161,7 +171,7 @@ export class WorkerPool {
     return worker;
   }
 
-  private handleWorkerMessage(worker: Worker, message: WorkerMessage): void {
+  private handleWorkerMessage(worker: PoolWorker, message: WorkerMessage): void {
     this.readyWorkers.add(worker);
     this.startupFailures = 0;
     const task = this.activeTasks.get(message.id);
@@ -197,7 +207,7 @@ export class WorkerPool {
     this.processQueue();
   }
 
-  private handleWorkerError(worker: Worker, error: ErrorEvent): void {
+  private handleWorkerError(worker: PoolWorker, error: ErrorEvent): void {
     console.error('Worker error:', error);
     if (!this.workers.includes(worker)) return; // already evicted (timeout/terminate)
     // Reject only the tasks this worker was running.
@@ -237,7 +247,7 @@ export class WorkerPool {
   /** Consecutive never-ready worker crashes tolerated before the pool stops respawning. */
   static readonly MAX_STARTUP_FAILURES = 3;
 
-  private isBusy(worker: Worker): boolean {
+  private isBusy(worker: PoolWorker): boolean {
     for (const task of this.activeTasks.values()) {
       if (task.worker === worker) return true;
     }
@@ -245,7 +255,7 @@ export class WorkerPool {
   }
 
   /** Terminate a crashed worker, drop it from the roster and spawn a replacement. */
-  private async evictAndReplace(dead: Worker): Promise<void> {
+  private async evictAndReplace(dead: PoolWorker): Promise<void> {
     try {
       dead.terminate();
     } catch {
@@ -276,7 +286,7 @@ export class WorkerPool {
     }
   }
 
-  private executeTask(worker: Worker, task: WorkerTask): void {
+  private executeTask(worker: PoolWorker, task: WorkerTask): void {
     this.activeTasks.set(task.id, task);
     task.worker = worker;
 
@@ -353,7 +363,7 @@ export class WorkerPool {
    */
   public async execute<T = unknown, R = unknown>(
     data: T,
-    transferables?: Transferable[],
+    transferables?: TransferableLike[],
     timeoutMs?: number
   ): Promise<R> {
     return new Promise<R>((resolve, reject) => {

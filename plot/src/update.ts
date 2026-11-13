@@ -6,8 +6,17 @@ import type { Layer2D, PlotOptions } from './types.js';
 const PLOT_ROOT = 'data-mathts-plot';
 const LIVE = 'data-mathts-live';
 
+/**
+ * The DOM `Element` when the compiling project has the DOM lib, and a minimal handle when it
+ * has not. The published declarations must load in a project with neither the DOM lib nor
+ * `@types/node` (`skipLibCheck: false`).
+ */
+export type PlotHostElement = typeof globalThis extends { Element: { prototype: infer E } }
+  ? E
+  : { readonly nodeType: number };
+
 /** Axes and live-node identity for the SVG we last mounted or patched. Not retained after the node is discarded. */
-const frameOf = new WeakMap<Element, string>();
+const frameOf = new WeakMap<PlotHostElement, string>();
 
 function isLayerArray(v: unknown): v is Layer2D[] {
   return (
@@ -34,27 +43,30 @@ function resolveLiveLayers(
   return { layers: [{ type: 'line', y: a as Layer2D['y'] }], opts: (b as PlotOptions) ?? {} };
 }
 
-function forEachElement(el: Element, visit: (e: Element) => void): void {
+function forEachElement(el: PlotHostElement, visit: (e: PlotHostElement) => void): void {
   visit(el);
   for (let i = 0; i < el.childNodes.length; i++) {
     const c = el.childNodes[i];
-    if (c.nodeType === 1) forEachElement(c as Element, visit);
+    if (c.nodeType === 1) forEachElement(c as PlotHostElement, visit);
   }
 }
 
-function findDescendant(el: Element, pred: (e: Element) => boolean): Element | null {
-  let found: Element | null = null;
+function findDescendant(
+  el: PlotHostElement,
+  pred: (e: PlotHostElement) => boolean
+): PlotHostElement | null {
+  let found: PlotHostElement | null = null;
   forEachElement(el, (e) => {
     if (!found && pred(e)) found = e;
   });
   return found;
 }
 
-function findPlotSvg(el: Element): Element | null {
+function findPlotSvg(el: PlotHostElement): PlotHostElement | null {
   return findDescendant(el, (e) => e.localName === 'svg' && e.getAttribute(PLOT_ROOT) === '1');
 }
 
-function parseSvgRoot(markup: string): Element {
+function parseSvgRoot(markup: string): PlotHostElement {
   const DOMParserCtor = (
     globalThis as {
       DOMParser?: { new (): { parseFromString: (s: string, t: string) => Document } };
@@ -67,7 +79,7 @@ function parseSvgRoot(markup: string): Element {
   return doc.documentElement;
 }
 
-function mountSvg(el: Element, svgMarkup: string): Element {
+function mountSvg(el: PlotHostElement, svgMarkup: string): PlotHostElement {
   if ('innerHTML' in el && typeof (el as HTMLElement).innerHTML === 'string') {
     (el as HTMLElement).innerHTML = svgMarkup;
   } else {
@@ -81,7 +93,7 @@ function mountSvg(el: Element, svgMarkup: string): Element {
   return svg;
 }
 
-function canPatchLive(layers: Layer2D[], svg: Element): boolean {
+function canPatchLive(layers: Layer2D[], svg: PlotHostElement): boolean {
   if (layers.length !== 1 || layers[0]?.type !== 'line') return false;
   return findDescendant(svg, (e) => e.getAttribute(LIVE) === 'line-0-path') !== null;
 }
@@ -108,7 +120,7 @@ function fmt(n: number): string {
   return String(Math.round(n * 100) / 100);
 }
 
-function patchLivePrimitives(svg: Element, prims: Prim[]): void {
+function patchLivePrimitives(svg: PlotHostElement, prims: Prim[]): void {
   for (const p of prims) {
     if (!('live' in p) || !p.live) continue;
     const live = p.live;
@@ -131,10 +143,15 @@ function patchLivePrimitives(svg: Element, prims: Prim[]): void {
  * A different layer type, a shorter or longer series, or a new data range replaces the
  * plot SVG in the container so stale nodes are not left behind and points stay on the axes.
  */
-export function update(el: Element, y: Layer2D['y'], opts?: PlotOptions): void;
-export function update(el: Element, x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): void;
-export function update(el: Element, layers: Layer2D[], opts?: PlotOptions): void;
-export function update(el: Element, a: unknown, b?: unknown, c?: PlotOptions): void {
+export function update(el: PlotHostElement, y: Layer2D['y'], opts?: PlotOptions): void;
+export function update(
+  el: PlotHostElement,
+  x: Layer2D['x'],
+  y: Layer2D['y'],
+  opts?: PlotOptions
+): void;
+export function update(el: PlotHostElement, layers: Layer2D[], opts?: PlotOptions): void;
+export function update(el: PlotHostElement, a: unknown, b?: unknown, c?: PlotOptions): void {
   const { layers, opts } = resolveLiveLayers(a, b, c);
   const scene = build2DScene(layers, opts);
   const markup = emitSVG(scene);

@@ -167,6 +167,12 @@
       "Transfer": {
         "kind": "function"
       },
+      "TransferDescriptor": {
+        "kind": "type"
+      },
+      "TransferableLike": {
+        "kind": "type"
+      },
       "WasmFeatureStatus": {
         "kind": "type"
       },
@@ -843,6 +849,9 @@
       }
     },
     "./internal": {
+      "AbortSignalLike": {
+        "kind": "type"
+      },
       "BaseUnitDef": {
         "kind": "type"
       },
@@ -853,6 +862,9 @@
         "kind": "type"
       },
       "BigNumberValue": {
+        "kind": "type"
+      },
+      "CompiledWasmModule": {
         "kind": "type"
       },
       "Complex": {
@@ -1030,6 +1042,9 @@
         "kind": "type"
       },
       "WasmManifest": {
+        "kind": "type"
+      },
+      "WasmMemoryHandle": {
         "kind": "type"
       },
       "WasmModuleLoader": {
@@ -10115,6 +10130,9 @@
       "SQRT2": {
         "kind": "object"
       },
+      "WasmMemory": {
+        "kind": "type"
+      },
       "__collect": {
         "kind": "function"
       },
@@ -11326,10 +11344,61 @@
       "DeviceLostEvent": {
         "kind": "type"
       },
+      "GPUAdapter": {
+        "kind": "type"
+      },
       "GPUAdapterInfo": {
         "kind": "type"
       },
+      "GPUBindGroup": {
+        "kind": "type"
+      },
+      "GPUBindGroupDescriptor": {
+        "kind": "type"
+      },
+      "GPUBindGroupEntry": {
+        "kind": "type"
+      },
+      "GPUBindGroupLayout": {
+        "kind": "type"
+      },
+      "GPUBindGroupLayoutDescriptor": {
+        "kind": "type"
+      },
+      "GPUBindGroupLayoutEntry": {
+        "kind": "type"
+      },
+      "GPUBuffer": {
+        "kind": "type"
+      },
+      "GPUBufferDescriptor": {
+        "kind": "type"
+      },
+      "GPUBufferUsageFlags": {
+        "kind": "type"
+      },
       "GPUCapabilities": {
+        "kind": "type"
+      },
+      "GPUCommandBuffer": {
+        "kind": "type"
+      },
+      "GPUCommandEncoder": {
+        "kind": "type"
+      },
+      "GPUCompilationInfo": {
+        "kind": "type"
+      },
+      "GPUCompilationMessage": {
+        "kind": "type"
+      },
+      "GPUComputePassEncoder": {
+        "kind": "type"
+      },
+      "GPUComputePipeline": {
+        "kind": "type"
+      },
+      "GPUComputePipelineDescriptor": {
         "kind": "type"
       },
       "GPUContext": {
@@ -11339,6 +11408,60 @@
         "kind": "type"
       },
       "GPUContextStatus": {
+        "kind": "type"
+      },
+      "GPUDevice": {
+        "kind": "type"
+      },
+      "GPUDeviceDescriptor": {
+        "kind": "type"
+      },
+      "GPUDeviceLostInfo": {
+        "kind": "type"
+      },
+      "GPUDeviceLostReason": {
+        "kind": "type"
+      },
+      "GPUError": {
+        "kind": "type"
+      },
+      "GPUErrorFilter": {
+        "kind": "type"
+      },
+      "GPUFeatureName": {
+        "kind": "type"
+      },
+      "GPUObjectBase": {
+        "kind": "type"
+      },
+      "GPUPipelineLayout": {
+        "kind": "type"
+      },
+      "GPUPipelineLayoutDescriptor": {
+        "kind": "type"
+      },
+      "GPUQueue": {
+        "kind": "type"
+      },
+      "GPURequestAdapterOptions": {
+        "kind": "type"
+      },
+      "GPUShaderModule": {
+        "kind": "type"
+      },
+      "GPUShaderModuleDescriptor": {
+        "kind": "type"
+      },
+      "GPUSupportedFeatures": {
+        "kind": "type"
+      },
+      "GPUSupportedLimits": {
+        "kind": "type"
+      },
+      "GPUUncapturedErrorEvent": {
+        "kind": "type"
+      },
+      "GPUUncapturedErrorHandler": {
         "kind": "type"
       },
       "GPU_MIN_ELEMENTS": {

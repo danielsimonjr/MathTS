@@ -16,7 +16,7 @@ npm install @danielsimonjr/mathts-arithmetic
 
 ## Example
 
-```ts
+```ts node
 import { add, multiply, sqrt } from '@danielsimonjr/mathts-arithmetic';
 import { Complex } from '@danielsimonjr/mathts-numbers';
 

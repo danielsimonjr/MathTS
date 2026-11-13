@@ -108,9 +108,9 @@ This document provides a comprehensive dependency graph of all files, components
 The codebase is organized into the following modules:
 
 - **packages/typed-function**: 1 file
-- **packages/workerpool**: 10 files
+- **packages/workerpool**: 11 files
 - **core/arithmetic**: 1 file
-- **core**: 20 files
+- **core**: 21 files
 - **core/error**: 3 files
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
@@ -186,7 +186,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
 - **compat**: 5 files
-- **gpu**: 8 files
+- **gpu**: 9 files
 - **plot**: 19 files
 - **plot/three**: 3 files
 
@@ -199,8 +199,8 @@ The codebase is organized into the following modules:
 | Package                                                             | Depends On                                                                                                                                                      | Files (Active) | Files (Dormant) |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
-| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 52             | 1               |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 11             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 53             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
@@ -220,7 +220,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                               | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 5              | 0               |
-| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
+| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 9              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
 ### Package Dependency Diagram
@@ -346,23 +346,25 @@ graph LR
 
 **External Dependencies:**
 
-| Package      | Import                                                      |
-| ------------ | ----------------------------------------------------------- |
-| `workerpool` | `pool, Pool, Transfer, PoolOptions, ExecOptions, PoolStats` |
+| Package      | Import |
+| ------------ | ------ |
+| `workerpool` | `pool` |
 
 **Internal Dependencies:**
 
-| File                           | Imports                                                                                                   | Type      |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------- | --------- |
-| `./compile-function-source.js` | `compileFunctionSource`                                                                                   | Import    |
-| `./chunk-typed.js`             | `chunkPairTyped, chunkTyped`                                                                              | Import    |
-| `./fft-core.js`                | `fftFrameInPlace`                                                                                         | Import    |
-| `./matmul-sequential.js`       | `assertMatmulBuffers, matmulSequential`                                                                   | Import    |
-| `./worker-numerics.js`         | `_workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerCombineScaledSsq` | Import    |
-| `./chunk-typed.js`             | `chunkTyped, chunkPairTyped`                                                                              | Re-export |
-| `./multi-index.js`             | `forEachMultiIndex`                                                                                       | Re-export |
-| `./tensordot-range.js`         | `tensordotRange`                                                                                          | Re-export |
-| `./matmul-sequential.js`       | `matmulSequential`                                                                                        | Re-export |
+| File                           | Imports                                                                                                   | Type                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./pool-types.js`              | `Transfer, Pool, PoolOptions, ExecOptions, PoolStats`                                                     | Import                |
+| `./compile-function-source.js` | `compileFunctionSource`                                                                                   | Import                |
+| `./chunk-typed.js`             | `chunkPairTyped, chunkTyped`                                                                              | Import                |
+| `./fft-core.js`                | `fftFrameInPlace`                                                                                         | Import                |
+| `./matmul-sequential.js`       | `assertMatmulBuffers, matmulSequential`                                                                   | Import                |
+| `./worker-numerics.js`         | `_workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerCombineScaledSsq` | Import                |
+| `./chunk-typed.js`             | `chunkTyped, chunkPairTyped`                                                                              | Re-export             |
+| `./multi-index.js`             | `forEachMultiIndex`                                                                                       | Re-export             |
+| `./tensordot-range.js`         | `tensordotRange`                                                                                          | Re-export             |
+| `./matmul-sequential.js`       | `matmulSequential`                                                                                        | Re-export             |
+| `./pool-types.js`              | `TransferDescriptor, TransferableLike`                                                                    | Re-export (type-only) |
 
 **Exports:**
 
@@ -370,7 +372,7 @@ graph LR
 - Interfaces: `WorkerpoolCapabilities`, `WasmFeatureStatus`, `WorkerPoolConfig`, `ParallelResult`, `PoolMetrics`, `EnhancedPoolStats`, `TaskOptions`
 - Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `viteDepsWorkerFallback`, `resolveDefaultWorkerScript`, `initializePool`, `terminatePool`, `getPoolStats`
 - Constants: `MIN_WORKER_CHUNK`, `DEFAULT_WORKER_CONFIG`, `mathWorkerPool`
-- Re-exports: `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`, `tensordotRange`, `matmulSequential`
+- Re-exports: `chunkTyped`, `chunkPairTyped`, `forEachMultiIndex`, `tensordotRange`, `matmulSequential`, `TransferDescriptor`, `TransferableLike`
 
 ---
 
@@ -387,6 +389,22 @@ graph LR
 **Exports:**
 
 - Functions: `forEachMultiIndex`
+
+---
+
+### `packages/workerpool/src/pool-types.ts` - Public types of the worker pool, written here so that the published declarations name no
+
+**External Dependencies:**
+
+| Package      | Import     |
+| ------------ | ---------- |
+| `workerpool` | `Transfer` |
+
+**Exports:**
+
+- Interfaces: `ExecOptions`, `PoolStats`, `PoolOptions`, `WorkerpoolPromise`, `TransferDescriptor`, `Pool`
+- Types: `TransferableLike`, `WorkerProxy`, `Transfer`
+- Constants: `Transfer`
 
 ---
 
@@ -649,6 +667,7 @@ graph LR
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
 | `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./node-module-import.js`    | `importModule`                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./platform-types.js`        | `WasmMemoryHandle, CompiledWasmModule, AbortSignalLike`                                                                                                                                                                                                                                                                                                                                                                                     | Re-export (type-only) |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, ConvertOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
@@ -657,7 +676,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -726,6 +745,15 @@ graph LR
 
 ---
 
+### `core/src/platform-types.ts` - Types of platform objects that the published declarations mention.
+
+**Exports:**
+
+- Interfaces: `AbortSignalLike`
+- Types: `WasmMemoryHandle`, `CompiledWasmModule`
+
+---
+
 ### `core/src/shared.ts` - Shared utility functions used across core utility modules.
 
 **Exports:**
@@ -763,6 +791,12 @@ graph LR
 
 ### `core/src/wasm-as-header.ts` - AssemblyScript managed ArrayBuffer + typed-array header allocation.
 
+**Internal Dependencies:**
+
+| File                  | Imports            | Type               |
+| --------------------- | ------------------ | ------------------ |
+| `./platform-types.js` | `WasmMemoryHandle` | Import (type-only) |
+
 **Exports:**
 
 - Interfaces: `AsHeaderRuntime`
@@ -778,6 +812,7 @@ graph LR
 | ------------------------- | ------------------------------ | ------------------ |
 | `./types/wasm-loader.js`  | `LoadingMetrics, WasmManifest` | Import (type-only) |
 | `./node-module-import.js` | `importModule`                 | Import             |
+| `./platform-types.js`     | `CompiledWasmModule`           | Import (type-only) |
 
 **Exports:**
 
@@ -1394,9 +1429,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                        |
-| -------------------------------- | --------------------------------------------- |
-| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, ComputePoolConfig` |
+| Package                          | Import                                                   |
+| -------------------------------- | -------------------------------------------------------- |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, ComputePoolConfig, PoolStats` |
 
 **Internal Dependencies:**
 
@@ -1442,9 +1477,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                             |
-| ---------------------------- | ---------------------------------- |
-| `@danielsimonjr/mathts-core` | `WasmModuleLoader, LoadingMetrics` |
+| Package                      | Import                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core` | `WasmModuleLoader, LoadingMetrics, WasmMemoryHandle, CompiledWasmModule` |
 
 **Internal Dependencies:**
 
@@ -1466,11 +1501,12 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                     | Import          |
-| --------------------------- | --------------- |
-| `@danielsimonjr/mathts-gpu` | `GPUContext`    |
-| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
-| `@danielsimonjr/mathts-gpu` | `BufferPool`    |
+| Package                     | Import                                            |
+| --------------------------- | ------------------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `GPUContext`                                      |
+| `@danielsimonjr/mathts-gpu` | `ShaderManager`                                   |
+| `@danielsimonjr/mathts-gpu` | `BufferPool`                                      |
+| `@danielsimonjr/mathts-gpu` | `GPUBuffer, GPUCommandEncoder, GPUBindGroupEntry` |
 
 **Exports:**
 
@@ -1488,6 +1524,7 @@ graph LR
 | --------------------------- | ------------ |
 | `@danielsimonjr/mathts-gpu` | `GPUContext` |
 | `@danielsimonjr/mathts-gpu` | `BufferPool` |
+| `@danielsimonjr/mathts-gpu` | `GPUBuffer`  |
 
 **Exports:**
 
@@ -1550,6 +1587,7 @@ graph LR
 | Package                     | Import                                  |
 | --------------------------- | --------------------------------------- |
 | `@danielsimonjr/mathts-gpu` | `BufferPool, GPUContext, ShaderManager` |
+| `@danielsimonjr/mathts-gpu` | `GPUBuffer`                             |
 
 **Exports:**
 
@@ -5366,6 +5404,7 @@ graph LR
 | Package                            | Import                                                                                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-core`       | `createSeededRng, pairwiseSum, SeededRng`                                                                                                            |
+| `@danielsimonjr/mathts-core`       | `AbortSignalLike`                                                                                                                                    |
 | `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                                         |
 | `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarBuildError, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
 
@@ -6533,6 +6572,7 @@ graph LR
 | Package                     | Import                                                                                                            |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-gpu` | `getGpuDevice, getGlobalGPUContext, GPU_MIN_ELEMENTS, ShaderManager, BufferPool, serializeGpu, GPUContextOptions` |
+| `@danielsimonjr/mathts-gpu` | `GPUBuffer, GPUDevice, GPUCommandEncoder`                                                                         |
 
 **Internal Dependencies:**
 
@@ -6556,6 +6596,7 @@ graph LR
 | Package                     | Import                                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-gpu` | `getGpuDevice, getGlobalGPUContext, ShaderManager, BufferPool, serializeGpu, GPUContextOptions` |
+| `@danielsimonjr/mathts-gpu` | `GPUBuffer, GPUDevice`                                                                          |
 
 **Internal Dependencies:**
 
@@ -12828,9 +12869,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                             |
-| ---------------------------- | ---------------------------------- |
-| `@danielsimonjr/mathts-core` | `WasmModuleLoader, LoadingMetrics` |
+| Package                      | Import                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core` | `WasmModuleLoader, LoadingMetrics, WasmMemoryHandle, CompiledWasmModule` |
 
 **Internal Dependencies:**
 
@@ -13280,6 +13321,12 @@ graph LR
 ---
 
 ### `expression/src/scalar-enumerate.ts` - Deterministic bounded enumeration of {@link ScalarNode} trees from a
+
+**Workspace Dependencies:**
+
+| Package                      | Import            |
+| ---------------------------- | ----------------- |
+| `@danielsimonjr/mathts-core` | `AbortSignalLike` |
 
 **Internal Dependencies:**
 
@@ -18477,13 +18524,15 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import         |
-| ---------------------------- | -------------- |
-| `@danielsimonjr/mathts-core` | `importModule` |
+| Package                            | Import             |
+| ---------------------------------- | ------------------ |
+| `@danielsimonjr/mathts-core`       | `importModule`     |
+| `@danielsimonjr/mathts-workerpool` | `TransferableLike` |
 
 **Exports:**
 
 - Classes: `WorkerPool`
+- Types: `PoolWorker`
 
 ---
 
@@ -19563,9 +19612,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports      | Type   |
-| ----------------- | ------------ | ------ |
-| `./GPUContext.js` | `GPUContext` | Import |
+| File                | Imports                          | Type               |
+| ------------------- | -------------------------------- | ------------------ |
+| `./GPUContext.js`   | `GPUContext`                     | Import             |
+| `./webgpu-types.js` | `GPUBuffer, GPUBufferUsageFlags` | Import (type-only) |
 
 **Exports:**
 
@@ -19578,9 +19628,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                                                                                                 | Type   |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `./detect.js` | `hasWebGPUSurface, getGPUAdapter, capabilitiesFromAdapter, markWebGPUAdapterUnavailable, resetWebGPUAvailabilityCache, GPUCapabilities` | Import |
+| File                | Imports                                                                                                                                                                                                                                                  | Type               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `./detect.js`       | `hasWebGPUSurface, getGPUAdapter, capabilitiesFromAdapter, markWebGPUAdapterUnavailable, resetWebGPUAvailabilityCache, GPUCapabilities`                                                                                                                  | Import             |
+| `./webgpu-types.js` | `GPUBuffer, GPUAdapter, GPUDevice, GPUQueue, GPUCommandEncoder, GPUCommandBuffer, GPUShaderModule, GPUPipelineLayout, GPUComputePipeline, GPUBindGroupLayout, GPUBindGroup, GPUBufferUsageFlags, GPUFeatureName, GPUDeviceLostReason, GPUBindGroupEntry` | Import (type-only) |
 
 **Exports:**
 
@@ -19595,9 +19646,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports      | Type   |
-| ----------------- | ------------ | ------ |
-| `./GPUContext.js` | `GPUContext` | Import |
+| File                | Imports                                                  | Type               |
+| ------------------- | -------------------------------------------------------- | ------------------ |
+| `./GPUContext.js`   | `GPUContext`                                             | Import             |
+| `./webgpu-types.js` | `GPUShaderModule, GPUPipelineLayout, GPUComputePipeline` | Import (type-only) |
 
 **Exports:**
 
@@ -19608,9 +19660,15 @@ graph LR
 
 ### `gpu/src/detect.ts` - WebGPU Detection and Capability Checking
 
+**Internal Dependencies:**
+
+| File                | Imports                                                | Type               |
+| ------------------- | ------------------------------------------------------ | ------------------ |
+| `./webgpu-types.js` | `GPUAdapter, GPUAdapterInfo, GPURequestAdapterOptions` | Import (type-only) |
+
 **Exports:**
 
-- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
+- Interfaces: `GPUCapabilities`
 - Functions: `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `markWebGPUAdapterUnavailable`, `markWebGPUAdapterAvailable`, `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `capabilitiesFromAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
 
 ---
@@ -19619,10 +19677,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports                                  | Type   |
-| ----------------- | ---------------------------------------- | ------ |
-| `./detect.js`     | `resetWebGPUAvailabilityCache`           | Import |
-| `./GPUContext.js` | `getGlobalGPUContext, GPUContextOptions` | Import |
+| File                | Imports                                  | Type               |
+| ------------------- | ---------------------------------------- | ------------------ |
+| `./detect.js`       | `resetWebGPUAvailabilityCache`           | Import             |
+| `./GPUContext.js`   | `getGlobalGPUContext, GPUContextOptions` | Import             |
+| `./webgpu-types.js` | `GPUDevice`                              | Import (type-only) |
 
 **Exports:**
 
@@ -19643,19 +19702,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                                                                                                                                                                                                                                                                              | Type      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, enableGpuUnavailableWarnings, disableGpuUnavailableWarnings, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                                                                                   | Re-export |
-| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                                                                                       | Re-export |
-| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                                                                              | Re-export |
-| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                                                                                      | Re-export |
-| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                                                                                        | Re-export |
-| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                                                                                       | Re-export |
+| File                 | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Type                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./detect.js`        | `hasWebGPU, hasWebGPUSurface, resetWebGPUAvailabilityCache, isBrowser, getGPUAdapter, detectGPUCapabilities, enableGpuUnavailableWarnings, disableGpuUnavailableWarnings, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities`                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
+| `./GPUContext.js`    | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, initializeGlobalGPUWithReason, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, GlobalGPUInitResult, DeviceLostEvent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
+| `./device.js`        | `getGpuDevice, resetGpuDevice`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
+| `./flag.js`          | `enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
+| `./BufferPool.js`    | `BufferPool, BufferPoolOptions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
+| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./serialize.js`     | `serializeGpu`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
+| `./webgpu-types.js`  | `GPUAdapter, GPUBindGroup, GPUBindGroupDescriptor, GPUBindGroupLayoutDescriptor, GPUBindGroupLayoutEntry, GPUBindGroupEntry, GPUBindGroupLayout, GPUBuffer, GPUBufferDescriptor, GPUBufferUsageFlags, GPUCommandBuffer, GPUCommandEncoder, GPUCompilationInfo, GPUCompilationMessage, GPUComputePassEncoder, GPUComputePipeline, GPUComputePipelineDescriptor, GPUDevice, GPUDeviceDescriptor, GPUDeviceLostInfo, GPUDeviceLostReason, GPUError, GPUErrorFilter, GPUFeatureName, GPUObjectBase, GPUPipelineLayout, GPUPipelineLayoutDescriptor, GPUQueue, GPURequestAdapterOptions, GPUShaderModule, GPUShaderModuleDescriptor, GPUSupportedFeatures, GPUSupportedLimits, GPUUncapturedErrorEvent, GPUUncapturedErrorHandler` | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`
+- Re-exports: `hasWebGPU`, `hasWebGPUSurface`, `resetWebGPUAvailabilityCache`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `enableGpuUnavailableWarnings`, `disableGpuUnavailableWarnings`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `initializeGlobalGPUWithReason`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `GlobalGPUInitResult`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`, `serializeGpu`, `GPUAdapter`, `GPUBindGroup`, `GPUBindGroupDescriptor`, `GPUBindGroupLayoutDescriptor`, `GPUBindGroupLayoutEntry`, `GPUBindGroupEntry`, `GPUBindGroupLayout`, `GPUBuffer`, `GPUBufferDescriptor`, `GPUBufferUsageFlags`, `GPUCommandBuffer`, `GPUCommandEncoder`, `GPUCompilationInfo`, `GPUCompilationMessage`, `GPUComputePassEncoder`, `GPUComputePipeline`, `GPUComputePipelineDescriptor`, `GPUDevice`, `GPUDeviceDescriptor`, `GPUDeviceLostInfo`, `GPUDeviceLostReason`, `GPUError`, `GPUErrorFilter`, `GPUFeatureName`, `GPUObjectBase`, `GPUPipelineLayout`, `GPUPipelineLayoutDescriptor`, `GPUQueue`, `GPURequestAdapterOptions`, `GPUShaderModule`, `GPUShaderModuleDescriptor`, `GPUSupportedFeatures`, `GPUSupportedLimits`, `GPUUncapturedErrorEvent`, `GPUUncapturedErrorHandler`
 
 ---
 
@@ -19664,6 +19724,15 @@ graph LR
 **Exports:**
 
 - Functions: `serializeGpu`
+
+---
+
+### `gpu/src/webgpu-types.ts` - WebGPU handle types of the published declarations.
+
+**Exports:**
+
+- Interfaces: `GPUSupportedLimits`, `GPUSupportedFeatures`, `GPURequestAdapterOptions`, `GPUAdapterInfo`, `GPUDeviceDescriptor`, `GPUDeviceLostInfo`, `GPUError`, `GPUUncapturedErrorEvent`, `GPUObjectBase`, `GPUBufferShape`, `GPUCompilationMessage`, `GPUCompilationInfo`, `GPUShaderModuleShape`, `GPUComputePipelineShape`, `GPUBindGroupEntry`, `GPUBufferDescriptor`, `GPUShaderModuleDescriptor`, `GPUBindGroupLayoutEntry`, `GPUBindGroupLayoutDescriptor`, `GPUPipelineLayoutDescriptor`, `GPUBindGroupDescriptor`, `GPUComputePipelineDescriptor`, `GPUComputePassEncoderShape`, `GPUCommandEncoderShape`, `GPUQueueShape`, `GPUDeviceShape`, `GPUAdapterShape`
+- Types: `GPUFeatureName`, `GPUBufferUsageFlags`, `GPUDeviceLostReason`, `GPUUncapturedErrorHandler`, `GPUErrorFilter`, `GPUPipelineLayoutShape`, `GPUBindGroupLayoutShape`, `GPUBindGroupShape`, `GPUCommandBufferShape`, `GPUBuffer`, `GPUShaderModule`, `GPUPipelineLayout`, `GPUBindGroupLayout`, `GPUBindGroup`, `GPUCommandBuffer`, `GPUComputePipeline`, `GPUComputePassEncoder`, `GPUCommandEncoder`, `GPUQueue`, `GPUDevice`, `GPUAdapter`
 
 ---
 
@@ -19975,7 +20044,7 @@ graph LR
 
 ---
 
-### `plot/src/update.ts` - Identity of everything except series coordinates. Equal keys mean the existing
+### `plot/src/update.ts` - The DOM `Element` when the compiling project has the DOM lib, and a minimal handle when it
 
 **Internal Dependencies:**
 
@@ -19988,6 +20057,7 @@ graph LR
 
 **Exports:**
 
+- Types: `PlotHostElement`
 - Functions: `update`, `update`, `update`, `update`
 
 ---
@@ -20080,7 +20150,7 @@ graph LR
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `core/src/internal`                                    | 21 files     | 0 files    |
+| `core/src/internal`                                    | 22 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -20139,840 +20209,842 @@ graph TD
         N4[index]
         N5[matmul-sequential]
         N6[multi-index]
-        N7[tensordot-range]
-        N8[worker-numerics]
-        N9[worker]
-        N10[workerpool-browser-shim]
+        N7[pool-types]
+        N8[tensordot-range]
+        N9[worker-numerics]
+        N10[worker]
+        N11[...1 more]
     end
 
     subgraph Core/arithmetic
-        N11[scalar]
+        N12[scalar]
     end
 
     subgraph Core
-        N12[array]
-        N13[bignumber-formatter]
-        N14[collection]
-        N15[config]
-        N16[constants]
-        N17[customs]
-        N18[deterministic]
-        N19[factory]
-        N20[index]
-        N21[internal]
-        N22[...10 more]
+        N13[array]
+        N14[bignumber-formatter]
+        N15[collection]
+        N16[config]
+        N17[constants]
+        N18[customs]
+        N19[deterministic]
+        N20[factory]
+        N21[index]
+        N22[internal]
+        N23[...11 more]
     end
 
     subgraph Core/error
-        N23[DimensionError]
-        N24[IndexError]
-        N25[MathjsError]
+        N24[DimensionError]
+        N25[IndexError]
+        N26[MathjsError]
     end
 
     subgraph Core/factory
-        N26[factory]
-        N27[index]
+        N27[factory]
+        N28[index]
     end
 
     subgraph Core/numeric
-        N28[rng]
-        N29[stable]
-        N30[strides]
+        N29[rng]
+        N30[stable]
+        N31[strides]
     end
 
     subgraph Core/typed
-        N31[index]
-        N32[mathts-typed]
-        N33[type-bridge]
+        N32[index]
+        N33[mathts-typed]
+        N34[type-bridge]
     end
 
     subgraph Core/types
-        N34[bignumber]
-        N35[complex]
-        N36[dual-rules]
-        N37[dual]
-        N38[fraction]
-        N39[interfaces]
-        N40[Range]
-        N41[si-dimension-vector]
-        N42[Unit]
-        N43[dependencies]
-        N44[...10 more]
+        N35[bignumber]
+        N36[complex]
+        N37[dual-rules]
+        N38[dual]
+        N39[fraction]
+        N40[interfaces]
+        N41[Range]
+        N42[si-dimension-vector]
+        N43[Unit]
+        N44[dependencies]
+        N45[...10 more]
     end
 
     subgraph Matrix/backends
-        N45[Backend]
-        N46[BackendManager]
-        N47[GPUBackend]
-        N48[GPUMatrixBackend]
-        N49[JSBackend]
-        N50[ParallelBackend]
-        N51[WASMBackend]
-        N52[WasmLoader]
-        N53[BatchExecutor]
-        N54[Sync]
-        N55[...11 more]
+        N46[Backend]
+        N47[BackendManager]
+        N48[GPUBackend]
+        N49[GPUMatrixBackend]
+        N50[JSBackend]
+        N51[ParallelBackend]
+        N52[WASMBackend]
+        N53[WasmLoader]
+        N54[BatchExecutor]
+        N55[Sync]
+        N56[...11 more]
     end
 
     subgraph Matrix
-        N56[config]
-        N57[index]
-        N58[parallel-matrix]
-        N59[typed-operations]
+        N57[config]
+        N58[index]
+        N59[parallel-matrix]
+        N60[typed-operations]
     end
 
     subgraph Matrix/operations
-        N60[as-packed]
-        N61[cholesky]
-        N62[common]
-        N63[condest]
-        N64[densify]
-        N65[eig-multiplicity]
-        N66[eig-wasm]
-        N67[eig]
-        N68[expm]
-        N69[givens]
-        N70[...13 more]
+        N61[as-packed]
+        N62[cholesky]
+        N63[common]
+        N64[condest]
+        N65[densify]
+        N66[eig-multiplicity]
+        N67[eig-wasm]
+        N68[eig]
+        N69[expm]
+        N70[givens]
+        N71[...13 more]
     end
 
     subgraph Matrix/types
-        N71[DenseMatrix]
-        N72[Matrix]
-        N73[SparseMatrix]
-        N74[arithmetic]
-        N75[gemm-f64]
-        N76[limits]
-        N77[reduction]
-        N78[storage]
-        N79[index]
+        N72[DenseMatrix]
+        N73[Matrix]
+        N74[SparseMatrix]
+        N75[arithmetic]
+        N76[gemm-f64]
+        N77[limits]
+        N78[reduction]
+        N79[storage]
+        N80[index]
     end
 
     subgraph Tensor
-        N80[Tensor]
-        N81[contraction-sequence]
-        N82[index]
-        N83[named-index]
-        N84[reshape-shape]
+        N81[Tensor]
+        N82[contraction-sequence]
+        N83[index]
+        N84[named-index]
+        N85[reshape-shape]
     end
 
     subgraph Tensor/operations
-        N85[cholesky]
-        N86[concatenate]
-        N87[eig]
-        N88[flip]
-        N89[gather]
-        N90[kron]
-        N91[lu]
-        N92[pad]
-        N93[pinv]
-        N94[qr]
-        N95[...8 more]
+        N86[cholesky]
+        N87[concatenate]
+        N88[eig]
+        N89[flip]
+        N90[gather]
+        N91[kron]
+        N92[lu]
+        N93[pad]
+        N94[pinv]
+        N95[qr]
+        N96[...8 more]
     end
 
     subgraph Autograd
-        N96[dual-tensor]
-        N97[forward-grad]
-        N98[grad]
-        N99[index]
-        N100[reverse-grad]
-        N101[shape]
-        N102[tape]
+        N97[dual-tensor]
+        N98[forward-grad]
+        N99[grad]
+        N100[index]
+        N101[reverse-grad]
+        N102[shape]
+        N103[tape]
     end
 
     subgraph Functions/algebra
-        N103[lup]
-        N104[qr]
-        N105[schur]
-        N106[slu]
-        N107[derivative]
-        N108[leafCount]
-        N109[lyap]
-        N110[polynomialRoot]
-        N111[rationalize]
-        N112[resolve]
-        N113[...38 more]
+        N104[lup]
+        N105[qr]
+        N106[schur]
+        N107[slu]
+        N108[derivative]
+        N109[leafCount]
+        N110[lyap]
+        N111[polynomialRoot]
+        N112[rationalize]
+        N113[resolve]
+        N114[...38 more]
     end
 
     subgraph Functions/arithmetic
-        N114[abs]
-        N115[addScalar]
-        N116[cbrt]
-        N117[ceil]
-        N118[cube]
-        N119[divide]
-        N120[divideScalar]
-        N121[dotDivide]
-        N122[dotMultiply]
-        N123[dotPow]
-        N124[...29 more]
+        N115[abs]
+        N116[addScalar]
+        N117[cbrt]
+        N118[ceil]
+        N119[cube]
+        N120[divide]
+        N121[divideScalar]
+        N122[dotDivide]
+        N123[dotMultiply]
+        N124[dotPow]
+        N125[...29 more]
     end
 
     subgraph Functions/bitwise
-        N125[bitAnd]
-        N126[bitNot]
-        N127[bitOr]
-        N128[bitXor]
-        N129[leftShift]
-        N130[rightArithShift]
-        N131[rightLogShift]
-        N132[useMatrixForArrayScalar]
+        N126[bitAnd]
+        N127[bitNot]
+        N128[bitOr]
+        N129[bitXor]
+        N130[leftShift]
+        N131[rightArithShift]
+        N132[rightLogShift]
+        N133[useMatrixForArrayScalar]
     end
 
     subgraph Functions
-        N133[calculus-extra]
-        N134[cas-integration]
-        N135[clustering-extra]
-        N136[config-api]
-        N137[descriptive-stats]
-        N138[distribution-functions]
-        N139[fit-scalar]
-        N140[front-export]
-        N141[geometry-extra]
-        N142[grad-forward]
-        N143[...26 more]
+        N134[calculus-extra]
+        N135[cas-integration]
+        N136[clustering-extra]
+        N137[config-api]
+        N138[descriptive-stats]
+        N139[distribution-functions]
+        N140[fit-scalar]
+        N141[front-export]
+        N142[geometry-extra]
+        N143[grad-forward]
+        N144[...26 more]
     end
 
     subgraph Functions/cas
-        N144[antiderivative]
-        N145[layer3]
-        N146[polynomial-canonical]
-        N147[rat]
-        N148[rational-integrate]
-        N149[real-roots]
-        N150[render-coeff-times]
+        N145[antiderivative]
+        N146[layer3]
+        N147[polynomial-canonical]
+        N148[rat]
+        N149[rational-integrate]
+        N150[real-roots]
+        N151[render-coeff-times]
     end
 
     subgraph Functions/combinatorics
-        N151[bellNumbers]
-        N152[catalan]
-        N153[composition]
-        N154[stirlingS2]
+        N152[bellNumbers]
+        N153[catalan]
+        N154[composition]
+        N155[stirlingS2]
     end
 
     subgraph Functions/complex
-        N155[arg]
-        N156[conj]
-        N157[im]
-        N158[re]
+        N156[arg]
+        N157[conj]
+        N158[im]
+        N159[re]
     end
 
     subgraph Functions/core
-        N159[config]
-        N160[create]
-        N161[config]
-        N162[import]
-        N163[typed]
+        N160[config]
+        N161[create]
+        N162[config]
+        N163[import]
+        N164[typed]
     end
 
     subgraph Functions/error
-        N164[ArgumentsError]
-        N165[DimensionError]
-        N166[IndexError]
+        N165[ArgumentsError]
+        N166[DimensionError]
+        N167[IndexError]
     end
 
     subgraph Functions/expression
-        N167[operators]
+        N168[operators]
     end
 
     subgraph Functions/factories
-        N168[evaluate]
-        N169[index]
-        N170[matrix-bridge]
-        N171[scope]
+        N169[evaluate]
+        N170[index]
+        N171[matrix-bridge]
+        N172[scope]
     end
 
     subgraph Functions/geometry
-        N172[alpha-shape]
-        N173[circumcircle]
-        N174[curves]
-        N175[delaunay]
-        N176[distance]
-        N177[frustum]
-        N178[geometry-extra]
-        N179[halfspace-intersection]
-        N180[hull]
-        N181[intersect]
-        N182[...10 more]
+        N173[alpha-shape]
+        N174[circumcircle]
+        N175[curves]
+        N176[delaunay]
+        N177[distance]
+        N178[frustum]
+        N179[geometry-extra]
+        N180[halfspace-intersection]
+        N181[hull]
+        N182[intersect]
+        N183[...10 more]
     end
 
     subgraph Functions/gpu
-        N183[elementwise-gpu]
-        N184[fft-gpu]
-        N185[implicit]
+        N184[elementwise-gpu]
+        N185[fft-gpu]
+        N186[implicit]
     end
 
     subgraph Functions/graph
-        N186[community-coloring]
-        N187[optimization]
-        N188[traversal-centrality]
+        N187[community-coloring]
+        N188[optimization]
+        N189[traversal-centrality]
     end
 
     subgraph Functions/logical
-        N189[and]
-        N190[not]
-        N191[nullish]
-        N192[or]
-        N193[xor]
+        N190[and]
+        N191[not]
+        N192[nullish]
+        N193[or]
+        N194[xor]
     end
 
     subgraph Functions/matrix
-        N194[column]
-        N195[complex-to-interleaved]
-        N196[concat]
-        N197[count]
-        N198[cross]
-        N199[ctranspose]
-        N200[det]
-        N201[diag]
-        N202[diff]
-        N203[dot]
-        N204[...39 more]
+        N195[column]
+        N196[complex-to-interleaved]
+        N197[concat]
+        N198[count]
+        N199[cross]
+        N200[ctranspose]
+        N201[det]
+        N202[diag]
+        N203[diff]
+        N204[dot]
+        N205[...39 more]
     end
 
     subgraph Functions/ml
-        N205[dbscan-knn]
-        N206[glm]
-        N207[kde]
-        N208[logistic-regression]
-        N209[ols]
-        N210[regularized-regression]
+        N206[dbscan-knn]
+        N207[glm]
+        N208[kde]
+        N209[logistic-regression]
+        N210[ols]
+        N211[regularized-regression]
     end
 
     subgraph Functions/numbertheory
-        N211[arithmetic-functions]
-        N212[diophantine]
-        N213[extra]
-        N214[integer-matrices]
-        N215[modular]
-        N216[sequences]
+        N212[arithmetic-functions]
+        N213[diophantine]
+        N214[extra]
+        N215[integer-matrices]
+        N216[modular]
+        N217[sequences]
     end
 
     subgraph Functions/numeric
-        N217[adaptive-quad]
-        N218[bfgs]
-        N219[box-lcp]
-        N220[bspline]
-        N221[constrained]
-        N222[control-equations]
-        N223[eigsh]
-        N224[finite-differences]
-        N225[fsolve]
-        N226[gauss-legendre4]
-        N227[...23 more]
+        N218[adaptive-quad]
+        N219[bfgs]
+        N220[box-lcp]
+        N221[bspline]
+        N222[constrained]
+        N223[control-equations]
+        N224[eigsh]
+        N225[finite-differences]
+        N226[fsolve]
+        N227[gauss-legendre4]
+        N228[...23 more]
     end
 
     subgraph Functions/plain
-        N228[arithmetic]
-        N229[bitwise]
-        N230[combinations]
-        N231[constants]
-        N232[index]
-        N233[logical]
-        N234[probability]
-        N235[relational]
-        N236[trigonometry]
-        N237[utils]
+        N229[arithmetic]
+        N230[bitwise]
+        N231[combinations]
+        N232[constants]
+        N233[index]
+        N234[logical]
+        N235[probability]
+        N236[relational]
+        N237[trigonometry]
+        N238[utils]
     end
 
     subgraph Functions/probability
-        N238[bernoulli]
-        N239[bigint-binomial]
-        N240[combinations]
-        N241[combinationsWithRep]
-        N242[factorial]
-        N243[gamma]
-        N244[kldivergence]
-        N245[lgamma]
-        N246[multinomial]
-        N247[permutations]
-        N248[...6 more]
+        N239[bernoulli]
+        N240[bigint-binomial]
+        N241[combinations]
+        N242[combinationsWithRep]
+        N243[factorial]
+        N244[gamma]
+        N245[kldivergence]
+        N246[lgamma]
+        N247[multinomial]
+        N248[permutations]
+        N249[...6 more]
     end
 
     subgraph Functions/relational
-        N249[compare]
-        N250[compareNatural]
-        N251[compareText]
-        N252[compareUnits]
-        N253[deepEqual]
-        N254[equal]
-        N255[equalScalar]
-        N256[equalText]
-        N257[larger]
-        N258[largerEq]
-        N259[...4 more]
+        N250[compare]
+        N251[compareNatural]
+        N252[compareText]
+        N253[compareUnits]
+        N254[deepEqual]
+        N255[equal]
+        N256[equalScalar]
+        N257[equalText]
+        N258[larger]
+        N259[largerEq]
+        N260[...4 more]
     end
 
     subgraph Functions/set
-        N260[flatten-pair]
-        N261[setCartesian]
-        N262[setDifference]
-        N263[setDistinct]
-        N264[setIntersect]
-        N265[setIsSubset]
-        N266[setMultiplicity]
-        N267[setPowerset]
-        N268[setSize]
-        N269[setSymDifference]
-        N270[...1 more]
+        N261[flatten-pair]
+        N262[setCartesian]
+        N263[setDifference]
+        N264[setDistinct]
+        N265[setIntersect]
+        N266[setIsSubset]
+        N267[setMultiplicity]
+        N268[setPowerset]
+        N269[setSize]
+        N270[setSymDifference]
+        N271[...1 more]
     end
 
     subgraph Functions/signal
-        N271[conv]
-        N272[dtw]
-        N273[fft-core-f64]
-        N274[fft-helpers]
-        N275[fft]
-        N276[fir-smoothing]
-        N277[freqz]
-        N278[iir-design]
-        N279[lomb-scargle]
-        N280[remez-exchange]
-        N281[...7 more]
+        N272[conv]
+        N273[dtw]
+        N274[fft-core-f64]
+        N275[fft-helpers]
+        N276[fft]
+        N277[fir-smoothing]
+        N278[freqz]
+        N279[iir-design]
+        N280[lomb-scargle]
+        N281[remez-exchange]
+        N282[...7 more]
     end
 
     subgraph Functions/special
-        N282[angular-momentum]
-        N283[erf-extra]
-        N284[erf]
-        N285[exp-integrals]
-        N286[hypergeometric]
-        N287[jacobi-elliptic]
-        N288[mathieu]
-        N289[niche]
-        N290[polygamma-orthopoly]
-        N291[spherical-bessel]
-        N292[...4 more]
+        N283[angular-momentum]
+        N284[erf-extra]
+        N285[erf]
+        N286[exp-integrals]
+        N287[hypergeometric]
+        N288[jacobi-elliptic]
+        N289[mathieu]
+        N290[niche]
+        N291[polygamma-orthopoly]
+        N292[spherical-bessel]
+        N293[...4 more]
     end
 
     subgraph Functions/statistics
-        N293[corr]
-        N294[cumsum]
-        N295[extreme]
-        N296[mad]
-        N297[max]
-        N298[mean]
-        N299[median]
-        N300[min]
-        N301[mode]
-        N302[nan-reductions]
-        N303[...9 more]
+        N294[corr]
+        N295[cumsum]
+        N296[extreme]
+        N297[mad]
+        N298[max]
+        N299[mean]
+        N300[median]
+        N301[min]
+        N302[mode]
+        N303[nan-reductions]
+        N304[...9 more]
     end
 
     subgraph Functions/stats
-        N304[distances]
-        N305[distributions-extra]
-        N306[effect-sizes]
-        N307[fit-distribution]
-        N308[gaussian-process]
-        N309[inference-extra]
-        N310[inference-extra2]
-        N311[multivariate-sampling]
-        N312[mvn]
-        N313[nonparametric-extra]
-        N314[...5 more]
+        N305[distances]
+        N306[distributions-extra]
+        N307[effect-sizes]
+        N308[fit-distribution]
+        N309[gaussian-process]
+        N310[inference-extra]
+        N311[inference-extra2]
+        N312[multivariate-sampling]
+        N313[mvn]
+        N314[nonparametric-extra]
+        N315[...5 more]
     end
 
     subgraph Functions/string
-        N315[bin]
-        N316[format]
-        N317[hex]
-        N318[oct]
-        N319[print]
+        N316[bin]
+        N317[format]
+        N318[hex]
+        N319[oct]
+        N320[print]
     end
 
     subgraph Functions/trigonometry
-        N320[acos]
-        N321[acosh]
-        N322[acot]
-        N323[acoth]
-        N324[acsc]
-        N325[acsch]
-        N326[asec]
-        N327[asech]
-        N328[asin]
-        N329[asinh]
-        N330[...16 more]
+        N321[acos]
+        N322[acosh]
+        N323[acot]
+        N324[acoth]
+        N325[acsc]
+        N326[acsch]
+        N327[asec]
+        N328[asech]
+        N329[asin]
+        N330[asinh]
+        N331[...16 more]
     end
 
     subgraph Functions/type
-        N331[BigNumber]
-        N332[Chain]
-        N333[chain]
-        N334[Complex]
-        N335[Decimal]
-        N336[FibonacciHeap]
-        N337[ImmutableDenseMatrix]
-        N338[MatrixIndex]
-        N339[Spa]
-        N340[index]
-        N341[...22 more]
+        N332[BigNumber]
+        N333[Chain]
+        N334[chain]
+        N335[Complex]
+        N336[Decimal]
+        N337[FibonacciHeap]
+        N338[ImmutableDenseMatrix]
+        N339[MatrixIndex]
+        N340[Spa]
+        N341[index]
+        N342[...22 more]
     end
 
     subgraph Functions/typed
-        N342[aggregate-restart]
-        N343[algebra]
-        N344[arithmetic]
-        N345[bitwise]
-        N346[cas]
-        N347[centrality-restarts]
-        N348[combinatorics]
-        N349[complex-promotion]
-        N350[complex]
-        N351[dist-objects]
-        N352[...43 more]
+        N343[aggregate-restart]
+        N344[algebra]
+        N345[arithmetic]
+        N346[bitwise]
+        N347[cas]
+        N348[centrality-restarts]
+        N349[combinatorics]
+        N350[complex-promotion]
+        N351[complex]
+        N352[dist-objects]
+        N353[...43 more]
     end
 
     subgraph Functions/unit
-        N353[to]
-        N354[toBest]
+        N354[to]
+        N355[toBest]
     end
 
     subgraph Functions/utils
-        N355[array]
-        N356[bigint]
-        N357[bitwise]
-        N358[nearlyEqual]
-        N359[clone]
-        N360[collection]
-        N361[complex]
-        N362[customs]
-        N363[emitter]
-        N364[factory]
-        N365[...27 more]
+        N356[array]
+        N357[bigint]
+        N358[bitwise]
+        N359[nearlyEqual]
+        N360[clone]
+        N361[collection]
+        N362[complex]
+        N363[customs]
+        N364[emitter]
+        N365[factory]
+        N366[...27 more]
     end
 
     subgraph Functions/wasm
-        N366[WasmLoader]
-        N367[wasm-bridge]
-        N368[common]
-        N369[wasm-bridge]
-        N370[integrity]
-        N371[wasm-bridge]
-        N372[policy]
-        N373[wasm-bridge]
-        N374[resolve]
-        N375[wasm-bridge]
-        N376[...3 more]
+        N367[WasmLoader]
+        N368[wasm-bridge]
+        N369[common]
+        N370[wasm-bridge]
+        N371[integrity]
+        N372[wasm-bridge]
+        N373[policy]
+        N374[wasm-bridge]
+        N375[resolve]
+        N376[wasm-bridge]
+        N377[...3 more]
     end
 
     subgraph Expression
-        N377[Help]
-        N378[Parser]
-        N379[default-instance]
-        N380[default-math-scope]
-        N381[index]
-        N382[keywords]
-        N383[limits]
-        N384[operators]
-        N385[parse-defaults]
-        N386[parse]
-        N387[...4 more]
+        N378[Help]
+        N379[Parser]
+        N380[default-instance]
+        N381[default-math-scope]
+        N382[index]
+        N383[keywords]
+        N384[limits]
+        N385[operators]
+        N386[parse-defaults]
+        N387[parse]
+        N388[...4 more]
     end
 
     subgraph Expression/compiler
-        N388[compile]
-        N389[index]
+        N389[compile]
+        N390[index]
     end
 
     subgraph Expression/embeddedDocs
-        N390[Infinity]
-        N391[LN10]
-        N392[LN2]
-        N393[LOG10E]
-        N394[LOG2E]
-        N395[NaN]
-        N396[SQRT1_2]
-        N397[SQRT2]
-        N398[e]
-        N399[false]
-        N400[...388 more]
+        N391[Infinity]
+        N392[LN10]
+        N393[LN2]
+        N394[LOG10E]
+        N395[LOG2E]
+        N396[NaN]
+        N397[SQRT1_2]
+        N398[SQRT2]
+        N399[e]
+        N400[false]
+        N401[...388 more]
     end
 
     subgraph Expression/error
-        N401[DimensionError]
-        N402[IndexError]
+        N402[DimensionError]
+        N403[IndexError]
     end
 
     subgraph Expression/evaluator
-        N403[evaluate]
-        N404[index]
+        N404[evaluate]
+        N405[index]
     end
 
     subgraph Expression/function
-        N405[parser]
+        N406[parser]
     end
 
     subgraph Expression/node
-        N406[AccessorNode]
-        N407[ArrayNode]
-        N408[AssignmentNode]
-        N409[BlockNode]
-        N410[ConditionalNode]
-        N411[ConstantNode]
-        N412[FunctionAssignmentNode]
-        N413[FunctionNode]
-        N414[IndexNode]
-        N415[Node]
-        N416[...11 more]
+        N407[AccessorNode]
+        N408[ArrayNode]
+        N409[AssignmentNode]
+        N410[BlockNode]
+        N411[ConditionalNode]
+        N412[ConstantNode]
+        N413[FunctionAssignmentNode]
+        N414[FunctionNode]
+        N415[IndexNode]
+        N416[Node]
+        N417[...11 more]
     end
 
     subgraph Expression/transform
-        N417[and.transform]
-        N418[bitAnd.transform]
-        N419[bitOr.transform]
-        N420[column.transform]
-        N421[concat.transform]
-        N422[cumsum.transform]
-        N423[diff.transform]
-        N424[filter.transform]
-        N425[forEach.transform]
-        N426[index.transform]
-        N427[...23 more]
+        N418[and.transform]
+        N419[bitAnd.transform]
+        N420[bitOr.transform]
+        N421[column.transform]
+        N422[concat.transform]
+        N423[cumsum.transform]
+        N424[diff.transform]
+        N425[filter.transform]
+        N426[forEach.transform]
+        N427[index.transform]
+        N428[...23 more]
     end
 
     subgraph Expression/utils
-        N428[array]
-        N429[char-classes]
-        N430[collection]
-        N431[current-config]
-        N432[customs]
-        N433[factory]
-        N434[is]
-        N435[latex]
-        N436[map]
-        N437[mathml]
-        N438[...6 more]
+        N429[array]
+        N430[char-classes]
+        N431[collection]
+        N432[current-config]
+        N433[customs]
+        N434[factory]
+        N435[is]
+        N436[latex]
+        N437[map]
+        N438[mathml]
+        N439[...6 more]
     end
 
     subgraph Parser
-        N439[index]
-    end
-
-    subgraph Units
         N440[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N441[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N442[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N443[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N444[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N445[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N446[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N447[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N448[index]
     end
 
+    subgraph Signal
+        N449[index]
+    end
+
     subgraph Parallel
-        N449[ComputePool]
-        N450[ParallelMatrix]
-        N451[WorkerPool]
-        N452[gemm-rows]
-        N453[index]
-        N454[matrix.worker]
-        N455[validate]
+        N450[ComputePool]
+        N451[ParallelMatrix]
+        N452[WorkerPool]
+        N453[gemm-rows]
+        N454[index]
+        N455[matrix.worker]
+        N456[validate]
     end
 
     subgraph Parallel/operations
-        N456[elementwise]
-        N457[index]
-        N458[map]
-        N459[matmul]
-        N460[reduce]
+        N457[elementwise]
+        N458[index]
+        N459[map]
+        N460[matmul]
+        N461[reduce]
     end
 
     subgraph Parallel/ops
-        N461[bitwise]
+        N462[bitwise]
     end
 
     subgraph Parallel/strategies
-        N462[chunk]
-        N463[index]
-        N464[threshold]
+        N463[chunk]
+        N464[index]
+        N465[threshold]
     end
 
     subgraph Workbook
-        N465[cli]
-        N466[contract]
-        N467[doc]
-        N468[edit]
-        N469[executor]
-        N470[formatter]
-        N471[fs-atomic]
-        N472[graph]
-        N473[html]
-        N474[index]
-        N475[...15 more]
+        N466[cli]
+        N467[contract]
+        N468[doc]
+        N469[edit]
+        N470[executor]
+        N471[formatter]
+        N472[fs-atomic]
+        N473[graph]
+        N474[html]
+        N475[index]
+        N476[...15 more]
     end
 
     subgraph Assembly/algebra
-        N476[decomposition]
+        N477[decomposition]
     end
 
     subgraph Assembly
-        N477[elementwise]
-        N478[heap]
-        N479[index]
-        N480[poly]
-        N481[signal]
-        N482[sort]
-        N483[special]
-        N484[tridiag]
+        N478[elementwise]
+        N479[heap]
+        N480[index]
+        N481[poly]
+        N482[signal]
+        N483[sort]
+        N484[special]
+        N485[tridiag]
     end
 
     subgraph Assembly/ops
-        N485[approx]
-        N486[array]
-        N487[bitwise]
-        N488[complex-array]
-        N489[complex-ops]
-        N490[curvefit]
-        N491[f64-buffer]
-        N492[fft]
-        N493[linalg]
-        N494[matrix]
-        N495[...7 more]
+        N486[approx]
+        N487[array]
+        N488[bitwise]
+        N489[complex-array]
+        N490[complex-ops]
+        N491[curvefit]
+        N492[f64-buffer]
+        N493[fft]
+        N494[linalg]
+        N495[matrix]
+        N496[...7 more]
     end
 
     subgraph Assembly/types
-        N496[complex]
+        N497[complex]
     end
 
     subgraph Compat
-        N497[chain]
-        N498[index]
-        N499[instance-api]
-        N500[shims]
-        N501[unary-fast-path]
+        N498[chain]
+        N499[index]
+        N500[instance-api]
+        N501[shims]
+        N502[unary-fast-path]
     end
 
     subgraph Gpu
-        N502[BufferPool]
-        N503[GPUContext]
-        N504[ShaderManager]
-        N505[detect]
-        N506[device]
-        N507[flag]
-        N508[index]
-        N509[serialize]
+        N503[BufferPool]
+        N504[GPUContext]
+        N505[ShaderManager]
+        N506[detect]
+        N507[device]
+        N508[flag]
+        N509[index]
+        N510[serialize]
+        N511[webgpu-types]
     end
 
     subgraph Plot
-        N510[coerce]
-        N511[contour]
-        N512[emit]
-        N513[frame]
-        N514[heatmap]
-        N515[histogram]
-        N516[index]
-        N517[marks2d]
-        N518[overlay]
-        N519[palette]
-        N520[...9 more]
+        N512[coerce]
+        N513[contour]
+        N514[emit]
+        N515[frame]
+        N516[heatmap]
+        N517[histogram]
+        N518[index]
+        N519[marks2d]
+        N520[overlay]
+        N521[palette]
+        N522[...9 more]
     end
 
     subgraph Plot/three
-        N521[points3d]
-        N522[project]
-        N523[surface]
+        N523[points3d]
+        N524[project]
+        N525[surface]
     end
 
+    N4 --> N7
     N4 --> N2
     N4 --> N1
     N4 --> N3
     N4 --> N5
-    N4 --> N8
+    N4 --> N9
     N4 --> N6
-    N4 --> N7
-    N7 --> N6
-    N7 --> N8
-    N9 --> N2
-    N9 --> N3
-    N9 --> N7
-    N9 --> N8
-    N11 --> N15
-    N11 --> N34
-    N11 --> N35
-    N11 --> N38
-    N12 --> N23
-    N12 --> N24
-    N14 --> N23
-    N14 --> N12
-    N26 --> N32
-    N27 --> N26
-    N19 --> N25
-    N20 --> N35
-    N20 --> N40
-    N20 --> N37
-    N20 --> N36
-    N20 --> N16
-    N20 --> N38
-    N20 --> N34
-    N20 --> N11
-    N20 --> N31
-    N20 --> N27
-    N20 --> N29
-    N20 --> N28
-    N20 --> N30
-    N20 --> N18
-    N20 --> N39
-    N21 --> N19
-    N21 --> N15
-    N21 --> N25
-    N21 --> N23
-    N21 --> N24
-    N21 --> N13
+    N4 --> N8
+    N8 --> N6
+    N8 --> N9
+    N10 --> N2
+    N10 --> N3
+    N10 --> N8
+    N10 --> N9
+    N12 --> N16
+    N12 --> N35
+    N12 --> N36
+    N12 --> N39
+    N13 --> N24
+    N13 --> N25
+    N15 --> N24
+    N15 --> N13
+    N27 --> N33
+    N28 --> N27
+    N20 --> N26
+    N21 --> N36
+    N21 --> N41
+    N21 --> N38
+    N21 --> N37
+    N21 --> N17
+    N21 --> N39
+    N21 --> N35
     N21 --> N12
-    N21 --> N14
-    N31 --> N32
-    N31 --> N33
-    N32 --> N35
-    N32 --> N37
-    N32 --> N38
+    N21 --> N32
+    N21 --> N28
+    N21 --> N30
+    N21 --> N29
+    N21 --> N31
+    N21 --> N19
+    N21 --> N40
+    N22 --> N20
+    N22 --> N16
+    N22 --> N26
+    N22 --> N24
+    N22 --> N25
+    N22 --> N14
+    N22 --> N13
+    N22 --> N15
+    N32 --> N33
     N32 --> N34
-    N33 --> N35
+    N33 --> N36
     N33 --> N38
-    N33 --> N34
+    N33 --> N39
+    N33 --> N35
+    N34 --> N36
     N34 --> N39
-    N35 --> N39
-    N37 --> N36
-    N38 --> N39
-    N40 --> N19
-    N41 --> N38
-    N42 --> N19
-    N42 --> N34
-    N43 --> N11
-    N43 --> N15
-    N43 --> N34
+    N34 --> N35
+    N35 --> N40
+    N36 --> N40
+    N38 --> N37
+    N39 --> N40
+    N41 --> N20
+    N42 --> N39
+    N43 --> N20
     N43 --> N35
-    N43 --> N38
-    N45 --> N71
-    N46 --> N71
-    N46 --> N45
-    N46 --> N49
-    N46 --> N56
-    N48 --> N45
+    N44 --> N12
+    N44 --> N16
+    N44 --> N35
+    N44 --> N36
+    N44 --> N39
+    N46 --> N72
+    N47 --> N72
+    N47 --> N46
+    N47 --> N50
+    N47 --> N57
 ```
 
 ---
@@ -20983,17 +21055,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1320   |
+| Total TypeScript Files  | 1323   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 226007 |
-| Total Exports           | 7196   |
-| Total Re-exports        | 3120   |
+| Total Lines of Code     | 226567 |
+| Total Exports           | 7237   |
+| Total Re-exports        | 3160   |
 | Total Classes           | 61     |
-| Total Interfaces        | 617    |
+| Total Interfaces        | 650    |
 | Total Functions         | 2460   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
-| Type-only Imports       | 670    |
+| Type-only Imports       | 680    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

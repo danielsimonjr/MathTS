@@ -9,6 +9,7 @@
  * helpers shared across the monorepo. See the `project-all-libraries-build-on-core`
  * principle: keep the implementation in the standard layer once and let it propagate.
  */
+export type { WasmMemoryHandle, CompiledWasmModule, AbortSignalLike } from './platform-types.js';
 export * from './is.js';
 export * from './number.js';
 export * from './object.js';
@@ -184,7 +185,7 @@ export {
 // Shared WASM-loader type shapes, consolidated from the byte-identical copies
 // formerly in functions/src/wasm/WasmLoader.ts + integrity.ts and
 // matrix/src/backends/WasmLoader.ts + wasm/integrity.ts (see
-// docs/Architecture/duplicate-symbols.json). `WasmModule` itself stays local to
+// docs/Architecture/duplicate-symbols.json). `CompiledWasmModule` itself stays local to
 // each package — it genuinely differs (package-scoped ABI subsets).
 export type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
 

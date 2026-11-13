@@ -8,7 +8,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -73,5 +74,8 @@
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
   },
-  "sideEffects": true
+  "sideEffects": true,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

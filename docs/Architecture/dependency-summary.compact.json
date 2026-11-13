@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1320, "e": 7196, "re": 3120 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1323, "e": 7237, "re": 3160 },
   "s": {
-    "loc": 226007,
+    "loc": 226567,
     "cls": 61,
-    "int": 617,
+    "int": 650,
     "fn": 2460,
     "tg": 178,
     "en": 0,
-    "co": 1665,
-    "toi": 670
+    "co": 1666,
+    "toi": 680
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -40,7 +40,7 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 10,
+      "f": 11,
       "exp": [
         "chunkTyped",
         "chunkPairTyped",
@@ -70,9 +70,9 @@
         "PoolMetrics",
         "EnhancedPoolStats",
         "TaskOptions",
-        "PoolOptions",
         "ExecOptions",
-        "PoolStats"
+        "PoolStats",
+        "PoolOptions"
       ]
     },
     "core/arithmetic": {
@@ -92,7 +92,7 @@
       ]
     },
     "core": {
-      "f": 20,
+      "f": 21,
       "exp": [
         "arraySize",
         "validate",
@@ -1867,7 +1867,7 @@
       ]
     },
     "gpu": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "BufferPool",
         "getGlobalGPUContext",
@@ -1897,8 +1897,11 @@
         "DeviceLostEvent",
         "ShaderSource",
         "PipelineConfig",
-        "GPUAdapterInfo",
-        "GPUCapabilities"
+        "GPUCapabilities",
+        "GPUSupportedLimits",
+        "GPUSupportedFeatures",
+        "GPURequestAdapterOptions",
+        "GPUAdapterInfo"
       ]
     },
     "plot": {

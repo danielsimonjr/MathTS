@@ -16,7 +16,7 @@ This package re-exports the factorizations and `DenseMatrix`. `DenseMatrix` is t
 
 ## Example
 
-```ts
+```ts node
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lu, svd, eig } from '@danielsimonjr/mathts-linalg';
 

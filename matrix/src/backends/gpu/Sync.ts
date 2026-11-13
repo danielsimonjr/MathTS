@@ -10,6 +10,7 @@
 
 import type { GPUContext } from '@danielsimonjr/mathts-gpu';
 import type { BufferPool } from '@danielsimonjr/mathts-gpu';
+import type { GPUBuffer } from '@danielsimonjr/mathts-gpu';
 
 /**
  * Synchronization strategy type

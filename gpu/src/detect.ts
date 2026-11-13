@@ -4,19 +4,9 @@
  * Provides runtime detection of WebGPU support and adapter capabilities.
  */
 
-/**
- * WebGPU adapter information
- */
-export interface GPUAdapterInfo {
-  /** Adapter vendor */
-  vendor: string;
-  /** Adapter architecture */
-  architecture: string;
-  /** Device description */
-  device: string;
-  /** Driver description */
-  description: string;
-}
+import type { GPUAdapter, GPUAdapterInfo, GPURequestAdapterOptions } from './webgpu-types.js';
+
+export type { GPUAdapterInfo };
 
 /**
  * WebGPU capability information

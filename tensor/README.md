@@ -14,7 +14,7 @@ npm install @danielsimonjr/mathts-tensor
 
 ## Example
 
-```ts
+```ts node
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 
 const t = Tensor.fromNested([
@@ -22,6 +22,19 @@ const t = Tensor.fromNested([
   [3, 4],
 ]);
 console.log(t.shape, t.sum().toNested()); // [2, 2] 10
+```
+
+## Reading the package version
+
+`./package.json` is an exported subpath. Node requires an import attribute to load JSON as a
+module, so a bare `import()` of it fails with `ERR_IMPORT_ATTRIBUTE_MISSING`:
+
+```ts node
+import pkg from '@danielsimonjr/mathts-tensor/package.json' with { type: 'json' };
+
+console.log(pkg.name, pkg.version);
+const again = await import('@danielsimonjr/mathts-tensor/package.json', { with: { type: 'json' } });
+console.log(again.default.version === pkg.version); // true
 ```
 
 ## What it provides

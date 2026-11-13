@@ -8,7 +8,12 @@
  * @packageDocumentation
  */
 
-import { computePool, ComputePool, type ComputePoolConfig } from '@danielsimonjr/mathts-parallel';
+import {
+  computePool,
+  ComputePool,
+  type ComputePoolConfig,
+  type PoolStats,
+} from '@danielsimonjr/mathts-parallel';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { BackendType } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
@@ -269,7 +274,7 @@ export class ParallelBackend {
   /**
    * Get pool statistics
    */
-  getStats() {
+  getStats(): PoolStats {
     return this.pool.stats();
   }
 

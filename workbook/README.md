@@ -94,7 +94,7 @@ export is available as `toTeX` from the package entry (with `RenderDoc`, `Render
 and `ToTexOptions`). A fragment omits the LaTeX preamble — the same shape as
 `mtsw export … --format tex --fragment`:
 
-```typescript
+```typescript node
 import { toTeX } from '@danielsimonjr/mathts-workbook';
 
 const body = toTeX(
@@ -163,7 +163,7 @@ above); one-shot commands use this envelope only.
 
 ## Programmatic API
 
-```typescript
+```typescript node
 import { parseWorkbook, createExecutor, formatResult } from '@danielsimonjr/mathts-workbook';
 
 const content = `

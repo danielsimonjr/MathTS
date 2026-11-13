@@ -1,0 +1,19 @@
+{
+  "note": "Entry-point policy of the packed-consumer checks (consumer-typecheck.mjs, consumer-typecheck-no-node.mjs, browser-bundle-neutral.mjs). A specifier is a package name, or a package name plus a subpath. Each entry carries its reason.",
+  "nodeOnly": {
+    "@danielsimonjr/mathts-workbook": "Headless notebook runtime and the mtsw CLI: reads files, so its declarations may use Node types.",
+    "@danielsimonjr/mathts-plot/render": "Writes PNG and PDF files and takes Buffer: a Node entry."
+  },
+  "workerScripts": {
+    "@danielsimonjr/mathts-workerpool/worker": "A worker script. Loading it registers the importing process as a pool worker, so it is type-checked but never imported."
+  },
+  "requireExempt": {
+    "@danielsimonjr/mathts-wasm": "The AssemblyScript glue awaits WebAssembly.instantiate at the top level, so require() reports ERR_REQUIRE_ASYNC_MODULE. Use import()."
+  },
+  "notBrowserFacing": {
+    "@danielsimonjr/mathts-workbook": "Node runtime.",
+    "@danielsimonjr/mathts-plot/render": "Node entry.",
+    "@danielsimonjr/mathts-workerpool/worker": "Worker script, bundled as its own entry by the app.",
+    "@danielsimonjr/mathts-wasm": "Needs a loader that supports top-level await and WebAssembly files; not a plain browser entry."
+  }
+}

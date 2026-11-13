@@ -12,7 +12,7 @@
  * bundler stubs the builtin and the stub throws on first use (see dist-node-imports.mjs).
  *
  * Run it with `node` (never `bun`): it refuses to run when `typeof Bun !== 'undefined'`.
- * CI runs it in the `Test (20.x)` and `Test (22.x)` matrix legs after `bun run build`.
+ * CI runs it in the `Test (22.x)` and `Test (24.x)` matrix legs after `bun run build`.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

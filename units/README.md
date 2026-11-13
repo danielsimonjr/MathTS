@@ -24,7 +24,7 @@ npm install @danielsimonjr/mathts-units
 - `DIMENSIONLESS`, `dim`, and the `Dimensions` / `UnitDef` types.
 - `toSiDimensionVector` / `fromSiDimensionVector` — `SiDimensionVector` exponents are core `Fraction`s (`SiDimensionExponent` is `number | Fraction` on the way in); `Unit.dimensions` remains `number[]`. Import `Fraction` from `@danielsimonjr/mathts-core` when comparing components.
 
-```ts
+```ts node
 import { Unit, type UnitInstance } from '@danielsimonjr/mathts-units';
 
 // Either annotation works:

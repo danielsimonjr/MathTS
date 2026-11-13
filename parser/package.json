@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-parser",
   "version": "0.1.35",
-  "description": "Standalone expression parser for MathTS \u2014 the parse function and Parser class, re-exported as a focused package",
+  "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -11,7 +11,8 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -75,5 +76,8 @@
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

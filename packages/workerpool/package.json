@@ -10,12 +10,16 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": "./dist/browser.js",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./worker": {
+      "browser": "./dist/worker.browser.js",
       "import": "./dist/worker.js",
-      "types": "./dist/worker.d.ts"
+      "types": "./dist/worker.d.ts",
+      "default": "./dist/worker.js"
     },
     "./package.json": "./package.json"
   },
@@ -25,8 +29,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts src/worker.ts --format esm && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs",
-    "dev": "tsdown src/index.ts src/worker.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs\"",
+    "build": "tsdown src/index.ts src/worker.ts --format esm && tsdown --config tsdown.browser.config.ts && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs",
+    "dev": "tsdown src/index.ts src/worker.ts --format esm --watch --on-success \"tsdown --config tsdown.browser.config.ts && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -34,7 +38,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts src/worker.ts --format esm --minify && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs"
+    "build:prod": "tsdown src/index.ts src/worker.ts --format esm --minify && tsdown --config tsdown.browser.config.ts --minify && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs && node ../../tools/ensure-js-sourcemaps.mjs"
   },
   "tsdown": {
     "fixedExtension": false,
@@ -78,5 +82,8 @@
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
   },
-  "sideEffects": true
+  "sideEffects": true,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

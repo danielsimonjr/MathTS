@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
  * Sync published-package packaging metadata (G29): LICENSE on disk + in `files`,
- * homepage/bugs, `exports["./package.json"]`, and honest `sideEffects`.
+ * homepage/bugs, `exports["./package.json"]`, honest `sideEffects`, `engines.node`, and a
+ * `default` condition on every conditional `exports` entry (so `require()` of the ES module
+ * works on Node >= 22.12; without it Node reports ERR_PACKAGE_PATH_NOT_EXPORTED).
  *
  *   node tools/sync-package-packaging.mjs --write     apply package.json + copy LICENSE
  *   node tools/sync-package-packaging.mjs --check     exit 1 when out of sync
@@ -12,6 +14,11 @@ import { repoRoot, workspaceDirs } from './test/workspaces.mjs';
 
 const HOMEPAGE = 'https://github.com/danielsimonjr/MathTS#readme';
 const BUGS = { url: 'https://github.com/danielsimonjr/MathTS/issues' };
+/**
+ * Node floor of every public package. 22.12 is the first 22 release where `require()` of an
+ * ES module works without a flag, which is what the `default` export condition relies on.
+ */
+const NODE_ENGINE = '>=22.12';
 const ROOT_LICENSE = join(repoRoot, 'LICENSE');
 
 /** @type {ReadonlySet<string>} */
@@ -70,6 +77,21 @@ function exportsHasPackageJson(pkg) {
 }
 
 /**
+ * Conditional `exports` entries that have a JavaScript `import` condition but no `default`.
+ * A `.wasm` asset entry is not a module and takes no `default`.
+ * @param {Record<string, unknown>} pkg
+ * @returns {string[]} the subpaths (for example `.` or `./worker`)
+ */
+function entriesMissingDefault(pkg) {
+  const exp = pkg.exports;
+  if (!exp || typeof exp !== 'object') return [];
+  return Object.entries(exp)
+    .filter(([, target]) => target && typeof target === 'object' && String(target.import).endsWith('.js'))
+    .filter(([, target]) => target.default !== target.import)
+    .map(([sub]) => sub);
+}
+
+/**
  * Packaging fields that still differ from the G29 expected shape.
  * @returns {string[]}
  */
@@ -83,6 +105,8 @@ function collectProblems(dir, pkg) {
   if (!exportsHasPackageJson(pkg)) problems.push('exports["./package.json"]');
   const wantSe = expectedSideEffects(dir);
   if (pkg.sideEffects !== wantSe) problems.push(`sideEffects (want ${wantSe})`);
+  if (pkg.engines?.node !== NODE_ENGINE) problems.push(`engines.node (want ${NODE_ENGINE})`);
+  for (const sub of entriesMissingDefault(pkg)) problems.push(`exports["${sub}"].default`);
   return problems;
 }
 
@@ -111,6 +135,8 @@ for (const dir of dirs) {
   if (!pkg.exports || typeof pkg.exports !== 'object') pkg.exports = { '.': { import: pkg.main, types: pkg.types } };
   pkg.exports['./package.json'] = './package.json';
   pkg.sideEffects = expectedSideEffects(dir);
+  pkg.engines = { ...pkg.engines, node: NODE_ENGINE };
+  for (const sub of entriesMissingDefault(pkg)) pkg.exports[sub].default = pkg.exports[sub].import;
 
   if (pkg.tsdown && typeof pkg.tsdown === 'object' && pkg.tsdown.sourcemap !== true) {
     pkg.tsdown = { ...pkg.tsdown, sourcemap: true };

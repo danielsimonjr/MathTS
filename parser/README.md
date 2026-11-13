@@ -30,7 +30,7 @@ npm install @danielsimonjr/mathts-parser
 
 The default parser is the sandboxed arithmetic parser. A literal outside IEEE-754 range throws `SyntaxError: Numeric overflow`. Evaluating that tree with `evaluate` (from `@danielsimonjr/mathts-expression` or `@danielsimonjr/mathts-evaluator`) rejects assignment unless you pass `{ unsafe: true }`.
 
-```ts
+```ts node
 import { parse, createParse } from '@danielsimonjr/mathts-parser';
 const ast = parse('2 + 3');
 ```

@@ -15,6 +15,11 @@
  *
  *   node tools/test/check-bundle-budget.mjs            compare, exit 1 on drift
  *   node tools/test/check-bundle-budget.mjs --write    refresh after a deliberate size change
+ *   - `bundles`: the minified size of what a user's bundler emits for one import line, packages
+ *     inlined (not external). `functions/evaluate` resolves any function name in an expression,
+ *     so it needs the whole function table; its size equals the barrel's within 1 percent
+ *     (dogfood #930), and the compat shim carries the same table. Each case lists its import
+ *     line, platform and bytes in the budget file; `--write` keeps the list and refreshes the bytes.
  * `--root <dir>`, `--budget <file>` and `--lock <file>` point it at a fixture.
  */
 import { buildSync } from 'esbuild';
@@ -99,12 +104,81 @@ function bundleText(root, entry, exportName) {
   return result.outputFiles[0].text;
 }
 
+/** Import lines measured when the budget file has no `bundles` list yet. */
+export const DEFAULT_BUNDLES = [
+  {
+    label: 'functions/evaluate',
+    import: "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
+    platform: 'node',
+  },
+  {
+    label: 'functions/evaluate three names',
+    import:
+      "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
+    platform: 'node',
+  },
+  {
+    label: 'functions barrel evaluate',
+    import: "import { evaluate } from '@danielsimonjr/mathts-functions';",
+    platform: 'node',
+  },
+  {
+    label: 'expression evaluate',
+    import: "import { evaluate } from '@danielsimonjr/mathts-expression';",
+    platform: 'node',
+  },
+  {
+    label: 'compat create(all)',
+    import: "import { create, all } from '@danielsimonjr/mathts-compat';",
+    platform: 'node',
+  },
+  {
+    label: 'compat create(all) browser',
+    import: "import { create, all } from '@danielsimonjr/mathts-compat';",
+    platform: 'browser',
+  },
+];
+
+/**
+ * Minified size of one import line, with every package inlined.
+ * @param {string} root
+ * @param {{ import: string, platform: 'node' | 'browser' }} bundle
+ * @returns {number}
+ */
+function bundleBytes(root, bundle) {
+  const names = [...bundle.import.matchAll(/import\s*\{([^}]+)\}/g)].flatMap((m) =>
+    m[1].split(',').map((part) =>
+      part
+        .trim()
+        .split(/\s+as\s+/i)
+        .pop()
+    )
+  );
+  const result = buildSync({
+    stdin: {
+      contents: `${bundle.import}
+globalThis.__keep = [${names.join(', ')}];
+`,
+      loader: 'js',
+      resolveDir: root,
+    },
+    bundle: true,
+    minify: true,
+    platform: bundle.platform,
+    format: 'esm',
+    write: false,
+    logLevel: 'silent',
+    absWorkingDir: root,
+  });
+  return result.outputFiles[0].contents.length;
+}
+
 /**
  * Measure every non-private workspace package under `root`.
  * @param {string} root
  * @param {Record<string, Record<string, Record<string, { kind: string }>>>} lock export lock tree
  */
-export function measureBudget(root, lock) {
+export function measureBudget(root, lock, bundleCases = []) {
   /** @type {Record<string, number>} */
   const files = {};
   /** @type {Record<string, { export: string, treeShake: boolean, sentinel?: string, sentinelPresent?: boolean }>} */
@@ -139,7 +213,8 @@ export function measureBudget(root, lock) {
     const wasm = join(root, dir, 'dist/wasm/mathts-as.wasm');
     if (existsSync(wasm)) files[relative(root, wasm).split('\\').join('/')] = statSync(wasm).size;
   }
-  return { files, entries };
+  const bundles = bundleCases.map((bundle) => ({ ...bundle, bytes: bundleBytes(root, bundle) }));
+  return { files, entries, bundles };
 }
 
 /**
@@ -184,6 +259,16 @@ export function compareBudget(live, budget) {
   for (const file of Object.keys(live.entries)) {
     if (!(file in budget.entries)) failures.push(`${file}: measured but not in the budget`);
   }
+
+  const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b.bytes]));
+  for (const expected of budget.bundles ?? []) {
+    const actual = liveBundles.get(expected.label);
+    if (actual === undefined)
+      failures.push(`bundle ${expected.label}: in the budget but not measured`);
+    else if (exceedsTolerance(expected.bytes, actual, budget.tolerance)) {
+      failures.push(`bundle ${expected.label}: ${actual} bytes, budget ${expected.bytes}`);
+    }
+  }
   return failures;
 }
 
@@ -207,7 +292,18 @@ export function main(args) {
     flagValue(args, '--budget') ?? join(root, 'tools/test/bundle-budget.json')
   );
   const lockPath = resolve(flagValue(args, '--lock') ?? join(root, 'tools/test/export-lock.json'));
-  const live = measureBudget(root, JSON.parse(readFileSync(lockPath, 'utf8')));
+  const committed = existsSync(budgetPath) ? JSON.parse(readFileSync(budgetPath, 'utf8')) : null;
+  const live = measureBudget(
+    root,
+    JSON.parse(readFileSync(lockPath, 'utf8')),
+    (committed?.bundles ?? (flagValue(args, '--root') ? [] : DEFAULT_BUNDLES)).map(
+      ({ label, import: line, platform }) => ({
+        label,
+        import: line,
+        platform,
+      })
+    )
+  );
 
   if (args.includes('--write')) {
     const budget = {
@@ -224,7 +320,7 @@ export function main(args) {
     console.error(`Missing ${budgetPath}. Run with --write after bun run build.`);
     return 1;
   }
-  const failures = compareBudget(live, JSON.parse(readFileSync(budgetPath, 'utf8')));
+  const failures = compareBudget(live, committed);
   if (failures.length > 0) {
     console.error('FAIL: bundle budget differs from tools/test/bundle-budget.json:');
     for (const line of failures) console.error(`  ${line}`);
@@ -232,7 +328,7 @@ export function main(args) {
     return 1;
   }
   console.log(
-    `OK: ${Object.keys(live.files).length} files and ${Object.keys(live.entries).length} tree-shake entries match the budget.`
+    `OK: ${Object.keys(live.files).length} files, ${Object.keys(live.entries).length} tree-shake entries and ${live.bundles.length} bundles match the budget.`
   );
   return 0;
 }

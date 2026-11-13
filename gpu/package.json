@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-gpu",
   "version": "0.3.0",
-  "description": "Shared WebGPU foundation for MathTS \u2014 device/context lifecycle, buffer pool, and a generic shader manager (no domain kernels)",
+  "description": "Shared WebGPU foundation for MathTS — device/context lifecycle, buffer pool, and a generic shader manager (no domain kernels)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -11,7 +11,8 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -70,5 +71,8 @@
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

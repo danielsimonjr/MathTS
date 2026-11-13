@@ -17,7 +17,7 @@ npm install @danielsimonjr/mathts-ast
 
 ## Example
 
-```ts
+```ts node
 import { createConstantNode, createNode } from '@danielsimonjr/mathts-ast';
 
 // The `create*` exports are mathjs-style factories. Pass the dependencies they

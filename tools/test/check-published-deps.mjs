@@ -11,7 +11,7 @@
  *   - a local spec: `file:`, `link:`, `portal:`;
  *   - a tarball URL (`http:` / `https:`).
  *
- * Why: npm 10 (bundled with Node 20 and 22) crashes while it prepares a git dependency
+ * Why: npm 10 (bundled with Node 22) crashes while it prepares a git dependency
  * ("git dep preparation failed ... Cannot read properties of null (reading 'edgesOut')").
  * mathts-core 0.15.1 declared `"typed-function": "github:danielsimonjr/typed-function"`,
  * so `npm install @danielsimonjr/mathts-core` failed for every npm 10 user.

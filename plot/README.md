@@ -25,7 +25,7 @@ into HTML.
 
 ### `line` — one series, or overlaid with others
 
-```ts
+```ts node
 import { line } from '@danielsimonjr/mathts-plot';
 
 const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares', xLabel: 'x', yLabel: 'y' });
@@ -34,7 +34,10 @@ const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'squares', xLabel: 'x', yL
 
 ### Live updates (`update` / `plot.update`)
 
-```ts
+`update` patches an SVG inside a DOM element, so this example needs a browser (it calls
+`document.getElementById`). On Node, `line()` and the other builders return the SVG string.
+
+```ts browser
 import { update } from '@danielsimonjr/mathts-plot';
 
 const chart = document.getElementById('chart')!;
@@ -47,7 +50,7 @@ update(chart, [0, 1, 2], [0, 1, 0.5], { title: 'SHO' });
 
 ### `overlay` — combine several layers on shared, auto-scaled axes
 
-```ts
+```ts node
 import { overlay } from '@danielsimonjr/mathts-plot';
 
 const svg = overlay(
@@ -61,7 +64,7 @@ const svg = overlay(
 
 ### `surface` — 3D surface via orthographic projection + painter's algorithm
 
-```ts
+```ts node
 import { surface } from '@danielsimonjr/mathts-plot';
 
 const z = [
@@ -74,7 +77,7 @@ const svg = surface(z, { kind: 'filled', azim: 45, elev: 25 });
 
 ### `plot` — generic, polymorphic entry point (including expression strings)
 
-```ts
+```ts node
 import { plot } from '@danielsimonjr/mathts-plot';
 
 // numeric series → line
@@ -102,7 +105,7 @@ generic `toTikZ()` mirroring `plot()`. The geometry matches the SVG output exact
 deterministic y-flip maps SVG's top-left origin to TikZ's bottom-left); only
 `\usepackage{tikz}` is required to compile the result.
 
-```ts
+```ts node
 import { toTikZ, line, surface } from '@danielsimonjr/mathts-plot';
 
 // generic entry point, expression source → line
@@ -152,7 +155,7 @@ Node subpath. PNG conversion tries, in order: `rsvg-convert` on PATH, the `resvg
 PATH, then the optional peer **`@resvg/resvg-wasm`** (lazy-loaded WASM; not required at install
 time). LaTeX PDF still uses `pdflatex` / `tectonic` on PATH.
 
-```ts
+```ts node
 import { line } from '@danielsimonjr/mathts-plot';
 import { renderToFile } from '@danielsimonjr/mathts-plot/render';
 

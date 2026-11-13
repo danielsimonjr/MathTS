@@ -6,6 +6,7 @@
  */
 
 import { GPUContext } from './GPUContext.js';
+import type { GPUBuffer, GPUBufferUsageFlags } from './webgpu-types.js';
 
 /**
  * Buffer pool entry

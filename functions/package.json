@@ -11,11 +11,13 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./evaluate": {
       "import": "./dist/subpath-evaluate.js",
-      "types": "./dist/subpath-evaluate.d.ts"
+      "types": "./dist/subpath-evaluate.d.ts",
+      "default": "./dist/subpath-evaluate.js"
     },
     "./package.json": "./package.json"
   },
@@ -94,5 +96,8 @@
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
   },
-  "sideEffects": true
+  "sideEffects": true,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

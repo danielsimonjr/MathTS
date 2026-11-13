@@ -31,7 +31,7 @@ npm install @danielsimonjr/mathts-autograd
 
 ## Minimal XOR (ReLU + BCE)
 
-```ts
+```ts node
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { Tape, TapedTensor } from '@danielsimonjr/mathts-autograd';
 

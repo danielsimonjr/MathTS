@@ -1,7 +1,7 @@
 # Bun Migration Roadmap
 
 > Status: **Phase 1 landed** (2026-09-05). The monorepo package manager and
-> TypeScript script runner are Bun. Published packages still target Node ≥20
+> TypeScript script runner are Bun. Published packages target Node >= 22.12
 > (and browsers); Bun is a _dev/CI_ cutover, not a consumer-runtime requirement.
 
 ## Why Bun
@@ -71,8 +71,8 @@ bun run docs:deps           # runs the CDG TypeScript entry via Bun
 including `node …` calls and node-shebang bins (vitest, `asc`, tsc, tsdown, turbo). Consumers of published `@danielsimonjr/mathts-*`
 packages do **not** need Bun.
 
-Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (20.x)` and
-`Test (22.x)` legs therefore also run two scripts with `node` directly (never through `bun run`,
+Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (22.x)` and
+`Test (24.x)` legs therefore also run two scripts with `node` directly (never through `bun run`,
 which would put them back on Bun):
 
 - `node tools/test/run-vitest-node.mjs` runs every package's suite under vitest on the matrix

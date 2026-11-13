@@ -22,6 +22,7 @@
  */
 
 import { createSeededRng, pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import type { AbortSignalLike } from '@danielsimonjr/mathts-core/internal';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
@@ -292,7 +293,7 @@ export interface ScalarSearchOptions {
    * and scoring runs to completion first). A pool the search owns is still
    * terminated. Omitted: no cancellation and the seed-7 pin is unchanged.
    */
-  readonly signal?: AbortSignal;
+  readonly signal?: AbortSignalLike;
   /**
    * Optional early stop (SR-15). Omitted: the search always runs to
    * `max-evaluations` (or `'max-candidates'`). Set: after a generation whose best

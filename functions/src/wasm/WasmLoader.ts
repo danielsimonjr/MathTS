@@ -14,7 +14,12 @@
  */
 
 import { resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm } from './resolve.js';
-import { WasmModuleLoader, type LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
+import {
+  WasmModuleLoader,
+  type LoadingMetrics,
+  type WasmMemoryHandle,
+  type CompiledWasmModule,
+} from '@danielsimonjr/mathts-core/internal';
 export type { LoadingMetrics };
 
 /**
@@ -271,7 +276,7 @@ export interface WasmModule {
   __pin: (ptr: number) => number;
   __unpin: (ptr: number) => void;
   __collect: () => void;
-  memory: WebAssembly.Memory;
+  memory: WasmMemoryHandle;
 }
 
 // `LoadingMetrics` consolidated onto `@danielsimonjr/mathts-core/internal`'s
@@ -336,7 +341,7 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
   /**
    * Get the compiled WASM module (for caching/serialization)
    */
-  public getCompiledModule(): WebAssembly.Module | null {
+  public getCompiledModule(): CompiledWasmModule | null {
     return this.compiledModule;
   }
 
