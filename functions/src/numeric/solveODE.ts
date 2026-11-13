@@ -108,7 +108,9 @@ export interface ODEOptions {
  * Solution result from ODE solver
  */
 export interface SolveODESolution<T = unknown> {
+  /** Times of the accepted steps, starting at `tspan[0]`. */
   t: T[];
+  /** States: `y[i]` is the state vector (length of `y0`) at `t[i]`, so `y.length === t.length`. */
   y: T[];
   /** Event crossing times, one array per event function (present only when `events` was given). */
   tEvents?: number[][];
