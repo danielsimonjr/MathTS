@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 // lstsq review contracts (issue #928): minimum-norm solution for rank-deficient
 // input, scaling safety, matrix right-hand sides, wide systems.
-import { lstsq } from '@danielsimonjr/mathts-matrix';
+import { lstsq } from '../src/index.js';
 
 const mul = (A: number[][], x: number[]) => A.map((r) => r.reduce((s, a, j) => s + a * x[j], 0));
 const normalEq = (A: number[][], x: number[], b: number[]) => {

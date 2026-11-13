@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 // Review contracts for eig().repeatedEigenvalues (issue #926): no false groups,
 // order independence, lazy evaluation, symmetric input.
-import { eig, eigvals } from '@danielsimonjr/mathts-matrix';
+import { eig, eigvals } from '../src/index.js';
 
 const diag = (d: number[]) => d.map((v, i) => d.map((_, j) => (i === j ? v : 0)));
 

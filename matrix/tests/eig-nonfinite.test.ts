@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 // eig and eigvals reject NaN and Infinity input with a RangeError, as lstsq does.
-import { eig, eigvals, eigWasm, eigvalsWasm } from '@danielsimonjr/mathts-matrix';
+import { eig, eigvals, eigWasm, eigvalsWasm } from '../src/index.js';
 
 const BAD: Array<[string, number[][]]> = [
   [

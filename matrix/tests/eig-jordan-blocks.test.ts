@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 // eig().repeatedEigenvalues on Jordan blocks of size 3 and more under a real similarity,
 // and on distinct eigenvalues that lie as close as the copies of such a block.
-import { eig, svd } from '@danielsimonjr/mathts-matrix';
+import { eig, svd } from '../src/index.js';
 
 type M = number[][];
 const EPS = 2.220446049250313e-16;
