@@ -349,7 +349,9 @@ function collectionSize(collection: unknown): number[] {
       ? [collection.length, (collection[0] as unknown[]).length]
       : [collection.length];
   }
-  return (collection as { size(): number[] }).size();
+  const m = collection as { size?: () => number[]; rows: number; cols: number };
+  // The public matrix classes expose `rows` and `cols`; the factory (CSC and dense) classes expose `size()`.
+  return typeof m.size === 'function' ? m.size() : [m.rows, m.cols];
 }
 
 /**

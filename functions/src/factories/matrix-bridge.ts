@@ -660,6 +660,12 @@ export class MathJSSparseMatrix {
     return 'sparse';
   }
 
+  /** Share of stored entries: stored count divided by rows times columns (0 for an empty matrix). */
+  density(): number {
+    const cells = this._size[0] * this._size[1];
+    return cells === 0 ? 0 : this._ptr[this._ptr.length - 1] / cells;
+  }
+
   datatype(): string | undefined {
     return this._datatype;
   }
