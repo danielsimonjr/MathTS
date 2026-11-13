@@ -892,9 +892,13 @@ export function hilbertTransform(x: number[]): number[] {
 /**
  * Compute spectrogram using Short-Time Fourier Transform.
  *
- * Each windowed frame is an independent FFT. The function is synchronous at every
- * size. For worker threads, call `computePool.fftBatch` from
- * `@danielsimonjr/mathts-parallel` on the packed frames.
+ * Each windowed frame is an independent FFT, zero-padded to the next power of two (`nfft`), so
+ * bin `i` is at the frequency `i / nfft`. The function is synchronous at every size. For worker
+ * threads, call `computePool.fftBatch` from `@danielsimonjr/mathts-parallel` on the packed frames.
+ *
+ * A defaulted `windowSize` is 256 clamped to the signal length, as for {@link welchPSD}; a
+ * defaulted `hopSize` is half the window, and at least 1. An explicit `windowSize` longer than
+ * the signal returns no frames. `windowSize` and `hopSize` must be integers of at least 1.
  *
  * @param x - Input signal
  * @param opts - { windowSize, hopSize, window }
@@ -904,11 +908,19 @@ export function spectrogram(
   x: number[],
   opts?: { windowSize?: i32; hopSize?: i32; window?: string }
 ): { magnitude: number[][]; frequencies: number[]; times: number[] } {
-  const windowSize: i32 = opts?.windowSize ?? 256;
-  const hopSize: i32 = opts?.hopSize ?? Math.floor(windowSize / 2);
+  const windowSize: i32 = resolvePsdFrameLength(x.length, opts?.windowSize);
+  const hopSize: i32 = opts?.hopSize ?? Math.max(1, Math.floor(windowSize / 2));
+  if (!Number.isInteger(windowSize) || windowSize < 1) {
+    throw new RangeError(
+      `spectrogram: windowSize must be an integer of at least 1 (got ${windowSize})`
+    );
+  }
+  if (!Number.isInteger(hopSize) || hopSize < 1) {
+    throw new RangeError(`spectrogram: hopSize must be an integer of at least 1 (got ${hopSize})`);
+  }
   const winType = opts?.window ?? 'hann';
   const nfft: i32 = nextPowerOf2(windowSize);
-  const nFreqs: i32 = nfft / 2 + 1;
+  const nFreqs: i32 = Math.floor(nfft / 2) + 1;
 
   const win = windowFunction(windowSize, winType);
 
@@ -1363,14 +1375,16 @@ function assertPsdFrameLength(
     );
   }
   if (frameLength < 2) {
-    throw new RangeError(`${name}: frameLength must be at least 2 (got ${frameLength})`);
+    throw new RangeError(
+      `${name}: frameLength must be at least 2 (got ${frameLength}); a defaulted frameLength is min(256, signal length)`
+    );
   }
 }
 
 /**
- * Frame length for a PSD call. An explicit `frameLength` is used as given and validated.
+ * Frame length for a PSD or spectrogram call. An explicit length is used as given and validated.
  * A defaulted one is 256 clamped to the signal length, as `scipy.signal.welch` clamps
- * `nperseg`. An empty signal keeps the 256 default, so it still returns an empty spectrum.
+ * `nperseg`. An empty signal keeps the 256 default, so it still returns an empty result.
  */
 function resolvePsdFrameLength(signalLength: i32, requested: i32 | undefined): i32 {
   if (requested !== undefined) return requested;

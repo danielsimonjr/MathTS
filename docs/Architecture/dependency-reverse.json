@@ -2495,7 +2495,9 @@
       "functions/src/matrix/fft.ts",
       "functions/src/matrix/ifft.ts",
       "functions/src/signal/fft.ts",
-      "functions/src/typed/signal.ts"
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/typed/signal.ts",
+      "functions/src/wasm/signal/wasm-bridge.ts"
     ],
     "functions/src/matrix/complex-to-interleaved.ts": [
       "functions/src/matrix/fft.ts",

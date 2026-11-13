@@ -30,6 +30,7 @@ import {
   type RawWasm,
 } from '../bridges/common.js';
 import { wasmPolicyAllows } from '../policy.js';
+import { fftExactFloat64 } from '../../signal/fft-core-f64.js';
 
 // ---------------------------------------------------------------------------
 // Threshold
@@ -163,6 +164,15 @@ function _nextPow2(n: number): number {
   return p;
 }
 
+/**
+ * The AS kernels `welch_psd_f64` and `bartlett_psd_f64` zero-pad every frame to the next power of
+ * two, so a frame of any other length would get bins at k / nextPow2(frame), not at k / frame.
+ * Only a power-of-two frame goes to the binary; any other frame takes the JS path (exact length).
+ */
+function _isPow2(n: number): boolean {
+  return n > 0 && Number.isInteger(n) && (n & (n - 1)) === 0;
+}
+
 /** JS fallback: Welch's PSD. */
 export function welchPSDJS(
   samples: Float64Array,
@@ -187,14 +197,11 @@ export function welchPSDJS(
   winPower /= frameLength;
 
   // A power-of-two frame uses the radix-2 FFT. Any other frame needs the DFT of exactly
-  // frameLength points: zero-padding to fftLen would put bin k at k / fftLen, not k / frameLength.
+  // frameLength points (Bluestein, `fftExactFloat64`): zero-padding to fftLen would put bin k
+  // at k / fftLen, not k / frameLength.
   const exact = fftLen !== frameLength;
-  const cosT = new Float64Array(exact ? frameLength : 0);
-  const sinT = new Float64Array(exact ? frameLength : 0);
-  for (let m = 0; m < cosT.length; m++) {
-    cosT[m] = Math.cos((2 * Math.PI * m) / frameLength);
-    sinT[m] = Math.sin((2 * Math.PI * m) / frameLength);
-  }
+  const frameRe = new Float64Array(exact ? frameLength : 0);
+  const frameIm = new Float64Array(exact ? frameLength : 0);
 
   let numFrames = 0;
   let start = 0;
@@ -202,15 +209,11 @@ export function welchPSDJS(
 
   while (start + frameLength <= n) {
     if (exact) {
+      for (let i = 0; i < frameLength; i++) frameRe[i] = samples[start + i] * win[i];
+      const spectrum = fftExactFloat64(frameRe, frameIm, false);
       for (let k = 0; k < psdLen; k++) {
-        let re = 0;
-        let im = 0;
-        for (let i = 0; i < frameLength; i++) {
-          const v = samples[start + i] * win[i];
-          const idx = (k * i) % frameLength;
-          re += v * cosT[idx];
-          im -= v * sinT[idx];
-        }
+        const re = spectrum.real[k];
+        const im = spectrum.imag[k];
         psd[k] += re * re + im * im;
       }
     } else {
@@ -362,7 +365,12 @@ export function welchPSDDispatch(
   const n = samples.length;
   const wt = windowTypeCode(windowName);
 
-  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength && wasmPolicyAllows('welch_psd_f64', n)) {
+  if (
+    n >= WASM_SIGNAL_THRESHOLD &&
+    n >= frameLength &&
+    _isPow2(frameLength) &&
+    wasmPolicyAllows('welch_psd_f64', n)
+  ) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -393,7 +401,12 @@ export function welchPSDDispatch(
 export function bartlettPSDDispatch(samples: Float64Array, frameLength: number): Float64Array {
   const n = samples.length;
 
-  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength && wasmPolicyAllows('bartlett_psd_f64', n)) {
+  if (
+    n >= WASM_SIGNAL_THRESHOLD &&
+    n >= frameLength &&
+    _isPow2(frameLength) &&
+    wasmPolicyAllows('bartlett_psd_f64', n)
+  ) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

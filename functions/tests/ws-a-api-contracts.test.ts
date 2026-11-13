@@ -9,6 +9,8 @@ import {
   bartlettPSD,
   stft,
   istft,
+  spectrogram,
+  windowFunction,
   normalDist,
   betaDist,
   binomialDist,
@@ -287,6 +289,129 @@ describe('#897 — PSD and STFT frame length clamps to n when defaulted', () => 
     const y = istft(stft(x));
     expect(y.length).toBe(x.length);
     for (let i = 8; i < 56; i++) expect(y[i]).toBeCloseTo(x[i], 9);
+  });
+});
+
+describe('#897 — STFT and spectrogram frames of any length', () => {
+  const tone = (n: number, bin: number, period = n): number[] =>
+    Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * bin * i) / period));
+
+  /** The DFT of one windowed frame, from the definition: the reference for the exact-length path. */
+  const referenceFrame = (
+    x: number[],
+    start: number,
+    nperseg: number
+  ): { re: number[]; im: number[] } => {
+    const win = windowFunction(nperseg, 'hann');
+    const re: number[] = [];
+    const im: number[] = [];
+    for (let k = 0; k < nperseg; k++) {
+      let a = 0;
+      let b = 0;
+      for (let i = 0; i < nperseg; i++) {
+        const v = x[start + i] * win[i];
+        a += v * Math.cos((2 * Math.PI * k * i) / nperseg);
+        b -= v * Math.sin((2 * Math.PI * k * i) / nperseg);
+      }
+      re.push(a);
+      im.push(b);
+    }
+    return { re, im };
+  };
+
+  it('stft and istft of an empty signal are empty (no nperseg check on no data)', () => {
+    expect(stft([])).toEqual({ re: [], im: [] });
+    expect(stft([], { nperseg: 16 })).toEqual({ re: [], im: [] });
+    expect(istft({ re: [], im: [] })).toEqual([]);
+  });
+
+  it('a non-power-of-two nperseg gives nperseg bins per frame, equal to the DFT of the frame', () => {
+    const x = tone(400, 4, 100);
+    const S = stft(x, { nperseg: 100 });
+    expect(S.re.length).toBe(7); // starts 0, 50, ..., 300
+    for (let f = 0; f < S.re.length; f++) {
+      expect(S.re[f].length).toBe(100);
+      expect(S.im[f].length).toBe(100);
+    }
+    const ref = referenceFrame(x, 100, 100);
+    arrClose(S.re[2], ref.re, 9);
+    arrClose(S.im[2], ref.im, 9);
+    const mag = S.re[2].map((r, k) => Math.hypot(r, S.im[2][k])).slice(0, 51);
+    expect(mag.indexOf(Math.max(...mag))).toBe(4); // bin k is at k / 100, not k / 128
+  });
+
+  it('a large odd frame keeps the DFT accurate (the chirp phase is reduced before it is evaluated)', () => {
+    const n = 4093; // prime: Bluestein length 8192, chirp angle up to pi * n
+    const x = Array.from({ length: n }, (_, i) => Math.sin(i * 0.37) + Math.cos(i * i * 1e-3));
+    const S = stft(x, { nperseg: n });
+    const win = windowFunction(n, 'hann');
+    for (const k of [0, 1, 7, 1000, 2046, 2047, 4092]) {
+      let a = 0;
+      let b = 0;
+      for (let i = 0; i < n; i++) {
+        const ang = (2 * Math.PI * ((k * i) % n)) / n;
+        a += x[i] * win[i] * Math.cos(ang);
+        b -= x[i] * win[i] * Math.sin(ang);
+      }
+      expect(Math.abs(S.re[0][k] - a)).toBeLessThan(6e-12);
+      expect(Math.abs(S.im[0][k] - b)).toBeLessThan(6e-12);
+    }
+  });
+
+  it('the default istft(stft(x)) reconstructs a signal whose default frame is not a power of two', () => {
+    const x = tone(200, 3).map((v, i) => v + 0.01 * i); // nperseg defaults to 200
+    const S = stft(x);
+    expect(S.re[0].length).toBe(200);
+    const y = istft(S);
+    expect(y.length).toBe(200);
+    for (let i = 5; i < 195; i++) expect(Math.abs(y[i] - x[i])).toBeLessThan(1e-9);
+  });
+
+  it('istft reads the frame width, so an explicit odd nperseg round-trips with a default call', () => {
+    const x = tone(300, 5, 70).map((v, i) => v + Math.cos(i / 9));
+    const S = stft(x, { nperseg: 7, noverlap: 4 });
+    expect(S.re[0].length).toBe(7);
+    const y = istft(S, { noverlap: 4 });
+    expect(y.length).toBeGreaterThanOrEqual(298);
+    for (let i = 8; i < 290; i++) expect(Math.abs(y[i] - x[i])).toBeLessThan(1e-9);
+  });
+
+  it('istft throws when its frame width disagrees with an explicit nperseg', () => {
+    const S = stft(tone(64, 4), { nperseg: 16 });
+    expect(() => istft(S, { nperseg: 32 })).toThrow(RangeError);
+  });
+
+  it('spectrogram clamps a defaulted windowSize to the signal and finds the tone', () => {
+    const r = spectrogram(tone(100, 4));
+    expect(r.magnitude.length).toBe(1);
+    expect(r.times).toEqual([50]);
+    expect(r.frequencies.length).toBe(65); // nfft 128: the window is zero-padded, bins are i / 128
+    const row = r.magnitude[0];
+    expect(Math.abs(r.frequencies[row.indexOf(Math.max(...row))] - 0.04)).toBeLessThan(1 / 128);
+  });
+
+  it('spectrogram with an explicit windowSize above n stays empty (pinned behavior)', () => {
+    expect(spectrogram([1, 2, 3], { windowSize: 8 }).magnitude).toEqual([]);
+  });
+
+  it('spectrogram of an empty signal is empty; tiny signals and windows terminate', () => {
+    expect(spectrogram([]).magnitude).toEqual([]);
+    expect(spectrogram([1]).magnitude.length).toBe(1);
+    // The default hop of a 1-sample window is floor(1 / 2) = 0, which never advanced.
+    expect(spectrogram([1, 2, 3], { windowSize: 1 }).magnitude.length).toBe(3);
+  });
+
+  it('spectrogram rejects a hopSize or windowSize below 1 instead of looping forever', () => {
+    expect(() => spectrogram([1, 2, 3, 4], { windowSize: 2, hopSize: 0 })).toThrow(RangeError);
+    expect(() => spectrogram([1, 2, 3, 4], { windowSize: 2, hopSize: 1.5 })).toThrow(RangeError);
+    expect(() => spectrogram([1, 2, 3, 4], { windowSize: 0 })).toThrow(RangeError);
+  });
+
+  it('empty and one-sample signals do not hang stft, welchPSD or bartlettPSD', () => {
+    expect(welchPSD([]).psd).toEqual([]);
+    expect(bartlettPSD([]).psd).toEqual([]);
+    expect(stft([1]).re).toEqual([[1]]);
+    expect(() => welchPSD([1])).toThrow(RangeError);
   });
 });
 
