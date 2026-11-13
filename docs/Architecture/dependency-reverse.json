@@ -3150,6 +3150,7 @@
       "expression/src/node/ArrayNode.ts",
       "expression/src/parse.ts"
     ],
+    "expression/src/utils/char-classes.ts": ["expression/src/parse.ts"],
     "expression/src/embeddedDocs/physicalConstants/index.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
