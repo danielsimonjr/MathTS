@@ -82,7 +82,7 @@ describe('G16 dogfood — mathjs compat surface', () => {
     expect(cMt.im).toBe(2);
 
     const fMt = roundtrip(mt, mt.fraction(1, 3)) as Fraction;
-    expect(fMt.toString()).toBe('1/3');
+    expect(fMt.toString()).toBe('0.(3)');
   });
 
   it('G22 — instance import/typed/compile stay out of safe evaluate', () => {

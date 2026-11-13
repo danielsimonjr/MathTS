@@ -4575,6 +4575,7 @@
       "assembly/src/ops/matrix.ts"
     ],
     "compat/src/shims.ts": ["compat/src/index.ts"],
+    "compat/src/unary-fast-path.ts": ["compat/src/index.ts", "compat/src/shims.ts"],
     "compat/src/chain.ts": ["compat/src/index.ts"],
     "compat/src/instance-api.ts": ["compat/src/index.ts"],
     "compat/src/index.ts": ["compat/src/instance-api.ts"],

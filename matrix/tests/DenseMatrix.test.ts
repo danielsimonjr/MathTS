@@ -671,9 +671,7 @@ describe('DenseMatrix', () => {
       ]);
 
       const str = m.toString();
-      expect(str).toContain('1');
-      expect(str).toContain('4');
-      expect(str.split('\n').length).toBe(2);
+      expect(str).toBe('[[1, 2], [3, 4]]');
     });
   });
 });

@@ -5,6 +5,9 @@
 
 import type { Scalar, IFraction } from './interfaces.js';
 
+/** Longest repeating period `Fraction#toString` prints before it falls back to `n/d`. */
+const FRACTION_MAX_PERIOD_DIGITS = 1000;
+
 /**
  * Check if a value is a Fraction
  */
@@ -292,37 +295,47 @@ export class Fraction implements IFraction {
     return Number(this.numerator) / Number(this.denominator);
   }
 
+  /**
+   * Decimal form in the mathjs notation: a terminating expansion (`1/2` → `0.5`) or a
+   * repeating one with the period in parentheses (`1/3` → `0.(3)`, `-1/6` → `-0.1(6)`).
+   * A period longer than {@link FRACTION_MAX_PERIOD_DIGITS} digits keeps the `n/d` form.
+   */
   toString(): string {
     if (this.denominator === 1n) {
       return this.numerator.toString();
     }
-    const dec = this.toTerminatingDecimalString();
-    if (dec !== null) {
-      return dec;
-    }
-    return `${this.numerator}/${this.denominator}`;
-  }
-
-  /** Decimal form when the denominator is a power of 10 (e.g. 1/10 → `0.1`). */
-  private toTerminatingDecimalString(): string | null {
-    let den = this.denominator;
-    if (den <= 0n) return null;
-    let places = 0n;
-    while (den % 10n === 0n) {
-      den /= 10n;
-      places += 1n;
-    }
-    if (den !== 1n) return null;
-    const scale = 10n ** places;
     const sign = this.numerator < 0n ? '-' : '';
     const num = this.numerator < 0n ? -this.numerator : this.numerator;
-    const whole = num / scale;
-    const frac = num % scale;
-    if (frac === 0n) {
+    const den = this.denominator;
+    const whole = num / den;
+    let rem = num % den;
+    if (rem === 0n) {
       return sign + whole.toString();
     }
-    const fracStr = frac.toString().padStart(Number(places), '0').replace(/0+$/, '');
-    return sign + whole.toString() + '.' + fracStr;
+    const digits: string[] = [];
+    const seenAt = new Map<bigint, number>();
+    let cycleStart = -1;
+    while (rem !== 0n) {
+      const start = seenAt.get(rem);
+      if (start !== undefined) {
+        cycleStart = start;
+        break;
+      }
+      if (digits.length >= FRACTION_MAX_PERIOD_DIGITS) {
+        return `${this.numerator}/${this.denominator}`;
+      }
+      seenAt.set(rem, digits.length);
+      rem *= 10n;
+      digits.push((rem / den).toString());
+      rem %= den;
+    }
+    if (cycleStart < 0) {
+      return `${sign}${whole}.${digits.join('')}`;
+    }
+    return (
+      `${sign}${whole}.${digits.slice(0, cycleStart).join('')}` +
+      `(${digits.slice(cycleStart).join('')})`
+    );
   }
 
   toJSON(): { mathjs: string; n: number | string; d: number | string } {

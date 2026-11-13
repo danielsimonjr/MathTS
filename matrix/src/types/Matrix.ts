@@ -262,18 +262,19 @@ export abstract class Matrix<T = number> {
   }
 
   /**
-   * Format matrix for display
+   * Format matrix for display, in the mathjs notation: nested brackets, one row per
+   * inner bracket (`[[1, 2], [3, 4]]`).
    */
   toString(): string {
-    const lines: string[] = [];
+    const rows: string[] = [];
     for (let i = 0; i < this.rows; i++) {
       const rowValues: string[] = [];
       for (let j = 0; j < this.cols; j++) {
         rowValues.push(String(this.get(i, j)));
       }
-      lines.push(`[ ${rowValues.join(', ')} ]`);
+      rows.push(`[${rowValues.join(', ')}]`);
     }
-    return lines.join('\n');
+    return `[${rows.join(', ')}]`;
   }
 
   /**

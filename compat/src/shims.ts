@@ -67,6 +67,7 @@ import {
   sparse as _factorySparse,
 } from '@danielsimonjr/mathts-functions';
 
+import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import {
   DenseMatrix,
   SparseMatrix,
@@ -286,6 +287,27 @@ const makeArithmetic =
     return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
   };
 
+/**
+ * One-argument shim with the same number fast path as `add` (#735, #889). A number
+ * argument inside `inReal` takes `fastNumber` directly. Every other input (Complex,
+ * BigNumber, matrices, out-of-domain reals that return Complex) goes to the typed function.
+ */
+const makeUnaryFastPath = (scalarFn: (...args: unknown[]) => unknown, fp: UnaryNumberFastPath) => {
+  const fast = function (x?: unknown): unknown {
+    if (arguments.length === 1 && typeof x === 'number' && fp.inReal(x)) {
+      return fp.fastNumber(x);
+    }
+    return scalarFn.apply(undefined, arguments as unknown as unknown[]);
+  };
+  // The shim keeps the typed function's surface (name, length, signatures, ...).
+  for (const key of Reflect.ownKeys(scalarFn)) {
+    if (key === 'prototype') continue;
+    const desc = Object.getOwnPropertyDescriptor(scalarFn, key);
+    if (desc) Object.defineProperty(fast, key, desc);
+  }
+  return fast;
+};
+
 type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
   _add as (a: unknown, b: unknown) => unknown,
@@ -303,23 +325,55 @@ export const multiply = makeArithmetic(
 ) as typeof _multiply;
 export const divide: TypedFunction = _divide;
 export const pow: TypedFunction = _pow;
-export const sqrt = _sqrt as PublicSqrt;
-export const abs = _abs as PublicAbs;
-export const exp = _exp as PublicExp;
-export const log = _log as PublicLog;
+// sqrt and log leave the real domain for x < 0 (they return Complex there).
+export const sqrt = makeUnaryFastPath(
+  _sqrt as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.sqrt
+) as PublicSqrt;
+export const abs = makeUnaryFastPath(
+  _abs as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.abs
+) as PublicAbs;
+export const exp = makeUnaryFastPath(
+  _exp as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.exp
+) as PublicExp;
+export const log = makeUnaryFastPath(
+  _log as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.log
+) as PublicLog;
 
 // =============================================================================
 // Trigonometric Function Shims
 // =============================================================================
 
-export const sin = _sin as PublicSin;
-export const cos = _cos as PublicCos;
-export const tan = _tan as PublicTan;
+export const sin = makeUnaryFastPath(
+  _sin as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.sin
+) as PublicSin;
+export const cos = makeUnaryFastPath(
+  _cos as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.cos
+) as PublicCos;
+export const tan = makeUnaryFastPath(
+  _tan as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.tan
+) as PublicTan;
 
 // Inverse trig — delegate to functions typed implementations (complex promotion).
-export const asin: TypedFunction = _asin;
-export const acos: TypedFunction = _acos;
-export const atan: TypedFunction = _atan;
+// asin and acos leave the real domain [-1, 1] to the typed function (it returns Complex there).
+export const asin: TypedFunction = makeUnaryFastPath(
+  _asin as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.asin
+) as unknown as TypedFunction;
+export const acos: TypedFunction = makeUnaryFastPath(
+  _acos as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.acos
+) as unknown as TypedFunction;
+export const atan: TypedFunction = makeUnaryFastPath(
+  _atan as (...args: unknown[]) => unknown,
+  UNARY_NUMBER_FAST_PATH.atan
+) as unknown as TypedFunction;
 export const atan2: TypedFunction = _atan2;
 
 // =============================================================================

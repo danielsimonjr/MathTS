@@ -22,7 +22,7 @@ describe('dogfood G32b formatting and units', () => {
     expect(String(fraction(0.1))).toBe('0.1');
     expect(String(new Fraction(1n, 10n))).toBe('0.1');
     const third = mt.fraction(1, 3) as unknown as { n: number; d: number };
-    expect(String(third)).toBe('1/3');
+    expect(String(third)).toBe('0.(3)');
     const j = JSON.parse(JSON.stringify(third));
     expect(j).toEqual({ mathjs: 'Fraction', n: 1, d: 3 });
     const huge = new Fraction(2n ** 60n, 3n).toJSON();

@@ -491,6 +491,7 @@
       "tan",
       "tau",
       "transpose",
+      "UNARY_NUMBER_FAST_PATH",
       "variance",
       "wireMathjsInstanceApi",
       "zeros"

@@ -18,6 +18,7 @@
  */
 
 import { shims } from './shims.js';
+import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
@@ -216,6 +217,26 @@ function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
 const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
 
 /**
+ * Front for a unary scalar shim (#889): a lone number in the real domain takes the Math
+ * fast path (the table in shims.ts) and skips the config wrapper. Config only reaches the
+ * other argument types (BigNumber precision, Complex, Unit, matrices).
+ */
+function withNumberFront(
+  raw: (...args: unknown[]) => unknown,
+  fp: UnaryNumberFastPath,
+  configured: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  const front = function (this: unknown, x?: unknown) {
+    if (arguments.length === 1 && typeof x === 'number' && fp.inReal(x)) {
+      return fp.fastNumber(x);
+    }
+    return configured.apply(this, arguments as unknown as unknown[]);
+  };
+  copyFunctionSurface(raw, front);
+  return front;
+}
+
+/**
  * Copies the name, length, prototype and own properties of `from` onto the wrapper `to`.
  * Keys that refuse redefinition stay as they are.
  */
@@ -259,8 +280,7 @@ function copyFunctionSurface(
 function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
   currentConfig: MathJSConfig,
-  configBaseline: MathJSConfig,
-  createdWithCustomConfig: boolean
+  usesOverlay: () => boolean
 ): T {
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
@@ -270,9 +290,7 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
       }
       return fn.apply(this, args);
     };
-    const needsOverlay =
-      createdWithCustomConfig || instanceConfigUsesOverlay(currentConfig, configBaseline);
-    if (!needsOverlay) {
+    if (!usesOverlay()) {
       return invoke();
     }
     return mathFunctions.runWithConfig(currentConfig, invoke);
@@ -315,6 +333,20 @@ export function create(
   const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
   const currentConfig: MathJSConfig = { ...configBaseline };
 
+  // The overlay decision diffs every config key. Each wrapped call used to repeat that
+  // diff (a Set per call, #889); it now recomputes only after config() changes the config.
+  let configGeneration = 0;
+  let decidedGeneration = -1;
+  let overlayNeeded = createdWithCustomConfig;
+  const usesOverlay = (): boolean => {
+    if (decidedGeneration !== configGeneration) {
+      decidedGeneration = configGeneration;
+      overlayNeeded =
+        createdWithCustomConfig || instanceConfigUsesOverlay(currentConfig, configBaseline);
+    }
+    return overlayNeeded;
+  };
+
   const instance: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
@@ -323,7 +355,10 @@ export function create(
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
     config: (newConfig?: Partial<MathJSConfig>) => {
-      if (newConfig) Object.assign(currentConfig, newConfig);
+      if (newConfig) {
+        Object.assign(currentConfig, newConfig);
+        configGeneration += 1;
+      }
       return { ...currentConfig };
     },
 
@@ -392,8 +427,7 @@ export function create(
         return dims;
       }) as (...args: unknown[]) => unknown,
       currentConfig,
-      configBaseline,
-      createdWithCustomConfig
+      usesOverlay
     ),
 
     // Type checking
@@ -459,7 +493,13 @@ export function create(
       get() {
         if (cached === undefined)
           replaceWith(
-            wrapWithInstanceConfig(raw, currentConfig, configBaseline, createdWithCustomConfig)
+            Object.prototype.hasOwnProperty.call(UNARY_NUMBER_FAST_PATH, key)
+              ? withNumberFront(
+                  raw,
+                  UNARY_NUMBER_FAST_PATH[key as keyof typeof UNARY_NUMBER_FAST_PATH],
+                  wrapWithInstanceConfig(raw, currentConfig, usesOverlay)
+                )
+              : wrapWithInstanceConfig(raw, currentConfig, usesOverlay)
           );
         return cached;
       },
