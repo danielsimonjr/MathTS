@@ -11,7 +11,7 @@
  * sigma(E) = c^2 sigma(m).
  */
 import { describe, it, expect } from 'vitest';
-import { Unit } from '@danielsimonjr/mathts-core';
+import { BigNumber, Unit } from '@danielsimonjr/mathts-core';
 import {
   electronMass,
   speedOfLight,
@@ -107,6 +107,16 @@ describe('propagateUncertainty accepts CODATA constants (#910)', () => {
     const result = propagateUncertainty('2 * a', { a: fineStructure });
     expect(result.value / (2 * Number(fineStructure))).toBeCloseTo(1, 12);
     expect(result.sigma / (2 * 1.1e-12)).toBeCloseTo(1, 12);
+  });
+
+  it('reads a BigNumber constant (the BigNumber configuration) with its uncertainty', () => {
+    const alpha = new BigNumber('0.0072973525643');
+    Object.defineProperty(alpha, 'uncertainty', { value: 1.1e-12 });
+    const result = propagateUncertainty('2 * a', { a: alpha });
+    expect(result.value / (2 * 0.0072973525643)).toBeCloseTo(1, 12);
+    expect(result.sigma / (2 * 1.1e-12)).toBeCloseTo(1, 12);
+    // A BigNumber with no uncertainty is a plain number: it adds no variance.
+    expect(propagateUncertainty('2 * a', { a: new BigNumber('3') }).sigma).toBe(0);
   });
 
   it('keeps the finite-difference step relative for a tiny constant', () => {

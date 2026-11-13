@@ -45,8 +45,9 @@ export interface UncertainScalar {
 
 /**
  * The declared type of a dimensionless CODATA constant such as `fineStructure`
- * (`number | string | Decimal`, the result type of its factory). The constant of the default
- * configuration is an {@link UncertainScalar} at run time; a `string` entry is rejected there.
+ * (`number | Decimal`, the result type of its factory). The constant of the default
+ * configuration is an {@link UncertainScalar} at run time; with `number: 'BigNumber'` it is a
+ * `Decimal` that carries the same `.uncertainty`.
  */
 type DeclaredScalarConstant = ReturnType<typeof createFineStructure>;
 
@@ -136,8 +137,9 @@ function readInput(name: string, entry: unknown): Reading {
     const scale = written === 0 || !Number.isFinite(written) ? 1 : value / written;
     return { value, sigma: stated * scale };
   }
-  if (stated === undefined) return { value: asFiniteNumber(label, entry) };
-  return { value: asFiniteNumber(label, Number(entry)), sigma: stated };
+  // A dimensionless constant: a number by valueOf (a `Decimal` converts through its string).
+  const value = asFiniteNumber(label, Number(entry));
+  return stated === undefined ? { value } : { value, sigma: stated };
 }
 
 function partialDerivative(expr: string, name: string, values: Record<string, number>): number {
