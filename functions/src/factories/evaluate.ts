@@ -276,6 +276,8 @@ function mergePhysicsIntoRecord(
 /**
  * Scope with CODATA physics constants (`e0`, `G`, `c`, `hbar`, …).
  *
+ * This is how to read `G`, `c` and `hbar` as the constants: the default scope reads them as
+ * the units gauss, speed of light and hectobar (`evaluate('G')` is the unit gauss).
  * Bare `e` is **not** rebound — it remains Euler's number on the math scope.
  * Pass the result as `evaluate`'s scope, or use `{ physics: true }`.
  * Explicit entries on `scope` win for each constant key.

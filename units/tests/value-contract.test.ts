@@ -58,6 +58,15 @@ describe('Unit.value is the SI magnitude (#921)', () => {
     close(new Unit(5, 'km').toNumeric('m'), 5000);
   });
 
+  it('keeps the oracle of the issue: toNumber("deg") is 180 for 180 deg', () => {
+    // mathjs: math.unit(180, 'deg').toNumber('deg') === 180. `toNumber` is deprecated in
+    // favor of `toNumeric` and warns once, but it returns the same number.
+    expect(new Unit(180, 'deg').toNumber('deg')).toBe(180);
+    expect(new Unit(180, 'deg').toNumber()).toBe(180);
+    close(new Unit(180, 'deg').to('rad').to('deg').toNumber('deg'), 180);
+    expect(new Unit(180, 'deg').toNumber('deg')).toBe(new Unit(180, 'deg').toNumeric('deg'));
+  });
+
   it('gives the shown number in toJSON().value', () => {
     expect(new Unit(180, 'deg').toJSON().value).toBe(180);
   });
