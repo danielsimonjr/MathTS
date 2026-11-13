@@ -12,6 +12,25 @@
     { "name": "sin", "source": "src/typed/trigonometry.ts" },
     { "name": "cos", "source": "src/typed/trigonometry.ts" },
     { "name": "tan", "source": "src/typed/trigonometry.ts" },
-    { "name": "det", "source": "src/matrix/det.ts", "mathTypedPattern": "return typed(name," }
+    { "name": "det", "source": "src/matrix/det.ts", "mathTypedPattern": "return typed(name," },
+    {
+      "name": "median",
+      "source": "src/statistics/median.ts",
+      "mathTypedPattern": "return typed(name,",
+      "fallback": ["(...rest: number[]): number;", "(...rest: unknown[]): unknown;"]
+    },
+    {
+      "name": "mode",
+      "source": "src/statistics/mode.ts",
+      "mathTypedPattern": "return typed(name,",
+      "fallback": ["(...rest: number[]): number[];", "(...rest: unknown[]): unknown;"]
+    },
+    {
+      "name": "mad",
+      "source": "src/statistics/mad.ts",
+      "mathTypedPattern": "return typed(name,",
+      "fallback": ["(...rest: unknown[]): unknown;"]
+    },
+    { "name": "parallelFFT", "source": "src/typed/signal.ts" }
   ]
 }

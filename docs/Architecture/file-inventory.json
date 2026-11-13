@@ -6540,7 +6540,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1773
+      "loc": 1780
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -8220,7 +8220,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 91
+      "loc": 92
     },
     {
       "file": "functions/src/statistics/max.ts",
@@ -8241,7 +8241,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 259
+      "loc": 262
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8255,7 +8255,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 97
+      "loc": 100
     },
     {
       "file": "functions/src/statistics/nan-reductions.ts",
@@ -9193,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1587
+      "loc": 1592
     },
     {
       "file": "functions/src/typed/special.ts",

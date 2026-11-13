@@ -190,9 +190,14 @@ export const createMedian = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // median([a, b, c, d, ...])
-      'Array | Matrix': _median,
-      'Float64Array | Float32Array': _median,
-      'Array | Matrix, Object': (array: unknown[] | MatrixType, opts: StatReduceOptions) => {
+      // The public overloads (functions/types) declare these numeric paths as `number`. The
+      // BigNumber, Complex and Unit element paths reach the `unknown` rest fallback instead.
+      'Array | Matrix': (array: unknown[] | MatrixType): number => _median(array) as number,
+      'Float64Array | Float32Array': (array: FloatTyped): number => _median(array) as number,
+      'Array | Matrix, Object': (
+        array: unknown[] | MatrixType,
+        opts: StatReduceOptions
+      ): number => {
         if (opts.skipNaN === true || opts.skipna === true) {
           if (opts.skipNaN === true && opts.skipna === false) {
             throw new TypeError('skipNaN and skipna disagree');
@@ -205,36 +210,34 @@ export const createMedian = /* #__PURE__ */ factory(
             true
           );
           if (finite.length === 0) return NaN;
-          return _median(finite);
+          return _median(finite) as number;
         }
-        return _median(array);
+        return _median(array) as number;
       },
       'Float64Array | Float32Array, Object': (
         array: FloatTyped,
         opts: StatReduceOptions
-      ): unknown => {
+      ): number => {
         if (opts.skipNaN === true || opts.skipna === true) {
           const finite = finiteNumbers(array, true);
           if (finite.length === 0) return NaN;
-          return _median(finite);
+          return _median(finite) as number;
         }
-        return _median(array);
+        return _median(array) as number;
       },
 
       // median([a, b, c, d, ...], dim)
-      'Array | Matrix, number | BigNumber': function (
+      'Array | Matrix, number | BigNumber': (
         _array: unknown[] | MatrixType,
         _dim: number | { valueOf(): number }
-      ): unknown {
-        return medianAlong(_array, _dim, false);
-      },
+      ): number | number[] => medianAlong(_array, _dim, false) as number | number[],
 
       // median(A, dim, { skipNaN }) — NaNs omitted per slice (NumPy nanmedian axis)
-      'Array | Matrix, number | BigNumber, Object': function (
+      'Array | Matrix, number | BigNumber, Object': (
         _array: unknown[] | MatrixType,
         _dim: number | { valueOf(): number },
         opts: StatReduceOptions
-      ): unknown {
+      ): number | number[] => {
         const skip = opts.skipNaN === true || opts.skipna === true;
         if (
           (opts.skipNaN === true && opts.skipna === false) ||
@@ -242,7 +245,7 @@ export const createMedian = /* #__PURE__ */ factory(
         ) {
           throw new TypeError('skipNaN and skipna disagree');
         }
-        return medianAlong(_array, _dim, skip);
+        return medianAlong(_array, _dim, skip) as number | number[];
       },
 
       // median(a, b, c, d, ...)

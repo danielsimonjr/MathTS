@@ -258,6 +258,47 @@ export interface DetCallable {
 }
 export type PublicDet = DetCallable;
 
+export interface MedianCallable {
+  (a: number[] | Matrix): number;
+  (a: Float64Array | Float32Array): number;
+  (a: number[] | Matrix, b: StatReduceOptions): number;
+  (a: Float64Array | Float32Array, b: StatReduceOptions): number;
+  (a: number[] | Matrix, b: number | BigNumber): number | number[];
+  (a: number[] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (...rest: number[]): number;
+  (...rest: unknown[]): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicMedian = MedianCallable;
+
+export interface ModeCallable {
+  (a: number[] | Matrix): number[] | number;
+  (a: Float64Array | Float32Array): number[] | number;
+  (...rest: number[]): number[];
+  (...rest: unknown[]): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicMode = ModeCallable;
+
+export interface MadCallable {
+  (a: number[] | Matrix): number;
+  (a: Float64Array | Float32Array): number;
+  (...rest: unknown[]): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicMad = MadCallable;
+
+export interface ParallelFFTCallable {
+  (a: number[] | number[][]): { real: Float64Array; imag: Float64Array; originalLength: number };
+  (a: Float64Array): Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicParallelFFT = ParallelFFTCallable;
+
 export interface EvaluateCallable {
   (expr: string, scope?: Record<string, unknown>, options?: PhysicsEvaluateOptions): number;
   (exprs: string[], scope?: Record<string, unknown>, options?: PhysicsEvaluateOptions): number[];

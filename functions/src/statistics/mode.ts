@@ -46,8 +46,11 @@ export const createMode = /* #__PURE__ */ factory(
      * @return {*} The mode of all values
      */
     return typed(name, {
-      'Array | Matrix': _mode,
-      'Float64Array | Float32Array': _mode,
+      // A list of modes, or NaN for an empty input. The public overloads declare this result.
+      'Array | Matrix': (values: unknown[] | MatrixType): number[] | number =>
+        _mode(values) as number[] | number,
+      'Float64Array | Float32Array': (values: FloatTyped): number[] | number =>
+        _mode(values) as number[] | number,
 
       '...': function (args: unknown[]): unknown {
         return _mode(args);

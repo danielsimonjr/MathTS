@@ -10,7 +10,12 @@
 
 import { factoryScope } from './scope.js';
 import { add, multiply } from '../typed/arithmetic.js';
-import type { PublicDet } from '../typed/public-type-exports.js';
+import type {
+  PublicDet,
+  PublicMad,
+  PublicMedian,
+  PublicMode,
+} from '../typed/public-type-exports.js';
 
 // ---------------------------------------------------------------------------
 // Tier 1: all imports
@@ -338,7 +343,7 @@ export const divideScalar = createDivideScalar(
 createRandomInt(factoryScope as Parameters<typeof createRandomInt>[0]);
 
 // statistics
-export const mode = createMode(factoryScope as Parameters<typeof createMode>[0]);
+export const mode = createMode(factoryScope as Parameters<typeof createMode>[0]) as PublicMode;
 export const prod = createProd(factoryScope as Parameters<typeof createProd>[0]);
 
 // string (activated factories — superseded by typed/string; kept internal for factoryScope wiring)
@@ -1266,7 +1271,9 @@ factoryScope.intersect = intersect;
 export const factory_mean = createMean(factoryScope as Parameters<typeof createMean>[0]);
 factoryScope.mean = factory_mean;
 
-export const median = createMedian(factoryScope as Parameters<typeof createMedian>[0]);
+export const median = createMedian(
+  factoryScope as Parameters<typeof createMedian>[0]
+) as PublicMedian;
 factoryScope.median = median;
 
 export const factory_variance = createVariance(
@@ -1375,7 +1382,7 @@ factoryScope.lusolve = lusolve;
 export const corr = createCorr(factoryScope as Parameters<typeof createCorr>[0]);
 factoryScope.corr = corr;
 
-export const mad = createMad(factoryScope as Parameters<typeof createMad>[0]);
+export const mad = createMad(factoryScope as Parameters<typeof createMad>[0]) as PublicMad;
 factoryScope.mad = mad;
 
 export const factory_std = createStd(factoryScope as Parameters<typeof createStd>[0]);
