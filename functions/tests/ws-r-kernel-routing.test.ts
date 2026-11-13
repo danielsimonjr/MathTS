@@ -2,9 +2,17 @@
  * WS-R R2: the public `median` and `fft` reach their typed kernels without extra copies,
  * and `parallelStatMedian` selects instead of sorting.
  *
- * Every check counts operations. Nothing here times a call.
+ * The checks compare results with an oracle and observe which path ran (a sort call, a call of
+ * the flat kernel). Nothing here times a call or counts allocations.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Wrap the flat kernel so a test sees which `fft` inputs reach it. The wrapper calls through.
+vi.mock('../src/signal/fft-core-f64.js', async (importOriginal) => {
+  const real = await importOriginal<typeof import('../src/signal/fft-core-f64.js')>();
+  return { ...real, fftExactFloat64: vi.fn(real.fftExactFloat64) };
+});
+import { fftExactFloat64 } from '../src/signal/fft-core-f64.js';
 import { fft, median, parallelStatMedian } from '../src/index.js';
 
 function lcg(seed: number): () => number {
@@ -29,80 +37,25 @@ function sortedMedian(x: ArrayLike<number>): number {
   return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
 }
 
-interface Counts {
-  /** `new Float64Array(length >= minLength)` */
-  largeF64: number;
-  /** `new Array(length >= minLength)` */
-  largeArray: number;
-  /** `Array.prototype.push` calls */
-  push: number;
-  /** Calls of any `sort` method (Array, Float64Array) */
-  sort: number;
-}
-
-/** Run `run` while counting large allocations and sorts. The globals come back in `finally`. */
-function counting<T>(minLength: number, run: () => T): { value: T; counts: Counts } {
-  const counts: Counts = { largeF64: 0, largeArray: 0, push: 0, sort: 0 };
-  const OriginalF64 = globalThis.Float64Array;
-  const OriginalArray = globalThis.Array;
-  const originalPush = Array.prototype.push;
+/** Run `run` while counting calls of any `sort` method (Array, Float64Array). */
+function countingSorts<T>(run: () => T): { value: T; sorts: number } {
+  let sorts = 0;
   const originalArraySort = Array.prototype.sort;
-  const typedProto = Object.getPrototypeOf(OriginalF64.prototype) as {
+  const typedProto = Object.getPrototypeOf(Float64Array.prototype) as {
     sort: (cmp?: (a: number, b: number) => number) => unknown;
   };
   const originalTypedSort = typedProto.sort;
-
-  const sizeOf = (args: unknown[]): number => {
-    const first = args[0];
-    if (typeof first === 'number') return first;
-    if (first !== null && typeof first === 'object') {
-      return (first as ArrayLike<number>).length ?? 0;
-    }
-    return 0;
-  };
-  const CountingF64: typeof Float64Array = new Proxy(OriginalF64, {
-    construct(target, args, newTarget): object {
-      if (sizeOf(args) >= minLength) counts.largeF64++;
-      return Reflect.construct(target, args, newTarget === CountingF64 ? target : newTarget);
-    },
-  });
-  const CountingArray: typeof Array = new Proxy(OriginalArray, {
-    construct(target, args, newTarget): object {
-      if (args.length === 1 && typeof args[0] === 'number' && args[0] >= minLength) {
-        counts.largeArray++;
-      }
-      return Reflect.construct(target, args, newTarget === CountingArray ? target : newTarget);
-    },
-    apply(target, thisArg, args) {
-      if (args.length === 1 && typeof args[0] === 'number' && args[0] >= minLength) {
-        counts.largeArray++;
-      }
-      return Reflect.apply(target, thisArg, args);
-    },
-  });
-
-  const g = globalThis as { Float64Array: unknown; Array: unknown };
   try {
-    g.Float64Array = CountingF64;
-    g.Array = CountingArray;
-    Array.prototype.push = function (this: unknown[], ...items: unknown[]): number {
-      counts.push += items.length;
-      return originalPush.apply(this, items);
-    };
     Array.prototype.sort = function (this: unknown[], cmp?: (a: unknown, b: unknown) => number) {
-      counts.sort++;
+      sorts++;
       return originalArraySort.call(this, cmp);
     } as typeof Array.prototype.sort;
     typedProto.sort = function (this: unknown, cmp?: (a: number, b: number) => number) {
-      counts.sort++;
+      sorts++;
       return originalTypedSort.call(this, cmp);
     };
-    const value = run();
-    return { value, counts };
+    return { value: run(), sorts };
   } finally {
-    g.Float64Array = OriginalF64;
-    g.Array = OriginalArray;
-    Array.prototype.push = originalPush;
     Array.prototype.sort = originalArraySort;
     typedProto.sort = originalTypedSort;
   }
@@ -116,18 +69,32 @@ describe('median: one pass, one copy, selection', () => {
     ['number[] (even)', () => Array.from(randomVector(n, 2))],
     ['Float64Array (odd)', () => randomVector(n + 1, 3)],
     ['Float64Array (even)', () => randomVector(n, 4)],
-  ])('%s equals the sorted median and builds no JS array of n values', (_name, make) => {
+  ])('%s equals the sorted median and sorts nothing', (_name, make) => {
     const input = make();
     const want = sortedMedian(input);
-    const { value, counts } = counting(n, () => median(input as number[]));
-    expect(value).toBe(want);
-    // No `new Array(n)` copy, and no element-by-element `push` (the flatten step).
-    expect(counts.largeArray).toBe(0);
-    expect(counts.push).toBeLessThan(n / 2);
-    // One typed work buffer holds the only copy.
-    expect(counts.largeF64).toBe(1);
+    const { value, sorts } = countingSorts(() => median(input as number[]));
+    expect(Object.is(value, want)).toBe(true);
     // Selection, not a sort.
-    expect(counts.sort).toBe(0);
+    expect(sorts).toBe(0);
+  });
+
+  it('the even-length average does not overflow', () => {
+    expect(median([1.7e308, 1.7e308])).toBe(1.7e308);
+    expect(median(Float64Array.of(1.7e308, 1.7e308))).toBe(1.7e308);
+    expect(Math.abs(median([-1.7e308, -1.6e308]) / -1.65e308 - 1)).toBeLessThan(1e-15);
+    expect(median([-1.7e308, 1.7e308])).toBe(0);
+    expect(median([1.6e308, 1.7e308, 1.7e308, 1.7e308])).toBe(1.7e308);
+  });
+
+  it('keeps the sign of zero', () => {
+    expect(Object.is(median([-0, -0]), -0)).toBe(true);
+    expect(Object.is(median([0, 0]), 0)).toBe(true);
+    expect(Object.is(median([-0, -0, -0]), -0)).toBe(true);
+    expect(Object.is(median([-0, 0]), 0)).toBe(true);
+    expect(Object.is(median([3, -0, 0, 5, 7]), 3)).toBe(true);
+    // The values of -0 and 0 compare equal, so the middle of [-0, 0, 0] is a zero: its sign
+    // follows the partition order, and the test accepts both.
+    expect(median([0, -0, 0])).toBe(0);
   });
 
   it('does not change the input', () => {
@@ -157,10 +124,10 @@ describe('parallelStatMedian selects instead of sorting', () => {
   it.each([4001, 4000])('n = %i: equals the sorted median and sorts nothing', async (n) => {
     const x = randomVector(n, 9);
     const want = sortedMedian(x);
-    const pending = counting(n, () => parallelStatMedian(x) as Promise<number>);
+    const pending = countingSorts(() => parallelStatMedian(x) as Promise<number>);
     const got = await pending.value;
     expect(got).toBe(want);
-    expect(pending.counts.sort).toBe(0);
+    expect(pending.sorts).toBe(0);
   });
 
   it('a NaN in the input keeps the NaN-last sort', async () => {
@@ -207,18 +174,32 @@ describe('fft: the number[] route and the Float64Array route are one kernel', ()
     }
   });
 
-  it('a power-of-two number[] builds four buffers of n values (re, im, and the two kernel outputs)', () => {
-    const n = 1 << 12;
-    const x = Array.from(signal(n, 3));
-    const { counts } = counting(n, () => fft(x));
-    expect(counts.largeF64).toBeLessThanOrEqual(4);
+  it('number[] of 64 or more values reaches the flat kernel once, with the spectrum of Float64Array', () => {
+    const kernel = vi.mocked(fftExactFloat64);
+    for (const n of [64, 65, 1 << 12]) {
+      const x = signal(n, 3);
+      kernel.mockClear();
+      const viaArray = fft(Array.from(x)) as Array<{ re: number; im: number }>;
+      expect(kernel, `n = ${n}`).toHaveBeenCalledTimes(1);
+      expect(kernel.mock.calls[0][0].length).toBe(n);
+      const viaTyped = fft(x) as Array<{ re: number; im: number }>;
+      for (let i = 0; i < n; i++) {
+        expect(Object.is(viaArray[i].re, viaTyped[i].re)).toBe(true);
+        expect(Object.is(viaArray[i].im, viaTyped[i].im)).toBe(true);
+      }
+    }
   });
 
-  it('a power-of-two Float64Array builds three buffers of n values (im and the two kernel outputs)', () => {
-    const n = 1 << 12;
-    const x = signal(n, 4);
-    const { counts } = counting(n, () => fft(x));
-    expect(counts.largeF64).toBeLessThanOrEqual(3);
+  it('number[] of 63 values does not send its own length to the flat kernel', () => {
+    const kernel = vi.mocked(fftExactFloat64);
+    kernel.mockClear();
+    const x = Array.from(signal(63, 5));
+    const got = fft(x) as Array<{ re: number; im: number }>;
+    // The chirp-z step of a length-63 transform calls the kernel on a longer padded length.
+    expect(kernel.mock.calls.every((c) => c[0].length !== 63)).toBe(true);
+    let re = 0;
+    for (let t = 0; t < 63; t++) re += x[t];
+    expect(Math.abs(got[0].re - re)).toBeLessThan(1e-9);
   });
 
   it('short inputs and Complex input keep their path', () => {

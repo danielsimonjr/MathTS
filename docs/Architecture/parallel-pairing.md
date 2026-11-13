@@ -105,7 +105,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `leftShift`                | never                 |    —    |           0 |
 | `log`                      | never                 |    —    |           0 |
 | `mannWhitneyTest`          | 4096                  |    ✓    |           0 |
-| `matmul`                   | 36864                 |    ✓    |           0 |
+| `matmul`                   | 7077888               |    ✓    |           0 |
 | `matrixPower`              | 9216                  |    ✓    |           0 |
 | `matvec`                   | never                 |    —    |           0 |
 | `max`                      | never                 |    —    |           1 |
