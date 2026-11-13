@@ -1,3 +1,4 @@
+import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { isArray, isMatrix, isDenseMatrix, isSparseMatrix } from '../../../utils/is.js';
 import { arraySize } from '../../../utils/array.js';
 import { format } from '../../../utils/string.js';
@@ -42,6 +43,16 @@ interface MatrixInternal {
 }
 
 /**
+ * Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
+ * other value unchanged. The solvers read `b` through the factory matrix fields, which
+ * that class does not have.
+ */
+export function denseRightHandSide<T>(b: T): T | number[][] {
+  const dense = densifyForSolver(b);
+  return dense ? dense.toArray() : b;
+}
+
+/**
  * Create the `solveValidation` function that the triangular solvers use to check `m` and
  * `b`.
  */
@@ -57,9 +68,10 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
    */
   return function solveValidation(
     m: DenseMatrixType | SparseMatrixType,
-    b: unknown[][] | DenseMatrixType | SparseMatrixType,
+    rhs: unknown[][] | DenseMatrixType | SparseMatrixType,
     copy?: boolean
   ): DenseMatrixType {
+    const b = denseRightHandSide(rhs);
     const mSize = m.size();
 
     if (mSize.length !== 2) {
