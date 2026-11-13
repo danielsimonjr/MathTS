@@ -2,7 +2,7 @@
 
 Per-package **markdown** API indexes for all public MathTS packages (maintained in this repo on
 `main`). There is no generated TypeDoc site: `danielsimonjr.com/MathTS` is a searchable
-**functions** landing page (`bun run docs:landing`). The published index at `/api/` lists these
+**functions** landing page (`bun run docs:site`). The published index at `/api/` lists these
 pages and links each one to GitHub. Browse the `docs/api/*.md` files on GitHub or in a clone for
 package-level export lists and usage notes.
 

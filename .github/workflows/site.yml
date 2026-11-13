@@ -207,8 +207,9 @@ jobs:
             commit -m "Deploy site from ${GITHUB_SHA}"
           git push origin HEAD:gh-pages
 
-      # A separate step, so that an empty push above still checks the live site. The
-      # query string defeats a cached copy. The API title comes from the artifact.
+      # A separate step, so that an empty push above still checks the live site. The query
+      # string (run, run attempt and try) defeats a cached copy. The API title comes from
+      # the artifact.
       - name: Check the live site
         run: |
           set -euo pipefail
@@ -217,7 +218,7 @@ jobs:
           [[ -n $api_title ]] || { echo "::error::the API index has no <title>"; exit 1; }
           has() { # url, text that the page must contain
             local body
-            body=$(curl --fail --silent --show-error --location --max-time 30 "$1?run=${GITHUB_RUN_ID}-${attempt}") || return 1
+            body=$(curl --fail --silent --show-error --location --max-time 30 "$1?run=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}") || return 1
             grep -qF -- "$2" <<< "$body"
           }
           for attempt in $(seq 1 "$WAIT_ATTEMPTS"); do

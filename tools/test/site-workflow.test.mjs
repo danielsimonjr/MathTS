@@ -14,6 +14,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -24,6 +25,7 @@ import { delimiter, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { load } from 'js-yaml';
+import { packageIdentity } from '../site-config.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const WORKFLOWS = join(REPO, '.github', 'workflows');
@@ -184,6 +186,7 @@ function runStep(sb, text, env = {}) {
       WAIT_SECONDS: '0',
       GITHUB_SHA: '0123456789abcdef0123456789abcdef01234567',
       GITHUB_RUN_ID: '42',
+      GITHUB_RUN_ATTEMPT: '1',
       ...env,
     },
   });
@@ -486,6 +489,43 @@ bashTest('push: fails when gh-pages moved (the push is not forced)', () => {
   }
 });
 
+bashTest('the deploy steps accept the output of the real generators', () => {
+  const sb = sandbox();
+  try {
+    // The workflow regex and the generators' slug rule are two places. This ties them.
+    const root = join(sb.dir, 'site-out');
+    const gen = (script, out) =>
+      spawnSync(process.execPath, [join(REPO, 'tools', script), `--out=${out}`], {
+        cwd: REPO,
+        encoding: 'utf8',
+      });
+    assert.equal(gen('generate-landing-site.mjs', root).status, 0);
+    assert.equal(gen('generate-api-index.mjs', join(root, 'api')).status, 0);
+    const pages = readdirSync(join(root, 'functions')).sort();
+    assert.ok(pages.length > 20, `only ${pages.length} function pages`);
+
+    const allow = runStep(sb, runOf('deploy', ALLOW));
+    assert.equal(allow.status, 0, allow.stdout + allow.stderr);
+
+    const { name, version } = packageIdentity(join(REPO, 'functions', 'package.json'));
+    const id = { SITE_PACKAGE: name, SITE_VERSION: version };
+    const npm = runStep(sb, runOf('deploy', NPM), { ...id, ...stubNpm(sb, [version]) });
+    assert.equal(npm.status, 0, npm.stdout + npm.stderr);
+
+    const repo = pagesRepo(sb);
+    const push = runStep(sb, runOf('deploy', PUSH));
+    assert.equal(push.status, 0, push.stdout + push.stderr);
+    assert.deepEqual(repo.tree(), [
+      '.nojekyll',
+      'api/index.html',
+      ...pages.map((p) => `functions/${p}`),
+      'index.html',
+    ]);
+  } finally {
+    sb.done();
+  }
+});
+
 /**
  * A stub curl. It maps the URL path to a file of a "live site" folder. The first
  * `lag` calls answer 404, which stands for a Pages build that is not done yet.
@@ -496,7 +536,7 @@ function stubCurl(sb, live, lag) {
     sb.bin,
     'curl',
     [
-      'url="${@: -1}"',
+      'url="${@: -1}"; echo "$url" >> "${CURL_LOG}"',
       'n=$(cat "${CURL_COUNTER}" 2>/dev/null || echo 0); n=$((n+1)); echo $n > "${CURL_COUNTER}"',
       `[ "$n" -gt "\${CURL_LAG}" ] || { ${notFound}; }`,
       // Drop the scheme and host, then the query, then the first path segment (the site folder).
@@ -506,7 +546,12 @@ function stubCurl(sb, live, lag) {
       'cat "$file"',
     ].join('\n')
   );
-  return { CURL_ROOT: live, CURL_LAG: String(lag), CURL_COUNTER: join(sb.dir, 'curl-counter') };
+  return {
+    CURL_ROOT: live,
+    CURL_LAG: String(lag),
+    CURL_COUNTER: join(sb.dir, 'curl-counter'),
+    CURL_LOG: join(sb.dir, 'curl-log'),
+  };
 }
 const LIVE_ENV = { SITE_URL: 'https://example.test/MathTS/', ...ID };
 
@@ -523,9 +568,19 @@ bashTest('live check: passes when the root shows the version and /api/ shows the
   try {
     writeSite(sb.dir);
     const live = writeLive(sb);
-    const r = runStep(sb, runOf('deploy', LIVE), { ...LIVE_ENV, ...stubCurl(sb, live, 0) });
+    const r = runStep(sb, runOf('deploy', LIVE), {
+      ...LIVE_ENV,
+      GITHUB_RUN_ATTEMPT: '2',
+      ...stubCurl(sb, live, 0),
+    });
     assert.equal(r.status, 0, r.stdout + r.stderr);
     assert.match(r.stdout, /shows v1\.2\.3 and .*\/api\/ shows 'MathTS API Index'/);
+    // A re-run (run attempt 2) must not ask for the URLs of the first run.
+    const urls = readFileSync(join(sb.dir, 'curl-log'), 'utf8').trim().split('\n');
+    assert.deepEqual(urls, [
+      'https://example.test/MathTS/?run=42-2-1',
+      'https://example.test/MathTS/api/?run=42-2-1',
+    ]);
   } finally {
     sb.done();
   }

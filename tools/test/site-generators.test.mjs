@@ -143,6 +143,28 @@ test('landing takes its version, count and links from its inputs, not from liter
   }
 });
 
+test('landing replaces index.html and functions/ and leaves other files alone', () => {
+  const out = scratch();
+  try {
+    mkdirSync(join(out, 'functions'));
+    mkdirSync(join(out, 'api'));
+    writeFileSync(join(out, 'functions', 'stale-page.html'), 'stale');
+    writeFileSync(join(out, 'api', 'index.html'), 'api index');
+    writeFileSync(join(out, 'notes.txt'), 'keep');
+    const r = run(LANDING, [`--out=${out}`]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.deepEqual(
+      readdirSync(join(out, 'functions')).filter((f) => f === 'stale-page.html'),
+      [],
+      'a stale page is removed'
+    );
+    assert.equal(readFileSync(join(out, 'api', 'index.html'), 'utf8'), 'api index');
+    assert.equal(readFileSync(join(out, 'notes.txt'), 'utf8'), 'keep');
+  } finally {
+    rmSync(out, { recursive: true, force: true });
+  }
+});
+
 test('landing fails when the reference has no export index', () => {
   const dir = scratch();
   try {
