@@ -13134,7 +13134,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 766
+      "loc": 778
     },
     {
       "file": "functions/tests/ws-a-welch-wasm-frame.test.ts",
@@ -15857,7 +15857,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 168
+      "loc": 187
     },
     {
       "file": "tests/docs/readme-fences.test.ts",
