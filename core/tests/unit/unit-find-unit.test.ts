@@ -77,7 +77,7 @@ function sampleOf<T>(items: readonly T[], count: number, rnd: () => number): T[]
   return pool.slice(0, count);
 }
 
-function corpus(): string[] {
+function corpus(): { strings: string[]; fullSize: number } {
   const keys = Object.keys(Unit.UNITS);
   const prefixSymbols = [
     ...new Set(
@@ -125,7 +125,7 @@ function corpus(): string[] {
     }
   }
   const choose = mulberry32(20261109);
-  return [
+  const strings = [
     ...new Set([
       ...always,
       ...sampleOf(valid, SAMPLE_VALID, choose),
@@ -133,6 +133,9 @@ function corpus(): string[] {
       ...sampleOf([...glued], SAMPLE_GLUED, choose),
     ]),
   ];
+  // The full corpus is a set union with no oracle call, so the coverage fraction is cheap.
+  const fullSize = new Set([...always, ...valid, ...invalid, ...glued]).size;
+  return { strings, fullSize };
 }
 
 describe('_findUnit (last-character index)', () => {
@@ -144,7 +147,12 @@ describe('_findUnit (last-character index)', () => {
   it(
     'gives the same unit and prefix as the linear scan, restricted and unrestricted',
     () => {
-      const strings = corpus();
+      const { strings, fullSize } = corpus();
+      // The coverage of the default run, in the test log: how much of the full corpus it checks.
+      console.info(
+        `[unit-oracle] _findUnit: ${strings.length} of ${fullSize} strings ` +
+          `(${((100 * strings.length) / fullSize).toFixed(1)}%)${FULL_CORPUS ? ', full corpus' : ''}`
+      );
       expect(strings.length).toBeGreaterThan(FULL_CORPUS ? 10000 : 5000);
       const mismatches: string[] = [];
       const seen = { prefixed: 0, bare: 0, miss: 0, widened: 0 };

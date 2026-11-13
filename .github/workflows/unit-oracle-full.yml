@@ -1,0 +1,65 @@
+name: Unit oracle (full corpus)
+
+# The two oracle tests in core compare the unit lookup with an exhaustive linear scan:
+# core/tests/unit/unit-find-unit.test.ts (_findUnit) and
+# core/tests/unit/unit-readings-matcher.test.ts (Unit.readings). Every CI run executes a fixed
+# seeded sample of each corpus (about 11% of the 47,532 strings and 25% of the 3,000 tokens),
+# so the run time does not depend on the load of the runner. UNIT_ORACLE_FULL=1 runs the whole
+# corpus. This workflow runs it on demand and once a week, on Bun and on Node.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Monday 06:17 UTC.
+    - cron: '17 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: this workflow only reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  full-oracle:
+    name: Full oracle
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: Check Bun matches the packageManager pin
+        run: node tools/test/check-bun-version.mjs
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The core tests import ../src, so no build is needed. The test log prints the sample
+      # size against the corpus size on a `[unit-oracle]` line.
+      - name: Full oracle (Bun runtime)
+        working-directory: core
+        env:
+          UNIT_ORACLE_FULL: '1'
+        run: bun test --isolate --timeout 120000 tests/unit/unit-find-unit.test.ts tests/unit/unit-readings-matcher.test.ts
+
+      # Plain `node`: a `bun run` script would run vitest on Bun again.
+      - name: Full oracle (Node runtime, vitest)
+        working-directory: core
+        env:
+          UNIT_ORACLE_FULL: '1'
+        run: node ../node_modules/vitest/vitest.mjs run tests/unit/unit-find-unit.test.ts tests/unit/unit-readings-matcher.test.ts

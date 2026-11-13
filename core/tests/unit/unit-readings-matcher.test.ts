@@ -102,7 +102,8 @@ function corpus(count: number): string[] {
 // 750 tokens of the seeded corpus (the generator is sequential, so they are a prefix of the full
 // corpus). `UNIT_ORACLE_FULL=1` runs all 3,000.
 const FULL_CORPUS = process.env.UNIT_ORACLE_FULL === '1';
-const CORPUS_SIZE = FULL_CORPUS ? 3000 : 750;
+const FULL_CORPUS_SIZE = 3000;
+const CORPUS_SIZE = FULL_CORPUS ? FULL_CORPUS_SIZE : 750;
 // The full run is a manual check, so it gets a long timeout. The default run keeps the config timeout.
 const FULL_TIMEOUT = FULL_CORPUS ? 600_000 : undefined;
 
@@ -112,6 +113,11 @@ describe('Unit.readings: the per-token matcher gives the readings of the exhaust
     () => {
       const differences: string[] = [];
       const seen = { readable: 0, ambiguous: 0, raised: 0 };
+      // The coverage of the default run, in the test log: how much of the full corpus it checks.
+      console.info(
+        `[unit-oracle] Unit.readings: ${CORPUS_SIZE} of ${FULL_CORPUS_SIZE} tokens ` +
+          `(${((100 * CORPUS_SIZE) / FULL_CORPUS_SIZE).toFixed(1)}%)${FULL_CORPUS ? ', full corpus' : ''}`
+      );
       for (const token of corpus(CORPUS_SIZE)) {
         const want = reference(token);
         if (want.length > 0) seen.readable++;
