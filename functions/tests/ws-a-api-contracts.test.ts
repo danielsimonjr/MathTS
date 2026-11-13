@@ -569,6 +569,15 @@ describe('#923 — the public mod applies the rule to each element of an array o
     expect(toArray(publicMod(sparseMatrix, dense))).toEqual(
       toArray(factoryModulo(sparseMatrix, dense))
     );
+    // The values are the factory values. The storage is not always the factory storage: a result
+    // with a sparse operand is sparse here, and the factory gives a dense result for
+    // `mod(dense, sparse)` and for `mod(scalar, sparse)`.
+    const storage = (m: unknown): string => (m as { storage(): string }).storage();
+    expect(storage(publicMod(dense, sparseMatrix))).toBe('sparse');
+    expect(storage(publicMod(sparseMatrix, dense))).toBe('sparse');
+    expect(storage(publicMod(3, sparseMatrix))).toBe('sparse');
+    expect(toArray(publicMod(3, sparseMatrix))).toEqual(toArray(factoryModulo(3, sparseMatrix)));
+    expect(toArray(publicMod(0, sparseMatrix))).toEqual(toArray(factoryModulo(0, sparseMatrix)));
   });
 
   it('takes bigint, Fraction and BigNumber elements', () => {
@@ -734,12 +743,15 @@ describe('solveODESystem counts accepted steps, as solveODE does (WS-A)', () => 
     expect(message).not.toMatch(/maxIter/);
   });
 
-  it('the stiffness hint fires on a stiff run and stays silent on a non-stiff one', () => {
+  it('the stiffness hint fires on a stiff run and stays silent on a run that rejects nothing', () => {
     const stiff = messageOf(() => solveODESystem(robertson, [1, 0, 0], [0, 40], { maxSteps: 5 }));
     expect(stiff).toMatch(/solveODESystem RK45: exceeded maxSteps=5 /);
     for (const name of ['BDF', 'Radau', 'Rosenbrock', 'RODAS']) expect(stiff).toContain(name);
     expect(stiff).toMatch(/If the system is stiff/);
 
+    // The hint reads the reject ratio and the step size, so a smooth run that rejects nothing
+    // (three accepted of three attempts) has none. A smooth run that rejects its first attempts
+    // and then takes a small step can still print it: the wording is conditional.
     const smooth = messageOf(() =>
       solveODESystem(oscillator, [1, 0], [0, 100], { maxSteps: 3, tol: 1e-10 })
     );
