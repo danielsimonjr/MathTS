@@ -17,20 +17,27 @@
       "name": "median",
       "source": "src/statistics/median.ts",
       "mathTypedPattern": "return typed(name,",
+      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
       "fallback": ["(...rest: number[]): number;", "(...rest: unknown[]): unknown;"]
     },
     {
       "name": "mode",
       "source": "src/statistics/mode.ts",
       "mathTypedPattern": "return typed(name,",
+      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
       "fallback": ["(...rest: number[]): number[];", "(...rest: unknown[]): unknown;"]
     },
     {
       "name": "mad",
       "source": "src/statistics/mad.ts",
       "mathTypedPattern": "return typed(name,",
+      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
       "fallback": ["(...rest: unknown[]): unknown;"]
     },
-    { "name": "parallelFFT", "source": "src/typed/signal.ts" }
+    {
+      "name": "parallelFFT",
+      "source": "src/typed/signal.ts",
+      "sigTypes": { "Array": "number[]" }
+    }
   ]
 }

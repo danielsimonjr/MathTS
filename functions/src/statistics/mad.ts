@@ -49,7 +49,11 @@ export const createMad = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // mad([a, b, c, d, ...])
-      // A number for a numeric input (NaN when empty). The public overloads declare this result.
+      // A number for a numeric input (NaN when empty). `gen-public-overloads` copies this
+      // annotation into the published `.d.ts` for `number[]`, `number[][]`, `Float64Array` and
+      // the public `Matrix` (numbers only). A BigNumber or Unit input, or a compat matrix
+      // (typed `unknown`), also reaches this signature and returns a BigNumber or a Unit; the
+      // public types send those inputs to the `unknown` rest overload.
       'Array | Matrix': (array: unknown[] | MatrixType): number => _mad(array) as number,
       'Float64Array | Float32Array': (array: FloatTyped): number => _mad(array) as number,
 

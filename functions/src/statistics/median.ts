@@ -190,8 +190,13 @@ export const createMedian = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // median([a, b, c, d, ...])
-      // The public overloads (functions/types) declare these numeric paths as `number`. The
-      // BigNumber, Complex and Unit element paths reach the `unknown` rest fallback instead.
+      // The return annotations are the public contract: `gen-public-overloads` copies them into
+      // the published `.d.ts`. They hold for the types that the overloads name: `number[]`,
+      // `number[][]`, `Float64Array` and the public `Matrix` (a `DenseMatrix` or `SparseMatrix`
+      // from the matrix package, which store numbers only). At run time these signatures also
+      // take BigNumber and Unit elements, and a compat matrix (the `matrix()` result, typed
+      // `unknown`), and then return a BigNumber or a Unit. The public types send those inputs
+      // to the `unknown` rest overload, so the `as number` casts make no claim about them.
       'Array | Matrix': (array: unknown[] | MatrixType): number => _median(array) as number,
       'Float64Array | Float32Array': (array: FloatTyped): number => _median(array) as number,
       'Array | Matrix, Object': (

@@ -371,6 +371,10 @@ function modeOf(arr: ArrayLike<number>): number[] {
 /**
  * Parallel mode with typed-function dispatch
  * Returns the most frequently occurring value(s)
+ *
+ * The result is always a list. An empty input gives `[]` (no value, no mode). The factory `mode`
+ * has a different contract: `number[] | number`, with `NaN` for an empty input. A change of the
+ * empty result here is a breaking change of this function.
  */
 export const parallelStatMode = mathTyped('parallelStatMode', {
   // Number array

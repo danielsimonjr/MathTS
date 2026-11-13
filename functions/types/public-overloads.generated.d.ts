@@ -259,12 +259,12 @@ export interface DetCallable {
 export type PublicDet = DetCallable;
 
 export interface MedianCallable {
-  (a: number[] | Matrix): number;
+  (a: number[] | number[][] | Matrix): number;
   (a: Float64Array | Float32Array): number;
-  (a: number[] | Matrix, b: StatReduceOptions): number;
+  (a: number[] | number[][] | Matrix, b: StatReduceOptions): number;
   (a: Float64Array | Float32Array, b: StatReduceOptions): number;
-  (a: number[] | Matrix, b: number | BigNumber): number | number[];
-  (a: number[] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (a: number[] | number[][] | Matrix, b: number | BigNumber): number | number[];
+  (a: number[] | number[][] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   (...rest: number[]): number;
   (...rest: unknown[]): unknown;
   readonly name: string;
@@ -273,7 +273,7 @@ export interface MedianCallable {
 export type PublicMedian = MedianCallable;
 
 export interface ModeCallable {
-  (a: number[] | Matrix): number[] | number;
+  (a: number[] | number[][] | Matrix): number[] | number;
   (a: Float64Array | Float32Array): number[] | number;
   (...rest: number[]): number[];
   (...rest: unknown[]): unknown;
@@ -283,7 +283,7 @@ export interface ModeCallable {
 export type PublicMode = ModeCallable;
 
 export interface MadCallable {
-  (a: number[] | Matrix): number;
+  (a: number[] | number[][] | Matrix): number;
   (a: Float64Array | Float32Array): number;
   (...rest: unknown[]): unknown;
   readonly name: string;
@@ -292,7 +292,7 @@ export interface MadCallable {
 export type PublicMad = MadCallable;
 
 export interface ParallelFFTCallable {
-  (a: number[] | number[][]): { real: Float64Array; imag: Float64Array; originalLength: number };
+  (a: number[]): { real: Float64Array; imag: Float64Array; originalLength: number };
   (a: Float64Array): Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
