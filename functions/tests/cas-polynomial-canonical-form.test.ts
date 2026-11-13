@@ -7,8 +7,13 @@ import {
   together,
   apart,
   groebnerBasis,
+  collect,
+  minimalPolynomial,
+  casSimplify,
+  simplify,
   evaluate,
 } from '../src/index.js';
+import { integratePolynomial } from '../src/cas/rational-integrate.js';
 import { renderPolynomial } from '../src/cas/render-polynomial.js';
 import { polyFromExpression, polyToString } from '../src/typed/polynomial-ideal.js';
 import {
@@ -127,6 +132,35 @@ describe('#887 one canonical polynomial form', () => {
 
     it('groebnerBasis prints each basis polynomial canonically', () => {
       expect(groebnerBasis(['x^2-y', 'x*y-1'], ['x', 'y'])).toEqual(['x - y^2', 'y^3 - 1']);
+    });
+  });
+
+  describe('the other printers of a polynomial use the same form', () => {
+    it('collect joins a negative term with a minus sign', () => {
+      expect(collect('x^2-3*x+1', 'x')).toBe('x^2 - 3*x + 1');
+      expect(collect('1+x-x^2', 'x')).toBe('-x^2 + x + 1');
+    });
+
+    it('minimalPolynomial prints the primitive polynomial in descending order', () => {
+      expect(minimalPolynomial('sqrt(2)', 'x')).toBe('x^2 - 2');
+      expect(minimalPolynomial('sqrt(3)-1', 'x')).toBe('x^2 + 2*x - 2');
+      expect(minimalPolynomial('1/3', 'x')).toBe('3*x - 1');
+      expect(minimalPolynomial('5', 'x')).toBe('x - 5');
+      expect(minimalPolynomial('-3', 'x')).toBe('x + 3');
+    });
+
+    it('casSimplify and the factory simplify reach the polynomial through expand', () => {
+      // tryPolynomialCanonicalForm calls expand and factor; casSimplify, simplify (algebra) and
+      // the factory simplify (algebra/simplify.ts) all call tryPolynomialCanonicalForm.
+      expect(casSimplify('3+2*x+x^2')).toBe('x^2 + 2*x + 3');
+      expect(casSimplify('x^2+x^2+3')).toBe('2*x^2 + 3');
+      expect(String(simplify('3 + x^2 + 2*x'))).toBe('x ^ 2 + 2 * x + 3');
+    });
+
+    it('integratePolynomial lists the terms by descending degree', () => {
+      // 1 + 2*x + 3*x^2 integrates to x + x^2 + x^3
+      expect(integratePolynomial([1n, 2n, 3n], 'x')).toBe('x^3 + x^2 + x');
+      expect(integratePolynomial([0n, 1n], 'x')).toBe('x^2/2');
     });
   });
 

@@ -7,23 +7,27 @@
  * `pi/6` and `5*pi/6`), a symbolic inverse call otherwise (`sin(x)=1/3` gives `asin(1/3)`
  * and `pi - asin(1/3)`). A periodic `F` also gives the period of the solution set.
  *
+ * The roots are real roots. A value that `F` never takes on the real line (`sin(x) = 2`,
+ * `exp(x) = -1`, `sqrt(x) = -1`) gives no roots.
+ *
+ * Exact means that no digit of the text is a rounded result. A constant is exact when it is a
+ * small fraction, a special value of `sin`/`cos`/`tan`, or a decimal of at most 12 digits that a
+ * person could have typed. The coefficient `p` may also be a rational multiple of `pi`
+ * (`sin(2*pi*x) = 0` gives `0` and `1/2`). Any other constant, such as `sqrt(2)/3` or `pi/4` in
+ * the offset, has no exact text here, and the function returns `null`.
+ *
  * Any other shape, such as `sin(x) = x`, `sin(x)^2 = 1/4` or `sinh(x) = 1`, has no closed form
  * here: the function returns `null`, and the caller decides what to do.
  */
 
-import { parse, evaluate } from '../factories/evaluate.js';
-
-/** The part of a syntax-tree node that the solver reads. */
-interface AstNode {
-  type: string;
-  op?: string;
-  fn?: string | { name?: string };
-  args?: AstNode[];
-  content?: AstNode;
-  value?: unknown;
-  name?: string;
-  toString(): string;
-}
+import {
+  type AstNode,
+  callName,
+  constantValue,
+  containsSymbol,
+  operatorName,
+  parseTree,
+} from './syntax-tree.js';
 
 /** The exact solution set of one equation. */
 export interface ElementarySolution {
@@ -41,6 +45,14 @@ interface Call {
   name: string;
   p: number;
   q: number;
+  /** True when the argument of the call names the constant `pi`. */
+  mentionsPi: boolean;
+}
+
+/** The scale `p` of the argument: `frac`, or `frac * pi` when `pi` is true. */
+interface Scale {
+  frac: Fraction;
+  pi: boolean;
 }
 
 /** `c + k * target`: a value that is linear in one target (a call, or the variable). */
@@ -120,11 +132,26 @@ function toFraction(x: number): Fraction | null {
   return null;
 }
 
-/** A constant as exact text: an integer, a small fraction `n/d`, or the shortest decimal. */
-function constantText(c: number): string {
-  const f = toFraction(c);
-  if (f === null) return String(Number(c.toPrecision(15)));
+/** The most digits of a decimal that counts as typed by a person and not as a rounded result. */
+const MAX_DECIMAL_DIGITS = 12;
+
+/** A fraction as text: `3`, `-1/2`. */
+function fractionText(f: Fraction): string {
   return f[1] === 1 ? String(f[0]) : `${f[0]}/${f[1]}`;
+}
+
+/**
+ * A constant as exact text: an integer, a small fraction `n/d`, or a decimal of at most
+ * {@link MAX_DECIMAL_DIGITS} digits. Returns null for any other value. A value such as
+ * `sqrt(2)/3` has about 16 digits and no small fraction, so no text can state it exactly.
+ */
+function exactText(c: number): string | null {
+  const f = toFraction(c);
+  if (f !== null) return fractionText(f);
+  const text = String(c);
+  if (!/^-?\d*\.\d+$/.test(text)) return null;
+  const digits = text.replace(/[-.]/g, '').replace(/^0+/, '');
+  return digits.length <= MAX_DECIMAL_DIGITS ? text : null;
 }
 
 /** A rational multiple of pi as text: `0`, `pi`, `-pi/6`, `5*pi/6`, `3*pi`. */
@@ -141,24 +168,6 @@ function subtractFrom(whole: number, f: Fraction): Fraction {
   return makeFraction(whole * f[1] - f[0], f[1]);
 }
 
-/** True when `node` holds the variable `v`. */
-function containsVariable(node: AstNode, v: string): boolean {
-  if (node.type === 'SymbolNode') return node.name === v;
-  if (node.content !== undefined && containsVariable(node.content, v)) return true;
-  return (node.args ?? []).some((a) => containsVariable(a, v));
-}
-
-/** The numeric value of a node that has no variable, or null when it is not a real number. */
-function constantValue(node: AstNode): number | null {
-  if (node.type === 'ConstantNode' && typeof node.value === 'number') return node.value;
-  try {
-    const value: unknown = evaluate(node.toString());
-    return typeof value === 'number' && Number.isFinite(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
  * Read `node` as `c + k * target`, where a leaf of the tree (`leaf`) supplies the one target.
  * Sums, differences, negation, and products or quotients with a constant are linear; anything
@@ -169,7 +178,7 @@ function foldLinear<T>(
   v: string,
   leaf: (n: AstNode) => Linear<T> | null
 ): Linear<T> | null {
-  if (!containsVariable(node, v)) {
+  if (!containsSymbol(node, v)) {
     const c = constantValue(node);
     return c === null ? null : { c, k: 0, target: null };
   }
@@ -178,8 +187,7 @@ function foldLinear<T>(
 
   const fold = (n: AstNode) => foldLinear(n, v, leaf);
   const args = node.args;
-  const fn = node.fn;
-  const op = typeof fn === 'string' ? fn : fn?.name;
+  const op = operatorName(node);
   if (args.length === 1) {
     const a = fold(args[0]);
     if (a === null) return null;
@@ -212,14 +220,6 @@ function foldLinear<T>(
   }
 }
 
-/** The name of a function-call node, or null. */
-function callName(node: AstNode): string | null {
-  if (node.type !== 'FunctionNode') return null;
-  const fn = node.fn;
-  if (typeof fn === 'string') return fn;
-  return fn?.name ?? node.name ?? null;
-}
-
 /** The functions the solver can invert. */
 const FORMS: ReadonlySet<string> = new Set(['sin', 'cos', 'tan', 'exp', 'log', 'sqrt', 'abs']);
 
@@ -232,12 +232,17 @@ function readCall(node: AstNode, v: string): Linear<Call> | null {
     if (name === null || !FORMS.has(name) || n.args?.length !== 1) return null;
     const inner = foldLinear(n.args[0], v, symbolLeaf);
     if (inner === null || inner.target === null || inner.k === 0) return null;
-    return { c: 0, k: 1, target: { name, p: inner.k, q: inner.c } };
+    const mentionsPi = containsSymbol(n.args[0], 'pi');
+    return { c: 0, k: 1, target: { name, p: inner.k, q: inner.c, mentionsPi } };
   };
   return foldLinear(node, v, callLeaf);
 }
 
-/** The roots of `F(u) = c` and the period of `F`, in `u`. */
+/**
+ * The roots of `F(u) = c` and the period of `F`, in `u`. Returns null when `c` is neither a
+ * special value nor a constant with exact text (see {@link exactText}), so that no text carries
+ * a rounded digit. Returns no roots when `F` never takes the value `c` on the real line.
+ */
 function solveUnit(name: string, c: number): { roots: UnitRoot[]; period?: Fraction } | null {
   const special = (key: 'asin' | 'acos' | 'atan'): Fraction | null => {
     const hit = SPECIAL_VALUES.find((s) => Math.abs(Math.abs(c) - s.value) < SPECIAL_TOLERANCE);
@@ -247,54 +252,63 @@ function solveUnit(name: string, c: number): { roots: UnitRoot[]; period?: Fract
     if (c >= 0) return angle;
     return key === 'acos' ? subtractFrom(1, angle) : makeFraction(-angle[0], angle[1]);
   };
-  const root = (frac: Fraction | null, generic: string): UnitRoot =>
-    frac ? { frac, text: piMultipleText(frac) } : { frac: null, text: generic };
-  const cText = constantText(c);
+  const text = exactText(c);
   const atOne = Math.abs(Math.abs(c) - 1) < SPECIAL_TOLERANCE;
+  /** The root `inverse(c)`: a multiple of pi for a special value, else the symbolic call. */
+  const principal = (key: 'asin' | 'acos' | 'atan'): UnitRoot | null => {
+    const frac = special(key);
+    if (frac) return { frac, text: piMultipleText(frac) };
+    return text === null ? null : { frac: null, text: `${key}(${text})` };
+  };
+  const plain = (rootText: string): UnitRoot => ({ frac: null, text: rootText });
 
   switch (name) {
     case 'sin': {
-      const r1 = root(special('asin'), `asin(${cText})`);
+      if (Math.abs(c) > 1 && !atOne) return { roots: [] };
+      const r1 = principal('asin');
+      if (r1 === null) return null;
       if (atOne) return { roots: [r1], period: [2, 1] };
-      const r2 = r1.frac
-        ? root(subtractFrom(1, r1.frac), '')
-        : { frac: null, text: `pi - ${r1.text}` };
+      const r2: UnitRoot = r1.frac
+        ? { frac: subtractFrom(1, r1.frac), text: piMultipleText(subtractFrom(1, r1.frac)) }
+        : plain(`pi - ${r1.text}`);
       return { roots: [r1, r2], period: [2, 1] };
     }
     case 'cos': {
-      const r1 = root(special('acos'), `acos(${cText})`);
+      if (Math.abs(c) > 1 && !atOne) return { roots: [] };
+      const r1 = principal('acos');
+      if (r1 === null) return null;
       if (atOne) return { roots: [r1], period: [2, 1] };
-      const r2 = r1.frac
-        ? root(subtractFrom(2, r1.frac), '')
-        : { frac: null, text: `2*pi - ${r1.text}` };
+      const r2: UnitRoot = r1.frac
+        ? { frac: subtractFrom(2, r1.frac), text: piMultipleText(subtractFrom(2, r1.frac)) }
+        : plain(`2*pi - ${r1.text}`);
       return { roots: [r1, r2], period: [2, 1] };
     }
-    case 'tan':
-      return { roots: [root(special('atan'), `atan(${cText})`)], period: [1, 1] };
+    case 'tan': {
+      const r = principal('atan');
+      return r === null ? null : { roots: [r], period: [1, 1] };
+    }
     case 'exp':
-      if (c === 0) return { roots: [] };
-      return { roots: [{ frac: null, text: c === 1 ? '0' : `log(${cText})` }] };
+      if (c <= 0) return { roots: [] };
+      if (Math.abs(c - 1) < SPECIAL_TOLERANCE) return { roots: [plain('0')] };
+      return text === null ? null : { roots: [plain(`log(${text})`)] };
     case 'log':
-      return { roots: [{ frac: null, text: c === 0 ? '1' : c === 1 ? 'e' : `exp(${cText})` }] };
+      if (Math.abs(c) < SPECIAL_TOLERANCE) return { roots: [plain('1')] };
+      if (Math.abs(c - 1) < SPECIAL_TOLERANCE) return { roots: [plain('e')] };
+      return text === null ? null : { roots: [plain(`exp(${text})`)] };
     case 'sqrt': {
       if (c < 0) return { roots: [] };
       const f = toFraction(c);
-      const text = f
-        ? f[1] === 1
-          ? String(f[0] * f[0])
-          : `${f[0] * f[0]}/${f[1] * f[1]}`
-        : constantText(c * c);
-      return { roots: [{ frac: null, text }] };
+      if (f === null) return null;
+      return { roots: [plain(fractionText(makeFraction(f[0] * f[0], f[1] * f[1])))] };
     }
-    case 'abs':
+    case 'abs': {
       if (c < 0) return { roots: [] };
-      if (c === 0) return { roots: [{ frac: null, text: '0' }] };
-      return {
-        roots: [
-          { frac: null, text: constantText(-c) },
-          { frac: null, text: constantText(c) },
-        ],
-      };
+      if (Math.abs(c) < SPECIAL_TOLERANCE) return { roots: [plain('0')] };
+      const positive = exactText(c);
+      const negative = exactText(-c);
+      if (positive === null || negative === null) return null;
+      return { roots: [plain(negative), plain(positive)] };
+    }
     default:
       return null;
   }
@@ -307,32 +321,76 @@ function plainNumber(text: string): number | null {
   return m[2] === undefined ? Number(m[1]) : Number(m[1]) / Number(m[2]);
 }
 
-/** Map the root `u` of `F(u) = c` back to `x`, where `u = p*x + q`. */
-function mapToVariable(root: UnitRoot, p: number, q: number): string {
-  const pFraction = toFraction(p);
-  if (root.frac && q === 0 && pFraction) {
-    return piMultipleText(makeFraction(root.frac[0] * pFraction[1], root.frac[1] * pFraction[0]));
+/** True when `text` has a `+` or `-` outside brackets, apart from a leading sign. */
+function hasTopLevelSum(text: string): boolean {
+  let depth = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (depth === 0 && i > 0 && (ch === '+' || ch === '-')) return true;
+  }
+  return false;
+}
+
+/**
+ * Read the coefficient `p` of the argument as a fraction, or as a fraction times `pi` when the
+ * argument names `pi`. Returns null for any other value of `p` (`sqrt(2)*x`, `3.14159*x`), which
+ * has no exact text.
+ */
+function readScale(p: number, mentionsPi: boolean): Scale | null {
+  if (mentionsPi) {
+    const ratio = toFraction(p / Math.PI);
+    if (ratio !== null && ratio[0] !== 0) return { frac: ratio, pi: true };
+  }
+  const frac = toFraction(p);
+  return frac !== null && frac[0] !== 0 ? { frac, pi: false } : null;
+}
+
+/**
+ * Map the root `u` of `F(u) = c` back to `x`, where `u = p*x + q`. Returns null when the text
+ * of a constant would carry a rounded digit.
+ */
+function mapToVariable(root: UnitRoot, scale: Scale, q: number): string | null {
+  const p = scale.frac[0] / scale.frac[1];
+  if (root.frac && q === 0) {
+    // u = t*pi, so x = t*pi / p. With p = r*pi the factors of pi cancel.
+    const t = makeFraction(root.frac[0] * scale.frac[1], root.frac[1] * scale.frac[0]);
+    return scale.pi ? fractionText(t) : piMultipleText(t);
   }
   const number = plainNumber(root.text);
-  if (number !== null) return constantText((number - q) / p);
+  if (number !== null && !scale.pi) return exactText((number - q) / p);
+
   let numerator: string;
-  if (q === 0) numerator = root.text;
-  else if (root.text === '0') numerator = constantText(-q);
-  else numerator = `${root.text} ${q > 0 ? '-' : '+'} ${constantText(Math.abs(q))}`;
-  if (p === 1) return numerator;
-  const wrapped = /^[\w.]+$/.test(numerator) ? numerator : `(${numerator})`;
-  if (p === -1) return `-${wrapped}`;
-  const divisor = constantText(Math.abs(p));
-  const divisorText = divisor.includes('/') ? `(${divisor})` : divisor;
-  return `${p < 0 ? '-' : ''}${wrapped}/${divisorText}`;
+  if (q === 0) {
+    numerator = root.text;
+  } else if (root.text === '0') {
+    const shift = exactText(-q);
+    if (shift === null) return null;
+    numerator = shift;
+  } else {
+    const shift = exactText(Math.abs(q));
+    if (shift === null) return null;
+    numerator = `${root.text} ${q > 0 ? '-' : '+'} ${shift}`;
+  }
+  // x = numerator / |p| with |p| = n/d (times pi when scale.pi): write d*numerator / n, or
+  // d*numerator / (n*pi), so that no quotient of quotients such as `a/(1/2)` appears.
+  const [n, d] = [Math.abs(scale.frac[0]), scale.frac[1]];
+  const divisor = scale.pi ? (n === 1 ? 'pi' : `(${n}*pi)`) : n === 1 ? '' : String(n);
+  const unit = d === 1 && divisor === '';
+  const wrap = !unit && (hasTopLevelSum(numerator) || (d !== 1 && numerator.startsWith('-')));
+  const top = wrap ? `(${numerator})` : numerator;
+  const product = d === 1 ? top : `${d}*${top}`;
+  const body = divisor === '' ? product : `${product}/${divisor}`;
+  if (scale.frac[0] > 0) return body;
+  if (hasTopLevelSum(body)) return `-(${body})`;
+  return body.startsWith('-') ? body.slice(1) : `-${body}`;
 }
 
 /** The period `base * pi / |p|` as text. */
-function periodText(base: Fraction, p: number): string {
-  const pFraction = toFraction(Math.abs(p));
-  if (pFraction)
-    return piMultipleText(makeFraction(base[0] * pFraction[1], base[1] * pFraction[0]));
-  return `${piMultipleText(base)}/${constantText(Math.abs(p))}`;
+function periodText(base: Fraction, scale: Scale): string {
+  const ratio = makeFraction(base[0] * scale.frac[1], base[1] * Math.abs(scale.frac[0]));
+  return scale.pi ? fractionText(ratio) : piMultipleText(ratio);
 }
 
 /**
@@ -340,29 +398,34 @@ function periodText(base: Fraction, p: number): string {
  *
  * @param expr - The expression to set to zero, as text.
  * @param variable - The variable to solve for.
- * @returns The exact roots and, for a periodic `F`, the period; or `null` when `expr` has
- *   another shape.
+ * @returns The exact real roots and, for a periodic `F`, the period; or `null` when `expr` has
+ *   another shape, or when a constant of it has no exact text.
  *
  * @example
  * solveElementary('sin(x)', 'x');     // { roots: ['0', 'pi'], period: '2*pi' }
  * solveElementary('2*cos(x) - 1', 'x'); // { roots: ['pi/3', '5*pi/3'], period: '2*pi' }
+ * solveElementary('sin(2*pi*x)', 'x'); // { roots: ['0', '1/2'], period: '1' }
  * solveElementary('sin(x) - x', 'x'); // null
+ * solveElementary('sin(x) - sqrt(2)/3', 'x'); // null
  */
 export function solveElementary(expr: string, variable: string): ElementarySolution | null {
-  let node: AstNode;
-  try {
-    node = parse(expr) as unknown as AstNode;
-  } catch {
-    return null;
-  }
+  const node = parseTree(expr);
+  if (node === null) return null;
   const linear = readCall(node, variable);
   if (linear === null || linear.target === null || linear.k === 0) return null;
-  const { name, p, q } = linear.target;
+  const { name, p, q, mentionsPi } = linear.target;
+  const scale = readScale(p, mentionsPi);
+  if (scale === null) return null;
+  if (q !== 0 && exactText(Math.abs(q)) === null) return null;
   const unit = solveUnit(name, -linear.c / linear.k);
   if (unit === null) return null;
-  const solution: ElementarySolution = {
-    roots: unit.roots.map((r) => mapToVariable(r, p, q)),
-  };
-  if (unit.period) solution.period = periodText(unit.period, p);
+  const roots: string[] = [];
+  for (const root of unit.roots) {
+    const text = mapToVariable(root, scale, q);
+    if (text === null) return null;
+    roots.push(text);
+  }
+  const solution: ElementarySolution = { roots };
+  if (unit.period) solution.period = periodText(unit.period, scale);
   return solution;
 }

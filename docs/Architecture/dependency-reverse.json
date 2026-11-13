@@ -1730,7 +1730,7 @@
     ],
     "functions/src/factories/evaluate.ts": [
       "functions/src/cas-integration.ts",
-      "functions/src/cas/elementary-solve.ts",
+      "functions/src/cas/syntax-tree.ts",
       "functions/src/help.ts",
       "functions/src/index.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
@@ -1740,6 +1740,8 @@
     "functions/src/cas/render-polynomial.ts": [
       "functions/src/cas-integration.ts",
       "functions/src/cas/layer3.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/typed/factorization/multi-poly.ts",
       "functions/src/typed/polynomial-ideal.ts"
     ],
@@ -2153,6 +2155,10 @@
     ],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
+    "functions/src/cas/syntax-tree.ts": [
+      "functions/src/cas/elementary-solve.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/typed/factorization/integer-poly.ts": [
       "functions/src/cas/layer3.ts",
       "functions/src/cas/rat.ts",
@@ -2540,7 +2546,10 @@
       "functions/src/probability/combinationsWithRep.ts",
       "functions/src/probability/permutations.ts"
     ],
-    "functions/src/plain/number/arithmetic.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/arithmetic.ts": [
+      "functions/src/plain/number/index.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/plain/number/bitwise.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/combinations.ts": [
       "functions/src/plain/number/index.ts",
