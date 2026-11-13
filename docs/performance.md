@@ -40,9 +40,11 @@ Dispatch decisions for `functions` WASM bridges come from **Node**, not Bun:
 node tools/benchmark/wasm/run-node.mjs opt-in
 ```
 
-Run twice; a row that flips between runs is noise. A dated functions snapshot is in
-`docs/BENCHMARK_RESULTS.md` (2026-06-27); it predates the 2026-09-26 `policy.ts`
-bands.
+Run twice; a row that flips between runs is noise. The tables of the public call after
+`await loadWasm()` are in `docs/BENCHMARK_RESULTS.md`. The script
+`tools/benchmark/wasm/gen-benchmark-results.mjs` writes them from a recorded
+measurement (`--measure` records, `--render` writes, `--check` compares), so no cell
+of those tables is typed by hand.
 
 Root scripts (Bun/JSC — useful for smoke, not dispatch policy):
 

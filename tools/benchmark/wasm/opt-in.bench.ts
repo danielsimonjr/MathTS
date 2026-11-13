@@ -23,10 +23,18 @@
  *
  * Run on V8, twice (AGENTS.md benchmarking rules 7, 8 and 10):
  *   node tools/benchmark/wasm/run-node.mjs opt-in
+ *
+ * By default the bench overrides the dispatch policy, so every kernel runs above its own
+ * threshold: that measures what a kernel can do, and it is how `policy.ts` is derived. With
+ * `--public` the policy stays as shipped, so the loaded column is what a consumer gets from
+ * `await loadWasm()` and the public call: a call outside the policy band takes the JavaScript
+ * path in both columns. `--sizes=a,b,c` replaces the sizes of every selected case, and the
+ * run ends with one `PUBLIC_CALL_JSON` line that `tools/benchmark/wasm/gen-benchmark-results.mjs`
+ * renders into `docs/BENCHMARK_RESULTS.md`.
  */
 import * as F from '../../../functions/src/index.js';
 import { loadWasm, wasmLoader } from '../../../functions/src/wasm/WasmLoader.js';
-import { overrideWasmPolicy } from '../../../functions/src/wasm/policy.js';
+import { overrideWasmPolicy, wasmDispatchPolicy } from '../../../functions/src/wasm/policy.js';
 import { WASM_ELEMENTWISE_THRESHOLD } from '../../../functions/src/wasm/elementwise/wasm-bridge.js';
 import { WASM_SPECIAL_THRESHOLD } from '../../../functions/src/wasm/special/wasm-bridge.js';
 import { WASM_SORT_THRESHOLD } from '../../../functions/src/wasm/sort/wasm-bridge.js';
@@ -461,24 +469,33 @@ interface Row {
 
 /** Times the selected benchmark cases with the WASM tier off and on, then prints a comparison table. */
 export async function main(): Promise<void> {
-  const only = process.argv.slice(2).filter((a) => !a.startsWith('-'));
+  const args = process.argv.slice(2);
+  const publicCall = args.includes('--public');
+  const sizesArg = args.find((a) => a.startsWith('--sizes='));
+  const sizesOverride = sizesArg
+    ? sizesArg.slice('--sizes='.length).split(',').filter(Boolean).map(Number)
+    : null;
+  const only = args.filter((a) => !a.startsWith('-'));
   const selected = only.length ? cases.filter((c) => only.includes(c.name)) : cases;
   if (!(await loadWasm())) throw new Error('opt-in bench: loadWasm() failed; build first');
   // Measure what each kernel can do, not what the dispatch policy currently allows: the
-  // policy (functions/src/wasm/policy.ts) is derived from these numbers.
-  const restorePolicy = overrideWasmPolicy({ '*': { min: 0 } });
+  // policy (functions/src/wasm/policy.ts) is derived from these numbers. `--public` keeps the
+  // shipped policy, so the rows are what a consumer sees.
+  const restorePolicy = publicCall ? () => {} : overrideWasmPolicy({ '*': { min: 0 } });
   const rows: Row[] = [];
   console.log(
-    'loadWasm() opt-in: public API, tier off vs on (interleaved). ratio = on/off (< 1: loading helps).'
+    publicCall
+      ? 'loadWasm() public call, shipped dispatch policy: tier off vs on (interleaved). ratio = on/off (< 1: loading helps).'
+      : 'loadWasm() opt-in: public API, tier off vs on (interleaved). ratio = on/off (< 1: loading helps).'
   );
   for (const c of selected) {
     console.log(`\n${c.name} (WASM at n >= ${c.threshold})`);
     console.log('       n        off ms       on ms   ratio   kernels called');
-    for (const n of c.sizes) {
+    for (const n of sizesOverride ?? c.sizes) {
       const input = c.prepare(n);
       const call = () => c.call(input);
       const kernels = await kernelsCalled(call);
-      if (n >= c.threshold && kernels.length === 0) {
+      if (!publicCall && n >= c.threshold && kernels.length === 0) {
         throw new Error(`opt-in bench: ${c.name} at n=${n} did not reach WASM once loaded`);
       }
       setTier(false);
@@ -506,6 +523,10 @@ export async function main(): Promise<void> {
     }
   }
   console.log(`\nOPT_IN_JSON ${JSON.stringify(rows)}`);
+  if (publicCall) {
+    const meta = { node: process.version, platform: process.platform, arch: process.arch };
+    console.log(`PUBLIC_CALL_JSON ${JSON.stringify({ meta, policy: wasmDispatchPolicy(), rows })}`);
+  }
   restorePolicy();
   await computePool.terminate();
 }

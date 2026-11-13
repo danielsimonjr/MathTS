@@ -172,6 +172,10 @@ jobs:
       - name: Scalar-search harness tests
         run: node --test tools/test/scalar-search-harness.test.mjs
 
+      # docs/BENCHMARK_RESULTS.md must be the render of docs/benchmarks/wasm-public-call.json.
+      - name: Benchmark results generator tests
+        run: node --test tools/test/gen-benchmark-results.test.mjs
+
       # Allocation-free fixed-size kernels (functions/src/geometry/kernels.generated.ts). The
       # generator check needs no build; the zero-allocation test imports functions/dist and
       # runs on Node with --expose-gc, so it is a direct `node` call, not a vitest file.

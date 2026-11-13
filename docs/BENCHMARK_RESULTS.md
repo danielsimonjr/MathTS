@@ -8,27 +8,118 @@ This document presents the performance comparison between JavaScript, WebAssembl
 
 ## Live dispatch (`functions` package, after `loadWasm()`)
 
-Authoritative bands: `functions/src/wasm/policy.ts` (`wasmPolicyAllows`). Measured
-2026-09-26 on Node 22 (V8); re-measure with two runs of
-`node tools/benchmark/wasm/run-node.mjs opt-in` before changing an entry.
+Authoritative bands: `functions/src/wasm/policy.ts` (`wasmPolicyAllows`). The two tables
+of this section are written by `tools/benchmark/wasm/gen-benchmark-results.mjs` from
+`docs/benchmarks/wasm-public-call.json`. Do not edit the text between the `bench:begin`
+and `bench:end` markers: change the measurement, then run the generator.
 
-| Policy key (AS export)                             | Band (`min` ≤ n, optional `max`) |
-| -------------------------------------------------- | -------------------------------- |
-| `array_abs_ptr`                                    | n ≥ 1_024                        |
-| `array_log10_ptr`                                  | n ≥ 1_024                        |
-| `array_sin_ptr`                                    | 16_384 ≤ n < 65_536 (G26 #711)   |
-| `array_log1p_ptr`                                  | 1_024 ≤ n < 16_384               |
-| `array_cos_ptr`                                    | n ≥ 16_384                       |
-| `array_atanh_ptr`                                  | n ≥ 16_384                       |
-| `array_log_ptr`                                    | n ≥ 16_384                       |
-| `array_sec_ptr`                                    | 16_384 ≤ n < 1_048_576           |
-| `fused_chain`                                      | n ≥ 1_024                        |
-| `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64` | n ≥ 1_024                        |
-| `lgamma_f64`, `sort_f64`                           | n ≥ 1_048_576                    |
+- Measure again: `bun run build`, then `node tools/benchmark/wasm/gen-benchmark-results.mjs --measure`.
+  Run it twice. A second run goes to a second file with `--data FILE --doc FILE`;
+  `docs/benchmarks/wasm-public-call-run2.json` is the second run of the table below, and a row
+  whose ratio differs between the two runs is noise.
+- Render only: `node tools/benchmark/wasm/gen-benchmark-results.mjs --render`.
+- Check the file against its record: `node tools/benchmark/wasm/gen-benchmark-results.mjs --check`.
+
+### Dispatch bands
+
+<!-- bench:begin policy -->
+
+Rendered from `wasmDispatchPolicy()` as it was during the measurement (2026-11-13,
+Node 26.13.0, win32 x64). The authority is
+`functions/src/wasm/policy.ts`; a kernel with no row stays on JavaScript after `loadWasm()`.
+
+| Policy key (AS export) | Band (`min` ≤ n, optional `max`) |
+| ---------------------- | -------------------------------- |
+| `array_abs_ptr`        | n ≥ 1_024                        |
+| `array_atanh_ptr`      | n ≥ 16_384                       |
+| `array_cos_ptr`        | n ≥ 16_384                       |
+| `array_log10_ptr`      | n ≥ 1_024                        |
+| `array_log1p_ptr`      | 1_024 ≤ n < 16_384               |
+| `array_log_ptr`        | n ≥ 16_384                       |
+| `array_sec_ptr`        | 16_384 ≤ n < 1_048_576           |
+| `array_sin_ptr`        | 16_384 ≤ n < 65_536              |
+| `cheb_fit_f64`         | n ≥ 1_024                        |
+| `fused_chain`          | n ≥ 1_024                        |
+| `legendre_fit_f64`     | n ≥ 1_024                        |
+| `lgamma_f64`           | n ≥ 1_048_576                    |
+| `poly_fit_f64`         | n ≥ 1_024                        |
+| `sort_f64`             | n ≥ 1_048_576                    |
+
+<!-- bench:end policy -->
 
 Kernels without a row (Bessel, Airy, elliptic, Carlson, Welch/Goertzel/chirp-Z,
 divided differences, polynomial division, bitwise, and others listed in the policy
 header) stay on JavaScript even when the module is loaded.
+
+### Public call after `loadWasm()` (shipped policy)
+
+Every row calls the public function on a `Float64Array`. The script switches the tier off and on
+inside one process and alternates the repetitions. The ratio is `loaded / unloaded`, so a ratio
+below 1 means that `await loadWasm()` makes the call faster. A call outside its band runs the
+JavaScript path in both tiers, so its ratio is 1 within the noise of the run, and the last
+column says `no`. The column `Max rel. diff` is the largest relative difference between the
+two tiers.
+
+<!-- bench:begin public-call -->
+
+Measured 2026-11-13 on Node 26.13.0 (V8), win32 x64.
+
+| Call  | n         | Unloaded (ms) | Loaded (ms) | Ratio | Max rel. diff | WASM ran             |
+| ----- | --------- | ------------- | ----------- | ----- | ------------- | -------------------- |
+| `sin` | 16_384    | 0.352         | 0.312       | 0.88  | 1.1e-16       | yes                  |
+| `sin` | 131_072   | 2.411         | 2.462       | 1.02  | 0             | no (JavaScript path) |
+| `sin` | 1_048_576 | 22.269        | 20.034      | 0.90  | 0             | no (JavaScript path) |
+| `cos` | 16_384    | 0.723         | 0.327       | 0.45  | 1.1e-16       | yes                  |
+| `cos` | 131_072   | 7.906         | 2.551       | 0.32  | 1.1e-16       | yes                  |
+| `cos` | 1_048_576 | 51.083        | 22.501      | 0.44  | 1.1e-16       | yes                  |
+| `tan` | 16_384    | 1.338         | 1.393       | 1.04  | 0             | no (JavaScript path) |
+| `tan` | 131_072   | 7.194         | 7.255       | 1.01  | 0             | no (JavaScript path) |
+| `tan` | 1_048_576 | 72.211        | 75.600      | 1.05  | 0             | no (JavaScript path) |
+| `abs` | 16_384    | 0.493         | 0.126       | 0.26  | 0             | yes                  |
+| `abs` | 131_072   | 5.006         | 0.765       | 0.15  | 0             | yes                  |
+| `abs` | 1_048_576 | 31.797        | 5.171       | 0.16  | 0             | yes                  |
+| `exp` | 16_384    | 1.442         | 1.435       | 0.99  | 0             | no (JavaScript path) |
+| `exp` | 131_072   | 6.903         | 6.530       | 0.95  | 0             | no (JavaScript path) |
+| `exp` | 1_048_576 | 56.217        | 57.800      | 1.03  | 0             | no (JavaScript path) |
+| `log` | 16_384    | 0.714         | 0.406       | 0.57  | 2.2e-16       | yes                  |
+| `log` | 131_072   | 6.280         | 3.181       | 0.51  | 2.2e-16       | yes                  |
+| `log` | 1_048_576 | 58.207        | 31.673      | 0.54  | 2.2e-16       | yes                  |
+
+<!-- bench:end public-call -->
+
+### The kernel on its own (dispatch policy overridden)
+
+The same calls with the dispatch policy overridden, so the AssemblyScript kernel runs at every
+size. These rows show what a kernel can do. A consumer does not get these numbers, because the
+dispatch bands above decide which calls reach the kernel. The two passes run in separate
+processes, so compare a ratio only with the unloaded time of its own table.
+
+<!-- bench:begin kernel-call -->
+
+Measured 2026-11-13 on Node 26.13.0 (V8), win32 x64.
+
+| Call  | n         | Unloaded (ms) | Loaded (ms) | Ratio | Max rel. diff |
+| ----- | --------- | ------------- | ----------- | ----- | ------------- |
+| `sin` | 16_384    | 0.486         | 0.427       | 0.88  | 1.1e-16       |
+| `sin` | 131_072   | 3.706         | 3.847       | 1.04  | 1.1e-16       |
+| `sin` | 1_048_576 | 36.298        | 25.979      | 0.72  | 1.1e-16       |
+| `cos` | 16_384    | 1.076         | 0.453       | 0.42  | 1.1e-16       |
+| `cos` | 131_072   | 7.514         | 2.746       | 0.37  | 1.1e-16       |
+| `cos` | 1_048_576 | 90.687        | 25.245      | 0.28  | 1.1e-16       |
+| `tan` | 16_384    | 1.915         | 0.954       | 0.50  | 0             |
+| `tan` | 131_072   | 15.346        | 7.400       | 0.48  | 0             |
+| `tan` | 1_048_576 | 127.947       | 53.422      | 0.42  | 0             |
+| `abs` | 16_384    | 0.769         | 0.178       | 0.23  | 0             |
+| `abs` | 131_072   | 4.069         | 0.902       | 0.22  | 0             |
+| `abs` | 1_048_576 | 86.732        | 7.736       | 0.09  | 0             |
+| `exp` | 16_384    | 1.820         | 0.937       | 0.51  | 1.6e-16       |
+| `exp` | 131_072   | 12.112        | 5.443       | 0.45  | 2.0e-16       |
+| `exp` | 1_048_576 | 116.359       | 40.022      | 0.34  | 2.0e-16       |
+| `log` | 16_384    | 0.892         | 0.490       | 0.55  | 2.2e-16       |
+| `log` | 131_072   | 11.945        | 6.049       | 0.51  | 2.2e-16       |
+| `log` | 1_048_576 | 102.640       | 36.265      | 0.35  | 2.2e-16       |
+
+<!-- bench:end kernel-call -->
 
 ---
 
@@ -50,22 +141,12 @@ Reproduce: `npm run bench:wasm` (or `bench:elementwise` / `bench:special` /
 **Environment (this snapshot):** Node v24.18.0, win32 x64. These are
 hardware-specific — re-run on your target machine for authoritative figures.
 
-### Elementwise transcendentals (AS `array_<op>_ptr` vs `Math.*`)
+### Elementwise transcendentals
 
-| op                  | n = 16,384 | n = 131,072 | n = 1e6    |
-| ------------------- | ---------- | ----------- | ---------- |
-| abs                 | 1.52x (JS) | 1.15x (JS)  | 1.15x (JS) |
-| sin                 | 0.43x      | 0.63x       | 0.32x      |
-| cos                 | 0.46x      | 0.44x       | 0.46x      |
-| tan                 | 0.71x      | 0.42x       | 0.66x      |
-| exp                 | 0.54x      | 0.47x       | 0.49x      |
-| log                 | 0.82x      | 0.47x       | 0.50x      |
-| sinh                | 0.60x      | 0.70x       | 0.61x      |
-| tanh                | 0.69x      | 0.52x       | 0.55x      |
-| fusion[sin→cos→exp] | 0.99x      | 0.94x       | 0.78x      |
-
-maxdiff ≤ 4.44e-16 across all of the above. `abs` is the one elementwise op
-where JS wins above ~16K (V8 hardware abs beats wasm+copy) — included honestly.
+The elementwise rows of this suite timed one AS kernel against `Math.*` on its own. They are not
+kept: a consumer calls the public function after `loadWasm()`, and the tables in
+[Live dispatch](#live-dispatch-functions-package-after-loadwasm) time that call, with and
+without the dispatch policy.
 
 ### Special functions (AS managed kernels vs JS scalars)
 
