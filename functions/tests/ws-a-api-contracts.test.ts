@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { mod, lcm, evaluate, bignumber, fraction, solveODE } from '@danielsimonjr/mathts-functions';
+import type { SolveODESolution } from '@danielsimonjr/mathts-functions';
+import {
+  mod,
+  factory_mod,
+  lcm,
+  evaluate,
+  bignumber,
+  fraction,
+  matrix,
+  sparse,
+  solveODE,
+} from '@danielsimonjr/mathts-functions';
 import { mod as arithmeticMod } from '@danielsimonjr/mathts-arithmetic';
 import { create, all } from '@danielsimonjr/mathts-compat';
 import {
@@ -200,7 +211,7 @@ describe('#899 — Distribution.sample(n)', () => {
   });
 
   it('every distribution factory returns n values from sample(n)', () => {
-    const factories: Array<[string, { sample: (n: number) => unknown }]> = [
+    const factories: Array<[string, { sample: { (): unknown; (n: number): unknown } }]> = [
       ['normalDist', normalDist(0, 1)],
       ['betaDist', betaDist(2, 3)],
       ['binomialDist', binomialDist(10, 0.5)],
@@ -446,8 +457,167 @@ describe('#923 — mod(x, 0) returns x (mathjs rule), on every path', () => {
   });
 
   it('BigNumber and Fraction zero divisor return the dividend', () => {
-    expect(mod(bignumber(10), bignumber(0)).toString()).toBe('10');
-    expect(mod(fraction(10), fraction(0)).toString()).toBe('10');
+    expect(String(mod(bignumber(10), bignumber(0)))).toBe('10');
+    expect(String(mod(fraction(10), fraction(0)))).toBe('10');
+  });
+});
+
+describe('#923 — the public mod applies the rule to each element of an array or a matrix', () => {
+  type Modulo = (a: unknown, b: unknown) => unknown;
+  const publicMod = mod as unknown as Modulo;
+  const factoryModulo = factory_mod as unknown as Modulo;
+  const toArray = (m: unknown): unknown => (m as { toArray(): unknown }).toArray();
+
+  it('mod([10, 20], 0) returns [10, 20] on the public and the factory function', () => {
+    expect(publicMod([10, 20], 0)).toEqual([10, 20]);
+    expect(factoryModulo([10, 20], 0)).toEqual([10, 20]);
+    expect(evaluate('mod([10, 20], 0)')).toEqual([10, 20]);
+    expect((arithmeticMod as unknown as Modulo)([10, 20], 0)).toEqual([10, 20]);
+  });
+
+  it('takes an array and a scalar in either order, and two arrays of the same shape', () => {
+    expect(publicMod([10, -7, 5.5], 3)).toEqual([1, 2, 2.5]);
+    expect(publicMod(10, [3, 4, 0])).toEqual([1, 2, 10]);
+    expect(
+      publicMod(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [
+          [2, 2],
+          [2, 0],
+        ]
+      )
+    ).toEqual([
+      [1, 0],
+      [1, 4],
+    ]);
+    expect(publicMod([], 3)).toEqual([]);
+  });
+
+  it('gives the factory result for every pair of a grid of integers and halves', () => {
+    // The scalar kernels differ in the sign of a zero (`mod(0, -4)` is -0 here and 0 in the
+    // factory), so the values are compared as numbers: `x + 0` turns -0 into 0.
+    const plain = (r: unknown): unknown => (r as number[]).map((x) => x + 0);
+    const values = [-9, -7.5, -3, -1, 0, 1, 2, 3, 7.5, 10, 25];
+    const divisors = [-4, -2, -0.5, 0, 0.5, 3, 7];
+    for (const d of divisors) {
+      expect(plain(publicMod(values, d)), `array mod ${d}`).toEqual(
+        plain(factoryModulo(values, d))
+      );
+      expect(plain(publicMod(d, values)), `${d} mod array`).toEqual(
+        plain(factoryModulo(d, values))
+      );
+    }
+    const sameShape = values.map((_, i) => divisors[i % divisors.length]);
+    expect(plain(publicMod(values, sameShape))).toEqual(plain(factoryModulo(values, sameShape)));
+  });
+
+  it('keeps the matrix type and the storage, and gives the factory values', () => {
+    const dense = matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const sparseMatrix = sparse([
+      [5, 0],
+      [0, 7],
+    ]);
+    const r1 = publicMod(dense, 3) as { storage(): string };
+    expect(r1.storage()).toBe('dense');
+    expect(toArray(r1)).toEqual(toArray(factoryModulo(dense, 3)));
+    const r2 = publicMod(3, dense) as { storage(): string };
+    expect(toArray(r2)).toEqual(toArray(factoryModulo(3, dense)));
+    const r3 = publicMod(sparseMatrix, 3) as { storage(): string };
+    expect(r3.storage()).toBe('sparse');
+    expect(toArray(r3)).toEqual(toArray(factoryModulo(sparseMatrix, 3)));
+    const pair = publicMod(dense, dense) as { storage(): string };
+    expect(pair.storage()).toBe('dense');
+    expect(toArray(pair)).toEqual(toArray(factoryModulo(dense, dense)));
+    const sparsePair = publicMod(sparseMatrix, sparseMatrix) as { storage(): string };
+    expect(sparsePair.storage()).toBe('sparse');
+    expect(toArray(sparsePair)).toEqual(toArray(factoryModulo(sparseMatrix, sparseMatrix)));
+    const sameShape = [
+      [2, 0],
+      [5, 3],
+    ];
+    expect(toArray(publicMod(dense, sameShape))).toEqual(toArray(factoryModulo(dense, sameShape)));
+    // A matrix operand gives a matrix, whichever side the plain array is on.
+    const mixed = publicMod([[5, 6]], matrix([[4, 0]])) as { storage(): string };
+    expect(mixed.storage()).toBe('dense');
+    expect(toArray(mixed)).toEqual([[1, 6]]);
+    expect(toArray(publicMod(matrix([[5, 6]]), [[4, 0]]))).toEqual([[1, 6]]);
+    const rightSparse = sparse([[4, 0]]);
+    expect(toArray(publicMod([[5, 0]], rightSparse))).toEqual(
+      toArray(factoryModulo([[5, 0]], rightSparse))
+    );
+  });
+
+  it('takes a dense matrix and a sparse matrix in either order', () => {
+    const dense = matrix([
+      [5, 6],
+      [7, 8],
+    ]);
+    const sparseMatrix = sparse([
+      [3, 0],
+      [0, 4],
+    ]);
+    expect(toArray(publicMod(dense, sparseMatrix))).toEqual(
+      toArray(factoryModulo(dense, sparseMatrix))
+    );
+    expect(toArray(publicMod(sparseMatrix, dense))).toEqual(
+      toArray(factoryModulo(sparseMatrix, dense))
+    );
+  });
+
+  it('takes bigint, Fraction and BigNumber elements', () => {
+    expect(publicMod([7n, -7n, 5n], 3n)).toEqual([1n, 2n, 2n]);
+    expect(publicMod(7n, [3n, 0n])).toEqual([1n, 7n]);
+    const f = publicMod([fraction(7), fraction(-7)], fraction(3)) as { toString(): string }[];
+    expect(f.map(String)).toEqual(['1', '2']);
+    const b = publicMod([bignumber(7), bignumber(-7)], bignumber(0)) as { toString(): string }[];
+    expect(b.map(String)).toEqual(['7', '-7']);
+    const s = publicMod(fraction(7), [fraction(3), fraction(0)]) as { toString(): string }[];
+    expect(s.map(String)).toEqual(['1', '7']);
+  });
+
+  it('works on an array of depth three, where the factory matrix class keeps only two dimensions', () => {
+    expect(
+      publicMod(
+        [
+          [
+            [5, 6],
+            [7, 8],
+          ],
+        ],
+        4
+      )
+    ).toEqual([
+      [
+        [1, 2],
+        [3, 0],
+      ],
+    ]);
+    expect(
+      publicMod(
+        [
+          [
+            [5, 6],
+            [7, 8],
+          ],
+        ],
+        0
+      )
+    ).toEqual([
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ]);
+  });
+
+  it('throws a RangeError for arrays of different lengths, as add and subtract do', () => {
+    expect(() => publicMod([1, 2, 3], [1, 2])).toThrow(RangeError);
   });
 });
 
@@ -474,13 +644,20 @@ describe('ODE maxIter message names the stiff drivers neutrally (WS-A)', () => {
 
 describe('solveODE sol.y layout (WS-A documentation)', () => {
   it('sol.y[i] is the state vector (length of y0) at sol.t[i]', () => {
-    const sol = solveODE((_t: number, y: number[]) => [y[1], -y[0]], [0, 1], [1, 0], { tol: 1e-8 });
-    expect(sol.y.length).toBe(sol.t.length);
-    for (const row of sol.y) expect(row.length).toBe(2);
+    // The callback takes `y` as the declared `MathNumericType | MathArray`; the state is an array.
+    const oscillator = (_t: unknown, y: unknown): number[] => {
+      const v = y as number[];
+      return [v[1], -v[0]];
+    };
+    const sol: SolveODESolution = solveODE(oscillator, [0, 1], [1, 0], { tol: 1e-8 });
+    const t = sol.t as number[];
+    const y = sol.y as number[][];
+    expect(y.length).toBe(t.length);
+    for (const row of y) expect(row.length).toBe(2);
     // y0 = [1, 0] is the state at t[0]; the first oscillator state is cos(t).
-    expect(sol.t[0]).toBe(0);
-    expect(sol.y[0]).toEqual([1, 0]);
-    const last = sol.t.length - 1;
-    expect(sol.y[last][0]).toBeCloseTo(Math.cos(sol.t[last]), 6);
+    expect(t[0]).toBe(0);
+    expect(y[0]).toEqual([1, 0]);
+    const last = t.length - 1;
+    expect(y[last][0]).toBeCloseTo(Math.cos(t[last]), 6);
   });
 });

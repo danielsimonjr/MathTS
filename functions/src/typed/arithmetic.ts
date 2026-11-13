@@ -271,6 +271,8 @@ const subtractForNumberPath: { fn?: object } = {};
 const multiplyForNumberPath: { fn?: object } = {};
 const divideForNumberPath: { fn?: object } = {};
 const divOp: ScalarOp = (x, y) => (divide as unknown as ScalarOp)(x, y);
+const modForNumberPath: { fn?: object } = {};
+const modOp: ScalarOp = (x, y) => (mod as unknown as ScalarOp)(x, y);
 
 // =============================================================================
 // Scalar x collection signatures
@@ -337,6 +339,7 @@ const addKernels = elementwiseKernels(addForNumberPath, addOp);
 const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
 const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp);
+const modKernels = elementwiseKernels(modForNumberPath, modOp);
 
 function rejectScalarOverCollection(): never {
   throw new TypeError(
@@ -1182,15 +1185,39 @@ export const fix = mathTyped('fix', {
 // Modular Operations
 // =============================================================================
 
+/** The scalar types of `mod`. Each one combines with an Array or a matrix. */
+const MOD_SCALAR_TYPES = ['number', 'bigint', 'Fraction', 'BigNumber'] as const;
+
 /**
- * Modulo operation. A zero divisor returns the dividend (mathjs rule, #923).
+ * Modulo operation. The result has the sign of the divisor. A zero divisor returns the dividend
+ * (mathjs rule, #923).
+ *
+ * An Array or a matrix applies the rule to each element, as `add` and `subtract` do. The
+ * operands are two collections of the same shape, or a collection and a scalar in either order
+ * (`mod([10, 20], 0)` is `[10, 20]`). A matrix operand gives a matrix: dense unless an operand is
+ * sparse. The operands do not broadcast: arrays of different lengths throw a `RangeError`.
  */
 export const mod = mathTyped('mod', {
   'number, number': (a: f64, b: f64): f64 => (b === 0 ? a : ((a % b) + b) % b),
   'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (b.isZero() ? a : a.mod(b)),
+
+  'Array, Array': modKernels.array,
+  'DenseMatrix, DenseMatrix': modKernels.matrix,
+  'SparseMatrix, SparseMatrix': modKernels.matrix,
+  'DenseMatrix, SparseMatrix': modKernels.matrix,
+  'SparseMatrix, DenseMatrix': modKernels.matrix,
+  'Array, DenseMatrix': modKernels.matrix,
+  'DenseMatrix, Array': modKernels.matrix,
+  'Array, SparseMatrix': modKernels.matrix,
+  'SparseMatrix, Array': modKernels.matrix,
+  ...scalarCollectionSignatures(
+    { scalarFirst: modKernels, collectionFirst: modKernels },
+    MOD_SCALAR_TYPES
+  ),
 });
+modForNumberPath.fn = mod;
 
 /** These are the call signatures of `gcd`. Each signature returns the type of its two arguments. */
 interface GcdOverloads {
