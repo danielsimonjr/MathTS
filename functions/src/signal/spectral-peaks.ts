@@ -10,7 +10,8 @@
  *
  * @packageDocumentation
  */
-import { fft, ifftReal, type ComplexNumber } from './fft.js';
+import { fft, type ComplexNumber } from './fft.js';
+import { fftExactFloat64 } from './fft-core-f64.js';
 import { windowFunction } from '../typed/signal.js';
 import { butter, filtfilt } from '../signal-filter-extra.js';
 
@@ -293,9 +294,14 @@ export function coherence(
 // Short-time Fourier transform + inverse (overlap-add, COLA-normalized)
 // =============================================================================
 
-/** Options for {@link stft} / {@link istft} — must match between the two calls. */
+/** Options for {@link stft} / {@link istft}: `window` and `noverlap` must match between the two calls. */
 export interface StftOptions {
-  /** Frame length (default 256). */
+  /**
+   * Frame length. For `stft` the default is 256 clamped to the signal length, as
+   * `scipy.signal.stft` clamps `nperseg`; an explicit value longer than the signal throws
+   * `RangeError`. For `istft` the default is the number of bins in a frame of the input, so
+   * `istft(stft(x))` needs no options; an explicit value that differs from that width throws.
+   */
   nperseg?: number;
   /** Samples of overlap between frames (default `floor(nperseg/2)`). */
   noverlap?: number;
@@ -303,21 +309,28 @@ export interface StftOptions {
   window?: string;
 }
 
-/** `stft`'s output: one row per frame, one column per (non-redundant-truncated) frequency bin. */
+/**
+ * `stft`'s output: one row per frame, and `nperseg` columns per row, the whole two-sided spectrum
+ * of the frame. Bin `k` of a row is at the frequency `k / nperseg` (cycles per sample), for a frame
+ * of any length: the transform has exactly `nperseg` points, not the next power of two.
+ */
 export interface StftResult {
   re: number[][];
   im: number[][];
 }
 
 /**
- * Short-time Fourier transform: windowed, overlapping frames, each FFT'd independently
- * — `scipy.signal.stft` (magnitude/phase convention; frames are not scaled).
+ * Short-time Fourier transform: windowed, overlapping frames, each transformed independently
+ * with a DFT of exactly `nperseg` points (a power of two uses the radix-2 FFT, any other length
+ * Bluestein's chirp-z) — `scipy.signal.stft` (magnitude/phase convention; frames are not scaled).
+ * An empty signal returns no frames.
  *
  * @param x - Input signal
  * @param opts - `{ nperseg?, noverlap?, window? }`
- * @returns `{ re, im }`, each `number[frame][bin]`
+ * @returns `{ re, im }`, each `number[frame][bin]` with `nperseg` bins per frame
  */
 export function stft(x: readonly number[], opts?: StftOptions): StftResult {
+  if (x.length === 0) return { re: [], im: [] };
   const nperseg = opts?.nperseg ?? Math.min(256, x.length);
   if (opts?.nperseg !== undefined && nperseg > x.length) {
     throw new RangeError(`stft: nperseg (${nperseg}) exceeds the signal length (${x.length})`);
@@ -331,32 +344,40 @@ export function stft(x: readonly number[], opts?: StftOptions): StftResult {
   const win = windowFunction(nperseg, winType);
   const re: number[][] = [];
   const im: number[][] = [];
+  const frameRe = new Float64Array(nperseg);
+  const frameIm = new Float64Array(nperseg);
 
   for (let start = 0; start + nperseg <= x.length; start += step) {
-    const seg = new Array<number>(nperseg);
-    for (let i = 0; i < nperseg; i++) seg[i] = x[start + i] * win[i];
-    const spectrum = fft(seg).spectrum;
-    re.push(spectrum.map((c) => c.re));
-    im.push(spectrum.map((c) => c.im));
+    for (let i = 0; i < nperseg; i++) frameRe[i] = x[start + i] * win[i];
+    const spectrum = fftExactFloat64(frameRe, frameIm, false);
+    re.push(Array.from(spectrum.real));
+    im.push(Array.from(spectrum.imag));
   }
 
   return { re, im };
 }
 
 /**
- * Inverse short-time Fourier transform via overlap-add: each frame is inverse-FFT'd
- * back to `nperseg` samples, re-windowed, and accumulated; the accumulation is
- * normalized by the running sum of squared window values (the standard
- * constant-overlap-add / COLA normalization), so reconstruction is exact in the
+ * Inverse short-time Fourier transform via overlap-add: each frame is inverse-transformed
+ * back to `nperseg` samples (an exact `nperseg`-point inverse DFT), re-windowed, and
+ * accumulated; the accumulation is normalized by the running sum of squared window values
+ * (the standard constant-overlap-add / COLA normalization), so reconstruction is exact in the
  * interior wherever the window's overlap sum is nonzero — `scipy.signal.istft`.
  *
  * @param S - `{ re, im }` as returned by {@link stft}
- * @param opts - `{ nperseg?, noverlap?, window? }` — must match the `stft` call
+ * @param opts - `{ nperseg?, noverlap?, window? }`; `window` and `noverlap` must match the `stft`
+ *   call, and `nperseg` defaults to the frame width of `S`
  * @returns Reconstructed signal
  */
 export function istft(S: StftResult, opts?: StftOptions): number[] {
-  // stft keeps every FFT bin, so a frame has nperseg bins: the default is the frame width.
-  const nperseg = opts?.nperseg ?? (S.re.length > 0 ? S.re[0].length : 256);
+  // A frame of stft holds nperseg bins, so the default frame length is the frame width.
+  const width = S.re.length > 0 ? S.re[0].length : 0;
+  const nperseg = opts?.nperseg ?? (width > 0 ? width : 256);
+  if (S.re.length > 0 && width !== nperseg) {
+    throw new RangeError(
+      `istft: a frame of the input has ${width} bins but nperseg is ${nperseg}; the frame length must equal the bin count`
+    );
+  }
   const noverlap = opts?.noverlap ?? Math.floor(nperseg / 2);
   const winType = opts?.window ?? 'hann';
   const step = nperseg - noverlap;
@@ -370,8 +391,11 @@ export function istft(S: StftResult, opts?: StftOptions): number[] {
   const normalizer = new Array<number>(outLength).fill(0);
 
   for (let f = 0; f < nFrames; f++) {
-    const spectrum: ComplexNumber[] = S.re[f].map((r, i) => ({ re: r, im: S.im[f][i] }));
-    const frame = ifftReal(spectrum, nperseg);
+    const frame = fftExactFloat64(
+      Float64Array.from(S.re[f]),
+      Float64Array.from(S.im[f]),
+      true
+    ).real;
     const start = f * step;
     for (let i = 0; i < nperseg; i++) {
       output[start + i] += frame[i] * win[i];
