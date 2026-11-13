@@ -18,6 +18,8 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { packageDotEntry } from './package-dot-entry.mjs';
+// The label of the catch-all group is defined once, in the module that reads the index back.
+import { UNCATEGORIZED as OTHER } from './reference-index.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
@@ -56,7 +58,6 @@ const code = (arr) =>
     .map((n) => `\`${n}\``)
     .join(', ');
 const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
-const OTHER = 'Other exports (uncategorized)';
 
 /**
  * Domain map for functions NOT captured by a `##` section of the reference doc — the

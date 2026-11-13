@@ -104,8 +104,10 @@ jobs:
           node --test tools/test/sync-readme-functions-stats.test.mjs
           node tools/sync-readme-functions-stats.mjs --check
 
-      - name: Site generators (landing and API index)
-        run: node --test tools/test/site-generators.test.mjs
+      # The generators, and the Site workflow: its deploy steps run in bash against a local
+      # bare gh-pages repository and stub npm and curl programs.
+      - name: Site generators and Site workflow
+        run: node --test tools/test/site-generators.test.mjs tools/test/site-workflow.test.mjs
 
       - name: Bundle size and tree-shake record
         run: |

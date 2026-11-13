@@ -241,6 +241,12 @@ Version bumps go through Changesets. Add a changeset with the change, and the Re
 
 npm publish runs in the Publish workflow after `bun run build`. `changeset publish` ships every workspace version that is not on npm yet, with public access. It uses the repository secret `NPM` (`NODE_AUTH_TOKEN`) and does not use OIDC or provenance. Merging a version PR publishes those new versions in the same workflow run when releases are enabled. `publish.yml` checks the same variable on `workflow_call`, `workflow_dispatch`, and `release: published`. Versions that are already on `main` without having been published are shipped by running the Publish workflow from the Actions tab (`workflow_dispatch`) after setting `RELEASES_ENABLED=true`.
 
+The Site workflow (`.github/workflows/site.yml`) deploys the public site to <https://danielsimonjr.com/MathTS/>. The site has the function reference and the API index at `/api/`. The Publish workflow calls the Site workflow after a successful publish, so the site shows only a version that npm has. A push to `main` does not deploy the site.
+
+To deploy without a release, run the Site workflow from the Actions tab (`workflow_dispatch`) on the default branch. Do this when `RELEASES_ENABLED` is off, or after a docs fix. A run on another branch does nothing.
+
+Before the workflow pushes `gh-pages`, it compares the site version with the `latest` version on npm. The run fails when they differ, for example when a version is on `main` but not yet published. After the push, the workflow polls the live site until it shows that version and the API index. `bun run docs:site` writes the same pages into the git-ignored `site/` folder.
+
 ## Questions?
 
 - Open an issue for bugs or feature requests

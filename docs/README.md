@@ -49,14 +49,14 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ### Reference (API symbols)
 
-| Doc                                                      | What it covers                                                                                                                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [reference/index.md](reference/index.md)                 | Reference landing page.                                                                                                                                                        |
-| [reference/functions.md](reference/functions.md)         | Function reference (HTML mirror: `reference/functions.html`).                                                                                                                  |
-| [landing/index.html](landing/index.html)                 | Static function-reference site (`bun run docs:landing` → `docs/landing/`), published at <https://danielsimonjr.com/MathTS/>. One page per function under `landing/functions/`. |
-| [reference/classes.md](reference/classes.md)             | Class reference.                                                                                                                                                               |
-| [reference/constants.md](reference/constants.md)         | Constants reference.                                                                                                                                                           |
-| [reference/scalar-search.md](reference/scalar-search.md) | ScalarNode toolkit, Pareto scoring, search, and non-goals.                                                                                                                     |
+| Doc                                                           | What it covers                                                                                                                                                                                              |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [reference/index.md](reference/index.md)                      | Reference landing page.                                                                                                                                                                                     |
+| [reference/functions.md](reference/functions.md)              | Function reference (HTML mirror: `reference/functions.html`).                                                                                                                                               |
+| [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) | Static function-reference site with an API index at `/api/` (`bun run docs:site` writes the git-ignored `site/` folder). The Site workflow deploys it; see [CONTRIBUTING.md](../CONTRIBUTING.md#releasing). |
+| [reference/classes.md](reference/classes.md)                  | Class reference.                                                                                                                                                                                            |
+| [reference/constants.md](reference/constants.md)              | Constants reference.                                                                                                                                                                                        |
+| [reference/scalar-search.md](reference/scalar-search.md)      | ScalarNode toolkit, Pareto scoring, search, and non-goals.                                                                                                                                                  |
 
 ## 3. API (per package) ✅
 

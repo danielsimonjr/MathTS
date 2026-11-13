@@ -3,22 +3,25 @@
  * Generate the static MathTS function-reference landing site (the sibling of
  * https://danielsimonjr.com/mathjs/) from the curated reference document.
  *
- *   node tools/generate-landing-site.mjs [--out=docs/landing] [--reference=PATH] [--version-file=PATH]
+ *   node tools/generate-landing-site.mjs [--out=site] [--reference=PATH] [--version-file=PATH]
+ *                                        [--repo-package=PATH] [--ref=BRANCH]
  *
  * Inputs (read-only):
  *   docs/reference/functions.md   curated `## <Domain>` tables (signature, description,
  *                                 types, acceleration) + the generated export index block,
- *                                 whose "**Domain** (n): `a`, `b`" lines are the
- *                                 authoritative category membership and whose
- *                                 "(n exports)" header is the export count (the same
- *                                 count the root README shows).
- *   functions/package.json        version shown in the hero.
+ *                                 read through tools/reference-index.mjs: its
+ *                                 "**Domain** (n): `a`, `b`" lines are the category
+ *                                 membership, its "(n exports)" header is the export
+ *                                 count, and the category count is derived there once
+ *                                 (the README sync tool reads the same module).
+ *   functions/package.json        package name and version shown in the hero.
+ *   package.json                  repository URL for the GitHub links (--repo-package).
  *
- * The site shows no literal version or count: both come from the inputs above, which
- * `bun run docs:functions` regenerates from the built packages. A test count is not
- * shown, because no step that builds the site runs the tests.
+ * The site shows no literal version, count or repository URL: all of them come from the
+ * inputs above, which `bun run docs:functions` regenerates from the built packages. A
+ * test count is not shown, because no step that builds the site runs the tests.
  *
- * Outputs:
+ * Outputs (default folder `site/`, which git ignores):
  *   <out>/index.html                 hero stats, search box, one card per category
  *   <out>/functions/<slug>.html      one card per function in that category
  *
@@ -29,6 +32,15 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseReferenceIndex } from './reference-index.mjs';
+import {
+  DEFAULT_REF,
+  DEFAULT_REPO_FILE,
+  DEFAULT_VERSION_FILE,
+  NPM_PACKAGE_PAGE,
+  packageIdentity,
+  repositoryUrl,
+} from './site-config.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(
@@ -37,38 +49,26 @@ const args = Object.fromEntries(
     return m ? [m[1], m[2] ?? true] : [a, true];
   })
 );
-const OUT = resolve(REPO, String(args.out ?? 'docs/landing'));
+const OUT = resolve(REPO, String(args.out ?? 'site'));
 const REFERENCE = resolve(REPO, String(args.reference ?? 'docs/reference/functions.md'));
-const VERSION_FILE = resolve(REPO, String(args['version-file'] ?? 'functions/package.json'));
+const VERSION_FILE = resolve(REPO, String(args['version-file'] ?? DEFAULT_VERSION_FILE));
+const REPO_PACKAGE = resolve(REPO, String(args['repo-package'] ?? DEFAULT_REPO_FILE));
+const REF = String(args.ref ?? DEFAULT_REF);
 
-const GITHUB = 'https://github.com/danielsimonjr/MathTS';
-const NPM = 'https://www.npmjs.com/package/@danielsimonjr/mathts-functions';
-const DOCS = `${GITHUB}/blob/main/docs/reference/functions.md`;
-
-const doc = readFileSync(REFERENCE, 'utf8');
-const version = JSON.parse(readFileSync(VERSION_FILE, 'utf8')).version;
-if (typeof version !== 'string' || !/^\d+\.\d+\.\d+/.test(version)) {
-  throw new Error(`landing: no semver version in ${VERSION_FILE}`);
-}
+const { name: packageName, version } = packageIdentity(VERSION_FILE);
+const GITHUB = repositoryUrl(REPO_PACKAGE);
+const NPM = `${NPM_PACKAGE_PAGE}${packageName}`;
+const DOCS = `${GITHUB}/blob/${REF}/docs/reference/functions.md`;
 
 // ---------------------------------------------------------------------------
 // 1. Category membership from the generated index block.
 // ---------------------------------------------------------------------------
-const [curatedText, indexText = ''] = doc.split('## Complete export index');
-const exportTotal = Number((indexText.match(/\((\d+) exports\)/) ?? [])[1] ?? 0);
-
-/** @type {Map<string, string[]>} domain -> names (index order) */
-const domains = new Map();
-const fnSection = indexText.split('### Functions by category')[1]?.split(/\n### /)[0] ?? '';
-for (const m of fnSection.matchAll(/^\*\*(.+?)\*\* \((\d+)\): (.+)$/gm)) {
-  const names = [...m[3].matchAll(/`([^`]+)`/g)].map((x) => x[1]);
-  domains.set(m[1], names);
-}
-if (!exportTotal || !domains.size) {
-  throw new Error(
-    `landing: ${REFERENCE} has no "(N exports)" header or no "### Functions by category" block; run bun run docs:functions`
-  );
-}
+const {
+  curatedText,
+  exportTotal,
+  domains, // domain -> names (index order); the catch-all group is included
+  categoryCount,
+} = parseReferenceIndex(readFileSync(REFERENCE, 'utf8'), `landing: ${REFERENCE}`);
 
 // ---------------------------------------------------------------------------
 // 2. Signatures / descriptions / columns from the curated tables.
@@ -350,7 +350,7 @@ function filterFuncs() {
 const totalFns = categories.reduce((s, c) => s + c.names.length, 0);
 const stats = [
   [fmtInt(exportTotal), 'Exports'],
-  [String(categories.length), 'Categories'],
+  [String(categoryCount), 'Categories'],
   [`v${version}`, 'functions Version'],
 ];
 const cardsHtml = categories
@@ -388,9 +388,9 @@ ${INDEX_CSS}
 ${stats.map(([v, l]) => `    <div class="stat"><div class="stat-value">${esc(v)}</div><div class="stat-label">${esc(l)}</div></div>`).join('\n')}
   </div>
   <div class="install">
-    <code>npm install @danielsimonjr/mathts-functions</code>
+    <code>npm install ${esc(packageName)}</code>
     <a href="${GITHUB}#readme">Getting started</a>
-    <a href="${GITHUB}/blob/main/docs/migration-guide.md">Migrating from mathjs</a>
+    <a href="${GITHUB}/blob/${REF}/docs/migration-guide.md">Migrating from mathjs</a>
   </div>
 </header>
 
@@ -418,5 +418,5 @@ function filterCards() {
 writeFileSync(resolve(OUT, 'index.html'), index);
 
 console.log(
-  `landing site: ${categories.length} categories, ${totalFns} functions (${documentedFns} with curated rows, ${totalFns - documentedFns} index-only), ${exportTotal} exports in the barrel → ${OUT}`
+  `landing site: ${categoryCount} categories (${categories.length} groups), ${totalFns} functions (${documentedFns} with curated rows, ${totalFns - documentedFns} index-only), ${exportTotal} exports in the barrel → ${OUT}`
 );
