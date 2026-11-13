@@ -20,7 +20,6 @@
       "script": "functions/tests/helpers/median-sort-perf-gate.mjs",
       "limit": 0.25,
       "selfTestScale": 12,
-      "selfTestAA": false,
       "needs": ["functions/dist/index.js"]
     },
     {
@@ -44,7 +43,6 @@
       "maxRounds": 32,
       "timeoutMs": 1200000,
       "selfTestScale": 8,
-      "selfTestAA": false,
       "needs": ["matrix/dist/index.js"]
     },
     {

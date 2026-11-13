@@ -19,6 +19,11 @@
  *
  * Exit code 0: every gate passed. Exit code 1: a gate failed, crashed or
  * printed no verdict. All gates run before the exit, so one report lists them.
+ * Exit code 2: a bad argument or an unreadable gate list; no gate ran.
+ *
+ * Each result line shows the median ratio, its confidence bounds, the headroom
+ * (limit / median: the slowdown of the candidate that brings the median to the
+ * limit) and the rounds taken.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -34,9 +39,14 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--list') out.list = true;
-    else if (a === '--only') out.only = (argv[++i] ?? '').split(',').filter(Boolean);
-    else if (a === '--config') out.config = argv[++i];
-    else throw new Error(`unknown argument: ${a}`);
+    else if (a === '--only') {
+      out.only = (argv[++i] ?? '').split(',').filter(Boolean);
+      if (out.only.length === 0)
+        throw new Error('--only needs a comma-separated list of gate names');
+    } else if (a === '--config') {
+      out.config = argv[++i];
+      if (!out.config) throw new Error('--config needs the path of a gate list');
+    } else throw new Error(`unknown argument: ${a}`);
   }
   return out;
 }
@@ -106,7 +116,8 @@ function main() {
   console.log(`[wall-clock-gates] node ${process.version} (${nodeBin})`);
   const scale = process.env.PERF_GATE_CANDIDATE_TIME_SCALE;
   if (scale) console.log(`[wall-clock-gates] PERF_GATE_CANDIDATE_TIME_SCALE=${scale}`);
-  if (process.env.PERF_GATE_AA) console.log('[wall-clock-gates] PERF_GATE_AA=' + process.env.PERF_GATE_AA);
+  if (process.env.PERF_GATE_AA)
+    console.log('[wall-clock-gates] PERF_GATE_AA=' + process.env.PERF_GATE_AA);
 
   let failed = 0;
   for (const gate of selected) {
@@ -114,31 +125,35 @@ function main() {
     if (res.error) {
       failed++;
       console.log(`FAIL  ${gate.name}  crashed: ${res.error}`);
-      if (ci) console.log(`::error title=wall-clock gate ${gate.name}::${res.error.split('\n')[0]}`);
+      if (ci)
+        console.log(`::error title=wall-clock gate ${gate.name}::${res.error.split('\n')[0]}`);
       continue;
     }
     const bound = `median ${fmt(res.ratio)}  [${fmt(res.lower)}, ${fmt(res.upper)}]`;
     const tag = res.verdict === 'pass' ? 'pass' : 'FAIL';
-    const note =
-      res.verdict === 'pass' && !res.conclusive
-        ? res.ratio >= res.limit
-          ? '  INCONCLUSIVE (median at or above the limit, noise as large as the margin)'
-          : '  (noise-limited)'
+    // limit / median: the slowdown of the candidate that brings the median to the limit.
+    const headroom =
+      Number.isFinite(res.ratio) && res.ratio > 0
+        ? `  headroom ${fmt(res.limit / res.ratio)}x`
         : '';
+    const note = res.conclusive
+      ? ''
+      : res.verdict === 'fail'
+        ? '  (at the round cap: the interval holds the limit, the median is at or above it)'
+        : '  (at the round cap: the interval holds the limit, the median is below it)';
     console.log(
-      `${tag}  ${gate.name}  limit ${res.limit}  ${bound}  rounds ${res.rounds}  ${res.seconds.toFixed(1)} s${note}`
+      `${tag}  ${gate.name}  limit ${res.limit}  ${bound}${headroom}  rounds ${res.rounds}  ${res.seconds.toFixed(1)} s${note}`
     );
     if (res.verdict === 'fail') {
       failed++;
       if (ci) {
+        const why = res.conclusive
+          ? `lower bound ${fmt(res.lower)} >= limit ${res.limit}`
+          : `at the round cap (${res.rounds}), median >= limit ${res.limit}`;
         console.log(
-          `::error title=wall-clock gate ${gate.name}::median ratio ${fmt(res.ratio)}, lower bound ${fmt(res.lower)} >= limit ${res.limit}`
+          `::error title=wall-clock gate ${gate.name}::median ratio ${fmt(res.ratio)}, ${why}`
         );
       }
-    } else if (ci && res.verdict === 'pass' && !res.conclusive && res.ratio >= res.limit) {
-      console.log(
-        `::warning title=wall-clock gate ${gate.name}::inconclusive: median ${fmt(res.ratio)} >= limit ${res.limit} but the lower bound ${fmt(res.lower)} is below it`
-      );
     }
   }
   console.log(`[wall-clock-gates] ${selected.length - failed} of ${selected.length} passed`);

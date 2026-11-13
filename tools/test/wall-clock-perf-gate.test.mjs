@@ -7,9 +7,10 @@
  * The statistics tests feed fixed numbers, so no clock decides them. The last
  * two groups time real code: an injected slowdown must fail (3x, or the
  * `selfTestScale` of a gate whose real ratio is far below its limit), and an A/A
- * control must pass.
+ * control must measure a ratio of about 1 and, when the limit is above 1, pass.
  */
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { execIsolatedPerfGate, isolatedPerfGateChildEnv } from './perf-gate-spawn.mjs';
@@ -149,9 +150,12 @@ describe('wall-clock-perf-gate statistics', () => {
 describe('decideGate', () => {
   const at = (v, n = 16) => new Array(n).fill(v);
 
-  test('fails only when the lower bound reaches the limit', () => {
-    assert.equal(decideGate(at(1.5), { limit: 1.2, alpha: 0.01, final: false }).verdict, 'fail');
-    // Median 1.3, but 14 of 16 rounds sit below the limit: the lower bound does not reach it.
+  test('fails early only when the lower bound reaches the limit', () => {
+    const d = decideGate(at(1.5), { limit: 1.2, alpha: 0.01, final: false });
+    assert.equal(d.verdict, 'fail');
+    assert.equal(d.conclusive, true);
+    // Half of the rounds sit far above the limit (median 1.2), but the lower bound is the
+    // 3rd smallest round, 1.0: a look that is not final asks for more rounds.
     const mixed = [...at(1.0, 8), ...at(1.4, 8)];
     assert.equal(decideGate(mixed, { limit: 1.2, alpha: 0.01, final: false }).verdict, 'continue');
   });
@@ -162,12 +166,24 @@ describe('decideGate', () => {
     assert.equal(d.conclusive, true);
   });
 
-  test('at the final look an unresolved interval passes and says so', () => {
-    const mixed = [...at(1.0, 32), ...at(1.4, 32)];
-    const d = decideGate(mixed, { limit: 1.2, alpha: 0.01, final: true });
-    assert.equal(d.verdict, 'pass');
-    assert.equal(d.conclusive, false);
-    assert.ok(d.ratio >= 1.2);
+  test('at the final look the median decides when the interval holds the limit', () => {
+    const p = { limit: 1.2, alpha: 0.01, final: true };
+    // 34 of 64 rounds at 1.4: the median is 1.4, the lower bound (23rd smallest) is 1.0.
+    const above = decideGate([...at(1.0, 30), ...at(1.4, 34)], p);
+    assert.equal(above.verdict, 'fail');
+    assert.equal(above.conclusive, false);
+    assert.equal(above.ratio, 1.4);
+    assert.ok(above.lower < p.limit);
+    // 30 of 64 rounds at 1.4: the median is 1.0, the upper bound (23rd largest) is 1.4.
+    const below = decideGate([...at(1.0, 34), ...at(1.4, 30)], p);
+    assert.equal(below.verdict, 'pass');
+    assert.equal(below.conclusive, false);
+    assert.equal(below.ratio, 1.0);
+    assert.ok(below.upper >= p.limit);
+    // A median exactly at the limit is a fail: the limit is exclusive.
+    const edge = decideGate([...at(1.0, 32), ...at(1.4, 32)], p);
+    assert.equal(edge.ratio, 1.2);
+    assert.equal(edge.verdict, 'fail');
   });
 
   test('refuses a sample with too few usable rounds', () => {
@@ -175,6 +191,46 @@ describe('decideGate', () => {
       () => decideGate([NaN, NaN, NaN, 1, 1, 1], { limit: 1.2, alpha: 0.01, final: false }),
       /too coarse/
     );
+  });
+});
+
+describe('sequential rule on seeded noise', () => {
+  // Per-round ratios ~ N(mu, sd) from a seeded LCG. The shipped rule must pass a correct
+  // build (true ratio far below the limit) in every trial, and fail a build that is 25%
+  // over the limit almost always, also when the noise is twice the measured one.
+  function seeded(seed) {
+    let state = seed;
+    const uniform = () => {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return (state + 0.5) / 4294967296;
+    };
+    return () => Math.sqrt(-2 * Math.log(uniform())) * Math.cos(2 * Math.PI * uniform());
+  }
+  function failRate(mu, sd, trials, seed) {
+    const normal = seeded(seed);
+    let fails = 0;
+    for (let t = 0; t < trials; t++) {
+      const take = (count) => Array.from({ length: count }, () => mu + sd * normal());
+      if (sequentialDecision(take, PARAMS).verdict === 'fail') fails++;
+    }
+    return fails / trials;
+  }
+
+  test('a correct build never fails, at the measured noise and at twice that', () => {
+    assert.equal(failRate(1.05, 0.13, 400, 1), 0);
+    assert.equal(failRate(1.05, 0.26, 400, 2), 0);
+  });
+
+  test('a true ratio of 1.5 against the limit 1.2 fails almost always', () => {
+    const rate = failRate(1.5, 0.13, 400, 3);
+    assert.ok(rate >= 0.99, `caught ${rate}`);
+  });
+
+  test('a true ratio of 1.25 against the limit 1.2 is caught at the cap', () => {
+    // About 1 run in 3 ends the 64 rounds inside the 99% interval, because the noise of
+    // the median (about 0.02) is as large as the 0.05 overshoot. The median decides those runs.
+    const rate = failRate(1.25, 0.13, 400, 4);
+    assert.ok(rate >= 0.97, `caught ${rate}`);
   });
 });
 
@@ -205,18 +261,24 @@ describe('sequentialDecision', () => {
     assert.ok(d.ratio < 1.2);
   });
 
-  test('every round feeds the estimate: none is dropped or repeated', () => {
-    const series = Array.from({ length: 200 }, (_, i) => (i % 2 === 0 ? 1.0 : 1.4));
-    const s = scripted(series);
-    const d = sequentialDecision(s.take, { ...PARAMS, discard: 3 });
-    assert.equal(d.verdict, 'pass');
-    assert.equal(d.conclusive, false);
-    assert.equal(d.rounds, 64);
-    assert.deepEqual(d.roundRatios, series.slice(3, 3 + 64));
-    assert.equal(
-      s.calls.reduce((a, b) => a + b, 0),
-      3 + 64
-    );
+  test('every round feeds the estimate: none is dropped or repeated, and the median decides at the cap', () => {
+    // 6 of every 15 rounds at 1.4, the rest at 1.0 (median 1.0), or 8 of every 15 (median 1.4):
+    // the interval holds the limit at every look, so the gate walks to the cap.
+    const walk = (highCount) => {
+      const series = Array.from({ length: 200 }, (_, i) => (i % 15 < highCount ? 1.4 : 1.0));
+      const s = scripted(series);
+      const d = sequentialDecision(s.take, { ...PARAMS, discard: 3 });
+      assert.equal(d.conclusive, false);
+      assert.equal(d.rounds, 64);
+      assert.deepEqual(d.roundRatios, series.slice(3, 3 + 64));
+      assert.equal(
+        s.calls.reduce((a, b) => a + b, 0),
+        3 + 64
+      );
+      return d;
+    };
+    assert.equal(walk(6).verdict, 'pass');
+    assert.equal(walk(8).verdict, 'fail');
   });
 
   test('rejects bad parameters', () => {
@@ -249,12 +311,56 @@ describe('gate list', () => {
       const dup = join(dir, 'dup.json');
       const g = { name: 'x', script: 'x.mjs', needs: [], limit: 1, alpha: 0.01 };
       const rounds = { initialRounds: 16, blockRounds: 8, maxRounds: 64, timeoutMs: 1000 };
-      writeFileSync(dup, JSON.stringify({ defaults: { ...rounds, gcBetween: false }, gates: [g, g] }));
+      writeFileSync(
+        dup,
+        JSON.stringify({ defaults: { ...rounds, gcBetween: false }, gates: [g, g] })
+      );
       assert.throws(() => loadGateList(dup), /duplicate name/);
       const noGc = join(dir, 'no-gc.json');
       writeFileSync(noGc, JSON.stringify({ defaults: rounds, gates: [g] }));
       assert.throws(() => loadGateList(noGc), /gcBetween must be true or false/);
       assert.throws(() => loadGateConfig('nope'), /not in/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('an unknown key or a bad optional value in the list fails loudly', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wcg-'));
+    try {
+      const good = {
+        name: 'x',
+        script: 'x.mjs',
+        needs: [],
+        limit: 1.2,
+        alpha: 0.01,
+        initialRounds: 16,
+        blockRounds: 8,
+        maxRounds: 64,
+        timeoutMs: 1000,
+        gcBetween: false,
+      };
+      const load = (gate, defaults) => {
+        const file = join(dir, 'list.json');
+        writeFileSync(file, JSON.stringify({ defaults, gates: [gate] }));
+        return loadGateList(file);
+      };
+      assert.equal(load(good)[0].name, 'x');
+      assert.equal(load({ ...good, discard: 4, selfTestScale: 8 })[0].selfTestScale, 8);
+      // A misspelled key is rejected, in a gate and in the defaults.
+      assert.throws(() => load({ ...good, selfTestScal: 8 }), /unknown key "selfTestScal"/);
+      assert.throws(() => load({ ...good, gcBetwen: true }), /unknown key "gcBetwen"/);
+      assert.throws(() => load(good, { maxRound: 9 }), /unknown key "maxRound"/);
+      assert.throws(() => load({ ...good, discard: -1 }), /discard must be an integer >= 0/);
+      assert.throws(
+        () => load({ ...good, selfTestScale: 1 }),
+        /selfTestScale must be a number greater than 1/
+      );
+      assert.throws(() => load({ ...good, selfTestScale: '8' }), /selfTestScale must be a number/);
+      assert.throws(() => load({ ...good, alpha: 0.7 }), /alpha must be in \(0, 0.5\)/);
+      assert.throws(() => load({ ...good, maxRounds: 8 }), /maxRounds must be >= initialRounds/);
+      assert.throws(() => load({ ...good, blockRounds: 2.5 }), /blockRounds must be an integer/);
+      assert.throws(() => load({ ...good, needs: 'a.js' }), /needs must be an array/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -273,7 +379,11 @@ describe('wallClockAbGate on real timers', () => {
   test('matched arms pass', () => {
     const fn = () => busyMs(4);
     const r = withEnv({ PERF_GATE_CANDIDATE_TIME_SCALE: '', PERF_GATE_AA: '' }, () =>
-      wallClockAbGate(fn, fn, { ...small, fullWarmupPairs: 2, warmup: { minPairs: 4, maxPairs: 8 } })
+      wallClockAbGate(fn, fn, {
+        ...small,
+        fullWarmupPairs: 2,
+        warmup: { minPairs: 4, maxPairs: 8 },
+      })
     );
     assert.equal(r.verdict, 'pass');
     assert.ok(r.ratio < 1.15, `expected ~1.0, got ${r.ratio}`);
@@ -283,7 +393,11 @@ describe('wallClockAbGate on real timers', () => {
     const base = () => busyMs(4);
     const slow = () => busyMs(12);
     const r = withEnv({ PERF_GATE_CANDIDATE_TIME_SCALE: '', PERF_GATE_AA: '' }, () =>
-      wallClockAbGate(base, slow, { ...small, fullWarmupPairs: 2, warmup: { minPairs: 4, maxPairs: 8 } })
+      wallClockAbGate(base, slow, {
+        ...small,
+        fullWarmupPairs: 2,
+        warmup: { minPairs: 4, maxPairs: 8 },
+      })
     );
     assert.equal(r.verdict, 'fail');
     assert.ok(r.ratio >= 2.5, `expected ~3x, got ${r.ratio}`);
@@ -337,7 +451,12 @@ describe('wallClockAbGate on real timers', () => {
     };
     try {
       const r = withEnv({ PERF_GATE_CANDIDATE_TIME_SCALE: '', PERF_GATE_AA: '' }, () =>
-        wallClockAbGate(fn, fn, { ...small, skipSymmetricWarmup: true, fullWarmupPairs: 0, gcBetween: true })
+        wallClockAbGate(fn, fn, {
+          ...small,
+          skipSymmetricWarmup: true,
+          fullWarmupPairs: 0,
+          gcBetween: true,
+        })
       );
       assert.equal(calls, r.rounds);
     } finally {
@@ -353,7 +472,12 @@ describe('wallClockAbGate on real timers', () => {
     try {
       assert.throws(
         () =>
-          wallClockAbGate(fn, fn, { ...small, skipSymmetricWarmup: true, fullWarmupPairs: 0, gcBetween: true }),
+          wallClockAbGate(fn, fn, {
+            ...small,
+            skipSymmetricWarmup: true,
+            fullWarmupPairs: 0,
+            gcBetween: true,
+          }),
         /--expose-gc/
       );
     } finally {
@@ -362,9 +486,10 @@ describe('wallClockAbGate on real timers', () => {
   });
 });
 
-// The self-tests run each real gate script with fewer rounds than the shipped list asks for:
-// a verdict that the first look cannot reach takes more rounds up to `maxRounds`, so the
-// verdict is the same, and the run is shorter.
+// The self-tests run each real gate script with fewer rounds than the shipped list asks for, to
+// keep the run short. The injected slowdown is far above the limit and an A/A run is far below
+// it, so the first look decides; the reduced `maxRounds` only shortens the walk of a run that
+// does not decide there.
 const gatesInList = loadGateList();
 const selfTestDir = mkdtempSync(join(tmpdir(), 'wcg-selftest-'));
 const selfTestConfig = join(selfTestDir, 'wall-clock-gates.json');
@@ -423,6 +548,40 @@ describe('runner spawn point', () => {
   });
 });
 
+describe('runner arguments', () => {
+  const runner = join(__dirname, 'run-wall-clock-gates.mjs');
+  const run = (...args) => spawnSync(process.execPath, [runner, ...args], { encoding: 'utf8' });
+
+  test('an empty or missing value, an unknown gate or an unknown flag exits 2 before any gate runs', () => {
+    for (const args of [
+      ['--only'],
+      ['--only', ''],
+      ['--only', ','],
+      ['--config'],
+      ['--only', 'nope'],
+      ['--bogus'],
+    ]) {
+      const r = run(...args);
+      assert.equal(r.status, 2, `${args.join(' ')}: exit ${r.status}, stdout ${r.stdout}`);
+      assert.doesNotMatch(r.stdout, /passed/, `${args.join(' ')} must not report a verdict`);
+      assert.match(r.stderr, /run-wall-clock-gates:/);
+    }
+  });
+
+  test('--list names every gate of the list and runs none', () => {
+    const r = run('--list');
+    assert.equal(r.status, 0, r.stderr);
+    const listed = r.stdout
+      .trim()
+      .split('\n')
+      .map((line) => line.split('\t')[0]);
+    assert.deepEqual(
+      listed,
+      gatesInList.map((g) => g.name)
+    );
+  });
+});
+
 function runGateScript(gate, env) {
   const missing = gate.needs.filter((p) => !existsSync(join(repoRoot, p)));
   assert.equal(missing.length, 0, `built dist required for ${gate.name}: ${missing.join(', ')}`);
@@ -454,15 +613,25 @@ describe('isolated gates fail under an injected candidate slowdown', () => {
   }
 });
 
-describe('isolated gates pass the A/A control', () => {
-  for (const gate of gatesInList.filter((g) => g.selfTestAA !== false)) {
+// A/A: the candidate arm runs the baseline function, so the true ratio is 1. Every gate must
+// measure a ratio of about 1. A gate whose limit is above 1 must also pass. A limit below 1
+// (median against sort: the candidate is meant to be far faster) cannot pass an A/A run by
+// design, so only the ratio is checked for it.
+describe('isolated gates measure a ratio of about 1 under the A/A control', () => {
+  for (const gate of gatesInList) {
     test(gate.name, () => {
       const payload = runGateScript(gate, {
         PERF_GATE_CANDIDATE_TIME_SCALE: '',
         PERF_GATE_AA: '1',
       });
       assert.equal(payload.aa, true);
-      assert.equal(payload.verdict, 'pass', `${gate.name} A/A ratio ${payload.ratio}`);
+      assert.ok(
+        payload.ratio > 0.5 && payload.ratio < 2,
+        `${gate.name} A/A ratio ${payload.ratio}`
+      );
+      if (gate.limit > 1) {
+        assert.equal(payload.verdict, 'pass', `${gate.name} A/A ratio ${payload.ratio}`);
+      }
     });
   }
 });
