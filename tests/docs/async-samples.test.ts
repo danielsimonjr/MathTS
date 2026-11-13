@@ -1,6 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { extractFences } from '../../tools/test/readme-fences.mjs';
 import {
   declaredReturns,
@@ -58,6 +59,24 @@ export declare const typed: TypedFunction;
     expect(found.get('syncArrow')).toEqual([false]);
     expect(found.has('typed')).toBe(false);
     expect(found.has('inComment')).toBe(false);
+  });
+});
+
+describe('#900 — a package without a build is an error, not a shorter list', () => {
+  const fixture = mkdtempSync(join(tmpdir(), 'async-exports-'));
+  afterAll(() => rmSync(fixture, { recursive: true, force: true }));
+
+  it('names the workspace package whose main entry is not built', async () => {
+    writeFileSync(join(fixture, 'package.json'), JSON.stringify({ workspaces: ['lib'] }));
+    mkdirSync(join(fixture, 'lib'));
+    writeFileSync(
+      join(fixture, 'lib', 'package.json'),
+      JSON.stringify({
+        name: 'lib',
+        exports: { '.': { types: './dist/index.d.ts', import: './dist/index.js' } },
+      })
+    );
+    await expect(deriveAsyncExports(fixture)).rejects.toThrow(/without a built main entry: .*lib/);
   });
 });
 

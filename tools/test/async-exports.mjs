@@ -137,7 +137,10 @@ function dtsFiles(dir) {
 }
 
 /**
- * The built main entry (`.`) of each workspace package whose JavaScript and declarations exist.
+ * The built main entry (`.`) of each workspace package. A package declares a main entry when its
+ * `exports["."]` names a JavaScript file and a declaration file. Such a package must be built:
+ * an unbuilt one would drop its names from the list and let a sample pass that should fail, so
+ * the function throws and names every package that is missing.
  * Subpath entries are not read: some are worker or tool scripts that run code when imported
  * (`workerpool/worker`), and a sample imports its calls from the main entry.
  * @returns {{ dir: string, js: string }[]}
@@ -145,6 +148,7 @@ function dtsFiles(dir) {
 function builtEntries(root) {
   const dirs = workspaceDirs(root).map((d) => join(root, d));
   const entries = [];
+  const unbuilt = [];
   for (const dir of dirs) {
     const manifest = join(dir, 'package.json');
     if (!existsSync(manifest)) continue;
@@ -156,20 +160,26 @@ function builtEntries(root) {
     if (typeof js !== 'string' || typeof types !== 'string') continue;
     if (existsSync(join(dir, js)) && existsSync(join(dir, types)))
       entries.push({ dir, js: join(dir, js) });
+    else unbuilt.push(dir);
+  }
+  if (unbuilt.length > 0) {
+    throw new Error(
+      `workspace packages without a built main entry: ${unbuilt.join(', ')}; run \`bun run build\``
+    );
   }
   return entries;
 }
 
 /**
  * Names that a built package exports as a function and that always return a Promise.
- * Throws when no package is built, so a missing build cannot pass as "no async exports".
+ * Throws when a package is not built, so a missing build cannot pass as "no async exports".
  * @param {string} root repository root
  * @returns {Promise<Set<string>>}
  */
 export async function deriveAsyncExports(root) {
   const entries = builtEntries(root);
   if (entries.length === 0) {
-    throw new Error('no built package found (dist entries of the workspaces): run `bun run build`');
+    throw new Error('no workspace package declares a main entry: the scan has nothing to read');
   }
   /** @type {Map<string, boolean[]>} */
   const declared = new Map();
