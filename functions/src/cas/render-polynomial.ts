@@ -2,8 +2,9 @@
  * The one canonical string form of a polynomial.
  *
  * Every CAS function that returns a polynomial as text (`expand`, `casExpand`, `factor`,
- * `cancel`, `apart`, `together`, `groebnerBasis`, `symbolicIntegral`, ...) renders it through
- * {@link renderPolynomial}, so the same polynomial has the same text wherever it comes from.
+ * `cancel`, `collect`, `minimalPolynomial`, `groebnerBasis`, and the polynomial pieces of the
+ * partial-fraction and Layer 3 integrals) renders it through {@link renderPolynomial}, so the
+ * same polynomial has the same text wherever it comes from.
  *
  * The canonical form:
  * - terms in descending lexicographic order of the exponent vector (the first variable is the

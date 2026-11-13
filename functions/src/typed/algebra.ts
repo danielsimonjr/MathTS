@@ -32,6 +32,7 @@ import {
 } from './factorization/index.js';
 import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
+import { renderPolynomial } from '../cas/render-polynomial.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
 import {
   collapseIdenticalFactors,
@@ -1168,25 +1169,10 @@ export function collect(expr: string, variable: string): string {
     }
   }
 
-  const powers = [...byPower.keys()].sort((a, b) => b - a);
-  const parts: string[] = [];
-  for (const p of powers) {
-    const c = byPower.get(p)!;
-    if (c === 0) continue;
-    if (p === 0) {
-      parts.push(String(c));
-    } else if (p === 1) {
-      if (c === 1) parts.push(variable);
-      else if (c === -1) parts.push('-' + variable);
-      else parts.push(c + '*' + variable);
-    } else {
-      if (c === 1) parts.push(variable + '^' + p);
-      else if (c === -1) parts.push('-' + variable + '^' + p);
-      else parts.push(c + '*' + variable + '^' + p);
-    }
-  }
-
-  return parts.join(' + ') || '0';
+  return renderPolynomial(
+    [...byPower].map(([power, coeff]) => ({ exps: [power], coeff: String(coeff) })),
+    [variable]
+  );
 }
 
 /**

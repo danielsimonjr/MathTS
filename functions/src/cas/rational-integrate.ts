@@ -317,7 +317,8 @@ function formatRatTerm(r: Rat, varPart: string): string {
 export function integratePolynomial(p: IntPoly, v: string): string {
   const trimmed = trimIntPoly(p);
   const terms: string[] = [];
-  for (let i = 0; i < trimmed.length; i += 1) {
+  // Descending degree, like every polynomial that the CAS prints.
+  for (let i = trimmed.length - 1; i >= 0; i -= 1) {
     const c = trimmed[i];
     if (c === 0n) {
       continue;

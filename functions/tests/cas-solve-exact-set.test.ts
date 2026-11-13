@@ -93,6 +93,16 @@ describe('#884 solve returns the exact solution set; the numeric scan is opt-in'
       ['exp(x)=5', 'exp(x)', '5'],
       ['log(x)=-1', 'log(x)', '-1'],
       ['sqrt(x)=2', 'sqrt(x)', '2'],
+      ['sin(x/2)=1/3', 'sin(x/2)', '1/3'],
+      ['sin(-2*x)=1/3', 'sin(-2*x)', '1/3'],
+      ['sin(pi*x)=1/3', 'sin(pi*x)', '1/3'],
+      ['sin(2*pi*x+1)=1/3', 'sin(2*pi*x+1)', '1/3'],
+      ['cos(pi*x/2)=-3/4', 'cos(pi*x/2)', '-3/4'],
+      ['tan(-pi*x)=2', 'tan(-pi*x)', '2'],
+      ['exp(pi*x)=5', 'exp(pi*x)', '5'],
+      ['log(-x)=-1', 'log(-x)', '-1'],
+      ['abs(pi*x)=3', 'abs(pi*x)', '3'],
+      ['abs(2*x-1)=3', 'abs(2*x-1)', '3'],
     ];
     for (const [equation, lhs, rhs] of cases) {
       it(`${equation}`, () => {
@@ -115,11 +125,17 @@ describe('#884 solve returns the exact solution set; the numeric scan is opt-in'
       ['tan(x)=1', 'x'],
       ['sin(2*x)=1/2', 'x'],
       ['sin(x/2)=0', 'x'],
+      ['sin(pi*x)=0', 'x'],
+      ['sin(2*pi*x)=1/2', 'x'],
+      ['cos(pi*x)=1/2', 'x'],
     ];
     for (const [equation, variable] of cases) {
       it(`${equation} on [${range}]`, () => {
         const exact = solveWith(equation, variable);
+        // A missing or zero period would make the loop below run from -Infinity to Infinity, and
+        // vitest cannot time out a synchronous loop. Fail here instead of hanging.
         const periodValue = Number(evaluate(exact.period ?? '0'));
+        expect(Number.isFinite(periodValue) && periodValue > 0).toBe(true);
         const expanded: number[] = [];
         for (const root of exact) {
           const base = Number(evaluate(String(root)));
@@ -136,6 +152,150 @@ describe('#884 solve returns the exact solution set; the numeric scan is opt-in'
         scanned.forEach((v, i) => expect(v).toBeCloseTo(expanded[i], 7));
       });
     }
+  });
+
+  describe('the shape is read from the syntax tree, not from sample values', () => {
+    // sin(2*pi*x) is 0 at every integer and half-integer. A test that samples only those points
+    // reads it as the zero polynomial and answers [] for sin(2*pi*x)=0.
+    it('sin(2*pi*x)=0 is 0 and 1/2, period 1', () => {
+      const r = solveWith('sin(2*pi*x)=0', 'x');
+      expect([...r]).toEqual(['0', '1/2']);
+      expect(r.period).toBe('1');
+    });
+
+    it('cos(2*pi*x)=1 is 0, period 1', () => {
+      const r = solveWith('cos(2*pi*x)=1', 'x');
+      expect([...r]).toEqual(['0']);
+      expect(r.period).toBe('1');
+    });
+
+    it('sin(2*pi*x)=x has no closed form and fails loudly, never [0]', () => {
+      expect(() => solveWith('sin(2*pi*x)=x', 'x')).toThrow(/numeric: true, range/);
+    });
+
+    it('a cubic with an irrational constant has three finite roots, not NaN', () => {
+      // The sampled fit gave coefficients with rounding noise, and the cubic formula returned NaN.
+      const roots = solveWith('x^3-e', 'x');
+      expect(roots).toHaveLength(3);
+      expect(roots[0]).toBeCloseTo(Math.cbrt(Math.E), 12);
+      for (const root of roots.slice(1)) {
+        const { re, im } = root as Complex;
+        expect(Number.isFinite(re) && Number.isFinite(im)).toBe(true);
+        expect(re).toBeCloseTo(-Math.cbrt(Math.E) / 2, 12);
+      }
+    });
+
+    it('a polynomial of degree 4 with an irrational coefficient has its real roots', () => {
+      const r = solveWith('pi*x^4-1', 'x') as number[];
+      expect(r).toHaveLength(2);
+      expect(r[1]).toBeCloseTo(Math.PI ** -0.25, 12);
+      expect(r[0]).toBeCloseTo(-(Math.PI ** -0.25), 12);
+      expect(solveWith('x^4-e', 'x')).toHaveLength(2);
+    });
+
+    it('a coefficient with pi is still a polynomial coefficient', () => {
+      const linear = solveWith('pi*x-1', 'x') as number[];
+      expect(linear).toHaveLength(1);
+      expect(linear[0]).toBeCloseTo(1 / Math.PI, 14);
+      const quadratic = solveWith('sqrt(2)*x^2-1', 'x') as number[];
+      expect(quadratic).toHaveLength(2);
+      expect(quadratic[1]).toBeCloseTo(2 ** -0.25, 12);
+    });
+  });
+
+  describe('a coefficient of pi gives rational roots', () => {
+    it('sin(pi*x)=0 is 0 and 1, period 2', () => {
+      const r = solveWith('sin(pi*x)=0', 'x');
+      expect([...r]).toEqual(['0', '1']);
+      expect(r.period).toBe('2');
+    });
+
+    it('special values give rational roots', () => {
+      expect([...solveWith('sin(pi*x)=1/2', 'x')]).toEqual(['1/6', '5/6']);
+      expect([...solveWith('sin(2*pi*x)=1/2', 'x')]).toEqual(['1/12', '5/12']);
+      expect([...solveWith('sin(-pi*x)=0', 'x')]).toEqual(['0', '-1']);
+    });
+
+    it('other values stay symbolic and divide by pi in the text', () => {
+      const r = solveWith('sin(pi*x)=1/3', 'x');
+      expect([...r]).toEqual(['asin(1/3)/pi', '(pi - asin(1/3))/pi']);
+      expect(r.period).toBe('2');
+      expect([...solveWith('exp(pi*x)=2', 'x')]).toEqual(['log(2)/pi']);
+    });
+  });
+
+  describe('exact text carries no rounded digit', () => {
+    it('a constant with no exact text is declined, not printed as a decimal', () => {
+      for (const equation of [
+        'sin(x)=sqrt(2)/3', // asin(0.4714045207910317) would pretend to be exact
+        'sin(x+pi/4)=0', // an offset of pi/4 has no exact text here
+        'cos(sqrt(2)*x)=0', // the scale sqrt(2) has no exact text here
+        'exp(x)=pi',
+        'log(x)=sqrt(2)',
+        'abs(x)=sqrt(2)',
+        'sqrt(x)=pi',
+      ]) {
+        expect(() => solveWith(equation, 'x'), equation).toThrow(/numeric: true, range/);
+      }
+    });
+
+    it('a decimal that a person typed is kept as typed', () => {
+      expect([...solveWith('sin(x)=0.1+0.2', 'x')]).toEqual(['asin(3/10)', 'pi - asin(3/10)']);
+      expect([...solveWith('sin(x)=0.123456789', 'x')]).toEqual([
+        'asin(0.123456789)',
+        'pi - asin(0.123456789)',
+      ]);
+    });
+
+    it('no root text of any supported form holds a long decimal', () => {
+      for (const equation of [
+        'sin(x)=1/3',
+        'sin(pi*x)=1/3',
+        'sin(2*pi*x+1)=1/7',
+        'cos(x/3)=2/5',
+        'tan(3*x-1)=7',
+        'exp(2*x)=3',
+        'log(x/2)=5',
+        'sqrt(3*x)=7/2',
+        'abs(pi*x-2)=1/3',
+      ]) {
+        const roots = solveWith(equation, 'x');
+        expect(roots.length, equation).toBeGreaterThan(0);
+        for (const root of roots) expect(String(root), equation).not.toMatch(/\d\.\d{5,}/);
+        if (roots.period) expect(roots.period, equation).not.toMatch(/\d\.\d{5,}/);
+      }
+    });
+
+    it('an argument that is scaled keeps the text readable', () => {
+      expect([...solveWith('sin(x/2)=1/3', 'x')]).toEqual(['2*asin(1/3)', '2*(pi - asin(1/3))']);
+      expect([...solveWith('sin(3*x-1)=1/3', 'x')]).toEqual([
+        '(asin(1/3) + 1)/3',
+        '(pi - asin(1/3) + 1)/3',
+      ]);
+      expect([...solveWith('sin(-x)=1/3', 'x')]).toEqual(['-asin(1/3)', '-(pi - asin(1/3))']);
+    });
+  });
+
+  describe('the exact roots are the real roots', () => {
+    it('a value that the function never takes on the real line gives []', () => {
+      expect([...solveWith('sin(x)=2', 'x')]).toEqual([]);
+      expect([...solveWith('cos(x)=-2', 'x')]).toEqual([]);
+      expect([...solveWith('exp(x)=-1', 'x')]).toEqual([]);
+      expect([...solveWith('exp(x)=0', 'x')]).toEqual([]);
+      expect([...solveWith('sqrt(x)=-1', 'x')]).toEqual([]);
+      expect([...solveWith('abs(x)=-1', 'x')]).toEqual([]);
+    });
+
+    it('[] carries no period', () => {
+      expect(solveWith('sin(x)=2', 'x').period).toBeUndefined();
+    });
+  });
+
+  describe('root types by form', () => {
+    it('a polynomial gives numbers and the elementary forms give text', () => {
+      expect(solveWith('x^2-9', 'x')).toEqual([-3, 3]);
+      expect(solveWith('abs(x)=3', 'x')).toEqual(['-3', '3']);
+    });
   });
 
   describe('forms without a closed form fail loudly', () => {
@@ -187,6 +347,12 @@ describe('#884 solve returns the exact solution set; the numeric scan is opt-in'
       expect(solveWith('2*x-6', 'x')).toEqual([3]);
       expect(solveWith('x^2-4', 'x')).toEqual([-2, 2]);
       expect(solveWith('x^2-2', 'x')).toEqual(['-sqrt(2)', 'sqrt(2)']);
+    });
+
+    it('a linear root keeps full precision, not ten digits', () => {
+      expect(solveWith('3*x-1', 'x')).toEqual([1 / 3]);
+      expect((solveWith('x/3-1/7', 'x') as number[])[0]).toBeCloseTo(3 / 7, 15);
+      expect(solveWith('0.1*x-0.3', 'x')).toEqual([3]);
     });
 
     it('degree 4 and above are real roots by Sturm isolation, not a scan window', () => {

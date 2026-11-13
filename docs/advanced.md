@@ -579,19 +579,32 @@ laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
 
 `solve` returns an exact solution set. It never scans for roots unless you ask it to.
 
+- `solve` reads the shape of the equation from its syntax tree. It never decides the shape from
+  sample values: `sin(2*pi*x)` is zero at every integer and half-integer, and a sampled test
+  reads it as the zero polynomial.
 - A polynomial of degree 1 to 3 gives exact roots: integers, `sqrt(n)` radicals, or complex
   numbers. A polynomial of degree 4 or more gives its real roots, found with Sturm sequences
-  over the whole real line (`realRoots`). These are floating-point numbers.
+  over the whole real line (`realRoots`). These are floating-point numbers. A coefficient may be
+  any real constant (`pi*x^4 - 1`).
 - An equation of the form `a*F(p*x + q) = b` gives exact text roots, where `F` is `sin`,
   `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. A special value gives a multiple of `pi`
   (`sin(x) = 1/2` gives `pi/6` and `5*pi/6`). Another value gives a symbolic inverse
-  (`sin(x) = 1/3` gives `asin(1/3)` and `pi - asin(1/3)`).
+  (`sin(x) = 1/3` gives `asin(1/3)` and `pi - asin(1/3)`). The text roots are real roots: a
+  value that `F` never takes (`sin(x) = 2`, `exp(x) = -1`, `sqrt(x) = -1`) gives `[]`. A root of
+  `abs(x) = 3` is the text `'-3'` or `'3'`, because every root of this form is text; the roots
+  of the polynomial `x^2 - 9` are the numbers `-3` and `3`.
+- The coefficient `p` is a fraction or a fraction of `pi`. `sin(2*pi*x) = 0` gives `0` and
+  `1/2` with period `1`.
+- No digit of a root is a rounded result. A constant is exact when it is a small fraction, a
+  special value of `sin`, `cos` or `tan` (`sqrt(2)/2`), or a decimal of at most 12 digits. A
+  constant with no exact text (`sin(x) = sqrt(2)/3`, `sin(x + pi/4) = 0`) makes `solve` throw
+  like an equation with no closed form.
 - The roots of `sin`, `cos` and `tan` are the principal roots of one period. The result array
   has a `period` property (a non-enumerable property, for example `'2*pi'`). Add
   `k * period` to each root, for any integer `k`, to get all roots.
 - An equation with no closed form (`sin(x) = x`, `sin(x)^2 = 1/4`, `1/x = 2`) throws an
   `Error`. The message names the numeric scan. `solve` does not return `[]` for these
-  equations, because `[]` means that the equation has no roots.
+  equations, because `[]` means that the equation has no real roots.
 - The numeric scan runs only when you pass `{ numeric: true, range: [a, b] }`. It looks for
   sign changes on a grid of `range` and refines each one with Brent's method. It does not look
   outside `range`, and it can miss a pair of roots that are closer than one grid step.

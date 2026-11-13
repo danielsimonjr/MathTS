@@ -3,13 +3,9 @@ import { solve } from '@danielsimonjr/mathts-functions';
 
 /**
  * The reproduction of #884, written as a user of the published package writes it (import by
- * package name, so the built `dist` is what runs).
+ * package name, so the built `dist` is what runs). The calls use the shipped types: no cast.
  */
-const solveWithOptions = solve as unknown as (
-  equation: string,
-  variable: string,
-  options?: { numeric?: boolean; range?: [number, number] }
-) => Array<number | string | { re: number; im: number }> & { period?: string };
+const solveWithOptions = solve;
 
 describe('#884 solve("sin(x)=0") returns the exact solution set', () => {
   it('replays the repro of the issue: two exact roots, not 63 floats', () => {
@@ -28,6 +24,22 @@ describe('#884 solve("sin(x)=0") returns the exact solution set', () => {
     expect(scanned).toHaveLength(7);
     expect(scanned.every((v) => typeof v === 'number')).toBe(true);
     expect(() => solveWithOptions('sin(x)=0', 'x', { numeric: true })).toThrow(/range/);
+  });
+
+  it('does not read a periodic function as a polynomial', () => {
+    // sin(2*pi*x) is zero at every integer and half-integer, so a sampled polynomial test
+    // returned [] for the first call and [0] for the third.
+    const r = solveWithOptions('sin(2*pi*x)=0', 'x');
+    expect([...r]).toEqual(['0', '1/2']);
+    expect(r.period).toBe('1');
+    expect(solveWithOptions('cos(2*pi*x)=1', 'x')).toEqual(['0']);
+    expect(() => solveWithOptions('sin(2*pi*x)=x', 'x')).toThrow(/numeric: true/);
+  });
+
+  it('puts no rounded digit in an exact root', () => {
+    expect([...solveWithOptions('sin(pi*x)=0', 'x')]).toEqual(['0', '1']);
+    expect(() => solveWithOptions('sin(x)=sqrt(2)/3', 'x')).toThrow(/numeric: true/);
+    expect(solveWithOptions('sin(x)=2', 'x')).toEqual([]);
   });
 
   it('keeps the #719 polynomial results (x^2-2 radicals, x^2+1 complex)', () => {

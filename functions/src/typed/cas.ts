@@ -24,7 +24,6 @@ import { parse, evaluate, compileExpr } from '../factories/evaluate.js';
 import { euclidSnap } from './euclid.js';
 import {
   polyFromExpression,
-  polyToDenseCoefficients,
   buchberger,
   polyToString as idealPolyToString,
 } from './polynomial-ideal.js';
@@ -45,6 +44,9 @@ import { polynomialRoot, derivative as factoryDerivative } from '../factories/in
 import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { solveElementary } from '../cas/elementary-solve.js';
+import { parseTree, polynomialCoefficients } from '../cas/syntax-tree.js';
+import { renderPolynomial } from '../cas/render-polynomial.js';
+import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
@@ -1123,41 +1125,17 @@ function isComplexRoot(r: unknown): r is { re: number; im: number } {
 }
 
 /**
- * Read [c0,c1,c2,c3] of `expr` in `varName`, confirming it is a polynomial of
- * degree ≤ 3. Uses Newton forward differences on the integer grid 0..4 (the 4th
- * difference must vanish) and validates at non-integer points. Returns null if
- * the expression is not a degree-≤3 polynomial or cannot be evaluated there.
+ * The coefficients of `expr` as a polynomial in `varName`, lowest degree first, read from the
+ * syntax tree (see `polynomialCoefficients`); trailing zero coefficients are dropped. Returns
+ * `null` when `expr` is not a polynomial with finite real coefficients.
  */
-function polyCoeffsDeg3(expr: string, varName: string): f64[] | null {
-  const at = (x: f64): f64 => {
-    const v = evalAt(expr, varName, x);
-    return typeof v === 'number' && Number.isFinite(v) ? v : NaN;
-  };
-  try {
-    const f = [0, 1, 2, 3, 4].map(at);
-    if (f.some((v) => !Number.isFinite(v))) return null;
-    const d1 = f[1] - f[0];
-    const d2 = f[2] - 2 * f[1] + f[0];
-    const d3 = f[3] - 3 * f[2] + 3 * f[1] - f[0];
-    const d4 = f[4] - 4 * f[3] + 6 * f[2] - 4 * f[1] + f[0];
-    const scale = Math.max(1, ...f.map(Math.abs));
-    if (Math.abs(d4) > 1e-7 * scale) return null; // degree ≥ 4 (or non-polynomial)
-    const c3 = d3 / 6;
-    const c2 = d2 / 2 - d3 / 2;
-    const c1 = d1 - d2 / 2 + d3 / 3;
-    const c0 = f[0];
-    const coeffs = [c0, c1, c2, c3];
-    // Validate the reconstruction against non-integer sample points.
-    for (const x of [-1.5, 0.5, 2.5, 3.5]) {
-      const recon = c0 + c1 * x + c2 * x * x + c3 * x * x * x;
-      const actual = at(x);
-      if (!Number.isFinite(actual)) return null;
-      if (Math.abs(recon - actual) > 1e-6 * (1 + Math.abs(actual))) return null;
-    }
-    return coeffs;
-  } catch {
-    return null;
-  }
+function readPolynomial(expr: string, varName: string): f64[] | null {
+  const tree = parseTree(expr);
+  if (tree === null) return null;
+  const dense = polynomialCoefficients(tree, varName);
+  if (dense === null || !dense.every(Number.isFinite)) return null;
+  while (dense.length > 1 && dense[dense.length - 1] === 0) dense.pop();
+  return dense;
 }
 
 /**
@@ -1274,14 +1252,8 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
  * roots and gives `[]`.
  */
 function polynomialRealRoots(expr: string, varName: string): f64[] | null {
-  let dense: f64[];
-  try {
-    dense = polyToDenseCoefficients(polyFromExpression(expr, [varName]));
-  } catch {
-    return null;
-  }
-  while (dense.length > 1 && dense[dense.length - 1] === 0) dense.pop();
-  if (!dense.every(Number.isFinite)) return null;
+  const dense = readPolynomial(expr, varName);
+  if (dense === null) return null;
   if (dense.length <= 1) return [];
   // A multiple root is ill-conditioned in floating point: a double root is only good to about
   // 1e-8. With integer coefficients the gcd is exact, so isolate on the square-free part, whose
@@ -1310,10 +1282,12 @@ function polynomialRealRoots(expr: string, varName: string): f64[] | null {
  */
 function solveLowDegree(expr: string, varName: string): Array<f64 | Complex | string> | null {
   // Exact path: polynomial of degree ≤ 3 — delegate to the Algebra solver
-  // `polynomialRoot` (linear/quadratic/cubic closed form, real + complex).
-  const coeffs = polyCoeffsDeg3(expr, varName);
-  if (coeffs) {
-    const [c0, c1, c2, c3] = coeffs;
+  // `polynomialRoot` (linear/quadratic/cubic closed form, real + complex). The coefficients
+  // come from the syntax tree: a sampled fit reads `sin(2*pi*x)` (zero at every integer and
+  // half-integer) as the zero polynomial, and adds rounding noise to every coefficient.
+  const dense = readPolynomial(expr, varName);
+  if (dense !== null && dense.length <= 4) {
+    const [c0 = 0, c1 = 0, c2 = 0, c3 = 0] = dense;
     const eps = 1e-9;
     let degree = 0;
     if (Math.abs(c3) > eps) degree = 3;
@@ -1336,14 +1310,6 @@ function solveLowDegree(expr: string, varName: string): Array<f64 | Complex | st
         }
       }
     }
-    if (degree === 1) {
-      const radicals = toRadicals(expr);
-      if (radicals.length === 1) {
-        const n = Number(radicals[0]);
-        if (Number.isFinite(n)) return [n];
-      }
-    }
-
     let raw: unknown[];
     try {
       // polynomialRoot(constant, linear, quadratic?, cubic?) — pass up to degree.
@@ -1453,15 +1419,21 @@ function readScanRange(options: SolveOptions | undefined): readonly [number, num
  *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates.
  * - **Polynomial, degree 4 or more:** all distinct real roots, found by Sturm isolation over
  *   the whole real line, sorted ascending. These are floating-point numbers.
+ *   A coefficient may be any real constant (`pi*x^4 - 1`). `solve` reads the polynomial from
+ *   the syntax tree of the equation, not from sample values.
  * - **`a*F(p*x + q) = b`, with `F` one of `sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `abs`:**
- *   exact roots as text. A special value gives a multiple of `pi` (`sin(x) = 1/2` gives
+ *   exact roots as text, and real roots only: a value that `F` never takes (`sin(x) = 2`,
+ *   `exp(x) = -1`) gives `[]`. A special value gives a multiple of `pi` (`sin(x) = 1/2` gives
  *   `['pi/6', '5*pi/6']`). Another value gives a symbolic inverse (`sin(x) = 1/3` gives
  *   `['asin(1/3)', 'pi - asin(1/3)']`). For `sin`, `cos` and `tan` the roots are the principal
  *   roots of one period, and the result has a `period` property: `solve('sin(x)=0', 'x')` is
- *   `['0', 'pi']` with `period` `'2*pi'`.
+ *   `['0', 'pi']` with `period` `'2*pi'`. The coefficient `p` is a fraction or a fraction of
+ *   `pi`: `solve('sin(2*pi*x)=0', 'x')` is `['0', '1/2']` with `period` `'1'`. No digit of the
+ *   text is a rounded result. A constant of the equation that has no exact text (`sqrt(2)/3`
+ *   as a value, `pi/4` as an offset) makes `solve` throw, like the next form.
  * - **Any other form** (`sin(x) = x`, `sin(x)^2 = 1/4`, `sinh(x) = 1`, `1/x = 2`): `solve`
  *   throws an `Error` that names the numeric option. It never returns `[]` for such an
- *   equation, because `[]` means that the equation has no roots.
+ *   equation, because `[]` means that the equation has no real roots.
  *
  * With `{ numeric: true, range: [a, b] }`, `solve` skips every exact method and scans `[a, b]`
  * for real roots (sign change on an even grid, refined by Brent's method), sorted ascending.
@@ -1476,6 +1448,7 @@ function readScanRange(options: SolveOptions | undefined): readonly [number, num
  * solve('sin(x) = 0', 'x')    // => ['0', 'pi'], with period '2*pi'
  * solve('cos(x) = 1/2', 'x')  // => ['pi/3', '5*pi/3']
  * solve('exp(x) = 2', 'x')    // => ['log(2)']
+ * solve('sin(2*pi*x) = 0', 'x') // => ['0', '1/2'], with period '1'
  * solve('cos(x) - x', 'x', { numeric: true, range: [0, 1] }) // => [0.7390851332151607]
  *
  * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
@@ -1795,8 +1768,13 @@ export function minimalPolynomial(expr: string, varName: string): string | null 
     const num = Math.round(alpha * den);
     if (Math.abs(alpha - num / den) < 1e-12) {
       // alpha = num/den, so den*x - num = 0
-      if (den === 1) return `${varName} - ${num}`;
-      return `${den}*${varName} - ${num}`;
+      return renderPolynomial(
+        [
+          { exps: [1], coeff: String(den) },
+          { exps: [0], coeff: String(-num) },
+        ],
+        [varName]
+      );
     }
   }
 
@@ -1810,21 +1788,13 @@ export function minimalPolynomial(expr: string, varName: string): string | null 
     // Brute force search for small integer coefficients
     const found = findIntegerRelation(powers.slice(0, deg + 1), maxCoeff);
     if (found) {
-      const terms: string[] = [];
-      for (let k = deg; k >= 0; k--) {
-        if (found[k] === 0) continue;
-        if (k === 0) terms.push(formatCoeff(found[k]));
-        else if (k === 1) {
-          if (found[k] === 1) terms.push(varName);
-          else if (found[k] === -1) terms.push(`-${varName}`);
-          else terms.push(`${found[k]}*${varName}`);
-        } else {
-          if (found[k] === 1) terms.push(`${varName}^${k}`);
-          else if (found[k] === -1) terms.push(`-${varName}^${k}`);
-          else terms.push(`${found[k]}*${varName}^${k}`);
-        }
-      }
-      return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
+      // The search returns the first relation it meets, a multiple of the minimal polynomial
+      // (`10*x^2 - 20` for sqrt(2)). Divide by the content: the minimal polynomial is primitive.
+      const content = found.reduce((g, c) => gcdNumber(g, c), 0) || 1;
+      return renderPolynomial(
+        found.map((c, k) => ({ exps: [k], coeff: String(c / content) })),
+        [varName]
+      );
     }
   }
 
