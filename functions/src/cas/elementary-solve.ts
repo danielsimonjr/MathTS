@@ -13,8 +13,10 @@
  * Exact means that no digit of the text is a rounded result. A constant is exact when it is a
  * small fraction, a special value of `sin`/`cos`/`tan`, or a decimal of at most 12 digits that a
  * person could have typed. The coefficient `p` may also be a rational multiple of `pi`
- * (`sin(2*pi*x) = 0` gives `0` and `1/2`). Any other constant, such as `sqrt(2)/3` or `pi/4` in
- * the offset, has no exact text here, and the function returns `null`.
+ * (`sin(2*pi*x) = 0` gives `0` and `1/2`), and the offset `q` may be a rational multiple of `pi`
+ * (`2*sin(3*x + pi/4) = 1` gives `-pi/36` and `7*pi/36`). Any other constant, such as `sqrt(2)/3`,
+ * has no exact text here: the equation has the supported shape, so the function returns an
+ * {@link ElementaryDecline} that names the constant.
  *
  * Any other shape, such as `sin(x) = x`, `sin(x)^2 = 1/4` or `sinh(x) = 1`, has no closed form
  * here: the function returns `null`, and the caller decides what to do.
@@ -28,6 +30,12 @@ import {
   operatorName,
   parseTree,
 } from './syntax-tree.js';
+
+/** The reason that an equation of the supported shape has no exact text. */
+export interface ElementaryDecline {
+  /** What has no exact text, for example `the value 0.4714045207910317 that sin must take`. */
+  declined: string;
+}
 
 /** The exact solution set of one equation. */
 export interface ElementarySolution {
@@ -104,11 +112,19 @@ function makeFraction(n: number, d: number): Fraction {
   return [(sign * n) / g, (sign * d) / g];
 }
 
-/** The fraction `n/d` that equals `x` (within a tolerance, `d` at most 100000), or null. */
-function toFraction(x: number): Fraction | null {
+/**
+ * The fraction `n/d` that equals `x` (within a relative tolerance, `d` at most `maxDenominator`),
+ * or null. The defaults suit a constant that a person typed; a quotient of two values that
+ * the computer rounded needs a tighter tolerance and a smaller denominator.
+ */
+function toFraction(
+  x: number,
+  maxDenominator = MAX_FRACTION_DENOMINATOR,
+  toleranceLimit = FRACTION_TOLERANCE
+): Fraction | null {
   if (!Number.isFinite(x)) return null;
   if (Number.isInteger(x)) return [x, 1];
-  const tolerance = FRACTION_TOLERANCE * Math.max(1, Math.abs(x));
+  const tolerance = toleranceLimit * Math.max(1, Math.abs(x));
   // Continued-fraction convergents.
   let h1 = 1;
   let h0 = 0;
@@ -119,7 +135,7 @@ function toFraction(x: number): Fraction | null {
     const a = Math.floor(rest);
     const h2 = a * h1 + h0;
     const k2 = a * k1 + k0;
-    if (k2 > MAX_FRACTION_DENOMINATOR) return null;
+    if (k2 > maxDenominator) return null;
     if (Math.abs(x - h2 / k2) <= tolerance) return makeFraction(h2, k2);
     h0 = h1;
     h1 = h2;
@@ -348,30 +364,41 @@ function readScale(p: number, mentionsPi: boolean): Scale | null {
 }
 
 /**
- * Map the root `u` of `F(u) = c` back to `x`, where `u = p*x + q`. Returns null when the text
- * of a constant would carry a rounded digit.
+ * Map the root `u` of `F(u) = c` back to `x`, where `u = p*x + q`. The offset `q` is `qPi * pi`
+ * when `qPi` is not null. Returns null when the text of a constant would carry a rounded digit.
  */
-function mapToVariable(root: UnitRoot, scale: Scale, q: number): string | null {
+function mapToVariable(
+  root: UnitRoot,
+  scale: Scale,
+  q: number,
+  qPi: Fraction | null
+): string | null {
   const p = scale.frac[0] / scale.frac[1];
-  if (root.frac && q === 0) {
-    // u = t*pi, so x = t*pi / p. With p = r*pi the factors of pi cancel.
-    const t = makeFraction(root.frac[0] * scale.frac[1], root.frac[1] * scale.frac[0]);
+  if (root.frac && (q === 0 || qPi !== null)) {
+    // u = t*pi and q = r*pi (r = 0 without an offset), so x = (t - r)*pi / p. With p = s*pi the
+    // factors of pi cancel.
+    const r: Fraction = qPi ?? [0, 1];
+    const shifted = makeFraction(root.frac[0] * r[1] - r[0] * root.frac[1], root.frac[1] * r[1]);
+    const t = makeFraction(shifted[0] * scale.frac[1], shifted[1] * scale.frac[0]);
     return scale.pi ? fractionText(t) : piMultipleText(t);
   }
   const number = plainNumber(root.text);
-  if (number !== null && !scale.pi) return exactText((number - q) / p);
+  if (number !== null && !scale.pi && qPi === null) return exactText((number - q) / p);
 
   let numerator: string;
   if (q === 0) {
     numerator = root.text;
-  } else if (root.text === '0') {
-    const shift = exactText(-q);
-    if (shift === null) return null;
-    numerator = shift;
   } else {
-    const shift = exactText(Math.abs(q));
+    const shift =
+      qPi !== null
+        ? piMultipleText(makeFraction(Math.abs(qPi[0]), qPi[1]))
+        : exactText(Math.abs(q));
     if (shift === null) return null;
-    numerator = `${root.text} ${q > 0 ? '-' : '+'} ${shift}`;
+    if (root.text === '0') {
+      numerator = q > 0 ? `-${shift}` : shift;
+    } else {
+      numerator = `${root.text} ${q > 0 ? '-' : '+'} ${shift}`;
+    }
   }
   // x = numerator / |p| with |p| = n/d (times pi when scale.pi): write d*numerator / n, or
   // d*numerator / (n*pi), so that no quotient of quotients such as `a/(1/2)` appears.
@@ -393,36 +420,75 @@ function periodText(base: Fraction, scale: Scale): string {
   return scale.pi ? fractionText(ratio) : piMultipleText(ratio);
 }
 
+/** The rule for a constant with exact text, as the text of a message. */
+const EXACT_CONSTANT_RULE =
+  'An exact constant is an integer, a fraction with a denominator up to 100000, ' +
+  'or a decimal of at most 12 digits';
+
+/** The fraction `r` with `q = r*pi`, when `q` is a small rational multiple of `pi`. */
+function piFraction(q: number): Fraction | null {
+  // A tight tolerance and a small denominator: `pi/4` and `3*pi/8` match, a typed decimal does not.
+  const ratio = toFraction(q / Math.PI, 1000, 1e-13);
+  return ratio !== null && ratio[0] !== 0 ? ratio : null;
+}
+
 /**
  * Solve `expr = 0` exactly when `expr` is `a*F(p*x + q) + b` for one supported `F`.
  *
  * @param expr - The expression to set to zero, as text.
  * @param variable - The variable to solve for.
- * @returns The exact real roots and, for a periodic `F`, the period; or `null` when `expr` has
- *   another shape, or when a constant of it has no exact text.
+ * @returns The exact real roots and, for a periodic `F`, the period; `null` when `expr` has
+ *   another shape; or an {@link ElementaryDecline} when `expr` has this shape but a constant of
+ *   it has no exact text.
  *
  * @example
  * solveElementary('sin(x)', 'x');     // { roots: ['0', 'pi'], period: '2*pi' }
  * solveElementary('2*cos(x) - 1', 'x'); // { roots: ['pi/3', '5*pi/3'], period: '2*pi' }
  * solveElementary('sin(2*pi*x)', 'x'); // { roots: ['0', '1/2'], period: '1' }
+ * solveElementary('2*sin(3*x + pi/4) - 1', 'x'); // { roots: ['-pi/36', '7*pi/36'], period: '2*pi/3' }
  * solveElementary('sin(x) - x', 'x'); // null
- * solveElementary('sin(x) - sqrt(2)/3', 'x'); // null
+ * solveElementary('sin(x) - sqrt(2)/3', 'x'); // { declined: 'the value ... has no exact text' }
  */
-export function solveElementary(expr: string, variable: string): ElementarySolution | null {
+export function solveElementary(
+  expr: string,
+  variable: string
+): ElementarySolution | ElementaryDecline | null {
   const node = parseTree(expr);
   if (node === null) return null;
   const linear = readCall(node, variable);
   if (linear === null || linear.target === null || linear.k === 0) return null;
   const { name, p, q, mentionsPi } = linear.target;
   const scale = readScale(p, mentionsPi);
-  if (scale === null) return null;
-  if (q !== 0 && exactText(Math.abs(q)) === null) return null;
-  const unit = solveUnit(name, -linear.c / linear.k);
-  if (unit === null) return null;
+  if (scale === null) {
+    return {
+      declined:
+        `the coefficient ${p} of ${variable} inside ${name}(...) has no exact text. ` +
+        'It must be a fraction, or a fraction of pi',
+    };
+  }
+  const qPi = mentionsPi && q !== 0 ? piFraction(q) : null;
+  if (q !== 0 && qPi === null && exactText(Math.abs(q)) === null) {
+    return {
+      declined:
+        `the offset ${q} inside ${name}(...) has no exact text. ${EXACT_CONSTANT_RULE}, ` +
+        'or a fraction of pi',
+    };
+  }
+  const value = -linear.c / linear.k;
+  const unit = solveUnit(name, value);
+  if (unit === null) {
+    return {
+      declined:
+        `the value ${value} that ${name} must take has no exact text. ${EXACT_CONSTANT_RULE}, ` +
+        'or a special value of sin, cos or tan (such as sqrt(2)/2)',
+    };
+  }
   const roots: string[] = [];
   for (const root of unit.roots) {
-    const text = mapToVariable(root, scale, q);
-    if (text === null) return null;
+    const text = mapToVariable(root, scale, q, qPi);
+    if (text === null) {
+      return { declined: `the root ${root.text} of ${name} has no exact text in ${variable}` };
+    }
     roots.push(text);
   }
   const solution: ElementarySolution = { roots };

@@ -547,6 +547,7 @@ import {
   partialDerivative,
   taylor,
   solve,
+  solveExact,
   laplace,
 } from '@danielsimonjr/mathts-functions';
 
@@ -567,8 +568,9 @@ taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
 // Solve equations
 solve('x^2 - 5*x + 6', 'x'); // [2, 3]
 solve('x^2 - 2', 'x'); // ['-sqrt(2)', 'sqrt(2)']
-solve('sin(x) = 0', 'x'); // ['0', 'pi'], with .period === '2*pi'
-solve('cos(x) = 1/2', 'x'); // ['pi/3', '5*pi/3']
+solveExact('sin(x) = 0', 'x'); // { roots: ['0', 'pi'], period: '2*pi' }
+solveExact('cos(x) = 1/2', 'x'); // { roots: ['pi/3', '5*pi/3'], period: '2*pi' }
+solve('exp(x) = 2', 'x'); // ['log(2)']
 solve('cos(x) - x', 'x', { numeric: true, range: [0, 1] }); // [0.7390851332151607]
 
 // Laplace transform
@@ -577,37 +579,78 @@ laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
 
 ### How `solve` answers
 
-`solve` returns an exact solution set. It never scans for roots unless you ask it to.
+`solve` returns a finite list of the real or complex roots of an equation. It throws an `Error` when
+no finite list holds the solutions. It never scans for roots unless you ask it to.
 
 - `solve` reads the shape of the equation from its syntax tree. It never decides the shape from
   sample values: `sin(2*pi*x)` is zero at every integer and half-integer, and a sampled test
   reads it as the zero polynomial.
-- A polynomial of degree 1 to 3 gives exact roots: integers, `sqrt(n)` radicals, or complex
-  numbers. A polynomial of degree 4 or more gives its real roots, found with Sturm sequences
-  over the whole real line (`realRoots`). These are floating-point numbers. A coefficient may be
-  any real constant (`pi*x^4 - 1`).
-- An equation of the form `a*F(p*x + q) = b` gives exact text roots, where `F` is `sin`,
-  `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. A special value gives a multiple of `pi`
-  (`sin(x) = 1/2` gives `pi/6` and `5*pi/6`). Another value gives a symbolic inverse
-  (`sin(x) = 1/3` gives `asin(1/3)` and `pi - asin(1/3)`). The text roots are real roots: a
-  value that `F` never takes (`sin(x) = 2`, `exp(x) = -1`, `sqrt(x) = -1`) gives `[]`. A root of
-  `abs(x) = 3` is the text `'-3'` or `'3'`, because every root of this form is text; the roots
-  of the polynomial `x^2 - 9` are the numbers `-3` and `3`.
-- The coefficient `p` is a fraction or a fraction of `pi`. `sin(2*pi*x) = 0` gives `0` and
-  `1/2` with period `1`.
+- A polynomial of degree 1 to 3 gives its roots in closed form: integers, `sqrt(n)` radicals,
+  real numbers, or complex numbers. A polynomial of degree 4 or more gives its real roots, found
+  with Sturm sequences over the whole real line (`realRoots`). These are floating-point numbers.
+  A coefficient can be any real constant (`pi*x^4 - 1`).
+- Each tolerance is relative to the size of the terms that made the value. A large root
+  (`x^2 - 1e12` gives `-1000000` and `1000000`) and a small root (`x - 1e-10` gives `1e-10`,
+  `x^2 - 1e-18` gives `-1e-9` and `1e-9`) keep their value. A root snaps to an integer only when
+  that integer is a root of the polynomial: `x - 1.000000001` gives `1.000000001`, and `x - 1`
+  gives `1`. The polynomial reader drops a coefficient only when it is the rounding noise of the
+  terms that were added into it (`0.1*x^2 - 0.3*x^2 + 0.2*x^2` is zero).
+- A polynomial of a degree above 1000 throws a `RangeError` (`PolynomialDegreeError`) that names
+  the limit. The numeric scan has no such limit.
+- An identity (`x^2 - x^2`, `0*x`, `x = x`) throws an `Error`: every value of the variable is a
+  solution, and no finite list holds them. An equation with no real root (`1 = 2`, `x^4 + 1`) gives
+  `[]`. So `[]` always means that the equation has no root, and never that it is an identity.
+- An equation of the form `a*F(p*x + q) = b` with `F` equal to `exp`, `log`, `sqrt` or `abs` gives
+  exact text roots (`exp(x) = 2` gives `'log(2)'`). The text roots are real roots: a value that
+  `F` never takes (`exp(x) = -1`, `sqrt(x) = -1`) gives `[]`. A root of `abs(x) = 3` is the text
+  `'-3'` or `'3'`, because every root of this form is text; the roots of the polynomial
+  `x^2 - 9` are the numbers `-3` and `3`.
+- The solutions of an equation with `sin`, `cos` or `tan` repeat with a period, so no finite list
+  holds them. `solve` throws an `Error` that names `solveExact` and the period. A value that the
+  function never takes (`sin(x) = 2`) gives `[]`.
 - No digit of a root is a rounded result. A constant is exact when it is a small fraction, a
   special value of `sin`, `cos` or `tan` (`sqrt(2)/2`), or a decimal of at most 12 digits. A
-  constant with no exact text (`sin(x) = sqrt(2)/3`, `sin(x + pi/4) = 0`) makes `solve` throw
-  like an equation with no closed form.
-- The roots of `sin`, `cos` and `tan` are the principal roots of one period. The result array
-  has a `period` property (a non-enumerable property, for example `'2*pi'`). Add
-  `k * period` to each root, for any integer `k`, to get all roots.
+  constant with no exact text (`sin(x) = sqrt(2)/3`) makes `solve` and `solveExact` throw an
+  `Error` that names the constant and the rule.
 - An equation with no closed form (`sin(x) = x`, `sin(x)^2 = 1/4`, `1/x = 2`) throws an
   `Error`. The message names the numeric scan. `solve` does not return `[]` for these
-  equations, because `[]` means that the equation has no real roots.
+  equations.
 - The numeric scan runs only when you pass `{ numeric: true, range: [a, b] }`. It looks for
   sign changes on a grid of `range` and refines each one with Brent's method. It does not look
-  outside `range`, and it can miss a pair of roots that are closer than one grid step.
+  outside `range`. It can miss a pair of roots that are closer than one grid step, and a root
+  of even multiplicity that is not on a grid point.
+
+### Periodic solution sets: `solveExact`
+
+`solveExact(equation, variable)` returns the exact solution set of an equation
+`a*F(p*x + q) = b`, with `F` equal to `sin`, `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. The
+result is a plain object, so it survives `JSON.stringify`, `structuredClone` and a worker
+boundary:
+
+```typescript
+interface ExactSolution {
+  roots: string[]; // the principal roots, one period of a periodic set
+  period: string | null; // the period as text, or null when the set is finite
+}
+```
+
+For a periodic set, add `k * period` to each root, for any integer `k`, to get all roots.
+
+```typescript
+solveExact('sin(x) = 1/2', 'x'); // { roots: ['pi/6', '5*pi/6'], period: '2*pi' }
+solveExact('sin(x) = 1/3', 'x'); // { roots: ['asin(1/3)', 'pi - asin(1/3)'], period: '2*pi' }
+solveExact('sin(2*pi*x) = 0', 'x'); // { roots: ['0', '1/2'], period: '1' }
+solveExact('2*sin(3*x + pi/4) = 1', 'x'); // { roots: ['-pi/36', '7*pi/36'], period: '2*pi/3' }
+solveExact('exp(x) = 2', 'x'); // { roots: ['log(2)'], period: null }
+solveExact('sin(x) = 2', 'x'); // { roots: [], period: null }
+```
+
+- A special value gives a multiple of `pi`. Another value gives a symbolic inverse.
+- The coefficient `p` is a fraction, or a fraction of `pi`. The offset `q` is a number, or a
+  fraction of `pi`.
+- `solveExact` takes only this form. A polynomial, or any other form, throws an `Error` that
+  names `solve`.
+- A constant with no exact text throws an `Error` that names the constant.
 
 ## Global Optimisation and Scalar Solvers
 

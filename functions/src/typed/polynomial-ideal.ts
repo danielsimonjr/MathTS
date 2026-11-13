@@ -12,7 +12,8 @@
  * basis-size caps throw an honest error instead of returning wrong results.
  */
 
-import { renderPolynomial } from '../cas/render-polynomial.js';
+import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
+import { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError } from '../cas/polynomial-limits.js';
 
 /** One monomial: coefficient × Π varsᵢ^powersᵢ (dense exponent vector). */
 export interface Term {
@@ -20,10 +21,14 @@ export interface Term {
   powers: number[];
 }
 
-/** A polynomial: combined, lex-sorted (descending), no near-zero coefficients. */
+/** A polynomial: combined, lex-sorted (descending), no zero or noise coefficients. */
 export type Poly = Term[];
 
-const EPS = 1e-10;
+/**
+ * A coefficient that is no larger than this fraction of the sum of the terms that made it is
+ * rounding noise. A coefficient with one term is never noise: `1e-11*x` is a term, not zero.
+ */
+const COEFFICIENT_NOISE_RATIO = 1e-12;
 
 /** Lex compare on exponent vectors: positive when a > b. */
 function cmpPowers(a: number[], b: number[]): number {
@@ -33,19 +38,29 @@ function cmpPowers(a: number[], b: number[]): number {
   return 0;
 }
 
-/** Combine like terms, drop |coeff| ≤ EPS, sort lex-descending. */
+/**
+ * Combine like terms, drop a coefficient that is zero or only the rounding noise of the terms
+ * that made it (see {@link COEFFICIENT_NOISE_RATIO}), sort lex-descending.
+ */
 export function normalize(p: Poly): Poly {
-  const byKey = new Map<string, Term>();
+  const byKey = new Map<string, { term: Term; magnitude: number }>();
   for (const t of p) {
     const key = t.powers.join(',');
     const existing = byKey.get(key);
-    if (existing) existing.coeff += t.coeff;
-    else byKey.set(key, { coeff: t.coeff, powers: [...t.powers] });
+    if (existing) {
+      existing.term.coeff += t.coeff;
+      existing.magnitude += Math.abs(t.coeff);
+    } else {
+      byKey.set(key, {
+        term: { coeff: t.coeff, powers: [...t.powers] },
+        magnitude: Math.abs(t.coeff),
+      });
+    }
   }
   const out: Poly = [];
-  for (const t of byKey.values()) {
-    if (Math.abs(t.coeff) > EPS) {
-      out.push(t);
+  for (const { term, magnitude } of byKey.values()) {
+    if (term.coeff !== 0 && Math.abs(term.coeff) > COEFFICIENT_NOISE_RATIO * magnitude) {
+      out.push(term);
     }
   }
   return out.sort((a, b) => cmpPowers(b.powers, a.powers));
@@ -96,8 +111,27 @@ export function polyMul(a: Poly, b: Poly): Poly {
 
 function polyPow(a: Poly, n: number, nVars: number): Poly {
   let result: Poly = [{ coeff: 1, powers: new Array<number>(nVars).fill(0) }];
+  // The highest total degree of a term: a power of a constant needs no loop, and a power above
+  // the limit is refused before the loop, so that `(x^0)^1000000000` and `(x+1)^1000000000` end
+  // at once, as they do in the syntax-tree reader (`MAX_POLYNOMIAL_DEGREE`).
+  let degree = 0;
+  for (const t of a)
+    degree = Math.max(
+      degree,
+      t.powers.reduce((sum, e) => sum + e, 0)
+    );
+  if (degree === 0) {
+    const constant = a.length === 0 ? 0 : a[0].coeff;
+    return n === 0 ? result : constPolynomial(constant ** n, nVars);
+  }
+  if (n * degree > MAX_POLYNOMIAL_DEGREE) throw new PolynomialDegreeError();
   for (let i = 0; i < n; i++) result = polyMul(result, a);
   return result;
+}
+
+/** The constant polynomial `value`: no terms when `value` is zero. */
+function constPolynomial(value: number, nVars: number): Poly {
+  return value === 0 ? [] : [{ coeff: value, powers: new Array<number>(nVars).fill(0) }];
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +279,7 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
       } else if (c === '/') {
         pos++;
         const denom = constOf(parseFactor());
-        if (denom === null || Math.abs(denom) <= EPS) {
+        if (denom === null || denom === 0) {
           return fail('division only by a nonzero numeric constant');
         }
         const nextP: Poly = [];
@@ -490,12 +524,9 @@ export function buchberger(input: Poly[]): Poly[] {
  * both print the same.
  */
 export function polyToString(p: Poly, vars: string[]): string {
-  const fmt = (c: number): string => {
-    const r = Math.round(c);
-    return Math.abs(c - r) < 1e-9 ? String(r) : String(Number(c.toPrecision(12)));
-  };
+  const texts = coefficientTexts(p.map((t) => t.coeff));
   return renderPolynomial(
-    p.map((t) => ({ exps: t.powers, coeff: fmt(t.coeff) })),
+    p.map((t, i) => ({ exps: t.powers, coeff: texts[i] })),
     vars
   );
 }

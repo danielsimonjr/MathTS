@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   MAX_POLYNOMIAL_DEGREE,
+  PolynomialDegreeError,
   parseTree,
   polynomialCoefficients,
 } from '../src/cas/syntax-tree.js';
@@ -48,12 +49,36 @@ describe('polynomialCoefficients reads the shape from the syntax tree', () => {
     }
   });
 
-  it('gives null for an unknown symbol and for a degree above the limit', () => {
+  it('gives null for an unknown symbol', () => {
     expect(coefficients('a*x + 1')).toBeNull();
-    expect(coefficients(`x^${MAX_POLYNOMIAL_DEGREE + 1}`)).toBeNull();
+  });
+
+  it('throws PolynomialDegreeError for a degree above the limit, a polynomial that is too high', () => {
+    expect(() => coefficients(`x^${MAX_POLYNOMIAL_DEGREE + 1}`)).toThrow(PolynomialDegreeError);
+    expect(() => coefficients('(x-x)^1000000000')).toThrow(PolynomialDegreeError);
+    expect(() => coefficients('(x+1)^1001')).toThrow(PolynomialDegreeError);
+    expect(() => coefficients('x^1001')).toThrow(/degree above 1000/);
+    expect(() => coefficients('x^1001')).toThrow(RangeError);
     expect(coefficients(`x^${MAX_POLYNOMIAL_DEGREE}`)).toHaveLength(MAX_POLYNOMIAL_DEGREE + 1);
-    expect(coefficients('(x-x)^1000000000')).toBeNull();
-    expect(coefficients('(x+1)^1001')).toBeNull();
+  });
+
+  it('a form that is not a polynomial wins over the degree limit', () => {
+    expect(coefficients('x^1001 + sin(x)')).toBeNull();
+    expect(coefficients('x^1001/x')).toBeNull();
+  });
+
+  it('drops a coefficient that is only the rounding noise of the terms summed into it', () => {
+    // 0.1x^2 - 0.3x^2 + 0.2x^2 is 2.7e-17 x^2 in floating point, and is 0.
+    expect(coefficients('0.1*x^2 - 0.3*x^2 + 0.2*x^2')).toEqual([0, 0, 0]);
+    expect(coefficients('0.1*x^2 - 0.3*x^2 + 0.2*x^2 + x - 2')).toEqual([-2, 1, 0]);
+  });
+
+  it('keeps a small or a large coefficient that is not noise next to a larger one', () => {
+    // The size of a coefficient next to the largest one is not a test for noise.
+    expect(coefficients('x^2 - 1e20')).toEqual([-1e20, 0, 1]);
+    expect(coefficients('x^2 - 1e12')).toEqual([-1e12, 0, 1]);
+    expect(coefficients('1e-20*x - 1e-30')).toEqual([-1e-30, 1e-20]);
+    expect(coefficients('x - 1e-10')).toEqual([-1e-10, 1]);
   });
 
   it('does not loop over a huge exponent of a constant base', () => {
