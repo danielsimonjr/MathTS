@@ -63,8 +63,13 @@ describe('factoryScope — required keys', () => {
 // ---------------------------------------------------------------------------
 
 describe('factoryScope.typed', () => {
-  it('is the same mathTyped instance exported from @danielsimonjr/mathts-core', () => {
-    expect(factoryScope.typed).toBe(mathTyped);
+  it('reads through to the mathTyped instance exported from @danielsimonjr/mathts-core', () => {
+    // `typed` in the scope is a proxy of `mathTyped`: a function that declares a matrix type
+    // accepts the public SparseMatrix (#949). Every property is the one of `mathTyped`.
+    const scoped = factoryScope.typed as unknown as typeof mathTyped;
+    expect(scoped.find).toBe(mathTyped.find);
+    expect(scoped.referToSelf).toBe(mathTyped.referToSelf);
+    expect(scoped.convert).toBe(mathTyped.convert);
   });
 
   it('is callable (typed-function instance is a function)', () => {

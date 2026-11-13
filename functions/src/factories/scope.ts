@@ -9,6 +9,7 @@ import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-c
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG, type ConfigOptions } from '../core/config.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
+import { acceptsMatrix, adaptSparse } from './sparse-adapter.js';
 
 // Initialize type bridge so typed-function recognizes native types
 initTypeBridge();
@@ -214,8 +215,23 @@ for (const key of Object.keys(DEFAULT_CONFIG) as (keyof ConfigOptions)[]) {
  * The scope object passed to each factory's assertAndCreate().
  * Keys match the dependency names factories declare.
  */
+/**
+ * `typed` as the factories see it. Calling it builds the typed function as usual. A function
+ * that declares a matrix type is wrapped once so that it accepts the public CSR
+ * `SparseMatrix` (see sparse-adapter.ts); every other property reads through to `mathTyped`.
+ */
+const factoryTyped = new Proxy(mathTyped, {
+  apply(target, thisArg, args: unknown[]) {
+    const fn = Reflect.apply(target as (...a: unknown[]) => unknown, thisArg, args);
+    if (typeof fn !== 'function' || !acceptsMatrix(fn)) return fn;
+    const name =
+      typeof args[0] === 'string' ? args[0] : (fn as { name?: string }).name || 'function';
+    return adaptSparse(fn as (...a: never[]) => unknown, name);
+  },
+});
+
 export const factoryScope: Record<string, unknown> = {
-  typed: mathTyped,
+  typed: factoryTyped,
   config: configView,
 
   // Class constructors (uppercase) — factories use `new BigNumber(...)` etc.

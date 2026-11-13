@@ -112,6 +112,9 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
         return dense._data.map((row) => (row as number[])[0]);
       }
+      if (isSparseMatrix(b)) {
+        return rhsToNumberVector((b as unknown as { toArray(): unknown[][] }).toArray(), n);
+      }
       if (isArray(b)) {
         const arr = b as unknown[];
         if (arr.length !== n) {

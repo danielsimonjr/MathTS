@@ -1194,6 +1194,7 @@
     "functions/src/factories/matrix-bridge.ts": [
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/factories/scope.ts",
+      "functions/src/factories/sparse-adapter.ts",
       "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/algebra/solver/pivot-tolerance.ts": [
@@ -2471,6 +2472,7 @@
       "functions/src/numeric/propagate-uncertainty.ts"
     ],
     "functions/src/typed/typed-bridge.ts": ["functions/src/factories/scope.ts"],
+    "functions/src/factories/sparse-adapter.ts": ["functions/src/factories/scope.ts"],
     "functions/src/geometry/circumcircle.ts": [
       "functions/src/geometry/alpha-shape.ts",
       "functions/src/geometry/voronoi.ts"
