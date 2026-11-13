@@ -1,0 +1,65 @@
+{
+  "node": "v26.13.0",
+  "cpus": 12,
+  "rounds": 9,
+  "median": {
+    "n": 1000000,
+    "ms": {
+      "median(Float64Array)": 6.539487500000064,
+      "numpy np.median": 5.206199999520322
+    },
+    "numpyVersion": "2.3.4",
+    "overNumpy": 1.2560960970770592
+  },
+  "fft": [
+    {
+      "n": 65536,
+      "ms": {
+        "fft(number[])": 9.20595000000003,
+        "fft(Float64Array)": 8.65801250000004,
+        "complex() x n (boxing floor)": 2.5997874999998203,
+        "fft.js transform": 3.5987250000000586
+      },
+      "numberArrayOverFftjs": 2.558114332159273,
+      "float64ArrayOverFftjs": 2.4058555460614244
+    },
+    {
+      "n": 1048576,
+      "ms": {
+        "fft(number[])": 354.1373999999996,
+        "fft(Float64Array)": 318.4315999999999,
+        "complex() x n (boxing floor)": 170.5996500000001,
+        "fft.js transform": 148.30319999999847
+      },
+      "numberArrayOverFftjs": 2.387928244299538,
+      "float64ArrayOverFftjs": 2.1471660759848956
+    }
+  ],
+  "lusolve": [
+    {
+      "n": 200,
+      "ms": {
+        "lusolve(A, b)": 8.800975000000108,
+        "ml-matrix solve": 8.769350000000486
+      },
+      "overMlMatrix": 1.0036063106159088
+    },
+    {
+      "n": 500,
+      "ms": {
+        "lusolve(A, b)": 96.47565000000031,
+        "ml-matrix solve": 86.50560000000041
+      },
+      "overMlMatrix": 1.1152532321606907
+    },
+    {
+      "n": 1000,
+      "ms": {
+        "lusolve(A, b)": 1190.0697999999975,
+        "ml-matrix solve": 793.9267000000036
+      },
+      "overMlMatrix": 1.4989668441683497
+    }
+  ],
+  "notMeasured": ["svd against ml-matrix (#699): the svd code is owned by another workstream"]
+}

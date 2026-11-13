@@ -28,3 +28,31 @@ export function complexToInterleaved(
   }
   return result;
 }
+
+/**
+ * Split a complex array into one real buffer and one imaginary buffer in a single pass.
+ * Returns null when an element is not a number or `{re, im}` pair.
+ * @internal
+ */
+export function complexToSplit(arr: unknown[]): { real: Float64Array; imag: Float64Array } | null {
+  const n = arr.length;
+  const real = new Float64Array(n);
+  const imag = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const val = arr[i];
+    if (typeof val === 'number') {
+      real[i] = val;
+    } else if (
+      val &&
+      typeof (val as { re?: unknown }).re === 'number' &&
+      typeof (val as { im?: unknown }).im === 'number'
+    ) {
+      const cval = val as { re: number; im: number };
+      real[i] = cval.re;
+      imag[i] = cval.im;
+    } else {
+      return null;
+    }
+  }
+  return { real, imag };
+}

@@ -1,0 +1,38 @@
+node v26.13.0, 12 cpus, 9 interleaved rounds
+
+median 1..1000000, ms per call
+  median(Float64Array)     6.539
+  numpy np.median          5.206
+  median / numpy 1.256 (numpy 2.3.4)
+
+fft n = 65536, ms per call
+  fft(number[])            9.206
+  fft(Float64Array)        8.658
+  complex() x n (boxing floor) 2.600
+  fft.js transform         3.599
+  fft(number[]) / fft.js 2.558   fft(Float64Array) / fft.js 2.406
+
+fft n = 1048576, ms per call
+  fft(number[])            354.137
+  fft(Float64Array)        318.432
+  complex() x n (boxing floor) 170.600
+  fft.js transform         148.303
+  fft(number[]) / fft.js 2.388   fft(Float64Array) / fft.js 2.147
+
+lusolve n = 200, ms per call
+  lusolve(A, b)            8.801
+  ml-matrix solve          8.769
+  lusolve / ml-matrix 1.004
+
+lusolve n = 500, ms per call
+  lusolve(A, b)            96.476
+  ml-matrix solve          86.506
+  lusolve / ml-matrix 1.115
+
+lusolve n = 1000, ms per call
+  lusolve(A, b)            1190.070
+  ml-matrix solve          793.927
+  lusolve / ml-matrix 1.499
+
+not measured:
+  svd against ml-matrix (#699): the svd code is owned by another workstream

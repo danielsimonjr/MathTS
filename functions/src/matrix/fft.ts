@@ -1,31 +1,26 @@
 import { arraySize } from '../utils/array.js';
-import { fftCoreFloat64, fftExactFloat64 } from '../signal/fft-core-f64.js';
-import { complexToInterleaved } from './complex-to-interleaved.js';
+import { fftExactFloat64 } from '../signal/fft-core-f64.js';
+import { complexToSplit } from './complex-to-interleaved.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
-// Minimum array size for WASM to be beneficial
-const FAST_FFT_THRESHOLD = 64; // below this the flat core is not worth the conversion
+// Below this length the recursive path runs, so short inputs keep the values they had before
+// the flat kernel existed. From this length on, `fft` calls the flat kernel.
+const FAST_FFT_THRESHOLD = 64;
 
 /**
- * Check if n is a power of 2
+ * Box a split spectrum into `Complex` values. This is the only per-element work after the
+ * transform: the result type of `fft` is an array of `Complex`, so the objects are made once,
+ * here, from the kernel's own output buffers.
  */
-function isPowerOf2(n: number): boolean {
-  return n > 0 && (n & (n - 1)) === 0;
-}
-
-/**
- * Convert interleaved Float64Array back to complex array
- */
-function interleavedToComplex(
-  data: Float64Array,
-  n: number,
+function boxSpectrum(
+  real: Float64Array,
+  imag: Float64Array,
   complex: (re: number, im?: number) => unknown
 ): unknown[] {
-  const result: unknown[] = [];
-  for (let i = 0; i < n; i++) {
-    result.push(complex(data[i * 2], data[i * 2 + 1]));
-  }
+  const n = real.length;
+  const result = new Array<unknown>(n);
+  for (let i = 0; i < n; i++) result[i] = complex(real[i], imag[i]);
   return result;
 }
 
@@ -143,14 +138,8 @@ export const createFft = /* #__PURE__ */ factory(
       Float64Array: function (arr: Float64Array): unknown[] {
         const n = arr.length;
         if (n === 0) return [];
-        const imag = new Float64Array(n);
-        const out = fftExactFloat64(arr, imag, false);
-        const packed = new Float64Array(n * 2);
-        for (let i = 0; i < n; i++) {
-          packed[i * 2] = out.real[i]!;
-          packed[i * 2 + 1] = out.imag[i]!;
-        }
-        return interleavedToComplex(packed, n, complex) as unknown[];
+        const out = fftExactFloat64(arr, new Float64Array(n), false);
+        return boxSpectrum(out.real, out.imag, complex);
       },
     });
 
@@ -258,7 +247,10 @@ export const createFft = /* #__PURE__ */ factory(
       const length = len ?? arr.length;
       if (length === 1) return [arr[0]];
 
-      // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
+      // FAST PATH — 1-D, at least FAST_FFT_THRESHOLD values, plain numeric/Complex data.
+      // Power-of-two lengths run the radix-2 core. Other lengths run Bluestein, the same
+      // kernel (`fftExactFloat64`) as the `Float64Array` signature, so `fft(number[])` and
+      // `fft(Float64Array)` give bit-identical spectra.
       //
       // The recursive fallback below is a Cooley-Tukey built out of ARRAY SPREADS
       // (`[..._fft(even), ..._fft(odd)]`) whose scalar arithmetic goes through
@@ -272,7 +264,7 @@ export const createFft = /* #__PURE__ */ factory(
       // path" was a pessimisation on top of a pessimisation. It now uses the core that
       // `parallelFFT` uses.
       //
-      // `complexToInterleaved` returns null for anything it cannot represent as f64
+      // `complexToSplit` returns null for anything it cannot represent as f64
       // (BigNumber, Fraction, Unit), so those fall through to the general path below
       // and keep their exact semantics.
       // NOTE the guard. This used to read `len === undefined`, intended as "top-level call
@@ -281,22 +273,11 @@ export const createFft = /* #__PURE__ */ factory(
       // `fft` took ~15 s at n=2^18: it always fell through to the recursive Complex path.
       // Every call site passes `len === arr.length` (the recursion halves both together),
       // so the honest guard is simply "are we transforming the whole array".
-      if (length === arr.length && length >= FAST_FFT_THRESHOLD && isPowerOf2(length)) {
-        const interleaved = complexToInterleaved(arr, complex);
-        if (interleaved) {
-          const real = new Float64Array(length);
-          const imag = new Float64Array(length);
-          for (let i = 0; i < length; i++) {
-            real[i] = interleaved[i * 2];
-            imag[i] = interleaved[i * 2 + 1];
-          }
-          const out = fftCoreFloat64(real, imag, false);
-          const result = new Float64Array(length * 2);
-          for (let i = 0; i < length; i++) {
-            result[i * 2] = out.real[i];
-            result[i * 2 + 1] = out.imag[i];
-          }
-          return interleavedToComplex(result, length, complex);
+      if (length === arr.length && length >= FAST_FFT_THRESHOLD) {
+        const split = complexToSplit(arr);
+        if (split) {
+          const out = fftExactFloat64(split.real, split.imag, false);
+          return boxSpectrum(out.real, out.imag, complex);
         }
       }
 
