@@ -767,18 +767,22 @@ describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
     expect((roots[0] as Complex).re).toBeCloseTo(1, 6);
     expect(Math.abs((roots[0] as Complex).im)).toBeCloseTo(1, 6);
   });
-  it('falls back to numeric for a quartic (x^4 - 5x^2 + 4)', () => {
+  it('finds the real roots of a quartic by Sturm isolation (x^4 - 5x^2 + 4)', () => {
     const roots = solve('x^4 - 5*x^2 + 4', 'x');
     for (const r of [-2, -1, 1, 2]) expect(roots).toContain(r);
   });
-  it('finds a transcendental root (exp(x) - 2)', () => {
-    const roots = solve('exp(x) - 2', 'x');
-    expect(roots.some((r) => typeof r === 'number' && Math.abs(r - Math.log(2)) < 1e-4)).toBe(true);
+  it('solves exp(x) - 2 exactly: log(2) (#884)', () => {
+    expect([...solve('exp(x) - 2', 'x')]).toEqual(['log(2)']);
   });
-  it('finds sin(x) = 1/2 near π/6 (numeric fallback)', () => {
+  it('solves sin(x) = 1/2 exactly: pi/6 and 5*pi/6, period 2*pi (#884)', () => {
     const roots = solve('sin(x) - 0.5', 'x');
-    const pi6 = Math.PI / 6;
-    expect(roots.some((r) => typeof r === 'number' && Math.abs(r - pi6) < 1e-6)).toBe(true);
+    expect([...roots]).toEqual(['pi/6', '5*pi/6']);
+    expect(roots.period).toBe('2*pi');
+  });
+  it('scans a range numerically only on request: sin(x) = 1/2 near pi/6', () => {
+    const roots = solve('sin(x) - 0.5', 'x', { numeric: true, range: [0, 1] });
+    expect(roots).toHaveLength(1);
+    expect(roots[0]).toBeCloseTo(Math.PI / 6, 9);
   });
   it('throws on multiple = signs', () => {
     expect(() => solve('x = 1 = 2', 'x')).toThrow();

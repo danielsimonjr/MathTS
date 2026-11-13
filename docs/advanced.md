@@ -566,10 +566,35 @@ taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
 
 // Solve equations
 solve('x^2 - 5*x + 6', 'x'); // [2, 3]
+solve('x^2 - 2', 'x'); // ['-sqrt(2)', 'sqrt(2)']
+solve('sin(x) = 0', 'x'); // ['0', 'pi'], with .period === '2*pi'
+solve('cos(x) = 1/2', 'x'); // ['pi/3', '5*pi/3']
+solve('cos(x) - x', 'x', { numeric: true, range: [0, 1] }); // [0.7390851332151607]
 
 // Laplace transform
 laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
 ```
+
+### How `solve` answers
+
+`solve` returns an exact solution set. It never scans for roots unless you ask it to.
+
+- A polynomial of degree 1 to 3 gives exact roots: integers, `sqrt(n)` radicals, or complex
+  numbers. A polynomial of degree 4 or more gives its real roots, found with Sturm sequences
+  over the whole real line (`realRoots`). These are floating-point numbers.
+- An equation of the form `a*F(p*x + q) = b` gives exact text roots, where `F` is `sin`,
+  `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. A special value gives a multiple of `pi`
+  (`sin(x) = 1/2` gives `pi/6` and `5*pi/6`). Another value gives a symbolic inverse
+  (`sin(x) = 1/3` gives `asin(1/3)` and `pi - asin(1/3)`).
+- The roots of `sin`, `cos` and `tan` are the principal roots of one period. The result array
+  has a `period` property (a non-enumerable property, for example `'2*pi'`). Add
+  `k * period` to each root, for any integer `k`, to get all roots.
+- An equation with no closed form (`sin(x) = x`, `sin(x)^2 = 1/4`, `1/x = 2`) throws an
+  `Error`. The message names the numeric scan. `solve` does not return `[]` for these
+  equations, because `[]` means that the equation has no roots.
+- The numeric scan runs only when you pass `{ numeric: true, range: [a, b] }`. It looks for
+  sign changes on a grid of `range` and refines each one with Brent's method. It does not look
+  outside `range`, and it can miss a pair of roots that are closer than one grid step.
 
 ## Global Optimisation and Scalar Solvers
 

@@ -116,7 +116,7 @@ describe('#887 one canonical polynomial form', () => {
     it('cancel, together and apart print the polynomial part canonically', () => {
       expect(cancel('(x^3-1)/(x-1)')).toBe('x^2 + x + 1');
       expect(together('1/x+1/(x+1)')).toBe('(2*x + 1)/((x)*((x+1)))');
-      expect(apart('x^3/(x+1)', 'x')).toBe('x^2 - x + 1 - 1/(x + 1)');
+      expect(apart('x^3/(x+1)')).toBe('x^2 - x + 1 - 1/(x + 1)');
     });
 
     it('factor prints the cofactor of a multivariate polynomial canonically', () => {
