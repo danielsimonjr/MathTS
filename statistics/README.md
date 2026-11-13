@@ -65,6 +65,8 @@ npm install @danielsimonjr/mathts-statistics
   `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `fTest`,
   `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `tukeyHSD`, `andersonDarlingTest`,
   `dagostinoTest`, `friedmanTest`, `multipleComparison`, `principalComponentAnalysis`.
+  `chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest` and `shapiroWilkTest` return a
+  Promise, so call them with `await`. The other tests in this list return their result directly.
 - **Probability & combinatorics** — `combinations`, `combinationsWithRep`, `permutations`,
   `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`,
   `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, and seedable RNG (`random`,
@@ -79,6 +81,7 @@ import {
   hypergeometricDist,
   kolmogorovSmirnov2Test,
   normalDist,
+  shapiroWilkTest,
 } from '@danielsimonjr/mathts-statistics';
 
 anova([
@@ -88,6 +91,7 @@ anova([
 kendallTau([1, 2, 3, 4, 5], [2, 1, 4, 3, 5]); // 0.6
 hypergeometricDist(50, 5, 10).pdf(1); // 0.4313371972
 kolmogorovSmirnov2Test([1, 2, 3], [2, 3, 4]); // { statistic, pValue }
+const normality = await shapiroWilkTest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]); // { statistic, pValue }
 
 const d = normalDist(0, 1);
 d.sample(); // one U(…) draw mapped to N(0,1)

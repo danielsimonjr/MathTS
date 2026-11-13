@@ -889,13 +889,13 @@ const anovaResult = anova(groups);
 // { F: 28.4, pValue: 0.0003, significant: true }
 
 // Test for normality
-const shapiro = shapiroWilkTest(control);
+const shapiro = await shapiroWilkTest(control);
 // { W: 0.98, pValue: 0.89, isNormal: true }
 
 // Chi-square goodness of fit
 const observed = [18, 22, 20, 25, 15];
 const expected = [20, 20, 20, 20, 20];
-chiSquareTest(observed, expected);
+await chiSquareTest(observed, expected);
 // { statistic: 2.3, pValue: 0.68, significant: false }
 
 // PCA dimensionality reduction
