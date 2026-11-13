@@ -1,14 +1,19 @@
 /** Context when an ODE driver exhausts its step budget. */
 export interface ODEStepLimitContext {
   method: string;
+  /** The budget of accepted steps (the value of the option that `budgetOption` names). */
   maxIter: number;
   acceptedSteps: number;
   attempts: number;
   tStart: number;
   tCurrent: number;
   tFinal: number;
-  /** Last attempted step magnitude (absolute), when known. */
-  lastStepMag?: number;
+  /** The magnitude (absolute) of the step that the driver would take next. */
+  lastStepMag: number;
+  /** The function that throws, as the caller knows it. Default `solveODE`. */
+  caller?: string;
+  /** The option that holds the budget. Default `maxIter`. */
+  budgetOption?: string;
 }
 
 function _stiffnessHint(ctx: ODEStepLimitContext): string {
@@ -21,7 +26,7 @@ function _stiffnessHint(ctx: ODEStepLimitContext): string {
   // maxIter, or tight tol) rejects nothing. Robertson and other stiff explicit
   // runs keep rejecting ~6–12% of attempts while the step stays tiny.
   const rejectRatio = ctx.attempts > 0 ? (ctx.attempts - ctx.acceptedSteps) / ctx.attempts : 0;
-  const stepFrac = ctx.lastStepMag === undefined ? 1 : ctx.lastStepMag / span;
+  const stepFrac = ctx.lastStepMag / span;
   if (rejectRatio >= 0.05 && stepFrac < 1e-3) {
     return ' Explicit RK stopped before tFinal. If the system is stiff, try solveODE(..., { method: "BDF" | "Radau" | "Rosenbrock" | "RODAS" }).';
   }
@@ -48,8 +53,10 @@ export function odeAcceptedBudget(maxIter: number | undefined): number {
 /** Human-readable error when `maxIter` accepted steps is exhausted before `tFinal`. */
 export function odeMaxStepsError(ctx: ODEStepLimitContext): Error {
   const hint = _stiffnessHint(ctx);
+  const caller = ctx.caller ?? 'solveODE';
+  const option = ctx.budgetOption ?? 'maxIter';
   return new Error(
-    `solveODE ${ctx.method}: exceeded maxIter=${ctx.maxIter} accepted steps (${ctx.acceptedSteps} accepted of ${ctx.attempts} attempts, last t=${ctx.tCurrent}, target t=${ctx.tFinal}).${hint} Raise options.maxIter or relax options.tol.`
+    `${caller} ${ctx.method}: exceeded ${option}=${ctx.maxIter} accepted steps (${ctx.acceptedSteps} accepted of ${ctx.attempts} attempts, last t=${ctx.tCurrent}, target t=${ctx.tFinal}).${hint} Raise options.${option} or relax options.tol.`
   );
 }
 
