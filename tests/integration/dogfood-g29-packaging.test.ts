@@ -115,6 +115,9 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
     }
   });
 
+  // The script packs and installs every public package (24 tarballs) and type-checks every entry
+  // point. Measured: 83 s on an idle machine, and it ran past 120 s in two full-suite runs under
+  // load. The limit is about 3.6 times the idle cost.
   it('#697 consumer typecheck without @types/node', () => {
     execFileSync('node', ['tools/test/consumer-typecheck-no-node.mjs', '--skip-build'], {
       cwd: REPO,
@@ -125,5 +128,5 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
         PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}`,
       },
     });
-  }, 120_000);
+  }, 300_000);
 });

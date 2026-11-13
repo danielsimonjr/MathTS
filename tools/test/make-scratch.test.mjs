@@ -54,6 +54,20 @@ describe('makeScratch', () => {
     assert.equal(existsSync(result.stdout.trim()), false);
   });
 
+  // The child emits the signal event itself. This runs the registered handler on every platform;
+  // an operating-system kill (TerminateProcess on Windows, SIGKILL) runs no handler, and only the
+  // stale sweep of the next run removes that folder (see the next test).
+  for (const [signal, code] of [
+    ['SIGINT', 130],
+    ['SIGTERM', 143],
+  ]) {
+    it(`removes the folder and exits with ${code} when ${signal} is handled`, () => {
+      const result = runChild(root, `process.emit(${JSON.stringify(signal)});`);
+      assert.equal(result.status, code, result.stderr);
+      assert.equal(existsSync(result.stdout.trim()), false);
+    });
+  }
+
   it('sweeps a folder of the same prefix that is older than the stale limit, and keeps a fresh one', () => {
     const old = join(root, `${PREFIX}old`);
     const fresh = join(root, `${PREFIX}fresh`);

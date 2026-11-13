@@ -15752,7 +15752,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 130
+      "loc": 133
     },
     {
       "file": "tests/integration/examples-smoke.test.ts",
