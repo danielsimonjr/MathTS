@@ -58,6 +58,7 @@ export function gather(t: Tensor, axis: number, indices: readonly number[]): Ten
 
   const outSize = outShape.reduce((a, b) => a * b, 1);
   const outData = new Float64Array(outSize);
+  const tData = t.data;
 
   if (outSize > 0) {
     const inStrides = Tensor.rowMajorStrides(t.shape);
@@ -79,7 +80,7 @@ export function gather(t: Tensor, axis: number, indices: readonly number[]): Ten
         flatIn += inK * inStrides[k];
       }
 
-      outData[flatOut] = t.data[flatIn];
+      outData[flatOut] = tData[flatIn];
     }
   }
 

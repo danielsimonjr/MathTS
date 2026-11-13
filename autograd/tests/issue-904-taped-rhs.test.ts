@@ -1,79 +1,69 @@
 /**
- * #904 — every binary Tensor op accepts a TapedTensor as the right-hand operand.
- *
- * Each case compares the result with the same op on the plain primal Tensor.
- * The primal values are non-zero, so a wrong read cannot pass by accident.
+ * #904 — a plain Tensor op given a TapedTensor or DualTensor throws a TypeError
+ * that names the autograd op. It never returns a tensor with the tape dropped.
+ * A taped or dual tensor made from a strided view carries the view's logical values.
  */
 import { describe, it, expect } from 'vitest';
-import { Tensor, idx } from '@danielsimonjr/mathts-tensor';
-import { Tape, TapedTensor } from '@danielsimonjr/mathts-autograd';
+import { Tensor, slice } from '@danielsimonjr/mathts-tensor';
+import { Tape, TapedTensor, DualTensor } from '@danielsimonjr/mathts-autograd';
 
-const primal = new Tensor([2, 4], new Float64Array([1, 0, 2, 0, 0, 1, 0, 2]));
-const vec = new Tensor([4], new Float64Array([3, -1, 2, 5]));
+const W = new Tensor([2, 4], new Float64Array([1, 0, 2, 0, 0, 1, 0, 2]));
+const X = Tensor.fromNested([
+  [1, 2],
+  [3, 4],
+]);
+const taped = (t: Tensor) => TapedTensor.fromTensorAsInput(t, new Tape());
 
-function taped(t: Tensor): TapedTensor {
-  return TapedTensor.fromTensorAsInput(t, new Tape());
-}
-
-function expectSame(actual: Tensor, expected: Tensor): void {
-  expect([...actual.shape]).toEqual([...expected.shape]);
-  expect([...actual.contiguous().data]).toEqual([...expected.contiguous().data]);
-}
-
-describe('#904 TapedTensor as the right-hand operand', () => {
-  it('matmul accepts a TapedTensor (issue repro with non-zero weights)', () => {
-    const X = Tensor.fromNested([
-      [0, 0],
-      [1, 1],
-    ]);
-    const X2 = Tensor.fromNested([
-      [1, 2],
-      [3, 4],
-    ]);
-    expectSame(X2.matmul(taped(primal)), X2.matmul(primal));
-    expect(() => X.matmul(taped(primal))).not.toThrow();
+describe('#904 plain Tensor op with a TapedTensor operand', () => {
+  it('matmul throws a TypeError that names TapedTensor.matmul', () => {
+    expect(() => X.matmul(taped(W) as unknown as Tensor)).toThrow(TypeError);
+    expect(() => X.matmul(taped(W) as unknown as Tensor)).toThrow(/TapedTensor\.matmul/);
+    expect(() => X.matMul(taped(W) as unknown as Tensor)).toThrow(/TapedTensor\.matmul/);
   });
 
-  it('matMul accepts a TapedTensor', () => {
-    const X = Tensor.fromNested([
-      [1, 2],
-      [3, 4],
-    ]);
-    expectSame(X.matMul(taped(primal)), X.matMul(primal));
+  it('add, sub, mul, contract and tensordot name their autograd op', () => {
+    const t = taped(W) as unknown as Tensor;
+    const a = new Tensor([2, 4], new Float64Array(8));
+    expect(() => a.add(t)).toThrow(/TapedTensor\.add/);
+    expect(() => a.sub(t)).toThrow(/TapedTensor\.sub/);
+    expect(() => a.mul(t)).toThrow(/TapedTensor\.mul/);
+    expect(() => a.add_(t)).toThrow(/TapedTensor\.add/);
+    expect(() => a.tensordot(t, [[1, 0]])).toThrow(/TapedTensor\.tensordot/);
   });
 
-  it('add, sub, mul and div accept a TapedTensor, same shape and broadcast', () => {
-    const a = new Tensor([2, 4], new Float64Array([2, 2, 2, 2, 4, 4, 4, 4]));
-    expectSame(a.add(taped(primal)), a.add(primal));
-    expectSame(a.sub(taped(primal)), a.sub(primal));
-    expectSame(a.mul(taped(primal)), a.mul(primal));
-    expectSame(a.div(taped(primal)), a.div(primal));
-    expectSame(a.add(taped(vec)), a.add(vec));
-    expectSame(a.mul(taped(vec)), a.mul(vec));
+  it('an op without an autograd version says so', () => {
+    const t = taped(W) as unknown as Tensor;
+    const a = new Tensor([2, 4], new Float64Array(8));
+    expect(() => a.div(t)).toThrow(/TapedTensor has no div op/);
   });
 
-  it('add_ and mul_ accept a TapedTensor and write the result in place', () => {
-    const base = new Tensor([2, 4], new Float64Array([2, 2, 2, 2, 4, 4, 4, 4]));
-    expectSame(base.clone().add_(taped(primal)), base.clone().add_(primal));
-    expectSame(base.clone().mul_(taped(primal)), base.clone().mul_(primal));
-    expectSame(base.clone().add_(taped(vec)), base.clone().add_(vec));
+  it('a DualTensor operand throws too', () => {
+    const d = DualTensor.fromTensor(W) as unknown as Tensor;
+    expect(() => X.matmul(d)).toThrow(TypeError);
+    expect(() => new Tensor([2, 4], new Float64Array(8)).add(d)).toThrow(/DualTensor\.add/);
   });
 
-  it('dot and cross accept a rank-1 TapedTensor', () => {
-    const u = new Tensor([4], new Float64Array([1, 2, 3, 4]));
-    expect(u.dot(taped(vec))).toBe(u.dot(vec));
-    const c = new Tensor([3], new Float64Array([1, 0, 0]));
-    const c2 = new Tensor([3], new Float64Array([2, 3, 4]));
-    expectSame(c.cross(taped(c2)), c.cross(c2));
+  it('an unknown object operand throws a TypeError', () => {
+    expect(() => X.add({ shape: [2, 2] } as unknown as Tensor)).toThrow(/must be a Tensor/);
+  });
+});
+
+describe('#904 autograd inputs made from a strided view', () => {
+  const view = () =>
+    slice(new Tensor([2, 3], new Float64Array([1, 2, 3, 4, 5, 6])), [null, { step: -1 }]);
+
+  it('TapedTensor.fromTensorAsInput copies the logical values', () => {
+    expect([...taped(view()).data]).toEqual([3, 2, 1, 6, 5, 4]);
   });
 
-  it('tensordot and contract accept a TapedTensor', () => {
-    const i = idx(2, 'i');
-    const j = idx(2, 'j');
-    const k = idx(4, 'k');
-    const A = new Tensor([2, 2], new Float64Array([1, 2, 3, 4]), [i, j]);
-    const W = new Tensor([2, 4], primal.data, [j, k]);
-    expectSame(A.tensordot(taped(primal), [[1, 0]]), A.tensordot(primal, [[1, 0]]));
-    expectSame(A.contract(taped(W)), A.contract(W));
+  it('DualTensor.fromTensor copies the logical values', () => {
+    expect([...DualTensor.fromTensor(view()).data]).toEqual([3, 2, 1, 6, 5, 4]);
+  });
+
+  it('a plain Tensor times a view-made TapedTensor weight takes the TapedTensor path', () => {
+    const tape = new Tape();
+    const w = TapedTensor.fromTensorAsInput(view(), tape);
+    const x = TapedTensor.fromTensorAsInput(new Tensor([1, 2], new Float64Array([1, 0])), tape);
+    expect([...x.matmul(w).data]).toEqual([3, 2, 1]);
   });
 });

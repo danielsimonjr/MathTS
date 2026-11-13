@@ -1,5 +1,5 @@
 ---
-'@danielsimonjr/mathts-tensor': patch
+'@danielsimonjr/mathts-tensor': minor
 ---
 
-Binary `Tensor` ops accept a `TapedTensor` as the right-hand operand, and read a strided view by its logical elements (#904).
+A binary `Tensor` op given a `TapedTensor` or `DualTensor` operand throws a `TypeError` that names the autograd op to use. Binary ops read a strided view operand by its logical values (#904).

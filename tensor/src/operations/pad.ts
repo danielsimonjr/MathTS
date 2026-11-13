@@ -87,6 +87,7 @@ export function pad(
   const outShape = t.shape.map((d, k) => d + padWidths[k][0] + padWidths[k][1]);
   const outSize = outShape.reduce((a, b) => a * b, 1);
   const outData = new Float64Array(outSize);
+  const tData = t.data;
 
   if (mode === 'constant') {
     // Fill entire output with constantValue (Float64Array is 0-filled by default).
@@ -152,7 +153,7 @@ export function pad(
     }
 
     if (inBounds) {
-      outData[flatOut] = t.data[flatIn];
+      outData[flatOut] = tData[flatIn];
     }
     // For constant mode, out-of-bounds cells already have fillValue.
   }

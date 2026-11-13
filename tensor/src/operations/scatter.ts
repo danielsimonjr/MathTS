@@ -106,6 +106,7 @@ export function scatter(
 
   // Copy input data into output.
   const outData = new Float64Array(t.data);
+  const updData = updates.data;
 
   if (indices.length > 0) {
     const inStrides = Tensor.rowMajorStrides(t.shape);
@@ -133,9 +134,9 @@ export function scatter(
       }
 
       if (reduce === 'add') {
-        outData[flatOut] += updates.data[flatUpd];
+        outData[flatOut] += updData[flatUpd];
       } else {
-        outData[flatOut] = updates.data[flatUpd];
+        outData[flatOut] = updData[flatUpd];
       }
     }
   }

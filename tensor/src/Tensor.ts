@@ -50,25 +50,49 @@ export interface EinsumSpec {
   readonly free: ReadonlyArray<{ readonly operand: number; readonly axis: number }>;
 }
 
-/**
- * A right-hand operand of a binary {@link Tensor} op: a `Tensor`, or any value
- * with the same `shape` and a `data` getter that returns its primal values, such
- * as an autograd `TapedTensor`. The op reads those values and returns a plain
- * `Tensor` with no gradient.
- */
-export interface TensorLike {
-  readonly shape: ReadonlyArray<number>;
-  readonly data: Float64Array;
-  readonly axisLabels?: ReadonlyArray<Index>;
+const TAPED_OPS: ReadonlySet<string> = new Set([
+  'add',
+  'sub',
+  'mul',
+  'matmul',
+  'contract',
+  'tensordot',
+]);
+const DUAL_OPS: ReadonlySet<string> = new Set(['add', 'sub', 'mul']);
+
+function autogradHint(kind: 'TapedTensor' | 'DualTensor', op: string, ops: ReadonlySet<string>) {
+  const name = op.replace(/_$/, '');
+  const factory =
+    kind === 'TapedTensor'
+      ? 'TapedTensor.fromTensorAsInput(tensor, tape)'
+      : 'DualTensor.fromTensor(tensor)';
+  return ops.has(name)
+    ? `Wrap this Tensor with ${factory} and call ${kind}.${name}.`
+    : `${kind} has no ${name} op; compose it from ${[...ops].join(', ')}.`;
 }
 
 /**
- * Normalises a binary-op operand to a C-contiguous `Tensor`, so every op reads
- * logical elements. A `TensorLike` is wrapped without a copy of its `data`.
+ * Checks a binary-op operand. A `Tensor` passes through. An autograd value
+ * (`TapedTensor`, `DualTensor`) throws a `TypeError`: a plain `Tensor` op would
+ * return a tensor with no gradient or tangent and drop the derivative silently.
  */
-function asTensorOperand(other: Tensor | TensorLike): Tensor {
-  const t = other instanceof Tensor ? other : new Tensor(other.shape, other.data, other.axisLabels);
-  return t.contiguous();
+function asTensorOperand(op: string, other: unknown): Tensor {
+  if (other instanceof Tensor) return other;
+  if (typeof other === 'object' && other !== null) {
+    if ('tape' in other) {
+      throw new TypeError(
+        `Tensor.${op}: operand is a TapedTensor, so a plain Tensor op would drop its gradient. ` +
+          autogradHint('TapedTensor', op, TAPED_OPS)
+      );
+    }
+    if ('tangent' in other) {
+      throw new TypeError(
+        `Tensor.${op}: operand is a DualTensor, so a plain Tensor op would drop its tangent. ` +
+          autogradHint('DualTensor', op, DUAL_OPS)
+      );
+    }
+  }
+  throw new TypeError(`Tensor.${op}: operand must be a Tensor`);
 }
 
 /**
@@ -80,16 +104,25 @@ function asTensorOperand(other: Tensor | TensorLike): Tensor {
  * `TypeError: data must be a Float64Array`. The constructor throws when
  * `data.length` is not the product of `shape`, or when `axisLabels` is given
  * and its length is not the rank.
+ *
+ * A view (`slice` with a step, an offset or a negative step) shares the `buffer`
+ * of its parent. `data` always returns the logical values; `buffer`, `offset`
+ * and `strides` describe the raw storage.
  */
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
-  readonly data: Float64Array;
-  /** Byte offset in elements from the start of `data` for the logical index [0,…,0]. */
+  /**
+   * Raw backing storage, shared with the parent tensor for a view. Index it with
+   * `offset` and `strides`. Use {@link Tensor.data} for the logical values.
+   */
+  readonly buffer: Float64Array;
+  /** Byte offset in elements from the start of `buffer` for the logical index [0,…,0]. */
   readonly offset: number;
   /** Per-axis strides in elements (defaults to row-major when omitted at construction). */
   readonly strides: number[];
   /** Optional per-axis Index labels. When set, enables `contract`, `replaceIndex`, `axisOf`. */
   readonly axisLabels?: ReadonlyArray<Index>;
+  private readonly contiguousFlag: boolean;
 
   constructor(
     shape: ReadonlyArray<number>,
@@ -127,9 +160,15 @@ export class Tensor {
       );
     }
     this.shape = shape;
-    this.data = data;
+    this.buffer = data;
     this.offset = offset;
     this.strides = strides;
+    const want = Tensor.rowMajorStrides(shape);
+    this.contiguousFlag =
+      offset === 0 &&
+      strides.length === want.length &&
+      strides.every((st, i) => st === want[i]) &&
+      data.length === Tensor.sizeOf(shape);
     if (axisLabels !== undefined) {
       this.axisLabels = [...axisLabels];
     }
@@ -265,13 +304,19 @@ export class Tensor {
     return new Tensor([len], out);
   }
 
+  /**
+   * Logical element values in row-major order. For a C-contiguous tensor this is
+   * the backing `buffer` itself (writes show through). For a view it is a new
+   * dense copy: writes to it do not reach the tensor, and each read copies, so
+   * read it once into a local. Use `buffer`, `offset` and `strides` for raw storage.
+   */
+  get data(): Float64Array {
+    return this.isContiguous() ? this.buffer : this.contiguous().buffer;
+  }
+
   /** True when storage is a dense C-contiguous slab (no parent-buffer view aliasing). */
   isContiguous(): boolean {
-    if (this.offset !== 0) return false;
-    const want = Tensor.rowMajorStrides(this.shape);
-    const stridesMatch =
-      this.strides.length === want.length && this.strides.every((st, i) => st === want[i]);
-    return stridesMatch && this.data.length === Tensor.sizeOf(this.shape);
+    return this.contiguousFlag;
   }
 
   /** Return a row-major C-contiguous copy when this tensor is a non-contiguous view. */
@@ -284,7 +329,7 @@ export class Tensor {
     for (let flat = 0; flat < size; flat++) {
       let idx = this.offset;
       for (let k = 0; k < rank; k++) idx += coords[k]! * this.strides[k]!;
-      out[flat] = this.data[idx]!;
+      out[flat] = this.buffer[idx]!;
       for (let k = rank - 1; k >= 0; k--) {
         if (++coords[k]! < this.shape[k]!) break;
         coords[k] = 0;
@@ -294,12 +339,13 @@ export class Tensor {
   }
 
   toNested(): NestedArray {
-    if (this.shape.length === 0) return this.data[0];
+    const values = this.data;
+    if (this.shape.length === 0) return values[0];
     const strides = Tensor.rowMajorStrides(this.shape);
     const build = (depth: number, offset: number): NestedArray => {
       if (depth === this.shape.length - 1) {
         const row: number[] = [];
-        for (let i = 0; i < this.shape[depth]; i++) row.push(this.data[offset + i]);
+        for (let i = 0; i < this.shape[depth]; i++) row.push(values[offset + i]);
         return row;
       }
       const out: NestedArray[] = [];
@@ -328,7 +374,7 @@ export class Tensor {
         `Tensor.toDenseMatrix: expected a rank-2 tensor, got rank ${this.shape.length}`
       );
     }
-    return new DenseMatrix(this.shape[0], this.shape[1], this.data.slice());
+    return new DenseMatrix(this.shape[0], this.shape[1], this.contiguous().buffer.slice());
   }
 
   private sameShape(other: Tensor): boolean {
@@ -337,14 +383,14 @@ export class Tensor {
     );
   }
 
-  add(operand: Tensor | TensorLike | number): Tensor {
+  add(operand: Tensor | number): Tensor {
     const a = this.data;
     if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
       for (let i = 0; i < a.length; i++) out[i] = a[i] + operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
-    const other = asTensorOperand(operand);
+    const other = asTensorOperand('add', operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -353,14 +399,14 @@ export class Tensor {
     }
     return Tensor.broadcastOp(this, other, 'add', (x, y) => x + y);
   }
-  sub(operand: Tensor | TensorLike | number): Tensor {
+  sub(operand: Tensor | number): Tensor {
     const a = this.data;
     if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
       for (let i = 0; i < a.length; i++) out[i] = a[i] - operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
-    const other = asTensorOperand(operand);
+    const other = asTensorOperand('sub', operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -369,11 +415,11 @@ export class Tensor {
     }
     return Tensor.broadcastOp(this, other, 'sub', (x, y) => x - y);
   }
-  mul(operand: Tensor | TensorLike | number): Tensor {
+  mul(operand: Tensor | number): Tensor {
     if (typeof operand === 'number') {
       return this.scale(operand);
     }
-    const other = asTensorOperand(operand);
+    const other = asTensorOperand('mul', operand);
     const a = this.data;
     if (this.sameShape(other)) {
       const b = other.data;
@@ -384,14 +430,14 @@ export class Tensor {
     return Tensor.broadcastOp(this, other, 'mul', (x, y) => x * y);
   }
   /** Element-wise division; broadcasts like `mul`. Division by zero follows IEEE-754. */
-  div(operand: Tensor | TensorLike | number): Tensor {
+  div(operand: Tensor | number): Tensor {
     const a = this.data;
     if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
       for (let i = 0; i < a.length; i++) out[i] = a[i] / operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
-    const other = asTensorOperand(operand);
+    const other = asTensorOperand('div', operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -420,7 +466,7 @@ export class Tensor {
   /** Deep copy: independent data buffer; shape and axisLabels are carried over. */
   clone(): Tensor {
     const c = this.contiguous();
-    return new Tensor([...this.shape], c.data.slice(), this.axisLabels);
+    return new Tensor([...this.shape], c.buffer.slice(), this.axisLabels);
   }
 
   /** Visit each logical element and write `fn(current)` back through strides. */
@@ -429,14 +475,15 @@ export class Tensor {
     const rank = this.shape.length;
     if (size === 0) return;
     if (this.isContiguous()) {
-      for (let i = 0; i < size; i++) this.data[i] = fn(this.data[i]!);
+      const buf = this.buffer;
+      for (let i = 0; i < size; i++) buf[i] = fn(buf[i]!);
       return;
     }
     const coords = new Array<number>(rank).fill(0);
     for (let flat = 0; flat < size; flat++) {
       let idx = this.offset;
       for (let k = 0; k < rank; k++) idx += coords[k]! * this.strides[k]!;
-      this.data[idx] = fn(this.data[idx]!);
+      this.buffer[idx] = fn(this.buffer[idx]!);
       for (let k = rank - 1; k >= 0; k--) {
         if (++coords[k]! < this.shape[k]!) break;
         coords[k] = 0;
@@ -450,14 +497,14 @@ export class Tensor {
    */
   private inplaceBinary(
     op: 'add_' | 'mul_',
-    operand: Tensor | TensorLike | number,
+    operand: Tensor | number,
     combine: (current: number, rhs: number) => number
   ): this {
     if (typeof operand === 'number') {
       this.writeEach((v) => combine(v, operand));
       return this;
     }
-    const other = asTensorOperand(operand);
+    const other = asTensorOperand(op, operand);
     let outShape: number[];
     try {
       outShape = Tensor.broadcastShape(this.shape, other.shape);
@@ -471,8 +518,9 @@ export class Tensor {
       );
     }
     if (this.sameShape(other) && this.isContiguous() && other.isContiguous()) {
-      const b = other.data;
-      for (let i = 0; i < this.data.length; i++) this.data[i] = combine(this.data[i]!, b[i]!);
+      const b = other.buffer;
+      const buf = this.buffer;
+      for (let i = 0; i < buf.length; i++) buf[i] = combine(buf[i]!, b[i]!);
       return this;
     }
     const rank = this.shape.length;
@@ -489,7 +537,7 @@ export class Tensor {
           otherIdx += coords[k]! * other.strides[otherAxis]!;
         }
       }
-      this.data[selfIdx] = combine(this.data[selfIdx]!, other.data[otherIdx]!);
+      this.buffer[selfIdx] = combine(this.buffer[selfIdx]!, other.buffer[otherIdx]!);
       for (let k = rank - 1; k >= 0; k--) {
         if (++coords[k]! < this.shape[k]!) break;
         coords[k] = 0;
@@ -503,17 +551,17 @@ export class Tensor {
     return this;
   }
 
-  add_(other: Tensor | TensorLike | number, alpha = 1): this {
+  add_(other: Tensor | number, alpha = 1): this {
     return this.inplaceBinary('add_', other, (v, rhs) => v + alpha * rhs);
   }
 
-  mul_(other: Tensor | TensorLike | number): this {
+  mul_(other: Tensor | number): this {
     return this.inplaceBinary('mul_', other, (v, rhs) => v * rhs);
   }
 
   /** Inner product of two rank-1 tensors (PyTorch `dot`). */
-  dot(operand: Tensor | TensorLike): number {
-    const other = asTensorOperand(operand);
+  dot(operand: Tensor): number {
+    const other = asTensorOperand('dot', operand);
     if (this.shape.length !== 1 || other.shape.length !== 1) {
       throw new Error('Tensor.dot: both operands must be rank-1');
     }
@@ -528,8 +576,8 @@ export class Tensor {
   }
 
   /** 3-vector cross product (PyTorch `cross` for length-3 vectors). */
-  cross(operand: Tensor | TensorLike): Tensor {
-    const other = asTensorOperand(operand);
+  cross(operand: Tensor): Tensor {
+    const other = asTensorOperand('cross', operand);
     if (this.shape.length !== 1 || other.shape.length !== 1 || this.shape[0] !== 3) {
       throw new Error('Tensor.cross: both operands must be rank-1 vectors of length 3');
     }
@@ -562,8 +610,9 @@ export class Tensor {
 
   normInf(): number {
     let max = 0;
-    for (let i = 0; i < this.data.length; i++) {
-      const a = Math.abs(this.data[i]);
+    const values = this.data;
+    for (let i = 0; i < values.length; i++) {
+      const a = Math.abs(values[i]);
       if (a > max) max = a;
     }
     return max;
@@ -639,6 +688,8 @@ export class Tensor {
       }
     }
 
+    const aData = a.data;
+    const bData = b.data;
     const out = new Float64Array(outSize);
     const coords = new Array<number>(rank).fill(0);
     for (let n = 0; n < outSize; n++) {
@@ -649,7 +700,7 @@ export class Tensor {
         aFlat += coords[k] * aEffStrides[k];
         bFlat += coords[k] * bEffStrides[k];
       }
-      out[n] = f(a.data[aFlat], b.data[bFlat]);
+      out[n] = f(aData[aFlat], bData[bFlat]);
       // increment coords (row-major)
       for (let k = rank - 1; k >= 0; k--) {
         if (++coords[k] < outShape[k]) break;
@@ -893,8 +944,8 @@ export class Tensor {
    *
    * Delegates to `Tensor.einsum` under the hood.
    */
-  tensordot(operand: Tensor | TensorLike, axes: ReadonlyArray<readonly [number, number]>): Tensor {
-    const other = asTensorOperand(operand);
+  tensordot(operand: Tensor, axes: ReadonlyArray<readonly [number, number]>): Tensor {
+    const other = asTensorOperand('tensordot', operand);
     const selfRank = this.shape.length;
     const otherRank = other.shape.length;
 
@@ -1036,8 +1087,8 @@ export class Tensor {
   }
 
   /** Batched matrix multiply; `matMul` is an alias (#753). */
-  matmul(operand: Tensor | TensorLike): Tensor {
-    const other = asTensorOperand(operand);
+  matmul(operand: Tensor): Tensor {
+    const other = asTensorOperand('matmul', operand);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
     if (rankA < 2 || rankB < 2) {
@@ -1086,7 +1137,7 @@ export class Tensor {
     return new Tensor([...batchShape, m, n], yData);
   }
 
-  matMul(other: Tensor | TensorLike): Tensor {
+  matMul(other: Tensor): Tensor {
     return this.matmul(other);
   }
 
@@ -1224,7 +1275,7 @@ export class Tensor {
     const pos = this.axisPosition(oldIndex, 'replaceIndex');
     const newLabels = [...this.axisLabels!];
     newLabels[pos] = newIndex;
-    return new Tensor([...this.shape], this.data.slice(), newLabels);
+    return new Tensor([...this.shape], this.contiguous().buffer.slice(), newLabels);
   }
 
   /**
@@ -1253,8 +1304,8 @@ export class Tensor {
    * - If there are no shared indices (use `einsum` or an explicit outer product).
    * - If a shared index has mismatched dimensions on the two operands.
    */
-  contract(operand: Tensor | TensorLike): Tensor {
-    const other = asTensorOperand(operand);
+  contract(operand: Tensor): Tensor {
+    const other = asTensorOperand('contract', operand);
     if (this.axisLabels === undefined || other.axisLabels === undefined) {
       throw new Error('Tensor.contract requires axisLabels on both operands');
     }
