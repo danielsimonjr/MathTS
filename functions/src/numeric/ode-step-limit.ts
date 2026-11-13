@@ -23,7 +23,7 @@ function _stiffnessHint(ctx: ODEStepLimitContext): string {
   const rejectRatio = ctx.attempts > 0 ? (ctx.attempts - ctx.acceptedSteps) / ctx.attempts : 0;
   const stepFrac = ctx.lastStepMag === undefined ? 1 : ctx.lastStepMag / span;
   if (rejectRatio >= 0.05 && stepFrac < 1e-3) {
-    return ' Explicit RK stopped before tFinal — this often indicates a stiff system; try solveODE(..., { method: "BDF" | "Radau" | "Rosenbrock" }).';
+    return ' Explicit RK stopped before tFinal. If the system is stiff, try solveODE(..., { method: "BDF" | "Radau" | "Rosenbrock" | "RODAS" }).';
   }
   return '';
 }

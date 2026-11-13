@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mod, lcm, evaluate, bignumber, fraction } from '@danielsimonjr/mathts-functions';
+import { mod, lcm, evaluate, bignumber, fraction, solveODE } from '@danielsimonjr/mathts-functions';
 import { mod as arithmeticMod } from '@danielsimonjr/mathts-arithmetic';
 import { create, all } from '@danielsimonjr/mathts-compat';
 import {
@@ -278,5 +278,39 @@ describe('#923 — mod(x, 0) returns x (mathjs rule), on every path', () => {
   it('BigNumber and Fraction zero divisor return the dividend', () => {
     expect(mod(bignumber(10), bignumber(0)).toString()).toBe('10');
     expect(mod(fraction(10), fraction(0)).toString()).toBe('10');
+  });
+});
+
+describe('ODE maxIter message names the stiff drivers neutrally (WS-A)', () => {
+  it('RK45 maxIter exhaustion on a stiff run names BDF, Radau, Rosenbrock and RODAS as options', () => {
+    // Robertson-type kinetics: explicit RK rejects steps and stops short of tFinal.
+    const robertson = (_t: number, y: number[]): number[] => [
+      -0.04 * y[0] + 1e4 * y[1] * y[2],
+      0.04 * y[0] - 1e4 * y[1] * y[2] - 3e7 * y[1] * y[1],
+      3e7 * y[1] * y[1],
+    ];
+    let message = '';
+    try {
+      solveODE(robertson, [0, 40], [1, 0, 0], { method: 'RK45', maxIter: 5 });
+    } catch (e) {
+      message = (e as Error).message;
+    }
+    expect(message).toMatch(/solveODE RK45: exceeded maxIter=5 /);
+    for (const name of ['BDF', 'Radau', 'Rosenbrock', 'RODAS']) expect(message).toContain(name);
+    expect(message).not.toMatch(/often indicates a stiff system/);
+    expect(message).toMatch(/If the system is stiff/);
+  });
+});
+
+describe('solveODE sol.y layout (WS-A documentation)', () => {
+  it('sol.y[i] is the state vector (length of y0) at sol.t[i]', () => {
+    const sol = solveODE((_t: number, y: number[]) => [y[1], -y[0]], [0, 1], [1, 0], { tol: 1e-8 });
+    expect(sol.y.length).toBe(sol.t.length);
+    for (const row of sol.y) expect(row.length).toBe(2);
+    // y0 = [1, 0] is the state at t[0]; the first oscillator state is cos(t).
+    expect(sol.t[0]).toBe(0);
+    expect(sol.y[0]).toEqual([1, 0]);
+    const last = sol.t.length - 1;
+    expect(sol.y[last][0]).toBeCloseTo(Math.cos(sol.t[last]), 6);
   });
 });
