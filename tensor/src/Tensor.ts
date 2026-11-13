@@ -51,12 +51,35 @@ export interface EinsumSpec {
 }
 
 /**
+ * A right-hand operand of a binary {@link Tensor} op: a `Tensor`, or any value
+ * with the same `shape` and a `data` getter that returns its primal values, such
+ * as an autograd `TapedTensor`. The op reads those values and returns a plain
+ * `Tensor` with no gradient.
+ */
+export interface TensorLike {
+  readonly shape: ReadonlyArray<number>;
+  readonly data: Float64Array;
+  readonly axisLabels?: ReadonlyArray<Index>;
+}
+
+/**
+ * Normalises a binary-op operand to a C-contiguous `Tensor`, so every op reads
+ * logical elements. A `TensorLike` is wrapped without a copy of its `data`.
+ */
+function asTensorOperand(other: Tensor | TensorLike): Tensor {
+  const t = other instanceof Tensor ? other : new Tensor(other.shape, other.data, other.axisLabels);
+  return t.contiguous();
+}
+
+/**
  * Dense N-dimensional array of float64 values in row-major (C) order.
- * The constructor keeps a reference to `data` and does not copy it.
- * `data` must already be a `Float64Array` (`TypeError: data must be a Float64Array`
- * otherwise — Float32Array, Int32Array, plain arrays, and array-likes are rejected,
- * not converted). The constructor throws when `data.length` is not the product of
- * `shape`, or when `axisLabels` is given and its length is not the rank.
+ * A `Float64Array` is stored by reference: the constructor does not copy it.
+ * A `Float32Array` is copied into a new `Float64Array`; each value widens
+ * exactly, so the tensor never aliases the source. Any other type, such as an
+ * `Int32Array`, a plain array or an array-like, throws
+ * `TypeError: data must be a Float64Array`. The constructor throws when
+ * `data.length` is not the product of `shape`, or when `axisLabels` is given
+ * and its length is not the rank.
  */
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
@@ -70,10 +93,13 @@ export class Tensor {
 
   constructor(
     shape: ReadonlyArray<number>,
-    data: Float64Array,
+    data: Float64Array | Float32Array,
     axisLabels?: ReadonlyArray<Index>,
     storage?: TensorStorage
   ) {
+    if (data instanceof Float32Array) {
+      data = Float64Array.from(data);
+    }
     if (!(data instanceof Float64Array)) {
       throw new TypeError('Tensor: data must be a Float64Array');
     }
@@ -311,13 +337,14 @@ export class Tensor {
     );
   }
 
-  add(other: Tensor | number): Tensor {
+  add(operand: Tensor | TensorLike | number): Tensor {
     const a = this.data;
-    if (typeof other === 'number') {
+    if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
-      for (let i = 0; i < a.length; i++) out[i] = a[i] + other;
+      for (let i = 0; i < a.length; i++) out[i] = a[i] + operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
+    const other = asTensorOperand(operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -326,13 +353,14 @@ export class Tensor {
     }
     return Tensor.broadcastOp(this, other, 'add', (x, y) => x + y);
   }
-  sub(other: Tensor | number): Tensor {
+  sub(operand: Tensor | TensorLike | number): Tensor {
     const a = this.data;
-    if (typeof other === 'number') {
+    if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
-      for (let i = 0; i < a.length; i++) out[i] = a[i] - other;
+      for (let i = 0; i < a.length; i++) out[i] = a[i] - operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
+    const other = asTensorOperand(operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -341,10 +369,11 @@ export class Tensor {
     }
     return Tensor.broadcastOp(this, other, 'sub', (x, y) => x - y);
   }
-  mul(other: Tensor | number): Tensor {
-    if (typeof other === 'number') {
-      return this.scale(other);
+  mul(operand: Tensor | TensorLike | number): Tensor {
+    if (typeof operand === 'number') {
+      return this.scale(operand);
     }
+    const other = asTensorOperand(operand);
     const a = this.data;
     if (this.sameShape(other)) {
       const b = other.data;
@@ -355,13 +384,14 @@ export class Tensor {
     return Tensor.broadcastOp(this, other, 'mul', (x, y) => x * y);
   }
   /** Element-wise division; broadcasts like `mul`. Division by zero follows IEEE-754. */
-  div(other: Tensor | number): Tensor {
+  div(operand: Tensor | TensorLike | number): Tensor {
     const a = this.data;
-    if (typeof other === 'number') {
+    if (typeof operand === 'number') {
       const out = new Float64Array(a.length);
-      for (let i = 0; i < a.length; i++) out[i] = a[i] / other;
+      for (let i = 0; i < a.length; i++) out[i] = a[i] / operand;
       return new Tensor(this.shape, out, this.axisLabels);
     }
+    const other = asTensorOperand(operand);
     if (this.sameShape(other)) {
       const b = other.data;
       const out = new Float64Array(a.length);
@@ -420,13 +450,14 @@ export class Tensor {
    */
   private inplaceBinary(
     op: 'add_' | 'mul_',
-    other: Tensor | number,
+    operand: Tensor | TensorLike | number,
     combine: (current: number, rhs: number) => number
   ): this {
-    if (typeof other === 'number') {
-      this.writeEach((v) => combine(v, other));
+    if (typeof operand === 'number') {
+      this.writeEach((v) => combine(v, operand));
       return this;
     }
+    const other = asTensorOperand(operand);
     let outShape: number[];
     try {
       outShape = Tensor.broadcastShape(this.shape, other.shape);
@@ -472,16 +503,17 @@ export class Tensor {
     return this;
   }
 
-  add_(other: Tensor | number, alpha = 1): this {
+  add_(other: Tensor | TensorLike | number, alpha = 1): this {
     return this.inplaceBinary('add_', other, (v, rhs) => v + alpha * rhs);
   }
 
-  mul_(other: Tensor | number): this {
+  mul_(other: Tensor | TensorLike | number): this {
     return this.inplaceBinary('mul_', other, (v, rhs) => v * rhs);
   }
 
   /** Inner product of two rank-1 tensors (PyTorch `dot`). */
-  dot(other: Tensor): number {
+  dot(operand: Tensor | TensorLike): number {
+    const other = asTensorOperand(operand);
     if (this.shape.length !== 1 || other.shape.length !== 1) {
       throw new Error('Tensor.dot: both operands must be rank-1');
     }
@@ -489,14 +521,15 @@ export class Tensor {
       throw new Error(`Tensor.dot: length mismatch ${this.shape[0]} vs ${other.shape[0]}`);
     }
     const a = this.contiguous().data;
-    const b = other.contiguous().data;
+    const b = other.data;
     let sum = 0;
     for (let i = 0; i < a.length; i++) sum += a[i]! * b[i]!;
     return sum;
   }
 
   /** 3-vector cross product (PyTorch `cross` for length-3 vectors). */
-  cross(other: Tensor): Tensor {
+  cross(operand: Tensor | TensorLike): Tensor {
+    const other = asTensorOperand(operand);
     if (this.shape.length !== 1 || other.shape.length !== 1 || this.shape[0] !== 3) {
       throw new Error('Tensor.cross: both operands must be rank-1 vectors of length 3');
     }
@@ -504,7 +537,7 @@ export class Tensor {
       throw new Error('Tensor.cross: both operands must be rank-1 vectors of length 3');
     }
     const a = this.contiguous().data;
-    const b = other.contiguous().data;
+    const b = other.data;
     const out = new Float64Array([
       a[1]! * b[2]! - a[2]! * b[1]!,
       a[2]! * b[0]! - a[0]! * b[2]!,
@@ -860,7 +893,8 @@ export class Tensor {
    *
    * Delegates to `Tensor.einsum` under the hood.
    */
-  tensordot(other: Tensor, axes: ReadonlyArray<readonly [number, number]>): Tensor {
+  tensordot(operand: Tensor | TensorLike, axes: ReadonlyArray<readonly [number, number]>): Tensor {
+    const other = asTensorOperand(operand);
     const selfRank = this.shape.length;
     const otherRank = other.shape.length;
 
@@ -1002,7 +1036,8 @@ export class Tensor {
   }
 
   /** Batched matrix multiply; `matMul` is an alias (#753). */
-  matmul(other: Tensor): Tensor {
+  matmul(operand: Tensor | TensorLike): Tensor {
+    const other = asTensorOperand(operand);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
     if (rankA < 2 || rankB < 2) {
@@ -1032,7 +1067,7 @@ export class Tensor {
     }
 
     const aData = this.contiguous().data;
-    const bData = other.contiguous().data;
+    const bData = other.data;
     let batchSize = 1;
     for (let b = 0; b < batchRank; b++) batchSize *= this.shape[b]!;
     const yData = new Float64Array(batchSize * m * n);
@@ -1051,7 +1086,7 @@ export class Tensor {
     return new Tensor([...batchShape, m, n], yData);
   }
 
-  matMul(other: Tensor): Tensor {
+  matMul(other: Tensor | TensorLike): Tensor {
     return this.matmul(other);
   }
 
@@ -1218,7 +1253,8 @@ export class Tensor {
    * - If there are no shared indices (use `einsum` or an explicit outer product).
    * - If a shared index has mismatched dimensions on the two operands.
    */
-  contract(other: Tensor): Tensor {
+  contract(operand: Tensor | TensorLike): Tensor {
+    const other = asTensorOperand(operand);
     if (this.axisLabels === undefined || other.axisLabels === undefined) {
       throw new Error('Tensor.contract requires axisLabels on both operands');
     }

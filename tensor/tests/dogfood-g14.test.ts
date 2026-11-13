@@ -150,10 +150,12 @@ describe('dogfood G14 — #749 stack default axis', () => {
 });
 
 describe('dogfood G14 — #748 constructor Float64Array contract', () => {
-  it('rejects Float32Array at runtime', () => {
-    expect(
-      () => new Tensor([2, 2], new Float32Array([1, 2, 3, 4]) as unknown as Float64Array)
-    ).toThrow(/data must be a Float64Array/);
+  it('accepts Float32Array by copy to float64 (#941)', () => {
+    const src = new Float32Array([1, 2, 3, 4]);
+    const t = new Tensor([2, 2], src);
+    expect(t.data).toBeInstanceOf(Float64Array);
+    expect([...t.data]).toEqual([1, 2, 3, 4]);
+    expect(t.data.buffer).not.toBe(src.buffer);
   });
 
   it('rejects Int32Array at runtime', () => {
