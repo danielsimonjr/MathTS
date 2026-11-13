@@ -269,6 +269,92 @@ const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
 const addForNumberPath: { fn?: object } = {};
 const subtractForNumberPath: { fn?: object } = {};
 const multiplyForNumberPath: { fn?: object } = {};
+const divideForNumberPath: { fn?: object } = {};
+const divOp: ScalarOp = (x, y) => (divide as unknown as ScalarOp)(x, y);
+
+// =============================================================================
+// Scalar x collection signatures
+// =============================================================================
+
+/**
+ * The scalar types, other than `number`, that combine with a collection. They go through the
+ * element-wise walk, whose leaves fold through the binary operation (so a `Unit` keeps its
+ * dimension check, and a `Complex`, `Fraction` or `BigNumber` keeps its type). `number` keeps
+ * the rows that each function writes out (`gen-public-overloads` reads the public overloads of
+ * `add` from those source rows, and it cannot read rows that a helper builds).
+ */
+const OTHER_SCALAR_TYPES = ['Unit', 'Complex', 'Fraction', 'BigNumber'] as const;
+const ALL_SCALAR_TYPES = ['number', ...OTHER_SCALAR_TYPES] as const;
+const COLLECTION_TYPES = ['Array', 'DenseMatrix', 'SparseMatrix'] as const;
+
+type CollectionKernel = (a: unknown, b: unknown) => unknown;
+
+/** What an operation runs for an Array operand, and for a matrix operand of either storage. */
+interface CollectionKernels {
+  array: CollectionKernel;
+  matrix: CollectionKernel;
+}
+
+/**
+ * The kernels of an operation that applies to each element. `path.fn` is the public typed
+ * function (it holds the `number, number` row of the fast path) and `leaf` is the same
+ * operation for any pair of scalars. Both are read at call time, after all are defined.
+ */
+function elementwiseKernels(path: { fn?: object }, leaf: ScalarOp): CollectionKernels {
+  return {
+    array: (a, b) => elementwiseNumber(path.fn!, leaf, a, b),
+    matrix: (a, b) => elementwiseMatrixNumber(path.fn!, leaf, a, b),
+  };
+}
+
+/**
+ * Signatures `<scalar>, <collection>` (from `scalarFirst`) and `<collection>, <scalar>`
+ * (from `collectionFirst`) for each of `scalars` and each collection of
+ * {@link COLLECTION_TYPES}. `add`, `subtract` and `multiply` pass the same kernels for both
+ * orders and the scalars of {@link OTHER_SCALAR_TYPES}; `divide` passes
+ * {@link ALL_SCALAR_TYPES}. A matrix operand keeps its matrix type and its storage.
+ */
+function scalarCollectionSignatures(
+  order: {
+    scalarFirst?: CollectionKernels;
+    collectionFirst?: CollectionKernels;
+  },
+  scalars: readonly string[] = OTHER_SCALAR_TYPES
+): Record<string, CollectionKernel> {
+  const rows: Record<string, CollectionKernel> = {};
+  for (const scalar of scalars) {
+    for (const collection of COLLECTION_TYPES) {
+      const pick = (kernels: CollectionKernels): CollectionKernel =>
+        collection === 'Array' ? kernels.array : kernels.matrix;
+      if (order.scalarFirst) rows[`${scalar}, ${collection}`] = pick(order.scalarFirst);
+      if (order.collectionFirst) rows[`${collection}, ${scalar}`] = pick(order.collectionFirst);
+    }
+  }
+  return rows;
+}
+
+const addKernels = elementwiseKernels(addForNumberPath, addOp);
+const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
+const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp);
+const divideKernels = elementwiseKernels(divideForNumberPath, divOp);
+
+function rejectScalarOverCollection(): never {
+  throw new TypeError(
+    'divide(scalar, collection) is a matrix division and needs the inverse of the collection. ' +
+      'Use dotDivide(scalar, collection) to divide by each element, or ' +
+      'multiply(scalar, inv(matrix)) for a square matrix.'
+  );
+}
+
+/**
+ * `divide(scalar, collection)` is a matrix division (`scalar * inv(collection)`), which is
+ * not a broadcast: mathjs rejects a vector there with "Matrix must be square". The throw
+ * names the element-wise form instead of the dispatch error.
+ */
+const scalarOverCollection: CollectionKernels = {
+  array: rejectScalarOverCollection,
+  matrix: rejectScalarOverCollection,
+};
 
 // =============================================================================
 // Unit operator helpers
@@ -420,6 +506,10 @@ export const add = withBinaryScalarGuards(
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
       elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
 
+    // A Unit, Complex, Fraction or BigNumber scalar and an Array or a matrix, in either
+    // order: the per-element sums.
+    ...scalarCollectionSignatures({ scalarFirst: addKernels, collectionFirst: addKernels }),
+
     // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
     // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
     // only number. (Needed e.g. by polynomialRoot's `add(b, C, …)` where C is a
@@ -482,6 +572,7 @@ export const subtract = mathTyped('subtract', {
   // subtraction is binary (mathjs parity).
   'Array, Array': (a: unknown[], b: unknown[]): unknown =>
     elementwiseNumber(subtractForNumberPath.fn!, subOp, a, b),
+
   'Array, number': (a: unknown[], b: f64): unknown =>
     elementwiseNumber(subtractForNumberPath.fn!, subOp, a, b),
   'number, Array': (a: f64, b: unknown[]): unknown =>
@@ -501,40 +592,16 @@ export const subtract = mathTyped('subtract', {
     elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
   'number, SparseMatrix': (a: f64, b: unknown): unknown =>
     elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+
+  // A Unit, Complex, Fraction or BigNumber scalar and an Array or a matrix, in either
+  // order: the per-element differences.
+  ...scalarCollectionSignatures({ scalarFirst: subtractKernels, collectionFirst: subtractKernels }),
 });
 subtractForNumberPath.fn = subtract;
 
 // =============================================================================
 // Multiplication
 // =============================================================================
-
-/**
- * The scalar types, other than `number`, that scale a collection. `number` keeps its own
- * signatures (they carry the typed-array fast path); every other scalar type goes
- * through the element-wise walk, whose leaves fold through the binary `multiply`.
- */
-const COLLECTION_SCALAR_TYPES = ['Unit', 'Complex', 'Fraction', 'BigNumber'] as const;
-const COLLECTION_TYPES = ['Array', 'DenseMatrix', 'SparseMatrix'] as const;
-
-/**
- * Signatures `<scalar>, <collection>` and `<collection>, <scalar>` for each scalar of
- * {@link COLLECTION_SCALAR_TYPES} and each collection of {@link COLLECTION_TYPES}. A
- * matrix operand keeps its matrix type and its storage, as the `number` rows do.
- */
-function scalarCollectionSignatures(
-  apply: (a: unknown, b: unknown) => unknown,
-  applyToMatrix: (a: unknown, b: unknown) => unknown
-): Record<string, (a: unknown, b: unknown) => unknown> {
-  const rows: Record<string, (a: unknown, b: unknown) => unknown> = {};
-  for (const scalar of COLLECTION_SCALAR_TYPES) {
-    for (const collection of COLLECTION_TYPES) {
-      const run = collection === 'Array' ? apply : applyToMatrix;
-      rows[`${scalar}, ${collection}`] = run;
-      rows[`${collection}, ${scalar}`] = run;
-    }
-  }
-  return rows;
-}
 
 /**
  * Polymorphic multiplication function. The Float64Array signature is synchronous.
@@ -639,12 +706,12 @@ export const multiply = withBinaryScalarGuards(
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
       elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
 
-    // The same scaling for a Unit, Complex, Fraction or BigNumber scalar, in either
-    // order (#911). Before, `number` was the only scalar with a collection signature.
-    ...scalarCollectionSignatures(
-      (a, b) => elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
-      (a, b) => elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b)
-    ),
+    // The same scaling for a Unit, Complex, Fraction or BigNumber scalar, in either order
+    // (#911). Before, `number` was the only scalar with a collection signature.
+    ...scalarCollectionSignatures({
+      scalarFirst: multiplyKernels,
+      collectionFirst: multiplyKernels,
+    }),
 
     // Variadic multiplication over ANY types (mathjs parity); folds pairwise
     // through the binary `multiply`. See the variadic-add note above re: types and
@@ -708,7 +775,15 @@ export const divide = mathTyped('divide', {
   // Float64Array element-wise division (synchronous)
   'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
     f64Binary(a, b, (x, y) => x / y),
+
+  // A collection divided by a scalar divides each element (mathjs parity, #911). A scalar
+  // divided by a collection is a matrix division and throws a clear error.
+  ...scalarCollectionSignatures(
+    { collectionFirst: divideKernels, scalarFirst: scalarOverCollection },
+    ALL_SCALAR_TYPES
+  ),
 });
+divideForNumberPath.fn = divide;
 
 // =============================================================================
 // Unary Operations
