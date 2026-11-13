@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-13'
-  totalFiles: 1314
+  totalFiles: 1318
   totalModules: 82
-  totalExports: 7173
+  totalExports: 7190
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4922,6 +4922,13 @@ modules:
           imports:
             - DenseMatrix
             - isDenseMatrix
+        - file: ../types/SparseMatrix.js
+          imports:
+            - SparseMatrix
+          typeOnly: true
+        - file: ./densify.js
+          imports:
+            - densifyForSolver
       workspaceDependencies: []
       exports:
         - isPackedMatrixDescriptor
@@ -5003,6 +5010,13 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ../types/SparseMatrix.js
+          imports:
+            - SparseMatrix
+          typeOnly: true
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
         - file: ./lu.js
           imports:
             - lu
@@ -5011,6 +5025,40 @@ modules:
         - condest
       functions:
         - condest
+    matrix/src/operations/densify.ts:
+      description: One entry point that turns a matrix-package sparse matrix into a dense one for
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - DEFAULT_SOLVER_MAX_ELEMENTS
+        - densifyForSolver
+      interfaces:
+        - DensifyOptions
+      functions:
+        - densifyForSolver
+      constants:
+        - DEFAULT_SOLVER_MAX_ELEMENTS
+    matrix/src/operations/eig-multiplicity.ts:
+      description: 'Repeated-eigenvalue report for `eig`: which computed eigenvalues are copies of one'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./pivoted-qr.js
+          imports:
+            - columnPivotedQr
+      workspaceDependencies: []
+      exports:
+        - repeatedEigenvalueReport
+      interfaces:
+        - RepeatedEigenvalue
+      functions:
+        - repeatedEigenvalueReport
     matrix/src/operations/eig-wasm.ts:
       description: '`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API'
       externalDependencies: []
@@ -5045,6 +5093,10 @@ modules:
           imports:
             - isSymmetric
             - eye
+        - file: ./eig-multiplicity.js
+          imports:
+            - repeatedEigenvalueReport
+            - RepeatedEigenvalue
         - file: ./as-packed.js
           imports:
             - decompositionInputToNestedArray
@@ -5111,6 +5163,7 @@ modules:
             - powerIteration
             - EigResult
             - EigOptions
+            - RepeatedEigenvalue
           reExport: true
         - file: ./svd.js
           imports:
@@ -5144,6 +5197,16 @@ modules:
             - qr
             - QRResult
             - QROptions
+          reExport: true
+        - file: ./lstsq.js
+          imports:
+            - lstsq
+          reExport: true
+        - file: ./densify.js
+          imports:
+            - densifyForSolver
+            - DEFAULT_SOLVER_MAX_ELEMENTS
+            - DensifyOptions
           reExport: true
         - file: ./lu.js
           imports:
@@ -5216,6 +5279,7 @@ modules:
         - powerIteration
         - EigResult
         - EigOptions
+        - RepeatedEigenvalue
         - svd
         - singularValues
         - pinv
@@ -5234,6 +5298,10 @@ modules:
         - qr
         - QRResult
         - QROptions
+        - lstsq
+        - densifyForSolver
+        - DEFAULT_SOLVER_MAX_ELEMENTS
+        - DensifyOptions
         - lu
         - luSolve
         - LUResult
@@ -5272,6 +5340,7 @@ modules:
         - powerIteration
         - EigResult
         - EigOptions
+        - RepeatedEigenvalue
         - svd
         - singularValues
         - pinv
@@ -5289,6 +5358,10 @@ modules:
         - qr
         - QRResult
         - QROptions
+        - lstsq
+        - densifyForSolver
+        - DEFAULT_SOLVER_MAX_ELEMENTS
+        - DensifyOptions
         - lu
         - luSolve
         - LUResult
@@ -5354,6 +5427,27 @@ modules:
         - LogmOptions
       functions:
         - matrixLogm
+    matrix/src/operations/lstsq.ts:
+      description: Linear least squares by column-pivoted Householder QR and a complete
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToNestedArray
+            - DecompositionMatrixInput
+        - file: ./pivoted-qr.js
+          imports:
+            - applyReflector
+            - columnPivotedQr
+            - columnReflector
+      workspaceDependencies: []
+      exports:
+        - lstsq
+      functions:
+        - lstsq
+        - lstsq
+        - lstsq
     matrix/src/operations/lu.ts:
       description: LU Decomposition (DenseMatrix primitive)
       externalDependencies: []
@@ -5393,6 +5487,22 @@ modules:
         - PinvOptions
       functions:
         - pinv
+    matrix/src/operations/pivoted-qr.ts:
+      description: Householder reflectors and column-pivoted QR on row-major `Float64Array` storage.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - scaledNorm
+        - columnReflector
+        - applyReflector
+        - columnPivotedQr
+      functions:
+        - scaledNorm
+        - columnReflector
+        - applyReflector
+        - columnPivotedQr
     matrix/src/operations/qr-family.ts:
       description: 'QR-family decompositions: LQ, RQ, QL'
       externalDependencies: []
@@ -7237,7 +7347,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
       exports:
         - createLsolve
       constants:
@@ -7255,7 +7369,11 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
       exports:
         - createLsolveAll
       interfaces:
@@ -7279,6 +7397,7 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+            - denseRightHandSide
         - file: ../sparse/csIpvec.js
           imports:
             - csIpvec
@@ -7304,6 +7423,7 @@ modules:
             - isPackedMatrixDescriptor
             - lu
             - luSolve
+            - densifyForSolver
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -7350,7 +7470,11 @@ modules:
         - file: ./pivot-tolerance.js
           imports:
             - LUSOLVE_SINGULAR_MESSAGE
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
       exports:
         - createUsolve
       constants:
@@ -7368,7 +7492,11 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
       exports:
         - createUsolveAll
       interfaces:
@@ -7376,7 +7504,7 @@ modules:
       constants:
         - createUsolveAll
     functions/src/algebra/solver/utils/solveValidation.ts:
-      description: Create the `solveValidation` function that the triangular solvers use to check `m` and
+      description: Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7392,10 +7520,16 @@ modules:
         - file: ../../../utils/string.js
           imports:
             - format
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
       exports:
+        - denseRightHandSide
         - createSolveValidation
       functions:
+        - denseRightHandSide
         - createSolveValidation
     functions/src/algebra/solver/validate-u-pivots.ts:
       description: Reject non-finite coefficients and singular upper-triangular factors before
@@ -11166,6 +11300,7 @@ modules:
             - eigvals
             - powerIteration
             - matrixPinv
+            - lstsq
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -11542,6 +11677,7 @@ modules:
         - eigvals
         - powerIteration
         - matrixPinv
+        - lstsq
         - weightedMean
         - weightedVariance
         - weightedMedian
@@ -12291,6 +12427,7 @@ modules:
         - eigvals
         - powerIteration
         - matrixPinv
+        - lstsq
         - weightedMean
         - weightedVariance
         - weightedMedian
@@ -25789,7 +25926,12 @@ modules:
             - GaussLegendre4Options
             - GaussLegendre4Solution
           reExport: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - densifyForSolver
+            - SparseMatrix
       exports:
         - rationalNullspace
         - RationalNullspaceOptions
@@ -37276,8 +37418,10 @@ modules:
             - eigvalsWasm
             - spectralRadiusWasm
             - svdWasm
+            - DenseMatrix
             - matrixPinv
             - qr
+            - lstsq
             - lu
             - luSolve
             - cholesky
@@ -37327,8 +37471,10 @@ modules:
         - eigvalsWasm
         - spectralRadiusWasm
         - svdWasm
+        - DenseMatrix
         - matrixPinv
         - qr
+        - lstsq
         - lu
         - luSolve
         - cholesky
@@ -37375,8 +37521,10 @@ modules:
         - eigvalsWasm
         - spectralRadiusWasm
         - svdWasm
+        - DenseMatrix
         - matrixPinv
         - qr
+        - lstsq
         - lu
         - luSolve
         - cholesky
@@ -43642,14 +43790,18 @@ dependencyGraph:
         - matrix/src/operations/cholesky.ts
         - matrix/src/operations/common.ts
         - matrix/src/operations/condest.ts
+        - matrix/src/operations/densify.ts
+        - matrix/src/operations/eig-multiplicity.ts
         - matrix/src/operations/eig-wasm.ts
         - matrix/src/operations/eig.ts
         - matrix/src/operations/expm.ts
         - matrix/src/operations/givens.ts
         - matrix/src/operations/index.ts
         - matrix/src/operations/logm.ts
+        - matrix/src/operations/lstsq.ts
         - matrix/src/operations/lu.ts
         - matrix/src/operations/pinv.ts
+        - matrix/src/operations/pivoted-qr.ts
         - matrix/src/operations/qr-family.ts
         - matrix/src/operations/qr-pivoted.ts
         - matrix/src/operations/qr.ts
@@ -45005,18 +45157,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1314
+  totalTypeScriptFiles: 1318
   totalModules: 82
-  totalLinesOfCode: 224941
-  totalExports: 7173
+  totalLinesOfCode: 225724
+  totalExports: 7190
   totalClasses: 61
-  totalInterfaces: 614
-  totalFunctions: 2447
+  totalInterfaces: 616
+  totalFunctions: 2457
   totalTypeGuards: 175
   totalEnums: 0
-  totalConstants: 1661
-  totalReExports: 3112
-  totalTypeOnlyImports: 667
+  totalConstants: 1662
+  totalReExports: 3120
+  totalTypeOnlyImports: 670
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1314, "e": 7173, "re": 3112 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1318, "e": 7190, "re": 3120 },
   "s": {
-    "loc": 224941,
+    "loc": 225724,
     "cls": 61,
-    "int": 614,
-    "fn": 2447,
+    "int": 616,
+    "fn": 2457,
     "tg": 175,
     "en": 0,
-    "co": 1661,
-    "toi": 667
+    "co": 1662,
+    "toi": 670
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -317,7 +317,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 19,
+      "f": 23,
       "exp": [
         "isPackedMatrixDescriptor",
         "decompositionInputToNestedArray",
@@ -343,14 +343,14 @@
       "int": [
         "PackedMatrixDescriptor",
         "CholeskyResult",
+        "DensifyOptions",
+        "RepeatedEigenvalue",
         "EigResult",
         "EigOptions",
         "ExpmOptions",
         "LogmOptions",
         "LUResult",
-        "PinvOptions",
-        "LQResult",
-        "RQResult"
+        "PinvOptions"
       ]
     },
     "matrix/types": {
@@ -1538,12 +1538,12 @@
         "eigvalsWasm",
         "spectralRadiusWasm",
         "svdWasm",
+        "DenseMatrix",
         "matrixPinv",
         "qr",
+        "lstsq",
         "lu",
-        "luSolve",
-        "cholesky",
-        "qrPivoted"
+        "luSolve"
       ]
     },
     "arithmetic": {
