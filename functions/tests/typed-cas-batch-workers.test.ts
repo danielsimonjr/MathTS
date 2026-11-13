@@ -121,7 +121,7 @@ describe('Slice 5.14 — CAS batch processing', () => {
     const results = await casExpand(exprs);
     expect(results).toHaveLength(2);
 
-    // (x+1)^2 → 1*x^2 + 2*x + 1 (like terms collected — no bare 'x*x')
+    // (x+1)^2 → x^2 + 2*x + 1 (like terms collected — no bare 'x*x')
     const r0 = results[0];
     expect(r0).toContain('2*x');
     expect(r0).not.toContain('x*x');

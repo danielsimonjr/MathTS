@@ -2497,6 +2497,9 @@
       "EvaluateCallable": {
         "kind": "type"
       },
+      "ExactSolution": {
+        "kind": "type"
+      },
       "ExpCallable": {
         "kind": "type"
       },
@@ -2961,6 +2964,9 @@
       },
       "PolarResult": {
         "kind": "type"
+      },
+      "PolynomialDegreeError": {
+        "kind": "function"
       },
       "Preconditioner": {
         "kind": "type"
@@ -6752,6 +6758,9 @@
         "kind": "function"
       },
       "solveDDE": {
+        "kind": "function"
+      },
+      "solveExact": {
         "kind": "function"
       },
       "solveODE": {

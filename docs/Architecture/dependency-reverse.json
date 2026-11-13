@@ -1756,6 +1756,7 @@
     ],
     "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
     "functions/src/factories/index.ts": [
+      "functions/src/cas/closed-form-roots.ts",
       "functions/src/clustering-extra.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/evaluate.ts",
@@ -2189,6 +2190,11 @@
       "functions/src/cas/rational-integrate.ts"
     ],
     "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
+    "functions/src/cas/polynomial-limits.ts": [
+      "functions/src/cas/syntax-tree.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/polynomial-ideal.ts"
+    ],
     "functions/src/error/ArgumentsError.ts": [
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts"
@@ -2703,6 +2709,7 @@
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/closed-form-roots.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",
       "functions/src/typed/graph.ts"

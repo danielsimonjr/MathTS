@@ -25,6 +25,7 @@ import {
   series,
   seriesCoefficient,
   solve,
+  solveExact,
   implicitDiff,
   summation,
   symbolicProduct,
@@ -89,7 +90,7 @@ describe('CAS: Calculus', () => {
     });
 
     it('should integrate c*x^n pattern', () => {
-      expect(integrate('3*x^2', 'x')).toBe('1*x^3');
+      expect(integrate('3*x^2', 'x')).toBe('x^3');
     });
   });
 
@@ -774,10 +775,14 @@ describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
   it('solves exp(x) - 2 exactly: log(2) (#884)', () => {
     expect([...solve('exp(x) - 2', 'x')]).toEqual(['log(2)']);
   });
-  it('solves sin(x) = 1/2 exactly: pi/6 and 5*pi/6, period 2*pi (#884)', () => {
-    const roots = solve('sin(x) - 0.5', 'x');
-    expect([...roots]).toEqual(['pi/6', '5*pi/6']);
-    expect(roots.period).toBe('2*pi');
+  it('solveExact gives sin(x) = 1/2 as pi/6 and 5*pi/6 with period 2*pi (#884)', () => {
+    expect(solveExact('sin(x) - 0.5', 'x')).toEqual({
+      roots: ['pi/6', '5*pi/6'],
+      period: '2*pi',
+    });
+  });
+  it('solve does not return one period of sin(x) = 1/2: it names solveExact (#884)', () => {
+    expect(() => solve('sin(x) - 0.5', 'x')).toThrow(/solveExact/);
   });
   it('scans a range numerically only on request: sin(x) = 1/2 near pi/6', () => {
     const roots = solve('sin(x) - 0.5', 'x', { numeric: true, range: [0, 1] });

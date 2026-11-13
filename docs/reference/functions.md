@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1381** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1383** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -1811,7 +1811,7 @@ import { polyval, factor, expand } from '@danielsimonjr/mathts-functions';
 
 polyval([1, 0, -1], 3); // -8  (constant-first: 1 - x² at x = 3)
 factor('x^2 - 1'); // '(x - 1)*(x + 1)'
-expand('(x + 1)^3'); // '1 + 3*x + 3*x^2 + 1*x^3'
+expand('(x + 1)^3'); // 'x^3 + 3*x^2 + 3*x + 1'
 ```
 
 ---
@@ -1841,7 +1841,9 @@ Symbolic calculus, transforms, and equation solving.
 | `multivariateTaylor(expr, vars, point, n)` | Multivariate Taylor expansion |
 | `series(expr, var, n)` | General series expansion |
 | `seriesCoefficient(expr, var, n)` | nth series coefficient |
-| `solve(expr, var)` | Solve an equation |
+| `solve(expr, var[, options])` | Finite list of the roots of an equation; throws for an identity or a periodic solution set; `{ numeric: true, range }` scans one range |
+| `solveExact(expr, var)` | Exact solution set of `a*F(p*x + q) = b` as `{ roots, period }` (`sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `abs`) |
+| `PolynomialDegreeError` | `RangeError` that `solve`, `expand` and the CAS reader throw for a polynomial of a degree above 1000 |
 | `summation(expr, var, from, to)` | Symbolic summation |
 | `symbolicProduct(expr, var, from, to)` | Symbolic product |
 | `groebnerBasis(polys, vars)` | Gröbner basis |
@@ -1868,6 +1870,10 @@ Symbolic calculus, transforms, and equation solving.
 - The transform functions (`laplace`, `fourierSeries`, `zTransform`) move a
   problem into a domain where differential or difference equations become
   algebraic.
+- `solve` returns a finite list of roots. The solutions of a `sin`, `cos` or `tan` equation
+  repeat with a period, so `solve` throws an error that names `solveExact`, and `solveExact`
+  returns the principal roots with the period. An identity (`x^2 - x^2`) throws an error. See
+  [How `solve` answers](../advanced.md#how-solve-answers).
 - `assume` / `getAssumptions` / `clearAssumptions` manage a global assumption
   context (for example, declaring a variable real or positive) that other CAS
   functions consult during simplification.
@@ -3302,7 +3308,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1381 exports).
+> `@danielsimonjr/mathts-functions` (1383 exports).
 
 ### Functions by category
 
@@ -3330,7 +3336,7 @@ await terminatePool();
 
 **Algebra** (50): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `descartesSignChanges`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `isolateRealRoots`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `realRoots`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `sturmRootCount`, `sturmSequence`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
 
-**Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
+**Computer Algebra System (CAS)** (38): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `PolynomialDegreeError`, `series`, `seriesCoefficient`, `solve`, `solveExact`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
 **Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
 

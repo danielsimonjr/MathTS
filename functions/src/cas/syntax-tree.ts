@@ -7,6 +7,9 @@
  */
 
 import { parse, evaluate } from '../factories/evaluate.js';
+import { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError } from './polynomial-limits.js';
+
+export { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError };
 
 /** The part of a syntax-tree node that the CAS code reads. */
 export interface AstNode {
@@ -65,23 +68,113 @@ export function constantValue(node: AstNode): number | null {
   }
 }
 
-/** The highest degree that {@link polynomialCoefficients} builds; a higher one gives null. */
-export const MAX_POLYNOMIAL_DEGREE = 1000;
+/**
+ * A coefficient that is not larger than this fraction of the magnitude of the terms that were
+ * summed into it is rounding noise, and reads as zero. The rounding error of a sum or a product
+ * is about `n * 2.2e-16` of the terms, with `n` up to the highest degree that the reader builds
+ * ({@link MAX_POLYNOMIAL_DEGREE}, about 1000 terms), so `1e-12` is above the noise of any
+ * polynomial that the reader accepts, and below any coefficient that a person wrote.
+ */
+export const COEFFICIENT_NOISE_RATIO = 1e-12;
 
-function addCoefficients(a: readonly number[], b: readonly number[], sign: 1 | -1): number[] {
-  const out = new Array<number>(Math.max(a.length, b.length)).fill(0);
-  a.forEach((c, i) => (out[i] += c));
-  b.forEach((c, i) => (out[i] += sign * c));
-  return out;
+/** The coefficients of a polynomial, and the magnitude of the terms that were summed into each. */
+interface Poly {
+  /** Coefficient of `x^i`. */
+  c: number[];
+  /** Sum of the absolute values of the terms that made `c[i]`: the scale of its rounding noise. */
+  m: number[];
 }
 
-function multiplyCoefficients(a: readonly number[], b: readonly number[]): number[] | null {
-  if (a.length + b.length - 1 > MAX_POLYNOMIAL_DEGREE + 1) return null;
-  const out = new Array<number>(a.length + b.length - 1).fill(0);
-  for (let i = 0; i < a.length; i++) {
-    for (let j = 0; j < b.length; j++) out[i + j] += a[i] * b[j];
+/** A built polynomial, `null` for an expression that is no polynomial, or `'degree'` for a degree above the limit. */
+type Built = Poly | null | 'degree';
+
+function addPolys(a: Poly, b: Poly, sign: 1 | -1): Poly {
+  const n = Math.max(a.c.length, b.c.length);
+  const c = new Array<number>(n).fill(0);
+  const m = new Array<number>(n).fill(0);
+  a.c.forEach((v, i) => (c[i] += v));
+  b.c.forEach((v, i) => (c[i] += sign * v));
+  a.m.forEach((v, i) => (m[i] += v));
+  b.m.forEach((v, i) => (m[i] += v));
+  return { c, m };
+}
+
+function multiplyPolys(a: Poly, b: Poly): Built {
+  if (a.c.length + b.c.length - 1 > MAX_POLYNOMIAL_DEGREE + 1) return 'degree';
+  const length = a.c.length + b.c.length - 1;
+  const c = new Array<number>(length).fill(0);
+  const m = new Array<number>(length).fill(0);
+  for (let i = 0; i < a.c.length; i++) {
+    for (let j = 0; j < b.c.length; j++) {
+      c[i + j] += a.c[i] * b.c[j];
+      m[i + j] += a.m[i] * b.m[j];
+    }
   }
-  return out;
+  return { c, m };
+}
+
+function scalePoly(a: Poly, factor: number): Poly {
+  return { c: a.c.map((v) => v * factor), m: a.m.map((v) => v * Math.abs(factor)) };
+}
+
+/** The result of two parts: a part that is no polynomial decides first, then a degree that is too high. */
+function both(a: Built, b: Built, join: (x: Poly, y: Poly) => Built): Built {
+  if (a === null || b === null) return null;
+  if (a === 'degree' || b === 'degree') return 'degree';
+  return join(a, b);
+}
+
+function buildPoly(node: AstNode, variable: string): Built {
+  if (!containsSymbol(node, variable)) {
+    const v = constantValue(node);
+    return v === null ? null : { c: [v], m: [Math.abs(v)] };
+  }
+  if (node.type === 'SymbolNode') return { c: [0, 1], m: [0, 1] };
+  if (node.type === 'ParenthesisNode') {
+    return node.content === undefined ? null : buildPoly(node.content, variable);
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === null) return null;
+  if (args.length === 1) {
+    const a = buildPoly(args[0], variable);
+    if (a === null || a === 'degree') return a;
+    if (op === 'unaryPlus') return a;
+    return op === 'unaryMinus' ? scalePoly(a, -1) : null;
+  }
+  if (args.length !== 2) return null;
+  const [left, right] = args;
+  if (op === 'divide' || op === 'pow') {
+    // The divisor and the exponent must not hold the variable.
+    if (containsSymbol(right, variable)) return null;
+    const scalar = constantValue(right);
+    const a = buildPoly(left, variable);
+    if (scalar === null || a === null) return null;
+    if (a === 'degree') return a;
+    if (op === 'divide') return scalar === 0 ? null : scalePoly(a, 1 / scalar);
+    if (!Number.isInteger(scalar) || scalar < 0) return null;
+    // A constant base needs no loop, and a base of degree d gives degree d*scalar: refuse a
+    // power above the limit before the loop, so that `(x^0)^1e9` cannot run for long.
+    if (a.c.length === 1) return { c: [a.c[0] ** scalar], m: [a.m[0] ** scalar] };
+    if (scalar * (a.c.length - 1) > MAX_POLYNOMIAL_DEGREE) return 'degree';
+    let power: Built = { c: [1], m: [1] };
+    for (let i = 0; i < scalar && power !== null && power !== 'degree'; i++) {
+      power = multiplyPolys(power, a);
+    }
+    return power;
+  }
+  const a = buildPoly(left, variable);
+  const b = buildPoly(right, variable);
+  switch (op) {
+    case 'add':
+      return both(a, b, (x, y) => addPolys(x, y, 1));
+    case 'subtract':
+      return both(a, b, (x, y) => addPolys(x, y, -1));
+    case 'multiply':
+      return both(a, b, multiplyPolys);
+    default:
+      return null;
+  }
 }
 
 /**
@@ -92,61 +185,27 @@ function multiplyCoefficients(a: readonly number[], b: readonly number[]): numbe
  * `pi*x - 1` and `sqrt(2)*x^2 - 1` are polynomials. The variable may appear in sums,
  * differences, products and negations; in a quotient only in the numerator; and as a power
  * base only with a non-negative integer exponent. Any call that holds the variable
- * (`sin(x)`, `abs(x)`), or the variable in an exponent or a denominator, gives null. So does a
- * degree above {@link MAX_POLYNOMIAL_DEGREE}.
+ * (`sin(x)`, `abs(x)`), or the variable in an exponent or a denominator, gives null.
  *
  * The coefficients come from the tree, not from sample values. A function with period 1 or
  * 0.5, such as `sin(2*pi*x)`, is zero at every integer and half-integer, so a sampled test
  * reads it as the zero polynomial; and a sampled fit adds rounding noise to the coefficients.
- * The result may end with zero coefficients (`x^2 - x^2` gives `[0, 0, 0]`).
+ *
+ * A coefficient that is rounding noise reads as `0`. A sum such as `0.1*x^2 - 0.3*x^2 + 0.2*x^2`
+ * leaves about `3e-17` in the `x^2` term, which is no larger than {@link COEFFICIENT_NOISE_RATIO}
+ * of the terms that made it. The test compares a coefficient with its own terms and not with the
+ * largest coefficient, so `x^2 - 1e20` keeps its leading `1`, and `1e-20*x - 1e-30` keeps both
+ * of its terms. The result may end with zero coefficients (`x^2 - x^2` gives `[0, 0, 0]`).
+ *
+ * @throws PolynomialDegreeError when `node` is a polynomial of a degree above
+ *   {@link MAX_POLYNOMIAL_DEGREE}. An expression that is no polynomial gives `null`, whatever its
+ *   other parts hold.
  */
 export function polynomialCoefficients(node: AstNode, variable: string): number[] | null {
-  if (!containsSymbol(node, variable)) {
-    const c = constantValue(node);
-    return c === null ? null : [c];
-  }
-  if (node.type === 'SymbolNode') return [0, 1];
-  if (node.type === 'ParenthesisNode') {
-    return node.content === undefined ? null : polynomialCoefficients(node.content, variable);
-  }
-  const op = operatorName(node);
-  const args = node.args ?? [];
-  if (op === null) return null;
-  if (args.length === 1) {
-    const a = polynomialCoefficients(args[0], variable);
-    if (a === null) return null;
-    if (op === 'unaryPlus') return a;
-    return op === 'unaryMinus' ? a.map((c) => -c) : null;
-  }
-  if (args.length !== 2) return null;
-  const [left, right] = args;
-  if (op === 'divide' || op === 'pow') {
-    // The divisor and the exponent must not hold the variable.
-    if (containsSymbol(right, variable)) return null;
-    const scalar = constantValue(right);
-    const a = polynomialCoefficients(left, variable);
-    if (scalar === null || a === null) return null;
-    if (op === 'divide') return scalar === 0 ? null : a.map((c) => c / scalar);
-    if (!Number.isInteger(scalar) || scalar < 0) return null;
-    // A constant base needs no loop, and a base of degree d gives degree d*scalar: refuse a
-    // power above the limit before the loop, so that `(x^0)^1e9` cannot run for long.
-    if (a.length === 1) return [a[0] ** scalar];
-    if (scalar * (a.length - 1) > MAX_POLYNOMIAL_DEGREE) return null;
-    let power: number[] | null = [1];
-    for (let i = 0; i < scalar && power !== null; i++) power = multiplyCoefficients(power, a);
-    return power;
-  }
-  const a = polynomialCoefficients(left, variable);
-  const b = polynomialCoefficients(right, variable);
-  if (a === null || b === null) return null;
-  switch (op) {
-    case 'add':
-      return addCoefficients(a, b, 1);
-    case 'subtract':
-      return addCoefficients(a, b, -1);
-    case 'multiply':
-      return multiplyCoefficients(a, b);
-    default:
-      return null;
-  }
+  const built = buildPoly(node, variable);
+  if (built === null) return null;
+  if (built === 'degree') throw new PolynomialDegreeError();
+  return built.c.map((c, i) =>
+    Number.isFinite(built.m[i]) && Math.abs(c) <= COEFFICIENT_NOISE_RATIO * built.m[i] ? 0 : c
+  );
 }
