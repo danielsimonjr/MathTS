@@ -1183,13 +1183,13 @@ export const fix = mathTyped('fix', {
 // =============================================================================
 
 /**
- * Modulo operation
+ * Modulo operation. A zero divisor returns the dividend (mathjs rule, #923).
  */
 export const mod = mathTyped('mod', {
-  'number, number': (a: f64, b: f64): f64 => ((a % b) + b) % b,
-  'bigint, bigint': (a: i64, b: i64): i64 => ((a % b) + b) % b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.mod(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.mod(b),
+  'number, number': (a: f64, b: f64): f64 => (b === 0 ? a : ((a % b) + b) % b),
+  'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (b.isZero() ? a : a.mod(b)),
 });
 
 /** These are the call signatures of `gcd`. Each signature returns the type of its two arguments. */
@@ -1235,10 +1235,11 @@ export const gcd: GcdFunction = mathTyped('gcd', {
 export const lcm = mathTyped('lcm', {
   'number, number': (a: f64, b: f64): f64 => {
     const g = gcd(a, b);
-    return Math.abs(a * b) / g;
+    return g === 0 ? 0 : Math.abs(a * b) / g;
   },
   'bigint, bigint': (a: i64, b: i64): i64 => {
     const g = gcd(a, b);
+    if (g === 0n) return 0n;
     const absA = a < 0n ? -a : a;
     const absB = b < 0n ? -b : b;
     return (absA * absB) / g;
