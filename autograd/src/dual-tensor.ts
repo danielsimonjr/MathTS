@@ -15,7 +15,7 @@
  */
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
-import { assertSameShape } from './shape.js';
+import { assertSameShape, ownedCopy } from './shape.js';
 
 /**
  * Holds a tensor value and its tangent for forward-mode automatic differentiation.
@@ -53,7 +53,8 @@ export class DualTensor {
 
   /** Lift a Tensor to a DualTensor with zero tangent. */
   static fromTensor(t: Tensor): DualTensor {
-    return new DualTensor(t.shape, new Float64Array(t.data), new Float64Array(t.data.length));
+    const primal = ownedCopy(t);
+    return new DualTensor(t.shape, primal, new Float64Array(primal.length));
   }
 
   /** Lift a Tensor to a DualTensor with a unit tangent at flat-index `i`. */

@@ -78,9 +78,7 @@ describe('G36 review probes', () => {
     expect(() => short.cross(a)).toThrow(/length 3/);
     expect(() => a.dot(short)).toThrow(/length mismatch/);
     expect(a.dtype).toBe('float64');
-    expect(() => new Tensor([2], new Float32Array([1, 2]) as unknown as Float64Array)).toThrow(
-      TypeError
-    );
+    expect([...new Tensor([2], new Float32Array([1, 2])).data]).toEqual([1, 2]);
   });
 
   it('matmul and matMul are one function and agree on a batch of rank-2 products', () => {

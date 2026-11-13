@@ -58,11 +58,12 @@ export function roll(
     }
     const shift = shifts as number;
     const outData = new Float64Array(totalSize);
+    const tData = t.data;
     // outFlat[i] = inFlat[(i - shift + n * totalSize) % totalSize]
     const n = totalSize;
     for (let i = 0; i < n; i++) {
       const srcIdx = (((i - shift) % n) + n) % n;
-      outData[i] = t.data[srcIdx];
+      outData[i] = tData[srcIdx];
     }
     let outLabels: ReadonlyArray<Index> | undefined;
     if (t.axisLabels !== undefined) outLabels = [...t.axisLabels];
@@ -97,6 +98,8 @@ export function roll(
   }
 
   const outData = new Float64Array(totalSize);
+
+  const tData = t.data;
   const inStrides = Tensor.rowMajorStrides(t.shape);
   const outStrides = Tensor.rowMajorStrides(t.shape); // same shape
 
@@ -121,7 +124,7 @@ export function roll(
       flatIn += srcK * inStrides[k];
     }
 
-    outData[flatOut] = t.data[flatIn];
+    outData[flatOut] = tData[flatIn];
   }
 
   // Axis labels: preserve from t (output shape == t.shape).

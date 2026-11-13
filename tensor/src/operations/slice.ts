@@ -96,9 +96,11 @@ export function slice(t: Tensor, ranges: (SliceRange | null)[]): Tensor {
   if (t.axisLabels !== undefined) {
     outLabels = t.axisLabels.map((lbl, k) => {
       const newDim = outShape[k]!;
+      // An axis kept at full extent keeps its label, so the slice still contracts with the source.
+      if (newDim === lbl.dim) return lbl;
       return new Index(Math.max(1, newDim), { name: lbl.name, tags: [...lbl.tags] });
     });
   }
 
-  return new Tensor(outShape, t.data, outLabels, { offset, strides: outStrides });
+  return new Tensor(outShape, t.buffer, outLabels, { offset, strides: outStrides });
 }

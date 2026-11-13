@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2330,
+  "totalFiles": 2336,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1288,
     "test-only": 0,
     "orphan": 0,
-    "test": 951,
+    "test": 957,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
     "src": 1314,
-    "tests": 951,
+    "tests": 957,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 28,
+    "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 22,
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
@@ -40,7 +40,7 @@
     "@danielsimonjr/mathts-plot": 51,
     "@danielsimonjr/mathts-signal": 4,
     "@danielsimonjr/mathts-statistics": 4,
-    "@danielsimonjr/mathts-tensor": 59,
+    "@danielsimonjr/mathts-tensor": 63,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
     "@danielsimonjr/mathts-workbook": 67
@@ -296,7 +296,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 331
+      "loc": 332
     },
     {
       "file": "autograd/src/forward-grad.ts",
@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 14
+      "loc": 23
     },
     {
       "file": "autograd/src/tape.ts",
@@ -381,6 +381,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
+    },
+    {
+      "file": "autograd/tests/issue-904-taped-rhs.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
+      "file": "autograd/tests/owned-copy.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 19
     },
     {
       "file": "autograd/tests/p7-batched-matmul-contract.test.ts",
@@ -15080,14 +15094,14 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 101
+      "loc": 103
     },
     {
       "file": "tensor/src/operations/gather.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 106
+      "loc": 107
     },
     {
       "file": "tensor/src/operations/kron.ts",
@@ -15108,7 +15122,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 168
+      "loc": 169
     },
     {
       "file": "tensor/src/operations/pinv.ts",
@@ -15143,21 +15157,21 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 133
+      "loc": 136
     },
     {
       "file": "tensor/src/operations/scatter.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 152
     },
     {
       "file": "tensor/src/operations/slice.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 105
+      "loc": 107
     },
     {
       "file": "tensor/src/operations/solve.ts",
@@ -15192,7 +15206,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1326
+      "loc": 1413
     },
     {
       "file": "tensor/tests/audit-ops.test.ts",
@@ -15227,14 +15241,14 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 202
+      "loc": 204
     },
     {
       "file": "tensor/tests/dogfood-g36-review.test.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 97
     },
     {
       "file": "tensor/tests/dogfood-g36.test.ts",
@@ -15249,6 +15263,34 @@
       "area": "tests",
       "disposition": "test",
       "loc": 154
+    },
+    {
+      "file": "tensor/tests/issue-902-slice-negative-step.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
+      "file": "tensor/tests/issue-902-view-data.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 127
+    },
+    {
+      "file": "tensor/tests/issue-904-view-operand.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 23
+    },
+    {
+      "file": "tensor/tests/issue-941-float32-input.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
     },
     {
       "file": "tensor/tests/operations/cholesky.test.ts",

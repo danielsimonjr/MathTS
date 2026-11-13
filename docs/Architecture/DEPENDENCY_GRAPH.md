@@ -2675,9 +2675,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File         | Imports           | Type   |
-| ------------ | ----------------- | ------ |
-| `./shape.js` | `assertSameShape` | Import |
+| File         | Imports                      | Type   |
+| ------------ | ---------------------------- | ------ |
+| `./shape.js` | `assertSameShape, ownedCopy` | Import |
 
 **Exports:**
 
@@ -2767,9 +2767,15 @@ graph LR
 
 ### `autograd/src/shape.ts` - Shared shape guard for DualTensor and TapedTensor elementwise ops.
 
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-tensor` | `Tensor` |
+
 **Exports:**
 
-- Functions: `assertSameShape`
+- Functions: `assertSameShape`, `ownedCopy`
 
 ---
 
@@ -2783,9 +2789,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File         | Imports           | Type   |
-| ------------ | ----------------- | ------ |
-| `./shape.js` | `assertSameShape` | Import |
+| File         | Imports                      | Type   |
+| ------------ | ---------------------------- | ------ |
+| `./shape.js` | `assertSameShape, ownedCopy` | Import |
 
 **Exports:**
 
@@ -20843,12 +20849,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1314   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 224834 |
-| Total Exports           | 7172   |
+| Total Lines of Code     | 224941 |
+| Total Exports           | 7173   |
 | Total Re-exports        | 3112   |
 | Total Classes           | 61     |
 | Total Interfaces        | 614    |
-| Total Functions         | 2446   |
+| Total Functions         | 2447   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 667    |

@@ -16,7 +16,7 @@
     "matrix/dist/index.js": 200149,
     "matrix/package.json": 2399,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
-    "tensor/dist/index.js": 85114,
+    "tensor/dist/index.js": 87222,
     "tensor/package.json": 2137,
     "autograd/dist/index.js": 69913,
     "autograd/package.json": 2172,

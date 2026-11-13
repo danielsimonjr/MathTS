@@ -68,6 +68,8 @@ export function flip(t: Tensor, axes: number | readonly number[]): Tensor {
   const flipSet = normAxesSet;
 
   const outData = new Float64Array(totalSize);
+
+  const tData = t.data;
   const inStrides = Tensor.rowMajorStrides(t.shape);
   const outStrides = Tensor.rowMajorStrides(t.shape); // same shape
 
@@ -89,7 +91,7 @@ export function flip(t: Tensor, axes: number | readonly number[]): Tensor {
       flatIn += iIdx * inStrides[k];
     }
 
-    outData[flatOut] = t.data[flatIn];
+    outData[flatOut] = tData[flatIn];
   }
 
   // Axis labels: preserve all labels from t.
