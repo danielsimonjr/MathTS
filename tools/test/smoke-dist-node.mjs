@@ -55,7 +55,10 @@ const CHECKS = {
   parser: (m) => assert(m.createParse.isFactory === true, 'createParse is a factory'),
   units: (m) => assert(m.isUnit(m.Unit.parse('5 cm')), "Unit.parse('5 cm') is a Unit"),
   numbers: (m) =>
-    assert(String(new m.Fraction(1, 3).add(new m.Fraction(1, 6))) === '1/2', '1/3 + 1/6 === 1/2'),
+    assert(
+      new m.Fraction(1, 3).add(new m.Fraction(1, 6)).equals(new m.Fraction(1, 2)),
+      '1/3 + 1/6 equals 1/2'
+    ),
   ast: (m) => assert(m.createConstantNode.isFactory === true, 'createConstantNode is a factory'),
   evaluator: (m) => assert(typeof m.createEvaluate((e) => e, {}) === 'function', 'createEvaluate'),
   linalg: (m) => assert(Math.abs(m.normFro([[3, 4]]) - 5) < 1e-12, 'normFro([[3,4]]) === 5'),
