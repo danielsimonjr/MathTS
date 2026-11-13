@@ -13,7 +13,6 @@
  * worker that reads `chunk.buffer` from index 0 would see the wrong region for
  * every chunk after the first.
  *
- * @internal
  * @param data - Source `Float64Array` or `Int32Array`.
  * @param chunkSize - Maximum length of each chunk.
  * @returns Chunks in source order. The last chunk may be shorter.
@@ -42,7 +41,6 @@ export function chunkTyped<T extends Float64Array | Int32Array>(data: T, chunkSi
  * last pair may be short. Do not fold this into `chunkTyped` with a pair flag:
  * the loops stay separate so a missed `b` slice cannot hide behind an `if`.
  *
- * @internal
  * @param a - First operand.
  * @param b - Second operand. Sliced with the same `[i, end)` as `a`.
  * @param chunkSize - Maximum length of each pair.
