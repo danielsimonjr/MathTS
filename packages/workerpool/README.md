@@ -16,7 +16,7 @@ npm install @danielsimonjr/mathts-workerpool
 
 ## Example
 
-```ts
+```ts node
 import {
   MathWorkerPool,
   initializePool,

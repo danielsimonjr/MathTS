@@ -9,14 +9,14 @@
  * @packageDocumentation
  */
 
+import { pool as createPool } from 'workerpool';
 import {
-  pool as createPool,
-  Pool,
   Transfer,
+  type Pool,
   type PoolOptions,
   type ExecOptions,
   type PoolStats,
-} from 'workerpool';
+} from './pool-types.js';
 import { compileFunctionSource } from './compile-function-source.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
@@ -226,7 +226,7 @@ export interface WorkerpoolCapabilities {
 /**
  * Logical CPU count on a runtime that has no `navigator`.
  *
- * Reads `os` through `process.getBuiltinModule` (Node 20.16+ and 22.3+, Bun). A `require('os')`
+ * Reads `os` through `process.getBuiltinModule` (Node 22.3+, Bun). A `require('os')`
  * call makes a bundler emit a module-level `createRequire` import of `node:module`; a browser
  * bundler rejects that import when the package loads, before any runtime guard runs.
  * A runtime without `getBuiltinModule` reports 4.
@@ -355,9 +355,10 @@ export interface WorkerPoolConfig {
  * into `/.vite/deps/` (that relative URL 404s). Dev then uses the package file
  * the Vite server serves from `node_modules`.
  */
-export function viteDepsWorkerFallback(sibling: URL): string {
+export function viteDepsWorkerFallback(sibling: { readonly href: string }): string {
   if (sibling.href.includes('/.vite/deps/')) {
-    return new URL('/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js', sibling).href;
+    return new URL('/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js', sibling.href)
+      .href;
   }
   return sibling.href;
 }
@@ -400,8 +401,12 @@ export async function resolveDefaultWorkerScript(): Promise<string | undefined> 
 
   // Node: workerpool's worker_threads / process-fork paths need a real file.
   try {
-    const { fileURLToPath } = await import('node:url');
-    const { existsSync } = await import('node:fs');
+    // `process.getBuiltinModule`, not `import('node:url')`: a browser bundler rejects (or stubs)
+    // a literal builtin import even when it sits behind the `isNode` check above.
+    // A missing `getBuiltinModule` (Node before 22.3) throws; the catch below handles it.
+    const getBuiltin = (process as { getBuiltinModule: (id: string) => unknown }).getBuiltinModule;
+    const { fileURLToPath } = getBuiltin('node:url') as typeof import('node:url');
+    const { existsSync } = getBuiltin('node:fs') as typeof import('node:fs');
 
     // When consumed as a built package this module is dist/index.js, so the
     // worker is a sibling. When running from src/ (tests) it lives in dist/.
@@ -2513,6 +2518,7 @@ export function getPoolStats(): PoolStats {
 
 export { Transfer };
 export type { Pool, PoolOptions, ExecOptions, PoolStats };
+export type { TransferDescriptor, TransferableLike } from './pool-types.js';
 
 export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
 export { forEachMultiIndex } from './multi-index.js';

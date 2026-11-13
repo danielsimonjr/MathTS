@@ -42,6 +42,7 @@
 
 import type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
 import { importModule } from './node-module-import.js';
+import type { CompiledWasmModule } from './platform-types.js';
 export type { WasmManifest };
 
 const ALGO = 'sha384';
@@ -237,7 +238,7 @@ export async function defaultWasmLocation(
  */
 export abstract class WasmModuleLoader<TModule> {
   protected wasmModule: TModule | null = null;
-  protected compiledModule: WebAssembly.Module | null = null;
+  protected compiledModule: CompiledWasmModule | null = null;
   protected loading: Promise<TModule> | null = null;
   protected isNode: boolean;
   protected lastMetrics: LoadingMetrics | null = null;
@@ -282,7 +283,10 @@ export abstract class WasmModuleLoader<TModule> {
     // If precompiled, use cached module
     if (this.compiledModule) {
       const instStart = performance.now();
-      const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+      const instance = await WebAssembly.instantiate(
+        this.compiledModule,
+        this.getImports() as WebAssembly.Imports
+      );
       this.lastMetrics = {
         fileReadMs: 0,
         compileMs: 0,
@@ -362,7 +366,10 @@ export abstract class WasmModuleLoader<TModule> {
     const compileEnd = performance.now();
 
     const instStart = performance.now();
-    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instance = await WebAssembly.instantiate(
+      this.compiledModule,
+      this.getImports() as WebAssembly.Imports
+    );
     const instEnd = performance.now();
 
     this.lastMetrics = {
@@ -386,7 +393,10 @@ export abstract class WasmModuleLoader<TModule> {
     if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
       // No manifest -> preserve fast streaming path (legacy compat).
       const instStart = performance.now();
-      const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
+      const result = await WebAssembly.instantiateStreaming(
+        fetch(path),
+        this.getImports() as WebAssembly.Imports
+      );
       this.compiledModule = result.module;
       this.lastMetrics = {
         fileReadMs: 0, // Combined with compile in streaming
@@ -411,7 +421,10 @@ export abstract class WasmModuleLoader<TModule> {
     const compileEnd = performance.now();
 
     const instStart = performance.now();
-    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instance = await WebAssembly.instantiate(
+      this.compiledModule,
+      this.getImports() as WebAssembly.Imports
+    );
     const instEnd = performance.now();
 
     this.lastMetrics = {
@@ -425,7 +438,7 @@ export abstract class WasmModuleLoader<TModule> {
     return instance.exports as unknown as TModule;
   }
 
-  protected getImports(): WebAssembly.Imports {
+  protected getImports(): Record<string, object> {
     return {
       env: {
         abort: (msg: number, file: number, line: number, column: number) => {

@@ -8,7 +8,7 @@ Thank you for your interest in contributing to MathTS! This document provides gu
 
 - Bun >= 1.4.2 (package manager and script runtime; the repo uses Bun workspaces + Turborepo)
 - Git
-- Node.js >= 20 is optional: you need it only to run the CI Node test matrix locally
+- Node.js >= 22.12 is optional: you need it only to run the CI Node test matrix locally
 
 ### Setup
 

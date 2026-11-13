@@ -1,6 +1,7 @@
 {
   "generated": "2026-11-13",
   "dependents": {
+    "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
@@ -134,6 +135,11 @@
     "core/src/wasm-loader.ts": ["core/src/internal.ts"],
     "core/src/wasm-as-header.ts": ["core/src/internal.ts"],
     "core/src/node-module-import.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
+    "core/src/platform-types.ts": [
+      "core/src/internal.ts",
+      "core/src/wasm-as-header.ts",
+      "core/src/wasm-loader.ts"
+    ],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",
@@ -4582,6 +4588,14 @@
     "gpu/src/GPUContext.ts": [
       "gpu/src/BufferPool.ts",
       "gpu/src/ShaderManager.ts",
+      "gpu/src/device.ts",
+      "gpu/src/index.ts"
+    ],
+    "gpu/src/webgpu-types.ts": [
+      "gpu/src/BufferPool.ts",
+      "gpu/src/GPUContext.ts",
+      "gpu/src/ShaderManager.ts",
+      "gpu/src/detect.ts",
       "gpu/src/device.ts",
       "gpu/src/index.ts"
     ],

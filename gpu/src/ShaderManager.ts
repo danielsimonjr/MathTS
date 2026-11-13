@@ -7,6 +7,7 @@
  */
 
 import { GPUContext } from './GPUContext.js';
+import type { GPUShaderModule, GPUPipelineLayout, GPUComputePipeline } from './webgpu-types.js';
 
 interface ShaderCacheEntry {
   module: GPUShaderModule;

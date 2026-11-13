@@ -8,13 +8,13 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 15,
       "ALIAS_DELEGATION": 4,
-      "ALLOWLISTED": 233
+      "ALLOWLISTED": 234
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 0,
       "ALIAS_DELEGATION": 0,
-      "ALLOWLISTED": 53
+      "ALLOWLISTED": 56
     }
   },
   "runtime": [
@@ -6062,6 +6062,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "Transfer",
+      "category": "class+constant",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/pool-types.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "variance",
       "category": "constant+function",
       "definers": [
@@ -7083,6 +7104,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "ExecOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/pool-types.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "ExecutionMode",
       "category": "type",
       "definers": [
@@ -7385,6 +7427,48 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "PoolOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/pool-types.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "PoolStats",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/pool-types.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

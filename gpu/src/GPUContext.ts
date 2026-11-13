@@ -12,6 +12,23 @@ import {
   resetWebGPUAvailabilityCache,
   type GPUCapabilities,
 } from './detect.js';
+import type {
+  GPUBuffer,
+  GPUAdapter,
+  GPUDevice,
+  GPUQueue,
+  GPUCommandEncoder,
+  GPUCommandBuffer,
+  GPUShaderModule,
+  GPUPipelineLayout,
+  GPUComputePipeline,
+  GPUBindGroupLayout,
+  GPUBindGroup,
+  GPUBufferUsageFlags,
+  GPUFeatureName,
+  GPUDeviceLostReason,
+  GPUBindGroupEntry,
+} from './webgpu-types.js';
 
 /**
  * Options for GPUContext initialization
@@ -161,7 +178,9 @@ export class GPUContext {
       // Request device with required features and limits
       const deviceDescriptor: GPUDeviceDescriptor = {
         label: this.label,
-        requiredFeatures: options.requiredFeatures || [],
+        // The public option type is `string[]` (no WebGPU types needed to name it).
+        requiredFeatures: (options.requiredFeatures ||
+          []) as GPUDeviceDescriptor['requiredFeatures'],
         requiredLimits: options.requiredLimits || {},
       };
 

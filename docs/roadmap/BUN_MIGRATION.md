@@ -71,8 +71,8 @@ bun run docs:deps           # runs the CDG TypeScript entry via Bun
 including `node …` calls and node-shebang bins (vitest, `asc`, tsc, tsdown, turbo). Consumers of published `@danielsimonjr/mathts-*`
 packages do **not** need Bun.
 
-Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (20.x)` and
-`Test (22.x)` legs therefore also run two scripts with `node` directly (never through `bun run`,
+Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (22.x)` and
+`Test (24.x)` legs therefore also run two scripts with `node` directly (never through `bun run`,
 which would put them back on Bun):
 
 - `node tools/test/run-vitest-node.mjs` runs every package's suite under vitest on the matrix

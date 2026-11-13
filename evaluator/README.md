@@ -26,7 +26,7 @@ npm install @danielsimonjr/mathts-evaluator
 
 This package does not import `@danielsimonjr/mathts-functions`. The default scope is arithmetic (`+`, `sin`, `sqrt`, `π`, …). It is the safe mode: `parse`, `typed`, `createUnit`, `resolve`, `chain`, `simplify`, and `derivative` are not reachable from an expression, including a nested `map` / `filter` callback expression. `evaluate('a = 1')` throws unless you pass `{ unsafe: true }`. An out-of-range numeric literal throws `SyntaxError: Numeric overflow`.
 
-```ts
+```ts node
 import { evaluate, compileExpression } from '@danielsimonjr/mathts-evaluator';
 
 evaluate('2 + 3'); // 5

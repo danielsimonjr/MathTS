@@ -322,7 +322,6 @@
       "filesGlob": ["functions/src/factories/index.ts", "matrix/src/types/dense/reduction.ts"],
       "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
     },
-
     {
       "names": ["is*"],
       "filesGlob": [
@@ -347,7 +346,6 @@
       ],
       "reason": "hot-path type-dispatch helper (rides with the is* guards; project-all-libraries-build-on-core). core/expression/functions each keep a local typeOf switch over the same guards for V8-inlinable dispatch; functions/src/factories/index.ts is the mathjs factory-registry copy. Same duck-typed logic, kept local by the same policy as is*. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["deepMap", "deepForEach"],
       "filesGlob": ["core/src/collection.ts"],
@@ -403,7 +401,6 @@
       "filesGlob": ["core/src/arithmetic/scalar.ts", "core/src/string.ts"],
       "reason": "hot-path scalar `number` primitives (Bucket-C temperature split, same pattern as the transcendental slice): core owns the inline number→number body (round/fix/equal in core/src/arithmetic/scalar.ts; compareText in core/src/string.ts); functions/src/typed/{arithmetic,relational}.ts register the auto-tagged DISPATCH_VARIANT that handles rich types and delegates the number case. Kept local per project-all-libraries-build-on-core. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["scatter"],
       "filesGlob": ["core/src/collection.ts", "plot/src/marks2d.ts"],
@@ -449,7 +446,6 @@
       "filesGlob": ["functions/src/wasm/special/scalars.ts"],
       "reason": "intra-functions, distinct roles: functions/src/wasm/special/scalars.ts's factorial(n: number) is the scalar primitive shared with the WASM special-function bridge; functions/src/factories/index.ts's is the mathjs `factorial` factory (BigNumber/Complex-aware), left canonical. Oracle-guarded (=120,=720) in gap-factory-core-parity.test.ts. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["factory"],
       "filesGlob": ["expression/src/utils/factory.ts", "functions/src/utils/factory.ts"],
@@ -475,7 +471,6 @@
       "filesGlob": ["functions/src/utils/print.ts"],
       "reason": "mathjs print-template helper, kept local to the functions print path; expression/src/utils/print.ts (left canonical) is the expression copy. Distinct consumers. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": [
         "addScalar",
@@ -538,7 +533,6 @@
       "filesGlob": ["functions/src/factories/index.ts", "functions/src/signal/fft.ts"],
       "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["to", "toBest"],
       "filesGlob": ["functions/src/factories/index.ts"],
@@ -549,7 +543,6 @@
       "filesGlob": ["functions/src/utils/bignumber/bitwise.ts"],
       "reason": "the BigNumber bit-xor op, the functions-internal sibling of the already-allowlisted bitAnd/bitOr/... BigNumber bitwise layer. With this, bitXor's remaining definers are functions/src/typed/bitwise.ts (auto-tagged DISPATCH_VARIANT) and parallel/src/ops/bitwise.ts (already allowlisted). 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["qr"],
       "filesGlob": ["functions/src/factories/index.ts", "matrix/src/operations/qr.ts"],
@@ -592,6 +585,11 @@
       "names": ["parse", "evaluate"],
       "filesGlob": ["expression/src/default-instance.ts", "functions/src/factories/evaluate.ts"],
       "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
+    },
+    {
+      "names": ["Transfer", "ExecOptions", "PoolOptions", "PoolStats"],
+      "filesGlob": ["packages/workerpool/src/workerpool-browser-shim.ts"],
+      "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
     }
   ]
 }

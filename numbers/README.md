@@ -15,7 +15,7 @@ npm install @danielsimonjr/mathts-numbers
 
 ## Example
 
-```ts
+```ts node
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-numbers';
 
 const z = new Complex(3, 4);

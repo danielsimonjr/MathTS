@@ -36,6 +36,7 @@ import {
   type GPUContextOptions,
 } from '@danielsimonjr/mathts-gpu';
 import { implicitGpuAllowed } from './implicit.js';
+import type { GPUBuffer, GPUDevice, GPUCommandEncoder } from '@danielsimonjr/mathts-gpu';
 
 /**
  * IEEE bit patterns, constructed explicitly.

@@ -14,7 +14,7 @@ npm install @danielsimonjr/mathts-expression
 
 Ready-to-call `parse`, `evaluate`, and `compileExpression(expr)` use a small arithmetic scope (`add`, `sin`, `sqrt`, `pi`, `π`, …). They do not import `@danielsimonjr/mathts-functions`, and importing this package does not build that scope. The first call does. Install `@danielsimonjr/mathts-functions` when you need matrices, units, statistics, or `simplify`.
 
-```ts
+```ts node
 import { parse, evaluate, compileExpression } from '@danielsimonjr/mathts-expression';
 
 evaluate('2+3'); // 5
@@ -36,7 +36,7 @@ That scope is the same safe mode as `functions` `evaluate`: `parse`, `typed`, `c
 - `scalarCanonical` / `scalarCanonicalKey` / `scalarSize` / `scalarDepth` / `scalarComplexity` / `scalarSymbols` — structural toolkit for an existing `ScalarNode`. The canonical key flattens `+` and `*`, rewrites `-` and `/`, and does not fold `2^3` to `8`.
 - `enumerateScalars` / `scalarGrammarAccepts` — deterministic size-ordered enumeration of scalar trees from a grammar, with deduplication by `scalarCanonicalKey`. It is a generator that returns an `EnumerationStop` reason (`exhausted-space`, `candidate-limit`, `time-limit`, `cancelled`). `budget.maxCandidates`, `budget.maxWallClockMs`, and an `AbortSignal` end it; the wall clock and the signal are checked every 128 candidates considered, so a grammar that yields few trees still stops promptly.
 
-```ts
+```ts node
 import { createScalarBuilder, scalarEquals } from '@danielsimonjr/mathts-expression';
 
 const b = createScalarBuilder();
@@ -57,7 +57,7 @@ Every node serializes to several formats. `toMathML()` returns a MathML
 wrap it in a `<math>` element with `mathMLDocument(node)` to render. MathML is
 typeset natively by modern browsers — no external dependencies.
 
-```ts
+```ts node
 import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
 import { parse, evaluate } from '@danielsimonjr/mathts-functions';
 

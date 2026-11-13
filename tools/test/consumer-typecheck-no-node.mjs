@@ -1,147 +1,82 @@
 #!/usr/bin/env node
 /**
- * Strict consumer typecheck of packed functions/matrix/linalg WITHOUT @types/node.
- * Regression gate for dogfood #697 (workerpool Node types leaking into consumers).
+ * Strict consumer typecheck of EVERY packed public package with no Node, DOM or WebGPU types.
+ *
+ * The consumer installs the tarballs and TypeScript only (no `@types/node`), compiles with
+ * `lib: ["ES2022"]` (no DOM), `types: []`, `strict`, `skipLibCheck: false` and NodeNext, and
+ * imports every entry point that declares types. A published `.d.ts` that names a Node, DOM,
+ * workerpool or WebGPU global then fails with TS2304, TS2307, TS2503 or TS2591.
+ * Regression gate for dogfood #886, #890, #697 and #726.
+ *
+ * Entries in `consumer-entries.json` `nodeOnly` are Node runtimes and are skipped; each carries
+ * its reason. Options: `--skip-build` (use the existing dist folders), `--keep`.
+ *
+ * Run it with `node` (never `bun run`): `[run] bun = true` would put it on Bun.
  */
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  MATHTS_WORKSPACE_PREFIX,
-  repoRoot,
-  workspaceMathtsClosure,
-  workspacePackageDirsByName,
-} from './workspaces.mjs';
-
-/** Workspace dirs reached from what the temporary consumer imports. */
-const CONSUMER_SEED_DIRS = ['functions'];
-const WORKERPOOL_VENDOR = 'workerpool';
+  entrySpecifiers,
+  installInto,
+  installedVersion,
+  packWorkspace,
+  publicPackages,
+  readEntryPolicy,
+  run,
+  runTsc,
+} from './consumer-env.mjs';
+import { MATHTS_WORKSPACE_PREFIX, repoRoot } from './workspaces.mjs';
 
 const skipBuild = process.argv.includes('--skip-build');
-/** npm and npx are .cmd files on Windows; a .cmd file runs only through a shell. */
-const shell = process.platform === 'win32';
+const keep = process.argv.includes('--keep');
 
-const packDirs = workspaceMathtsClosure(CONSUMER_SEED_DIRS);
-
-if (!skipBuild) {
-  execFileSync('npx', ['turbo', 'build', ...packDirs.flatMap((d) => ['--filter', `./${d}`])], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-    shell,
-  });
-}
-
-const nameByDir = new Map(
-  [...workspacePackageDirsByName().entries()].map(([name, dir]) => [dir, name])
-);
+const packages = publicPackages();
+const policy = readEntryPolicy();
+if (!skipBuild) run('bun', ['run', 'build'], repoRoot);
 
 const work = mkdtempSync(join(tmpdir(), 'mathts-no-node-'));
-const tarballs = join(work, 'tarballs');
 const consumer = join(work, 'consumer');
-mkdirSync(tarballs);
-
-/**
- * Resolves the npm package name for a `package-lock.json` `packages` entry.
- * Lockfile v3 often omits `name`; derive it from `node_modules/@danielsimonjr/mathts-*` keys when needed.
- * @param {string} pkgPath - lock `packages` key (for example `node_modules/@danielsimonjr/mathts-core`)
- * @param {{ name?: string }} meta - lockfile row metadata
- * @returns {string | null} package name, or null when the row is not a direct mathts install path
- */
-function lockEntryPackageName(pkgPath, meta) {
-  if (typeof meta?.name === 'string') return meta.name;
-  const scoped = /^node_modules\/(@danielsimonjr\/mathts-[^/]+)$/.exec(pkgPath);
-  return scoped ? scoped[1] : null;
-}
 
 /**
  * Fails when any `@danielsimonjr/mathts-*` dependency would have come from the npm registry.
- * @param {string} consumerDir - temporary consumer project root (holds `package-lock.json`)
- * @param {Set<string>} packedNames - workspace package names installed as local tarballs
- * @returns {void}
+ * @param {string} consumerDir temporary consumer project root (holds `package-lock.json`)
+ * @param {Set<string>} packedNames workspace package names installed as local tarballs
  */
 function assertMathtsInstalledFromTarballs(consumerDir, packedNames) {
-  const lockPath = join(consumerDir, 'package-lock.json');
-  const lock = JSON.parse(readFileSync(lockPath, 'utf8'));
+  const lock = JSON.parse(readFileSync(join(consumerDir, 'package-lock.json'), 'utf8'));
   const problems = [];
-  /** @type {Map<string, string>} name -> resolved */
+  /** @type {Map<string, string>} */
   const installed = new Map();
-
   for (const [pkgPath, meta] of Object.entries(lock.packages ?? {})) {
     if (pkgPath === '' || meta === undefined) continue;
-    const name = lockEntryPackageName(pkgPath, meta);
-    if (name === null || !name.startsWith(MATHTS_WORKSPACE_PREFIX)) continue;
+    const scoped = /^node_modules\/(@danielsimonjr\/mathts-[^/]+)$/.exec(pkgPath);
+    const name = typeof meta.name === 'string' ? meta.name : scoped?.[1];
+    if (!name?.startsWith(MATHTS_WORKSPACE_PREFIX)) continue;
     installed.set(name, meta.resolved ?? '');
   }
-
   for (const name of packedNames) {
     const resolved = installed.get(name);
-    if (resolved === undefined) {
-      problems.push(`${name}: not present in package-lock after install`);
-      continue;
-    }
-    if (!resolved.startsWith('file:')) {
-      problems.push(`${name}: expected file: tarball (got ${resolved || '(missing resolved)'})`);
-    }
+    if (resolved === undefined) problems.push(`${name}: not present in package-lock after install`);
+    else if (!resolved.startsWith('file:')) problems.push(`${name}: expected file: tarball (got ${resolved})`);
   }
-
   for (const [name, resolved] of installed) {
-    if (!resolved.startsWith('file:')) {
-      problems.push(`${name}: workspace package resolved from registry (${resolved})`);
-    }
+    if (!resolved.startsWith('file:')) problems.push(`${name}: resolved from registry (${resolved})`);
   }
-
   if (problems.length > 0) {
-    throw new Error(
-      `consumer-typecheck-no-node: workspace packages must not come from the registry:\n${problems.join('\n')}`
-    );
+    throw new Error(`consumer-typecheck-no-node: workspace packages must come from tarballs:\n${problems.join('\n')}`);
   }
 }
 
+let exitCode = 1;
 try {
-  for (const dir of packDirs) {
-    execFileSync(
-      'npm',
-      ['pack', '--ignore-scripts', '--silent', '--pack-destination', tarballs],
-      { cwd: join(repoRoot, dir), stdio: 'inherit', shell }
-    );
-  }
-  // Packed @danielsimonjr/mathts-* tarballs still depend on registry workerpool; ship the
-  // patched fork the monorepo installs so #697 is tested against the same types consumers
-  // receive once the workerpool fork release ships this patch.
-  execFileSync(
-    'npm',
-    ['pack', '--ignore-scripts', '--silent', '--pack-destination', tarballs],
-    { cwd: join(repoRoot, 'node_modules', WORKERPOOL_VENDOR), stdio: 'inherit', shell }
-  );
-  const tgz = readdirSync(tarballs).filter((f) => f.endsWith('.tgz'));
-  const wpTgz = tgz.find((f) => /workerpool-10/.test(f));
-  if (!wpTgz) throw new Error('consumer-typecheck-no-node: missing patched workerpool pack');
-  const packedNames = new Set(
-    packDirs.map((dir) => {
-      const name = nameByDir.get(dir);
-      if (name === undefined) throw new Error(`consumer-typecheck-no-node: no package name for ${dir}`);
-      return name;
-    })
-  );
-  const tsVersion = JSON.parse(
-    readFileSync(join(repoRoot, 'node_modules/typescript/package.json'), 'utf8')
-  ).version;
+  const tgz = packWorkspace(packages, join(work, 'tarballs'));
+  const specifiers = entrySpecifiers(packages, { types: true }).filter((s) => !(s in policy.nodeOnly));
 
   mkdirSync(consumer);
-  mkdirSync(join(consumer, 'src'));
   writeFileSync(
     join(consumer, 'package.json'),
-    JSON.stringify(
-      {
-        name: 'mathts-consumer-no-node',
-        private: true,
-        type: 'module',
-        overrides: { workerpool: `file:${join(tarballs, wpTgz)}` },
-      },
-      null,
-      2
-    )
+    JSON.stringify({ name: 'mathts-consumer-no-node', private: true, type: 'module' }, null, 2)
   );
   writeFileSync(
     join(consumer, 'tsconfig.json'),
@@ -152,51 +87,39 @@ try {
           skipLibCheck: false,
           noEmit: true,
           target: 'ES2022',
-          lib: ['ESNext', 'DOM'],
+          lib: ['ES2022'],
           module: 'NodeNext',
           moduleResolution: 'NodeNext',
+          types: [],
         },
-        include: ['src'],
+        files: ['index.ts'],
       },
       null,
       2
     )
   );
   writeFileSync(
-    join(consumer, 'src', 'consumer.ts'),
-    `import { det } from '@danielsimonjr/mathts-functions';\nconst d: number = det([[1, 2], [3, 4]]);\nexport { d };\n`
+    join(consumer, 'index.ts'),
+    specifiers.map((s, i) => `import * as m${i} from '${s}';`).join('\n') +
+      `\nexport const all = [${specifiers.map((_, i) => `m${i}`).join(', ')}];\n`
   );
 
-  const mathtsTgz = tgz.filter((f) => f !== wpTgz).map((f) => join(tarballs, f));
-  execFileSync(
-    'npm',
-    [
-      'install',
-      '--no-audit',
-      '--no-fund',
-      '--loglevel=error',
-      `typescript@${tsVersion}`,
-      ...mathtsTgz,
-    ],
-    { cwd: consumer, stdio: 'inherit', shell }
+  installInto(consumer, [`typescript@${installedVersion('typescript')}`, ...tgz]);
+  assertMathtsInstalledFromTarballs(consumer, new Set(packages.map(({ pkg }) => pkg.name)));
+
+  const diagnostics = runTsc(consumer);
+  console.log(
+    `consumer-typecheck-no-node: ${packages.length} packages, ${specifiers.length} entry points, no @types/node, lib ES2022`
   );
-
-  assertMathtsInstalledFromTarballs(consumer, packedNames);
-
-  let output = '';
-  try {
-    execFileSync('npx', ['--no-install', 'tsc', '-p', '.'], { cwd: consumer, stdio: 'pipe', shell });
-  } catch (err) {
-    output = `${err.stdout ?? ''}${err.stderr ?? ''}`;
-    if (!/error TS\d+/.test(output)) throw err;
+  if (diagnostics.length > 0) {
+    console.error(diagnostics.join('\n'));
+    console.error(`consumer-typecheck-no-node: FAIL (${diagnostics.length} errors)`);
+  } else {
+    console.log('consumer-typecheck-no-node: PASS');
+    exitCode = 0;
   }
-
-  if (/error TS\d+/.test(output)) {
-    console.error(output);
-    console.error('consumer-typecheck-no-node: FAIL');
-    process.exit(1);
-  }
-  console.log('consumer-typecheck-no-node: PASS');
 } finally {
-  rmSync(work, { recursive: true, force: true });
+  if (keep) console.log(`consumer-typecheck-no-node: kept ${work}`);
+  else rmSync(work, { recursive: true, force: true });
 }
+process.exit(exitCode);

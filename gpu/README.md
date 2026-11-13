@@ -8,7 +8,7 @@ npm install @danielsimonjr/mathts-gpu
 
 ## Example (Node without a GPU adapter)
 
-```ts
+```ts node
 import { getGpuDevice, GPUContext } from '@danielsimonjr/mathts-gpu';
 
 const device = await getGpuDevice();

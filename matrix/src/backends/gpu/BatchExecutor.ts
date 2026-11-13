@@ -10,6 +10,7 @@
 import type { GPUContext } from '@danielsimonjr/mathts-gpu';
 import type { ShaderManager } from '@danielsimonjr/mathts-gpu';
 import type { BufferPool } from '@danielsimonjr/mathts-gpu';
+import type { GPUBuffer, GPUCommandEncoder, GPUBindGroupEntry } from '@danielsimonjr/mathts-gpu';
 
 /**
  * Operation types that can be batched

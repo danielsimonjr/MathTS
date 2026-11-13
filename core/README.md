@@ -13,7 +13,7 @@ type guards and numeric types, `mathts-core` alone is enough.
 
 ## Usage
 
-```typescript
+```typescript node
 import { DEFAULT_CONFIG, isNumber, isMatrix } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 

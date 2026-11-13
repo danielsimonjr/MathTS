@@ -16,7 +16,7 @@ npm install @danielsimonjr/mathts-trigonometry
 
 ## Example
 
-```ts
+```ts node
 import { sin, cos, asin } from '@danielsimonjr/mathts-trigonometry';
 
 sin(Math.PI / 2); // 1

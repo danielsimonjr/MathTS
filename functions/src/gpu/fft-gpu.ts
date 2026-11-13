@@ -55,6 +55,7 @@ import {
   type GPUContextOptions,
 } from '@danielsimonjr/mathts-gpu';
 import { implicitGpuAllowed } from './implicit.js';
+import type { GPUBuffer, GPUDevice } from '@danielsimonjr/mathts-gpu';
 
 /** Threads per workgroup. Each thread owns one butterfly, so a pass covers n/2 threads. */
 const WORKGROUP_SIZE = 64;

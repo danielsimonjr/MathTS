@@ -10,6 +10,7 @@
  * @packageDocumentation
  */
 
+import type { AbortSignalLike } from '@danielsimonjr/mathts-core/internal';
 import {
   createScalarBuilder,
   type LoweredScalarFn,
@@ -219,7 +220,7 @@ function assertEnumerationInputs(grammar: ScalarGrammar, budget: EnumerationBudg
 export function* enumerateScalars(
   grammar: ScalarGrammar,
   budget: EnumerationBudget,
-  signal?: AbortSignal
+  signal?: AbortSignalLike
 ): Generator<ScalarNode, EnumerationStop> {
   assertEnumerationInputs(grammar, budget);
   const b = createScalarBuilder();

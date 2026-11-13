@@ -17,7 +17,7 @@ npm install @danielsimonjr/mathts-compat
 
 ## Example
 
-```ts
+```ts node
 import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);

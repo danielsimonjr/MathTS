@@ -31,6 +31,26 @@ export {
   type DeviceLostEvent,
 } from './GPUContext.js';
 
+export type {
+  GPUAdapter,
+  GPUBindGroup,
+  GPUBindGroupEntry,
+  GPUBindGroupLayout,
+  GPUBuffer,
+  GPUBufferUsageFlags,
+  GPUCommandBuffer,
+  GPUCommandEncoder,
+  GPUComputePipeline,
+  GPUDevice,
+  GPUDeviceLostReason,
+  GPUFeatureName,
+  GPUPipelineLayout,
+  GPUQueue,
+  GPURequestAdapterOptions,
+  GPUShaderModule,
+  OpaqueGpuHandle,
+} from './webgpu-types.js';
+
 export { getGpuDevice, resetGpuDevice } from './device.js';
 
 export { enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS } from './flag.js';

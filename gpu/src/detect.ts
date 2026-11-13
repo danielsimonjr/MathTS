@@ -4,6 +4,8 @@
  * Provides runtime detection of WebGPU support and adapter capabilities.
  */
 
+import type { GPUAdapter, GPURequestAdapterOptions } from './webgpu-types.js';
+
 /**
  * WebGPU adapter information
  */

@@ -264,9 +264,9 @@ jobs:
       # `node` directly (a `bun run` script would put them back on Bun).
       fail-fast: false
       matrix:
-        # Node 18 reached EOL 2026-04 and the toolchain uses Node 20+ APIs
-        # (e.g. util.styleText), so 18.x is no longer supported/tested.
-        node-version: [20.x, 22.x]
+        # Every package declares engines.node ">=22.12": Node 20 reached EOL 2026-04 and
+        # 22.12 is the first 22 release where require() of an ES module works unflagged.
+        node-version: [22.x, 24.x]
 
     steps:
       - name: Checkout
@@ -290,7 +290,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # npm 10 (bundled with Node 20 and 22) cannot install a package that has a git
+      # npm 10 (bundled with Node 22) cannot install a package that has a git
       # dependency, so every published manifest must use registry specs only.
       - name: Published manifests use registry dependencies only
         run: node tools/test/check-published-deps.mjs
@@ -360,6 +360,7 @@ jobs:
         run: |
           node tools/sync-package-packaging.mjs --check
           node tools/test/consumer-typecheck-no-node.mjs --skip-build
+          node --test tools/test/packed-consumer.test.mjs
 
   coverage:
     name: Coverage
@@ -478,7 +479,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # repo-tools needs Node 20 or later. The check parses the source files and reads the
+      # repo-tools needs Node 22 or later. The check parses the source files and reads the
       # documents, so this job needs no Bun, no install of the workspace and no build.
       - name: Setup Node.js 22
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7

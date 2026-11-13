@@ -8,7 +8,8 @@
   "exports": {
     ".": {
       "import": "./build/mathts.js",
-      "types": "./build/mathts.d.ts"
+      "types": "./build/mathts.d.ts",
+      "default": "./build/mathts.js"
     },
     "./wasm": {
       "import": "./build/mathts.wasm"
@@ -26,7 +27,7 @@
     "asbuild:debug": "asc src/index.ts --target debug",
     "asbuild:release": "asc src/index.ts --target release",
     "asbuild": "bun run asbuild:debug && bun run asbuild:release && bun run gen:manifest",
-    "gen:manifest": "node scripts/gen-wasm-manifest.mjs",
+    "gen:manifest": "node scripts/gen-wasm-manifest.mjs && node scripts/patch-dts.mjs",
     "build": "bun run asbuild && node ../tools/ensure-js-sourcemaps.mjs",
     "clean": "rm -rf build/",
     "test": "node tests/run.js && node tests/f64-buffer-clone.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs && node tests/phase2-kernels.test.mjs && bun run test:diff",
@@ -64,5 +65,8 @@
     "access": "public"
   },
   "homepage": "https://github.com/danielsimonjr/MathTS#readme",
-  "sideEffects": true
+  "sideEffects": true,
+  "engines": {
+    "node": ">=22.12"
+  }
 }

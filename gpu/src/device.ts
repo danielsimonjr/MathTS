@@ -9,6 +9,7 @@
 
 import { resetWebGPUAvailabilityCache } from './detect.js';
 import { getGlobalGPUContext, type GPUContextOptions } from './GPUContext.js';
+import type { GPUDevice } from './webgpu-types.js';
 
 let inFlightDevice: Promise<GPUDevice | null> | null = null;
 

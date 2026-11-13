@@ -12,7 +12,7 @@ npm install @danielsimonjr/mathts-parallel
 
 ## Example
 
-```ts
+```ts node
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 await computePool.initialize();
@@ -42,16 +42,36 @@ await computePool.terminate();
 
 ## Vite / browser workers
 
-The default worker URL is `new URL('./worker.js', import.meta.url)`. Vite's production
-build rewrites that into an emitted worker asset. In dev, the optimizer prebundles the
-package and that relative URL 404s as `/node_modules/.vite/deps/worker.js`; the resolver
-then loads `/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.js`, which the dev
-server already serves. You can still pass an explicit URL:
+The default worker URL is `new URL('./worker.js', import.meta.url)` (in the browser build of
+the package, `worker.browser.js`). Vite's production build rewrites that into an emitted worker
+asset. In dev, the optimizer prebundles the package and that relative URL 404s as
+`/node_modules/.vite/deps/worker.js`; the resolver then loads
+`/node_modules/@danielsimonjr/mathts-workerpool/dist/worker.browser.js`, which the dev server
+already serves. A bundler that targets the browser picks the `browser` export condition of
+`@danielsimonjr/mathts-workerpool` and `@danielsimonjr/mathts-parallel`; those entries import no
+Node builtin. A bundler build that targets browsers older than ES2022 needs
+`build.target: 'es2022'` (or newer) for the top-level `await` of the page code itself.
 
-```ts
+On Node, let the package find its worker script:
+
+```ts node
+import { ComputePool, resolveDefaultWorkerScript } from '@danielsimonjr/mathts-parallel';
+
+const large = new Float64Array(65_536).fill(0.5);
+const pool = new ComputePool({ workerScript: await resolveDefaultWorkerScript(), maxWorkers: 2 });
+const { result, parallelized } = await pool.sin(large, { forceParallel: true });
+console.log(result.length, parallelized); // 65536 true
+await pool.terminate();
+```
+
+In a Vite project you can pass an explicit URL. The `?url` suffix is resolved by Vite, so this
+fence is an illustration: it needs `"types": ["vite/client"]` in `tsconfig.json`.
+
+```ts example
 import { ComputePool } from '@danielsimonjr/mathts-parallel';
 import workerUrl from '@danielsimonjr/mathts-workerpool/worker?url';
 
+const large = new Float64Array(65_536);
 const pool = new ComputePool({ workerScript: workerUrl, maxWorkers: 4 });
 await pool.sin(large, { forceParallel: true });
 ```

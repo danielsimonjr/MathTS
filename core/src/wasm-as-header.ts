@@ -5,10 +5,12 @@
  * Exported only from `@danielsimonjr/mathts-core/internal`.
  */
 
+import type { WasmMemoryHandle } from './platform-types.js';
+
 export interface AsHeaderRuntime {
   __new(size: number, id: number): number;
   __pin(ptr: number): number;
-  memory: WebAssembly.Memory;
+  memory: WasmMemoryHandle;
 }
 
 /** Pin a data buffer and write the 12-byte AS typed-array header. */

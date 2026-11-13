@@ -17,7 +17,14 @@
  *      needed a cast, and step 5 could not see it: an uncallable declaration is still a
  *      valid one.
  *
- * Any compiler error or shipped-wasm problem fails the run (exit 1), except the pre-existing
+ *   7. Load every entry point by `import()` and by `require()` (Node >= 22.12 loads an ES module
+ *      through `require()` when the package has a `default` export condition and no top-level
+ *      await), bundle every browser-facing entry point with `esbuild --platform=browser` and
+ *      scan the bundle for Node builtins, and run the README fences (see `readme-fences.mjs`).
+ *      esbuild is installed in the temporary consumer only.
+ *
+ * Any compiler error, load error, browser-bundle finding, README fence problem or shipped-wasm
+ * problem fails the run (exit 1), except the pre-existing
  * compiler errors in KNOWN_ERRORS. The monorepo's own `tsc` runs do not find these
  * errors: they read source, not the emitted `.d.ts`, and consumers with `skipLibCheck: false`
  * also check the emitted `.d.ts` against their own lib (for example TS2416 in core 0.15.0
@@ -46,6 +53,9 @@ import {
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
+import { browserBundleProblems, loadProblems } from './consumer-checks.mjs';
+import { entrySpecifiers, readEntryPolicy } from './consumer-env.mjs';
+import { fenceProblems } from './readme-fences.mjs';
 
 /**
  * Pre-existing consumer errors, accepted by package and error code so that any NEW error fails.
@@ -96,7 +106,7 @@ function shippedWasmProblems(consumerDir, selectedNames) {
  * importing process as a pool worker (and throws outside a worker). They are still
  * type-checked by step 5.
  */
-const WORKER_ENTRIES = new Set(['@danielsimonjr/mathts-workerpool/worker']);
+const WORKER_ENTRIES = new Set(Object.keys(readEntryPolicy().workerScripts));
 
 /**
  * The exports of each entry point that are functions at runtime, read by importing the
@@ -258,6 +268,7 @@ try {
       '--loglevel=error',
       `typescript@${tsVersion}`,
       `@types/node@${nodeTypesVersion}`,
+      `esbuild@${installedVersion('esbuild')}`,
       ...tgz.map((f) => join(tarballs, f)),
     ],
     consumer
@@ -317,11 +328,28 @@ try {
         `consumer-typecheck: WARNING known entry ${k.pkg} ${k.code} no longer matches; remove it`
       );
   }
-  if (unexpected.length === 0 && wasmProblems.length === 0) {
+  // Load, browser-bundle and README-fence checks.
+  const policy = readEntryPolicy();
+  const jsEntries = entrySpecifiers(packages);
+  const loadIssues = loadProblems(consumer, jsEntries, policy);
+  const browserEntries = jsEntries.filter((s) => !(s in policy.notBrowserFacing));
+  const bundle = browserBundleProblems(consumer, browserEntries);
+  const fences = fenceProblems(consumer, packages.map(({ pkg }) => pkg.name));
+  const extra = [...loadIssues, ...bundle.problems, ...fences.problems];
+  console.log(
+    `consumer-typecheck: loaded ${jsEntries.length} entries by import() and require(), ` +
+      `bundled ${browserEntries.length} for the browser, ran README fences ` +
+      `(${fences.counts.node} node, ${fences.counts.browser} browser, ${fences.counts.example} example)`
+  );
+  for (const problem of extra) console.error(`consumer-typecheck: ${problem}`);
+
+  if (unexpected.length === 0 && wasmProblems.length === 0 && extra.length === 0) {
     console.log('consumer-typecheck: PASS (0 unexpected errors)');
     exitCode = 0;
   } else if (unexpected.length === 0) {
-    console.error(`consumer-typecheck: FAIL (${wasmProblems.length} shipped-wasm problem(s))`);
+    console.error(
+      `consumer-typecheck: FAIL (${wasmProblems.length} shipped-wasm problem(s), ${extra.length} load/bundle/fence problem(s))`
+    );
   } else {
     console.error(unexpected.join('\n'));
     console.error(`consumer-typecheck: FAIL (${unexpected.length} unexpected errors)`);

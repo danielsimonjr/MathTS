@@ -49,7 +49,7 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
     // Four esbuild bundles of the package graphs: several seconds on Windows.
   }, 120_000);
 
-  it('#707 evaluate subpath minifies smaller than the main barrel named import', () => {
+  it('#930 evaluate subpath is not a size saving: within 5% of the barrel, and far above mathts-expression', () => {
     const out = mkdtempSync(join(tmpdir(), 'mathts-g27-'));
     try {
       sizesAreOrdered(out);
@@ -71,11 +71,10 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
         join(out, `g27-eval-barrel-${platform}.js`),
         platform
       );
-      expect(sub, platform).toBeLessThan(barrel);
-      // Named `{ evaluate }` already tree-shakes most of the barrel. The subpath
-      // still has to be smaller on the issue's esbuild command (minify, both
-      // node and neutral). The gap is the barrel entry's extra live modules.
-      expect(barrel - sub, platform).toBeGreaterThan(5_000);
+      // `evaluate` resolves any function name, so both entries carry the whole
+      // function table. The README withdraws the #707 size claim on this evidence.
+      expect(Math.abs(barrel - sub) / barrel, platform).toBeLessThan(0.05);
+      expect(sub, platform).toBeGreaterThan(800_000);
     }
   }
 

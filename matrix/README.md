@@ -10,7 +10,7 @@ npm install @danielsimonjr/mathts-matrix
 
 ## Usage
 
-```typescript
+```typescript node
 import {
   DenseMatrix,
   matMul,
@@ -52,7 +52,7 @@ pass. `Tensor.matMul` in `@danielsimonjr/mathts-tensor` routes through the same
 manager. Public `lu` / `qr` / `cholesky` / `eig` / `svd` stay on JS; `eigWasm` and
 `svdWasm` are async wrappers that still call those JS solvers.
 
-```typescript
+```typescript node
 import { backendManager, DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 await backendManager.initialize();

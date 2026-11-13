@@ -3,6 +3,7 @@
  */
 
 import type { BufferPool, GPUContext, ShaderManager } from '@danielsimonjr/mathts-gpu';
+import type { GPUBuffer } from '@danielsimonjr/mathts-gpu';
 
 /** Maps one shader binding to a storage buffer index; index -1 selects the uniform buffer. */
 export type ShaderBindEntry = { binding: number; bufferIndex: number };

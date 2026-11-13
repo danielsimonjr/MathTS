@@ -30,7 +30,7 @@ npm run asbuild
 The published entry is AssemblyScript-generated glue in `build/mathts.js` (see
 `package.json` `exports["."]`). Import named functions directly:
 
-```typescript
+```typescript node
 import { add_f64, sqrt_f64, sin_f64 } from '@danielsimonjr/mathts-wasm';
 
 console.log(add_f64(2, 3)); // 5

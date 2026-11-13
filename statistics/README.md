@@ -66,7 +66,7 @@ npm install @danielsimonjr/mathts-statistics
 
 ## Example
 
-```ts
+```ts node
 import {
   anova,
   kendallTau,
