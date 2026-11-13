@@ -148,7 +148,7 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides **1,326** exports (see the generated export index in [reference/functions.md](reference/functions.md), or browse them at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)) across 27 categories. A representative subset:
+`@danielsimonjr/mathts-functions` provides the exports listed in the generated export index in [reference/functions.md](reference/functions.md), or browse them at [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/), by category. A representative subset:
 
 | Category                      | Examples                                                                                                                                                                |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -175,17 +175,17 @@ main();
 
 ## Package Overview
 
-| Package                            | Purpose                                     |
-| ---------------------------------- | ------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | Core types: Complex, Fraction, BigNumber    |
-| `@danielsimonjr/mathts-functions`  | 1,326 exports with type dispatch (v0.72.0)  |
-| `@danielsimonjr/mathts-matrix`     | Dense and sparse matrices                   |
-| `@danielsimonjr/mathts-tensor`     | Rank-N dense Tensor (Float64Array-backed)   |
-| `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode autodiff over Tensor |
-| `@danielsimonjr/mathts-parallel`   | Parallel computing via ComputePool          |
-| `@danielsimonjr/mathts-expression` | Expression parser/evaluator                 |
-| `@danielsimonjr/mathts-workbook`   | `.mtsw` reactive notebook runtime           |
-| `@danielsimonjr/mathts-compat`     | mathjs compatibility layer                  |
+| Package                            | Purpose                                                            |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core`       | Core types: Complex, Fraction, BigNumber                           |
+| `@danielsimonjr/mathts-functions`  | exports with type dispatch (version: see `functions/package.json`) |
+| `@danielsimonjr/mathts-matrix`     | Dense and sparse matrices                                          |
+| `@danielsimonjr/mathts-tensor`     | Rank-N dense Tensor (Float64Array-backed)                          |
+| `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode autodiff over Tensor                        |
+| `@danielsimonjr/mathts-parallel`   | Parallel computing via ComputePool                                 |
+| `@danielsimonjr/mathts-expression` | Expression parser/evaluator                                        |
+| `@danielsimonjr/mathts-workbook`   | `.mtsw` reactive notebook runtime                                  |
+| `@danielsimonjr/mathts-compat`     | mathjs compatibility layer                                         |
 
 ## Next Steps
 

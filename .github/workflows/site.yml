@@ -1,0 +1,127 @@
+name: Site
+
+# Deploys the static site to the gh-pages branch, which GitHub Pages serves (legacy
+# build from the branch root, so no Pages setting changes with this workflow). The site
+# has two parts: the function reference at the root (tools/generate-landing-site.mjs)
+# and the API index at /api/ (tools/generate-api-index.mjs). Both read the packages:
+# the build job builds them and regenerates docs/reference from their dist, so the
+# version and the export count come from the packages, never from a literal.
+#
+# Triggers:
+# - workflow_call: publish.yml calls this job after a successful publish. A publish
+#   that does nothing still deploys, which keeps the site current.
+# - workflow_dispatch: a manual deploy from any ref of the default branch.
+#
+# Least privilege, split by job:
+# - build runs the repository code (install, build, generators) with contents: read.
+# - deploy holds contents: write and runs no repository code. It downloads the built
+#   site as an artifact, copies it onto the gh-pages checkout, and pushes that branch.
+#   Pages uses the branch, so no id-token and no deploy-pages action are needed.
+#
+# Auth is the default GITHUB_TOKEN. No PAT and no repository secret are used.
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+# One deploy at a time. Never cancel a push that is in progress.
+concurrency:
+  group: site-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TURBO_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: Check Bun matches the packageManager pin
+        run: node tools/test/check-bun-version.mjs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      # Regenerates docs/reference and docs/api from the built dist. The generator refuses
+      # a stale dist, so the export index is the one the packages produce now.
+      - name: Regenerate the export index from the built packages
+        run: bun run docs:functions
+
+      - name: Generate the function reference site
+        run: node tools/generate-landing-site.mjs --out=site
+
+      - name: Generate the API index
+        run: node tools/generate-api-index.mjs --out=site/api
+
+      - name: Check the site has both parts
+        run: test -f site/index.html && test -f site/api/index.html && test -d site/functions
+
+      - name: Upload the site
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: site
+          retention-days: 1
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to gh-pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download the site
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: site
+          path: site-out
+
+      - name: Check out gh-pages
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: pages
+          fetch-depth: 1
+
+      # Replaces only the generated paths. Anything else on gh-pages stays.
+      - name: Copy the site onto gh-pages and push
+        run: |
+          set -euo pipefail
+          cd pages
+          rm -rf index.html functions api
+          cp -R ../site-out/. .
+          git add --all -- .
+          if git diff --cached --quiet; then
+            echo "gh-pages already has this site; nothing to push."
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "Deploy site from ${GITHUB_SHA}"
+          git push origin HEAD:gh-pages

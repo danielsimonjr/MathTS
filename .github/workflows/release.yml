@@ -138,8 +138,10 @@ jobs:
     name: Publish
     needs: release
     if: vars.RELEASES_ENABLED == 'true' && needs.release.outputs.versions_bumped == 'true'
+    # contents: write is the ceiling for the site job that publish.yml calls after a
+    # publish (it pushes gh-pages). publish.yml's own publish job stays contents: read.
     permissions:
-      contents: read
+      contents: write
     uses: ./.github/workflows/publish.yml
     secrets:
       NPM: ${{ secrets.NPM }}

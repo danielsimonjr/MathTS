@@ -53,6 +53,10 @@ jobs:
     if: vars.RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # Explicit read: the caller may grant more (release.yml grants contents: write so the
+    # site job below can push gh-pages). This job keeps the read-only token.
+    permissions:
+      contents: read
     env:
       TURBO_TELEMETRY_DISABLED: '1'
       NODE_AUTH_TOKEN: ${{ secrets.NPM }}
@@ -106,3 +110,12 @@ jobs:
         run: |
           echo "changeset publish skips versions already on npm and passes --access public. Provenance is not requested."
           bunx changeset publish
+
+  # Deploys the site after a successful publish. Permission is granted to this job only;
+  # the caller (release.yml) must grant contents: write to this call. See site.yml.
+  site:
+    name: Deploy site
+    needs: publish
+    permissions:
+      contents: write
+    uses: ./.github/workflows/site.yml
