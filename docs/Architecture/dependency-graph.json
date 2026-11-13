@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-13",
-    "totalFiles": 1328,
+    "totalFiles": 1329,
     "totalModules": 82,
-    "totalExports": 7256
+    "totalExports": 7258
   },
   "entryPoints": [
     {
@@ -15450,6 +15450,10 @@
             "imports": ["add", "multiply"]
           },
           {
+            "file": "../typed/divide-inverse.js",
+            "imports": ["registerDivideInverse"]
+          },
+          {
             "file": "../typed/public-type-exports.js",
             "imports": ["PublicDet", "PublicMad", "PublicMedian", "PublicMode"],
             "typeOnly": true
@@ -25477,6 +25481,10 @@
             "imports": ["withBinaryScalarGuards"]
           },
           {
+            "file": "./divide-inverse.js",
+            "imports": ["divideInverse"]
+          },
+          {
             "file": "./public-type-exports.js",
             "imports": [
               "PublicAbs",
@@ -26214,6 +26222,15 @@
           "noncentralChi2PDF",
           "typedDistributions"
         ]
+      },
+      "functions/src/typed/divide-inverse.ts": {
+        "description": "The public `inv` that `divide(scalar, square matrix)` uses. The factory layer imports the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["registerDivideInverse", "divideInverse"],
+        "functions": ["registerDivideInverse", "divideInverse"]
       },
       "functions/src/typed/euclid.ts": {
         "description": "Euclidean GCD with a caller-chosen integer snap (floor vs round).",
@@ -47566,6 +47583,7 @@
           "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
+          "functions/src/typed/divide-inverse.ts",
           "functions/src/typed/euclid.ts",
           "functions/src/typed/expression-eval-barrel.ts",
           "functions/src/typed/f64-kernels.ts",
@@ -48403,13 +48421,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1328,
+    "totalTypeScriptFiles": 1329,
     "totalModules": 82,
-    "totalLinesOfCode": 228726,
-    "totalExports": 7256,
+    "totalLinesOfCode": 228760,
+    "totalExports": 7258,
     "totalClasses": 62,
     "totalInterfaces": 658,
-    "totalFunctions": 2473,
+    "totalFunctions": 2475,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1668,

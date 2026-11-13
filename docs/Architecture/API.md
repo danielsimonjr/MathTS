@@ -92,7 +92,7 @@ threshold): `sum`, `prod`, `dot(a,b)`, `elementwise(a,b,op)`
 `TaskOptions`, `WorkerpoolCapabilities`, `WasmFeatureStatus`. Constant:
 `DEFAULT_WORKER_CONFIG`.
 
-**@internal** (for `@danielsimonjr/mathts-parallel`, not a stable public API):
+**Public helpers** (root export, stable under semver; `@danielsimonjr/mathts-parallel` uses them):
 `chunkTyped`, `chunkPairTyped` (`slice`, not `subarray`, so each worker chunk
 owns its buffer), `forEachMultiIndex` (row-major; rank 0 calls `cb([])` once;
 `multi-index.ts` has no imports, so `dist/worker.js` cannot pull `core` or
