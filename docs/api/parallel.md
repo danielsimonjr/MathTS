@@ -16,8 +16,8 @@ npm install @danielsimonjr/mathts-parallel
 
 `ComputePool` wraps `@danielsimonjr/mathts-workerpool` for chunked work on
 `Float64Array` data. Most element-wise and reduction ops default to **sequential**
-(`DEFAULT_THRESHOLD_BY_OP` → `'never'`); `matmul` parallelizes at **36,864** result
-elements (192×192). Unlisted ops use the global **50,000** element fallback. Standalone `parallel*`
+(`DEFAULT_THRESHOLD_BY_OP` → `'never'`); `matmul` parallelizes at **7,077,888**
+multiply-adds (`aRows * aCols * bCols`, 192×192×192). Unlisted ops use the global **50,000** element fallback. Standalone `parallel*`
 functions and bitwise ops (`bitAnd`, …) share the same threshold table.
 
 ```typescript
@@ -297,8 +297,8 @@ console.log(result.parallelized); // false for many defaults at moderate n
    workers; the others start on the first parallel call, and that call includes their
    start-up. Call `await pool.warmup()` after `initialize()` to start them first.
 3. **Batch operations**: Use `Promise.all()` for independent operations
-4. **Large data**: Only ops above their threshold parallelize (`matmul` at 36,864
-   result elements; most element-wise ops default to sequential)
+4. **Large data**: Only ops above their threshold parallelize (`matmul` at 7,077,888
+   multiply-adds; most element-wise ops default to sequential)
 
 ```typescript
 // Good: Use typed arrays
@@ -338,9 +338,9 @@ The main ones:
 Every standalone function in `operations/` (`parallelAdd`, `parallelSum`, `parallelMatmul`,
 `parallelMap`, ...) takes `forceParallel` / `forceSequential`, and so does the matching
 `ComputePool` method as a last argument. `forceSequential` computes inline whatever the
-size. `forceParallel` skips the threshold checks; it still needs a pool that was
-`initialize()`d, and on one that was not, the call runs inline. Workers beyond `minWorkers`
-start on the first parallel call, so call `warmup()` before timing `forceParallel`.
+size. `forceParallel` skips the threshold checks. On a pool that is not initialized, the call
+starts the pool first and then runs on the workers. Workers beyond `minWorkers` start on the
+first parallel call, so call `warmup()` before timing `forceParallel`.
 
 ### Argument checks
 

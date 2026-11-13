@@ -529,7 +529,7 @@
     },
     {
       "op": "matmul",
-      "threshold": "36864",
+      "threshold": "7077888",
       "active": true,
       "functions": []
     },

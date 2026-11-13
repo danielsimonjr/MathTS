@@ -48,7 +48,19 @@ export function medianInPlace(work: Float64Array): number {
     const v = work[i];
     if (v < upper) upper = v;
   }
-  return (lower + upper) / 2;
+  return middleOf(lower, upper);
+}
+
+/**
+ * The value halfway between `lower` and `upper` (`lower <= upper`), without overflow.
+ * Equal values return that value, so `-0` stays `-0`. Values on both sides of zero cannot
+ * overflow in the sum. Values on one side use `lower + (upper - lower) / 2`, whose
+ * difference cannot overflow.
+ */
+function middleOf(lower: number, upper: number): number {
+  if (lower === upper) return lower;
+  if (lower <= 0 && upper >= 0) return (lower + upper) / 2;
+  return lower + (upper - lower) / 2;
 }
 
 function quickSelectInPlace(a: Float64Array, lo: number, hi: number, k: number): number {
