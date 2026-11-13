@@ -487,9 +487,10 @@ describe('wallClockAbGate on real timers', () => {
 });
 
 // The self-tests run each real gate script with fewer rounds than the shipped list asks for, to
-// keep the run short. The injected slowdown is far above the limit and an A/A run is far below
-// it, so the first look decides; the reduced `maxRounds` only shortens the walk of a run that
-// does not decide there.
+// keep the run short. The injected slowdown is far above the limit, so the first look decides.
+// An A/A run reads about 1: below the limit of most gates, but above the limit of median-vs-sort
+// (which the first look fails, and the test does not assert). A run that does not decide at the
+// first look walks to the reduced `maxRounds`, where the median decides.
 const gatesInList = loadGateList();
 const selfTestDir = mkdtempSync(join(tmpdir(), 'wcg-selftest-'));
 const selfTestConfig = join(selfTestDir, 'wall-clock-gates.json');
