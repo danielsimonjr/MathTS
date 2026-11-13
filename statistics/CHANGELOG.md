@@ -6,7 +6,7 @@
 
 - e47134f: Document `gammaDist` rate parameterization and add `{ scale }` option for SciPy parity. Positional second argument remains **rate**; `gammaDist(2, { scale: 2 })` matches SciPy `stats.gamma(a=2, scale=2)`.
 - e817055: `studentTTest(sample, popmean)` runs a one-sample t-test against the hypothesized mean (SciPy `ttest_1samp`) instead of treating a numeric second argument as a second sample and returning NaN. Non-finite or non-array/non-number second arguments throw `TypeError`.
-- e51c0d5: Descriptive statistics: NumPy `{ ddof }` on typed `variance`/`std`, `{ skipNaN: true }` and `nanmean`/`nanmedian`/`nanvariance`, `Float64Array` on median/mode/quantileSeq/mad/corr, constant-input variance fast path for huge magnitudes, and empty `median`/`mad` return `NaN` (empty `mode` returns `[]`).
+- e51c0d5: Descriptive statistics: NumPy `{ ddof }` on typed `variance`/`std`, `{ skipNaN: true }` and `nanmean`/`nanmedian`/`nanvariance`, `Float64Array` on median/mode/quantileSeq/mad/corr, constant-input variance fast path for huge magnitudes, and empty `median`/`mad` return `NaN` (empty `mode` returns `NaN`).
 - a07bf29: Packaging P2 (dogfood G29): ship LICENSE in tarballs, homepage/bugs links, `exports['./package.json']`, honest `sideEffects`, JS source maps from tsdown, and workerpool types that typecheck without `@types/node` (via updated `@danielsimonjr/workerpool` patch).
 - 5a0b2e1: SciPy/NumPy parity for dogfood stats leftovers (G30): stable Pearson/linregress p-values, Kendall exact small-n default, NumPy quantile methods, `describe` quartiles, KS norm names and scipy `auto` two-sample p-values, heatmap colorbar/labels.
 - Updated dependencies [ef236dc]

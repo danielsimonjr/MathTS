@@ -9,13 +9,21 @@
  * `typed/f64-kernels.ts` (number stays number[], a Matrix stays that Matrix,
  * and sqrt/log-style `number | Complex` scalar returns widen the array).
  *
+ * Manifest entry keys: `name`, `source`, `mathTypedPattern` (where the signature block starts),
+ * `fallback` (overload lines appended last, for the `'...'` rest signature) and `sigTypes`
+ * (a typed-function type name to a public type, for this export only). A `sigTypes` name that
+ * matches no signature part of the export is an error.
+ *
  * `--check` fails when the generated file, or the public option aliases, drift.
+ * `--root=<dir>` reads the manifest and the sources from another package folder.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+/** `--root=<dir>` reads the manifest and the sources from another package folder (tests use it). */
+const rootOption = process.argv.find((arg) => arg.startsWith('--root='))?.slice('--root='.length);
+const ROOT = resolve(rootOption ?? join(dirname(fileURLToPath(import.meta.url)), '..'));
 const MANIFEST = join(ROOT, 'types/public-overloads.manifest.json');
 const OUT = join(ROOT, 'types/public-overloads.generated.d.ts');
 
@@ -109,8 +117,9 @@ function parseSigKeys(body) {
 
 function aliasMap(source) {
   const map = new Map();
-  // One-line aliases only. The value may hold `;` (an object type), so it runs to the last `;`.
-  for (const match of source.matchAll(/^type (\w+) = (.+);[ \t]*$/gm)) {
+  // One alias per line (prettier keeps it so). The value may hold `;` (an object type), so it
+  // runs to the last `;` of the line, before an optional `//` comment.
+  for (const match of source.matchAll(/^type (\w+) = (.+?);[ \t]*(?:\/\/[^\n]*)?$/gm)) {
     map.set(match[1], match[2].trim());
   }
   return map;
@@ -201,12 +210,18 @@ function containerTypes(scalar) {
   };
 }
 
-/** A typed-function type name, or a union of them such as `Float64Array | Float32Array`. */
-function mapSigType(part) {
-  if (SIG_TYPE[part]) return SIG_TYPE[part];
+/**
+ * A typed-function type name, or a union of them such as `Float64Array | Float32Array`.
+ * `overrides` is the manifest `sigTypes` of one export. It replaces the public type of a name
+ * for that export only. The bare `Array` key maps to `number[] | number[][]`, which is wrong for
+ * an export that takes a vector only.
+ */
+function mapSigType(part, overrides = {}) {
+  const lookup = (name) => overrides[name] ?? SIG_TYPE[name];
+  if (lookup(part)) return lookup(part);
   const alternatives = part.split('|').map((alt) => alt.trim());
-  if (alternatives.length > 1 && alternatives.every((alt) => SIG_TYPE[alt])) {
-    return alternatives.map((alt) => SIG_TYPE[alt]).join(' | ');
+  if (alternatives.length > 1 && alternatives.every((alt) => lookup(alt))) {
+    return alternatives.map((alt) => lookup(alt)).join(' | ');
   }
   throw new Error(`unmapped typed-function type "${part}"`);
 }
@@ -215,16 +230,16 @@ function splitKey(key) {
   return key.split(',').map((part) => part.trim());
 }
 
-function paramsOf(parts) {
+function paramsOf(parts, overrides) {
   const rendered = [];
   parts.forEach((part, i) => {
     if (part.startsWith('...')) {
       const inner = part.slice(3);
-      rendered.push(`...rest: ${mapSigType(inner)}[]`);
+      rendered.push(`...rest: ${mapSigType(inner, overrides)}[]`);
       return;
     }
     const name = PARAM_NAMES[i] ?? `x${i}`;
-    rendered.push(`${name}: ${mapSigType(part)}`);
+    rendered.push(`${name}: ${mapSigType(part, overrides)}`);
   });
   return rendered.join(', ');
 }
@@ -233,7 +248,7 @@ function overload(params, ret) {
   return `  (${params}): ${ret};`;
 }
 
-function overloadsForKey(key, body, exportName, aliases, nextKey) {
+function overloadsForKey(key, body, exportName, aliases, nextKey, overrides) {
   // The rest key has no fixed parameter list; its overloads come from the manifest `fallback`.
   if (key === '...') return [];
   const chunk = signatureChunk(body, key, nextKey);
@@ -262,7 +277,7 @@ function overloadsForKey(key, body, exportName, aliases, nextKey) {
         if (part === 'DenseMatrix') return `${name}: DenseMatrix`;
         if (part === 'SparseMatrix') return `${name}: SparseMatrix`;
         if (part === 'Matrix') return `${name}: Matrix`;
-        return `${name}: ${mapSigType(part)}`;
+        return `${name}: ${mapSigType(part, overrides)}`;
       })
       .join(', ');
     const hasArray = parts.includes('Array');
@@ -284,7 +299,7 @@ function overloadsForKey(key, body, exportName, aliases, nextKey) {
     ret = 'unknown';
   }
 
-  const lines = [overload(paramsOf(splitKey(key)), ret)];
+  const lines = [overload(paramsOf(splitKey(key), overrides), ret)];
   if (exportName === 'det' && key === 'Array | Matrix') {
     lines.unshift(overload('A: readonly number[][]', 'number'));
     lines.unshift(overload('A: number[][]', 'number'));
@@ -356,13 +371,29 @@ function buildFile(manifest) {
     const aliases = aliasMap(source);
     const { body, keys } = mathTypedBody(source, entry.name, entry.mathTypedPattern);
     if (keys.length === 0) throw new Error(`${entry.name}: no signatures parsed`);
+    const sigTypes = entry.sigTypes ?? {};
+    const sigParts = new Set(keys.flatMap((key) => splitKey(key)));
+    for (const name of Object.keys(sigTypes)) {
+      if (!sigParts.has(name)) {
+        throw new Error(
+          `${entry.name}: sigTypes "${name}" matches no signature part (parts: ${[...sigParts].join('; ')})`
+        );
+      }
+    }
     const iface = `${capitalize(entry.name)}Callable`;
     lines.push(`export interface ${iface} {`);
     const seen = new Set();
     const specific = [];
     const fallback = [];
     keys.forEach((key, index) => {
-      for (const line of overloadsForKey(key, body, entry.name, aliases, keys[index + 1])) {
+      for (const line of overloadsForKey(
+        key,
+        body,
+        entry.name,
+        aliases,
+        keys[index + 1],
+        sigTypes
+      )) {
         if (seen.has(line)) continue;
         seen.add(line);
         if (/\(\s*a: unknown\b/.test(line) || line.includes('...rest:')) fallback.push(line);

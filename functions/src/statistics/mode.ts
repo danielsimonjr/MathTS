@@ -46,7 +46,11 @@ export const createMode = /* #__PURE__ */ factory(
      * @return {*} The mode of all values
      */
     return typed(name, {
-      // A list of modes, or NaN for an empty input. The public overloads declare this result.
+      // A list of modes, or NaN for an empty input. `gen-public-overloads` copies this
+      // annotation into the published `.d.ts` for `number[]`, `number[][]`, `Float64Array` and
+      // the public `Matrix` (numbers only). A list of BigNumber, Unit or string values, or a
+      // compat matrix (typed `unknown`), also reaches this signature and returns a list of those
+      // values; the public types send those inputs to the `unknown` rest overload.
       'Array | Matrix': (values: unknown[] | MatrixType): number[] | number =>
         _mode(values) as number[] | number,
       'Float64Array | Float32Array': (values: FloatTyped): number[] | number =>

@@ -20,6 +20,7 @@ import {
   nanvariance,
   nanstd,
   factory_variance,
+  parallelStatMode,
 } from '../src/index.js';
 import { BigNumber } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
@@ -170,6 +171,14 @@ describe('G19 #775 empty input', () => {
     expect(std([])).toBeNaN();
     expect(nanmean([])).toBeNaN();
     expect(nanmedian([])).toBeNaN();
+  });
+
+  it('parallelStatMode keeps its own contract: always a list, [] when empty', () => {
+    // `mode` returns `number[] | number` and NaN when empty. `parallelStatMode` returns `number[]`.
+    // A change of its empty result is a breaking change, so it is pinned here beside `mode`.
+    expect(parallelStatMode([])).toEqual([]);
+    expect(parallelStatMode(new Float64Array(0))).toEqual([]);
+    expect(parallelStatMode([1, 2, 2])).toEqual([2]);
   });
 });
 

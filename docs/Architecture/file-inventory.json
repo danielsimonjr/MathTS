@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2373,
+  "totalFiles": 2375,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1297,
     "test-only": 0,
     "orphan": 0,
-    "test": 984,
+    "test": 986,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1323,
-    "tests": 984,
+    "tests": 986,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 67,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1060,
+    "@danielsimonjr/mathts-functions": 1062,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 136,
@@ -8220,7 +8220,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 92
+      "loc": 96
     },
     {
       "file": "functions/src/statistics/max.ts",
@@ -8241,7 +8241,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 262
+      "loc": 267
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8255,7 +8255,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 104
     },
     {
       "file": "functions/src/statistics/nan-reductions.ts",
@@ -9207,7 +9207,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 907
+      "loc": 911
     },
     {
       "file": "functions/src/typed/string-derivative.ts",
@@ -10194,7 +10194,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 196
+      "loc": 205
     },
     {
       "file": "functions/tests/dogfood-g21-cas.test.ts",
@@ -11084,6 +11084,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 30
+    },
+    {
+      "file": "functions/tests/gen-public-overloads.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 169
     },
     {
       "file": "functions/tests/geometry-consumers-oracle.test.ts",
@@ -12743,6 +12750,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 378
+    },
+    {
+      "file": "functions/tests/typed-return-contract.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 137
     },
     {
       "file": "functions/tests/typed-set.test.ts",
