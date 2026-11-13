@@ -110,13 +110,15 @@ describe('propagateUncertainty accepts CODATA constants (#910)', () => {
   });
 
   it('reads a BigNumber constant (the BigNumber configuration) with its uncertainty', () => {
+    // The constant factories declare `Decimal` (decimal.js); core's `BigNumber` is a separate
+    // declaration of the same runtime class, so the entries below are cast at this one point.
     const alpha = new BigNumber('0.0072973525643');
     Object.defineProperty(alpha, 'uncertainty', { value: 1.1e-12 });
-    const result = propagateUncertainty('2 * a', { a: alpha });
+    const result = propagateUncertainty('2 * a', { a: alpha as never });
     expect(result.value / (2 * 0.0072973525643)).toBeCloseTo(1, 12);
     expect(result.sigma / (2 * 1.1e-12)).toBeCloseTo(1, 12);
     // A BigNumber with no uncertainty is a plain number: it adds no variance.
-    expect(propagateUncertainty('2 * a', { a: new BigNumber('3') }).sigma).toBe(0);
+    expect(propagateUncertainty('2 * a', { a: new BigNumber('3') as never }).sigma).toBe(0);
   });
 
   it('keeps the finite-difference step relative for a tiny constant', () => {
