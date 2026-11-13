@@ -14,11 +14,11 @@ describe('factor() — multivariate irreducible factorization', () => {
       expect(at(f, { x, y })).toBeCloseTo((x + y + 1) * (x + 2 * y + 3), 6);
     }
   });
-  it('regression: existing multivariate fast-paths byte-identical', () => {
-    // Pinned to the CURRENT factor() byte output (polyToString does not elide
-    // unit coefficients, so the cofactor renders as "1*y + 1*x"). This guards
-    // that the fast path is preserved exactly when Kronecker adds nothing.
-    expect(factor('x^2*y + x*y^2')).toBe('x*y*(1*y + 1*x)');
+  it('regression: existing multivariate fast-paths keep their factors', () => {
+    // The cofactor renders in the canonical polynomial form (#887): descending
+    // lexicographic order, no unit coefficient. This guards that the fast path is
+    // preserved exactly when Kronecker adds nothing.
+    expect(factor('x^2*y + x*y^2')).toBe('x*y*(x + y)');
     expect(factor('4*x^2 - 9*y^2')).toBe('(2*x - 3*y)*(2*x + 3*y)');
   });
   it('irreducible multivariate returned unchanged', () => {

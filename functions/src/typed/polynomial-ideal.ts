@@ -12,6 +12,8 @@
  * basis-size caps throw an honest error instead of returning wrong results.
  */
 
+import { renderPolynomial } from '../cas/render-polynomial.js';
+
 /** One monomial: coefficient × Π varsᵢ^powersᵢ (dense exponent vector). */
 export interface Term {
   coeff: number;
@@ -478,24 +480,22 @@ export function buchberger(input: Poly[]): Poly[] {
 // Formatting
 // ---------------------------------------------------------------------------
 
-/** Format a Poly back to an expression string (constant-first, like `-1 + 1*y + 1*x^2`). */
+/**
+ * Format a Poly back to an expression string in the canonical polynomial form
+ * ({@link renderPolynomial}): descending lexicographic order, no unit coefficient,
+ * like `x^2 - y + 2`.
+ *
+ * The order does not depend on the order of `p`. A `Poly` from `polyFromExpression` is
+ * lex-descending, and a `Poly` that a caller builds from dense coefficients is ascending;
+ * both print the same.
+ */
 export function polyToString(p: Poly, vars: string[]): string {
-  if (p.length === 0) return '0';
   const fmt = (c: number): string => {
     const r = Math.round(c);
     return Math.abs(c - r) < 1e-9 ? String(r) : String(Number(c.toPrecision(12)));
   };
-  const terms: string[] = [];
-  for (let i = p.length - 1; i >= 0; i--) {
-    const t = p[i];
-    const parts: string[] = [];
-    for (let j = 0; j < t.powers.length; j++) {
-      const e = t.powers[j];
-      if (e === 1) parts.push(vars[j]);
-      else if (e > 1) parts.push(`${vars[j]}^${e}`);
-    }
-    const varPart = parts.join('*');
-    terms.push(varPart ? `${fmt(t.coeff)}*${varPart}` : fmt(t.coeff));
-  }
-  return terms.join(' + ').replace(/\+ -/g, '- ');
+  return renderPolynomial(
+    p.map((t) => ({ exps: t.powers, coeff: fmt(t.coeff) })),
+    vars
+  );
 }

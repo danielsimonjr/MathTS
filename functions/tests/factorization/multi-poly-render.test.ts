@@ -28,9 +28,9 @@ describe('toAlgebraString — bigint-exact rendering (no Number() fidelity loss)
         [[1, 0], 1n],
       ]
     );
-    // Pinned to the CURRENT (pre-fix) toAlgebraString byte output — same term
-    // order, same "1*x" unit-coefficient style, same "*"/"+" spacing that
-    // polyToString has always produced for this input.
-    expect(toAlgebraString(p)).toBe('1*x + 1*y');
+    // The canonical polynomial form (#887): descending lexicographic order with
+    // the first variable most significant, no unit coefficient. The text does not
+    // depend on the insertion order of the terms.
+    expect(toAlgebraString(p)).toBe('x + y');
   });
 });
