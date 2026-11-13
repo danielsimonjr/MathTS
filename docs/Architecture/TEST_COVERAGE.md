@@ -10,12 +10,12 @@
 
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
-| Total Source Files                     | 1313                  |
+| Total Source Files                     | 1314                  |
 | Total Test Files                       | 922                   |
 | Source Files with Tests                | 543                   |
-| Source Files without Tests             | 770                   |
-| Coverage (raw, direct-import)          | **41.4%**             |
-| Coverage (effective, active code only) | **47.3%** (388 / 821) |
+| Source Files without Tests             | 771                   |
+| Coverage (raw, direct-import)          | **41.3%**             |
+| Coverage (effective, active code only) | **47.2%** (388 / 822) |
 
 > The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
 
@@ -26,13 +26,13 @@
 | **Synced mathjs categories in functions/**     |   306 | Mechanically synced from upstream mathjs by ~/.            |
 | **Synced expression utils + transforms**       |     4 | Synced from mathjs.                                        |
 | **AssemblyScript sources under assembly/src/** |    27 | AssemblyScript is not a vitest target.                     |
-| **Active (real gap — needs a test)**           |   433 | These are the files that should grow a direct-import test. |
+| **Active (real gap — needs a test)**           |   434 | These are the files that should grow a direct-import test. |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 770 source files are not directly imported by any test file:
+The following 771 source files are not directly imported by any test file:
 
 ### workerpool/
 
@@ -477,6 +477,7 @@ The following 770 source files are not directly imported by any test file:
 - `expression/src/transform/utils/lastDimToZeroBase.ts` → Expected test: `tests/unit/src/lastDimToZeroBase.test.ts`
 - `expression/src/transform/utils/shortCircuitBinary.ts` → Expected test: `tests/unit/src/shortCircuitBinary.test.ts`
 - `expression/src/transform/utils/transformCallback.ts` → Expected test: `tests/unit/src/transformCallback.test.ts`
+- `expression/src/utils/current-config.ts` → Expected test: `tests/unit/src/current-config.test.ts`
 - `expression/src/utils/safe-result.ts` → Expected test: `tests/unit/src/safe-result.test.ts`
 - `functions/src/algebra/decomposition/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
 - `functions/src/algebra/decomposition/slu.ts` → Expected test: `tests/unit/src/slu.test.ts`

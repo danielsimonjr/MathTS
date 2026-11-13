@@ -35,6 +35,14 @@ export const EXPRESSION_SCOPE_OMIT: ReadonlySet<string> = new Set([
   'chain',
   'parser',
   'resolve',
+  // compat instance members that compile, import or rebind the evaluator, or
+  // that run a callback under another config.
+  'compileExpr',
+  'importFactory',
+  'createInstanceEvaluator',
+  'runWithConfig',
+  'expression',
+  'emit',
   'ConstantNode',
   'SymbolNode',
   'OperatorNode',

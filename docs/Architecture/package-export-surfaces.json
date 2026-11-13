@@ -1050,6 +1050,7 @@
       "cubeDocs",
       "cubicSplineDocs",
       "cumSumDocs",
+      "currentConfig",
       "deepEqualDocs",
       "deepExtend",
       "deepFlatten",

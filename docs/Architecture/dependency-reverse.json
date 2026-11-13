@@ -3129,6 +3129,10 @@
       "expression/src/parse.ts"
     ],
     "expression/src/parse-defaults.ts": ["expression/src/parse.ts"],
+    "expression/src/utils/current-config.ts": [
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/parse.ts"
+    ],
     "expression/src/embeddedDocs/physicalConstants/index.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
