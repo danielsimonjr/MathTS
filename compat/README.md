@@ -46,6 +46,21 @@ math.complex(2, 3); // 2 + 3i
   and related helpers promote out-of-domain values to `Complex` instead of `NaN`.
   `create(all, { predictable: true })` keeps real-only `Math.*` behaviour.
 
+## Deliberate differences from mathjs
+
+The expression parser accepts a superset of the mathjs 15.2.0 syntax for these Unicode symbols.
+mathjs 15.2.0 rejects them or reads them as undefined symbols.
+
+| Input                            | MathTS                                 | mathjs 15.2.0    |
+| -------------------------------- | -------------------------------------- | ---------------- |
+| `√x`, `∛x`, `∜x`                 | `sqrt(x)`, `cbrt(x)`, `nthRoot(x, 4)`  | syntax error     |
+| `·`, `⋅`, `×`                    | multiply (`*`)                         | undefined symbol |
+| `÷`                              | divide (`/`)                           | undefined symbol |
+| `−` (U+2212)                     | minus (`-`)                            | syntax error     |
+| `𝟙` (Unicode mathematical digit) | syntax error that names the code point | undefined symbol |
+
+Code that must reject these symbols has to check the input before it calls the parser.
+
 ## License
 
 MIT (c) Daniel Simon Jr.

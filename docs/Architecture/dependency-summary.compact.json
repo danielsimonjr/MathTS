@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1318, "e": 7190, "re": 3120 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1319, "e": 7195, "re": 3120 },
   "s": {
-    "loc": 225724,
+    "loc": 225850,
     "cls": 61,
-    "int": 616,
-    "fn": 2457,
-    "tg": 175,
+    "int": 617,
+    "fn": 2460,
+    "tg": 178,
     "en": 0,
-    "co": 1662,
+    "co": 1664,
     "toi": 670
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1376,7 +1376,7 @@
       "int": ["PreparedTransformArgs"]
     },
     "expression/utils": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "arraySize",
         "validate",
@@ -1400,6 +1400,7 @@
         "last"
       ],
       "int": [
+        "RadicalSpec",
         "FactoryFunction",
         "BigNumber",
         "Complex",
@@ -1408,8 +1409,7 @@
         "Matrix",
         "DenseMatrix",
         "SparseMatrix",
-        "Range",
-        "IndexDimension"
+        "Range"
       ]
     },
     "parser": {

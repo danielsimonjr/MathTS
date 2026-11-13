@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-13'
-  totalFiles: 1318
+  totalFiles: 1319
   totalModules: 82
-  totalExports: 7190
+  totalExports: 7195
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -29113,6 +29113,7 @@ modules:
             - isConstantNode
             - isFunctionNode
             - isOperatorNode
+            - isParenthesisNode
             - isSymbolNode
             - rule2Node
         - file: ./utils/collection.js
@@ -29147,6 +29148,13 @@ modules:
         - file: ./utils/current-config.js
           imports:
             - currentConfig
+        - file: ./utils/char-classes.js
+          imports:
+            - OPERATOR_SYMBOLS
+            - RADICAL_SYMBOLS
+            - isLatinOrGreekLetter
+            - isMathDigitPair
+            - isMathLetterPair
       workspaceDependencies: []
       exports:
         - createParse
@@ -36330,6 +36338,27 @@ modules:
         - cloneArray
         - NestedArray
         - IdentifiedValue
+    expression/src/utils/char-classes.ts:
+      description: The one character-class table for the expression tokenizer and for the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - RADICAL_SYMBOLS
+        - OPERATOR_SYMBOLS
+        - isMathDigitPair
+        - isLatinOrGreekLetter
+        - isMathLetterPair
+      interfaces:
+        - RadicalSpec
+      functions:
+        - isMathDigitPair
+        - isLatinOrGreekLetter
+        - isMathLetterPair
+      constants:
+        - RADICAL_SYMBOLS
+        - OPERATOR_SYMBOLS
     expression/src/utils/collection.ts:
       description: Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
       externalDependencies: []
@@ -44984,6 +45013,7 @@ dependencyGraph:
     - name: Expression/utils
       files:
         - expression/src/utils/array.ts
+        - expression/src/utils/char-classes.ts
         - expression/src/utils/collection.ts
         - expression/src/utils/current-config.ts
         - expression/src/utils/customs.ts
@@ -45157,16 +45187,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1318
+  totalTypeScriptFiles: 1319
   totalModules: 82
-  totalLinesOfCode: 225724
-  totalExports: 7190
+  totalLinesOfCode: 225850
+  totalExports: 7195
   totalClasses: 61
-  totalInterfaces: 616
-  totalFunctions: 2457
-  totalTypeGuards: 175
+  totalInterfaces: 617
+  totalFunctions: 2460
+  totalTypeGuards: 178
   totalEnums: 0
-  totalConstants: 1662
+  totalConstants: 1664
   totalReExports: 3120
   totalTypeOnlyImports: 670
   runtimeCircularDeps: 2

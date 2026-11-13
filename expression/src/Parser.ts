@@ -60,7 +60,7 @@ export const createParserClass = /* #__PURE__ */ factory(
      *
      *    // evaluate expressions
      *    parser.evaluate('sqrt(3^2 + 4^2)')        // 5
-     *    parser.evaluate('sqrt(-4)')               // 2i
+     *    parser.evaluate('sqrt(-4)')               // 2i with the functions package math scope; NaN in this package's default scope
      *    parser.evaluate('2 inch in cm')           // 5.08 cm
      *    parser.evaluate('cos(45 deg)')            // 0.7071067811865476
      *

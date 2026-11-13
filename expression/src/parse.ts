@@ -4,6 +4,7 @@ import {
   isConstantNode,
   isFunctionNode,
   isOperatorNode,
+  isParenthesisNode,
   isSymbolNode,
   rule2Node,
 } from './utils/is.js';
@@ -16,6 +17,13 @@ import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from '.
 import type { MathNode } from './node/Node.js';
 import { parseDefaults } from './parse-defaults.js';
 import { currentConfig } from './utils/current-config.js';
+import {
+  OPERATOR_SYMBOLS,
+  RADICAL_SYMBOLS,
+  isLatinOrGreekLetter,
+  isMathDigitPair,
+  isMathLetterPair,
+} from './utils/char-classes.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
  *  constructors accept heterogeneous positional args and all yield a MathNode. */
@@ -158,7 +166,6 @@ const UNARY_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
   '+': 'unaryPlus',
   '~': 'bitNot',
   not: 'not',
-  '√': 'sqrt',
 });
 
 const POSTFIX_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
@@ -469,11 +476,18 @@ export const createParse = /* #__PURE__ */ factory(
       const c2 = currentString(state, 2);
       const c3 = currentString(state, 3);
 
-      if (c1 === '√') {
+      if (hasOwnProperty(RADICAL_SYMBOLS, c1) || hasOwnProperty(OPERATOR_SYMBOLS, c1)) {
         state.tokenType = TOKENTYPE.DELIMITER;
-        state.token = '√';
+        state.token = hasOwnProperty(OPERATOR_SYMBOLS, c1) ? OPERATOR_SYMBOLS[c1] : c1;
         next(state);
         return;
+      }
+
+      if (isMathDigitPair(c2.charAt(0), c2.charAt(1))) {
+        throw createSyntaxError(
+          state,
+          `Unicode mathematical digit "${c2}" is not allowed; use ASCII digits 0-9`
+        );
       }
 
       let delim = '';
@@ -710,10 +724,11 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Test whether a character is a valid latin, greek, or letter-like character
+     * (the letter table in utils/char-classes.ts).
      * @param c
      */
     parse.isValidLatinOrGreek = function isValidLatinOrGreek(c: string): boolean {
-      return /^[a-zA-Z_$\u00C0-\u02AF\u0370-\u03FF\u2100-\u214F]$/.test(c);
+      return isLatinOrGreekLetter(c) || c === '_' || c === '$';
     };
 
     /**
@@ -731,13 +746,7 @@ export const createParse = /* #__PURE__ */ factory(
      * @param low
      */
     parse.isValidMathSymbol = function isValidMathSymbol(high: string, low: string): boolean {
-      return (
-        /^[\uD835]$/.test(high) &&
-        /^[\uDC00-\uDFFF]$/.test(low) &&
-        /^[^\uDC55\uDC9D\uDCA0\uDCA1\uDCA3\uDCA4\uDCA7\uDCA8\uDCAD\uDCBA\uDCBC\uDCC4\uDD06\uDD0B\uDD0C\uDD15\uDD1D\uDD3A\uDD3F\uDD45\uDD47-\uDD49\uDD51\uDEA6\uDEA7\uDFCC\uDFCD]$/.test(
-          low
-        )
-      );
+      return isMathLetterPair(high, low);
     };
 
     /**
@@ -1298,13 +1307,15 @@ export const createParse = /* #__PURE__ */ factory(
           (state.tokenType === TOKENTYPE.NUMBER &&
             !isConstantNode(last) &&
             (!isOperatorNode(last) || (last as unknown as { op: string }).op === '!')) ||
-          state.token === '('
+          state.token === '(' ||
+          hasOwnProperty(RADICAL_SYMBOLS, state.token)
         ) {
           // parse implicit multiplication
           //
           // symbol:      implicit multiplication like '2a', '(2+3)a', 'a b'
           // number:      implicit multiplication like '(2+3)2'
           // parenthesis: implicit multiplication like '2(3+4)', '(3+4)(1+2)'
+          // radical:     implicit multiplication like '2√3', 'a√b', '√2√3'
           last = parseRule2(state);
           node = new OperatorNode('*', 'multiply', [node, last], true /* implicit */);
         } else {
@@ -1417,10 +1428,43 @@ export const createParse = /* #__PURE__ */ factory(
       }
     }
 
+    /**
+     * Drop grouping parentheses that the tree does not need: the operand itself, and an atomic
+     * base of ^ or !. A parenthesis around a compound base stays: it keeps toString() correct.
+     */
+    function stripGroupingParens(node: MathNode): MathNode {
+      if (isParenthesisNode(node)) {
+        return (node as unknown as { content: MathNode }).content;
+      }
+      if (isOperatorNode(node)) {
+        const { op, fn, args } = node as unknown as { op: string; fn: string; args: MathNode[] };
+        if ((op === '^' || op === '!') && isParenthesisNode(args[0])) {
+          const inner = (args[0] as unknown as { content: MathNode }).content;
+          if (isConstantNode(inner) || isSymbolNode(inner)) {
+            return new OperatorNode(op, fn, [inner, ...args.slice(1)]);
+          }
+        }
+      }
+      return node;
+    }
+
     function parseUnaryRule(state: ParserState): MathNode {
       let name: string;
       let params: MathNode[];
       let fn: string;
+
+      if (hasOwnProperty(RADICAL_SYMBOLS, state.token)) {
+        // A radical is a call of its function: √x is sqrt(x), ∛x is cbrt(x), ∜x is nthRoot(x, 4).
+        const radical = RADICAL_SYMBOLS[state.token];
+        getTokenSkipNewline(state);
+        // The operand is the unary operand, as for unary minus: √2^2 is sqrt(2^2) and √x! is sqrt(x!).
+        const operand = stripGroupingParens(parseUnary(state));
+        const args: MathNode[] = [operand];
+        if (radical.index !== undefined) {
+          args.push(new ConstantNode(radical.index));
+        }
+        return new FunctionNode(radical.fn, args);
+      }
 
       if (hasOwnProperty(UNARY_OPERATORS, state.token)) {
         fn = UNARY_OPERATORS[state.token];
