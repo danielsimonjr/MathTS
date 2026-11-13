@@ -1471,6 +1471,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DEFAULT_SOLVER_MAX_ELEMENTS": {
+        "kind": "number"
+      },
       "DENSE_MATRIX_MAX_ELEMENTS": {
         "kind": "number"
       },
@@ -1479,6 +1482,9 @@
       },
       "DenseMatrix": {
         "kind": "function"
+      },
+      "DensifyOptions": {
+        "kind": "type"
       },
       "EigOptions": {
         "kind": "type"
@@ -1579,6 +1585,9 @@
       "RQResult": {
         "kind": "type"
       },
+      "RepeatedEigenvalue": {
+        "kind": "type"
+      },
       "SVDOptions": {
         "kind": "type"
       },
@@ -1670,6 +1679,9 @@
         "kind": "function"
       },
       "decompositionInputToNestedArray": {
+        "kind": "function"
+      },
+      "densifyForSolver": {
         "kind": "function"
       },
       "destroyGlobalGPU": {
@@ -1769,6 +1781,9 @@
         "kind": "function"
       },
       "lq": {
+        "kind": "function"
+      },
+      "lstsq": {
         "kind": "function"
       },
       "lu": {
@@ -5422,6 +5437,9 @@
       "lsqBounded": {
         "kind": "function"
       },
+      "lstsq": {
+        "kind": "function"
+      },
       "lucas": {
         "kind": "function"
       },
@@ -8563,6 +8581,9 @@
       "CholeskyResult": {
         "kind": "type"
       },
+      "DenseMatrix": {
+        "kind": "function"
+      },
       "EigOptions": {
         "kind": "type"
       },
@@ -8639,6 +8660,9 @@
         "kind": "function"
       },
       "lq": {
+        "kind": "function"
+      },
+      "lstsq": {
         "kind": "function"
       },
       "lu": {

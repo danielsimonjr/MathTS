@@ -6,12 +6,22 @@
  */
 
 import { isSymmetric, eye } from './common.js';
+import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
+
+export type { RepeatedEigenvalue };
 
 /**
  * Result of eigenvalue decomposition
  */
 export interface EigResult {
+  /**
+   * Each eigenvalue that occurs at least twice, with the count of its independent
+   * eigenvectors. Empty when every eigenvalue is simple. Computed on first read, so `eigvals`
+   * and `eig` pay nothing for it. This field is additive: `values`
+   * and `vectors` are unchanged.
+   */
+  repeatedEigenvalues: RepeatedEigenvalue[];
   /** Eigenvalues (may be complex for non-symmetric matrices) */
   values: Array<{ re: number; im: number }>;
   /**
@@ -586,7 +596,14 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
     vectorsIm = Array.from({ length: nn }, () => new Array<number>(nn).fill(0));
   }
 
-  return { values, vectors, vectorsIm, isSymmetric: symmetric };
+  const result = { values, vectors, vectorsIm, isSymmetric: symmetric } as EigResult;
+  // The report factors the matrix, so it is computed on first read and cached.
+  let report: RepeatedEigenvalue[] | undefined;
+  Object.defineProperty(result, 'repeatedEigenvalues', {
+    enumerable: true,
+    get: () => (report ??= repeatedEigenvalueReport(A, values, symmetric)),
+  });
+  return result;
 }
 
 /**
@@ -597,6 +614,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
  * @param options - Computation options
  * @returns Eigenvalues and eigenvectors
  * @throws {TypeError} if `matrix` is not one of the accepted shapes, or a non-square `Float64Array`.
+ * @throws {RangeError} if an entry is `NaN` or infinite.
  */
 export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}): EigResult {
   // maxIterations / tolerance are accepted for API compatibility but the
@@ -607,13 +625,16 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
 
   const n = A.length;
   if (n === 0) {
-    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
+    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true, repeatedEigenvalues: [] };
   }
 
   // Check dimensions
   for (let i = 0; i < n; i++) {
     if (A[i].length !== n) {
       throw new Error('Matrix must be square');
+    }
+    for (let j = 0; j < n; j++) {
+      if (!Number.isFinite(A[i][j])) throw new RangeError('eig: matrix has a non-finite entry');
     }
   }
 
@@ -626,6 +647,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
       vectors: [[1]],
       vectorsIm: [[0]],
       isSymmetric: symmetric,
+      repeatedEigenvalues: [],
     };
   }
 

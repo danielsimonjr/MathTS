@@ -6,6 +6,8 @@
  */
 
 import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
+import type { SparseMatrix } from '../types/SparseMatrix.js';
+import { densifyForSolver } from './densify.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
 export interface PackedMatrixDescriptor {
@@ -14,12 +16,17 @@ export interface PackedMatrixDescriptor {
   cols: number;
 }
 
-/** Inputs accepted by matrix-package dense decompositions. */
+/**
+ * Inputs accepted by matrix-package dense decompositions. A `SparseMatrix` is
+ * densified with `densifyForSolver` before the factorization runs, so the element
+ * limit of that helper applies. The sparse test is structural: a `SparseMatrix` from
+ * a second loaded copy of this package is accepted.
+ */
 export type DecompositionMatrixInput =
-  DenseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
+  DenseMatrix | SparseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
 
 const ACCEPTED_TYPES_MSG =
-  'DenseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
+  'DenseMatrix, SparseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
 
 function isNestedNumberMatrix(value: unknown): value is number[][] {
   if (!Array.isArray(value)) {
@@ -96,6 +103,10 @@ function resolveDimensions(input: DecompositionMatrixInput): {
   if (isDenseMatrix(input)) {
     return { rows: input.rows, cols: input.cols, nested: input.toArray() };
   }
+  const dense = densifyForSolver(input);
+  if (dense) {
+    return { rows: dense.rows, cols: dense.cols, nested: dense.toArray() };
+  }
   if (isNestedNumberMatrix(input)) {
     const rows = input.length;
     const cols = input[0]?.length ?? 0;
@@ -122,14 +133,6 @@ function resolveDimensions(input: DecompositionMatrixInput): {
  * mathjs-style solvers that call `matrix(nested)`).
  */
 export function decompositionInputToNestedArray(input: DecompositionMatrixInput): number[][] {
-  if (
-    !isDenseMatrix(input) &&
-    !isNestedNumberMatrix(input) &&
-    !(input instanceof Float64Array) &&
-    !isPackedMatrixDescriptor(input)
-  ) {
-    invalidDecompositionInput(input);
-  }
   return resolveDimensions(input).nested;
 }
 
@@ -140,6 +143,12 @@ export function decompositionInputToNestedArray(input: DecompositionMatrixInput)
 export function decompositionInputToDenseMatrix(input: DecompositionMatrixInput): DenseMatrix {
   if (isDenseMatrix(input)) {
     return input;
+  }
+  const dense = densifyForSolver(input);
+  if (dense) {
+    // A second copy of the package returns its own DenseMatrix class: rebuild a local one.
+    const d: { rows: number; cols: number; toArray(): number[][] } = dense;
+    return d instanceof DenseMatrix ? d : new DenseMatrix(d.rows, d.cols, d.toArray());
   }
   if (input instanceof Float64Array) {
     const n = squareSize(input.length);

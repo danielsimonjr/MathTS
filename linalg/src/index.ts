@@ -32,8 +32,10 @@ export {
   svdWasm,
 
   // DenseMatrix primitives
+  DenseMatrix,
   matrixPinv,
   qr,
+  lstsq,
   lu,
   luSolve,
   cholesky,

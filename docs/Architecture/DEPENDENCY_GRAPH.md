@@ -118,7 +118,7 @@ The codebase is organized into the following modules:
 - **core/types**: 20 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
-- **matrix/operations**: 19 files
+- **matrix/operations**: 23 files
 - **matrix/types**: 9 files
 - **tensor**: 5 files
 - **tensor/operations**: 18 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 10             | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 52             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 53             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 568            | 0               |
@@ -1757,9 +1757,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                      | Type   |
-| ------------------------- | ---------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Import |
+| File                       | Imports                      | Type               |
+| -------------------------- | ---------------------------- | ------------------ |
+| `../types/DenseMatrix.js`  | `DenseMatrix, isDenseMatrix` | Import             |
+| `../types/SparseMatrix.js` | `SparseMatrix`               | Import (type-only) |
+| `./densify.js`             | `densifyForSolver`           | Import             |
 
 **Exports:**
 
@@ -1803,14 +1805,47 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports       | Type   |
-| ------------------------- | ------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./lu.js`                 | `lu`          | Import |
+| File                       | Imports                           | Type               |
+| -------------------------- | --------------------------------- | ------------------ |
+| `../types/DenseMatrix.js`  | `DenseMatrix`                     | Import             |
+| `../types/SparseMatrix.js` | `SparseMatrix`                    | Import (type-only) |
+| `./as-packed.js`           | `decompositionInputToDenseMatrix` | Import             |
+| `./lu.js`                  | `lu`                              | Import             |
 
 **Exports:**
 
 - Functions: `condest`
+
+---
+
+### `matrix/src/operations/densify.ts` - One entry point that turns a matrix-package sparse matrix into a dense one for
+
+**Internal Dependencies:**
+
+| File                      | Imports       | Type               |
+| ------------------------- | ------------- | ------------------ |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `DensifyOptions`
+- Functions: `densifyForSolver`
+- Constants: `DEFAULT_SOLVER_MAX_ELEMENTS`
+
+---
+
+### `matrix/src/operations/eig-multiplicity.ts` - Repeated-eigenvalue report for `eig`: which computed eigenvalues are copies of one
+
+**Internal Dependencies:**
+
+| File              | Imports           | Type   |
+| ----------------- | ----------------- | ------ |
+| `./pivoted-qr.js` | `columnPivotedQr` | Import |
+
+**Exports:**
+
+- Interfaces: `RepeatedEigenvalue`
+- Functions: `repeatedEigenvalueReport`
 
 ---
 
@@ -1833,10 +1868,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports                                                     | Type   |
-| ---------------- | ----------------------------------------------------------- | ------ |
-| `./common.js`    | `isSymmetric, eye`                                          | Import |
-| `./as-packed.js` | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| File                    | Imports                                                     | Type   |
+| ----------------------- | ----------------------------------------------------------- | ------ |
+| `./common.js`           | `isSymmetric, eye`                                          | Import |
+| `./eig-multiplicity.js` | `repeatedEigenvalueReport, RepeatedEigenvalue`              | Import |
+| `./as-packed.js`        | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
 
 **Exports:**
 
@@ -1875,12 +1911,14 @@ graph LR
 
 | File              | Imports                                                                                                                                        | Type      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `./eig.js`        | `eig, eigvals, powerIteration, EigResult, EigOptions`                                                                                          | Re-export |
+| `./eig.js`        | `eig, eigvals, powerIteration, EigResult, EigOptions, RepeatedEigenvalue`                                                                      | Re-export |
 | `./svd.js`        | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions`                                                        | Re-export |
 | `./eig-wasm.js`   | `eigWasm, eigvalsWasm, spectralRadiusWasm`                                                                                                     | Re-export |
 | `./svd-wasm.js`   | `svdWasm`                                                                                                                                      | Re-export |
 | `./pinv.js`       | `pinv, PinvOptions`                                                                                                                            | Re-export |
 | `./qr.js`         | `qr, QRResult, QROptions`                                                                                                                      | Re-export |
+| `./lstsq.js`      | `lstsq`                                                                                                                                        | Re-export |
+| `./densify.js`    | `densifyForSolver, DEFAULT_SOLVER_MAX_ELEMENTS, DensifyOptions`                                                                                | Re-export |
 | `./lu.js`         | `lu, luSolve, LUResult`                                                                                                                        | Re-export |
 | `./cholesky.js`   | `cholesky, CholeskyResult`                                                                                                                     | Re-export |
 | `./expm.js`       | `matrixExpm, ExpmOptions`                                                                                                                      | Re-export |
@@ -1895,7 +1933,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `isPackedMatrixDescriptor`, `DecompositionMatrixInput`, `PackedMatrixDescriptor`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `RepeatedEigenvalue`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lstsq`, `densifyForSolver`, `DEFAULT_SOLVER_MAX_ELEMENTS`, `DensifyOptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `isPackedMatrixDescriptor`, `DecompositionMatrixInput`, `PackedMatrixDescriptor`
 
 ---
 
@@ -1915,6 +1953,21 @@ graph LR
 
 - Interfaces: `LogmOptions`
 - Functions: `matrixLogm`
+
+---
+
+### `matrix/src/operations/lstsq.ts` - Linear least squares by column-pivoted Householder QR and a complete
+
+**Internal Dependencies:**
+
+| File              | Imports                                                     | Type   |
+| ----------------- | ----------------------------------------------------------- | ------ |
+| `./as-packed.js`  | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| `./pivoted-qr.js` | `applyReflector, columnPivotedQr, columnReflector`          | Import |
+
+**Exports:**
+
+- Functions: `lstsq`, `lstsq`, `lstsq`
 
 ---
 
@@ -1947,6 +2000,14 @@ graph LR
 
 - Interfaces: `PinvOptions`
 - Functions: `pinv`
+
+---
+
+### `matrix/src/operations/pivoted-qr.ts` - Householder reflectors and column-pivoted QR on row-major `Float64Array` storage.
+
+**Exports:**
+
+- Functions: `scaledNorm`, `columnReflector`, `applyReflector`, `columnPivotedQr`
 
 ---
 
@@ -3078,6 +3139,12 @@ graph LR
 
 ### `functions/src/algebra/solver/lsolve.ts` - Finds one solution of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix. Throw
 
+**Workspace Dependencies:**
+
+| Package                        | Import             |
+| ------------------------------ | ------------------ |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver` |
+
 **Internal Dependencies:**
 
 | File                           | Imports                 | Type               |
@@ -3094,6 +3161,12 @@ graph LR
 ---
 
 ### `functions/src/algebra/solver/lsolveAll.ts` - Finds all solutions of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix.
+
+**Workspace Dependencies:**
+
+| Package                        | Import             |
+| ------------------------------ | ------------------ |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver` |
 
 **Internal Dependencies:**
 
@@ -3113,10 +3186,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                                                                   |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| `@danielsimonjr/mathts-matrix` | `decompositionInputToNestedArray, isPackedMatrixDescriptor, lu, luSolve` |
-| `@danielsimonjr/mathts-matrix` | `PackedMatrixDescriptor`                                                 |
+| Package                        | Import                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-matrix` | `decompositionInputToNestedArray, isPackedMatrixDescriptor, lu, luSolve, densifyForSolver` |
+| `@danielsimonjr/mathts-matrix` | `PackedMatrixDescriptor`                                                                   |
 
 **Internal Dependencies:**
 
@@ -3124,7 +3197,7 @@ graph LR
 | ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
-| `./utils/solveValidation.js`       | `createSolveValidation`                                              | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide`                          | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
 | `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                                                 | Import             |
@@ -3148,6 +3221,12 @@ graph LR
 
 ### `functions/src/algebra/solver/usolve.ts` - Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro
 
+**Workspace Dependencies:**
+
+| Package                        | Import             |
+| ------------------------------ | ------------------ |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver` |
+
 **Internal Dependencies:**
 
 | File                           | Imports                    | Type               |
@@ -3166,6 +3245,12 @@ graph LR
 
 ### `functions/src/algebra/solver/usolveAll.ts` - Finds all solutions of a linear equation system by backward substitution. Matrix must be an upper triangular matrix.
 
+**Workspace Dependencies:**
+
+| Package                        | Import             |
+| ------------------------------ | ------------------ |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver` |
+
 **Internal Dependencies:**
 
 | File                         | Imports                 | Type   |
@@ -3180,7 +3265,13 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/utils/solveValidation.ts` - Create the `solveValidation` function that the triangular solvers use to check `m` and
+### `functions/src/algebra/solver/utils/solveValidation.ts` - Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
+
+**Workspace Dependencies:**
+
+| Package                        | Import             |
+| ------------------------------ | ------------------ |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver` |
 
 **Internal Dependencies:**
 
@@ -3192,7 +3283,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `createSolveValidation`
+- Functions: `denseRightHandSide`, `createSolveValidation`
 
 ---
 
@@ -4701,7 +4792,7 @@ graph LR
 | Package                        | Import                                                                                     |
 | ------------------------------ | ------------------------------------------------------------------------------------------ |
 | `@danielsimonjr/mathts-matrix` | `svd`                                                                                      |
-| `@danielsimonjr/mathts-matrix` | `qrPivoted, lq, rq, ql, condest, eigvals, powerIteration, matrixPinv`                      |
+| `@danielsimonjr/mathts-matrix` | `qrPivoted, lq, rq, ql, condest, eigvals, powerIteration, matrixPinv, lstsq`               |
 | `@danielsimonjr/mathts-matrix` | `SVDResult, SVDOptions`                                                                    |
 | `@danielsimonjr/mathts-matrix` | `QRPivotedResult, QRPivotedOptions, LQResult, RQResult, QLResult, PinvOptions, EigOptions` |
 
@@ -4923,7 +5014,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `* from ./geometry/kernels.generated.js`, `* from ./geometry/sym3.js`, `* from ./geometry/mat4.js`, `* from ./geometry/frustum.js`, `config`, `runWithConfig`, `importFactory`, `ImportOptions`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `createInstanceEvaluator`, `EVALUATE_SCOPE_OMIT`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `runScalarSearch`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `nanmedian`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `studentTTwoSidedP`, `chiSquaredCDF`, `chiSquaredQuantile`, `chiSquaredSF`, `fCDF`, `fQuantile`, `fSF`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `solveBoxLcp`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionInverse`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `quaternionToAxisAngle`, `quaternionFromRotationMatrix`, `quaternionFromEuler`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `wilsonInterval`, `newcombePairedInterval`, `cohensKappa`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `eigvals`, `powerIteration`, `matrixPinv`, `weightedMean`, `weightedVariance`, `weightedMedian`, `weightedQuantile`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`, `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`, `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`, `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`, `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`, `erfinv`, `erfcinv`, `erfcx`, `dawson`, `expIntegralE1`, `expn`, `sinhIntegral`, `coshIntegral`, `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`, `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`, `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`, `differentialEvolution`, `simulatedAnnealing`, `minimizeConstrained`, `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`, `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`, `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`, `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`, `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`, `conv2`, `sinc`, `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`, `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`, `lombScargle`, `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`, `dtw`, `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`, `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`, `orient2D`, `orient3D`, `inCircle`, `pointInTriangle`, `barycentricCoordinates`, `polygonIsConvex`, `polygonClip`, `minkowskiSum`, `earClipping`, `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarDimensionFilter`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchRunOptions`, `ScalarSearchRunProblem`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `UnitDimensionOptions`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `BoxLcpOptions`, `BoxLcpResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`, `QRPivotedResult`, `QRPivotedOptions`, `LQResult`, `RQResult`, `QLResult`, `PinvOptions`, `EigOptions`, `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`, `ConstrainedOptions`, `ConstrainedResult`, `GaussRule`, `TanhSinhOptions`, `Limit1`, `Limit2`, `ScalarSolveOptions`, `FixedPointOptions`, `ConvMode`, `ExtraWindowName`, `WindowOptions`, `ChirpMethod`, `ChirpOptions`, `LombScargleOptions`, `StateSpace`, `DiscretizeMethod`, `BiquadCoefficients`, `DtwOptions`, `DtwResult`, `type * from ./typed/public-type-exports.js`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `* from ./geometry/kernels.generated.js`, `* from ./geometry/sym3.js`, `* from ./geometry/mat4.js`, `* from ./geometry/frustum.js`, `config`, `runWithConfig`, `importFactory`, `ImportOptions`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `createInstanceEvaluator`, `EVALUATE_SCOPE_OMIT`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `runScalarSearch`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `nanmedian`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `studentTTwoSidedP`, `chiSquaredCDF`, `chiSquaredQuantile`, `chiSquaredSF`, `fCDF`, `fQuantile`, `fSF`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `solveBoxLcp`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionInverse`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `quaternionToAxisAngle`, `quaternionFromRotationMatrix`, `quaternionFromEuler`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `wilsonInterval`, `newcombePairedInterval`, `cohensKappa`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `eigvals`, `powerIteration`, `matrixPinv`, `lstsq`, `weightedMean`, `weightedVariance`, `weightedMedian`, `weightedQuantile`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`, `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`, `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`, `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`, `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`, `erfinv`, `erfcinv`, `erfcx`, `dawson`, `expIntegralE1`, `expn`, `sinhIntegral`, `coshIntegral`, `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`, `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`, `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`, `differentialEvolution`, `simulatedAnnealing`, `minimizeConstrained`, `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`, `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`, `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`, `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`, `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`, `conv2`, `sinc`, `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`, `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`, `lombScargle`, `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`, `dtw`, `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`, `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`, `orient2D`, `orient3D`, `inCircle`, `pointInTriangle`, `barycentricCoordinates`, `polygonIsConvex`, `polygonClip`, `minkowskiSum`, `earClipping`, `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarDimensionFilter`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchRunOptions`, `ScalarSearchRunProblem`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `UnitDimensionOptions`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `BoxLcpOptions`, `BoxLcpResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`, `QRPivotedResult`, `QRPivotedOptions`, `LQResult`, `RQResult`, `QLResult`, `PinvOptions`, `EigOptions`, `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`, `ConstrainedOptions`, `ConstrainedResult`, `GaussRule`, `TanhSinhOptions`, `Limit1`, `Limit2`, `ScalarSolveOptions`, `FixedPointOptions`, `ConvMode`, `ExtraWindowName`, `WindowOptions`, `ChirpMethod`, `ChirpOptions`, `LombScargleOptions`, `StateSpace`, `DiscretizeMethod`, `BiquadCoefficients`, `DtwOptions`, `DtwResult`, `type * from ./typed/public-type-exports.js`
 
 ---
 
@@ -11829,6 +11920,12 @@ graph LR
 
 ### `functions/src/typed/numeric.ts` - Typed Numerical Methods Functions
 
+**Workspace Dependencies:**
+
+| Package                        | Import                           |
+| ------------------------------ | -------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver, SparseMatrix` |
+
 **Internal Dependencies:**
 
 | File                               | Imports                                                                                                                            | Type      |
@@ -18218,14 +18315,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                                                                                                                                                                                                                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@danielsimonjr/mathts-matrix` | `eig, eigvals, powerIteration, svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, eigWasm, eigvalsWasm, spectralRadiusWasm, svdWasm, matrixPinv, qr, lu, luSolve, cholesky, qrPivoted, lq, rq, ql, condest, transposeNestedArray, matrixExpm, matrixLogm, matrixSqrtm, matrixSchur` |
-| `@danielsimonjr/mathts-matrix` | `EigResult, EigOptions, SVDResult, SVDOptions, PinvOptions, QRResult, QROptions, LUResult, QRPivotedResult, LQResult, RQResult, QLResult, CholeskyResult, ExpmOptions, LogmOptions, SqrtmOptions, SchurResult, SchurOptions`                                                                     |
+| Package                        | Import                                                                                                                                                                                                                                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `eig, eigvals, powerIteration, svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, eigWasm, eigvalsWasm, spectralRadiusWasm, svdWasm, DenseMatrix, matrixPinv, qr, lstsq, lu, luSolve, cholesky, qrPivoted, lq, rq, ql, condest, transposeNestedArray, matrixExpm, matrixLogm, matrixSqrtm, matrixSchur` |
+| `@danielsimonjr/mathts-matrix` | `EigResult, EigOptions, SVDResult, SVDOptions, PinvOptions, QRResult, QROptions, LUResult, QRPivotedResult, LQResult, RQResult, QLResult, CholeskyResult, ExpmOptions, LogmOptions, SqrtmOptions, SchurResult, SchurOptions`                                                                                         |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `matrixPinv`, `qr`, `lu`, `luSolve`, `cholesky`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `transposeNestedArray`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `matrixSchur`, `EigResult`, `EigOptions`, `SVDResult`, `SVDOptions`, `PinvOptions`, `QRResult`, `QROptions`, `LUResult`, `QRPivotedResult`, `LQResult`, `RQResult`, `QLResult`, `CholeskyResult`, `ExpmOptions`, `LogmOptions`, `SqrtmOptions`, `SchurResult`, `SchurOptions`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `DenseMatrix`, `matrixPinv`, `qr`, `lstsq`, `lu`, `luSolve`, `cholesky`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `transposeNestedArray`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `matrixSchur`, `EigResult`, `EigOptions`, `SVDResult`, `SVDOptions`, `PinvOptions`, `QRResult`, `QROptions`, `LUResult`, `QRPivotedResult`, `LQResult`, `RQResult`, `QLResult`, `CholeskyResult`, `ExpmOptions`, `LogmOptions`, `SqrtmOptions`, `SchurResult`, `SchurOptions`
 
 ---
 
@@ -19939,7 +20036,7 @@ graph LR
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
-| `matrix/src/types/DenseMatrix`                         | 5 files      | 22 files   |
+| `matrix/src/types/DenseMatrix`                         | 5 files      | 23 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
@@ -19947,13 +20044,13 @@ graph LR
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `core/src/internal`                                    | 21 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `functions/src/typed/numeric`                          | 9 files      | 10 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
-| `matrix/src/operations/index`                          | 17 files     | 1 file     |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
@@ -20091,13 +20188,13 @@ graph TD
         N61[cholesky]
         N62[common]
         N63[condest]
-        N64[eig-wasm]
-        N65[eig]
-        N66[expm]
-        N67[givens]
-        N68[index]
-        N69[logm]
-        N70[...9 more]
+        N64[densify]
+        N65[eig-multiplicity]
+        N66[eig-wasm]
+        N67[eig]
+        N68[expm]
+        N69[givens]
+        N70[...13 more]
     end
 
     subgraph Matrix/types
@@ -20847,17 +20944,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1314   |
+| Total TypeScript Files  | 1318   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 224941 |
-| Total Exports           | 7173   |
-| Total Re-exports        | 3112   |
+| Total Lines of Code     | 225724 |
+| Total Exports           | 7190   |
+| Total Re-exports        | 3120   |
 | Total Classes           | 61     |
-| Total Interfaces        | 614    |
-| Total Functions         | 2447   |
+| Total Interfaces        | 616    |
+| Total Functions         | 2457   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 667    |
+| Type-only Imports       | 670    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

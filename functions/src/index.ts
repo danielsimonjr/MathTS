@@ -770,6 +770,7 @@ export {
   eigvals,
   powerIteration,
   matrixPinv,
+  lstsq,
 } from '@danielsimonjr/mathts-matrix';
 export type {
   QRPivotedResult,

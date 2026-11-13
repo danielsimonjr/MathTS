@@ -174,6 +174,7 @@
       "matrix/src/operations/as-packed.ts",
       "matrix/src/operations/cholesky.ts",
       "matrix/src/operations/condest.ts",
+      "matrix/src/operations/densify.ts",
       "matrix/src/operations/expm.ts",
       "matrix/src/operations/logm.ts",
       "matrix/src/operations/lu.ts",
@@ -259,11 +260,22 @@
     "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
     "matrix/src/typed-operations.ts": ["matrix/src/index.ts"],
     "matrix/src/parallel-matrix.ts": ["matrix/src/index.ts"],
+    "matrix/src/types/SparseMatrix.ts": [
+      "matrix/src/operations/as-packed.ts",
+      "matrix/src/operations/condest.ts",
+      "matrix/src/types/index.ts"
+    ],
+    "matrix/src/operations/densify.ts": [
+      "matrix/src/operations/as-packed.ts",
+      "matrix/src/operations/index.ts"
+    ],
     "matrix/src/operations/as-packed.ts": [
       "matrix/src/operations/cholesky.ts",
+      "matrix/src/operations/condest.ts",
       "matrix/src/operations/eig-wasm.ts",
       "matrix/src/operations/eig.ts",
       "matrix/src/operations/index.ts",
+      "matrix/src/operations/lstsq.ts",
       "matrix/src/operations/lu.ts",
       "matrix/src/operations/qr-family.ts",
       "matrix/src/operations/qr-pivoted.ts",
@@ -275,6 +287,10 @@
     "matrix/src/operations/lu.ts": [
       "matrix/src/operations/condest.ts",
       "matrix/src/operations/index.ts"
+    ],
+    "matrix/src/operations/pivoted-qr.ts": [
+      "matrix/src/operations/eig-multiplicity.ts",
+      "matrix/src/operations/lstsq.ts"
     ],
     "matrix/src/operations/eig.ts": [
       "matrix/src/operations/eig-wasm.ts",
@@ -292,6 +308,7 @@
       "matrix/src/operations/sqrtm.ts",
       "matrix/src/operations/svd.ts"
     ],
+    "matrix/src/operations/eig-multiplicity.ts": ["matrix/src/operations/eig.ts"],
     "matrix/src/operations/svd.ts": [
       "matrix/src/operations/index.ts",
       "matrix/src/operations/pinv.ts",
@@ -304,6 +321,7 @@
       "matrix/src/operations/index.ts",
       "matrix/src/operations/qr-family.ts"
     ],
+    "matrix/src/operations/lstsq.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/cholesky.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/expm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/logm.ts": ["matrix/src/operations/index.ts"],
@@ -341,7 +359,6 @@
       "matrix/src/types/dense/arithmetic.ts",
       "matrix/src/types/dense/reduction.ts"
     ],
-    "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",
       "tensor/src/contraction-sequence.ts",

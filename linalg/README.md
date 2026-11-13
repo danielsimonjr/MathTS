@@ -12,7 +12,7 @@ The implementation is re-exported, not duplicated.
 npm install @danielsimonjr/mathts-matrix @danielsimonjr/mathts-linalg
 ```
 
-`DenseMatrix` lives in `mathts-matrix`. This package re-exports factorizations only.
+This package re-exports the factorizations and `DenseMatrix`. `DenseMatrix` is the same class as in `mathts-matrix`, so a program that uses only this package can build a matrix and factorize it.
 
 ## Example
 

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2336,
+  "totalFiles": 2352,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1288,
+    "build-entry": 1292,
     "test-only": 0,
     "orphan": 0,
-    "test": 957,
+    "test": 969,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1314,
-    "tests": 957,
+    "src": 1318,
+    "tests": 969,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 64,
     "@danielsimonjr/mathts-expression": 571,
-    "@danielsimonjr/mathts-functions": 1052,
+    "@danielsimonjr/mathts-functions": 1055,
     "@danielsimonjr/mathts-gpu": 20,
-    "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 126,
+    "@danielsimonjr/mathts-linalg": 6,
+    "@danielsimonjr/mathts-matrix": 136,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 24,
@@ -5707,21 +5707,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 361
+      "loc": 366
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 311
+      "loc": 314
     },
     {
       "file": "functions/src/algebra/solver/lusolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 437
+      "loc": 456
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -5735,21 +5735,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 362
+      "loc": 365
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 313
+      "loc": 316
     },
     {
       "file": "functions/src/algebra/solver/utils/solveValidation.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 193
+      "loc": 209
     },
     {
       "file": "functions/src/algebra/solver/validate-u-pivots.ts",
@@ -6729,7 +6729,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1017
+      "loc": 1018
     },
     {
       "file": "functions/src/kendall-exact.ts",
@@ -9088,7 +9088,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2353
+      "loc": 2355
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -11324,6 +11324,20 @@
       "loc": 30
     },
     {
+      "file": "functions/tests/issue-927-sparse-solve.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 115
+    },
+    {
+      "file": "functions/tests/issue-928-lstsq.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 68
+    },
+    {
       "file": "functions/tests/jacobi-elliptic-gauss.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -12204,6 +12218,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 464
+    },
+    {
+      "file": "functions/tests/sparse-rhs-solve.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 81
     },
     {
       "file": "functions/tests/special-accuracy.test.ts",
@@ -13106,7 +13127,28 @@
       "package": "@danielsimonjr/mathts-linalg",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 78
+      "loc": 80
+    },
+    {
+      "file": "linalg/tests/issue-915-densematrix-export.test.ts",
+      "package": "@danielsimonjr/mathts-linalg",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 22
+    },
+    {
+      "file": "linalg/tests/issue-927-lusolve-sparse.test.ts",
+      "package": "@danielsimonjr/mathts-linalg",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 24
+    },
+    {
+      "file": "linalg/tests/issue-928-lstsq-export.test.ts",
+      "package": "@danielsimonjr/mathts-linalg",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 21
     },
     {
       "file": "linalg/tests/linalg.test.ts",
@@ -13288,7 +13330,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 158
+      "loc": 167
     },
     {
       "file": "matrix/src/operations/cholesky.ts",
@@ -13309,7 +13351,21 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 169
+      "loc": 172
+    },
+    {
+      "file": "matrix/src/operations/densify.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 66
+    },
+    {
+      "file": "matrix/src/operations/eig-multiplicity.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 315
     },
     {
       "file": "matrix/src/operations/eig-wasm.ts",
@@ -13323,7 +13379,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 699
+      "loc": 721
     },
     {
       "file": "matrix/src/operations/expm.ts",
@@ -13344,7 +13400,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 75
+      "loc": 88
     },
     {
       "file": "matrix/src/operations/logm.ts",
@@ -13352,6 +13408,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 411
+    },
+    {
+      "file": "matrix/src/operations/lstsq.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 155
     },
     {
       "file": "matrix/src/operations/lu.ts",
@@ -13366,6 +13429,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 79
+    },
+    {
+      "file": "matrix/src/operations/pivoted-qr.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 146
     },
     {
       "file": "matrix/src/operations/qr-family.ts",
@@ -13690,6 +13760,27 @@
       "loc": 184
     },
     {
+      "file": "matrix/tests/eig-jordan-blocks.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 286
+    },
+    {
+      "file": "matrix/tests/eig-nonfinite.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 57
+    },
+    {
+      "file": "matrix/tests/eig-repeated-robust.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 69
+    },
+    {
       "file": "matrix/tests/gap-linalg-extension-oracle.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -13732,11 +13823,25 @@
       "loc": 27
     },
     {
+      "file": "matrix/tests/issue-926-eig-defective.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 62
+    },
+    {
       "file": "matrix/tests/JSBackend.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
       "loc": 395
+    },
+    {
+      "file": "matrix/tests/lstsq-robust.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 110
     },
     {
       "file": "matrix/tests/operations/cholesky.test.ts",
@@ -13884,6 +13989,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 363
+    },
+    {
+      "file": "matrix/tests/second-copy-sparse-decomposition.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

@@ -1,3 +1,4 @@
+import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
@@ -154,6 +155,10 @@ export const createLsolve = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
+        // A matrix-package SparseMatrix (CSR) has no _index/_ptr/size(): densify it and
+        // run the dense forward substitution, which gives the same result as lsolve(dense).
+        const dense = densifyForSolver(m);
+        if (dense) return _denseForwardSubstitution(matrix(dense.toArray()) as DenseMatrix, b);
         return _sparseForwardSubstitution(m, b);
       },
 
