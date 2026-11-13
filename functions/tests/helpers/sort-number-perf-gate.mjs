@@ -1,17 +1,23 @@
 /**
  * Isolated Node gate for #712: sort(number[]) vs Float64Array.sort.
- * stdout: one JSON line { ratio, sortMs, nativeMs, checksum }.
+ * Limit and round counts: tools/test/wall-clock-gates.json ("sort-number").
+ * stdout: one JSON line, see reportGate.
  */
 import { sort } from '../../dist/index.js';
-import { gatePasses, wallClockAbRatio } from '../../../tools/test/wall-clock-perf-gate.mjs';
+import {
+  loadGateConfig,
+  reportGate,
+  wallClockAbGate,
+} from '../../../tools/test/wall-clock-perf-gate.mjs';
 
+const gate = loadGateConfig('sort-number');
 const n = 100_000;
 const src = [];
 for (let i = 0; i < n; i++) src.push(Math.sin(i));
 
 let checksum = 0;
 
-const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
+const result = wallClockAbGate(
   () => {
     const f = new Float64Array(src);
     f.sort();
@@ -22,18 +28,7 @@ const { ratio, baselineMs, candidateMs } = wallClockAbRatio(
     sort(b);
     checksum += b[0] + b[n - 1];
   },
-  {
-    warmup: { minPairs: 10, maxPairs: 32 },
-    sample: { samplePairs: 14, gcBetween: true },
-  }
+  { ...gate, warmup: { minPairs: 10, maxPairs: 32 } }
 );
 
-process.stdout.write(
-  JSON.stringify({
-    ratio,
-    sortMs: candidateMs,
-    nativeMs: baselineMs,
-    checksum,
-    gateWouldPass: gatePasses(ratio, 1.5),
-  }) + '\n'
-);
+reportGate(gate, result, { checksum });

@@ -1,9 +1,6 @@
 /** Fixes #692 — unary element-wise ops share one Array | Matrix dispatch. */
 
 import { describe, it, expect } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
-import { nodeBinary } from './helpers/node-binary.js';
 import { BigNumber, Complex, Fraction, Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import {
@@ -20,8 +17,6 @@ import {
   sqrt,
   unaryMinus,
 } from '../dist/index.js';
-
-const PERF_GATE = fileURLToPath(new URL('./helpers/sin-f64-perf-gate.mjs', import.meta.url));
 
 const UNARIES = [sin, cos, exp, log, sqrt, abs, asin, acos, acosh, acsc, unaryMinus] as const;
 
@@ -139,18 +134,16 @@ describe('#692 elementwise sin on number[]', () => {
     expect(cos(xs) as number[]).toEqual(xs.map((x) => Math.cos(x)));
   });
 
-  it('sin(Float64Array 1e6) within 1.2× a Math.sin loop (isolated Node gate)', () => {
-    const line = execIsolatedPerfGate(nodeBinary(), PERF_GATE);
-    const { ratio, loopMs, sinMs, gateWouldPass } = JSON.parse(line) as {
-      ratio: number;
-      loopMs: number;
-      sinMs: number;
-      gateWouldPass: boolean;
-    };
-    expect(Number.isFinite(ratio)).toBe(true);
-    expect(sinMs).toBeGreaterThan(0);
-    expect(loopMs).toBeGreaterThan(0);
-    expect(gateWouldPass).toBe(true);
-    expect(ratio).toBeLessThan(1.2);
+  // The speed bound of sin(Float64Array) against a Math.sin loop is the "sin-f64" gate of
+  // tools/test/wall-clock-gates.json. It runs in its own CI step, not in this suite.
+  it('sin(Float64Array) matches a Math.sin loop and returns a new Float64Array', () => {
+    const xs = new Float64Array(2048);
+    for (let i = 0; i < xs.length; i++) xs[i] = (i % 997) / 997;
+    const copy = xs.slice();
+    const out = sin(xs) as Float64Array;
+    expect(out).toBeInstanceOf(Float64Array);
+    expect(out).not.toBe(xs);
+    expect(xs).toEqual(copy);
+    for (let i = 0; i < xs.length; i++) expect(out[i]).toBeCloseTo(Math.sin(copy[i]), 12);
   });
 });

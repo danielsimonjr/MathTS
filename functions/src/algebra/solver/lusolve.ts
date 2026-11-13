@@ -12,7 +12,10 @@ import { csIpvec } from '../sparse/csIpvec.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { MathJSSparseMatrix } from '../../factories/matrix-bridge.js';
 import { LUSOLVE_SINGULAR_MESSAGE } from './pivot-tolerance.js';
-import { validateUpperTriangularPivots } from './validate-u-pivots.js';
+import {
+  validatePackedUpperTriangularPivots,
+  validateUpperTriangularPivots,
+} from './validate-u-pivots.js';
 
 interface MatrixConstructor {
   (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
@@ -121,10 +124,14 @@ export const createLusolve = /* #__PURE__ */ factory(
       throw new TypeError('Invalid right-hand side for lusolve');
     }
 
+    /**
+     * Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
+     * Returns the solution as a plain `n x 1` nested array.
+     */
     function lusolveFromNested(
       nested: number[][],
       b: unknown[][] | DenseMatrix | SparseMatrix
-    ): DenseMatrix {
+    ): number[][] {
       const eq = equilibrateDense(nested, b);
       const aRows = eq.a as number[][];
       const bVec = rhsToNumberVector(eq.b as typeof b, aRows.length);
@@ -137,9 +144,8 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
         throw err;
       }
-      validateUpperTriangularPivots(fac.U.toArray());
-      const x = luSolve(fac, bVec);
-      return matrix(x.map((v) => [v]) as unknown[][]) as DenseMatrix;
+      validatePackedUpperTriangularPivots(fac.U.toFloat64Array(), aRows.length);
+      return luSolve(fac, bVec).map((v) => [v]);
     }
 
     function isLUPDecomposition(value: unknown): value is LUPDecomposition {
@@ -318,14 +324,14 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: unknown[][],
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        return lusolveFromNested(a as number[][], b).valueOf();
+        return lusolveFromNested(a as number[][], b);
       },
 
       'Float64Array, Array | Matrix': function (
         a: Float64Array,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        return lusolveFromNested(decompositionInputToNestedArray(a), b).valueOf();
+        return lusolveFromNested(decompositionInputToNestedArray(a), b);
       },
 
       'DenseMatrix, Array | Matrix': function (
@@ -366,7 +372,7 @@ export const createLusolve = /* #__PURE__ */ factory(
           return _lusolve(a.L, a.U, a.p, a.q, b);
         }
         if (isPackedMatrixDescriptor(a)) {
-          return lusolveFromNested(decompositionInputToNestedArray(a), b).valueOf();
+          return lusolveFromNested(decompositionInputToNestedArray(a), b);
         }
         const candidate = a as Record<string, unknown>;
         if (

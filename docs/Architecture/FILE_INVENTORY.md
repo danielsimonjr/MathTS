@@ -4,13 +4,13 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-11-12 (by tools/create-dependency-graph)
+**Generated**: 2026-11-13 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2321
+**Total files**: 2318
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1284 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      946 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      943 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2321** |                                                                                                                |
+| **Total**     | **2318** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     7 |
 | `src`      |  1310 |
-| `tests`    |   946 |
+| `tests`    |   943 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -44,14 +44,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    28 |
-| `@danielsimonjr/mathts-compat`         |    22 |
+| `@danielsimonjr/mathts-compat`         |    21 |
 | `@danielsimonjr/mathts-core`           |   123 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   567 |
-| `@danielsimonjr/mathts-functions`      |  1052 |
+| `@danielsimonjr/mathts-functions`      |  1051 |
 | `@danielsimonjr/mathts-gpu`            |    20 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   127 |
+| `@danielsimonjr/mathts-matrix`         |   126 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    53 |
 | `@danielsimonjr/mathts-parser`         |     5 |
@@ -147,7 +147,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/tests/dogfood-g26.test.ts`                                                | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-g32b.test.ts`                                               | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/gap-config-behavior.test.ts`                                        | @danielsimonjr/mathts-compat         | tests    | test        |
-| `compat/tests/helpers/node-binary.ts`                                             | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/instance-config-isolation.test.ts`                                  | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/matrix-array-ops.test.ts`                                           | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/parity-oracle.test.ts`                                              | @danielsimonjr/mathts-compat         | tests    | test        |
@@ -1660,7 +1659,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/graph-traversal.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/graph.test.ts`                                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/helpers/gpu-hardware.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/helpers/node-binary.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/helpers/wasm-spy.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/hypergeometric.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/hypothesis.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2018,7 +2016,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/gpu/initialization.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gpu/integration.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gpu/operations.test.ts`                                             | @danielsimonjr/mathts-matrix         | tests    | test        |
-| `matrix/tests/helpers/node-binary.ts`                                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/helpers/stub-global.ts`                                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/JSBackend.test.ts`                                                  | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/cholesky.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |

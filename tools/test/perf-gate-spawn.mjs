@@ -12,12 +12,17 @@ import { execFileSync } from 'node:child_process';
 export const PERF_GATE_NODE_FLAGS = ['--expose-gc'];
 
 /**
- * Environment for a perf-gate child: no V8 coverage dirs and no vitest worker ids.
+ * Environment for a perf-gate child: no V8 coverage collection and no vitest worker ids.
+ *
+ * Node adds NODE_V8_COVERAGE of the parent to every child process unless `env`
+ * has that name as an own key. Deleting the key from the copy therefore leaves
+ * the child instrumented. An empty value is an own key, and Node reads it as
+ * "no coverage".
  * @returns {NodeJS.ProcessEnv}
  */
 export function isolatedPerfGateChildEnv() {
   const env = { ...process.env };
-  delete env.NODE_V8_COVERAGE;
+  env.NODE_V8_COVERAGE = '';
   delete env.NODE_V8_COVERAGE_DIR;
   delete env.VITEST;
   delete env.VITEST_WORKER_ID;

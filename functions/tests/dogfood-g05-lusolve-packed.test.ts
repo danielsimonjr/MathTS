@@ -2,8 +2,79 @@
  * Dogfood relay G05 — lusolve packed f64 (#701).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lup, lusolve } from '../src/factories/index.js';
+
+describe('lusolve on nested input reads the packed U factor without a nested copy', () => {
+  // A diagonally dominant 40x40 system whose solution is known: x[i] = i + 1.
+  const n = 40;
+  const A = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (i === j ? n + 1 : ((i * 7 + j * 3) % 5) / 10))
+  );
+  const want = Array.from({ length: n }, (_, i) => i + 1);
+  const b = A.map((row) => row.reduce((s, v, j) => s + v * want[j], 0));
+
+  it('does not call DenseMatrix.toArray or DenseMatrix.get', () => {
+    const toArray = vi.spyOn(DenseMatrix.prototype, 'toArray');
+    const get = vi.spyOn(DenseMatrix.prototype, 'get');
+    try {
+      const x = lusolve(A, b) as number[][];
+      expect(toArray).not.toHaveBeenCalled();
+      expect(get).not.toHaveBeenCalled();
+      expect(x).toHaveLength(n);
+      // Positive control: the spies see calls on the matrix package that lusolve uses.
+      DenseMatrix.fromArray(A).toArray();
+      expect(toArray).toHaveBeenCalledTimes(1);
+    } finally {
+      toArray.mockRestore();
+      get.mockRestore();
+    }
+  });
+
+  it('returns a fresh column of n single-number rows that solves the system', () => {
+    const x = lusolve(A, b) as number[][];
+    expect(Array.isArray(x)).toBe(true);
+    expect(x).toHaveLength(n);
+    for (let i = 0; i < n; i++) {
+      expect(x[i]).toHaveLength(1);
+      expect(x[i][0]).toBeCloseTo(want[i], 9);
+    }
+    const again = lusolve(A, b) as number[][];
+    expect(again).not.toBe(x);
+    expect(again[0]).not.toBe(x[0]);
+  });
+
+  it('keeps the singular check: a zero pivot, a non-finite entry and a tiny pivot throw', () => {
+    expect(() =>
+      lusolve(
+        [
+          [1, 2],
+          [2, 4],
+        ],
+        [1, 2]
+      )
+    ).toThrow(/singular/i);
+    expect(() =>
+      lusolve(
+        [
+          [1, Number.NaN],
+          [0, 1],
+        ],
+        [1, 1]
+      )
+    ).toThrow(/singular/i);
+    expect(() =>
+      lusolve(
+        [
+          [1, 1],
+          [1, 1 + 4e-16],
+        ],
+        [1, 1]
+      )
+    ).toThrow(/singular/i);
+  });
+});
 
 describe('G05 #701 — lusolve accepts square Float64Array', () => {
   it('packed 2×2 row-major matches issue AC', () => {

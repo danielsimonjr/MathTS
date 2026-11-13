@@ -3,7 +3,7 @@
  * @module @danielsimonjr/mathts-matrix/tests/DenseMatrix
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { DenseMatrix } from '../src/types/DenseMatrix.js';
 
 describe('DenseMatrix', () => {
@@ -450,6 +450,80 @@ describe('DenseMatrix', () => {
       expect(arr).toEqual([
         [1, 2],
         [3, 4],
+      ]);
+    });
+
+    it('toArray copies rows from storage and does not call get() per entry', () => {
+      const m = DenseMatrix.fromArray(
+        Array.from({ length: 30 }, (_, i) => Array.from({ length: 40 }, (_, j) => i * 100 + j))
+      );
+      const get = vi.spyOn(DenseMatrix.prototype, 'get');
+      try {
+        const arr = m.toArray();
+        expect(get).not.toHaveBeenCalled();
+        expect(arr).toHaveLength(30);
+        expect(arr[29]).toHaveLength(40);
+        expect(arr[7][11]).toBe(711);
+      } finally {
+        get.mockRestore();
+      }
+    });
+
+    it('toArray returns fresh rows: editing the result leaves the matrix unchanged', () => {
+      const m = DenseMatrix.fromArray([
+        [1, 2],
+        [3, 4],
+      ]);
+      const first = m.toArray();
+      first[0][0] = 99;
+      first[1].push(5);
+      expect(m.get(0, 0)).toBe(1);
+      expect(m.toArray()).toEqual([
+        [1, 2],
+        [3, 4],
+      ]);
+      const second = m.toArray();
+      expect(second).not.toBe(first);
+      expect(second[0]).not.toBe(first[0]);
+    });
+
+    it('toArray keeps NaN, Infinity and the sign of zero', () => {
+      const m = DenseMatrix.fromArray([
+        [Number.NaN, Infinity],
+        [-Infinity, -0],
+      ]);
+      const arr = m.toArray();
+      expect(Number.isNaN(arr[0][0])).toBe(true);
+      expect(arr[0][1]).toBe(Infinity);
+      expect(arr[1][0]).toBe(-Infinity);
+      expect(Object.is(arr[1][1], -0)).toBe(true);
+    });
+
+    it('toArray of an empty matrix keeps the shape', () => {
+      expect(new DenseMatrix(0, 2).toArray()).toEqual([]);
+      expect(new DenseMatrix(2, 0).toArray()).toEqual([[], []]);
+    });
+
+    it('toArray of a row slice (a view) reads the rows of the slice', () => {
+      const m = DenseMatrix.fromArray([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        [10, 11, 12],
+      ]);
+      expect(m.slice({ rowStart: 1, rowEnd: 3 }).toArray()).toEqual([
+        [4, 5, 6],
+        [7, 8, 9],
+      ]);
+      expect(m.row(2).toArray()).toEqual([[7, 8, 9]]);
+      expect(
+        m.slice({ rowStart: 1, rowEnd: 4 }).slice({ rowStart: 1, rowEnd: 2 }).toArray()
+      ).toEqual([[7, 8, 9]]);
+      expect(m.slice({ colStart: 1, colEnd: 3 }).toArray()).toEqual([
+        [2, 3],
+        [5, 6],
+        [8, 9],
+        [11, 12],
       ]);
     });
 

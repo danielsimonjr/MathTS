@@ -1,0 +1,55 @@
+{
+  "defaults": {
+    "alpha": 0.01,
+    "initialRounds": 16,
+    "blockRounds": 8,
+    "maxRounds": 64,
+    "timeoutMs": 600000,
+    "gcBetween": false
+  },
+  "gates": [
+    {
+      "name": "sort-number",
+      "script": "functions/tests/helpers/sort-number-perf-gate.mjs",
+      "limit": 1.5,
+      "gcBetween": true,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "median-vs-sort",
+      "script": "functions/tests/helpers/median-sort-perf-gate.mjs",
+      "limit": 0.25,
+      "selfTestScale": 12,
+      "selfTestAA": false,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "lusolve",
+      "script": "functions/tests/helpers/lusolve-perf-gate.mjs",
+      "limit": 1.2,
+      "needs": ["functions/dist/index.js", "matrix/dist/index.js"]
+    },
+    {
+      "name": "sin-f64",
+      "script": "functions/tests/helpers/sin-f64-perf-gate.mjs",
+      "limit": 1.2,
+      "discard": 4,
+      "gcBetween": true,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "gemm",
+      "script": "matrix/tests/helpers/gemm-perf-gate.mjs",
+      "limit": 1.15,
+      "maxRounds": 32,
+      "selfTestAA": false,
+      "needs": ["matrix/dist/index.js"]
+    },
+    {
+      "name": "compat-add",
+      "script": "compat/tests/helpers/compat-add-perf-gate.mjs",
+      "limit": 2.0,
+      "needs": ["compat/dist/index.js"]
+    }
+  ]
+}

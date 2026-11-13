@@ -523,15 +523,18 @@ export class DenseMatrix extends Matrix<number> {
   // =========================================================================
 
   /**
-   * Convert to nested array
+   * Convert to nested array. Each row is a new array, read straight from the
+   * storage (a view honours its offset and row stride), so the result never
+   * aliases the matrix.
    */
   toArray(): number[][] {
-    const result: number[][] = [];
-    for (let i = 0; i < this.rows; i++) {
-      result[i] = [];
-      for (let j = 0; j < this.cols; j++) {
-        result[i][j] = this.get(i, j);
-      }
+    const { rows, cols, data, offset, rowStride } = this;
+    const result = new Array<number[]>(rows);
+    for (let i = 0; i < rows; i++) {
+      const base = offset + i * rowStride;
+      const row = new Array<number>(cols);
+      for (let j = 0; j < cols; j++) row[j] = data[base + j];
+      result[i] = row;
     }
     return result;
   }

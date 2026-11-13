@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-12",
+    "lastUpdated": "2026-11-13",
     "totalFiles": 1310,
     "totalModules": 82,
-    "totalExports": 7160
+    "totalExports": 7161
   },
   "entryPoints": [
     {
@@ -7535,7 +7535,7 @@
         "constants": ["createLsolveAll"]
       },
       "functions/src/algebra/solver/lusolve.ts": {
-        "description": "Max |entry| when every entry is a finite number.",
+        "description": "Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -7570,7 +7570,7 @@
           },
           {
             "file": "./validate-u-pivots.js",
-            "imports": ["validateUpperTriangularPivots"]
+            "imports": ["validatePackedUpperTriangularPivots", "validateUpperTriangularPivots"]
           }
         ],
         "workspaceDependencies": [
@@ -7690,8 +7690,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["validateUpperTriangularPivots"],
-        "functions": ["validateUpperTriangularPivots"]
+        "exports": ["validateUpperTriangularPivots", "validatePackedUpperTriangularPivots"],
+        "functions": ["validateUpperTriangularPivots", "validatePackedUpperTriangularPivots"]
       },
       "functions/src/algebra/sparse/csAmd.ts": {
         "description": "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each",
@@ -47424,11 +47424,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1310,
     "totalModules": 82,
-    "totalLinesOfCode": 224502,
-    "totalExports": 7160,
+    "totalLinesOfCode": 224535,
+    "totalExports": 7161,
     "totalClasses": 61,
     "totalInterfaces": 613,
-    "totalFunctions": 2437,
+    "totalFunctions": 2438,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1658,
