@@ -3404,3 +3404,4 @@ All 46 test files created for src/wasm/ modules:
       the wasm existed. `turbo.json` now orders `matrix#build`/`functions#build` after
       `@danielsimonjr/mathts-wasm#build`, which also puts the wasm build's hash into theirs.
       A cold `bun install && bun run build && bun run test` now passes; it failed before.
+- [ ] **#932 follow-up: route `eig`, `eig-wasm`, `lstsq`, `powerIteration` through `decompositionSource`.** Each converts its input once (`toArray` or a flat copy). Route them only when a measurement shows a gain. Five-axis (2026-11-13, #932): speed not measured; stability storage probe (11 tests, 8 fail on main); reliability full suites pass; security `denseReader` exposes no writable storage; maintainability copy code moved into one module. `decompositionInputToDenseMatrix` callers (`lu`, `cholesky`, `qr`, `lq`, `rq`, `condest`) copy before any write, so the shared object is safe.
