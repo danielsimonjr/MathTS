@@ -34,6 +34,11 @@ npm install @danielsimonjr/mathts-statistics
   `hmean`, `cov`, `corr`, `corrcoef`, `rankdata`, `ptp`, `trimmedMean`, `variation`, `describe`,
   `logsumexp`, `softmax`, `detrend`, `movingAverage`, `ewma`, `acf`, and the correlation helpers
   `pearsonr`, `spearman`, `spearmanr`, `kendalltau` / `kendallTau`.
+- **Matrix layout (`cov`, `corrcoef`)** — the default layout is _observations as rows, variables as
+  columns_ (`rowvar: false`). NumPy's `np.cov` / `np.corrcoef` default is the transpose: pass
+  `{ rowvar: true }` to get variables as rows. `corrcoef([[1, 2, 3], [4, 5, 6]], { rowvar: true })`
+  returns the 2×2 matrix `[[1, 1], [1, 1]]`, the same as `np.corrcoef([[1, 2, 3], [4, 5, 6]])`.
+  `rowvar` applies to the matrix form only; `cov(x, y)` with two vectors throws if `rowvar` is set.
 - **Parallel reductions** — `parallelStat*` helpers mirror the typed reductions on `Float64Array`;
   most op thresholds in `ComputePool` are `'never'` today (inline JS), but the API stays
   `async`-friendly where the typed layer returns a `Promise`. Factory `mad` is **median**
