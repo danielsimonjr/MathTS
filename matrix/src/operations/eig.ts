@@ -6,6 +6,7 @@
  */
 
 import { isSymmetric, eye } from './common.js';
+import { svd } from './svd.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
@@ -31,7 +32,8 @@ export interface RepeatedEigenvalue {
 export interface EigResult {
   /**
    * Each eigenvalue that occurs at least twice, with the count of its independent
-   * eigenvectors. Empty when every eigenvalue is simple. This field is additive: `values`
+   * eigenvectors. Empty when every eigenvalue is simple. Computed on first read, so `eigvals`
+   * and `eig` pay nothing for it. This field is additive: `values`
    * and `vectors` are unchanged.
    */
   repeatedEigenvalues: RepeatedEigenvalue[];
@@ -609,123 +611,108 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
     vectorsIm = Array.from({ length: nn }, () => new Array<number>(nn).fill(0));
   }
 
-  return {
-    values,
-    vectors,
-    vectorsIm,
-    isSymmetric: symmetric,
-    repeatedEigenvalues: repeatedEigenvalueReport(A, values),
-  };
+  const result = { values, vectors, vectorsIm, isSymmetric: symmetric } as EigResult;
+  // The report needs singular values, so it is computed on first read and cached.
+  let report: RepeatedEigenvalue[] | undefined;
+  Object.defineProperty(result, 'repeatedEigenvalues', {
+    enumerable: true,
+    get: () => (report ??= repeatedEigenvalueReport(A, values, symmetric)),
+  });
+  return result;
 }
 
-/** Computed eigenvalues closer than this (relative to max(1, |lambda|)) form one repeated value. */
-const REPEATED_GROUP_TOL = 1e-6;
+/** Machine epsilon for double precision. */
+const EIG_EPS = 2.220446049250313e-16;
 
 /**
- * A pivot at or below this fraction of the largest entry counts as zero. Rank is
- * read from pivots, so a repeated eigenvalue with a Jordan block of size k has its
- * computed copies split by about eps^(1/k); the group mean keeps the split out of the count.
+ * Two computed eigenvalues are linked when they are closer than this multiple of
+ * `sqrt(eps) * ||A||_F`. A double eigenvalue in a Jordan block splits by about
+ * `sqrt(eps)` times the matrix scale, so the link tolerance sits just above that.
+ * Linked eigenvalues form one group by single linkage, so the grouping does not
+ * depend on the order of the spectrum. A Jordan block of size 3 or more splits wider
+ * (about `eps^(1/k)`) and is not grouped.
  */
-const NULLITY_RANK_TOL = Math.sqrt(2.220446049250313e-16);
+const GROUP_TOL_FACTOR = 2 * Math.sqrt(EIG_EPS);
 
-/**
- * Rank of a square row-major matrix by Gaussian elimination with complete pivoting.
- * Pivoting stops at the first remaining maximum at or below `tol`. The input is
- * overwritten. Cost is O(N^3), which is far cheaper than an SVD of the same matrix.
- */
-function rankByCompletePivoting(E: Float64Array, N: number, tol: number): number {
-  let rank = 0;
-  for (let k = 0; k < N; k++) {
-    let best = 0;
-    let bi = k;
-    let bj = k;
-    for (let i = k; i < N; i++) {
-      for (let j = k; j < N; j++) {
-        const v = Math.abs(E[i * N + j]);
-        if (v > best) {
-          best = v;
-          bi = i;
-          bj = j;
-        }
-      }
-    }
-    if (!(best > tol)) break;
-    rank++;
-    if (bi !== k) {
-      for (let j = 0; j < N; j++) {
-        const t = E[k * N + j];
-        E[k * N + j] = E[bi * N + j];
-        E[bi * N + j] = t;
-      }
-    }
-    if (bj !== k) {
-      for (let i = 0; i < N; i++) {
-        const t = E[i * N + k];
-        E[i * N + k] = E[i * N + bj];
-        E[i * N + bj] = t;
-      }
-    }
-    const p = E[k * N + k];
-    for (let i = k + 1; i < N; i++) {
-      const f = E[i * N + k] / p;
-      if (f === 0) continue;
-      for (let j = k; j < N; j++) E[i * N + j] -= f * E[k * N + j];
-    }
-  }
-  return rank;
+/** Number of singular values of the square matrix `M` at or below `thr`. */
+function smallSingularValues(M: number[][], thr: number): number {
+  const { S } = svd(M);
+  let count = 0;
+  for (const s of S) if (s <= thr) count++;
+  return count;
 }
 
 /**
- * Nullity over the complex numbers of `A - lambda I`.
- *
- * The complex matrix `M = Re + i Im` is embedded as the real 2n x 2n matrix
- * `[[Re, -Im], [Im, Re]]`. Each complex null vector gives two real null vectors
- * of the embedding, so the nullity of the complex matrix is half the embedding's.
+ * Nullity over the complex numbers of `A - lambda I`, from singular values.
+ * A real `lambda` uses the n x n matrix. A complex `lambda` embeds
+ * `Re + i Im` as the real 2n x 2n matrix `[[Re, -Im], [Im, Re]]`, whose nullity
+ * is twice the complex nullity.
  */
-function complexNullity(A: number[][], lambda: { re: number; im: number }): number {
+function nullityOf(A: number[][], lambda: { re: number; im: number }, normF: number): number {
   const n = A.length;
-  const size = 2 * n;
-  const E = new Float64Array(size * size);
-  let maxAbs = 0;
+  const real = lambda.im === 0;
+  const size = real ? n : 2 * n;
+  const M: number[][] = Array.from({ length: size }, () => new Array<number>(size).fill(0));
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       const re = A[i][j] - (i === j ? lambda.re : 0);
-      const im = i === j ? -lambda.im : 0;
-      E[i * size + j] = re;
-      E[(i + n) * size + j + n] = re;
-      E[i * size + j + n] = -im;
-      E[(i + n) * size + j] = im;
-      maxAbs = Math.max(maxAbs, Math.abs(re), Math.abs(im));
+      M[i][j] = re;
+      if (!real) {
+        const im = i === j ? -lambda.im : 0;
+        M[i + n][j + n] = re;
+        M[i][j + n] = -im;
+        M[i + n][j] = im;
+      }
     }
   }
-  const rank = rankByCompletePivoting(E, size, NULLITY_RANK_TOL * maxAbs);
-  return Math.round((size - rank) / 2);
+  const thr = Math.sqrt(EIG_EPS) * normF;
+  const small = smallSingularValues(M, thr);
+  return real ? small : Math.round(small / 2);
 }
 
 /**
  * Groups the computed eigenvalues into repeated values and counts the independent
- * eigenvectors of each group. A group is the set of eigenvalues within
- * {@link REPEATED_GROUP_TOL} of each other, and its value is their mean.
+ * eigenvectors of each group. Grouping is single linkage with a tolerance relative
+ * to the matrix norm. A symmetric matrix has as many independent eigenvectors as
+ * the multiplicity, so it skips the singular value computation.
  */
 function repeatedEigenvalueReport(
   A: number[][],
-  values: Array<{ re: number; im: number }>
+  values: Array<{ re: number; im: number }>,
+  symmetric: boolean
 ): RepeatedEigenvalue[] {
   const n = values.length;
-  const grouped = new Array<boolean>(n).fill(false);
-  const report: RepeatedEigenvalue[] = [];
-  for (let i = 0; i < n; i++) {
-    if (grouped[i]) continue;
-    const members = [i];
-    const scale = Math.max(1, Math.hypot(values[i].re, values[i].im));
-    for (let j = i + 1; j < n; j++) {
-      if (grouped[j]) continue;
-      const d = Math.hypot(values[j].re - values[i].re, values[j].im - values[i].im);
-      if (d <= REPEATED_GROUP_TOL * scale) members.push(j);
-    }
-    for (const k of members) grouped[k] = true;
-    if (members.length < 2) continue;
+  let normF = 0;
+  for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
+  const linkTol = GROUP_TOL_FACTOR * normF;
 
+  // Union-find over pairs closer than linkTol.
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = (i: number): number => {
+    while (parent[i] !== i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  };
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (Math.hypot(values[j].re - values[i].re, values[j].im - values[i].im) <= linkTol) {
+        parent[find(j)] = find(i);
+      }
+    }
+  }
+  const groups = new Map<number, number[]>();
+  for (let i = 0; i < n; i++) {
+    const r = find(i);
+    const g = groups.get(r);
+    if (g) g.push(i);
+    else groups.set(r, [i]);
+  }
+
+  const report: RepeatedEigenvalue[] = [];
+  for (const members of groups.values()) {
+    if (members.length < 2) continue;
     let re = 0;
     let im = 0;
     for (const k of members) {
@@ -734,7 +721,10 @@ function repeatedEigenvalueReport(
     }
     re /= members.length;
     im /= members.length;
-    const independent = Math.min(complexNullity(A, { re, im }), members.length);
+    if (Math.abs(im) <= linkTol) im = 0;
+    const independent = symmetric
+      ? members.length
+      : Math.min(nullityOf(A, { re, im }, normF), members.length);
     report.push({
       value: { re, im },
       algebraicMultiplicity: members.length,

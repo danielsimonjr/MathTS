@@ -299,6 +299,7 @@
       "matrix/src/operations/svd.ts"
     ],
     "matrix/src/operations/svd.ts": [
+      "matrix/src/operations/eig.ts",
       "matrix/src/operations/index.ts",
       "matrix/src/operations/pinv.ts",
       "matrix/src/operations/svd-wasm.ts"
