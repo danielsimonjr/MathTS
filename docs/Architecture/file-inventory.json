@@ -9011,7 +9011,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 21
+      "loc": 32
     },
     {
       "file": "functions/src/typed/euclid.ts",
