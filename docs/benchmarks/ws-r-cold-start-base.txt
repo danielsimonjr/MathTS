@@ -1,0 +1,14 @@
+tree=base node=v26.13.0 cpus=12 maxWorkers=4
+first 10 calls of a fresh pool, ms per call
+
+trial 1: workers 1 -> 4
+  sin 1000000 forceParallel: 88.2 32.2 32.6 14.3 16.7 21.4 35.4 29.6 33.5 31.7   | in-process median 24.1
+  matmul 256 default (parallelized=true): 152.8 90.6 95.2 130.0 127.5 85.6 81.9 100.3 80.0 84.6   | DenseMatrix.multiply median 15.7
+
+trial 2: workers 1 -> 4
+  sin 1000000 forceParallel: 77.0 32.3 42.1 13.8 17.4 60.4 45.5 38.5 61.3 41.5   | in-process median 37.8
+  matmul 256 default (parallelized=true): 160.3 101.9 92.2 140.6 141.0 101.9 84.9 84.4 85.8 101.5   | DenseMatrix.multiply median 29.7
+
+trial 3: workers 1 -> 4
+  sin 1000000 forceParallel: 88.7 37.0 45.7 28.7 21.9 38.1 44.6 40.2 44.8 39.7   | in-process median 24.2
+  matmul 256 default (parallelized=true): 171.4 155.4 128.5 147.7 156.5 113.0 116.7 126.9 85.3 93.4   | DenseMatrix.multiply median 14.4

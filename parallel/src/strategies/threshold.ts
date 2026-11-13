@@ -7,7 +7,12 @@
  * @packageDocumentation
  */
 
-import { computePool, ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../ComputePool.js';
+import {
+  computePool,
+  ComputePool,
+  DEFAULT_POOL_CONFIG,
+  DEFAULT_THRESHOLD_BY_OP,
+} from '../ComputePool.js';
 
 /**
  * Pull a numeric per-op threshold from the canonical {@link DEFAULT_THRESHOLD_BY_OP}
@@ -63,7 +68,8 @@ export interface ThresholdConfig {
  * heuristic defaults for compute-vs-memory-bound work.
  */
 export const DEFAULT_THRESHOLDS: ThresholdConfig = {
-  matmul: opThreshold('matmul', 4096), // canonical: DEFAULT_THRESHOLD_BY_OP.matmul
+  // canonical: DEFAULT_THRESHOLD_BY_OP.matmul; the pool-wide default when that entry is not a number
+  matmul: opThreshold('matmul', DEFAULT_POOL_CONFIG.thresholdElements),
   elementwise: 50000, // ~50K elements (memory-bound; ComputePool ops mostly 'never')
   reduce: 100000, // ~100K elements
   map: 10000, // ~10K elements

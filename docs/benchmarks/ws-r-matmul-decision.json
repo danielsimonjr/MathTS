@@ -1,0 +1,698 @@
+{
+  "decision": {
+    "rule": "smallest grid n whose par/seq is <= 0.9 in every process, with every larger n also won; threshold = n * n result elements",
+    "maxRatio": 0.9,
+    "processes": [
+      {
+        "workers": 4,
+        "node": "v26.13.0"
+      },
+      {
+        "workers": 4,
+        "node": "v26.13.0"
+      },
+      {
+        "workers": 2,
+        "node": "v26.13.0"
+      },
+      {
+        "workers": 2,
+        "node": "v26.13.0"
+      },
+      {
+        "workers": 12,
+        "node": "v26.13.0"
+      },
+      {
+        "workers": 12,
+        "node": "v26.13.0"
+      }
+    ],
+    "perSize": [
+      {
+        "n": 64,
+        "worst": 4.119510922239449,
+        "best": 1.3524692777394536,
+        "won": false
+      },
+      {
+        "n": 96,
+        "worst": 2.5911504219604637,
+        "best": 0.9557249846162991,
+        "won": false
+      },
+      {
+        "n": 128,
+        "worst": 1.5684762167448287,
+        "best": 0.71777282893816,
+        "won": false
+      },
+      {
+        "n": 160,
+        "worst": 1.0999481841468455,
+        "best": 0.5537525777973388,
+        "won": false
+      },
+      {
+        "n": 192,
+        "worst": 0.7816277627000102,
+        "best": 0.464448812984049,
+        "won": true
+      },
+      {
+        "n": 224,
+        "worst": 0.725457750514386,
+        "best": 0.47777872809255584,
+        "won": true
+      },
+      {
+        "n": 256,
+        "worst": 0.7016131915396774,
+        "best": 0.41923673963132346,
+        "won": true
+      },
+      {
+        "n": 320,
+        "worst": 0.5912321487877801,
+        "best": 0.306252041234579,
+        "won": true
+      },
+      {
+        "n": 384,
+        "worst": 0.5893606091650556,
+        "best": 0.3143233178471419,
+        "won": true
+      }
+    ],
+    "crossoverN": 192,
+    "thresholdElements": 36864
+  },
+  "records": [
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 4,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.5659625000000119,
+          "parMs": 1.020787499999983,
+          "parOverSeq": 1.8036309826180386,
+          "poolDefaultMs": 1.0039750000000822,
+          "denseMultiplyMs": 0.5945375000000013,
+          "poolDefaultOverDense": 1.6886655593635054,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 1.2481874999999718,
+          "parMs": 1.4574249999999438,
+          "parOverSeq": 1.1676330679485067,
+          "poolDefaultMs": 1.1254999999999882,
+          "denseMultiplyMs": 1.1577875000000404,
+          "poolDefaultOverDense": 0.9721127581701727,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 2.5875874999999837,
+          "parMs": 1.8573000000000093,
+          "parOverSeq": 0.71777282893816,
+          "poolDefaultMs": 1.9226249999999823,
+          "denseMultiplyMs": 2.556500000000028,
+          "poolDefaultOverDense": 0.7520535888910468,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 5.0377750000000106,
+          "parMs": 3.045037500000035,
+          "parOverSeq": 0.6044409486330827,
+          "poolDefaultMs": 3.217612499999973,
+          "denseMultiplyMs": 5.359012499999949,
+          "poolDefaultOverDense": 0.6004114564017164,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 11.159287500000005,
+          "parMs": 5.3615875000000415,
+          "parOverSeq": 0.4804596619631889,
+          "poolDefaultMs": 6.032950000000028,
+          "denseMultiplyMs": 12.889837499999999,
+          "poolDefaultOverDense": 0.4680392596105287,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 22.989462499999945,
+          "parMs": 11.734800000000064,
+          "parOverSeq": 0.5104425560188757,
+          "poolDefaultMs": 9.355537500000082,
+          "denseMultiplyMs": 19.8207625,
+          "poolDefaultOverDense": 0.47200694221526956,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 20.284362499999816,
+          "parMs": 8.503949999999804,
+          "parOverSeq": 0.41923673963132346,
+          "poolDefaultMs": 7.93057500000009,
+          "denseMultiplyMs": 19.19618750000018,
+          "poolDefaultOverDense": 0.41313281608652846,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 38.88242500000001,
+          "parMs": 15.728075000000217,
+          "parOverSeq": 0.4045034485374874,
+          "poolDefaultMs": 14.316850000000159,
+          "denseMultiplyMs": 38.46137499999986,
+          "poolDefaultOverDense": 0.37223968201865404,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 68.35739999999987,
+          "parMs": 25.927599999999074,
+          "parOverSeq": 0.37929470693734874,
+          "poolDefaultMs": 30.665149999998903,
+          "denseMultiplyMs": 77.7382749999997,
+          "poolDefaultOverDense": 0.3944665610344328,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    },
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 4,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.48926249999999527,
+          "parMs": 0.661712499999993,
+          "parOverSeq": 1.3524692777394536,
+          "poolDefaultMs": 0.6235374999999976,
+          "denseMultiplyMs": 0.33439999999998804,
+          "poolDefaultOverDense": 1.8646456339713515,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 1.2699500000000228,
+          "parMs": 1.6286750000000154,
+          "parOverSeq": 1.2824717508563221,
+          "poolDefaultMs": 1.388962499999991,
+          "denseMultiplyMs": 1.2919875000000047,
+          "poolDefaultOverDense": 1.0750587757234384,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 2.9861874999999998,
+          "parMs": 2.1470875000000547,
+          "parOverSeq": 0.7190062579794654,
+          "poolDefaultMs": 1.9535875000000829,
+          "denseMultiplyMs": 2.7265874999999937,
+          "poolDefaultOverDense": 0.7164954361450301,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 5.394625000000019,
+          "parMs": 2.9872874999999794,
+          "parOverSeq": 0.5537525777973388,
+          "poolDefaultMs": 3.2089374999999905,
+          "denseMultiplyMs": 4.8236875000000055,
+          "poolDefaultOverDense": 0.6652457274647221,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 9.487025000000074,
+          "parMs": 4.406237500000032,
+          "parOverSeq": 0.464448812984049,
+          "poolDefaultMs": 4.664000000000101,
+          "denseMultiplyMs": 9.353174999999965,
+          "poolDefaultOverDense": 0.49865420031167157,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 13.591987500000073,
+          "parMs": 6.493962499999952,
+          "parOverSeq": 0.47777872809255584,
+          "poolDefaultMs": 6.060950000000048,
+          "denseMultiplyMs": 13.440249999999992,
+          "poolDefaultOverDense": 0.4509551533639666,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 18.591225000000122,
+          "parMs": 8.514299999999935,
+          "parOverSeq": 0.4579741248895583,
+          "poolDefaultMs": 7.792012500000055,
+          "denseMultiplyMs": 18.455587500000092,
+          "poolDefaultOverDense": 0.4222034383895943,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 39.87986250000017,
+          "parMs": 17.827962499999785,
+          "parOverSeq": 0.4470417243790574,
+          "poolDefaultMs": 14.278987499999857,
+          "denseMultiplyMs": 34.17645000000016,
+          "poolDefaultOverDense": 0.4178019513436823,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 58.07960000000003,
+          "parMs": 22.346700000000055,
+          "parOverSeq": 0.38475988126640065,
+          "poolDefaultMs": 24.531875000000582,
+          "denseMultiplyMs": 56.790125000000444,
+          "poolDefaultOverDense": 0.4319743089137485,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    },
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 2,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.27263750000000186,
+          "parMs": 0.45306249999998727,
+          "parOverSeq": 1.6617761679885714,
+          "poolDefaultMs": 0.46880000000001587,
+          "denseMultiplyMs": 0.26789999999996894,
+          "poolDefaultOverDense": 1.7499066815978732,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 0.8328625000000329,
+          "parMs": 0.7959875000000238,
+          "parOverSeq": 0.9557249846162991,
+          "poolDefaultMs": 0.7591624999999738,
+          "denseMultiplyMs": 0.8009375000000034,
+          "poolDefaultOverDense": 0.9478423722200179,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 1.9876999999999896,
+          "parMs": 1.5837375000000122,
+          "parOverSeq": 0.7967688786034213,
+          "poolDefaultMs": 1.6443874999999935,
+          "denseMultiplyMs": 2.033712500000007,
+          "poolDefaultOverDense": 0.8085643865590577,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 3.8045750000000282,
+          "parMs": 2.6253875000000164,
+          "parOverSeq": 0.6900606506640024,
+          "poolDefaultMs": 2.740175000000022,
+          "denseMultiplyMs": 3.7743750000000205,
+          "poolDefaultOverDense": 0.7259943699287981,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 7.475137500000017,
+          "parMs": 5.8427749999999605,
+          "parOverSeq": 0.7816277627000102,
+          "poolDefaultMs": 5.519350000000031,
+          "denseMultiplyMs": 8.138449999999978,
+          "poolDefaultOverDense": 0.678181963395984,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 12.66677500000003,
+          "parMs": 8.916924999999992,
+          "parOverSeq": 0.7039617424324638,
+          "poolDefaultMs": 8.36850000000004,
+          "denseMultiplyMs": 12.127687500000093,
+          "poolDefaultOverDense": 0.6900326216354087,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 18.181350000000066,
+          "parMs": 12.75627499999996,
+          "parOverSeq": 0.7016131915396774,
+          "poolDefaultMs": 12.008074999999735,
+          "denseMultiplyMs": 17.37474999999995,
+          "poolDefaultOverDense": 0.6911221744197626,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 35.75562500000001,
+          "parMs": 21.139875000000075,
+          "parOverSeq": 0.5912321487877801,
+          "poolDefaultMs": 25.356625000000122,
+          "denseMultiplyMs": 44.7415625000001,
+          "poolDefaultOverDense": 0.5667353481452523,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 59.56237499999952,
+          "parMs": 34.23214999999982,
+          "parOverSeq": 0.5747277538882574,
+          "poolDefaultMs": 34.60752499999944,
+          "denseMultiplyMs": 55.160524999999325,
+          "poolDefaultOverDense": 0.6273965847859473,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    },
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 2,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.3316624999999931,
+          "parMs": 0.6404125000000249,
+          "parOverSeq": 1.9309162175405368,
+          "poolDefaultMs": 0.5745000000000005,
+          "denseMultiplyMs": 0.3315250000000276,
+          "poolDefaultOverDense": 1.732900987858993,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 1.0213750000000061,
+          "parMs": 1.1286125000000027,
+          "parOverSeq": 1.1049932688777344,
+          "poolDefaultMs": 1.002475000000004,
+          "denseMultiplyMs": 0.9104000000000099,
+          "poolDefaultOverDense": 1.1011368629173914,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 2.367324999999994,
+          "parMs": 2.047162500000013,
+          "parOverSeq": 0.8647576906423995,
+          "poolDefaultMs": 2.005400000000037,
+          "denseMultiplyMs": 2.35023750000002,
+          "poolDefaultOverDense": 0.8532754668411257,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 5.195637499999975,
+          "parMs": 3.7980624999999577,
+          "parOverSeq": 0.7310099097560167,
+          "poolDefaultMs": 3.8887000000000285,
+          "denseMultiplyMs": 4.195562499999994,
+          "poolDefaultOverDense": 0.9268602243441812,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 8.36650000000003,
+          "parMs": 6.048600000000022,
+          "parOverSeq": 0.7229546405306878,
+          "poolDefaultMs": 5.38158749999991,
+          "denseMultiplyMs": 7.789150000000063,
+          "poolDefaultOverDense": 0.6909081863874577,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 11.452062499999897,
+          "parMs": 8.307987500000081,
+          "parOverSeq": 0.725457750514386,
+          "poolDefaultMs": 8.72547499999996,
+          "denseMultiplyMs": 12.866187500000024,
+          "poolDefaultOverDense": 0.6781709811084242,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 19.257237499999974,
+          "parMs": 12.394525000000044,
+          "parOverSeq": 0.6436294406194066,
+          "poolDefaultMs": 14.832050000000208,
+          "denseMultiplyMs": 20.969437499999913,
+          "poolDefaultOverDense": 0.7073174948064425,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 35.179187500000126,
+          "parMs": 20.33208750000017,
+          "parOverSeq": 0.5779578479463204,
+          "poolDefaultMs": 23.450250000000324,
+          "denseMultiplyMs": 38.02128749999997,
+          "poolDefaultOverDense": 0.6167663312295866,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 60.00672500000019,
+          "parMs": 35.365600000000086,
+          "parOverSeq": 0.5893606091650556,
+          "poolDefaultMs": 36.622325000000274,
+          "denseMultiplyMs": 58.281450000000405,
+          "poolDefaultOverDense": 0.628370176102345,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    },
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 12,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.4016499999999894,
+          "parMs": 1.4897624999999834,
+          "parOverSeq": 3.7091061869787696,
+          "poolDefaultMs": 1.2105375000000151,
+          "denseMultiplyMs": 0.31732500000001096,
+          "poolDefaultOverDense": 3.8148191916803698,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 1.0231249999999932,
+          "parMs": 2.3105999999999938,
+          "parOverSeq": 2.2583750763592025,
+          "poolDefaultMs": 2.9305625000000077,
+          "denseMultiplyMs": 1.075125000000014,
+          "poolDefaultOverDense": 2.7257876991047265,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 3.0161375000000135,
+          "parMs": 4.716712499999971,
+          "parOverSeq": 1.5638254224152415,
+          "poolDefaultMs": 5.131775000000005,
+          "denseMultiplyMs": 3.475537499999973,
+          "poolDefaultOverDense": 1.4765413982729418,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 5.982725000000016,
+          "parMs": 6.580687499999954,
+          "parOverSeq": 1.0999481841468455,
+          "poolDefaultMs": 5.738199999999949,
+          "denseMultiplyMs": 5.641025000000013,
+          "poolDefaultOverDense": 1.0172264792302703,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 8.399537499999951,
+          "parMs": 6.144024999999942,
+          "parOverSeq": 0.7314718221092504,
+          "poolDefaultMs": 5.038012500000036,
+          "denseMultiplyMs": 7.036624999999958,
+          "poolDefaultOverDense": 0.7159700140337258,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 13.390662500000076,
+          "parMs": 6.974012500000072,
+          "parOverSeq": 0.520811610329215,
+          "poolDefaultMs": 6.667412499999841,
+          "denseMultiplyMs": 13.615687499999922,
+          "poolDefaultOverDense": 0.4896860698367144,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 18.313112500000216,
+          "parMs": 7.828112499999861,
+          "parOverSeq": 0.4274594228588815,
+          "poolDefaultMs": 7.430650000000014,
+          "denseMultiplyMs": 16.81707499999993,
+          "poolDefaultOverDense": 0.4418515110386345,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 39.919162500000084,
+          "parMs": 12.225324999999884,
+          "parOverSeq": 0.306252041234579,
+          "poolDefaultMs": 11.681449999999813,
+          "denseMultiplyMs": 34.874062500000036,
+          "poolDefaultOverDense": 0.33496097565346167,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 70.07314999999926,
+          "parMs": 22.02562500000022,
+          "parOverSeq": 0.3143233178471419,
+          "poolDefaultMs": 23.036425000000236,
+          "denseMultiplyMs": 78.4405999999999,
+          "poolDefaultOverDense": 0.2936798673136139,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    },
+    {
+      "tree": "head",
+      "node": "v26.13.0",
+      "cpus": 12,
+      "workers": 12,
+      "reps": 7,
+      "elementwise": [],
+      "matmul": [
+        {
+          "n": 64,
+          "seqMs": 0.33532500000001164,
+          "parMs": 1.3813749999999914,
+          "parOverSeq": 4.119510922239449,
+          "poolDefaultMs": 1.5330999999999904,
+          "denseMultiplyMs": 0.40076250000001323,
+          "poolDefaultOverDense": 3.825457721218776,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 96,
+          "seqMs": 1.078300000000013,
+          "parMs": 2.7940375000000017,
+          "parOverSeq": 2.5911504219604637,
+          "poolDefaultMs": 2.67361249999999,
+          "denseMultiplyMs": 1.0240124999999978,
+          "poolDefaultOverDense": 2.6109178354756373,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 128,
+          "seqMs": 2.4925624999999627,
+          "parMs": 3.9095249999999737,
+          "parOverSeq": 1.5684762167448287,
+          "poolDefaultMs": 3.398674999999969,
+          "denseMultiplyMs": 2.237000000000023,
+          "poolDefaultOverDense": 1.519300402324512,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 160,
+          "seqMs": 3.9256750000000125,
+          "parMs": 3.77973750000001,
+          "parOverSeq": 0.9628248645137456,
+          "poolDefaultMs": 3.3006125000000566,
+          "denseMultiplyMs": 3.4911999999999352,
+          "poolDefaultOverDense": 0.9454091716315645,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 192,
+          "seqMs": 7.0153250000000185,
+          "parMs": 4.776662500000043,
+          "parOverSeq": 0.6808896950604613,
+          "poolDefaultMs": 4.360249999999951,
+          "denseMultiplyMs": 6.443925000000149,
+          "poolDefaultOverDense": 0.6766450571662225,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 224,
+          "seqMs": 11.532087500000102,
+          "parMs": 6.766312500000026,
+          "parOverSeq": 0.586737873780438,
+          "poolDefaultMs": 5.19117499999993,
+          "denseMultiplyMs": 10.20487500000013,
+          "poolDefaultOverDense": 0.5086955989171709,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 256,
+          "seqMs": 13.721212499999979,
+          "parMs": 5.9928500000000895,
+          "parOverSeq": 0.43675804889692504,
+          "poolDefaultMs": 6.029724999999871,
+          "denseMultiplyMs": 13.441912500000171,
+          "poolDefaultOverDense": 0.44857642095198835,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 320,
+          "seqMs": 35.46437500000002,
+          "parMs": 11.560549999999921,
+          "parOverSeq": 0.3259764199989402,
+          "poolDefaultMs": 11.101062499999898,
+          "denseMultiplyMs": 34.3670874999998,
+          "poolDefaultOverDense": 0.3230143520308482,
+          "poolDefaultParallelized": true
+        },
+        {
+          "n": 384,
+          "seqMs": 59.74212500000067,
+          "parMs": 20.08384999999953,
+          "parOverSeq": 0.33617568842754264,
+          "poolDefaultMs": 24.60399999999936,
+          "denseMultiplyMs": 77.95747500000016,
+          "poolDefaultOverDense": 0.31560796447036427,
+          "poolDefaultParallelized": true
+        }
+      ],
+      "path": []
+    }
+  ]
+}

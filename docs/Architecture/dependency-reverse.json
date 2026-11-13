@@ -11,7 +11,14 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
-    "packages/workerpool/src/matmul-sequential.ts": ["packages/workerpool/src/index.ts"],
+    "packages/workerpool/src/matmul-sequential.ts": [
+      "packages/workerpool/src/index.ts",
+      "packages/workerpool/src/worker.ts"
+    ],
+    "packages/workerpool/src/unary-kernels.ts": [
+      "packages/workerpool/src/index.ts",
+      "packages/workerpool/src/worker.ts"
+    ],
     "packages/workerpool/src/worker-numerics.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/tensordot-range.ts",
@@ -2653,7 +2660,10 @@
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts"
     ],
-    "functions/src/utils/median-numbers.ts": ["functions/src/statistics/median.ts"],
+    "functions/src/utils/median-numbers.ts": [
+      "functions/src/statistics/median.ts",
+      "functions/src/typed/statistics.ts"
+    ],
     "functions/src/statistics/quantile-numpy-methods.ts": [
       "functions/src/statistics/quantileSeq.ts"
     ],

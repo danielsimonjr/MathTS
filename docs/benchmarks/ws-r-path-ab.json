@@ -1,0 +1,116 @@
+{
+  "runs": {
+    "base": [
+      {
+        "tree": "base",
+        "node": "v26.13.0",
+        "cpus": 12,
+        "workers": 4,
+        "reps": 9,
+        "elementwise": [],
+        "matmul": [],
+        "path": [
+          {
+            "n": 100000,
+            "poolSinMs": 10.627725000000055,
+            "functionsSinMs": 7.61889999999994,
+            "ratio": 1.3949159327462153
+          },
+          {
+            "n": 1000000,
+            "poolSinMs": 150.09522500000003,
+            "functionsSinMs": 110.23982499999966,
+            "ratio": 1.3615335927828305
+          }
+        ]
+      },
+      {
+        "tree": "base",
+        "node": "v26.13.0",
+        "cpus": 12,
+        "workers": 4,
+        "reps": 9,
+        "elementwise": [],
+        "matmul": [],
+        "path": [
+          {
+            "n": 100000,
+            "poolSinMs": 10.897525000000087,
+            "functionsSinMs": 7.570337500000051,
+            "ratio": 1.4395031925591182
+          },
+          {
+            "n": 1000000,
+            "poolSinMs": 110.52302499999996,
+            "functionsSinMs": 76.44650000000001,
+            "ratio": 1.4457565094543234
+          }
+        ]
+      }
+    ],
+    "head": [
+      {
+        "tree": "head",
+        "node": "v26.13.0",
+        "cpus": 12,
+        "workers": 4,
+        "reps": 9,
+        "elementwise": [],
+        "matmul": [],
+        "path": [
+          {
+            "n": 100000,
+            "poolSinMs": 5.490512500000136,
+            "functionsSinMs": 5.349649999999883,
+            "ratio": 1.0263311618517579
+          },
+          {
+            "n": 1000000,
+            "poolSinMs": 85.89509999999973,
+            "functionsSinMs": 81.52582500000017,
+            "ratio": 1.05359375388105
+          }
+        ]
+      },
+      {
+        "tree": "head",
+        "node": "v26.13.0",
+        "cpus": 12,
+        "workers": 4,
+        "reps": 9,
+        "elementwise": [],
+        "matmul": [],
+        "path": [
+          {
+            "n": 100000,
+            "poolSinMs": 10.787262499999883,
+            "functionsSinMs": 9.68220000000008,
+            "ratio": 1.1141334097622229
+          },
+          {
+            "n": 1000000,
+            "poolSinMs": 90.8478,
+            "functionsSinMs": 85.77669999999944,
+            "ratio": 1.0591197842770892
+          }
+        ]
+      }
+    ]
+  },
+  "rows": {
+    "path": [
+      {
+        "n": 100000,
+        "base": 1.4172095626526668,
+        "head": 1.0702322858069904
+      },
+      {
+        "n": 1000000,
+        "base": 1.403645051118577,
+        "head": 1.0563567690790696
+      }
+    ],
+    "elementwise": [],
+    "matmul": []
+  }
+}

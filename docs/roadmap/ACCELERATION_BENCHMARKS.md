@@ -210,6 +210,11 @@ in those element-count terms.
 | fft2d                    | 50000   | **~65536** (256x256, lower bound) | marginal crossover at largest size tested      |
 | distanceMatrix           | 50000   | `MAX_SAFE_INTEGER` (never)        | 512-point "win" not persistent                 |
 
+> **`matmul` was re-measured.** The row above records the first measurement. The
+> in-process kernel was then changed to a packed-column dot product, and the threshold
+> was re-derived from 2-, 4- and 12-worker runs: the current `matmul` entry is **36,864**
+> result elements (192x192). See `docs/benchmarks/ws-r-matmul-decision.json`.
+
 ### Interpretation
 
 - The single most actionable change: **lower `matmul`'s threshold and raise

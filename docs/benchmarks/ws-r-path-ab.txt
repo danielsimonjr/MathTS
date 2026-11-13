@@ -1,0 +1,7 @@
+A/B base vs head, order base head head base, medians of 4 processes
+node v26.13.0, 12 cpus, 4 workers, 9 rounds
+
+pool.sin (default path) / functions.sin, in-process; lower is better, per process in brackets
+  n=100000  base 1.417 [1.395 1.440]  head 1.070 [1.026 1.114]
+  n=1000000  base 1.404 [1.362 1.446]  head 1.056 [1.054 1.059]
+

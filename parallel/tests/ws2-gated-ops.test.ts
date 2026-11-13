@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { ComputePool } from '../src/index';
+import { ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../src/index';
 
 /**
  * WS-2 completion: histogram / transpose / matvec / outer previously dispatched
@@ -107,7 +107,7 @@ describe("bitwise family — 'never' by default (WS-2 addendum, 2026-07-05)", ()
 describe('unary / elementwise / scale / matmul honour their thresholdByOp entries', () => {
   // These methods forwarded to the worker pool without options, and the pool checks only
   // the global 50,000-element threshold: `sin: 'never'` still went to the workers once the
-  // pool was initialized, and `matmul: 4_096` did not parallelize below 50,000.
+  // pool was initialized, and a `matmul` entry below 50,000 did not parallelize below 50,000.
   let pool: ComputePool;
 
   beforeAll(async () => {
@@ -136,8 +136,9 @@ describe('unary / elementwise / scale / matmul honour their thresholdByOp entrie
     expect(scaled.result[0]).toBe(2);
   });
 
-  it('matmul parallelizes from its 4,096-element entry, below the global 50,000', async () => {
-    const n = 100; // a 10,000-element result
+  it('matmul parallelizes from its own entry, below the global 50,000', async () => {
+    // The entry is 36,864 result elements; 200 x 200 is 40,000, between the entry and 50,000.
+    const n = 200;
     const a = new Float64Array(n * n).fill(1);
     const b = new Float64Array(n * n).fill(2);
     const r = await pool.matmul(a, n, n, b, n);
@@ -156,7 +157,7 @@ describe('unary / elementwise / scale / matmul honour their thresholdByOp entrie
       expect(s.result[199_999]).toBeCloseTo(Math.sin(0.5), 15);
       // cos kept its 'never' default instead of falling to the global 50,000.
       expect((await tuned.cos(big)).parallelized).toBe(false);
-      expect(tuned.getConfig().thresholdByOp?.matmul).toBe(4_096);
+      expect(tuned.getConfig().thresholdByOp?.matmul).toBe(DEFAULT_THRESHOLD_BY_OP.matmul);
     } finally {
       await tuned.terminate();
     }
