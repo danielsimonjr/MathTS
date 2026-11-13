@@ -157,15 +157,15 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/utils**: 37 files
 - **functions/wasm**: 13 files
-- **expression**: 12 files
+- **expression**: 14 files
 - **expression/compiler**: 2 files
 - **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
-- **expression/node**: 20 files
+- **expression/node**: 21 files
 - **expression/transform**: 33 files
-- **expression/utils**: 14 files
+- **expression/utils**: 15 files
 - **parser**: 1 file
 - **units**: 1 file
 - **numbers**: 1 file
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 568            | 0               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 484            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 488            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3008,12 +3008,13 @@ graph LR
 
 ---
 
-### `functions/src/algebra/simplify.ts` - Simplify an expression tree.
+### `functions/src/algebra/simplify.ts` - Structural node guards, narrowed to the node types of this file. They test the
 
 **Internal Dependencies:**
 
 | File                             | Imports                                                                                                                           | Type               |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`                 | `* as is`                                                                                                                         | Import             |
 | `../utils/is.js`                 | `isParenthesisNode`                                                                                                               | Import             |
 | `./simplify/wildcards.js`        | `isConstantNode, isVariableNode, isNumericNode, isConstantExpression`                                                             | Import             |
 | `../utils/factory.js`            | `factory`                                                                                                                         | Import             |
@@ -5798,7 +5799,7 @@ graph LR
 
 | Package                            | Import                                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpressionWithDeps`                                                          |
+| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpressionWithDeps, EXPRESSION_SCOPE_OMIT`                                   |
 | `@danielsimonjr/mathts-core`       | `BigNumber, Complex, Fraction, I, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E, Unit, UnitInstance` |
 
 **Internal Dependencies:**
@@ -12943,12 +12944,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports   | Type   |
-| -------------------- | --------- | ------ |
-| `./utils/is.js`      | `isHelp`  | Import |
-| `./utils/object.js`  | `clone`   | Import |
-| `./utils/string.js`  | `format`  | Import |
-| `./utils/factory.js` | `factory` | Import |
+| File                      | Imports              | Type   |
+| ------------------------- | -------------------- | ------ |
+| `./utils/is.js`           | `isHelp`             | Import |
+| `./utils/object.js`       | `clone`              | Import |
+| `./utils/string.js`       | `format`             | Import |
+| `./utils/factory.js`      | `factory`            | Import |
+| `./evaluator/evaluate.js` | `getDefaultEvaluate` | Import |
 
 **Exports:**
 
@@ -12960,11 +12962,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                    | Type   |
-| -------------------- | -------------------------- | ------ |
-| `./utils/factory.js` | `factory`                  | Import |
-| `./utils/is.js`      | `isFunction`               | Import |
-| `./utils/map.js`     | `createEmptyMap, toObject` | Import |
+| File                      | Imports                               | Type   |
+| ------------------------- | ------------------------------------- | ------ |
+| `./utils/factory.js`      | `factory`                             | Import |
+| `./evaluator/evaluate.js` | `getDefaultEvaluate, getDefaultParse` | Import |
+| `./utils/is.js`           | `isFunction`                          | Import |
+| `./utils/map.js`          | `createEmptyMap, toObject`            | Import |
 
 **Exports:**
 
@@ -12974,46 +12977,39 @@ graph LR
 
 ### `expression/src/default-instance.ts` - Default wired `parse` / `evaluate` for thin packages and one-liner use.
 
-**Workspace Dependencies:**
-
-| Package                      | Import      |
-| ---------------------------- | ----------- |
-| `@danielsimonjr/mathts-core` | `mathTyped` |
-
 **Internal Dependencies:**
 
-| File                                           | Imports                                     | Type               |
-| ---------------------------------------------- | ------------------------------------------- | ------------------ |
-| `./parse.js`                                   | `createParse`                               | Import             |
-| `./node/Node.js`                               | `createNode`                                | Import             |
-| `./node/AccessorNode.js`                       | `createAccessorNode`                        | Import             |
-| `./node/ArrayNode.js`                          | `createArrayNode`                           | Import             |
-| `./node/AssignmentNode.js`                     | `createAssignmentNode`                      | Import             |
-| `./node/BlockNode.js`                          | `createBlockNode`                           | Import             |
-| `./node/ConditionalNode.js`                    | `createConditionalNode`                     | Import             |
-| `./node/ConstantNode.js`                       | `createConstantNode`                        | Import             |
-| `./node/FunctionAssignmentNode.js`             | `createFunctionAssignmentNode`              | Import             |
-| `./node/FunctionNode.js`                       | `createFunctionNode`                        | Import             |
-| `./node/IndexNode.js`                          | `createIndexNode`                           | Import             |
-| `./node/ObjectNode.js`                         | `createObjectNode`                          | Import             |
-| `./node/OperatorNode.js`                       | `createOperatorNode`                        | Import             |
-| `./node/ParenthesisNode.js`                    | `createParenthesisNode`                     | Import             |
-| `./node/RangeNode.js`                          | `createRangeNode`                           | Import             |
-| `./node/RelationalNode.js`                     | `createRelationalNode`                      | Import             |
-| `./node/SymbolNode.js`                         | `createSymbolNode`                          | Import             |
-| `./compiler/compile.js`                        | `compile`                                   | Import             |
-| `./evaluator/evaluate.js`                      | `createEvaluate, compileExpressionWithDeps` | Import             |
-| `./transform/utils/compileInlineExpression.js` | `compileInlineExpression`                   | Import             |
-| `./compiler/compile.js`                        | `CompiledExpression`                        | Import (type-only) |
-| `./evaluator/evaluate.js`                      | `EvaluateOptions`                           | Import (type-only) |
-| `./node/Node.js`                               | `MathNode`                                  | Import (type-only) |
-| `./compiler/compile.js`                        | `Scope`                                     | Import (type-only) |
+| File                      | Imports                                                          | Type               |
+| ------------------------- | ---------------------------------------------------------------- | ------------------ |
+| `./default-math-scope.js` | `getDefaultMathScope, defaultMathScope`                          | Import             |
+| `./evaluator/evaluate.js` | `getDefaultParse, getDefaultEvaluate, compileExpressionWithDeps` | Import             |
+| `./compiler/compile.js`   | `CompiledExpression`                                             | Import (type-only) |
+| `./evaluator/evaluate.js` | `EvaluateOptions`                                                | Import (type-only) |
+| `./node/Node.js`          | `MathNode`                                                       | Import (type-only) |
+| `./compiler/compile.js`   | `Scope`                                                          | Import (type-only) |
 
 **Exports:**
 
 - Interfaces: `CallableCompiledExpression`
 - Functions: `parse`, `evaluate`, `compileExpression`, `compileExpression`, `compileExpression`
-- Constants: `defaultMathScope`
+
+---
+
+### `expression/src/default-math-scope.ts` - The default math scope that the public factories fall back to.
+
+**Internal Dependencies:**
+
+| File                                           | Imports                   | Type               |
+| ---------------------------------------------- | ------------------------- | ------------------ |
+| `./compiler/compile.js`                        | `compile`                 | Import             |
+| `./compiler/compile.js`                        | `Scope`                   | Import (type-only) |
+| `./transform/utils/compileInlineExpression.js` | `compileInlineExpression` | Import             |
+| `./node/Node.js`                               | `MathNode`                | Import (type-only) |
+
+**Exports:**
+
+- Functions: `expressionView`, `getDefaultMathScope`
+- Constants: `EXPRESSION_SCOPE_OMIT`, `defaultMathScope`
 
 ---
 
@@ -13035,6 +13031,7 @@ graph LR
 | `./function/parser.js`             | `createParser`                                                                                                                          | Re-export             |
 | `./embeddedDocs/embeddedDocs.js`   | `embeddedDocs`                                                                                                                          | Re-export             |
 | `./default-instance.js`            | `defaultMathScope`                                                                                                                      | Re-export             |
+| `./default-math-scope.js`          | `EXPRESSION_SCOPE_OMIT`                                                                                                                 | Re-export             |
 | `./utils/mathml.js`                | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol`                                                                             | Re-export             |
 | `./node/Node.js`                   | `createNode`                                                                                                                            | Re-export             |
 | `./node/AccessorNode.js`           | `createAccessorNode`                                                                                                                    | Re-export             |
@@ -13064,7 +13061,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `defaultMathScope`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `getStringSubset`, `setStringSubset`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `enumerateScalars`, `scalarGrammarAccepts`, `MathNode`, `StringOptions`, `IndexLike`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`, `ScalarComplexityWeights`, `EnumerationBudget`, `EnumerationStop`, `ScalarGrammar`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `defaultMathScope`, `EXPRESSION_SCOPE_OMIT`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `getStringSubset`, `setStringSubset`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `enumerateScalars`, `scalarGrammarAccepts`, `MathNode`, `StringOptions`, `IndexLike`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`, `ScalarComplexityWeights`, `EnumerationBudget`, `EnumerationStop`, `ScalarGrammar`
 
 ---
 
@@ -13102,21 +13099,60 @@ graph LR
 
 ---
 
+### `expression/src/parse-defaults.ts` - Default dependencies for the parse factory (`createParse`).
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                               | Imports                               | Type               |
+| ---------------------------------- | ------------------------------------- | ------------------ |
+| `./default-math-scope.js`          | `expressionView, getDefaultMathScope` | Import             |
+| `./node/default-node.js`           | `nodeBaseFor`                         | Import             |
+| `./node/AccessorNode.js`           | `createAccessorNode`                  | Import             |
+| `./node/ArrayNode.js`              | `createArrayNode`                     | Import             |
+| `./node/AssignmentNode.js`         | `createAssignmentNode`                | Import             |
+| `./node/BlockNode.js`              | `createBlockNode`                     | Import             |
+| `./node/ConditionalNode.js`        | `createConditionalNode`               | Import             |
+| `./node/ConstantNode.js`           | `createConstantNode`                  | Import             |
+| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode`        | Import             |
+| `./node/FunctionNode.js`           | `createFunctionNode`                  | Import             |
+| `./node/IndexNode.js`              | `createIndexNode`                     | Import             |
+| `./node/ObjectNode.js`             | `createObjectNode`                    | Import             |
+| `./node/OperatorNode.js`           | `createOperatorNode`                  | Import             |
+| `./node/ParenthesisNode.js`        | `createParenthesisNode`               | Import             |
+| `./node/RangeNode.js`              | `createRangeNode`                     | Import             |
+| `./node/RelationalNode.js`         | `createRelationalNode`                | Import             |
+| `./node/SymbolNode.js`             | `createSymbolNode`                    | Import             |
+| `./utils/factory.js`               | `DefaultDependencies`                 | Import (type-only) |
+
+**Exports:**
+
+- Constants: `parseDefaults`
+
+---
+
 ### `expression/src/parse.ts` - Parse an expression. Returns a node tree, which can be evaluated by
 
 **Internal Dependencies:**
 
-| File                    | Imports                                                                                   | Type               |
-| ----------------------- | ----------------------------------------------------------------------------------------- | ------------------ |
-| `./utils/factory.js`    | `factory`                                                                                 | Import             |
-| `./utils/is.js`         | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import             |
-| `./utils/collection.js` | `deepMap`                                                                                 | Import             |
-| `./utils/number.js`     | `safeNumberType`                                                                          | Import             |
-| `./utils/number.js`     | `NumberTypeConfig`                                                                        | Import (type-only) |
-| `./utils/object.js`     | `hasOwnProperty`                                                                          | Import             |
-| `./utils/customs.js`    | `isSafeProperty, setSafeProperty`                                                         | Import             |
-| `./limits.js`           | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
-| `./node/Node.js`        | `MathNode`                                                                                | Import (type-only) |
+| File                        | Imports                                                                                   | Type               |
+| --------------------------- | ----------------------------------------------------------------------------------------- | ------------------ |
+| `./utils/factory.js`        | `factory`                                                                                 | Import             |
+| `./utils/is.js`             | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import             |
+| `./utils/collection.js`     | `deepMap`                                                                                 | Import             |
+| `./utils/number.js`         | `safeNumberType`                                                                          | Import             |
+| `./utils/number.js`         | `NumberTypeConfig`                                                                        | Import (type-only) |
+| `./utils/object.js`         | `hasOwnProperty`                                                                          | Import             |
+| `./utils/customs.js`        | `isSafeProperty, setSafeProperty`                                                         | Import             |
+| `./limits.js`               | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
+| `./node/Node.js`            | `MathNode`                                                                                | Import (type-only) |
+| `./parse-defaults.js`       | `parseDefaults`                                                                           | Import             |
+| `./utils/current-config.js` | `currentConfig`                                                                           | Import             |
 
 **Exports:**
 
@@ -16850,18 +16886,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                        | Type               |
-| ------------------------- | ---------------------------------------------- | ------------------ |
-| `../compiler/compile.js`  | `compile`                                      | Import             |
-| `../limits.js`            | `MAX_COMPILE_DEPTH`                            | Import             |
-| `../utils/safe-result.js` | `sanitizeEvaluateResult, trustedMathFunctions` | Import             |
-| `../compiler/compile.js`  | `CompiledExpression, Scope`                    | Import (type-only) |
-| `../node/Node.js`         | `MathNode`                                     | Import (type-only) |
+| File                       | Imports                                        | Type               |
+| -------------------------- | ---------------------------------------------- | ------------------ |
+| `../compiler/compile.js`   | `compile`                                      | Import             |
+| `../limits.js`             | `MAX_COMPILE_DEPTH`                            | Import             |
+| `../utils/safe-result.js`  | `sanitizeEvaluateResult, trustedMathFunctions` | Import             |
+| `../parse.js`              | `createParse`                                  | Import             |
+| `../default-math-scope.js` | `getDefaultMathScope`                          | Import             |
+| `../compiler/compile.js`   | `CompiledExpression, Scope`                    | Import (type-only) |
+| `../node/Node.js`          | `MathNode`                                     | Import (type-only) |
 
 **Exports:**
 
-- Interfaces: `EvaluateOptions`
-- Functions: `createEvaluate`, `compileExpressionWithDeps`
+- Interfaces: `EvaluateOptions`, `EvaluateFunction`
+- Functions: `getDefaultParse`, `getDefaultEvaluate`, `createEvaluate`, `createEvaluate`, `createEvaluate`, `compileExpressionWithDeps`
 
 ---
 
@@ -16887,11 +16925,18 @@ graph LR
 
 ### `expression/src/function/parser.ts` - Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of expressions
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
 **Internal Dependencies:**
 
-| File                  | Imports   | Type   |
-| --------------------- | --------- | ------ |
-| `../utils/factory.js` | `factory` | Import |
+| File                  | Imports             | Type   |
+| --------------------- | ------------------- | ------ |
+| `../utils/factory.js` | `factory`           | Import |
+| `../Parser.js`        | `createParserClass` | Import |
 
 **Exports:**
 
@@ -16909,6 +16954,7 @@ graph LR
 
 | File                  | Imports                                                                                                                           | Type               |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                                                                                                                    | Import             |
 | `../utils/is.js`      | `isAccessorNode, isArrayNode, isConstantNode, isFunctionNode, isIndexNode, isNode, isObjectNode, isParenthesisNode, isSymbolNode` | Import             |
 | `../utils/customs.js` | `getSafeProperty`                                                                                                                 | Import             |
 | `../utils/factory.js` | `factory`                                                                                                                         | Import             |
@@ -16925,13 +16971,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                   | Type               |
-| --------------------- | ------------------------- | ------------------ |
-| `../utils/is.js`      | `isArrayNode, isNode`     | Import             |
-| `../utils/array.js`   | `map`                     | Import             |
-| `../utils/factory.js` | `factory`                 | Import             |
-| `./Node.js`           | `MathNode, StringOptions` | Import (type-only) |
-| `./Node.js`           | `mapChildArray`           | Import             |
+| File                         | Imports                   | Type               |
+| ---------------------------- | ------------------------- | ------------------ |
+| `./default-node.js`          | `nodeDefaults`            | Import             |
+| `../utils/is.js`             | `isArrayNode, isNode`     | Import             |
+| `../utils/array.js`          | `map`                     | Import             |
+| `../utils/factory.js`        | `factory`                 | Import             |
+| `../utils/current-config.js` | `currentConfig`           | Import             |
+| `./Node.js`                  | `MathNode, StringOptions` | Import (type-only) |
+| `./Node.js`                  | `mapChildArray`           | Import             |
 
 **Exports:**
 
@@ -16945,6 +16993,7 @@ graph LR
 
 | File                      | Imports                                             | Type               |
 | ------------------------- | --------------------------------------------------- | ------------------ |
+| `./default-node.js`       | `nodeDefaults`                                      | Import             |
 | `../utils/is.js`          | `isAccessorNode, isIndexNode, isNode, isSymbolNode` | Import             |
 | `../utils/customs.js`     | `getSafeProperty, setSafeProperty`                  | Import             |
 | `../utils/factory.js`     | `factory`                                           | Import             |
@@ -16967,6 +17016,7 @@ graph LR
 
 | File                  | Imports                   | Type               |
 | --------------------- | ------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`            | Import             |
 | `../utils/is.js`      | `isNode`                  | Import             |
 | `../utils/array.js`   | `forEach, map`            | Import             |
 | `../utils/factory.js` | `factory`                 | Import             |
@@ -16984,6 +17034,7 @@ graph LR
 
 | File                  | Imports                                          | Type               |
 | --------------------- | ------------------------------------------------ | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                                   | Import             |
 | `../utils/is.js`      | `isBigNumber, isComplex, isNode, isUnit, typeOf` | Import             |
 | `../utils/factory.js` | `factory`                                        | Import             |
 | `../operators.js`     | `getPrecedence`                                  | Import             |
@@ -17001,6 +17052,7 @@ graph LR
 
 | File                  | Imports                   | Type               |
 | --------------------- | ------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`            | Import             |
 | `../utils/string.js`  | `format`                  | Import             |
 | `../utils/is.js`      | `typeOf`                  | Import             |
 | `../utils/latex.js`   | `escapeLatex`             | Import             |
@@ -17020,6 +17072,7 @@ graph LR
 
 | File                  | Imports                   | Type               |
 | --------------------- | ------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`            | Import             |
 | `../utils/is.js`      | `isNode`                  | Import             |
 | `../keywords.js`      | `keywords`                | Import             |
 | `../utils/string.js`  | `escape`                  | Import             |
@@ -17036,7 +17089,7 @@ graph LR
 
 ---
 
-### `expression/src/node/FunctionNode.ts` - Sandbox-safe "is this member undefined?" test for `obj?.method()`. It never
+### `expression/src/node/FunctionNode.ts` - FunctionNode also needs a SymbolNode class. The default is built on the same
 
 **Internal Dependencies:**
 
@@ -17048,6 +17101,9 @@ graph LR
 | `../utils/customs.js` | `getSafeProperty, getSafeMethod, isSafeProperty, isSafeMethod`                | Import             |
 | `../utils/scope.js`   | `createSubScope`                                                              | Import             |
 | `../utils/factory.js` | `factory`                                                                     | Import             |
+| `../utils/factory.js` | `DefaultDependencies`                                                         | Import (type-only) |
+| `./default-node.js`   | `nodeDefaults`                                                                | Import             |
+| `./SymbolNode.js`     | `createSymbolNode`                                                            | Import             |
 | `../utils/latex.js`   | `defaultTemplate, latexFunctions`                                             | Import             |
 | `../utils/mathml.js`  | `toMathMLSymbol`                                                              | Import             |
 | `./Node.js`           | `MathNode, StringOptions`                                                     | Import (type-only) |
@@ -17065,6 +17121,7 @@ graph LR
 
 | File                  | Imports                                                                                  | Type               |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                                                                           | Import             |
 | `../utils/array.js`   | `map`                                                                                    | Import             |
 | `../utils/customs.js` | `getSafeProperty`                                                                        | Import             |
 | `../utils/factory.js` | `factory`                                                                                | Import             |
@@ -17084,14 +17141,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                                | Type   |
-| --------------------- | ---------------------------------------------------------------------- | ------ |
-| `../utils/is.js`      | `isNode, isConstantNode, isSymbolNode, isOperatorNode, isFunctionNode` | Import |
-| `../utils/mathml.js`  | `escapeMathML`                                                         | Import |
-| `../keywords.js`      | `keywords`                                                             | Import |
-| `../utils/object.js`  | `deepStrictEqual`                                                      | Import |
-| `../utils/factory.js` | `factory`                                                              | Import |
-| `../utils/map.js`     | `createMap`                                                            | Import |
+| File                       | Imports                                                                | Type   |
+| -------------------------- | ---------------------------------------------------------------------- | ------ |
+| `../utils/is.js`           | `isNode, isConstantNode, isSymbolNode, isOperatorNode, isFunctionNode` | Import |
+| `../utils/mathml.js`       | `escapeMathML`                                                         | Import |
+| `../keywords.js`           | `keywords`                                                             | Import |
+| `../utils/object.js`       | `deepStrictEqual`                                                      | Import |
+| `../utils/factory.js`      | `factory`                                                              | Import |
+| `../utils/map.js`          | `createMap`                                                            | Import |
+| `../default-math-scope.js` | `getDefaultMathScope`                                                  | Import |
 
 **Exports:**
 
@@ -17108,6 +17166,7 @@ graph LR
 
 | File                  | Imports                            | Type               |
 | --------------------- | ---------------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                     | Import             |
 | `../utils/customs.js` | `getSafeProperty, setSafeProperty` | Import             |
 | `../utils/factory.js` | `factory`                          | Import             |
 | `../utils/is.js`      | `isNode`                           | Import             |
@@ -17128,6 +17187,7 @@ graph LR
 
 | File                  | Imports                                                          | Type               |
 | --------------------- | ---------------------------------------------------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                                                   | Import             |
 | `../utils/is.js`      | `isNode, isConstantNode, isOperatorNode, isParenthesisNode`      | Import             |
 | `../utils/array.js`   | `map`                                                            | Import             |
 | `../utils/scope.js`   | `createSubScope`                                                 | Import             |
@@ -17150,11 +17210,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports    | Type               |
-| --------------------- | ---------- | ------------------ |
-| `../utils/is.js`      | `isNode`   | Import             |
-| `../utils/factory.js` | `factory`  | Import             |
-| `./Node.js`           | `MathNode` | Import (type-only) |
+| File                  | Imports        | Type               |
+| --------------------- | -------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults` | Import             |
+| `../utils/is.js`      | `isNode`       | Import             |
+| `../utils/factory.js` | `factory`      | Import             |
+| `./Node.js`           | `MathNode`     | Import (type-only) |
 
 **Exports:**
 
@@ -17168,6 +17229,7 @@ graph LR
 
 | File                  | Imports                | Type               |
 | --------------------- | ---------------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`         | Import             |
 | `../utils/is.js`      | `isNode, isSymbolNode` | Import             |
 | `../utils/factory.js` | `factory`              | Import             |
 | `../operators.js`     | `getPrecedence`        | Import             |
@@ -17185,6 +17247,7 @@ graph LR
 
 | File                  | Imports                        | Type               |
 | --------------------- | ------------------------------ | ------------------ |
+| `./default-node.js`   | `nodeDefaults`                 | Import             |
 | `../operators.js`     | `getPrecedence`                | Import             |
 | `../utils/string.js`  | `escape`                       | Import             |
 | `../utils/customs.js` | `getSafeProperty`              | Import             |
@@ -17205,6 +17268,7 @@ graph LR
 
 | File                  | Imports           | Type               |
 | --------------------- | ----------------- | ------------------ |
+| `./default-node.js`   | `nodeDefaults`    | Import             |
 | `../utils/string.js`  | `escape`          | Import             |
 | `../utils/customs.js` | `getSafeProperty` | Import             |
 | `../utils/factory.js` | `factory`         | Import             |
@@ -17215,6 +17279,29 @@ graph LR
 **Exports:**
 
 - Constants: `createSymbolNode`
+
+---
+
+### `expression/src/node/default-node.ts` - Default dependencies for the AST node constructors.
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                       | Imports               | Type               |
+| -------------------------- | --------------------- | ------------------ |
+| `./Node.js`                | `createNode`          | Import             |
+| `../default-math-scope.js` | `getDefaultMathScope` | Import             |
+| `../utils/factory.js`      | `DefaultDependencies` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `nodeBaseFor`
+- Constants: `nodeDefaults`
 
 ---
 
@@ -17847,6 +17934,14 @@ graph LR
 
 ---
 
+### `expression/src/utils/current-config.ts` - A math scope holds its config as an object, or as an accessor function that
+
+**Exports:**
+
+- Functions: `currentConfig`
+
+---
+
 ### `expression/src/utils/customs.ts` - Values the expression sandbox may read or call methods on.
 
 **Internal Dependencies:**
@@ -17877,7 +17972,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `FactoryFunction`
-- Types: `CreateFunction`
+- Types: `CreateFunction`, `DefaultDependencies`
 - Functions: `factory`
 
 ---
@@ -19260,12 +19355,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                 | Type      |
-| ------------------- | ----------------------- | --------- |
-| `./shims.js`        | `shims`                 | Import    |
-| `./chain.js`        | `createChain, Chain`    | Import    |
-| `./instance-api.js` | `wireMathjsInstanceApi` | Import    |
-| `./shims.js`        | `*`                     | Re-export |
+| File                | Imports                                      | Type      |
+| ------------------- | -------------------------------------------- | --------- |
+| `./shims.js`        | `shims`                                      | Import    |
+| `./chain.js`        | `createChain, Chain`                         | Import    |
+| `./instance-api.js` | `wireMathjsInstanceApi, WiredCompatInstance` | Import    |
+| `./shims.js`        | `*`                                          | Re-export |
 
 **Exports:**
 
@@ -19277,12 +19372,6 @@ graph LR
 ---
 
 ### `compat/src/instance-api.ts` - mathjs instance methods on `create(all)`: import, typed, compile, and
-
-**External Dependencies:**
-
-| Package          | Import          |
-| ---------------- | --------------- |
-| `typed-function` | `typedFunction` |
 
 **Workspace Dependencies:**
 
@@ -19833,36 +19922,36 @@ graph LR
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
+| `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
-| `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 46 files   |
 | `functions/src/utils/collection`                       | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
+| `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
-| `expression/src/index`                                 | 33 files     | 0 files    |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
+| `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `matrix/src/types/DenseMatrix`                         | 5 files      | 22 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
-| `expression/src/node/Node`                             | 6 files      | 21 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `expression/src/default-instance`                      | 20 files     | 2 files    |
 | `core/src/internal`                                    | 21 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `functions/src/typed/numeric`                          | 9 files      | 10 files   |
+| `expression/src/node/default-node`                     | 3 files      | 16 files   |
+| `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 17 files     | 1 file     |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 17 files   |
-| `functions/src/typed/arithmetic`                       | 7 files      | 10 files   |
 
 ---
 
@@ -19870,10 +19959,10 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**3 circular dependencies detected:**
+**5 circular dependencies detected:**
 
 - **Runtime cycles**: 2 (require attention)
-- **Type-only cycles**: 1 (safe, no runtime impact)
+- **Type-only cycles**: 3 (safe, no runtime impact)
 
 ### Runtime Circular Dependencies
 
@@ -19886,6 +19975,8 @@ These cycles involve runtime imports and may cause issues:
 
 These cycles only involve type imports and are safe (erased at runtime):
 
+- expression/src/compiler/compile.ts -> expression/src/node/Node.ts -> expression/src/default-math-scope.ts -> expression/src/compiler/compile.ts
+- expression/src/node/Node.ts -> expression/src/default-math-scope.ts -> expression/src/node/Node.ts
 - compat/src/index.ts -> compat/src/instance-api.ts -> compat/src/index.ts
 
 ---
@@ -20427,14 +20518,14 @@ graph TD
         N377[Help]
         N378[Parser]
         N379[default-instance]
-        N380[index]
-        N381[keywords]
-        N382[limits]
-        N383[operators]
-        N384[parse]
-        N385[scalar-builder]
-        N386[scalar-enumerate]
-        N387[...2 more]
+        N380[default-math-scope]
+        N381[index]
+        N382[keywords]
+        N383[limits]
+        N384[operators]
+        N385[parse-defaults]
+        N386[parse]
+        N387[...4 more]
     end
 
     subgraph Expression/compiler
@@ -20481,7 +20572,7 @@ graph TD
         N413[FunctionNode]
         N414[IndexNode]
         N415[Node]
-        N416[...10 more]
+        N416[...11 more]
     end
 
     subgraph Expression/transform
@@ -20501,15 +20592,15 @@ graph TD
     subgraph Expression/utils
         N428[array]
         N429[collection]
-        N430[customs]
-        N431[factory]
-        N432[is]
-        N433[latex]
-        N434[map]
-        N435[mathml]
-        N436[number]
-        N437[object]
-        N438[...4 more]
+        N430[current-config]
+        N431[customs]
+        N432[factory]
+        N433[is]
+        N434[latex]
+        N435[map]
+        N436[mathml]
+        N437[number]
+        N438[...5 more]
     end
 
     subgraph Parser
@@ -20750,18 +20841,18 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1310   |
+| Total TypeScript Files  | 1314   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 224535 |
-| Total Exports           | 7161   |
-| Total Re-exports        | 3111   |
+| Total Lines of Code     | 224834 |
+| Total Exports           | 7172   |
+| Total Re-exports        | 3112   |
 | Total Classes           | 61     |
-| Total Interfaces        | 613    |
-| Total Functions         | 2438   |
+| Total Interfaces        | 614    |
+| Total Functions         | 2446   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 662    |
+| Type-only Imports       | 667    |
 | Runtime Circular Deps   | 2      |
-| Type-only Circular Deps | 1      |
+| Type-only Circular Deps | 3      |
 
 ---
