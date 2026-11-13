@@ -204,13 +204,41 @@ export function zscore(x: Vec): number[] {
 }
 
 /**
+ * Layout option for the matrix forms of {@link cov} and {@link corrcoef}.
+ *   - `rowvar: false` (default) — rows are observations, columns are variables.
+ *     This is the MathTS layout and matches NumPy `rowvar=False`.
+ *   - `rowvar: true` — rows are variables, columns are observations. This is the
+ *     NumPy default `np.cov` / `np.corrcoef` layout (`rowvar=True`).
+ */
+export interface CovLayoutOptions {
+  rowvar?: boolean;
+}
+
+/** Transpose a rectangular number matrix (rows ↔ columns). */
+function transposeMatrix(M: number[][]): number[][] {
+  const nCols = M.length === 0 ? 0 : M[0].length;
+  return Array.from({ length: nCols }, (_, j) => M.map((r) => r[j]));
+}
+
+/**
  * Covariance.
  *   - `cov(x, y)` → scalar sample covariance of two equal-length vectors.
  *   - `cov(matrix)` → covariance matrix; rows are observations, columns are
  *     variables (NumPy `rowvar=false`). `ddof` defaults to 1 (sample).
+ *   - `cov(matrix, undefined, ddof, { rowvar: true })` → rows are variables,
+ *     columns are observations (NumPy `rowvar=True`, the NumPy default).
+ *     `rowvar` applies to the matrix form only; passing it with two vectors throws.
  */
-export function cov(x: Vec | number[][], y?: Vec, ddof = 1): number | number[][] {
+export function cov(
+  x: Vec | number[][],
+  y?: Vec,
+  ddof = 1,
+  opts: CovLayoutOptions = {}
+): number | number[][] {
   if (y !== undefined) {
+    if (opts.rowvar !== undefined) {
+      throw new Error('cov: rowvar applies to the matrix form only (pass one matrix)');
+    }
     const a = arr(x as Vec);
     const b = arr(y);
     if (a.length !== b.length) throw new Error(`cov: length mismatch ${a.length} vs ${b.length}`);
@@ -222,8 +250,9 @@ export function cov(x: Vec | number[][], y?: Vec, ddof = 1): number | number[][]
     for (let i = 0; i < a.length; i++) acc += (a[i] - ma) * (b[i] - mb);
     return acc / (a.length - ddof);
   }
-  // matrix form: rows = observations, columns = variables
-  const M = (x as number[][]).map((r) => Array.from(r));
+  // matrix form: rows = observations, columns = variables (rowvar=false)
+  const input = (x as number[][]).map((r) => Array.from(r));
+  const M = opts.rowvar === true ? transposeMatrix(input) : input;
   const nObs = M.length;
   if (nObs <= ddof)
     throw new Error(`cov: need more than ddof=${ddof} observations (got n=${nObs})`);
@@ -244,11 +273,15 @@ export function cov(x: Vec | number[][], y?: Vec, ddof = 1): number | number[][]
 }
 
 /**
- * Correlation-coefficient matrix from {@link cov} (rows = observations,
- * columns = variables). Diagonal is 1; off-diagonals are Pearson r.
+ * Correlation-coefficient matrix from {@link cov}. Diagonal is 1; off-diagonals
+ * are Pearson r.
+ *   - default (`rowvar: false`): rows = observations, columns = variables.
+ *   - `{ rowvar: true }`: rows = variables, columns = observations, the NumPy
+ *     `np.corrcoef` layout. `corrcoef([[1,2,3],[4,5,6]], { rowvar: true })`
+ *     returns the 2×2 matrix `[[1,1],[1,1]]`.
  */
-export function corrcoef(matrix: number[][]): number[][] {
-  const c = cov(matrix) as number[][];
+export function corrcoef(matrix: number[][], opts: CovLayoutOptions = {}): number[][] {
+  const c = cov(matrix, undefined, 1, opts) as number[][];
   const n = c.length;
   const d = c.map((row, i) => Math.sqrt(row[i]));
   return Array.from({ length: n }, (_, i) =>
