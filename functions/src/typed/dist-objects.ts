@@ -78,8 +78,8 @@ export interface Distribution {
   mean: f64;
   /** Distribution variance */
   variance: f64;
-  /** Generate a single random sample (synchronous) */
-  sample: () => f64;
+  /** One random sample (synchronous), or `sample(n)`: `n` samples in a `Float64Array` (unseeded). */
+  sample: { (): f64; (n: number): Float64Array };
   /**
    * Generate `n` random samples.
    *
@@ -98,6 +98,29 @@ export interface Distribution {
 // =============================================================================
 
 const SQRT_2PI = Math.sqrt(2 * Math.PI);
+
+/**
+ * Adds the count form to a distribution's `sample`: `sample()` returns one draw,
+ * `sample(n)` returns a `Float64Array` of `n` draws (`n = 0` gives an empty array).
+ * The batch form draws with `Math.random`, so it is not seeded; use `sampleN(n, { seed })`
+ * for a reproducible batch. A second argument throws, because it would otherwise be ignored.
+ */
+function _withSampleCount(d: Omit<Distribution, 'sample'> & { sample: () => f64 }): Distribution {
+  const drawOne = d.sample;
+  const sample = (n?: number, extra?: unknown): f64 | Float64Array => {
+    if (extra !== undefined) {
+      throw new TypeError('sample takes one count: use sampleN(n, { seed }) for a seeded batch');
+    }
+    if (n === undefined) return drawOne();
+    if (!Number.isSafeInteger(n) || n < 0) {
+      throw new RangeError(`sample: count must be a non-negative integer (got ${n})`);
+    }
+    const values = new Float64Array(n);
+    for (let i = 0; i < n; i++) values[i] = drawOne();
+    return values;
+  };
+  return { ...d, sample: sample as Distribution['sample'] };
+}
 
 /**
  * Standard-normal CDF Φ(z) = ½·erfc(−z/√2), using the package's accurate
@@ -229,7 +252,7 @@ async function _sampleNDispatch(
  */
 export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   if (sigma <= 0) throw new Error('normalDist: sigma must be positive');
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * SQRT_2PI),
     cdf: (x: f64) => _normalCdfStd((x - mu) / sigma),
     quantile: (p: f64) => mu + sigma * _normalQuantileStd(p),
@@ -259,7 +282,7 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -280,7 +303,7 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
 export function betaDist(alpha: f64, beta_: f64): Distribution {
   if (alpha <= 0 || beta_ <= 0) throw new Error('betaDist: alpha and beta must be positive');
   const B = (_gamma(alpha) * _gamma(beta_)) / _gamma(alpha + beta_);
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0 || x > 1) return 0;
       if (x === 0 && alpha < 1) return Infinity;
@@ -326,7 +349,7 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -369,7 +392,7 @@ export function binomialDist(n: number, p: f64): Distribution {
     throw new Error('binomialDist: n must be a non-negative integer');
   if (p < 0 || p > 1) throw new Error('binomialDist: p must be in [0, 1]');
   const q = 1 - p;
-  return {
+  return _withSampleCount({
     pdf: (k: f64) => {
       if (!Number.isInteger(k) || k < 0 || k > n) return 0;
       // Special cases: avoid 0 * log(0) = NaN
@@ -418,7 +441,7 @@ export function binomialDist(n: number, p: f64): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -438,7 +461,7 @@ export function binomialDist(n: number, p: f64): Distribution {
 export function chiSquaredDist(k: number): Distribution {
   if (k <= 0) throw new Error('chiSquaredDist: k must be positive');
   const halfK = k / 2;
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0) return 0;
       if (x === 0) return halfK < 1 ? Infinity : halfK === 1 ? 0.5 : 0;
@@ -486,7 +509,7 @@ export function chiSquaredDist(k: number): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -505,7 +528,7 @@ export function chiSquaredDist(k: number): Distribution {
  */
 export function exponentialDist(lambda: f64 = 1): Distribution {
   if (lambda <= 0) throw new Error('exponentialDist: lambda must be positive');
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)),
     cdf: (x: f64) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
     quantile: (p: f64) => {
@@ -526,7 +549,7 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -546,7 +569,7 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
  */
 export function fDist(d1: f64, d2: f64): Distribution {
   if (d1 <= 0 || d2 <= 0) throw new Error('fDist: d1 and d2 must be positive');
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0) return 0;
       if (x === 0) {
@@ -600,7 +623,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -684,7 +707,7 @@ export function gammaDist(
     }
   }
   const scale = 1 / rate;
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0) return 0;
       if (x === 0) {
@@ -727,7 +750,7 @@ export function gammaDist(
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -747,7 +770,7 @@ export function gammaDist(
  */
 export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   if (sigma <= 0) throw new Error('logNormalDist: sigma must be positive');
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x <= 0) return 0;
       const lnx = Math.log(x);
@@ -774,7 +797,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -793,7 +816,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  */
 export function poissonDist(lambda: f64): Distribution {
   if (lambda <= 0) throw new Error('poissonDist: lambda must be positive');
-  return {
+  return _withSampleCount({
     pdf: (k: f64) => {
       if (!Number.isInteger(k) || k < 0) return 0;
       return Math.exp(k * Math.log(lambda) - lambda - _logFactorial(k));
@@ -843,7 +866,7 @@ export function poissonDist(lambda: f64): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -863,7 +886,7 @@ export function poissonDist(lambda: f64): Distribution {
 export function tDist(nu: f64): Distribution {
   if (nu <= 0) throw new Error('tDist: nu must be positive');
   const coeff = Math.exp(_lgamma((nu + 1) / 2) - _lgamma(nu / 2)) / Math.sqrt(nu * Math.PI);
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       return coeff * Math.pow(1 + (x * x) / nu, -(nu + 1) / 2);
     },
@@ -908,7 +931,7 @@ export function tDist(nu: f64): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -929,7 +952,7 @@ export function tDist(nu: f64): Distribution {
 export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
   if (b <= a) throw new Error('uniformDist: b must be greater than a');
   const range = b - a;
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => (x >= a && x <= b ? 1 / range : 0),
     cdf: (x: f64) => {
       if (x < a) return 0;
@@ -953,7 +976,7 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -973,7 +996,7 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
  */
 export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
   if (k <= 0 || lambda <= 0) throw new Error('weibullDist: k and lambda must be positive');
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0) return 0;
       if (x === 0) return k === 1 ? 1 / lambda : k < 1 ? Infinity : 0;
@@ -1001,7 +1024,7 @@ export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
         }
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -1067,7 +1090,7 @@ export function hypergeometricDist(
   };
   const mean = (N * K) / M;
   const variance = N * (K / M) * ((M - K) / M) * ((M - N) / (M - 1));
-  return {
+  return _withSampleCount({
     pdf: pmf,
     cdf,
     quantile: (p: f64) => {
@@ -1086,7 +1109,7 @@ export function hypergeometricDist(
         for (let j = 0; j < count; j++) out[j] = _discreteSample(cdf, rng, kMax);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1111,7 +1134,7 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
   };
   const mean = (r * (1 - p)) / p;
   const variance = (r * (1 - p)) / (p * p);
-  return {
+  return _withSampleCount({
     pdf: pmf,
     cdf,
     quantile: (prob: f64) => {
@@ -1136,7 +1159,7 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
         for (let j = 0; j < count; j++) out[j] = _discreteSample(cdf, rng, cap);
         return out;
       }),
-  };
+  });
 }
 
 // =============================================================================
@@ -1158,7 +1181,7 @@ function _contSample(quantile: (p: f64) => f64, rng: () => number): f64 {
 export function paretoDist(b: number, xm: number): Distribution {
   if (b <= 0 || xm <= 0) throw new Error('paretoDist: shape b and scale xm must be positive');
   const quantile = (p: f64): f64 => (p <= 0 ? xm : p >= 1 ? Infinity : xm / Math.pow(1 - p, 1 / b));
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => (x < xm ? 0 : (b * Math.pow(xm, b)) / Math.pow(x, b + 1)),
     cdf: (x: f64) => (x < xm ? 0 : 1 - Math.pow(xm / x, b)),
     quantile,
@@ -1171,7 +1194,7 @@ export function paretoDist(b: number, xm: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1183,7 +1206,7 @@ export function rayleighDist(sigma: number): Distribution {
   const s2 = sigma * sigma;
   const quantile = (p: f64): f64 =>
     p <= 0 ? 0 : p >= 1 ? Infinity : sigma * Math.sqrt(-2 * Math.log(1 - p));
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => (x < 0 ? 0 : (x / s2) * Math.exp(-(x * x) / (2 * s2))),
     cdf: (x: f64) => (x < 0 ? 0 : 1 - Math.exp(-(x * x) / (2 * s2))),
     quantile,
@@ -1196,7 +1219,7 @@ export function rayleighDist(sigma: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1216,7 +1239,7 @@ export function triangularDist(a: number, c: number, b: number): Distribution {
       ? a + Math.sqrt(p * (b - a) * (c - a))
       : b - Math.sqrt((1 - p) * (b - a) * (b - c));
   };
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x < a || x > b) return 0;
       if (x < c) return (2 * (x - a)) / ((b - a) * (c - a));
@@ -1240,7 +1263,7 @@ export function triangularDist(a: number, c: number, b: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1258,7 +1281,7 @@ export function discreteUniformDist(lo: number, hi: number): Distribution {
     if (x >= hi) return 1;
     return (Math.floor(x) - lo + 1) / k;
   };
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => (Number.isInteger(x) && x >= lo && x <= hi ? 1 / k : 0),
     cdf,
     quantile: (p: f64) => {
@@ -1276,7 +1299,7 @@ export function discreteUniformDist(lo: number, hi: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = lo + Math.floor(rng() * k);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1288,7 +1311,7 @@ export function gumbelDist(mu: number, beta: number): Distribution {
   if (beta <= 0) throw new Error('gumbelDist: scale beta must be positive');
   const quantile = (p: f64): f64 =>
     p <= 0 ? -Infinity : p >= 1 ? Infinity : mu - beta * Math.log(-Math.log(p));
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       const z = (x - mu) / beta;
       return (1 / beta) * Math.exp(-(z + Math.exp(-z)));
@@ -1304,7 +1327,7 @@ export function gumbelDist(mu: number, beta: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
         return out;
       }),
-  };
+  });
 }
 
 /**
@@ -1335,7 +1358,7 @@ export function invGaussDist(mu: number, lambda: number): Distribution {
     const b = -Math.sqrt(lambda / x) * (x / mu + 1);
     return _normalCdfStd(a) + Math.exp((2 * lambda) / mu) * _normalCdfStd(b);
   };
-  return {
+  return _withSampleCount({
     pdf: (x: f64) => {
       if (x <= 0) return 0;
       return (
@@ -1354,7 +1377,7 @@ export function invGaussDist(mu: number, lambda: number): Distribution {
         for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
         return out;
       }),
-  };
+  });
 }
 
 /**

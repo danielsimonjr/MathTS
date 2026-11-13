@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { cov, corrcoef } from '@danielsimonjr/mathts-functions';
+import {
+  cov,
+  corrcoef,
+  normalDist,
+  betaDist,
+  binomialDist,
+  chiSquaredDist,
+  exponentialDist,
+  fDist,
+  gammaDist,
+  logNormalDist,
+  poissonDist,
+  tDist,
+  uniformDist,
+  weibullDist,
+  hypergeometricDist,
+  negativeBinomialDist,
+  paretoDist,
+  rayleighDist,
+  triangularDist,
+  discreteUniformDist,
+  gumbelDist,
+  invGaussDist,
+} from '@danielsimonjr/mathts-functions';
 
 /**
  * WS-A API contracts (issues #896, #897, #899, #900, #923 and the ODE message items).
@@ -83,5 +106,79 @@ describe('#896 — cov / corrcoef rowvar option', () => {
 
   it('rowvar with the two-vector form throws (no silent ignore)', () => {
     expect(() => cov([1, 2, 3], [4, 5, 6], 1, { rowvar: true })).toThrow(/rowvar/);
+  });
+});
+
+describe('#899 — Distribution.sample(n)', () => {
+  it('sample() with no argument returns one number (unchanged)', () => {
+    const x = normalDist(0, 1).sample();
+    expect(typeof x).toBe('number');
+  });
+
+  it('sample(5) returns a Float64Array of length 5 (not one number)', () => {
+    const out = normalDist(0, 1).sample(5) as unknown as Float64Array;
+    expect(out).toBeInstanceOf(Float64Array);
+    expect(out.length).toBe(5);
+  });
+
+  it('sample(1) returns a length-1 Float64Array, so the shape never depends on n', () => {
+    const out = normalDist(0, 1).sample(1) as unknown as Float64Array;
+    expect(out).toBeInstanceOf(Float64Array);
+    expect(out.length).toBe(1);
+  });
+
+  it('sample(0) returns an empty Float64Array', () => {
+    const out = normalDist(0, 1).sample(0) as unknown as Float64Array;
+    expect(out.length).toBe(0);
+  });
+
+  it('rejects a negative, fractional or non-finite count with RangeError', () => {
+    const d = normalDist(0, 1);
+    expect(() => d.sample(-1)).toThrow(RangeError);
+    expect(() => d.sample(1.5)).toThrow(RangeError);
+    expect(() => d.sample(Number.NaN)).toThrow(RangeError);
+  });
+
+  it('a second argument throws TypeError instead of being ignored', () => {
+    const d = normalDist(0, 1) as unknown as { sample: (n?: number, o?: unknown) => unknown };
+    expect(() => d.sample(5, { seed: 1 })).toThrow(TypeError);
+    expect(() => d.sample(5, { seed: 1 })).toThrow(/sampleN/);
+  });
+
+  it('every distribution factory returns n values from sample(n)', () => {
+    const factories: Array<[string, { sample: (n: number) => unknown }]> = [
+      ['normalDist', normalDist(0, 1)],
+      ['betaDist', betaDist(2, 3)],
+      ['binomialDist', binomialDist(10, 0.5)],
+      ['chiSquaredDist', chiSquaredDist(3)],
+      ['exponentialDist', exponentialDist(1)],
+      ['fDist', fDist(3, 4)],
+      ['gammaDist', gammaDist(2, 1)],
+      ['logNormalDist', logNormalDist(0, 1)],
+      ['poissonDist', poissonDist(3)],
+      ['tDist', tDist(5)],
+      ['uniformDist', uniformDist(0, 1)],
+      ['weibullDist', weibullDist(2, 1)],
+      ['hypergeometricDist', hypergeometricDist(50, 5, 10)],
+      ['negativeBinomialDist', negativeBinomialDist(3, 0.5)],
+      ['paretoDist', paretoDist(1, 2)],
+      ['rayleighDist', rayleighDist(1)],
+      ['triangularDist', triangularDist(0, 0.5, 1)],
+      ['discreteUniformDist', discreteUniformDist(1, 6)],
+      ['gumbelDist', gumbelDist(0, 1)],
+      ['invGaussDist', invGaussDist(1, 2)],
+    ];
+    for (const [name, d] of factories) {
+      const out = d.sample(3) as Float64Array;
+      expect(out.length, name).toBe(3);
+      expect(typeof d.sample(), name).toBe('number');
+    }
+  });
+
+  it('gamma: positional second argument is rate; { scale } is the scale form (characterization)', () => {
+    // shape 2, rate 2 -> mean 1 ; shape 2, scale 2 -> mean 4.
+    expect(gammaDist(2, 2).mean).toBeCloseTo(1, 12);
+    expect(gammaDist(2, { scale: 2 }).mean).toBeCloseTo(4, 12);
+    expect(gammaDist({ shape: 2, scale: 2 }).mean).toBeCloseTo(4, 12);
   });
 });
