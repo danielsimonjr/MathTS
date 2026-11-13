@@ -119,6 +119,13 @@ describe('parallelFFT takes a vector', () => {
       originalLength: number;
     }>();
     expect(sync.originalLength).toBe(4);
+    const readOnly: readonly number[] = Object.freeze([0, 1, 0, -1]);
+    expectTypeOf(parallelFFT(readOnly)).toEqualTypeOf<{
+      real: Float64Array;
+      imag: Float64Array;
+      originalLength: number;
+    }>();
+    expect(parallelFFT(readOnly).originalLength).toBe(4);
     const pending = parallelFFT(new Float64Array([0, 1, 0, -1]));
     expectTypeOf(pending).toEqualTypeOf<
       Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>
