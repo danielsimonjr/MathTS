@@ -1362,6 +1362,19 @@ function assertPsdFrameLength(
       `${name}: signal length (${signalLength}) is shorter than frameLength (${frameLength})`
     );
   }
+  if (frameLength < 2) {
+    throw new RangeError(`${name}: frameLength must be at least 2 (got ${frameLength})`);
+  }
+}
+
+/**
+ * Frame length for a PSD call. An explicit `frameLength` is used as given and validated.
+ * A defaulted one is 256 clamped to the signal length, as `scipy.signal.welch` clamps
+ * `nperseg`. An empty signal keeps the 256 default, so it still returns an empty spectrum.
+ */
+function resolvePsdFrameLength(signalLength: i32, requested: i32 | undefined): i32 {
+  if (requested !== undefined) return requested;
+  return signalLength === 0 ? 256 : Math.min(256, signalLength);
 }
 
 /**
@@ -1398,11 +1411,16 @@ export function welchPSD(
   opts?: { frameLength?: i32; overlap?: i32; window?: string }
 ): { psd: number[]; frequencies: number[]; frameLength: number } {
   const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
-  const frameLength: i32 = opts?.frameLength ?? 256;
+  const frameLength: i32 = resolvePsdFrameLength(samples.length, opts?.frameLength);
   const overlap: i32 = opts?.overlap ?? Math.floor(frameLength / 2);
   const window = opts?.window ?? 'hann';
 
   assertPsdFrameLength(samples.length, frameLength, 'welchPSD');
+  if (samples.length > 0 && overlap >= frameLength) {
+    throw new RangeError(
+      `welchPSD: overlap (${overlap}) must be less than frameLength (${frameLength})`
+    );
+  }
   return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
 }
 
@@ -1420,7 +1438,7 @@ export function bartlettPSD(
   opts?: { frameLength?: i32 }
 ): { psd: number[]; frequencies: number[]; frameLength: number } {
   const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
-  const frameLength: i32 = opts?.frameLength ?? 256;
+  const frameLength: i32 = resolvePsdFrameLength(samples.length, opts?.frameLength);
 
   assertPsdFrameLength(samples.length, frameLength, 'bartlettPSD');
   return packPsd(samples, frameLength, (s, fl) => bartlettPSDDispatch(s, fl));

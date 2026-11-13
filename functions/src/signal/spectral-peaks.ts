@@ -318,7 +318,11 @@ export interface StftResult {
  * @returns `{ re, im }`, each `number[frame][bin]`
  */
 export function stft(x: readonly number[], opts?: StftOptions): StftResult {
-  const nperseg = opts?.nperseg ?? 256;
+  const nperseg = opts?.nperseg ?? Math.min(256, x.length);
+  if (opts?.nperseg !== undefined && nperseg > x.length) {
+    throw new RangeError(`stft: nperseg (${nperseg}) exceeds the signal length (${x.length})`);
+  }
+  if (nperseg < 1) throw new RangeError(`stft: nperseg must be at least 1 (got ${nperseg})`);
   const noverlap = opts?.noverlap ?? Math.floor(nperseg / 2);
   const winType = opts?.window ?? 'hann';
   const step = nperseg - noverlap;
@@ -351,7 +355,8 @@ export function stft(x: readonly number[], opts?: StftOptions): StftResult {
  * @returns Reconstructed signal
  */
 export function istft(S: StftResult, opts?: StftOptions): number[] {
-  const nperseg = opts?.nperseg ?? 256;
+  // stft keeps every FFT bin, so a frame has nperseg bins: the default is the frame width.
+  const nperseg = opts?.nperseg ?? (S.re.length > 0 ? S.re[0].length : 256);
   const noverlap = opts?.noverlap ?? Math.floor(nperseg / 2);
   const winType = opts?.window ?? 'hann';
   const step = nperseg - noverlap;
