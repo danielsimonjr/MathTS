@@ -10,6 +10,7 @@ import {
   matrix,
   sparse,
   solveODE,
+  solveODESystem,
 } from '@danielsimonjr/mathts-functions';
 import { mod as arithmeticMod } from '@danielsimonjr/mathts-arithmetic';
 import { create, all } from '@danielsimonjr/mathts-compat';
@@ -659,5 +660,106 @@ describe('solveODE sol.y layout (WS-A documentation)', () => {
     expect(y[0]).toEqual([1, 0]);
     const last = t.length - 1;
     expect(y[last][0]).toBeCloseTo(Math.cos(t[last]), 6);
+  });
+});
+
+describe('solveODESystem counts accepted steps, as solveODE does (WS-A)', () => {
+  const oscillator = (_t: number, y: number[]): number[] => [y[1], -y[0]];
+  const robertson = (_t: number, y: number[]): number[] => [
+    -0.04 * y[0] + 1e4 * y[1] * y[2],
+    0.04 * y[0] - 1e4 * y[1] * y[2] - 3e7 * y[1] * y[1],
+    3e7 * y[1] * y[1],
+  ];
+  const span: [number, number] = [0, 2 * Math.PI];
+  const messageOf = (run: () => unknown): string => {
+    try {
+      run();
+    } catch (e) {
+      return (e as Error).message;
+    }
+    return '';
+  };
+
+  it('a budget equal to the accepted steps the run needs succeeds; one less throws', () => {
+    // Each attempt calls f seven times, plus one call for the first step size, so the calls give
+    // the attempt count. The run rejects some attempts: the old cap counted those.
+    let calls = 0;
+    const counted = (t: number, y: number[]): number[] => {
+      calls++;
+      return oscillator(t, y);
+    };
+    const full = solveODESystem(counted, [1, 0], span);
+    const accepted = full.t.length - 1;
+    const attempts = (calls - 1) / 7;
+    expect(attempts).toBeGreaterThan(accepted);
+
+    const exact = solveODESystem(oscillator, [1, 0], span, { maxSteps: accepted });
+    expect(exact.t).toEqual(full.t);
+    expect(exact.t[exact.t.length - 1]).toBe(span[1]);
+    expect(() => solveODESystem(oscillator, [1, 0], span, { maxSteps: accepted - 1 })).toThrow(
+      /exceeded maxSteps=\d+ accepted steps/
+    );
+  });
+
+  it('counts accepted steps on a backward span too', () => {
+    const full = solveODESystem(oscillator, [1, 0], [span[1], span[0]]);
+    const accepted = full.t.length - 1;
+    expect(
+      solveODESystem(oscillator, [1, 0], [span[1], span[0]], { maxSteps: accepted }).t
+    ).toEqual(full.t);
+    expect(() =>
+      solveODESystem(oscillator, [1, 0], [span[1], span[0]], { maxSteps: accepted - 1 })
+    ).toThrow(/maxSteps/);
+  });
+
+  it('an empty span returns the initial point whatever the budget', () => {
+    expect(solveODESystem(oscillator, [1, 0], [3, 3], { maxSteps: 1 }).t).toEqual([3]);
+  });
+
+  it('a zero maxSteps takes the default budget, as a zero maxIter does in solveODE', () => {
+    const sol = solveODESystem(oscillator, [1, 0], [0, 1], { maxSteps: 0 });
+    expect(sol.t[sol.t.length - 1]).toBe(1);
+  });
+
+  it('the error names solveODESystem and maxSteps, not the old message', () => {
+    const message = messageOf(() =>
+      solveODESystem(oscillator, [1, 0], [0, 100], { maxSteps: 3, tol: 1e-10 })
+    );
+    expect(message).toMatch(
+      /^solveODESystem RK45: exceeded maxSteps=3 accepted steps \(3 accepted of \d+ attempts, last t=/
+    );
+    expect(message).toMatch(/target t=100\)/);
+    expect(message).toMatch(/Raise options\.maxSteps or relax options\.tol\./);
+    expect(message).not.toMatch(/Maximum number of steps/);
+    expect(message).not.toMatch(/maxIter/);
+  });
+
+  it('the stiffness hint fires on a stiff run and stays silent on a non-stiff one', () => {
+    const stiff = messageOf(() => solveODESystem(robertson, [1, 0, 0], [0, 40], { maxSteps: 5 }));
+    expect(stiff).toMatch(/solveODESystem RK45: exceeded maxSteps=5 /);
+    for (const name of ['BDF', 'Radau', 'Rosenbrock', 'RODAS']) expect(stiff).toContain(name);
+    expect(stiff).toMatch(/If the system is stiff/);
+
+    const smooth = messageOf(() =>
+      solveODESystem(oscillator, [1, 0], [0, 100], { maxSteps: 3, tol: 1e-10 })
+    );
+    expect(smooth).toMatch(/exceeded maxSteps=3 /);
+    expect(smooth).not.toMatch(/stiff/);
+  });
+
+  it('a right-hand side that is not finite stops the run at once, not at the attempt cap', () => {
+    // The attempt cap is 25,000,000 for the default budget: a NaN step that never advances
+    // would run for seconds, past the five-second test limit.
+    expect(() => solveODESystem(() => [NaN], [1], [0, 1])).toThrow(RangeError);
+    expect(() => solveODESystem(() => [Infinity], [1], [0, 1])).toThrow(/not finite/);
+    expect(() => solveODESystem(oscillator, [NaN, 0], [0, 1])).toThrow(/not finite/);
+    expect(() => solveODESystem((t) => [t > 0.5 ? NaN : 1], [1], [0, 1])).toThrow(
+      /step size underflow/
+    );
+  });
+
+  it('a fixed step ignores maxSteps', () => {
+    const sol = solveODESystem(oscillator, [1, 0], [0, 1], { dt: 0.1, maxSteps: 1 });
+    expect(sol.t.length).toBe(11);
   });
 });

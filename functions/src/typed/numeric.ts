@@ -14,6 +14,7 @@
 import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
+import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { levenbergMarquardt, nelderMead } from '../optimization-extra.js';
 export {
@@ -979,13 +980,18 @@ const _DP_BHAT = [5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187
  * tolerance `atol + rtol·|y|` (rtol = `tol`, atol = `tol·1e-3`), adjusting the step per accepted
  * step; the last output point lands exactly on `tf`. Non-stiff use only — stiff systems should use
  * `stiffODESolver` or `solveODE(..., {method:'BDF'|'Radau'})`.
+ *
+ * `maxSteps` is a budget of **accepted** steps, as `maxIter` is in `solveODE`: a rejected attempt
+ * does not use it, and a run that needs exactly `maxSteps` accepted steps succeeds. A separate cap
+ * on the attempts (`odeMaxAttempts`) stops a run that rejects every step. A zero `maxSteps` takes
+ * the default budget.
  */
 function _adaptiveRK45System(
   f: (t: f64, y: number[]) => number[],
   y0: number[],
   tspan: [f64, f64],
   tol: f64,
-  maxSteps: i32
+  maxSteps: i32 | undefined
 ): ODESolution {
   const n = y0.length;
   const [t0, tf] = tspan;
@@ -1007,12 +1013,42 @@ function _adaptiveRK45System(
   };
   const d0 = rms(y);
   const d1 = rms(f0);
+  // A non-finite start gives a NaN step, and a NaN step never advances: reject it here.
+  if (!Number.isFinite(d0) || !Number.isFinite(d1)) {
+    throw new RangeError(
+      `solveODESystem: the initial state or f(t0, y0) is not finite (t0=${t0}); check y0 and f`
+    );
+  }
   let h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), Math.abs(tf - t0));
 
-  let steps = 0;
-  while ((dir > 0 ? t < tf : t > tf) && steps < maxSteps) {
-    steps++;
+  const maxAccepted = odeAcceptedBudget(maxSteps);
+  const attemptCap = odeMaxAttempts(maxAccepted);
+  let attempts = 0;
+  const ongoing = (): boolean => (dir > 0 ? t < tf : t > tf);
+  const stepLimitError = (): Error =>
+    odeMaxStepsError({
+      method: 'RK45',
+      caller: 'solveODESystem',
+      budgetOption: 'maxSteps',
+      maxIter: maxAccepted,
+      acceptedSteps: ts.length - 1,
+      attempts,
+      tStart: t0,
+      tCurrent: t,
+      tFinal: tf,
+      lastStepMag: Math.abs(h),
+    });
+
+  while (ongoing() && ts.length - 1 < maxAccepted) {
+    attempts++;
     if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
+    // A step below the spacing of t does not advance it. The shrink below reaches this point when
+    // f returns a non-finite value, so the run stops here and does not spin to the attempt cap.
+    if (t + h === t) {
+      throw new Error(
+        `solveODESystem RK45: step size underflow at t=${t} (h=${h}); the step does not advance the independent variable.`
+      );
+    }
 
     const k: number[][] = [f(t, y)];
     for (let s = 1; s < 7; s++) {
@@ -1046,13 +1082,17 @@ function _adaptiveRK45System(
       ts.push(t);
       ys.push(y.slice());
     }
-    // Step-size control (order-5 embedded → exponent 1/5), clamped to avoid wild swings.
-    h *= Math.min(5, Math.max(0.2, 0.9 * Math.pow(errNorm || 1e-10, -1 / 5)));
+    // Step-size control (order-5 embedded → exponent 1/5), clamped to avoid wild swings. A
+    // non-finite error estimate (NaN or infinite state) rejects the step and takes the smallest
+    // factor: `NaN || 1e-10` would otherwise grow the step by the largest factor.
+    h *= Number.isFinite(errNorm)
+      ? Math.min(5, Math.max(0.2, 0.9 * Math.pow(errNorm || 1e-10, -1 / 5)))
+      : 0.2;
+    if (attempts >= attemptCap && ongoing()) throw stepLimitError();
   }
 
-  if (steps >= maxSteps) {
-    throw new Error('Maximum number of steps reached in solveODESystem, try changing options');
-  }
+  // The loop ends on tf (done) or on the budget. Only an unfinished run is an error.
+  if (ongoing()) throw stepLimitError();
   return { t: ts, y: ys };
 }
 
@@ -1067,8 +1107,9 @@ function _adaptiveRK45System(
  * @param f - System function (t, y) => dy/dt
  * @param y0 - Initial state vector
  * @param tspan - [t0, tf] time span
- * @param opts - Options: `tol` (adaptive local-error tolerance, default 1e-6), `maxSteps` (step
- *   cap), `dt` (fixed step — selects the legacy fixed-step RK4 path)
+ * @param opts - Options: `tol` (adaptive local-error tolerance, default 1e-6), `maxSteps` (budget
+ *   of accepted steps of the adaptive path, default 100000, counted as `maxIter` is in `solveODE`;
+ *   ignored by the fixed-step path), `dt` (fixed step — selects the legacy fixed-step RK4 path)
  * @returns Solution { t, y }
  */
 export function solveODESystem(
@@ -1079,7 +1120,7 @@ export function solveODESystem(
 ): ODESolution {
   // Adaptive path when no explicit fixed step is requested (embedded RK45 error control).
   if (opts?.dt === undefined) {
-    return _adaptiveRK45System(f, y0, tspan, opts?.tol ?? 1e-6, opts?.maxSteps ?? 100_000);
+    return _adaptiveRK45System(f, y0, tspan, opts?.tol ?? 1e-6, opts?.maxSteps);
   }
 
   const n = y0.length;

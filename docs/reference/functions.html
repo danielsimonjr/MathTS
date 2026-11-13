@@ -2766,7 +2766,11 @@
         dense linear solve onto the `matrix` package's LU primitive for large systems
         (inline below n=8). `solveODESystem` integrates a first-order system with
         **adaptive** embedded RK45 (Dormand-Prince) error control by default; passing an
-        explicit `dt` selects the legacy fixed-step RK4 instead.
+        explicit `dt` selects the legacy fixed-step RK4 instead. The `maxSteps` option
+        (default 100000) is a budget of accepted steps, counted as `maxIter` is in
+        `solveODE`: a rejected attempt does not use it, and a run that needs exactly
+        `maxSteps` accepted steps succeeds. The error names `maxSteps`, and for a run
+        that rejects many steps it names the stiff methods as options.
         `solveODE` also supports scipy-`solve_ivp`-style **event detection** via the
         `events` option (one `g(t, y)` function or an array; each zero crossing is
         located and returned in `tEvents`/`yEvents`, with `terminal`/`direction`
