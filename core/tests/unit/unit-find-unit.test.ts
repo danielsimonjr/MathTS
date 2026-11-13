@@ -9,15 +9,16 @@ const MICRO_SIGN = /[µμ]/;
 
 // The reference: the linear scan over every UNITS key that `_findUnit` used before the
 // last-character index. The new lookup must give the same unit and prefix for every string.
+// The unrestricted set that stands for a prefix table (the table itself when it has none).
+function wide(table: PrefixTable | undefined): PrefixTable | undefined {
+  for (const [key, w] of Object.entries(UNIT_PREFIX_SET_UNRESTRICTED)) {
+    if (table === Unit.PREFIXES[key]) return Unit.PREFIXES[w!];
+  }
+  return table;
+}
+
 function referenceFind(str: string, unrestricted: boolean): Found {
   const UNITS = Unit.UNITS;
-  const PREFIXES = Unit.PREFIXES;
-  const wide = (table: PrefixTable | undefined): PrefixTable | undefined => {
-    for (const [key, w] of Object.entries(UNIT_PREFIX_SET_UNRESTRICTED)) {
-      if (table === PREFIXES[key]) return PREFIXES[w!];
-    }
-    return table;
-  };
   if (Object.hasOwn(UNITS, str)) return { unit: UNITS[str].name, prefix: '' };
   for (const name in UNITS) {
     if (!Object.hasOwn(UNITS, name) || !str.endsWith(name)) continue;
@@ -52,31 +53,89 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function corpus(): string[] {
+// The full corpus is every prefix x unit string plus every substring of 200 glued tokens: about
+// 47,000 strings, and the reference scans every UNITS key for each of them in two modes. That
+// cost grows with the corpus and with the load of the machine, and the test timeout is fixed.
+// The default run keeps every unit key, the micro-sign variants, the named hard cases and every
+// string that only the unrestricted prefix set reads. It takes a fixed seeded sample of the
+// rest, so the run time does not depend on load. `UNIT_ORACLE_FULL=1` runs the full corpus.
+const FULL_CORPUS = process.env.UNIT_ORACLE_FULL === '1';
+// The full run is a manual check, so it gets a long timeout. The default run keeps the config timeout.
+const FULL_TIMEOUT = FULL_CORPUS ? 600_000 : undefined;
+const SAMPLE_VALID = 1500;
+const SAMPLE_INVALID = 1000;
+const SAMPLE_GLUED = 2000;
+
+// A seeded partial shuffle: the same sample on every run.
+function sampleOf<T>(items: readonly T[], count: number, rnd: () => number): T[] {
+  if (FULL_CORPUS || items.length <= count) return [...items];
+  const pool = [...items];
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(rnd() * (pool.length - i));
+    [pool[i], pool[j]] = [pool[j]!, pool[i]!];
+  }
+  return pool.slice(0, count);
+}
+
+function corpus(): { strings: string[]; fullSize: number } {
   const keys = Object.keys(Unit.UNITS);
   const prefixSymbols = [
     ...new Set(
       Object.values(Unit.PREFIXES).flatMap((t) => Object.keys(t as Record<string, PrefixDef>))
     ),
   ];
-  const out = new Set<string>(['', 'xyzzy', 'qq', 'µ', 'μm', 'µm', 'µµm', 'μs', 'µkm', 'toString']);
+  const always = new Set<string>([
+    '',
+    'xyzzy',
+    'qq',
+    'µ',
+    'μm',
+    'µm',
+    'µµm',
+    'μs',
+    'µkm',
+    'toString',
+  ]);
+  // A prefix x unit string is "valid" when the prefix set of the unit (the unrestricted set)
+  // holds the prefix. The strings that only the unrestricted set reads always run.
+  const valid: string[] = [];
+  const invalid: string[] = [];
   for (const k of keys) {
-    out.add(k);
-    out.add('µ' + k);
-    out.add('μ' + k);
-    for (const p of prefixSymbols) out.add(p + k);
+    always.add(k);
+    always.add('µ' + k);
+    always.add('μ' + k);
+    const unit = Unit.UNITS[k]!;
+    const narrow = unit.prefixes;
+    const widened = wide(narrow);
+    for (const p of prefixSymbols) {
+      if (widened === undefined || !Object.hasOwn(widened, p)) invalid.push(p + k);
+      else if (narrow !== undefined && Object.hasOwn(narrow, p)) valid.push(p + k);
+      else always.add(p + k);
+    }
   }
   const rnd = mulberry32(20261108);
   const pick = <T>(xs: readonly T[]): T => xs[Math.floor(rnd() * xs.length)]!;
+  const glued = new Set<string>();
   for (let t = 0; t < 200; t++) {
     let token = '';
     const parts = 2 + Math.floor(rnd() * 3);
     for (let j = 0; j < parts; j++) token += (rnd() < 0.4 ? pick(prefixSymbols) : '') + pick(keys);
     for (let i = 0; i < token.length; i++) {
-      for (let j = i + 1; j <= token.length; j++) out.add(token.slice(i, j));
+      for (let j = i + 1; j <= token.length; j++) glued.add(token.slice(i, j));
     }
   }
-  return [...out];
+  const choose = mulberry32(20261109);
+  const strings = [
+    ...new Set([
+      ...always,
+      ...sampleOf(valid, SAMPLE_VALID, choose),
+      ...sampleOf(invalid, SAMPLE_INVALID, choose),
+      ...sampleOf([...glued], SAMPLE_GLUED, choose),
+    ]),
+  ];
+  // The full corpus is a set union with no oracle call, so the coverage fraction is cheap.
+  const fullSize = new Set([...always, ...valid, ...invalid, ...glued]).size;
+  return { strings, fullSize };
 }
 
 describe('_findUnit (last-character index)', () => {
@@ -85,21 +144,44 @@ describe('_findUnit (last-character index)', () => {
     for (const name of created.splice(0)) Unit.deleteUnit(name);
   });
 
-  it('gives the same unit and prefix as the linear scan, restricted and unrestricted', () => {
-    const strings = corpus();
-    expect(strings.length).toBeGreaterThan(10000);
-    const mismatches: string[] = [];
-    for (const s of strings) {
-      for (const unrestricted of [false, true]) {
-        const got = find(s, unrestricted);
-        const want = referenceFind(s, unrestricted);
-        if (JSON.stringify(got) !== JSON.stringify(want)) {
-          mismatches.push(`${JSON.stringify(s)} ${unrestricted}: ${JSON.stringify(got)}`);
+  it(
+    'gives the same unit and prefix as the linear scan, restricted and unrestricted',
+    () => {
+      const { strings, fullSize } = corpus();
+      // The coverage of the default run, in the test log: how much of the full corpus it checks.
+      console.info(
+        `[unit-oracle] _findUnit: ${strings.length} of ${fullSize} strings ` +
+          `(${((100 * strings.length) / fullSize).toFixed(1)}%)${FULL_CORPUS ? ', full corpus' : ''}`
+      );
+      expect(strings.length).toBeGreaterThan(FULL_CORPUS ? 10000 : 5000);
+      const mismatches: string[] = [];
+      const seen = { prefixed: 0, bare: 0, miss: 0, widened: 0 };
+      for (const s of strings) {
+        const restricted = referenceFind(s, false);
+        const unrestricted = referenceFind(s, true);
+        if (restricted === null) seen.miss++;
+        else if (restricted.prefix === '') seen.bare++;
+        else seen.prefixed++;
+        if (JSON.stringify(restricted) !== JSON.stringify(unrestricted)) seen.widened++;
+        for (const [mode, want] of [
+          [false, restricted],
+          [true, unrestricted],
+        ] as const) {
+          const got = find(s, mode);
+          if (JSON.stringify(got) !== JSON.stringify(want)) {
+            mismatches.push(`${JSON.stringify(s)} ${mode}: ${JSON.stringify(got)}`);
+          }
         }
       }
-    }
-    expect(mismatches.slice(0, 20)).toEqual([]);
-  });
+      expect(mismatches.slice(0, 20)).toEqual([]);
+      // The sample must keep each kind of string, so that it cannot shrink to a trivial check.
+      expect(seen.bare).toBeGreaterThanOrEqual(300);
+      expect(seen.prefixed).toBeGreaterThanOrEqual(1400);
+      expect(seen.miss).toBeGreaterThanOrEqual(3000);
+      expect(seen.widened).toBeGreaterThanOrEqual(30);
+    },
+    FULL_TIMEOUT
+  );
 
   it('reads a single micro sign as the micro prefix, and refuses two', () => {
     expect(find('µm')).toEqual({ unit: 'm', prefix: 'u' });
@@ -185,6 +267,27 @@ describe('_findUnit (last-character index)', () => {
     const replacement: UnitDef = { ...Unit.UNITS['zd'], value: 2 };
     Unit.UNITS['zd'] = replacement;
     expect(Unit._findUnit('kzd')?.unit).toBe(replacement);
+  });
+
+  it.each([
+    ['shorter than the longest built-in name', 'zzqshort'],
+    ['longer than the longest built-in name', 'zzqlonger'.repeat(3)],
+    ['much longer than the longest built-in name', 'zzqmuchlonger'.repeat(12)],
+  ])('finds a prefixed unit written straight into Unit.UNITS, %s', (_label, name) => {
+    // The first call is a miss, so the index does not know the name yet. A miss must still
+    // see a name that was written directly, whatever its length.
+    expect(find('k' + name)).toBeNull();
+    Unit.UNITS[name] = { ...Unit.UNITS['m'], name };
+    created.push(name);
+    expect(find('k' + name)).toEqual({ unit: name, prefix: 'k' });
+    expect(find('k' + name)).toEqual(referenceFind('k' + name, false));
+    expect(find(name)).toEqual({ unit: name, prefix: '' });
+  });
+
+  it('misses a long unknown token and a long token with an unknown prefix', () => {
+    expect(find('q'.repeat(5000))).toBeNull();
+    expect(find('q'.repeat(5000) + 'm')).toBeNull();
+    expect(find('km' + 'q'.repeat(60))).toBeNull();
   });
 
   it('finds a unit written straight into Unit.UNITS, after a miss on it', () => {

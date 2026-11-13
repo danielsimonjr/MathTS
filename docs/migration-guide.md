@@ -111,6 +111,28 @@ One confirmed divergence (see `CHANGELOG.md` audit section):
 `divisorSigma(n, k)` — MathTS uses `(n, k=1)` where mathjs uses `(k, n)`
 (both required). If your code calls `math.divisorSigma`, verify argument order.
 
+### Unit conversion rounding (last digit of `toString()`)
+
+A unit conversion in MathTS multiplies the exact scales of the two units and rounds
+once. A unit has an exact scale when the unit table gives it as a decimal literal or a
+rational (`inch` is `0.0254`, `L` is `0.001`). When both units have exact scales, the
+result is the double nearest to the exact value, and `toString()` prints the shortest
+digits that read back as that double. mathjs divides or adds two rounded doubles, so its
+last digit can differ by one ULP, in either direction:
+
+| Conversion                     | MathTS                   | mathjs 13 and 15          |
+| ------------------------------ | ------------------------ | ------------------------- |
+| `unit(5, 'cm').to('inch')`     | `1.968503937007874 inch` | `1.9685039370078743 inch` |
+| `unit(1, 'L').to('mL')`        | `1000 mL`                | `1000.0000000000001 mL`   |
+| `unit(100, 'degC').to('degF')` | `212 degF`               | `211.99999999999997 degF` |
+
+For these three conversions, the `toNumeric()` values of the two libraries differ by one
+ULP. For snapshot tests, choose one of these:
+
+- Compare numbers with a tolerance (`toBeCloseTo`), not strings.
+- Format with a fixed precision. `unit.format({ precision: 14 })` gives the same string
+  in both libraries for the three conversions above.
+
 ---
 
 ## Switching to the typed-function API (recommended)

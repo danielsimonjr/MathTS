@@ -4,6 +4,7 @@ import { fraction } from '../src/shims.js';
 import { Fraction } from '@danielsimonjr/mathts-core';
 
 type UnitOut = { toString(): string; toNumber(): number };
+type Formattable = { format(options: { precision: number }): string };
 
 type G32bApi = {
   fraction: (n: number, d: number) => unknown;
@@ -73,5 +74,20 @@ describe('dogfood G32b formatting and units', () => {
     const foot: UnitOut = mt.unit(1, 'ft').to('inch');
     expect(foot.toNumber()).toBe(12);
     expect(String(foot)).toBe('12 inch');
+  });
+
+  it('#742 the other two pairs of the report: exact scales round once', () => {
+    // mathjs 13 and 15 print 1.9685039370078743 inch and 211.99999999999997 degF:
+    // they divide or add rounded doubles. 250/127 and 212 are the nearest doubles.
+    expect(String(mt.unit(5, 'cm').to('inch'))).toBe('1.968503937007874 inch');
+    expect(String(mt.unit(100, 'degC').to('degF'))).toBe('212 degF');
+    expect(mt.unit(100, 'degC').to('degF').toNumber()).toBe(212);
+  });
+
+  it('#742 a fixed precision makes the strings of both libraries agree', () => {
+    const format = (u: UnitOut): string => (u as unknown as Formattable).format({ precision: 14 });
+    expect(format(mt.unit(5, 'cm').to('inch'))).toBe('1.9685039370079 inch');
+    expect(format(mt.unit(1, 'L').to('mL'))).toBe('1000 mL');
+    expect(format(mt.unit(100, 'degC').to('degF'))).toBe('212 degF');
   });
 });

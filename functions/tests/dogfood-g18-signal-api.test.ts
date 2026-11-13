@@ -19,6 +19,27 @@ const SCIPY_HAMMING_8 = [
   0.6423596298545902, 0.253194696254052, 0.08,
 ];
 
+/** One unit in the last place of `x`: the gap between `|x|` and the next double above it. */
+function ulp(x: number): number {
+  const magnitude = Math.abs(x);
+  return magnitude === 0 ? Number.MIN_VALUE : 2 ** (Math.floor(Math.log2(magnitude)) - 52);
+}
+
+/**
+ * The bound for an FFT followed by its inverse on `n` points, in ULP of the largest sample.
+ *
+ * Each transform has log2(n) butterfly stages and each stage adds at most one ULP, so the
+ * round trip stays within 2 log2(n) ULP. The twiddle factors come from `Math.cos` and
+ * `Math.sin`, and the libm of the runtime rounds those in the last bit: V8 (Node) gives
+ * `sin(-pi/4) = -0.70710678118654746` and JavaScriptCore (Bun) gives
+ * `-0.70710678118654757`, one ULP apart. A fixed number of digits (`toBeCloseTo(x, 15)`
+ * is 5e-16, below one ULP of 4) passes on one runtime and fails on the other, so the
+ * bound is in ULP and covers the variance of both libm sources.
+ */
+function roundTripUlps(n: number): number {
+  return 2 * Math.log2(n);
+}
+
 const NUMPY_FFT_8_REAL = [36, -4, -4, -4, -4, -4, -4, -4];
 const NUMPY_FFT_8_IMAG = [
   0, 9.65685424949238, 4, 1.65685424949238, 0, -1.65685424949238, -4, -9.65685424949238,
@@ -75,7 +96,7 @@ describe('#706 factory fft accepts Float64Array', () => {
 });
 
 describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
-  it('parallelFFT → parallelIFFT recovers the series within 1e-15', async () => {
+  it('parallelFFT → parallelIFFT recovers the series within 2 log2(n) ULP', async () => {
     const x = new Float64Array([1, 2, 3, 4, 5, 6, 7, 8]);
     const F = (await parallelFFT(x)) as { real: Float64Array; imag: Float64Array };
     expect(F.real[0]).toBeCloseTo(NUMPY_FFT_8_REAL[0]!, 10);
@@ -85,8 +106,9 @@ describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
     expect(F.real.length).toBe(8);
     expect(F.imag.length).toBe(8);
     const back = (await parallelIFFT(F)) as { real: Float64Array; imag: Float64Array };
+    const bound = roundTripUlps(x.length) * ulp(Math.max(...x));
     for (let i = 0; i < x.length; i++) {
-      expect(back.real[i]).toBeCloseTo(x[i]!, 15);
+      expect(Math.abs(back.real[i]! - x[i]!)).toBeLessThanOrEqual(bound);
     }
   });
 

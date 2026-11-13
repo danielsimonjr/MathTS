@@ -224,6 +224,16 @@ export interface UnitDependencies {
 
 /** An instance of Unit (the prototype methods + per-instance fields). */
 export interface UnitInstance {
+  /**
+   * The magnitude in SI base units, not the number in the unit that the quantity shows:
+   * `new Unit(180, 'deg').value` is `Math.PI` and `new Unit(5, 'km').value` is `5000`.
+   * An offset temperature unit keeps its zero point (`new Unit(0, 'degC').value` is `0`),
+   * so read kelvin with `toNumeric('K')`. `null` for a unit with no value.
+   *
+   * To read the number in the shown unit, call `toNumeric()`. To read the number in a
+   * named unit, call `toNumeric('deg')`. `toNumber` does the same but is deprecated.
+   * mathjs `Unit.value` follows the same rule.
+   */
   value: Numeric | null;
   /**
    * Exact SI quantity for a number reading that was normalized through exact
@@ -262,7 +272,12 @@ export interface UnitInstance {
   pow(p: number): UnitInstance | Numeric;
   abs(): UnitInstance;
   to(valuelessUnit: string | UnitInstance, options?: ConvertOptions): UnitInstance;
+  /** @deprecated Use {@link UnitInstance.toNumeric}. It warns once on use. */
   toNumber(valuelessUnit?: string | UnitInstance): number;
+  /**
+   * The number in the unit the quantity shows, or in `valuelessUnit` when you pass one
+   * (`toNumeric('deg')`). `value` is the SI magnitude instead.
+   */
   toNumeric(valuelessUnit?: string | UnitInstance): Numeric | null;
   toString(): string;
   toJSON(): UnitJSON;

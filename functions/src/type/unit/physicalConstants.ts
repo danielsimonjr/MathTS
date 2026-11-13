@@ -414,13 +414,13 @@ class CodataScalar {
   }
 }
 
-function numberFactory(name: string, value: number | string) {
+function numberFactory(name: string, value: number) {
   const dependencies = ['config', 'BigNumber'];
 
   return factory(
     name,
     dependencies,
-    ({ config, BigNumber }: NumberFactoryDependencies): number | string | Decimal => {
+    ({ config, BigNumber }: NumberFactoryDependencies): number | Decimal => {
       const numeric = config.number === 'BigNumber' ? new BigNumber(value) : value;
       const uncText = CODATA_2022_UNCERTAINTY[name];
       if (uncText === undefined) return numeric;

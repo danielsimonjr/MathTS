@@ -8096,17 +8096,24 @@ graph LR
 
 ### `functions/src/numeric/propagate-uncertainty.ts` - First-order (linear) uncertainty propagation for scalar expressions.
 
+**Workspace Dependencies:**
+
+| Package                      | Import                 |
+| ---------------------------- | ---------------------- |
+| `@danielsimonjr/mathts-core` | `isUnit, UnitInstance` |
+
 **Internal Dependencies:**
 
-| File                       | Imports      | Type   |
-| -------------------------- | ------------ | ------ |
-| `../factories/index.js`    | `derivative` | Import |
-| `../factories/evaluate.js` | `evaluate`   | Import |
+| File                                | Imports               | Type               |
+| ----------------------------------- | --------------------- | ------------------ |
+| `../factories/index.js`             | `derivative`          | Import             |
+| `../factories/evaluate.js`          | `evaluate`            | Import             |
+| `../type/unit/physicalConstants.js` | `createFineStructure` | Import (type-only) |
 
 **Exports:**
 
-- Interfaces: `UncertaintyPropagationResult`, `UncertaintyPropagationOptions`
-- Types: `UncertaintyExpression`
+- Interfaces: `UncertainScalar`, `UncertaintyPropagationResult`, `UncertaintyPropagationOptions`
+- Types: `UncertaintyExpression`, `UncertaintyInput`
 - Functions: `propagateUncertainty`
 
 ---
@@ -21057,15 +21064,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1323   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 226567 |
+| Total Lines of Code     | 226951 |
 | Total Exports           | 7237   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 61     |
-| Total Interfaces        | 650    |
+| Total Interfaces        | 651    |
 | Total Functions         | 2460   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
-| Type-only Imports       | 680    |
+| Type-only Imports       | 681    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 
