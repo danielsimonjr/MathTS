@@ -4,7 +4,7 @@
  * The in-process path of `MathWorkerPool.unary` and the worker task `unaryChunk` both call
  * these kernels, so the loop that runs on the caller's thread is the loop that runs in a
  * worker. Each kernel is its own loop. A single loop with a `switch (fn)` inside tests the
- * function name once per element; measured on Node 22 at n = 1e6 for `sin`, that loop took
+ * function name once per element; measured on Node 26 at n = 1e6 for `sin`, that loop took
  * 19.8 ms and the hoisted loop 15.3 ms (`tools/benchmarks/ws-r-compute-pool.mjs`, section
  * `path`, records the pool against `functions.sin`).
  *
