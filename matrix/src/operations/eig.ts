@@ -743,6 +743,7 @@ function repeatedEigenvalueReport(
  * @param options - Computation options
  * @returns Eigenvalues and eigenvectors
  * @throws {TypeError} if `matrix` is not one of the accepted shapes, or a non-square `Float64Array`.
+ * @throws {RangeError} if an entry is `NaN` or infinite.
  */
 export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}): EigResult {
   // maxIterations / tolerance are accepted for API compatibility but the
@@ -760,6 +761,9 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   for (let i = 0; i < n; i++) {
     if (A[i].length !== n) {
       throw new Error('Matrix must be square');
+    }
+    for (let j = 0; j < n; j++) {
+      if (!Number.isFinite(A[i][j])) throw new RangeError('eig: matrix has a non-finite entry');
     }
   }
 

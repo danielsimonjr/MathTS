@@ -265,8 +265,13 @@
       "matrix/src/operations/condest.ts",
       "matrix/src/types/index.ts"
     ],
+    "matrix/src/operations/densify.ts": [
+      "matrix/src/operations/as-packed.ts",
+      "matrix/src/operations/index.ts"
+    ],
     "matrix/src/operations/as-packed.ts": [
       "matrix/src/operations/cholesky.ts",
+      "matrix/src/operations/condest.ts",
       "matrix/src/operations/eig-wasm.ts",
       "matrix/src/operations/eig.ts",
       "matrix/src/operations/index.ts",
@@ -313,7 +318,6 @@
       "matrix/src/operations/qr-family.ts"
     ],
     "matrix/src/operations/lstsq.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/densify.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/cholesky.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/expm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/logm.ts": ["matrix/src/operations/index.ts"],
