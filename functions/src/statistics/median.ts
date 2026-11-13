@@ -4,7 +4,7 @@ import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
 import { arrayHasNaN } from '../utils/sort-numbers.js';
-import { medianNumbers } from '../utils/median-numbers.js';
+import { medianInPlace, medianNumbers } from '../utils/median-numbers.js';
 import {
   flattenForStatistics,
   finiteNumbers,
@@ -106,8 +106,43 @@ export const createMedian = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Complex | Unit} median
      * @private
      */
+    /**
+     * Median of a flat vector of finite numbers (a plain `number[]` or a `Float32Array` /
+     * `Float64Array`) with one pass and one copy: the values go into a `Float64Array` while
+     * the pass checks the type and NaN, then quickselect runs on that buffer.
+     * Returns `undefined` for every other input (nested arrays, matrices, other element
+     * types, NaN), which take the general path below.
+     */
+    function medianOfFlatNumbers(array: unknown[] | MatrixType | FloatTyped): number | undefined {
+      if (isFloatTyped(array)) {
+        const n = array.length;
+        if (n === 0) return undefined;
+        if (!getNumberCompare()) return undefined;
+        const work = new Float64Array(n);
+        for (let i = 0; i < n; i++) {
+          const v = array[i];
+          if (v !== v) return undefined;
+          work[i] = v;
+        }
+        return medianInPlace(work);
+      }
+      if (!Array.isArray(array)) return undefined;
+      const n = array.length;
+      if (n === 0 || !getNumberCompare()) return undefined;
+      const work = new Float64Array(n);
+      for (let i = 0; i < n; i++) {
+        const v = array[i];
+        if (typeof v !== 'number' || v !== v) return undefined;
+        work[i] = v;
+      }
+      return medianInPlace(work);
+    }
+
     function _median(array: unknown[] | MatrixType | FloatTyped): unknown {
       try {
+        const fast = medianOfFlatNumbers(array);
+        if (fast !== undefined) return fast;
+
         const flat = flattenForStatistics(array);
 
         const num = flat.length;

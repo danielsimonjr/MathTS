@@ -15,6 +15,7 @@
 import { mathTyped, neumaierCumsum } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
+import { medianInPlace } from '../utils/median-numbers.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -304,7 +305,9 @@ export const parallelStatMinMax = mathTyped('parallelStatMinMax', {
 /**
  * Parallel median with typed-function dispatch
  *
- * Note: Median requires sorting which is O(n log n)
+ * The median is one order statistic (two for an even length), so the values are selected
+ * (quickselect, O(n) average) and never sorted. Input that holds a NaN keeps the sort, which
+ * orders NaN last; quickselect has no defined result for NaN.
  */
 export const parallelStatMedian = mathTyped('parallelStatMedian', {
   // Float64Array
@@ -313,15 +316,25 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
     if (n === 0) return NaN;
     if (n === 1) return data[0];
 
-    // Sort a copy — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
-    const sorted = new Float64Array(data);
-    sortF64Dispatch(sorted);
+    // Select on a copy. NaN-free input never reaches a sort.
+    const work = new Float64Array(data);
+    let hasNaN = false;
+    for (let i = 0; i < n; i++) {
+      if (work[i] !== work[i]) {
+        hasNaN = true;
+        break;
+      }
+    }
+    if (!hasNaN) return medianInPlace(work);
+
+    // NaN sorts last. sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576).
+    sortF64Dispatch(work);
 
     const mid: i32 = Math.floor(n / 2);
     if (n % 2 === 0) {
-      return (sorted[mid - 1] + sorted[mid]) / 2;
+      return (work[mid - 1] + work[mid]) / 2;
     }
-    return sorted[mid];
+    return work[mid];
   },
 
   // Number array
