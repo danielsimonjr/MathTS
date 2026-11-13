@@ -7,6 +7,7 @@
 
 import type { WasmMemoryHandle } from './platform-types.js';
 
+/** The AssemblyScript runtime exports that header allocation uses. */
 export interface AsHeaderRuntime {
   __new(size: number, id: number): number;
   __pin(ptr: number): number;

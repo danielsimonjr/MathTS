@@ -1045,7 +1045,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 31
+      "loc": 32
     },
     {
       "file": "core/src/wasm-loader.ts",
@@ -13106,7 +13106,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 300
+      "loc": 312
     },
     {
       "file": "gpu/tests/bufferpool.test.ts",
@@ -14296,7 +14296,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 86
+      "loc": 91
     },
     {
       "file": "packages/workerpool/src/tensordot-range.ts",

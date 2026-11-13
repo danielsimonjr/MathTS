@@ -282,18 +282,30 @@ export interface GPUAdapterShape {
   requestDevice(descriptor?: GPUDeviceDescriptor): Promise<GPUDevice>;
 }
 
+/** The handle type of a GPU buffer: the global WebGPU type when the project declares it, else `GPUBufferShape`. */
 export type GPUBuffer = GlobalInstance<'GPUBuffer', GPUBufferShape>;
+/** The handle type of a compiled shader module: the global WebGPU type when the project declares it, else `GPUShaderModuleShape`. */
 export type GPUShaderModule = GlobalInstance<'GPUShaderModule', GPUShaderModuleShape>;
+/** The handle type of a pipeline layout: the global WebGPU type when the project declares it, else `GPUPipelineLayoutShape`. */
 export type GPUPipelineLayout = GlobalInstance<'GPUPipelineLayout', GPUPipelineLayoutShape>;
+/** The handle type of a bind group layout: the global WebGPU type when the project declares it, else `GPUBindGroupLayoutShape`. */
 export type GPUBindGroupLayout = GlobalInstance<'GPUBindGroupLayout', GPUBindGroupLayoutShape>;
+/** The handle type of a bind group: the global WebGPU type when the project declares it, else `GPUBindGroupShape`. */
 export type GPUBindGroup = GlobalInstance<'GPUBindGroup', GPUBindGroupShape>;
+/** The handle type of a recorded command buffer: the global WebGPU type when the project declares it, else `GPUCommandBufferShape`. */
 export type GPUCommandBuffer = GlobalInstance<'GPUCommandBuffer', GPUCommandBufferShape>;
+/** The handle type of a compute pipeline: the global WebGPU type when the project declares it, else `GPUComputePipelineShape`. */
 export type GPUComputePipeline = GlobalInstance<'GPUComputePipeline', GPUComputePipelineShape>;
+/** The handle type of a compute pass encoder: the global WebGPU type when the project declares it, else `GPUComputePassEncoderShape`. */
 export type GPUComputePassEncoder = GlobalInstance<
   'GPUComputePassEncoder',
   GPUComputePassEncoderShape
 >;
+/** The handle type of a command encoder: the global WebGPU type when the project declares it, else `GPUCommandEncoderShape`. */
 export type GPUCommandEncoder = GlobalInstance<'GPUCommandEncoder', GPUCommandEncoderShape>;
+/** The handle type of the device queue: the global WebGPU type when the project declares it, else `GPUQueueShape`. */
 export type GPUQueue = GlobalInstance<'GPUQueue', GPUQueueShape>;
+/** The handle type of a logical GPU device: the global WebGPU type when the project declares it, else `GPUDeviceShape`. */
 export type GPUDevice = GlobalInstance<'GPUDevice', GPUDeviceShape>;
+/** The handle type of a physical GPU adapter: the global WebGPU type when the project declares it, else `GPUAdapterShape`. */
 export type GPUAdapter = GlobalInstance<'GPUAdapter', GPUAdapterShape>;

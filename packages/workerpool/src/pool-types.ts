@@ -14,12 +14,14 @@ import { Transfer as WorkerpoolTransfer } from 'workerpool';
  */
 export type TransferableLike = object;
 
+/** The options of one `exec` call. */
 export interface ExecOptions<T = unknown> {
   on?: (payload: unknown) => void;
   transfer?: TransferableLike[];
   metadata?: T;
 }
 
+/** The counts of workers and tasks that a pool reports. */
 export interface PoolStats {
   totalWorkers: number;
   busyWorkers: number;
@@ -28,6 +30,7 @@ export interface PoolStats {
   activeTasks: number;
 }
 
+/** The options of a new pool. */
 export interface PoolOptions {
   minWorkers?: number | 'max';
   maxWorkers?: number;
@@ -46,6 +49,7 @@ export interface PoolOptions {
   debugPortStart?: number;
 }
 
+/** The promise that `exec` returns. It adds `cancel` and `timeout` to a promise. */
 export interface WorkerpoolPromise<T> extends Promise<T> {
   readonly resolved: boolean;
   readonly rejected: boolean;
@@ -82,4 +86,5 @@ export const Transfer: new <T = unknown>(
   message: T,
   transfer: TransferableLike[]
 ) => TransferDescriptor<T> = WorkerpoolTransfer;
+/** The type of a `Transfer` instance. */
 export type Transfer<T = unknown> = TransferDescriptor<T>;
