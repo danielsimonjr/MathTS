@@ -5,31 +5,45 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Plain constants: the suite runs under `bun test`, which has no vi.hoisted. The module
-// under test is imported dynamically below, after the mock is registered.
+// The suite runs under both bun test and vitest. vitest hoists vi.mock above every
+// top-level binding and passes importOriginal; bun does neither. So the factory reads
+// only globalThis: the counters live there, and under bun the real module is copied
+// there before the mock is registered. compat is imported dynamically, after the mock.
+type Counts = { runWithConfig: number; typed: Record<string, number> };
+type FastPathGlobal = { __fpCounts?: Counts; __fpOrig?: Record<string, unknown> };
+const g = globalThis as FastPathGlobal;
 const KEYS = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log'] as const;
-const counts = { runWithConfig: 0, typed: {} as Record<string, number> };
 
-// Bun's mock factory receives no importOriginal: load the real module and copy it first.
-const orig = { ...(await import('@danielsimonjr/mathts-functions')) } as Record<string, unknown>;
-vi.mock('@danielsimonjr/mathts-functions', () => {
+if (typeof (globalThis as { Bun?: unknown }).Bun !== 'undefined') {
+  g.__fpOrig = { ...(await import('@danielsimonjr/mathts-functions')) };
+}
+
+vi.mock('@danielsimonjr/mathts-functions', async (importOriginal?: () => Promise<unknown>) => {
+  const gg = globalThis as FastPathGlobal;
+  const orig = (gg.__fpOrig ??
+    ({ ...((await importOriginal!()) as object) } as Record<string, unknown>)) as Record<
+    string,
+    unknown
+  >;
+  const c: Counts = (gg.__fpCounts ??= { runWithConfig: 0, typed: {} });
   const out: Record<string, unknown> = { ...orig };
-  for (const k of KEYS) {
+  for (const k of ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log']) {
     out[k] = new Proxy(orig[k] as (...a: unknown[]) => unknown, {
       apply(target, thisArg, args) {
-        counts.typed[k] = (counts.typed[k] ?? 0) + 1;
+        c.typed[k] = (c.typed[k] ?? 0) + 1;
         return Reflect.apply(target, thisArg, args);
       },
     });
   }
   out.runWithConfig = (...args: unknown[]) => {
-    counts.runWithConfig += 1;
+    c.runWithConfig += 1;
     return (orig.runWithConfig as (...a: unknown[]) => unknown)(...args);
   };
   return out;
 });
 
 const { create, all } = await import('../src/index.js');
+const counts = (g.__fpCounts ??= { runWithConfig: 0, typed: {} });
 
 const total = () => counts.runWithConfig + Object.values(counts.typed).reduce((a, b) => a + b, 0);
 
