@@ -114,6 +114,30 @@ describe('#896 — cov / corrcoef rowvar option', () => {
   it('rowvar with the two-vector form throws (no silent ignore)', () => {
     expect(() => cov([1, 2, 3], [4, 5, 6], 1, { rowvar: true })).toThrow(/rowvar/);
   });
+
+  it('rowvar: false is the default layout, so it is accepted with two vectors', () => {
+    expect(cov([1, 2, 3], [4, 5, 6], 1, { rowvar: false })).toBeCloseTo(1, 12);
+    expect(cov([1, 2, 3], [4, 5, 6], 1, {})).toBeCloseTo(1, 12);
+  });
+
+  it('ragged rows throw a RangeError that names the rows, in both layouts (no NaN)', () => {
+    const ragged = [
+      [1, 2, 3],
+      [4, 5],
+    ];
+    expect(() => cov(ragged)).toThrow(RangeError);
+    expect(() => cov(ragged)).toThrow(/row 1 has 2 values.*row 0 has 3/);
+    expect(() => cov(ragged, undefined, 1, { rowvar: true })).toThrow(RangeError);
+    expect(() => corrcoef(ragged)).toThrow(RangeError);
+    expect(() => corrcoef(ragged, { rowvar: true })).toThrow(/row 1 has 2 values/);
+    // A longer later row is ragged too (the old code read only row 0).
+    expect(() =>
+      cov([
+        [1, 2],
+        [3, 4, 5],
+      ])
+    ).toThrow(RangeError);
+  });
 });
 
 describe('#899 — Distribution.sample(n)', () => {
