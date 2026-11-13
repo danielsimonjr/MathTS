@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2394
+**Total files**: 2401
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1303 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1304 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      999 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1005 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2394** |                                                                                                                |
+| **Total**     | **2401** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    30 |
 | `examples` |     7 |
-| `src`      |  1329 |
-| `tests`    |   999 |
+| `src`      |  1330 |
+| `tests`    |  1005 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,12 +48,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   125 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   573 |
-| `@danielsimonjr/mathts-functions`      |  1075 |
+| `@danielsimonjr/mathts-functions`      |  1077 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
-| `@danielsimonjr/mathts-matrix`         |   137 |
+| `@danielsimonjr/mathts-matrix`         |   138 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
-| `@danielsimonjr/mathts-parallel`       |    53 |
+| `@danielsimonjr/mathts-parallel`       |    54 |
 | `@danielsimonjr/mathts-parser`         |     5 |
 | `@danielsimonjr/mathts-plot`           |    51 |
 | `@danielsimonjr/mathts-signal`         |     4 |
@@ -64,7 +64,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-units`          |     4 |
 | `@danielsimonjr/mathts-wasm`           |    27 |
 | `@danielsimonjr/mathts-workbook`       |    67 |
-| `@danielsimonjr/mathts-workerpool`     |    27 |
+| `@danielsimonjr/mathts-workerpool`     |    30 |
 
 ## All files
 
@@ -1455,6 +1455,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/audit-2026-11-functions.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/b2-bridge-regression.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/batch-e1-signal-reexports.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/benchmark-record.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/bessel-real-order.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/betainc-order.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/bfgs.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1944,6 +1945,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/workerpool-stress.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/ws-a-api-contracts.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/ws-a-welch-wasm-frame.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/ws-r-kernel-routing.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/xgcd-factory-ring.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/zeta-extra.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/vitest.config.ts`                                                      | @danielsimonjr/mathts-functions      | config   | config      |
@@ -2090,6 +2092,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/operations/sqrtm.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/p7-jsbackend-multiply.test.ts`                                      | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/parallel-matrix.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/pool-matmul-parity.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/public-api-smoke.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/s2r-clones-batch3-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/s2r-clones-batch4-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -2128,6 +2131,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/src/multi-index.ts`                                          | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/pool-types.ts`                                           | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/tensordot-range.ts`                                      | @danielsimonjr/mathts-workerpool     | src      | build-entry |
+| `packages/workerpool/src/unary-kernels.ts`                                        | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/worker-numerics.ts`                                      | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/worker.ts`                                               | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/workerpool-browser-shim.ts`                              | @danielsimonjr/mathts-workerpool     | src      | build-entry |
@@ -2137,6 +2141,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/tests/fft-core.test.ts`                                      | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/fixtures/tensordot-legacy-kernel.ts`                   | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/index.test.ts`                                         | @danielsimonjr/mathts-workerpool     | tests    | test        |
+| `packages/workerpool/tests/matmul-row-block.test.ts`                              | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/matmul-sequential.test.ts`                             | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/parallel-dispatch.test.ts`                             | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/root-helpers-public.test.ts`                           | @danielsimonjr/mathts-workerpool     | tests    | test        |
@@ -2144,6 +2149,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/tests/s2r-clones-workerpool-chunks-oracle.test.ts`           | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/tensordot-range-legacy-pin.test.ts`                    | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/tensordot-range-pin.test.ts`                           | @danielsimonjr/mathts-workerpool     | tests    | test        |
+| `packages/workerpool/tests/unary-kernels.test.ts`                                 | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/worker-numerics.test.ts`                               | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tsdown.browser.config.ts`                                    | @danielsimonjr/mathts-workerpool     | config   | config      |
 | `packages/workerpool/vitest.config.ts`                                            | @danielsimonjr/mathts-workerpool     | config   | config      |
@@ -2165,6 +2171,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/src/WorkerPool.ts`                                                      | @danielsimonjr/mathts-parallel       | src      | build-entry |
 | `parallel/tests/benchmark.test.ts`                                                | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/chunk.test.ts`                                                    | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/ComputePool.cost-model.test.ts`                                   | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.coverage.test.ts`                                     | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.g12-regression.test.ts`                               | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.test.ts`                                              | @danielsimonjr/mathts-parallel       | tests    | test        |

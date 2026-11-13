@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2394,
+  "totalFiles": 2401,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1303,
+    "build-entry": 1304,
     "test-only": 0,
     "orphan": 0,
-    "test": 999,
+    "test": 1005,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1329,
-    "tests": 999,
+    "src": 1330,
+    "tests": 1005,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,14 +28,14 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1075,
+    "@danielsimonjr/mathts-functions": 1077,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 137,
+    "@danielsimonjr/mathts-matrix": 138,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
-    "@danielsimonjr/mathts-workerpool": 27,
-    "@danielsimonjr/mathts-parallel": 53,
+    "@danielsimonjr/mathts-workerpool": 30,
+    "@danielsimonjr/mathts-parallel": 54,
     "@danielsimonjr/mathts-parser": 5,
     "@danielsimonjr/mathts-plot": 51,
     "@danielsimonjr/mathts-signal": 4,
@@ -6911,7 +6911,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 31
+      "loc": 59
     },
     {
       "file": "functions/src/matrix/concat.ts",
@@ -6995,7 +6995,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 333
+      "loc": 314
     },
     {
       "file": "functions/src/matrix/filter.ts",
@@ -8283,7 +8283,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 267
+      "loc": 302
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -9256,7 +9256,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 911
+      "loc": 924
     },
     {
       "file": "functions/src/typed/string-derivative.ts",
@@ -9487,7 +9487,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 52
+      "loc": 98
     },
     {
       "file": "functions/src/utils/node.ts",
@@ -9740,6 +9740,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 47
+    },
+    {
+      "file": "functions/tests/benchmark-record.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 51
     },
     {
       "file": "functions/tests/bessel-real-order.test.ts",
@@ -13165,6 +13172,13 @@
       "loc": 46
     },
     {
+      "file": "functions/tests/ws-r-kernel-routing.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 214
+    },
+    {
       "file": "functions/tests/xgcd-factory-ring.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -14187,6 +14201,13 @@
       "loc": 168
     },
     {
+      "file": "matrix/tests/pool-matmul-parity.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
       "file": "matrix/tests/public-api-smoke.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -14422,14 +14443,14 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2527
+      "loc": 2497
     },
     {
       "file": "packages/workerpool/src/matmul-sequential.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 58
+      "loc": 117
     },
     {
       "file": "packages/workerpool/src/multi-index.ts",
@@ -14453,6 +14474,13 @@
       "loc": 83
     },
     {
+      "file": "packages/workerpool/src/unary-kernels.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 106
+    },
+    {
       "file": "packages/workerpool/src/worker-numerics.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
@@ -14464,7 +14492,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 994
+      "loc": 954
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
@@ -14516,6 +14544,13 @@
       "loc": 650
     },
     {
+      "file": "packages/workerpool/tests/matmul-row-block.test.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 98
+    },
+    {
       "file": "packages/workerpool/tests/matmul-sequential.test.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
@@ -14565,6 +14600,13 @@
       "loc": 122
     },
     {
+      "file": "packages/workerpool/tests/unary-kernels.test.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
+    },
+    {
       "file": "packages/workerpool/tests/worker-numerics.test.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
@@ -14590,7 +14632,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1871
+      "loc": 1911
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -14681,7 +14723,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 257
+      "loc": 263
     },
     {
       "file": "parallel/src/validate.ts",
@@ -14712,6 +14754,13 @@
       "loc": 301
     },
     {
+      "file": "parallel/tests/ComputePool.cost-model.test.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 279
+    },
+    {
       "file": "parallel/tests/ComputePool.coverage.test.ts",
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
@@ -14730,7 +14779,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 1408
+      "loc": 1413
     },
     {
       "file": "parallel/tests/deterministic.test.ts",
@@ -14807,7 +14856,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 251
+      "loc": 255
     },
     {
       "file": "parallel/tests/ops-bitwise.test.ts",
@@ -14884,7 +14933,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 30
     },
     {
       "file": "parallel/tests/strategies/threshold-extended.test.ts",
@@ -14947,7 +14996,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 165
+      "loc": 167
     },
     {
       "file": "parallel/vitest.config.ts",
@@ -16200,7 +16249,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 519
+      "loc": 540
     },
     {
       "file": "tools/benchmark/wasm/run.ts",
