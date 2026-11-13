@@ -12,7 +12,9 @@
  * Manifest entry keys: `name`, `source`, `mathTypedPattern` (where the signature block starts),
  * `fallback` (overload lines appended last, for the `'...'` rest signature) and `sigTypes`
  * (a typed-function type name to a public type, for this export only). A `sigTypes` name that
- * matches no signature part of the export is an error.
+ * matches no signature part of the export is an error. It sets parameter types of the keys that
+ * the generator reads as written. The element-wise `Array | Matrix` key follows the container
+ * rule and ignores it.
  *
  * `--check` fails when the generated file, or the public option aliases, drift.
  * `--root=<dir>` reads the manifest and the sources from another package folder.
