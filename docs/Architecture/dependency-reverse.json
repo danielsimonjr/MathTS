@@ -1730,11 +1730,18 @@
     ],
     "functions/src/factories/evaluate.ts": [
       "functions/src/cas-integration.ts",
+      "functions/src/cas/elementary-solve.ts",
       "functions/src/help.ts",
       "functions/src/index.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
       "functions/src/subpath-evaluate.ts",
       "functions/src/typed/cas.ts"
+    ],
+    "functions/src/cas/render-polynomial.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/layer3.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
+      "functions/src/typed/polynomial-ideal.ts"
     ],
     "functions/src/typed/polynomial-ideal.ts": [
       "functions/src/cas-integration.ts",

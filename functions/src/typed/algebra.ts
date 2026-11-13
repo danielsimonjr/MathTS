@@ -817,10 +817,12 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
  *
  * **Polynomials in one OR MORE variables** (integer/non-negative-integer
  * powers, no function calls, division only by numeric constants) are expanded
- * EXACTLY via `polyFromExpression` + `polyToString`, collecting like terms:
- * `expand('(x+1)^3')` → `'1*x^3 + 3*x^2 + 3*x + 1'`;
- * `expand('(x+y)^2')` → `'1*y^2 + 2*x*y + 1*x^2'`;
- * `expand('(x+y)*(x-y)')` → `'-1*y^2 + 1*x^2'` (the `x*y` terms cancel).
+ * EXACTLY via `polyFromExpression` + `polyToString`, collecting like terms. The text is the
+ * canonical polynomial form (see `renderPolynomial`): descending lexicographic order, the
+ * first variable most significant, and no unit coefficient, as in SymPy:
+ * `expand('(x+1)^3')` → `'x^3 + 3*x^2 + 3*x + 1'`;
+ * `expand('(x+y)^2')` → `'x^2 + 2*x*y + y^2'`;
+ * `expand('(x+y)*(x-y)')` → `'x^2 - y^2'` (the `x*y` terms cancel).
  *
  * Everything else (function calls like `sin`, non-integer exponents, division
  * by a variable) falls back to the original regex-based distributor below,
@@ -832,8 +834,8 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
  * @example
  * ```typescript
  * expand('(a+b)*(c+d)'); // 'a*c + a*d + b*c + b*d'
- * expand('(x+1)^3');     // '1*x^3 + 3*x^2 + 3*x + 1'
- * expand('(x+y)^2');     // '1*y^2 + 2*x*y + 1*x^2'
+ * expand('(x+1)^3');     // 'x^3 + 3*x^2 + 3*x + 1'
+ * expand('(x+y)^2');     // 'x^2 + 2*x*y + y^2'
  * ```
  */
 export function expand(expr: string): string {
@@ -1003,11 +1005,11 @@ function factorMultivariate(expr: string, vars: string[]): { text: string; count
  * factored **completely over ℤ/ℚ** into irreducible factors. A fast path (see
  * {@link factorMultivariate}) handles the common cases byte-for-byte — integer
  * content, common-monomial extraction, monomial difference-of-squares
- * (`x^2*y + x*y^2 → 'x*y*(1*y + 1*x)'`, `4*x^2 - 9*y^2 → '(2*x - 3*y)*(2*x + 3*y)'`).
+ * (`x^2*y + x*y^2 → 'x*y*(x + y)'`, `4*x^2 - 9*y^2 → '(2*x - 3*y)*(2*x + 3*y)'`).
  * Anything the fast path leaves whole or only partially factored is routed
  * through the Kronecker-substitution engine ({@link factorMultivariateString}),
  * which reduces to the univariate ℤ engine and recombines by exact division
- * (`x^2 + 3*x*y + 4*x + 2*y^2 + 5*y + 3 → (1*x + 1*y + 1)*(1*x + 2*y + 3)`). The
+ * (`x^2 + 3*x*y + 4*x + 2*y^2 + 5*y + 3 → (x + y + 1)*(x + 2*y + 3)`). The
  * engine declines (and the caller keeps the fast-path/legacy output) beyond a
  * substituted-degree cap; irreducible multivariate polynomials (`x^2 + y^2`) are
  * returned unchanged. Wang/EEZ is a future performance upgrade, not a

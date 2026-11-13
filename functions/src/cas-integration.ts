@@ -38,6 +38,7 @@
 import { parse as _parseRaw } from './factories/evaluate.js';
 import { evaluate as _evaluateRaw } from './factories/evaluate.js';
 import { apart, variables } from './typed/algebra.js';
+import { renderPolynomial } from './cas/render-polynomial.js';
 import { polyFromExpression, polyToDenseCoefficients } from './typed/polynomial-ideal.js';
 import { integrateRationalFunction } from './cas/rational-integrate.js';
 
@@ -273,22 +274,12 @@ function derivDense(c: number[]): number[] {
   return c.slice(1).map((v, i) => v * (i + 1));
 }
 
-/** Format a dense ascending-coefficient polynomial as a string (highest power first). */
+/** Format a dense ascending-coefficient polynomial in the canonical polynomial form. */
 function densePolyToStr(coeffs: number[], x: string): string {
-  const parts: string[] = [];
-  for (let i = coeffs.length - 1; i >= 0; i--) {
-    const c = coeffs[i];
-    if (Math.abs(c) < 1e-12) continue;
-    if (i === 0) parts.push(num(c));
-    else {
-      const v = i === 1 ? x : `${x}^${i}`;
-      if (Math.abs(c - 1) < 1e-12) parts.push(v);
-      else if (Math.abs(c + 1) < 1e-12) parts.push(`-${v}`);
-      else parts.push(`${num(c)}*${v}`);
-    }
-  }
-  if (parts.length === 0) return '0';
-  return parts.join(' + ').replace(/\+ -/g, '- ');
+  return renderPolynomial(
+    coeffs.flatMap((c, i) => (Math.abs(c) < 1e-12 ? [] : [{ exps: [i], coeff: num(c) }])),
+    [x]
+  );
 }
 
 /** True when a dense polynomial is identically zero. */

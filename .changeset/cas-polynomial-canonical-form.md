@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': minor
+---
+
+**Breaking (output text):** every CAS function that returns a polynomial as text now writes the one canonical form: descending lexicographic order (the first variable is the most significant) and no unit coefficient. `expand('(x+1)^2')` is `x^2 + 2*x + 1`; it was `1 + 2*x + 1*x^2` (#887). The same text now comes from `casExpand`, `factor`, `cancel`, `together`, `apart` and `groebnerBasis`: `expand('(x+y)^2')` is `x^2 + 2*x*y + y^2`, `factor('x^2*y + x*y^2')` is `x*y*(x + y)`, and `groebnerBasis(['x^2-y', 'x*y-1'], ['x', 'y'])` is `['x - y^2', 'y^3 - 1']`. The rational-function integrators share the printer too; a leading negative term there prints `-x^2 + 1`, not `- x^2 + 1`. Before, four printers each had their own style, and one of them (`polyToString`) printed the terms in the order of its input, so `expand` and `cancel` gave opposite orders. Code that compares these strings with the old text must change. The value of each result is the same.

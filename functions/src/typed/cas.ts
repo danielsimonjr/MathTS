@@ -2829,7 +2829,7 @@ export function casDerivative(
  *
  * Delegates to the real polynomial engine {@link algebraExpand} (`expand` from
  * `algebra.ts`): polynomials in one OR MORE variables are expanded EXACTLY
- * (`'(x+1)^2'` → `'1*x^2 + 2*x + 1'`, `'(x+y)^2'` → `'1*y^2 + 2*x*y + 1*x^2'`).
+ * (`'(x+1)^2'` → `'x^2 + 2*x + 1'`, `'(x+y)^2'` → `'x^2 + 2*x*y + y^2'`).
  * Non-polynomial pieces fall back to that engine's regex distributor.
  *
  * (Formerly a crude string stub that emitted uncollected products like
@@ -2839,8 +2839,8 @@ export function casDerivative(
  * @returns Expanded expression string
  *
  * @example
- * casExpand('(x+1)^2')     // => '1*x^2 + 2*x + 1'
- * casExpand('(x+y)*(x-y)') // => '-1*y^2 + 1*x^2'
+ * casExpand('(x+1)^2')     // => 'x^2 + 2*x + 1'
+ * casExpand('(x+y)*(x-y)') // => 'x^2 - y^2'
  */
 export function casExpand(expr: string | MathNode): string;
 /**

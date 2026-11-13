@@ -14,6 +14,7 @@
  */
 
 import { bigintGcd } from './integer-poly.js';
+import { renderPolynomial } from '../../cas/render-polynomial.js';
 import { polyFromExpression, type Poly } from '../polynomial-ideal.js';
 
 /** Sparse multivariate polynomial over ℤ. */
@@ -296,24 +297,14 @@ export function fromAlgebraExpr(expr: string, vars: string[]): MultiPoly | null 
 }
 
 /**
- * Renders `p` back to an expression string in the SAME format as
- * `polynomial-ideal.polyToString` (term order, `*`/`^` spacing, `+ -`
- * collapsing, `1*x` unit-coefficient style) — but rendered directly from
- * `bigint` coefficients so values above 2^53 stay exact. Routing through
- * `polyToString` would require `Number(v)`, which silently rounds.
+ * Renders `p` back to an expression string in the canonical polynomial form
+ * ({@link renderPolynomial}), the same text as `polynomial-ideal.polyToString` gives for the
+ * same polynomial. The coefficients are written directly from `bigint`, so a value above
+ * 2^53 stays exact; routing through `polyToString` would need `Number(v)`, which rounds.
  */
 export function toAlgebraString(p: MultiPoly): string {
-  if (p.terms.size === 0) return '0';
-  const fmt = (c: bigint): string => c.toString();
-  const terms = [...p.terms]
-    .map(([k, v]) => ({ exps: unkey(k), coeff: v }))
-    .reverse()
-    .map(({ exps, coeff }) => {
-      const varPart = exps
-        .map((e, i) => (e === 0 ? '' : e === 1 ? p.vars[i] : `${p.vars[i]}^${e}`))
-        .filter(Boolean)
-        .join('*');
-      return varPart ? `${fmt(coeff)}*${varPart}` : fmt(coeff);
-    });
-  return terms.join(' + ').replace(/\+ -/g, '- ');
+  return renderPolynomial(
+    [...p.terms].map(([k, v]) => ({ exps: unkey(k), coeff: v.toString() })),
+    p.vars
+  );
 }

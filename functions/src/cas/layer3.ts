@@ -26,6 +26,7 @@ import {
 import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
 import { ratAdd, ratSub, ratMul, ratDiv, ratFromBigint, RAT_ZERO, type Rat } from './rat.js';
 import { renderCoeffTimes } from './render-coeff-times.js';
+import { renderPolynomial } from './render-polynomial.js';
 
 function ratEq(a: Rat, b: Rat): boolean {
   return a.num === b.num && a.den === b.den;
@@ -36,22 +37,13 @@ function joinTerms(parts: string[]): string {
   return parts.join(' + ').replace(/\+ -/g, '- ');
 }
 
+/** Render a dense ascending `bigint` polynomial in the canonical polynomial form. */
 function renderPoly(p: IntPoly, v: string): string {
   const t = trim(p);
-  if (t.length === 0) return '0';
-  const parts: string[] = [];
-  for (let i = t.length - 1; i >= 0; i -= 1) {
-    const c = t[i];
-    if (c === 0n) continue;
-    const sign = c < 0n ? '-' : parts.length === 0 ? '' : '+';
-    const abs = c < 0n ? -c : c;
-    let term: string;
-    if (i === 0) term = `${abs}`;
-    else if (i === 1) term = abs === 1n ? v : `${abs}*${v}`;
-    else term = abs === 1n ? `${v}^${i}` : `${abs}*${v}^${i}`;
-    parts.push(parts.length === 0 && sign === '' ? term : `${sign} ${term}`);
-  }
-  return parts.join(' ').replace(/^\+ /, '');
+  return renderPolynomial(
+    t.map((c, i) => ({ exps: [i], coeff: c.toString() })),
+    [v]
+  );
 }
 
 /** Bareiss fraction-free determinant over ℤ. */
