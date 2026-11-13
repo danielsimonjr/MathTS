@@ -64,10 +64,10 @@ console.log(result.length, parallelized); // 65536 true
 await pool.terminate();
 ```
 
-In a Vite project you can pass an explicit URL. The `?url` suffix is resolved by Vite, so this
-fence is an illustration: it needs `"types": ["vite/client"]` in `tsconfig.json`.
+In a Vite project you can pass an explicit URL. Vite resolves the `?url` suffix; add
+`"types": ["vite/client"]` to `tsconfig.json` so that TypeScript accepts the import.
 
-```ts example
+```ts browser
 import { ComputePool } from '@danielsimonjr/mathts-parallel';
 import workerUrl from '@danielsimonjr/mathts-workerpool/worker?url';
 

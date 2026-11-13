@@ -112,6 +112,12 @@ export const DEFAULT_BUNDLES = [
     platform: 'node',
   },
   {
+    label: 'functions/evaluate three names',
+    import:
+      "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
+    platform: 'node',
+  },
+  {
     label: 'functions barrel evaluate',
     import: "import { evaluate } from '@danielsimonjr/mathts-functions';",
     platform: 'node',
@@ -141,7 +147,12 @@ export const DEFAULT_BUNDLES = [
  */
 function bundleBytes(root, bundle) {
   const names = [...bundle.import.matchAll(/import\s*\{([^}]+)\}/g)].flatMap((m) =>
-    m[1].split(',').map((part) => part.trim().split(/\s+as\s+/i).pop())
+    m[1].split(',').map((part) =>
+      part
+        .trim()
+        .split(/\s+as\s+/i)
+        .pop()
+    )
   );
   const result = buildSync({
     stdin: {
@@ -252,7 +263,8 @@ export function compareBudget(live, budget) {
   const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b.bytes]));
   for (const expected of budget.bundles ?? []) {
     const actual = liveBundles.get(expected.label);
-    if (actual === undefined) failures.push(`bundle ${expected.label}: in the budget but not measured`);
+    if (actual === undefined)
+      failures.push(`bundle ${expected.label}: in the budget but not measured`);
     else if (exceedsTolerance(expected.bytes, actual, budget.tolerance)) {
       failures.push(`bundle ${expected.label}: ${actual} bytes, budget ${expected.bytes}`);
     }
@@ -284,11 +296,13 @@ export function main(args) {
   const live = measureBudget(
     root,
     JSON.parse(readFileSync(lockPath, 'utf8')),
-    (committed?.bundles ?? (flagValue(args, '--root') ? [] : DEFAULT_BUNDLES)).map(({ label, import: line, platform }) => ({
-      label,
-      import: line,
-      platform,
-    }))
+    (committed?.bundles ?? (flagValue(args, '--root') ? [] : DEFAULT_BUNDLES)).map(
+      ({ label, import: line, platform }) => ({
+        label,
+        import: line,
+        platform,
+      })
+    )
   );
 
   if (args.includes('--write')) {

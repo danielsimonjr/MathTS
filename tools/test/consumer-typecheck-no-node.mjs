@@ -13,13 +13,13 @@
  *
  * Run it with `node` (never `bun run`): `[run] bun = true` would put it on Bun.
  */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   entrySpecifiers,
   installInto,
   installedVersion,
+  makeScratch,
   packWorkspace,
   publicPackages,
   readEntryPolicy,
@@ -35,7 +35,7 @@ const packages = publicPackages();
 const policy = readEntryPolicy();
 if (!skipBuild) run('bun', ['run', 'build'], repoRoot);
 
-const work = mkdtempSync(join(tmpdir(), 'mathts-no-node-'));
+const work = makeScratch('mathts-no-node-', { keep });
 const consumer = join(work, 'consumer');
 
 /**
@@ -58,20 +58,26 @@ function assertMathtsInstalledFromTarballs(consumerDir, packedNames) {
   for (const name of packedNames) {
     const resolved = installed.get(name);
     if (resolved === undefined) problems.push(`${name}: not present in package-lock after install`);
-    else if (!resolved.startsWith('file:')) problems.push(`${name}: expected file: tarball (got ${resolved})`);
+    else if (!resolved.startsWith('file:'))
+      problems.push(`${name}: expected file: tarball (got ${resolved})`);
   }
   for (const [name, resolved] of installed) {
-    if (!resolved.startsWith('file:')) problems.push(`${name}: resolved from registry (${resolved})`);
+    if (!resolved.startsWith('file:'))
+      problems.push(`${name}: resolved from registry (${resolved})`);
   }
   if (problems.length > 0) {
-    throw new Error(`consumer-typecheck-no-node: workspace packages must come from tarballs:\n${problems.join('\n')}`);
+    throw new Error(
+      `consumer-typecheck-no-node: workspace packages must come from tarballs:\n${problems.join('\n')}`
+    );
   }
 }
 
 let exitCode = 1;
 try {
   const tgz = packWorkspace(packages, join(work, 'tarballs'));
-  const specifiers = entrySpecifiers(packages, { types: true }).filter((s) => !(s in policy.nodeOnly));
+  const specifiers = entrySpecifiers(packages, { types: true }).filter(
+    (s) => !(s in policy.nodeOnly)
+  );
 
   mkdirSync(consumer);
   writeFileSync(
@@ -120,6 +126,5 @@ try {
   }
 } finally {
   if (keep) console.log(`consumer-typecheck-no-node: kept ${work}`);
-  else rmSync(work, { recursive: true, force: true });
 }
 process.exit(exitCode);

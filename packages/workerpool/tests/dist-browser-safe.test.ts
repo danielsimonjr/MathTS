@@ -21,6 +21,19 @@ describe('@danielsimonjr/mathts-workerpool bundles are browser-safe', () => {
   it('has the package entry and the worker entry', () => {
     expect(bundles).toContain('index.js');
     expect(bundles).toContain('worker.js');
+    expect(bundles).toContain('browser.js');
+    expect(bundles).toContain('worker.browser.js');
+  });
+
+  it('worker.browser.js is a classic script: the pool starts it with `new Worker(url)`', () => {
+    // A worker started without `{ type: 'module' }` fails on an `import` or `export` statement
+    // ("Cannot use import statement outside a module"), and a shared chunk next to it would
+    // not travel with a bundler that copies the worker file as an asset (Vite `?url`).
+    // `tests/browser/compute-pool-worker.browser.test.ts` runs the file in Chromium.
+    const code = readFileSync(join(distDir, 'worker.browser.js'), 'utf8');
+    expect(code).not.toMatch(/^\s*import\s[^\n]*\sfrom\s/m);
+    expect(code).not.toMatch(/^\s*import\s*["']/m);
+    expect(code).not.toMatch(/^\s*export\s/m);
   });
 
   it.each(bundles)('%s has no module-level node:module import', (name) => {

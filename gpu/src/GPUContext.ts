@@ -178,7 +178,7 @@ export class GPUContext {
       // Request device with required features and limits
       const deviceDescriptor: GPUDeviceDescriptor = {
         label: this.label,
-        // The public option type is `string[]` (no WebGPU types needed to name it).
+        // The public option type is `string[]`: naming it needs no WebGPU types.
         requiredFeatures: (options.requiredFeatures ||
           []) as GPUDeviceDescriptor['requiredFeatures'],
         requiredLimits: options.requiredLimits || {},

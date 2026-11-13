@@ -41,20 +41,11 @@
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 import { browserBundleProblems, loadProblems } from './consumer-checks.mjs';
-import { entrySpecifiers, readEntryPolicy } from './consumer-env.mjs';
+import { entrySpecifiers, makeScratch, readEntryPolicy } from './consumer-env.mjs';
 import { fenceProblems } from './readme-fences.mjs';
 
 /**
@@ -195,7 +186,7 @@ if (packages.length === 0) {
 
 if (!flag('skip-build')) run('bun', ['run', 'build'], repoRoot);
 
-const work = mkdtempSync(join(tmpdir(), 'mathts-consumer-'));
+const work = makeScratch('mathts-consumer-', { keep: flag('keep') });
 const tarballs = join(work, 'tarballs');
 const consumer = join(work, 'consumer');
 let exitCode = 1;
@@ -334,7 +325,10 @@ try {
   const loadIssues = loadProblems(consumer, jsEntries, policy);
   const browserEntries = jsEntries.filter((s) => !(s in policy.notBrowserFacing));
   const bundle = browserBundleProblems(consumer, browserEntries);
-  const fences = fenceProblems(consumer, packages.map(({ pkg }) => pkg.name));
+  const fences = fenceProblems(
+    consumer,
+    packages.map(({ pkg }) => pkg.name)
+  );
   const extra = [...loadIssues, ...bundle.problems, ...fences.problems];
   console.log(
     `consumer-typecheck: loaded ${jsEntries.length} entries by import() and require(), ` +
@@ -356,6 +350,5 @@ try {
   }
 } finally {
   if (flag('keep')) console.log(`consumer-typecheck: kept ${work}`);
-  else rmSync(work, { recursive: true, force: true });
 }
 process.exit(exitCode);

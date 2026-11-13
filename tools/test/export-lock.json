@@ -11353,13 +11353,25 @@
       "GPUBindGroup": {
         "kind": "type"
       },
+      "GPUBindGroupDescriptor": {
+        "kind": "type"
+      },
       "GPUBindGroupEntry": {
         "kind": "type"
       },
       "GPUBindGroupLayout": {
         "kind": "type"
       },
+      "GPUBindGroupLayoutDescriptor": {
+        "kind": "type"
+      },
+      "GPUBindGroupLayoutEntry": {
+        "kind": "type"
+      },
       "GPUBuffer": {
+        "kind": "type"
+      },
+      "GPUBufferDescriptor": {
         "kind": "type"
       },
       "GPUBufferUsageFlags": {
@@ -11374,7 +11386,19 @@
       "GPUCommandEncoder": {
         "kind": "type"
       },
+      "GPUCompilationInfo": {
+        "kind": "type"
+      },
+      "GPUCompilationMessage": {
+        "kind": "type"
+      },
+      "GPUComputePassEncoder": {
+        "kind": "type"
+      },
       "GPUComputePipeline": {
+        "kind": "type"
+      },
+      "GPUComputePipelineDescriptor": {
         "kind": "type"
       },
       "GPUContext": {
@@ -11389,13 +11413,31 @@
       "GPUDevice": {
         "kind": "type"
       },
+      "GPUDeviceDescriptor": {
+        "kind": "type"
+      },
+      "GPUDeviceLostInfo": {
+        "kind": "type"
+      },
       "GPUDeviceLostReason": {
+        "kind": "type"
+      },
+      "GPUError": {
+        "kind": "type"
+      },
+      "GPUErrorFilter": {
         "kind": "type"
       },
       "GPUFeatureName": {
         "kind": "type"
       },
+      "GPUObjectBase": {
+        "kind": "type"
+      },
       "GPUPipelineLayout": {
+        "kind": "type"
+      },
+      "GPUPipelineLayoutDescriptor": {
         "kind": "type"
       },
       "GPUQueue": {
@@ -11407,13 +11449,25 @@
       "GPUShaderModule": {
         "kind": "type"
       },
+      "GPUShaderModuleDescriptor": {
+        "kind": "type"
+      },
+      "GPUSupportedFeatures": {
+        "kind": "type"
+      },
+      "GPUSupportedLimits": {
+        "kind": "type"
+      },
+      "GPUUncapturedErrorEvent": {
+        "kind": "type"
+      },
+      "GPUUncapturedErrorHandler": {
+        "kind": "type"
+      },
       "GPU_MIN_ELEMENTS": {
         "kind": "number"
       },
       "GlobalGPUInitResult": {
-        "kind": "type"
-      },
-      "OpaqueGpuHandle": {
         "kind": "type"
       },
       "PipelineConfig": {

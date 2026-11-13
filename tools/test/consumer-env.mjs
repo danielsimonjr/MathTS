@@ -7,7 +7,8 @@
  * (`registry: true`), which reproduces what an npm user receives today.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
@@ -17,7 +18,8 @@ export const shell = process.platform === 'win32';
 
 /** Path of the entry-point policy; `MATHTS_CONSUMER_ENTRIES` overrides it. */
 export const ENTRIES_PATH =
-  process.env.MATHTS_CONSUMER_ENTRIES ?? fileURLToPath(new URL('./consumer-entries.json', import.meta.url));
+  process.env.MATHTS_CONSUMER_ENTRIES ??
+  fileURLToPath(new URL('./consumer-entries.json', import.meta.url));
 
 /**
  * Read the entry-point policy. Fails loudly when the file is missing or unreadable.
@@ -25,6 +27,56 @@ export const ENTRIES_PATH =
  */
 export function readEntryPolicy() {
   return JSON.parse(readFileSync(ENTRIES_PATH, 'utf8'));
+}
+
+/**
+ * Create a scratch folder that is removed when the process ends.
+ *
+ * A folder of the same `prefix` that is older than `MATHTS_SCRATCH_STALE_HOURS` (default 6) is a
+ * leftover of a killed run (a CI timeout, a hard kill) and is removed first. The new folder is
+ * removed on normal exit, on `process.exit()`, on an uncaught error and on SIGINT or SIGTERM.
+ * A SIGKILL cannot be handled; the sweep of the next run removes that folder.
+ * `MATHTS_SCRATCH_ROOT` replaces the parent folder (default: the OS temp folder).
+ * @param {string} prefix folder name prefix, for example `mathts-packed-`
+ * @param {{ keep?: boolean }} [opts] `keep: true` leaves the folder in place
+ * @returns {string} absolute folder path
+ */
+export function makeScratch(prefix, { keep = false } = {}) {
+  const root = process.env.MATHTS_SCRATCH_ROOT ?? tmpdir();
+  const staleHours = Number(process.env.MATHTS_SCRATCH_STALE_HOURS ?? 6);
+  if (!Number.isFinite(staleHours) || staleHours < 0) {
+    throw new Error(
+      `MATHTS_SCRATCH_STALE_HOURS must be a number of hours >= 0, got '${process.env.MATHTS_SCRATCH_STALE_HOURS}'`
+    );
+  }
+  const staleMs = staleHours * 3_600_000;
+  for (const name of readdirSync(root).filter((n) => n.startsWith(prefix))) {
+    const old = join(root, name);
+    try {
+      if (Date.now() - statSync(old).mtimeMs > staleMs)
+        rmSync(old, { recursive: true, force: true });
+    } catch (err) {
+      console.error(`scratch sweep: cannot remove ${old}: ${err.message}`);
+    }
+  }
+  const dir = mkdtempSync(join(root, prefix));
+  if (!keep) {
+    const remove = () => {
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch (err) {
+        console.error(`scratch cleanup: cannot remove ${dir}: ${err.message}`);
+      }
+    };
+    process.on('exit', remove);
+    for (const [signal, code] of [
+      ['SIGINT', 130],
+      ['SIGTERM', 143],
+    ]) {
+      process.on(signal, () => process.exit(code));
+    }
+  }
+  return dir;
 }
 
 /**
@@ -62,8 +114,12 @@ export function entrySpecifiers(packages, { types = false } = {}) {
   return packages.flatMap(({ pkg }) => {
     const exp = pkg.exports ?? { '.': { types: pkg.types, import: pkg.main } };
     return Object.entries(exp)
-      .filter(([sub, target]) => sub !== './package.json' && typeof target === 'object' && target !== null)
-      .filter(([, target]) => (types ? Boolean(target.types) : String(target.import).endsWith('.js')))
+      .filter(
+        ([sub, target]) => sub !== './package.json' && typeof target === 'object' && target !== null
+      )
+      .filter(([, target]) =>
+        types ? Boolean(target.types) : String(target.import).endsWith('.js')
+      )
       .map(([sub]) => (sub === '.' ? pkg.name : `${pkg.name}/${sub.slice(2)}`));
   });
 }
@@ -77,7 +133,11 @@ export function entrySpecifiers(packages, { types = false } = {}) {
 export function packWorkspace(packages, dest) {
   mkdirSync(dest, { recursive: true });
   for (const { dir } of packages) {
-    run('npm', ['pack', '--ignore-scripts', '--silent', '--pack-destination', dest], join(repoRoot, dir));
+    run(
+      'npm',
+      ['pack', '--ignore-scripts', '--silent', '--pack-destination', dest],
+      join(repoRoot, dir)
+    );
   }
   return readdirSync(dest)
     .filter((f) => f.endsWith('.tgz'))
@@ -99,7 +159,8 @@ export function installInto(consumer, specs) {
  * @returns {string}
  */
 export function installedVersion(name) {
-  return JSON.parse(readFileSync(join(repoRoot, 'node_modules', name, 'package.json'), 'utf8')).version;
+  return JSON.parse(readFileSync(join(repoRoot, 'node_modules', name, 'package.json'), 'utf8'))
+    .version;
 }
 
 /**

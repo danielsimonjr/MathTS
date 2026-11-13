@@ -4,7 +4,8 @@
  * A code fence of a published README carries a runtime tag after its language:
  *
  *     ```ts node       runs in the tarball consumer on Node (and is type-checked)
- *     ```ts browser    type-checked with the DOM lib only; never run
+ *     ```ts browser    type-checked with the DOM lib and an ambient `*?url` module (the part of
+ *                      `vite/client` that a bundler example needs); never run
  *     ```ts example    an illustration that has no setup; skipped, but the tag is required
  *
  * GitHub and npm read only the first word of the info string, so the tag does not change how
@@ -36,7 +37,12 @@ export function extractFences(markdown) {
     const start = i + 1;
     const body = [];
     for (i = start; i < lines.length && !/^```\s*$/.test(lines[i]); i++) body.push(lines[i]);
-    fences.push({ lang: open[1].toLowerCase(), tag: open[2] ? open[2].toLowerCase() : null, code: body.join('\n'), line: start });
+    fences.push({
+      lang: open[1].toLowerCase(),
+      tag: open[2] ? open[2].toLowerCase() : null,
+      code: body.join('\n'),
+      line: start,
+    });
   }
   return fences;
 }
@@ -61,7 +67,9 @@ export function fenceProblems(consumer, packageNames) {
       if (!CODE_LANGS.has(fence.lang)) continue;
       const where = `${name} README line ${fence.line}`;
       if (fence.tag === null || !FENCE_TAGS.has(fence.tag)) {
-        problems.push(`${where}: ${fence.lang} fence needs a runtime tag (node, browser or example)`);
+        problems.push(
+          `${where}: ${fence.lang} fence needs a runtime tag (node, browser or example)`
+        );
         continue;
       }
       counts[fence.tag]++;
@@ -75,6 +83,14 @@ export function fenceProblems(consumer, packageNames) {
   if (typed.length === 0) return { problems, counts };
 
   // 1. Type check every runnable fence (DOM lib for all; browser fences may use `document`).
+  //    `*?url` is the Vite asset import: Vite resolves it at build time and `vite/client` types
+  //    it as a string. The ambient declaration says the same, so no Vite install is needed.
+  writeFileSync(
+    join(dir, 'ambient.d.ts'),
+    ["declare module '*?url' {", '  const url: string;', '  export default url;', '}', ''].join(
+      '\n'
+    )
+  );
   writeFileSync(
     join(dir, 'tsconfig.json'),
     JSON.stringify({
@@ -90,12 +106,16 @@ export function fenceProblems(consumer, packageNames) {
         noUnusedLocals: false,
         resolveJsonModule: true,
       },
-      files: typed.map((t) => `${t.base}.mts`),
+      files: ['ambient.d.ts', ...typed.map((t) => `${t.base}.mts`)],
     })
   );
   let out = '';
   try {
-    out = execFileSync('npx', ['--no-install', 'tsc', '-p', dir], { cwd: consumer, encoding: 'utf8', shell: process.platform === 'win32' });
+    out = execFileSync('npx', ['--no-install', 'tsc', '-p', dir], {
+      cwd: consumer,
+      encoding: 'utf8',
+      shell: process.platform === 'win32',
+    });
   } catch (err) {
     out = `${err.stdout ?? ''}${err.stderr ?? ''}`;
     if (!/error TS\d+/.test(out)) throw err;
@@ -103,7 +123,9 @@ export function fenceProblems(consumer, packageNames) {
   for (const d of out.split(/\r?\n(?=\S)/).filter((x) => /error TS\d+/.test(x))) {
     const m = /(?:^|[\\/])([\w@.-]+)\.mts\((\d+),/.exec(d);
     const hit = m && typed.find((t) => t.base === m[1]);
-    problems.push(`${hit?.where ?? 'fence'} does not type-check: ${d.split(/\r?\n/)[0].replace(/^.*?\): /, '')}`);
+    problems.push(
+      `${hit?.where ?? 'fence'} does not type-check: ${d.split(/\r?\n/)[0].replace(/^.*?\): /, '')}`
+    );
   }
 
   // 2. Run every node fence: transpile with esbuild, run with node.
@@ -124,7 +146,9 @@ export function fenceProblems(consumer, packageNames) {
       // A fence that opens worker threads may leave the process alive; the fence must end it.
       execFileSync(process.execPath, [js], { cwd: consumer, stdio: 'pipe', timeout: 90_000 });
     } catch (err) {
-      const msg = `${err.stderr ?? ''}`.split(/\r?\n/).filter((l) => /Error|error/.test(l))[0] ?? String(err.message);
+      const msg =
+        `${err.stderr ?? ''}`.split(/\r?\n/).filter((l) => /Error|error/.test(l))[0] ??
+        String(err.message);
       problems.push(`${t.where} throws on Node: ${msg.trim().slice(0, 240)}`);
     }
   }

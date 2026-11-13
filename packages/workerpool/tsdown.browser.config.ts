@@ -10,7 +10,8 @@ import { defineConfig } from 'tsdown';
  * `src/js/index.js`, which requires `worker_threads`, `os` and `child_process`. The bundle
  * fails to resolve them, or it succeeds only with stubs that throw on first use. This build
  * aliases `workerpool` to its prebuilt browser file (`dist/workerpool.js`) and inlines it, so
- * the browser entries of the package import no Node builtin. `platform: 'browser'` makes the
+ * the browser entries of the package import no Node builtin. `worker.browser.js` is a classic
+ * (IIFE) script with no imports, because the pool starts it with `new Worker(url)`. `platform: 'browser'` makes the
  * bundler replace the Node builtins that file still requires (behind `platform === 'node'`
  * checks) with empty modules, instead of a `node:module` `createRequire` import. `package.json` `exports` names
  * these files under the `browser` condition.
@@ -47,9 +48,8 @@ const browserBuildPlugin = {
   },
 };
 
-export default defineConfig({
-  entry: { browser: 'src/index.ts', 'worker.browser': 'src/worker.ts' },
-  format: 'esm',
+/** Options of both browser builds. */
+const common = {
   platform: 'browser',
   clean: false,
   dts: false,
@@ -59,4 +59,20 @@ export default defineConfig({
   plugins: [browserBuildPlugin],
   noExternal: ['workerpool'],
   outputOptions: { comments: { legal: true, annotation: true, jsdoc: false } },
-});
+} as const;
+
+export default defineConfig([
+  // The pool: an ES module that a bundler (or a `<script type="module">`) imports.
+  { ...common, entry: { browser: 'src/index.ts' }, format: 'esm' },
+  // The worker: ONE self-contained classic script (no `import`, no shared chunk). The pool
+  // starts it with `new Worker(url)`, which is a classic worker, so an ES module file with
+  // `import` statements fails there with "Cannot use import statement outside a module". A
+  // bundler that copies the file as an asset (Vite `?url`) also copies nothing else with it.
+  {
+    ...common,
+    entry: { 'worker.browser': 'src/worker.ts' },
+    format: 'iife',
+    // tsdown names an IIFE entry `<name>.iife.js`; `exports` names `worker.browser.js`.
+    outputOptions: { ...common.outputOptions, entryFileNames: '[name].js' },
+  },
+]);

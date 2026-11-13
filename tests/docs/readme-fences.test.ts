@@ -2,6 +2,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { transformSync } from 'esbuild';
 import { describe, expect, it } from 'vitest';
+// The one fence parser of the repository: it reads the runtime tag after the language
+// (```` ```ts node ````), which a bare language pattern does not match.
+import { extractFences } from '../../tools/test/readme-fences.mjs';
 
 const repoRoot = join(import.meta.dirname, '../..');
 
@@ -25,7 +28,7 @@ const README_PATHS = [
   'plot/README.md',
 ] as const;
 
-const CODE_FENCE = /```(?:ts|typescript|js|javascript)\r?\n([\s\S]*?)```/g;
+const CODE_LANGS = new Set(['ts', 'typescript', 'js', 'javascript']);
 
 function wrapForTranspile(code: string): string {
   const trimmed = code.trim();
@@ -60,11 +63,9 @@ function compileFence(code: string, virtualName: string): string[] {
 }
 
 function extractBlocks(markdown: string): string[] {
-  const blocks: string[] = [];
-  for (const match of markdown.matchAll(CODE_FENCE)) {
-    blocks.push(match[1] ?? '');
-  }
-  return blocks;
+  return extractFences(markdown)
+    .filter((fence) => CODE_LANGS.has(fence.lang))
+    .map((fence) => fence.code);
 }
 
 describe('README fenced code compiles', () => {

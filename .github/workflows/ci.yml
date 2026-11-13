@@ -158,6 +158,9 @@ jobs:
       - name: Apt install fallback tests
         run: node --test tools/test/apt-install.test.mjs
 
+      - name: Scratch folder tests
+        run: node --test tools/test/make-scratch.test.mjs
+
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 

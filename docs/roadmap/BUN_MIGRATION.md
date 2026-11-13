@@ -1,7 +1,7 @@
 # Bun Migration Roadmap
 
 > Status: **Phase 1 landed** (2026-09-05). The monorepo package manager and
-> TypeScript script runner are Bun. Published packages still target Node ≥20
+> TypeScript script runner are Bun. Published packages target Node >= 22.12
 > (and browsers); Bun is a _dev/CI_ cutover, not a consumer-runtime requirement.
 
 ## Why Bun
