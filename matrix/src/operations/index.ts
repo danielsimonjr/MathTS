@@ -5,7 +5,14 @@
  */
 
 // Eigenvalue decomposition
-export { eig, eigvals, powerIteration, type EigResult, type EigOptions } from './eig.js';
+export {
+  eig,
+  eigvals,
+  powerIteration,
+  type EigResult,
+  type EigOptions,
+  type RepeatedEigenvalue,
+} from './eig.js';
 
 // Singular Value Decomposition
 export {
@@ -32,6 +39,9 @@ export { pinv as matrixPinv, type PinvOptions } from './pinv.js';
 
 // QR decomposition (DenseMatrix primitive — Gram-Schmidt with re-orthogonalisation)
 export { qr, type QRResult, type QROptions } from './qr.js';
+
+// Linear least squares (Householder QR; rows >= columns)
+export { lstsq } from './lstsq.js';
 
 // LU decomposition (DenseMatrix primitive — Doolittle with partial pivoting)
 export { lu, luSolve, type LUResult } from './lu.js';

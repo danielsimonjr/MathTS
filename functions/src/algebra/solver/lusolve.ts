@@ -3,6 +3,7 @@ import {
   isPackedMatrixDescriptor,
   lu,
   luSolve,
+  SparseMatrix as MatrixSparseMatrix,
 } from '@danielsimonjr/mathts-matrix';
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
@@ -338,16 +339,19 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: DenseMatrix,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const eq = equilibrateDense(a._data, b);
-        const aMatrix = eq.a === a._data ? a : (matrix(eq.a as unknown[][]) as DenseMatrix);
-        const d = lup(aMatrix);
-        return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
+        return _lusolveDense(a, b);
       },
 
       'SparseMatrix, Array | Matrix': function (
         a: SparseMatrix,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
+        // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
+        // use the dense factorization.
+        const csr: unknown = a;
+        if (csr instanceof MatrixSparseMatrix) {
+          return _lusolveDense(matrix(csr.toDense().toArray()) as DenseMatrix, b);
+        }
         const eq = equilibrateSparse(a, b);
         const d = lup(eq.a);
         return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
@@ -386,6 +390,17 @@ export const createLusolve = /* #__PURE__ */ factory(
         throw new TypeError('Invalid Matrix LU decomposition');
       },
     });
+
+    /** LU solve of a dense matrix: equilibrate, factor with partial pivoting, then substitute. */
+    function _lusolveDense(
+      a: DenseMatrix,
+      b: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix {
+      const eq = equilibrateDense(a._data, b);
+      const aMatrix = eq.a === a._data ? a : (matrix(eq.a as unknown[][]) as DenseMatrix);
+      const d = lup(aMatrix);
+      return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
+    }
 
     function _toMatrix(a: DenseMatrix | SparseMatrix | unknown[][]): DenseMatrix | SparseMatrix {
       if (isMatrix(a)) {

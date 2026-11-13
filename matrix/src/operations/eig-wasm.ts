@@ -26,7 +26,7 @@ export async function eigWasm(
   const nested = decompositionInputToNestedArray(matrix);
   const n = nested.length;
   if (n === 0) {
-    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
+    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true, repeatedEigenvalues: [] };
   }
   for (let i = 0; i < n; i++) {
     if (nested[i].length !== n) {

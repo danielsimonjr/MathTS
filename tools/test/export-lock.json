@@ -1579,6 +1579,9 @@
       "RQResult": {
         "kind": "type"
       },
+      "RepeatedEigenvalue": {
+        "kind": "type"
+      },
       "SVDOptions": {
         "kind": "type"
       },
@@ -1769,6 +1772,9 @@
         "kind": "function"
       },
       "lq": {
+        "kind": "function"
+      },
+      "lstsq": {
         "kind": "function"
       },
       "lu": {
@@ -5422,6 +5428,9 @@
       "lsqBounded": {
         "kind": "function"
       },
+      "lstsq": {
+        "kind": "function"
+      },
       "lucas": {
         "kind": "function"
       },
@@ -8563,6 +8572,9 @@
       "CholeskyResult": {
         "kind": "type"
       },
+      "DenseMatrix": {
+        "kind": "function"
+      },
       "EigOptions": {
         "kind": "type"
       },
@@ -8639,6 +8651,9 @@
         "kind": "function"
       },
       "lq": {
+        "kind": "function"
+      },
+      "lstsq": {
         "kind": "function"
       },
       "lu": {

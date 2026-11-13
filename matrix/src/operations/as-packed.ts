@@ -6,6 +6,7 @@
  */
 
 import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
+import { SparseMatrix, isSparseMatrix } from '../types/SparseMatrix.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
 export interface PackedMatrixDescriptor {
@@ -14,9 +15,12 @@ export interface PackedMatrixDescriptor {
   cols: number;
 }
 
-/** Inputs accepted by matrix-package dense decompositions. */
+/**
+ * Inputs accepted by matrix-package dense decompositions. A `SparseMatrix` is
+ * densified with `toDense()` before the factorization runs.
+ */
 export type DecompositionMatrixInput =
-  DenseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
+  DenseMatrix | SparseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
 
 const ACCEPTED_TYPES_MSG =
   'DenseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
@@ -96,6 +100,10 @@ function resolveDimensions(input: DecompositionMatrixInput): {
   if (isDenseMatrix(input)) {
     return { rows: input.rows, cols: input.cols, nested: input.toArray() };
   }
+  if (isSparseMatrix(input)) {
+    const dense = input.toDense();
+    return { rows: dense.rows, cols: dense.cols, nested: dense.toArray() };
+  }
   if (isNestedNumberMatrix(input)) {
     const rows = input.length;
     const cols = input[0]?.length ?? 0;
@@ -124,6 +132,7 @@ function resolveDimensions(input: DecompositionMatrixInput): {
 export function decompositionInputToNestedArray(input: DecompositionMatrixInput): number[][] {
   if (
     !isDenseMatrix(input) &&
+    !isSparseMatrix(input) &&
     !isNestedNumberMatrix(input) &&
     !(input instanceof Float64Array) &&
     !isPackedMatrixDescriptor(input)
@@ -140,6 +149,9 @@ export function decompositionInputToNestedArray(input: DecompositionMatrixInput)
 export function decompositionInputToDenseMatrix(input: DecompositionMatrixInput): DenseMatrix {
   if (isDenseMatrix(input)) {
     return input;
+  }
+  if (isSparseMatrix(input)) {
+    return input.toDense();
   }
   if (input instanceof Float64Array) {
     const n = squareSize(input.length);

@@ -9,9 +9,32 @@ import { isSymmetric, eye } from './common.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
 /**
+ * A repeated eigenvalue (algebraic multiplicity 2 or more) and its eigenvectors.
+ */
+export interface RepeatedEigenvalue {
+  /** The repeated eigenvalue: the mean of the computed copies within the grouping tolerance. */
+  value: { re: number; im: number };
+  /** Number of computed eigenvalues in the group (algebraic multiplicity). */
+  algebraicMultiplicity: number;
+  /**
+   * Number of linearly independent eigenvectors for this value: the nullity of
+   * `A - value * I`, at most `algebraicMultiplicity`.
+   */
+  independentEigenvectors: number;
+  /** True when `independentEigenvectors < algebraicMultiplicity` (a Jordan block). */
+  defective: boolean;
+}
+
+/**
  * Result of eigenvalue decomposition
  */
 export interface EigResult {
+  /**
+   * Each eigenvalue that occurs at least twice, with the count of its independent
+   * eigenvectors. Empty when every eigenvalue is simple. This field is additive: `values`
+   * and `vectors` are unchanged.
+   */
+  repeatedEigenvalues: RepeatedEigenvalue[];
   /** Eigenvalues (may be complex for non-symmetric matrices) */
   values: Array<{ re: number; im: number }>;
   /**
@@ -586,7 +609,140 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
     vectorsIm = Array.from({ length: nn }, () => new Array<number>(nn).fill(0));
   }
 
-  return { values, vectors, vectorsIm, isSymmetric: symmetric };
+  return {
+    values,
+    vectors,
+    vectorsIm,
+    isSymmetric: symmetric,
+    repeatedEigenvalues: repeatedEigenvalueReport(A, values),
+  };
+}
+
+/** Computed eigenvalues closer than this (relative to max(1, |lambda|)) form one repeated value. */
+const REPEATED_GROUP_TOL = 1e-6;
+
+/**
+ * A pivot at or below this fraction of the largest entry counts as zero. Rank is
+ * read from pivots, so a repeated eigenvalue with a Jordan block of size k has its
+ * computed copies split by about eps^(1/k); the group mean keeps the split out of the count.
+ */
+const NULLITY_RANK_TOL = Math.sqrt(2.220446049250313e-16);
+
+/**
+ * Rank of a square row-major matrix by Gaussian elimination with complete pivoting.
+ * Pivoting stops at the first remaining maximum at or below `tol`. The input is
+ * overwritten. Cost is O(N^3), which is far cheaper than an SVD of the same matrix.
+ */
+function rankByCompletePivoting(E: Float64Array, N: number, tol: number): number {
+  let rank = 0;
+  for (let k = 0; k < N; k++) {
+    let best = 0;
+    let bi = k;
+    let bj = k;
+    for (let i = k; i < N; i++) {
+      for (let j = k; j < N; j++) {
+        const v = Math.abs(E[i * N + j]);
+        if (v > best) {
+          best = v;
+          bi = i;
+          bj = j;
+        }
+      }
+    }
+    if (!(best > tol)) break;
+    rank++;
+    if (bi !== k) {
+      for (let j = 0; j < N; j++) {
+        const t = E[k * N + j];
+        E[k * N + j] = E[bi * N + j];
+        E[bi * N + j] = t;
+      }
+    }
+    if (bj !== k) {
+      for (let i = 0; i < N; i++) {
+        const t = E[i * N + k];
+        E[i * N + k] = E[i * N + bj];
+        E[i * N + bj] = t;
+      }
+    }
+    const p = E[k * N + k];
+    for (let i = k + 1; i < N; i++) {
+      const f = E[i * N + k] / p;
+      if (f === 0) continue;
+      for (let j = k; j < N; j++) E[i * N + j] -= f * E[k * N + j];
+    }
+  }
+  return rank;
+}
+
+/**
+ * Nullity over the complex numbers of `A - lambda I`.
+ *
+ * The complex matrix `M = Re + i Im` is embedded as the real 2n x 2n matrix
+ * `[[Re, -Im], [Im, Re]]`. Each complex null vector gives two real null vectors
+ * of the embedding, so the nullity of the complex matrix is half the embedding's.
+ */
+function complexNullity(A: number[][], lambda: { re: number; im: number }): number {
+  const n = A.length;
+  const size = 2 * n;
+  const E = new Float64Array(size * size);
+  let maxAbs = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const re = A[i][j] - (i === j ? lambda.re : 0);
+      const im = i === j ? -lambda.im : 0;
+      E[i * size + j] = re;
+      E[(i + n) * size + j + n] = re;
+      E[i * size + j + n] = -im;
+      E[(i + n) * size + j] = im;
+      maxAbs = Math.max(maxAbs, Math.abs(re), Math.abs(im));
+    }
+  }
+  const rank = rankByCompletePivoting(E, size, NULLITY_RANK_TOL * maxAbs);
+  return Math.round((size - rank) / 2);
+}
+
+/**
+ * Groups the computed eigenvalues into repeated values and counts the independent
+ * eigenvectors of each group. A group is the set of eigenvalues within
+ * {@link REPEATED_GROUP_TOL} of each other, and its value is their mean.
+ */
+function repeatedEigenvalueReport(
+  A: number[][],
+  values: Array<{ re: number; im: number }>
+): RepeatedEigenvalue[] {
+  const n = values.length;
+  const grouped = new Array<boolean>(n).fill(false);
+  const report: RepeatedEigenvalue[] = [];
+  for (let i = 0; i < n; i++) {
+    if (grouped[i]) continue;
+    const members = [i];
+    const scale = Math.max(1, Math.hypot(values[i].re, values[i].im));
+    for (let j = i + 1; j < n; j++) {
+      if (grouped[j]) continue;
+      const d = Math.hypot(values[j].re - values[i].re, values[j].im - values[i].im);
+      if (d <= REPEATED_GROUP_TOL * scale) members.push(j);
+    }
+    for (const k of members) grouped[k] = true;
+    if (members.length < 2) continue;
+
+    let re = 0;
+    let im = 0;
+    for (const k of members) {
+      re += values[k].re;
+      im += values[k].im;
+    }
+    re /= members.length;
+    im /= members.length;
+    const independent = Math.min(complexNullity(A, { re, im }), members.length);
+    report.push({
+      value: { re, im },
+      algebraicMultiplicity: members.length,
+      independentEigenvectors: independent,
+      defective: independent < members.length,
+    });
+  }
+  return report;
 }
 
 /**
@@ -607,7 +763,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
 
   const n = A.length;
   if (n === 0) {
-    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
+    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true, repeatedEigenvalues: [] };
   }
 
   // Check dimensions
@@ -626,6 +782,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
       vectors: [[1]],
       vectorsIm: [[0]],
       isSymmetric: symmetric,
+      repeatedEigenvalues: [],
     };
   }
 

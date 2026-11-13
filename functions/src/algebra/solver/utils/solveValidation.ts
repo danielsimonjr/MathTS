@@ -70,7 +70,11 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
     const columns = mSize[1];
 
     if (rows !== columns) {
-      throw new RangeError('Matrix must be square (size: ' + format(mSize, {}) + ')');
+      throw new RangeError(
+        'Matrix must be square (size: ' +
+          format(mSize, {}) +
+          '); for a rectangular least-squares system use lstsq'
+      );
     }
 
     let data: unknown[][] = [];

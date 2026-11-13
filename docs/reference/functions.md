@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1380** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1381** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -3302,7 +3302,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1380 exports).
+> `@danielsimonjr/mathts-functions` (1381 exports).
 
 ### Functions by category
 
@@ -3360,7 +3360,7 @@ await terminatePool();
 
 **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (48): `createInstanceEvaluator`, `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `importFactory`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3ToQuat`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `nanmean`, `nanmedian`, `nanstd`, `nanvariance`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
+**Other exports (uncategorized)** (49): `createInstanceEvaluator`, `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `importFactory`, `lstsq`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3ToQuat`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `nanmean`, `nanmedian`, `nanstd`, `nanvariance`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
 
 ### Constants & values (73)
 
