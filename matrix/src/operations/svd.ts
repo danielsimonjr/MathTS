@@ -11,7 +11,6 @@
 import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
 import { applyGivensCols, givensRotation } from './givens.js';
 import {
-  decompositionInputToNestedArray,
   decompositionSource,
   type DecompositionMatrixInput,
   type DecompositionSource,
@@ -647,12 +646,6 @@ export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): n
  * Equals sqrt(sum of squared singular values)
  */
 export function normFro(matrix: DecompositionMatrixInput): number {
-  const nested = decompositionInputToNestedArray(matrix);
-  let sum = 0;
-  for (const row of nested) {
-    for (const val of row) {
-      sum += val * val;
-    }
-  }
+  const sum = decompositionSource(matrix).sumOfSquares();
   return Math.sqrt(sum);
 }

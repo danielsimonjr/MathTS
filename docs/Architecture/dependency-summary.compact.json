@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1329, "e": 7258, "re": 3160 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1329, "e": 7261, "re": 3160 },
   "s": {
-    "loc": 228798,
+    "loc": 228903,
     "cls": 62,
-    "int": 658,
-    "fn": 2475,
+    "int": 660,
+    "fn": 2478,
     "tg": 178,
     "en": 0,
     "co": 1668,
@@ -321,6 +321,7 @@
       "exp": [
         "isPackedMatrixDescriptor",
         "decompositionInputToNestedArray",
+        "decompositionSource",
         "decompositionInputToDenseMatrix",
         "cholesky",
         "eye",
@@ -337,11 +338,11 @@
         "normInf",
         "norm1",
         "householder",
-        "applyHouseholderLeft",
-        "applyHouseholderRight"
+        "applyHouseholderLeft"
       ],
       "int": [
         "PackedMatrixDescriptor",
+        "DecompositionSource",
         "CholeskyResult",
         "DensifyOptions",
         "RepeatedEigenvalue",
@@ -349,8 +350,7 @@
         "EigOptions",
         "ExpmOptions",
         "LogmOptions",
-        "LUResult",
-        "PinvOptions"
+        "LUResult"
       ]
     },
     "matrix/types": {
@@ -378,7 +378,7 @@
         "min"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
-      "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
+      "int": ["MatrixIndex", "SliceSpec", "MatrixEntry", "DenseReader"]
     },
     "tensor": {
       "f": 5,

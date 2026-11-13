@@ -8,7 +8,7 @@
 import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { densifyForSolver } from './densify.js';
-import { denseStorage, type DenseStorage } from '../types/dense/storage.js';
+import { denseReader } from '../types/dense/storage.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
 export interface PackedMatrixDescriptor {
@@ -150,28 +150,8 @@ export interface DecompositionSource {
    * aliases the input, so the caller may mutate it.
    */
   copyRows(transpose: boolean): number[][];
-}
-
-/** Copies a `DenseMatrix` straight from its storage, honouring offset and row stride. */
-function copyDenseRows(dm: DenseStorage, transpose: boolean): number[][] {
-  const { rows, cols, data, offset, rowStride } = dm;
-  if (!transpose) {
-    const out = new Array<number[]>(rows);
-    for (let i = 0; i < rows; i++) {
-      const base = offset + i * rowStride;
-      const row = new Array<number>(cols);
-      for (let j = 0; j < cols; j++) row[j] = data[base + j];
-      out[i] = row;
-    }
-    return out;
-  }
-  const out = new Array<number[]>(cols);
-  for (let j = 0; j < cols; j++) {
-    const row = new Array<number>(rows);
-    for (let i = 0; i < rows; i++) row[i] = data[offset + i * rowStride + j];
-    out[j] = row;
-  }
-  return out;
+  /** The sum of squares of all entries, summed in row-major order. No copy. */
+  sumOfSquares(): number;
 }
 
 /** Copies a nested array row by row, transposing it when asked. */
@@ -195,19 +175,18 @@ function copyNestedRows(nested: number[][], transpose: boolean): number[][] {
  * nested form. Other inputs are resolved with `decompositionInputToNestedArray`.
  */
 export function decompositionSource(input: DecompositionMatrixInput): DecompositionSource {
-  const storage = isDenseMatrix(input) ? denseStorage(input) : null;
-  if (storage) {
-    return {
-      rows: storage.rows,
-      cols: storage.cols,
-      copyRows: (transpose) => copyDenseRows(storage, transpose),
-    };
-  }
+  const reader = isDenseMatrix(input) ? denseReader(input) : null;
+  if (reader) return reader;
   const nested = decompositionInputToNestedArray(input);
   return {
     rows: nested.length,
     cols: nested[0]?.length ?? 0,
     copyRows: (transpose) => copyNestedRows(nested, transpose),
+    sumOfSquares: () => {
+      let sum = 0;
+      for (const row of nested) for (const v of row) sum += v * v;
+      return sum;
+    },
   };
 }
 
