@@ -190,7 +190,7 @@ export function decideGate(roundRatios, p) {
  * Throw a RangeError when `p` cannot drive a sequential gate. `discard` is optional.
  * @param {SequentialParams} p
  */
-export function checkSequentialParams(p) {
+function checkSequentialParams(p) {
   if (!(p.limit > 0) || !Number.isFinite(p.limit)) throw new RangeError(`bad limit ${p.limit}`);
   if (!(p.alpha > 0 && p.alpha < 0.5))
     throw new RangeError(`alpha must be in (0, 0.5), got ${p.alpha}`);
