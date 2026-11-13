@@ -5,13 +5,14 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { KEYS, counts } = vi.hoisted(() => ({
-  KEYS: ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log'] as const,
-  counts: { runWithConfig: 0, typed: {} as Record<string, number> },
-}));
+// Plain constants: the suite runs under `bun test`, which has no vi.hoisted. The module
+// under test is imported dynamically below, after the mock is registered.
+const KEYS = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log'] as const;
+const counts = { runWithConfig: 0, typed: {} as Record<string, number> };
 
-vi.mock('@danielsimonjr/mathts-functions', async (importOriginal) => {
-  const orig = await importOriginal<Record<string, unknown>>();
+// Bun's mock factory receives no importOriginal: load the real module and copy it first.
+const orig = { ...(await import('@danielsimonjr/mathts-functions')) } as Record<string, unknown>;
+vi.mock('@danielsimonjr/mathts-functions', () => {
   const out: Record<string, unknown> = { ...orig };
   for (const k of KEYS) {
     out[k] = new Proxy(orig[k] as (...a: unknown[]) => unknown, {
@@ -28,7 +29,7 @@ vi.mock('@danielsimonjr/mathts-functions', async (importOriginal) => {
   return out;
 });
 
-import { create, all } from '../src/index.js';
+const { create, all } = await import('../src/index.js');
 
 const total = () => counts.runWithConfig + Object.values(counts.typed).reduce((a, b) => a + b, 0);
 

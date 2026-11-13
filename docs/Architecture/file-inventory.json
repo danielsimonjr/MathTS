@@ -674,7 +674,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 76
+      "loc": 77
     },
     {
       "file": "compat/vitest.config.ts",
