@@ -220,6 +220,17 @@ function transposeMatrix(M: number[][]): number[][] {
   return Array.from({ length: nCols }, (_, j) => M.map((r) => r[j]));
 }
 
+/** Throw a `RangeError` unless every row of `M` has the length of row 0. */
+function assertRectangular(M: number[][], fn: string): void {
+  for (let i = 1; i < M.length; i++) {
+    if (M[i].length !== M[0].length) {
+      throw new RangeError(
+        `${fn}: row ${i} has ${M[i].length} values but row 0 has ${M[0].length}; every row needs the same length`
+      );
+    }
+  }
+}
+
 /**
  * Covariance.
  *   - `cov(x, y)` → scalar sample covariance of two equal-length vectors.
@@ -227,7 +238,9 @@ function transposeMatrix(M: number[][]): number[][] {
  *     variables (NumPy `rowvar=false`). `ddof` defaults to 1 (sample).
  *   - `cov(matrix, undefined, ddof, { rowvar: true })` → rows are variables,
  *     columns are observations (NumPy `rowvar=True`, the NumPy default).
- *     `rowvar` applies to the matrix form only; passing it with two vectors throws.
+ *     `rowvar` applies to the matrix form only; `rowvar: true` with two vectors throws
+ *     (`rowvar: false` is the default layout, so it is accepted).
+ *   - Rows of unequal length throw a `RangeError` in either layout.
  */
 export function cov(
   x: Vec | number[][],
@@ -236,7 +249,7 @@ export function cov(
   opts: CovLayoutOptions = {}
 ): number | number[][] {
   if (y !== undefined) {
-    if (opts.rowvar !== undefined) {
+    if (opts.rowvar === true) {
       throw new Error('cov: rowvar applies to the matrix form only (pass one matrix)');
     }
     const a = arr(x as Vec);
@@ -252,6 +265,7 @@ export function cov(
   }
   // matrix form: rows = observations, columns = variables (rowvar=false)
   const input = (x as number[][]).map((r) => Array.from(r));
+  assertRectangular(input, 'cov');
   const M = opts.rowvar === true ? transposeMatrix(input) : input;
   const nObs = M.length;
   if (nObs <= ddof)
