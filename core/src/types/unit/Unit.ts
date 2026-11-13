@@ -1793,8 +1793,25 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const valThis = this.value === null ? this._normalize(one(other.value)) : this.value;
         const valOther = other.value === null ? other._normalize(one(this.value)) : other.value;
 
-        res.value = multiplyScalar(valThis!, valOther!);
-        res._exactSI = undefined;
+        // A valueless unit times a plain finite number is a reading, so it takes the exact route
+        // of `new Unit(number, unit)`. Without it, `evaluate('0.75 inch')` rounds in floats while
+        // `unit(0.75, 'inch')` does not (#955).
+        const readingScale =
+          this.value === null &&
+          typeof _other === 'number' &&
+          Number.isFinite(_other) &&
+          _other !== 0 &&
+          res.units.length > 0 &&
+          !res.units.some((u) => u.unit.logarithmic !== undefined)
+            ? res.exactScale()
+            : null;
+        if (readingScale !== null && typeof _other === 'number') {
+          res._exactSI = multiplyExactScales(exactScaleOf(_other), readingScale);
+          res.value = roundExactScale(res._exactSI);
+        } else {
+          res.value = multiplyScalar(valThis!, valOther!);
+          res._exactSI = undefined;
+        }
       } else {
         res.value = null;
         res._exactSI = undefined;
@@ -1860,8 +1877,18 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // non-null numeric (the `one(...)` fallback always produces a value).
         const valThis = this.value === null ? this._normalize(one(other.value)) : this.value;
         const valOther = other.value === null ? other._normalize(one(this.value)) : other.value;
-        res.value = divideScalar(valThis!, valOther!);
-        res._exactSI = undefined;
+        // A valued unit divided by a valueless unit keeps the exact route when both scales are
+        // exact, as the multiply reading does (#955). `60 mile/hour` is one exact rounding.
+        const exactThis = liveExactSI(this);
+        const otherScale =
+          other.value === null && typeof valThis === 'number' ? other.exactScale() : null;
+        if (exactThis !== undefined && otherScale !== null) {
+          res._exactSI = divideExactScales(exactThis, otherScale);
+          res.value = roundExactScale(res._exactSI);
+        } else {
+          res.value = divideScalar(valThis!, valOther!);
+          res._exactSI = undefined;
+        }
       } else {
         res.value = null;
         res._exactSI = undefined;
