@@ -108,7 +108,7 @@ This document provides a comprehensive dependency graph of all files, components
 The codebase is organized into the following modules:
 
 - **packages/typed-function**: 1 file
-- **packages/workerpool**: 11 files
+- **packages/workerpool**: 12 files
 - **core/arithmetic**: 1 file
 - **core**: 21 files
 - **core/error**: 3 files
@@ -199,7 +199,7 @@ The codebase is organized into the following modules:
 | Package                                                             | Depends On                                                                                                                                                      | Files (Active) | Files (Dormant) |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
-| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 11             | 1               |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 12             | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 53             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
@@ -359,6 +359,7 @@ graph LR
 | `./chunk-typed.js`             | `chunkPairTyped, chunkTyped`                                                                              | Import                |
 | `./fft-core.js`                | `fftFrameInPlace`                                                                                         | Import                |
 | `./matmul-sequential.js`       | `assertMatmulBuffers, matmulSequential`                                                                   | Import                |
+| `./unary-kernels.js`           | `applyUnary, UnaryFn`                                                                                     | Import                |
 | `./worker-numerics.js`         | `_workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerCombineScaledSsq` | Import                |
 | `./chunk-typed.js`             | `chunkTyped, chunkPairTyped`                                                                              | Re-export             |
 | `./multi-index.js`             | `forEachMultiIndex`                                                                                       | Re-export             |
@@ -380,7 +381,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `assertMatmulBuffers`, `matmulSequential`
+- Functions: `assertMatmulBuffers`, `matmulRowBlock`, `matmulSequential`
 
 ---
 
@@ -423,6 +424,16 @@ graph LR
 
 ---
 
+### `packages/workerpool/src/unary-kernels.ts` - Element-wise unary kernels for `Float64Array` data, one tight loop per function.
+
+**Exports:**
+
+- Types: `UnaryFn`, `UnaryKernel`
+- Functions: `applyUnary`
+- Constants: `UNARY_KERNELS`
+
+---
+
 ### `packages/workerpool/src/worker-numerics.ts` - Worker-bundle copies of core numeric helpers.
 
 **Exports:**
@@ -445,7 +456,9 @@ graph LR
 | ------------------------------ | --------------------------------------------------------------------------------------------------- | ------ |
 | `./compile-function-source.js` | `compileFunctionSource`                                                                             | Import |
 | `./fft-core.js`                | `fftFrameInPlace`                                                                                   | Import |
+| `./matmul-sequential.js`       | `matmulRowBlock`                                                                                    | Import |
 | `./tensordot-range.js`         | `tensordotRange`                                                                                    | Import |
+| `./unary-kernels.js`           | `UNARY_KERNELS, UnaryFn`                                                                            | Import |
 | `./worker-numerics.js`         | `_workerMulberry32, _workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff` | Import |
 
 ---
@@ -6861,7 +6874,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `complexToInterleaved`
+- Functions: `complexToInterleaved`, `complexToSplit`
 
 ---
 
@@ -7086,17 +7099,17 @@ graph LR
 
 ---
 
-### `functions/src/matrix/fft.ts` - Check if n is a power of 2
+### `functions/src/matrix/fft.ts` - Box a split spectrum into `Complex` values. This is the only per-element work after the
 
 **Internal Dependencies:**
 
-| File                          | Imports                           | Type               |
-| ----------------------------- | --------------------------------- | ------------------ |
-| `../utils/array.js`           | `arraySize`                       | Import             |
-| `../signal/fft-core-f64.js`   | `fftCoreFloat64, fftExactFloat64` | Import             |
-| `./complex-to-interleaved.js` | `complexToInterleaved`            | Import             |
-| `../utils/factory.js`         | `factory`                         | Import             |
-| `../core/function/typed.js`   | `TypedFunction`                   | Import (type-only) |
+| File                          | Imports           | Type               |
+| ----------------------------- | ----------------- | ------------------ |
+| `../utils/array.js`           | `arraySize`       | Import             |
+| `../signal/fft-core-f64.js`   | `fftExactFloat64` | Import             |
+| `./complex-to-interleaved.js` | `complexToSplit`  | Import             |
+| `../utils/factory.js`         | `factory`         | Import             |
+| `../core/function/typed.js`   | `TypedFunction`   | Import (type-only) |
 
 **Exports:**
 
@@ -9772,7 +9785,7 @@ graph LR
 | `../core/function/typed.js`      | `TypedFunction`                                                                                                     | Import (type-only) |
 | `../utils/typed-impl.js`         | `findTypedImpl`                                                                                                     | Import             |
 | `../utils/sort-numbers.js`       | `arrayHasNaN`                                                                                                       | Import             |
-| `../utils/median-numbers.js`     | `medianNumbers`                                                                                                     | Import             |
+| `../utils/median-numbers.js`     | `medianInPlace, medianNumbers`                                                                                      | Import             |
 | `./numeric-data.js`              | `flattenForStatistics, finiteNumbers, isFloatTyped, numberGrid, reduceNumericMatrix, FloatTyped, StatReduceOptions` | Import             |
 
 **Exports:**
@@ -12281,6 +12294,7 @@ graph LR
 | File                          | Imports           | Type   |
 | ----------------------------- | ----------------- | ------ |
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch` | Import |
+| `../utils/median-numbers.js`  | `medianInPlace`   | Import |
 
 **Exports:**
 
@@ -12768,11 +12782,11 @@ graph LR
 
 ---
 
-### `functions/src/utils/median-numbers.ts` - Median of a flat finite `number[]` via quickselect (O(n) average).
+### `functions/src/utils/median-numbers.ts` - Median of a flat numeric vector by quickselect (O(n) average), on one `Float64Array`
 
 **Exports:**
 
-- Functions: `medianNumbers`
+- Functions: `medianNumbers`, `medianInPlace`
 
 ---
 
@@ -18844,9 +18858,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                                             | Type   |
-| ------------------- | --------------------------------------------------- | ------ |
-| `../ComputePool.js` | `computePool, ComputePool, DEFAULT_THRESHOLD_BY_OP` | Import |
+| File                | Imports                                                                  | Type   |
+| ------------------- | ------------------------------------------------------------------------ | ------ |
+| `../ComputePool.js` | `computePool, ComputePool, DEFAULT_POOL_CONFIG, DEFAULT_THRESHOLD_BY_OP` | Import |
 
 **Exports:**
 
@@ -20327,9 +20341,9 @@ graph TD
         N6[multi-index]
         N7[pool-types]
         N8[tensordot-range]
-        N9[worker-numerics]
-        N10[worker]
-        N11[...1 more]
+        N9[unary-kernels]
+        N10[worker-numerics]
+        N11[...2 more]
     end
 
     subgraph Core/arithmetic
@@ -21096,14 +21110,11 @@ graph TD
     N4 --> N3
     N4 --> N5
     N4 --> N9
+    N4 --> N10
     N4 --> N6
     N4 --> N8
     N8 --> N6
-    N8 --> N9
-    N10 --> N2
-    N10 --> N3
-    N10 --> N8
-    N10 --> N9
+    N8 --> N10
     N12 --> N16
     N12 --> N35
     N12 --> N36
@@ -21165,6 +21176,9 @@ graph TD
     N47 --> N46
     N47 --> N50
     N47 --> N57
+    N49 --> N46
+    N49 --> N72
+    N49 --> N50
 ```
 
 ---
@@ -21175,14 +21189,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1329   |
+| Total TypeScript Files  | 1330   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 228903 |
-| Total Exports           | 7261   |
+| Total Lines of Code     | 229147 |
+| Total Exports           | 7266   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
 | Total Interfaces        | 660    |
-| Total Functions         | 2478   |
+| Total Functions         | 2482   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-13",
-    "totalFiles": 1329,
+    "totalFiles": 1330,
     "totalModules": 82,
-    "totalExports": 7261
+    "totalExports": 7266
   },
   "entryPoints": [
     {
@@ -287,6 +287,10 @@
             "imports": ["assertMatmulBuffers", "matmulSequential"]
           },
           {
+            "file": "./unary-kernels.js",
+            "imports": ["applyUnary", "UnaryFn"]
+          },
+          {
             "file": "./worker-numerics.js",
             "imports": [
               "_workerPairwiseSum",
@@ -401,8 +405,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["assertMatmulBuffers", "matmulSequential"],
-        "functions": ["assertMatmulBuffers", "matmulSequential"]
+        "exports": ["assertMatmulBuffers", "matmulRowBlock", "matmulSequential"],
+        "functions": ["assertMatmulBuffers", "matmulRowBlock", "matmulSequential"]
       },
       "packages/workerpool/src/multi-index.ts": {
         "description": "Multi-dimensional index iteration (no imports — safe for the worker bundle).",
@@ -453,6 +457,16 @@
         "exports": ["tensordotRange"],
         "functions": ["tensordotRange"]
       },
+      "packages/workerpool/src/unary-kernels.ts": {
+        "description": "Element-wise unary kernels for `Float64Array` data, one tight loop per function.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["UNARY_KERNELS", "applyUnary"],
+        "functions": ["applyUnary"],
+        "constants": ["UNARY_KERNELS"]
+      },
       "packages/workerpool/src/worker-numerics.ts": {
         "description": "Worker-bundle copies of core numeric helpers.",
         "externalDependencies": [],
@@ -497,8 +511,16 @@
             "imports": ["fftFrameInPlace"]
           },
           {
+            "file": "./matmul-sequential.js",
+            "imports": ["matmulRowBlock"]
+          },
+          {
             "file": "./tensordot-range.js",
             "imports": ["tensordotRange"]
+          },
+          {
+            "file": "./unary-kernels.js",
+            "imports": ["UNARY_KERNELS", "UnaryFn"]
           },
           {
             "file": "./worker-numerics.js",
@@ -18058,8 +18080,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["complexToInterleaved"],
-        "functions": ["complexToInterleaved"]
+        "exports": ["complexToInterleaved", "complexToSplit"],
+        "functions": ["complexToInterleaved", "complexToSplit"]
       },
       "functions/src/matrix/concat.ts": {
         "description": "Concatenate two or more matrices.",
@@ -18381,7 +18403,7 @@
         "constants": ["createEigs"]
       },
       "functions/src/matrix/fft.ts": {
-        "description": "Check if n is a power of 2",
+        "description": "Box a split spectrum into `Complex` values. This is the only per-element work after the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -18391,11 +18413,11 @@
           },
           {
             "file": "../signal/fft-core-f64.js",
-            "imports": ["fftCoreFloat64", "fftExactFloat64"]
+            "imports": ["fftExactFloat64"]
           },
           {
             "file": "./complex-to-interleaved.js",
-            "imports": ["complexToInterleaved"]
+            "imports": ["complexToSplit"]
           },
           {
             "file": "../utils/factory.js",
@@ -22650,7 +22672,7 @@
           },
           {
             "file": "../utils/median-numbers.js",
-            "imports": ["medianNumbers"]
+            "imports": ["medianInPlace", "medianNumbers"]
           },
           {
             "file": "./numeric-data.js",
@@ -28641,6 +28663,10 @@
           {
             "file": "../wasm/sort/wasm-bridge.js",
             "imports": ["sortF64Dispatch"]
+          },
+          {
+            "file": "../utils/median-numbers.js",
+            "imports": ["medianInPlace"]
           }
         ],
         "workspaceDependencies": [
@@ -29689,13 +29715,13 @@
         ]
       },
       "functions/src/utils/median-numbers.ts": {
-        "description": "Median of a flat finite `number[]` via quickselect (O(n) average).",
+        "description": "Median of a flat numeric vector by quickselect (O(n) average), on one `Float64Array`",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["medianNumbers"],
-        "functions": ["medianNumbers"]
+        "exports": ["medianNumbers", "medianInPlace"],
+        "functions": ["medianNumbers", "medianInPlace"]
       },
       "functions/src/utils/node.ts": {
         "description": "Type definitions for Math.js AST nodes",
@@ -42207,7 +42233,12 @@
         "internalDependencies": [
           {
             "file": "../ComputePool.js",
-            "imports": ["computePool", "ComputePool", "DEFAULT_THRESHOLD_BY_OP"]
+            "imports": [
+              "computePool",
+              "ComputePool",
+              "DEFAULT_POOL_CONFIG",
+              "DEFAULT_THRESHOLD_BY_OP"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -46762,6 +46793,7 @@
           "packages/workerpool/src/multi-index.ts",
           "packages/workerpool/src/pool-types.ts",
           "packages/workerpool/src/tensordot-range.ts",
+          "packages/workerpool/src/unary-kernels.ts",
           "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
           "packages/workerpool/src/workerpool-browser-shim.ts"
@@ -48440,16 +48472,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1329,
+    "totalTypeScriptFiles": 1330,
     "totalModules": 82,
-    "totalLinesOfCode": 228903,
-    "totalExports": 7261,
+    "totalLinesOfCode": 229147,
+    "totalExports": 7266,
     "totalClasses": 62,
     "totalInterfaces": 660,
-    "totalFunctions": 2478,
+    "totalFunctions": 2482,
     "totalTypeGuards": 178,
     "totalEnums": 0,
-    "totalConstants": 1668,
+    "totalConstants": 1669,
     "totalReExports": 3160,
     "totalTypeOnlyImports": 682,
     "runtimeCircularDeps": 2,
