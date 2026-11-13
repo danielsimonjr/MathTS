@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-13'
-  totalFiles: 1323
+  totalFiles: 1328
   totalModules: 82
-  totalExports: 7237
+  totalExports: 7256
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9529,6 +9529,9 @@ modules:
           imports:
             - apart
             - variables
+        - file: ./cas/render-polynomial.js
+          imports:
+            - renderPolynomial
         - file: ./typed/polynomial-ideal.js
           imports:
             - polyFromExpression
@@ -13742,6 +13745,46 @@ modules:
         - antiderivativeReciprocal
       functions:
         - antiderivativeReciprocal
+    functions/src/cas/closed-form-roots.ts:
+      description: Roots of a polynomial of degree 1 to 3 in closed form, and the rule that snaps a computed root
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - polynomialRoot
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - snapRoot
+        - closedFormRoots
+      functions:
+        - snapRoot
+        - closedFormRoots
+    functions/src/cas/elementary-solve.ts:
+      description: 'Exact solution sets of one-function equations: `a*F(p*x + q) + b = 0`.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./syntax-tree.js
+          imports:
+            - AstNode
+            - callName
+            - constantValue
+            - containsSymbol
+            - operatorName
+            - parseTree
+      workspaceDependencies: []
+      exports:
+        - solveElementary
+      interfaces:
+        - ElementaryDecline
+        - ElementarySolution
+      functions:
+        - solveElementary
     functions/src/cas/layer3.ts:
       description: Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
       externalDependencies: []
@@ -13773,6 +13816,9 @@ modules:
         - file: ./render-coeff-times.js
           imports:
             - renderCoeffTimes
+        - file: ./render-polynomial.js
+          imports:
+            - renderPolynomial
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -13815,6 +13861,22 @@ modules:
       functions:
         - collapseIdenticalFactors
         - tryPolynomialCanonicalForm
+    functions/src/cas/polynomial-limits.ts:
+      description: The size limit of a polynomial that the CAS builds from an expression.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - MAX_POLYNOMIAL_DEGREE
+        - polynomialDegreeMessage
+        - PolynomialDegreeError
+      classes:
+        - PolynomialDegreeError
+      functions:
+        - polynomialDegreeMessage
+      constants:
+        - MAX_POLYNOMIAL_DEGREE
     functions/src/cas/rat.ts:
       description: Exact rational arithmetic (lowest-terms, positive denominator).
       externalDependencies: []
@@ -13954,6 +14016,55 @@ modules:
         - renderCoeffTimes
       functions:
         - renderCoeffTimes
+    functions/src/cas/render-polynomial.ts:
+      description: The one canonical string form of a polynomial.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - renderPolynomial
+        - coefficientTexts
+      interfaces:
+        - PolynomialTermText
+      functions:
+        - renderPolynomial
+        - coefficientTexts
+    functions/src/cas/syntax-tree.ts:
+      description: Read an expression as a syntax tree, and answer structural questions about it.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/evaluate.js
+          imports:
+            - parse
+            - evaluate
+        - file: ./polynomial-limits.js
+          imports:
+            - MAX_POLYNOMIAL_DEGREE
+            - PolynomialDegreeError
+      workspaceDependencies: []
+      exports:
+        - MAX_POLYNOMIAL_DEGREE
+        - PolynomialDegreeError
+        - COEFFICIENT_NOISE_RATIO
+        - parseTree
+        - containsSymbol
+        - operatorName
+        - callName
+        - constantValue
+        - polynomialCoefficients
+      interfaces:
+        - AstNode
+      functions:
+        - parseTree
+        - containsSymbol
+        - operatorName
+        - callName
+        - constantValue
+        - polynomialCoefficients
+      constants:
+        - COEFFICIENT_NOISE_RATIO
   functions/combinatorics:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
@@ -23709,6 +23820,13 @@ modules:
         - file: ./euclid.js
           imports:
             - euclidSnap
+        - file: ../cas/render-polynomial.js
+          imports:
+            - renderPolynomial
+        - file: ../cas/polynomial-limits.js
+          imports:
+            - PolynomialDegreeError
+            - polynomialDegreeMessage
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
@@ -24075,9 +24193,11 @@ modules:
           imports:
             - expand
             - factor
+            - polyder
+            - polynomialGCD
+            - polynomialQuotient
         - file: ../factories/index.js
           imports:
-            - polynomialRoot
             - derivative
         - file: ../cas/antiderivative.js
           imports:
@@ -24085,6 +24205,29 @@ modules:
         - file: ../cas/polynomial-canonical.js
           imports:
             - tryPolynomialCanonicalForm
+        - file: ../cas/elementary-solve.js
+          imports:
+            - solveElementary
+        - file: ../cas/syntax-tree.js
+          imports:
+            - MAX_POLYNOMIAL_DEGREE
+            - PolynomialDegreeError
+            - parseTree
+            - polynomialCoefficients
+        - file: ../cas/closed-form-roots.js
+          imports:
+            - closedFormRoots
+            - snapRoot
+        - file: ../cas/render-polynomial.js
+          imports:
+            - coefficientTexts
+            - renderPolynomial
+        - file: ../plain/number/arithmetic.js
+          imports:
+            - gcdNumber
+        - file: ../cas/real-roots.js
+          imports:
+            - realRoots
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
@@ -24101,6 +24244,7 @@ modules:
           imports:
             - Complex
       exports:
+        - PolynomialDegreeError
         - CAS_BATCH_THRESHOLD
         - integrate
         - limit
@@ -24119,6 +24263,7 @@ modules:
         - series
         - seriesCoefficient
         - solve
+        - solveExact
         - implicitDiff
         - summation
         - symbolicProduct
@@ -24137,6 +24282,9 @@ modules:
         - casDerivative
         - casExpand
         - casFactor
+      interfaces:
+        - SolveOptions
+        - ExactSolution
       functions:
         - integrate
         - limit
@@ -24157,6 +24305,7 @@ modules:
         - series
         - seriesCoefficient
         - solve
+        - solveExact
         - implicitDiff
         - summation
         - symbolicProduct
@@ -24986,6 +25135,9 @@ modules:
         - file: ./integer-poly.js
           imports:
             - bigintGcd
+        - file: ../../cas/render-polynomial.js
+          imports:
+            - renderPolynomial
         - file: ../polynomial-ideal.js
           imports:
             - polyFromExpression
@@ -26205,7 +26357,15 @@ modules:
       description: Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../cas/render-polynomial.js
+          imports:
+            - coefficientTexts
+            - renderPolynomial
+        - file: ../cas/polynomial-limits.js
+          imports:
+            - MAX_POLYNOMIAL_DEGREE
+            - PolynomialDegreeError
       workspaceDependencies: []
       exports:
         - normalize
@@ -44372,12 +44532,17 @@ dependencyGraph:
     - name: Functions/cas
       files:
         - functions/src/cas/antiderivative.ts
+        - functions/src/cas/closed-form-roots.ts
+        - functions/src/cas/elementary-solve.ts
         - functions/src/cas/layer3.ts
         - functions/src/cas/polynomial-canonical.ts
+        - functions/src/cas/polynomial-limits.ts
         - functions/src/cas/rat.ts
         - functions/src/cas/rational-integrate.ts
         - functions/src/cas/real-roots.ts
         - functions/src/cas/render-coeff-times.ts
+        - functions/src/cas/render-polynomial.ts
+        - functions/src/cas/syntax-tree.ts
     - name: Functions/combinatorics
       files:
         - functions/src/combinatorics/bellNumbers.ts
@@ -45534,16 +45699,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1323
+  totalTypeScriptFiles: 1328
   totalModules: 82
-  totalLinesOfCode: 226987
-  totalExports: 7237
-  totalClasses: 61
-  totalInterfaces: 651
-  totalFunctions: 2460
+  totalLinesOfCode: 228451
+  totalExports: 7256
+  totalClasses: 62
+  totalInterfaces: 657
+  totalFunctions: 2473
   totalTypeGuards: 178
   totalEnums: 0
-  totalConstants: 1666
+  totalConstants: 1668
   totalReExports: 3160
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2

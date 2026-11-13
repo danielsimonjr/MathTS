@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2375,
+  "totalFiles": 2386,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1297,
+    "build-entry": 1302,
     "test-only": 0,
     "orphan": 0,
-    "test": 986,
+    "test": 992,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1323,
-    "tests": 986,
+    "src": 1328,
+    "tests": 992,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -26,9 +26,9 @@
     "@danielsimonjr/mathts-compat": 26,
     "@danielsimonjr/mathts-core": 125,
     "@danielsimonjr/mathts-evaluator": 5,
-    "(root)": 67,
+    "(root)": 69,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1062,
+    "@danielsimonjr/mathts-functions": 1071,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 136,
@@ -6330,7 +6330,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 411
+      "loc": 402
     },
     {
       "file": "functions/src/cas/antiderivative.ts",
@@ -6340,11 +6340,25 @@
       "loc": 9
     },
     {
+      "file": "functions/src/cas/closed-form-roots.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 262
+    },
+    {
+      "file": "functions/src/cas/elementary-solve.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 498
+    },
+    {
       "file": "functions/src/cas/layer3.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 453
+      "loc": 445
     },
     {
       "file": "functions/src/cas/polynomial-canonical.ts",
@@ -6352,6 +6366,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 77
+    },
+    {
+      "file": "functions/src/cas/polynomial-limits.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 27
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -6365,7 +6386,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 869
+      "loc": 870
     },
     {
       "file": "functions/src/cas/real-roots.ts",
@@ -6380,6 +6401,20 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 17
+    },
+    {
+      "file": "functions/src/cas/render-polynomial.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 183
+    },
+    {
+      "file": "functions/src/cas/syntax-tree.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 220
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -8899,7 +8934,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1815
+      "loc": 1808
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -8920,7 +8955,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2924
+      "loc": 3183
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -9032,7 +9067,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 311
     },
     {
       "file": "functions/src/typed/factorization/render-univariate.ts",
@@ -9158,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 502
+      "loc": 549
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -9749,6 +9784,13 @@
       "loc": 37
     },
     {
+      "file": "functions/tests/cas-closed-form-roots.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 100
+    },
+    {
       "file": "functions/tests/cas-engine.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9770,11 +9812,32 @@
       "loc": 50
     },
     {
+      "file": "functions/tests/cas-polynomial-canonical-form.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 314
+    },
+    {
+      "file": "functions/tests/cas-solve-exact-set.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 672
+    },
+    {
+      "file": "functions/tests/cas-syntax-tree.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 98
+    },
+    {
       "file": "functions/tests/cas.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 787
+      "loc": 796
     },
     {
       "file": "functions/tests/chi2-f-survival.test.ts",
@@ -9921,7 +9984,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 626
+      "loc": 628
     },
     {
       "file": "functions/tests/cov-dist-objects.test.ts",
@@ -15830,6 +15893,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 59
+    },
+    {
+      "file": "tests/integration/issue-884-solve-exact-set.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 82
+    },
+    {
+      "file": "tests/integration/issue-887-expand-canonical-form.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 37
     },
     {
       "file": "tests/integration/issue-908-909-physics-symbols.test.ts",

@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1323, "e": 7237, "re": 3160 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1328, "e": 7256, "re": 3160 },
   "s": {
-    "loc": 226987,
-    "cls": 61,
-    "int": 651,
-    "fn": 2460,
+    "loc": 228451,
+    "cls": 62,
+    "int": 657,
+    "fn": 2473,
     "tg": 178,
     "en": 0,
-    "co": 1666,
+    "co": 1668,
     "toi": 682
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -583,9 +583,12 @@
       ]
     },
     "functions/cas": {
-      "f": 7,
+      "f": 12,
       "exp": [
         "antiderivativeReciprocal",
+        "snapRoot",
+        "closedFormRoots",
+        "solveElementary",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -595,15 +598,26 @@
         "integrateLayer3",
         "collapseIdenticalFactors",
         "tryPolynomialCanonicalForm",
+        "MAX_POLYNOMIAL_DEGREE",
+        "polynomialDegreeMessage",
+        "PolynomialDegreeError",
         "RAT_ZERO",
         "ratNormalize",
         "ratAdd",
-        "ratSub",
-        "ratMul",
-        "ratDiv",
-        "ratFromBigint"
+        "ratSub"
       ],
-      "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
+      "cls": ["PolynomialDegreeError"],
+      "int": [
+        "ElementaryDecline",
+        "ElementarySolution",
+        "Rat",
+        "RatFunc",
+        "Surd",
+        "DenFactor",
+        "PFTerm",
+        "PolynomialTermText",
+        "AstNode"
+      ]
     },
     "functions/combinatorics": {
       "f": 4,
@@ -1179,6 +1193,8 @@
       ],
       "cls": ["DivisorGeobucket"],
       "int": [
+        "SolveOptions",
+        "ExactSolution",
         "SampleNOptions",
         "Distribution",
         "GammaDistOptions",
@@ -1186,9 +1202,7 @@
         "MultivariateDistribution",
         "UnaryRealSpec",
         "MultiPoly",
-        "UnivariateTerm",
-        "SquareFreeFactor",
-        "KDTreeNode"
+        "UnivariateTerm"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
@@ -1938,7 +1952,7 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 248, "o": 14 },
+    { "p": "factories/index.ts", "i": 248, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 205 },
