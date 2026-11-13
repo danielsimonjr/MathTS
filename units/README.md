@@ -15,7 +15,7 @@ npm install @danielsimonjr/mathts-units
 ## What it exports
 
 - `Unit` -- dimensional quantity class (`new Unit(5, 'km')`), with `.to()`, `.toBest()`, `.value`, `.type`. In TypeScript, annotate values as `Unit` (same name as the constructor) or `UnitInstance`.
-- **`.value` is the SI magnitude** (radians for angles, meters per second after `.to('m/s')`, etc.). For a number in the unit's current display, use `.toNumber('deg')`, `.toJSON().value`, or `String(u)`.
+- **`.value` is the SI magnitude**, not the number in the unit you wrote: `new Unit(180, 'deg').value` is `Math.PI` (radians for angles, meters for lengths, and so on). An offset temperature unit keeps its zero point, so `new Unit(0, 'degC').value` is `0`; read kelvin with `toNumeric('K')`. mathjs `Unit.value` follows the same rule. For the number in the unit that the quantity shows, call `.toNumeric()`. For the number in a named unit, call `.toNumeric('deg')`. `.toJSON().value` and `String(u)` also show the written number. `.toNumber(unit)` still works, but it is deprecated and it warns.
 - **Logarithmic units.** `dB` and `dBW` are power quantities (`10 log10` of a power ratio). `dBm` is power referred to 1 mW (`0 dBm` = 1 mW). `Np` is a field quantity (`ln` of an amplitude ratio), so `1 Np` = `20/ln(10)` dB. `B` is the byte (8 bit), not the bel.
 - `isUnit` / `isUnitValue` -- type guards.
 - `DimensionMismatchError`, `UnitParseError` -- error types.
@@ -30,10 +30,15 @@ import { Unit, type UnitInstance } from '@danielsimonjr/mathts-units';
 // Either annotation works:
 // const a: Unit = new Unit(1, 'N');
 // const b: UnitInstance = new Unit(1, 'N');
-// After .to('m/s'), .value is SI (m/s):
-new Unit(100, 'km/h').to('m/s').value; // 27.777...
-// For 180° in degrees, not radians, use .toNumber('deg'):
-new Unit(180, 'deg').toNumber('deg'); // 180
+// .value is SI. After .to('m/s'), it is in m/s:
+new Unit(100, 'km/h').to('m/s').value; // 27.77777777777778
+// For 180° the .value is radians:
+new Unit(180, 'deg').value; // 3.141592653589793
+// For the 180 that you wrote, call toNumeric:
+new Unit(180, 'deg').toNumeric('deg'); // 180
+// An offset temperature unit keeps its zero point in .value:
+new Unit(0, 'degC').value; // 0
+new Unit(0, 'degC').toNumeric('K'); // 273.15
 ```
 
 ## License

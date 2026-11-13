@@ -509,6 +509,34 @@ subtractForNumberPath.fn = subtract;
 // =============================================================================
 
 /**
+ * The scalar types, other than `number`, that scale a collection. `number` keeps its own
+ * signatures (they carry the typed-array fast path); every other scalar type goes
+ * through the element-wise walk, whose leaves fold through the binary `multiply`.
+ */
+const COLLECTION_SCALAR_TYPES = ['Unit', 'Complex', 'Fraction', 'BigNumber'] as const;
+const COLLECTION_TYPES = ['Array', 'DenseMatrix', 'SparseMatrix'] as const;
+
+/**
+ * Signatures `<scalar>, <collection>` and `<collection>, <scalar>` for each scalar of
+ * {@link COLLECTION_SCALAR_TYPES} and each collection of {@link COLLECTION_TYPES}. A
+ * matrix operand keeps its matrix type and its storage, as the `number` rows do.
+ */
+function scalarCollectionSignatures(
+  apply: (a: unknown, b: unknown) => unknown,
+  applyToMatrix: (a: unknown, b: unknown) => unknown
+): Record<string, (a: unknown, b: unknown) => unknown> {
+  const rows: Record<string, (a: unknown, b: unknown) => unknown> = {};
+  for (const scalar of COLLECTION_SCALAR_TYPES) {
+    for (const collection of COLLECTION_TYPES) {
+      const run = collection === 'Array' ? apply : applyToMatrix;
+      rows[`${scalar}, ${collection}`] = run;
+      rows[`${collection}, ${scalar}`] = run;
+    }
+  }
+  return rows;
+}
+
+/**
  * Polymorphic multiplication function. The Float64Array signature is synchronous.
  * Invalid operands throw `TypeError: multiply: unexpected type …` (same rules as `add`).
  * Booleans coerce to 0/1. `bigint` mixed with `number` returns a `number`.
@@ -610,6 +638,13 @@ export const multiply = withBinaryScalarGuards(
       elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
       elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+
+    // The same scaling for a Unit, Complex, Fraction or BigNumber scalar, in either
+    // order (#911). Before, `number` was the only scalar with a collection signature.
+    ...scalarCollectionSignatures(
+      (a, b) => elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+      (a, b) => elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b)
+    ),
 
     // Variadic multiplication over ANY types (mathjs parity); folds pairwise
     // through the binary `multiply`. See the variadic-add note above re: types and

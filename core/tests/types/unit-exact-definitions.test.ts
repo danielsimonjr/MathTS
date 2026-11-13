@@ -455,8 +455,19 @@ describe('conversions multiply exact scales and round once', () => {
     [-40, 'degF', 'degC', -40],
     [491.67, 'degR', 'degF', 32],
     [300, 'K', 'degC', 26.85],
+    [1, 'L', 'mL', 1000],
+    [100, 'degC', 'degF', 212],
   ])('%s %s is %s %s', (value, from, to, want) => {
     expect(new Unit(value, from).to(to).toNumeric()).toBe(want);
+  });
+
+  it('5 cm to inch is the double nearest 250/127, not the quotient of two rounded doubles (#742)', () => {
+    // mathjs divides the rounded SI values 0.05 and 0.0254, so its last digit can differ.
+    expect(new Unit(5, 'cm').to('inch').toNumeric()).toBe(binaryRound(250n, 127n));
+    expect(binaryRound(250n, 127n)).toBe(1.968503937007874);
+    expect(0.05 / 0.0254).toBe(1.9685039370078743);
+    expect(String(new Unit(5, 'cm').to('inch'))).toBe('1.968503937007874 inch');
+    expect(new Unit(5, 'cm').to('inch').format({ precision: 14 })).toBe('1.9685039370079 inch');
   });
 
   it('Unit.exactScale gives a compound unit its exact scale', () => {

@@ -47,6 +47,31 @@ evaluate('fibonacci(10)'); // 55
 evaluate('beta(2, 3)'); // ~0.0833
 ```
 
+### Physical constants and unit symbols
+
+The default scope reads a short symbol that names a unit as that unit. The physics mode
+reads the same symbol as a physical constant. Choose the mode that matches the formula.
+
+| Symbol | Default scope                       | `{ physics: true }` or `physicsScope()`  |
+| ------ | ----------------------------------- | ---------------------------------------- |
+| `G`    | gauss (unit): `5 G to T` works      | Newton's gravitational constant (CODATA) |
+| `c`    | speed of light as a unit: `GeV/c^2` | speed of light, `299792458 m/s`          |
+| `hbar` | hectobar (unit): `1 hbar to Pa`     | reduced Planck constant (CODATA)         |
+| `h`    | hour (unit)                         | hour (unit): not bound                   |
+| `e`    | Euler's number                      | Euler's number: not bound                |
+| `e0`   | undefined                           | elementary charge                        |
+
+The long names `speedOfLight`, `gravitationConstant`, `planckConstant`,
+`reducedPlanckConstant` and `elementaryCharge` are in the default scope. A scope entry
+that the caller passes wins over a physics binding.
+
+```typescript
+evaluate('G'); // the unit gauss, with no value
+evaluate('G', undefined, { physics: true }); // 6.6743e-11 m^3 / (kg s^2)
+evaluate('hbar * omega', { omega: 2 }, { physics: true }); // 2.109e-34 J s
+evaluate('speedOfLight'); // 2.99792458e+8 m / s, in either mode
+```
+
 ### Scope
 
 The optional scope is a plain object with variable bindings. **Assignment is disabled by

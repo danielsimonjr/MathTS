@@ -7,10 +7,16 @@
  *
  * A string expression takes partials from the symbolic {@link derivative}.
  * A function takes central differences
- * `h = relativeStep · max(|xᵢ|, 1e-30)` (default `relativeStep` is `1e-6`).
+ * `h = relativeStep · |xᵢ|` (`relativeStep` when `xᵢ = 0`; default `relativeStep` is `1e-6`).
  * Independent inputs are the shorthand `Σ = diag(σᵢ²)`; pass
  * `options.covariance` for a full matrix, in `Object.keys(values)` order.
  * Supplying both `sigmas` and `covariance` is rejected.
+ *
+ * A value may be a CODATA constant (`electronMass`, `fineStructure`, ...) in place of a
+ * number. The callback and the expression read its SI magnitude, and its absolute
+ * `.uncertainty`, converted to the same SI scale, is the input sigma. A `sigmas` entry
+ * for the same name wins, and `options.covariance` replaces every constant uncertainty.
+ * A `Unit` that has no `.uncertainty` adds no variance by itself.
  *
  * `options.curvatureOffsets` reports the second-difference ratio
  * `|f(x+u) + f(x−u) − 2f(x)| / 2 / |∂f/∂x · u|` and does not fold it into
@@ -20,11 +26,35 @@
  * @packageDocumentation
  */
 
+import { isUnit, type UnitInstance } from '@danielsimonjr/mathts-core';
 import { derivative } from '../factories/index.js';
 import { evaluate } from '../factories/evaluate.js';
+import type { createFineStructure } from '../type/unit/physicalConstants.js';
 
 /** A scalar expression, or a black-box map of the same names. */
 export type UncertaintyExpression = string | ((values: Record<string, number>) => number);
+
+/**
+ * A dimensionless CODATA scalar (`fineStructure`, `weakMixingAngle`, ...): a number by
+ * `valueOf()` with an absolute `.uncertainty`.
+ */
+export interface UncertainScalar {
+  valueOf(): number;
+  readonly uncertainty: number;
+}
+
+/**
+ * The declared type of a dimensionless CODATA constant such as `fineStructure`
+ * (`number | string | Decimal`, the result type of its factory). The constant of the default
+ * configuration is an {@link UncertainScalar} at run time; a `string` entry is rejected there.
+ */
+type DeclaredScalarConstant = ReturnType<typeof createFineStructure>;
+
+/**
+ * One entry of `values`: a number, a `Unit` (read as its SI magnitude; a CODATA constant
+ * also carries its `.uncertainty`) or a dimensionless CODATA scalar.
+ */
+export type UncertaintyInput = number | UnitInstance | UncertainScalar | DeclaredScalarConstant;
 
 /** Result of {@link propagateUncertainty}. */
 export interface UncertaintyPropagationResult {
@@ -50,7 +80,7 @@ export interface UncertaintyPropagationOptions {
   covariance?: ReadonlyArray<ReadonlyArray<number>>;
   /**
    * Relative central-difference step for a function:
-   * `h = relativeStep * max(|x|, 1e-30)`. Default `1e-6`.
+   * `h = relativeStep * |x|`, or `relativeStep` when `x` is exactly 0. Default `1e-6`.
    * A string expression uses the symbolic derivative and rejects this option.
    */
   relativeStep?: number;
@@ -73,6 +103,43 @@ function asFiniteNumber(label: string, value: unknown): number {
   return value;
 }
 
+/** One entry of `values` as the SI number the expression reads, and its own sigma if it has one. */
+interface Reading {
+  readonly value: number;
+  readonly sigma?: number;
+}
+
+/**
+ * The reading of one entry of `values`.
+ *
+ * A `Unit` is read as its SI magnitude (`Unit.value`). Its `.uncertainty` is stated in the
+ * unit the constant is written in (`GeV^-2` for `fermiCoupling`), so it is scaled by
+ * SI magnitude / written magnitude to give an SI sigma. A dimensionless scalar is read
+ * through `valueOf()`.
+ */
+function readInput(name: string, entry: unknown): Reading {
+  const label = `values.${name}`;
+  if (typeof entry === 'number') return { value: asFiniteNumber(label, entry) };
+  if (typeof entry !== 'object' || entry === null) {
+    return { value: asFiniteNumber(label, entry) };
+  }
+  const stated = (entry as { uncertainty?: unknown }).uncertainty;
+  if (stated !== undefined && (typeof stated !== 'number' || !(stated >= 0))) {
+    throw new RangeError(`${label}.uncertainty must be a finite number >= 0`);
+  }
+  if (isUnit(entry)) {
+    const unit = entry as UnitInstance;
+    if (unit.value === null) throw new TypeError(`${label} is a unit with no value`);
+    const value = asFiniteNumber(label, Number(unit.value));
+    if (stated === undefined) return { value };
+    const written = Number(unit.toNumeric());
+    const scale = written === 0 || !Number.isFinite(written) ? 1 : value / written;
+    return { value, sigma: stated * scale };
+  }
+  if (stated === undefined) return { value: asFiniteNumber(label, entry) };
+  return { value: asFiniteNumber(label, Number(entry)), sigma: stated };
+}
+
 function partialDerivative(expr: string, name: string, values: Record<string, number>): number {
   const node = derivative(expr, name) as EvaluableDerivative;
   return asFiniteNumber(`partial of "${expr}" with respect to "${name}"`, node.evaluate(values));
@@ -85,7 +152,9 @@ function centralPartial(
   relativeStep: number
 ): number {
   const x = point[name];
-  const h = relativeStep * Math.max(Math.abs(x), 1e-30);
+  // Relative to the input, so the step follows a constant of any size (planckTime is 5e-44).
+  // An input of exactly zero has no scale; it takes an absolute step of `relativeStep`.
+  const h = relativeStep * (x === 0 ? 1 : Math.abs(x));
   const plus = asFiniteNumber(
     `partial of function with respect to "${name}"`,
     f({ ...point, [name]: x + h })
@@ -127,7 +196,9 @@ function curvatureRatio(
  *
  * @param expr - Expression in the names of `values` (for example `'x * y'`),
  *   or a function of that same record.
- * @param values - Point at which `f` and `∇f` are evaluated.
+ * @param values - Point at which `f` and `∇f` are evaluated, keyed by input name. An entry
+ *   is a number or a CODATA constant (see the header). The function and the expression
+ *   receive the SI magnitude of each constant.
  * @param sigmas - Independent 1σ uncertainties, keyed like `values`. Omitted
  *   keys contribute no variance. Do not pass this together with
  *   `options.covariance`.
@@ -135,7 +206,7 @@ function curvatureRatio(
  */
 export function propagateUncertainty(
   expr: UncertaintyExpression,
-  values: Readonly<Record<string, number>>,
+  values: Readonly<Record<string, UncertaintyInput>>,
   sigmas?: Readonly<Record<string, number>>,
   options?: UncertaintyPropagationOptions
 ): UncertaintyPropagationResult {
@@ -152,14 +223,20 @@ export function propagateUncertainty(
   if (isFunction && (!(relativeStep > 0) || !Number.isFinite(relativeStep))) {
     throw new TypeError('relativeStep must be a positive finite number');
   }
-  if (values === null || typeof values !== 'object') {
-    throw new TypeError('values must be an object of finite numbers');
+  if (values === null || typeof values !== 'object' || Array.isArray(values) || isUnit(values)) {
+    throw new TypeError(
+      'values must be an object that maps each input name to a number or a constant, ' +
+        'for example { m: electronMass }; the function receives that object as its argument'
+    );
   }
 
   const names = Object.keys(values);
   const point: Record<string, number> = {};
+  const ownSigma: Record<string, number> = {};
   for (const name of names) {
-    point[name] = asFiniteNumber(`values.${name}`, values[name]);
+    const reading = readInput(name, values[name]);
+    point[name] = reading.value;
+    if (reading.sigma !== undefined) ownSigma[name] = reading.sigma;
   }
 
   const covariance = options?.covariance;
@@ -210,15 +287,21 @@ export function propagateUncertainty(
           throw new TypeError(`sigmas.${key} has no matching value`);
         }
       }
-      for (let i = 0; i < names.length; i++) {
-        const name = names[i];
-        if (!Object.prototype.hasOwnProperty.call(sigmas, name)) continue;
-        const sigma = asFiniteNumber(`sigmas.${name}`, sigmas[name]);
+    }
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i];
+      let sigma: number;
+      if (sigmas !== undefined && Object.prototype.hasOwnProperty.call(sigmas, name)) {
+        sigma = asFiniteNumber(`sigmas.${name}`, sigmas[name]);
         if (sigma < 0) {
           throw new RangeError(`sigmas.${name} must be >= 0`);
         }
-        variance += (gradient[i] * sigma) ** 2;
+      } else if (Object.prototype.hasOwnProperty.call(ownSigma, name)) {
+        sigma = ownSigma[name];
+      } else {
+        continue;
       }
+      variance += (gradient[i] * sigma) ** 2;
     }
   }
 

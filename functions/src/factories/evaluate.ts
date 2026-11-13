@@ -218,7 +218,9 @@ export interface PhysicsEvaluateOptions {
    * Bare `e` stays Euler's number; use `e0` or `elementaryCharge` for the
    * elementary charge. Pass `charge: 'scalar'` so `e0` is the plain SI
    * magnitude for dimensionless formulas such as `1 - e0^2`.
-   * Default `false`: only the usual math scope applies.
+   * Default `false`: only the usual math scope applies, where `G`, `c`, and `hbar`
+   * read as the units gauss, speed of light, and hectobar. With `true`, they read as
+   * the constants, so `5 G to T` and `1 hbar to Pa` no longer work.
    */
   physics?: boolean;
   /**
@@ -324,6 +326,14 @@ function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOpt
 
 /**
  * Evaluate a math expression string against the full activated math scope.
+ *
+ * In the default scope, a short symbol that names a unit reads as that unit: `G` is the
+ * gauss, `hbar` is the hectobar (bar with the prefix `h`), `c` is the speed of light as a
+ * unit (as in `GeV/c^2`), and `h` is the hour. `5 G to T` and `1 hbar to Pa` depend on
+ * that reading, so the default does not bind these letters to constants. Use
+ * `{ physics: true }` (or {@link physicsScope}) to bind `G`, `c`, `hbar`, `e0`, and
+ * `elementaryCharge` to the CODATA constants. The long names (`gravitationConstant`,
+ * `speedOfLight`, `reducedPlanckConstant`, ...) are in the default scope.
  *
  * @param expr - Expression string (e.g., '2 + 3', 'sin(pi/2)', 'x^2')
  * @param scope - Optional variable bindings (e.g., { x: 3 })
