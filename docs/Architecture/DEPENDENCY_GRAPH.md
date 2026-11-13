@@ -4685,7 +4685,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`
+- Interfaces: `CovLayoutOptions`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`
 - Functions: `rankdata`, `spearman`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`
 
 ---
@@ -9328,11 +9328,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                        | Type   |
-| --------------------------- | ------------------------------ | ------ |
-| `./fft.js`                  | `fft, ifftReal, ComplexNumber` | Import |
-| `../typed/signal.js`        | `windowFunction`               | Import |
-| `../signal-filter-extra.js` | `butter, filtfilt`             | Import |
+| File                        | Imports              | Type   |
+| --------------------------- | -------------------- | ------ |
+| `./fft.js`                  | `fft, ComplexNumber` | Import |
+| `./fft-core-f64.js`         | `fftExactFloat64`    | Import |
+| `../typed/signal.js`        | `windowFunction`     | Import |
+| `../signal-filter-extra.js` | `butter, filtfilt`   | Import |
 
 **Exports:**
 
@@ -12068,6 +12069,7 @@ graph LR
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
+| `../numeric/ode-step-limit.js`     | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
 | `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
 | `../optimization-extra.js`         | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
 | `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
@@ -13129,10 +13131,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                                                    | Type   |
-| ---------------------- | ---------------------------------------------------------- | ------ |
-| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
-| `../policy.js`         | `wasmPolicyAllows`                                         | Import |
+| File                           | Imports                                                    | Type   |
+| ------------------------------ | ---------------------------------------------------------- | ------ |
+| `../bridges/common.js`         | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
+| `../policy.js`                 | `wasmPolicyAllows`                                         | Import |
+| `../../signal/fft-core-f64.js` | `fftExactFloat64`                                          | Import |
 
 **Exports:**
 
@@ -20254,8 +20257,8 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
+| `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `functions/src/typed/numeric`                          | 9 files      | 10 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
@@ -21161,11 +21164,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1328   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 228451 |
+| Total Lines of Code     | 228726 |
 | Total Exports           | 7256   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
-| Total Interfaces        | 657    |
+| Total Interfaces        | 658    |
 | Total Functions         | 2473   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |

@@ -10252,6 +10252,7 @@
           "histogram"
         ],
         "interfaces": [
+          "CovLayoutOptions",
           "LinRegressResult",
           "CorrelationTestResult",
           "KendallTauTestResult",
@@ -21945,7 +21946,11 @@
         "internalDependencies": [
           {
             "file": "./fft.js",
-            "imports": ["fft", "ifftReal", "ComplexNumber"]
+            "imports": ["fft", "ComplexNumber"]
+          },
+          {
+            "file": "./fft-core-f64.js",
+            "imports": ["fftExactFloat64"]
           },
           {
             "file": "../typed/signal.js",
@@ -27846,6 +27851,10 @@
             "imports": ["rosenbrockSolve"]
           },
           {
+            "file": "../numeric/ode-step-limit.js",
+            "imports": ["odeAcceptedBudget", "odeMaxAttempts", "odeMaxStepsError"]
+          },
+          {
             "file": "../numeric/adaptive-quad.js",
             "imports": ["quad"]
           },
@@ -30395,6 +30404,10 @@
           {
             "file": "../policy.js",
             "imports": ["wasmPolicyAllows"]
+          },
+          {
+            "file": "../../signal/fft-core-f64.js",
+            "imports": ["fftExactFloat64"]
           }
         ],
         "workspaceDependencies": [],
@@ -48392,10 +48405,10 @@
   "statistics": {
     "totalTypeScriptFiles": 1328,
     "totalModules": 82,
-    "totalLinesOfCode": 228451,
+    "totalLinesOfCode": 228726,
     "totalExports": 7256,
     "totalClasses": 62,
-    "totalInterfaces": 657,
+    "totalInterfaces": 658,
     "totalFunctions": 2473,
     "totalTypeGuards": 178,
     "totalEnums": 0,
