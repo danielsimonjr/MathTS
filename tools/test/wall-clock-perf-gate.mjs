@@ -1,10 +1,18 @@
 /**
- * Shared wall-clock A/B gate statistics for CI perf tests (G26 / #876).
+ * Shared wall-clock A/B gate statistics for CI perf gates (G26 / #876).
  *
  * Interleaved ABBA sampling, symmetric warmup, optional GC between rounds, and
- * median + trimmed-mean ratio estimates. Import from isolated Node gate scripts
- * under package test helpers.
+ * a sequential verdict on the median of the per-round ratios. The gate stops
+ * early when a distribution-free confidence bound of the median is on one side
+ * of the limit, and it takes more rounds while the noise is as large as the
+ * margin. At the round cap the median decides: the gate fails when the median
+ * ratio is at or above the limit. Import from the isolated Node gate scripts
+ * under the package test helpers. Limits and round counts live in
+ * `wall-clock-gates.json`, not in the scripts.
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Median of a numeric sample.
@@ -15,22 +23,6 @@ export function median(xs) {
   const s = [...xs].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-
-/**
- * Trimmed mean dropping the same count from each tail (10% default, at least 0).
- * @param {number[]} xs
- * @param {number} [trimFraction]
- */
-export function trimmedMean(xs, trimFraction = 0.1) {
-  if (xs.length === 0) return NaN;
-  const s = [...xs].sort((a, b) => a - b);
-  const trim = Math.min(Math.floor(s.length * trimFraction), Math.floor((s.length - 1) / 2));
-  const slice = trim > 0 ? s.slice(trim, s.length - trim) : s;
-  if (slice.length === 0) return median(s);
-  let sum = 0;
-  for (const x of slice) sum += x;
-  return sum / slice.length;
 }
 
 /**
@@ -112,93 +104,331 @@ export function symmetricWarmup(baseline, candidate, opts = {}) {
 }
 
 /**
- * ABBA timed ratio: baseline vs candidate (candidate/baseline).
- *
- * @param {() => void} baseline
- * @param {() => void} candidate
- * @param {{ samplePairs?: number, gcBetween?: boolean, leadingDiscard?: number }} [opts]
+ * P(X <= k) for X ~ Binomial(n, 1/2).
+ * @param {number} n
+ * @param {number} k
  */
-export function abbaTimedRatio(baseline, candidate, opts = {}) {
-  const samplePairs = opts.samplePairs ?? 16;
-  const gcBetween = opts.gcBetween ?? true;
-  const leadingDiscard = opts.leadingDiscard ?? 0;
-  const baselineMs = [];
-  const candidateMs = [];
-  const candidateRawMs = [];
-  const roundRatios = [];
-
-  for (let r = 0; r < samplePairs; r++) {
-    if (gcBetween && globalThis.gc) globalThis.gc();
-    let b;
-    let c;
-    if (r % 2 === 0) {
-      b = timeMs(baseline, 'baseline');
-      c = timeMs(candidate, 'candidate');
-    } else {
-      c = timeMs(candidate, 'candidate');
-      b = timeMs(baseline, 'baseline');
-    }
-    baselineMs.push(b.wall);
-    candidateMs.push(c.wall);
-    candidateRawMs.push(c.raw);
-    if (b.wall > 0) roundRatios.push(c.wall / b.wall);
+function binomialHalfCdf(n, k) {
+  if (k < 0) return 0;
+  if (k >= n) return 1;
+  let p = 0.5 ** n;
+  let sum = p;
+  for (let i = 0; i < k; i++) {
+    p = (p * (n - i)) / (i + 1);
+    sum += p;
   }
-
-  const baseSlice = baselineMs.slice(leadingDiscard);
-  const candSlice = candidateMs.slice(leadingDiscard);
-  const candRawSlice = candidateRawMs.slice(leadingDiscard);
-  const ratioSlice = roundRatios.slice(leadingDiscard);
-  const ratioOfMedians = median(candSlice) / Math.max(median(baseSlice), Number.EPSILON);
-  const ratioOfTrimmed = trimmedMean(candSlice) / Math.max(trimmedMean(baseSlice), Number.EPSILON);
-  const ratioOfRoundMedians = median(ratioSlice);
-  const ratio = ratioOfRoundMedians;
-
-  const scale = candidateTimeScale();
-  const candidateInjectionFactor =
-    scale === 1 ? 1 : measuredCandidateInjectionFactor(candSlice, candRawSlice);
-
-  return {
-    ratio,
-    ratioOfMedians,
-    ratioOfTrimmed,
-    ratioOfRoundMedians,
-    baselineMs: median(baselineMs),
-    candidateMs: median(candidateMs),
-    candidateRawMs: median(candidateRawMs),
-    candidateInjectionFactor,
-    roundRatios,
-  };
+  return sum;
 }
 
 /**
- * Full gate: warmup then ABBA ratio.
+ * Exact, distribution-free one-sided bounds for the median of `xs`, each at
+ * confidence `1 - alpha` (the sign test). `lower` and `upper` are order
+ * statistics, so one outlier moves neither of them. With too few samples for
+ * the requested `alpha` the bounds are -Infinity and +Infinity.
+ *
+ * @param {number[]} xs finite samples
+ * @param {number} alpha one-sided error rate, in (0, 0.5)
+ * @returns {{ lower: number, upper: number }}
+ */
+export function medianBounds(xs, alpha) {
+  if (!(alpha > 0 && alpha < 0.5)) throw new RangeError(`alpha must be in (0, 0.5), got ${alpha}`);
+  const n = xs.length;
+  if (n > 1000) throw new RangeError(`medianBounds supports at most 1000 samples, got ${n}`);
+  const s = [...xs].sort((a, b) => a - b);
+  // Largest 1-based rank r with P(Binomial(n, 1/2) <= r - 1) <= alpha.
+  let r = 0;
+  while (r + 1 <= n && binomialHalfCdf(n, r) <= alpha) r++;
+  if (r === 0) return { lower: -Infinity, upper: Infinity };
+  return { lower: s[r - 1], upper: s[n - r] };
+}
+
+/**
+ * Verdict from the paired round ratios (candidate / baseline) collected so far.
+ *
+ * - `fail`, conclusive: even the lower confidence bound of the median ratio
+ *   reaches the limit.
+ * - `pass`, conclusive: even the upper confidence bound stays below the limit.
+ * - `continue`: the limit lies inside the interval, and more rounds are allowed.
+ * - at the final look, an interval that still holds the limit is not
+ *   conclusive, and the median decides: `fail` when it is at or above the
+ *   limit, `pass` when it is below. A correct build sits far below its limit,
+ *   so its median at the cap is far below it too; a build whose true ratio is
+ *   above the limit by more than the noise of the median has its median above
+ *   it.
+ *
+ * @param {number[]} roundRatios
+ * @param {{ limit: number, alpha: number, final: boolean }} p
+ */
+export function decideGate(roundRatios, p) {
+  const xs = roundRatios.filter((x) => Number.isFinite(x));
+  if (xs.length < 5) {
+    throw new Error(
+      `wall-clock gate has ${xs.length} valid rounds of ${roundRatios.length}; ` +
+        'the timer resolution is too coarse for this workload'
+    );
+  }
+  const ratio = median(xs);
+  const { lower, upper } = medianBounds(xs, p.alpha);
+  if (lower >= p.limit) return { verdict: 'fail', conclusive: true, ratio, lower, upper };
+  if (upper < p.limit) return { verdict: 'pass', conclusive: true, ratio, lower, upper };
+  if (!p.final) return { verdict: 'continue', conclusive: false, ratio, lower, upper };
+  const verdict = ratio >= p.limit ? 'fail' : 'pass';
+  return { verdict, conclusive: false, ratio, lower, upper };
+}
+
+/**
+ * @typedef {object} SequentialParams
+ * @property {number} limit exclusive upper bound for the median ratio
+ * @property {number} alpha one-sided error rate of each look
+ * @property {number} initialRounds rounds before the first look
+ * @property {number} blockRounds rounds added between looks
+ * @property {number} maxRounds rounds at the final look
+ * @property {number} [discard] leading rounds taken and dropped (JIT settle)
+ */
+
+/**
+ * Throw a RangeError when `p` cannot drive a sequential gate. `discard` is optional.
+ * @param {SequentialParams} p
+ */
+function checkSequentialParams(p) {
+  if (!(p.limit > 0) || !Number.isFinite(p.limit)) throw new RangeError(`bad limit ${p.limit}`);
+  if (!(p.alpha > 0 && p.alpha < 0.5))
+    throw new RangeError(`alpha must be in (0, 0.5), got ${p.alpha}`);
+  for (const key of ['initialRounds', 'blockRounds', 'maxRounds']) {
+    if (!Number.isInteger(p[key]) || p[key] < 1)
+      throw new RangeError(`${key} must be an integer >= 1`);
+  }
+  if (p.maxRounds < p.initialRounds) throw new RangeError('maxRounds must be >= initialRounds');
+  const discard = p.discard ?? 0;
+  if (!Number.isInteger(discard) || discard < 0)
+    throw new RangeError('discard must be an integer >= 0');
+}
+
+/**
+ * Take paired rounds in blocks until the confidence interval of the median
+ * ratio excludes the limit, or `maxRounds` is reached (then the median decides,
+ * see {@link decideGate}). Every round feeds one estimate, and no round is
+ * dropped or repeated: this is one sequential measurement, not a re-run.
+ *
+ * @param {(count: number) => number[]} takeRounds returns `count` new round ratios (NaN for an unusable round)
+ * @param {SequentialParams} p
+ */
+export function sequentialDecision(takeRounds, p) {
+  checkSequentialParams(p);
+  const discard = p.discard ?? 0;
+
+  const all = [...takeRounds(discard + p.initialRounds)];
+  for (;;) {
+    const kept = all.slice(discard);
+    const final = kept.length >= p.maxRounds;
+    const d = decideGate(kept, { limit: p.limit, alpha: p.alpha, final });
+    if (d.verdict !== 'continue') return { ...d, rounds: kept.length, roundRatios: kept };
+    all.push(...takeRounds(Math.min(p.blockRounds, p.maxRounds - kept.length)));
+  }
+}
+
+/**
+ * True when the A/A control is on: the candidate arm runs the baseline function.
+ * A gate must pass in this mode, whatever the machine does.
+ */
+export function aaControl() {
+  const raw = process.env.PERF_GATE_AA;
+  return raw !== undefined && raw !== '' && raw !== '0';
+}
+
+/**
+ * Wall-clock A/B gate with a noise-aware sequential verdict.
+ *
+ * Warms both arms, then times paired ABBA rounds in blocks. The gate fails
+ * early only when the lower confidence bound of the median ratio reaches
+ * `limit`, so a verdict never rests on a sample whose noise is as large as its
+ * margin; such a sample gets more rounds first, up to `maxRounds`, where the
+ * median decides (see {@link decideGate}). `PERF_GATE_CANDIDATE_TIME_SCALE`
+ * multiplies candidate times (injection self-test); `PERF_GATE_AA=1` times the
+ * baseline function as both arms (control).
  *
  * @param {() => void} baseline
  * @param {() => void} candidate
- * @param {{ warmup?: Parameters<typeof symmetricWarmup>[2], sample?: Parameters<typeof abbaTimedRatio>[2], fullWarmupPairs?: number, skipSymmetricWarmup?: boolean }} [opts]
+ * @param {SequentialParams & { skipSymmetricWarmup?: boolean, warmup?: Parameters<typeof symmetricWarmup>[2], fullWarmupPairs?: number, gcBetween?: boolean }} opts
  */
-export function wallClockAbRatio(baseline, candidate, opts = {}) {
-  if (!opts.skipSymmetricWarmup) {
-    symmetricWarmup(baseline, candidate, opts.warmup);
-  }
+export function wallClockAbGate(baseline, candidate, opts) {
+  const cand = aaControl() ? baseline : candidate;
+  if (!opts.skipSymmetricWarmup) symmetricWarmup(baseline, cand, opts.warmup);
   const fullPairs = opts.fullWarmupPairs ?? 4;
   for (let p = 0; p < fullPairs; p++) {
     if (p % 2 === 0) {
       baseline();
-      candidate();
+      cand();
     } else {
-      candidate();
+      cand();
       baseline();
     }
   }
-  return abbaTimedRatio(baseline, candidate, opts.sample);
+
+  const gcBetween = opts.gcBetween ?? false;
+  if (gcBetween && typeof globalThis.gc !== 'function') {
+    throw new Error(
+      'gcBetween needs a gate process started with --expose-gc; ' +
+        'start the gate through run-wall-clock-gates.mjs (tools/test/perf-gate-spawn.mjs)'
+    );
+  }
+  const discard = opts.discard ?? 0;
+  const baselineMs = [];
+  const candidateMs = [];
+  const candidateRawMs = [];
+  let round = 0;
+  const takeRounds = (count) => {
+    const out = [];
+    for (let i = 0; i < count; i++, round++) {
+      if (gcBetween) globalThis.gc();
+      let b;
+      let c;
+      if (round % 2 === 0) {
+        b = timeMs(baseline, 'baseline');
+        c = timeMs(cand, 'candidate');
+      } else {
+        c = timeMs(cand, 'candidate');
+        b = timeMs(baseline, 'baseline');
+      }
+      if (round >= discard) {
+        baselineMs.push(b.wall);
+        candidateMs.push(c.wall);
+        candidateRawMs.push(c.raw);
+      }
+      out.push(b.wall > 0 ? c.wall / b.wall : NaN);
+    }
+    return out;
+  };
+
+  const decision = sequentialDecision(takeRounds, opts);
+  const scale = candidateTimeScale();
+  return {
+    ...decision,
+    limit: opts.limit,
+    alpha: opts.alpha,
+    aa: aaControl(),
+    baselineMs: median(baselineMs),
+    candidateMs: median(candidateMs),
+    candidateRawMs: median(candidateRawMs),
+    candidateInjectionFactor:
+      scale === 1 ? 1 : measuredCandidateInjectionFactor(candidateMs, candidateRawMs),
+  };
+}
+
+/** Default location of the gate list; `PERF_GATE_CONFIG` overrides it. */
+export const DEFAULT_GATE_CONFIG = join(
+  dirname(fileURLToPath(import.meta.url)),
+  'wall-clock-gates.json'
+);
+
+/** Path of the gate list in use. */
+export function gateConfigPath() {
+  const raw = process.env.PERF_GATE_CONFIG;
+  return raw !== undefined && raw !== '' ? raw : DEFAULT_GATE_CONFIG;
+}
+
+/** Every key that a gate of the list may set (after `defaults` are applied). */
+const GATE_KEYS = new Set([
+  'name',
+  'script',
+  'needs',
+  'limit',
+  'alpha',
+  'initialRounds',
+  'blockRounds',
+  'maxRounds',
+  'timeoutMs',
+  'gcBetween',
+  'discard',
+  'selfTestScale',
+]);
+
+/**
+ * Read and validate the gate list. Every gate is `defaults` overlaid with its
+ * own keys. A missing or malformed file, an unknown key and a bad value throw;
+ * nothing falls back to a built-in value, so a misspelled key cannot go
+ * unnoticed.
+ *
+ * `selfTestScale` (optional) is the candidate slowdown that the self-test
+ * injects, for a gate whose real ratio is far below its limit.
+ *
+ * @param {string} [path]
+ * @returns {Array<SequentialParams & { name: string, script: string, needs: string[], timeoutMs: number, gcBetween: boolean, selfTestScale?: number }>}
+ */
+export function loadGateList(path = gateConfigPath()) {
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    throw new Error(`wall-clock gate list unreadable: ${path}: ${e.message}`);
+  }
+  if (!Array.isArray(parsed.gates) || parsed.gates.length === 0) {
+    throw new Error(`wall-clock gate list ${path} has no "gates" array`);
+  }
+  const defaults = parsed.defaults ?? {};
+  const names = new Set();
+  return parsed.gates.map((g) => {
+    const gate = { ...defaults, ...g };
+    const where = `${path}: gate ${JSON.stringify(g.name)}`;
+    for (const key of Object.keys(gate)) {
+      if (!GATE_KEYS.has(key)) throw new Error(`${where}: unknown key ${JSON.stringify(key)}`);
+    }
+    if (typeof gate.name !== 'string' || gate.name === '')
+      throw new Error(`${where}: name missing`);
+    if (names.has(gate.name)) throw new Error(`${where}: duplicate name`);
+    names.add(gate.name);
+    if (typeof gate.script !== 'string' || gate.script === '')
+      throw new Error(`${where}: script missing`);
+    if (!Array.isArray(gate.needs) || !gate.needs.every((n) => typeof n === 'string')) {
+      throw new Error(`${where}: needs must be an array of paths`);
+    }
+    for (const key of [
+      'limit',
+      'alpha',
+      'initialRounds',
+      'blockRounds',
+      'maxRounds',
+      'timeoutMs',
+    ]) {
+      if (typeof gate[key] !== 'number' || !Number.isFinite(gate[key]) || gate[key] <= 0) {
+        throw new Error(`${where}: ${key} must be a positive number`);
+      }
+    }
+    try {
+      checkSequentialParams(gate);
+    } catch (e) {
+      throw new Error(`${where}: ${e.message}`);
+    }
+    if (typeof gate.gcBetween !== 'boolean')
+      throw new Error(`${where}: gcBetween must be true or false`);
+    if (
+      'selfTestScale' in gate &&
+      !(Number.isFinite(gate.selfTestScale) && gate.selfTestScale > 1)
+    ) {
+      throw new Error(`${where}: selfTestScale must be a number greater than 1`);
+    }
+    return gate;
+  });
 }
 
 /**
- * Whether a measured ratio is strictly below the gate limit.
- * @param {number} ratio
- * @param {number} limit exclusive upper bound
+ * One gate of the list, by name.
+ * @param {string} name
+ * @param {string} [path]
  */
-export function gatePasses(ratio, limit) {
-  return Number.isFinite(ratio) && ratio < limit;
+export function loadGateConfig(name, path = gateConfigPath()) {
+  const gate = loadGateList(path).find((g) => g.name === name);
+  if (!gate) throw new Error(`wall-clock gate "${name}" is not in ${path}`);
+  return gate;
+}
+
+/**
+ * Print the one JSON line that a gate script owes the runner.
+ * @param {{ name: string }} gate
+ * @param {ReturnType<typeof wallClockAbGate>} result
+ * @param {Record<string, unknown>} [extra]
+ */
+export function reportGate(gate, result, extra = {}) {
+  const { roundRatios: _rounds, ...summary } = result;
+  process.stdout.write(JSON.stringify({ gate: gate.name, ...summary, ...extra }) + '\n');
 }

@@ -3102,7 +3102,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Max |entry| when every entry is a finite number.
+### `functions/src/algebra/solver/lusolve.ts` - Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
 
 **Workspace Dependencies:**
 
@@ -3113,16 +3113,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                               | Imports                                            | Type               |
-| ---------------------------------- | -------------------------------------------------- | ------------------ |
-| `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix` | Import             |
-| `../../utils/factory.js`           | `factory`                                          | Import             |
-| `./utils/solveValidation.js`       | `createSolveValidation`                            | Import             |
-| `../sparse/csIpvec.js`             | `csIpvec`                                          | Import             |
-| `../../core/function/typed.js`     | `TypedFunction`                                    | Import (type-only) |
-| `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                               | Import             |
-| `./pivot-tolerance.js`             | `LUSOLVE_SINGULAR_MESSAGE`                         | Import             |
-| `./validate-u-pivots.js`           | `validateUpperTriangularPivots`                    | Import             |
+| File                               | Imports                                                              | Type               |
+| ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
+| `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
+| `../../utils/factory.js`           | `factory`                                                            | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation`                                              | Import             |
+| `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
+| `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
+| `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                                                 | Import             |
+| `./pivot-tolerance.js`             | `LUSOLVE_SINGULAR_MESSAGE`                                           | Import             |
+| `./validate-u-pivots.js`           | `validatePackedUpperTriangularPivots, validateUpperTriangularPivots` | Import             |
 
 **Exports:**
 
@@ -3200,7 +3200,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `validateUpperTriangularPivots`
+- Functions: `validateUpperTriangularPivots`, `validatePackedUpperTriangularPivots`
 
 ---
 
@@ -20752,12 +20752,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1310   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 224502 |
-| Total Exports           | 7160   |
+| Total Lines of Code     | 224535 |
+| Total Exports           | 7161   |
 | Total Re-exports        | 3111   |
 | Total Classes           | 61     |
 | Total Interfaces        | 613    |
-| Total Functions         | 2437   |
+| Total Functions         | 2438   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 662    |

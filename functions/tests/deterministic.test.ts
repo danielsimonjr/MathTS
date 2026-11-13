@@ -33,6 +33,22 @@ function seeded(n: number, lo: number, hi: number, seed: number): Float64Array {
 }
 const bits = (x: ArrayLike<number>): BigUint64Array =>
   new BigUint64Array(Float64Array.from(x).buffer);
+// True when both arrays hold the same IEEE-754 bit patterns. The three 2^20-element checks use this
+// and not `expect(bits(a)).toEqual(bits(b))`: vitest compares a BigUint64Array element by element
+// and boxes every element as a BigInt, which took 4.0 s (Node 26) to 6.0 s (Node 20) for two equal
+// arrays of 2^20 and pushed these tests past the 30 s timeout in the full suite. A native
+// byte comparison takes 1 ms.
+function sameBits(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
+  const x = a instanceof Float64Array ? a : Float64Array.from(a);
+  const y = b instanceof Float64Array ? b : Float64Array.from(b);
+  return (
+    x.length === y.length &&
+    Buffer.compare(
+      new Uint8Array(x.buffer, x.byteOffset, x.byteLength),
+      new Uint8Array(y.buffer, y.byteOffset, y.byteLength)
+    ) === 0
+  );
+}
 function jsOnly<T>(f: () => T): T {
   const restore = overrideWasmPolicy({ '*': null });
   try {
@@ -100,21 +116,21 @@ describe('WASM policy in deterministic mode', () => {
 
   it('abs through WASM equals the JS bits', () => {
     const a = seeded(N, -1e6, 1e6, 1);
-    const js = bits(jsOnly(() => abs(a) as Float64Array));
+    const js = jsOnly(() => abs(a) as Float64Array);
     setDeterministic(true);
     expect(wasmPolicyAllows('array_abs_ptr', N)).toBe(true);
-    expect(bits(abs(a) as Float64Array)).toEqual(js);
+    expect(sameBits(abs(a) as Float64Array, js)).toBe(true);
   });
 
   it('sort is forced to JS: the WASM sort orders -0 and +0 differently', () => {
     const a = seeded(N, -1e6, 1e6, 2);
     for (let i = 8; i < 4096; i += 2) a[i] = i % 4 === 0 ? 0 : -0;
-    const js = bits(jsOnly(() => sortF64Dispatch(a.slice())));
+    const js = jsOnly(() => sortF64Dispatch(a.slice()));
     const restore = overrideWasmPolicy({ sort_f64: { min: 0 } });
     try {
-      expect(bits(sortF64Dispatch(a.slice()))).not.toEqual(js);
+      expect(sameBits(sortF64Dispatch(a.slice()), js)).toBe(false);
       setDeterministic(true);
-      expect(bits(sortF64Dispatch(a.slice()))).toEqual(js);
+      expect(sameBits(sortF64Dispatch(a.slice()), js)).toBe(true);
     } finally {
       restore();
     }
@@ -122,13 +138,13 @@ describe('WASM policy in deterministic mode', () => {
 
   it('sin is forced to JS and equals the JS bits', () => {
     const a = seeded(N, -10, 10, 3);
-    const js = bits(jsOnly(() => sin(a) as Float64Array));
+    const js = jsOnly(() => sin(a) as Float64Array);
     // Off: the policy dispatches sin to WASM at this size and the bits differ (measured).
     const restore = overrideWasmPolicy({ array_sin_ptr: { min: 0 } });
     try {
-      expect(bits(sin(a) as Float64Array)).not.toEqual(js);
+      expect(sameBits(sin(a) as Float64Array, js)).toBe(false);
       setDeterministic(true);
-      expect(bits(sin(a) as Float64Array)).toEqual(js);
+      expect(sameBits(sin(a) as Float64Array, js)).toBe(true);
     } finally {
       restore();
     }

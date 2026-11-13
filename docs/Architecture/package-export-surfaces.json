@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12",
+  "generated": "2026-11-13",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4121,6 +4121,7 @@
       "validateDimensionVector",
       "validateIndex",
       "validateIndexSourceSize",
+      "validatePackedUpperTriangularPivots",
       "validateUpperTriangularPivots",
       "valueAndDerivativeAt",
       "vander",

@@ -3,10 +3,6 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { performance } from 'node:perf_hooks';
-import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
-import { nodeBinary } from './helpers/node-binary.js';
 import { sort, median, lusolve, sin, loadWasm, isWasmLoaded } from '../src/index.js';
 import { wasmPolicyAllows } from '../src/wasm/policy.js';
 
@@ -23,12 +19,16 @@ describe('G26 #712 sort on number[]', () => {
     expect(a[2]).toBe(3);
   });
 
-  it('n=1e5 sort is within 1.5× native Float64Array.sort (issue #712)', () => {
-    const gate = fileURLToPath(new URL('./helpers/sort-number-perf-gate.mjs', import.meta.url));
-    const raw = execIsolatedPerfGate(nodeBinary(), gate);
-    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
-    expect(Number.isFinite(checksum)).toBe(true);
-    expect(ratio).toBeLessThan(1.5);
+  // The speed bound (within 1.5x of Float64Array.sort, issue #712) is the "sort-number" gate of
+  // tools/test/wall-clock-gates.json. It runs in its own CI step, not in this suite.
+  it('n=1e5 sort equals the native Float64Array.sort order', () => {
+    const n = 100_000;
+    const src: number[] = [];
+    for (let i = 0; i < n; i++) src.push(Math.sin(i));
+    const want = Array.from(new Float64Array(src).sort());
+    const got = src.slice();
+    sort(got);
+    expect(got).toEqual(want);
   });
 });
 
@@ -38,42 +38,29 @@ describe('G26 #712 median quickselect path', () => {
     expect(median(v)).toBe(3);
   });
 
-  it('n=1e6 median is ≪ full sort (quickselect gate)', () => {
-    const n = 1_000_000;
-    const data = Array.from({ length: n }, (_, i) => Math.sin(i));
-    for (let w = 0; w < 2; w++) {
-      median(data.slice());
-      const s = data.slice();
-      s.sort((a, b) => a - b);
-    }
-    const medTimes: number[] = [];
-    const sortTimes: number[] = [];
-    for (let r = 0; r < 5; r++) {
-      const t0 = performance.now();
-      median(data);
-      medTimes.push(performance.now() - t0);
-      const s = data.slice();
-      const t1 = performance.now();
-      s.sort((a, b) => a - b);
-      sortTimes.push(performance.now() - t1);
-    }
-    medTimes.sort((a, b) => a - b);
-    sortTimes.sort((a, b) => a - b);
-    const med = medTimes[Math.floor(medTimes.length / 2)];
-    const sort = sortTimes[Math.floor(sortTimes.length / 2)];
-    expect(med).toBeLessThan(sort * 0.25);
-  }, 120_000);
+  // The speed bound (under 0.25x of a full sort) is the "median-vs-sort" gate of
+  // tools/test/wall-clock-gates.json. It runs in its own CI step, not in this suite.
+  it('n=1e5 median equals the middle of the sorted data', () => {
+    const odd = Array.from({ length: 100_001 }, (_, i) => Math.sin(i));
+    const sortedOdd = odd.slice().sort((a, b) => a - b);
+    expect(median(odd)).toBe(sortedOdd[50_000]);
+    const even = odd.slice(0, 100_000);
+    const sortedEven = even.slice().sort((a, b) => a - b);
+    expect(median(even)).toBeCloseTo((sortedEven[49_999] + sortedEven[50_000]) / 2, 15);
+  });
+
+  it('median does not reorder its input', () => {
+    const data = [5, 3, 9, 1, 7];
+    median(data);
+    expect(data).toEqual([5, 3, 9, 1, 7]);
+  });
 });
 
 describe('G26 #694 lusolve uses packed matrix lu', () => {
-  it('n=1000 ABBA median ≤ 1.2× matrix lu+luSolve (isolated Node gate)', () => {
-    const gate = fileURLToPath(new URL('./helpers/lusolve-perf-gate.mjs', import.meta.url));
-    const raw = execIsolatedPerfGate(nodeBinary(), gate);
-    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
-    expect(Number.isFinite(checksum)).toBe(true);
-    expect(ratio).toBeLessThan(1.2);
-  }, 120_000);
-
+  // The speed bound (within 1.2x of matrix lu + luSolve) is the "lusolve" gate of
+  // tools/test/wall-clock-gates.json. It runs in its own CI step, not in this suite. The cause
+  // of a slowdown that the gate would catch, an extra nested copy of U, is pinned here by
+  // dogfood-g05-lusolve-packed.test.ts (a spy test that no toArray or get call happens).
   it('2×2 closed form', () => {
     const x = lusolve(
       [

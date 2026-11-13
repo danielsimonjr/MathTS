@@ -158,9 +158,6 @@ jobs:
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
-      - name: Wall-clock perf gate tests
-        run: node --test tools/test/wall-clock-perf-gate.test.mjs
-
       - name: Scalar-search harness tests
         run: node --test tools/test/scalar-search-harness.test.mjs
 
@@ -189,10 +186,21 @@ jobs:
       - name: Release script tests
         run: node --test tools/test/ensure-package-releases.test.mjs
 
+  # This job also runs the wall-clock perf gates (tools/test/wall-clock-gates.json) and the
+  # self-test of the gates. A wall-clock verdict does not belong in the Test or Coverage jobs:
+  # `bun run test` runs about 48 package processes at once, and each of them shares the two
+  # cores of the runner with the gate. Here a gate runs alone, one gate at a time, and its
+  # verdict comes from a noise-aware sequential rule (see tools/test/wall-clock-perf-gate.mjs).
+  # The gates need the built dist of functions, matrix and compat, and one Node. This job sets
+  # up Node 22 itself, so every gate and the self-test run on that Node; the Test matrix (Node
+  # 20 and 22) checks correctness only. A gate that finds its noise as large as its margin
+  # takes more rounds, up to `maxRounds`. When every gate decides at its first look the step
+  # takes about a minute; a gate at its cap takes up to four times its first look, so the
+  # worst case is a few minutes.
   benchmark-baseline:
     name: Benchmark baseline
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -205,16 +213,39 @@ jobs:
         with:
           bun-version-file: package.json
 
+      - name: Setup Node.js 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build functions (pulls core + wasm)
-        run: bunx turbo build --filter=@danielsimonjr/mathts-functions
+      - name: Build functions, matrix and compat (pulls core + wasm)
+        run: >-
+          bunx turbo build
+          --filter=@danielsimonjr/mathts-functions
+          --filter=@danielsimonjr/mathts-matrix
+          --filter=@danielsimonjr/mathts-compat
 
       - name: Sprint baseline fingerprints
         run: |
           node --test tools/test/sprint-baseline.test.mjs
           node tools/benchmarks/sprint-baseline.mjs --check
+
+      # The self-test runs each gate with an injected slowdown (it must fail) and with the
+      # A/A control (it must measure a ratio of about 1). It runs before the gates, so a broken
+      # harness shows first.
+      - name: Wall-clock perf gate tests
+        run: node --test tools/test/wall-clock-perf-gate.test.mjs
+
+      # Plain `node`: under `bun run` the name `node` resolves to Bun, and a gate would time Bun.
+      # The runner prints one line for each gate: the median ratio, its confidence bounds, the
+      # headroom (limit / median) and the number of rounds. A gate fails early when the lower
+      # bound reaches the limit. A gate that reaches its round cap with the limit still inside
+      # the interval fails when its median is at or above the limit.
+      - name: Wall-clock perf gates
+        run: node tools/test/run-wall-clock-gates.mjs
 
   test:
     name: Test

@@ -1,10 +1,15 @@
 /**
  * Isolated Node gate for #693: DenseMatrix.multiply vs ml-matrix mmul at n=1000.
- * stdout: one JSON line { ratio, mathTsMs, mlMs, checksum }.
+ * Limit and round counts: tools/test/wall-clock-gates.json ("gemm").
+ * stdout: one JSON line, see reportGate.
  */
 import { DenseMatrix } from '../../dist/index.js';
 import { Matrix as MLMatrix } from 'ml-matrix';
-import { gatePasses, wallClockAbRatio } from '../../../tools/test/wall-clock-perf-gate.mjs';
+import {
+  loadGateConfig,
+  reportGate,
+  wallClockAbGate,
+} from '../../../tools/test/wall-clock-perf-gate.mjs';
 
 function randSpd(n, seed) {
   let s = seed;
@@ -24,6 +29,7 @@ function randSpd(n, seed) {
   return A;
 }
 
+const gate = loadGateConfig('gemm');
 const n = 1000;
 const A = randSpd(n, 42);
 const B = randSpd(n, 99);
@@ -34,7 +40,7 @@ const BM = new MLMatrix(B);
 
 let checksum = 0;
 
-const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAbRatio(
+const result = wallClockAbGate(
   () => {
     AM.mmul(BM);
     checksum += 1;
@@ -43,20 +49,7 @@ const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAb
     AD.multiply(BD);
     checksum += 1;
   },
-  {
-    skipSymmetricWarmup: true,
-    fullWarmupPairs: 4,
-    sample: { samplePairs: 9, gcBetween: false },
-  }
+  { ...gate, skipSymmetricWarmup: true, fullWarmupPairs: 4 }
 );
 
-process.stdout.write(
-  JSON.stringify({
-    ratio,
-    mathTsMs: candidateMs,
-    mlMs: baselineMs,
-    checksum,
-    gateWouldPass: gatePasses(ratio, 1.15),
-    candidateInjectionFactor,
-  }) + '\n'
-);
+reportGate(gate, result, { checksum });

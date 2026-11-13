@@ -3,20 +3,27 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { execIsolatedPerfGate } from '../../tools/test/perf-gate-spawn.mjs';
 import { DenseMatrix, matMul, svd } from '../src/index.js';
 import { Matrix as MLMatrix, SVD as MLSvd } from 'ml-matrix';
-import { nodeBinary } from './helpers/node-binary.js';
 
 describe('G26 #693 DenseMatrix.multiply vs ml-matrix', () => {
-  it('n=1000 ABBA median ≤ 1.15× ml-matrix mmul (isolated Node gate)', () => {
-    const gate = fileURLToPath(new URL('./helpers/gemm-perf-gate.mjs', import.meta.url));
-    const raw = execIsolatedPerfGate(nodeBinary(), gate);
-    const { ratio, checksum } = JSON.parse(raw) as { ratio: number; checksum: number };
-    expect(checksum).toBeGreaterThan(0);
-    expect(ratio).toBeLessThan(1.15);
-  }, 180_000);
+  // The speed bound against ml-matrix mmul is the "gemm" gate of
+  // tools/test/wall-clock-gates.json. It runs in its own CI step, not in this suite.
+  it('n=48 product matches ml-matrix mmul', () => {
+    const n = 48;
+    let s = 42;
+    const rnd = () => {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 0xffffffff;
+    };
+    const A = Array.from({ length: n }, () => Array.from({ length: n }, rnd));
+    const B = Array.from({ length: n }, () => Array.from({ length: n }, rnd));
+    const got = DenseMatrix.fromArray(A).multiply(DenseMatrix.fromArray(B)).toArray();
+    const want = new MLMatrix(A).mmul(new MLMatrix(B)).to2DArray();
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) expect(got[i][j]).toBeCloseTo(want[i][j], 10);
+    }
+  });
 
   it('matMul nested matches DenseMatrix.multiply on a spot check', () => {
     const A = [

@@ -1,11 +1,17 @@
 /**
  * Isolated Node gate for G26 #694: lusolve vs matrix lu+luSolve at n=1000.
- * stdout: one JSON line { ratio, solveMs, facMs, checksum }.
+ * Limit and round counts: tools/test/wall-clock-gates.json ("lusolve").
+ * stdout: one JSON line, see reportGate.
  */
 import { lusolve } from '../../dist/index.js';
 import { lu, luSolve } from '@danielsimonjr/mathts-matrix';
-import { gatePasses, wallClockAbRatio } from '../../../tools/test/wall-clock-perf-gate.mjs';
+import {
+  loadGateConfig,
+  reportGate,
+  wallClockAbGate,
+} from '../../../tools/test/wall-clock-perf-gate.mjs';
 
+const gate = loadGateConfig('lusolve');
 const n = 1000;
 let s = 42;
 const rnd = () => {
@@ -25,7 +31,7 @@ const b = Array.from({ length: n }, (_, i) => 0.1 * (i + 1));
 
 let checksum = 0;
 
-const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAbRatio(
+const result = wallClockAbGate(
   () => {
     const x = luSolve(lu(M), b);
     checksum += (x[0]?.[0] ?? 0) + (x[n - 1]?.[0] ?? 0);
@@ -34,20 +40,7 @@ const { ratio, baselineMs, candidateMs, candidateInjectionFactor } = wallClockAb
     const x = lusolve(M, b);
     checksum += (x[0]?.[0] ?? 0) + (x[n - 1]?.[0] ?? 0);
   },
-  {
-    skipSymmetricWarmup: true,
-    fullWarmupPairs: 4,
-    sample: { samplePairs: 9, gcBetween: false },
-  }
+  { ...gate, skipSymmetricWarmup: true, fullWarmupPairs: 4 }
 );
 
-process.stdout.write(
-  JSON.stringify({
-    ratio,
-    solveMs: candidateMs,
-    facMs: baselineMs,
-    checksum,
-    gateWouldPass: gatePasses(ratio, 1.2),
-    candidateInjectionFactor,
-  }) + '\n'
-);
+reportGate(gate, result, { checksum });

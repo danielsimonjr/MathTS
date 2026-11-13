@@ -37,6 +37,30 @@ function failSingular(): never {
   throw new Error(LUSOLVE_SINGULAR_MESSAGE);
 }
 
+/**
+ * Packed twin of {@link validateUpperTriangularPivots} for a row-major `n x n`
+ * `Float64Array` factor (the storage of a matrix-package `DenseMatrix`). It applies the
+ * same rule in one pass over the storage and builds no nested array: every entry must
+ * be finite, and no diagonal entry may be zero or smaller than `LU_PIVOT_TOL` times
+ * the largest absolute entry.
+ *
+ * @param data Row-major factor storage of length `n * n`.
+ * @param n Number of rows and columns.
+ * @throws {Error} with {@link LUSOLVE_SINGULAR_MESSAGE} when the factor is unusable.
+ */
+export function validatePackedUpperTriangularPivots(data: Float64Array, n: number): void {
+  let scale = 0;
+  for (let k = 0; k < data.length; k++) {
+    const v = data[k];
+    if (!Number.isFinite(v)) failSingular();
+    const a = Math.abs(v);
+    if (a > scale) scale = a;
+  }
+  for (let i = 0; i < n; i++) {
+    if (isBadLuFactorPivot(data[i * n + i], scale)) failSingular();
+  }
+}
+
 /** Max |finite number| in a dense factor. Non-finite numbers fail before this is used. */
 function denseNumberScale(data: unknown[][]): number {
   let scale = 0;
