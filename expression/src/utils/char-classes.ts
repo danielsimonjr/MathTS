@@ -3,7 +3,7 @@
  * variable-name check. Every rule about a non-ASCII symbol lives here.
  *
  * - Radical signs (`√ ∛ ∜`) are prefix operators. The parser builds a function call.
- * - Operator signs (`· × ÷ −`) are binary operators. The tokenizer maps each to its ASCII token.
+ * - Operator signs (`· ⋅ × ÷ −`) are binary operators. The tokenizer maps each to its ASCII token.
  * - Mathematical digits (U+1D7CE to U+1D7FF) are not letters and not numbers. The
  *   tokenizer rejects them at parse time, so parse and evaluate agree.
  */
@@ -25,6 +25,7 @@ export const RADICAL_SYMBOLS: Readonly<Record<string, RadicalSpec>> = Object.fre
 /** Operator signs and the ASCII token each one stands for. */
 export const OPERATOR_SYMBOLS: Readonly<Record<string, string>> = Object.freeze({
   '·': '*',
+  '⋅': '*',
   '×': '*',
   '÷': '/',
   '−': '-',

@@ -1307,13 +1307,15 @@ export const createParse = /* #__PURE__ */ factory(
           (state.tokenType === TOKENTYPE.NUMBER &&
             !isConstantNode(last) &&
             (!isOperatorNode(last) || (last as unknown as { op: string }).op === '!')) ||
-          state.token === '('
+          state.token === '(' ||
+          hasOwnProperty(RADICAL_SYMBOLS, state.token)
         ) {
           // parse implicit multiplication
           //
           // symbol:      implicit multiplication like '2a', '(2+3)a', 'a b'
           // number:      implicit multiplication like '(2+3)2'
           // parenthesis: implicit multiplication like '2(3+4)', '(3+4)(1+2)'
+          // radical:     implicit multiplication like '2√3', 'a√b', '√2√3'
           last = parseRule2(state);
           node = new OperatorNode('*', 'multiply', [node, last], true /* implicit */);
         } else {
@@ -1426,6 +1428,26 @@ export const createParse = /* #__PURE__ */ factory(
       }
     }
 
+    /**
+     * Drop grouping parentheses that the tree does not need: the operand itself, and an atomic
+     * base of ^ or !. A parenthesis around a compound base stays: it keeps toString() correct.
+     */
+    function stripGroupingParens(node: MathNode): MathNode {
+      if (isParenthesisNode(node)) {
+        return (node as unknown as { content: MathNode }).content;
+      }
+      if (isOperatorNode(node)) {
+        const { op, fn, args } = node as unknown as { op: string; fn: string; args: MathNode[] };
+        if ((op === '^' || op === '!') && isParenthesisNode(args[0])) {
+          const inner = (args[0] as unknown as { content: MathNode }).content;
+          if (isConstantNode(inner) || isSymbolNode(inner)) {
+            return new OperatorNode(op, fn, [inner, ...args.slice(1)]);
+          }
+        }
+      }
+      return node;
+    }
+
     function parseUnaryRule(state: ParserState): MathNode {
       let name: string;
       let params: MathNode[];
@@ -1435,11 +1457,8 @@ export const createParse = /* #__PURE__ */ factory(
         // A radical is a call of its function: √x is sqrt(x), ∛x is cbrt(x), ∜x is nthRoot(x, 4).
         const radical = RADICAL_SYMBOLS[state.token];
         getTokenSkipNewline(state);
-        // Grouping parentheses are not part of the tree: √(2) is the same node as √2.
-        const parsed = parseUnary(state);
-        const operand = isParenthesisNode(parsed)
-          ? (parsed as unknown as { content: MathNode }).content
-          : parsed;
+        // The operand is the unary operand, as for unary minus: √2^2 is sqrt(2^2) and √x! is sqrt(x!).
+        const operand = stripGroupingParens(parseUnary(state));
         const args: MathNode[] = [operand];
         if (radical.index !== undefined) {
           args.push(new ConstantNode(radical.index));

@@ -36,3 +36,22 @@ describe('#922 Unicode mathematical digit is rejected at parse time', () => {
     expect(() => evaluate('𝟙+1')).toThrow(SyntaxError);
   });
 });
+
+describe('radical operand and implicit multiplication', () => {
+  it('the operand is the unary operand', () => {
+    expect(parse('√2^2').toString()).toBe('sqrt(2 ^ 2)');
+    expect(parse('√(2)^2').toString()).toBe('sqrt(2 ^ 2)');
+    expect(parse('√x!').toString()).toBe('sqrt(x!)');
+    expect(evaluate('-√4')).toBe(-2);
+    expect(evaluate('√√16')).toBe(2);
+  });
+
+  it('2√3 is a product', () => {
+    expect(evaluate('2√9')).toBe(6);
+    expect(evaluate('√4√9')).toBe(6);
+  });
+
+  it('√-4 is complex with the full math scope', () => {
+    expect(String(evaluate('√-4'))).toBe('2i');
+  });
+});

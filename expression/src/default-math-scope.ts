@@ -95,6 +95,23 @@ export function expressionView(scope: Record<string, unknown>): Record<string, u
   return view;
 }
 
+/**
+ * The real n-th root. An odd integer index keeps the sign of a negative radicand
+ * (nthRoot(-8, 3) is -2). An even index of a negative radicand is NaN.
+ */
+function nthRoot(a: number, n: number = 2): number {
+  if (n === 0) return NaN;
+  if (n < 0) return 1 / nthRoot(a, -n);
+  const negative = a < 0;
+  if (negative && !(Number.isInteger(n) && n % 2 === 1)) return NaN;
+  const magnitude = Math.abs(a);
+  const root = Math.pow(magnitude, 1 / n);
+  // Prefer the exact integer root when one exists: 81^(1/4) must be 3, not 3.0000000000000004.
+  const rounded = Math.round(root);
+  const exact = Number.isInteger(n) && Math.pow(rounded, n) === magnitude ? rounded : root;
+  return negative ? -exact : exact;
+}
+
 /** Minimal math scope for arithmetic expressions (no matrix/functions barrel). */
 export const defaultMathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
@@ -109,6 +126,8 @@ export const defaultMathScope: Record<string, unknown> = {
   cos: Math.cos,
   tan: Math.tan,
   sqrt: Math.sqrt,
+  cbrt: Math.cbrt,
+  nthRoot,
   abs: Math.abs,
   exp: Math.exp,
   log: Math.log,
