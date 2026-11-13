@@ -3,14 +3,20 @@
  * Generate the static MathTS function-reference landing site (the sibling of
  * https://danielsimonjr.com/mathjs/) from the curated reference document.
  *
- *   node tools/generate-landing-site.mjs [--out=docs/landing] [--tests=N]
+ *   node tools/generate-landing-site.mjs [--out=docs/landing] [--reference=PATH] [--version-file=PATH]
  *
  * Inputs (read-only):
  *   docs/reference/functions.md   curated `## <Domain>` tables (signature, description,
  *                                 types, acceleration) + the generated export index block,
  *                                 whose "**Domain** (n): `a`, `b`" lines are the
- *                                 authoritative category membership.
+ *                                 authoritative category membership and whose
+ *                                 "(n exports)" header is the export count (the same
+ *                                 count the root README shows).
  *   functions/package.json        version shown in the hero.
+ *
+ * The site shows no literal version or count: both come from the inputs above, which
+ * `bun run docs:functions` regenerates from the built packages. A test count is not
+ * shown, because no step that builds the site runs the tests.
  *
  * Outputs:
  *   <out>/index.html                 hero stats, search box, one card per category
@@ -32,14 +38,18 @@ const args = Object.fromEntries(
   })
 );
 const OUT = resolve(REPO, String(args.out ?? 'docs/landing'));
-const TESTS = args.tests ? Number(args.tests) : null;
+const REFERENCE = resolve(REPO, String(args.reference ?? 'docs/reference/functions.md'));
+const VERSION_FILE = resolve(REPO, String(args['version-file'] ?? 'functions/package.json'));
 
 const GITHUB = 'https://github.com/danielsimonjr/MathTS';
 const NPM = 'https://www.npmjs.com/package/@danielsimonjr/mathts-functions';
 const DOCS = `${GITHUB}/blob/main/docs/reference/functions.md`;
 
-const doc = readFileSync(resolve(REPO, 'docs/reference/functions.md'), 'utf8');
-const version = JSON.parse(readFileSync(resolve(REPO, 'functions/package.json'), 'utf8')).version;
+const doc = readFileSync(REFERENCE, 'utf8');
+const version = JSON.parse(readFileSync(VERSION_FILE, 'utf8')).version;
+if (typeof version !== 'string' || !/^\d+\.\d+\.\d+/.test(version)) {
+  throw new Error(`landing: no semver version in ${VERSION_FILE}`);
+}
 
 // ---------------------------------------------------------------------------
 // 1. Category membership from the generated index block.
@@ -53,6 +63,11 @@ const fnSection = indexText.split('### Functions by category')[1]?.split(/\n### 
 for (const m of fnSection.matchAll(/^\*\*(.+?)\*\* \((\d+)\): (.+)$/gm)) {
   const names = [...m[3].matchAll(/`([^`]+)`/g)].map((x) => x[1]);
   domains.set(m[1], names);
+}
+if (!exportTotal || !domains.size) {
+  throw new Error(
+    `landing: ${REFERENCE} has no "(N exports)" header or no "### Functions by category" block; run bun run docs:functions`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -334,9 +349,8 @@ function filterFuncs() {
 // ---------------------------------------------------------------------------
 const totalFns = categories.reduce((s, c) => s + c.names.length, 0);
 const stats = [
-  [fmtInt(totalFns), 'Functions'],
+  [fmtInt(exportTotal), 'Exports'],
   [String(categories.length), 'Categories'],
-  ...(TESTS ? [[fmtInt(TESTS), 'Tests Passing']] : []),
   [`v${version}`, 'functions Version'],
 ];
 const cardsHtml = categories

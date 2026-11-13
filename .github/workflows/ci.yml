@@ -104,6 +104,9 @@ jobs:
           node --test tools/test/sync-readme-functions-stats.test.mjs
           node tools/sync-readme-functions-stats.mjs --check
 
+      - name: Site generators (landing and API index)
+        run: node --test tools/test/site-generators.test.mjs
+
       - name: Bundle size and tree-shake record
         run: |
           node --test tools/test/check-bundle-budget.test.mjs
