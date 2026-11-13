@@ -266,6 +266,19 @@ describe('eig repeatedEigenvalues: distinct eigenvalues as close as a split Jord
     }
   });
 
+  it('a normal ring inside the link tolerance but outside the rank tolerance', () => {
+    // Side 5.0e-8 links the three eigenvalues (limit 5.2e-8). Each lies 2.9e-8 from the
+    // mean, above the rank tolerance 2.6e-8, so `A - mean * I` has full rank: no group.
+    const rho = 2.9e-8;
+    const c = -0.5 * rho;
+    const s = (Math.sqrt(3) / 2) * rho;
+    none([
+      [1 + rho, 0, 0],
+      [0, 1 + c, -s],
+      [0, s, 1 + c],
+    ]);
+  });
+
   it('a non-symmetric matrix with well separated eigenvalues', () => {
     none(similar(diag([1, 2, 3, 4, 5])));
   });

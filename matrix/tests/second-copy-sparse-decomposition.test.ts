@@ -1,4 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { copyFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { describe, it, expect } from 'vitest';
 // A SparseMatrix from a second loaded copy of the package fails `instanceof`.
 // Every decomposition input must still accept it (issue #949 class).
 import * as first from '@danielsimonjr/mathts-matrix';
@@ -18,10 +21,26 @@ const DENSE = [
   [0, -1, 4],
 ];
 
-async function foreignSparse(): Promise<first.SparseMatrix> {
-  vi.resetModules();
-  const second = await import('@danielsimonjr/mathts-matrix');
+/**
+ * Loads the built package a second time. The bundle files are copied to a cache folder
+ * inside the package, so the copy is a different module with the same dependencies.
+ */
+async function secondCopy(): Promise<typeof first> {
+  const dist = fileURLToPath(new URL('../dist/', import.meta.url));
+  const copy = fileURLToPath(new URL('../node_modules/.cache/second-copy/', import.meta.url));
+  mkdirSync(copy, { recursive: true });
+  for (const name of readdirSync(dist)) {
+    if (name.endsWith('.js') || name.endsWith('.js.map'))
+      copyFileSync(join(dist, name), join(copy, name));
+  }
+  const url = pathToFileURL(join(copy, 'index.js')).href;
+  const second = (await import(/* @vite-ignore */ url)) as typeof first;
   expect(second.SparseMatrix).not.toBe(first.SparseMatrix);
+  return second;
+}
+
+async function foreignSparse(): Promise<first.SparseMatrix> {
+  const second = await secondCopy();
   const S = second.SparseMatrix.fromCOO(3, 3, ENTRIES);
   expect(S instanceof first.SparseMatrix).toBe(false);
   return S as unknown as first.SparseMatrix;
@@ -78,8 +97,7 @@ describe('decompositions accept a SparseMatrix of a second package copy', () => 
   });
 
   it('the element limit applies to a decomposition input', async () => {
-    vi.resetModules();
-    const second = await import('@danielsimonjr/mathts-matrix');
+    const second = await secondCopy();
     const big = second.SparseMatrix.fromCOO(5000, 5000, [{ row: 0, col: 0, value: 1 }]);
     expect(() => first.svd(big as never)).toThrow(RangeError);
   });
