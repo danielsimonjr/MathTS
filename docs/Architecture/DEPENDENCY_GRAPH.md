@@ -165,7 +165,7 @@ The codebase is organized into the following modules:
 - **expression/function**: 1 file
 - **expression/node**: 21 files
 - **expression/transform**: 33 files
-- **expression/utils**: 15 files
+- **expression/utils**: 16 files
 - **parser**: 1 file
 - **units**: 1 file
 - **numbers**: 1 file
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 568            | 0               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 488            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -13243,19 +13243,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                                                   | Type               |
-| --------------------------- | ----------------------------------------------------------------------------------------- | ------------------ |
-| `./utils/factory.js`        | `factory`                                                                                 | Import             |
-| `./utils/is.js`             | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import             |
-| `./utils/collection.js`     | `deepMap`                                                                                 | Import             |
-| `./utils/number.js`         | `safeNumberType`                                                                          | Import             |
-| `./utils/number.js`         | `NumberTypeConfig`                                                                        | Import (type-only) |
-| `./utils/object.js`         | `hasOwnProperty`                                                                          | Import             |
-| `./utils/customs.js`        | `isSafeProperty, setSafeProperty`                                                         | Import             |
-| `./limits.js`               | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
-| `./node/Node.js`            | `MathNode`                                                                                | Import (type-only) |
-| `./parse-defaults.js`       | `parseDefaults`                                                                           | Import             |
-| `./utils/current-config.js` | `currentConfig`                                                                           | Import             |
+| File                        | Imports                                                                                                      | Type               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `./utils/factory.js`        | `factory`                                                                                                    | Import             |
+| `./utils/is.js`             | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isParenthesisNode, isSymbolNode, rule2Node` | Import             |
+| `./utils/collection.js`     | `deepMap`                                                                                                    | Import             |
+| `./utils/number.js`         | `safeNumberType`                                                                                             | Import             |
+| `./utils/number.js`         | `NumberTypeConfig`                                                                                           | Import (type-only) |
+| `./utils/object.js`         | `hasOwnProperty`                                                                                             | Import             |
+| `./utils/customs.js`        | `isSafeProperty, setSafeProperty`                                                                            | Import             |
+| `./limits.js`               | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                                              | Import             |
+| `./node/Node.js`            | `MathNode`                                                                                                   | Import (type-only) |
+| `./parse-defaults.js`       | `parseDefaults`                                                                                              | Import             |
+| `./utils/current-config.js` | `currentConfig`                                                                                              | Import             |
+| `./utils/char-classes.js`   | `OPERATOR_SYMBOLS, RADICAL_SYMBOLS, isLatinOrGreekLetter, isMathDigitPair, isMathLetterPair`                 | Import             |
 
 **Exports:**
 
@@ -18023,6 +18024,16 @@ graph LR
 
 ---
 
+### `expression/src/utils/char-classes.ts` - The one character-class table for the expression tokenizer and for the
+
+**Exports:**
+
+- Interfaces: `RadicalSpec`
+- Functions: `isMathDigitPair`, `isLatinOrGreekLetter`, `isMathLetterPair`
+- Constants: `RADICAL_SYMBOLS`, `OPERATOR_SYMBOLS`
+
+---
+
 ### `expression/src/utils/collection.ts` - Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
 
 **Workspace Dependencies:**
@@ -20694,16 +20705,16 @@ graph TD
 
     subgraph Expression/utils
         N428[array]
-        N429[collection]
-        N430[current-config]
-        N431[customs]
-        N432[factory]
-        N433[is]
-        N434[latex]
-        N435[map]
-        N436[mathml]
-        N437[number]
-        N438[...5 more]
+        N429[char-classes]
+        N430[collection]
+        N431[current-config]
+        N432[customs]
+        N433[factory]
+        N434[is]
+        N435[latex]
+        N436[map]
+        N437[mathml]
+        N438[...6 more]
     end
 
     subgraph Parser
@@ -20944,15 +20955,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1318   |
+| Total TypeScript Files  | 1319   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 225724 |
-| Total Exports           | 7190   |
+| Total Lines of Code     | 225850 |
+| Total Exports           | 7195   |
 | Total Re-exports        | 3120   |
 | Total Classes           | 61     |
-| Total Interfaces        | 616    |
-| Total Functions         | 2457   |
-| Total Type Guards       | 175    |
+| Total Interfaces        | 617    |
+| Total Functions         | 2460   |
+| Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 670    |
 | Runtime Circular Deps   | 2      |

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2352,
+  "totalFiles": 2355,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1292,
+    "build-entry": 1293,
     "test-only": 0,
     "orphan": 0,
-    "test": 969,
+    "test": 971,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1318,
-    "tests": 969,
+    "src": 1319,
+    "tests": 971,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 64,
-    "@danielsimonjr/mathts-expression": 571,
-    "@danielsimonjr/mathts-functions": 1055,
+    "@danielsimonjr/mathts-expression": 573,
+    "@danielsimonjr/mathts-functions": 1056,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 136,
@@ -1626,7 +1626,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 180
+      "loc": 199
     },
     {
       "file": "expression/src/embeddedDocs/constants/e.ts",
@@ -4643,7 +4643,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2101
+      "loc": 2145
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4919,6 +4919,13 @@
       "loc": 57
     },
     {
+      "file": "expression/src/utils/char-classes.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 63
+    },
+    {
       "file": "expression/src/utils/collection.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
@@ -5057,6 +5064,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 284
+    },
+    {
+      "file": "expression/tests/char-classes.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 127
     },
     {
       "file": "expression/tests/compile-nodes.test.ts",
@@ -11763,6 +11777,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 270
+    },
+    {
+      "file": "functions/tests/parser-character-classes.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 58
     },
     {
       "file": "functions/tests/physical-constants-codata2022.test.ts",
