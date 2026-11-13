@@ -170,6 +170,27 @@ describe('#899 — Distribution.sample(n)', () => {
     expect(() => d.sample(Number.NaN)).toThrow(RangeError);
   });
 
+  it('a count above 2**26 throws RangeError before any allocation (no hang), on every factory', () => {
+    // 2**26 values is a 512 MiB Float64Array. Only the first count above the limit is tried:
+    // a count at the limit would allocate it. Before the limit, sample(2**31) never returned.
+    const tooMany = 2 ** 26 + 1;
+    const d = normalDist(0, 1);
+    expect(() => d.sample(tooMany)).toThrow(RangeError);
+    expect(() => d.sample(tooMany)).toThrow(/2\*\*26 \(67108864\)/);
+    expect(() => d.sample(tooMany)).toThrow(/sampleN/);
+    expect(() => d.sample(2 ** 31)).toThrow(RangeError);
+    expect(() => d.sample(Number.MAX_SAFE_INTEGER)).toThrow(RangeError);
+    for (const dist of [
+      betaDist(2, 3),
+      binomialDist(10, 0.5),
+      poissonDist(3),
+      discreteUniformDist(1, 6),
+      invGaussDist(1, 2),
+    ]) {
+      expect(() => dist.sample(tooMany)).toThrow(RangeError);
+    }
+  });
+
   it('a second argument throws TypeError instead of being ignored', () => {
     const d = normalDist(0, 1) as unknown as { sample: (n?: number, o?: unknown) => unknown };
     expect(() => d.sample(5, { seed: 1 })).toThrow(TypeError);

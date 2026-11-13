@@ -50,7 +50,7 @@ npm install @danielsimonjr/mathts-statistics
   `spearman`, `spearmanr`, `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`,
   `permutationTest`, `mahalanobis`, `hotellingT2`, `kmeans`, `spectralClustering`.
 - **Probability distributions** — distribution objects with `.pdf`, `.cdf`, `.quantile`, `.mean`,
-  `.variance`, `.sample()` (one draw), `.sample(n)` (a `Float64Array` of `n` unseeded draws), and
+  `.variance`, `.sample()` (one draw), `.sample(n)` (a `Float64Array` of `n` unseeded draws; `n` is at most 2**26, above that it throws `RangeError`), and
   `.sampleN(n, { seed })` (async batch, optionally seeded; use it when the draws must reproduce)
   (`normalDist`, `gammaDist`, `betaDist`, `binomialDist`, `poissonDist`, `exponentialDist`,
   `chiSquaredDist`, `fDist`, `tDist`, `logNormalDist`, `uniformDist`, `weibullDist`,

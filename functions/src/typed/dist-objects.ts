@@ -78,7 +78,10 @@ export interface Distribution {
   mean: f64;
   /** Distribution variance */
   variance: f64;
-  /** One random sample (synchronous), or `sample(n)`: `n` samples in a `Float64Array` (unseeded). */
+  /**
+   * One random sample (synchronous), or `sample(n)`: `n` samples in a `Float64Array` (unseeded).
+   * `n` must be an integer from 0 to 2**26 (67,108,864); above that it throws `RangeError`.
+   */
   sample: { (): f64; (n: number): Float64Array };
   /**
    * Generate `n` random samples.
@@ -100,8 +103,16 @@ export interface Distribution {
 const SQRT_2PI = Math.sqrt(2 * Math.PI);
 
 /**
+ * The largest count that `sample(n)` accepts: 2**26 = 67,108,864 values, a 512 MiB
+ * `Float64Array` and several seconds of synchronous draws. A larger count throws a
+ * `RangeError` before any allocation. `sampleN(n, { seed })` is the route for a larger batch.
+ */
+const MAX_SAMPLE_COUNT = 2 ** 26;
+
+/**
  * Adds the count form to a distribution's `sample`: `sample()` returns one draw,
- * `sample(n)` returns a `Float64Array` of `n` draws (`n = 0` gives an empty array).
+ * `sample(n)` returns a `Float64Array` of `n` draws (`n = 0` gives an empty array;
+ * `n` above {@link MAX_SAMPLE_COUNT} throws `RangeError`).
  * The batch form draws with `Math.random`, so it is not seeded; use `sampleN(n, { seed })`
  * for a reproducible batch. A second argument throws, because it would otherwise be ignored.
  */
@@ -114,6 +125,11 @@ function _withSampleCount(d: Omit<Distribution, 'sample'> & { sample: () => f64 
     if (n === undefined) return drawOne();
     if (!Number.isSafeInteger(n) || n < 0) {
       throw new RangeError(`sample: count must be a non-negative integer (got ${n})`);
+    }
+    if (n > MAX_SAMPLE_COUNT) {
+      throw new RangeError(
+        `sample: count ${n} is above the limit of 2**26 (${MAX_SAMPLE_COUNT}) values; use sampleN(n, { seed }) for a larger batch`
+      );
     }
     const values = new Float64Array(n);
     for (let i = 0; i < n; i++) values[i] = drawOne();
