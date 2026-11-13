@@ -127,8 +127,10 @@ describe('G02 — angle units rad/deg/grad/cycle on forward trig', () => {
     expect(sin(new Unit(0.25, 'cycle'))).toBe(1);
     // Exact SI of 200 grad is π; Math.sin(π) is the positive residual.
     expect(sin(new Unit(200, 'grad'))).toBe(Math.sin(Math.PI));
-    // Expression parse matches mathjs@13.2.3 bit-for-bit.
-    expect(evaluate('sin(200 grad)')).toBe(-3.216245299353273e-16);
+    // The expression reads 200 grad through the exact route (#955), so it equals the exact-π case
+    // above: 1.2246467991473532e-16, which is closer to sin(π) = 0 than the former
+    // -3.216245299353273e-16 float product.
+    expect(evaluate('sin(200 grad)')).toBe(Math.sin(Math.PI));
     expect(evaluate('sin(0.25 cycle)')).toBe(1);
     expect(evaluate('cos(0.5 cycle)')).toBe(-1);
   });

@@ -61,6 +61,21 @@ mathjs 15.2.0 rejects them or reads them as undefined symbols.
 
 Code that must reject these symbols has to check the input before it calls the parser.
 
+### Unit readings and their printed digits
+
+`unit(v, name)` and `evaluate('v name')` store one value, and that value is the exact SI quantity
+rounded once. mathjs 15 rounds through a float product, so the two libraries can print one unit
+reading differently:
+
+| Input                   | MathTS      | mathjs 15.2.0             |
+| ----------------------- | ----------- | ------------------------- |
+| `unit(0.75, 'inch')`    | `0.75 inch` | `0.7499999999999999 inch` |
+| `evaluate('0.75 inch')` | `0.75 inch` | `0.7499999999999999 inch` |
+
+Both MathTS forms store the same SI value (`0.01905`). mathjs stores `0.019049999999999997`.
+The exact route is a deliberate feature (the `exact-scale` conversions, #742); see the core
+`Unit` tests that pin it.
+
 ## License
 
 MIT (c) Daniel Simon Jr.

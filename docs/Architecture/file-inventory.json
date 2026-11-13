@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2392,
+  "totalFiles": 2393,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1303,
     "test-only": 0,
     "orphan": 0,
-    "test": 997,
+    "test": 998,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1329,
-    "tests": 997,
+    "tests": 998,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
-    "@danielsimonjr/mathts-compat": 26,
+    "@danielsimonjr/mathts-compat": 27,
     "@danielsimonjr/mathts-core": 125,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
@@ -572,6 +572,13 @@
       "loc": 99
     },
     {
+      "file": "compat/tests/dogfood-955-unit-paths.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 44
+    },
+    {
       "file": "compat/tests/dogfood-g01-complex-promotion.test.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
@@ -1024,7 +1031,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3644
+      "loc": 3671
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -10222,7 +10229,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 207
+      "loc": 209
     },
     {
       "file": "functions/tests/dogfood-g03-null-scalar-dispatch.test.ts",
