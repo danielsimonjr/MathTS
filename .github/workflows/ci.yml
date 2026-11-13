@@ -149,6 +149,9 @@ jobs:
       - name: Docs dist-freshness tests
         run: node --test tools/test/dist-freshness.test.mjs
 
+      - name: Source map backfill tests
+        run: node --test tools/test/ensure-js-sourcemaps.test.mjs
+
       - name: Bun audit retry tests
         run: node --test tools/test/bun-audit-retry.test.mjs
 

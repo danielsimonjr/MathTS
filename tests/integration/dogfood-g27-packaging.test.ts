@@ -46,7 +46,8 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
       cwd: REPO,
       stdio: 'pipe',
     });
-  });
+    // Four esbuild bundles of the package graphs: several seconds on Windows.
+  }, 120_000);
 
   it('#707 evaluate subpath minifies smaller than the main barrel named import', () => {
     const out = mkdtempSync(join(tmpdir(), 'mathts-g27-'));

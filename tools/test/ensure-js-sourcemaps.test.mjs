@@ -18,6 +18,10 @@ test('a rebuilt .js whose old .map is still present gets its sourceMappingURL ba
     execFileSync(process.execPath, [TOOL], { cwd: pkg, stdio: 'pipe' });
     const js = readFileSync(join(pkg, 'build', 'mod.js'), 'utf8');
     assert.match(js, /\/\/# sourceMappingURL=mod\.js\.map\n$/);
+    // The stale map of the earlier build is written again for the new file.
+    const map = JSON.parse(readFileSync(join(pkg, 'build', 'mod.js.map'), 'utf8'));
+    assert.equal(map.file, 'mod.js');
+    assert.notEqual(map.mappings, '');
   } finally {
     rmSync(pkg, { recursive: true, force: true });
   }

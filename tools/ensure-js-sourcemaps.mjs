@@ -68,16 +68,10 @@ for (const jsPath of walkJs(distDir, [])) {
   const mapPath = `${jsPath}.map`;
   const js = readFileSync(jsPath, 'utf8');
   const fileName = basename(jsPath);
-  const url = `//# sourceMappingURL=${fileName}.map\n`;
-  const withUrl = js.endsWith('\n') ? js + url : `${js}\n${url}`;
-  if (existsSync(mapPath)) {
-    // A rebuild can rewrite the .js and keep the .map of the earlier build.
-    if (!js.includes('sourceMappingURL=')) {
-      writeFileSync(jsPath, withUrl);
-      wrote += 1;
-    }
-    continue;
-  }
+  const hasUrl = js.includes('sourceMappingURL=');
+  // A .js without the comment next to a .map is a rebuilt file with the map of
+  // an earlier build: that map is stale, so it is written again.
+  if (hasUrl && existsSync(mapPath)) continue;
   const stem = fileName.slice(0, -'.js'.length);
   const candidate = join(pkgRoot, 'src', `${stem}.ts`);
   const sourcePath = existsSync(candidate) ? candidate : jsPath;
@@ -92,7 +86,10 @@ for (const jsPath of walkJs(distDir, [])) {
     mappings: identityMappings(lineCount),
   };
   writeFileSync(mapPath, JSON.stringify(map));
-  if (!js.includes('sourceMappingURL=')) writeFileSync(jsPath, withUrl);
+  if (!hasUrl) {
+    const url = `//# sourceMappingURL=${fileName}.map\n`;
+    writeFileSync(jsPath, js.endsWith('\n') ? js + url : `${js}\n${url}`);
+  }
   wrote += 1;
 }
 

@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["tools/ensure-js-sourcemaps.mjs"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
