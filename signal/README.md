@@ -21,8 +21,7 @@ import { parallelFFT } from '@danielsimonjr/mathts-signal';
 
 const x = new Float64Array([0, 1, 0, -1]);
 // Float64Array dispatch is async (number[] is synchronous).
-// Typed functions return `unknown`; narrow the result at the call site.
-const { real, imag } = (await parallelFFT(x)) as { real: Float64Array; imag: Float64Array };
+const { real, imag } = await parallelFFT(x);
 console.log(real.length, imag.length);
 ```
 

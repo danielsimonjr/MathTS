@@ -49,8 +49,9 @@ export const createMad = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // mad([a, b, c, d, ...])
-      'Array | Matrix': _mad,
-      'Float64Array | Float32Array': _mad,
+      // A number for a numeric input (NaN when empty). The public overloads declare this result.
+      'Array | Matrix': (array: unknown[] | MatrixType): number => _mad(array) as number,
+      'Float64Array | Float32Array': (array: FloatTyped): number => _mad(array) as number,
 
       // mad(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {

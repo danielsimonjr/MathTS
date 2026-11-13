@@ -16,6 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { PublicParallelFFT } from './public-type-exports.js';
 import { fftCoreFloat64, fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
@@ -183,6 +184,10 @@ async function fourStepFFT(
 // Typed FFT Functions
 // =============================================================================
 
+/** The FFT result shape. `gen-public-overloads` reads the return annotation of each signature. */
+type FftResult = { real: Float64Array; imag: Float64Array; originalLength: number };
+type FftResultPromise = Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
+
 /**
  * Parallel FFT with typed-function dispatch.
  *
@@ -197,7 +202,7 @@ async function fourStepFFT(
  */
 export const parallelFFT = mathTyped('parallelFFT', {
   // FFT of number array
-  Array: (signal: number[]) => {
+  Array: (signal: number[]): FftResult => {
     const n: i32 = signal.length;
     if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0), originalLength: 0 };
 
@@ -214,7 +219,7 @@ export const parallelFFT = mathTyped('parallelFFT', {
   },
 
   // FFT of Float64Array (parallel-ready)
-  Float64Array: async (signal: Float64Array) => {
+  Float64Array: async (signal: Float64Array): FftResultPromise => {
     const n: i32 = signal.length;
     if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0), originalLength: 0 };
 
@@ -244,7 +249,7 @@ export const parallelFFT = mathTyped('parallelFFT', {
       : fftCoreFloat64(real, imag, false);
     return { ...result, originalLength: n };
   },
-});
+}) as PublicParallelFFT;
 
 /**
  * Parallel IFFT with typed-function dispatch.

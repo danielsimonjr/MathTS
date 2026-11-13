@@ -150,6 +150,40 @@ function callableAssertions(specifiers, functionsBySpecifier) {
   return { text: `${lines.join('\n')}\n`, lineNames };
 }
 
+/**
+ * Exact-return cases. `Equals` is true only when the two types are identical, so a
+ * declaration that is `unknown` or `any` fails here. An assignment to an annotated
+ * `number` would pass for `any`. Each `ok…` constant is typed `true`, so the run fails
+ * when the typed call returns a different type.
+ */
+const RETURNS_FIXTURE = [
+  "import { median, mode, mad } from '@danielsimonjr/mathts-statistics';",
+  "import { parallelFFT } from '@danielsimonjr/mathts-signal';",
+  '',
+  'type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2',
+  '  ? true',
+  '  : false;',
+  '',
+  'const xs: number[] = [1, 2, 3, 4, 5];',
+  'const medianOf = median(xs);',
+  'export const okMedian: Equals<typeof medianOf, number> = true;',
+  'const modeOf = mode(xs);',
+  'export const okMode: Equals<typeof modeOf, number[] | number> = true;',
+  'const madOf = mad(xs);',
+  'export const okMad: Equals<typeof madOf, number> = true;',
+  'const scalarMedian = median(5, 2, 7);',
+  'export const okScalarMedian: Equals<typeof scalarMedian, number> = true;',
+  '// A wide input still compiles: the fallback overload returns unknown.',
+  'export const wideMedian: unknown = median(xs as unknown[]);',
+  'export async function fftBins(): Promise<void> {',
+  '  const { real, imag } = await parallelFFT(new Float64Array([0, 1, 0, -1]));',
+  '  const bins: Equals<typeof real, Float64Array> = true;',
+  '  const bins2: Equals<typeof imag, Float64Array> = true;',
+  '  console.log(bins, bins2, real.length, imag.length);',
+  '}',
+  '',
+].join('\n');
+
 const args = process.argv.slice(2);
 const option = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
 const flag = (name) => args.includes(`--${name}`);
@@ -238,7 +272,7 @@ try {
           moduleResolution: resolution,
           types: ['node'],
         },
-        files: ['index.ts', 'callable.ts'],
+        files: ['index.ts', 'callable.ts', 'returns.ts'],
       },
       null,
       2
@@ -246,6 +280,7 @@ try {
     'index.ts':
       specifiers.map((s, i) => `import * as m${i} from '${s}';`).join('\n') +
       `\nexport const all = [${specifiers.map((_, i) => `m${i}`).join(', ')}];\n`,
+    'returns.ts': RETURNS_FIXTURE,
   };
   mkdirSync(consumer);
   for (const [name, text] of Object.entries(files)) writeFileSync(join(consumer, name), text);

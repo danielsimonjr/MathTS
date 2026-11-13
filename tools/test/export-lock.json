@@ -2785,6 +2785,9 @@
       "MWBootstrapResult": {
         "kind": "type"
       },
+      "MadCallable": {
+        "kind": "type"
+      },
       "MannWhitneyResult": {
         "kind": "type"
       },
@@ -2821,6 +2824,9 @@
       "MeanCallable": {
         "kind": "type"
       },
+      "MedianCallable": {
+        "kind": "type"
+      },
       "MinCutResult": {
         "kind": "type"
       },
@@ -2831,6 +2837,9 @@
         "kind": "type"
       },
       "MinimizeScalarResult": {
+        "kind": "type"
+      },
+      "ModeCallable": {
         "kind": "type"
       },
       "MonteCarloOptions": {
@@ -2932,6 +2941,9 @@
       "ParabolicSource": {
         "kind": "type"
       },
+      "ParallelFFTCallable": {
+        "kind": "type"
+      },
       "ParameterDimensionResult": {
         "kind": "type"
       },
@@ -2983,7 +2995,19 @@
       "PublicLog10": {
         "kind": "type"
       },
+      "PublicMad": {
+        "kind": "type"
+      },
       "PublicMean": {
+        "kind": "type"
+      },
+      "PublicMedian": {
+        "kind": "type"
+      },
+      "PublicMode": {
+        "kind": "type"
+      },
+      "PublicParallelFFT": {
         "kind": "type"
       },
       "PublicSin": {

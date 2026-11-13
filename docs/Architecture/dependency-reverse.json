@@ -2124,6 +2124,7 @@
       "functions/src/factories/index.ts",
       "functions/src/index.ts",
       "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/signal.ts",
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/typed/matrix-ops.ts": [

@@ -109,7 +109,8 @@ function parseSigKeys(body) {
 
 function aliasMap(source) {
   const map = new Map();
-  for (const match of source.matchAll(/^type (\w+) = ([^;\n]+);/gm)) {
+  // One-line aliases only. The value may hold `;` (an object type), so it runs to the last `;`.
+  for (const match of source.matchAll(/^type (\w+) = (.+);[ \t]*$/gm)) {
     map.set(match[1], match[2].trim());
   }
   return map;
@@ -200,9 +201,14 @@ function containerTypes(scalar) {
   };
 }
 
+/** A typed-function type name, or a union of them such as `Float64Array | Float32Array`. */
 function mapSigType(part) {
   if (SIG_TYPE[part]) return SIG_TYPE[part];
-  throw new Error(`unmapped typed-function type "${part}" in ${part}`);
+  const alternatives = part.split('|').map((alt) => alt.trim());
+  if (alternatives.length > 1 && alternatives.every((alt) => SIG_TYPE[alt])) {
+    return alternatives.map((alt) => SIG_TYPE[alt]).join(' | ');
+  }
+  throw new Error(`unmapped typed-function type "${part}"`);
 }
 
 function splitKey(key) {
@@ -228,6 +234,8 @@ function overload(params, ret) {
 }
 
 function overloadsForKey(key, body, exportName, aliases, nextKey) {
+  // The rest key has no fixed parameter list; its overloads come from the manifest `fallback`.
+  if (key === '...') return [];
   const chunk = signatureChunk(body, key, nextKey);
   const elementwise =
     chunk.includes('unaryCollection') ||
@@ -361,7 +369,9 @@ function buildFile(manifest) {
         else specific.push(line);
       }
     });
-    lines.push(...specific, ...fallback);
+    // `fallback` in the manifest holds overloads that a signature key cannot express, such as
+    // the `'...'` rest signature. They come last, after every specific overload.
+    lines.push(...specific, ...fallback, ...(entry.fallback ?? []).map((line) => `  ${line}`));
     lines.push('  readonly name: string;');
     lines.push(
       '  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;'

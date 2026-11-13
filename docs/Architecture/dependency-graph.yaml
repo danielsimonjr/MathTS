@@ -14547,6 +14547,9 @@ modules:
         - file: ../typed/public-type-exports.js
           imports:
             - PublicDet
+            - PublicMad
+            - PublicMedian
+            - PublicMode
           typeOnly: true
         - file: ../arithmetic/abs.js
           imports:
@@ -26367,6 +26370,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./public-type-exports.js
+          imports:
+            - PublicParallelFFT
+          typeOnly: true
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
@@ -45529,7 +45536,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1323
   totalModules: 82
-  totalLinesOfCode: 226951
+  totalLinesOfCode: 226970
   totalExports: 7237
   totalClasses: 61
   totalInterfaces: 651
@@ -45538,7 +45545,7 @@ statistics:
   totalEnums: 0
   totalConstants: 1666
   totalReExports: 3160
-  totalTypeOnlyImports: 681
+  totalTypeOnlyImports: 682
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0
