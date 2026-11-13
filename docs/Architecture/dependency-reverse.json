@@ -2225,6 +2225,10 @@
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
     "functions/src/typed/expression-eval-barrel.ts": ["functions/src/factories/evaluate.ts"],
+    "functions/src/typed/divide-inverse.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
     "functions/src/arithmetic/abs.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/addScalar.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/cube.ts": ["functions/src/factories/index.ts"],

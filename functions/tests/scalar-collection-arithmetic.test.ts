@@ -195,12 +195,16 @@ describe('a scalar and a matrix keep the matrix type and the storage (#911)', ()
 });
 
 describe('divide(scalar, collection) is matrix division and names the way out (#911)', () => {
-  it('throws a TypeError that names dotDivide for an array, a matrix and a Unit scalar', () => {
-    expect(() => ops.divide(2, [1, 2])).toThrow(TypeError);
-    expect(() => ops.divide(2, [1, 2])).toThrow(/dotDivide/);
-    expect(() => ops.divide(2, matrix([1, 2]))).toThrow(/dotDivide/);
-    expect(() => ops.divide(m(2), [1, 2])).toThrow(/dotDivide/);
-    expect(() => ops.divide(new Complex(1, 1), sparse([[1, 0]]))).toThrow(/dotDivide/);
+  // #960 replaced the #911 dispatch error: a square matrix is a matrix division now, and a
+  // non-square collection throws mathjs's RangeError.
+  it('throws mathjs RangeError for a non-square collection, with a Unit scalar too', () => {
+    expect(() => ops.divide(2, [1, 2])).toThrow(RangeError);
+    expect(() => ops.divide(2, [1, 2])).toThrow('Matrix must be square (size: [2])');
+    expect(() => ops.divide(2, matrix([1, 2]))).toThrow('Matrix must be square (size: [2])');
+    expect(() => ops.divide(m(2), [1, 2])).toThrow('Matrix must be square (size: [2])');
+    expect(() => ops.divide(new Complex(1, 1), sparse([[1, 0]]))).toThrow(
+      'Matrix must be square (size: [1, 2])'
+    );
   });
 
   it('has the element-wise form in dotDivide', () => {

@@ -10,6 +10,7 @@
 
 import { factoryScope } from './scope.js';
 import { add, multiply } from '../typed/arithmetic.js';
+import { registerDivideInverse } from '../typed/divide-inverse.js';
 import type {
   PublicDet,
   PublicMad,
@@ -555,6 +556,9 @@ export const inv = ((m: unknown) =>
     m,
     factoryInv as unknown as (x: unknown) => unknown
   )) as unknown as typeof factoryInv;
+// `divide(scalar, square matrix)` multiplies by this `inv` (#960). Registered here because the
+// typed arithmetic module cannot import the factory layer.
+registerDivideInverse(inv as unknown as (m: unknown) => unknown);
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);

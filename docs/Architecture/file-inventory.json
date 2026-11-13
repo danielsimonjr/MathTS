@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2389,
+  "totalFiles": 2392,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1302,
+    "build-entry": 1303,
     "test-only": 0,
     "orphan": 0,
-    "test": 995,
+    "test": 997,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1328,
-    "tests": 995,
+    "src": 1329,
+    "tests": 997,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,13 +28,13 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1073,
+    "@danielsimonjr/mathts-functions": 1075,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 136,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
-    "@danielsimonjr/mathts-workerpool": 26,
+    "@danielsimonjr/mathts-workerpool": 27,
     "@danielsimonjr/mathts-parallel": 53,
     "@danielsimonjr/mathts-parser": 5,
     "@danielsimonjr/mathts-plot": 51,
@@ -6575,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1780
+      "loc": 1784
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -8941,7 +8941,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2255
+      "loc": 2267
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8998,6 +8998,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 731
+    },
+    {
+      "file": "functions/src/typed/divide-inverse.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 21
     },
     {
       "file": "functions/src/typed/euclid.ts",
@@ -10188,6 +10195,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 239
+    },
+    {
+      "file": "functions/tests/dogfood-960-divide-scalar-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 80
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",
@@ -12168,7 +12182,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 210
+      "loc": 214
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
@@ -14373,7 +14387,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 74
     },
     {
       "file": "packages/workerpool/src/compile-function-source.ts",
@@ -14408,7 +14422,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 44
+      "loc": 43
     },
     {
       "file": "packages/workerpool/src/pool-types.ts",
@@ -14500,6 +14514,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 264
+    },
+    {
+      "file": "packages/workerpool/tests/root-helpers-public.test.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 38
     },
     {
       "file": "packages/workerpool/tests/run-parallel-envelope-pin.test.ts",

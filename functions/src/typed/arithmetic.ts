@@ -60,6 +60,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
+import { divideInverse } from './divide-inverse.js';
 import type {
   PublicAbs,
   PublicAdd,
@@ -341,22 +342,33 @@ const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp);
 const modKernels = elementwiseKernels(modForNumberPath, modOp);
 
-function rejectScalarOverCollection(): never {
-  throw new TypeError(
-    'divide(scalar, collection) is a matrix division and needs the inverse of the collection. ' +
-      'Use dotDivide(scalar, collection) to divide by each element, or ' +
-      'multiply(scalar, inv(matrix)) for a square matrix.'
-  );
+/** The size of an Array or a matrix, in mathjs's shape: `[n]` for a vector, `[r, c]` otherwise. */
+function collectionSize(collection: unknown): number[] {
+  if (Array.isArray(collection)) {
+    return Array.isArray(collection[0])
+      ? [collection.length, (collection[0] as unknown[]).length]
+      : [collection.length];
+  }
+  return (collection as { size(): number[] }).size();
 }
 
 /**
- * `divide(scalar, collection)` is a matrix division (`scalar * inv(collection)`), which is
- * not a broadcast: mathjs rejects a vector there with "Matrix must be square". The throw
- * names the element-wise form instead of the dispatch error.
+ * `divide(scalar, collection)` is a matrix division, `scalar * inv(collection)` (mathjs
+ * parity, #960). A non-square collection throws mathjs's RangeError text. A singular square
+ * collection throws the error of `inv` unchanged.
  */
+function divideScalarByCollection(scalar: unknown, collection: unknown): unknown {
+  const size = collectionSize(collection);
+  if (size.length !== 2 || size[0] !== size[1]) {
+    throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
+  }
+  const inverse = divideInverse()(collection);
+  return (multiply as unknown as ScalarOp)(scalar, inverse);
+}
+
 const scalarOverCollection: CollectionKernels = {
-  array: rejectScalarOverCollection,
-  matrix: rejectScalarOverCollection,
+  array: divideScalarByCollection,
+  matrix: divideScalarByCollection,
 };
 
 // =============================================================================
