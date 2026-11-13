@@ -24,12 +24,19 @@ import { parse, evaluate, compileExpr } from '../factories/evaluate.js';
 import { euclidSnap } from './euclid.js';
 import {
   polyFromExpression,
+  polyToDenseCoefficients,
   buchberger,
   polyToString as idealPolyToString,
 } from './polynomial-ideal.js';
 // Real polynomial/rational CAS engines — casExpand/casFactor delegate to these
 // (they were formerly crude string-manipulation stubs).
-import { expand as algebraExpand, factor as algebraFactor } from './algebra.js';
+import {
+  expand as algebraExpand,
+  factor as algebraFactor,
+  polyder,
+  polynomialGCD,
+  polynomialQuotient,
+} from './algebra.js';
 
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
@@ -37,6 +44,8 @@ import { Complex } from '@danielsimonjr/mathts-core';
 import { polynomialRoot, derivative as factoryDerivative } from '../factories/index.js';
 import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
+import { solveElementary } from '../cas/elementary-solve.js';
+import { realRoots } from '../cas/real-roots.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
@@ -1108,21 +1117,6 @@ export function seriesCoefficient(expr: string, varName: string, x0: f64, k: num
 // SOLVER (4 functions)
 // =============================================================================
 
-/**
- * Solve an equation for a variable.
- *
- * Supports linear, quadratic, and cubic equations. For the expression f(x),
- * finds roots where f(x) = 0.
- *
- * @param expr - Expression string (set equal to 0)
- * @param varName - Variable to solve for
- * @returns Array of solutions (real roots)
- *
- * @example
- * solve('x^2 - 4', 'x')      // => [-2, 2]
- * solve('x^2 + 2*x + 1', 'x') // => [-1]
- * solve('2*x - 6', 'x')       // => [3]
- */
 /** Duck-typed Complex check (works for any Complex-shaped root). */
 function isComplexRoot(r: unknown): r is { re: number; im: number } {
   return typeof r === 'object' && r !== null && 're' in r && 'im' in r;
@@ -1167,105 +1161,154 @@ function polyCoeffsDeg3(expr: string, varName: string): f64[] | null {
 }
 
 /**
- * Numeric real-root scan (sign change + Brent refinement) — fallback for degree ≥ 4 / transcendental.
- *
- * Scan ranges are fixed: first [-100, 100] in steps of 0.1; only if that finds
- * no root, [-1000, 1000] in steps of 1. Roots outside +/-1000, pairs of roots
- * closer than one step (no sign change), and even-multiplicity roots away from
- * a grid point are not detected.
+ * Snap a root to an integer when it is within 1e-8 of one, and turn `-0` into `0`. A numeric
+ * method returns `1.0000000000000002` for the root 1; the snapped value is the one a user expects.
  */
-function numericRealRoots(expr: string, varName: string): f64[] {
+function snapRoot(r: f64): f64 {
+  const rounded = Math.round(r);
+  return (Math.abs(r - rounded) < 1e-8 ? rounded : r) + 0;
+}
+
+/**
+ * Polish a root of the dense ascending polynomial with a few Newton steps. Sturm isolation
+ * bisects on signs, and at a large `|x|` the rounding error of the polynomial value moves the
+ * root by about 1e-8; a Newton step on the same polynomial recovers the digits. A step is kept
+ * only when it stays near the root and lowers `|p|`, so a multiple root (where `p'` is about
+ * zero) keeps the value that the isolation gave.
+ */
+function polishRoot(dense: readonly f64[], root: f64): f64 {
+  const evaluateAt = (x: f64): [value: f64, slope: f64] => {
+    let value = 0;
+    let slope = 0;
+    for (let i = dense.length - 1; i >= 0; i--) {
+      slope = slope * x + value;
+      value = value * x + dense[i];
+    }
+    return [value, slope];
+  };
+  const reach = 1e-6 * Math.max(1, Math.abs(root));
+  let best = root;
+  for (let i = 0; i < 4; i++) {
+    const [value, slope] = evaluateAt(best);
+    if (value === 0 || slope === 0 || !Number.isFinite(slope)) break;
+    const next = best - value / slope;
+    if (Math.abs(next - root) > reach || !(Math.abs(evaluateAt(next)[0]) < Math.abs(value))) break;
+    best = next;
+  }
+  return best;
+}
+
+/**
+ * Target grid step of the numeric scan. The scan places one interval per this much of the
+ * range, but never fewer than {@link SCAN_MIN_INTERVALS} and never more than
+ * {@link SCAN_MAX_INTERVALS}.
+ */
+const SCAN_TARGET_STEP = 0.1;
+/** Fewest intervals of the numeric scan, so a short range still has a fine grid. */
+const SCAN_MIN_INTERVALS = 1_000;
+/** Most intervals of the numeric scan; a wider range gets a coarser grid. */
+const SCAN_MAX_INTERVALS = 1_000_000;
+
+/**
+ * Numeric real-root scan (sign change + Brent refinement) over the closed interval `range`.
+ *
+ * The scan samples `range` on an even grid (see {@link SCAN_TARGET_STEP}) and refines every
+ * sign change with Brent's method. It never looks outside `range`. It does not detect a pair
+ * of roots that are closer than one grid step (no sign change), or an even-multiplicity root
+ * away from a grid point. A sign change at a pole (`tan(x)` at `pi/2`) is not a root: the
+ * refined point is kept only when `|f|` there is not above the larger `|f|` at the bracket ends.
+ */
+function numericRealRoots(expr: string, varName: string, range: readonly [number, number]): f64[] {
+  const [lo, hi] = range;
   const roots: f64[] = [];
   const seen = new Set<string>();
   const addRoot = (r: f64) => {
-    const rounded = Math.round(r);
-    const clean = Math.abs(r - rounded) < 1e-8 ? rounded : r;
+    const clean = snapRoot(r);
     const key = clean.toFixed(8);
     if (!seen.has(key)) {
       seen.add(key);
       roots.push(clean);
     }
   };
-  const ranges = [
-    { lo: -100, hi: 100, step: 0.1 },
-    { lo: -1000, hi: 1000, step: 1 },
-  ];
   const f = compileAt(expr, varName);
-  for (const { lo, hi, step } of ranges) {
-    // fb of one interval is fa of the next: one evaluation per grid point.
-    let fa: f64 | undefined;
-    for (let x = lo; x <= hi; x += step) {
-      if (fa === undefined) {
-        try {
-          fa = f(x);
-        } catch {
-          continue;
-        }
-      }
-      if (Math.abs(fa) < 1e-10) {
-        addRoot(x);
-        fa = undefined;
-        continue;
-      }
-      let fb: f64;
-      try {
-        fb = f(x + step);
-      } catch {
-        fa = undefined;
-        continue;
-      }
-      if (fa * fb < 0 && Number.isFinite(fa) && Number.isFinite(fb)) {
-        const a = x;
-        const b = x + step;
-        const root = findRoot(f, a, b, { tol: 1e-14, xtol: 1e-14 });
-        addRoot(root);
-      }
-      fa = fb;
+  const sample = (x: f64): f64 => {
+    try {
+      return f(x);
+    } catch {
+      return NaN;
     }
-    if (roots.length > 0) break;
+  };
+  const width = hi - lo;
+  const intervals = Math.min(
+    SCAN_MAX_INTERVALS,
+    Math.max(SCAN_MIN_INTERVALS, Math.ceil(width / SCAN_TARGET_STEP))
+  );
+  let xPrev = lo;
+  let fPrev = sample(lo);
+  if (Math.abs(fPrev) < 1e-10) addRoot(lo);
+  for (let i = 1; i <= intervals; i++) {
+    const x = i === intervals ? hi : lo + (width * i) / intervals;
+    const fx = sample(x);
+    if (Math.abs(fx) < 1e-10) {
+      addRoot(x);
+    } else if (
+      Number.isFinite(fPrev) &&
+      Number.isFinite(fx) &&
+      Math.abs(fPrev) >= 1e-10 &&
+      fPrev * fx < 0
+    ) {
+      const root = findRoot(f, xPrev, x, { tol: 1e-14, xtol: 1e-14 });
+      if (Math.abs(sample(root)) <= Math.max(Math.abs(fPrev), Math.abs(fx))) addRoot(root);
+    }
+    xPrev = x;
+    fPrev = fx;
   }
   roots.sort((a, b) => a - b);
   return roots;
 }
 
 /**
- * Solve an equation or expression for a variable, returning its distinct roots.
- *
- * Accepts either an expression (treated as `expr = 0`) or a full equation with a
- * single `=` sign. Polynomials of degree ≤ 3 yield exact closed-form roots —
- * including complex conjugates — while higher-degree and transcendental
- * equations fall back to a numeric scan for real roots, refining each bracket with
- * Brent's method (`findRoot`). Real roots are returned
- * first (cleaned of float noise and sorted ascending), followed by any complex
- * roots.
- *
- * @example
- * solve('x^2 - 4', 'x')       // => [-2, 2]
- * solve('x^2 + 1 = 0', 'x')   // => [Complex(0, 1), Complex(0, -1)]
- * solve('2*x - 6', 'x')       // => [3]
- * solve('x^3 - 8', 'x')       // => [2, Complex(-1, 1.732…), Complex(-1, -1.732…)]
- * solve('cos(x)', 'x')        // => numeric real roots
- *
- * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
- * @param varName  - Variable to solve for.
- * @returns Distinct roots: real numbers (sorted) then Complex.
+ * All distinct real roots of `expr` when it is a polynomial in `varName` (any degree, integer
+ * powers, numeric coefficients), by Sturm isolation over the whole real line (`realRoots`).
+ * Returns `null` when `expr` is not such a polynomial. A constant polynomial has no isolated
+ * roots and gives `[]`.
  */
-export function solve(equation: unknown, varName: string): Array<f64 | Complex | string> {
-  if (typeof equation !== 'string') {
-    throw new TypeError(
-      'solve(equation, variable) is symbolic; for linear systems A x = b use linsolve or lusolve'
-    );
+function polynomialRealRoots(expr: string, varName: string): f64[] | null {
+  let dense: f64[];
+  try {
+    dense = polyToDenseCoefficients(polyFromExpression(expr, [varName]));
+  } catch {
+    return null;
   }
-  // Normalize "lhs = rhs" to a root-finding expression "lhs - (rhs)".
-  let expr = equation;
-  if (equation.includes('=')) {
-    const parts = equation.split('=');
-    if (parts.length !== 2) {
-      throw new SyntaxError("solve: equation must contain at most one '=' sign");
+  while (dense.length > 1 && dense[dense.length - 1] === 0) dense.pop();
+  if (!dense.every(Number.isFinite)) return null;
+  if (dense.length <= 1) return [];
+  // A multiple root is ill-conditioned in floating point: a double root is only good to about
+  // 1e-8. With integer coefficients the gcd is exact, so isolate on the square-free part, whose
+  // roots are the same and all simple.
+  let squareFree = dense;
+  if (dense.length > 2 && dense.every(Number.isSafeInteger)) {
+    const common = polynomialGCD(dense, polyder(dense));
+    if (common.length > 1) squareFree = polynomialQuotient(dense, common);
+  }
+  const roots: f64[] = [];
+  const seen = new Set<string>();
+  for (const r of realRoots(squareFree)) {
+    const clean = snapRoot(polishRoot(squareFree, r));
+    const key = clean.toFixed(8);
+    if (!seen.has(key)) {
+      seen.add(key);
+      roots.push(clean);
     }
-    expr = `${parts[0].trim()} - (${parts[1].trim()})`;
   }
+  return roots.sort((a, b) => a - b);
+}
 
+/**
+ * Exact roots of a polynomial of degree 1 to 3: closed form, real and complex. Returns `null`
+ * when `expr` is not such a polynomial, or when the closed-form solver rejects it.
+ */
+function solveLowDegree(expr: string, varName: string): Array<f64 | Complex | string> | null {
   // Exact path: polynomial of degree ≤ 3 — delegate to the Algebra solver
   // `polynomialRoot` (linear/quadratic/cubic closed form, real + complex).
   const coeffs = polyCoeffsDeg3(expr, varName);
@@ -1307,8 +1350,8 @@ export function solve(equation: unknown, varName: string): Array<f64 | Complex |
       const args = [c0, c1, c2, c3].slice(0, degree + 1);
       raw = (polynomialRoot as (...a: number[]) => unknown[])(...args);
     } catch {
-      // Fall back to numeric scan if the closed-form solver rejects the input.
-      return numericRealRoots(expr, varName);
+      // The closed-form solver rejected the input: let the caller try another method.
+      return null;
     }
 
     // Clean + dedupe: real roots first (sorted), then complex.
@@ -1349,8 +1392,138 @@ export function solve(equation: unknown, varName: string): Array<f64 | Complex |
     return [...reals, ...complexRoots];
   }
 
-  // Fallback: numeric real roots for degree ≥ 4 / transcendental equations.
-  return numericRealRoots(expr, varName);
+  return null;
+}
+
+/** Options of {@link solve}. */
+export interface SolveOptions {
+  /**
+   * Scan `range` numerically for real roots. The scan is the only way `solve` returns
+   * floating-point roots for an equation with no closed form. It needs `range`.
+   */
+  numeric?: boolean;
+  /** The closed interval `[a, b]` of the numeric scan, with finite `a < b`. Needs `numeric: true`. */
+  range?: readonly [number, number];
+}
+
+/**
+ * The roots that {@link solve} returns, in an array.
+ *
+ * For an exact periodic solution set (`sin`, `cos`, `tan`) the array holds the principal roots
+ * of one period, and `period` (a non-enumerable property) is the period as text, for example
+ * `'2*pi'`. Add `k * period` to a root, for any integer `k`, for all roots.
+ */
+export type SolveResult = Array<f64 | Complex | string> & { readonly period?: string };
+
+/** Read and check the numeric-scan options. Returns the range, or null when no scan is asked for. */
+function readScanRange(options: SolveOptions | undefined): readonly [number, number] | null {
+  if (options === undefined) return null;
+  if (typeof options !== 'object' || options === null) {
+    throw new TypeError(
+      'solve: options must be an object such as { numeric: true, range: [a, b] }'
+    );
+  }
+  const { numeric, range } = options;
+  if (!numeric) {
+    if (range !== undefined) {
+      throw new TypeError('solve: `range` applies only with `numeric: true`');
+    }
+    return null;
+  }
+  if (
+    !Array.isArray(range) ||
+    range.length !== 2 ||
+    !Number.isFinite(range[0]) ||
+    !Number.isFinite(range[1]) ||
+    !(range[0] < range[1])
+  ) {
+    throw new RangeError('solve: `numeric: true` needs `range: [a, b]` with finite a < b');
+  }
+  return [range[0], range[1]];
+}
+
+/**
+ * Solve an equation or expression for a variable. The result is exact; `solve` scans for
+ * roots numerically only when you pass `{ numeric: true, range: [a, b] }`.
+ *
+ * Accepts either an expression (treated as `expr = 0`) or a full equation with a single `=`
+ * sign. What it returns, by form of the equation:
+ *
+ * - **Polynomial, degree 1 to 3:** exact closed-form roots, real and complex: numbers,
+ *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates.
+ * - **Polynomial, degree 4 or more:** all distinct real roots, found by Sturm isolation over
+ *   the whole real line, sorted ascending. These are floating-point numbers.
+ * - **`a*F(p*x + q) = b`, with `F` one of `sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `abs`:**
+ *   exact roots as text. A special value gives a multiple of `pi` (`sin(x) = 1/2` gives
+ *   `['pi/6', '5*pi/6']`). Another value gives a symbolic inverse (`sin(x) = 1/3` gives
+ *   `['asin(1/3)', 'pi - asin(1/3)']`). For `sin`, `cos` and `tan` the roots are the principal
+ *   roots of one period, and the result has a `period` property: `solve('sin(x)=0', 'x')` is
+ *   `['0', 'pi']` with `period` `'2*pi'`.
+ * - **Any other form** (`sin(x) = x`, `sin(x)^2 = 1/4`, `sinh(x) = 1`, `1/x = 2`): `solve`
+ *   throws an `Error` that names the numeric option. It never returns `[]` for such an
+ *   equation, because `[]` means that the equation has no roots.
+ *
+ * With `{ numeric: true, range: [a, b] }`, `solve` skips every exact method and scans `[a, b]`
+ * for real roots (sign change on an even grid, refined by Brent's method), sorted ascending.
+ * The scan does not look outside the range and can miss two roots that are closer than one
+ * grid step.
+ *
+ * @example
+ * solve('x^2 - 4', 'x')       // => [-2, 2]
+ * solve('x^2 - 2', 'x')       // => ['-sqrt(2)', 'sqrt(2)']
+ * solve('x^2 + 1 = 0', 'x')   // => [Complex(0, 1), Complex(0, -1)]
+ * solve('x^3 - 8', 'x')       // => [2, Complex(-1, 1.732…), Complex(-1, -1.732…)]
+ * solve('sin(x) = 0', 'x')    // => ['0', 'pi'], with period '2*pi'
+ * solve('cos(x) = 1/2', 'x')  // => ['pi/3', '5*pi/3']
+ * solve('exp(x) = 2', 'x')    // => ['log(2)']
+ * solve('cos(x) - x', 'x', { numeric: true, range: [0, 1] }) // => [0.7390851332151607]
+ *
+ * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
+ * @param varName  - Variable to solve for.
+ * @param options  - `{ numeric: true, range: [a, b] }` to scan a range numerically.
+ * @returns The distinct roots: real numbers (sorted) then Complex for a low-degree polynomial,
+ *   or exact text roots (with `period` when periodic).
+ * @throws An `Error` when the equation has no closed form and no numeric scan was asked for.
+ * @throws A `RangeError` when `numeric: true` has no valid `range`.
+ */
+export function solve(equation: unknown, varName: string, options?: SolveOptions): SolveResult {
+  if (typeof equation !== 'string') {
+    throw new TypeError(
+      'solve(equation, variable) is symbolic; for linear systems A x = b use linsolve or lusolve'
+    );
+  }
+  const scanRange = readScanRange(options);
+  // Normalize "lhs = rhs" to a root-finding expression "lhs - (rhs)".
+  let expr = equation;
+  if (equation.includes('=')) {
+    const parts = equation.split('=');
+    if (parts.length !== 2) {
+      throw new SyntaxError("solve: equation must contain at most one '=' sign");
+    }
+    expr = `${parts[0].trim()} - (${parts[1].trim()})`;
+  }
+
+  if (scanRange !== null) return numericRealRoots(expr, varName, scanRange);
+
+  const lowDegree = solveLowDegree(expr, varName);
+  if (lowDegree !== null) return lowDegree;
+
+  const polynomial = polynomialRealRoots(expr, varName);
+  if (polynomial !== null) return polynomial;
+
+  const exact = solveElementary(expr, varName);
+  if (exact !== null) {
+    const roots: SolveResult = [...exact.roots];
+    if (exact.period !== undefined) {
+      Object.defineProperty(roots, 'period', { value: exact.period, enumerable: false });
+    }
+    return roots;
+  }
+
+  throw new Error(
+    `solve: no closed-form solution found for "${equation}". ` +
+      'Pass { numeric: true, range: [a, b] } to scan that range for real roots.'
+  );
 }
 
 /**

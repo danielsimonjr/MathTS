@@ -3172,7 +3172,13 @@
       "SolveODESolution": {
         "kind": "type"
       },
+      "SolveOptions": {
+        "kind": "type"
+      },
       "SolveParabolicPDEOptions": {
+        "kind": "type"
+      },
+      "SolveResult": {
         "kind": "type"
       },
       "SpaceCoefficient": {
