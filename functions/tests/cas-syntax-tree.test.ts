@@ -53,6 +53,17 @@ describe('polynomialCoefficients reads the shape from the syntax tree', () => {
     expect(coefficients(`x^${MAX_POLYNOMIAL_DEGREE + 1}`)).toBeNull();
     expect(coefficients(`x^${MAX_POLYNOMIAL_DEGREE}`)).toHaveLength(MAX_POLYNOMIAL_DEGREE + 1);
     expect(coefficients('(x-x)^1000000000')).toBeNull();
+    expect(coefficients('(x+1)^1001')).toBeNull();
+  });
+
+  it('does not loop over a huge exponent of a constant base', () => {
+    // x^0 is the constant 1: `(x^0)^1e9` must answer at once, not after 1e9 multiplications.
+    const started = Date.now();
+    expect(coefficients('(x^0)^1000000000')).toEqual([1]);
+    expect(coefficients('(2*x^0)^3')).toEqual([8]);
+    expect(coefficients('(x^0)^1e300')).toEqual([1]);
+    expect(coefficients('(2*x^0)^1e300')).toEqual([Infinity]);
+    expect(Date.now() - started).toBeLessThan(1000);
   });
 
   it('parseTree gives null for text that is not an expression', () => {

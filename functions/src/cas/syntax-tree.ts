@@ -128,6 +128,10 @@ export function polynomialCoefficients(node: AstNode, variable: string): number[
     if (scalar === null || a === null) return null;
     if (op === 'divide') return scalar === 0 ? null : a.map((c) => c / scalar);
     if (!Number.isInteger(scalar) || scalar < 0) return null;
+    // A constant base needs no loop, and a base of degree d gives degree d*scalar: refuse a
+    // power above the limit before the loop, so that `(x^0)^1e9` cannot run for long.
+    if (a.length === 1) return [a[0] ** scalar];
+    if (scalar * (a.length - 1) > MAX_POLYNOMIAL_DEGREE) return null;
     let power: number[] | null = [1];
     for (let i = 0; i < scalar && power !== null; i++) power = multiplyCoefficients(power, a);
     return power;
