@@ -194,11 +194,15 @@ jobs:
   # processes at once, and each of them shares the two cores of the runner with the gate. Here
   # the gate runs alone, one gate at a time, and each verdict comes from a noise-aware sequential
   # rule (see tools/test/wall-clock-perf-gate.mjs). The gates need the built dist of functions,
-  # matrix and compat, and one Node, so this job sets up Node 22 itself.
+  # matrix and compat, and one Node, so this job sets up Node 22 itself. A gate that finds its
+  # noise as large as its margin takes more rounds, up to `maxRounds`: on a 12-core machine the
+  # six gates took 3.7 min (Node 26) and 7.2 min (Node 20) when every gate decided at its first
+  # look, and the worst case, every gate at its cap, is about 16 min. The timeout leaves room for
+  # a runner that is much slower.
   benchmark-baseline:
     name: Benchmark baseline
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
 
     steps:
       - name: Checkout

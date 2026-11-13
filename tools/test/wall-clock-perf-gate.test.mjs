@@ -5,8 +5,9 @@
  *   node --test tools/test/wall-clock-perf-gate.test.mjs
  *
  * The statistics tests feed fixed numbers, so no clock decides them. The last
- * two groups time real code: a 3x slowdown must fail, and an A/A control must
- * pass.
+ * two groups time real code: an injected slowdown must fail (3x, or the
+ * `selfTestScale` of a gate whose real ratio is far below its limit), and an A/A
+ * control must pass.
  */
 import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
