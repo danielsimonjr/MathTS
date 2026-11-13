@@ -9,69 +9,10 @@
  */
 
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
+import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
 
 /** Machine epsilon for double precision (2^-52). */
 const LSTSQ_EPS = 2.220446049250313e-16;
-
-/** Euclidean norm of `col[from..to)` of a row-major matrix, safe against overflow and underflow. */
-function scaledNorm(M: Float64Array, ld: number, col: number, from: number, to: number): number {
-  let big = 0;
-  for (let i = from; i < to; i++) big = Math.max(big, Math.abs(M[i * ld + col]));
-  if (big === 0) return 0;
-  let s = 0;
-  for (let i = from; i < to; i++) {
-    const t = M[i * ld + col] / big;
-    s += t * t;
-  }
-  return big * Math.sqrt(s);
-}
-
-/**
- * Builds the reflector that maps `col[k..rows)` onto `alpha * e_k`. Returns the
- * normalised reflector `v` (length rows - k), `v^T v`, and `alpha`, or `null` when the
- * column is already `alpha * e_k`.
- */
-function householder(
-  M: Float64Array,
-  ld: number,
-  rows: number,
-  k: number
-): { v: Float64Array; vv: number; alpha: number } | null {
-  const norm = scaledNorm(M, ld, k, k, rows);
-  const alpha = M[k * ld + k] > 0 ? -norm : norm;
-  const v = new Float64Array(rows - k);
-  for (let i = k; i < rows; i++) v[i - k] = M[i * ld + k];
-  v[0] -= alpha;
-  let big = 0;
-  for (let i = 0; i < v.length; i++) big = Math.max(big, Math.abs(v[i]));
-  if (big === 0) return null;
-  // Normalise v so v^T v can neither underflow nor overflow.
-  let vv = 0;
-  for (let i = 0; i < v.length; i++) {
-    v[i] /= big;
-    vv += v[i] * v[i];
-  }
-  return { v, vv, alpha };
-}
-
-/** Applies H = I - 2 v v^T / (v^T v) to columns [c0, c1) of `M`, rows k..k+v.length. */
-function applyReflector(
-  M: Float64Array,
-  ld: number,
-  k: number,
-  v: Float64Array,
-  vv: number,
-  c0: number,
-  c1: number
-): void {
-  for (let j = c0; j < c1; j++) {
-    let s = 0;
-    for (let i = 0; i < v.length; i++) s += v[i] * M[(k + i) * ld + j];
-    const f = (2 * s) / vv;
-    if (f === 0) continue;
-    for (let i = 0; i < v.length; i++) M[(k + i) * ld + j] -= f * v[i];
-  }
-}
 
 /**
  * Least-squares solution of `A x ≈ b`.
@@ -139,33 +80,8 @@ export function lstsq(
   for (let i = 0; i < Y.length; i++) Y[i] /= sB;
 
   // Column-pivoted Householder QR. perm[j] is the original index of working column j.
-  const perm = Array.from({ length: n }, (_, j) => j);
   const steps = Math.min(m, n);
-  for (let c = 0; c < steps; c++) {
-    let best = c;
-    let bestNorm = -1;
-    for (let j = c; j < n; j++) {
-      const nrm = scaledNorm(R, n, j, c, m);
-      if (nrm > bestNorm) {
-        bestNorm = nrm;
-        best = j;
-      }
-    }
-    if (best !== c) {
-      for (let i = 0; i < m; i++) {
-        const t = R[i * n + c];
-        R[i * n + c] = R[i * n + best];
-        R[i * n + best] = t;
-      }
-      [perm[c], perm[best]] = [perm[best], perm[c]];
-    }
-    const h = householder(R, n, m, c);
-    if (h === null) continue; // column is already alpha * e_c
-    applyReflector(R, n, c, h.v, h.vv, c, n);
-    applyReflector(Y, k, c, h.v, h.vv, 0, k);
-    R[c * n + c] = h.alpha;
-    for (let i = c + 1; i < m; i++) R[i * n + c] = 0;
-  }
+  const perm = columnPivotedQr(R, m, n, (c, v, vv) => applyReflector(Y, k, c, v, vv, 0, k));
 
   // Numerical rank from the pivoted diagonal.
   const tol = LSTSQ_EPS * Math.max(m, n) * Math.abs(R[0]);
@@ -208,7 +124,7 @@ function minNormSolve(
   for (let i = 0; i < r; i++) for (let j = 0; j < n; j++) M[j * r + i] = R[i * n + j];
   const reflectors: Array<{ v: Float64Array; vv: number } | null> = [];
   for (let c = 0; c < r; c++) {
-    const h = householder(M, r, n, c);
+    const h = columnReflector(M, r, n, c);
     if (h === null) {
       reflectors.push(null);
       continue;

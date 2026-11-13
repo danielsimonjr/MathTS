@@ -6,25 +6,10 @@
  */
 
 import { isSymmetric, eye } from './common.js';
-import { svd } from './svd.js';
+import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
-/**
- * A repeated eigenvalue (algebraic multiplicity 2 or more) and its eigenvectors.
- */
-export interface RepeatedEigenvalue {
-  /** The repeated eigenvalue: the mean of the computed copies within the grouping tolerance. */
-  value: { re: number; im: number };
-  /** Number of computed eigenvalues in the group (algebraic multiplicity). */
-  algebraicMultiplicity: number;
-  /**
-   * Number of linearly independent eigenvectors for this value: the nullity of
-   * `A - value * I`, at most `algebraicMultiplicity`.
-   */
-  independentEigenvectors: number;
-  /** True when `independentEigenvectors < algebraicMultiplicity` (a Jordan block). */
-  defective: boolean;
-}
+export type { RepeatedEigenvalue };
 
 /**
  * Result of eigenvalue decomposition
@@ -612,127 +597,13 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
   }
 
   const result = { values, vectors, vectorsIm, isSymmetric: symmetric } as EigResult;
-  // The report needs singular values, so it is computed on first read and cached.
+  // The report factors the matrix, so it is computed on first read and cached.
   let report: RepeatedEigenvalue[] | undefined;
   Object.defineProperty(result, 'repeatedEigenvalues', {
     enumerable: true,
     get: () => (report ??= repeatedEigenvalueReport(A, values, symmetric)),
   });
   return result;
-}
-
-/** Machine epsilon for double precision. */
-const EIG_EPS = 2.220446049250313e-16;
-
-/**
- * Two computed eigenvalues are linked when they are closer than this multiple of
- * `sqrt(eps) * ||A||_F`. A double eigenvalue in a Jordan block splits by about
- * `sqrt(eps)` times the matrix scale, so the link tolerance sits just above that.
- * Linked eigenvalues form one group by single linkage, so the grouping does not
- * depend on the order of the spectrum. A Jordan block of size 3 or more splits wider
- * (about `eps^(1/k)`) and is not grouped.
- */
-const GROUP_TOL_FACTOR = 2 * Math.sqrt(EIG_EPS);
-
-/** Number of singular values of the square matrix `M` at or below `thr`. */
-function smallSingularValues(M: number[][], thr: number): number {
-  const { S } = svd(M);
-  let count = 0;
-  for (const s of S) if (s <= thr) count++;
-  return count;
-}
-
-/**
- * Nullity over the complex numbers of `A - lambda I`, from singular values.
- * A real `lambda` uses the n x n matrix. A complex `lambda` embeds
- * `Re + i Im` as the real 2n x 2n matrix `[[Re, -Im], [Im, Re]]`, whose nullity
- * is twice the complex nullity.
- */
-function nullityOf(A: number[][], lambda: { re: number; im: number }, normF: number): number {
-  const n = A.length;
-  const real = lambda.im === 0;
-  const size = real ? n : 2 * n;
-  const M: number[][] = Array.from({ length: size }, () => new Array<number>(size).fill(0));
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      const re = A[i][j] - (i === j ? lambda.re : 0);
-      M[i][j] = re;
-      if (!real) {
-        const im = i === j ? -lambda.im : 0;
-        M[i + n][j + n] = re;
-        M[i][j + n] = -im;
-        M[i + n][j] = im;
-      }
-    }
-  }
-  const thr = Math.sqrt(EIG_EPS) * normF;
-  const small = smallSingularValues(M, thr);
-  return real ? small : Math.round(small / 2);
-}
-
-/**
- * Groups the computed eigenvalues into repeated values and counts the independent
- * eigenvectors of each group. Grouping is single linkage with a tolerance relative
- * to the matrix norm. A symmetric matrix has as many independent eigenvectors as
- * the multiplicity, so it skips the singular value computation.
- */
-function repeatedEigenvalueReport(
-  A: number[][],
-  values: Array<{ re: number; im: number }>,
-  symmetric: boolean
-): RepeatedEigenvalue[] {
-  const n = values.length;
-  let normF = 0;
-  for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
-  const linkTol = GROUP_TOL_FACTOR * normF;
-
-  // Union-find over pairs closer than linkTol.
-  const parent = Array.from({ length: n }, (_, i) => i);
-  const find = (i: number): number => {
-    while (parent[i] !== i) {
-      parent[i] = parent[parent[i]];
-      i = parent[i];
-    }
-    return i;
-  };
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (Math.hypot(values[j].re - values[i].re, values[j].im - values[i].im) <= linkTol) {
-        parent[find(j)] = find(i);
-      }
-    }
-  }
-  const groups = new Map<number, number[]>();
-  for (let i = 0; i < n; i++) {
-    const r = find(i);
-    const g = groups.get(r);
-    if (g) g.push(i);
-    else groups.set(r, [i]);
-  }
-
-  const report: RepeatedEigenvalue[] = [];
-  for (const members of groups.values()) {
-    if (members.length < 2) continue;
-    let re = 0;
-    let im = 0;
-    for (const k of members) {
-      re += values[k].re;
-      im += values[k].im;
-    }
-    re /= members.length;
-    im /= members.length;
-    if (Math.abs(im) <= linkTol) im = 0;
-    const independent = symmetric
-      ? members.length
-      : Math.min(nullityOf(A, { re, im }, normF), members.length);
-    report.push({
-      value: { re, im },
-      algebraicMultiplicity: members.length,
-      independentEigenvectors: independent,
-      defective: independent < members.length,
-    });
-  }
-  return report;
 }
 
 /**

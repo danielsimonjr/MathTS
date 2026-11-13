@@ -288,6 +288,10 @@
       "matrix/src/operations/condest.ts",
       "matrix/src/operations/index.ts"
     ],
+    "matrix/src/operations/pivoted-qr.ts": [
+      "matrix/src/operations/eig-multiplicity.ts",
+      "matrix/src/operations/lstsq.ts"
+    ],
     "matrix/src/operations/eig.ts": [
       "matrix/src/operations/eig-wasm.ts",
       "matrix/src/operations/index.ts",
@@ -304,8 +308,8 @@
       "matrix/src/operations/sqrtm.ts",
       "matrix/src/operations/svd.ts"
     ],
+    "matrix/src/operations/eig-multiplicity.ts": ["matrix/src/operations/eig.ts"],
     "matrix/src/operations/svd.ts": [
-      "matrix/src/operations/eig.ts",
       "matrix/src/operations/index.ts",
       "matrix/src/operations/pinv.ts",
       "matrix/src/operations/svd-wasm.ts"
