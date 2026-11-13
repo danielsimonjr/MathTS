@@ -11,7 +11,7 @@
  * @packageDocumentation
  */
 
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
@@ -195,7 +195,7 @@ export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOpti
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]
  */
 export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
-  const dense = A instanceof SparseMatrix ? A.toDense().toArray() : A;
+  const dense = densifyForSolver(A)?.toArray() ?? (A as number[][]);
   const n = dense.length;
   if (n === 0) throw new Error('linsolve: empty matrix');
   if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');

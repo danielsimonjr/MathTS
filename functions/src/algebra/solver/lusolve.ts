@@ -3,7 +3,7 @@ import {
   isPackedMatrixDescriptor,
   lu,
   luSolve,
-  SparseMatrix as MatrixSparseMatrix,
+  densifyForSolver,
 } from '@danielsimonjr/mathts-matrix';
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
@@ -348,10 +348,8 @@ export const createLusolve = /* #__PURE__ */ factory(
       ): DenseMatrix {
         // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
         // use the dense factorization.
-        const csr: unknown = a;
-        if (csr instanceof MatrixSparseMatrix) {
-          return _lusolveDense(matrix(csr.toDense().toArray()) as DenseMatrix, b);
-        }
+        const dense = densifyForSolver(a);
+        if (dense) return _lusolveDense(matrix(dense.toArray()) as DenseMatrix, b);
         const eq = equilibrateSparse(a, b);
         const d = lup(eq.a);
         return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 // Issue #927: linsolve, lsolve and luSolve must accept a SparseMatrix. Imported by
 // package name (built dist). The sparse input is the issue's SPD tridiagonal matrix.
-import { linsolve, lsolve } from '@danielsimonjr/mathts-functions';
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { linsolve, lsolve, usolve, lsolveAll, usolveAll } from '@danielsimonjr/mathts-functions';
+import { SparseMatrix, densifyForSolver } from '@danielsimonjr/mathts-matrix';
 
 const entries = [
   { row: 0, col: 0, value: 4 },
@@ -63,5 +63,52 @@ describe('issue #927: solvers accept SparseMatrix', () => {
     // L * [1, 1, 1] = [2, 5, 3]
     const x = (lsolve(L, [2, 5, 3]) as unknown as number[][]).map((r) => r[0]);
     expect(maxAbsDiff(x, [1, 1, 1])).toBeLessThan(1e-12);
+  });
+});
+
+describe('issue #927 review: every solver densifies through one guarded helper', () => {
+  const L = [
+    { row: 0, col: 0, value: 2 },
+    { row: 1, col: 0, value: 1 },
+    { row: 1, col: 1, value: 3 },
+  ];
+  const U = [
+    { row: 0, col: 0, value: 2 },
+    { row: 0, col: 1, value: 1 },
+    { row: 1, col: 1, value: 3 },
+  ];
+
+  it('usolve accepts a matrix-package SparseMatrix', () => {
+    const x = (
+      usolve(SparseMatrix.fromCOO(2, 2, U), [[4], [3]]) as { toArray(): number[][] }
+    ).toArray();
+    expect(x[0][0]).toBeCloseTo(1.5, 12);
+    expect(x[1][0]).toBeCloseTo(1, 12);
+  });
+
+  it('lsolveAll and usolveAll accept a matrix-package SparseMatrix', () => {
+    const a = lsolveAll(SparseMatrix.fromCOO(2, 2, L), [[2], [4]]) as unknown as Array<{
+      toArray(): number[][];
+    }>;
+    expect(a[0].toArray()[0][0]).toBeCloseTo(1, 12);
+    const b = usolveAll(SparseMatrix.fromCOO(2, 2, U), [[4], [3]]) as unknown as Array<{
+      toArray(): number[][];
+    }>;
+    expect(b[0].toArray()[1][0]).toBeCloseTo(1, 12);
+  });
+
+  it('densifyForSolver refuses a matrix above the element limit', () => {
+    const big = SparseMatrix.fromCOO(100, 100, [{ row: 0, col: 0, value: 1 }]);
+    expect(() => densifyForSolver(big, { maxElements: 9999 })).toThrow(RangeError);
+    expect(densifyForSolver(big, { maxElements: 10000 })).toBeDefined();
+    expect(densifyForSolver([[1]])).toBeUndefined();
+  });
+
+  it('linsolve accepts a structurally typed sparse matrix (a second package copy)', () => {
+    const real = SparseMatrix.fromCOO(2, 2, U);
+    const duck = { rows: 2, cols: 2, nnz: 3, toDense: () => real.toDense() };
+    const x = linsolve(duck as never, [4, 3]);
+    expect(x[0]).toBeCloseTo(1.5, 12);
+    expect(x[1]).toBeCloseTo(1, 12);
   });
 });

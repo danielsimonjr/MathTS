@@ -1,3 +1,4 @@
+import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
@@ -155,6 +156,8 @@ export const createUsolve = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
+        const dense = densifyForSolver(m);
+        if (dense) return _denseBackwardSubstitution(matrix(dense.toArray()) as DenseMatrix, b);
         return _sparseBackwardSubstitution(m, b);
       },
 

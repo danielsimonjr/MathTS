@@ -23,7 +23,7 @@ export type DecompositionMatrixInput =
   DenseMatrix | SparseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
 
 const ACCEPTED_TYPES_MSG =
-  'DenseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
+  'DenseMatrix, SparseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
 
 function isNestedNumberMatrix(value: unknown): value is number[][] {
   if (!Array.isArray(value)) {

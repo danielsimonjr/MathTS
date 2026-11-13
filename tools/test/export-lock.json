@@ -1471,6 +1471,9 @@
       "DEFAULT_EXTENDED_HINTS": {
         "kind": "object"
       },
+      "DEFAULT_SOLVER_MAX_ELEMENTS": {
+        "kind": "number"
+      },
       "DENSE_MATRIX_MAX_ELEMENTS": {
         "kind": "number"
       },
@@ -1479,6 +1482,9 @@
       },
       "DenseMatrix": {
         "kind": "function"
+      },
+      "DensifyOptions": {
+        "kind": "type"
       },
       "EigOptions": {
         "kind": "type"
@@ -1673,6 +1679,9 @@
         "kind": "function"
       },
       "decompositionInputToNestedArray": {
+        "kind": "function"
+      },
+      "densifyForSolver": {
         "kind": "function"
       },
       "destroyGlobalGPU": {

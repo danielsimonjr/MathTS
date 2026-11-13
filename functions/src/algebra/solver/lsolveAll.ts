@@ -1,3 +1,4 @@
+import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 
@@ -126,6 +127,8 @@ export const createLsolveAll = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix[] {
+        const dense = densifyForSolver(m);
+        if (dense) return _denseForwardSubstitution(matrix(dense.toArray()) as DenseMatrix, b);
         return _sparseForwardSubstitution(m, b);
       },
 
