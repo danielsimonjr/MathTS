@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-13",
-    "totalFiles": 1320,
+    "totalFiles": 1323,
     "totalModules": 82,
-    "totalExports": 7196
+    "totalExports": 7237
   },
   "entryPoints": [
     {
@@ -261,11 +261,15 @@
         "externalDependencies": [
           {
             "package": "workerpool",
-            "imports": ["pool", "Pool", "Transfer", "PoolOptions", "ExecOptions", "PoolStats"]
+            "imports": ["pool"]
           }
         ],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./pool-types.js",
+            "imports": ["Transfer", "Pool", "PoolOptions", "ExecOptions", "PoolStats"]
+          },
           {
             "file": "./compile-function-source.js",
             "imports": ["compileFunctionSource"]
@@ -311,6 +315,12 @@
             "file": "./matmul-sequential.js",
             "imports": ["matmulSequential"],
             "reExport": true
+          },
+          {
+            "file": "./pool-types.js",
+            "imports": ["TransferDescriptor", "TransferableLike"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -341,14 +351,18 @@
           "initializePool",
           "terminatePool",
           "getPoolStats",
-          "MathWorkerPool"
+          "MathWorkerPool",
+          "TransferDescriptor",
+          "TransferableLike"
         ],
         "reExported": [
           "chunkTyped",
           "chunkPairTyped",
           "forEachMultiIndex",
           "tensordotRange",
-          "matmulSequential"
+          "matmulSequential",
+          "TransferDescriptor",
+          "TransferableLike"
         ],
         "classes": ["MathWorkerPool"],
         "interfaces": [
@@ -398,6 +412,28 @@
         "workspaceDependencies": [],
         "exports": ["forEachMultiIndex"],
         "functions": ["forEachMultiIndex"]
+      },
+      "packages/workerpool/src/pool-types.ts": {
+        "description": "Public types of the worker pool, written here so that the published declarations name no",
+        "externalDependencies": [
+          {
+            "package": "workerpool",
+            "imports": ["Transfer"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["Transfer"],
+        "interfaces": [
+          "ExecOptions",
+          "PoolStats",
+          "PoolOptions",
+          "WorkerpoolPromise",
+          "TransferDescriptor",
+          "Pool"
+        ],
+        "constants": ["Transfer"]
       },
       "packages/workerpool/src/tensordot-range.ts": {
         "description": "Pure-JS tensordot over a contiguous range `[outStart, outEnd)` of output elements.",
@@ -1677,6 +1713,12 @@
             "reExport": true
           },
           {
+            "file": "./platform-types.js",
+            "imports": ["WasmMemoryHandle", "CompiledWasmModule", "AbortSignalLike"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./shared.js",
             "imports": ["MemoizedFunction"],
             "reExport": true,
@@ -1820,6 +1862,9 @@
           "get",
           "clone",
           "assign",
+          "WasmMemoryHandle",
+          "CompiledWasmModule",
+          "AbortSignalLike",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -1932,6 +1977,9 @@
           "WasmModuleLoader",
           "allocAsHeader",
           "importModule",
+          "WasmMemoryHandle",
+          "CompiledWasmModule",
+          "AbortSignalLike",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -2199,6 +2247,15 @@
           "pickShallow"
         ]
       },
+      "core/src/platform-types.ts": {
+        "description": "Types of platform objects that the published declarations mention.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": ["AbortSignalLike"]
+      },
       "core/src/shared.ts": {
         "description": "Shared utility functions used across core utility modules.",
         "externalDependencies": [],
@@ -2252,7 +2309,13 @@
         "description": "AssemblyScript managed ArrayBuffer + typed-array header allocation.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./platform-types.js",
+            "imports": ["WasmMemoryHandle"],
+            "typeOnly": true
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["allocAsHeader"],
         "interfaces": ["AsHeaderRuntime"],
@@ -2271,6 +2334,11 @@
           {
             "file": "./node-module-import.js",
             "imports": ["importModule"]
+          },
+          {
+            "file": "./platform-types.js",
+            "imports": ["CompiledWasmModule"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -4094,7 +4162,7 @@
           {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
-            "imports": ["computePool", "ComputePool", "ComputePoolConfig"]
+            "imports": ["computePool", "ComputePool", "ComputePoolConfig", "PoolStats"]
           }
         ],
         "exports": ["parallelBackend", "createParallelBackend", "ParallelBackend"],
@@ -4172,7 +4240,12 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["WasmModuleLoader", "LoadingMetrics"],
+            "imports": [
+              "WasmModuleLoader",
+              "LoadingMetrics",
+              "WasmMemoryHandle",
+              "CompiledWasmModule"
+            ],
             "subpath": "internal"
           }
         ],
@@ -4202,6 +4275,11 @@
             "package": "@danielsimonjr/mathts-gpu",
             "directory": "gpu",
             "imports": ["BufferPool"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUBuffer", "GPUCommandEncoder", "GPUBindGroupEntry"]
           }
         ],
         "exports": ["BatchExecutor"],
@@ -4223,6 +4301,11 @@
             "package": "@danielsimonjr/mathts-gpu",
             "directory": "gpu",
             "imports": ["BufferPool"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUBuffer"]
           }
         ],
         "exports": ["createSyncManager", "SyncManager"],
@@ -4410,6 +4493,11 @@
             "package": "@danielsimonjr/mathts-gpu",
             "directory": "gpu",
             "imports": ["BufferPool", "GPUContext", "ShaderManager"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUBuffer"]
           }
         ],
         "exports": [
@@ -14164,6 +14252,12 @@
             "imports": ["createSeededRng", "pairwiseSum", "SeededRng"]
           },
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["AbortSignalLike"],
+            "subpath": "internal"
+          },
+          {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
             "imports": ["WorkerPool"]
@@ -17458,6 +17552,11 @@
               "serializeGpu",
               "GPUContextOptions"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUBuffer", "GPUDevice", "GPUCommandEncoder"]
           }
         ],
         "exports": [
@@ -17501,6 +17600,11 @@
               "serializeGpu",
               "GPUContextOptions"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUBuffer", "GPUDevice"]
           }
         ],
         "exports": ["resetGpuFft", "fftGpuDispatch"],
@@ -29828,7 +29932,12 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["WasmModuleLoader", "LoadingMetrics"],
+            "imports": [
+              "WasmModuleLoader",
+              "LoadingMetrics",
+              "WasmMemoryHandle",
+              "CompiledWasmModule"
+            ],
             "subpath": "internal"
           }
         ],
@@ -31140,7 +31249,14 @@
             "imports": ["hasOwnProperty"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["AbortSignalLike"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["scalarGrammarAccepts"],
         "interfaces": ["ScalarGrammar", "EnumerationBudget"],
         "functions": ["scalarGrammarAccepts"]
@@ -40977,6 +41093,11 @@
             "directory": "core",
             "imports": ["importModule"],
             "subpath": "internal"
+          },
+          {
+            "package": "@danielsimonjr/mathts-workerpool",
+            "directory": "packages/workerpool",
+            "imports": ["TransferableLike"]
           }
         ],
         "exports": ["WorkerPool"],
@@ -45213,6 +45334,11 @@
           {
             "file": "./GPUContext.js",
             "imports": ["GPUContext"]
+          },
+          {
+            "file": "./webgpu-types.js",
+            "imports": ["GPUBuffer", "GPUBufferUsageFlags"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -45235,6 +45361,27 @@
               "resetWebGPUAvailabilityCache",
               "GPUCapabilities"
             ]
+          },
+          {
+            "file": "./webgpu-types.js",
+            "imports": [
+              "GPUBuffer",
+              "GPUAdapter",
+              "GPUDevice",
+              "GPUQueue",
+              "GPUCommandEncoder",
+              "GPUCommandBuffer",
+              "GPUShaderModule",
+              "GPUPipelineLayout",
+              "GPUComputePipeline",
+              "GPUBindGroupLayout",
+              "GPUBindGroup",
+              "GPUBufferUsageFlags",
+              "GPUFeatureName",
+              "GPUDeviceLostReason",
+              "GPUBindGroupEntry"
+            ],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -45262,6 +45409,11 @@
           {
             "file": "./GPUContext.js",
             "imports": ["GPUContext"]
+          },
+          {
+            "file": "./webgpu-types.js",
+            "imports": ["GPUShaderModule", "GPUPipelineLayout", "GPUComputePipeline"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -45273,7 +45425,13 @@
         "description": "WebGPU Detection and Capability Checking",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./webgpu-types.js",
+            "imports": ["GPUAdapter", "GPUAdapterInfo", "GPURequestAdapterOptions"],
+            "typeOnly": true
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "enableGpuUnavailableWarnings",
@@ -45291,7 +45449,7 @@
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize"
         ],
-        "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
+        "interfaces": ["GPUCapabilities"],
         "functions": [
           "enableGpuUnavailableWarnings",
           "disableGpuUnavailableWarnings",
@@ -45321,6 +45479,11 @@
           {
             "file": "./GPUContext.js",
             "imports": ["getGlobalGPUContext", "GPUContextOptions"]
+          },
+          {
+            "file": "./webgpu-types.js",
+            "imports": ["GPUDevice"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -45400,6 +45563,48 @@
             "file": "./serialize.js",
             "imports": ["serializeGpu"],
             "reExport": true
+          },
+          {
+            "file": "./webgpu-types.js",
+            "imports": [
+              "GPUAdapter",
+              "GPUBindGroup",
+              "GPUBindGroupDescriptor",
+              "GPUBindGroupLayoutDescriptor",
+              "GPUBindGroupLayoutEntry",
+              "GPUBindGroupEntry",
+              "GPUBindGroupLayout",
+              "GPUBuffer",
+              "GPUBufferDescriptor",
+              "GPUBufferUsageFlags",
+              "GPUCommandBuffer",
+              "GPUCommandEncoder",
+              "GPUCompilationInfo",
+              "GPUCompilationMessage",
+              "GPUComputePassEncoder",
+              "GPUComputePipeline",
+              "GPUComputePipelineDescriptor",
+              "GPUDevice",
+              "GPUDeviceDescriptor",
+              "GPUDeviceLostInfo",
+              "GPUDeviceLostReason",
+              "GPUError",
+              "GPUErrorFilter",
+              "GPUFeatureName",
+              "GPUObjectBase",
+              "GPUPipelineLayout",
+              "GPUPipelineLayoutDescriptor",
+              "GPUQueue",
+              "GPURequestAdapterOptions",
+              "GPUShaderModule",
+              "GPUShaderModuleDescriptor",
+              "GPUSupportedFeatures",
+              "GPUSupportedLimits",
+              "GPUUncapturedErrorEvent",
+              "GPUUncapturedErrorHandler"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -45437,7 +45642,42 @@
           "ShaderManager",
           "ShaderSource",
           "PipelineConfig",
-          "serializeGpu"
+          "serializeGpu",
+          "GPUAdapter",
+          "GPUBindGroup",
+          "GPUBindGroupDescriptor",
+          "GPUBindGroupLayoutDescriptor",
+          "GPUBindGroupLayoutEntry",
+          "GPUBindGroupEntry",
+          "GPUBindGroupLayout",
+          "GPUBuffer",
+          "GPUBufferDescriptor",
+          "GPUBufferUsageFlags",
+          "GPUCommandBuffer",
+          "GPUCommandEncoder",
+          "GPUCompilationInfo",
+          "GPUCompilationMessage",
+          "GPUComputePassEncoder",
+          "GPUComputePipeline",
+          "GPUComputePipelineDescriptor",
+          "GPUDevice",
+          "GPUDeviceDescriptor",
+          "GPUDeviceLostInfo",
+          "GPUDeviceLostReason",
+          "GPUError",
+          "GPUErrorFilter",
+          "GPUFeatureName",
+          "GPUObjectBase",
+          "GPUPipelineLayout",
+          "GPUPipelineLayoutDescriptor",
+          "GPUQueue",
+          "GPURequestAdapterOptions",
+          "GPUShaderModule",
+          "GPUShaderModuleDescriptor",
+          "GPUSupportedFeatures",
+          "GPUSupportedLimits",
+          "GPUUncapturedErrorEvent",
+          "GPUUncapturedErrorHandler"
         ],
         "reExported": [
           "hasWebGPU",
@@ -45473,7 +45713,42 @@
           "ShaderManager",
           "ShaderSource",
           "PipelineConfig",
-          "serializeGpu"
+          "serializeGpu",
+          "GPUAdapter",
+          "GPUBindGroup",
+          "GPUBindGroupDescriptor",
+          "GPUBindGroupLayoutDescriptor",
+          "GPUBindGroupLayoutEntry",
+          "GPUBindGroupEntry",
+          "GPUBindGroupLayout",
+          "GPUBuffer",
+          "GPUBufferDescriptor",
+          "GPUBufferUsageFlags",
+          "GPUCommandBuffer",
+          "GPUCommandEncoder",
+          "GPUCompilationInfo",
+          "GPUCompilationMessage",
+          "GPUComputePassEncoder",
+          "GPUComputePipeline",
+          "GPUComputePipelineDescriptor",
+          "GPUDevice",
+          "GPUDeviceDescriptor",
+          "GPUDeviceLostInfo",
+          "GPUDeviceLostReason",
+          "GPUError",
+          "GPUErrorFilter",
+          "GPUFeatureName",
+          "GPUObjectBase",
+          "GPUPipelineLayout",
+          "GPUPipelineLayoutDescriptor",
+          "GPUQueue",
+          "GPURequestAdapterOptions",
+          "GPUShaderModule",
+          "GPUShaderModuleDescriptor",
+          "GPUSupportedFeatures",
+          "GPUSupportedLimits",
+          "GPUUncapturedErrorEvent",
+          "GPUUncapturedErrorHandler"
         ]
       },
       "gpu/src/serialize.ts": {
@@ -45484,6 +45759,43 @@
         "workspaceDependencies": [],
         "exports": ["serializeGpu"],
         "functions": ["serializeGpu"]
+      },
+      "gpu/src/webgpu-types.ts": {
+        "description": "WebGPU handle types of the published declarations.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "GPUSupportedLimits",
+          "GPUSupportedFeatures",
+          "GPURequestAdapterOptions",
+          "GPUAdapterInfo",
+          "GPUDeviceDescriptor",
+          "GPUDeviceLostInfo",
+          "GPUError",
+          "GPUUncapturedErrorEvent",
+          "GPUObjectBase",
+          "GPUBufferShape",
+          "GPUCompilationMessage",
+          "GPUCompilationInfo",
+          "GPUShaderModuleShape",
+          "GPUComputePipelineShape",
+          "GPUBindGroupEntry",
+          "GPUBufferDescriptor",
+          "GPUShaderModuleDescriptor",
+          "GPUBindGroupLayoutEntry",
+          "GPUBindGroupLayoutDescriptor",
+          "GPUPipelineLayoutDescriptor",
+          "GPUBindGroupDescriptor",
+          "GPUComputePipelineDescriptor",
+          "GPUComputePassEncoderShape",
+          "GPUCommandEncoderShape",
+          "GPUQueueShape",
+          "GPUDeviceShape",
+          "GPUAdapterShape"
+        ]
       }
     },
     "plot": {
@@ -46057,7 +46369,7 @@
         "interfaces": ["AxisSpec", "PlotOptions", "Layer2D"]
       },
       "plot/src/update.ts": {
-        "description": "Identity of everything except series coordinates. Equal keys mean the existing",
+        "description": "The DOM `Element` when the compiling project has the DOM lib, and a minimal handle when it",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -46217,6 +46529,7 @@
           "packages/workerpool/src/index.ts",
           "packages/workerpool/src/matmul-sequential.ts",
           "packages/workerpool/src/multi-index.ts",
+          "packages/workerpool/src/pool-types.ts",
           "packages/workerpool/src/tensordot-range.ts",
           "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
@@ -46245,6 +46558,7 @@
           "core/src/node-module-import.ts",
           "core/src/number.ts",
           "core/src/object.ts",
+          "core/src/platform-types.ts",
           "core/src/shared.ts",
           "core/src/string.ts",
           "core/src/switch.ts",
@@ -47850,7 +48164,8 @@
           "gpu/src/device.ts",
           "gpu/src/flag.ts",
           "gpu/src/index.ts",
-          "gpu/src/serialize.ts"
+          "gpu/src/serialize.ts",
+          "gpu/src/webgpu-types.ts"
         ]
       },
       {
@@ -47888,18 +48203,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1320,
+    "totalTypeScriptFiles": 1323,
     "totalModules": 82,
-    "totalLinesOfCode": 226007,
-    "totalExports": 7196,
+    "totalLinesOfCode": 226549,
+    "totalExports": 7237,
     "totalClasses": 61,
-    "totalInterfaces": 617,
+    "totalInterfaces": 650,
     "totalFunctions": 2460,
     "totalTypeGuards": 178,
     "totalEnums": 0,
-    "totalConstants": 1665,
-    "totalReExports": 3120,
-    "totalTypeOnlyImports": 670,
+    "totalConstants": 1666,
+    "totalReExports": 3160,
+    "totalTypeOnlyImports": 680,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,
