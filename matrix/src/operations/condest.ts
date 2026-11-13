@@ -12,7 +12,8 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
-import { SparseMatrix, isSparseMatrix } from '../types/SparseMatrix.js';
+import type { SparseMatrix } from '../types/SparseMatrix.js';
+import { decompositionInputToDenseMatrix } from './as-packed.js';
 import { lu } from './lu.js';
 
 /** Solve `A x = b` given `A`'s LU factors (`P · A = L · U`). */
@@ -123,7 +124,7 @@ function hagerNormEstimate(
  * `condest` is O(n²)-per-iteration and avoids forming `A⁻¹`, at the cost of
  * being a (typically close) lower-bound estimate rather than an exact value.
  *
- * @param A - Square input matrix.
+ * @param input - Square `DenseMatrix`, or a `SparseMatrix` (densified with `densifyForSolver`).
  * @param p - Only the 1-norm (`p = 1`, the default) is currently implemented.
  * @throws {Error} if `A` is not square, or `p !== 1`.
  */
@@ -131,7 +132,7 @@ export function condest(input: DenseMatrix | SparseMatrix, p: number = 1): numbe
   if (p !== 1) {
     throw new Error(`condest: only the 1-norm estimator (p=1) is implemented (got p=${p})`);
   }
-  const A = isSparseMatrix(input) ? input.toDense() : input;
+  const A = decompositionInputToDenseMatrix(input);
   const n = A.rows;
   if (A.cols !== n) {
     throw new Error(`condest: matrix must be square (got ${A.rows}×${A.cols})`);
