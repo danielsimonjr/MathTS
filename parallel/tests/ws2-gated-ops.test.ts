@@ -137,7 +137,8 @@ describe('unary / elementwise / scale / matmul honour their thresholdByOp entrie
   });
 
   it('matmul parallelizes from its own entry, below the global 50,000', async () => {
-    // The entry is 36,864 result elements; 200 x 200 is 40,000, between the entry and 50,000.
+    // The entry is 7,077,888 multiply-adds (192^3); 200^3 is 8,000,000, above the entry. The global
+    // fallback of 50,000 would count 40,000 result elements and not parallelize.
     const n = 200;
     const a = new Float64Array(n * n).fill(1);
     const b = new Float64Array(n * n).fill(2);

@@ -70,8 +70,10 @@ const DEFAULTS = {
  * The matmul threshold rule. `records` are head-tree records, one per process, and may mix
  * worker counts. A grid size is won when every record has par/seq <= maxRatio at it. The
  * crossover is the smallest size that is won, with every larger grid size won too.
- * The threshold is the element count of that result (`aRows * bCols`, the unit of
- * `DEFAULT_THRESHOLD_BY_OP.matmul`), or null when no size is won.
+ * The grid is square (n x n times n x n), so the threshold is its multiply-add count
+ * (`aRows * aCols * bCols = n^3`, the unit of `DEFAULT_THRESHOLD_BY_OP.matmul`), or null when
+ * no size is won. The grid does not vary the inner dimension: the cost of a product is the
+ * multiply-add count, so the square cut is the cut for any shape of the same count.
  */
 function decideMatmul(records, maxRatio) {
   const sizes = [...new Set(records.flatMap((r) => r.matmul.map((m) => m.n)))].sort(
@@ -91,12 +93,12 @@ function decideMatmul(records, maxRatio) {
   let crossover = null;
   for (let i = perSize.length - 1; i >= 0 && perSize[i].won; i--) crossover = perSize[i].n;
   return {
-    rule: `smallest grid n whose par/seq is <= ${maxRatio} in every process, with every larger n also won; threshold = n * n result elements`,
+    rule: `smallest grid n whose par/seq is <= ${maxRatio} in every process, with every larger n also won; threshold = n * n * n multiply-adds`,
     maxRatio,
     processes: records.map((r) => ({ workers: r.workers, node: r.node })),
     perSize,
     crossoverN: crossover,
-    thresholdElements: crossover === null ? null : crossover * crossover,
+    thresholdMultiplyAdds: crossover === null ? null : crossover ** 3,
   };
 }
 
@@ -570,7 +572,7 @@ async function main() {
           (s) =>
             `  n=${String(s.n).padEnd(4)} par/seq worst ${s.worst.toFixed(3)} best ${s.best.toFixed(3)}  ${s.won ? 'won' : 'not won'}`
         ),
-        `  crossover n = ${decision.crossoverN}, threshold = ${decision.thresholdElements} result elements`,
+        `  crossover n = ${decision.crossoverN}, threshold = ${decision.thresholdMultiplyAdds} multiply-adds`,
       ];
     }
     console.log(lines.join('\n'));

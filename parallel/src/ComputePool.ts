@@ -366,12 +366,14 @@ export const DEFAULT_THRESHOLD_BY_OP: ThresholdByOp = {
   besselJ: 1_000_000,
   spectrogram: 65_536,
 
-  // linear algebra: parallel wins above these element counts
-  // matmul: the unit is result elements (`aRows * bCols`). 36_864 = 192 x 192, the smallest
-  // measured size at which `forceParallel` took at most 0.90 of `forceSequential` in every
-  // recorded process (2, 4 and 12 workers). The row data and the rule are in
-  // `docs/benchmarks/ws-r-matmul-decision.json`; a test derives this value from that record.
-  matmul: 36_864,
+  // linear algebra: parallel wins above these counts (matmul counts multiply-adds)
+  // matmul: the unit is multiply-adds (`aRows * aCols * bCols`), the cost of the product.
+  // 7_077_888 = 192^3, the smallest measured size at which `forceParallel` took at most 0.90
+  // of `forceSequential` in every recorded process (2, 4 and 12 workers). The measured grid
+  // is square, so a square product fixes the cut and the multiply-add count carries it to
+  // other shapes. The rule and the rows are in `docs/benchmarks/ws-r-matmul-decision.json`;
+  // a test derives this value from that record.
+  matmul: 7_077_888,
   matrixPower: 9_216, // break-even at ~96×96
   characteristicPolynomial: 9_216, // break-even at ~96×96
 
@@ -780,7 +782,7 @@ export class ComputePool {
    * forwarded without options let its entry govern nothing: `sin: 'never'` still went to the
    * workers at 50,000 elements once the pool was initialized, and a `matmul` entry below
    * 50,000 did not parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
-   * `shouldParallelize` requires a ready pool, so `forceParallel` never reaches an idle one.
+   * `ensureInitializedForParallel` starts an idle pool before a forced or gated parallel call.
    */
   private async poolOptions(
     elementCount: number,
@@ -873,7 +875,7 @@ export class ComputePool {
       aCols,
       b,
       bCols,
-      await this.poolOptions(aRows * bCols, 'matmul', force)
+      await this.poolOptions(aRows * aCols * bCols, 'matmul', force)
     );
     return toParallelResult(result);
   }
