@@ -9645,6 +9645,7 @@ modules:
         - describe
         - histogram
       interfaces:
+        - CovLayoutOptions
         - LinRegressResult
         - CorrelationTestResult
         - KendallTauTestResult
@@ -20690,8 +20691,10 @@ modules:
         - file: ./fft.js
           imports:
             - fft
-            - ifftReal
             - ComplexNumber
+        - file: ./fft-core-f64.js
+          imports:
+            - fftExactFloat64
         - file: ../typed/signal.js
           imports:
             - windowFunction
@@ -26146,6 +26149,11 @@ modules:
         - file: ../numeric/solveODE.js
           imports:
             - rosenbrockSolve
+        - file: ../numeric/ode-step-limit.js
+          imports:
+            - odeAcceptedBudget
+            - odeMaxAttempts
+            - odeMaxStepsError
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
@@ -28554,6 +28562,9 @@ modules:
         - file: ../policy.js
           imports:
             - wasmPolicyAllows
+        - file: ../../signal/fft-core-f64.js
+          imports:
+            - fftExactFloat64
       workspaceDependencies: []
       exports:
         - WASM_SIGNAL_THRESHOLD
@@ -45701,10 +45712,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1328
   totalModules: 82
-  totalLinesOfCode: 228451
+  totalLinesOfCode: 228726
   totalExports: 7256
   totalClasses: 62
-  totalInterfaces: 657
+  totalInterfaces: 658
   totalFunctions: 2473
   totalTypeGuards: 178
   totalEnums: 0
