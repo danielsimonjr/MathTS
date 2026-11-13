@@ -113,7 +113,9 @@ describe('the finite-difference step follows the scale of the input and of f (#9
 
 describe('the result is finite or the call throws (#910)', () => {
   it('does not return NaN for a subnormal input', () => {
-    const result = propagateUncertainty((v: Values) => v.x * v.x, { x: 5e-324 }, { x: 1e-324 });
+    // Number.MIN_VALUE (5e-324) is the smallest subnormal. The literal 1e-324 would round to 0.
+    const tiny = Number.MIN_VALUE;
+    const result = propagateUncertainty((v: Values) => v.x * v.x, { x: tiny }, { x: tiny });
     expect(Number.isFinite(result.sigma)).toBe(true);
     expect(Number.isFinite(result.partials.x)).toBe(true);
   });
