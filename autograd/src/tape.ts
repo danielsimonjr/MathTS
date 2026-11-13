@@ -11,7 +11,7 @@
  * v0.2.0 adds: contract (named-index), matmul (batched rank-N).
  */
 import { Tensor, Index, tensorSvd, tensorEig } from '@danielsimonjr/mathts-tensor';
-import { assertSameShape } from './shape.js';
+import { assertSameShape, ownedCopy } from './shape.js';
 
 type BackwardFn = (outputGrad: Float64Array) => void;
 
@@ -222,7 +222,7 @@ export class TapedTensor {
 
   static fromTensorAsInput(t: Tensor, tape: Tape): TapedTensor {
     const { id } = tape.allocate(t.data.length);
-    return new TapedTensor(t.shape, new Float64Array(t.data), tape, id, t.axisLabels);
+    return new TapedTensor(t.shape, ownedCopy(t), tape, id, t.axisLabels);
   }
 
   /** Gradient slot for this tensor; throws if `reset()` has invalidated it. */

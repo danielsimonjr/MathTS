@@ -406,6 +406,7 @@
       "grad",
       "jacobian",
       "NumericInput",
+      "ownedCopy",
       "reverseGrad",
       "ScalarFn",
       "Tape",
