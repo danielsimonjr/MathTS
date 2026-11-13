@@ -13,7 +13,7 @@
     "core/dist/index.js": 225184,
     "core/dist/internal.js": 228969,
     "core/package.json": 1907,
-    "matrix/dist/index.js": 200149,
+    "matrix/dist/index.js": 212837,
     "matrix/package.json": 2399,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 87222,
