@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2355,
+  "totalFiles": 2360,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1293,
+    "build-entry": 1294,
     "test-only": 0,
     "orphan": 0,
-    "test": 971,
+    "test": 975,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1319,
-    "tests": 971,
+    "src": 1320,
+    "tests": 975,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,8 +23,8 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
-    "@danielsimonjr/mathts-compat": 22,
-    "@danielsimonjr/mathts-core": 123,
+    "@danielsimonjr/mathts-compat": 26,
+    "@danielsimonjr/mathts-core": 124,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 64,
     "@danielsimonjr/mathts-expression": 573,
@@ -513,7 +513,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 515
+      "loc": 556
     },
     {
       "file": "compat/src/instance-api.ts",
@@ -527,7 +527,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 761
+      "loc": 815
+    },
+    {
+      "file": "compat/src/unary-fast-path.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 30
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -593,6 +600,13 @@
       "loc": 78
     },
     {
+      "file": "compat/tests/dogfood-mathjs-parity.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 127
+    },
+    {
       "file": "compat/tests/gap-config-behavior.test.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
@@ -612,6 +626,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 35
+    },
+    {
+      "file": "compat/tests/instance-types.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -647,6 +668,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 40
+    },
+    {
+      "file": "compat/tests/unary-fast-path.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
     },
     {
       "file": "compat/vitest.config.ts",
@@ -835,7 +863,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 267
+      "loc": 289
     },
     {
       "file": "core/src/switch.ts",
@@ -877,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 783
+      "loc": 786
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -898,7 +926,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 781
+      "loc": 794
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -947,7 +975,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 127
+      "loc": 135
     },
     {
       "file": "core/src/types/unit/errors.ts",
@@ -1297,7 +1325,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 442
+      "loc": 449
     },
     {
       "file": "core/tests/types/core-exact-clones-oracle.test.ts",
@@ -1326,6 +1354,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 170
+    },
+    {
+      "file": "core/tests/types/fraction-format.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "core/tests/types/fraction-from-number-cap.test.ts",
@@ -6505,7 +6540,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1117
+      "loc": 1104
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -13575,7 +13610,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 318
+      "loc": 312
     },
     {
       "file": "matrix/src/types/SparseMatrix.ts",
@@ -13757,7 +13792,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 680
+      "loc": 678
     },
     {
       "file": "matrix/tests/dogfood-g24-densematrix.test.ts",
@@ -16102,7 +16137,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 105
     },
     {
       "file": "workbook/src/fs-atomic.ts",
@@ -16347,7 +16382,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 60
+      "loc": 67
     },
     {
       "file": "workbook/tests/fs-atomic.test.ts",

@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1319, "e": 7195, "re": 3120 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-13", "f": 1320, "e": 7196, "re": 3120 },
   "s": {
-    "loc": 225850,
+    "loc": 226007,
     "cls": 61,
     "int": 617,
     "fn": 2460,
     "tg": 178,
     "en": 0,
-    "co": 1664,
+    "co": 1665,
     "toi": 670
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1834,7 +1834,7 @@
       "cls": ["Complex"]
     },
     "compat": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "createChain",
         "Complex",
@@ -1861,9 +1861,9 @@
         "ChainMethods",
         "ChainUnwrap",
         "MathJSConfig",
-        "MathInstance",
         "CompatExpressionLayers",
-        "WiredCompatInstance"
+        "WiredCompatInstance",
+        "UnaryNumberFastPath"
       ]
     },
     "gpu": {

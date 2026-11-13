@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2355
+**Total files**: 2360
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1293 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1294 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      971 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      975 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2355** |                                                                                                                |
+| **Total**     | **2360** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     7 |
-| `src`      |  1319 |
-| `tests`    |   971 |
+| `src`      |  1320 |
+| `tests`    |   975 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -44,8 +44,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    30 |
-| `@danielsimonjr/mathts-compat`         |    22 |
-| `@danielsimonjr/mathts-core`           |   123 |
+| `@danielsimonjr/mathts-compat`         |    26 |
+| `@danielsimonjr/mathts-core`           |   124 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   573 |
 | `@danielsimonjr/mathts-functions`      |  1056 |
@@ -139,6 +139,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/src/index.ts`                                                             | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/instance-api.ts`                                                      | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/shims.ts`                                                             | @danielsimonjr/mathts-compat         | src      | build-entry |
+| `compat/src/unary-fast-path.ts`                                                   | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/tests/chain.test.ts`                                                      | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/compat.test.ts`                                                     | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/coverage-gaps.test.ts`                                              | @danielsimonjr/mathts-compat         | tests    | test        |
@@ -148,14 +149,17 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/tests/dogfood-g16-mathjs-compat-surface.test.ts`                          | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-g26.test.ts`                                                | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-g32b.test.ts`                                               | @danielsimonjr/mathts-compat         | tests    | test        |
+| `compat/tests/dogfood-mathjs-parity.test.ts`                                      | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/gap-config-behavior.test.ts`                                        | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/instance-config-isolation.test.ts`                                  | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/instance-typed-surface.test.ts`                                     | @danielsimonjr/mathts-compat         | tests    | test        |
+| `compat/tests/instance-types.test.ts`                                             | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/matrix-array-ops.test.ts`                                           | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/parity-oracle.test.ts`                                              | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/public-api-smoke.test.ts`                                           | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/shims.test.ts`                                                      | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/std-variance.test.ts`                                               | @danielsimonjr/mathts-compat         | tests    | test        |
+| `compat/tests/unary-fast-path.test.ts`                                            | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/vitest.config.ts`                                                         | @danielsimonjr/mathts-compat         | config   | config      |
 | `core/src/arithmetic/scalar.ts`                                                   | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/array.ts`                                                               | @danielsimonjr/mathts-core           | src      | build-entry |
@@ -253,6 +257,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/exact-scale-registry-parse.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/exact-scale-review.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction-coverage.test.ts`                                      | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/fraction-format.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction-from-number-cap.test.ts`                               | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction-oracle.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction.test.ts`                                               | @danielsimonjr/mathts-core           | tests    | test        |

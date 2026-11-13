@@ -76,11 +76,7 @@
       "core/src/types/unit/dependencies.ts",
       "core/src/types/unit/unit-types.ts"
     ],
-    "core/src/string.ts": [
-      "core/src/array.ts",
-      "core/src/internal.ts",
-      "core/src/types/unit/dependencies.ts"
-    ],
+    "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/error/DimensionError.ts": [
       "core/src/array.ts",
       "core/src/collection.ts",
