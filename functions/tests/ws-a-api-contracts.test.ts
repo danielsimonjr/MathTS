@@ -1,4 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { mod, lcm, evaluate, bignumber, fraction } from '@danielsimonjr/mathts-functions';
+import { mod as arithmeticMod } from '@danielsimonjr/mathts-arithmetic';
+import { create, all } from '@danielsimonjr/mathts-compat';
 import {
   cov,
   corrcoef,
@@ -239,5 +242,41 @@ describe('#897 — PSD and STFT frame length clamps to n when defaulted', () => 
     const y = istft(stft(x));
     expect(y.length).toBe(x.length);
     for (let i = 8; i < 56; i++) expect(y[i]).toBeCloseTo(x[i], 9);
+  });
+});
+
+describe('#923 — mod(x, 0) returns x (mathjs rule), on every path', () => {
+  it('public mod on numbers returns the dividend', () => {
+    expect(mod(10, 0)).toBe(10);
+    expect(mod(-7, 0)).toBe(-7);
+  });
+
+  it('public mod on bigint returns the dividend (typed path threw "Division by zero")', () => {
+    expect(mod(10n, 0n)).toBe(10n);
+  });
+
+  it('evaluate("mod(10,0)") and the % operator return 10', () => {
+    expect(evaluate('mod(10,0)')).toBe(10);
+    expect(evaluate('10 % 0')).toBe(10);
+  });
+
+  it('lcm with a zero argument is 0 (typed path returned NaN / threw), matching factory lcm', () => {
+    expect(lcm(0, 0)).toBe(0);
+    expect(lcm(0n, 0n)).toBe(0n);
+    expect(lcm(4, 0)).toBe(0);
+  });
+
+  it('the arithmetic package re-exports the same rule', () => {
+    expect(arithmeticMod(10, 0)).toBe(10);
+  });
+
+  it('compat create(all).mod returns the dividend', () => {
+    const math = create(all);
+    expect(math.mod(10, 0)).toBe(10);
+  });
+
+  it('BigNumber and Fraction zero divisor return the dividend', () => {
+    expect(mod(bignumber(10), bignumber(0)).toString()).toBe('10');
+    expect(mod(fraction(10), fraction(0)).toString()).toBe('10');
   });
 });
