@@ -49,7 +49,8 @@ npm install @danielsimonjr/mathts-statistics
   `spearman`, `spearmanr`, `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`,
   `permutationTest`, `mahalanobis`, `hotellingT2`, `kmeans`, `spectralClustering`.
 - **Probability distributions** — distribution objects with `.pdf`, `.cdf`, `.quantile`, `.mean`,
-  `.variance`, `.sample` (one draw), and `.sampleN(n, { seed })` (batch, optionally seeded)
+  `.variance`, `.sample()` (one draw), `.sample(n)` (a `Float64Array` of `n` unseeded draws), and
+  `.sampleN(n, { seed })` (async batch, optionally seeded; use it when the draws must reproduce)
   (`normalDist`, `gammaDist`, `betaDist`, `binomialDist`, `poissonDist`, `exponentialDist`,
   `chiSquaredDist`, `fDist`, `tDist`, `logNormalDist`, `uniformDist`, `weibullDist`,
   `hypergeometricDist`, `negativeBinomialDist`, `paretoDist`, `rayleighDist`, `triangularDist`,
@@ -91,7 +92,8 @@ kolmogorovSmirnov2Test([1, 2, 3], [2, 3, 4]); // { statistic, pValue }
 const d = normalDist(0, 1);
 d.sample(); // one U(…) draw mapped to N(0,1)
 const batch = await d.sampleN(5, { seed: 1 }); // Float64Array length 5, reproducible
-console.log(batch.length);
+const five = d.sample(5); // Float64Array length 5, unseeded
+console.log(batch.length, five.length);
 ```
 
 ## License
