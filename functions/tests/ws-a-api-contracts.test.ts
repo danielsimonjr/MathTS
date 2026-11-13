@@ -2,6 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   cov,
   corrcoef,
+  welchPSD,
+  bartlettPSD,
+  stft,
+  istft,
   normalDist,
   betaDist,
   binomialDist,
@@ -180,5 +184,60 @@ describe('#899 — Distribution.sample(n)', () => {
     expect(gammaDist(2, 2).mean).toBeCloseTo(1, 12);
     expect(gammaDist(2, { scale: 2 }).mean).toBeCloseTo(4, 12);
     expect(gammaDist({ shape: 2, scale: 2 }).mean).toBeCloseTo(4, 12);
+  });
+});
+
+describe('#897 — PSD and STFT frame length clamps to n when defaulted', () => {
+  const tone = (n: number, bin: number): number[] =>
+    Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * bin * i) / n));
+
+  const peakIndex = (a: number[]): number => a.reduce((m, v, i, arr) => (v > arr[m] ? i : m), 0);
+
+  it('welchPSD with a 64-sample signal and no frameLength returns a spectrum (not a throw)', () => {
+    const r = welchPSD(tone(64, 4));
+    expect(r.frameLength).toBe(64);
+    expect(r.psd.length).toBe(33); // 64/2 + 1, the SciPy nperseg=64 bin count
+    expect(r.frequencies.length).toBe(33);
+  });
+
+  it('defaulted welchPSD equals the explicit clamp frameLength: n', () => {
+    const x = tone(64, 4);
+    expect(welchPSD(x).psd).toEqual(welchPSD(x, { frameLength: 64 }).psd);
+  });
+
+  it('bartlettPSD with a 64-sample signal and no frameLength clamps to 64', () => {
+    const r = bartlettPSD(tone(64, 4));
+    expect(r.frameLength).toBe(64);
+    expect(r.psd.length).toBe(33);
+  });
+
+  it('a non-power-of-two clamped frame puts the tone at the right frequency (n = 100)', () => {
+    const r = welchPSD(tone(100, 4));
+    expect(r.frameLength).toBe(100);
+    expect(r.frequencies[peakIndex(r.psd)]).toBeCloseTo(4 / 100, 12);
+  });
+
+  it('an explicit frameLength greater than n still throws RangeError', () => {
+    expect(() => welchPSD(tone(64, 4), { frameLength: 256 })).toThrow(RangeError);
+    expect(() => bartlettPSD(tone(64, 4), { frameLength: 256 })).toThrow(RangeError);
+  });
+
+  it('an explicit overlap >= the clamped frame throws instead of returning []', () => {
+    expect(() => welchPSD(tone(64, 4), { overlap: 64 })).toThrow(RangeError);
+  });
+
+  it('stft with a short signal and no nperseg clamps; an explicit nperseg > n throws', () => {
+    const x = tone(64, 4);
+    const s = stft(x);
+    expect(s.re.length).toBeGreaterThan(0);
+    expect(s.re[0].length).toBe(64); // stft keeps every bin of the frame
+    expect(() => stft(x, { nperseg: 256 })).toThrow(RangeError);
+  });
+
+  it('istft inverts a defaulted stft of a short signal', () => {
+    const x = tone(64, 4);
+    const y = istft(stft(x));
+    expect(y.length).toBe(x.length);
+    for (let i = 8; i < 56; i++) expect(y[i]).toBeCloseTo(x[i], 9);
   });
 });

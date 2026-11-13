@@ -186,20 +186,44 @@ export function welchPSDJS(
   for (let i = 0; i < frameLength; i++) winPower += win[i] * win[i];
   winPower /= frameLength;
 
+  // A power-of-two frame uses the radix-2 FFT. Any other frame needs the DFT of exactly
+  // frameLength points: zero-padding to fftLen would put bin k at k / fftLen, not k / frameLength.
+  const exact = fftLen !== frameLength;
+  const cosT = new Float64Array(exact ? frameLength : 0);
+  const sinT = new Float64Array(exact ? frameLength : 0);
+  for (let m = 0; m < cosT.length; m++) {
+    cosT[m] = Math.cos((2 * Math.PI * m) / frameLength);
+    sinT[m] = Math.sin((2 * Math.PI * m) / frameLength);
+  }
+
   let numFrames = 0;
   let start = 0;
   const fftData = new Float64Array(fftLen * 2);
 
   while (start + frameLength <= n) {
-    fftData.fill(0);
-    for (let i = 0; i < frameLength; i++) {
-      fftData[i * 2] = samples[start + i] * win[i];
-    }
-    _fftInterleavedJS(fftData, fftLen, false);
-    for (let k = 0; k < psdLen; k++) {
-      const re = fftData[k * 2];
-      const im = fftData[k * 2 + 1];
-      psd[k] += re * re + im * im;
+    if (exact) {
+      for (let k = 0; k < psdLen; k++) {
+        let re = 0;
+        let im = 0;
+        for (let i = 0; i < frameLength; i++) {
+          const v = samples[start + i] * win[i];
+          const idx = (k * i) % frameLength;
+          re += v * cosT[idx];
+          im -= v * sinT[idx];
+        }
+        psd[k] += re * re + im * im;
+      }
+    } else {
+      fftData.fill(0);
+      for (let i = 0; i < frameLength; i++) {
+        fftData[i * 2] = samples[start + i] * win[i];
+      }
+      _fftInterleavedJS(fftData, fftLen, false);
+      for (let k = 0; k < psdLen; k++) {
+        const re = fftData[k * 2];
+        const im = fftData[k * 2 + 1];
+        psd[k] += re * re + im * im;
+      }
     }
     numFrames++;
     start += hop;

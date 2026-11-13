@@ -130,10 +130,16 @@ describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
 });
 
 describe('#768 welchPSD short signal', () => {
-  it('welchPSD on n=64 throws when default frameLength exceeds signal', () => {
+  it('welchPSD on n=64 clamps a defaulted frameLength to 64 (#897, SciPy nperseg clamp)', () => {
     const x = Float64Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 8));
-    expect(() => welchPSD(x)).toThrow(/shorter than frameLength/);
-    expect(() => bartlettPSD(x)).toThrow(/shorter than frameLength/);
+    expect(welchPSD(x).frameLength).toBe(64);
+    expect(bartlettPSD(x).frameLength).toBe(64);
+  });
+
+  it('welchPSD still throws for an explicit frameLength longer than the signal', () => {
+    const x = Float64Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 8));
+    expect(() => welchPSD(x, { frameLength: 256 })).toThrow(/shorter than frameLength/);
+    expect(() => bartlettPSD(x, { frameLength: 256 })).toThrow(/shorter than frameLength/);
   });
 
   it('welchPSD with frameLength 32 returns non-empty psd', () => {
