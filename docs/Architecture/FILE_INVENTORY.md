@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2366
+**Total files**: 2373
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1297 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      977 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      984 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2366** |                                                                                                                |
+| **Total**     | **2373** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,14 +33,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1323 |
-| `tests`    |   977 |
+| `tests`    |   984 |
 | `tools`    |    29 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    65 |
+| `(root)`                               |    67 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    30 |
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   125 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   573 |
-| `@danielsimonjr/mathts-functions`      |  1056 |
+| `@danielsimonjr/mathts-functions`      |  1060 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   136 |
@@ -61,7 +61,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-tensor`         |    63 |
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
-| `@danielsimonjr/mathts-units`          |     3 |
+| `@danielsimonjr/mathts-units`          |     4 |
 | `@danielsimonjr/mathts-wasm`           |    27 |
 | `@danielsimonjr/mathts-workbook`       |    67 |
 | `@danielsimonjr/mathts-workerpool`     |    26 |
@@ -1719,6 +1719,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/matrix-ops.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/minimize-scalar.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/modular.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/multiply-scalar-collection.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/multivariate-sampling-oracle.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/nelder-mead-parity.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/nnls.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1762,6 +1763,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/polygon-ops.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polynomial-gcd-exact.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/predicates.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/propagate-uncertainty-constants.test.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/propagate-uncertainty-edges.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/propagate-uncertainty.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/property-invariants.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/public-api-smoke.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1788,6 +1791,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/s2r-clones-batch4-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/s2r-jacobian-norms-parity.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-batch-parallel.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/scalar-collection-arithmetic.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-compile-gradient.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-compile.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-dimension.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2319,6 +2323,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tests/integration/functions.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/integration/instance.test.ts`                                              | (root)                               | tests    | test        |
 | `tests/integration/issue-883-zero-arg-factories.test.ts`                          | (root)                               | tests    | test        |
+| `tests/integration/issue-908-909-physics-symbols.test.ts`                         | (root)                               | tests    | test        |
+| `tests/integration/issue-911-910-921-repros.test.ts`                              | (root)                               | tests    | test        |
 | `tests/integration/issue-924-compat-parse-sandbox.test.ts`                        | (root)                               | tests    | test        |
 | `tests/integration/issue-924-compat-parse-scope.test.ts`                          | (root)                               | tests    | test        |
 | `tests/integration/issue-937-parse-registration-functions-first.test.ts`          | (root)                               | tests    | test        |
@@ -2365,6 +2371,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `trigonometry/vitest.config.ts`                                                   | @danielsimonjr/mathts-trigonometry   | config   | config      |
 | `units/src/index.ts`                                                              | @danielsimonjr/mathts-units          | src      | build-entry |
 | `units/tests/units.test.ts`                                                       | @danielsimonjr/mathts-units          | tests    | test        |
+| `units/tests/value-contract.test.ts`                                              | @danielsimonjr/mathts-units          | tests    | test        |
 | `units/vitest.config.ts`                                                          | @danielsimonjr/mathts-units          | config   | config      |
 | `vitest.config.bench.ts`                                                          | (root)                               | config   | config      |
 | `vitest.config.browser.ts`                                                        | (root)                               | config   | config      |

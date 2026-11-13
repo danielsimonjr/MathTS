@@ -18654,10 +18654,20 @@ modules:
         - file: ../factories/evaluate.js
           imports:
             - evaluate
-      workspaceDependencies: []
+        - file: ../type/unit/physicalConstants.js
+          imports:
+            - createFineStructure
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isUnit
+            - UnitInstance
       exports:
         - propagateUncertainty
       interfaces:
+        - UncertainScalar
         - UncertaintyPropagationResult
         - UncertaintyPropagationOptions
       functions:
@@ -45519,16 +45529,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1323
   totalModules: 82
-  totalLinesOfCode: 226567
+  totalLinesOfCode: 226951
   totalExports: 7237
   totalClasses: 61
-  totalInterfaces: 650
+  totalInterfaces: 651
   totalFunctions: 2460
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1666
   totalReExports: 3160
-  totalTypeOnlyImports: 680
+  totalTypeOnlyImports: 681
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0
