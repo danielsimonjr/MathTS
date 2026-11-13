@@ -82,7 +82,15 @@ function formatValue(value: unknown, options?: unknown): string {
   if (typeof value === 'number') {
     return format(value, options as FormatOptions);
   }
-  if (value instanceof BigNumber || value instanceof Fraction || value instanceof Complex) {
+  // A Fraction value prints as the ratio (`1/8 S`), as mathjs does; its toString is the decimal.
+  if (value instanceof Fraction) {
+    if ((options as { fraction?: string } | undefined)?.fraction === 'decimal')
+      return value.toString();
+    return value.denominator === 1n
+      ? `${value.numerator}`
+      : `${value.numerator}/${value.denominator}`;
+  }
+  if (value instanceof BigNumber || value instanceof Complex) {
     return value.toString();
   }
   return String(value);

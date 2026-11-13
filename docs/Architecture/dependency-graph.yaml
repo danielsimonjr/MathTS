@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-13'
-  totalFiles: 1319
+  totalFiles: 1320
   totalModules: 82
-  totalExports: 7195
+  totalExports: 7196
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5746,6 +5746,11 @@ modules:
           directory: core
           imports:
             - MatrixDimensions
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - formatGeneric
+          subpath: internal
       exports:
         - isMatrix
       interfaces:
@@ -15836,6 +15841,11 @@ modules:
           directory: core
           imports:
             - mathTyped
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - formatGeneric
+          subpath: internal
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -39764,7 +39774,16 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isFraction
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - formatGeneric
+          subpath: internal
       exports:
         - formatResult
       functions:
@@ -42397,6 +42416,10 @@ modules:
         - file: ./shims.js
           imports:
             - shims
+        - file: ./unary-fast-path.js
+          imports:
+            - UNARY_NUMBER_FAST_PATH
+            - UnaryNumberFastPath
         - file: ./chain.js
           imports:
             - createChain
@@ -42475,7 +42498,6 @@ modules:
         - computePool
       interfaces:
         - MathJSConfig
-        - MathInstance
       functions:
         - create
       constants:
@@ -42519,7 +42541,11 @@ modules:
       description: mathjs Compatibility Shims
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./unary-fast-path.js
+          imports:
+            - UNARY_NUMBER_FAST_PATH
+            - UnaryNumberFastPath
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -42718,6 +42744,18 @@ modules:
         - Infinity_
         - NaN_
         - shims
+    compat/src/unary-fast-path.ts:
+      description: Number fast path of the unary scalar shims (#889).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - UNARY_NUMBER_FAST_PATH
+      interfaces:
+        - UnaryNumberFastPath
+      constants:
+        - UNARY_NUMBER_FAST_PATH
   gpu:
     gpu/src/BufferPool.ts:
       description: GPU Buffer Pool
@@ -45150,6 +45188,7 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/instance-api.ts
         - compat/src/shims.ts
+        - compat/src/unary-fast-path.ts
     - name: Gpu
       files:
         - gpu/src/BufferPool.ts
@@ -45187,16 +45226,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1319
+  totalTypeScriptFiles: 1320
   totalModules: 82
-  totalLinesOfCode: 225850
-  totalExports: 7195
+  totalLinesOfCode: 226007
+  totalExports: 7196
   totalClasses: 61
   totalInterfaces: 617
   totalFunctions: 2460
   totalTypeGuards: 178
   totalEnums: 0
-  totalConstants: 1664
+  totalConstants: 1665
   totalReExports: 3120
   totalTypeOnlyImports: 670
   runtimeCircularDeps: 2

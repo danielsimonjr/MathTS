@@ -82,7 +82,7 @@ describe('G16 dogfood — mathjs compat surface', () => {
     expect(cMt.im).toBe(2);
 
     const fMt = roundtrip(mt, mt.fraction(1, 3)) as Fraction;
-    expect(fMt.toString()).toBe('1/3');
+    expect(fMt.toString()).toBe('0.(3)');
   });
 
   it('G22 — instance import/typed/compile stay out of safe evaluate', () => {
@@ -99,7 +99,7 @@ describe('G16 dogfood — mathjs compat surface', () => {
       },
       { override: true }
     );
-    expect((mt.parse as () => string)()).toBe('leaked');
+    expect((mt.parse as unknown as () => string)()).toBe('leaked');
     expect(() => mt.evaluate('parse("1+1")')).toThrow();
     expect(mt.evaluate('parse("1+1")', {}, { unsafe: true })).not.toBe('leaked');
     expect(() => mt.evaluate('map([1], x ? parse : 0)')).toThrow(/Undefined symbol parse/);

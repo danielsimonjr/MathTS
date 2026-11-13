@@ -12,6 +12,7 @@
  * byte-identical copy (see docs/Architecture/duplicate-symbols.json).
  */
 import type { MatrixDimensions } from '@danielsimonjr/mathts-core';
+import { formatGeneric } from '@danielsimonjr/mathts-core/internal';
 export type { MatrixDimensions };
 
 /**
@@ -262,18 +263,11 @@ export abstract class Matrix<T = number> {
   }
 
   /**
-   * Format matrix for display
+   * Format matrix for display, in the mathjs notation: nested brackets (`[[1, 2], [3, 4]]`),
+   * each entry through the core `format()` (fractions as `1/3`, strings quoted).
    */
   toString(): string {
-    const lines: string[] = [];
-    for (let i = 0; i < this.rows; i++) {
-      const rowValues: string[] = [];
-      for (let j = 0; j < this.cols; j++) {
-        rowValues.push(String(this.get(i, j)));
-      }
-      lines.push(`[ ${rowValues.join(', ')} ]`);
-    }
-    return lines.join('\n');
+    return formatGeneric(this.toArray());
   }
 
   /**

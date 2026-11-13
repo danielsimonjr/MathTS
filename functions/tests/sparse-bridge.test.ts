@@ -450,14 +450,14 @@ describe('MathJSSparseMatrix', () => {
       expect(json.size).toEqual([2, 2]);
     });
 
-    it('toString shows sparse format', () => {
+    it('toString prints the nested-array form', () => {
       const s = new MathJSSparseMatrix([
         [1, 0],
         [0, 2],
       ]);
       const str = s.toString();
-      expect(str).toContain('Sparse Matrix');
-      expect(str).toContain('2 non-zero');
+      // mathjs prints the nested-array form from toString.
+      expect(str).toBe('[[1, 0], [0, 2]]');
     });
   });
 });

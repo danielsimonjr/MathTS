@@ -267,7 +267,7 @@ describe('compat parity — numeric-type constructors vs oracle', () => {
   it('fraction reduces to 1/3', () => {
     const f = cFraction(2, 6); // compat's own Fraction type (numerator/denominator)
     expect(f.valueOf()).toBeCloseTo(1 / 3, 15); // 2/6 = 1/3
-    expect(f.toString()).toBe('1/3');
+    expect(f.toString()).toBe('0.(3)'); // mathjs prints the repeating decimal
   });
   it('complex builds re/im', () => {
     const z = cComplex(1, 2);

@@ -11,6 +11,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { formatGeneric } from '@danielsimonjr/mathts-core/internal';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
@@ -164,11 +165,7 @@ export class MathJSDenseMatrix {
   }
 
   toString(): string {
-    if (this._size.length === 1) {
-      const flat = this._data as unknown as number[];
-      return `[${flat.join(', ')}]`;
-    }
-    return this._data.map((row) => `[ ${row.join(', ')} ]`).join('\n');
+    return formatGeneric(this._data);
   }
 
   /**
@@ -912,19 +909,9 @@ export class MathJSSparseMatrix {
     };
   }
 
+  /** mathjs prints a sparse matrix as its nested-array form. */
   toString(): string {
-    const lines: string[] = [];
-    const cols = this._size[1];
-    for (let j = 0; j < cols; j++) {
-      for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
-        const v = this._values ? this._values[k] : 1;
-        lines.push(`    (${this._index[k]}, ${j}) ==> ${v}`);
-      }
-    }
-    return (
-      `Sparse Matrix [${this._size[0]} x ${this._size[1]}] (${this._index.length} non-zero)\n` +
-      lines.join('\n')
-    );
+    return formatGeneric(this.toArray());
   }
 
   /**

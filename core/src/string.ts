@@ -101,6 +101,16 @@ function _format(value: unknown, options?: unknown): string {
 
   // note: we use unsafe duck-typing here to check for Fractions, this is
   // ok here since we're only invoking toString or concatenating its values
+  // A core Fraction (bigint numerator and denominator). Its toString gives the decimal
+  // form (mathjs 'decimal' output), so the ratio default is written here.
+  if (isCoreFraction(value)) {
+    if (!options || (options as { fraction?: string }).fraction !== 'decimal') {
+      if (value.denominator === 1n) return `${value.numerator}`;
+      return `${value.numerator}/${value.denominator}`;
+    }
+    return value.toString();
+  }
+
   if (looksLikeFraction(value)) {
     if (!options || (options as { fraction?: string }).fraction !== 'decimal') {
       // output as ratio, like '1/3'
@@ -218,6 +228,18 @@ function formatArray(array: unknown, options?: unknown): string {
   } else {
     return format(array, options);
   }
+}
+
+/** Check whether a value is a core Fraction (bigint numerator and denominator fields). */
+function isCoreFraction(value: unknown): value is { numerator: bigint; denominator: bigint } {
+  const frac = value as { numerator?: unknown; denominator?: unknown } | null;
+  return (
+    typeof frac === 'object' &&
+    frac !== null &&
+    typeof frac.numerator === 'bigint' &&
+    typeof frac.denominator === 'bigint' &&
+    typeof (value as { toString?: unknown }).toString === 'function'
+  );
 }
 
 /**

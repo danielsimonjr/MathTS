@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly**: 8 files
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
-- **compat**: 4 files
+- **compat**: 5 files
 - **gpu**: 8 files
 - **plot**: 19 files
 - **plot/three**: 3 files
@@ -217,9 +217,9 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 16             | 0               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 25             | 0               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                               | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 4              | 0               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 5              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
@@ -277,6 +277,7 @@ graph LR
     P18 --> P2
     P18 --> P1
     P19 --> P6
+    P19 --> P2
     P19 --> P7
     P19 --> P23
     P21 --> P6
@@ -2159,6 +2160,7 @@ graph LR
 | Package                      | Import             |
 | ---------------------------- | ------------------ |
 | `@danielsimonjr/mathts-core` | `MatrixDimensions` |
+| `@danielsimonjr/mathts-core` | `formatGeneric`    |
 
 **Exports:**
 
@@ -6193,6 +6195,7 @@ graph LR
 | Package                        | Import                        |
 | ------------------------------ | ----------------------------- |
 | `@danielsimonjr/mathts-core`   | `mathTyped`                   |
+| `@danielsimonjr/mathts-core`   | `formatGeneric`               |
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
 
 **Exports:**
@@ -18810,6 +18813,13 @@ graph LR
 
 ### `workbook/src/formatter.ts` - Human-readable rendering of cell results for terminal output.
 
+**Workspace Dependencies:**
+
+| Package                      | Import          |
+| ---------------------------- | --------------- |
+| `@danielsimonjr/mathts-core` | `isFraction`    |
+| `@danielsimonjr/mathts-core` | `formatGeneric` |
+
 **Exports:**
 
 - Functions: `formatResult`
@@ -19469,16 +19479,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                                      | Type      |
-| ------------------- | -------------------------------------------- | --------- |
-| `./shims.js`        | `shims`                                      | Import    |
-| `./chain.js`        | `createChain, Chain`                         | Import    |
-| `./instance-api.js` | `wireMathjsInstanceApi, WiredCompatInstance` | Import    |
-| `./shims.js`        | `*`                                          | Re-export |
+| File                   | Imports                                       | Type      |
+| ---------------------- | --------------------------------------------- | --------- |
+| `./shims.js`           | `shims`                                       | Import    |
+| `./unary-fast-path.js` | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath` | Import    |
+| `./chain.js`           | `createChain, Chain`                          | Import    |
+| `./instance-api.js`    | `wireMathjsInstanceApi, WiredCompatInstance`  | Import    |
+| `./shims.js`           | `*`                                           | Re-export |
 
 **Exports:**
 
-- Interfaces: `MathJSConfig`, `MathInstance`
+- Interfaces: `MathJSConfig`
+- Types: `MathInstance`
 - Functions: `create`
 - Constants: `all`
 - Re-exports: `* from ./shims.js`, `Complex`, `Fraction`, `BigNumber`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `FRACTION_ZERO`, `FRACTION_ONE`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `DenseMatrix`, `SparseMatrix`, `computePool`
@@ -19520,11 +19532,26 @@ graph LR
 | `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse` |
 | `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                                                   |
 
+**Internal Dependencies:**
+
+| File                   | Imports                                       | Type   |
+| ---------------------- | --------------------------------------------- | ------ |
+| `./unary-fast-path.js` | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath` | Import |
+
 **Exports:**
 
 - Types: `CompatMatrixValue`
 - Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
+
+---
+
+### `compat/src/unary-fast-path.ts` - Number fast path of the unary scalar shims (#889).
+
+**Exports:**
+
+- Interfaces: `UnaryNumberFastPath`
+- Constants: `UNARY_NUMBER_FAST_PATH`
 
 ---
 
@@ -20837,37 +20864,38 @@ graph TD
         N498[index]
         N499[instance-api]
         N500[shims]
+        N501[unary-fast-path]
     end
 
     subgraph Gpu
-        N501[BufferPool]
-        N502[GPUContext]
-        N503[ShaderManager]
-        N504[detect]
-        N505[device]
-        N506[flag]
-        N507[index]
-        N508[serialize]
+        N502[BufferPool]
+        N503[GPUContext]
+        N504[ShaderManager]
+        N505[detect]
+        N506[device]
+        N507[flag]
+        N508[index]
+        N509[serialize]
     end
 
     subgraph Plot
-        N509[coerce]
-        N510[contour]
-        N511[emit]
-        N512[frame]
-        N513[heatmap]
-        N514[histogram]
-        N515[index]
-        N516[marks2d]
-        N517[overlay]
-        N518[palette]
-        N519[...9 more]
+        N510[coerce]
+        N511[contour]
+        N512[emit]
+        N513[frame]
+        N514[heatmap]
+        N515[histogram]
+        N516[index]
+        N517[marks2d]
+        N518[overlay]
+        N519[palette]
+        N520[...9 more]
     end
 
     subgraph Plot/three
-        N520[points3d]
-        N521[project]
-        N522[surface]
+        N521[points3d]
+        N522[project]
+        N523[surface]
     end
 
     N4 --> N2
@@ -20955,10 +20983,10 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1319   |
+| Total TypeScript Files  | 1320   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 225850 |
-| Total Exports           | 7195   |
+| Total Lines of Code     | 226007 |
+| Total Exports           | 7196   |
 | Total Re-exports        | 3120   |
 | Total Classes           | 61     |
 | Total Interfaces        | 617    |
