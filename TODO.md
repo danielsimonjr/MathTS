@@ -546,6 +546,12 @@ typecheck` 32/32, eslint clean, full affected-package suites green, `check:dupli
 Consolidated from the per-phase records above. None gate the released work; each is an additive improvement
 or a documented scope limit worth revisiting.
 
+- [ ] **WASM policy for `tan` and `exp`.** Two runs of `docs/benchmarks/wasm-public-call.json` and
+      `wasm-public-call-run2.json` show the AssemblyScript kernel at 0.34 to 0.57 of the JavaScript time for
+      16,384 to 1,048,576 values, and `policy.ts` keeps both on JavaScript. The kernel `exp` differs from
+      `Math.exp` by about 2e-16 relative error. Decide: move the policy bands, or record why the accuracy
+      difference blocks it. The benchmark script `tools/benchmark/wasm/opt-in.bench.ts --public` re-measures it.
+
 - [x] ✅ **Doc honesty (Phase 0) — RESOLVED 2026-07-16 (functions@0.37.0).** Rule-4 re-probe of the built
       `dist` found the "pass-through" claim was **stale**: `rationalize` already returns a real transformed
       Node (`(x+1)^2`→`x^2+2x+1`) and `simplify` already reduces (`2x+3x`→`5x`; it just doesn't apply trig

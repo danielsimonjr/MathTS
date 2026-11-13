@@ -212,8 +212,8 @@ in those element-count terms.
 
 > **`matmul` was re-measured.** The row above records the first measurement. The
 > in-process kernel was then changed to a packed-column dot product, and the threshold
-> was re-derived from 2-, 4- and 12-worker runs: the current `matmul` entry is **36,864**
-> result elements (192x192). See `docs/benchmarks/ws-r-matmul-decision.json`.
+> was re-derived from 2-, 4- and 12-worker runs: the current `matmul` entry is **7,077,888**
+> multiply-adds (192x192x192). See `docs/benchmarks/ws-r-matmul-decision.json`.
 
 ### Interpretation
 

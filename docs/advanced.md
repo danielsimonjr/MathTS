@@ -106,7 +106,8 @@ const largeData = new Float64Array(100000);
 const result2 = await computePool.sum(largeData);
 // result2.parallelized === false
 
-// matmul parallelizes at or above 36,864 result elements (192×192); threshold is inclusive
+// matmul parallelizes at or above 7,077,888 multiply-adds (aRows * aCols * bCols, 192×192×192);
+// the threshold is inclusive
 const big = await computePool.matmul(
   new Float64Array(192 * 192),
   192,
@@ -114,7 +115,7 @@ const big = await computePool.matmul(
   new Float64Array(192 * 192),
   192
 );
-// big.parallelized === true when the pool is initialized (exactly 36,864 elements)
+// big.parallelized === true when the pool is initialized (exactly 7,077,888 multiply-adds)
 ```
 
 ### Batch Operations
