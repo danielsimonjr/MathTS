@@ -124,10 +124,18 @@ function both(a: Built, b: Built, join: (x: Poly, y: Poly) => Built): Built {
   return join(a, b);
 }
 
+/** The operators that a variable-free subtree keeps as arithmetic, so its rounding noise is measured. */
+const CONSTANT_ARITHMETIC = new Set(['add', 'subtract', 'multiply', 'unaryMinus', 'unaryPlus']);
+
 function buildPoly(node: AstNode, variable: string): Built {
   if (!containsSymbol(node, variable)) {
-    const v = constantValue(node);
-    return v === null ? null : { c: [v], m: [Math.abs(v)] };
+    // A sum or product of constants (`0.1 + 0.2 - 0.3`) is built term by term, with the magnitude of
+    // each term, so that its rounding noise reads as zero. Any other constant has one value.
+    const op = node.type === 'OperatorNode' ? operatorName(node) : null;
+    if (node.type !== 'ParenthesisNode' && !(op !== null && CONSTANT_ARITHMETIC.has(op))) {
+      const v = constantValue(node);
+      return v === null ? null : { c: [v], m: [Math.abs(v)] };
+    }
   }
   if (node.type === 'SymbolNode') return { c: [0, 1], m: [0, 1] };
   if (node.type === 'ParenthesisNode') {

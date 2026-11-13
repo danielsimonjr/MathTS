@@ -513,6 +513,15 @@ describe('#884 solve returns a finite solution set; solveExact returns the perio
       expect(solveWith('0.1*x^2-0.3*x^2+0.2*x^2+x-2', 'x')).toEqual([2]);
     });
 
+    it('the rounding noise of a sum of constants is zero, also inside a coefficient', () => {
+      // 0.1 + 0.2 - 0.3 is 5.55e-17 in floating point
+      expect(solveWith('0.1+0.2-0.3+x', 'x')).toEqual([0]);
+      expect(solveWith('(0.1+0.2-0.3)*x + 1', 'x')).toEqual([]);
+      expect(() => solveWith('(0.1+0.2-0.3)*x', 'x')).toThrow(/identity/);
+      expect(solveWith('(2+3)*x - 10', 'x')).toEqual([2]);
+      expect(solveWith('sqrt(2)*sqrt(2)*x - 2', 'x')).toEqual([1]);
+    });
+
     it('degree 4 and above are real roots by Sturm isolation, not a scan window', () => {
       expect(solveWith('x^4-5*x^2+4', 'x')).toEqual([-2, -1, 1, 2]);
       expect(solveWith('x^5-5*x^3+4*x', 'x')).toEqual([-2, -1, 0, 1, 2]);

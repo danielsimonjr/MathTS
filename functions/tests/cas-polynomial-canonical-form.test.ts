@@ -185,6 +185,15 @@ describe('#887 one canonical polynomial form', () => {
       expect(expand('x/1e-11')).toBe('100000000000*x');
     });
 
+    it('expand reads the residue of a cancellation as zero, also when a later step cancels it again', () => {
+      // each step leaves rounding noise of the first terms; the noise is measured against them
+      expect(expand('x + 1e-5*x - x - 1e-5*x')).toBe('0');
+      expect(expand('0.1*x + 0.2*x - 0.3*x')).toBe('0');
+      expect(expand('(x+0.1)^2 - x^2 - 0.2*x - 0.01')).toBe('0');
+      expect(expand('(0.1*x+0.2)*(x+3) - 0.1*x^2 - 0.5*x - 0.6')).toBe('0');
+      expect(expand('0.1+0.2-0.3+x')).toBe('x');
+    });
+
     it('expand never prints a term with a zero coefficient', () => {
       expect(expand('x^2 - x^2 + 1')).toBe('1');
       expect(expand('(x+1)^2 - x^2 - 2*x')).toBe('1');
