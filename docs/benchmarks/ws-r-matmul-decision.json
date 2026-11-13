@@ -1,6 +1,6 @@
 {
   "decision": {
-    "rule": "smallest grid n whose par/seq is <= 0.9 in every process, with every larger n also won; threshold = n * n result elements",
+    "rule": "smallest grid n whose par/seq is <= 0.9 in every process, with every larger n also won; threshold = n * n * n multiply-adds",
     "maxRatio": 0.9,
     "processes": [
       {
@@ -85,7 +85,7 @@
       }
     ],
     "crossoverN": 192,
-    "thresholdElements": 36864
+    "thresholdMultiplyAdds": 7077888
   },
   "records": [
     {

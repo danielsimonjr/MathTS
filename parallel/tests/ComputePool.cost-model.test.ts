@@ -1,4 +1,4 @@
-import { describe, it, expect, afterAll, beforeAll } from 'vitest';
+import { describe, it, expect, afterAll, beforeAll, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../src/index.js';
@@ -6,10 +6,11 @@ import { ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../src/index.js';
 /**
  * WS-R cost model for `ComputePool.matmul` (#935).
  *
- * `DEFAULT_THRESHOLD_BY_OP.matmul` is not a typed-in number: it is the output of the rule
- * in `tools/benchmarks/ws-r-compute-pool.mjs --decide`, run on the processes recorded in
- * `docs/benchmarks/ws-r-matmul-decision.json`. The first test derives the threshold from
- * those recorded rows again, so a constant that no recorded measurement supports fails.
+ * `DEFAULT_THRESHOLD_BY_OP.matmul` is a count of multiply-adds (`aRows * aCols * bCols`). It is
+ * the cube of the crossover size that the rule in `tools/benchmarks/ws-r-compute-pool.mjs
+ * --decide` gives for the processes recorded in `docs/benchmarks/ws-r-matmul-decision.json`.
+ * The recorded grid is square and comes from one host, so the first test checks that the
+ * constant follows the record. It does not check that the rule is right for other hosts.
  */
 
 interface MatmulRow {
@@ -19,7 +20,7 @@ interface MatmulRow {
 interface Decision {
   maxRatio: number;
   crossoverN: number | null;
-  thresholdElements: number | null;
+  thresholdMultiplyAdds: number | null;
 }
 interface DecisionFile {
   decision: Decision;
@@ -43,7 +44,7 @@ function derive(file: DecisionFile): number | null {
     });
   let crossover: number | null = null;
   for (let i = sizes.length - 1; i >= 0 && won(sizes[i]); i--) crossover = sizes[i];
-  return crossover === null ? null : crossover * crossover;
+  return crossover === null ? null : crossover ** 3;
 }
 
 /** The plain triple loop: the order of every sum is k = 0 .. aCols - 1. */
@@ -65,11 +66,11 @@ function operand(n: number, seed: number): Float64Array {
   return x;
 }
 
-describe('matmul threshold comes from a recorded measurement', () => {
+describe('matmul threshold equals the crossover of the recorded square grid', () => {
   it('the recorded rows give the threshold in the file and the threshold in the pool', () => {
     const derived = derive(recorded);
     expect(derived).not.toBeNull();
-    expect(recorded.decision.thresholdElements).toBe(derived);
+    expect(recorded.decision.thresholdMultiplyAdds).toBe(derived);
     expect(DEFAULT_THRESHOLD_BY_OP.matmul).toBe(derived);
   });
 
@@ -83,9 +84,9 @@ describe('matmul threshold comes from a recorded measurement', () => {
 describe('ComputePool.matmul keeps small products in-process', () => {
   let pool: ComputePool;
   const threshold = DEFAULT_THRESHOLD_BY_OP.matmul as number;
-  // The sizes on each side of the threshold: result elements are n * n.
-  const below = Math.floor(Math.sqrt(threshold)) - 1;
-  const above = Math.ceil(Math.sqrt(threshold)) + 1;
+  // The square sizes on each side of the threshold: multiply-adds are n^3.
+  const below = Math.floor(Math.cbrt(threshold)) - 1;
+  const above = Math.ceil(Math.cbrt(threshold)) + 1;
 
   beforeAll(async () => {
     pool = new ComputePool({ maxWorkers: 2 });
@@ -114,6 +115,34 @@ describe('ComputePool.matmul keeps small products in-process', () => {
     for (let i = 0; i < want.length; i++) expect(Object.is(r.result[i], want[i])).toBe(true);
   });
 
+  it('a tall product with a short inner dimension has many result elements and stays in-process', async () => {
+    // 512 x 2 times 2 x 72: 36,864 result elements, 73,728 multiply-adds.
+    const [m, k, n] = [512, 2, 72];
+    const a = new Float64Array(m * k).map((_, i) => ((i % 13) - 6) / 5);
+    const b = new Float64Array(k * n).map((_, i) => ((i % 11) - 5) / 3);
+    const r = await pool.matmul(a, m, k, b, n);
+    expect(r.parallelized).toBe(false);
+    const want = new Float64Array(m * n);
+    for (let i = 0; i < m; i++)
+      for (let j = 0; j < n; j++) {
+        let sum = 0;
+        for (let t = 0; t < k; t++) sum += a[i * k + t] * b[t * n + j];
+        want[i * n + j] = sum;
+      }
+    for (let i = 0; i < want.length; i++) expect(Object.is(r.result[i], want[i])).toBe(true);
+  });
+
+  it('a product with a long inner dimension has few result elements and uses the workers', async () => {
+    // 2 x 4,000 times 4,000 x 2,000: 4,000 result elements, 16,000,000 multiply-adds.
+    const [m, k, n] = [2, 4000, 2000];
+    const a = new Float64Array(m * k).map((_, i) => ((i % 13) - 6) / 5);
+    const b = new Float64Array(k * n).map((_, i) => ((i % 11) - 5) / 3);
+    const r = await pool.matmul(a, m, k, b, n);
+    expect(r.parallelized).toBe(true);
+    const seq = await pool.matmul(a, m, k, b, n, { forceSequential: true });
+    for (let i = 0; i < m * n; i++) expect(Object.is(r.result[i], seq.result[i])).toBe(true);
+  });
+
   it('forced sequential and forced parallel agree bit for bit at an odd size', async () => {
     const n = 37;
     const a = operand(n, 7);
@@ -126,49 +155,30 @@ describe('ComputePool.matmul keeps small products in-process', () => {
   });
 });
 
-/** Count `new Float64Array(length >= minLength)` while `run` executes (the global is restored). */
-async function countLargeF64<T>(minLength: number, run: () => Promise<T>): Promise<[T, number]> {
-  const Original = globalThis.Float64Array;
-  let count = 0;
-  const Counting: typeof Float64Array = new Proxy(Original, {
-    construct(target, args, newTarget): object {
-      const first = args[0] as unknown;
-      if (typeof first === 'number' && first >= minLength) count++;
-      else if (
-        first !== null &&
-        typeof first === 'object' &&
-        (first as ArrayLike<number>).length >= minLength
-      ) {
-        count++;
-      }
-      return Reflect.construct(target, args, newTarget === Counting ? target : newTarget);
-    },
-  });
-  (globalThis as { Float64Array: unknown }).Float64Array = Counting;
-  try {
-    return [await run(), count];
-  } finally {
-    (globalThis as { Float64Array: unknown }).Float64Array = Original;
-  }
-}
-
 describe('ComputePool.sin default path (#931)', () => {
-  it("stays in-process for the 'never' op and builds one array of n values, the result", async () => {
+  it("stays in-process for the 'never' op, so Math.sin runs here once per value", async () => {
     const pool = new ComputePool({ maxWorkers: 2 });
     await pool.initialize();
+    const n = 100_000;
+    const x = new Float64Array(n);
+    for (let i = 0; i < n; i++) x[i] = i * 1e-5;
+    const before = Float64Array.from(x);
+    // A worker would call its own Math.sin, which this spy does not see.
+    const spy = vi.spyOn(Math, 'sin');
+    let r;
     try {
-      const n = 100_000;
-      const x = new Float64Array(n);
-      for (let i = 0; i < n; i++) x[i] = i * 1e-5;
-      const [r, large] = await countLargeF64(n, () => pool.sin(x));
-      expect(r.parallelized).toBe(false);
-      expect(r.chunks).toBe(1);
-      // An input copy would make it two.
-      expect(large).toBe(1);
-      for (let i = 0; i < n; i += 997) expect(Object.is(r.result[i], Math.sin(x[i]))).toBe(true);
+      r = await pool.sin(x);
     } finally {
+      const calls = spy.mock.calls.length;
+      spy.mockRestore();
       await pool.terminate(true);
+      expect(calls).toBe(n);
     }
+    expect(r.parallelized).toBe(false);
+    expect(r.chunks).toBe(1);
+    expect(r.result).toHaveLength(n);
+    for (let i = 0; i < n; i++) expect(Object.is(r.result[i], Math.sin(x[i]))).toBe(true);
+    expect(x).toEqual(before);
   });
 });
 
@@ -190,6 +200,20 @@ describe('ComputePool forceParallel after warmup (#903)', () => {
       expect(r.parallelized).toBe(true);
       expect(r.chunks).toBeGreaterThan(1);
       for (let i = 0; i < n; i += 991) expect(Object.is(r.result[i], Math.sin(x[i]))).toBe(true);
+    } finally {
+      await pool.terminate(true);
+    }
+  });
+
+  it('forceParallel on a pool that was not initialized starts the pool and runs on workers', async () => {
+    const pool = new ComputePool({ maxWorkers: 2 });
+    try {
+      expect(pool.isReady()).toBe(false);
+      const x = new Float64Array(1000).fill(0.5);
+      const r = await pool.sin(x, { forceParallel: true });
+      expect(pool.isReady()).toBe(true);
+      expect(r.parallelized).toBe(true);
+      expect(Object.is(r.result[999], Math.sin(0.5))).toBe(true);
     } finally {
       await pool.terminate(true);
     }

@@ -1,5 +1,5 @@
 matmul threshold decision from 6 head-tree processes
-  rule: smallest grid n whose par/seq is <= 0.9 in every process, with every larger n also won; threshold = n * n result elements
+  rule: smallest grid n whose par/seq is <= 0.9 in every process, with every larger n also won; threshold = n * n * n multiply-adds
   n=64   par/seq worst 4.120 best 1.352  not won
   n=96   par/seq worst 2.591 best 0.956  not won
   n=128  par/seq worst 1.568 best 0.718  not won
@@ -9,4 +9,4 @@ matmul threshold decision from 6 head-tree processes
   n=256  par/seq worst 0.702 best 0.419  won
   n=320  par/seq worst 0.591 best 0.306  won
   n=384  par/seq worst 0.589 best 0.314  won
-  crossover n = 192, threshold = 36864 result elements
+  crossover n = 192, threshold = 7077888 multiply-adds

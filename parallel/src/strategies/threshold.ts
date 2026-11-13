@@ -41,7 +41,7 @@ export type OperationCategory =
  * Threshold configuration for different operation types
  */
 export interface ThresholdConfig {
-  /** Minimum elements for parallel matmul */
+  /** Minimum multiply-adds (`aRows * aCols * bCols`) for parallel matmul */
   matmul: number;
   /** Minimum elements for parallel elementwise ops */
   elementwise: number;
