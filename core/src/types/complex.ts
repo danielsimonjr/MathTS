@@ -196,6 +196,9 @@ export class Complex implements IComplex {
   }
 
   toString(): string {
+    // complex.js (mathjs) prints a non-finite value as one bare word.
+    if (Number.isNaN(this.re) || Number.isNaN(this.im)) return 'NaN';
+    if (!Number.isFinite(this.re) || !Number.isFinite(this.im)) return 'Infinity';
     if (this.im === 0) return `${this.re}`;
     if (this.re === 0) {
       if (this.im === 1) return 'i';

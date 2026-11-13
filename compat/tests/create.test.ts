@@ -60,7 +60,7 @@ describe('compat create(all) lazy wrapping', () => {
   });
 
   it('memoizes wrappers: math.add === math.add and stays stable across reads', () => {
-    const math = create(all) as Record<string, unknown>;
+    const math = create(all) as unknown as Record<string, unknown>;
     const first = math.add;
     expect(typeof first).toBe('function');
     expect(math.add).toBe(first);
@@ -69,13 +69,13 @@ describe('compat create(all) lazy wrapping', () => {
   });
 
   it('keeps wrappers per-instance (not shared between instances)', () => {
-    const a = create(all) as Record<string, unknown>;
-    const b = create(all) as Record<string, unknown>;
+    const a = create(all) as unknown as Record<string, unknown>;
+    const b = create(all) as unknown as Record<string, unknown>;
     expect(a.add).not.toBe(b.add);
   });
 
   it('Object.keys lists the whole surface, unchanged by accessing members', () => {
-    const math = create(all) as Record<string, unknown>;
+    const math = create(all) as unknown as Record<string, unknown>;
     const before = Object.keys(math);
     expect(before.length).toBeGreaterThan(Object.keys(all).length - 1);
     for (const key of Object.keys(all)) expect(before).toContain(key);
@@ -92,7 +92,7 @@ describe('compat create(all) lazy wrapping', () => {
   });
 
   it('members are enumerable own properties and remain assignable', () => {
-    const math = create(all) as Record<string, unknown>;
+    const math = create(all) as unknown as Record<string, unknown>;
     expect(Object.prototype.propertyIsEnumerable.call(math, 'add')).toBe(true);
     const custom = () => 'custom';
     math.add = custom;
@@ -102,7 +102,7 @@ describe('compat create(all) lazy wrapping', () => {
   });
 
   it('spread of an instance materializes the same keys', () => {
-    const math = create(all) as Record<string, unknown>;
+    const math = create(all) as unknown as Record<string, unknown>;
     expect(Object.keys({ ...math })).toEqual(Object.keys(math));
   });
 });

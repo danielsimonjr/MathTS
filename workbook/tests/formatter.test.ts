@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { Fraction } from '@danielsimonjr/mathts-core';
 import { formatResult } from '../src/formatter.js';
 
 describe('formatResult', () => {
@@ -55,5 +56,11 @@ describe('formatResult', () => {
     const out = formatResult({ a: shared, b: shared });
     expect(out).not.toContain('[Circular]');
     expect(out).toBe('{"a":{"v":1},"b":{"v":1}}');
+  });
+
+  it('shows a core Fraction as the ratio, like format() and mathjs cells (#892)', () => {
+    expect(formatResult(new Fraction(1n, 3n))).toBe('1/3');
+    expect(formatResult(new Fraction(1n, 2n))).toBe('1/2');
+    expect(formatResult(new Fraction(4n, 2n))).toBe('2');
   });
 });

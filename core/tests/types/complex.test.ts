@@ -80,6 +80,13 @@ describe('Complex', () => {
       expect(new Complex(3, 0).toString()).toBe('3');
       expect(new Complex(0, 4).toString()).toBe('4i');
       expect(new Complex(0, 1).toString()).toBe('i');
+      // complex.js (mathjs) prints a non-finite part as the bare word.
+      expect(new Complex(NaN, NaN).toString()).toBe('NaN');
+      expect(new Complex(NaN, 1).toString()).toBe('NaN');
+      expect(new Complex(Infinity, 1).toString()).toBe('Infinity');
+      expect(new Complex(1, -Infinity).toString()).toBe('Infinity');
+      expect(new Complex(-Infinity, 0).toString()).toBe('Infinity');
+      expect(new Complex(Infinity, NaN).toString()).toBe('NaN');
       expect(new Complex(0, -1).toString()).toBe('-i');
       expect(new Complex(3, 1).toString()).toBe('3 + i');
     });

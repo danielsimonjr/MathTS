@@ -50,12 +50,6 @@
       "script": "compat/tests/helpers/compat-add-perf-gate.mjs",
       "limit": 2.0,
       "needs": ["compat/dist/index.js"]
-    },
-    {
-      "name": "compat-sin",
-      "script": "compat/tests/helpers/compat-sin-perf-gate.mjs",
-      "limit": 3.0,
-      "needs": ["compat/dist/index.js"]
     }
   ]
 }

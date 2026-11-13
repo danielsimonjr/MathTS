@@ -31,6 +31,7 @@ import {
 } from '../../arithmetic/scalar.js';
 import { DEFAULT_CONFIG } from '../../config.js';
 import { isUnit } from '../../is.js';
+import { format as formatGeneric } from '../../string.js';
 import { format, type FormatOptions } from '../../number.js';
 import { BigNumber } from '../bignumber.js';
 import { Complex, I as ComplexI } from '../complex.js';
@@ -82,7 +83,11 @@ function formatValue(value: unknown, options?: unknown): string {
   if (typeof value === 'number') {
     return format(value, options as FormatOptions);
   }
-  if (value instanceof BigNumber || value instanceof Fraction || value instanceof Complex) {
+  // A Fraction value prints as the ratio (`1/8 S`), as mathjs does; its toString is the decimal.
+  if (value instanceof Fraction) {
+    return formatGeneric(value, options);
+  }
+  if (value instanceof BigNumber || value instanceof Complex) {
     return value.toString();
   }
   return String(value);

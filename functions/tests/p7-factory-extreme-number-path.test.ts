@@ -142,7 +142,7 @@ describe('P7-3 factory max/min number path', () => {
         a[199] = new Fraction(3, 2);
         const result = run(a);
         expect(same(result, reference(a, pick))).toBe(true);
-        expect(String(result)).toBe(pick === 'max' ? '3/2' : '1');
+        expect(String(result)).toBe(pick === 'max' ? '1.5' : '1');
       });
 
       it('a Fraction in the middle of numbers', () => {

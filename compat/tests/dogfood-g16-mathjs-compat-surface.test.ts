@@ -99,7 +99,7 @@ describe('G16 dogfood — mathjs compat surface', () => {
       },
       { override: true }
     );
-    expect((mt.parse as () => string)()).toBe('leaked');
+    expect((mt.parse as unknown as () => string)()).toBe('leaked');
     expect(() => mt.evaluate('parse("1+1")')).toThrow();
     expect(mt.evaluate('parse("1+1")', {}, { unsafe: true })).not.toBe('leaked');
     expect(() => mt.evaluate('map([1], x ? parse : 0)')).toThrow(/Undefined symbol parse/);

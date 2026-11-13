@@ -85,15 +85,7 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
 /**
  * MathTS instance with mathjs-compatible API
  */
-export interface MathInstance {
-  /**
-   * Index signature for the full functions namespace surfaced by
-   * `create(all)`. Members declared explicitly below keep their precise
-   * types; everything else (det, integrate, eigs, …) is reachable as
-   * `unknown` and can be narrowed by the caller.
-   */
-  [name: string]: unknown;
-
+interface MathInstanceOverrides {
   /** Fluent chain: `math.chain(x).add(3).done()`. */
   chain: (value: unknown) => Chain;
 
@@ -205,6 +197,13 @@ export interface MathInstance {
   Infinity: typeof shims.Infinity;
   NaN: typeof shims.NaN;
 }
+
+/**
+ * The compat instance: every export of the functions namespace (`create(all)` surfaces
+ * them all) with the compat-specific members above taking precedence. No index signature.
+ */
+export type MathInstance = Omit<typeof mathFunctions, keyof MathInstanceOverrides> &
+  MathInstanceOverrides;
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
@@ -338,6 +337,11 @@ export function create(
   let configGeneration = 0;
   let decidedGeneration = -1;
   let overlayNeeded = createdWithCustomConfig;
+  /** The only writer of `currentConfig`: every change bumps the generation. */
+  const setConfig = (patch: Partial<MathJSConfig>): void => {
+    Object.assign(currentConfig, patch);
+    configGeneration += 1;
+  };
   const usesOverlay = (): boolean => {
     if (decidedGeneration !== configGeneration) {
       decidedGeneration = configGeneration;
@@ -355,10 +359,7 @@ export function create(
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
     config: (newConfig?: Partial<MathJSConfig>) => {
-      if (newConfig) {
-        Object.assign(currentConfig, newConfig);
-        configGeneration += 1;
-      }
+      if (newConfig) setConfig(newConfig);
       return { ...currentConfig };
     },
 
@@ -512,7 +513,7 @@ export function create(
 
   wireMathjsInstanceApi(instance as Record<string, unknown>, currentConfig);
 
-  return instance as MathInstance;
+  return instance as unknown as MathInstance;
 }
 
 /**

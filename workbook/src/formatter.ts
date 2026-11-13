@@ -6,6 +6,9 @@
  * fall back to safe markers rather than crashing the run.
  */
 
+import { isFraction } from '@danielsimonjr/mathts-core';
+import { formatGeneric } from '@danielsimonjr/mathts-core/internal';
+
 function bigintReplacer(_key: string, val: unknown): unknown {
   return typeof val === 'bigint' ? `${val}n` : val;
 }
@@ -82,6 +85,8 @@ export function formatResult(value: unknown): string {
     case 'symbol':
       return value.toString();
     case 'object': {
+      // A core Fraction prints as the ratio (`1/3`), as format() does; its toString is the decimal form.
+      if (isFraction(value)) return formatGeneric(value);
       // Class instances (Complex, Fraction, matrices, …) render via toString.
       if (!Array.isArray(value) && hasCustomToString(value)) {
         try {

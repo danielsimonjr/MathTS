@@ -105,6 +105,7 @@ function _format(value: unknown, options?: unknown): string {
   // form (mathjs 'decimal' output), so the ratio default is written here.
   if (isCoreFraction(value)) {
     if (!options || (options as { fraction?: string }).fraction !== 'decimal') {
+      if (value.denominator === 1n) return `${value.numerator}`;
       return `${value.numerator}/${value.denominator}`;
     }
     return value.toString();
