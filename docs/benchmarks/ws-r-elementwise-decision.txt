@@ -1,0 +1,36 @@
+element-wise warm-pool decision from 5 head-tree processes (workers 4, 4, 2, 12, 4)
+  rule: per op: smallest input size whose par/seq is <= 0.9 in every process, with every larger size also won; warm pools only
+  sin
+    n=100000    par/seq worst 1.113 best 0.946 (4 processes)  not won
+    n=250000    par/seq worst 0.978 best 0.899 (4 processes)  not won
+    n=1000000   par/seq worst 0.880 best 0.555 (4 processes)  won
+    n=4000000   par/seq worst 0.804 best 0.549 (4 processes)  won
+    n=16000000  par/seq worst 0.650 best 0.610 (2 processes)  won
+    warm crossover = 1000000 elements
+  cos
+    n=100000    par/seq worst 1.230 best 0.929 (4 processes)  not won
+    n=250000    par/seq worst 1.055 best 0.915 (4 processes)  not won
+    n=1000000   par/seq worst 1.095 best 0.588 (4 processes)  not won
+    n=4000000   par/seq worst 0.860 best 0.562 (4 processes)  won
+    n=16000000  par/seq worst 0.665 best 0.644 (2 processes)  won
+    warm crossover = 4000000 elements
+  exp
+    n=100000    par/seq worst 1.503 best 1.133 (4 processes)  not won
+    n=250000    par/seq worst 1.240 best 0.787 (4 processes)  not won
+    n=1000000   par/seq worst 0.946 best 0.592 (4 processes)  not won
+    n=4000000   par/seq worst 0.860 best 0.531 (4 processes)  won
+    n=16000000  par/seq worst 0.665 best 0.591 (2 processes)  won
+    warm crossover = 4000000 elements
+  log
+    n=100000    par/seq worst 1.367 best 0.978 (4 processes)  not won
+    n=250000    par/seq worst 1.085 best 0.791 (4 processes)  not won
+    n=1000000   par/seq worst 0.865 best 0.608 (4 processes)  won
+    n=4000000   par/seq worst 0.757 best 0.482 (4 processes)  won
+    n=16000000  par/seq worst 0.564 best 0.558 (2 processes)  won
+    warm crossover = 1000000 elements
+  tan
+    n=100000    par/seq worst 1.213 best 0.706 (3 processes)  not won
+    n=250000    par/seq worst 1.050 best 0.658 (3 processes)  not won
+    n=1000000   par/seq worst 0.982 best 0.457 (3 processes)  not won
+    n=4000000   par/seq worst 0.756 best 0.435 (3 processes)  won
+    warm crossover = 4000000 elements

@@ -1,0 +1,32 @@
+A/B base vs head, order base head head base, medians of 4 processes
+node v26.13.0, 12 cpus, 4 workers, 7 rounds
+
+matmul n x n, ms per call (median of processes) and ratios, per process in brackets
+  seq = forceSequential, par = forceParallel, dense = DenseMatrix.multiply
+  n=64
+    base  seq 2.414  par 9.431  dense 0.581  par/seq 2.761 [4.549 0.972]  default/dense 16.050 [29.240 2.861] parallelized=true
+    head  seq 0.528  par 0.841  dense 0.464  par/seq 1.578 [1.804 1.352]  default/dense 1.777 [1.689 1.865] parallelized=true
+  n=96
+    base  seq 10.965  par 24.956  dense 1.913  par/seq 1.608 [2.521 0.696]  default/dense 7.856 [13.441 2.270] parallelized=true
+    head  seq 1.259  par 1.543  dense 1.225  par/seq 1.225 [1.168 1.282]  default/dense 1.024 [0.972 1.075] parallelized=true
+  n=128
+    base  seq 17.841  par 25.525  dense 5.982  par/seq 1.129 [1.682 0.576]  default/dense 2.701 [3.413 1.989] parallelized=true
+    head  seq 2.787  par 2.002  dense 2.642  par/seq 0.718 [0.718 0.719]  default/dense 0.734 [0.752 0.716] parallelized=true
+  n=160
+    base  seq 42.415  par 28.299  dense 10.304  par/seq 0.608 [0.703 0.514]  default/dense 2.452 [3.115 1.788] parallelized=true
+    head  seq 5.216  par 3.016  dense 5.091  par/seq 0.579 [0.604 0.554]  default/dense 0.633 [0.600 0.665] parallelized=true
+  n=192
+    base  seq 76.183  par 48.730  dense 17.507  par/seq 0.581 [0.683 0.480]  default/dense 2.595 [3.615 1.575] parallelized=true
+    head  seq 10.323  par 4.884  dense 11.122  par/seq 0.472 [0.480 0.464]  default/dense 0.483 [0.468 0.499] parallelized=true
+  n=224
+    base  seq 103.602  par 60.916  dense 26.217  par/seq 0.540 [0.625 0.455]  default/dense 2.377 [3.112 1.642] parallelized=true
+    head  seq 18.291  par 9.114  dense 16.631  par/seq 0.494 [0.510 0.478]  default/dense 0.461 [0.472 0.451] parallelized=true
+  n=256
+    base  seq 223.982  par 94.726  dense 18.169  par/seq 0.425 [0.421 0.430]  default/dense 2.240 [2.272 2.208] parallelized=true
+    head  seq 19.438  par 8.509  dense 18.826  par/seq 0.439 [0.419 0.458]  default/dense 0.418 [0.413 0.422] parallelized=true
+  n=320
+    base  seq 124.639  par 57.914  dense 42.754  par/seq 0.464 [0.440 0.487]  default/dense 1.497 [1.440 1.554] parallelized=true
+    head  seq 39.381  par 16.778  dense 36.319  par/seq 0.426 [0.405 0.447]  default/dense 0.395 [0.372 0.418] parallelized=true
+  n=384
+    base  seq 381.651  par 154.267  dense 84.675  par/seq 0.403 [0.416 0.390]  default/dense 2.052 [2.152 1.952] parallelized=true
+    head  seq 63.218  par 24.137  dense 67.264  par/seq 0.382 [0.379 0.385]  default/dense 0.413 [0.394 0.432] parallelized=true

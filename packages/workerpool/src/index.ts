@@ -21,6 +21,7 @@ import { compileFunctionSource } from './compile-function-source.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
 import { assertMatmulBuffers, matmulSequential } from './matmul-sequential.js';
+import { applyUnary, type UnaryFn } from './unary-kernels.js';
 import {
   _workerPairwiseSum,
   _workerPairwiseDot,
@@ -1586,44 +1587,13 @@ export class MathWorkerPool {
    */
   async unary(
     data: Float64Array,
-    fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square',
+    fn: UnaryFn,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      const result = new Float64Array(data.length);
-      for (let i = 0; i < data.length; i++) {
-        switch (fn) {
-          case 'abs':
-            result[i] = Math.abs(data[i]);
-            break;
-          case 'sqrt':
-            result[i] = Math.sqrt(data[i]);
-            break;
-          case 'exp':
-            result[i] = Math.exp(data[i]);
-            break;
-          case 'log':
-            result[i] = Math.log(data[i]);
-            break;
-          case 'sin':
-            result[i] = Math.sin(data[i]);
-            break;
-          case 'cos':
-            result[i] = Math.cos(data[i]);
-            break;
-          case 'tan':
-            result[i] = Math.tan(data[i]);
-            break;
-          case 'negate':
-            result[i] = -data[i];
-            break;
-          case 'square':
-            result[i] = data[i] * data[i];
-            break;
-        }
-      }
+      const result = applyUnary(fn, data);
       return {
         result,
         duration: performance.now() - start,

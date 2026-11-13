@@ -9,7 +9,9 @@
 
 import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
+import { matmulRowBlock } from './matmul-sequential.js';
 import { tensordotRange } from './tensordot-range.js';
+import { UNARY_KERNELS, type UnaryFn } from './unary-kernels.js';
 import {
   _workerMulberry32,
   _workerPairwiseSum,
@@ -196,45 +198,11 @@ function unaryChunk(
   buffer: ArrayBuffer,
   start: number,
   length: number,
-  fnName: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square'
+  fnName: UnaryFn
 ): ArrayBuffer {
-  const data = new Float64Array(buffer);
-  const result = new Float64Array(length);
-
-  for (let i = 0; i < length; i++) {
-    const val = data[start + i];
-    switch (fnName) {
-      case 'abs':
-        result[i] = Math.abs(val);
-        break;
-      case 'sqrt':
-        result[i] = Math.sqrt(val);
-        break;
-      case 'exp':
-        result[i] = Math.exp(val);
-        break;
-      case 'log':
-        result[i] = Math.log(val);
-        break;
-      case 'sin':
-        result[i] = Math.sin(val);
-        break;
-      case 'cos':
-        result[i] = Math.cos(val);
-        break;
-      case 'tan':
-        result[i] = Math.tan(val);
-        break;
-      case 'negate':
-        result[i] = -val;
-        break;
-      case 'square':
-        result[i] = val * val;
-        break;
-    }
-  }
-
-  return transferBuffer(result.buffer);
+  return transferBuffer(
+    UNARY_KERNELS[fnName](new Float64Array(buffer), start, length).buffer as ArrayBuffer
+  );
 }
 
 /**
@@ -441,29 +409,21 @@ function fftBatchChunk(
 function matmulRows(
   aBuffer: ArrayBuffer,
   bBuffer: ArrayBuffer,
-  aRows: number,
+  _aRows: number,
   aCols: number,
   bCols: number,
   rowStart: number,
   rowEnd: number
 ): ArrayBuffer {
-  const a = new Float64Array(aBuffer);
-  const b = new Float64Array(bBuffer);
-  const resultRows = rowEnd - rowStart;
-  const result = new Float64Array(resultRows * bCols);
-
-  for (let i = 0; i < resultRows; i++) {
-    const aRowIdx = rowStart + i;
-    for (let j = 0; j < bCols; j++) {
-      let sum = 0;
-      for (let k = 0; k < aCols; k++) {
-        sum += a[aRowIdx * aCols + k] * b[k * bCols + j];
-      }
-      result[i * bCols + j] = sum;
-    }
-  }
-
-  return transferBuffer(result.buffer);
+  const result = matmulRowBlock(
+    new Float64Array(aBuffer),
+    aCols,
+    new Float64Array(bBuffer),
+    bCols,
+    rowStart,
+    rowEnd
+  );
+  return transferBuffer(result.buffer as ArrayBuffer);
 }
 
 /**

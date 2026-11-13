@@ -162,8 +162,20 @@ only stored when `recordSample` runs (tests today).
 ## Parallel pool (`@danielsimonjr/mathts-parallel`)
 
 - `DEFAULT_THRESHOLD_BY_OP` sets most element-wise and reduction ops to `'never'`
-  (sequential). `matmul` parallelizes at **4096** elements (64×64). Unlisted ops
-  fall through to **50,000** elements.
+  (sequential). `matmul` parallelizes at **36,864** result elements (192×192), the
+  smallest measured size where workers took at most 0.90 of the in-process time with 2, 4
+  and 12 workers (`docs/benchmarks/ws-r-matmul-decision.json`). Unlisted ops fall through
+  to **50,000** elements.
+- The thresholds come from pools whose workers are all running and have run the kernel
+  before. A new pool is not warm: the first parallel call starts the workers, and the next
+  few calls run the kernel in workers that have not optimised it yet. A `sin` of 1,000,000
+  values took 60-75 ms on the first forced-parallel call and 20-28 ms in-process, then
+  12-22 ms (`docs/benchmarks/ws-r-cold-start-head.txt`). Call `await pool.warmup()` after
+  `initialize()` to start the workers first.
+- `sin`, `cos`, `tan`, `exp` and `log` stay `'never'`. With a warm pool, `forceParallel`
+  took at most 0.88 of the in-process time from 1,000,000 values (`sin`, `log`) or 4,000,000
+  values (`cos`, `exp`, `tan`): `docs/benchmarks/ws-r-elementwise-decision.txt`. For repeated
+  large calls, call `warmup()` and pass `{ forceParallel: true }`.
 - `computePool.initialize()` default `maxWorkers` is **4** in Node (no `navigator`).
 - `workerType`: `'auto' | 'web' | 'thread'` (not `'node'`).
 - Operations return `ParallelResult<T>` (`result`, `duration`, `chunks`,

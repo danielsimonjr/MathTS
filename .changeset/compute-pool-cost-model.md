@@ -1,0 +1,6 @@
+---
+'@danielsimonjr/mathts-workerpool': patch
+'@danielsimonjr/mathts-parallel': minor
+---
+
+`ComputePool.matmul` runs in the calling thread below 36,864 result elements (a 192 x 192 product), up from 4,096. The value is the output of a recorded measurement (`docs/benchmarks/ws-r-matmul-decision.json`; the rule is `node tools/benchmarks/ws-r-compute-pool.mjs --decide`): with 2, 4 and 12 workers a 160 x 160 product is not faster on workers, and a 192 x 192 product is. The matrix kernel of `MathWorkerPool` and of its workers packs two columns of B and reads contiguous rows. Every sum keeps the order `k = 0 .. n - 1`, so the result is bit-identical to the plain triple loop, and the in-process product takes 0.9 to 1.1 times as long as `DenseMatrix.multiply` from 64 x 64 to 224 x 224 (the strided kernel took 3.0 to 5.7 times as long). The in-process unary path (`sin`, `cos`, `tan`, `exp`, `log` and the other `UnaryFn` names) runs one hoisted loop per function, the loop that the workers run: `pool.sin` takes 1.06 times as long as `functions.sin` (it took 1.41). New `ComputePool.warmup(count?)` starts the workers before the first parallel call, so a first `forceParallel` call does not pay for worker start-up.

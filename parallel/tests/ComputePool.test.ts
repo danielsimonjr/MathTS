@@ -11,6 +11,7 @@ import {
   ComputePool,
   computePool,
   DEFAULT_POOL_CONFIG,
+  DEFAULT_THRESHOLD_BY_OP,
   Transfer,
   resolveOpThreshold,
 } from '../src/ComputePool.js';
@@ -163,17 +164,21 @@ describe('ComputePool', () => {
 
     // --- matmul numeric threshold -------------------------------------------
 
-    it("shouldParallelize(8_000, 'matmul') returns true — above 4096 break-even", () => {
-      // matmul threshold is 4_096 (break-even at 64×64).
-      expect(pool.shouldParallelize(8_000, 'matmul')).toBe(true);
+    // The value of the entry comes from a recorded measurement; see
+    // `ComputePool.cost-model.test.ts`. These tests pin the comparison, not the number.
+    const matmulThreshold = DEFAULT_THRESHOLD_BY_OP.matmul as number;
+
+    it("shouldParallelize above the 'matmul' threshold returns true", () => {
+      expect(pool.shouldParallelize(2 * matmulThreshold, 'matmul')).toBe(true);
     });
 
-    it("shouldParallelize(2_000, 'matmul') returns false — below 4096 break-even", () => {
+    it("shouldParallelize below the 'matmul' threshold returns false", () => {
       expect(pool.shouldParallelize(2_000, 'matmul')).toBe(false);
+      expect(pool.shouldParallelize(matmulThreshold - 1, 'matmul')).toBe(false);
     });
 
-    it("shouldParallelize(4_096, 'matmul') returns true — exactly at threshold", () => {
-      expect(pool.shouldParallelize(4_096, 'matmul')).toBe(true);
+    it("shouldParallelize exactly at the 'matmul' threshold returns true", () => {
+      expect(pool.shouldParallelize(matmulThreshold, 'matmul')).toBe(true);
     });
 
     // --- erfc / besselJ / spectrogram numeric thresholds --------------------

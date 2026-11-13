@@ -253,7 +253,16 @@ export interface ComputePoolConfig {
  * (e.g. matmul) from here so the two cannot silently diverge.
  */
 export const DEFAULT_THRESHOLD_BY_OP: ThresholdByOp = {
-  // element-wise: overhead dominates at all tested sizes
+  // element-wise: overhead dominates at all tested sizes.
+  // `sin`, `cos`, `tan`, `exp` and `log` win only on a warm pool. With every worker running and
+  // the kernel run before, `forceParallel` took at most 0.88 of `forceSequential` in every
+  // recorded process from 1,000,000 values (`sin`, `log`) or 4,000,000 values (`cos`, `exp`,
+  // `tan`): `docs/benchmarks/ws-r-elementwise-decision.txt`. A default pool is cold. Its first
+  // parallel call starts the workers, and the next calls run the kernel in workers that have
+  // not optimised it yet: one `sin` of 1,000,000 values took 60-75 ms on the first call of a
+  // fresh pool and 20-28 ms in-process (`docs/benchmarks/ws-r-cold-start-head.txt`). So these
+  // five stay `'never'`. For repeated large calls: `await pool.warmup()`, then pass
+  // `{ forceParallel: true }`.
   add: 'never',
   subtract: 'never',
   multiply: 'never',
@@ -358,7 +367,11 @@ export const DEFAULT_THRESHOLD_BY_OP: ThresholdByOp = {
   spectrogram: 65_536,
 
   // linear algebra: parallel wins above these element counts
-  matmul: 4_096, // break-even at 64×64 (4,096 elements)
+  // matmul: the unit is result elements (`aRows * bCols`). 36_864 = 192 x 192, the smallest
+  // measured size at which `forceParallel` took at most 0.90 of `forceSequential` in every
+  // recorded process (2, 4 and 12 workers). The row data and the rule are in
+  // `docs/benchmarks/ws-r-matmul-decision.json`; a test derives this value from that record.
+  matmul: 36_864,
   matrixPower: 9_216, // break-even at ~96×96
   characteristicPolynomial: 9_216, // break-even at ~96×96
 
@@ -514,6 +527,31 @@ export class ComputePool {
   async initialize(): Promise<void> {
     this.terminated = false;
     await this.workerPool.initialize();
+  }
+
+  /**
+   * Start workers and wait until each has run a task, so that the next parallel call pays no
+   * thread start-up.
+   *
+   * `initialize()` starts `minWorkers` workers; the others start on demand, one per chunk of
+   * the first parallel call. That call then includes the start-up, which is far longer than
+   * the work of a mid-size element-wise call (about 100 ms per worker thread on the measuring
+   * machine, against 5 to 25 ms of work for `sin` on 1e6 elements). Call `warmup()` once at
+   * start-up, or before timing a parallel call.
+   *
+   * @param count - Workers to start; at most `maxWorkers` (default `maxWorkers`)
+   *
+   * @example
+   * ```typescript
+   * const pool = new ComputePool({ maxWorkers: 4 });
+   * await pool.initialize();
+   * await pool.warmup(); // pool.stats().totalWorkers === 4
+   * ```
+   */
+  async warmup(count?: number): Promise<void> {
+    this.assertActive();
+    const max = this.config.maxWorkers;
+    await this.workerPool.warmup(Math.min(Math.max(1, count ?? max), max));
   }
 
   private assertActive(): void {
@@ -740,8 +778,8 @@ export class ComputePool {
    *
    * The worker pool's methods check only the global `thresholdElements`, so a method that
    * forwarded without options let its entry govern nothing: `sin: 'never'` still went to the
-   * workers at 50,000 elements once the pool was initialized, and `matmul: 4_096` did not
-   * parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
+   * workers at 50,000 elements once the pool was initialized, and a `matmul` entry below
+   * 50,000 did not parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
    * `shouldParallelize` requires a ready pool, so `forceParallel` never reaches an idle one.
    */
   private async poolOptions(
