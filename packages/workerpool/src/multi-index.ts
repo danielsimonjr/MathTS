@@ -11,7 +11,6 @@
  * This module has no imports. The worker bundle can load it without pulling
  * `core` or `parallel`.
  *
- * @internal
  * @param sizes - Extent of each axis.
  * @param cb - Visitor. Receives one index array per call.
  *
