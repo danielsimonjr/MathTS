@@ -164,9 +164,9 @@ only stored when `recordSample` runs (tests today).
 ## Parallel pool (`@danielsimonjr/mathts-parallel`)
 
 - `DEFAULT_THRESHOLD_BY_OP` sets most element-wise and reduction ops to `'never'`
-  (sequential). `matmul` parallelizes at **36,864** result elements (192×192), the
-  smallest measured size where workers took at most 0.90 of the in-process time with 2, 4
-  and 12 workers (`docs/benchmarks/ws-r-matmul-decision.json`). Unlisted ops fall through
+  (sequential). `matmul` parallelizes at **7,077,888** multiply-adds (`aRows * aCols * bCols`; 192×192×192),
+  the smallest measured square size where workers took at most 0.90 of the in-process time
+  with 2, 4 and 12 workers. The measured grid is square and comes from one host (`docs/benchmarks/ws-r-matmul-decision.json`). Unlisted ops fall through
   to **50,000** elements.
 - The thresholds come from pools whose workers are all running and have run the kernel
   before. A new pool is not warm: the first parallel call starts the workers, and the next
