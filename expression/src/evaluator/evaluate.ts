@@ -232,8 +232,8 @@ export function createEvaluate(
   cacheKey?: () => string
 ): EvaluateFunction;
 export function createEvaluate(
-  parseArg?: (expr: string) => MathNode,
-  scopeArg?: Record<string, unknown>,
+  parseFn?: (expr: string) => MathNode,
+  mathScope?: Record<string, unknown>,
   /**
    * Optional fingerprint of the state `parseFn` depends on besides the text
    * (for example the live `number` / `precision` config, which decides the
@@ -244,8 +244,8 @@ export function createEvaluate(
    */
   cacheKey?: () => string
 ): EvaluateFunction {
-  const parseFn: (expr: string) => MathNode = parseArg ?? getDefaultParse();
-  const mathScope: Record<string, unknown> = scopeArg ?? getDefaultMathScope();
+  const parse: (expr: string) => MathNode = parseFn ?? getDefaultParse();
+  const mathNamespace: Record<string, unknown> = mathScope ?? getDefaultMathScope();
 
   /**
    * Evaluate a math expression string.
@@ -292,8 +292,8 @@ export function createEvaluate(
     return evaluateOne(exprOrExprs, scope, options);
   }
 
-  const cache = cacheFor(mathScope, parseFn);
-  const trusted = trustedMathFunctions(mathScope);
+  const cache = cacheFor(mathNamespace, parse);
+  const trusted = trustedMathFunctions(mathNamespace);
 
   function evaluateOne(
     expr: string,
@@ -309,11 +309,11 @@ export function createEvaluate(
       cache.delete(key);
       cache.set(key, compiled);
     } else {
-      const node = parseFn(expr);
+      const node = parse(expr);
       if (!unsafe) {
         validateAst(node);
       }
-      compiled = compile(node, mathScope);
+      compiled = compile(node, mathNamespace);
       cache.set(key, compiled);
       if (cache.size > COMPILE_CACHE_SIZE) {
         const oldest = cache.keys().next().value;
