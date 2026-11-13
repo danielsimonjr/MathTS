@@ -8,6 +8,7 @@
 import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { densifyForSolver } from './densify.js';
+import { denseStorage, type DenseStorage } from '../types/dense/storage.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
 export interface PackedMatrixDescriptor {
@@ -134,6 +135,80 @@ function resolveDimensions(input: DecompositionMatrixInput): {
  */
 export function decompositionInputToNestedArray(input: DecompositionMatrixInput): number[][] {
   return resolveDimensions(input).nested;
+}
+
+/**
+ * A decomposition input with its shape known and a way to copy its rows into a
+ * kernel's own working storage. Kernels that need a nested working copy use
+ * `copyRows`, so a `DenseMatrix` never goes through `toArray()`.
+ */
+export interface DecompositionSource {
+  readonly rows: number;
+  readonly cols: number;
+  /**
+   * A fresh row-major nested copy, transposed when `transpose` is true. It never
+   * aliases the input, so the caller may mutate it.
+   */
+  copyRows(transpose: boolean): number[][];
+}
+
+/** Copies a `DenseMatrix` straight from its storage, honouring offset and row stride. */
+function copyDenseRows(dm: DenseStorage, transpose: boolean): number[][] {
+  const { rows, cols, data, offset, rowStride } = dm;
+  if (!transpose) {
+    const out = new Array<number[]>(rows);
+    for (let i = 0; i < rows; i++) {
+      const base = offset + i * rowStride;
+      const row = new Array<number>(cols);
+      for (let j = 0; j < cols; j++) row[j] = data[base + j];
+      out[i] = row;
+    }
+    return out;
+  }
+  const out = new Array<number[]>(cols);
+  for (let j = 0; j < cols; j++) {
+    const row = new Array<number>(rows);
+    for (let i = 0; i < rows; i++) row[i] = data[offset + i * rowStride + j];
+    out[j] = row;
+  }
+  return out;
+}
+
+/** Copies a nested array row by row, transposing it when asked. */
+function copyNestedRows(nested: number[][], transpose: boolean): number[][] {
+  if (!transpose) {
+    return nested.map((row) => row.slice());
+  }
+  const rows = nested.length;
+  const cols = rows === 0 ? 0 : nested[0].length;
+  const out = new Array<number[]>(cols);
+  for (let j = 0; j < cols; j++) {
+    const row = new Array<number>(rows);
+    for (let i = 0; i < rows; i++) row[i] = nested[i][j];
+    out[j] = row;
+  }
+  return out;
+}
+
+/**
+ * Resolve a decomposition input once, without converting a `DenseMatrix` to
+ * nested form. Other inputs are resolved with `decompositionInputToNestedArray`.
+ */
+export function decompositionSource(input: DecompositionMatrixInput): DecompositionSource {
+  const storage = isDenseMatrix(input) ? denseStorage(input) : null;
+  if (storage) {
+    return {
+      rows: storage.rows,
+      cols: storage.cols,
+      copyRows: (transpose) => copyDenseRows(storage, transpose),
+    };
+  }
+  const nested = decompositionInputToNestedArray(input);
+  return {
+    rows: nested.length,
+    cols: nested[0]?.length ?? 0,
+    copyRows: (transpose) => copyNestedRows(nested, transpose),
+  };
 }
 
 /**

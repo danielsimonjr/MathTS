@@ -11,8 +11,8 @@
  * @packageDocumentation
  */
 
-import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
-import { svd, type SVDResult, type SVDOptions } from './svd.js';
+import { decompositionSource, type DecompositionMatrixInput } from './as-packed.js';
+import { svdOfSource, type SVDResult, type SVDOptions } from './svd.js';
 
 /** Count singular values above the rank tolerance. */
 function estimateRank(s: number[], rankTolerance: number): number {
@@ -46,13 +46,13 @@ export async function svdWasm(
   matrix: DecompositionMatrixInput,
   options?: SVDOptions
 ): Promise<SVDResult> {
-  const nested = decompositionInputToNestedArray(matrix);
-  const m = nested.length;
-  const n = nested[0]?.length ?? 0;
+  const source = decompositionSource(matrix);
+  const m = source.rows;
+  const n = source.cols;
   if (m === 0 || n === 0) {
     return { U: [], S: [], V: [], rank: 0 };
   }
   const k = Math.min(m, n);
   const rankTolerance = options?.rankTolerance ?? 1e-10;
-  return toThin(svd(nested, options), k, rankTolerance);
+  return toThin(svdOfSource(source, options), k, rankTolerance);
 }

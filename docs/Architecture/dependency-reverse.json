@@ -275,6 +275,12 @@
       "matrix/src/operations/as-packed.ts",
       "matrix/src/operations/index.ts"
     ],
+    "matrix/src/types/dense/storage.ts": [
+      "matrix/src/operations/as-packed.ts",
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/types/dense/arithmetic.ts",
+      "matrix/src/types/dense/reduction.ts"
+    ],
     "matrix/src/operations/as-packed.ts": [
       "matrix/src/operations/cholesky.ts",
       "matrix/src/operations/condest.ts",
@@ -359,11 +365,6 @@
     "matrix/src/types/dense/limits.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/index.ts"
-    ],
-    "matrix/src/types/dense/storage.ts": [
-      "matrix/src/types/DenseMatrix.ts",
-      "matrix/src/types/dense/arithmetic.ts",
-      "matrix/src/types/dense/reduction.ts"
     ],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",

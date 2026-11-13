@@ -8,15 +8,14 @@
  *   - V: n x n orthogonal matrix (right singular vectors)
  */
 
-import {
-  eye,
-  cloneMatrix,
-  householder,
-  applyHouseholderLeft,
-  applyHouseholderRight,
-} from './common.js';
+import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
 import { applyGivensCols, givensRotation } from './givens.js';
-import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
+import {
+  decompositionInputToNestedArray,
+  decompositionSource,
+  type DecompositionMatrixInput,
+  type DecompositionSource,
+} from './as-packed.js';
 
 /**
  * Result of SVD decomposition
@@ -56,13 +55,13 @@ const DEFAULT_MAX_ITERATIONS = 1000;
 const DEFAULT_TOLERANCE = 1e-12;
 
 /**
- * Bidiagonalize matrix A to B = U' * A * V
+ * Bidiagonalize the working copy B in place to B' = U' * A * V, where A is the
+ * input. B must be a fresh copy: this function overwrites it.
  * Returns bidiagonal B, and orthogonal U, V
  */
-function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number[][] } {
-  const m = A.length;
-  const n = A[0].length;
-  const B = cloneMatrix(A);
+function bidiagonalize(B: number[][]): { B: number[][]; U: number[][]; V: number[][] } {
+  const m = B.length;
+  const n = B[0].length;
   const U = eye(m);
   const V = eye(n);
 
@@ -374,6 +373,14 @@ function completeOrthonormalBasis(cols: number[][], m: number): number[][] {
  * @throws Error if a `Float64Array` length is not a perfect square.
  */
 export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}): SVDResult {
+  return svdOfSource(decompositionSource(matrix), options);
+}
+
+/**
+ * The SVD kernel. It takes a resolved source, so a caller that already holds one
+ * (`pinv`, `lowRankApprox`, `svdWasm`) does not convert the input again.
+ */
+export function svdOfSource(source: DecompositionSource, options: SVDOptions = {}): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -381,23 +388,22 @@ export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}):
     rankTolerance = 1e-10,
   } = options;
 
-  let A = decompositionInputToNestedArray(matrix);
-  let m = A.length;
-  let n = A[0]?.length || 0;
+  let m = source.rows;
+  let n = source.cols;
 
   if (m === 0 || n === 0) {
     return { U: [], S: [], V: [], rank: 0 };
   }
 
-  // Transpose if m < n for better numerical behavior
+  // Transpose if m < n for better numerical behavior. The kernel works on one
+  // fresh copy of the input, which bidiagonalize overwrites in place.
   const transposed = m < n;
   if (transposed) {
-    A = A[0].map((_, j) => A.map((row) => row[j]));
     [m, n] = [n, m];
   }
 
   // Bidiagonalize
-  const { B, U, V } = bidiagonalize(A);
+  const { B, U, V } = bidiagonalize(source.copyRows(transposed));
 
   // Extract diagonal and superdiagonal
   const minMN = Math.min(m, n);
@@ -471,7 +477,8 @@ export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}):
   let vFinal = V;
   const maxAbsD = d.reduce((mx, x) => Math.max(mx, Math.abs(x)), 0);
   if (maxAbsD > 0 && d.some((x) => Math.abs(x) <= rankTolerance * maxAbsD)) {
-    const jac = jacobiSVD(A);
+    // bidiagonalize consumed its copy, so the fallback takes a new one from the source.
+    const jac = jacobiSVD(source.copyRows(transposed));
     dFinal = jac.d;
     uFinal = jac.U;
     vFinal = jac.V;
@@ -545,12 +552,12 @@ export function singularValues(
  * Compute the pseudoinverse (Moore-Penrose inverse) using SVD
  */
 export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): number[][] {
-  const nested = decompositionInputToNestedArray(matrix);
-  const { U, S, V, rank } = svd(nested, options);
+  const source = decompositionSource(matrix);
+  const { U, S, V, rank } = svdOfSource(source, options);
 
   if (rank === 0) {
-    const m = nested.length;
-    const n = nested[0]?.length || 0;
+    const m = source.rows;
+    const n = source.cols;
     return Array.from({ length: n }, () => new Array(m).fill(0));
   }
 
@@ -590,11 +597,11 @@ export function lowRankApprox(
   r: number,
   options?: SVDOptions
 ): number[][] {
-  const nested = decompositionInputToNestedArray(matrix);
-  const { U, S, V } = svd(nested, options);
+  const source = decompositionSource(matrix);
+  const { U, S, V } = svdOfSource(source, options);
 
-  const m = nested.length;
-  const n = nested[0]?.length ?? 0;
+  const m = source.rows;
+  const n = source.cols;
   const k = Math.min(r, S.length);
 
   // Reconstruct with top k singular values

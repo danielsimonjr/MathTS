@@ -9,6 +9,7 @@ export type DenseStorage = {
   isView: boolean;
   offset: number;
   rowStride: number;
+  rows: number;
   cols: number;
   data: Float64Array;
   toFlatFloat64Array(): Float64Array;
@@ -25,6 +26,15 @@ function isDenseStorage(m: unknown): m is DenseStorage {
     typeof s.rowStride === 'number' &&
     typeof s.toFlatFloat64Array === 'function'
   );
+}
+
+/**
+ * The storage of a `DenseMatrix` for in-package kernels, or `null` for any other
+ * matrix type. Callers read `data` through `offset` and `rowStride`, so a view is
+ * read in place. Callers must not write to it.
+ */
+export function denseStorage(matrix: Matrix<number>): DenseStorage | null {
+  return isDenseStorage(matrix) ? matrix : null;
 }
 
 /**
