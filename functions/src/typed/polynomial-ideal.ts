@@ -19,16 +19,36 @@ import { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError } from '../cas/polynomial-
 export interface Term {
   coeff: number;
   powers: number[];
+  /**
+   * The sum of the absolute values of the terms that were added or multiplied into `coeff`: the
+   * scale of its rounding noise. A term that holds only its own value has no `magnitude`, which
+   * reads as `|coeff|`.
+   */
+  magnitude?: number;
 }
 
 /** A polynomial: combined, lex-sorted (descending), no zero or noise coefficients. */
 export type Poly = Term[];
 
 /**
- * A coefficient that is no larger than this fraction of the sum of the terms that made it is
- * rounding noise. A coefficient with one term is never noise: `1e-11*x` is a term, not zero.
+ * A coefficient that is no larger than this fraction of the magnitude of the terms that made it
+ * is rounding noise. A coefficient with one term is never noise: `1e-11*x` is a term, not zero.
+ * The magnitude travels with the term (`Term.magnitude`), so a residue of a cancellation that a
+ * later step cancels again (`x + 1e-5*x - x - 1e-5*x`) is still measured against the first terms.
  */
 const COEFFICIENT_NOISE_RATIO = 1e-12;
+
+/** The scale of the rounding noise of a coefficient: its `magnitude`, else its own size. */
+function magnitudeOf(t: Term): number {
+  return t.magnitude ?? Math.abs(t.coeff);
+}
+
+/** A term with a coefficient and the magnitude of the terms that made it (kept only when larger). */
+function makeTerm(coeff: number, powers: number[], magnitude: number): Term {
+  const term: Term = { coeff, powers };
+  if (Number.isFinite(magnitude) && magnitude > Math.abs(coeff)) term.magnitude = magnitude;
+  return term;
+}
 
 /** Lex compare on exponent vectors: positive when a > b. */
 function cmpPowers(a: number[], b: number[]): number {
@@ -43,24 +63,21 @@ function cmpPowers(a: number[], b: number[]): number {
  * that made it (see {@link COEFFICIENT_NOISE_RATIO}), sort lex-descending.
  */
 export function normalize(p: Poly): Poly {
-  const byKey = new Map<string, { term: Term; magnitude: number }>();
+  const byKey = new Map<string, { coeff: number; powers: number[]; magnitude: number }>();
   for (const t of p) {
     const key = t.powers.join(',');
     const existing = byKey.get(key);
     if (existing) {
-      existing.term.coeff += t.coeff;
-      existing.magnitude += Math.abs(t.coeff);
+      existing.coeff += t.coeff;
+      existing.magnitude += magnitudeOf(t);
     } else {
-      byKey.set(key, {
-        term: { coeff: t.coeff, powers: [...t.powers] },
-        magnitude: Math.abs(t.coeff),
-      });
+      byKey.set(key, { coeff: t.coeff, powers: [...t.powers], magnitude: magnitudeOf(t) });
     }
   }
   const out: Poly = [];
-  for (const { term, magnitude } of byKey.values()) {
-    if (term.coeff !== 0 && Math.abs(term.coeff) > COEFFICIENT_NOISE_RATIO * magnitude) {
-      out.push(term);
+  for (const { coeff, powers, magnitude } of byKey.values()) {
+    if (coeff !== 0 && Math.abs(coeff) > COEFFICIENT_NOISE_RATIO * magnitude) {
+      out.push(makeTerm(coeff, powers, magnitude));
     }
   }
   return out.sort((a, b) => cmpPowers(b.powers, a.powers));
@@ -78,7 +95,7 @@ export function polyAdd(a: Poly, b: Poly): Poly {
 export function polyNeg(a: Poly): Poly {
   const out: Poly = [];
   for (let i = 0; i < a.length; i++) {
-    out.push({ coeff: -a[i].coeff, powers: [...a[i].powers] });
+    out.push(makeTerm(-a[i].coeff, [...a[i].powers], magnitudeOf(a[i])));
   }
   return out;
 }
@@ -100,10 +117,7 @@ export function polyMul(a: Poly, b: Poly): Poly {
       for (let i = 0; i < ta.powers.length; i++) {
         powers[i] = ta.powers[i] + tb.powers[i];
       }
-      out.push({
-        coeff: ta.coeff * tb.coeff,
-        powers,
-      });
+      out.push(makeTerm(ta.coeff * tb.coeff, powers, magnitudeOf(ta) * magnitudeOf(tb)));
     }
   }
   return normalize(out);
@@ -284,7 +298,9 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
         }
         const nextP: Poly = [];
         for (let i = 0; i < p.length; i++) {
-          nextP.push({ coeff: p[i].coeff / denom, powers: p[i].powers });
+          nextP.push(
+            makeTerm(p[i].coeff / denom, p[i].powers, magnitudeOf(p[i]) / Math.abs(denom))
+          );
         }
         p = normalize(nextP);
       } else {
@@ -430,7 +446,7 @@ function monic(p: Poly): Poly {
   const c = p[0].coeff;
   const out: Poly = [];
   for (let i = 0; i < p.length; i++) {
-    out.push({ coeff: p[i].coeff / c, powers: [...p[i].powers] });
+    out.push(makeTerm(p[i].coeff / c, [...p[i].powers], magnitudeOf(p[i]) / Math.abs(c)));
   }
   return out;
 }
