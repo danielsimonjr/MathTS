@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { applyInlineStats, applyReadmeStats } from '../sync-readme-functions-stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -49,8 +49,14 @@ const reference = `## Complete export index
 \`pi\`
 `;
 
+const made = [];
+after(() => {
+  for (const dir of made) rmSync(dir, { recursive: true, force: true });
+});
+
 function fixture(files) {
   const dir = mkdtempSync(join(tmpdir(), 'readme-stats-'));
+  made.push(dir);
   const paths = {};
   for (const [name, content] of Object.entries(files)) {
     paths[name] = join(dir, name);

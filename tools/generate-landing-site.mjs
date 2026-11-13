@@ -27,9 +27,10 @@
  *
  * The pages are single self-contained HTML files (inline CSS, no CDN) so the
  * folder can be copied verbatim to a static host, e.g. danielsimonjr.com/mathts/.
- * Re-run after `bun run docs:functions`; the pre-existing output is overwritten.
+ * Re-run after `bun run docs:functions`. The run replaces <out>/index.html and <out>/functions
+ * and leaves every other file of <out> alone.
  */
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseReferenceIndex } from './reference-index.mjs';
@@ -266,7 +267,10 @@ const footer = `<footer>
 // ---------------------------------------------------------------------------
 // 4. Category pages.
 // ---------------------------------------------------------------------------
-if (existsSync(OUT)) rmSync(OUT, { recursive: true, force: true });
+// Replace only what this generator writes. Anything else in the folder (the API index) stays,
+// and a wrong --out cannot delete a whole folder.
+rmSync(resolve(OUT, 'index.html'), { force: true });
+rmSync(resolve(OUT, 'functions'), { recursive: true, force: true });
 mkdirSync(resolve(OUT, 'functions'), { recursive: true });
 
 const categories = [];

@@ -11,6 +11,9 @@ out/
 # Generated static site (bun run docs:site; CI builds and deploys it from the Site workflow)
 /site/
 
+# Old output folder of the landing generator (the generated site is not tracked)
+docs/landing/
+
 # Python bytecode (inventory/scan tooling under tools/)
 __pycache__/
 *.pyc
