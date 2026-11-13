@@ -15,7 +15,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
-import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
+import { decompositionSource, type DecompositionMatrixInput } from './as-packed.js';
 import {
   eye,
   cloneMatrix,
@@ -358,10 +358,10 @@ export interface SchurOptions {
  * @throws {TypeError} if `A` is not one of the accepted matrix shapes.
  */
 export function matrixSchur(A: DecompositionMatrixInput, opts?: SchurOptions): SchurResult {
-  const dense = decompositionInputToDenseMatrix(A);
-  const n = dense.rows;
-  if (n !== dense.cols) {
-    throw new Error(`matrixSchur: matrix must be square (got ${dense.rows}×${dense.cols})`);
+  const source = decompositionSource(A);
+  const n = source.rows;
+  if (n !== source.cols) {
+    throw new Error(`matrixSchur: matrix must be square (got ${source.rows}×${source.cols})`);
   }
   if (n === 0) {
     return {
@@ -373,7 +373,7 @@ export function matrixSchur(A: DecompositionMatrixInput, opts?: SchurOptions): S
   const maxIterations = opts?.maxIterations ?? 1000;
   const tolerance = opts?.tolerance ?? 1e-12;
 
-  const Aarr = dense.toArray();
+  const Aarr = source.copyRows(false);
   const { H, Q } = schurRaw(Aarr, maxIterations, tolerance);
 
   const n2 = n * n;

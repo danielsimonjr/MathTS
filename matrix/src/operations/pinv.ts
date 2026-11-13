@@ -49,12 +49,9 @@ export function pinv(A: DenseMatrix, opts?: PinvOptions): DenseMatrix {
     return DenseMatrix.zeros(n, m);
   }
 
-  // Convert DenseMatrix to number[][] for the SVD primitive.
-  const matrix2D = A.toArray();
-
   // Full SVD: A = U · diag(S) · Vᵀ
   // U: m×m, V: n×n, S: min(m,n) values in descending order.
-  const { U, S, V } = svd(matrix2D, { tolerance: 1e-12 });
+  const { U, S, V } = svd(A, { tolerance: 1e-12 });
 
   // Threshold singular values: keep s_i only when s_i > rcond · max(S).
   const maxS = S.length > 0 ? S[0] : 0; // S is in descending order
