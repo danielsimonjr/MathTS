@@ -15,6 +15,7 @@ import { isSafeProperty, setSafeProperty } from './utils/customs.js';
 import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
 import type { MathNode } from './node/Node.js';
 import { parseDefaults } from './parse-defaults.js';
+import { currentConfig } from './utils/current-config.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
  *  constructors accept heterogeneous positional args and all yield a MathNode. */
@@ -1967,10 +1968,7 @@ export const createParse = /* #__PURE__ */ factory(
         numberStr = state.token;
         getToken(state);
 
-        const numericType = safeNumberType(
-          numberStr,
-          typeof config === 'function' ? config() : config
-        );
+        const numericType = safeNumberType(numberStr, currentConfig(config));
         const value = numeric(numberStr, numericType);
         // ±Infinity is an overflow. A decimal point must not sneak past
         // (`1` followed by hundreds of zeros, then `.5` is Infinity).

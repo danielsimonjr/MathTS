@@ -46,3 +46,13 @@ describe('#924 createParse reads a compat config accessor', () => {
     expect((viaFactory as { isBigNumber?: boolean }).isBigNumber).toBe(true);
   });
 });
+
+describe('#924 createParse nodes read a compat config accessor', () => {
+  it('[1, 2] is an Array when the instance is configured for Array', () => {
+    const math = create(all, { matrix: 'Array' }) as unknown as Record<string, unknown>;
+    const viaInstance = (math.evaluate as (s: string) => unknown)('[1, 2]');
+    const viaFactory = createParse(math)('[1, 2]').compile().evaluate({});
+    expect(Array.isArray(viaInstance)).toBe(true);
+    expect(viaFactory).toEqual([1, 2]);
+  });
+});

@@ -2,6 +2,7 @@ import { nodeDefaults } from './default-node.js';
 import { isArrayNode, isNode } from '../utils/is.js';
 import { map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { currentConfig } from '../utils/current-config.js';
 import type { MathNode, StringOptions } from './Node.js';
 import { mapChildArray } from './Node.js';
 
@@ -59,7 +60,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
           return item._compile(math, argNames);
         });
 
-        const asMatrix = (math.config as Record<string, unknown>).matrix !== 'Array';
+        const asMatrix = currentConfig(math.config as Record<string, unknown>).matrix !== 'Array';
         if (asMatrix) {
           const matrix = math.matrix as (value: unknown[]) => unknown;
           return function evalArrayNode(
