@@ -349,10 +349,26 @@ describe('#884 solve returns the exact solution set; the numeric scan is opt-in'
       expect(solveWith('x^2-2', 'x')).toEqual(['-sqrt(2)', 'sqrt(2)']);
     });
 
-    it('a linear root keeps full precision, not ten digits', () => {
+    it('a linear or quadratic root keeps full precision, not ten digits', () => {
       expect(solveWith('3*x-1', 'x')).toEqual([1 / 3]);
       expect((solveWith('x/3-1/7', 'x') as number[])[0]).toBeCloseTo(3 / 7, 15);
       expect(solveWith('0.1*x-0.3', 'x')).toEqual([3]);
+      expect(solveWith('3*x^2-4*x+1', 'x')).toEqual([1 / 3, 1]);
+      expect(solveWith('9*x^2-1', 'x')).toEqual([-1 / 3, 1 / 3]);
+    });
+
+    it('a radical root keeps its exact text, and a decimal never appears in it', () => {
+      expect(solveWith('x^2-2', 'x')).toEqual(['-sqrt(2)', 'sqrt(2)']);
+      for (const equation of ['2*x^2-3*x+1/3', 'x^2/3-1/9']) {
+        for (const root of solveWith(equation, 'x')) expect(typeof root).toBe('number');
+      }
+    });
+
+    it('a polynomial with small coefficients is not read as a constant', () => {
+      expect(solveWith('1e-10*x-1e-10', 'x')).toEqual([1]);
+      expect(solveWith('1e-12*x^2-1e-12', 'x')).toEqual([-1, 1]);
+      // rounding noise of a sum is negligible next to its terms
+      expect(solveWith('0.1*x^2-0.3*x^2+0.2*x^2+x-2', 'x')).toEqual([2]);
     });
 
     it('degree 4 and above are real roots by Sturm isolation, not a scan window', () => {

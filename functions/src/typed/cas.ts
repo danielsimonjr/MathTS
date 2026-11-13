@@ -1288,32 +1288,41 @@ function solveLowDegree(expr: string, varName: string): Array<f64 | Complex | st
   const dense = readPolynomial(expr, varName);
   if (dense !== null && dense.length <= 4) {
     const [c0 = 0, c1 = 0, c2 = 0, c3 = 0] = dense;
-    const eps = 1e-9;
+    // A coefficient is negligible next to the largest one: the rounding noise of a sum such as
+    // `0.1*x^2 - 0.3*x^2 + 0.2*x^2` is about 1e-16 of its terms. A fixed absolute limit would
+    // also drop a real coefficient of a polynomial with small terms (`1e-10*x - 1e-10`).
+    const largest = Math.max(Math.abs(c0), Math.abs(c1), Math.abs(c2), Math.abs(c3));
+    const negligible = (c: f64): boolean => Math.abs(c) <= 1e-12 * largest;
     let degree = 0;
-    if (Math.abs(c3) > eps) degree = 3;
-    else if (Math.abs(c2) > eps) degree = 2;
-    else if (Math.abs(c1) > eps) degree = 1;
+    if (!negligible(c3)) degree = 3;
+    else if (!negligible(c2)) degree = 2;
+    else if (!negligible(c1)) degree = 1;
 
     if (degree === 0) {
       // Constant: identity (c0 ≈ 0) or no solution — no isolated roots.
       return [];
     }
 
-    // Prefer exact radical forms for low-degree polynomials (e.g. x^2 - 2 → ±sqrt(2)).
+    // Prefer exact radical forms for a quadratic (e.g. x^2 - 2 → ±sqrt(2)). The text of a radical
+    // root is exact only when it holds no decimal: `toRadicals` rounds a decimal to ten digits.
+    // Every other root comes from `polynomialRoot` below, in full precision.
     if (degree === 2) {
       const radicals = toRadicals(expr);
-      if (radicals.length > 0) {
-        if (radicals.some((r) => r.includes('sqrt'))) return radicals;
-        if (radicals.length === 2) {
-          const nums = radicals.map((r) => Number(r));
-          if (nums.every((n) => Number.isFinite(n))) return nums.sort((a, b) => a - b);
-        }
+      if (
+        radicals.length > 0 &&
+        radicals.some((r) => r.includes('sqrt')) &&
+        !radicals.some((r) => /\d\.\d/.test(r))
+      ) {
+        return radicals;
       }
     }
     let raw: unknown[];
     try {
-      // polynomialRoot(constant, linear, quadratic?, cubic?) — pass up to degree.
-      const args = [c0, c1, c2, c3].slice(0, degree + 1);
+      // polynomialRoot(constant, linear, quadratic?, cubic?) — pass up to degree. Its tolerances are
+      // absolute, so scale the coefficients to about 1 by a power of two (exact in binary
+      // floating point); the roots do not change.
+      const unit = 2 ** Math.round(Math.log2(largest));
+      const args = [c0, c1, c2, c3].slice(0, degree + 1).map((c) => c / unit);
       raw = (polynomialRoot as (...a: number[]) => unknown[])(...args);
     } catch {
       // The closed-form solver rejected the input: let the caller try another method.
