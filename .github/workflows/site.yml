@@ -3,26 +3,44 @@ name: Site
 # Deploys the static site to the gh-pages branch, which GitHub Pages serves (legacy
 # build from the branch root, so no Pages setting changes with this workflow). The site
 # has two parts: the function reference at the root (tools/generate-landing-site.mjs)
-# and the API index at /api/ (tools/generate-api-index.mjs). Both read the packages:
-# the build job builds them and regenerates docs/reference from their dist, so the
-# version and the export count come from the packages, never from a literal.
+# and the API index at /api/ (tools/generate-api-index.mjs). The build job builds the
+# packages and regenerates docs/reference from their dist, so the version and the export
+# count come from the packages, never from a literal.
 #
 # Triggers:
-# - workflow_call: publish.yml calls this job after a successful publish. A publish
-#   that does nothing still deploys, which keeps the site current.
-# - workflow_dispatch: a manual deploy from any ref of the default branch.
+# - workflow_call: publish.yml calls this workflow after a successful publish. The site
+#   then shows only a version that npm has. A push to the default branch does not deploy.
+# - workflow_dispatch: a manual deploy for when no publish ran (RELEASES_ENABLED is off,
+#   or a docs fix needs to go live). Both jobs run only on the default branch. A dispatch
+#   on another ref does nothing. Run it from the Actions tab.
 #
 # Least privilege, split by job:
 # - build runs the repository code (install, build, generators) with contents: read.
 # - deploy holds contents: write and runs no repository code. It downloads the built
-#   site as an artifact, copies it onto the gh-pages checkout, and pushes that branch.
-#   Pages uses the branch, so no id-token and no deploy-pages action are needed.
+#   site as an artifact, accepts only the files on the allowlist below, copies them onto
+#   the gh-pages checkout, and pushes that branch. Pages uses the branch, so no id-token
+#   and no deploy-pages action are needed.
+#
+# Checks in the deploy job:
+# - Before the push, the version in the site must equal the latest version of the package
+#   on npm. This keeps an unpublished version off the site.
+# - After the push, the live site must show that version at the root and the API index
+#   title at /api/. The check polls, because Pages needs time to build.
 #
 # Auth is the default GITHUB_TOKEN. No PAT and no repository secret are used.
 
 on:
   workflow_call:
   workflow_dispatch:
+
+# Defaults of this workflow, each in one place.
+env:
+  # Public base URL of the site. The post-deploy check reads it. Change it here when the site moves.
+  SITE_URL: https://danielsimonjr.com/MathTS
+  # Bounded waits: WAIT_ATTEMPTS tries, WAIT_SECONDS apart. They apply to the npm check
+  # (registry lag after a publish) and to the post-deploy poll (Pages build time).
+  WAIT_ATTEMPTS: '10'
+  WAIT_SECONDS: '30'
 
 # One deploy at a time. Never cancel a push that is in progress.
 concurrency:
@@ -35,10 +53,16 @@ permissions:
 jobs:
   build:
     name: Build site
+    # A dispatch runs only on the default branch. A call from release.yml or publish.yml
+    # carries the caller's event (push, release or dispatch), so those paths pass.
+    if: github.event_name != 'workflow_dispatch' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       TURBO_TELEMETRY_DISABLED: '1'
+    outputs:
+      package: ${{ steps.identity.outputs.package }}
+      version: ${{ steps.identity.outputs.version }}
 
     steps:
       - name: Checkout
@@ -70,11 +94,13 @@ jobs:
       - name: Regenerate the export index from the built packages
         run: bun run docs:functions
 
-      - name: Generate the function reference site
-        run: node tools/generate-landing-site.mjs --out=site
+      # The package and its version, read from the file that the function reference reads.
+      - name: Read the package name and version
+        id: identity
+        run: node tools/site-config.mjs >> "$GITHUB_OUTPUT"
 
-      - name: Generate the API index
-        run: node tools/generate-api-index.mjs --out=site/api
+      - name: Generate the site (function reference and API index)
+        run: bun run docs:site
 
       - name: Check the site has both parts
         run: test -f site/index.html && test -f site/api/index.html && test -d site/functions
@@ -90,10 +116,14 @@ jobs:
   deploy:
     name: Deploy to gh-pages
     needs: build
+    if: github.event_name != 'workflow_dispatch' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: write
+    env:
+      SITE_PACKAGE: ${{ needs.build.outputs.package }}
+      SITE_VERSION: ${{ needs.build.outputs.version }}
 
     steps:
       - name: Download the site
@@ -102,6 +132,53 @@ jobs:
           name: site
           path: site-out
 
+      # The build job runs dependency code, so its artifact is not trusted. Only the named
+      # paths pass: index.html, api/index.html and functions/<slug>.html. Any other file,
+      # any other directory and any link fails the run.
+      - name: Accept only the allowed files
+        run: |
+          set -euo pipefail
+          allowed_file='^\./(index\.html|api/index\.html|functions/[a-z0-9-]+\.html)$'
+          allowed_dir='^\./(api|functions)$'
+          cd site-out
+          bad=0
+          while IFS= read -r -d '' path; do
+            if [[ -L $path ]]; then
+              echo "::error::link in the site artifact: $path"; bad=1
+            elif [[ -d $path ]]; then
+              [[ $path =~ $allowed_dir ]] || { echo "::error::unexpected directory: $path"; bad=1; }
+            elif [[ -f $path ]]; then
+              [[ $path =~ $allowed_file ]] || { echo "::error::unexpected file: $path"; bad=1; }
+            else
+              echo "::error::unexpected entry: $path"; bad=1
+            fi
+          done < <(find . -mindepth 1 -print0)
+          [[ $bad -eq 0 ]] || exit 1
+          [[ -f index.html && -f api/index.html ]] || { echo "::error::index.html or api/index.html is missing"; exit 1; }
+          compgen -G 'functions/*.html' > /dev/null || { echo "::error::no function page in the site artifact"; exit 1; }
+
+      # The site shows the version of main. npm must have it as latest, or the site would
+      # show a version that users cannot install. A publish takes a short time to appear
+      # in the registry, so the check waits, then fails.
+      - name: Check the site version is the version on npm
+        run: |
+          set -euo pipefail
+          [[ $SITE_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+.][0-9A-Za-z.+-]+)?$ ]] || { echo "::error::bad version from the build: '$SITE_VERSION'"; exit 1; }
+          [[ $SITE_PACKAGE =~ ^(@[a-z0-9._-]+/)?[a-z0-9._-]+$ ]] || { echo "::error::bad package name from the build: '$SITE_PACKAGE'"; exit 1; }
+          grep -qF ">v${SITE_VERSION}<" site-out/index.html || { echo "::error::site-out/index.html does not show v${SITE_VERSION}"; exit 1; }
+          latest=''
+          for attempt in $(seq 1 "$WAIT_ATTEMPTS"); do
+            latest=$(npm view "$SITE_PACKAGE" version --prefer-online 2>/dev/null || true)
+            if [[ $latest == "$SITE_VERSION" ]]; then
+              echo "The site version $SITE_VERSION is the latest version of $SITE_PACKAGE on npm."
+              exit 0
+            fi
+            echo "Attempt $attempt of $WAIT_ATTEMPTS: npm has '${latest:-nothing readable}', the site shows $SITE_VERSION."
+            if [[ $attempt -lt $WAIT_ATTEMPTS ]]; then sleep "$WAIT_SECONDS"; fi
+          done
+          echo "::error::The site shows $SITE_VERSION, but the latest version of $SITE_PACKAGE on npm is '${latest:-unreadable}'. Publish that version first, or build the site from the commit that npm has."
+          exit 1
+
       - name: Check out gh-pages
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -109,14 +186,18 @@ jobs:
           path: pages
           fetch-depth: 1
 
-      # Replaces only the generated paths. Anything else on gh-pages stays.
+      # Replaces only the generated paths, and copies only the named files. Anything else
+      # on gh-pages stays. The push is not forced, so a concurrent change fails the run.
       - name: Copy the site onto gh-pages and push
         run: |
           set -euo pipefail
           cd pages
           rm -rf index.html functions api
-          cp -R ../site-out/. .
-          git add --all -- .
+          mkdir functions api
+          cp ../site-out/index.html index.html
+          cp ../site-out/api/index.html api/index.html
+          cp ../site-out/functions/*.html functions/
+          git add --all -- index.html functions api
           if git diff --cached --quiet; then
             echo "gh-pages already has this site; nothing to push."
             exit 0
@@ -125,3 +206,30 @@ jobs:
             -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
             commit -m "Deploy site from ${GITHUB_SHA}"
           git push origin HEAD:gh-pages
+
+      # A separate step, so that an empty push above still checks the live site. The
+      # query string defeats a cached copy. The API title comes from the artifact.
+      - name: Check the live site
+        run: |
+          set -euo pipefail
+          base="${SITE_URL%/}"
+          api_title=$(sed -n 's:.*<title>\(.*\)</title>.*:\1:p' site-out/api/index.html | head -n 1)
+          [[ -n $api_title ]] || { echo "::error::the API index has no <title>"; exit 1; }
+          has() { # url, text that the page must contain
+            local body
+            body=$(curl --fail --silent --show-error --location --max-time 30 "$1?run=${GITHUB_RUN_ID}-${attempt}") || return 1
+            grep -qF -- "$2" <<< "$body"
+          }
+          for attempt in $(seq 1 "$WAIT_ATTEMPTS"); do
+            root_ok=0; api_ok=0
+            has "${base}/" ">v${SITE_VERSION}<" && root_ok=1
+            has "${base}/api/" "<title>${api_title}</title>" && api_ok=1
+            if [[ $root_ok -eq 1 && $api_ok -eq 1 ]]; then
+              echo "${base}/ shows v${SITE_VERSION} and ${base}/api/ shows '${api_title}'."
+              exit 0
+            fi
+            echo "Attempt $attempt of $WAIT_ATTEMPTS: root shows v${SITE_VERSION}=$root_ok, api title=$api_ok."
+            if [[ $attempt -lt $WAIT_ATTEMPTS ]]; then sleep "$WAIT_SECONDS"; fi
+          done
+          echo "::error::The live site at ${base}/ does not show v${SITE_VERSION} and the '${api_title}' page at /api/. See the Pages build history for the gh-pages push."
+          exit 1

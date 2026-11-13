@@ -8,6 +8,9 @@ build/
 out/
 *.tsbuildinfo
 
+# Generated static site (bun run docs:site; CI builds and deploys it from the Site workflow)
+/site/
+
 # Python bytecode (inventory/scan tooling under tools/)
 __pycache__/
 *.pyc

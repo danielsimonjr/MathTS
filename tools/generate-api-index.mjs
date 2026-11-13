@@ -5,15 +5,19 @@
  * level-one heading and its first prose paragraph.
  *
  *   node tools/generate-api-index.mjs --out=<dir> [--api-dir=docs/api]
+ *                                     [--repo-package=PATH] [--ref=BRANCH]
  *
  * Output: <out>/index.html. Every entry links to the page on GitHub, because the
  * pages use relative links to the rest of the repository that do not resolve on a
- * static host. The script fails when --out is missing, when the directory holds no
- * page, or when a page has no level-one heading.
+ * static host. The repository URL is the "repository" field of --repo-package
+ * (default: the root package.json). The script fails when --out is missing, when the
+ * directory holds no page, when a page has no level-one heading, or when the package
+ * file has no https repository URL.
  */
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, basename, join, resolve } from 'node:path';
+import { dirname, basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DEFAULT_REF, DEFAULT_REPO_FILE, repositoryUrl } from './site-config.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(
@@ -27,7 +31,13 @@ if (typeof args.out !== 'string' || !args.out) {
 }
 const OUT = resolve(REPO, args.out);
 const API_DIR = resolve(REPO, String(args['api-dir'] ?? 'docs/api'));
-const GITHUB_BLOB = 'https://github.com/danielsimonjr/MathTS/blob/main/docs/api';
+const REPO_PACKAGE = resolve(REPO, String(args['repo-package'] ?? DEFAULT_REPO_FILE));
+const REF = String(args.ref ?? DEFAULT_REF);
+const GITHUB = repositoryUrl(REPO_PACKAGE);
+// Repository-relative location of the pages, for the links and the file labels.
+const API_PATH = relative(REPO, API_DIR).split(sep).join('/');
+const GITHUB_BLOB = `${GITHUB}/blob/${REF}/${API_PATH}`;
+const GITHUB_TREE = `${GITHUB}/tree/${REF}/${API_PATH}`;
 
 const esc = (s) =>
   String(s)
@@ -61,6 +71,11 @@ const pages = readdirSync(API_DIR)
 if (!pages.length) {
   throw new Error(`api-index: no package pages in ${API_DIR}`);
 }
+if (isAbsolute(API_PATH) || API_PATH.startsWith('..')) {
+  throw new Error(
+    `api-index: ${API_DIR} is outside the repository, so its pages have no GitHub link`
+  );
+}
 
 const entries = pages.map((file) => {
   const lines = readFileSync(join(API_DIR, file), 'utf8').split('\n');
@@ -80,7 +95,7 @@ const items = entries
     (e) => `  <li class="entry">
     <a class="title" href="${GITHUB_BLOB}/${esc(e.file)}">${esc(e.title)}</a>
     <p class="summary">${esc(e.summary)}</p>
-    <span class="file">docs/api/${esc(e.file)}</span>
+    <span class="file">${esc(API_PATH)}/${esc(e.file)}</span>
   </li>`
   )
   .join('\n');
@@ -115,14 +130,14 @@ footer { margin-top: 2rem; color: var(--text2); font-size: 0.85rem; }
 <div class="container">
 <header>
   <h1>MathTS API Index</h1>
-  <p class="nav"><a href="../">Function reference</a> · <a href="https://github.com/danielsimonjr/MathTS#readme">Getting started</a></p>
+  <p class="nav"><a href="../">Function reference</a> · <a href="${GITHUB}#readme">Getting started</a></p>
   <p class="intro">Per-package API reference for the public MathTS packages. Each entry opens the page in the repository, where the export lists and usage notes are kept.</p>
 </header>
 <ul>
 ${items}
 </ul>
 <footer>
-  <p>Generated from <a href="https://github.com/danielsimonjr/MathTS/tree/main/docs/api">docs/api</a> · ${entries.length} packages</p>
+  <p>Generated from <a href="${GITHUB_TREE}">${esc(API_PATH)}</a> · ${entries.length} packages</p>
 </footer>
 </div>
 </body>
