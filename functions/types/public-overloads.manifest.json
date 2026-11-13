@@ -37,7 +37,7 @@
     {
       "name": "parallelFFT",
       "source": "src/typed/signal.ts",
-      "sigTypes": { "Array": "number[]" }
+      "sigTypes": { "Array": "readonly number[]" }
     }
   ]
 }

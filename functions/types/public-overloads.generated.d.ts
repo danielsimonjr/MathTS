@@ -292,7 +292,7 @@ export interface MadCallable {
 export type PublicMad = MadCallable;
 
 export interface ParallelFFTCallable {
-  (a: number[]): { real: Float64Array; imag: Float64Array; originalLength: number };
+  (a: readonly number[]): { real: Float64Array; imag: Float64Array; originalLength: number };
   (a: Float64Array): Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;

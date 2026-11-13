@@ -148,7 +148,7 @@ describe('gen-public-overloads: the typed-return contract in the committed file'
 
   it('parallelFFT takes a vector: no 2-D overload', () => {
     const block = interfaceOf('ParallelFFTCallable');
-    expect(block).toContain('(a: number[]): {');
+    expect(block).toContain('(a: readonly number[]): {');
     expect(block).toContain('(a: Float64Array): Promise<{');
     expect(block).not.toContain('number[][]');
   });

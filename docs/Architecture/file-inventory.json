@@ -12756,7 +12756,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 137
+      "loc": 144
     },
     {
       "file": "functions/tests/typed-set.test.ts",
