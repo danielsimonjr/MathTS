@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-13",
-    "totalFiles": 1310,
+    "totalFiles": 1314,
     "totalModules": 82,
-    "totalExports": 7161
+    "totalExports": 7172
   },
   "entryPoints": [
     {
@@ -7337,10 +7337,14 @@
         "functions": ["isNumericNode", "isConstantExpression"]
       },
       "functions/src/algebra/simplify.ts": {
-        "description": "Simplify an expression tree.",
+        "description": "Structural node guards, narrowed to the node types of this file. They test the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "../utils/is.js",
+            "imports": ["* as is"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isParenthesisNode"]
@@ -15028,7 +15032,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["createEvaluate", "compileExpressionWithDeps"]
+            "imports": ["createEvaluate", "compileExpressionWithDeps", "EXPRESSION_SCOPE_OMIT"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -30255,6 +30259,10 @@
           {
             "file": "./utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["getDefaultEvaluate"]
           }
         ],
         "workspaceDependencies": [],
@@ -30269,6 +30277,10 @@
           {
             "file": "./utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./evaluator/evaluate.js",
+            "imports": ["getDefaultEvaluate", "getDefaultParse"]
           },
           {
             "file": "./utils/is.js",
@@ -30289,84 +30301,12 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./parse.js",
-            "imports": ["createParse"]
-          },
-          {
-            "file": "./node/Node.js",
-            "imports": ["createNode"]
-          },
-          {
-            "file": "./node/AccessorNode.js",
-            "imports": ["createAccessorNode"]
-          },
-          {
-            "file": "./node/ArrayNode.js",
-            "imports": ["createArrayNode"]
-          },
-          {
-            "file": "./node/AssignmentNode.js",
-            "imports": ["createAssignmentNode"]
-          },
-          {
-            "file": "./node/BlockNode.js",
-            "imports": ["createBlockNode"]
-          },
-          {
-            "file": "./node/ConditionalNode.js",
-            "imports": ["createConditionalNode"]
-          },
-          {
-            "file": "./node/ConstantNode.js",
-            "imports": ["createConstantNode"]
-          },
-          {
-            "file": "./node/FunctionAssignmentNode.js",
-            "imports": ["createFunctionAssignmentNode"]
-          },
-          {
-            "file": "./node/FunctionNode.js",
-            "imports": ["createFunctionNode"]
-          },
-          {
-            "file": "./node/IndexNode.js",
-            "imports": ["createIndexNode"]
-          },
-          {
-            "file": "./node/ObjectNode.js",
-            "imports": ["createObjectNode"]
-          },
-          {
-            "file": "./node/OperatorNode.js",
-            "imports": ["createOperatorNode"]
-          },
-          {
-            "file": "./node/ParenthesisNode.js",
-            "imports": ["createParenthesisNode"]
-          },
-          {
-            "file": "./node/RangeNode.js",
-            "imports": ["createRangeNode"]
-          },
-          {
-            "file": "./node/RelationalNode.js",
-            "imports": ["createRelationalNode"]
-          },
-          {
-            "file": "./node/SymbolNode.js",
-            "imports": ["createSymbolNode"]
-          },
-          {
-            "file": "./compiler/compile.js",
-            "imports": ["compile"]
+            "file": "./default-math-scope.js",
+            "imports": ["getDefaultMathScope", "defaultMathScope"]
           },
           {
             "file": "./evaluator/evaluate.js",
-            "imports": ["createEvaluate", "compileExpressionWithDeps"]
-          },
-          {
-            "file": "./transform/utils/compileInlineExpression.js",
-            "imports": ["compileInlineExpression"]
+            "imports": ["getDefaultParse", "getDefaultEvaluate", "compileExpressionWithDeps"]
           },
           {
             "file": "./compiler/compile.js",
@@ -30389,13 +30329,7 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core",
-            "directory": "core",
-            "imports": ["mathTyped"]
-          }
-        ],
+        "workspaceDependencies": [],
         "exports": ["defaultMathScope", "parse", "evaluate", "compileExpression"],
         "interfaces": ["CallableCompiledExpression"],
         "functions": [
@@ -30404,8 +30338,41 @@
           "compileExpression",
           "compileExpression",
           "compileExpression"
+        ]
+      },
+      "expression/src/default-math-scope.ts": {
+        "description": "The default math scope that the public factories fall back to.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["compile"]
+          },
+          {
+            "file": "./compiler/compile.js",
+            "imports": ["Scope"],
+            "typeOnly": true
+          },
+          {
+            "file": "./transform/utils/compileInlineExpression.js",
+            "imports": ["compileInlineExpression"]
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          }
         ],
-        "constants": ["defaultMathScope"]
+        "workspaceDependencies": [],
+        "exports": [
+          "EXPRESSION_SCOPE_OMIT",
+          "defaultMathScope",
+          "expressionView",
+          "getDefaultMathScope"
+        ],
+        "functions": ["expressionView", "getDefaultMathScope"],
+        "constants": ["EXPRESSION_SCOPE_OMIT", "defaultMathScope"]
       },
       "expression/src/index.ts": {
         "description": "Expression parsing and evaluation for MathTS.",
@@ -30470,6 +30437,11 @@
           {
             "file": "./default-instance.js",
             "imports": ["defaultMathScope"],
+            "reExport": true
+          },
+          {
+            "file": "./default-math-scope.js",
+            "imports": ["EXPRESSION_SCOPE_OMIT"],
             "reExport": true
           },
           {
@@ -30634,6 +30606,7 @@
           "createParser",
           "embeddedDocs",
           "defaultMathScope",
+          "EXPRESSION_SCOPE_OMIT",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -30697,6 +30670,7 @@
           "createParser",
           "embeddedDocs",
           "defaultMathScope",
+          "EXPRESSION_SCOPE_OMIT",
           "mathMLDocument",
           "mathMLError",
           "escapeMathML",
@@ -30802,6 +30776,95 @@
         "functions": ["getPrecedence", "getAssociativity", "isAssociativeWith", "getOperator"],
         "constants": ["properties"]
       },
+      "expression/src/parse-defaults.ts": {
+        "description": "Default dependencies for the parse factory (`createParse`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./default-math-scope.js",
+            "imports": ["expressionView", "getDefaultMathScope"]
+          },
+          {
+            "file": "./node/default-node.js",
+            "imports": ["nodeBaseFor"]
+          },
+          {
+            "file": "./node/AccessorNode.js",
+            "imports": ["createAccessorNode"]
+          },
+          {
+            "file": "./node/ArrayNode.js",
+            "imports": ["createArrayNode"]
+          },
+          {
+            "file": "./node/AssignmentNode.js",
+            "imports": ["createAssignmentNode"]
+          },
+          {
+            "file": "./node/BlockNode.js",
+            "imports": ["createBlockNode"]
+          },
+          {
+            "file": "./node/ConditionalNode.js",
+            "imports": ["createConditionalNode"]
+          },
+          {
+            "file": "./node/ConstantNode.js",
+            "imports": ["createConstantNode"]
+          },
+          {
+            "file": "./node/FunctionAssignmentNode.js",
+            "imports": ["createFunctionAssignmentNode"]
+          },
+          {
+            "file": "./node/FunctionNode.js",
+            "imports": ["createFunctionNode"]
+          },
+          {
+            "file": "./node/IndexNode.js",
+            "imports": ["createIndexNode"]
+          },
+          {
+            "file": "./node/ObjectNode.js",
+            "imports": ["createObjectNode"]
+          },
+          {
+            "file": "./node/OperatorNode.js",
+            "imports": ["createOperatorNode"]
+          },
+          {
+            "file": "./node/ParenthesisNode.js",
+            "imports": ["createParenthesisNode"]
+          },
+          {
+            "file": "./node/RangeNode.js",
+            "imports": ["createRangeNode"]
+          },
+          {
+            "file": "./node/RelationalNode.js",
+            "imports": ["createRelationalNode"]
+          },
+          {
+            "file": "./node/SymbolNode.js",
+            "imports": ["createSymbolNode"]
+          },
+          {
+            "file": "./utils/factory.js",
+            "imports": ["DefaultDependencies"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["parseDefaults"],
+        "constants": ["parseDefaults"]
+      },
       "expression/src/parse.ts": {
         "description": "Parse an expression. Returns a node tree, which can be evaluated by",
         "externalDependencies": [],
@@ -30851,6 +30914,14 @@
             "file": "./node/Node.js",
             "imports": ["MathNode"],
             "typeOnly": true
+          },
+          {
+            "file": "./parse-defaults.js",
+            "imports": ["parseDefaults"]
+          },
+          {
+            "file": "./utils/current-config.js",
+            "imports": ["currentConfig"]
           }
         ],
         "workspaceDependencies": [],
@@ -36390,6 +36461,14 @@
             "imports": ["sanitizeEvaluateResult", "trustedMathFunctions"]
           },
           {
+            "file": "../parse.js",
+            "imports": ["createParse"]
+          },
+          {
+            "file": "../default-math-scope.js",
+            "imports": ["getDefaultMathScope"]
+          },
+          {
             "file": "../compiler/compile.js",
             "imports": ["CompiledExpression", "Scope"],
             "typeOnly": true
@@ -36401,9 +36480,21 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEvaluate", "compileExpressionWithDeps"],
-        "interfaces": ["EvaluateOptions"],
-        "functions": ["createEvaluate", "compileExpressionWithDeps"]
+        "exports": [
+          "getDefaultParse",
+          "getDefaultEvaluate",
+          "createEvaluate",
+          "compileExpressionWithDeps"
+        ],
+        "interfaces": ["EvaluateOptions", "EvaluateFunction"],
+        "functions": [
+          "getDefaultParse",
+          "getDefaultEvaluate",
+          "createEvaluate",
+          "createEvaluate",
+          "createEvaluate",
+          "compileExpressionWithDeps"
+        ]
       },
       "expression/src/evaluator/index.ts": {
         "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 6 symbols)",
@@ -36455,9 +36546,19 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../Parser.js",
+            "imports": ["createParserClass"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
         "exports": ["createParser"],
         "constants": ["createParser"]
       }
@@ -36468,6 +36569,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/is.js",
             "imports": [
@@ -36510,6 +36615,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["isArrayNode", "isNode"]
           },
@@ -36520,6 +36629,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/current-config.js",
+            "imports": ["currentConfig"]
           },
           {
             "file": "./Node.js",
@@ -36540,6 +36653,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isAccessorNode", "isIndexNode", "isNode", "isSymbolNode"]
@@ -36589,6 +36706,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["isNode"]
           },
@@ -36616,6 +36737,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["isBigNumber", "isComplex", "isNode", "isUnit", "typeOf"]
           },
@@ -36642,6 +36767,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/string.js",
             "imports": ["format"]
@@ -36677,6 +36806,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isNode"]
@@ -36720,7 +36853,7 @@
         "constants": ["createFunctionAssignmentNode"]
       },
       "expression/src/node/FunctionNode.ts": {
-        "description": "Sandbox-safe \"is this member undefined?\" test for `obj?.method()`. It never",
+        "description": "FunctionNode also needs a SymbolNode class. The default is built on the same",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -36755,6 +36888,19 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/factory.js",
+            "imports": ["DefaultDependencies"],
+            "typeOnly": true
+          },
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
+            "file": "./SymbolNode.js",
+            "imports": ["createSymbolNode"]
+          },
+          {
             "file": "../utils/latex.js",
             "imports": ["defaultTemplate", "latexFunctions"]
           },
@@ -36781,6 +36927,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/array.js",
             "imports": ["map"]
@@ -36862,6 +37012,10 @@
           {
             "file": "../utils/map.js",
             "imports": ["createMap"]
+          },
+          {
+            "file": "../default-math-scope.js",
+            "imports": ["getDefaultMathScope"]
           }
         ],
         "workspaceDependencies": [],
@@ -36875,6 +37029,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/customs.js",
             "imports": ["getSafeProperty", "setSafeProperty"]
@@ -36914,6 +37072,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isNode", "isConstantNode", "isOperatorNode", "isParenthesisNode"]
@@ -36970,6 +37132,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["isNode"]
           },
@@ -36992,6 +37158,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isNode", "isSymbolNode"]
@@ -37019,6 +37189,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
           {
             "file": "../operators.js",
             "imports": ["getPrecedence"]
@@ -37059,6 +37233,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./default-node.js",
+            "imports": ["nodeDefaults"]
+          },
+          {
             "file": "../utils/string.js",
             "imports": ["escape"]
           },
@@ -37087,6 +37265,36 @@
         "workspaceDependencies": [],
         "exports": ["createSymbolNode"],
         "constants": ["createSymbolNode"]
+      },
+      "expression/src/node/default-node.ts": {
+        "description": "Default dependencies for the AST node constructors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Node.js",
+            "imports": ["createNode"]
+          },
+          {
+            "file": "../default-math-scope.js",
+            "imports": ["getDefaultMathScope"]
+          },
+          {
+            "file": "../utils/factory.js",
+            "imports": ["DefaultDependencies"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mathTyped"]
+          }
+        ],
+        "exports": ["nodeDefaults", "nodeBaseFor"],
+        "functions": ["nodeBaseFor"],
+        "constants": ["nodeDefaults"]
       },
       "expression/src/node/utils/access.ts": {
         "description": "Make the `access` function that the expression nodes use to read a part of a value.",
@@ -38134,6 +38342,15 @@
         ],
         "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
         "reExported": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+      },
+      "expression/src/utils/current-config.ts": {
+        "description": "A math scope holds its config as an object, or as an accessor function that",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["currentConfig"],
+        "functions": ["currentConfig"]
       },
       "expression/src/utils/customs.ts": {
         "description": "Values the expression sandbox may read or call methods on.",
@@ -44417,7 +44634,7 @@
           },
           {
             "file": "./instance-api.js",
-            "imports": ["wireMathjsInstanceApi"]
+            "imports": ["wireMathjsInstanceApi", "WiredCompatInstance"]
           },
           {
             "file": "./shims.js",
@@ -44503,12 +44720,7 @@
       },
       "compat/src/instance-api.ts": {
         "description": "mathjs instance methods on `create(all)`: import, typed, compile, and",
-        "externalDependencies": [
-          {
-            "package": "typed-function",
-            "imports": ["typedFunction"]
-          }
-        ],
+        "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -45742,10 +45954,23 @@
           "functions/src/typed/algebra.ts"
         ]
       ],
-      "typeOnly": [["compat/src/index.ts", "compat/src/instance-api.ts", "compat/src/index.ts"]],
-      "total": 3,
+      "typeOnly": [
+        [
+          "expression/src/compiler/compile.ts",
+          "expression/src/node/Node.ts",
+          "expression/src/default-math-scope.ts",
+          "expression/src/compiler/compile.ts"
+        ],
+        [
+          "expression/src/node/Node.ts",
+          "expression/src/default-math-scope.ts",
+          "expression/src/node/Node.ts"
+        ],
+        ["compat/src/index.ts", "compat/src/instance-api.ts", "compat/src/index.ts"]
+      ],
+      "total": 5,
       "runtimeCount": 2,
-      "typeOnlyCount": 1
+      "typeOnlyCount": 3
     },
     "layers": [
       {
@@ -46706,10 +46931,12 @@
           "expression/src/Help.ts",
           "expression/src/Parser.ts",
           "expression/src/default-instance.ts",
+          "expression/src/default-math-scope.ts",
           "expression/src/index.ts",
           "expression/src/keywords.ts",
           "expression/src/limits.ts",
           "expression/src/operators.ts",
+          "expression/src/parse-defaults.ts",
           "expression/src/parse.ts",
           "expression/src/scalar-builder.ts",
           "expression/src/scalar-enumerate.ts",
@@ -47155,6 +47382,7 @@
           "expression/src/node/RangeNode.ts",
           "expression/src/node/RelationalNode.ts",
           "expression/src/node/SymbolNode.ts",
+          "expression/src/node/default-node.ts",
           "expression/src/node/utils/access.ts",
           "expression/src/node/utils/assign.ts",
           "expression/src/node/utils/describeType.ts",
@@ -47204,6 +47432,7 @@
         "files": [
           "expression/src/utils/array.ts",
           "expression/src/utils/collection.ts",
+          "expression/src/utils/current-config.ts",
           "expression/src/utils/customs.ts",
           "expression/src/utils/factory.ts",
           "expression/src/utils/is.ts",
@@ -47422,20 +47651,20 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1310,
+    "totalTypeScriptFiles": 1314,
     "totalModules": 82,
-    "totalLinesOfCode": 224535,
-    "totalExports": 7161,
+    "totalLinesOfCode": 224834,
+    "totalExports": 7172,
     "totalClasses": 61,
-    "totalInterfaces": 613,
-    "totalFunctions": 2438,
+    "totalInterfaces": 614,
+    "totalFunctions": 2446,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1658,
-    "totalReExports": 3111,
-    "totalTypeOnlyImports": 662,
+    "totalConstants": 1661,
+    "totalReExports": 3112,
+    "totalTypeOnlyImports": 667,
     "runtimeCircularDeps": 2,
-    "typeOnlyCircularDeps": 1,
+    "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0
   }

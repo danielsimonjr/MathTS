@@ -17,7 +17,7 @@ npm install @danielsimonjr/mathts-parser
 ## What it exports
 
 - `parse` — ready-to-call parser (string → AST) with a default wired instance.
-- `createParse` — factory for the `parse` function when you inject your own scope.
+- `createParse` — factory for the `parse` function. Call it with no argument for the default parse. Pass a math scope (for example `create(all)` from `@danielsimonjr/mathts-compat`) to bind symbols to that scope.
 - `createParserClass` — factory for the `Parser` class (stateful, scope-aware).
 - `createParser` — factory for the `parser()` instance (a `Parser` with its own scope).
 - AST node constructors produced by parsing: `createNode`, `createConstantNode`,

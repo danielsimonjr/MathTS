@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { map } from '../utils/array.js';
 import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
@@ -323,5 +324,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
     return IndexNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

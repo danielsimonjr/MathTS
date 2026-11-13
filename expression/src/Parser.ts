@@ -1,4 +1,5 @@
 import { factory } from './utils/factory.js';
+import { getDefaultEvaluate, getDefaultParse } from './evaluator/evaluate.js';
 import { isFunction } from './utils/is.js';
 import { createEmptyMap, toObject } from './utils/map.js';
 
@@ -233,7 +234,14 @@ export const createParserClass = /* #__PURE__ */ factory(
 
     return Parser;
   },
-  { isClass: true }
+  { isClass: true },
+  (_supplied, missing) => {
+    // The default evaluate and parse are the package's own, built on first use.
+    const fill: Record<string, unknown> = {};
+    if (missing.includes('parse')) fill.parse = getDefaultParse();
+    if (missing.includes('evaluate')) fill.evaluate = getDefaultEvaluate();
+    return fill;
+  }
 );
 
 /** A compiled expression function carries its source `syntax` and `expr`. */

@@ -19,6 +19,8 @@ const CONSUMER_SEED_DIRS = ['functions'];
 const WORKERPOOL_VENDOR = 'workerpool';
 
 const skipBuild = process.argv.includes('--skip-build');
+/** npm and npx are .cmd files on Windows; a .cmd file runs only through a shell. */
+const shell = process.platform === 'win32';
 
 const packDirs = workspaceMathtsClosure(CONSUMER_SEED_DIRS);
 
@@ -26,6 +28,7 @@ if (!skipBuild) {
   execFileSync('npx', ['turbo', 'build', ...packDirs.flatMap((d) => ['--filter', `./${d}`])], {
     cwd: repoRoot,
     stdio: 'inherit',
+    shell,
   });
 }
 
@@ -100,7 +103,7 @@ try {
     execFileSync(
       'npm',
       ['pack', '--ignore-scripts', '--silent', '--pack-destination', tarballs],
-      { cwd: join(repoRoot, dir), stdio: 'inherit' }
+      { cwd: join(repoRoot, dir), stdio: 'inherit', shell }
     );
   }
   // Packed @danielsimonjr/mathts-* tarballs still depend on registry workerpool; ship the
@@ -109,7 +112,7 @@ try {
   execFileSync(
     'npm',
     ['pack', '--ignore-scripts', '--silent', '--pack-destination', tarballs],
-    { cwd: join(repoRoot, 'node_modules', WORKERPOOL_VENDOR), stdio: 'inherit' }
+    { cwd: join(repoRoot, 'node_modules', WORKERPOOL_VENDOR), stdio: 'inherit', shell }
   );
   const tgz = readdirSync(tarballs).filter((f) => f.endsWith('.tgz'));
   const wpTgz = tgz.find((f) => /workerpool-10/.test(f));
@@ -175,14 +178,14 @@ try {
       `typescript@${tsVersion}`,
       ...mathtsTgz,
     ],
-    { cwd: consumer, stdio: 'inherit' }
+    { cwd: consumer, stdio: 'inherit', shell }
   );
 
   assertMathtsInstalledFromTarballs(consumer, packedNames);
 
   let output = '';
   try {
-    execFileSync('npx', ['--no-install', 'tsc', '-p', '.'], { cwd: consumer, stdio: 'pipe' });
+    execFileSync('npx', ['--no-install', 'tsc', '-p', '.'], { cwd: consumer, stdio: 'pipe', shell });
   } catch (err) {
     output = `${err.stdout ?? ''}${err.stderr ?? ''}`;
     if (!/error TS\d+/.test(output)) throw err;

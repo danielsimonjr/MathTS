@@ -2,6 +2,7 @@ import { isHelp } from './utils/is.js';
 import { clone } from './utils/object.js';
 import { format } from './utils/string.js';
 import { factory } from './utils/factory.js';
+import { getDefaultEvaluate } from './evaluator/evaluate.js';
 
 const name = 'Help';
 const dependencies = ['evaluate'];
@@ -157,5 +158,6 @@ export const createHelpClass = /* #__PURE__ */ factory(
 
     return Help;
   },
-  { isClass: true }
+  { isClass: true },
+  (_supplied, missing) => (missing.includes('evaluate') ? { evaluate: getDefaultEvaluate() } : {})
 );

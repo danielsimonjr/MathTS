@@ -44,6 +44,8 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
       const out = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
         cwd: join(REPO, dir),
         encoding: 'utf8',
+        // npm is npm.cmd on Windows; a .cmd file runs only through a shell.
+        shell: process.platform === 'win32',
       });
       const [entry] = JSON.parse(out) as { filename: string; files: { path: string }[] }[];
       const full = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8')) as {

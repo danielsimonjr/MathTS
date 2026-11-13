@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import { isNode } from '../utils/is.js';
@@ -265,5 +266,6 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
     return ObjectNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isNode } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode } from './Node.js';
@@ -185,5 +186,6 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
     return ParenthesisNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

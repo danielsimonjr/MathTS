@@ -18,6 +18,7 @@ export { embeddedDocs } from './embeddedDocs/embeddedDocs.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';
 export { defaultMathScope } from './default-instance.js';
+export { EXPRESSION_SCOPE_OMIT } from './default-math-scope.js';
 
 // MathML serialization (alongside node .toTex()/.toHTML()): `toMathML` is a
 // per-node method; these are the helpers to wrap a node's fragment in a <math>

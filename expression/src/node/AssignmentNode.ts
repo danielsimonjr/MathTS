@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isAccessorNode, isIndexNode, isNode, isSymbolNode } from '../utils/is.js';
 import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
@@ -393,5 +394,6 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
     return AssignmentNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

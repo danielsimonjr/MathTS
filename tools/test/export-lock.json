@@ -7321,6 +7321,9 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EXPRESSION_SCOPE_OMIT": {
+        "kind": "object"
+      },
       "EnumerationBudget": {
         "kind": "type"
       },
@@ -7620,6 +7623,9 @@
   "@danielsimonjr/mathts-parser": {
     ".": {
       "CompiledExpression": {
+        "kind": "type"
+      },
+      "EXPRESSION_SCOPE_OMIT": {
         "kind": "type"
       },
       "EnumerationBudget": {
@@ -8223,6 +8229,9 @@
   "@danielsimonjr/mathts-ast": {
     ".": {
       "CompiledExpression": {
+        "kind": "type"
+      },
+      "EXPRESSION_SCOPE_OMIT": {
         "kind": "type"
       },
       "EnumerationBudget": {

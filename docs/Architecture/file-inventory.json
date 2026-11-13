@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-13",
-  "totalFiles": 2318,
+  "totalFiles": 2330,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1284,
+    "build-entry": 1288,
     "test-only": 0,
     "orphan": 0,
-    "test": 943,
+    "test": 951,
     "tool": 29,
     "config": 29,
     "example": 7
   },
   "byArea": {
-    "src": 1310,
-    "tests": 943,
+    "src": 1314,
+    "tests": 951,
     "config": 29,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 28,
-    "@danielsimonjr/mathts-compat": 21,
+    "@danielsimonjr/mathts-compat": 22,
     "@danielsimonjr/mathts-core": 123,
     "@danielsimonjr/mathts-evaluator": 5,
-    "(root)": 58,
-    "@danielsimonjr/mathts-expression": 567,
-    "@danielsimonjr/mathts-functions": 1051,
+    "(root)": 64,
+    "@danielsimonjr/mathts-expression": 571,
+    "@danielsimonjr/mathts-functions": 1052,
     "@danielsimonjr/mathts-gpu": 20,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 126,
@@ -591,6 +591,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 104
+    },
+    {
+      "file": "compat/tests/instance-typed-surface.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -1598,7 +1605,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 336
+      "loc": 104
+    },
+    {
+      "file": "expression/src/default-math-scope.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 180
     },
     {
       "file": "expression/src/embeddedDocs/constants/e.ts",
@@ -4405,7 +4419,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 367
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4419,21 +4433,21 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 66
+      "loc": 76
     },
     {
       "file": "expression/src/Help.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 162
+      "loc": 164
     },
     {
       "file": "expression/src/index.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 83
+      "loc": 84
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4454,112 +4468,119 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 308
+      "loc": 310
     },
     {
       "file": "expression/src/node/ArrayNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 233
+      "loc": 236
     },
     {
       "file": "expression/src/node/AssignmentNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 398
+      "loc": 400
     },
     {
       "file": "expression/src/node/BlockNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 226
+      "loc": 228
     },
     {
       "file": "expression/src/node/ConditionalNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 302
+      "loc": 304
     },
     {
       "file": "expression/src/node/ConstantNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 200
+      "loc": 202
+    },
+    {
+      "file": "expression/src/node/default-node.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 50
     },
     {
       "file": "expression/src/node/FunctionAssignmentNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 327
+      "loc": 329
     },
     {
       "file": "expression/src/node/FunctionNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 661
+      "loc": 680
     },
     {
       "file": "expression/src/node/IndexNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 328
+      "loc": 330
     },
     {
       "file": "expression/src/node/Node.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 544
+      "loc": 547
     },
     {
       "file": "expression/src/node/ObjectNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 270
+      "loc": 272
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 952
+      "loc": 954
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 190
+      "loc": 192
     },
     {
       "file": "expression/src/node/RangeNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 346
+      "loc": 348
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 293
+      "loc": 295
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 245
     },
     {
       "file": "expression/src/node/utils/access.ts",
@@ -4597,18 +4618,25 @@
       "loc": 485
     },
     {
+      "file": "expression/src/parse-defaults.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 134
+    },
+    {
       "file": "expression/src/parse.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2095
+      "loc": 2101
     },
     {
       "file": "expression/src/Parser.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 251
+      "loc": 259
     },
     {
       "file": "expression/src/scalar-builder.ts",
@@ -4884,6 +4912,13 @@
       "loc": 21
     },
     {
+      "file": "expression/src/utils/current-config.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 13
+    },
+    {
       "file": "expression/src/utils/customs.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
@@ -4895,7 +4930,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 131
+      "loc": 157
     },
     {
       "file": "expression/src/utils/is.ts",
@@ -5140,7 +5175,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 159
+      "loc": 135
     },
     {
       "file": "expression/tests/helpers/wired-parse.ts",
@@ -5280,7 +5315,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 757
+      "loc": 736
     },
     {
       "file": "expression/tests/parse.test.ts",
@@ -5623,7 +5658,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1377
+      "loc": 1395
     },
     {
       "file": "functions/src/algebra/simplify/util.ts",
@@ -6428,14 +6463,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 628
+      "loc": 598
     },
     {
       "file": "functions/src/factories/index.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1758
+      "loc": 1773
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -12101,6 +12136,13 @@
       "loc": 150
     },
     {
+      "file": "functions/tests/simplify-foreign-nodes.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 39
+    },
+    {
       "file": "functions/tests/solveode-events.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -15451,14 +15493,14 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 90
+      "loc": 110
     },
     {
       "file": "tests/integration/dogfood-g29-packaging.test.ts",
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 128
+      "loc": 130
     },
     {
       "file": "tests/integration/examples-smoke.test.ts",
@@ -15487,6 +15529,48 @@
       "area": "tests",
       "disposition": "test",
       "loc": 334
+    },
+    {
+      "file": "tests/integration/issue-883-zero-arg-factories.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
+    },
+    {
+      "file": "tests/integration/issue-924-compat-parse-sandbox.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
+    },
+    {
+      "file": "tests/integration/issue-924-compat-parse-scope.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
+    },
+    {
+      "file": "tests/integration/issue-937-parse-registration-functions-first.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
+    },
+    {
+      "file": "tests/integration/issue-937-parse-registration-parser-first.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 55
+    },
+    {
+      "file": "tests/integration/issue-937-thin-parse-registers-no-converter.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 23
     },
     {
       "file": "tests/integration/runtime-probe.test.ts",

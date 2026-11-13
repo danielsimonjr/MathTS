@@ -10,8 +10,26 @@
 import { compile } from '../compiler/compile.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
 import { sanitizeEvaluateResult, trustedMathFunctions } from '../utils/safe-result.js';
+import { createParse } from '../parse.js';
+import { getDefaultMathScope } from '../default-math-scope.js';
 import type { CompiledExpression, Scope } from '../compiler/compile.js';
 import type { MathNode } from '../node/Node.js';
+
+let defaultParse: ((expr: string) => MathNode) | undefined;
+
+/** The default parse function. It is built once, on first use. */
+export function getDefaultParse(): (expr: string) => MathNode {
+  defaultParse ??= createParse();
+  return defaultParse;
+}
+
+let defaultEvaluate: ReturnType<typeof createEvaluate> | undefined;
+
+/** The default evaluate function: the default parse with the default math scope. */
+export function getDefaultEvaluate(): ReturnType<typeof createEvaluate> {
+  defaultEvaluate ??= createEvaluate();
+  return defaultEvaluate;
+}
 
 /**
  * Options accepted by evaluate / compileExpression.
@@ -171,11 +189,23 @@ function cacheFor(mathScope: object, parseFn: object): CompileCache {
   return cache;
 }
 
+/** The evaluate function that `createEvaluate` returns. */
+export interface EvaluateFunction {
+  (expr: string, scope?: Record<string, unknown> | Scope, options?: EvaluateOptions): unknown;
+  (exprs: string[], scope?: Record<string, unknown> | Scope, options?: EvaluateOptions): unknown[];
+}
+
 /**
  * Create an evaluate function bound to a math scope and parse function.
  *
- * @param parseFn - The parse function (from createParse factory)
- * @param mathScope - Math namespace with functions and constants
+ * Both arguments are optional. A missing `parseFn` is the default parse, and a
+ * missing `mathScope` is the default math scope. The two are independent: the
+ * expression resolves its symbols and functions against `mathScope`, whatever
+ * built the parse tree. A parse function built on a custom scope needs that
+ * scope here too: `createEvaluate(createParse(math), math)`.
+ *
+ * @param parseFn - The parse function (from createParse factory). Optional.
+ * @param mathScope - Math namespace with functions and constants. Optional.
  * @returns An evaluate function
  *
  * @example
@@ -188,8 +218,22 @@ function cacheFor(mathScope: object, parseFn: object): CompileCache {
  * ```
  */
 export function createEvaluate(
+  parseFn?: (expr: string) => MathNode,
+  mathScope?: Record<string, unknown>,
+  cacheKey?: () => string
+): EvaluateFunction;
+/**
+ * The same factory with required arguments. It types `Parameters<typeof createEvaluate>`
+ * as the two required parameters, as the factory did before the defaults existed.
+ */
+export function createEvaluate(
   parseFn: (expr: string) => MathNode,
   mathScope: Record<string, unknown>,
+  cacheKey?: () => string
+): EvaluateFunction;
+export function createEvaluate(
+  parseFn?: (expr: string) => MathNode,
+  mathScope?: Record<string, unknown>,
   /**
    * Optional fingerprint of the state `parseFn` depends on besides the text
    * (for example the live `number` / `precision` config, which decides the
@@ -199,7 +243,10 @@ export function createEvaluate(
    * input.
    */
   cacheKey?: () => string
-) {
+): EvaluateFunction {
+  const parse: (expr: string) => MathNode = parseFn ?? getDefaultParse();
+  const mathNamespace: Record<string, unknown> = mathScope ?? getDefaultMathScope();
+
   /**
    * Evaluate a math expression string.
    *
@@ -245,8 +292,8 @@ export function createEvaluate(
     return evaluateOne(exprOrExprs, scope, options);
   }
 
-  const cache = cacheFor(mathScope, parseFn);
-  const trusted = trustedMathFunctions(mathScope);
+  const cache = cacheFor(mathNamespace, parse);
+  const trusted = trustedMathFunctions(mathNamespace);
 
   function evaluateOne(
     expr: string,
@@ -262,11 +309,11 @@ export function createEvaluate(
       cache.delete(key);
       cache.set(key, compiled);
     } else {
-      const node = parseFn(expr);
+      const node = parse(expr);
       if (!unsafe) {
         validateAst(node);
       }
-      compiled = compile(node, mathScope);
+      compiled = compile(node, mathNamespace);
       cache.set(key, compiled);
       if (cache.size > COMPILE_CACHE_SIZE) {
         const oldest = cache.keys().next().value;

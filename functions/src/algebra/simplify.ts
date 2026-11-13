@@ -1,3 +1,4 @@
+import * as is from '../utils/is.js';
 import { isParenthesisNode } from '../utils/is.js';
 import {
   isConstantNode,
@@ -24,9 +25,27 @@ import type {
 } from '../utils/node.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
+/**
+ * Structural node guards, narrowed to the node types of this file. They test the
+ * node's flag and its constructor prototype (see utils/is.ts) and never its class,
+ * so a node built by another parse is matched like an own node (#937).
+ */
+function nodeGuard<T>(test: (x: unknown) => boolean): (x: unknown) => x is T {
+  return (x: unknown): x is T => test(x);
+}
+const isOperatorNode = nodeGuard<OperatorNode>(is.isOperatorNode);
+const isFunctionNode = nodeGuard<FunctionNode>(is.isFunctionNode);
+const isSymbolNode = nodeGuard<SymbolNode>(is.isSymbolNode);
+const isConstantAstNode = nodeGuard<ConstantNode>(is.isConstantNode);
+const isArrayNode = nodeGuard<ArrayNode>(is.isArrayNode);
+const isObjectNode = nodeGuard<ObjectNode>(is.isObjectNode);
+const isAccessorNode = nodeGuard<AccessorNode>(is.isAccessorNode);
+const isIndexNode = nodeGuard<IndexNode>(is.isIndexNode);
+
 // Type definitions for simplify.
 // NOTE: each constructor's instance type is the specific node type (not the
-// MathNode base) so that `x instanceof OperatorNode` narrows correctly.
+// MathNode base). Rules and inputs are matched with the structural guards (`isOperatorNode`, ...),
+// not `instanceof`: a node built by another parse has other node classes (#937).
 interface AccessorNodeConstructor {
   new (object: MathNode, index: IndexNode): AccessorNode;
 }
@@ -177,7 +196,6 @@ export const createSimplify = /* #__PURE__ */ factory(
     simplifyCore,
     AccessorNode,
     ArrayNode,
-    ConstantNode,
     FunctionNode,
     IndexNode,
     ObjectNode,
@@ -870,25 +888,25 @@ export const createSimplify = /* #__PURE__ */ factory(
       // First replace our child nodes with their simplified versions
       // If a child could not be simplified, applying the rule to it
       // will have no effect since the node is returned unchanged
-      if (res instanceof OperatorNode || res instanceof FunctionNode) {
+      if (isOperatorNode(res) || isFunctionNode(res)) {
         const newArgs = mapRule((res as NodeLike).args, rule, context);
         if (newArgs !== (res as NodeLike).args) {
           res = res.clone();
           (res as NodeLike).args = newArgs!;
         }
-      } else if (res instanceof ParenthesisNode) {
+      } else if (isParenthesisNode(res)) {
         if ((res as ParenthesisNode).content) {
           const newContent = applyRule((res as ParenthesisNode).content, rule, context);
           if (newContent !== (res as ParenthesisNode).content) {
             res = new ParenthesisNode(newContent);
           }
         }
-      } else if (res instanceof ArrayNode) {
+      } else if (isArrayNode(res)) {
         const newItems = mapRule((res as ArrayNode).items, rule, context);
         if (newItems !== (res as ArrayNode).items) {
           res = new ArrayNode(newItems!);
         }
-      } else if (res instanceof AccessorNode) {
+      } else if (isAccessorNode(res)) {
         let newObj = (res as AccessorNode).object;
         if ((res as AccessorNode).object) {
           newObj = applyRule((res as AccessorNode).object, rule, context);
@@ -900,12 +918,12 @@ export const createSimplify = /* #__PURE__ */ factory(
         if (newObj !== (res as AccessorNode).object || newIndex !== (res as AccessorNode).index) {
           res = new AccessorNode(newObj, newIndex);
         }
-      } else if (res instanceof IndexNode) {
+      } else if (isIndexNode(res)) {
         const newDims = mapRule((res as IndexNode).dimensions, rule, context);
         if (newDims !== (res as IndexNode).dimensions) {
           res = new IndexNode(newDims!) as MathNode;
         }
-      } else if (res instanceof ObjectNode) {
+      } else if (isObjectNode(res)) {
         let changed = false;
         const newProps: Record<string, MathNode> = {};
         for (const prop in (res as ObjectNode).properties) {
@@ -1118,18 +1136,18 @@ export const createSimplify = /* #__PURE__ */ factory(
       let res: MatchResult[] = [{ placeholders: {} }];
 
       if (
-        (rule instanceof OperatorNode && node instanceof OperatorNode) ||
-        (rule instanceof FunctionNode && node instanceof FunctionNode)
+        (isOperatorNode(rule) && isOperatorNode(node)) ||
+        (isFunctionNode(rule) && isFunctionNode(node))
       ) {
         // If the rule is an OperatorNode or a FunctionNode, then node must match exactly
-        if (rule instanceof OperatorNode) {
+        if (isOperatorNode(rule)) {
           if (
             (rule as NodeLike).op !== (node as OperatorNode).op ||
             (rule as NodeLike).fn !== (node as OperatorNode).fn
           ) {
             return [];
           }
-        } else if (rule instanceof FunctionNode) {
+        } else if (isFunctionNode(rule)) {
           if ((rule as unknown as NodeLike).name !== (node as unknown as NodeLike).name) {
             return [];
           }
@@ -1212,7 +1230,7 @@ export const createSimplify = /* #__PURE__ */ factory(
           // Incorrect number of arguments in rule and node, so no match
           return [];
         }
-      } else if (rule instanceof SymbolNode) {
+      } else if (isSymbolNode(rule)) {
         // If the rule is a SymbolNode, then it carries a special meaning
         // according to the first one or two characters of the symbol node name.
         // These meanings are expalined in the documentation for simplify()
@@ -1306,7 +1324,7 @@ export const createSimplify = /* #__PURE__ */ factory(
               throw new Error('Invalid symbol in rule: ' + (rule as SymbolNode).name);
           }
         }
-      } else if (rule instanceof ConstantNode) {
+      } else if (isConstantAstNode(rule)) {
         // Literal constant must match exactly
         if (!equal((rule as ConstantNode).value, (node as ConstantNode).value)) {
           return [];
@@ -1330,26 +1348,26 @@ export const createSimplify = /* #__PURE__ */ factory(
      * @return {Object} Information about the match, if it exists.
      */
     function _exactMatch(p: MathNode, q: MathNode): boolean {
-      if (p instanceof ConstantNode && q instanceof ConstantNode) {
+      if (isConstantAstNode(p) && isConstantAstNode(q)) {
         if (!equal((p as ConstantNode).value, (q as ConstantNode).value)) {
           return false;
         }
-      } else if (p instanceof SymbolNode && q instanceof SymbolNode) {
+      } else if (isSymbolNode(p) && isSymbolNode(q)) {
         if ((p as SymbolNode).name !== (q as SymbolNode).name) {
           return false;
         }
       } else if (
-        (p instanceof OperatorNode && q instanceof OperatorNode) ||
-        (p instanceof FunctionNode && q instanceof FunctionNode)
+        (isOperatorNode(p) && isOperatorNode(q)) ||
+        (isFunctionNode(p) && isFunctionNode(q))
       ) {
-        if (p instanceof OperatorNode) {
+        if (isOperatorNode(p)) {
           if (
             (p as OperatorNode).op !== (q as OperatorNode).op ||
             (p as OperatorNode).fn !== (q as OperatorNode).fn
           ) {
             return false;
           }
-        } else if (p instanceof FunctionNode) {
+        } else if (isFunctionNode(p)) {
           if ((p as unknown as NodeLike).name !== (q as unknown as NodeLike).name) {
             return false;
           }

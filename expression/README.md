@@ -24,7 +24,7 @@ parse('2+2'); // operator node
 
 That scope is the same safe mode as `functions` `evaluate`: `parse`, `typed`, `compile`, `import`, `createUnit`, `resolve`, `chain`, `simplify`, and `derivative` are not reachable, including from a nested expression. `evaluate('a = 1')` throws unless you pass `{ unsafe: true }` (trusted input only). A numeric literal outside IEEE-754 range throws `SyntaxError: Numeric overflow`. `1e308` and the identifier `Infinity` stay.
 
-`createParse` / `compileExpression(parseFn, mathScope, expr)` stay factories. Pass your own parse function and scope; this package does not replace that form.
+`createParse()` and `createEvaluate()` accept no argument. They use the default parse and math scope. `createParse(scope)` and `compileExpression(parseFn, mathScope, expr)` still accept your own scope or parse function.
 
 ## What it provides
 

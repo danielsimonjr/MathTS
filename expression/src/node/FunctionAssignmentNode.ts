@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isNode } from '../utils/is.js';
 
 import { keywords } from '../keywords.js';
@@ -322,5 +323,6 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
     return FunctionAssignmentNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

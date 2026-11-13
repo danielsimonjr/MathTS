@@ -19,7 +19,7 @@
 
 import { shims } from './shims.js';
 import { createChain, type Chain } from './chain.js';
-import { wireMathjsInstanceApi } from './instance-api.js';
+import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -104,8 +104,8 @@ export interface MathInstance {
     functions: unknown,
     options?: { override?: boolean; silent?: boolean; wrap?: boolean }
   ) => void;
-  /** mathjs typed-function dispatcher for custom overloads. */
-  typed: (...args: unknown[]) => unknown;
+  /** mathjs typed-function dispatcher for custom overloads, with the whole `mathTyped` registry surface. */
+  typed: WiredCompatInstance['typed'];
   /** Alias of `compileExpr` (mathjs naming). */
   compile: (
     expr: string,

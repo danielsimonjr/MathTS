@@ -58,31 +58,7 @@ const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const subset = fScope.subset;
 const size = fScope.size;
 const matrix = fScope.matrix;
-const baseTyped = fScope.typed;
-
-// The functions package's own parse already registered the string->Node
-// conversion on the shared typed instance. Our source `createParse` tries to
-// register it again, which throws "already a conversion". Wrap typed so that
-// the duplicate registration is tolerated; everything else delegates through.
-interface TypedShim {
-  (...args: unknown[]): unknown;
-  addConversion: (...args: unknown[]) => unknown;
-  [key: string]: unknown;
-}
-const typed = function (...args: unknown[]): unknown {
-  return (baseTyped as (...a: unknown[]) => unknown)(...args);
-} as unknown as TypedShim;
-// Delegate all other typed methods/properties to the real instance via the
-// prototype chain (avoids copying getter-only own props).
-Object.setPrototypeOf(typed, baseTyped as object);
-typed.addConversion = (...args: unknown[]): unknown => {
-  try {
-    return (baseTyped as { addConversion: (...a: unknown[]) => unknown }).addConversion(...args);
-  } catch (e) {
-    if (e instanceof Error && /already a conversion/.test(e.message)) return undefined;
-    throw e;
-  }
-};
+const typed = fScope.typed;
 
 // ---------------------------------------------------------------------------
 // Build source node classes.

@@ -1,17 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import { buildSync } from 'esbuild';
-import { readFileSync, statSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '../..');
 
+/**
+ * Minified bundle size of one import line. The entry is esbuild stdin that
+ * resolves from the repository root, and the bundle goes to a new temporary
+ * folder, so the test writes no file in the repository.
+ */
 function bundledBytes(importLine: string, outfile: string, platform: 'neutral' | 'node'): number {
-  const entry = join(REPO, 'tools/test/fixtures/g27-eval-size.mjs');
-  writeFileSync(entry, `${importLine}\nexport { evaluate };\n`);
   buildSync({
-    entryPoints: [entry],
+    stdin: {
+      contents: `${importLine}\nexport { evaluate };\n`,
+      resolveDir: REPO,
+      sourcefile: 'g27-eval-size.mjs',
+      loader: 'js',
+    },
     bundle: true,
     minify: true,
     format: 'esm',
@@ -37,18 +46,29 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
       cwd: REPO,
       stdio: 'pipe',
     });
-  });
+    // Four esbuild bundles of the package graphs: several seconds on Windows.
+  }, 120_000);
 
   it('#707 evaluate subpath minifies smaller than the main barrel named import', () => {
+    const out = mkdtempSync(join(tmpdir(), 'mathts-g27-'));
+    try {
+      sizesAreOrdered(out);
+    } finally {
+      rmSync(out, { recursive: true, force: true });
+    }
+    // Four minified bundles of the functions graph: about 15 s on Windows.
+  }, 120_000);
+
+  function sizesAreOrdered(out: string): void {
     for (const platform of ['node', 'neutral'] as const) {
       const sub = bundledBytes(
         "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
-        `/tmp/g27-eval-subpath-${platform}.js`,
+        join(out, `g27-eval-subpath-${platform}.js`),
         platform
       );
       const barrel = bundledBytes(
         "import { evaluate } from '@danielsimonjr/mathts-functions';",
-        `/tmp/g27-eval-barrel-${platform}.js`,
+        join(out, `g27-eval-barrel-${platform}.js`),
         platform
       );
       expect(sub, platform).toBeLessThan(barrel);
@@ -57,7 +77,7 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
       // node and neutral). The gap is the barrel entry's extra live modules.
       expect(barrel - sub, platform).toBeGreaterThan(5_000);
     }
-  });
+  }
 
   it('#736 documents ESM-only consumption', () => {
     const readme = readFileSync(join(REPO, 'compat/README.md'), 'utf8');

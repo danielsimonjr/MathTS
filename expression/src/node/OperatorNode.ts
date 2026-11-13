@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isNode, isConstantNode, isOperatorNode, isParenthesisNode } from '../utils/is.js';
 import { map } from '../utils/array.js';
 import { createSubScope } from '../utils/scope.js';
@@ -947,5 +948,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
     return OperatorNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

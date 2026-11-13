@@ -66,9 +66,12 @@ if (!distDir) process.exit(0);
 let wrote = 0;
 for (const jsPath of walkJs(distDir, [])) {
   const mapPath = `${jsPath}.map`;
-  if (existsSync(mapPath)) continue;
   const js = readFileSync(jsPath, 'utf8');
   const fileName = basename(jsPath);
+  const hasUrl = js.includes('sourceMappingURL=');
+  // A .js without the comment next to a .map is a rebuilt file with the map of
+  // an earlier build: that map is stale, so it is written again.
+  if (hasUrl && existsSync(mapPath)) continue;
   const stem = fileName.slice(0, -'.js'.length);
   const candidate = join(pkgRoot, 'src', `${stem}.ts`);
   const sourcePath = existsSync(candidate) ? candidate : jsPath;
@@ -83,8 +86,8 @@ for (const jsPath of walkJs(distDir, [])) {
     mappings: identityMappings(lineCount),
   };
   writeFileSync(mapPath, JSON.stringify(map));
-  const url = `//# sourceMappingURL=${fileName}.map\n`;
-  if (!js.includes('sourceMappingURL=')) {
+  if (!hasUrl) {
+    const url = `//# sourceMappingURL=${fileName}.map\n`;
     writeFileSync(jsPath, js.endsWith('\n') ? js + url : `${js}\n${url}`);
   }
   wrote += 1;
@@ -92,6 +95,6 @@ for (const jsPath of walkJs(distDir, [])) {
 
 if (wrote > 0) {
   console.log(
-    `ensure-js-sourcemaps: wrote ${wrote} map(s) in ${relative(process.cwd(), distDir) || 'dist'}`
+    `ensure-js-sourcemaps: fixed ${wrote} file(s) in ${relative(process.cwd(), distDir) || 'dist'}`
   );
 }

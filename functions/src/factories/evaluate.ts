@@ -11,6 +11,7 @@
 import {
   createEvaluate,
   compileExpressionWithDeps as _compileExpression,
+  EXPRESSION_SCOPE_OMIT,
 } from '@danielsimonjr/mathts-expression';
 import {
   BigNumber,
@@ -44,41 +45,10 @@ import * as typedFns from '../typed/expression-eval-barrel.js';
  * dispatcher. They stay out of every namespace the safe expression language can
  * resolve, including the one `Node.compile` and map/filter callbacks close over.
  * A denylist that only covers the object passed to `createEvaluate` is not enough:
- * those callbacks compile against `mathWithTransform`.
+ * those callbacks compile against `mathWithTransform`. The list is the
+ * expression package's `EXPRESSION_SCOPE_OMIT` (also enforced on compat import).
  */
-/** Symbols kept out of the safe expression namespace (also enforced on compat import). */
-export const EVALUATE_SCOPE_OMIT = new Set([
-  'import',
-  'createUnit',
-  'evaluate',
-  'parse',
-  'compile',
-  'typed',
-  'simplify',
-  'derivative',
-  'help',
-  'chain',
-  'parser',
-  'resolve',
-  // Node constructors live on factoryScope for the parser closure. They must
-  // not be names the safe expression language can resolve (same denylist as
-  // the expression package's default evaluate).
-  'ConstantNode',
-  'SymbolNode',
-  'OperatorNode',
-  'FunctionNode',
-  'AssignmentNode',
-  'FunctionAssignmentNode',
-  'BlockNode',
-  'ArrayNode',
-  'ObjectNode',
-  'IndexNode',
-  'AccessorNode',
-  'ParenthesisNode',
-  'RangeNode',
-  'RelationalNode',
-  'ConditionalNode',
-]);
+export const EVALUATE_SCOPE_OMIT = EXPRESSION_SCOPE_OMIT;
 
 function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...scope };

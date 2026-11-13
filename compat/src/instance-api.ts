@@ -4,7 +4,6 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import typedFunction from 'typed-function';
 import {
   createInstanceEvaluator,
   EVALUATE_SCOPE_OMIT,
@@ -58,11 +57,12 @@ export function wireMathjsInstanceApi(
     mathWithTransform: {},
   };
 
-  const instanceTyped = Object.assign(
+  // The call builds through the shared typed instance. Every other member
+  // (`addConversion`, `find`, `isTypedFunction`, ...) is read from mathTyped
+  // through the prototype chain, so the declared `typeof mathTyped` holds.
+  const instanceTyped = Object.setPrototypeOf(
     (...args: unknown[]) => mathTyped(...(args as Parameters<typeof mathTyped>)),
-    {
-      isTypedFunction: typedFunction.isTypedFunction,
-    }
+    mathTyped
   ) as WiredCompatInstance['typed'];
 
   const mathNs = instance as MathNamespace;

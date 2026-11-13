@@ -14,6 +14,8 @@ import { hasOwnProperty } from './utils/object.js';
 import { isSafeProperty, setSafeProperty } from './utils/customs.js';
 import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
 import type { MathNode } from './node/Node.js';
+import { parseDefaults } from './parse-defaults.js';
+import { currentConfig } from './utils/current-config.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
  *  constructors accept heterogeneous positional args and all yield a MathNode. */
@@ -43,7 +45,6 @@ interface ParseFunction {
 /** The injected typed-function builder used to assemble `parse`. */
 interface TypedFunction {
   (name: string, signatures: Record<string, unknown>): ParseFunction;
-  addConversion(conversion: { from: string; to: string; convert: unknown }): void;
 }
 
 /** Factory dependencies for createParse (typed builder, numeric parser,
@@ -51,7 +52,8 @@ interface TypedFunction {
 interface ParseDependencies {
   typed: TypedFunction;
   numeric: (value: string, type: string) => unknown;
-  config: NumberTypeConfig;
+  /** A config object, or an accessor that returns the current config (compat `math.config`). */
+  config: NumberTypeConfig | (() => NumberTypeConfig);
   AccessorNode: NodeConstructor;
   ArrayNode: NodeConstructor;
   AssignmentNode: NodeConstructor;
@@ -1966,7 +1968,7 @@ export const createParse = /* #__PURE__ */ factory(
         numberStr = state.token;
         getToken(state);
 
-        const numericType = safeNumberType(numberStr, config);
+        const numericType = safeNumberType(numberStr, currentConfig(config));
         const value = numeric(numberStr, numericType);
         // ±Infinity is an overflow. A decimal point must not sneak past
         // (`1` followed by hundreds of zeros, then `.5` is Infinity).
@@ -2086,9 +2088,13 @@ export const createParse = /* #__PURE__ */ factory(
       return error;
     }
 
-    // Now that we can parse, automatically convert strings to Nodes by parsing
-    typed.addConversion({ from: 'string', to: 'Node', convert: parse });
+    // This factory does not register a string-to-Node conversion. `typed` is often the
+    // process-wide `mathTyped`, which holds one converter per type pair, and a converter
+    // belongs to the node classes of the typed functions that take a `Node`. The owner of
+    // those typed functions registers it, built on its own parse (#937).
 
     return parse;
-  }
+  },
+  undefined,
+  parseDefaults
 );

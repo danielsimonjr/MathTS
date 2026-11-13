@@ -1,3 +1,4 @@
+import { nodeDefaults } from './default-node.js';
 import { isNode } from '../utils/is.js';
 import { forEach, map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
@@ -221,5 +222,6 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
     return BlockNode;
   },
-  { isClass: true, isNode: true }
+  { isClass: true, isNode: true },
+  nodeDefaults
 );

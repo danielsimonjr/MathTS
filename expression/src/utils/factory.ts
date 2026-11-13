@@ -53,7 +53,7 @@ import {
  * Type for a factory function that creates instances
  */
 export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
-  (scope: Record<string, unknown>): TResult;
+  (scope?: Record<string, unknown>): TResult;
   isFactory: true;
   fn: string;
   dependencies: string[];
@@ -64,6 +64,18 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
  * Type for the create callback function
  */
 export type CreateFunction<TDeps extends object, TResult> = (dependencies: TDeps) => TResult;
+
+/**
+ * Supplies default dependencies for a factory. `supplied` is the scope the
+ * caller passed (undefined for a zero-argument call). `missing` lists the
+ * dependency names the caller left out. Return a value for each name in
+ * `missing` that this package can build. Leave the others out: the factory
+ * then reports them as missing.
+ */
+export type DefaultDependencies = (
+  supplied: Record<string, unknown> | undefined,
+  missing: string[]
+) => Record<string, unknown>;
 
 /**
  * Create a factory function, which can be used to inject dependencies.
@@ -98,15 +110,29 @@ export function factory<
   name: string,
   dependencies: DependencyName[],
   create: CreateFunction<TDeps, TResult>,
-  meta?: FactoryMeta
+  meta?: FactoryMeta,
+  defaults?: DefaultDependencies
 ): FactoryFunction<TDeps, TResult> {
-  function assertAndCreate(scope: Record<string, unknown>): TResult {
+  function assertAndCreate(scope?: Record<string, unknown>): TResult {
+    const required = dependencies.map(stripOptionalNotation);
+    let resolved: Record<string, unknown> = scope ?? {};
+    const missing = required.filter((key) => resolved[key] === undefined);
+    if (defaults !== undefined && missing.length > 0) {
+      // The caller's values win. Defaults fill only the names the caller left out.
+      const fill = defaults(scope, missing);
+      const filled = missing.filter((key) => fill[key] !== undefined);
+      if (filled.length > 0) {
+        resolved = { ...resolved };
+        for (const key of filled) resolved[key] = fill[key];
+      }
+    }
+
     // we only pass the requested dependencies to the factory function
     // to prevent functions to rely on dependencies that are not explicitly
     // requested.
-    const deps = pickShallow(scope, dependencies.map(stripOptionalNotation)) as TDeps;
+    const deps = pickShallow(resolved, required) as TDeps;
 
-    assertDependencies(name, dependencies, scope);
+    assertDependencies(name, dependencies, resolved);
 
     return create(deps);
   }
