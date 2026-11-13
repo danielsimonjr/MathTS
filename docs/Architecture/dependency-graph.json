@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-13",
     "totalFiles": 1314,
     "totalModules": 82,
-    "totalExports": 7172
+    "totalExports": 7173
   },
   "entryPoints": [
     {
@@ -6804,7 +6804,7 @@
         "internalDependencies": [
           {
             "file": "./shape.js",
-            "imports": ["assertSameShape"]
+            "imports": ["assertSameShape", "ownedCopy"]
           }
         ],
         "workspaceDependencies": [
@@ -6952,9 +6952,15 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["assertSameShape"],
-        "functions": ["assertSameShape"]
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-tensor",
+            "directory": "tensor",
+            "imports": ["Tensor"]
+          }
+        ],
+        "exports": ["assertSameShape", "ownedCopy"],
+        "functions": ["assertSameShape", "ownedCopy"]
       },
       "autograd/src/tape.ts": {
         "description": "Tape — records the sequence of ops during a forward pass so we can",
@@ -6963,7 +6969,7 @@
         "internalDependencies": [
           {
             "file": "./shape.js",
-            "imports": ["assertSameShape"]
+            "imports": ["assertSameShape", "ownedCopy"]
           }
         ],
         "workspaceDependencies": [
@@ -47653,11 +47659,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1314,
     "totalModules": 82,
-    "totalLinesOfCode": 224834,
-    "totalExports": 7172,
+    "totalLinesOfCode": 224941,
+    "totalExports": 7173,
     "totalClasses": 61,
     "totalInterfaces": 614,
-    "totalFunctions": 2446,
+    "totalFunctions": 2447,
     "totalTypeGuards": 175,
     "totalEnums": 0,
     "totalConstants": 1661,

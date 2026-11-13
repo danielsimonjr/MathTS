@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1314                  |
-| Total Test Files                       | 922                   |
+| Total Test Files                       | 928                   |
 | Source Files with Tests                | 543                   |
 | Source Files without Tests             | 771                   |
 | Coverage (raw, direct-import)          | **41.3%**             |
@@ -1532,6 +1532,10 @@ The following 771 source files are not directly imported by any test file:
 | `tests/dogfood-g14.test.ts`                                        | 21 files            |
 | `tests/dogfood-g36-review.test.ts`                                 | 1 files             |
 | `tests/dogfood-g36.test.ts`                                        | 2 files             |
+| `tests/issue-902-slice-negative-step.test.ts`                      | 0 files             |
+| `tests/issue-902-view-data.test.ts`                                | 0 files             |
+| `tests/issue-904-view-operand.test.ts`                             | 0 files             |
+| `tests/issue-941-float32-input.test.ts`                            | 0 files             |
 | `operations/cholesky.test.ts`                                      | 3 files             |
 | `operations/concatenate.test.ts`                                   | 4 files             |
 | `operations/decomposition-wasm.test.ts`                            | 21 files            |
@@ -1561,6 +1565,8 @@ The following 771 source files are not directly imported by any test file:
 | `tests/dual-elementwise-ad.test.ts`                                | 1 files             |
 | `tests/forward-grad.test.ts`                                       | 1 files             |
 | `tests/grad-bridge-ad.test.ts`                                     | 6 files             |
+| `tests/issue-904-taped-rhs.test.ts`                                | 0 files             |
+| `tests/owned-copy.test.ts`                                         | 0 files             |
 | `tests/p7-batched-matmul-contract.test.ts`                         | 1 files             |
 | `tests/public-api-smoke.test.ts`                                   | 6 files             |
 | `tests/reverse-grad.test.ts`                                       | 1 files             |
