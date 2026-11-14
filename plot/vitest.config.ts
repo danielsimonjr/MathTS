@@ -15,6 +15,7 @@ export default defineConfig({
   test: {
     setupFiles: ['./tests/vitest-dom-setup.ts'],
     include: ['tests/**/*.test.ts'],
+    exclude: ['**/*.browser.test.ts', 'node_modules/**'],
     // Calibrated for the CONCURRENT gate. `npm run test` runs EVERY package's
     // suite at once (turbo), each with its own worker pool, so vitest's 5000ms
     // default is far too tight: measured, functions/tests/special.test.ts takes
