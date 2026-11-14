@@ -24,6 +24,38 @@ export function fftBitReverse(x: number, bits: number): number {
   return result;
 }
 
+/** Twiddle tables kept for reuse, at most this many sizes. */
+const TWIDDLE_CACHE_LIMIT = 8;
+/** Larger sizes are computed on each call and not kept, so the cache stays small. */
+const TWIDDLE_CACHE_MAX_SIZE = 1 << 20;
+const twiddleCache = new Map<number, { cos: Float64Array; sin: Float64Array }>();
+
+/**
+ * The forward twiddles `exp(-2 pi i k / n)` for k in [0, n/2), as cos and sin tables.
+ * Same arithmetic as `functions/src/signal/fft-core-f64.ts`: one trig call per index, so the
+ * two copies agree bit for bit on the same runtime.
+ */
+function forwardTwiddles(n: number): { cos: Float64Array; sin: Float64Array } {
+  const hit = twiddleCache.get(n);
+  if (hit) return hit;
+  const half = n / 2;
+  const cos = new Float64Array(half);
+  const sin = new Float64Array(half);
+  for (let k = 0; k < half; k++) {
+    const angle = (-2.0 * Math.PI * k) / n;
+    cos[k] = Math.cos(angle);
+    sin[k] = Math.sin(angle);
+  }
+  if (n > TWIDDLE_CACHE_MAX_SIZE) return { cos, sin };
+  if (twiddleCache.size >= TWIDDLE_CACHE_LIMIT) {
+    const oldest = twiddleCache.keys().next().value;
+    if (oldest !== undefined) twiddleCache.delete(oldest);
+  }
+  const table = { cos, sin };
+  twiddleCache.set(n, table);
+  return table;
+}
+
 /**
  * In-place radix-2 Cooley-Tukey FFT over a single frame.
  *
@@ -54,24 +86,22 @@ export function fftFrameInPlace(
     }
   }
 
-  const direction = inverse ? 1.0 : -1.0;
+  const sign = inverse ? -1.0 : 1.0;
+  const { cos: twRe, sin: twIm } = forwardTwiddles(Math.max(n, 2));
 
   for (let size = 2; size <= n; size *= 2) {
     const halfSize = size / 2;
-    const angle = (direction * 2.0 * Math.PI) / size;
-    const wRe = Math.cos(angle);
-    const wIm = Math.sin(angle);
+    const stride = n / size;
 
     for (let start = 0; start < n; start += size) {
-      let tRe = 1.0;
-      let tIm = 0.0;
-
       for (let j = 0; j < halfSize; j++) {
         const evenIdx = offset + start + j;
         const oddIdx = offset + start + j + halfSize;
+        const wRe = twRe[j * stride];
+        const wIm = sign * twIm[j * stride];
 
-        const uRe = real[oddIdx] * tRe - imag[oddIdx] * tIm;
-        const uIm = real[oddIdx] * tIm + imag[oddIdx] * tRe;
+        const uRe = real[oddIdx] * wRe - imag[oddIdx] * wIm;
+        const uIm = real[oddIdx] * wIm + imag[oddIdx] * wRe;
 
         const eRe = real[evenIdx];
         const eIm = imag[evenIdx];
@@ -80,11 +110,6 @@ export function fftFrameInPlace(
         imag[evenIdx] = eIm + uIm;
         real[oddIdx] = eRe - uRe;
         imag[oddIdx] = eIm - uIm;
-
-        const nextTRe = tRe * wRe - tIm * wIm;
-        const nextTIm = tRe * wIm + tIm * wRe;
-        tRe = nextTRe;
-        tIm = nextTIm;
       }
     }
   }

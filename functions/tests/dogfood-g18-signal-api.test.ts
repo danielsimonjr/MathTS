@@ -112,6 +112,26 @@ describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
     }
   });
 
+  it('round trip at n = 1024 and 4096 stays within 2 log2(n) ULP of the largest sample (#947)', async () => {
+    // A fixed seeded series, so every runtime checks the same input. Before the twiddle table,
+    // the error grew with n (about 190 ULP at n = 1024 against a bound of 20) because each
+    // twiddle was the product of the previous one.
+    let seed = 12345;
+    const next = (): number => {
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      return (seed / 4294967296) * 2 - 1;
+    };
+    for (const n of [1024, 4096]) {
+      const x = Float64Array.from({ length: n }, () => next() * 10);
+      const F = (await parallelFFT(x)) as { real: Float64Array; imag: Float64Array };
+      const back = (await parallelIFFT(F)) as { real: Float64Array };
+      const bound = roundTripUlps(n) * ulp(Math.max(...x.map(Math.abs)));
+      for (let i = 0; i < n; i++) {
+        expect(Math.abs(back.real[i]! - x[i]!)).toBeLessThanOrEqual(bound);
+      }
+    }
+  });
+
   it('non-power-of-two input reports originalLength and a padded spectrum that still round-trips', async () => {
     const x = new Float64Array([1, 2, 3]);
     const F = (await parallelFFT(x)) as {

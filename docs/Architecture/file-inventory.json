@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-13",
-  "totalFiles": 2401,
+  "generated": "2026-11-14",
+  "totalFiles": 2402,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1304,
     "test-only": 0,
     "orphan": 0,
-    "test": 1005,
+    "test": 1006,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1330,
-    "tests": 1005,
+    "tests": 1006,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1077,
+    "@danielsimonjr/mathts-functions": 1078,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 138,
@@ -8038,7 +8038,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 199
+      "loc": 234
     },
     {
       "file": "functions/src/signal/fft-helpers.ts",
@@ -10278,7 +10278,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 249
+      "loc": 269
     },
     {
       "file": "functions/tests/dogfood-g19-stats-nan-ddof.test.ts",
@@ -10601,6 +10601,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 45
+    },
+    {
+      "file": "functions/tests/fft-twiddle-table.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 61
     },
     {
       "file": "functions/tests/finite-differences.test.ts",
@@ -14436,7 +14443,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 99
+      "loc": 124
     },
     {
       "file": "packages/workerpool/src/index.ts",

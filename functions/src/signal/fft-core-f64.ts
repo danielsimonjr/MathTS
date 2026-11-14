@@ -37,6 +37,49 @@ export function bitReverse(x: i32, bits: i32): i32 {
   return result;
 }
 
+/** Twiddle tables kept for reuse, at most this many sizes. Each holds n/2 cos and sin values. */
+const TWIDDLE_CACHE_LIMIT = 8;
+/** Larger sizes are computed on each call and not kept, so the cache stays small. */
+const TWIDDLE_CACHE_MAX_SIZE = 1 << 20;
+const twiddleCache = new Map<i32, { cos: Float64Array; sin: Float64Array }>();
+
+/**
+ * The forward twiddles `exp(-2 pi i k / n)` for k in [0, n/2), as cos and sin tables.
+ *
+ * Each entry is one `Math.cos` and one `Math.sin` call of its own angle, so the error of a
+ * twiddle does not depend on its index. The tables are cached per size. The inverse transform
+ * takes the conjugate of the same values, so it needs no second set of trig calls.
+ *
+ * Why not a running product: the earlier core multiplied each twiddle by the step, so the
+ * rounding error grew with the index. Measured round trip at n = 4096 was 640 ULP of the largest
+ * sample; with this table it is about 4 ULP (5.5 at n = 65536) on the seeded test input.
+ * With twiddles of fixed relative error, the standard bound for a radix-2 FFT grows as
+ * log2(n) times that error (Higham, Accuracy and Stability of Numerical Algorithms, 2nd ed.,
+ * Theorem 24.2). The test bound of 2 log2(n) ULP follows that growth. It is a measured margin,
+ * not a proven constant. `Math.cos` and `Math.sin` still differ in the last bit between V8 and
+ * JavaScriptCore, so the result is bounded, not bit-identical across runtimes.
+ */
+function forwardTwiddles(n: i32): { cos: Float64Array; sin: Float64Array } {
+  const hit = twiddleCache.get(n);
+  if (hit) return hit;
+  const half: i32 = n / 2;
+  const cos = new Float64Array(half);
+  const sin = new Float64Array(half);
+  for (let k: i32 = 0; k < half; k++) {
+    const angle: f64 = (-2.0 * Math.PI * k) / n;
+    cos[k] = Math.cos(angle);
+    sin[k] = Math.sin(angle);
+  }
+  if (n > TWIDDLE_CACHE_MAX_SIZE) return { cos, sin };
+  if (twiddleCache.size >= TWIDDLE_CACHE_LIMIT) {
+    const oldest = twiddleCache.keys().next().value;
+    if (oldest !== undefined) twiddleCache.delete(oldest);
+  }
+  const table = { cos, sin };
+  twiddleCache.set(n, table);
+  return table;
+}
+
 /**
  * Radix-2 FFT core using Float64Array for WASM compatibility
  */
@@ -57,27 +100,25 @@ export function fftCoreFloat64(
     imag[j] = imagIn[i];
   }
 
-  // Direction factor
-  const direction: f64 = inverse ? 1.0 : -1.0;
+  // Direction factor: the inverse conjugates the forward twiddles
+  const sign: f64 = inverse ? -1.0 : 1.0;
+  const { cos: twRe, sin: twIm } = forwardTwiddles(Math.max(n, 2));
 
   // Butterfly operations
   for (let size: i32 = 2; size <= n; size *= 2) {
     const halfSize: i32 = size / 2;
-    const angle: f64 = (direction * 2.0 * Math.PI) / size;
-    const wRe: f64 = Math.cos(angle);
-    const wIm: f64 = Math.sin(angle);
+    const stride: i32 = n / size;
 
     for (let start: i32 = 0; start < n; start += size) {
-      let tRe: f64 = 1.0;
-      let tIm: f64 = 0.0;
-
       for (let j: i32 = 0; j < halfSize; j++) {
         const evenIdx: i32 = start + j;
         const oddIdx: i32 = start + j + halfSize;
+        const wRe: f64 = twRe[j * stride];
+        const wIm: f64 = sign * twIm[j * stride];
 
         // Twiddle factor multiplication
-        const uRe: f64 = real[oddIdx] * tRe - imag[oddIdx] * tIm;
-        const uIm: f64 = real[oddIdx] * tIm + imag[oddIdx] * tRe;
+        const uRe: f64 = real[oddIdx] * wRe - imag[oddIdx] * wIm;
+        const uIm: f64 = real[oddIdx] * wIm + imag[oddIdx] * wRe;
 
         // Butterfly
         const eRe: f64 = real[evenIdx];
@@ -87,12 +128,6 @@ export function fftCoreFloat64(
         imag[evenIdx] = eIm + uIm;
         real[oddIdx] = eRe - uRe;
         imag[oddIdx] = eIm - uIm;
-
-        // Update twiddle factor
-        const nextTRe: f64 = tRe * wRe - tIm * wIm;
-        const nextTIm: f64 = tRe * wIm + tIm * wRe;
-        tRe = nextTRe;
-        tIm = nextTIm;
       }
     }
   }
