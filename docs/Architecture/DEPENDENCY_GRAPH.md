@@ -338,7 +338,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `fftBitReverse`, `fftFrameInPlace`
+- Functions: `fftBitReverse`, `setTwiddleCacheMaxBytes`, `twiddleCacheState`, `fftFrameInPlace`
+- Constants: `TWIDDLE_CACHE_DEFAULT_MAX_BYTES`
 
 ---
 
@@ -9231,7 +9232,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitReverse`, `fftCoreFloat64`, `fftExactFloat64`
+- Functions: `bitReverse`, `setTwiddleCacheMaxBytes`, `twiddleCacheState`, `fftCoreFloat64`, `fftExactFloat64`
+- Constants: `TWIDDLE_CACHE_DEFAULT_MAX_BYTES`
 
 ---
 
@@ -21191,12 +21193,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1330   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229207 |
-| Total Exports           | 7266   |
+| Total Lines of Code     | 229265 |
+| Total Exports           | 7272   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
 | Total Interfaces        | 660    |
-| Total Functions         | 2482   |
+| Total Functions         | 2486   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |

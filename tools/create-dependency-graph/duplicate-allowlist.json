@@ -2,6 +2,11 @@
   "note": "Entries here are legitimately-independent own-definitions that detectDuplicateSymbols would otherwise flag as TRUE_DUPLICATE. Matched by (name, file) — `names` supports a trailing '*' wildcard or exact literal '*' for match-all; `filesGlob` supports a trailing '/**' prefix match or an exact repo-relative file path. A duplicate name is only fully explained away (tag ALLOWLISTED) when ALL of its non-alias-delegation, non-dispatch-variant definers match an entry here.",
   "entries": [
     {
+      "names": ["TWIDDLE_CACHE_DEFAULT_MAX_BYTES", "setTwiddleCacheMaxBytes", "twiddleCacheState"],
+      "filesGlob": ["functions/src/signal/fft-core-f64.ts", "packages/workerpool/src/fft-core.ts"],
+      "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+    },
+    {
       "names": ["abs", "add", "cos", "det", "exp", "log", "mean", "sin", "sqrt", "tan", "variance"],
       "filesGlob": ["compat/src/shims.ts"],
       "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"

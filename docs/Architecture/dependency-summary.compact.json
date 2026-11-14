@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1330, "e": 7266, "re": 3160 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1330, "e": 7272, "re": 3160 },
   "s": {
-    "loc": 229207,
+    "loc": 229265,
     "cls": 62,
     "int": 660,
-    "fn": 2482,
+    "fn": 2486,
     "tg": 178,
     "en": 0,
-    "co": 1669,
+    "co": 1671,
     "toi": 682
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -45,7 +45,10 @@
         "chunkTyped",
         "chunkPairTyped",
         "compileFunctionSource",
+        "TWIDDLE_CACHE_DEFAULT_MAX_BYTES",
         "fftBitReverse",
+        "setTwiddleCacheMaxBytes",
+        "twiddleCacheState",
         "fftFrameInPlace",
         "Transfer",
         "forEachMultiIndex",
@@ -56,10 +59,7 @@
         "mathWorkerPool",
         "canUseWasm",
         "canUseSharedMemory",
-        "transferFloat64",
-        "transferArrayBuffer",
-        "transferTypedArray",
-        "createSharedFloat64Array"
+        "transferFloat64"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -986,17 +986,17 @@
         "conv2FFT",
         "conv2",
         "dtw",
+        "TWIDDLE_CACHE_DEFAULT_MAX_BYTES",
         "bitReverse",
+        "setTwiddleCacheMaxBytes",
+        "twiddleCacheState",
         "fftCoreFloat64",
         "fftExactFloat64",
         "rfft",
         "irfft",
         "fftshift",
         "ifftshift",
-        "fftfreq",
-        "rfftfreq",
-        "fftn",
-        "complex"
+        "fftfreq"
       ],
       "int": [
         "DtwOptions",
