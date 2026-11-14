@@ -26,6 +26,9 @@ const workerpoolBrowserShim = fileURLToPath(
 const isCI = !!process.env.CI;
 
 export default defineConfig({
+  // A browser test cannot read process.env. Pass the CI flag as a compile-time
+  // constant, so a test can fail on CI when no WebGPU adapter exists.
+  define: { __MATHTS_CI__: JSON.stringify(isCI) },
   // The browser bundle transitively pulls in `@danielsimonjr/mathts-workerpool`
   // (via matrix → parallel-matrix → parallel/ComputePool), which imports the
   // Node `workerpool` package. `workerpool`'s `import` export condition resolves

@@ -14072,7 +14072,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 184
+      "loc": 186
     },
     {
       "file": "matrix/tests/gpu/operations.test.ts",
@@ -16403,7 +16403,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 74
+      "loc": 77
     },
     {
       "file": "vitest.config.ts",
