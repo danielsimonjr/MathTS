@@ -7,7 +7,7 @@
  * Two numbers skip the scan. That is the hot path (`add(1, 2)`); the checks exist
  * for values typed-function would convert or report as a missing argument.
  */
-import { BigNumber, Complex, Dual, Fraction } from '@danielsimonjr/mathts-core';
+import { isBigNumber, isComplex, isDual, isFraction } from '@danielsimonjr/mathts-core';
 import { Matrix } from '@danielsimonjr/mathts-matrix';
 
 /** Human-readable label for a rejected operand in a `TypeError` message. */
@@ -27,11 +27,13 @@ export function unexpectedArgumentType(fn: string, value: unknown, index: number
 
 function isAllowedObject(value: object): boolean {
   if (Array.isArray(value) || ArrayBuffer.isView(value)) return true;
+  // The type tests of core also accept a value of a second copy of core. `Matrix` is not a core
+  // class: a matrix of another copy passes the `isMatrix` check below.
   if (
-    value instanceof Complex ||
-    value instanceof Fraction ||
-    value instanceof BigNumber ||
-    value instanceof Dual ||
+    isComplex(value) ||
+    isFraction(value) ||
+    isBigNumber(value) ||
+    isDual(value) ||
     value instanceof Matrix
   ) {
     return true;
