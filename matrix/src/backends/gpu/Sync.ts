@@ -325,7 +325,8 @@ export class SyncManager {
     for (const req of downloads) {
       const id = this.nextRequestId++;
       try {
-        const data = await this.download(req.buffer);
+        // A pooled buffer can be larger than req.data: read only the bytes that fit.
+        const data = await this.download(req.buffer, { size: req.data.byteLength });
         req.data.set(data);
         results.push({
           id,
