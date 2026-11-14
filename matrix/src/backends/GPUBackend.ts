@@ -283,7 +283,8 @@ export class GPUBackend {
     ctx.dispatchCompute(pipeline, [bindGroup], [workgroups, 1, 1]);
 
     // Read result
-    const resultData = await ctx.readBuffer(bufferResult);
+    // The pool rounds a buffer up to a power of two: read `size` bytes only.
+    const resultData = await ctx.readBuffer(bufferResult, 0, size);
 
     // Release buffers
     pool.release(bufferA);

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2405,
+  "totalFiles": 2406,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1305,
     "test-only": 0,
     "orphan": 0,
-    "test": 1008,
+    "test": 1009,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1331,
-    "tests": 1008,
+    "tests": 1009,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1080,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 139,
+    "@danielsimonjr/mathts-matrix": 140,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -13463,21 +13463,21 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 181
+      "loc": 182
     },
     {
       "file": "matrix/src/backends/gpu/Sync.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 438
+      "loc": 439
     },
     {
       "file": "matrix/src/backends/GPUBackend.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 368
+      "loc": 369
     },
     {
       "file": "matrix/src/backends/GPUMatrixBackend.ts",
@@ -14080,6 +14080,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 362
+    },
+    {
+      "file": "matrix/tests/gpu/run-shader-readback.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 72
     },
     {
       "file": "matrix/tests/helpers/stub-global.ts",

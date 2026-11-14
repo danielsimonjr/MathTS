@@ -167,7 +167,8 @@ export async function runShader(
     if (resultBuf === undefined) {
       throw new Error(`runShader: missing result buffer at index ${plan.resultBufferIndex}`);
     }
-    const resultData = await ctx.readBuffer(resultBuf);
+    // The pool rounds a buffer up to a power of two: read the bytes of the plan only.
+    const resultData = await ctx.readBuffer(resultBuf, 0, plan.bytes[plan.resultBufferIndex]);
     return new Float32Array(resultData);
   } finally {
     for (const buf of storageBuffers) {
