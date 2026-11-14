@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2415,
+  "totalFiles": 2416,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1307,
     "test-only": 0,
     "orphan": 0,
-    "test": 1016,
+    "test": 1017,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1333,
-    "tests": 1016,
+    "tests": 1017,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1083,
+    "@danielsimonjr/mathts-functions": 1084,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 141,
@@ -8990,7 +8990,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2346
+      "loc": 2360
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9067,7 +9067,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 42
+      "loc": 46
     },
     {
       "file": "functions/src/typed/expression-eval-barrel.ts",
@@ -10482,6 +10482,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 52
+    },
+    {
+      "file": "functions/tests/exact-reductions-unregistered.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 17
     },
     {
       "file": "functions/tests/exp-integrals.test.ts",
@@ -12203,7 +12210,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 116
+      "loc": 181
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",

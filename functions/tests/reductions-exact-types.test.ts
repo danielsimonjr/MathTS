@@ -9,8 +9,8 @@
  * kernel.
  */
 import { describe, expect, it } from 'vitest';
-import { BigNumber, Complex, Fraction } from '@danielsimonjr/mathts-core';
-import { matrix, sum } from '../src/index.js';
+import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
+import { matrix, sparse, sum } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
 const B = [new BigNumber('0.1000000000000000000001'), new BigNumber('0.2')];
@@ -111,5 +111,70 @@ describe('sum pins that hold before and after the fix', () => {
 
   it('returns a number for a flat number array', () => {
     expect(sum([1, 2, 3.5])).toBe(6.5);
+  });
+});
+
+/** A number array whose naive left-to-right sum and pairwise sum differ in their bits. */
+function mixed(n: number): number[] {
+  return Array.from({ length: n }, (_, i) => Math.sin(i * 1.7) * 10 ** ((i % 7) - 3));
+}
+
+function naive(xs: number[]): number {
+  let s = 0;
+  for (const x of xs) s += x;
+  return s;
+}
+
+/** Split a flat array into rows of the given width. */
+function rows(xs: number[], width: number): number[][] {
+  const out: number[][] = [];
+  for (let i = 0; i < xs.length; i += width) out.push(xs.slice(i, i + width));
+  return out;
+}
+
+describe('sum uses the pairwise kernel for number data', () => {
+  const xs = mixed(2048);
+
+  it('the pinned input tells the two summation orders apart', () => {
+    expect(pairwiseSum(xs)).not.toBe(naive(xs));
+  });
+
+  it('a flat array gives the pairwise bits', () => {
+    expect(sum(xs)).toBe(pairwiseSum(xs));
+  });
+
+  it('a 1-d Matrix gives the pairwise bits', () => {
+    expect(sum(matrix(xs))).toBe(pairwiseSum(xs));
+  });
+
+  it('a nested array gives the same bits as the flat array', () => {
+    expect(sum(rows(xs, 64))).toBe(pairwiseSum(xs));
+  });
+
+  it('a 2-d Matrix gives the same bits as the flat array', () => {
+    expect(sum(matrix(rows(xs, 64)))).toBe(pairwiseSum(xs));
+  });
+});
+
+describe('sum edge cases follow mathjs', () => {
+  it('sums a sparse matrix', () => {
+    expect(
+      sum(
+        sparse([
+          [1, 0],
+          [0, 2.5],
+        ])
+      )
+    ).toBe(3.5);
+  });
+
+  it('returns 0 for an empty Matrix', () => {
+    expect(sum(matrix([]))).toBe(0);
+  });
+
+  it('throws a TypeError for a null or undefined element', () => {
+    expect(() => sum([1, null])).toThrow(TypeError);
+    expect(() => sum([1, undefined])).toThrow(TypeError);
+    expect(() => sum([[1], [null]])).toThrow(TypeError);
   });
 });

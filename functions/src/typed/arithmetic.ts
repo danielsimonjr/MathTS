@@ -1723,6 +1723,26 @@ export const fsum = mathTyped('fsum', {
   Float64Array: (a: Float64Array): f64 => neumaierSum(a),
 });
 
+/**
+ * The pairwise sum of an array whose leaves are all numbers, at any depth. A nested array gives
+ * the same bits as its flat form. Returns `undefined` when any leaf is not a number, so the
+ * caller can use the exact sum.
+ */
+function numberSum(arr: unknown[]): number | undefined {
+  const flat = pairwiseSumChecked(arr);
+  if (flat !== undefined) return flat;
+  const leaves: number[] = [];
+  const collect = (xs: unknown[]): boolean => {
+    for (let i = 0; i < xs.length; i++) {
+      const x = xs[i];
+      if (typeof x === 'number') leaves.push(x);
+      else if (!Array.isArray(x) || !collect(x)) return false;
+    }
+    return true;
+  };
+  return collect(arr) ? pairwiseSum(leaves) : undefined;
+}
+
 export const sum = mathTyped('sum', {
   // PAIRWISE summation, not `total += arr[i]`.
   //
@@ -1737,21 +1757,15 @@ export const sum = mathTyped('sum', {
   // all inherit it. Pairwise costs the same number of additions — the naive loop was simply worse.
   // For catastrophic cancellation (e.g. [1e16, 1, -1e16], which pairwise AND np.sum both
   // annihilate to 0) use `fsum`.
-  Array: (arr: f64[]): unknown => {
-    const s = pairwiseSumChecked(arr);
-    return s !== undefined ? s : exactReductions().sum(arr);
-  },
+  Array: (arr: unknown[]): unknown => numberSum(arr) ?? exactReductions('sum').sum(arr),
   Matrix: (m: unknown): unknown => {
-    // A nested (2-d or deeper) Matrix holds array elements, so the checked kernel returns
-    // undefined for it and the exact sum runs.
     const v = (m as { valueOf(): unknown }).valueOf();
-    const s = Array.isArray(v) ? pairwiseSumChecked(v) : undefined;
-    return s !== undefined ? s : exactReductions().sum(m);
+    return (Array.isArray(v) ? numberSum(v) : undefined) ?? exactReductions('sum').sum(m);
   },
   'Array, number | BigNumber': (arr: unknown, dim: unknown): unknown =>
-    exactReductions().sum(arr, dim),
+    exactReductions('sum').sum(arr, dim),
   'Matrix, number | BigNumber': (m: unknown, dim: unknown): unknown =>
-    exactReductions().sum(m, dim),
+    exactReductions('sum').sum(m, dim),
 
   // Synchronous pairwise sum on typed arrays (no worker pool).
   Float64Array: (a: Float64Array): f64 => pairwiseSum(a),

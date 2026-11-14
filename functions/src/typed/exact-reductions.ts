@@ -30,12 +30,16 @@ export function registerExactReductions(fns: ExactReductions): void {
 /**
  * The registered exact reductions.
  *
+ * @param name - The public function that needs the exact reductions, for the error message.
  * @returns The exact reductions.
  * @throws Error when the factory layer has not registered them.
  */
-export function exactReductions(): ExactReductions {
+export function exactReductions(name: string): ExactReductions {
   if (registered.fns === undefined) {
-    throw new Error('exact reductions are not registered');
+    throw new Error(
+      `${name}: the exact reductions are not registered; ` +
+        'import the package entry, which loads functions/src/factories/index.ts'
+    );
   }
   return registered.fns;
 }
