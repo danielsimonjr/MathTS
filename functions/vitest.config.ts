@@ -17,6 +17,7 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 30_000,
     include: ['tests/**/*.test.ts'],
+    exclude: ['**/*.browser.test.ts', 'node_modules/**'],
     globals: false,
     environment: 'node',
     coverage: {
