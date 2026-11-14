@@ -11,7 +11,8 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { formatGeneric } from '@danielsimonjr/mathts-core/internal';
+import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
+import { typeOf } from '../utils/is.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
@@ -432,7 +433,9 @@ export class MathJSDenseMatrix {
    * Get the data type of elements (used by getMatrixDataType).
    */
   getDataType(): string {
-    return this._datatype ?? 'number';
+    // Like mathjs, the type comes from the elements: 'Complex' for a matrix of Complex values,
+    // 'mixed' for more than one type. A declared `_datatype` wins.
+    return this._datatype ?? (getArrayDataType(this._data, typeOf) as string);
   }
 
   // ---------------------------------------------------------------------------
@@ -682,8 +685,10 @@ export class MathJSSparseMatrix {
   /**
    * Get element at [row, col]. Returns 0 for structural zeros.
    */
-  get(index: number[]): unknown {
-    const [i, j] = index;
+  get(indexOrRow: number[] | number, col?: number): unknown {
+    // Accepts `get([i, j])` and `get(i, j)`, as the dense matrix does: the core Matrix to Array
+    // conversion reads a matrix with `get(i, j)`.
+    const [i, j] = Array.isArray(indexOrRow) ? indexOrRow : [indexOrRow, col as number];
     if (j < 0 || j >= this._size[1] || i < 0 || i >= this._size[0]) {
       throw new RangeError(`Index out of range (${i}, ${j}) for matrix of size [${this._size}]`);
     }
@@ -746,6 +751,13 @@ export class MathJSSparseMatrix {
     }
 
     return this;
+  }
+
+  /**
+   * The data type of the stored values (see the dense `getDataType`).
+   */
+  getDataType(): string {
+    return this._datatype ?? (getArrayDataType(this._values ?? [], typeOf) as string);
   }
 
   /**

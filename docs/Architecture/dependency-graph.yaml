@@ -16137,7 +16137,10 @@ modules:
       description: Matrix Compatibility Bridge
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/is.js
+          imports:
+            - typeOf
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -16147,6 +16150,7 @@ modules:
           directory: core
           imports:
             - formatGeneric
+            - getArrayDataType
           subpath: internal
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -45904,7 +45908,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1333
   totalModules: 82
-  totalLinesOfCode: 230242
+  totalLinesOfCode: 230290
   totalExports: 7287
   totalClasses: 62
   totalInterfaces: 661
