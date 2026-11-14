@@ -363,7 +363,6 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
   const n = xs.length;
   if (n < 2) return 0;
 
-  let shift = 0;
   let allFinite = Number.isFinite(xs[0]);
   if (allFinite) {
     for (let i = 1; i < n; i++) {
@@ -372,8 +371,34 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
         break;
       }
     }
-    if (allFinite) shift = xs[0];
   }
+  return squaredDeviationsFrom(xs, allFinite);
+}
+
+/**
+ * {@link sumSquaredDeviations} that returns `undefined` when an element is not a number.
+ *
+ * The type test sits in the loop that checks each element for finiteness, so no second pass is
+ * needed. Returns 0 for fewer than two numbers. For number input the bits equal
+ * `sumSquaredDeviations`.
+ */
+export function sumSquaredDeviationsChecked(xs: ArrayLike<unknown>): number | undefined {
+  const n = xs.length;
+  if (n < 2) return n === 0 || typeof xs[0] === 'number' ? 0 : undefined;
+
+  let allFinite = true;
+  for (let i = 0; i < n; i++) {
+    const x = xs[i];
+    if (typeof x !== 'number') return undefined;
+    if (!Number.isFinite(x)) allFinite = false;
+  }
+  return squaredDeviationsFrom(xs as ArrayLike<number>, allFinite);
+}
+
+/** The shifted two-pass sum of squared deviations of `xs`, which has at least two numbers. */
+function squaredDeviationsFrom(xs: ArrayLike<number>, allFinite: boolean): number {
+  const n = xs.length;
+  const shift = allFinite ? xs[0] : 0;
 
   const mean = pairwiseSum(xs, 0, n, shift) / n;
   // Same pairwise tree as `pairwiseSum(d)` + `pairwiseDot(d, d)`, but the

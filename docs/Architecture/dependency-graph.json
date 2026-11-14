@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-14",
     "totalFiles": 1333,
     "totalModules": 82,
-    "totalExports": 7285
+    "totalExports": 7287
   },
   "entryPoints": [
     {
@@ -1089,7 +1089,8 @@
               "pairwiseDot",
               "scaledDistance",
               "neumaierCumsum",
-              "sumSquaredDeviations"
+              "sumSquaredDeviations",
+              "sumSquaredDeviationsChecked"
             ],
             "reExport": true
           },
@@ -1349,6 +1350,7 @@
           "scaledDistance",
           "neumaierCumsum",
           "sumSquaredDeviations",
+          "sumSquaredDeviationsChecked",
           "mulberry32",
           "boxMuller",
           "createSeededRng",
@@ -1548,6 +1550,7 @@
           "scaledDistance",
           "neumaierCumsum",
           "sumSquaredDeviations",
+          "sumSquaredDeviationsChecked",
           "mulberry32",
           "boxMuller",
           "createSeededRng",
@@ -2531,6 +2534,7 @@
           "pairwiseDot",
           "scaledDistance",
           "sumSquaredDeviations",
+          "sumSquaredDeviationsChecked",
           "neumaierCumsum"
         ],
         "functions": [
@@ -2541,6 +2545,7 @@
           "pairwiseDot",
           "scaledDistance",
           "sumSquaredDeviations",
+          "sumSquaredDeviationsChecked",
           "neumaierCumsum"
         ]
       },
@@ -23098,7 +23103,7 @@
           },
           {
             "file": "../utils/is.js",
-            "imports": ["isBigNumber"]
+            "imports": ["isBigNumber", "isComplex"]
           },
           {
             "file": "../utils/factory.js",
@@ -25595,10 +25600,8 @@
             "file": "../statistics/numeric-data.js",
             "imports": [
               "finiteNumbers",
-              "flattenNumeric",
               "normalizationFromSecondArg",
               "normalizationFromStringAndOptions",
-              "numberGrid",
               "reduceNumericMatrix",
               "StatReduceOptions",
               "NumericVectorInput",
@@ -25675,7 +25678,8 @@
               "neumaierSum",
               "norm2",
               "pairwiseDot",
-              "sumSquaredDeviations"
+              "sumSquaredDeviations",
+              "sumSquaredDeviationsChecked"
             ]
           },
           {
@@ -48592,15 +48596,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1333,
     "totalModules": 82,
-    "totalLinesOfCode": 229902,
-    "totalExports": 7285,
+    "totalLinesOfCode": 230060,
+    "totalExports": 7287,
     "totalClasses": 62,
     "totalInterfaces": 661,
-    "totalFunctions": 2494,
+    "totalFunctions": 2495,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1675,
-    "totalReExports": 3161,
+    "totalReExports": 3162,
     "totalTypeOnlyImports": 682,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

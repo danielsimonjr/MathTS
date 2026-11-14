@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2417,
+  "totalFiles": 2418,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1307,
     "test-only": 0,
     "orphan": 0,
-    "test": 1018,
+    "test": 1019,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1333,
-    "tests": 1018,
+    "tests": 1019,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 28,
-    "@danielsimonjr/mathts-core": 130,
+    "@danielsimonjr/mathts-core": 131,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
@@ -800,7 +800,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 274
+      "loc": 275
     },
     {
       "file": "core/src/internal.ts",
@@ -849,7 +849,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 500
+      "loc": 525
     },
     {
       "file": "core/src/numeric/strides.ts",
@@ -1207,6 +1207,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 324
+    },
+    {
+      "file": "core/tests/numeric/sum-squared-deviations-checked.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 77
     },
     {
       "file": "core/tests/object-pollution.test.ts",
@@ -8416,7 +8423,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 257
+      "loc": 276
     },
     {
       "file": "functions/src/stats/distances.ts",
@@ -8997,7 +9004,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2446
+      "loc": 2559
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -12217,7 +12224,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 421
+      "loc": 428
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",

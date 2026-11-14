@@ -1,5 +1,5 @@
 import { deepForEach } from '../utils/collection.js';
-import { isBigNumber } from '../utils/is.js';
+import { isBigNumber, isComplex } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { sumSquaredDeviations } from '@danielsimonjr/mathts-core';
@@ -36,6 +36,8 @@ interface VarianceDependencies {
   divide: TypedFunction;
   mapSlices: TypedFunction;
   isNaN: TypedFunction;
+  conj: TypedFunction;
+  re: TypedFunction;
 }
 
 type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
@@ -43,7 +45,17 @@ type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
 const DEFAULT_NORMALIZATION: NormalizationType = 'unbiased';
 
 const name = 'variance';
-const dependencies = ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlices', 'isNaN'];
+const dependencies = [
+  'typed',
+  'add',
+  'subtract',
+  'multiply',
+  'divide',
+  'mapSlices',
+  'isNaN',
+  'conj',
+  're',
+];
 
 export const createVariance = /* #__PURE__ */ factory(
   name,
@@ -56,7 +68,13 @@ export const createVariance = /* #__PURE__ */ factory(
     divide,
     mapSlices,
     isNaN: mathIsNaN,
+    conj,
+    re,
   }: VarianceDependencies) => {
+    /** A squared deviation: `diff * conj(diff)` for Complex (real, |diff|^2), else `diff * diff`. */
+    const squaredDeviation = (diff: unknown): unknown =>
+      isComplex(diff) ? re(multiply(diff, conj(diff))) : multiply(diff, diff);
+
     /**
      * Compute the variance of a matrix or a  list with values.
      * In case of a multidimensional array or matrix, the variance over all
@@ -197,7 +215,8 @@ export const createVariance = /* #__PURE__ */ factory(
       sum = undefined;
       deepForEach(array, function (value: unknown) {
         const diff = subtract(value, mean);
-        sum = sum === undefined ? multiply(diff, diff) : add(sum, multiply(diff, diff));
+        const sq = squaredDeviation(diff);
+        sum = sum === undefined ? sq : add(sum, sq);
       });
 
       if (mathIsNaN(sum)) {

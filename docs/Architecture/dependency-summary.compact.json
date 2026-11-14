@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1333, "e": 7285, "re": 3161 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1333, "e": 7287, "re": 3162 },
   "s": {
-    "loc": 229902,
+    "loc": 230060,
     "cls": 62,
     "int": 661,
-    "fn": 2494,
+    "fn": 2495,
     "tg": 178,
     "en": 0,
     "co": 1675,
@@ -164,6 +164,7 @@
         "pairwiseDot",
         "scaledDistance",
         "sumSquaredDeviations",
+        "sumSquaredDeviationsChecked",
         "neumaierCumsum",
         "rowMajorStrides"
       ],

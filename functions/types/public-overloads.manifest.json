@@ -6,9 +6,21 @@
     { "name": "exp", "source": "src/typed/arithmetic.ts" },
     { "name": "log", "source": "src/typed/arithmetic.ts" },
     { "name": "log10", "source": "src/typed/arithmetic.ts" },
-    { "name": "mean", "source": "src/typed/arithmetic.ts" },
-    { "name": "variance", "source": "src/typed/arithmetic.ts" },
-    { "name": "std", "source": "src/typed/arithmetic.ts" },
+    {
+      "name": "mean",
+      "source": "src/typed/arithmetic.ts",
+      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+    },
+    {
+      "name": "variance",
+      "source": "src/typed/arithmetic.ts",
+      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+    },
+    {
+      "name": "std",
+      "source": "src/typed/arithmetic.ts",
+      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+    },
     { "name": "sin", "source": "src/typed/trigonometry.ts" },
     { "name": "cos", "source": "src/typed/trigonometry.ts" },
     { "name": "tan", "source": "src/typed/trigonometry.ts" },

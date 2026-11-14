@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-14'
   totalFiles: 1333
   totalModules: 82
-  totalExports: 7285
+  totalExports: 7287
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1024,6 +1024,7 @@ modules:
             - scaledDistance
             - neumaierCumsum
             - sumSquaredDeviations
+            - sumSquaredDeviationsChecked
           reExport: true
         - file: ./numeric/rng.js
           imports:
@@ -1273,6 +1274,7 @@ modules:
         - scaledDistance
         - neumaierCumsum
         - sumSquaredDeviations
+        - sumSquaredDeviationsChecked
         - mulberry32
         - boxMuller
         - createSeededRng
@@ -1471,6 +1473,7 @@ modules:
         - scaledDistance
         - neumaierCumsum
         - sumSquaredDeviations
+        - sumSquaredDeviationsChecked
         - mulberry32
         - boxMuller
         - createSeededRng
@@ -2449,6 +2452,7 @@ modules:
         - pairwiseDot
         - scaledDistance
         - sumSquaredDeviations
+        - sumSquaredDeviationsChecked
         - neumaierCumsum
       functions:
         - pairwiseSum
@@ -2458,6 +2462,7 @@ modules:
         - pairwiseDot
         - scaledDistance
         - sumSquaredDeviations
+        - sumSquaredDeviationsChecked
         - neumaierCumsum
     core/src/numeric/strides.ts:
       description: Row-major stride vectors for dense tensor layouts.
@@ -21829,6 +21834,7 @@ modules:
         - file: ../utils/is.js
           imports:
             - isBigNumber
+            - isComplex
         - file: ../utils/factory.js
           imports:
             - factory
@@ -24067,10 +24073,8 @@ modules:
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
-            - flattenNumeric
             - normalizationFromSecondArg
             - normalizationFromStringAndOptions
-            - numberGrid
             - reduceNumericMatrix
             - StatReduceOptions
             - NumericVectorInput
@@ -24132,6 +24136,7 @@ modules:
             - norm2
             - pairwiseDot
             - sumSquaredDeviations
+            - sumSquaredDeviationsChecked
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -45899,15 +45904,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1333
   totalModules: 82
-  totalLinesOfCode: 229902
-  totalExports: 7285
+  totalLinesOfCode: 230060
+  totalExports: 7287
   totalClasses: 62
   totalInterfaces: 661
-  totalFunctions: 2494
+  totalFunctions: 2495
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1675
-  totalReExports: 3161
+  totalReExports: 3162
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
