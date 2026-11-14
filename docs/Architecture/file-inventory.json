@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2402,
+  "totalFiles": 2404,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1304,
+    "build-entry": 1305,
     "test-only": 0,
     "orphan": 0,
-    "test": 1006,
+    "test": 1007,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1330,
-    "tests": 1006,
+    "src": 1331,
+    "tests": 1007,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1078,
+    "@danielsimonjr/mathts-functions": 1080,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 138,
@@ -5784,7 +5784,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 456
+      "loc": 459
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -6582,21 +6582,28 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1784
+      "loc": 1787
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1104
+      "loc": 1110
     },
     {
       "file": "functions/src/factories/scope.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 254
+      "loc": 270
+    },
+    {
+      "file": "functions/src/factories/sparse-adapter.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 191
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -8948,7 +8955,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2267
+      "loc": 2330
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10586,7 +10593,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 268
+      "loc": 273
     },
     {
       "file": "functions/tests/fft-factory-correctness.test.ts",
@@ -12203,7 +12210,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 214
+      "loc": 215
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
@@ -12421,6 +12428,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 81
+    },
+    {
+      "file": "functions/tests/sparse-shapes-949.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 448
     },
     {
       "file": "functions/tests/special-accuracy.test.ts",
@@ -13169,7 +13183,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 778
+      "loc": 777
     },
     {
       "file": "functions/tests/ws-a-welch-wasm-frame.test.ts",

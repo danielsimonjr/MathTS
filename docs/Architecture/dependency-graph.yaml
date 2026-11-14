@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-14'
-  totalFiles: 1330
+  totalFiles: 1331
   totalModules: 82
-  totalExports: 7272
+  totalExports: 7276
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -16124,6 +16124,10 @@ modules:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
             - createMatrixBridge
+        - file: ./sparse-adapter.js
+          imports:
+            - acceptsMatrix
+            - adaptSparse
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -16141,6 +16145,31 @@ modules:
         - popConfigOverlay
       constants:
         - factoryScope
+    functions/src/factories/sparse-adapter.ts:
+      description: Sparse shape adapter for the mathjs-derived factory functions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./matrix-bridge.js
+          imports:
+            - MathJSDenseMatrix
+            - MathJSSparseMatrix
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - SparseMatrix
+      exports:
+        - csrToCsc
+        - cscToPublic
+        - adaptSparse
+        - acceptsMatrix
+      functions:
+        - csrToCsc
+        - cscToPublic
+        - adaptSparse
+        - acceptsMatrix
   functions/geometry:
     functions/src/geometry/alpha-shape.ts:
       description: Alpha shape (2-D) — a consumer of the Delaunay triangulation.
@@ -24063,6 +24092,7 @@ modules:
           directory: matrix
           imports:
             - DenseMatrix
+            - SparseMatrix
             - backendManager
             - singularValues
         - package: '@danielsimonjr/mathts-parallel'
@@ -44666,6 +44696,7 @@ dependencyGraph:
         - functions/src/factories/index.ts
         - functions/src/factories/matrix-bridge.ts
         - functions/src/factories/scope.ts
+        - functions/src/factories/sparse-adapter.ts
     - name: Functions/geometry
       files:
         - functions/src/geometry/alpha-shape.ts
@@ -45790,13 +45821,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1330
+  totalTypeScriptFiles: 1331
   totalModules: 82
-  totalLinesOfCode: 229265
-  totalExports: 7272
+  totalLinesOfCode: 229547
+  totalExports: 7276
   totalClasses: 62
   totalInterfaces: 660
-  totalFunctions: 2486
+  totalFunctions: 2490
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1671
