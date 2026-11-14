@@ -5630,7 +5630,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 120
+      "loc": 124
     },
     {
       "file": "expression/tests/utils-customs.test.ts",
@@ -10229,7 +10229,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 28
+      "loc": 46
     },
     {
       "file": "functions/tests/diophantine.test.ts",
