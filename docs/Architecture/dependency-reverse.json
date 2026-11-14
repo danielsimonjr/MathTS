@@ -990,6 +990,7 @@
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts",
       "functions/src/core/function/typed.ts",
+      "functions/src/factories/matrix-bridge.ts",
       "functions/src/geometry/distance.ts",
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/det.ts",

@@ -6638,7 +6638,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1115
+      "loc": 1127
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -7023,7 +7023,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 263
+      "loc": 299
     },
     {
       "file": "functions/src/matrix/eigs.ts",

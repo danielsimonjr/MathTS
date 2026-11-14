@@ -1,7 +1,7 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1333, "e": 7287, "re": 3162 },
   "s": {
-    "loc": 230242,
+    "loc": 230290,
     "cls": 62,
     "int": 661,
     "fn": 2495,
@@ -1959,7 +1959,7 @@
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 205 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 58 },
+    { "p": "utils/is.ts", "i": 0, "o": 59 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },

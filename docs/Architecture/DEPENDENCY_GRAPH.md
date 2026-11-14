@@ -6336,11 +6336,17 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                        |
-| ------------------------------ | ----------------------------- |
-| `@danielsimonjr/mathts-core`   | `mathTyped`                   |
-| `@danielsimonjr/mathts-core`   | `formatGeneric`               |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+| Package                        | Import                            |
+| ------------------------------ | --------------------------------- |
+| `@danielsimonjr/mathts-core`   | `mathTyped`                       |
+| `@danielsimonjr/mathts-core`   | `formatGeneric, getArrayDataType` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager`     |
+
+**Internal Dependencies:**
+
+| File             | Imports  | Type   |
+| ---------------- | -------- | ------ |
+| `../utils/is.js` | `typeOf` | Import |
 
 **Exports:**
 
@@ -20307,7 +20313,7 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 205 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
-| `functions/src/utils/is`                               | 0 files      | 58 files   |
+| `functions/src/utils/is`                               | 0 files      | 59 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
@@ -21240,7 +21246,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1333   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230242 |
+| Total Lines of Code     | 230290 |
 | Total Exports           | 7287   |
 | Total Re-exports        | 3162   |
 | Total Classes           | 62     |

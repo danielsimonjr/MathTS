@@ -80,6 +80,10 @@ export const createDot = /* #__PURE__ */ factory(
     return typed(name, {
       'Array | DenseMatrix, Array | DenseMatrix': _denseDot,
       'SparseMatrix, SparseMatrix': _sparseDot,
+      'SparseMatrix, Array | DenseMatrix': (x: SparseMatrix, y: unknown[] | DenseMatrix) =>
+        _mixedDot(x, y, true),
+      'Array | DenseMatrix, SparseMatrix': (x: unknown[] | DenseMatrix, y: SparseMatrix) =>
+        _mixedDot(y, x, false),
     });
 
     /**
@@ -246,6 +250,38 @@ export const createDot = /* #__PURE__ */ factory(
         }
       }
 
+      return c;
+    }
+
+    /**
+     * Dot product of a sparse and a dense vector. Like mathjs, which converts the dense vector to
+     * sparse, the product runs over the stored entries of the sparse vector and skips the zeros of
+     * the dense one. The core DenseMatrix to SparseMatrix conversion copies a matrix into a plain
+     * object, so the signature is explicit instead of relying on that conversion.
+     * @param sparse - The sparse vector
+     * @param other - The dense vector or array
+     * @param sparseFirst - True when the sparse vector is the first argument
+     */
+    function _mixedDot(
+      sparse: SparseMatrix,
+      other: unknown[] | DenseMatrix,
+      sparseFirst: boolean
+    ): unknown {
+      if (sparseFirst) _validateDim(sparse, other);
+      else _validateDim(other, sparse);
+
+      const data = (isMatrix(other) ? (other as DenseMatrix)._data : other) as unknown[];
+      const isColumn = _size(other).length === 2;
+      const index = sparse._index!;
+      const values = sparse._values!;
+
+      let c: unknown = 0;
+      for (let k = 0; k < index.length; k++) {
+        const raw = data[index[k]];
+        const y = isColumn ? (raw as unknown[])[0] : raw;
+        if (y === 0 || (y as { isZero?: () => boolean } | null)?.isZero?.() === true) continue;
+        c = addScalar(c, sparseFirst ? multiplyScalar(values[k], y) : multiplyScalar(y, values[k]));
+      }
       return c;
     }
 
