@@ -53,7 +53,7 @@ export const createFlatten = /* #__PURE__ */ factory(
         throw new TypeError(
           'SparseMatrix is not supported by function flatten ' +
             'because it does not support 1D vectors. ' +
-            'Convert to a DenseMatrix or Array first. Example: flatten(x.toArray())'
+            'Convert it with toDense() or toArray() first. Example: flatten(x.toDense())'
         );
       },
     });
