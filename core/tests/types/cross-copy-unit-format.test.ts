@@ -13,7 +13,7 @@ let core2: Core;
 beforeAll(async () => {
   // The built bundle has its own classes, so `dist` is a second copy of the `src` classes under
   // both bun test and vitest. The `test` task of turbo builds core first.
-  core2 = (await import('../../dist/index.js')) as Core;
+  core2 = (await import('../../dist/index.js')) as unknown as Core;
 });
 
 describe('Unit format with a value of a second copy of core', () => {
