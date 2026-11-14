@@ -1912,10 +1912,19 @@ function meanOfInput(input: unknown, skipNaN: boolean): f64 | undefined {
   return leaves === undefined ? undefined : meanOfData(leaves);
 }
 
+/** True when every leaf of `xs` is a number. Allocates nothing. */
+function allNumbers(xs: ArrayLike<unknown>): boolean {
+  for (let i = 0; i < xs.length; i++) {
+    const x = xs[i];
+    if (typeof x !== 'number' && !(Array.isArray(x) && allNumbers(x))) return false;
+  }
+  return true;
+}
+
 /** True when `input` is number data at any depth. The dimension path checks this before it reduces. */
 function isNumberData(input: unknown): boolean {
   const xs = statData(input);
-  return xs !== undefined && numberLeaves(xs, false) !== undefined;
+  return xs !== undefined && allNumbers(xs);
 }
 
 function meanAlongData(
