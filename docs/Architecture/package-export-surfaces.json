@@ -821,6 +821,7 @@
       "subtractScalar",
       "SubtractScalar",
       "sumSquaredDeviations",
+      "sumSquaredDeviationsChecked",
       "tanh",
       "TAU",
       "toEngineering",

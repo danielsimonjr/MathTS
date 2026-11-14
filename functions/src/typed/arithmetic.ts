@@ -31,13 +31,12 @@ import {
   norm2,
   pairwiseDot,
   sumSquaredDeviations,
+  sumSquaredDeviationsChecked,
 } from '@danielsimonjr/mathts-core';
 import {
   finiteNumbers,
-  flattenNumeric,
   normalizationFromSecondArg,
   normalizationFromStringAndOptions,
-  numberGrid,
   reduceNumericMatrix,
   type StatReduceOptions,
   type NumericVectorInput,
@@ -1817,16 +1816,8 @@ export const fsum = mathTyped('fsum', {
 function numberSum(arr: unknown[]): number | undefined {
   const flat = pairwiseSumChecked(arr);
   if (flat !== undefined) return flat;
-  const leaves: number[] = [];
-  const collect = (xs: unknown[]): boolean => {
-    for (let i = 0; i < xs.length; i++) {
-      const x = xs[i];
-      if (typeof x === 'number') leaves.push(x);
-      else if (!Array.isArray(x) || !collect(x)) return false;
-    }
-    return true;
-  };
-  return collect(arr) ? pairwiseSum(leaves) : undefined;
+  const leaves = numberLeaves(arr, false);
+  return leaves === undefined ? undefined : pairwiseSum(leaves);
 }
 
 export const sum = mathTyped('sum', {
@@ -1868,47 +1859,102 @@ function meanOfNumeric(xs: ArrayLike<number>): f64 {
   return pairwiseSum(xs) / n;
 }
 
-/** Nested numeric arrays flatten, matching mathjs `mean`/`variance` over every element. */
-function vectorForReduction(input: unknown, skipNaN: boolean): ArrayLike<number> {
-  if (!skipNaN && Array.isArray(input) && (input.length === 0 || typeof input[0] === 'number')) {
-    return input as number[];
+/**
+ * The data of a mean, variance or std call: a typed array or an array is itself, and a Matrix
+ * gives its `toArray()` (or `valueOf()`) when that is an array. Anything else (a Fraction, BigNumber, Complex,
+ * string, ...) is not data, so the caller uses the exact factory.
+ */
+function statData(input: unknown): ArrayLike<unknown> | undefined {
+  if (input instanceof Float64Array || input instanceof Float32Array) return input;
+  if (Array.isArray(input)) return input;
+  if (input !== null && typeof input === 'object') {
+    const o = input as { toArray?: () => unknown; valueOf(): unknown };
+    const v = typeof o.toArray === 'function' ? o.toArray() : o.valueOf();
+    if (Array.isArray(v)) return v;
   }
-  if (!skipNaN && (input instanceof Float64Array || input instanceof Float32Array)) {
-    return input;
-  }
-  if (Array.isArray(input) && input.length > 0 && Array.isArray(input[0])) {
-    return flattenNumeric(input, skipNaN);
-  }
-  if (numberGrid(input)) return flattenNumeric(input, skipNaN);
-  return skipNaN ? finiteNumbers(input as ArrayLike<number>, true) : (input as ArrayLike<number>);
+  return undefined;
 }
 
-function meanPrepared(input: unknown, opts?: StatReduceOptions): f64 {
-  const skipNaN = opts ? normalizationFromSecondArg(opts).skipNaN : false;
-  return meanOfNumeric(vectorForReduction(input, skipNaN));
+/**
+ * The number leaves of a nested array, in order, dropping NaN when `skipNaN`. `undefined` when a
+ * leaf is not a number. Flat and nested input give the same leaves.
+ */
+function numberLeaves(xs: ArrayLike<unknown>, skipNaN: boolean): number[] | undefined {
+  const out: number[] = [];
+  const collect = (ys: ArrayLike<unknown>): boolean => {
+    for (let i = 0; i < ys.length; i++) {
+      const y = ys[i];
+      if (typeof y === 'number') {
+        if (!skipNaN || !Number.isNaN(y)) out.push(y);
+      } else if (!Array.isArray(y) || !collect(y)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  return collect(xs) ? out : undefined;
 }
 
-function meanAlong(
+/** Mean of number data at any depth, or `undefined` for exact data. */
+function meanOfData(xs: ArrayLike<unknown>): f64 | undefined {
+  const flat = pairwiseSumChecked(xs);
+  if (flat !== undefined) return xs.length === 0 ? NaN : flat / xs.length;
+  const leaves = numberLeaves(xs, false);
+  return leaves === undefined ? undefined : meanOfNumeric(leaves);
+}
+
+/** The mean of number data, or `undefined` when the data is exact. */
+function meanOfInput(input: unknown, skipNaN: boolean): f64 | undefined {
+  const xs = statData(input);
+  if (xs === undefined) return undefined;
+  if (!skipNaN) return meanOfData(xs);
+  const leaves = numberLeaves(xs, true);
+  return leaves === undefined ? undefined : meanOfData(leaves);
+}
+
+/** True when `input` is number data at any depth. The dimension path checks this before it reduces. */
+function isNumberData(input: unknown): boolean {
+  const xs = statData(input);
+  return xs !== undefined && numberLeaves(xs, false) !== undefined;
+}
+
+function meanAlongData(
   input: unknown,
   dim: number | { valueOf(): number },
-  opts?: StatReduceOptions
-): number | number[] {
-  const skipNaN = opts ? normalizationFromSecondArg(opts).skipNaN : false;
-  return reduceNumericMatrix(input, dim, skipNaN, meanOfNumeric);
+  skipNaN: boolean
+): number | number[] | undefined {
+  return isNumberData(input) ? reduceNumericMatrix(input, dim, skipNaN, meanOfNumeric) : undefined;
 }
 
+/** A call with an options object needs number data. Exact data throws. */
+function numbersOnly<T>(value: T | undefined, name: string): T {
+  if (value === undefined) {
+    throw new TypeError(
+      `${name}: an options object needs number data (a number vector, a 2-d number matrix or a typed array)`
+    );
+  }
+  return value;
+}
+
+const exactMean = (...args: unknown[]): unknown => exactReductions('mean').mean(...args);
+
 export const mean = mathTyped('mean', {
-  Array: (arr: f64[]): f64 => meanPrepared(arr),
-  'Array, Object': (arr: f64[], opts: StatReduceOptions): f64 => meanPrepared(arr, opts),
+  // The number keys keep `number` as their public type. Exact data is not a number, so the
+  // `unknown` fallback overloads in the manifest type it; the cast marks that split.
+  Array: (arr: f64[]): f64 => (meanOfInput(arr, false) ?? exactMean(arr)) as f64,
+  'Array, Object': (arr: f64[], opts: StatReduceOptions): f64 =>
+    numbersOnly(meanOfInput(arr, normalizationFromSecondArg(opts).skipNaN), 'mean'),
   'Array, number | BigNumber': (
     arr: f64[],
     dim: number | { valueOf(): number }
-  ): number | number[] => meanAlong(arr, dim),
+  ): number | number[] =>
+    (meanAlongData(arr, dim, false) ?? exactMean(arr, dim)) as number | number[],
   'Array, number | BigNumber, Object': (
     arr: f64[],
     dim: number | { valueOf(): number },
     opts: StatReduceOptions
-  ): number | number[] => meanAlong(arr, dim, opts),
+  ): number | number[] =>
+    numbersOnly(meanAlongData(arr, dim, normalizationFromSecondArg(opts).skipNaN), 'mean'),
 
   Float64Array: (a: Float64Array): f64 => meanOfNumeric(a),
   'Float64Array, Object': (a: Float64Array, opts: StatReduceOptions): f64 => {
@@ -1921,17 +1967,19 @@ export const mean = mathTyped('mean', {
     return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
   },
 
-  Matrix: (m: unknown): f64 => meanPrepared(m),
-  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 => meanPrepared(m, opts),
+  Matrix: (m: unknown): f64 => (meanOfInput(m, false) ?? exactMean(m)) as f64,
+  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 =>
+    numbersOnly(meanOfInput(m, normalizationFromSecondArg(opts).skipNaN), 'mean'),
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
-  ): number | number[] => meanAlong(m, dim),
+  ): number | number[] => (meanAlongData(m, dim, false) ?? exactMean(m, dim)) as number | number[],
   'Matrix, number | BigNumber, Object': (
     m: unknown,
     dim: number | { valueOf(): number },
     opts: StatReduceOptions
-  ): number | number[] => meanAlong(m, dim, opts),
+  ): number | number[] =>
+    numbersOnly(meanAlongData(m, dim, normalizationFromSecondArg(opts).skipNaN), 'mean'),
 }) as PublicMean;
 
 /**
@@ -1966,16 +2014,33 @@ function varianceFromDdof(m2: f64, n: i32, ddof: number): f64 {
   return m2 / (n - ddof);
 }
 
-function varianceOf(xs: ArrayLike<number>, request: VarianceRequest): f64 {
-  const n = xs.length;
-  const m2 = n < 2 ? 0 : sumSquaredDeviations(xs);
+function varianceFromSum(m2: f64, n: i32, request: VarianceRequest): f64 {
   return request.kind === 'ddof'
     ? varianceFromDdof(m2, n, request.ddof)
     : varianceFromM2(m2, n, request.norm);
 }
 
-function variancePrepared(input: unknown, request: VarianceRequest, skipNaN: boolean): f64 {
-  return varianceOf(vectorForReduction(input, skipNaN), request);
+/** Variance of a number vector (no NaN handling; the caller filters). */
+function varianceOf(xs: ArrayLike<number>, request: VarianceRequest): f64 {
+  const n = xs.length;
+  return varianceFromSum(n < 2 ? 0 : sumSquaredDeviations(xs), n, request);
+}
+
+/** Variance of number data at any depth, or `undefined` for exact data. */
+function varianceOfData(xs: ArrayLike<unknown>, request: VarianceRequest): f64 | undefined {
+  const m2 = sumSquaredDeviationsChecked(xs);
+  if (m2 !== undefined) return varianceFromSum(m2, xs.length, request);
+  const leaves = numberLeaves(xs, false);
+  return leaves === undefined ? undefined : varianceOf(leaves, request);
+}
+
+/** The variance of number data, or `undefined` when the data is exact. */
+function varianceWith(input: unknown, request: VarianceRequest, skipNaN: boolean): f64 | undefined {
+  const xs = statData(input);
+  if (xs === undefined) return undefined;
+  if (!skipNaN) return varianceOfData(xs, request);
+  const leaves = numberLeaves(xs, true);
+  return leaves === undefined ? undefined : varianceOfData(leaves, request);
 }
 
 function varianceAlong(
@@ -1987,6 +2052,20 @@ function varianceAlong(
   return reduceNumericMatrix(input, dim, skipNaN, (xs) => varianceOf(xs, request));
 }
 
+function varianceAlongData(
+  input: unknown,
+  dim: number | { valueOf(): number },
+  request: VarianceRequest,
+  skipNaN: boolean
+): number | number[] | undefined {
+  return isNumberData(input) ? varianceAlong(input, dim, request, skipNaN) : undefined;
+}
+
+const UNBIASED: VarianceRequest = { kind: 'norm', norm: 'unbiased' };
+
+const exactVariance = (...args: unknown[]): unknown =>
+  exactReductions('variance').variance(...args);
+
 /**
  * Variance. The Float64Array signature is synchronous.
  *
@@ -1995,30 +2074,32 @@ function varianceAlong(
  * 'unbiased' | 'uncorrected' (population) | 'biased'. See VarNormalization.
  */
 export const variance = mathTyped('variance', {
-  Array: (arr: f64[]): f64 => variancePrepared(arr, { kind: 'norm', norm: 'unbiased' }, false),
+  Array: (arr: f64[]): f64 => (varianceWith(arr, UNBIASED, false) ?? exactVariance(arr)) as f64,
   'Array, string': (arr: f64[], norm: string): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(norm);
-    return variancePrepared(arr, request, skipNaN);
+    return (varianceWith(arr, request, skipNaN) ?? exactVariance(arr, norm)) as f64;
   },
   'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return variancePrepared(arr, request, skipNaN);
+    return numbersOnly(varianceWith(arr, request, skipNaN), 'variance');
   },
   'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return variancePrepared(arr, request, skipNaN);
+    return numbersOnly(varianceWith(arr, request, skipNaN), 'variance');
   },
   'Array, number | BigNumber': (
     arr: f64[],
     dim: number | { valueOf(): number }
-  ): number | number[] => varianceAlong(arr, dim, { kind: 'norm', norm: 'unbiased' }, false),
+  ): number | number[] =>
+    (varianceAlongData(arr, dim, UNBIASED, false) ?? exactVariance(arr, dim)) as number | number[],
   'Array, number | BigNumber, string': (
     arr: f64[],
     dim: number | { valueOf(): number },
     norm: string
   ): number | number[] => {
     const { request } = normalizationFromSecondArg(norm);
-    return varianceAlong(arr, dim, request, false);
+    return (varianceAlongData(arr, dim, request, false) ?? exactVariance(arr, dim, norm)) as
+      number | number[];
   },
   'Array, number | BigNumber, Object': (
     arr: f64[],
@@ -2026,11 +2107,11 @@ export const variance = mathTyped('variance', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return varianceAlong(arr, dim, request, skipNaN);
+    return numbersOnly(varianceAlongData(arr, dim, request, skipNaN), 'variance');
   },
 
-  Float64Array: (a: Float64Array): f64 => varianceOf(a, { kind: 'norm', norm: 'unbiased' }),
-  Float32Array: (a: Float32Array): f64 => varianceOf(a, { kind: 'norm', norm: 'unbiased' }),
+  Float64Array: (a: Float64Array): f64 => varianceOf(a, UNBIASED),
+  Float32Array: (a: Float32Array): f64 => varianceOf(a, UNBIASED),
   'Float64Array, string': (a: Float64Array, norm: string): f64 => {
     const { request } = normalizationFromSecondArg(norm);
     return varianceOf(a, request);
@@ -2056,30 +2137,32 @@ export const variance = mathTyped('variance', {
     return varianceOf(skipNaN ? finiteNumbers(a, true) : a, request);
   },
 
-  Matrix: (m: unknown): f64 => variancePrepared(m, { kind: 'norm', norm: 'unbiased' }, false),
+  Matrix: (m: unknown): f64 => (varianceWith(m, UNBIASED, false) ?? exactVariance(m)) as f64,
   'Matrix, string': (m: unknown, norm: string): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(norm);
-    return variancePrepared(m, request, skipNaN);
+    return (varianceWith(m, request, skipNaN) ?? exactVariance(m, norm)) as f64;
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return variancePrepared(m, request, skipNaN);
+    return numbersOnly(varianceWith(m, request, skipNaN), 'variance');
   },
   'Matrix, string, Object': (m: unknown, norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return variancePrepared(m, request, skipNaN);
+    return numbersOnly(varianceWith(m, request, skipNaN), 'variance');
   },
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
-  ): number | number[] => varianceAlong(m, dim, { kind: 'norm', norm: 'unbiased' }, false),
+  ): number | number[] =>
+    (varianceAlongData(m, dim, UNBIASED, false) ?? exactVariance(m, dim)) as number | number[],
   'Matrix, number | BigNumber, string': (
     m: unknown,
     dim: number | { valueOf(): number },
     norm: string
   ): number | number[] => {
     const { request } = normalizationFromSecondArg(norm);
-    return varianceAlong(m, dim, request, false);
+    return (varianceAlongData(m, dim, request, false) ?? exactVariance(m, dim, norm)) as
+      number | number[];
   },
   'Matrix, number | BigNumber, Object': (
     m: unknown,
@@ -2087,7 +2170,7 @@ export const variance = mathTyped('variance', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return varianceAlong(m, dim, request, skipNaN);
+    return numbersOnly(varianceAlongData(m, dim, request, skipNaN), 'variance');
   },
 }) as PublicVariance;
 
@@ -2099,32 +2182,64 @@ function stdOf(value: number | number[]): number | number[] {
   return Array.isArray(value) ? value.map((v) => Math.sqrt(v)) : Math.sqrt(value);
 }
 
+function sqrtNumber(v: f64 | undefined): f64 | undefined {
+  return v === undefined ? undefined : Math.sqrt(v);
+}
+
+function stdAlongData(
+  input: unknown,
+  dim: number | { valueOf(): number },
+  request: VarianceRequest,
+  skipNaN: boolean
+): number | number[] | undefined {
+  const v = varianceAlongData(input, dim, request, skipNaN);
+  return v === undefined ? undefined : stdOf(v);
+}
+
+/**
+ * The square root of an exact variance. A Fraction gives a number. An array or Matrix maps the
+ * same rule over its elements. Anything else (number, BigNumber, Complex) uses the exact sqrt.
+ */
+function exactSqrt(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map((x: unknown) => exactSqrt(x));
+  if (v instanceof Fraction) return Math.sqrt(v.valueOf());
+  const shaped = v as { map?: unknown; size?: unknown } | null;
+  if (shaped && typeof shaped.map === 'function' && typeof shaped.size === 'function') {
+    return (v as { map(fn: (x: unknown) => unknown): unknown }).map((x) => exactSqrt(x));
+  }
+  return exactReductions('std').sqrt(v);
+}
+
+const exactStd = (...args: unknown[]): unknown => exactSqrt(exactVariance(...args));
+
 export const std = mathTyped('std', {
   Array: (arr: f64[]): f64 =>
-    Math.sqrt(variancePrepared(arr, { kind: 'norm', norm: 'unbiased' }, false)),
+    (sqrtNumber(varianceWith(arr, UNBIASED, false)) ?? exactStd(arr)) as f64,
   'Array, string': (arr: f64[], norm: string): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(norm);
-    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+    return (sqrtNumber(varianceWith(arr, request, skipNaN)) ?? exactStd(arr, norm)) as f64;
   },
   'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+    return numbersOnly(sqrtNumber(varianceWith(arr, request, skipNaN)), 'std');
   },
   'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return Math.sqrt(variancePrepared(arr, request, skipNaN));
+    return numbersOnly(sqrtNumber(varianceWith(arr, request, skipNaN)), 'std');
   },
   'Array, number | BigNumber': (
     arr: f64[],
     dim: number | { valueOf(): number }
-  ): number | number[] => stdOf(varianceAlong(arr, dim, { kind: 'norm', norm: 'unbiased' }, false)),
+  ): number | number[] =>
+    (stdAlongData(arr, dim, UNBIASED, false) ?? exactStd(arr, dim)) as number | number[],
   'Array, number | BigNumber, string': (
     arr: f64[],
     dim: number | { valueOf(): number },
     norm: string
   ): number | number[] => {
     const { request } = normalizationFromSecondArg(norm);
-    return stdOf(varianceAlong(arr, dim, request, false));
+    return (stdAlongData(arr, dim, request, false) ?? exactStd(arr, dim, norm)) as
+      number | number[];
   },
   'Array, number | BigNumber, Object': (
     arr: f64[],
@@ -2132,13 +2247,11 @@ export const std = mathTyped('std', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return stdOf(varianceAlong(arr, dim, request, skipNaN));
+    return numbersOnly(stdAlongData(arr, dim, request, skipNaN), 'std');
   },
 
-  Float64Array: (a: Float64Array): f64 =>
-    Math.sqrt(varianceOf(a, { kind: 'norm', norm: 'unbiased' })),
-  Float32Array: (a: Float32Array): f64 =>
-    Math.sqrt(varianceOf(a, { kind: 'norm', norm: 'unbiased' })),
+  Float64Array: (a: Float64Array): f64 => Math.sqrt(varianceOf(a, UNBIASED)),
+  Float32Array: (a: Float32Array): f64 => Math.sqrt(varianceOf(a, UNBIASED)),
   'Float64Array, string': (a: Float64Array, norm: string): f64 => {
     const { request } = normalizationFromSecondArg(norm);
     return Math.sqrt(varianceOf(a, request));
@@ -2164,27 +2277,27 @@ export const std = mathTyped('std', {
     return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
   },
 
-  Matrix: (m: unknown): f64 =>
-    Math.sqrt(variancePrepared(m, { kind: 'norm', norm: 'unbiased' }, false)),
+  Matrix: (m: unknown): f64 => (sqrtNumber(varianceWith(m, UNBIASED, false)) ?? exactStd(m)) as f64,
   'Matrix, string': (m: unknown, norm: string): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(norm);
-    return Math.sqrt(variancePrepared(m, request, skipNaN));
+    return (sqrtNumber(varianceWith(m, request, skipNaN)) ?? exactStd(m, norm)) as f64;
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return Math.sqrt(variancePrepared(m, request, skipNaN));
+    return numbersOnly(sqrtNumber(varianceWith(m, request, skipNaN)), 'std');
   },
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
-  ): number | number[] => stdOf(varianceAlong(m, dim, { kind: 'norm', norm: 'unbiased' }, false)),
+  ): number | number[] =>
+    (stdAlongData(m, dim, UNBIASED, false) ?? exactStd(m, dim)) as number | number[],
   'Matrix, number | BigNumber, string': (
     m: unknown,
     dim: number | { valueOf(): number },
     norm: string
   ): number | number[] => {
     const { request } = normalizationFromSecondArg(norm);
-    return stdOf(varianceAlong(m, dim, request, false));
+    return (stdAlongData(m, dim, request, false) ?? exactStd(m, dim, norm)) as number | number[];
   },
   'Matrix, number | BigNumber, Object': (
     m: unknown,
@@ -2192,7 +2305,7 @@ export const std = mathTyped('std', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return stdOf(varianceAlong(m, dim, request, skipNaN));
+    return numbersOnly(stdAlongData(m, dim, request, skipNaN), 'std');
   },
 }) as PublicStd;
 

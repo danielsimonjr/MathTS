@@ -265,6 +265,7 @@ export {
   scaledDistance,
   neumaierCumsum,
   sumSquaredDeviations,
+  sumSquaredDeviationsChecked,
 } from './numeric/stable.js';
 export { mulberry32, boxMuller, createSeededRng, type SeededRng } from './numeric/rng.js';
 export { rowMajorStrides } from './numeric/strides.js';
