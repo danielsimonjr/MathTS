@@ -94,7 +94,7 @@ export interface SyncConfig {
  * await sync.upload(cpuData, gpuBuffer);
  *
  * // Download results from GPU
- * const result = await sync.download(gpuBuffer);
+ * const result = await sync.download(gpuBuffer, { size: byteLength });
  * ```
  */
 export class SyncManager {
@@ -201,8 +201,10 @@ export class SyncManager {
     // (This is simplified - real double buffering would track previous operations)
 
     // Map and read
-    await staging1.mapAsync(GPUMapMode.READ);
-    const data = new Float32Array(staging1.getMappedRange().slice(0));
+    // The staging buffer is rounded up to a power of two and can be reused:
+    // map and read only the `size` bytes that this call copied.
+    await staging1.mapAsync(GPUMapMode.READ, 0, size);
+    const data = new Float32Array(staging1.getMappedRange(0, size).slice(0));
     staging1.unmap();
 
     return data;
