@@ -12,7 +12,7 @@ export const SLOW_LIMIT = 1.02;
 export const GAIN_LIMIT = 0.95;
 /** In a `--control` session the A/A' median must stay inside 1 ± this. */
 export const CONTROL_BAND = 0.02;
-/** Runs of the rerun that decides a case which first read above `SLOW_LIMIT`. */
+/** Runs of the rerun of a case which first read above `SLOW_LIMIT`; its processes join the first reading. */
 export const RERUN_RUNS = 9;
 /**
  * Processes per side in one run. A run times each tree alone in its own process, so the two
@@ -65,8 +65,8 @@ export function twoTreeRatio(baseFirst, headFirst) {
 }
 
 /**
- * A reading that would fail the gate is rerun once with `RERUN_RUNS` runs, and that rerun
- * decides it: a `neutral` or `gain` case above the slow limit, a `gain` case above the gain
+ * A reading that would fail the gate is rerun once with `RERUN_RUNS` runs, and the processes of
+ * both readings together decide it (`pooledEstimate`): a `neutral` or `gain` case above the slow limit, a `gain` case above the gain
  * limit, or, in a `--control` session, a case outside the control band. One run of five has a
  * noise floor of a few percent (a process sits 3-5% from the next), so a single marginal
  * reading is not evidence either way.
