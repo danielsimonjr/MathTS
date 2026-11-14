@@ -4,6 +4,7 @@
  */
 
 import type { Scalar, IFraction } from './interfaces.js';
+import { FRACTION_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
 
 /** Longest repeating period `Fraction#toString` prints before it falls back to `n/d`. */
 const FRACTION_MAX_PERIOD_DIGITS = 1000;
@@ -11,15 +12,12 @@ const FRACTION_MAX_PERIOD_DIGITS = 1000;
 /**
  * Check if a value is a Fraction.
  *
- * Marker-based, so a second copy of the package recognises its own Fraction values. Reads the
- * prototype only, so a null-prototype object returns false.
+ * True for a `Fraction` of this copy of the package and for one of a second copy, which carries the
+ * same prototype brand (see `type-marker.ts`). The `instanceof` test comes first: it is the fast
+ * path for a value of this copy, and the brand test decides for every other value.
  */
 export function isFraction(value: unknown): value is Fraction {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    (Object.getPrototypeOf(value) as { isFraction?: unknown } | null)?.isFraction === true
-  );
+  return value instanceof Fraction || hasBrand(value, FRACTION_BRAND);
 }
 
 /**
@@ -422,7 +420,7 @@ export class Fraction implements IFraction {
    * Shared add/subtract core: same-denominator or cross-multiply, with a bigint combiner.
    */
   private addSub(other: Scalar, combine: (a: bigint, b: bigint) => bigint): Fraction {
-    if (other instanceof Fraction) {
+    if (isFraction(other)) {
       if (this.denominator === other.denominator) {
         return new Fraction(combine(this.numerator, other.numerator), this.denominator);
       }
@@ -455,7 +453,7 @@ export class Fraction implements IFraction {
    * on the small operands rather than on the full-size products.
    */
   multiply(other: Scalar): Fraction {
-    if (other instanceof Fraction) {
+    if (isFraction(other)) {
       const g1 = gcd(this.numerator, other.denominator);
       const g2 = gcd(other.numerator, this.denominator);
       return Fraction.fromReduced(
@@ -470,7 +468,7 @@ export class Fraction implements IFraction {
    * Division: a/b ÷ c/d = ad / bc
    */
   divide(other: Scalar): Fraction {
-    if (other instanceof Fraction) {
+    if (isFraction(other)) {
       if (other.numerator === 0n) {
         throw new Error('Division by zero');
       }
@@ -789,8 +787,8 @@ export class Fraction implements IFraction {
   }
 }
 
-// Prototype marker read by `isFraction`. Not enumerable, not writable.
-Object.defineProperty(Fraction.prototype, 'isFraction', { value: true });
+// Prototype markers: the brand that `isFraction` reads, and the mathjs marker.
+defineTypeMarkers(Fraction.prototype, FRACTION_BRAND, 'isFraction');
 
 /**
  * Common fraction constants

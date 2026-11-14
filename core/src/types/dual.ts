@@ -15,6 +15,7 @@
  * `DualTensor` apply exactly the same chain rules (no reinvention).
  */
 import { DUAL_UNARY_RULES, type DualUnaryRule } from './dual-rules.js';
+import { DUAL_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
 
 /**
  * A dual number `value + deriv·ε` for forward-mode automatic differentiation.
@@ -115,14 +116,16 @@ export class Dual {
   }
 }
 
-/** Type guard for {@link Dual}. Marker-based, so a second copy of the package recognises its values. */
+/**
+ * Type guard for {@link Dual}.
+ *
+ * True for a `Dual` of this copy of the package and for one of a second copy, which carries the
+ * same prototype brand (see `type-marker.ts`). The `instanceof` test comes first: it is the fast
+ * path for a value of this copy, and the brand test decides for every other value.
+ */
 export function isDual(x: unknown): x is Dual {
-  return (
-    x !== null &&
-    typeof x === 'object' &&
-    (Object.getPrototypeOf(x) as { isDual?: unknown } | null)?.isDual === true
-  );
+  return x instanceof Dual || hasBrand(x, DUAL_BRAND);
 }
 
-// Prototype marker read by `isDual`. Not enumerable, not writable.
-Object.defineProperty(Dual.prototype, 'isDual', { value: true });
+// Prototype brand read by `isDual`.
+defineTypeMarkers(Dual.prototype, DUAL_BRAND);

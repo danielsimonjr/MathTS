@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-14",
-    "totalFiles": 1331,
+    "totalFiles": 1332,
     "totalModules": 82,
-    "totalExports": 7276
+    "totalExports": 7282
   },
   "entryPoints": [
     {
@@ -576,15 +576,15 @@
           },
           {
             "file": "../types/bignumber.js",
-            "imports": ["BigNumber"]
+            "imports": ["BigNumber", "isBigNumber"]
           },
           {
             "file": "../types/complex.js",
-            "imports": ["Complex"]
+            "imports": ["Complex", "isComplex"]
           },
           {
             "file": "../types/fraction.js",
-            "imports": ["Fraction"]
+            "imports": ["Fraction", "isFraction"]
           }
         ],
         "workspaceDependencies": [],
@@ -2055,20 +2055,7 @@
         "description": "Shape of a BigNumber value that the duck-typing guards in this module read.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./types/bignumber.js",
-            "imports": ["isBigNumber"]
-          },
-          {
-            "file": "./types/complex.js",
-            "imports": ["isComplex"]
-          },
-          {
-            "file": "./types/fraction.js",
-            "imports": ["isFraction"]
-          }
-        ],
+        "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
           "isArray",
@@ -2848,6 +2835,10 @@
             "file": "./interfaces.js",
             "imports": ["Scalar", "MathTSValue"],
             "typeOnly": true
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["BIGNUMBER_BRAND", "defineTypeMarkers", "hasBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -2887,6 +2878,10 @@
             "file": "./interfaces.js",
             "imports": ["Scalar", "IComplex"],
             "typeOnly": true
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["COMPLEX_BRAND", "defineTypeMarkers", "hasBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -2914,6 +2909,10 @@
           {
             "file": "./dual-rules.js",
             "imports": ["DUAL_UNARY_RULES", "DualUnaryRule"]
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["DUAL_BRAND", "defineTypeMarkers", "hasBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -2930,6 +2929,10 @@
             "file": "./interfaces.js",
             "imports": ["Scalar", "IFraction"],
             "typeOnly": true
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["FRACTION_BRAND", "defineTypeMarkers", "hasBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -3027,6 +3030,23 @@
           "fromSiDimensionVector"
         ],
         "constants": ["UNIT_DIMENSION_LENGTH", "SI_DIMENSION_LENGTH"]
+      },
+      "core/src/types/type-marker.ts": {
+        "description": "Prototype markers that identify a core value across copies of the package.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "COMPLEX_BRAND",
+          "FRACTION_BRAND",
+          "BIGNUMBER_BRAND",
+          "DUAL_BRAND",
+          "defineTypeMarkers",
+          "hasBrand"
+        ],
+        "functions": ["defineTypeMarkers", "hasBrand"],
+        "constants": ["COMPLEX_BRAND", "FRACTION_BRAND", "BIGNUMBER_BRAND", "DUAL_BRAND"]
       },
       "core/src/types/unit/Unit.ts": {
         "description": "`scale_from × offset_from − scale_to × offset_to`: what converting between two",
@@ -27832,7 +27852,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["BigNumber", "Complex", "Dual", "Fraction"]
+            "imports": ["isBigNumber", "isComplex", "isDual", "isFraction"]
           },
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -46931,6 +46951,7 @@
           "core/src/types/interfaces.ts",
           "core/src/types/matrix/Range.ts",
           "core/src/types/si-dimension-vector.ts",
+          "core/src/types/type-marker.ts",
           "core/src/types/unit/Unit.ts",
           "core/src/types/unit/dependencies.ts",
           "core/src/types/unit/errors.ts",
@@ -48536,16 +48557,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1331,
+    "totalTypeScriptFiles": 1332,
     "totalModules": 82,
-    "totalLinesOfCode": 229584,
-    "totalExports": 7276,
+    "totalLinesOfCode": 229637,
+    "totalExports": 7282,
     "totalClasses": 62,
     "totalInterfaces": 660,
-    "totalFunctions": 2490,
+    "totalFunctions": 2492,
     "totalTypeGuards": 178,
     "totalEnums": 0,
-    "totalConstants": 1671,
+    "totalConstants": 1675,
     "totalReExports": 3160,
     "totalTypeOnlyImports": 682,
     "runtimeCircularDeps": 2,

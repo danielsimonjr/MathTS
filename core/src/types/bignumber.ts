@@ -4,19 +4,17 @@
  */
 
 import type { Scalar, MathTSValue } from './interfaces.js';
+import { BIGNUMBER_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
 
 /**
  * Check if a value is a BigNumber.
  *
- * Marker-based, so a second copy of the package recognises its own BigNumber values. Reads the
- * prototype only, so a null-prototype object returns false.
+ * True for a `BigNumber` of this copy of the package and for one of a second copy, which carries
+ * the same prototype brand (see `type-marker.ts`). The `instanceof` test comes first: it is the
+ * fast path for a value of this copy, and the brand test decides for every other value.
  */
 export function isBigNumber(value: unknown): value is BigNumber {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    (Object.getPrototypeOf(value) as { isBigNumber?: unknown } | null)?.isBigNumber === true
-  );
+  return value instanceof BigNumber || hasBrand(value, BIGNUMBER_BRAND);
 }
 
 /**
@@ -116,7 +114,7 @@ export class BigNumber implements MathTSValue {
     }
 
     const input = value === undefined ? 0 : value;
-    if (input === null || (typeof input === 'object' && !(input instanceof BigNumber))) {
+    if (input === null || (typeof input === 'object' && !isBigNumber(input))) {
       throw new TypeError(
         'BigNumber requires a number, string, bigint, or another BigNumber ' +
           `(received ${input === null ? 'null' : typeof input})`
@@ -157,7 +155,7 @@ export class BigNumber implements MathTSValue {
    * Create a BigNumber from a number, string, bigint, or existing instance (mathjs / Decimal.js style).
    */
   static from(value: number | string | bigint | BigNumber): BigNumber {
-    if (value instanceof BigNumber) {
+    if (isBigNumber(value)) {
       return value;
     }
     if (typeof value === 'string') {
@@ -1635,7 +1633,7 @@ export class BigNumber implements MathTSValue {
   // ============================================================
 
   private ensureBigNumber(value: Scalar | BigNumber | number | string): BigNumber {
-    if (value instanceof BigNumber) return value;
+    if (isBigNumber(value)) return value;
     if (typeof value === 'number') return BigNumber.fromNumber(value);
     if (typeof value === 'string') return BigNumber.parse(value);
     return BigNumber.fromNumber(Number(value.valueOf()));
@@ -1669,9 +1667,9 @@ export class BigNumber implements MathTSValue {
   }
 }
 
-// Prototype marker read by `isBigNumber`. Not enumerable, not writable. The instance field of the
-// same name stays as it is.
-Object.defineProperty(BigNumber.prototype, 'isBigNumber', { value: true });
+// Prototype markers: the brand that `isBigNumber` reads, and the mathjs marker. The instance field
+// `isBigNumber` stays as it is.
+defineTypeMarkers(BigNumber.prototype, BIGNUMBER_BRAND, 'isBigNumber');
 
 /**
  * Common BigNumber constants

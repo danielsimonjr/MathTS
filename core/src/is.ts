@@ -12,10 +12,6 @@
 //   for security reasons, so these functions are not exposed in the expression
 //   parser.
 
-import { isBigNumber as isBigNumberValue } from './types/bignumber.js';
-import { isComplex as isComplexValue } from './types/complex.js';
-import { isFraction as isFractionValue } from './types/fraction.js';
-
 // Type interfaces for math.js types
 /**
  * Shape of a BigNumber value that the duck-typing guards in this module read.
@@ -157,18 +153,25 @@ export function isNumber(x: unknown): x is number {
  * @returns True when `x` and its constructor prototype both have `isBigNumber === true`, or when `x.constructor.isDecimal(x)` returns true.
  */
 export function isBigNumber(x: unknown): x is BigNumber {
-  if (isBigNumberValue(x)) {
-    return true;
-  }
-
-  // decimal.js values are accepted here, but not by the class type test.
   if (!x || typeof x !== 'object' || typeof (x as BigNumber).constructor !== 'function') {
     return false;
   }
 
   const obj = x as BigNumber;
 
-  return typeof obj.constructor.isDecimal === 'function' && obj.constructor.isDecimal(obj) === true;
+  if (
+    obj.isBigNumber === true &&
+    typeof obj.constructor.prototype === 'object' &&
+    obj.constructor.prototype.isBigNumber === true
+  ) {
+    return true;
+  }
+
+  if (typeof obj.constructor.isDecimal === 'function' && obj.constructor.isDecimal(obj) === true) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -188,7 +191,7 @@ export function isBigInt(x: unknown): x is bigint {
  * @returns True when `x` is an object whose prototype has `isComplex === true`.
  */
 export function isComplex(x: unknown): x is Complex {
-  return isComplexValue(x);
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true);
 }
 
 /**
@@ -198,7 +201,7 @@ export function isComplex(x: unknown): x is Complex {
  * @returns True when `x` is an object whose prototype has `isFraction === true`.
  */
 export function isFraction(x: unknown): x is Fraction {
-  return isFractionValue(x);
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true);
 }
 
 /**

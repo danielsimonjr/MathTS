@@ -115,7 +115,7 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
 - **core/typed**: 3 files
-- **core/types**: 20 files
+- **core/types**: 21 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
 - **matrix/operations**: 23 files
@@ -200,7 +200,7 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 12             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 53             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 54             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
@@ -483,13 +483,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports          | Type   |
-| ----------------------- | ---------------- | ------ |
-| `../config.js`          | `DEFAULT_CONFIG` | Import |
-| `../number.js`          | `nearlyEqual`    | Import |
-| `../types/bignumber.js` | `BigNumber`      | Import |
-| `../types/complex.js`   | `Complex`        | Import |
-| `../types/fraction.js`  | `Fraction`       | Import |
+| File                    | Imports                  | Type   |
+| ----------------------- | ------------------------ | ------ |
+| `../config.js`          | `DEFAULT_CONFIG`         | Import |
+| `../number.js`          | `nearlyEqual`            | Import |
+| `../types/bignumber.js` | `BigNumber, isBigNumber` | Import |
+| `../types/complex.js`   | `Complex, isComplex`     | Import |
+| `../types/fraction.js`  | `Fraction, isFraction`   | Import |
 
 **Exports:**
 
@@ -695,14 +695,6 @@ graph LR
 ---
 
 ### `core/src/is.ts` - Shape of a BigNumber value that the duck-typing guards in this module read.
-
-**Internal Dependencies:**
-
-| File                   | Imports       | Type   |
-| ---------------------- | ------------- | ------ |
-| `./types/bignumber.js` | `isBigNumber` | Import |
-| `./types/complex.js`   | `isComplex`   | Import |
-| `./types/fraction.js`  | `isFraction`  | Import |
 
 **Exports:**
 
@@ -1010,9 +1002,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports               | Type               |
-| ----------------- | --------------------- | ------------------ |
-| `./interfaces.js` | `Scalar, MathTSValue` | Import (type-only) |
+| File               | Imports                                        | Type               |
+| ------------------ | ---------------------------------------------- | ------------------ |
+| `./interfaces.js`  | `Scalar, MathTSValue`                          | Import (type-only) |
+| `./type-marker.js` | `BIGNUMBER_BRAND, defineTypeMarkers, hasBrand` | Import             |
 
 **Exports:**
 
@@ -1028,9 +1021,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports            | Type               |
-| ----------------- | ------------------ | ------------------ |
-| `./interfaces.js` | `Scalar, IComplex` | Import (type-only) |
+| File               | Imports                                      | Type               |
+| ------------------ | -------------------------------------------- | ------------------ |
+| `./interfaces.js`  | `Scalar, IComplex`                           | Import (type-only) |
+| `./type-marker.js` | `COMPLEX_BRAND, defineTypeMarkers, hasBrand` | Import             |
 
 **Exports:**
 
@@ -1055,9 +1049,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports                           | Type   |
-| ----------------- | --------------------------------- | ------ |
-| `./dual-rules.js` | `DUAL_UNARY_RULES, DualUnaryRule` | Import |
+| File               | Imports                                   | Type   |
+| ------------------ | ----------------------------------------- | ------ |
+| `./dual-rules.js`  | `DUAL_UNARY_RULES, DualUnaryRule`         | Import |
+| `./type-marker.js` | `DUAL_BRAND, defineTypeMarkers, hasBrand` | Import |
 
 **Exports:**
 
@@ -1070,9 +1065,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports             | Type               |
-| ----------------- | ------------------- | ------------------ |
-| `./interfaces.js` | `Scalar, IFraction` | Import (type-only) |
+| File               | Imports                                       | Type               |
+| ------------------ | --------------------------------------------- | ------------------ |
+| `./interfaces.js`  | `Scalar, IFraction`                           | Import (type-only) |
+| `./type-marker.js` | `FRACTION_BRAND, defineTypeMarkers, hasBrand` | Import             |
 
 **Exports:**
 
@@ -1124,6 +1120,15 @@ graph LR
 - Types: `SiDimensionVector`, `SiDimensionExponent`
 - Functions: `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`
 - Constants: `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`
+
+---
+
+### `core/src/types/type-marker.ts` - Prototype markers that identify a core value across copies of the package.
+
+**Exports:**
+
+- Functions: `defineTypeMarkers`, `hasBrand`
+- Constants: `COMPLEX_BRAND`, `FRACTION_BRAND`, `BIGNUMBER_BRAND`, `DUAL_BRAND`
 
 ---
 
@@ -12062,10 +12067,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                               |
-| ------------------------------ | ------------------------------------ |
-| `@danielsimonjr/mathts-core`   | `BigNumber, Complex, Dual, Fraction` |
-| `@danielsimonjr/mathts-matrix` | `Matrix`                             |
+| Package                        | Import                                       |
+| ------------------------------ | -------------------------------------------- |
+| `@danielsimonjr/mathts-core`   | `isBigNumber, isComplex, isDual, isFraction` |
+| `@danielsimonjr/mathts-matrix` | `Matrix`                                     |
 
 **Exports:**
 
@@ -20427,9 +20432,9 @@ graph TD
         N40[interfaces]
         N41[Range]
         N42[si-dimension-vector]
-        N43[Unit]
-        N44[dependencies]
-        N45[...10 more]
+        N43[type-marker]
+        N44[Unit]
+        N45[...11 more]
     end
 
     subgraph Matrix/backends
@@ -21191,18 +21196,17 @@ graph TD
     N34 --> N39
     N34 --> N35
     N35 --> N40
+    N35 --> N43
     N36 --> N40
+    N36 --> N43
     N38 --> N37
+    N38 --> N43
     N39 --> N40
+    N39 --> N43
     N41 --> N20
     N42 --> N39
-    N43 --> N20
-    N43 --> N35
-    N44 --> N12
-    N44 --> N16
+    N44 --> N20
     N44 --> N35
-    N44 --> N36
-    N44 --> N39
     N46 --> N72
     N47 --> N72
     N47 --> N46
@@ -21211,6 +21215,7 @@ graph TD
     N49 --> N46
     N49 --> N72
     N49 --> N50
+    N49 --> N48
 ```
 
 ---
@@ -21221,14 +21226,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1331   |
+| Total TypeScript Files  | 1332   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229584 |
-| Total Exports           | 7276   |
+| Total Lines of Code     | 229637 |
+| Total Exports           | 7282   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
 | Total Interfaces        | 660    |
-| Total Functions         | 2490   |
+| Total Functions         | 2492   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |
