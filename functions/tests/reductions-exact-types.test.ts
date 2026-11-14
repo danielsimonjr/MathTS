@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
-import { matrix, max, min, sparse, sum } from '../src/index.js';
+import { matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
 const B = [new BigNumber('0.1000000000000000000001'), new BigNumber('0.2')];
@@ -299,5 +299,129 @@ describe('min and max follow mathjs on equal values, NaN and mixed types', () =>
     expect(min(1n, 2)).toBe(1n);
     expect(max(3n, 2)).toBe(3n);
     expect(max(2, B0)).toBe(2);
+  });
+});
+
+const B1 = B[1];
+
+describe('mean, variance and std keep exact types', () => {
+  it('mean of Complex, BigNumber and Fraction values', () => {
+    const [re, im] = parts(mean(C));
+    expect(re).toBeCloseTo(4.5, 12);
+    expect(im).toBeCloseTo(6, 12);
+    expect(String(mean(B))).toBe('0.15000000000000000000005');
+    expect(ratio(mean(F))).toEqual([1n, 4n]);
+  });
+
+  it('variance of BigNumber and Fraction values', () => {
+    const v = variance(B);
+    expect(v).toBeInstanceOf(BigNumber);
+    expect(String(v)).toBe('0.004999999999999999999990000000000000000000005');
+    expect(ratio(variance(F))).toEqual([1n, 72n]);
+  });
+
+  it('variance of Complex values is the mean squared modulus of the deviations (a real number)', () => {
+    // Mean i; deviations 1 - i, 0, -1 + i; |d|^2 = 2, 0, 2; unbiased: 4 / (3 - 1) = 2. The values
+    // are not on one line through 0, so the variance of their magnitudes (1, 1, sqrt 5) differs.
+    const Z = [new Complex(1, 0), new Complex(0, 1), new Complex(-1, 2)];
+    expect(variance(Z)).toBeCloseTo(2, 12);
+    expect(std(Z)).toBeCloseTo(Math.SQRT2, 12);
+  });
+
+  it('std of Fraction values is a number, std of BigNumber values a BigNumber', () => {
+    const sf = std(F);
+    expect(typeof sf).toBe('number');
+    expect(sf as number).toBeCloseTo(Math.sqrt(1 / 72), 15);
+    const sb = std(B);
+    expect(sb).toBeInstanceOf(BigNumber);
+    const sq = (sb as BigNumber).times(sb as BigNumber);
+    expect(
+      sq
+        .minus(variance(B) as BigNumber)
+        .abs()
+        .lt(new BigNumber('1e-40'))
+    ).toBe(true);
+  });
+
+  it('mixed arrays, Matrix and nested exact data', () => {
+    expect(String(mean([1, B1]))).toBe('0.6');
+    expect(ratio(mean(matrix([[F0, F1]])))).toEqual([1n, 4n]);
+    const along = variance(
+      [
+        [F0, F1],
+        [F1, F0],
+      ],
+      0
+    ) as unknown[];
+    expect(along.map(ratio)).toEqual([
+      [1n, 72n],
+      [1n, 72n],
+    ]);
+  });
+
+  it('a normalization string with exact data', () => {
+    expect(ratio(variance(F, 'uncorrected'))).toEqual([1n, 144n]);
+  });
+
+  it('an options object with exact data throws', () => {
+    expect(() => mean(F, { skipNaN: true })).toThrow(/options object needs number data/);
+    expect(() => variance(B, { ddof: 0 })).toThrow(/options object needs number data/);
+    expect(() => std(F, 'uncorrected', { skipNaN: true })).toThrow(
+      /options object needs number data/
+    );
+  });
+
+  it('numeric strings and bigints follow mathjs', () => {
+    expect(mean(['1', '2'])).toBe(1.5);
+    expect(variance(['1', '2'])).toBe(0.5);
+    expect(mean([1n, 2n, 3n])).toBe(2);
+  });
+
+  it('a Matrix of numbers gives the same bits as the array', () => {
+    expect(variance(matrix([1, 2, 3.5]))).toBe(variance([1, 2, 3.5]));
+  });
+});
+
+describe('mean, variance and std pins that hold before and after the fix', () => {
+  it('empty input gives NaN', () => {
+    expect(mean([])).toBeNaN();
+    expect(variance([])).toBeNaN();
+    expect(std([])).toBeNaN();
+  });
+
+  it('typed arrays stay on the number kernel', () => {
+    expect(typeof mean(new Float64Array([1, 2, 3.5]))).toBe('number');
+  });
+
+  it('options objects with number data', () => {
+    expect(mean([Number.NaN, 1, 3], { skipNaN: true })).toBe(2);
+    expect(variance([1, 2, 3.5], { ddof: 0 })).toBe(1.0555555555555556);
+    expect(
+      variance(
+        [
+          [1, 2],
+          [3, Number.NaN],
+        ],
+        0,
+        { skipNaN: true }
+      )
+    ).toEqual([2, 0]);
+  });
+
+  it('a dimension on a number Matrix gives a plain array', () => {
+    expect(
+      mean(
+        matrix([
+          [1, 2],
+          [3, 4.5],
+        ]),
+        0
+      )
+    ).toEqual([2, 3.25]);
+  });
+
+  it('kernel values', () => {
+    expect(variance([1, 2, 3.5])).toBe(1.5833333333333335);
+    expect(std([1, 2, 3.5])).toBe(1.2583057392117918);
   });
 });
