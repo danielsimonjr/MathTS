@@ -245,7 +245,7 @@ function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknow
 /**
  * Element-wise operation on matrix operands. The result storage follows mathjs: two sparse
  * operands give a sparse result; a sparse operand with a number gives a sparse result when
- * `scalarKeepsSparse` is true (multiply, divide, mod: a zero stays zero) and a dense result
+ * `scalarKeepsSparse` is true (multiply, divide: a zero stays zero; `mod` takes 'left': mathjs gives a sparse result when the first operand is sparse) and a dense result
  * otherwise (add, subtract: a zero becomes the number); a sparse operand with a dense one
  * gives a dense result. A call with a public CSR `SparseMatrix` returns the public class,
  * which stores numbers only; a result with another entry type stays a dense matrix.
@@ -255,15 +255,16 @@ function elementwiseMatrixNumber(
   fallback: ScalarOp,
   a: unknown,
   b: unknown,
-  scalarKeepsSparse = false
+  scalarKeepsSparse: boolean | 'left' = false
 ): MathJSDenseMatrix | MathJSSparseMatrix | SparseMatrix {
   const data = elementwiseNumber(tf, fallback, toNested(a), toNested(b)) as unknown[][];
   const sparseA = isSparseStorage(a);
   const sparseB = isSparseStorage(b);
   const sparseOut =
     (sparseA && sparseB) ||
-    (scalarKeepsSparse &&
-      ((sparseA && typeof b === 'number') || (sparseB && typeof a === 'number')));
+    (scalarKeepsSparse === 'left' && sparseA) ||
+    (scalarKeepsSparse === true &&
+      ((sparseA && !isCollection(b)) || (sparseB && !isCollection(a))));
   if (!sparseOut) return new MathJSDenseMatrix(data as number[][]);
   if (a instanceof SparseMatrix || b instanceof SparseMatrix) return publicSparseOrDense(data);
   return new MathJSSparseMatrix(data);
@@ -277,6 +278,11 @@ function publicSparseOrDense(data: unknown[][]): SparseMatrix | MathJSDenseMatri
     }
   }
   return SparseMatrix.fromDense(DenseMatrix.fromArray(data as number[][]));
+}
+
+/** True for an Array or a matrix; false for a scalar of any type. */
+function isCollection(x: unknown): boolean {
+  return Array.isArray(x) || typeof (x as { toArray?: unknown } | null)?.toArray === 'function';
 }
 
 /** True if `m` is a matrix in sparse storage (the public CSR class or the factory CSC class). */
@@ -344,7 +350,7 @@ interface CollectionKernels {
 function elementwiseKernels(
   path: { fn?: object },
   leaf: ScalarOp,
-  scalarKeepsSparse = false
+  scalarKeepsSparse: boolean | 'left' = false
 ): CollectionKernels {
   return {
     array: (a, b) => elementwiseNumber(path.fn!, leaf, a, b),
@@ -382,7 +388,7 @@ const addKernels = elementwiseKernels(addForNumberPath, addOp);
 const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
 const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
-const modKernels = elementwiseKernels(modForNumberPath, modOp, true);
+const modKernels = elementwiseKernels(modForNumberPath, modOp, 'left');
 
 /** The size of an Array or a matrix, in mathjs's shape: `[n]` for a vector, `[r, c]` otherwise. */
 function collectionSize(collection: unknown): number[] {

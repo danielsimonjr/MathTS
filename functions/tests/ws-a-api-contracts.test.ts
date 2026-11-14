@@ -569,13 +569,12 @@ describe('#923 — the public mod applies the rule to each element of an array o
     expect(toArray(publicMod(sparseMatrix, dense))).toEqual(
       toArray(factoryModulo(sparseMatrix, dense))
     );
-    // The values are the factory values. The storage is not always the factory storage: a result
-    // with a sparse operand is sparse here, and the factory gives a dense result for
-    // `mod(dense, sparse)` and for `mod(scalar, sparse)`.
+    // The storage is the storage of mathjs 15: the result is sparse when the first operand is
+    // sparse, and dense for `mod(dense, sparse)` and for `mod(scalar, sparse)`.
     const storage = (m: unknown): string => (m as { storage(): string }).storage();
-    expect(storage(publicMod(dense, sparseMatrix))).toBe('sparse');
+    expect(storage(publicMod(dense, sparseMatrix))).toBe('dense');
     expect(storage(publicMod(sparseMatrix, dense))).toBe('sparse');
-    expect(storage(publicMod(3, sparseMatrix))).toBe('sparse');
+    expect(storage(publicMod(3, sparseMatrix))).toBe('dense');
     expect(toArray(publicMod(3, sparseMatrix))).toEqual(toArray(factoryModulo(3, sparseMatrix)));
     expect(toArray(publicMod(0, sparseMatrix))).toEqual(toArray(factoryModulo(0, sparseMatrix)));
   });
