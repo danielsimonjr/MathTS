@@ -257,9 +257,47 @@ describe('min and max pins that hold before and after the fix', () => {
     expect(min([1, Number.NaN, 0])).toBeNaN();
   });
 
-  it('keep the number paths', () => {
-    expect(min(1, 2, 3, 4)).toBe(1);
+  it('give Infinity and -Infinity for an empty Matrix and empty nested arrays', () => {
+    expect(min(matrix([]))).toBe(Infinity);
+    expect(max(matrix([]))).toBe(-Infinity);
+    expect(min([[]])).toBe(Infinity);
+    expect(max([[], []])).toBe(-Infinity);
+  });
+
+  it('keep the bigint and typed-array paths', () => {
     expect(min(1n, 2n)).toBe(1n);
     expect(max(new Float64Array([1, 2, 3.5]))).toBe(3.5);
+  });
+});
+
+describe('min and max follow mathjs on equal values, NaN and mixed types', () => {
+  it('keep the first of equal zeros', () => {
+    expect(Object.is(min([0, -0]), 0)).toBe(true);
+    expect(Object.is(max([-0, 0]), -0)).toBe(true);
+    expect(Object.is(min(0, -0), 0)).toBe(true);
+    expect(Object.is(max(-0, 0), -0)).toBe(true);
+    expect(Object.is(min(0, -0, 1), 0)).toBe(true);
+    expect(Object.is(min([[0], [-0]]), 0)).toBe(true);
+  });
+
+  it('return NaN once any value is NaN', () => {
+    expect(min([Number.NaN, 1])).toBeNaN();
+    expect(max([1, Number.NaN, 5])).toBeNaN();
+    expect(min(F0, Number.NaN)).toBeNaN();
+    expect(min([0.5, Number.NaN, F0])).toBeNaN();
+    expect(min(1, Number.NaN, 0)).toBeNaN();
+  });
+
+  it('keep the first of equal zeros in a Float64Array', () => {
+    expect(Object.is(min(new Float64Array([0, -0])), 0)).toBe(true);
+    expect(Object.is(max(new Float64Array([-0, 0])), -0)).toBe(true);
+  });
+
+  it('return the winning argument itself for two arguments of mixed types', () => {
+    expect(max(1, F0)).toBe(1);
+    expect(min(F0, 1)).toBe(F0);
+    expect(min(1n, 2)).toBe(1n);
+    expect(max(3n, 2)).toBe(3n);
+    expect(max(2, B0)).toBe(2);
   });
 });

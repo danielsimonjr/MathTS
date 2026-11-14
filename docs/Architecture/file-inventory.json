@@ -8304,7 +8304,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 92
+      "loc": 94
     },
     {
       "file": "functions/src/statistics/mad.ts",
@@ -8997,7 +8997,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2414
+      "loc": 2445
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -11895,7 +11895,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 322
+      "loc": 323
     },
     {
       "file": "functions/tests/p7-lsolve-usolve-number-path.test.ts",
@@ -11916,7 +11916,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 39
+      "loc": 40
     },
     {
       "file": "functions/tests/p7-median-number-path.test.ts",
@@ -12217,7 +12217,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 266
+      "loc": 304
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",

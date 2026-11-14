@@ -43,7 +43,8 @@ function reference(
   let res: unknown;
   for (const value of flatten(values)) {
     if (isNaNFn(value)) res = value;
-    else if (res === undefined || compare(value, res)) res = value;
+    // A NaN result stays NaN: no later value is compared with that result.
+    else if (res === undefined || (!isNaNFn(res) && compare(value, res))) res = value;
   }
   return typeof res === 'string' ? Number(res) : res;
 }

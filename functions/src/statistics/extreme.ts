@@ -50,7 +50,7 @@ export function reduceExtreme(
         if (typeof value !== 'number') break;
         if (nan(value)) {
           best = value;
-        } else if (best === undefined || cmp(value, best)) {
+        } else if (best === undefined || (!nan(best) && cmp(value, best))) {
           best = value;
         }
       }
@@ -69,9 +69,11 @@ export function reduceExtreme(
 
   deepForEach(rest, function (value: unknown) {
     try {
+      // A NaN result stays NaN, so no later value is compared with it: a comparison of NaN with
+      // a Fraction would convert NaN to a Fraction, which throws.
       if (mathIsNaN(value)) {
         res = value;
-      } else if (res === undefined || compare(value, res)) {
+      } else if (res === undefined || (!mathIsNaN(res) && compare(value, res))) {
         res = value;
       }
     } catch (err) {

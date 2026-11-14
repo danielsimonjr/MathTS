@@ -1,8 +1,8 @@
 {
   "generated": "2026-11-14",
-  "total": 216,
+  "total": 214,
   "acceleratedCount": 23,
-  "parallelOnlyCount": 17,
+  "parallelOnlyCount": 15,
   "jsOnlyCount": 176,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 21,
@@ -171,20 +171,6 @@
     }
   ],
   "parallelOnly": [
-    {
-      "name": "max",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "min",
-      "file": "arithmetic.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
     {
       "name": "norm",
       "file": "arithmetic.ts",
@@ -472,7 +458,7 @@
   "byFile": {
     "arithmetic.ts": {
       "wasm": 0,
-      "parallel": 3,
+      "parallel": 1,
       "jsOnly": 40
     },
     "bitwise.ts": {
