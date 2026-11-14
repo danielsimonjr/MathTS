@@ -412,7 +412,8 @@ describe('issue #949: factoryScope.typed keeps the behaviour of mathTyped', () =
   it('builds a working function, and referToSelf works inside it', () => {
     const fact = scoped('fact', {
       number: scoped.referToSelf(
-        (self: (n: number) => number) => (n: number) => (n <= 1 ? 1 : n * self(n - 1))
+        (self) => (n: number) =>
+          n <= 1 ? 1 : n * (self as unknown as (m: number) => number)(n - 1)
       ),
     }) as unknown as (n: number) => number;
     expect(fact(5)).toBe(120);
