@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2404,
+  "totalFiles": 2405,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1305,
     "test-only": 0,
     "orphan": 0,
-    "test": 1007,
+    "test": 1008,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1331,
-    "tests": 1007,
+    "tests": 1008,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1080,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 138,
+    "@danielsimonjr/mathts-matrix": 139,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -14068,11 +14068,18 @@
       "loc": 441
     },
     {
+      "file": "matrix/tests/gpu/operations.browser.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 184
+    },
+    {
       "file": "matrix/tests/gpu/operations.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 422
+      "loc": 362
     },
     {
       "file": "matrix/tests/helpers/stub-global.ts",
