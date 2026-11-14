@@ -12210,7 +12210,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 181
+      "loc": 266
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",
