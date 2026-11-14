@@ -38,6 +38,7 @@ interface VarianceDependencies {
   isNaN: TypedFunction;
   conj: TypedFunction;
   re: TypedFunction;
+  parseNumberWithConfig: (value: string) => unknown;
 }
 
 type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
@@ -55,6 +56,7 @@ const dependencies = [
   'isNaN',
   'conj',
   're',
+  'parseNumberWithConfig',
 ];
 
 export const createVariance = /* #__PURE__ */ factory(
@@ -70,7 +72,11 @@ export const createVariance = /* #__PURE__ */ factory(
     isNaN: mathIsNaN,
     conj,
     re,
+    parseNumberWithConfig,
   }: VarianceDependencies) => {
+    /** A string value becomes a number of the configured type, as in `sum`. */
+    const toValue = (v: unknown): unknown => (typeof v === 'string' ? parseNumberWithConfig(v) : v);
+
     /** A squared deviation: `diff * conj(diff)` for Complex (real, |diff|^2), else `diff * diff`. */
     const squaredDeviation = (diff: unknown): unknown =>
       isComplex(diff) ? re(multiply(diff, conj(diff))) : multiply(diff, diff);
@@ -201,7 +207,8 @@ export const createVariance = /* #__PURE__ */ factory(
       // calculate the mean and number of elements
       deepForEach(array, function (value: unknown) {
         try {
-          sum = sum === undefined ? value : add(sum, value);
+          const x = toValue(value);
+          sum = sum === undefined ? x : add(sum, x);
           num++;
         } catch (err) {
           throw improveErrorMessage(err, 'variance', value);
@@ -214,7 +221,7 @@ export const createVariance = /* #__PURE__ */ factory(
       // calculate the variance
       sum = undefined;
       deepForEach(array, function (value: unknown) {
-        const diff = subtract(value, mean);
+        const diff = subtract(toValue(value), mean);
         const sq = squaredDeviation(diff);
         sum = sum === undefined ? sq : add(sum, sq);
       });

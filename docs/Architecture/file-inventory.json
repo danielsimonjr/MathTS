@@ -1213,7 +1213,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 106
     },
     {
       "file": "core/tests/object-pollution.test.ts",
@@ -6638,7 +6638,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1110
+      "loc": 1115
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -8332,7 +8332,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 122
+      "loc": 128
     },
     {
       "file": "functions/src/statistics/median.ts",
@@ -8423,7 +8423,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 276
+      "loc": 284
     },
     {
       "file": "functions/src/stats/distances.ts",
@@ -9004,7 +9004,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2568
+      "loc": 2602
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -12224,7 +12224,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 433
+      "loc": 489
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",

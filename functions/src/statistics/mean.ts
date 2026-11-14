@@ -18,15 +18,19 @@ interface MeanDependencies {
   typed: TypedFunction;
   add: TypedFunction;
   divide: TypedFunction;
+  parseNumberWithConfig: (value: string) => unknown;
 }
 
 const name = 'mean';
-const dependencies = ['typed', 'add', 'divide'];
+const dependencies = ['typed', 'add', 'divide', 'parseNumberWithConfig'];
 
 export const createMean = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, divide }: MeanDependencies) => {
+  ({ typed, add, divide, parseNumberWithConfig }: MeanDependencies) => {
+    /** A string value becomes a number of the configured type, as in `sum`. */
+    const toValue = (v: unknown): unknown => (typeof v === 'string' ? parseNumberWithConfig(v) : v);
+
     /**
      * Compute the mean value of matrix or a list with values.
      * In case of a multidimensional array, the mean of the flattened array
@@ -85,7 +89,9 @@ export const createMean = /* #__PURE__ */ factory(
     ): unknown {
       try {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        const sum = reduce(array, dimValue, add);
+        const sum = reduce(array, dimValue, (a: unknown, b: unknown) =>
+          add(toValue(a), toValue(b))
+        );
         const s = Array.isArray(array) ? arraySize(array) : (array as MatrixType).size();
         return divide(sum, s[dimValue]);
       } catch (err) {
@@ -105,7 +111,8 @@ export const createMean = /* #__PURE__ */ factory(
 
       deepForEach(array, function (value: unknown) {
         try {
-          sum = sum === undefined ? value : add(sum, value);
+          const x = toValue(value);
+          sum = sum === undefined ? x : add(sum, x);
           num++;
         } catch (err) {
           throw improveErrorMessage(err, 'mean', value);

@@ -13,6 +13,35 @@ function data(n: number): number[] {
   return Array.from({ length: n }, (_, i) => Math.sin(i * 1.7) * 10 ** ((i % 7) - 3));
 }
 
+/** The IEEE-754 bits of a double, as 16 hex digits. */
+function bits(x: number): string {
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, x);
+  return view.getBigUint64(0).toString(16).padStart(16, '0');
+}
+
+describe('both kernels keep the bits of the kernel before #1039', () => {
+  // Literals computed with `sumSquaredDeviations` at commit 77c84ef4, before the kernel was
+  // shared. The two functions now share one loop, so comparing the functions with each other cannot see
+  // a change to that loop; these literals can.
+  const offset = Array.from({ length: 37 }, (_, i) => 1e9 + 0.1 * i);
+  const wave = Array.from({ length: 300 }, (_, i) => Math.sin(i) * 1e-3 + 42.5);
+
+  it('a large offset and a long wave give the recorded bits', () => {
+    for (const fn of [sumSquaredDeviations, sumSquaredDeviationsChecked]) {
+      expect(bits(fn(offset) as number)).toBe('4045170a3cc28f62');
+      expect(bits(fn(wave) as number)).toBe('3f2397ed67db9bdc');
+    }
+  });
+
+  it('an Infinity or a NaN element gives NaN', () => {
+    for (const fn of [sumSquaredDeviations, sumSquaredDeviationsChecked]) {
+      expect(fn([1, 2, Infinity, 4])).toBeNaN();
+      expect(fn([1, NaN, 3])).toBeNaN();
+    }
+  });
+});
+
 describe('sumSquaredDeviationsChecked', () => {
   it('returns the same bits as sumSquaredDeviations for every length from 0 to 300', () => {
     for (let n = 0; n <= 300; n++) {

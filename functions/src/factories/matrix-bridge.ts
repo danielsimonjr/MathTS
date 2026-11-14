@@ -622,9 +622,14 @@ export class MathJSSparseMatrix {
   }
 
   /**
-   * Convert a dense 2D array to CSC format.
+   * Convert a dense 2D array to CSC format. A 1-D array becomes a column vector
+   * of size [n, 1], as in mathjs.
    */
-  private _fromDenseArray(data: unknown[][]): void {
+  private _fromDenseArray(input: unknown[][] | unknown[]): void {
+    const data: unknown[][] =
+      input.length > 0 && !Array.isArray(input[0])
+        ? (input as unknown[]).map((v) => [v])
+        : (input as unknown[][]);
     const rows = data.length;
     const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
     this._values = [];
