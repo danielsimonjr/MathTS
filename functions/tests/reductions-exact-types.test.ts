@@ -10,6 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
+import type { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
@@ -304,6 +305,10 @@ describe('min and max follow mathjs on equal values, NaN and mixed types', () =>
 
 const B1 = B[1];
 
+// `matrix` returns `unknown` by design; the typed statistics overloads take a Matrix. This is the one
+// cast of the file.
+const dense = (data: unknown[]): DenseMatrix => matrix(data) as DenseMatrix;
+
 describe('mean, variance and std keep exact types', () => {
   it('mean of Complex, BigNumber and Fraction values', () => {
     const [re, im] = parts(mean(C));
@@ -337,15 +342,15 @@ describe('mean, variance and std keep exact types', () => {
     const sq = (sb as BigNumber).times(sb as BigNumber);
     expect(
       sq
-        .minus(variance(B) as BigNumber)
+        .sub(variance(B) as BigNumber)
         .abs()
-        .lt(new BigNumber('1e-40'))
+        .lessThan(new BigNumber('1e-40'))
     ).toBe(true);
   });
 
   it('mixed arrays, Matrix and nested exact data', () => {
     expect(String(mean([1, B1]))).toBe('0.6');
-    expect(ratio(mean(matrix([[F0, F1]])))).toEqual([1n, 4n]);
+    expect(ratio(mean(dense([[F0, F1]])))).toEqual([1n, 4n]);
     const along = variance(
       [
         [F0, F1],
@@ -378,7 +383,7 @@ describe('mean, variance and std keep exact types', () => {
   });
 
   it('a Matrix of numbers gives the same bits as the array', () => {
-    expect(variance(matrix([1, 2, 3.5]))).toBe(variance([1, 2, 3.5]));
+    expect(variance(dense([1, 2, 3.5]))).toBe(variance([1, 2, 3.5]));
   });
 });
 
@@ -411,7 +416,7 @@ describe('mean, variance and std pins that hold before and after the fix', () =>
   it('a dimension on a number Matrix gives a plain array', () => {
     expect(
       mean(
-        matrix([
+        dense([
           [1, 2],
           [3, 4.5],
         ]),
