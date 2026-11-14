@@ -1,5 +1,27 @@
 # @danielsimonjr/mathts-expression
 
+## 0.14.0
+
+### Minor Changes
+
+- 50c506c: Breaking: a radical sign parses as a function call. `√x` is `sqrt(x)` (a `FunctionNode`), not an `OperatorNode`, so `toString()` is `sqrt(2)` and `toTex()` is `\sqrt{2}` (#885). `∛` is `cbrt` and `∜` is `nthRoot(x, 4)`; both work in the expression package alone. The operand of a radical is the operand of unary minus (`√2^2` is `sqrt(2 ^ 2)`), and a radical can be the right operand of implicit multiplication (`2√3`). `·`, `⋅`, `×`, `÷` and `−` are operators. A Unicode mathematical digit is a parse-time `SyntaxError` (#922). mathjs 15.2.0 rejects these symbols; MathTS accepts them as a deliberate superset.
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- 69f09cc: Public factories resolve their own default dependencies. `createParse()` and `createEvaluate()` run with no argument (#883, #924). `createParse(create(all))` builds the AST node constructors on the caller's math scope (#924). The string-to-Node converter on the shared typed instance belongs to `functions`: `createParse` registers none, so `parse` works in every load order (#937). `simplify` tests nodes by their structure, so a node from another parse simplifies like an own node (#937). Caller-supplied dependencies always win. The nodes of `createParse(create(all))` hide the same denylisted names as `math.evaluate` (`import`, `createUnit`, `parse`, ...), and parse reads a config accessor such as compat's `math.config` on each call, so `number: 'BigNumber'` holds. `create(all).typed` has every member of `mathTyped` (`addConversion`, `find`, ...).
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [799b0fe]
+- Updated dependencies [b95de8a]
+  - @danielsimonjr/mathts-core@0.28.0
+
 ## 0.13.0
 
 ### Minor Changes

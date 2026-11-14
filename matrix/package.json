@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-matrix",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "description": "Matrix operations for MathTS with WASM/WebGPU backend support",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -47,9 +47,9 @@
     "sourcemap": true
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.27.0",
-    "@danielsimonjr/mathts-gpu": "^0.3.0",
-    "@danielsimonjr/mathts-parallel": "^0.10.1"
+    "@danielsimonjr/mathts-core": "^0.28.0",
+    "@danielsimonjr/mathts-gpu": "^0.4.0",
+    "@danielsimonjr/mathts-parallel": "^0.11.0"
   },
   "devDependencies": {
     "ml-matrix": "^6.15.1",

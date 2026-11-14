@@ -1,5 +1,44 @@
 # @danielsimonjr/mathts-signal
 
+## 0.2.0
+
+### Minor Changes
+
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- 531b343: Factory `median`, `mode` and `mad`, and `parallelFFT`, declare real return types in the published `.d.ts`. A strict consumer no longer needs a cast on their result. `median` and `mad` of a vector, a 2-D array, a `Float64Array` or a `Matrix` return `number`, and `mode` returns `number[] | number` (`NaN` for an empty input). `parallelFFT` accepts a `readonly number[]` or a `Float64Array` only: a call with a 2-D array, a `Matrix` or a `Float32Array` is now a compile error, because it gave NaN or threw at run time. The release notes of `mathts-statistics@0.4.15` and `mathts-functions@0.85.0` said that an empty `mode` returns `[]`; it returns `NaN`.
+- b5e7dd8: `welchPSD`, `bartlettPSD`, `stft` and `spectrogram` clamp a defaulted frame length (`frameLength`, `nperseg`, `windowSize`) to the signal length, as `scipy.signal.welch` clamps `nperseg`, so a 64-sample signal returns a 33-bin spectrum. An explicit frame longer than the signal still throws (`spectrogram` returns no frames). A frame that is not a power of two uses an exact-length DFT in `welchPSD`, `bartlettPSD`, `stft` and `istft`, so bin `k` is at `k / frameLength` and an `stft` frame has `nperseg` bins; `istft` reads the frame width from its input, and `istft(stft(x))` reconstructs the signal. `stft([])` returns no frames. `spectrogram` no longer throws for a one-sample window or loops for a `hopSize` below 1 (#897).
+- Updated dependencies [59581d0]
+- Updated dependencies [a66847e]
+- Updated dependencies [9f2eefa]
+- Updated dependencies [9188123]
+- Updated dependencies [e422aa3]
+- Updated dependencies [9f3f5d6]
+- Updated dependencies [2635bbb]
+- Updated dependencies [531b343]
+- Updated dependencies [9188123]
+- Updated dependencies [efa8b4f]
+- Updated dependencies [69f09cc]
+- Updated dependencies [ece9539]
+- Updated dependencies [a1e3395]
+- Updated dependencies [799b0fe]
+- Updated dependencies [cee43ac]
+- Updated dependencies [f89e84d]
+- Updated dependencies [2635bbb]
+- Updated dependencies [203ff66]
+- Updated dependencies [b5e7dd8]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-functions@0.86.0
+
 ## 0.1.87
 
 ### Patch Changes

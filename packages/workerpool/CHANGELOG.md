@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.5.0
+
+### Minor Changes
+
+- 59581d0: The radix-2 FFT cores read each twiddle from a table of one `Math.cos` and one `Math.sin` call per index. The earlier cores multiplied each twiddle by the step, so the rounding error grew with the index. The round trip `parallelFFT` then `parallelIFFT` at n = 4096 was 640 ULP of the largest sample; it is about 4 ULP now. The spectrum of a power-of-two length changes in the last bits, so this release is minor and not patch. The `workerpool` copy and the `functions` copy give the same bits on one runtime. Two runtimes can still differ in the last bit, because V8 and JavaScriptCore round `Math.cos` and `Math.sin` differently.
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- 3e0fb02: `ComputePool.matmul` runs a product in the calling thread below 7,077,888 multiply-adds (`aRows * aCols * bCols`, 192 x 192 x 192), up from 4,096 result elements. A `thresholdByOp.matmul` value set by a user now counts multiply-adds. The matrix kernel packs two columns of B and gives the same bits as the plain triple loop. The in-process `sin`, `cos`, `tan`, `exp` and `log` run one loop per function. New `ComputePool.warmup(count?)` starts the workers before the first parallel call.
+
 ## 0.4.1
 
 ### Patch Changes

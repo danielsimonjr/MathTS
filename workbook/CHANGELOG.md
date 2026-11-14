@@ -1,5 +1,62 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.6.0
+
+### Minor Changes
+
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- 799b0fe: Compat output matches mathjs for `toString` and scalar trig (#889, #891, #892, #737).
+  
+  Breaking, visible output changes:
+  
+  - `Fraction#toString` prints the repeating decimal (`1/3` is now `0.(3)`, `1/2` is `0.5`). `format()` still prints the ratio (`1/3`), and a whole value prints without a denominator (`format(fraction(4, 2))` is `2`, not `2/1`).
+  - `Matrix#toString` (matrix package, and the compat dense and sparse matrices) prints the nested-array form through `format()`: `[[1, 2], [3, 4]]` for 2-D, nested brackets for 3-D and more. Entries use `format()`: a Fraction entry prints `1/3` and a string entry prints quoted. The sparse matrix no longer prints the `Sparse Matrix [n x m]` listing from `toString`.
+  - `Complex#toString` prints `NaN` when a part is NaN and `Infinity` when a part is infinite, as mathjs does (`log(-Infinity)` prints `Infinity`).
+  - The compat instance type has no string index signature: `MathInstance` is the functions namespace plus the compat members. Code that read `math[name]` as `unknown` needs a cast.
+  
+  Workbook cells keep the ratio form for a Fraction result (`1/3`).
+  
+  Compat scalar `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sqrt`, `abs`, `exp` and `log` take a number fast path.
+  
+  Documented exception: `asin(NaN)`, `acos(NaN)` and `log(NaN)` return a real `NaN` (mathjs returns Complex `NaN`); the printed text is the same.
+- Updated dependencies [59581d0]
+- Updated dependencies [a66847e]
+- Updated dependencies [9f2eefa]
+- Updated dependencies [9188123]
+- Updated dependencies [e422aa3]
+- Updated dependencies [9f3f5d6]
+- Updated dependencies [2635bbb]
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [531b343]
+- Updated dependencies [9188123]
+- Updated dependencies [efa8b4f]
+- Updated dependencies [69f09cc]
+- Updated dependencies [ece9539]
+- Updated dependencies [a1e3395]
+- Updated dependencies [799b0fe]
+- Updated dependencies [cee43ac]
+- Updated dependencies [f89e84d]
+- Updated dependencies [2635bbb]
+- Updated dependencies [203ff66]
+- Updated dependencies [b5e7dd8]
+- Updated dependencies [50c506c]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-functions@0.86.0
+  - @danielsimonjr/mathts-core@0.28.0
+  - @danielsimonjr/mathts-expression@0.14.0
+  - @danielsimonjr/mathts-plot@0.5.0
+
 ## 0.5.19
 
 ### Patch Changes

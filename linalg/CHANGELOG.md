@@ -1,5 +1,34 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.3.0
+
+### Minor Changes
+
+- 9188123: `@danielsimonjr/mathts-linalg` exports `DenseMatrix`. `lstsq(A, b)` is a new export of matrix, linalg and functions: the column-pivoted Householder QR least-squares solution of `A x ≈ b`. It accepts any shape and a vector or matrix `b`, and returns the minimum-norm solution for rank-deficient or wide input, as NumPy does. The rectangular `lsolve` error names `lstsq`.
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+- 9188123: `linsolve`, `lsolve` and `lu` / `luSolve` accept a `SparseMatrix` from `@danielsimonjr/mathts-matrix`. The sparse input is densified with `toDense()` before the solve; `usolve`, `lsolveAll` and `usolveAll` do the same. `densifyForSolver(input, { maxElements })` is the one helper behind them: it tests the input by shape, so it works with a second copy of the matrix package, and it throws a `RangeError` above `maxElements` (default 4096 x 4096). The shared decomposition input also accepts a `SparseMatrix`, so `qr`, `eig`, `svd` and `cholesky` densify it too. Previously these threw `Cannot read properties of undefined (reading 'length')`, `m.size is not a function` or a shape error.
+
+### Patch Changes
+
+- Updated dependencies [a66847e]
+- Updated dependencies [e6a651b]
+- Updated dependencies [9188123]
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [9188123]
+- Updated dependencies [799b0fe]
+- Updated dependencies [9188123]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-matrix@0.11.0
+  - @danielsimonjr/mathts-core@0.28.0
+
 ## 0.2.6
 
 ### Patch Changes

@@ -1,5 +1,66 @@
 # @danielsimonjr/mathts-compat
 
+## 0.6.0
+
+### Minor Changes
+
+- 799b0fe: Compat output matches mathjs for `toString` and scalar trig (#889, #891, #892, #737).
+  
+  Breaking, visible output changes:
+  
+  - `Fraction#toString` prints the repeating decimal (`1/3` is now `0.(3)`, `1/2` is `0.5`). `format()` still prints the ratio (`1/3`), and a whole value prints without a denominator (`format(fraction(4, 2))` is `2`, not `2/1`).
+  - `Matrix#toString` (matrix package, and the compat dense and sparse matrices) prints the nested-array form through `format()`: `[[1, 2], [3, 4]]` for 2-D, nested brackets for 3-D and more. Entries use `format()`: a Fraction entry prints `1/3` and a string entry prints quoted. The sparse matrix no longer prints the `Sparse Matrix [n x m]` listing from `toString`.
+  - `Complex#toString` prints `NaN` when a part is NaN and `Infinity` when a part is infinite, as mathjs does (`log(-Infinity)` prints `Infinity`).
+  - The compat instance type has no string index signature: `MathInstance` is the functions namespace plus the compat members. Code that read `math[name]` as `unknown` needs a cast.
+  
+  Workbook cells keep the ratio form for a Fraction result (`1/3`).
+  
+  Compat scalar `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sqrt`, `abs`, `exp` and `log` take a number fast path.
+  
+  Documented exception: `asin(NaN)`, `acos(NaN)` and `log(NaN)` return a real `NaN` (mathjs returns Complex `NaN`); the printed text is the same.
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- aa76758: `evaluate('0.75 inch')` and `unit(0.75, 'inch')` store one exact value, and `60 mile/hour` agrees on both paths (#955). The `sin(200 grad)` result moves to the exact value, which is closer to sin(π) = 0.
+- 69f09cc: Public factories resolve their own default dependencies. `createParse()` and `createEvaluate()` run with no argument (#883, #924). `createParse(create(all))` builds the AST node constructors on the caller's math scope (#924). The string-to-Node converter on the shared typed instance belongs to `functions`: `createParse` registers none, so `parse` works in every load order (#937). `simplify` tests nodes by their structure, so a node from another parse simplifies like an own node (#937). Caller-supplied dependencies always win. The nodes of `createParse(create(all))` hide the same denylisted names as `math.evaluate` (`import`, `createUnit`, `parse`, ...), and parse reads a config accessor such as compat's `math.config` on each call, so `number: 'BigNumber'` holds. `create(all).typed` has every member of `mathTyped` (`addConversion`, `find`, ...).
+- Updated dependencies [59581d0]
+- Updated dependencies [a66847e]
+- Updated dependencies [9f2eefa]
+- Updated dependencies [3e0fb02]
+- Updated dependencies [e6a651b]
+- Updated dependencies [9188123]
+- Updated dependencies [e422aa3]
+- Updated dependencies [9f3f5d6]
+- Updated dependencies [2635bbb]
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [531b343]
+- Updated dependencies [9188123]
+- Updated dependencies [efa8b4f]
+- Updated dependencies [69f09cc]
+- Updated dependencies [ece9539]
+- Updated dependencies [a1e3395]
+- Updated dependencies [799b0fe]
+- Updated dependencies [cee43ac]
+- Updated dependencies [f89e84d]
+- Updated dependencies [2635bbb]
+- Updated dependencies [9188123]
+- Updated dependencies [203ff66]
+- Updated dependencies [b5e7dd8]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-functions@0.86.0
+  - @danielsimonjr/mathts-matrix@0.11.0
+  - @danielsimonjr/mathts-parallel@0.11.0
+  - @danielsimonjr/mathts-core@0.28.0
+
 ## 0.5.0
 
 ### Minor Changes

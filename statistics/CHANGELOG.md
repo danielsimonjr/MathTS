@@ -1,5 +1,46 @@
 # @danielsimonjr/mathts-statistics
 
+## 0.5.0
+
+### Minor Changes
+
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- 9f3f5d6: `cov` and `corrcoef` take `{ rowvar: true }` for the NumPy layout (variables as rows). The default stays observations as rows. `corrcoef([[1, 2, 3], [4, 5, 6]], { rowvar: true })` returns the 2×2 matrix of `np.corrcoef` (#896). Rows of unequal length throw a `RangeError` in both layouts, where they gave `NaN`.
+- 531b343: Factory `median`, `mode` and `mad`, and `parallelFFT`, declare real return types in the published `.d.ts`. A strict consumer no longer needs a cast on their result. `median` and `mad` of a vector, a 2-D array, a `Float64Array` or a `Matrix` return `number`, and `mode` returns `number[] | number` (`NaN` for an empty input). `parallelFFT` accepts a `readonly number[]` or a `Float64Array` only: a call with a 2-D array, a `Matrix` or a `Float32Array` is now a compile error, because it gave NaN or threw at run time. The release notes of `mathts-statistics@0.4.15` and `mathts-functions@0.85.0` said that an empty `mode` returns `[]`; it returns `NaN`.
+- f89e84d: `Distribution.sample(n)` returns a `Float64Array` of `n` draws, and `sample()` still returns one number. Before, `sample(5)` returned one number and ignored the argument. `sample(n, opts)` throws `TypeError` (use `sampleN(n, { seed })` for a seeded batch), and a negative, non-integer or non-finite `n` throws `RangeError`, as does `n` above 2**26 (67,108,864; the check runs before the allocation) (#899).
+- 6f0cff7: The statistics README shows `await` for the hypothesis tests that return a Promise (`chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`). The samples in `docs/advanced.md` await them too (#900).
+- Updated dependencies [59581d0]
+- Updated dependencies [a66847e]
+- Updated dependencies [9f2eefa]
+- Updated dependencies [9188123]
+- Updated dependencies [e422aa3]
+- Updated dependencies [9f3f5d6]
+- Updated dependencies [2635bbb]
+- Updated dependencies [531b343]
+- Updated dependencies [9188123]
+- Updated dependencies [efa8b4f]
+- Updated dependencies [69f09cc]
+- Updated dependencies [ece9539]
+- Updated dependencies [a1e3395]
+- Updated dependencies [799b0fe]
+- Updated dependencies [cee43ac]
+- Updated dependencies [f89e84d]
+- Updated dependencies [2635bbb]
+- Updated dependencies [203ff66]
+- Updated dependencies [b5e7dd8]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-functions@0.86.0
+
 ## 0.4.15
 
 ### Patch Changes

@@ -1,5 +1,52 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.11.0
+
+### Minor Changes
+
+- 9188123: `eig().repeatedEigenvalues` finds Jordan blocks of size 3 and more: a cluster of `m` eigenvalues links up to `2 * eps^(1/m) * ||A||_F` and is accepted when an orthogonal staircase of column-pivoted QR factorizations counts the multiplicity `m`. Distinct eigenvalues at the same spacing are not grouped.
+  
+  Breaking: `eig` and `eigvals` throw a `RangeError` on `NaN` or infinite input. Previously they returned `null` eigenvalues.
+  
+  `eig`, `svd`, `qr`, `cholesky`, `lu`, `lstsq` and `condest` accept a `SparseMatrix` from a second loaded copy of the package, and the element limit of `densifyForSolver` applies to them. `lsolve`, `usolve`, `lsolveAll`, `usolveAll` and `lusolve` accept a matrix-package `SparseMatrix` as the right-hand side.
+- 9188123: `@danielsimonjr/mathts-linalg` exports `DenseMatrix`. `lstsq(A, b)` is a new export of matrix, linalg and functions: the column-pivoted Householder QR least-squares solution of `A x ≈ b`. It accepts any shape and a vector or matrix `b`, and returns the minimum-norm solution for rank-deficient or wide input, as NumPy does. The rectangular `lsolve` error names `lstsq`.
+- 799b0fe: Compat output matches mathjs for `toString` and scalar trig (#889, #891, #892, #737).
+  
+  Breaking, visible output changes:
+  
+  - `Fraction#toString` prints the repeating decimal (`1/3` is now `0.(3)`, `1/2` is `0.5`). `format()` still prints the ratio (`1/3`), and a whole value prints without a denominator (`format(fraction(4, 2))` is `2`, not `2/1`).
+  - `Matrix#toString` (matrix package, and the compat dense and sparse matrices) prints the nested-array form through `format()`: `[[1, 2], [3, 4]]` for 2-D, nested brackets for 3-D and more. Entries use `format()`: a Fraction entry prints `1/3` and a string entry prints quoted. The sparse matrix no longer prints the `Sparse Matrix [n x m]` listing from `toString`.
+  - `Complex#toString` prints `NaN` when a part is NaN and `Infinity` when a part is infinite, as mathjs does (`log(-Infinity)` prints `Infinity`).
+  - The compat instance type has no string index signature: `MathInstance` is the functions namespace plus the compat members. Code that read `math[name]` as `unknown` needs a cast.
+  
+  Workbook cells keep the ratio form for a Fraction result (`1/3`).
+  
+  Compat scalar `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sqrt`, `abs`, `exp` and `log` take a number fast path.
+  
+  Documented exception: `asin(NaN)`, `acos(NaN)` and `log(NaN)` return a real `NaN` (mathjs returns Complex `NaN`); the printed text is the same.
+- 9188123: `eig` returns `repeatedEigenvalues`, one entry per eigenvalue that occurs at least twice. Each entry gives the algebraic multiplicity, the count of independent eigenvectors (the nullity of `A - λI`), and whether the eigenvalue is defective. Eigenvalues are grouped by single linkage with a tolerance relative to the matrix norm that grows with the size of the group, and the report is computed on first read, so `eig` and `eigvals` pay nothing for it. The field is additive: `values` and `vectors` are unchanged.
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+- 9188123: `linsolve`, `lsolve` and `lu` / `luSolve` accept a `SparseMatrix` from `@danielsimonjr/mathts-matrix`. The sparse input is densified with `toDense()` before the solve; `usolve`, `lsolveAll` and `usolveAll` do the same. `densifyForSolver(input, { maxElements })` is the one helper behind them: it tests the input by shape, so it works with a second copy of the matrix package, and it throws a `RangeError` above `maxElements` (default 4096 x 4096). The shared decomposition input also accepts a `SparseMatrix`, so `qr`, `eig`, `svd` and `cholesky` densify it too. Previously these threw `Cannot read properties of undefined (reading 'length')`, `m.size is not a function` or a shape error.
+
+### Patch Changes
+
+- a66847e: `DenseMatrix.toArray()` copies each row straight from the storage. It no longer calls `get()` and its bounds check for every entry, and it honours the offset and the row stride of a view. `lusolve` on nested input reads the packed U factor with one `toFloat64Array()` copy. It no longer builds a nested copy of U, and it returns the n×1 column without a matrix wrapper.
+- e6a651b: `svd`, `pinv`, `lowRankApprox`, `normFro`, `qrPivoted` and `matrixSchur` read a `DenseMatrix` from its storage instead of calling `toArray()` first. Results are bit-identical to the nested-array input.
+- Updated dependencies [3e0fb02]
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [799b0fe]
+- Updated dependencies [b95de8a]
+  - @danielsimonjr/mathts-parallel@0.11.0
+  - @danielsimonjr/mathts-core@0.28.0
+  - @danielsimonjr/mathts-gpu@0.4.0
+
 ## 0.10.1
 
 ### Patch Changes
