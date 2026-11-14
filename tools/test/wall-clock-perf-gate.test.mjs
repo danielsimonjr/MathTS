@@ -600,7 +600,15 @@ function runGateScript(gate, env) {
 describe('isolated gates fail under an injected candidate slowdown', () => {
   for (const gate of gatesInList) {
     test(gate.name, () => {
-      const scale = gate.selfTestScale ?? 3;
+      // The injected slowdown must carry the measured ratio past the limit with a 3x margin.
+      // A fixed factor fails silently when the candidate gets faster (median vs sort, #971):
+      // so measure the true ratio first, and use selfTestScale only as the floor.
+      const measured = runGateScript(gate, {
+        PERF_GATE_CANDIDATE_TIME_SCALE: '',
+        PERF_GATE_AA: '',
+      });
+      const needed = measured.ratio > 0 ? (3 * gate.limit) / measured.ratio : 0;
+      const scale = Math.max(gate.selfTestScale ?? 3, needed);
       const payload = runGateScript(gate, {
         PERF_GATE_CANDIDATE_TIME_SCALE: String(scale),
         PERF_GATE_AA: '',
