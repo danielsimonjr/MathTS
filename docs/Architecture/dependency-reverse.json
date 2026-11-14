@@ -158,6 +158,12 @@
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
+    "core/src/types/type-marker.ts": [
+      "core/src/types/bignumber.ts",
+      "core/src/types/complex.ts",
+      "core/src/types/dual.ts",
+      "core/src/types/fraction.ts"
+    ],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/va-var.ts": ["core/src/types/unit/Unit.ts"],
     "core/src/types/unit/exact-scale.ts": [

@@ -1,4 +1,4 @@
-import { Complex } from '@danielsimonjr/mathts-core';
+import { isComplex } from '@danielsimonjr/mathts-core';
 
 /**
  * Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721).
@@ -13,7 +13,7 @@ export function rejectMisusedIndexedSum(args: unknown[]): void {
   // Only the imaginary unit is the textbook footgun (`sum(i, 1, 3, i)`).
   // Equal numbers (`sum(2, 1, 4, 2)`) and a scope variable named `i` are real variadic sums.
   const isImaginaryUnit = (v: unknown): boolean =>
-    v instanceof Complex && Math.abs(v.re) < 1e-12 && Math.abs(v.im - 1) < 1e-12;
+    isComplex(v) && Math.abs(v.re) < 1e-12 && Math.abs(v.im - 1) < 1e-12;
   if (!isImaginaryUnit(body) || !isImaginaryUnit(tail)) return;
 
   throw new TypeError(

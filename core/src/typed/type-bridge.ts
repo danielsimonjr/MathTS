@@ -2,8 +2,9 @@
  * Type compatibility bridge for mathjs duck-typing.
  *
  * mathjs factories check types via duck-typing (x.isComplex, x.type === 'Complex').
- * Native MathTS types use instanceof. This bridge adds duck-typing markers to
- * native type prototypes so mathjs factories can recognize them.
+ * The class modules set the `isComplex`, `isFraction` and `isBigNumber` markers on the
+ * prototypes (`types/type-marker.ts`). Each instance has its own `type` field. This bridge
+ * also sets `type` on each prototype, for code that reads the prototype.
  *
  * Call registerNativeTypes() once at initialization.
  */
@@ -14,9 +15,9 @@ import { BigNumber } from '../types/bignumber.js';
 let registered = false;
 
 /**
- * Add duck-typing markers to the prototypes of the native Complex, Fraction and BigNumber classes.
+ * Set the `type` marker on the prototypes of the native Complex, Fraction and BigNumber classes.
  *
- * The function adds each marker only when the prototype does not have it.
+ * The function sets each marker only when the prototype does not have it.
  * The markers are not writable, not enumerable and not configurable.
  * Calls after the first call do nothing.
  */
@@ -25,14 +26,6 @@ export function registerNativeTypes(): void {
   registered = true;
 
   // Complex: mathjs checks x.isComplex === true && x.type === 'Complex'
-  if (!('isComplex' in Complex.prototype)) {
-    Object.defineProperty(Complex.prototype, 'isComplex', {
-      value: true,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
-  }
   if (!('type' in Complex.prototype)) {
     Object.defineProperty(Complex.prototype, 'type', {
       value: 'Complex',
@@ -43,14 +36,6 @@ export function registerNativeTypes(): void {
   }
 
   // Fraction: mathjs checks x.isFraction === true
-  if (!('isFraction' in Fraction.prototype)) {
-    Object.defineProperty(Fraction.prototype, 'isFraction', {
-      value: true,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
-  }
   if (!('type' in Fraction.prototype)) {
     Object.defineProperty(Fraction.prototype, 'type', {
       value: 'Fraction',
@@ -61,14 +46,6 @@ export function registerNativeTypes(): void {
   }
 
   // BigNumber: mathjs checks x.isBigNumber === true
-  if (!('isBigNumber' in BigNumber.prototype)) {
-    Object.defineProperty(BigNumber.prototype, 'isBigNumber', {
-      value: true,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
-  }
   if (!('type' in BigNumber.prototype)) {
     Object.defineProperty(BigNumber.prototype, 'type', {
       value: 'BigNumber',

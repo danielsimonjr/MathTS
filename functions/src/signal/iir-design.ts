@@ -16,7 +16,7 @@
  * `jacobiSN`/`jacobiCN`/`jacobiDN` (Phase 5 special functions, `m = k²`
  * convention, matching scipy's `ellipk`/`ellipj`).
  */
-import { Complex } from '@danielsimonjr/mathts-core';
+import { Complex, isComplex } from '@danielsimonjr/mathts-core';
 import {
   analogToDigital,
   cDiv,
@@ -577,7 +577,8 @@ export function buttord(
 type ZpkRoot = number | Complex;
 
 function toComplex(x: ZpkRoot): Complex {
-  return x instanceof Complex ? x : new Complex(x, 0);
+  // `isComplex` reads the brand, so a root of a second copy of core keeps its parts (#1033).
+  return isComplex(x) ? x : new Complex(x, 0);
 }
 
 /**

@@ -91,8 +91,9 @@ export function complex(re?: number | string | Complex, im?: number): Complex {
   if (re === undefined) {
     return COMPLEX_ZERO;
   }
-  if (re instanceof Complex) {
-    return re;
+  // The brand tests also return a value of a second copy of core unchanged (#1033).
+  if (isComplex(re)) {
+    return re as Complex;
   }
   if (typeof re === 'string') {
     return Complex.parse(re);
@@ -111,8 +112,8 @@ export function fraction(numerator?: number | string | Fraction, denominator?: n
   if (numerator === undefined) {
     return new Fraction(0, 1);
   }
-  if (numerator instanceof Fraction) {
-    return numerator;
+  if (isFraction(numerator)) {
+    return numerator as Fraction;
   }
   if (typeof numerator === 'string') {
     return Fraction.parse(numerator);
@@ -133,8 +134,8 @@ export function bignumber(value?: number | string | BigNumber): BigNumber {
   if (value === undefined) {
     return BigNumber.fromNumber(0);
   }
-  if (value instanceof BigNumber) {
-    return value;
+  if (isBigNumber(value)) {
+    return value as BigNumber;
   }
   if (typeof value === 'string') {
     return BigNumber.parse(value);

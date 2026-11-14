@@ -7,7 +7,8 @@
  * coexist.
  *
  * Canonical surface (from the package entry):
- *   - isComplex / isFraction / isBigNumber  -> `instanceof` checks (types/*.ts)
+ *   - isComplex / isFraction / isBigNumber  -> class tests (types/*.ts): `instanceof`, then the
+ *                                              prototype brand of a second copy of core
  *   - isMatrix                              -> duck-types a Matrix object
  *                                              (rows/cols/get/type), NOT number[][]
  */
@@ -36,7 +37,7 @@ describe('typeOf — canonical names for core numeric types (bundler-mangling pr
   });
 });
 
-describe('canonical isComplex (instanceof)', () => {
+describe('canonical isComplex (core values only)', () => {
   it('accepts a real Complex instance', () => {
     expect(isComplex(new Complex(1, 2))).toBe(true);
   });
@@ -52,7 +53,7 @@ describe('canonical isComplex (instanceof)', () => {
   });
 });
 
-describe('canonical isFraction (instanceof)', () => {
+describe('canonical isFraction (core values only)', () => {
   it('accepts a real Fraction instance', () => {
     expect(isFraction(new Fraction(1n, 2n))).toBe(true);
   });
@@ -68,7 +69,7 @@ describe('canonical isFraction (instanceof)', () => {
   });
 });
 
-describe('canonical isBigNumber (instanceof)', () => {
+describe('canonical isBigNumber (core values only)', () => {
   it('accepts a real BigNumber instance', () => {
     expect(isBigNumber(BigNumber.fromNumber(3))).toBe(true);
   });

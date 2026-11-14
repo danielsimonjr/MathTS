@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-14'
-  totalFiles: 1331
+  totalFiles: 1332
   totalModules: 82
-  totalExports: 7276
+  totalExports: 7281
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -523,12 +523,15 @@ modules:
         - file: ../types/bignumber.js
           imports:
             - BigNumber
+            - isBigNumber
         - file: ../types/complex.js
           imports:
             - Complex
+            - isComplex
         - file: ../types/fraction.js
           imports:
             - Fraction
+            - isFraction
       workspaceDependencies: []
       exports:
         - addScalar
@@ -2728,6 +2731,10 @@ modules:
             - Scalar
             - MathTSValue
           typeOnly: true
+        - file: ./type-marker.js
+          imports:
+            - BIGNUMBER_BRAND
+            - defineTypeMarkers
       workspaceDependencies: []
       exports:
         - BIGNUMBER_ZERO
@@ -2767,6 +2774,10 @@ modules:
             - Scalar
             - IComplex
           typeOnly: true
+        - file: ./type-marker.js
+          imports:
+            - COMPLEX_BRAND
+            - defineTypeMarkers
       workspaceDependencies: []
       exports:
         - I
@@ -2807,6 +2818,10 @@ modules:
           imports:
             - DUAL_UNARY_RULES
             - DualUnaryRule
+        - file: ./type-marker.js
+          imports:
+            - DUAL_BRAND
+            - defineTypeMarkers
       workspaceDependencies: []
       exports:
         - isDual
@@ -2825,6 +2840,10 @@ modules:
             - Scalar
             - IFraction
           typeOnly: true
+        - file: ./type-marker.js
+          imports:
+            - FRACTION_BRAND
+            - defineTypeMarkers
       workspaceDependencies: []
       exports:
         - FRACTION_ZERO
@@ -2920,6 +2939,25 @@ modules:
       constants:
         - UNIT_DIMENSION_LENGTH
         - SI_DIMENSION_LENGTH
+    core/src/types/type-marker.ts:
+      description: Prototype markers that identify a core value across copies of the package.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - COMPLEX_BRAND
+        - FRACTION_BRAND
+        - BIGNUMBER_BRAND
+        - DUAL_BRAND
+        - defineTypeMarkers
+      functions:
+        - defineTypeMarkers
+      constants:
+        - COMPLEX_BRAND
+        - FRACTION_BRAND
+        - BIGNUMBER_BRAND
+        - DUAL_BRAND
     core/src/types/unit/Unit.ts:
       description: '`scale_from × offset_from − scale_to × offset_to`: what converting between two'
       externalDependencies: []
@@ -3053,13 +3091,16 @@ modules:
         - file: ../bignumber.js
           imports:
             - BigNumber
+            - isBigNumber
         - file: ../complex.js
           imports:
             - Complex
             - I
+            - isComplex
         - file: ../fraction.js
           imports:
             - Fraction
+            - isFraction
         - file: ./unit-types.js
           imports:
             - BigNumberConstructor
@@ -13357,6 +13398,7 @@ modules:
           directory: core
           imports:
             - Fraction
+            - isFraction
             - SI_DIMENSION_LENGTH
             - toSiDimensionVector
             - Unit
@@ -16136,6 +16178,7 @@ modules:
             - Complex
             - Fraction
             - BigNumber
+            - isBigNumber
       exports:
         - factoryScope
         - pushConfigOverlay
@@ -20728,6 +20771,7 @@ modules:
           directory: core
           imports:
             - Complex
+            - isComplex
       exports:
         - cheby1
         - cheby2
@@ -21712,7 +21756,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
-            - Complex
+            - isComplex
       exports:
         - rejectMisusedIndexedSum
       functions:
@@ -26110,10 +26154,10 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
-            - BigNumber
-            - Complex
-            - Dual
-            - Fraction
+            - isBigNumber
+            - isComplex
+            - isDual
+            - isFraction
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -26580,6 +26624,9 @@ modules:
             - Complex
             - BigNumber
             - Fraction
+            - isBigNumber
+            - isComplex
+            - isFraction
       exports:
         - equalScalar
         - unequal
@@ -27037,6 +27084,7 @@ modules:
           imports:
             - mathTyped
             - BigNumber
+            - isBigNumber
       exports:
         - bin
         - hex
@@ -44397,6 +44445,7 @@ dependencyGraph:
         - core/src/types/interfaces.ts
         - core/src/types/matrix/Range.ts
         - core/src/types/si-dimension-vector.ts
+        - core/src/types/type-marker.ts
         - core/src/types/unit/Unit.ts
         - core/src/types/unit/dependencies.ts
         - core/src/types/unit/errors.ts
@@ -45821,16 +45870,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1331
+  totalTypeScriptFiles: 1332
   totalModules: 82
-  totalLinesOfCode: 229552
-  totalExports: 7276
+  totalLinesOfCode: 229638
+  totalExports: 7281
   totalClasses: 62
   totalInterfaces: 660
-  totalFunctions: 2490
+  totalFunctions: 2491
   totalTypeGuards: 178
   totalEnums: 0
-  totalConstants: 1671
+  totalConstants: 1675
   totalReExports: 3160
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2

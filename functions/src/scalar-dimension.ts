@@ -11,6 +11,7 @@
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
 import {
   Fraction,
+  isFraction,
   SI_DIMENSION_LENGTH,
   toSiDimensionVector,
   Unit,
@@ -109,7 +110,8 @@ function validateDimensionVector(vector: RationalDimension, label = 'dimension v
   if (
     !Array.isArray(vector) ||
     vector.length !== SI_DIMENSION_LENGTH ||
-    !vector.every((entry) => entry instanceof Fraction)
+    // `isFraction` reads the brand, so a Fraction of a second copy of core is valid (#1033).
+    !vector.every((entry) => isFraction(entry))
   ) {
     throw new TypeError(`${label} must be a ${SI_DIMENSION_LENGTH}-tuple of Fractions`);
   }

@@ -4,6 +4,7 @@
  */
 
 import type { Scalar, IComplex } from './interfaces.js';
+import { COMPLEX_BRAND, defineTypeMarkers } from './type-marker.js';
 
 /** Beyond this, `cosh`/`sinh` of the argument is within a factor e^-700 of overflowing to Infinity. */
 const HYPERBOLIC_OVERFLOW_ARG = 700;
@@ -44,10 +45,19 @@ function createTanFamilyMethod(
 }
 
 /**
- * Check if a value is a Complex number
+ * Check if a value is a Complex number.
+ *
+ * True for a `Complex` of this copy of the package and for one of a second copy, which carries the
+ * same prototype brand (see `type-marker.ts`). The `instanceof` test comes first: it is the fast
+ * path for a value of this copy, and the brand test decides for every other value.
  */
 export function isComplex(value: unknown): value is Complex {
-  return value instanceof Complex;
+  return (
+    value instanceof Complex ||
+    (typeof value === 'object' &&
+      value !== null &&
+      (value as { [COMPLEX_BRAND]?: unknown })[COMPLEX_BRAND] === true)
+  );
 }
 
 /**
@@ -90,6 +100,8 @@ export class Complex implements IComplex {
   // `tan`, `cot`, `tanh` and `coth` are created from `createTanFamilyMethod`, with the same property
   // attributes a class method has. Their signatures and docs sit on the `Complex` interface below.
   static {
+    // Prototype markers: the brand that `isComplex` reads, and the mathjs marker.
+    defineTypeMarkers(Complex.prototype, COMPLEX_BRAND, 'isComplex');
     const tanFamily = [
       ['tan', 1, false],
       ['cot', -1, false],
@@ -306,7 +318,7 @@ export class Complex implements IComplex {
    * Addition: (a + bi) + (c + di) = (a + c) + (b + d)i
    */
   add(other: Scalar): Complex {
-    if (other instanceof Complex) {
+    if (isComplex(other)) {
       return new Complex(this.re + other.re, this.im + other.im);
     }
     return new Complex(this.re + Number(other.valueOf()), this.im);
@@ -316,7 +328,7 @@ export class Complex implements IComplex {
    * Subtraction: (a + bi) - (c + di) = (a - c) + (b - d)i
    */
   subtract(other: Scalar): Complex {
-    if (other instanceof Complex) {
+    if (isComplex(other)) {
       return new Complex(this.re - other.re, this.im - other.im);
     }
     return new Complex(this.re - Number(other.valueOf()), this.im);
@@ -326,7 +338,7 @@ export class Complex implements IComplex {
    * Multiplication: (a + bi)(c + di) = (ac - bd) + (ad + bc)i
    */
   multiply(other: Scalar): Complex {
-    if (other instanceof Complex) {
+    if (isComplex(other)) {
       return new Complex(
         this.re * other.re - this.im * other.im,
         this.re * other.im + this.im * other.re
@@ -340,7 +352,7 @@ export class Complex implements IComplex {
    * Division: (a + bi)/(c + di) = ((ac + bd) + (bc - ad)i) / (c² + d²)
    */
   divide(other: Scalar): Complex {
-    if (other instanceof Complex) {
+    if (isComplex(other)) {
       const denom = other.re * other.re + other.im * other.im;
       if (denom === 0) {
         return new Complex(
