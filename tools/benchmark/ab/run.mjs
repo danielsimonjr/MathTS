@@ -125,26 +125,17 @@ if (!control) {
   }
 }
 
-/** Every case name of every case file in `cases/`, for the checks on `--only` and on the allow file. */
+/** Every case name of every case file in `cases/`, for the check on the allow file. */
 const knownCaseNames = [];
 for (const f of readdirSync(join(abDir, 'cases')).sort()) {
   if (!f.endsWith('.mjs') || f === 'helpers.mjs') continue;
   const all = await import(pathToFileURL(join(abDir, 'cases', f)).href);
   for (const c of all.cases) knownCaseNames.push(c.name);
 }
-const staleEntries = unknownAllowEntries(allowedChanges.keys(), knownCaseNames);
-if (staleEntries.length > 0) {
-  console.error(`allowed-output-changes.json names no known case: ${staleEntries.join('; ')}`);
-  process.exit(1);
-}
-const unmatched = unmatchedOnly(only, knownCaseNames);
-if (unmatched.length > 0) {
-  console.error(`--only matches no case: ${unmatched.join('; ')}`);
-  process.exit(2);
-}
-
 /** @type {{ file: string, cases: { name: string, kind: string }[] }[]} */
 const specs = [];
+/** The case names of the case files of this run, before `--only` filters them. */
+const loadedCaseNames = [];
 for (const cf of caseFiles) {
   let spec;
   try {
@@ -154,9 +145,25 @@ for (const cf of caseFiles) {
     process.exit(1);
   }
   let cases = pr ? spec.cases.filter((c) => c.pr === pr || c.control === true) : spec.cases;
+  for (const c of cases) loadedCaseNames.push(c.name);
   if (only.length > 0) cases = cases.filter((c) => only.some((o) => c.name.includes(o)));
   if (slowOnly) cases = cases.map((c) => ({ ...c, kind: 'neutral' }));
   if (cases.length > 0) specs.push({ file: cf, ...spec, cases });
+}
+// `--only` is checked against the files of this run: a value that matches a case in a file that
+// was not passed would leave the gate with no case for it.
+const unmatched = unmatchedOnly(only, loadedCaseNames);
+if (unmatched.length > 0) {
+  console.error(`--only matches no case in the case files of this run: ${unmatched.join('; ')}`);
+  process.exit(2);
+}
+const staleEntries = unknownAllowEntries(allowedChanges.keys(), [
+  ...knownCaseNames,
+  ...loadedCaseNames,
+]);
+if (staleEntries.length > 0) {
+  console.error(`allowed-output-changes.json names no known case: ${staleEntries.join('; ')}`);
+  process.exit(1);
 }
 if (specs.length === 0) {
   console.error(pr ? `no case is tagged pr: '${pr}'` : 'no cases');

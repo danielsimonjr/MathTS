@@ -38,7 +38,7 @@ function ulp(x: number): number {
   return magnitude === 0 ? Number.MIN_VALUE : 2 ** (Math.floor(Math.log2(magnitude)) - 52);
 }
 
-/** The seeded series of the g18 round-trip test: 10 times a congruential stream in [-1, 1). */
+/** A seeded series: 10 times a congruential stream in [-1, 1), restarted for each size. */
 function g18Series(n: number): Float64Array {
   let seed = 12345;
   return Float64Array.from({ length: n }, () => {

@@ -272,7 +272,7 @@ jobs:
       # with the slow limit 1.25. The README of tools/benchmark/ab records the A/A spread that
       # sets the limit. A push has no base to compare, so the steps run on pull requests only.
       # Every package is built first, because the A/B preflight refuses a stale dist. The cases
-      # are the five that the README of that folder lists. `--slow-only` gates a `gain` case on
+      # are the six that the README of that folder lists. `--slow-only` gates a `gain` case on
       # no slowdown. A case whose result differs bit for bit from the base fails too, unless
       # tools/benchmark/ab/allowed-output-changes.json lists the case with its pull request and
       # reason.

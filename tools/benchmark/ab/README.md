@@ -3,7 +3,7 @@
 `run.mjs` times the base tree and the head tree of each case in separate processes. It prints
 the ratio head / base for each case and fails when a case is slower than the slow limit (1.02, or
 the value of `--slow-limit`). A `gain` case must also reach 0.95, unless `--slow-only` is set. The CI
-job "Benchmark baseline" runs the five cases that the section "Slow limit of the CI gate" lists on
+job "Benchmark baseline" runs the six cases that the section "Slow limit of the CI gate" lists on
 each pull request with `--slow-only`.
 
 Commands:
@@ -44,7 +44,7 @@ Rules:
 
 ## Slow limit of the CI gate
 
-The CI step runs `--slow-only --slow-limit 1.25` on five cases: `median n = 100,000`,
+The CI step runs `--slow-only --slow-limit 1.25` on six cases: `median n = 100,000`,
 `JSBackend multiply 128×128`, `qr 128×128`, `lup 128×128` and the two `lusolve 128×128` cases.
 
 The limit comes from A/A control sessions (`make-base.mjs --control`, then
