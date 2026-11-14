@@ -11,6 +11,7 @@
 import { factoryScope } from './scope.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
+import { registerExactReductions } from '../typed/exact-reductions.js';
 import type {
   PublicDet,
   PublicMad,
@@ -1394,6 +1395,16 @@ factoryScope.mad = mad;
 
 export const factory_std = createStd(factoryScope as Parameters<typeof createStd>[0]);
 factoryScope.std = factory_std;
+
+registerExactReductions({
+  sum: factory_sum,
+  mean: factory_mean,
+  min: factory_min,
+  max: factory_max,
+  variance: factory_variance,
+  sqrt: factory_sqrt,
+  dot: factory_dot,
+});
 
 // setSymDifference (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setSymDifference = createSetSymDifference(

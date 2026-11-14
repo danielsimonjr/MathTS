@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1332, "e": 7281, "re": 3160 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1333, "e": 7285, "re": 3161 },
   "s": {
-    "loc": 229638,
+    "loc": 229788,
     "cls": 62,
-    "int": 660,
-    "fn": 2491,
+    "int": 661,
+    "fn": 2494,
     "tg": 178,
     "en": 0,
     "co": 1675,
@@ -158,6 +158,7 @@
         "boxMuller",
         "createSeededRng",
         "pairwiseSum",
+        "pairwiseSumChecked",
         "neumaierSum",
         "norm2",
         "pairwiseDot",
@@ -1168,7 +1169,7 @@
       ]
     },
     "functions/typed": {
-      "f": 54,
+      "f": 55,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1200,9 +1201,9 @@
         "GammaDistOptions",
         "GammaDistNamedOptions",
         "MultivariateDistribution",
+        "ExactReductions",
         "UnaryRealSpec",
-        "MultiPoly",
-        "UnivariateTerm"
+        "MultiPoly"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
@@ -1952,7 +1953,7 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 249, "o": 15 },
+    { "p": "factories/index.ts", "i": 250, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 205 },

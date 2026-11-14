@@ -98,6 +98,85 @@ export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length, s
 }
 
 /**
+ * {@link pairwiseSum} with shift 0 that returns `undefined` when an element is not a number.
+ *
+ * The check runs in the loop that adds each element, so no second pass is needed. An array hole
+ * reads as `undefined` and also gives `undefined`. For number input the bits equal `pairwiseSum`.
+ */
+export function pairwiseSumChecked(xs: ArrayLike<unknown>): number | undefined {
+  return pairwiseSumCheckedRange(xs, 0, xs.length);
+}
+
+function pairwiseSumCheckedRange(
+  xs: ArrayLike<unknown>,
+  start: number,
+  end: number
+): number | undefined {
+  const n = end - start;
+
+  if (n <= PAIRWISE_BLOCK) {
+    // Same accumulators, order and combine as pairwiseSum (shift 0).
+    let s0 = 0;
+    let s1 = 0;
+    let s2 = 0;
+    let s3 = 0;
+    let s4 = 0;
+    let s5 = 0;
+    let s6 = 0;
+    let s7 = 0;
+
+    let i = start;
+    const limit = start + (n - (n % 8));
+    for (; i < limit; i += 8) {
+      const v0 = xs[i];
+      const v1 = xs[i + 1];
+      const v2 = xs[i + 2];
+      const v3 = xs[i + 3];
+      const v4 = xs[i + 4];
+      const v5 = xs[i + 5];
+      const v6 = xs[i + 6];
+      const v7 = xs[i + 7];
+      if (
+        typeof v0 !== 'number' ||
+        typeof v1 !== 'number' ||
+        typeof v2 !== 'number' ||
+        typeof v3 !== 'number' ||
+        typeof v4 !== 'number' ||
+        typeof v5 !== 'number' ||
+        typeof v6 !== 'number' ||
+        typeof v7 !== 'number'
+      ) {
+        return undefined;
+      }
+      s0 += v0;
+      s1 += v1;
+      s2 += v2;
+      s3 += v3;
+      s4 += v4;
+      s5 += v5;
+      s6 += v6;
+      s7 += v7;
+    }
+
+    let tail = 0;
+    for (; i < end; i++) {
+      const v = xs[i];
+      if (typeof v !== 'number') return undefined;
+      tail += v;
+    }
+
+    return s0 + s1 + (s2 + s3) + (s4 + s5 + (s6 + s7)) + tail;
+  }
+
+  const half = (n >> 1) - ((n >> 1) % 8);
+  const left = pairwiseSumCheckedRange(xs, start, start + half);
+  if (left === undefined) return undefined;
+  const right = pairwiseSumCheckedRange(xs, start + half, end);
+  if (right === undefined) return undefined;
+  return left + right;
+}
+
+/**
  * Sum with **Neumaier compensation** — correctly rounded for practical purposes, the equivalent
  * of Python's `math.fsum`.
  *

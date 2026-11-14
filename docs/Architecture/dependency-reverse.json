@@ -2244,6 +2244,10 @@
       "functions/src/factories/index.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/typed/exact-reductions.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
     "functions/src/arithmetic/abs.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/addScalar.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/cube.ts": ["functions/src/factories/index.ts"],
