@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 54 files
+- **functions/typed**: 55 files
 - **functions/unit**: 2 files
 - **functions/utils**: 37 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 575            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 576            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -634,7 +634,7 @@ graph LR
 | `./types/unit-prefixes.js`    | `SI_PREFIXES, BEST_PREFIXES, getPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
 | `./typed/index.js`            | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes`                                                                                                                                                                                                                                                                                                                                           | Re-export             |
 | `./factory/index.js`          | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export             |
-| `./numeric/stable.js`         | `pairwiseSum, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./numeric/stable.js`         | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./numeric/rng.js`            | `mulberry32, boxMuller, createSeededRng, SeededRng`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
 | `./numeric/strides.js`        | `rowMajorStrides`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export             |
 | `./deterministic.js`          | `setDeterministic, isDeterministic`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
@@ -652,7 +652,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `unitReadingSearchSteps`, `MAX_UNIT_STRING_LENGTH`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `unitReadingSearchSteps`, `MAX_UNIT_STRING_LENGTH`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `pairwiseSumChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -918,7 +918,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `sumSquaredDeviations`, `neumaierCumsum`
+- Functions: `pairwiseSum`, `pairwiseSumChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `sumSquaredDeviations`, `neumaierCumsum`
 
 ---
 
@@ -6077,6 +6077,7 @@ graph LR
 | `./scope.js`                             | `factoryScope`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
 | `../typed/arithmetic.js`                 | `add, multiply`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../typed/divide-inverse.js`             | `registerDivideInverse`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Import                |
+| `../typed/exact-reductions.js`           | `registerExactReductions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import                |
 | `../typed/public-type-exports.js`        | `PublicDet, PublicMad, PublicMedian, PublicMode`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import (type-only)    |
 | `../arithmetic/abs.js`                   | `createAbs`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
 | `../arithmetic/addScalar.js`             | `createAddScalar`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import                |
@@ -11406,14 +11407,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                                  |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError` |
-| `@danielsimonjr/mathts-core`     | `pairwiseSum, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations`    |
-| `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                |
-| `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                           |
-| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, SparseMatrix, backendManager, singularValues`             |
-| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                            |
+| Package                          | Import                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError`                  |
+| `@danielsimonjr/mathts-core`     | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations` |
+| `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                                 |
+| `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                                            |
+| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, SparseMatrix, backendManager, singularValues`                              |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                                             |
 
 **Internal Dependencies:**
 
@@ -11425,6 +11426,7 @@ graph LR
 | `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                 | Import             |
 | `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                                                                                                                                | Import             |
 | `./divide-inverse.js`           | `divideInverse`                                                                                                                                                                         | Import             |
+| `./exact-reductions.js`         | `exactReductions`                                                                                                                                                                       | Import             |
 | `./public-type-exports.js`      | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                            | Import (type-only) |
 | `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, sqrtReal, staysRealSqrt, powReal, nthRootReal`                                                     | Import             |
 
@@ -11624,6 +11626,16 @@ graph LR
 **Exports:**
 
 - Functions: `euclidSnap`
+
+---
+
+### `functions/src/typed/exact-reductions.ts` - The exact (factory) reductions that the typed `sum` falls back to. The factory layer imports the
+
+**Exports:**
+
+- Interfaces: `ExactReductions`
+- Types: `ExactReductionFn`
+- Functions: `registerExactReductions`, `exactReductions`
 
 ---
 
@@ -20290,7 +20302,7 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/factories/index`                        | 247 files    | 15 files   |
+| `functions/src/factories/index`                        | 248 files    | 15 files   |
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
 | `functions/src/core/function/typed`                    | 3 files      | 205 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
@@ -20322,12 +20334,12 @@ graph LR
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/typed/arithmetic`                       | 9 files      | 10 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
-| `functions/src/typed/arithmetic`                       | 8 files      | 10 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 
 ---
@@ -20861,7 +20873,7 @@ graph TD
         N355[complex-promotion]
         N356[complex]
         N357[dist-objects]
-        N358[...44 more]
+        N358[...45 more]
     end
 
     subgraph Functions/unit
@@ -21226,14 +21238,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1332   |
+| Total TypeScript Files  | 1333   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229638 |
-| Total Exports           | 7281   |
-| Total Re-exports        | 3160   |
+| Total Lines of Code     | 229788 |
+| Total Exports           | 7285   |
+| Total Re-exports        | 3161   |
 | Total Classes           | 62     |
-| Total Interfaces        | 660    |
-| Total Functions         | 2491   |
+| Total Interfaces        | 661    |
+| Total Functions         | 2494   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |

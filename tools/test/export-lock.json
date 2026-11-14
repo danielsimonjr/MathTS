@@ -784,6 +784,9 @@
       "pairwiseSum": {
         "kind": "function"
       },
+      "pairwiseSumChecked": {
+        "kind": "function"
+      },
       "pow": {
         "kind": "function"
       },

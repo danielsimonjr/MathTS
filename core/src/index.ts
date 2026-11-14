@@ -258,6 +258,7 @@ export const VERSION: string = __PKG_VERSION__;
 // `sum`, `mean`, `std` and `norm` are only as good as how they accumulate.
 export {
   pairwiseSum,
+  pairwiseSumChecked,
   neumaierSum,
   norm2,
   pairwiseDot,

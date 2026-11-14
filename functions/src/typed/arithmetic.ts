@@ -26,6 +26,7 @@ import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import {
   pairwiseSum,
+  pairwiseSumChecked,
   neumaierSum,
   norm2,
   pairwiseDot,
@@ -66,6 +67,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { divideInverse } from './divide-inverse.js';
+import { exactReductions } from './exact-reductions.js';
 import type {
   PublicAbs,
   PublicAdd,
@@ -1735,7 +1737,22 @@ export const sum = mathTyped('sum', {
   // all inherit it. Pairwise costs the same number of additions — the naive loop was simply worse.
   // For catastrophic cancellation (e.g. [1e16, 1, -1e16], which pairwise AND np.sum both
   // annihilate to 0) use `fsum`.
-  Array: (arr: f64[]): f64 => pairwiseSum(arr),
+  Array: (arr: f64[]): unknown => {
+    const s = pairwiseSumChecked(arr);
+    return s !== undefined ? s : exactReductions().sum(arr);
+  },
+  Matrix: (m: unknown): unknown => {
+    const v = (m as { valueOf(): unknown }).valueOf();
+    if (Array.isArray(v) && v.every((x) => !Array.isArray(x))) {
+      const s = pairwiseSumChecked(v);
+      return s !== undefined ? s : exactReductions().sum(m);
+    }
+    return exactReductions().sum(m);
+  },
+  'Array, number | BigNumber': (arr: unknown, dim: unknown): unknown =>
+    exactReductions().sum(arr, dim),
+  'Matrix, number | BigNumber': (m: unknown, dim: unknown): unknown =>
+    exactReductions().sum(m, dim),
 
   // Synchronous pairwise sum on typed arrays (no worker pool).
   Float64Array: (a: Float64Array): f64 => pairwiseSum(a),

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-14'
-  totalFiles: 1332
+  totalFiles: 1333
   totalModules: 82
-  totalExports: 7281
+  totalExports: 7285
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1017,6 +1017,7 @@ modules:
         - file: ./numeric/stable.js
           imports:
             - pairwiseSum
+            - pairwiseSumChecked
             - neumaierSum
             - norm2
             - pairwiseDot
@@ -1265,6 +1266,7 @@ modules:
         - math
         - DEFAULT_CONFIG
         - pairwiseSum
+        - pairwiseSumChecked
         - neumaierSum
         - norm2
         - pairwiseDot
@@ -1462,6 +1464,7 @@ modules:
         - math
         - DEFAULT_CONFIG
         - pairwiseSum
+        - pairwiseSumChecked
         - neumaierSum
         - norm2
         - pairwiseDot
@@ -2440,6 +2443,7 @@ modules:
       workspaceDependencies: []
       exports:
         - pairwiseSum
+        - pairwiseSumChecked
         - neumaierSum
         - norm2
         - pairwiseDot
@@ -2448,6 +2452,7 @@ modules:
         - neumaierCumsum
       functions:
         - pairwiseSum
+        - pairwiseSumChecked
         - neumaierSum
         - norm2
         - pairwiseDot
@@ -14746,6 +14751,9 @@ modules:
         - file: ../typed/divide-inverse.js
           imports:
             - registerDivideInverse
+        - file: ../typed/exact-reductions.js
+          imports:
+            - registerExactReductions
         - file: ../typed/public-type-exports.js
           imports:
             - PublicDet
@@ -24077,6 +24085,9 @@ modules:
         - file: ./divide-inverse.js
           imports:
             - divideInverse
+        - file: ./exact-reductions.js
+          imports:
+            - exactReductions
         - file: ./public-type-exports.js
           imports:
             - PublicAbs
@@ -24116,6 +24127,7 @@ modules:
           directory: core
           imports:
             - pairwiseSum
+            - pairwiseSumChecked
             - neumaierSum
             - norm2
             - pairwiseDot
@@ -24795,6 +24807,20 @@ modules:
         - euclidSnap
       functions:
         - euclidSnap
+    functions/src/typed/exact-reductions.ts:
+      description: The exact (factory) reductions that the typed `sum` falls back to. The factory layer imports the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - registerExactReductions
+        - exactReductions
+      interfaces:
+        - ExactReductions
+      functions:
+        - registerExactReductions
+        - exactReductions
     functions/src/typed/expression-eval-barrel.ts:
       description: Typed surface for `factories/evaluate.ts` and the `@danielsimonjr/mathts-functions/evaluate`
       externalDependencies: []
@@ -45103,6 +45129,7 @@ dependencyGraph:
         - functions/src/typed/distributions.ts
         - functions/src/typed/divide-inverse.ts
         - functions/src/typed/euclid.ts
+        - functions/src/typed/exact-reductions.ts
         - functions/src/typed/expression-eval-barrel.ts
         - functions/src/typed/f64-kernels.ts
         - functions/src/typed/factorization/finite-field.ts
@@ -45870,17 +45897,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1332
+  totalTypeScriptFiles: 1333
   totalModules: 82
-  totalLinesOfCode: 229638
-  totalExports: 7281
+  totalLinesOfCode: 229788
+  totalExports: 7285
   totalClasses: 62
-  totalInterfaces: 660
-  totalFunctions: 2491
+  totalInterfaces: 661
+  totalFunctions: 2494
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1675
-  totalReExports: 3160
+  totalReExports: 3161
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
