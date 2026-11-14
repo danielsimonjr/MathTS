@@ -4,15 +4,16 @@
  * A second copy loads when a package manager fails to dedupe. `instanceof` fails across copies,
  * so a formatter that tests with `instanceof` prints a Fraction value as a decimal.
  */
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { Fraction, Unit } from '../../src/index.js';
 
 type Core = typeof import('../../src/index.js');
 let core2: Core;
 
 beforeAll(async () => {
-  vi.resetModules();
-  core2 = (await import('../../src/index.js')) as Core;
+  // The built bundle has its own classes, so `dist` is a second copy of the `src` classes under
+  // both bun test and vitest. The `test` task of turbo builds core first.
+  core2 = (await import('../../dist/index.js')) as Core;
 });
 
 describe('Unit format with a value of a second copy of core', () => {

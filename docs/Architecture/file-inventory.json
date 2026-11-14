@@ -569,7 +569,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 38
+      "loc": 51
     },
     {
       "file": "compat/tests/delegation.test.ts",
@@ -1374,7 +1374,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 30
+      "loc": 31
     },
     {
       "file": "core/tests/types/exact-scale-registry-parse.test.ts",
