@@ -13218,7 +13218,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "config",
       "disposition": "config",
-      "loc": 29
+      "loc": 30
     },
     {
       "file": "gpu/src/BufferPool.ts",
