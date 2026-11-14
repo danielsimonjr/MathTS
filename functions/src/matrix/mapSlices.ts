@@ -1,8 +1,7 @@
-import { _switch } from '@danielsimonjr/mathts-core/internal';
+import { _switch, validateDimension } from '@danielsimonjr/mathts-core/internal';
 import { factory } from '../utils/factory.js';
 import { arraySize } from '../utils/array.js';
 import { isMatrix } from '../utils/is.js';
-import { IndexError } from '../error/IndexError.js';
 
 import { TypedFunction, Matrix, BigNumber } from '../types.js';
 
@@ -10,18 +9,12 @@ import { TypedFunction, Matrix, BigNumber } from '../types.js';
 type SliceCallback = (...args: unknown[]) => unknown;
 
 const name = 'mapSlices';
-const dependencies = ['typed', 'isInteger'];
+const dependencies = ['typed'];
 
 export const createMapSlices = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    isInteger,
-  }: {
-    typed: TypedFunction;
-    isInteger: (value: unknown) => boolean;
-  }): TypedFunction => {
+  ({ typed }: { typed: TypedFunction }): TypedFunction => {
     /**
      * Apply a function that maps an array to a scalar
      * along a given axis of a matrix or array.
@@ -65,15 +58,9 @@ export const createMapSlices = /* #__PURE__ */ factory(
         dim: number | BigNumber,
         callback: SliceCallback
       ) {
-        if (!isInteger(dim)) {
-          throw new TypeError('Integer number expected for dimension');
-        }
-
         const dimNum = typeof dim === 'number' ? dim : dim.toNumber();
         const size = Array.isArray(mat) ? arraySize(mat) : mat.size();
-        if (dimNum < 0 || dimNum >= size.length) {
-          throw new IndexError(dimNum, 0, size.length);
-        }
+        validateDimension(dimNum, size.length);
 
         if (isMatrix(mat)) {
           const m = mat as Matrix & {

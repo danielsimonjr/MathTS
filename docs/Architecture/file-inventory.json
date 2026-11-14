@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2418,
+  "totalFiles": 2420,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1307,
     "test-only": 0,
     "orphan": 0,
-    "test": 1019,
+    "test": 1021,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1333,
-    "tests": 1019,
+    "tests": 1021,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 28,
-    "@danielsimonjr/mathts-core": 131,
+    "@danielsimonjr/mathts-core": 132,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1084,
+    "@danielsimonjr/mathts-functions": 1085,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 141,
@@ -723,7 +723,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 302
+      "loc": 317
     },
     {
       "file": "core/src/config.ts",
@@ -807,7 +807,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 216
+      "loc": 223
     },
     {
       "file": "core/src/is.ts",
@@ -1109,6 +1109,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 204
+    },
+    {
+      "file": "core/tests/collection-dim-validation.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
     },
     {
       "file": "core/tests/collection-nested.test.ts",
@@ -5490,7 +5497,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 144
+      "loc": 149
     },
     {
       "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
@@ -6974,7 +6981,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 127
+      "loc": 126
     },
     {
       "file": "functions/src/matrix/count.ts",
@@ -7128,7 +7135,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 124
+      "loc": 111
     },
     {
       "file": "functions/src/matrix/matrixFromColumns.ts",
@@ -8304,7 +8311,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 199
+      "loc": 196
     },
     {
       "file": "functions/src/statistics/extreme.ts",
@@ -9431,7 +9438,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 21
+      "loc": 22
     },
     {
       "file": "functions/src/utils/complex.ts",
@@ -10054,7 +10061,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 405
+      "loc": 407
     },
     {
       "file": "functions/tests/cov-bitwise.test.ts",
@@ -10187,7 +10194,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 1142
+      "loc": 1155
     },
     {
       "file": "functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts",
@@ -10216,6 +10223,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 227
+    },
+    {
+      "file": "functions/tests/dim-validation-1047.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "functions/tests/diophantine.test.ts",
@@ -10341,7 +10355,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 63
     },
     {
       "file": "functions/tests/dogfood-g18-signal-api.test.ts",
@@ -12224,7 +12238,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 643
+      "loc": 647
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",

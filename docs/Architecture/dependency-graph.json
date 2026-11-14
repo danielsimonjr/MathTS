@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-14",
     "totalFiles": 1333,
     "totalModules": 82,
-    "totalExports": 7289
+    "totalExports": 7292
   },
   "entryPoints": [
     {
@@ -753,8 +753,8 @@
             "imports": ["isCollection", "isMatrix"]
           },
           {
-            "file": "./error/DimensionError.js",
-            "imports": ["DimensionError"]
+            "file": "./error/IndexError.js",
+            "imports": ["IndexError"]
           },
           {
             "file": "./array.js",
@@ -766,7 +766,14 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
+        "exports": [
+          "containsCollections",
+          "deepForEach",
+          "deepMap",
+          "validateDimension",
+          "reduce",
+          "scatter"
+        ],
         "functions": [
           "containsCollections",
           "deepForEach",
@@ -775,6 +782,7 @@
           "deepMap",
           "deepMap",
           "deepMap",
+          "validateDimension",
           "reduce",
           "reduce",
           "reduce",
@@ -1712,7 +1720,14 @@
           },
           {
             "file": "./collection.js",
-            "imports": ["containsCollections", "deepMap", "deepForEach", "reduce", "scatter"],
+            "imports": [
+              "containsCollections",
+              "deepMap",
+              "deepForEach",
+              "reduce",
+              "scatter",
+              "validateDimension"
+            ],
             "reExport": true
           },
           {
@@ -1881,6 +1896,7 @@
           "deepForEach",
           "reduce",
           "scatter",
+          "validateDimension",
           "_switch",
           "ObjectWrappingMap",
           "PartitionedMap",
@@ -2004,6 +2020,7 @@
           "containsCollections",
           "reduce",
           "scatter",
+          "validateDimension",
           "_switch",
           "ObjectWrappingMap",
           "PartitionedMap",
@@ -18190,6 +18207,10 @@
             "imports": ["clone"]
           },
           {
+            "file": "../utils/collection.js",
+            "imports": ["validateDimension"]
+          },
+          {
             "file": "../utils/array.js",
             "imports": ["arraySize", "concat"]
           },
@@ -18803,10 +18824,6 @@
             "imports": ["isMatrix"]
           },
           {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
             "file": "../types.js",
             "imports": ["TypedFunction", "Matrix", "BigNumber"]
           }
@@ -18815,7 +18832,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["_switch"],
+            "imports": ["_switch", "validateDimension"],
             "subpath": "internal"
           }
         ],
@@ -22579,7 +22596,7 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["containsCollections"]
+            "imports": ["containsCollections", "validateDimension"]
           },
           {
             "file": "../utils/factory.js",
@@ -22596,10 +22613,6 @@
           {
             "file": "../utils/array.js",
             "imports": ["arraySize"]
-          },
-          {
-            "file": "../error/DimensionError.js",
-            "imports": ["DimensionError"]
           },
           {
             "file": "../core/function/typed.js",
@@ -29304,12 +29317,33 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
+            "imports": [
+              "containsCollections",
+              "deepForEach",
+              "deepMap",
+              "reduce",
+              "scatter",
+              "validateDimension"
+            ],
             "subpath": "internal"
           }
         ],
-        "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
-        "reExported": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+        "exports": [
+          "containsCollections",
+          "deepForEach",
+          "deepMap",
+          "reduce",
+          "scatter",
+          "validateDimension"
+        ],
+        "reExported": [
+          "containsCollections",
+          "deepForEach",
+          "deepMap",
+          "reduce",
+          "scatter",
+          "validateDimension"
+        ]
       },
       "functions/src/utils/complex.ts": {
         "description": "Test whether two complex values are equal provided a given relTol and absTol.",
@@ -48607,15 +48641,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1333,
     "totalModules": 82,
-    "totalLinesOfCode": 230309,
-    "totalExports": 7289,
+    "totalLinesOfCode": 230315,
+    "totalExports": 7292,
     "totalClasses": 62,
     "totalInterfaces": 661,
-    "totalFunctions": 2496,
+    "totalFunctions": 2497,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1675,
-    "totalReExports": 3163,
+    "totalReExports": 3165,
     "totalTypeOnlyImports": 682,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

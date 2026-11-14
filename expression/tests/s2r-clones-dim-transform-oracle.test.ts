@@ -7,7 +7,6 @@ import { evaluate } from '../../functions/src/factories/evaluate.js';
 import { cumsum, mapSlices, factory_sum as sum } from '../../functions/src/factories/index.js';
 import { factoryScope } from '../../functions/src/factories/scope.js';
 import { IndexError } from '../src/error/IndexError.js';
-import { DimensionError } from '../src/error/DimensionError.js';
 import { dimToZeroBase } from '../src/transform/utils/dimToZeroBase.js';
 
 const A = [
@@ -68,14 +67,20 @@ describe('cumsum transform dim oracle', () => {
     }
   });
 
-  it('out-of-range cumsum dim throws DimensionError with the shifted (zero-based) value', () => {
-    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 9)')).toThrow(DimensionError);
-    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 9)')).toThrow('Dimension mismatch (8 < 2)');
+  it('out-of-range cumsum dim throws a one-based IndexError (#1047)', () => {
+    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 9)')).toThrow(IndexError);
+    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 9)')).toThrow('Index out of range (9 > 2)');
   });
 
-  it('zero and negative cumsum dims throw DimensionError after the 1-based shift', () => {
-    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 0)')).toThrow('Dimension mismatch (-1 < 2)');
-    expect(() => evaluate('cumsum([[1, 2], [3, 4]], -1)')).toThrow('Dimension mismatch (-2 < 2)');
+  it('zero and negative cumsum dims throw a one-based IndexError (#1047)', () => {
+    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 0)')).toThrow('Index out of range (0 < 1)');
+    expect(() => evaluate('cumsum([[1, 2], [3, 4]], -1)')).toThrow('Index out of range (-1 < 1)');
+  });
+
+  it('a cumsum dim that is not an integer throws a TypeError (#1047)', () => {
+    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 1.5)')).toThrow(
+      'Integer number expected for dimension'
+    );
   });
 });
 

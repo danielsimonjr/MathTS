@@ -38,6 +38,26 @@
       "dependsOn": ["^build", "build"],
       "outputs": ["coverage/**"]
     },
+    "@danielsimonjr/mathts-functions#test": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "@danielsimonjr/mathts-compat#build",
+        "@danielsimonjr/mathts-statistics#build",
+        "@danielsimonjr/mathts-trigonometry#build"
+      ],
+      "outputs": []
+    },
+    "@danielsimonjr/mathts-functions#test:coverage": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "@danielsimonjr/mathts-compat#build",
+        "@danielsimonjr/mathts-statistics#build",
+        "@danielsimonjr/mathts-trigonometry#build"
+      ],
+      "outputs": ["coverage/**"]
+    },
     "typecheck": {
       "dependsOn": ["^build", "build"],
       "outputs": []

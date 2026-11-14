@@ -543,16 +543,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                                        | Type   |
-| --------------------------- | ---------------------------------------------- | ------ |
-| `./is.js`                   | `isCollection, isMatrix`                       | Import |
-| `./error/DimensionError.js` | `DimensionError`                               | Import |
-| `./array.js`                | `NestedArray, arraySize, deepMap, deepForEach` | Import |
-| `./switch.js`               | `_switch`                                      | Import |
+| File                    | Imports                                        | Type   |
+| ----------------------- | ---------------------------------------------- | ------ |
+| `./is.js`               | `isCollection, isMatrix`                       | Import |
+| `./error/IndexError.js` | `IndexError`                                   | Import |
+| `./array.js`            | `NestedArray, arraySize, deepMap, deepForEach` | Import |
+| `./switch.js`           | `_switch`                                      | Import |
 
 **Exports:**
 
-- Functions: `containsCollections`, `deepForEach`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `reduce`, `reduce`, `reduce`, `scatter`
+- Functions: `containsCollections`, `deepForEach`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `validateDimension`, `reduce`, `reduce`, `reduce`, `scatter`
 
 ---
 
@@ -675,7 +675,7 @@ graph LR
 | `./bignumber-formatter.js`   | `format, toEngineering, toExponential, toFixed, BigNumberValue`                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./types/unit/index.js`      | `createUnitClass, unitDependencies, Unit`                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
 | `./array.js`                 | `arraySize, validate, validateIndexSourceSize, validateIndex, isEmptyIndex, resize, reshape, processSizesWildcard, squeeze, unsqueeze, flatten, map, forEach, filter, filterRegExp, join, identify, generalize, getArrayDataType, last, initial, concat, broadcastSizes, checkBroadcastingRules, broadcastTo, broadcastArrays, stretch, get, deepMap, deepForEach, clone`                                                                   | Re-export             |
-| `./collection.js`            | `containsCollections, deepMap, deepForEach, reduce, scatter`                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
+| `./collection.js`            | `containsCollections, deepMap, deepForEach, reduce, scatter, validateDimension`                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./switch.js`                | `_switch`                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
 | `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
@@ -690,7 +690,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -6928,6 +6928,7 @@ graph LR
 | ---------------------------- | --------------------------------- | ------------------ |
 | `../utils/is.js`             | `isBigNumber, isMatrix, isNumber` | Import             |
 | `../utils/object.js`         | `clone`                           | Import             |
+| `../utils/collection.js`     | `validateDimension`               | Import             |
 | `../utils/array.js`          | `arraySize, concat`               | Import             |
 | `../error/DimensionError.js` | `DimensionError`                  | Import             |
 | `../utils/factory.js`        | `factory`                         | Import             |
@@ -7336,19 +7337,18 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import    |
-| ---------------------------- | --------- |
-| `@danielsimonjr/mathts-core` | `_switch` |
+| Package                      | Import                       |
+| ---------------------------- | ---------------------------- |
+| `@danielsimonjr/mathts-core` | `_switch, validateDimension` |
 
 **Internal Dependencies:**
 
-| File                     | Imports                            | Type   |
-| ------------------------ | ---------------------------------- | ------ |
-| `../utils/factory.js`    | `factory`                          | Import |
-| `../utils/array.js`      | `arraySize`                        | Import |
-| `../utils/is.js`         | `isMatrix`                         | Import |
-| `../error/IndexError.js` | `IndexError`                       | Import |
-| `../types.js`            | `TypedFunction, Matrix, BigNumber` | Import |
+| File                  | Imports                            | Type   |
+| --------------------- | ---------------------------------- | ------ |
+| `../utils/factory.js` | `factory`                          | Import |
+| `../utils/array.js`   | `arraySize`                        | Import |
+| `../utils/is.js`      | `isMatrix`                         | Import |
+| `../types.js`         | `TypedFunction, Matrix, BigNumber` | Import |
 
 **Exports:**
 
@@ -9727,15 +9727,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports               | Type               |
-| -------------------------------- | --------------------- | ------------------ |
-| `../utils/collection.js`         | `containsCollections` | Import             |
-| `../utils/factory.js`            | `factory`             | Import             |
-| `../utils/switch.js`             | `_switch`             | Import             |
-| `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
-| `../utils/array.js`              | `arraySize`           | Import             |
-| `../error/DimensionError.js`     | `DimensionError`      | Import             |
-| `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
+| File                             | Imports                                  | Type               |
+| -------------------------------- | ---------------------------------------- | ------------------ |
+| `../utils/collection.js`         | `containsCollections, validateDimension` | Import             |
+| `../utils/factory.js`            | `factory`                                | Import             |
+| `../utils/switch.js`             | `_switch`                                | Import             |
+| `./utils/improveErrorMessage.js` | `improveErrorMessage`                    | Import             |
+| `../utils/array.js`              | `arraySize`                              | Import             |
+| `../core/function/typed.js`      | `TypedFunction`                          | Import (type-only) |
 
 **Exports:**
 
@@ -12567,13 +12566,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| `@danielsimonjr/mathts-core` | `containsCollections, deepForEach, deepMap, reduce, scatter` |
+| Package                      | Import                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `containsCollections, deepForEach, deepMap, reduce, scatter, validateDimension` |
 
 **Exports:**
 
-- Re-exports: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
+- Re-exports: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`, `validateDimension`
 
 ---
 
@@ -20320,7 +20319,7 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 46 files   |
-| `functions/src/utils/collection`                       | 0 files      | 41 files   |
+| `functions/src/utils/collection`                       | 0 files      | 42 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21176,7 +21175,7 @@ graph TD
     N12 --> N39
     N13 --> N24
     N13 --> N25
-    N15 --> N24
+    N15 --> N25
     N15 --> N13
     N27 --> N33
     N28 --> N27
@@ -21246,12 +21245,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1333   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230309 |
-| Total Exports           | 7289   |
-| Total Re-exports        | 3163   |
+| Total Lines of Code     | 230315 |
+| Total Exports           | 7292   |
+| Total Re-exports        | 3165   |
 | Total Classes           | 62     |
 | Total Interfaces        | 661    |
-| Total Functions         | 2496   |
+| Total Functions         | 2497   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |

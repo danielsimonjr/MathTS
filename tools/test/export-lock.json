@@ -1449,6 +1449,9 @@
       "validate": {
         "kind": "function"
       },
+      "validateDimension": {
+        "kind": "function"
+      },
       "validateIndex": {
         "kind": "function"
       },
