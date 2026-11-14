@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-14",
     "totalFiles": 1333,
     "totalModules": 82,
-    "totalExports": 7287
+    "totalExports": 7289
   },
   "entryPoints": [
     {
@@ -1084,6 +1084,7 @@
             "imports": [
               "pairwiseSum",
               "pairwiseSumChecked",
+              "pairwiseDotChecked",
               "neumaierSum",
               "norm2",
               "pairwiseDot",
@@ -1344,6 +1345,7 @@
           "DEFAULT_CONFIG",
           "pairwiseSum",
           "pairwiseSumChecked",
+          "pairwiseDotChecked",
           "neumaierSum",
           "norm2",
           "pairwiseDot",
@@ -1544,6 +1546,7 @@
           "DEFAULT_CONFIG",
           "pairwiseSum",
           "pairwiseSumChecked",
+          "pairwiseDotChecked",
           "neumaierSum",
           "norm2",
           "pairwiseDot",
@@ -2532,6 +2535,7 @@
           "neumaierSum",
           "norm2",
           "pairwiseDot",
+          "pairwiseDotChecked",
           "scaledDistance",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
@@ -2543,6 +2547,7 @@
           "neumaierSum",
           "norm2",
           "pairwiseDot",
+          "pairwiseDotChecked",
           "scaledDistance",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
@@ -25683,6 +25688,7 @@
               "neumaierSum",
               "norm2",
               "pairwiseDot",
+              "pairwiseDotChecked",
               "sumSquaredDeviations",
               "sumSquaredDeviationsChecked"
             ]
@@ -48601,15 +48607,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1333,
     "totalModules": 82,
-    "totalLinesOfCode": 230290,
-    "totalExports": 7287,
+    "totalLinesOfCode": 230309,
+    "totalExports": 7289,
     "totalClasses": 62,
     "totalInterfaces": 661,
-    "totalFunctions": 2495,
+    "totalFunctions": 2496,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1675,
-    "totalReExports": 3162,
+    "totalReExports": 3163,
     "totalTypeOnlyImports": 682,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

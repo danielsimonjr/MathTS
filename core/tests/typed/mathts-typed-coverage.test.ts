@@ -183,13 +183,17 @@ describe('MATHTS_CONVERSIONS convert callbacks', () => {
     ]);
   });
 
-  it('DenseMatrix -> SparseMatrix retags the descriptor', () => {
-    const out = convert('DenseMatrix', 'SparseMatrix')({ type: 'DenseMatrix', data: [1] }) as {
-      type: string;
-      data: number[];
-    };
-    expect(out.type).toBe('SparseMatrix');
-    expect(out.data).toEqual([1]);
+  it('Matrix -> Array keeps the shape of a matrix that has toArray', () => {
+    // A 1-D matrix of size [n] has rows n and cols 0; a get(i, j) loop would give n empty rows.
+    const vector = { rows: 3, cols: 0, get: () => 0, toArray: () => [1, 2, 3] };
+    expect(convert('Matrix', 'Array')(vector)).toEqual([1, 2, 3]);
+  });
+
+  it('has no DenseMatrix -> SparseMatrix conversion (a sparse-only signature rejects a dense matrix)', () => {
+    const def = MATHTS_CONVERSIONS.find(
+      (c: ConversionDef) => c.from === 'DenseMatrix' && c.to === 'SparseMatrix'
+    );
+    expect(def).toBeUndefined();
   });
 });
 

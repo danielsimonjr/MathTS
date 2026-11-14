@@ -158,7 +158,7 @@ export function vec2Dot(
   const a1 = a[aOff + 1]!;
   const b0 = b[bOff]!;
   const b1 = b[bOff + 1]!;
-  return 0 + a0 * b0 + a1 * b1;
+  return a0 * b0 + a1 * b1;
 }
 
 /**
@@ -344,7 +344,7 @@ export function vec3Dot(
   const b0 = b[bOff]!;
   const b1 = b[bOff + 1]!;
   const b2 = b[bOff + 2]!;
-  return 0 + a0 * b0 + a1 * b1 + a2 * b2;
+  return a0 * b0 + a1 * b1 + a2 * b2;
 }
 
 /**
@@ -649,15 +649,15 @@ export function mat3Multiply(
   const b6 = b[bOff + 6]!;
   const b7 = b[bOff + 7]!;
   const b8 = b[bOff + 8]!;
-  out[outOff] = 0 + a0 * b0 + a3 * b1 + a6 * b2;
-  out[outOff + 1] = 0 + a1 * b0 + a4 * b1 + a7 * b2;
-  out[outOff + 2] = 0 + a2 * b0 + a5 * b1 + a8 * b2;
-  out[outOff + 3] = 0 + a0 * b3 + a3 * b4 + a6 * b5;
-  out[outOff + 4] = 0 + a1 * b3 + a4 * b4 + a7 * b5;
-  out[outOff + 5] = 0 + a2 * b3 + a5 * b4 + a8 * b5;
-  out[outOff + 6] = 0 + a0 * b6 + a3 * b7 + a6 * b8;
-  out[outOff + 7] = 0 + a1 * b6 + a4 * b7 + a7 * b8;
-  out[outOff + 8] = 0 + a2 * b6 + a5 * b7 + a8 * b8;
+  out[outOff] = a0 * b0 + a3 * b1 + a6 * b2;
+  out[outOff + 1] = a1 * b0 + a4 * b1 + a7 * b2;
+  out[outOff + 2] = a2 * b0 + a5 * b1 + a8 * b2;
+  out[outOff + 3] = a0 * b3 + a3 * b4 + a6 * b5;
+  out[outOff + 4] = a1 * b3 + a4 * b4 + a7 * b5;
+  out[outOff + 5] = a2 * b3 + a5 * b4 + a8 * b5;
+  out[outOff + 6] = a0 * b6 + a3 * b7 + a6 * b8;
+  out[outOff + 7] = a1 * b6 + a4 * b7 + a7 * b8;
+  out[outOff + 8] = a2 * b6 + a5 * b7 + a8 * b8;
   return out;
 }
 
@@ -692,9 +692,9 @@ export function mat3MulVec(
   const v0 = v[vOff]!;
   const v1 = v[vOff + 1]!;
   const v2 = v[vOff + 2]!;
-  out[outOff] = 0 + m0 * v0 + m3 * v1 + m6 * v2;
-  out[outOff + 1] = 0 + m1 * v0 + m4 * v1 + m7 * v2;
-  out[outOff + 2] = 0 + m2 * v0 + m5 * v1 + m8 * v2;
+  out[outOff] = m0 * v0 + m3 * v1 + m6 * v2;
+  out[outOff + 1] = m1 * v0 + m4 * v1 + m7 * v2;
+  out[outOff + 2] = m2 * v0 + m5 * v1 + m8 * v2;
   return out;
 }
 

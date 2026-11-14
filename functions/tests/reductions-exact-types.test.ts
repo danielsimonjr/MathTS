@@ -9,7 +9,7 @@
  * kernel.
  */
 import { describe, expect, it } from 'vitest';
-import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
+import { BigNumber, Complex, Fraction, pairwiseDot, pairwiseSum } from '@danielsimonjr/mathts-core';
 import type { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { dot, matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
 
@@ -558,5 +558,89 @@ describe('dot pins that hold before and after the fix', () => {
 
   it('vectors of different length throw', () => {
     expect(() => dot([1, 2], [1, 2, 3])).toThrow();
+  });
+});
+
+describe('dot follows mathjs on matrices, sparse input, errors and signed zero', () => {
+  const C = (re: number, im: number): Complex => new Complex(re, im);
+
+  it('a Matrix of Complex or Fraction values keeps its type', () => {
+    const z = dot(dense([C(3, 4), C(6, 8)]) as never, dense([1, 1]) as never) as unknown as Complex;
+    expect([z.re, z.im]).toEqual([9, -12]);
+    const q = dot(dense([new Fraction(1, 2), new Fraction(1, 3)]) as never, dense([2, 3]) as never);
+    expect(q).toBeInstanceOf(Fraction);
+    expect((q as unknown as Fraction).equals(new Fraction(2))).toBe(true);
+  });
+
+  it('a sparse vector with a dense one gives the mathjs result in both orders', () => {
+    expect(dot(sparse([1, 2, 4]) as never, [1, 2, 4])).toBe(21);
+    expect(dot([1, 2, 4], sparse([1, 2, 4]) as never)).toBe(21);
+  });
+
+  it('a sparse first argument is conjugated, as in the dense path', () => {
+    const v = sparse([C(3, 4), C(6, 8)]);
+    for (const r of [dot(v as never, [1, 1]), dot(v as never, sparse([1, 1]) as never)]) {
+      const z = r as unknown as Complex;
+      expect([z.re, z.im]).toEqual([9, -12]);
+    }
+    const w = dot([1, 1], v as never) as unknown as Complex;
+    expect([w.re, w.im]).toEqual([9, 12]);
+  });
+
+  it('vectors of different length and empty vectors throw the mathjs RangeError', () => {
+    expect(() => dot([1, 2], [1, 2, 3])).toThrow(
+      new RangeError('Vectors must have equal length (2 != 3)')
+    );
+    expect(() => dot([], [])).toThrow(
+      new RangeError('Cannot calculate the dot product of empty vectors')
+    );
+    expect(() => dot(new Float64Array(0), new Float64Array(0))).toThrow(RangeError);
+  });
+
+  it('a sum of -0 terms is -0, as in mathjs', () => {
+    expect(Object.is(dot([-0], [1]), -0)).toBe(true);
+    expect(Object.is(dot([-0, -0], [1, 2]), -0)).toBe(true);
+    expect(Object.is(dot([-0, 0], [1, 1]), 0)).toBe(true);
+    expect(Object.is(dot(new Float64Array([-0]), new Float64Array([1])), -0)).toBe(true);
+  });
+
+  it('bigints give an exact Fraction, also past 2^53 where mathjs throws', () => {
+    const r = dot([9007199254740993n, 1n] as never, [1n, 1n] as never) as unknown as Fraction;
+    expect(r).toBeInstanceOf(Fraction);
+    expect(r.toString()).toBe('9007199254740994');
+  });
+});
+
+describe('dot keeps the bits of the core pairwise kernel', () => {
+  const vec = (n: number, k: number): number[] =>
+    Array.from({ length: n }, (_, i) => Math.sin(i * k) * 10 ** ((i % 5) - 2));
+
+  it('number arrays equal pairwiseDot at every leaf boundary', () => {
+    for (const n of [1, 7, 8, 127, 128, 129, 255, 256, 1000, 5000]) {
+      const a = vec(n, 1.3);
+      const b = vec(n, 0.7);
+      expect(Object.is(dot(a, b), pairwiseDot(a, b))).toBe(true);
+    }
+  });
+
+  it('a column vector takes the naive loop of mathjs, a flat vector the pairwise kernel', () => {
+    const a = vec(1000, 1.3);
+    const b = vec(1000, 0.7);
+    let naive = a[0] * b[0];
+    for (let i = 1; i < a.length; i++) naive += a[i] * b[i];
+    const column = dot(dense(a.map((x) => [x])) as never, b);
+    expect(Object.is(column, naive)).toBe(true);
+    expect(Object.is(dot(a, b), pairwiseDot(a, b))).toBe(true);
+  });
+});
+
+describe('a matrix reports the data type of its elements, as mathjs does', () => {
+  it('dense and sparse matrices read the type from their values', () => {
+    const t = (m: unknown): string => (m as { getDataType(): string }).getDataType();
+    expect(t(matrix([new Complex(1, 2)]))).toBe('Complex');
+    expect(t(matrix([1, 'a']))).toBe('mixed');
+    expect(t(matrix([1, 2]))).toBe('number');
+    expect(t(sparse([1, 2]))).toBe('number');
+    expect(t(sparse([new Fraction(1, 2)]))).toBe('Fraction');
   });
 });

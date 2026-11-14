@@ -1958,12 +1958,14 @@ export interface MathJsInstance extends MathJsFactory {
   /**
    * Calculate the dot product of two vectors. The dot product of A = [a1,
    * a2, a3, ..., an] and B = [b1, b2, b3, ..., bn] is defined as: dot(A,
-   * B) = a1 * b1 + a2 * b2 + a3 * b3 + ... + an * bn
+   * B) = conj(a1) * b1 + conj(a2) * b2 + ... + conj(an) * bn
    * @param x First vector
    * @param y Second vector
-   * @returns Returns the dot product of x and y
+   * @returns Returns the dot product of x and y: a number for number vectors, else a value of
+   * the element type (Complex, Fraction, BigNumber)
    */
-  dot(x: MathCollection, y: MathCollection): number;
+  dot(x: number[], y: number[]): number;
+  dot(x: MathCollection, y: MathCollection): MathScalarType;
 
   /**
    * Compute eigenvalues and eigenvectors of a matrix.

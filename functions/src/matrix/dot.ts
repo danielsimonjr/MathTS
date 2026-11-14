@@ -224,8 +224,8 @@ export const createDot = /* #__PURE__ */ factory(
       const yindex = y._index!;
       const yvalues = y._values!;
 
-      // TODO optimize add & mul using datatype
-      let c: unknown = 0;
+      // The sum starts at the first product, not at 0, so a -0 product stays -0 (as mathjs).
+      let c: unknown;
       const add: ScalarFn = addScalar;
       const mul: ScalarFn = multiplyScalar;
 
@@ -244,20 +244,21 @@ export const createDot = /* #__PURE__ */ factory(
           continue;
         }
         if (I === J) {
-          c = add(c, mul(xvalues[i], yvalues[j]));
+          const p = mul(conj(xvalues[i]), yvalues[j]);
+          c = c === undefined ? p : add(c, p);
           i++;
           j++;
         }
       }
 
-      return c;
+      return c === undefined ? 0 : c;
     }
 
     /**
-     * Dot product of a sparse and a dense vector. Like mathjs, which converts the dense vector to
-     * sparse, the product runs over the stored entries of the sparse vector and skips the zeros of
-     * the dense one. The core DenseMatrix to SparseMatrix conversion copies a matrix into a plain
-     * object, so the signature is explicit instead of relying on that conversion.
+     * Dot product of a sparse and a dense vector. mathjs converts the dense vector to sparse. Like
+     * mathjs, the product runs over the stored entries of the sparse vector and skips the zeros of
+     * the dense vector. Core has no DenseMatrix to SparseMatrix conversion, so the signature is
+     * explicit.
      * @param sparse - The sparse vector
      * @param other - The dense vector or array
      * @param sparseFirst - True when the sparse vector is the first argument
@@ -275,14 +276,18 @@ export const createDot = /* #__PURE__ */ factory(
       const index = sparse._index!;
       const values = sparse._values!;
 
-      let c: unknown = 0;
+      // The first argument is conjugated, as in the dense path: dot(a, b) = sum(conj(a_i) * b_i).
+      let c: unknown;
       for (let k = 0; k < index.length; k++) {
         const raw = data[index[k]];
         const y = isColumn ? (raw as unknown[])[0] : raw;
         if (y === 0 || (y as { isZero?: () => boolean } | null)?.isZero?.() === true) continue;
-        c = addScalar(c, sparseFirst ? multiplyScalar(values[k], y) : multiplyScalar(y, values[k]));
+        const p = sparseFirst
+          ? multiplyScalar(conj(values[k]), y)
+          : multiplyScalar(conj(y), values[k]);
+        c = c === undefined ? p : addScalar(c, p);
       }
-      return c;
+      return c === undefined ? 0 : c;
     }
 
     // TODO remove this once #1771 is fixed
