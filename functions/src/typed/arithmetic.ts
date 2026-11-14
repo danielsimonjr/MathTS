@@ -1742,12 +1742,11 @@ export const sum = mathTyped('sum', {
     return s !== undefined ? s : exactReductions().sum(arr);
   },
   Matrix: (m: unknown): unknown => {
+    // A nested (2-d or deeper) Matrix holds array elements, so the checked kernel returns
+    // undefined for it and the exact sum runs.
     const v = (m as { valueOf(): unknown }).valueOf();
-    if (Array.isArray(v) && v.every((x) => !Array.isArray(x))) {
-      const s = pairwiseSumChecked(v);
-      return s !== undefined ? s : exactReductions().sum(m);
-    }
-    return exactReductions().sum(m);
+    const s = Array.isArray(v) ? pairwiseSumChecked(v) : undefined;
+    return s !== undefined ? s : exactReductions().sum(m);
   },
   'Array, number | BigNumber': (arr: unknown, dim: unknown): unknown =>
     exactReductions().sum(arr, dim),
