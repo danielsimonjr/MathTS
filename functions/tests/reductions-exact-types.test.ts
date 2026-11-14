@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
 import type { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-import { matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
+import { dot, matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
 const B = [new BigNumber('0.1000000000000000000001'), new BigNumber('0.2')];
@@ -504,5 +504,59 @@ describe('mean, variance and std pins that hold before and after the fix', () =>
   it('kernel values', () => {
     expect(variance([1, 2, 3.5])).toBe(1.5833333333333335);
     expect(std([1, 2, 3.5])).toBe(1.2583057392117918);
+  });
+});
+
+describe('dot keeps exact types and follows mathjs', () => {
+  const C = [new Complex(3, 4), new Complex(6, 8)];
+
+  it('conjugates the first Complex argument, as mathjs does', () => {
+    const a = dot(C as never, [1, 1]) as unknown as Complex;
+    expect(a).toBeInstanceOf(Complex);
+    expect([a.re, a.im]).toEqual([9, -12]);
+    const b = dot([1, 1], C as never) as unknown as Complex;
+    expect([b.re, b.im]).toEqual([9, 12]);
+  });
+
+  it('keeps a Fraction exact', () => {
+    const r = dot(
+      [new Fraction(1, 3), new Fraction(1, 6)] as never,
+      [new Fraction(1, 2), 3] as never
+    ) as unknown as Fraction;
+    expect(r).toBeInstanceOf(Fraction);
+    expect(r.equals(new Fraction(2, 3))).toBe(true);
+  });
+
+  it('keeps a BigNumber exact', () => {
+    const r = dot(
+      [new BigNumber('0.1'), new BigNumber('0.2')] as never,
+      [new BigNumber(1), new BigNumber(1)] as never
+    ) as unknown as BigNumber;
+    expect(r).toBeInstanceOf(BigNumber);
+    expect(r.toString()).toBe('0.3');
+  });
+
+  it('takes bigints, as mathjs does', () => {
+    expect(Number(dot([1n, 2n] as never, [3n, 4n] as never))).toBe(11);
+  });
+
+  it('takes two Matrix vectors', () => {
+    expect(dot(dense([1, 2, 3]) as never, dense([4, 5, 6]) as never)).toBe(32);
+  });
+});
+
+describe('dot pins that hold before and after the fix', () => {
+  it('number vectors keep the bits of the pairwise kernel', () => {
+    const a = Array.from({ length: 101 }, (_, i) => Math.sin(i) * 1e3);
+    const b = Array.from({ length: 101 }, (_, i) => Math.cos(i * 0.7));
+    expect(dot(a, b)).toBe(dot(new Float64Array(a), new Float64Array(b)));
+  });
+
+  it('a column matrix and an array give the mathjs result', () => {
+    expect(dot(dense([[1], [2]]) as never, [3, 4])).toBe(11);
+  });
+
+  it('vectors of different length throw', () => {
+    expect(() => dot([1, 2], [1, 2, 3])).toThrow();
   });
 });
