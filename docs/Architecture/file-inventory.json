@@ -9004,7 +9004,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2602
+      "loc": 2722
     },
     {
       "file": "functions/src/typed/bitwise.ts",

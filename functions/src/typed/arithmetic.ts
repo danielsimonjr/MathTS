@@ -2388,14 +2388,134 @@ export function nanstd(
 }
 
 /**
- * Dot product. The Float64Array signature is synchronous.
+ * Leaf size of the checked dot. It equals the leaf of core `pairwiseDot` (`PAIRWISE_BLOCK`, not
+ * exported), so the two give the same bits. A separate typeof pass over the data costs about 40%
+ * more than the dot itself, so the check runs in the same pass as the multiply-adds.
+ */
+const DOT_LEAF = 128;
+
+/**
+ * The pairwise dot of `a[start, end)` and `b[start, end)` (the tree of core `pairwiseDot`), or
+ * `undefined` when an element that the dot reads is not a number.
+ */
+function pairwiseDotChecked(
+  a: unknown[],
+  b: unknown[],
+  start: number,
+  end: number
+): f64 | undefined {
+  const n = end - start;
+  if (n <= DOT_LEAF) {
+    let s0 = 0;
+    let s1 = 0;
+    let s2 = 0;
+    let s3 = 0;
+    let s4 = 0;
+    let s5 = 0;
+    let s6 = 0;
+    let s7 = 0;
+    let i = start;
+    const limit = start + (n - (n % 8));
+    for (; i < limit; i += 8) {
+      const a0 = a[i];
+      const a1 = a[i + 1];
+      const a2 = a[i + 2];
+      const a3 = a[i + 3];
+      const a4 = a[i + 4];
+      const a5 = a[i + 5];
+      const a6 = a[i + 6];
+      const a7 = a[i + 7];
+      const b0 = b[i];
+      const b1 = b[i + 1];
+      const b2 = b[i + 2];
+      const b3 = b[i + 3];
+      const b4 = b[i + 4];
+      const b5 = b[i + 5];
+      const b6 = b[i + 6];
+      const b7 = b[i + 7];
+      if (
+        typeof a0 !== 'number' ||
+        typeof a1 !== 'number' ||
+        typeof a2 !== 'number' ||
+        typeof a3 !== 'number' ||
+        typeof a4 !== 'number' ||
+        typeof a5 !== 'number' ||
+        typeof a6 !== 'number' ||
+        typeof a7 !== 'number' ||
+        typeof b0 !== 'number' ||
+        typeof b1 !== 'number' ||
+        typeof b2 !== 'number' ||
+        typeof b3 !== 'number' ||
+        typeof b4 !== 'number' ||
+        typeof b5 !== 'number' ||
+        typeof b6 !== 'number' ||
+        typeof b7 !== 'number'
+      ) {
+        return undefined;
+      }
+      s0 += a0 * b0;
+      s1 += a1 * b1;
+      s2 += a2 * b2;
+      s3 += a3 * b3;
+      s4 += a4 * b4;
+      s5 += a5 * b5;
+      s6 += a6 * b6;
+      s7 += a7 * b7;
+    }
+    let tail = 0;
+    for (; i < end; i++) {
+      const x = a[i];
+      const y = b[i];
+      if (typeof x !== 'number' || typeof y !== 'number') return undefined;
+      tail += x * y;
+    }
+    return s0 + s1 + (s2 + s3) + (s4 + s5 + (s6 + s7)) + tail;
+  }
+  // Split on an 8-aligned boundary, as core pairwiseDot does, so both halves stay block-aligned.
+  const half = (n >> 1) - ((n >> 1) % 8);
+  const left = pairwiseDotChecked(a, b, start, start + half);
+  if (left === undefined) return undefined;
+  const right = pairwiseDotChecked(a, b, start + half, end);
+  if (right === undefined) return undefined;
+  return left + right;
+}
+
+/**
+ * The pairwise dot product of two arrays whose elements are all numbers, or `undefined` when an
+ * element of either is not a number (an exact value, a bigint, a string, a nested array). The
+ * caller then uses the exact dot.
+ */
+function numberDot(a: unknown[], b: unknown[]): f64 | undefined {
+  if (a.length !== b.length) {
+    throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
+  }
+  return pairwiseDotChecked(a, b, 0, a.length);
+}
+
+/**
+ * Dot product. The Float64Array signature is synchronous. Number vectors take the pairwise kernel;
+ * exact data, bigints and nested arrays take the factory dot, which follows mathjs.
  */
 export const dot = mathTyped('dot', {
-  'Array, Array': (a: f64[], b: f64[]): f64 => {
-    if (a.length !== b.length) {
-      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
-    }
-    return pairwiseDot(a, b);
+  'Array, Array': (a: unknown[], b: unknown[]): unknown =>
+    numberDot(a, b) ?? exactReductions('dot').dot(a, b),
+
+  // A Matrix gives its data when that is a flat array of numbers, else the factory dot.
+  'Matrix, Matrix': (a: unknown, b: unknown): unknown => {
+    const va = (a as { valueOf(): unknown }).valueOf();
+    const vb = (b as { valueOf(): unknown }).valueOf();
+    return (
+      (Array.isArray(va) && Array.isArray(vb) ? numberDot(va, vb) : undefined) ??
+      exactReductions('dot').dot(a, b)
+    );
+  },
+  'Matrix, Array': (a: unknown, b: unknown[]): unknown => {
+    const va = (a as { valueOf(): unknown }).valueOf();
+    return (Array.isArray(va) ? numberDot(va, b) : undefined) ?? exactReductions('dot').dot(a, b);
+  },
+  'Array, Matrix': (a: unknown[], b: unknown): unknown => {
+    const vb = (b as { valueOf(): unknown }).valueOf();
+    return (Array.isArray(vb) ? numberDot(a, vb) : undefined) ?? exactReductions('dot').dot(a, b);
   },
 
   // Float64Array dot product (synchronous, pairwise summation)
