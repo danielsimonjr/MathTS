@@ -137,7 +137,7 @@ export interface MeanCallable {
   (a: Matrix, b: StatReduceOptions): number;
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;
+  (a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }
@@ -166,7 +166,7 @@ export interface VarianceCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;
+  (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }
@@ -194,7 +194,7 @@ export interface StdCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;
+  (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }
