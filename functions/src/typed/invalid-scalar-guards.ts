@@ -27,14 +27,14 @@ export function unexpectedArgumentType(fn: string, value: unknown, index: number
 
 function isAllowedObject(value: object): boolean {
   if (Array.isArray(value) || ArrayBuffer.isView(value)) return true;
-  // The type tests of core also accept a value of a second copy of core. `Matrix` is not a core
-  // class: a matrix of another copy passes the `isMatrix` check below.
+  // `instanceof Matrix` is the cheapest test, so it comes first. The type tests of core also accept
+  // a value of a second copy of core.
   if (
+    value instanceof Matrix ||
     isComplex(value) ||
     isFraction(value) ||
     isBigNumber(value) ||
-    isDual(value) ||
-    value instanceof Matrix
+    isDual(value)
   ) {
     return true;
   }

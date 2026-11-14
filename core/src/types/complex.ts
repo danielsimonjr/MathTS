@@ -4,7 +4,7 @@
  */
 
 import type { Scalar, IComplex } from './interfaces.js';
-import { COMPLEX_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
+import { COMPLEX_BRAND, defineTypeMarkers } from './type-marker.js';
 
 /** Beyond this, `cosh`/`sinh` of the argument is within a factor e^-700 of overflowing to Infinity. */
 const HYPERBOLIC_OVERFLOW_ARG = 700;
@@ -52,7 +52,12 @@ function createTanFamilyMethod(
  * path for a value of this copy, and the brand test decides for every other value.
  */
 export function isComplex(value: unknown): value is Complex {
-  return value instanceof Complex || hasBrand(value, COMPLEX_BRAND);
+  return (
+    value instanceof Complex ||
+    (typeof value === 'object' &&
+      value !== null &&
+      (value as { [COMPLEX_BRAND]?: unknown })[COMPLEX_BRAND] === true)
+  );
 }
 
 /**

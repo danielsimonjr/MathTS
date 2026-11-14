@@ -15,7 +15,7 @@
  * `DualTensor` apply exactly the same chain rules (no reinvention).
  */
 import { DUAL_UNARY_RULES, type DualUnaryRule } from './dual-rules.js';
-import { DUAL_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
+import { DUAL_BRAND, defineTypeMarkers } from './type-marker.js';
 
 /**
  * A dual number `value + deriv·ε` for forward-mode automatic differentiation.
@@ -124,7 +124,10 @@ export class Dual {
  * path for a value of this copy, and the brand test decides for every other value.
  */
 export function isDual(x: unknown): x is Dual {
-  return x instanceof Dual || hasBrand(x, DUAL_BRAND);
+  return (
+    x instanceof Dual ||
+    (typeof x === 'object' && x !== null && (x as { [DUAL_BRAND]?: unknown })[DUAL_BRAND] === true)
+  );
 }
 
 // Prototype brand read by `isDual`.

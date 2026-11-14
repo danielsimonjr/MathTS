@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-14",
     "totalFiles": 1332,
     "totalModules": 82,
-    "totalExports": 7282
+    "totalExports": 7281
   },
   "entryPoints": [
     {
@@ -2838,7 +2838,7 @@
           },
           {
             "file": "./type-marker.js",
-            "imports": ["BIGNUMBER_BRAND", "defineTypeMarkers", "hasBrand"]
+            "imports": ["BIGNUMBER_BRAND", "defineTypeMarkers"]
           }
         ],
         "workspaceDependencies": [],
@@ -2881,7 +2881,7 @@
           },
           {
             "file": "./type-marker.js",
-            "imports": ["COMPLEX_BRAND", "defineTypeMarkers", "hasBrand"]
+            "imports": ["COMPLEX_BRAND", "defineTypeMarkers"]
           }
         ],
         "workspaceDependencies": [],
@@ -2912,7 +2912,7 @@
           },
           {
             "file": "./type-marker.js",
-            "imports": ["DUAL_BRAND", "defineTypeMarkers", "hasBrand"]
+            "imports": ["DUAL_BRAND", "defineTypeMarkers"]
           }
         ],
         "workspaceDependencies": [],
@@ -2932,7 +2932,7 @@
           },
           {
             "file": "./type-marker.js",
-            "imports": ["FRACTION_BRAND", "defineTypeMarkers", "hasBrand"]
+            "imports": ["FRACTION_BRAND", "defineTypeMarkers"]
           }
         ],
         "workspaceDependencies": [],
@@ -3042,10 +3042,9 @@
           "FRACTION_BRAND",
           "BIGNUMBER_BRAND",
           "DUAL_BRAND",
-          "defineTypeMarkers",
-          "hasBrand"
+          "defineTypeMarkers"
         ],
-        "functions": ["defineTypeMarkers", "hasBrand"],
+        "functions": ["defineTypeMarkers"],
         "constants": ["COMPLEX_BRAND", "FRACTION_BRAND", "BIGNUMBER_BRAND", "DUAL_BRAND"]
       },
       "core/src/types/unit/Unit.ts": {
@@ -48559,11 +48558,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1332,
     "totalModules": 82,
-    "totalLinesOfCode": 229637,
-    "totalExports": 7282,
+    "totalLinesOfCode": 229649,
+    "totalExports": 7281,
     "totalClasses": 62,
     "totalInterfaces": 660,
-    "totalFunctions": 2492,
+    "totalFunctions": 2491,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1675,

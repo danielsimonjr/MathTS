@@ -16,6 +16,11 @@
  *
  * Both are read-only and not enumerable. They add no own key to an instance. This module has no
  * imports, so the class modules can share it without a cycle.
+ *
+ * Each type test reads its own brand constant at its own site, and does not call a shared helper
+ * that takes the brand as an argument. A lookup site that sees four different symbols is
+ * megamorphic: a miss, which is the normal result for a matrix or a unit, was three to six times
+ * slower than the `instanceof` test it replaces.
  */
 
 /** Brand of `Complex`. */
@@ -39,15 +44,4 @@ export function defineTypeMarkers(
 ): void {
   Object.defineProperty(proto, brand, { value: true });
   if (mathjsMarker !== undefined) Object.defineProperty(proto, mathjsMarker, { value: true });
-}
-
-/**
- * Check whether the prototype of `value` carries `brand`.
- *
- * Reads the prototype only. A primitive, `null` and an object with a null prototype return false.
- */
-export function hasBrand(value: unknown, brand: symbol): boolean {
-  if (value === null || typeof value !== 'object') return false;
-  const proto = Object.getPrototypeOf(value) as Record<symbol, unknown> | null;
-  return proto !== null && proto[brand] === true;
 }

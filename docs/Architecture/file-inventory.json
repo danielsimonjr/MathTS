@@ -912,14 +912,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1701
+      "loc": 1706
     },
     {
       "file": "core/src/types/complex.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 793
+      "loc": 798
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -933,14 +933,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 132
+      "loc": 135
     },
     {
       "file": "core/src/types/fraction.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 802
+      "loc": 807
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -968,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 54
+      "loc": 48
     },
     {
       "file": "core/src/types/unit-definitions.ts",

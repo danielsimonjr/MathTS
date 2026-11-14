@@ -4,7 +4,7 @@
  */
 
 import type { Scalar, MathTSValue } from './interfaces.js';
-import { BIGNUMBER_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
+import { BIGNUMBER_BRAND, defineTypeMarkers } from './type-marker.js';
 
 /**
  * Check if a value is a BigNumber.
@@ -14,7 +14,12 @@ import { BIGNUMBER_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
  * fast path for a value of this copy, and the brand test decides for every other value.
  */
 export function isBigNumber(value: unknown): value is BigNumber {
-  return value instanceof BigNumber || hasBrand(value, BIGNUMBER_BRAND);
+  return (
+    value instanceof BigNumber ||
+    (typeof value === 'object' &&
+      value !== null &&
+      (value as { [BIGNUMBER_BRAND]?: unknown })[BIGNUMBER_BRAND] === true)
+  );
 }
 
 /**

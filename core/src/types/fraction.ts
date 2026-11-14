@@ -4,7 +4,7 @@
  */
 
 import type { Scalar, IFraction } from './interfaces.js';
-import { FRACTION_BRAND, defineTypeMarkers, hasBrand } from './type-marker.js';
+import { FRACTION_BRAND, defineTypeMarkers } from './type-marker.js';
 
 /** Longest repeating period `Fraction#toString` prints before it falls back to `n/d`. */
 const FRACTION_MAX_PERIOD_DIGITS = 1000;
@@ -17,7 +17,12 @@ const FRACTION_MAX_PERIOD_DIGITS = 1000;
  * path for a value of this copy, and the brand test decides for every other value.
  */
 export function isFraction(value: unknown): value is Fraction {
-  return value instanceof Fraction || hasBrand(value, FRACTION_BRAND);
+  return (
+    value instanceof Fraction ||
+    (typeof value === 'object' &&
+      value !== null &&
+      (value as { [FRACTION_BRAND]?: unknown })[FRACTION_BRAND] === true)
+  );
 }
 
 /**

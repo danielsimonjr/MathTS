@@ -1002,10 +1002,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                        | Type               |
-| ------------------ | ---------------------------------------------- | ------------------ |
-| `./interfaces.js`  | `Scalar, MathTSValue`                          | Import (type-only) |
-| `./type-marker.js` | `BIGNUMBER_BRAND, defineTypeMarkers, hasBrand` | Import             |
+| File               | Imports                              | Type               |
+| ------------------ | ------------------------------------ | ------------------ |
+| `./interfaces.js`  | `Scalar, MathTSValue`                | Import (type-only) |
+| `./type-marker.js` | `BIGNUMBER_BRAND, defineTypeMarkers` | Import             |
 
 **Exports:**
 
@@ -1021,10 +1021,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                      | Type               |
-| ------------------ | -------------------------------------------- | ------------------ |
-| `./interfaces.js`  | `Scalar, IComplex`                           | Import (type-only) |
-| `./type-marker.js` | `COMPLEX_BRAND, defineTypeMarkers, hasBrand` | Import             |
+| File               | Imports                            | Type               |
+| ------------------ | ---------------------------------- | ------------------ |
+| `./interfaces.js`  | `Scalar, IComplex`                 | Import (type-only) |
+| `./type-marker.js` | `COMPLEX_BRAND, defineTypeMarkers` | Import             |
 
 **Exports:**
 
@@ -1049,10 +1049,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                   | Type   |
-| ------------------ | ----------------------------------------- | ------ |
-| `./dual-rules.js`  | `DUAL_UNARY_RULES, DualUnaryRule`         | Import |
-| `./type-marker.js` | `DUAL_BRAND, defineTypeMarkers, hasBrand` | Import |
+| File               | Imports                           | Type   |
+| ------------------ | --------------------------------- | ------ |
+| `./dual-rules.js`  | `DUAL_UNARY_RULES, DualUnaryRule` | Import |
+| `./type-marker.js` | `DUAL_BRAND, defineTypeMarkers`   | Import |
 
 **Exports:**
 
@@ -1065,10 +1065,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                       | Type               |
-| ------------------ | --------------------------------------------- | ------------------ |
-| `./interfaces.js`  | `Scalar, IFraction`                           | Import (type-only) |
-| `./type-marker.js` | `FRACTION_BRAND, defineTypeMarkers, hasBrand` | Import             |
+| File               | Imports                             | Type               |
+| ------------------ | ----------------------------------- | ------------------ |
+| `./interfaces.js`  | `Scalar, IFraction`                 | Import (type-only) |
+| `./type-marker.js` | `FRACTION_BRAND, defineTypeMarkers` | Import             |
 
 **Exports:**
 
@@ -1127,7 +1127,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `defineTypeMarkers`, `hasBrand`
+- Functions: `defineTypeMarkers`
 - Constants: `COMPLEX_BRAND`, `FRACTION_BRAND`, `BIGNUMBER_BRAND`, `DUAL_BRAND`
 
 ---
@@ -21228,12 +21228,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1332   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229637 |
-| Total Exports           | 7282   |
+| Total Lines of Code     | 229649 |
+| Total Exports           | 7281   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |
 | Total Interfaces        | 660    |
-| Total Functions         | 2492   |
+| Total Functions         | 2491   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
 | Type-only Imports       | 682    |
