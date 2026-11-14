@@ -245,20 +245,20 @@ describe('fixed-size kernels equal their twin or oracle', () => {
     });
   }
 
-  it('dot, mat3Multiply and mat3MulVec give +0 (not -0) for all-negative-zero products, as the twin does', () => {
+  it('dot, mat3Multiply and mat3MulVec give -0 for all-negative-zero products, as mathjs and the twin do', () => {
     const negZero = [-0, -0, -0];
     const one = [1, 1, 1];
-    expect(Object.is(K.vec3Dot!(negZero, one), 0)).toBe(true);
-    expect(Object.is(K.vec2Dot!([-0, -0], [1, 1]), 0)).toBe(true);
-    expect(Object.is(F.dot(negZero, one) as number, 0)).toBe(true);
+    expect(Object.is(K.vec3Dot!(negZero, one), -0)).toBe(true);
+    expect(Object.is(K.vec2Dot!([-0, -0], [1, 1]), -0)).toBe(true);
+    expect(Object.is(F.dot(negZero, one) as number, -0)).toBe(true);
     const z = [-0, -0, -0, -0, -0, -0, -0, -0, -0];
     const i9 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
     const out: Arr = new Array<number>(9).fill(1);
     K.mat3Multiply!(out, z, i9);
-    for (const x of out) expect(Object.is(x, 0)).toBe(true);
+    for (const x of out) expect(Object.is(x, -0)).toBe(true);
     const out3: Arr = [1, 1, 1];
     K.mat3MulVec!(out3, z, one);
-    for (const x of out3) expect(Object.is(x, 0)).toBe(true);
+    for (const x of out3) expect(Object.is(x, -0)).toBe(true);
   });
 
   it('length and normalize take the Math.hypot path outside the plain square-root range', () => {

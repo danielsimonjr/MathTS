@@ -781,6 +781,9 @@
       "pairwiseDot": {
         "kind": "function"
       },
+      "pairwiseDotChecked": {
+        "kind": "function"
+      },
       "pairwiseSum": {
         "kind": "function"
       },

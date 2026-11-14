@@ -755,6 +755,7 @@
       "NumericType",
       "ObjectWrappingMap",
       "pairwiseDot",
+      "pairwiseDotChecked",
       "pairwiseSum",
       "pairwiseSumChecked",
       "ParseOptions",

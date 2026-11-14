@@ -259,6 +259,7 @@ export const VERSION: string = __PKG_VERSION__;
 export {
   pairwiseSum,
   pairwiseSumChecked,
+  pairwiseDotChecked,
   neumaierSum,
   norm2,
   pairwiseDot,

@@ -309,7 +309,9 @@ describe('arithmetic — number scalar edge branches', () => {
     expect(std([2, 4, 6], 'uncorrected')).toBeCloseTo(Math.sqrt(8 / 3), 10);
     expect(std([])).toBeNaN();
     expect(dot([1, 2, 3], [4, 5, 6])).toBe(32);
-    expect(() => dot([1, 2], [1, 2, 3])).toThrow(/lengths must match/);
+    expect(() => dot([1, 2], [1, 2, 3])).toThrow(
+      new RangeError('Vectors must have equal length (2 != 3)')
+    );
   });
 
   it('min/max single + variadic + array', () => {

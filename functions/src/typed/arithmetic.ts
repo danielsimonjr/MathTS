@@ -30,6 +30,7 @@ import {
   neumaierSum,
   norm2,
   pairwiseDot,
+  pairwiseDotChecked,
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
 } from '@danielsimonjr/mathts-core';
@@ -2388,108 +2389,29 @@ export function nanstd(
 }
 
 /**
- * Leaf size of the checked dot. It equals the leaf of core `pairwiseDot` (`PAIRWISE_BLOCK`, not
- * exported), so the two give the same bits. A separate typeof pass over the data costs about 40%
- * more than the dot itself, so the check runs in the same pass as the multiply-adds.
- */
-const DOT_LEAF = 128;
-
-/**
- * The pairwise dot of `a[start, end)` and `b[start, end)` (the tree of core `pairwiseDot`), or
- * `undefined` when an element that the dot reads is not a number.
- */
-function pairwiseDotChecked(
-  a: unknown[],
-  b: unknown[],
-  start: number,
-  end: number
-): f64 | undefined {
-  const n = end - start;
-  if (n <= DOT_LEAF) {
-    let s0 = 0;
-    let s1 = 0;
-    let s2 = 0;
-    let s3 = 0;
-    let s4 = 0;
-    let s5 = 0;
-    let s6 = 0;
-    let s7 = 0;
-    let i = start;
-    const limit = start + (n - (n % 8));
-    for (; i < limit; i += 8) {
-      const a0 = a[i];
-      const a1 = a[i + 1];
-      const a2 = a[i + 2];
-      const a3 = a[i + 3];
-      const a4 = a[i + 4];
-      const a5 = a[i + 5];
-      const a6 = a[i + 6];
-      const a7 = a[i + 7];
-      const b0 = b[i];
-      const b1 = b[i + 1];
-      const b2 = b[i + 2];
-      const b3 = b[i + 3];
-      const b4 = b[i + 4];
-      const b5 = b[i + 5];
-      const b6 = b[i + 6];
-      const b7 = b[i + 7];
-      if (
-        typeof a0 !== 'number' ||
-        typeof a1 !== 'number' ||
-        typeof a2 !== 'number' ||
-        typeof a3 !== 'number' ||
-        typeof a4 !== 'number' ||
-        typeof a5 !== 'number' ||
-        typeof a6 !== 'number' ||
-        typeof a7 !== 'number' ||
-        typeof b0 !== 'number' ||
-        typeof b1 !== 'number' ||
-        typeof b2 !== 'number' ||
-        typeof b3 !== 'number' ||
-        typeof b4 !== 'number' ||
-        typeof b5 !== 'number' ||
-        typeof b6 !== 'number' ||
-        typeof b7 !== 'number'
-      ) {
-        return undefined;
-      }
-      s0 += a0 * b0;
-      s1 += a1 * b1;
-      s2 += a2 * b2;
-      s3 += a3 * b3;
-      s4 += a4 * b4;
-      s5 += a5 * b5;
-      s6 += a6 * b6;
-      s7 += a7 * b7;
-    }
-    let tail = 0;
-    for (; i < end; i++) {
-      const x = a[i];
-      const y = b[i];
-      if (typeof x !== 'number' || typeof y !== 'number') return undefined;
-      tail += x * y;
-    }
-    return s0 + s1 + (s2 + s3) + (s4 + s5 + (s6 + s7)) + tail;
-  }
-  // Split on an 8-aligned boundary, as core pairwiseDot does, so both halves stay block-aligned.
-  const half = (n >> 1) - ((n >> 1) % 8);
-  const left = pairwiseDotChecked(a, b, start, start + half);
-  if (left === undefined) return undefined;
-  const right = pairwiseDotChecked(a, b, start + half, end);
-  if (right === undefined) return undefined;
-  return left + right;
-}
-
-/**
  * The pairwise dot product of two arrays whose elements are all numbers, or `undefined` when an
  * element of either is not a number (an exact value, a bigint, a string, a nested array). The
  * caller then uses the exact dot.
  */
 function numberDot(a: unknown[], b: unknown[]): f64 | undefined {
-  if (a.length !== b.length) {
-    throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
-  }
-  return pairwiseDotChecked(a, b, 0, a.length);
+  checkDotLengths(a.length, b.length);
+  const r = pairwiseDotChecked(a, b);
+  return r === 0 ? signedZeroDot(a as number[], b as number[]) : r;
+}
+
+/** Throw the mathjs `RangeError` for vectors of different length or empty vectors. */
+function checkDotLengths(na: number, nb: number): void {
+  if (na !== nb) throw new RangeError(`Vectors must have equal length (${na} != ${nb})`);
+  if (na === 0) throw new RangeError('Cannot calculate the dot product of empty vectors');
+}
+
+/**
+ * The sign of a zero dot product. A sum is -0 only when every term is -0, as in the naive loop of
+ * mathjs; the pairwise kernel starts its accumulators at +0. This check runs only for a zero result.
+ */
+function signedZeroDot(a: ArrayLike<number>, b: ArrayLike<number>): f64 {
+  for (let i = 0; i < a.length; i++) if (!Object.is(a[i] * b[i], -0)) return 0;
+  return -0;
 }
 
 /**
@@ -2520,10 +2442,9 @@ export const dot = mathTyped('dot', {
 
   // Float64Array dot product (synchronous, pairwise summation)
   'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): f64 => {
-    if (a.length !== b.length) {
-      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
-    }
-    return pairwiseDot(a, b);
+    checkDotLengths(a.length, b.length);
+    const r = pairwiseDot(a, b);
+    return r === 0 ? signedZeroDot(a, b) : r;
   },
 });
 

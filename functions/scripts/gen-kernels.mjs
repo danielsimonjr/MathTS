@@ -85,7 +85,7 @@ function buildRows() {
       normalizeOut.push('a' + c + ' / m');
     }
 
-    let dotValue = '0 + a0 * b0';
+    let dotValue = 'a0 * b0';
     for (let c = 1; c < size; c += 1) {
       dotValue += ' + a' + c + ' * b' + c;
     }
@@ -314,7 +314,7 @@ function buildRows() {
   for (let c = 0; c < 3; c += 1) {
     for (let r = 0; r < 3; r += 1) {
       mat3MultiplyOut.push(
-        `0 + a${r} * b${c * 3} + a${3 + r} * b${c * 3 + 1} + a${6 + r} * b${c * 3 + 2}`
+        `a${r} * b${c * 3} + a${3 + r} * b${c * 3 + 1} + a${6 + r} * b${c * 3 + 2}`
       );
     }
   }
@@ -335,7 +335,7 @@ function buildRows() {
 
   const mat3MulVecOut = [];
   for (let r = 0; r < 3; r += 1) {
-    mat3MulVecOut.push(`0 + m${r} * v0 + m${3 + r} * v1 + m${6 + r} * v2`);
+    mat3MulVecOut.push(`m${r} * v0 + m${3 + r} * v1 + m${6 + r} * v2`);
   }
 
   rows.push({

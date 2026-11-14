@@ -686,8 +686,8 @@ export class MathJSSparseMatrix {
    * Get element at [row, col]. Returns 0 for structural zeros.
    */
   get(indexOrRow: number[] | number, col?: number): unknown {
-    // Accepts `get([i, j])` and `get(i, j)`, as the dense matrix does: the core Matrix to Array
-    // conversion reads a matrix with `get(i, j)`.
+    // `get` accepts `get([i, j])` and `get(i, j)`, as the dense matrix does. The core Matrix to
+    // Array conversion can read a matrix with `get(i, j)`.
     const [i, j] = Array.isArray(indexOrRow) ? indexOrRow : [indexOrRow, col as number];
     if (j < 0 || j >= this._size[1] || i < 0 || i >= this._size[0]) {
       throw new RangeError(`Index out of range (${i}, ${j}) for matrix of size [${this._size}]`);

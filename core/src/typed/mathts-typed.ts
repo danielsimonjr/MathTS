@@ -438,6 +438,10 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     from: 'Matrix',
     to: 'Array',
     convert: (m: unknown) => {
+      // A matrix with its own `toArray` keeps its shape. A 1-D matrix of size [n] has rows n and
+      // cols 0, so the `get(i, j)` loop below would give n empty rows.
+      const own = m as { toArray?: () => unknown[] };
+      if (typeof own.toArray === 'function') return own.toArray();
       const matrix = m as { rows: number; cols: number; get: (r: number, c: number) => number };
       const result: number[][] = [];
       for (let i = 0; i < matrix.rows; i++) {
@@ -447,14 +451,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
         }
       }
       return result;
-    },
-  },
-  {
-    from: 'DenseMatrix',
-    to: 'SparseMatrix',
-    convert: (m: unknown) => {
-      // Placeholder - will implement proper CSR conversion
-      return { ...(m as object), type: 'SparseMatrix' };
     },
   },
 ];
