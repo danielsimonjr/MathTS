@@ -172,13 +172,14 @@ describe('a scalar and a matrix keep the matrix type and the storage (#911)', ()
     });
   });
 
-  it('adds a Complex scalar to a SparseMatrix and keeps the storage sparse', () => {
+  it('adds a Complex scalar to a SparseMatrix and gives a dense matrix, as mathjs 15 does', () => {
     const a = sparse([
       [1, 0],
       [0, 2],
     ]);
+    // mathjs 15: add(complex, sparse) is a DenseMatrix (a number added to a zero is not a zero).
     const out = matrixTexts(ops.add(new Complex(0, 1), a));
-    expect(out.storage).toBe('sparse');
+    expect(out.storage).toBe('dense');
     expect(out.rows).toEqual([
       ['1 + i', 'i'],
       ['i', '2 + i'],
