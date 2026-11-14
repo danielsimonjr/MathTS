@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2416,
+  "totalFiles": 2417,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1307,
     "test-only": 0,
     "orphan": 0,
-    "test": 1017,
+    "test": 1018,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1333,
-    "tests": 1017,
+    "tests": 1018,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 28,
-    "@danielsimonjr/mathts-core": 129,
+    "@danielsimonjr/mathts-core": 130,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 635
+      "loc": 642
     },
     {
       "file": "core/src/typed/type-bridge.ts",
@@ -1291,6 +1291,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 290
+    },
+    {
+      "file": "core/tests/typed/string-conversion-order.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 50
     },
     {
       "file": "core/tests/typed/type-bridge.test.ts",
@@ -8990,7 +8997,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2420
+      "loc": 2414
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -11888,7 +11895,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 321
+      "loc": 322
     },
     {
       "file": "functions/tests/p7-lsolve-usolve-number-path.test.ts",

@@ -287,6 +287,42 @@ export const MATHTS_TYPES: MathTSTypeDef[] = [
 
 export const MATHTS_CONVERSIONS: ConversionDef[] = [
   // -------------------------------------------------------------------------
+  // From string: number first, then BigNumber, bigint, Fraction and Complex, as in mathjs.
+  // typed-function prefers the conversion that comes first, so this order decides which
+  // signature a string argument reaches.
+  // -------------------------------------------------------------------------
+  {
+    from: 'string',
+    to: 'number',
+    convert: (s: unknown) => {
+      // Number() reads the whole string (hex, exponent, surrounding space); parseFloat would
+      // read '3abc' as 3.
+      const n = Number(s as string);
+      if (isNaN(n)) throw new Error(`Cannot convert "${s}" to a number`);
+      return n;
+    },
+  },
+  {
+    from: 'string',
+    to: 'BigNumber',
+    convert: (s: unknown) => BigNumber.parse(s as string),
+  },
+  {
+    from: 'string',
+    to: 'bigint',
+    convert: (s: unknown) => BigInt(s as string),
+  },
+  {
+    from: 'string',
+    to: 'Fraction',
+    convert: (s: unknown) => Fraction.parse(s as string),
+  },
+  {
+    from: 'string',
+    to: 'Complex',
+    convert: (s: unknown) => Complex.parse(s as string),
+  },
+  // -------------------------------------------------------------------------
   // To Complex conversions
   // -------------------------------------------------------------------------
   {
@@ -304,11 +340,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     to: 'Complex',
     convert: (bn: unknown) => Complex.fromNumber((bn as BigNumber).valueOf()),
   },
-  {
-    from: 'string',
-    to: 'Complex',
-    convert: (s: unknown) => Complex.parse(s as string),
-  },
 
   // -------------------------------------------------------------------------
   // To Fraction conversions
@@ -322,11 +353,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     from: 'bigint',
     to: 'Fraction',
     convert: (n: unknown) => new Fraction(n as bigint, 1n),
-  },
-  {
-    from: 'string',
-    to: 'Fraction',
-    convert: (s: unknown) => Fraction.parse(s as string),
   },
 
   // -------------------------------------------------------------------------
@@ -347,11 +373,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     to: 'BigNumber',
     convert: (f: unknown) => BigNumber.fromNumber((f as Fraction).toNumber()),
   },
-  {
-    from: 'string',
-    to: 'BigNumber',
-    convert: (s: unknown) => BigNumber.parse(s as string),
-  },
 
   // -------------------------------------------------------------------------
   // To number conversions
@@ -360,15 +381,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     from: 'boolean',
     to: 'number',
     convert: (b: unknown) => (b ? 1 : 0),
-  },
-  {
-    from: 'string',
-    to: 'number',
-    convert: (s: unknown) => {
-      const n = parseFloat(s as string);
-      if (isNaN(n)) throw new Error(`Cannot convert "${s}" to number`);
-      return n;
-    },
   },
   {
     from: 'bigint',
@@ -403,11 +415,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     from: 'BigNumber',
     to: 'bigint',
     convert: (bn: unknown) => (bn as BigNumber).toBigInt(),
-  },
-  {
-    from: 'string',
-    to: 'bigint',
-    convert: (s: unknown) => BigInt(s as string),
   },
 
   // -------------------------------------------------------------------------

@@ -169,7 +169,8 @@ describe('P7-3 factory max/min number path', () => {
         expect(run([' 5 '])).toBe(5);
         expect(same(run([1, '2']), reference([1, '2'], pick))).toBe(true);
         expect(run([1, 2, '40'])).toBe(pick === 'max' ? 40 : 1);
-        expect(() => run(['3', '12'])).toThrow(new RegExp(`Cannot calculate ${pick}`));
+        // Two strings compare as numbers, as in mathjs (string converts to number first).
+        expect(run(['3', '12'])).toBe(pick === 'max' ? 12 : 3);
       });
 
       it('a 2-D array is flattened by the generic walk', () => {
