@@ -9,17 +9,23 @@
     {
       "name": "mean",
       "source": "src/typed/arithmetic.ts",
-      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+      "fallback": [
+        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;"
+      ]
     },
     {
       "name": "variance",
       "source": "src/typed/arithmetic.ts",
-      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+      "fallback": [
+        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
+      ]
     },
     {
       "name": "std",
       "source": "src/typed/arithmetic.ts",
-      "fallback": ["(a: readonly unknown[] | Matrix, b?: unknown, c?: unknown): unknown;"]
+      "fallback": [
+        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
+      ]
     },
     { "name": "sin", "source": "src/typed/trigonometry.ts" },
     { "name": "cos", "source": "src/typed/trigonometry.ts" },
