@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathTS API Index</title>
+<meta name="description" content="Index of the per-package API reference for MathTS.">
+<style>
+:root { --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff; }
+:root[data-theme="light"] { --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de; --text: #1f2328; --text2: #59636e; --accent: #0969da; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de; --text: #1f2328; --text2: #59636e; --accent: #0969da; } }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 16px; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+a { color: var(--accent); }
+.nav { font-size: 0.9rem; margin-top: 0.5rem; }
+.intro { color: var(--text2); margin: 1rem 0 1.5rem; }
+ul { list-style: none; }
+.entry { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+.title { font-weight: 600; font-size: 1.05rem; }
+.summary { color: var(--text); font-size: 0.92rem; margin-top: 0.25rem; }
+.file { color: var(--text2); font-family: monospace; font-size: 0.8rem; }
+footer { margin-top: 2rem; color: var(--text2); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>MathTS API Index</h1>
+  <p class="nav"><a href="../">Function reference</a> · <a href="https://github.com/danielsimonjr/mathts#readme">Getting started</a></p>
+  <p class="intro">Per-package API reference for the public MathTS packages. Each entry opens the page in the repository, where the export lists and usage notes are kept.</p>
+</header>
+<ul>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/autograd.md">@danielsimonjr/mathts-autograd API Reference</a>
+    <p class="summary">Automatic differentiation over @danielsimonjr/mathts-tensor's Tensor — **forward-mode** (dual numbers, DualTensor) and **reverse-mode** (tape-based, Tape / TapedTensor) — plus a JAX-style grad / valueAndGrad / derivative / jacobian…</p>
+    <span class="file">docs/api/autograd.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/compat.md">@danielsimonjr/mathts-compat API Reference</a>
+    <p class="summary">mathjs compatibility layer for easy migration.</p>
+    <span class="file">docs/api/compat.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/core.md">@danielsimonjr/mathts-core API Reference</a>
+    <p class="summary">The core package provides fundamental types and utilities for MathTS.</p>
+    <span class="file">docs/api/core.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/expression.md">@danielsimonjr/mathts-expression API Reference</a>
+    <p class="summary">Expression parsing, AST, compilation, and evaluation for MathTS — a mathjs-lineage parser plus a standalone tree-walking compiler/evaluator and a security-validating high-level evaluate.</p>
+    <span class="file">docs/api/expression.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/functions.md">@danielsimonjr/mathts-functions API Reference</a>
+    <p class="summary">Mathematical functions with automatic type dispatch. The domain tables below are a **curated highlight** of commonly-used functions with signatures and examples; for the **complete, always-current list of every export**, see the…</p>
+    <span class="file">docs/api/functions.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/gpu.md">@danielsimonjr/mathts-gpu API Reference</a>
+    <p class="summary">Shared WebGPU foundation for MathTS: device/adapter lifecycle, buffer pooling, generic shader compile/cache, and capability detection.</p>
+    <span class="file">docs/api/gpu.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/matrix.md">@danielsimonjr/mathts-matrix API Reference</a>
+    <p class="summary">Dense and sparse matrix implementations with backend selection.</p>
+    <span class="file">docs/api/matrix.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/parallel.md">@danielsimonjr/mathts-parallel API Reference</a>
+    <p class="summary">Parallel execution via Web Workers using ComputePool.</p>
+    <span class="file">docs/api/parallel.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/plot.md">@danielsimonjr/mathts-plot API Reference</a>
+    <p class="summary">Headless, dependency-light SVG 2D/3D plotting for MathTS — expression-aware (samples MathTS expressions directly) and browser-safe by default.</p>
+    <span class="file">docs/api/plot.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/tensor.md">@danielsimonjr/mathts-tensor API Reference</a>
+    <p class="summary">Rank-N, row-major Float64Array-backed dense tensors with einsum/broadcasting, decompositions routed through matrix, and an ITensor-inspired named-index labelling system for tensor-network-style contraction.</p>
+    <span class="file">docs/api/tensor.md</span>
+  </li>
+  <li class="entry">
+    <a class="title" href="https://github.com/danielsimonjr/mathts/blob/main/docs/api/workbook.md">@danielsimonjr/mathts-workbook API Reference</a>
+    <p class="summary">Headless runtime + CLI for .mtsw reactive YAML notebooks. Code and test cells are evaluated as **MathTS expressions** (via @danielsimonjr/mathts-expression's standalone compile/evaluate path) — **not** TypeScript or JavaScript.</p>
+    <span class="file">docs/api/workbook.md</span>
+  </li>
+</ul>
+<footer>
+  <p>Generated from <a href="https://github.com/danielsimonjr/mathts/tree/main/docs/api">docs/api</a> · 11 packages</p>
+</footer>
+</div>
+</body>
+</html>

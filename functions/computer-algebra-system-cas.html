@@ -44,7 +44,7 @@ h1 span { color: var(--accent); }
 <div class="container">
 <header>
   <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Computer Algebra System (CAS)</div>
-  <h1><span>Computer Algebra System (CAS)</span> (36)</h1>
+  <h1><span>Computer Algebra System (CAS)</span> (38)</h1>
   <p class="cat-desc">Symbolic calculus, transforms, and equation solving.</p>
 </header>
 
@@ -265,6 +265,14 @@ h1 span { color: var(--accent); }
     <div class="example">piecewise(conditions)</div>
   </div>
 </div>
+<div class="func-card" id="PolynomialDegreeError" data-name="polynomialdegreeerror">
+  <div class="func-name">PolynomialDegreeError</div>
+  <div class="func-desc"><code>RangeError</code> that <code>solve</code>, <code>expand</code> and the CAS reader throw for a polynomial of a degree above 1000</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">PolynomialDegreeError</div>
+  </div>
+</div>
 <div class="func-card" id="series" data-name="series">
   <div class="func-name">series</div>
   <div class="func-desc">General series expansion</div>
@@ -283,10 +291,18 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="solve" data-name="solve">
   <div class="func-name">solve</div>
-  <div class="func-desc">Solve an equation</div>
+  <div class="func-desc">Finite list of the roots of an equation; throws for an identity or a periodic solution set; <code>{ numeric: true, range }</code> scans one range</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
-    <div class="example">solve(expr, var)</div>
+    <div class="example">solve(expr, var[, options])</div>
+  </div>
+</div>
+<div class="func-card" id="solveExact" data-name="solveexact">
+  <div class="func-name">solveExact</div>
+  <div class="func-desc">Exact solution set of <code>a*F(p*x + q) = b</code> as <code>{ roots, period }</code> (<code>sin</code>, <code>cos</code>, <code>tan</code>, <code>exp</code>, <code>log</code>, <code>sqrt</code>, <code>abs</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveExact(expr, var)</div>
   </div>
 </div>
 <div class="func-card" id="summation" data-name="summation">
@@ -339,7 +355,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-14 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>

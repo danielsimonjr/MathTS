@@ -299,12 +299,11 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="fft2d" data-name="fft2d">
   <div class="func-name">fft2d</div>
-  <div class="func-desc">2D FFT (nameless <code>shouldParallelize</code> on batch size; map <code>fft2d</code> is <code>'never'</code>)</div>
+  <div class="func-desc">2D FFT (synchronous; for worker threads use <code>computePool.fftBatch</code>)</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">fft2d(matrix)</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="fftfreq" data-name="fftfreq">
   <div class="func-name">fftfreq</div>
@@ -539,7 +538,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="istft" data-name="istft">
   <div class="func-name">istft</div>
-  <div class="func-desc">Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — <code>scipy.signal.istft</code></div>
+  <div class="func-desc">Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA); <code>nperseg</code> defaults to the frame width of <code>S</code> — <code>scipy.signal.istft</code></div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">istft(S[, opts])</div>
@@ -759,12 +758,11 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="spectrogram" data-name="spectrogram">
   <div class="func-name">spectrogram</div>
-  <div class="func-desc">Spectrogram</div>
+  <div class="func-desc">Magnitude spectrogram; each frame is zero-padded to the next power of two (bin <code>i</code> at <code>i / nfft</code>); default <code>windowSize</code> 256 clamped to the signal length</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">spectrogram(x[, opts])</div>
   </div>
-  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
 </div>
 <div class="func-card" id="squareWave" data-name="squarewave">
   <div class="func-name">squareWave</div>
@@ -795,7 +793,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="stft" data-name="stft">
   <div class="func-name">stft</div>
-  <div class="func-desc">Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — <code>scipy.signal.stft</code></div>
+  <div class="func-desc">Short-time Fourier transform (windowed overlapping frames → one exact <code>nperseg</code>-point DFT per frame, <code>nperseg</code> bins per row; default <code>nperseg</code> 256 clamped to the signal length) — <code>scipy.signal.stft</code></div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">stft(x[, opts])</div>
@@ -872,7 +870,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="welchPSD" data-name="welchpsd">
   <div class="func-name">welchPSD</div>
-  <div class="func-desc">Welch overlapped-segment-averaging PSD; <code>opts = { frameLength, overlap, window }</code> (defaults 256, frameLength/2, <code>'hann'</code>) → <code>{ psd, frequencies, frameLength }</code> (JS; WASM refused by policy)</div>
+  <div class="func-desc">Welch overlapped-segment-averaging PSD; <code>opts = { frameLength, overlap, window }</code> (defaults 256 clamped to the signal length, frameLength/2, <code>'hann'</code>; a frame that is not a power of two uses an exact-length DFT) → <code>{ psd, frequencies, frameLength }</code> (JS; WASM refused by policy)</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">welchPSD(x[, opts])</div>
@@ -912,7 +910,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-14 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>

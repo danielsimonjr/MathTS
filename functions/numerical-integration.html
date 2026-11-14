@@ -44,7 +44,7 @@ h1 span { color: var(--accent); }
 <div class="container">
 <header>
   <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Numerical Integration</div>
-  <h1><span>Numerical Integration</span> (22)</h1>
+  <h1><span>Numerical Integration</span> (24)</h1>
   
 </header>
 
@@ -107,6 +107,22 @@ h1 span { color: var(--accent); }
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">nintegrate(f, a, b[, tol])</div>
+  </div>
+</div>
+<div class="func-card" id="parallelGaussQuad" data-name="parallelgaussquad">
+  <div class="func-name">parallelGaussQuad</div>
+  <div class="func-desc">Async <code>gaussQuad</code> with a worker fan-out</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelGaussQuad(f, a, b[, n, order, { workerCount }])</div>
+  </div>
+</div>
+<div class="func-card" id="parallelRomberg" data-name="parallelromberg">
+  <div class="func-name">parallelRomberg</div>
+  <div class="func-desc">Async <code>romberg</code> with a worker fan-out</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelRomberg(f, a, b[, tol, { workerCount }])</div>
   </div>
 </div>
 <div class="func-card" id="quad" data-name="quad">
@@ -238,7 +254,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-14 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>

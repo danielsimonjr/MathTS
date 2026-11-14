@@ -92,19 +92,19 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="corrcoef" data-name="corrcoef">
   <div class="func-name">corrcoef</div>
-  <div class="func-desc">Pearson correlation-coefficient matrix (rows = observations, cols = variables); diagonal is 1</div>
+  <div class="func-desc">Pearson correlation-coefficient matrix (rows = observations, cols = variables; <code>{ rowvar: true }</code> takes variables as rows, as <code>np.corrcoef</code> does); diagonal is 1</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
-    <div class="example">corrcoef(matrix)</div>
+    <div class="example">corrcoef(matrix[, { rowvar }])</div>
   </div>
 </div>
 <div class="func-card" id="cov" data-name="cov">
   <div class="func-name">cov</div>
-  <div class="func-desc">Sample covariance (scalar for two vectors) or covariance matrix (rows = observations, cols = variables); <code>ddof</code> defaults to 1</div>
+  <div class="func-desc">Sample covariance (scalar for two vectors) or covariance matrix (rows = observations, cols = variables; <code>{ rowvar: true }</code> takes variables as rows, the NumPy default layout); <code>ddof</code> defaults to 1; rows of unequal length throw <code>RangeError</code></div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">cov(x, y[, ddof])
-cov(matrix[, , ddof])</div>
+cov(matrix[, , ddof][, { rowvar }])</div>
   </div>
 </div>
 <div class="func-card" id="cummax" data-name="cummax">
@@ -970,7 +970,7 @@ cov(matrix[, , ddof])</div>
 </div>
 
 <footer>
-  <p>Generated 2026-11-06 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-14 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>
