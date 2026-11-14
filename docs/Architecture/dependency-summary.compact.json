@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1330, "e": 7272, "re": 3160 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-14", "f": 1331, "e": 7276, "re": 3160 },
   "s": {
-    "loc": 229265,
+    "loc": 229547,
     "cls": 62,
     "int": 660,
-    "fn": 2486,
+    "fn": 2490,
     "tg": 178,
     "en": 0,
     "co": 1671,
@@ -647,7 +647,7 @@
     },
     "functions/expression": { "f": 1, "exp": ["properties", "getOperator"] },
     "functions/factories": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "EVALUATE_SCOPE_OMIT",
         "parse",

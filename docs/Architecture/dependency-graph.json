@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-14",
-    "totalFiles": 1330,
+    "totalFiles": 1331,
     "totalModules": 82,
-    "totalExports": 7272
+    "totalExports": 7276
   },
   "entryPoints": [
     {
@@ -17175,6 +17175,10 @@
           {
             "file": "./matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix", "createMatrixBridge"]
+          },
+          {
+            "file": "./sparse-adapter.js",
+            "imports": ["acceptsMatrix", "adaptSparse"]
           }
         ],
         "workspaceDependencies": [
@@ -17187,6 +17191,26 @@
         "exports": ["factoryScope", "pushConfigOverlay", "popConfigOverlay"],
         "functions": ["pushConfigOverlay", "popConfigOverlay"],
         "constants": ["factoryScope"]
+      },
+      "functions/src/factories/sparse-adapter.ts": {
+        "description": "Sparse shape adapter for the mathjs-derived factory functions.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./matrix-bridge.js",
+            "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "SparseMatrix"]
+          }
+        ],
+        "exports": ["csrToCsc", "cscToPublic", "adaptSparse", "acceptsMatrix"],
+        "functions": ["csrToCsc", "cscToPublic", "adaptSparse", "acceptsMatrix"]
       }
     },
     "functions/geometry": {
@@ -25620,7 +25644,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "backendManager", "singularValues"]
+            "imports": ["DenseMatrix", "SparseMatrix", "backendManager", "singularValues"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -47244,7 +47268,8 @@
           "functions/src/factories/evaluate.ts",
           "functions/src/factories/index.ts",
           "functions/src/factories/matrix-bridge.ts",
-          "functions/src/factories/scope.ts"
+          "functions/src/factories/scope.ts",
+          "functions/src/factories/sparse-adapter.ts"
         ]
       },
       {
@@ -48498,13 +48523,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1330,
+    "totalTypeScriptFiles": 1331,
     "totalModules": 82,
-    "totalLinesOfCode": 229265,
-    "totalExports": 7272,
+    "totalLinesOfCode": 229547,
+    "totalExports": 7276,
     "totalClasses": 62,
     "totalInterfaces": 660,
-    "totalFunctions": 2486,
+    "totalFunctions": 2490,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1671,
