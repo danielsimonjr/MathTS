@@ -201,6 +201,9 @@ describe('gate decisions', () => {
   test('a neutral case passes at 1.02 and fails above it', () => {
     assert.equal(failureOf(neutral(SLOW_LIMIT), false), null);
     assert.equal(failureOf(neutral(1.021), false), 'slow');
+    assert.equal(failureOf(neutral(1.2), false, 1.25), null);
+    assert.equal(failureOf(neutral(1.26), false, 1.25), 'slow');
+    assert.equal(needsRerun(neutral(1.2), false, 1.25), false);
   });
 
   test('a neutral case below 0.95 passes: neutral is a ceiling only', () => {

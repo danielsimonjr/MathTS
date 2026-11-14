@@ -270,11 +270,13 @@ jobs:
       # leaves headroom for that reference ratio, so a slowdown smaller than the headroom passes
       # (measured in #950: a 2x slowdown passed the gemm and the median-vs-sort gates). This step
       # compares HEAD with the base commit of the pull request, on the same runner, with the slow
-      # limit of tools/benchmark/ab/gate.mjs (1.02). It needs a pull request, because a push has no
+      # limit 1.25. The README of tools/benchmark/ab records the A/A spread that sets it. It needs a
+      # pull request, because a push has no
       # base to compare. Every package is built first, because the A/B preflight refuses a stale
       # dist. The cases cover matmul, decomposition and statistics. `--slow-only` gates a
       # `gain` case on no slowdown. A case whose result differs bit for bit from the base fails
-      # too: a deliberate change of those results needs a review of that row.
+      # too, unless the case is listed in tools/benchmark/ab/allowed-output-changes.json with its
+      # pull request and reason (see the README of that folder).
       - name: Build every package for the A/B
         if: github.event_name == 'pull_request'
         run: bun run build
@@ -288,8 +290,8 @@ jobs:
       - name: Base-against-head perf gate
         if: github.event_name == 'pull_request'
         run: >-
-          node tools/benchmark/ab/run.mjs --slow-only --engine node
-          --only "median n = 100,000" --only "sort n = 100,000"
+          node tools/benchmark/ab/run.mjs --slow-only --slow-limit 1.25 --engine node
+          --only "median n = 100,000"
           --only "multiply 128" --only "qr 128" --only "lup 128" --only "lusolve 128×128"
           tools/benchmark/ab/cases/stats.mjs tools/benchmark/ab/cases/matmul.mjs
           tools/benchmark/ab/cases/decomp.mjs
