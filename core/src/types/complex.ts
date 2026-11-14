@@ -44,10 +44,17 @@ function createTanFamilyMethod(
 }
 
 /**
- * Check if a value is a Complex number
+ * Check if a value is a Complex number.
+ *
+ * Marker-based, so a second copy of the package recognises its own Complex values. Reads the
+ * prototype only, so a null-prototype object returns false.
  */
 export function isComplex(value: unknown): value is Complex {
-  return value instanceof Complex;
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    (Object.getPrototypeOf(value) as { isComplex?: unknown } | null)?.isComplex === true
+  );
 }
 
 /**
@@ -90,6 +97,8 @@ export class Complex implements IComplex {
   // `tan`, `cot`, `tanh` and `coth` are created from `createTanFamilyMethod`, with the same property
   // attributes a class method has. Their signatures and docs sit on the `Complex` interface below.
   static {
+    // Prototype marker read by `isComplex`. Not enumerable, not writable.
+    Object.defineProperty(Complex.prototype, 'isComplex', { value: true });
     const tanFamily = [
       ['tan', 1, false],
       ['cot', -1, false],

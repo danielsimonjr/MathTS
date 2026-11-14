@@ -6,10 +6,17 @@
 import type { Scalar, MathTSValue } from './interfaces.js';
 
 /**
- * Check if a value is a BigNumber
+ * Check if a value is a BigNumber.
+ *
+ * Marker-based, so a second copy of the package recognises its own BigNumber values. Reads the
+ * prototype only, so a null-prototype object returns false.
  */
 export function isBigNumber(value: unknown): value is BigNumber {
-  return value instanceof BigNumber;
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    (Object.getPrototypeOf(value) as { isBigNumber?: unknown } | null)?.isBigNumber === true
+  );
 }
 
 /**
@@ -1661,6 +1668,10 @@ export class BigNumber implements MathTSValue {
     return BigNumber.#allocate(sign, coef, exp);
   }
 }
+
+// Prototype marker read by `isBigNumber`. Not enumerable, not writable. The instance field of the
+// same name stays as it is.
+Object.defineProperty(BigNumber.prototype, 'isBigNumber', { value: true });
 
 /**
  * Common BigNumber constants

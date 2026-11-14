@@ -115,7 +115,14 @@ export class Dual {
   }
 }
 
-/** Type guard for {@link Dual}. */
+/** Type guard for {@link Dual}. Marker-based, so a second copy of the package recognises its values. */
 export function isDual(x: unknown): x is Dual {
-  return x instanceof Dual;
+  return (
+    x !== null &&
+    typeof x === 'object' &&
+    (Object.getPrototypeOf(x) as { isDual?: unknown } | null)?.isDual === true
+  );
 }
+
+// Prototype marker read by `isDual`. Not enumerable, not writable.
+Object.defineProperty(Dual.prototype, 'isDual', { value: true });

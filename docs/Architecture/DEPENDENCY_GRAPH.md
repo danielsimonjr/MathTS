@@ -696,6 +696,14 @@ graph LR
 
 ### `core/src/is.ts` - Shape of a BigNumber value that the duck-typing guards in this module read.
 
+**Internal Dependencies:**
+
+| File                   | Imports       | Type   |
+| ---------------------- | ------------- | ------ |
+| `./types/bignumber.js` | `isBigNumber` | Import |
+| `./types/complex.js`   | `isComplex`   | Import |
+| `./types/fraction.js`  | `isFraction`  | Import |
+
 **Exports:**
 
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`
@@ -21215,7 +21223,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1331   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229550 |
+| Total Lines of Code     | 229584 |
 | Total Exports           | 7276   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |

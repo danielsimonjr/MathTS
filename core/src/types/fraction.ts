@@ -9,10 +9,17 @@ import type { Scalar, IFraction } from './interfaces.js';
 const FRACTION_MAX_PERIOD_DIGITS = 1000;
 
 /**
- * Check if a value is a Fraction
+ * Check if a value is a Fraction.
+ *
+ * Marker-based, so a second copy of the package recognises its own Fraction values. Reads the
+ * prototype only, so a null-prototype object returns false.
  */
 export function isFraction(value: unknown): value is Fraction {
-  return value instanceof Fraction;
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    (Object.getPrototypeOf(value) as { isFraction?: unknown } | null)?.isFraction === true
+  );
 }
 
 /**
@@ -781,6 +788,9 @@ export class Fraction implements IFraction {
     return new Fraction(this.numerator + other.numerator, this.denominator + other.denominator);
   }
 }
+
+// Prototype marker read by `isFraction`. Not enumerable, not writable.
+Object.defineProperty(Fraction.prototype, 'isFraction', { value: true });
 
 /**
  * Common fraction constants

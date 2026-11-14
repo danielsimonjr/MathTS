@@ -2055,7 +2055,20 @@
         "description": "Shape of a BigNumber value that the duck-typing guards in this module read.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types/bignumber.js",
+            "imports": ["isBigNumber"]
+          },
+          {
+            "file": "./types/complex.js",
+            "imports": ["isComplex"]
+          },
+          {
+            "file": "./types/fraction.js",
+            "imports": ["isFraction"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "isArray",
@@ -48525,7 +48538,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1331,
     "totalModules": 82,
-    "totalLinesOfCode": 229550,
+    "totalLinesOfCode": 229584,
     "totalExports": 7276,
     "totalClasses": 62,
     "totalInterfaces": 660,

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2406,
+  "totalFiles": 2407,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1305,
     "test-only": 0,
     "orphan": 0,
-    "test": 1009,
+    "test": 1010,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1331,
-    "tests": 1009,
+    "tests": 1010,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 27,
-    "@danielsimonjr/mathts-core": 125,
+    "@danielsimonjr/mathts-core": 126,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
@@ -807,7 +807,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 418
+      "loc": 415
     },
     {
       "file": "core/src/map.ts",
@@ -912,14 +912,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1692
+      "loc": 1703
     },
     {
       "file": "core/src/types/complex.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 786
+      "loc": 795
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -933,14 +933,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 122
+      "loc": 129
     },
     {
       "file": "core/src/types/fraction.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 794
+      "loc": 804
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -1242,6 +1242,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 103
+    },
+    {
+      "file": "core/tests/type-markers.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "core/tests/typed/mathts-typed-coverage.test.ts",
