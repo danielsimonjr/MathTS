@@ -8,7 +8,7 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 15,
       "ALIAS_DELEGATION": 4,
-      "ALLOWLISTED": 234
+      "ALLOWLISTED": 237
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -5619,6 +5619,28 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "setTwiddleCacheMaxBytes",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-core-f64.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+        },
+        {
+          "file": "packages/workerpool/src/fft-core.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "sign",
       "category": "constant",
       "definers": [
@@ -6077,6 +6099,50 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "TWIDDLE_CACHE_DEFAULT_MAX_BYTES",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-core-f64.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+        },
+        {
+          "file": "packages/workerpool/src/fft-core.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "twiddleCacheState",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-core-f64.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
+        },
+        {
+          "file": "packages/workerpool/src/fft-core.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
         }
       ],
       "canonicalHint": "AMBIGUOUS",

@@ -37,11 +37,37 @@ export function bitReverse(x: i32, bits: i32): i32 {
   return result;
 }
 
-/** Twiddle tables kept for reuse, at most this many sizes. Each holds n/2 cos and sin values. */
-const TWIDDLE_CACHE_LIMIT = 8;
-/** Larger sizes are computed on each call and not kept, so the cache stays small. */
-const TWIDDLE_CACHE_MAX_SIZE = 1 << 20;
+/**
+ * Default most bytes of twiddle tables kept for reuse. A table of size n holds n/2 cos and n/2
+ * sin values, so it takes 8n bytes. A table larger than the cap is built on each call and not
+ * kept. Measured on Bun: building the table of 2^22 points takes 44 ms against 1,300 ms for the
+ * transform (3%); at 2^20 it takes 17 ms against 156 ms (11%). The default keeps one table of
+ * 2^22 points, so the three transforms of one Bluestein call of up to 2^21 points share it.
+ */
+export const TWIDDLE_CACHE_DEFAULT_MAX_BYTES = 1 << 25;
+let twiddleCacheMaxBytes = TWIDDLE_CACHE_DEFAULT_MAX_BYTES;
+/** Least recently used first: a hit moves the table to the end, and eviction takes the first. */
 const twiddleCache = new Map<i32, { cos: Float64Array; sin: Float64Array }>();
+let twiddleCacheBytes = 0;
+
+function evictTwiddlesDownTo(limit: i32): void {
+  for (const [oldSize] of twiddleCache) {
+    if (twiddleCacheBytes <= limit) break;
+    twiddleCache.delete(oldSize);
+    twiddleCacheBytes -= 8 * oldSize;
+  }
+}
+
+/** Sets the byte cap and evicts down to it. A cap of 0 empties the cache. For tests. */
+export function setTwiddleCacheMaxBytes(bytes: i32): void {
+  twiddleCacheMaxBytes = bytes;
+  evictTwiddlesDownTo(bytes);
+}
+
+/** The sizes kept (least recently used first) and their total bytes. For tests. */
+export function twiddleCacheState(): { sizes: i32[]; bytes: i32 } {
+  return { sizes: Array.from(twiddleCache.keys()), bytes: twiddleCacheBytes };
+}
 
 /**
  * The forward twiddles `exp(-2 pi i k / n)` for k in [0, n/2), as cos and sin tables.
@@ -50,18 +76,22 @@ const twiddleCache = new Map<i32, { cos: Float64Array; sin: Float64Array }>();
  * twiddle does not depend on its index. The tables are cached per size. The inverse transform
  * takes the conjugate of the same values, so it needs no second set of trig calls.
  *
- * Why not a running product: the earlier core multiplied each twiddle by the step, so the
- * rounding error grew with the index. Measured round trip at n = 4096 was 640 ULP of the largest
- * sample; with this table it is about 4 ULP (5.5 at n = 65536) on the seeded test input.
- * With twiddles of fixed relative error, the standard bound for a radix-2 FFT grows as
- * log2(n) times that error (Higham, Accuracy and Stability of Numerical Algorithms, 2nd ed.,
- * Theorem 24.2). The test bound of 2 log2(n) ULP follows that growth. It is a measured margin,
- * not a proven constant. `Math.cos` and `Math.sin` still differ in the last bit between V8 and
- * JavaScriptCore, so the result is bounded, not bit-identical across runtimes.
+ * Why not a running product: a twiddle that is the product of the previous one carries a
+ * rounding error that grows with its index (640 ULP of the largest sample for a round trip at
+ * n = 4096, against about 4 with this table). With twiddles of fixed relative error, the
+ * standard bound for a radix-2 FFT grows as log2(n) times that error (Higham, Accuracy and
+ * Stability of Numerical Algorithms, 2nd ed., Theorem 24.2). The test bound of 2 log2(n) ULP
+ * follows that growth. It is a measured margin, not a proven constant. `Math.cos` and
+ * `Math.sin` still differ in the last bit between V8 and JavaScriptCore, so the result is
+ * bounded, not bit-identical across runtimes.
  */
 function forwardTwiddles(n: i32): { cos: Float64Array; sin: Float64Array } {
   const hit = twiddleCache.get(n);
-  if (hit) return hit;
+  if (hit) {
+    twiddleCache.delete(n);
+    twiddleCache.set(n, hit);
+    return hit;
+  }
   const half: i32 = n / 2;
   const cos = new Float64Array(half);
   const sin = new Float64Array(half);
@@ -70,13 +100,12 @@ function forwardTwiddles(n: i32): { cos: Float64Array; sin: Float64Array } {
     cos[k] = Math.cos(angle);
     sin[k] = Math.sin(angle);
   }
-  if (n > TWIDDLE_CACHE_MAX_SIZE) return { cos, sin };
-  if (twiddleCache.size >= TWIDDLE_CACHE_LIMIT) {
-    const oldest = twiddleCache.keys().next().value;
-    if (oldest !== undefined) twiddleCache.delete(oldest);
-  }
   const table = { cos, sin };
+  const bytes = 8 * n;
+  if (bytes > twiddleCacheMaxBytes) return table;
+  evictTwiddlesDownTo(twiddleCacheMaxBytes - bytes);
   twiddleCache.set(n, table);
+  twiddleCacheBytes += bytes;
   return table;
 }
 

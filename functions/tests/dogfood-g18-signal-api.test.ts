@@ -112,10 +112,10 @@ describe('#774 signal fft/ifft round-trip (typed parallel path)', () => {
     }
   });
 
-  it('round trip at n = 1024 and 4096 stays within 2 log2(n) ULP of the largest sample (#947)', async () => {
-    // A fixed seeded series, so every runtime checks the same input. Before the twiddle table,
-    // the error grew with n (about 190 ULP at n = 1024 against a bound of 20) because each
-    // twiddle was the product of the previous one.
+  it('round trip at n = 1024 and 4096 stays within 2 log2(n) ULP of the largest sample', async () => {
+    // A fixed seeded series, so every runtime checks the same input. A twiddle that is the product of
+    // the previous one makes the error grow with n (about 190 ULP at n = 1024 against a bound
+    // of 20).
     let seed = 12345;
     const next = (): number => {
       seed = (seed * 1103515245 + 12345) >>> 0;

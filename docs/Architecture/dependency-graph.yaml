@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-14'
   totalFiles: 1330
   totalModules: 82
-  totalExports: 7266
+  totalExports: 7272
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -208,11 +208,18 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - TWIDDLE_CACHE_DEFAULT_MAX_BYTES
         - fftBitReverse
+        - setTwiddleCacheMaxBytes
+        - twiddleCacheState
         - fftFrameInPlace
       functions:
         - fftBitReverse
+        - setTwiddleCacheMaxBytes
+        - twiddleCacheState
         - fftFrameInPlace
+      constants:
+        - TWIDDLE_CACHE_DEFAULT_MAX_BYTES
     packages/workerpool/src/index.ts:
       description: Worker pool management for MathTS parallel computations.
       externalDependencies:
@@ -20518,13 +20525,20 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - TWIDDLE_CACHE_DEFAULT_MAX_BYTES
         - bitReverse
+        - setTwiddleCacheMaxBytes
+        - twiddleCacheState
         - fftCoreFloat64
         - fftExactFloat64
       functions:
         - bitReverse
+        - setTwiddleCacheMaxBytes
+        - twiddleCacheState
         - fftCoreFloat64
         - fftExactFloat64
+      constants:
+        - TWIDDLE_CACHE_DEFAULT_MAX_BYTES
     functions/src/signal/fft-helpers.ts:
       description: numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`
       externalDependencies: []
@@ -45778,14 +45792,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1330
   totalModules: 82
-  totalLinesOfCode: 229207
-  totalExports: 7266
+  totalLinesOfCode: 229265
+  totalExports: 7272
   totalClasses: 62
   totalInterfaces: 660
-  totalFunctions: 2482
+  totalFunctions: 2486
   totalTypeGuards: 178
   totalEnums: 0
-  totalConstants: 1669
+  totalConstants: 1671
   totalReExports: 3160
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2

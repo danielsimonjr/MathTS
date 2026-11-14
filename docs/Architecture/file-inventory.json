@@ -8038,7 +8038,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 234
+      "loc": 263
     },
     {
       "file": "functions/src/signal/fft-helpers.ts",
@@ -10607,7 +10607,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 61
+      "loc": 164
     },
     {
       "file": "functions/tests/finite-differences.test.ts",
@@ -14443,7 +14443,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 124
+      "loc": 153
     },
     {
       "file": "packages/workerpool/src/index.ts",
