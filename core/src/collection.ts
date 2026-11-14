@@ -134,8 +134,8 @@ export function deepMap<T, U>(
  *
  * @param dim   The dimension index.
  * @param ndims The number of dimensions.
- * @throws {TypeError} When `dim` is not an integer.
- * @throws {IndexError} When `dim` is less than 0 or not less than `ndims`.
+ * @throws A `TypeError` when `dim` is not an integer.
+ * @throws An `IndexError` when `dim` is less than 0 or not less than `ndims`.
  */
 export function validateDimension(dim: number, ndims: number): void {
   if (!Number.isInteger(dim)) {
