@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-14",
-  "status": "7 standalone function(s) route to WebGPU; 2 of 216 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
-  "total": 216,
+  "status": "7 standalone function(s) route to WebGPU; 2 of 214 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
+  "total": 214,
   "gpuAcceleratedCount": 2,
-  "noneCount": 214,
+  "noneCount": 212,
   "gpuAccelerated": [
     {
       "name": "parallelFFT",
@@ -139,9 +139,7 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
-    "max",
     "mean",
-    "min",
     "mod",
     "moebiusMu",
     "multinomial",
@@ -237,7 +235,7 @@
   "byFile": {
     "arithmetic.ts": {
       "gpu": 0,
-      "none": 43
+      "none": 41
     },
     "bitwise.ts": {
       "gpu": 0,

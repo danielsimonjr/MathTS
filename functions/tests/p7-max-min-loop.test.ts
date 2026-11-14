@@ -14,9 +14,10 @@ describe('P7-6 max/min array loops', () => {
   it('NaN, -0 and Infinity stay IEEE', () => {
     expect(Number.isNaN(max([1, NaN, 3]) as number)).toBe(true);
     expect(Number.isNaN(min([NaN, 2, 3]) as number)).toBe(true);
-    expect(Object.is(min([-0, 0]), -0) || Object.is(min([-0, 0]), 0)).toBe(true);
-    expect(Object.is(max([-0, 0]), 0)).toBe(true);
-    expect(max([-Infinity, -0, 0])).toBe(0);
+    // Equal values keep the first one, as in mathjs: the sign of a zero is not an order.
+    expect(Object.is(min([-0, 0]), -0)).toBe(true);
+    expect(Object.is(max([-0, 0]), -0)).toBe(true);
+    expect(Object.is(max([-Infinity, -0, 0]), -0)).toBe(true);
   });
 
   it('empty array matches the old spread (Infinity / -Infinity)', () => {
