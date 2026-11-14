@@ -72,10 +72,11 @@ export function twoTreeRatio(baseFirst, headFirst) {
  * reading is not evidence either way.
  * @param {{ kind: string, ratio: number }} row
  * @param {boolean} control
+ * @param {number} [slowLimit] replaces `SLOW_LIMIT` (see `--slow-limit` in run.mjs)
  */
-export function needsRerun(row, control) {
+export function needsRerun(row, control, slowLimit = SLOW_LIMIT) {
   if (control) return Math.abs(row.ratio - 1) > CONTROL_BAND;
-  return row.ratio > SLOW_LIMIT || (row.kind === 'gain' && row.ratio > GAIN_LIMIT);
+  return row.ratio > slowLimit || (row.kind === 'gain' && row.ratio > GAIN_LIMIT);
 }
 
 /**
@@ -83,13 +84,14 @@ export function needsRerun(row, control) {
  * A/A' ratio of the gate's own estimator.
  * @param {{ kind: string, ratio: number }} row
  * @param {boolean} control
+ * @param {number} [slowLimit] replaces `SLOW_LIMIT` (see `--slow-limit` in run.mjs)
  * @returns {string | null} the reason the row fails the gate, or null
  */
-export function failureOf(row, control) {
+export function failureOf(row, control, slowLimit = SLOW_LIMIT) {
   if (control) {
     return Math.abs(row.ratio - 1) > CONTROL_BAND ? 'control' : null;
   }
-  if (row.ratio > SLOW_LIMIT) return 'slow';
+  if (row.ratio > slowLimit) return 'slow';
   if (row.kind === 'gain' && row.ratio > GAIN_LIMIT) return 'gain';
   return null;
 }

@@ -216,7 +216,9 @@ async function main() {
     order === 'base-first' ? [firstResult, secondResult] : [secondResult, firstResult];
 
   const checked = checkResults(baseResult, headResult, base.caseDef.compare);
-  if (!checked.ok) {
+  // A case named in `allowed-output-changes.json` keeps timing when its results differ; run.mjs
+  // sets PERF_ALLOW_UNEQUAL for that case alone and reports the difference in the table.
+  if (!checked.ok && process.env.PERF_ALLOW_UNEQUAL !== '1') {
     console.log(JSON.stringify({ ok: false, error: checked.reason, equal: false }));
     return;
   }
@@ -241,7 +243,7 @@ async function main() {
   }
 
   console.log(
-    JSON.stringify({ ok: true, equal: true, medBaseUs, medHeadUs, ratio, aaRatio, order })
+    JSON.stringify({ ok: true, equal: checked.ok, medBaseUs, medHeadUs, ratio, aaRatio, order })
   );
 }
 

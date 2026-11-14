@@ -2,12 +2,19 @@
 /**
  * Phase 7 base-against-head benchmark runner.
  *
- *   node tools/benchmark/ab/run.mjs [--runs 5] [--engine node|bun] [--control] [--json]
- *                                   [--pr P7-3] [--only <name substring>] [--cases <file.mjs> ...] [<file.mjs> ...]
+ *   node tools/benchmark/ab/run.mjs [--runs 5] [--engine node|bun] [--control] [--json] [--slow-only] [--slow-limit 1.25]
+ *                                   [--pr P7-3] [--only <name substring> ...] [--cases <file.mjs> ...] [<file.mjs> ...]
  *
  * `--pr P7-n` keeps the cases tagged `pr: 'P7-n'` and the cases tagged `control: true`, which
  * is the gate of that pull request; the other pull requests' cases run unchanged code on both
  * sides, so they are left out.
+ *
+ * `--slow-only` gates every case on the slow limit alone: a `gain` case then needs no improvement,
+ * only no slowdown. A pull request that does not change the measured code uses it, because its
+ * ratios sit near 1.
+ *
+ * `--slow-limit N` replaces the slow limit 1.02. A runner whose A/A ratios spread wider than 2%
+ * needs a wider limit; the README of this folder records the measured spread.
  *
  * Run it with `node`, not through `bun run`: the `node` engine rows must run on Node.js.
  * Exit code 1 when the gate fails (see `gate.mjs`), 2 when the base tree or a dist is missing.
@@ -19,6 +26,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   PROCESSES_PER_RUN,
   RERUN_RUNS,
+  SLOW_LIMIT,
   estimate,
   failureOf,
   needsRerun,
@@ -29,13 +37,40 @@ import { median, nodeBinary, perfBaseDir } from './util.mjs';
 import { repoRoot } from '../../test/workspaces.mjs';
 
 const abDir = fileURLToPath(new URL('.', import.meta.url));
+
+/**
+ * The cases whose results are allowed to differ from the base, from `allowed-output-changes.json`.
+ * Each entry names a case, the pull request that changes its results and the reason. A missing or
+ * malformed file stops the run: no entry may be skipped silently.
+ * @returns {Map<string, { pr: string, reason: string }>}
+ */
+function loadAllowedChanges() {
+  const file = join(abDir, 'allowed-output-changes.json');
+  const list = JSON.parse(readFileSync(file, 'utf8'));
+  if (!Array.isArray(list)) throw new Error(`${file}: expected an array`);
+  const map = new Map();
+  for (const e of list) {
+    for (const key of ['case', 'pr', 'reason']) {
+      if (typeof e?.[key] !== 'string' || e[key].trim() === '') {
+        throw new Error(`${file}: every entry needs a non-empty "${key}"`);
+      }
+    }
+    if (map.has(e.case)) throw new Error(`${file}: the case "${e.case}" appears twice`);
+    map.set(e.case, { pr: e.pr, reason: e.reason });
+  }
+  return map;
+}
+const allowedChanges = loadAllowedChanges();
 const argv = process.argv.slice(2);
 
 let runs = 5;
 let control = false;
 let jsonOut = false;
+let slowOnly = false;
+let slowLimit = SLOW_LIMIT;
 let pr = null;
-let only = null;
+/** Name substrings from `--only`; a case runs when its name contains any of them. */
+const only = [];
 let engines = ['node', 'bun'];
 const caseFiles = [];
 
@@ -44,8 +79,10 @@ for (let i = 0; i < argv.length; i++) {
   if (a === '--runs') runs = Number(argv[++i]);
   else if (a === '--control') control = true;
   else if (a === '--json') jsonOut = true;
+  else if (a === '--slow-only') slowOnly = true;
+  else if (a === '--slow-limit') slowLimit = Number(argv[++i]);
   else if (a === '--pr') pr = argv[++i];
-  else if (a === '--only') only = argv[++i];
+  else if (a === '--only') only.push(argv[++i]);
   else if (a === '--engine') engines = [argv[++i]];
   else if (a === '--cases') caseFiles.push(resolve(argv[++i]));
   else if (a.endsWith('.mjs')) caseFiles.push(resolve(a));
@@ -53,6 +90,11 @@ for (let i = 0; i < argv.length; i++) {
     console.error(`unknown argument ${a}`);
     process.exit(2);
   }
+}
+
+if (!(slowLimit >= 1)) {
+  console.error('--slow-limit needs a number of at least 1');
+  process.exit(2);
 }
 
 if (!Number.isInteger(runs) || runs < 1) {
@@ -90,7 +132,8 @@ for (const cf of caseFiles) {
     process.exit(1);
   }
   let cases = pr ? spec.cases.filter((c) => c.pr === pr || c.control === true) : spec.cases;
-  if (only) cases = cases.filter((c) => c.name.includes(only));
+  if (only.length > 0) cases = cases.filter((c) => only.some((o) => c.name.includes(o)));
+  if (slowOnly) cases = cases.map((c) => ({ ...c, kind: 'neutral' }));
   if (cases.length > 0) specs.push({ file: cf, ...spec, cases });
 }
 if (specs.length === 0) {
@@ -139,7 +182,13 @@ function parseChild(out) {
  * @param {Record<string, string>} extra
  */
 function childEnv(caseFile, caseName, extra) {
-  return { PERF_REPO_ROOT: repoRoot, PERF_CASE_FILE: caseFile, PERF_CASE_NAME: caseName, ...extra };
+  return {
+    PERF_REPO_ROOT: repoRoot,
+    PERF_CASE_FILE: caseFile,
+    PERF_CASE_NAME: caseName,
+    ...(allowedChanges.has(caseName) ? { PERF_ALLOW_UNEQUAL: '1' } : {}),
+    ...extra,
+  };
 }
 
 /**
@@ -157,6 +206,7 @@ function childEnv(caseFile, caseName, extra) {
 function measure(engine, caseFile, caseDef, nRuns) {
   const dual = {};
   const aaRatios = [];
+  let unequal = false;
   for (const order of ['base-first', 'head-first']) {
     const res = parseChild(
       spawnChild(
@@ -170,6 +220,7 @@ function measure(engine, caseFile, caseDef, nRuns) {
     );
     if (!res.ok) return { fail: res.error || 'child failed' };
     dual[order] = res.ratio;
+    if (res.equal === false) unequal = true;
     if (res.aaRatio != null) aaRatios.push(res.aaRatio);
   }
 
@@ -197,6 +248,7 @@ function measure(engine, caseFile, caseDef, nRuns) {
     twoTree: twoTreeRatio(dual['base-first'], dual['head-first']),
     aaMedian: aaRatios.length ? median(aaRatios) : null,
     runs: nRuns,
+    unequal,
   };
 }
 
@@ -207,7 +259,7 @@ for (const { file, cases } of specs) {
   for (const c of cases) {
     for (const engine of engines) {
       let row = measure(engine, file, c, runs);
-      if (!row.fail && needsRerun({ kind: c.kind, ratio: row.ratio }, control)) {
+      if (!row.fail && needsRerun({ kind: c.kind, ratio: row.ratio }, control, slowLimit)) {
         process.stderr.write(
           `${c.name} (${engine}): ${row.ratio.toFixed(3)}, rerun with R = ${RERUN_RUNS}\n`
         );
@@ -238,11 +290,15 @@ for (const row of allResults) {
     );
     continue;
   }
-  const reason = failureOf(row, control);
+  const allowed = allowedChanges.get(row.case);
+  // An entry for a case whose results are equal is stale: it would hide a later change.
+  const stale = allowed && !row.unequal ? 'stale allow entry' : null;
+  const reason = failureOf(row, control, slowLimit) ?? stale;
   if (reason) failed = true;
   const aa = row.aaMedian != null ? row.aaMedian.toFixed(3) : '—';
+  const equalCell = row.unequal ? `no, allowed by ${allowed.pr}` : 'yes';
   lines.push(
-    `| ${row.case} | ${row.kind} | ${row.engine} | ${row.ratio.toFixed(3)} | ${row.min.toFixed(3)}–${row.max.toFixed(3)} | ${row.twoTree.toFixed(3)} | ${aa} | ${row.runs} | yes | ${reason ? `FAIL (${reason})` : 'pass'} |`
+    `| ${row.case} | ${row.kind} | ${row.engine} | ${row.ratio.toFixed(3)} | ${row.min.toFixed(3)}–${row.max.toFixed(3)} | ${row.twoTree.toFixed(3)} | ${aa} | ${row.runs} | ${equalCell} | ${reason ? `FAIL (${reason})` : 'pass'} |`
   );
   row.gate = reason ?? 'pass';
 }
