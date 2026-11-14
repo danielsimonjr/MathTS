@@ -19,5 +19,6 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    exclude: ['**/*.browser.test.ts', 'node_modules/**'],
   },
 });

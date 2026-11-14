@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-14",
-  "totalFiles": 2411,
+  "totalFiles": 2412,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1306,
     "test-only": 0,
     "orphan": 0,
-    "test": 1013,
+    "test": 1014,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1332,
-    "tests": 1013,
+    "tests": 1014,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1081,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 140,
+    "@danielsimonjr/mathts-matrix": 141,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -72,7 +72,7 @@
       "package": "@danielsimonjr/mathts-arithmetic",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "assembly/src/algebra/decomposition.ts",
@@ -289,7 +289,7 @@
       "package": "@danielsimonjr/mathts-ast",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "autograd/src/dual-tensor.ts",
@@ -499,7 +499,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "compat/src/chain.ts",
@@ -695,7 +695,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "config",
       "disposition": "config",
-      "loc": 24
+      "loc": 25
     },
     {
       "file": "core/src/arithmetic/scalar.ts",
@@ -1591,7 +1591,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "config",
       "disposition": "config",
-      "loc": 32
+      "loc": 33
     },
     {
       "file": "evaluator/src/index.ts",
@@ -1626,7 +1626,7 @@
       "package": "@danielsimonjr/mathts-evaluator",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "examples/basic-arithmetic.ts",
@@ -5686,7 +5686,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "functions/src/algebra/decomposition/lup.ts",
@@ -13407,7 +13407,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "linalg/src/index.ts",
@@ -13449,7 +13449,7 @@
       "package": "@danielsimonjr/mathts-linalg",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "matrix/src/backends/Backend.ts",
@@ -13505,7 +13505,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 439
+      "loc": 441
     },
     {
       "file": "matrix/src/backends/GPUBackend.ts",
@@ -14089,6 +14089,13 @@
       "loc": 19
     },
     {
+      "file": "matrix/tests/gpu/gpu-backend-scale-readback.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 36
+    },
+    {
       "file": "matrix/tests/gpu/initialization.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -14107,7 +14114,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 186
+      "loc": 209
     },
     {
       "file": "matrix/tests/gpu/operations.test.ts",
@@ -14121,7 +14128,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 72
+      "loc": 100
     },
     {
       "file": "matrix/tests/helpers/stub-global.ts",
@@ -14429,7 +14436,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "config",
       "disposition": "config",
-      "loc": 24
+      "loc": 25
     },
     {
       "file": "numbers/src/index.ts",
@@ -14457,7 +14464,7 @@
       "package": "@danielsimonjr/mathts-numbers",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "packages/typed-function/src/index.ts",
@@ -15073,7 +15080,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "config",
       "disposition": "config",
-      "loc": 24
+      "loc": 25
     },
     {
       "file": "parser/src/index.ts",
@@ -15108,7 +15115,7 @@
       "package": "@danielsimonjr/mathts-parser",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "plot/src/coerce.ts",
@@ -15465,7 +15472,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "config",
       "disposition": "config",
-      "loc": 38
+      "loc": 39
     },
     {
       "file": "signal/src/index.ts",
@@ -15493,7 +15500,7 @@
       "package": "@danielsimonjr/mathts-signal",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "statistics/src/index.ts",
@@ -15521,7 +15528,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "tensor/src/contraction-sequence.ts",
@@ -15962,7 +15969,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "config",
       "disposition": "config",
-      "loc": 24
+      "loc": 25
     },
     {
       "file": "tests/benchmark/fft-factory-surface.test.ts",
@@ -16403,7 +16410,7 @@
       "package": "@danielsimonjr/mathts-trigonometry",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "units/src/index.ts",
@@ -16431,7 +16438,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "config",
       "disposition": "config",
-      "loc": 22
+      "loc": 23
     },
     {
       "file": "vitest.config.bench.ts",
@@ -16445,7 +16452,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 77
+      "loc": 79
     },
     {
       "file": "vitest.config.ts",
@@ -16921,7 +16928,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "config",
       "disposition": "config",
-      "loc": 32
+      "loc": 33
     }
   ]
 }

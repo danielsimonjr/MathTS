@@ -69,3 +69,31 @@ describe('SyncManager.batchTransfer readback size', () => {
     expect(results[0]?.bytesTransferred).toBe(1536 * 4);
   });
 });
+
+describe('SyncManager.downloadDoubleBuffered readback size', () => {
+  it('maps only the requested bytes of a larger staging buffer', async () => {
+    const created: Array<{ size: number }> = [];
+    const context = {
+      createStagingBuffer: (size: number) => {
+        const buf = {
+          size,
+          mapAsync: () => Promise.resolve(),
+          getMappedRange: (offset = 0, len?: number) => new ArrayBuffer(len ?? size - offset),
+          unmap: () => {},
+        };
+        created.push(buf);
+        return buf;
+      },
+      createCommandEncoder: () => ({ copyBufferToBuffer: () => {}, finish: () => ({}) }),
+      submitCommands: () => {},
+    };
+    (globalThis as Record<string, unknown>).GPUMapMode ??= { READ: 1 };
+    (globalThis as Record<string, unknown>).GPUBufferUsage ??= { MAP_READ: 1, COPY_DST: 8 };
+    const sync = new SyncManager(context as never, {} as never);
+
+    const result = await sync.downloadDoubleBuffered({ size: 8192 } as never, 1536 * 4);
+
+    expect(created[0]?.size).toBe(8192);
+    expect(result.length).toBe(1536);
+  });
+});
