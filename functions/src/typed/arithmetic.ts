@@ -1912,19 +1912,32 @@ function meanOfInput(input: unknown, skipNaN: boolean): f64 | undefined {
   return leaves === undefined ? undefined : meanOfData(leaves);
 }
 
-/** True when every leaf of `xs` is a number. Allocates nothing. */
-function allNumbers(xs: ArrayLike<unknown>): boolean {
-  for (let i = 0; i < xs.length; i++) {
-    const x = xs[i];
-    if (typeof x !== 'number' && !(Array.isArray(x) && allNumbers(x))) return false;
+/**
+ * True when `xs` has the shape that the number kernel reduces along a dimension: a vector of
+ * numbers, or a rectangular grid of number rows. Allocates nothing.
+ */
+function isNumberGrid(xs: ArrayLike<unknown>): boolean {
+  if (xs.length === 0 || !Array.isArray(xs[0])) {
+    for (let i = 0; i < xs.length; i++) if (typeof xs[i] !== 'number') return false;
+    return true;
+  }
+  const cols = (xs[0] as unknown[]).length;
+  for (let r = 0; r < xs.length; r++) {
+    const row = xs[r];
+    if (!Array.isArray(row) || row.length !== cols) return false;
+    for (let c = 0; c < cols; c++) if (typeof row[c] !== 'number') return false;
   }
   return true;
 }
 
-/** True when `input` is number data at any depth. The dimension path checks this before it reduces. */
+/**
+ * True when `input` is number data in the shape of the number kernel. The dimension path checks
+ * `input` before the dimension path reduces. Other data (exact values, 3-D or ragged arrays) goes to the factory path,
+ * which reduces any number of dimensions.
+ */
 function isNumberData(input: unknown): boolean {
   const xs = statData(input);
-  return xs !== undefined && allNumbers(xs);
+  return xs !== undefined && isNumberGrid(xs);
 }
 
 function meanAlongData(
@@ -1945,7 +1958,23 @@ function numbersOnly<T>(value: T | undefined, name: string): T {
   return value;
 }
 
-const exactMean = (...args: unknown[]): unknown => exactReductions('mean').mean(...args);
+/**
+ * The result of an exact reduction along a dimension, in the container of the number path: a
+ * plain array. A matrix result becomes its array. A sparse input gives a column matrix of size
+ * [n, 1]. A sparse matrix has no 1-D form, so that result becomes a 1-D array.
+ */
+function asAlongResult(input: unknown, result: unknown): unknown {
+  const r = result as { toArray?: () => unknown[] } | null;
+  if (!r || typeof r.toArray !== 'function') return result;
+  const data = r.toArray();
+  const sparseInput = (input as { storage?: () => string } | null)?.storage?.() === 'sparse';
+  return sparseInput && data.every((row) => Array.isArray(row) && row.length === 1)
+    ? data.map((row) => (row as unknown[])[0])
+    : data;
+}
+
+const exactMean = (...args: unknown[]): unknown =>
+  asAlongResult(args[0], exactReductions('mean').mean(...args));
 
 export const mean = mathTyped('mean', {
   // The number keys keep `number` as their public type. Exact data is not a number, so the
@@ -2073,7 +2102,7 @@ function varianceAlongData(
 const UNBIASED: VarianceRequest = { kind: 'norm', norm: 'unbiased' };
 
 const exactVariance = (...args: unknown[]): unknown =>
-  exactReductions('variance').variance(...args);
+  asAlongResult(args[0], exactReductions('variance').variance(...args));
 
 /**
  * Variance. The Float64Array signature is synchronous.
@@ -2221,6 +2250,11 @@ function exactSqrt(v: unknown): unknown {
 
 const exactStd = (...args: unknown[]): unknown => exactSqrt(exactVariance(...args));
 
+/**
+ * The standard deviation: the square root of `variance`, with the same arguments. Number data
+ * gives a number. BigNumber and Complex data give their own type. Fraction data gives a number,
+ * because the square root of a fraction is not a fraction in general.
+ */
 export const std = mathTyped('std', {
   Array: (arr: f64[]): f64 =>
     (sqrtNumber(varianceWith(arr, UNBIASED, false)) ?? exactStd(arr)) as f64,

@@ -379,7 +379,83 @@ describe('mean, variance and std keep exact types', () => {
   it('numeric strings and bigints follow mathjs', () => {
     expect(mean(['1', '2'])).toBe(1.5);
     expect(variance(['1', '2'])).toBe(0.5);
+    expect(std(['1', '2'])).toBe(Math.SQRT1_2);
+    expect(mean([1, '2'])).toBe(1.5);
+    expect(
+      mean(
+        [
+          ['1', '2'],
+          ['3', '4'],
+        ],
+        0
+      )
+    ).toEqual([2, 3]);
     expect(mean([1n, 2n, 3n])).toBe(2);
+  });
+
+  it('an exact sparse matrix along a dimension keeps its values', () => {
+    const f = (n: number): Fraction => new Fraction(n);
+    const m = sparse([
+      [f(1), f(2)],
+      [f(3), f(4)],
+    ]) as DenseMatrix;
+    for (const [fn, want] of [
+      [mean, [2, 3]],
+      [variance, [2, 2]],
+    ] as const) {
+      // The public type says number; exact data returns Fractions (#1049).
+      const r = fn(m, 0) as unknown as Fraction[];
+      expect(Array.isArray(r)).toBe(true);
+      expect(r.map((x) => x.valueOf())).toEqual(want);
+    }
+  });
+
+  it('along a dimension, exact data comes back in the container of the number path', () => {
+    const f = (n: number): Fraction => new Fraction(n);
+    const numbers = mean(
+      dense([
+        [1, 2],
+        [3, 4],
+      ]),
+      0
+    );
+    const exact = mean(
+      dense([
+        [f(1), f(2)],
+        [f(3), f(4)],
+      ]),
+      0
+    ) as unknown as Fraction[];
+    expect(Array.isArray(numbers)).toBe(true);
+    expect(Array.isArray(exact)).toBe(true);
+    expect(exact.map((x) => x.valueOf())).toEqual(numbers);
+  });
+
+  it('3-D number data reduces along a dimension, as in mathjs', () => {
+    const a = [
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ];
+    expect(mean(a, 0)).toEqual([
+      [3, 4],
+      [5, 6],
+    ]);
+    expect(variance(a, 0)).toEqual([
+      [8, 8],
+      [8, 8],
+    ]);
+  });
+
+  it('a 1-D sparse matrix is a column vector, as in mathjs', () => {
+    const v = sparse([1, 2, 4]) as { size(): number[] };
+    expect(v.size()).toEqual([3, 1]);
+    expect(mean(v as never)).toBeCloseTo(7 / 3, 15);
   });
 
   it('a Matrix of numbers gives the same bits as the array', () => {
