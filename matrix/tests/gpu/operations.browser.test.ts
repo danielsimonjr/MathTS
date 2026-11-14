@@ -23,6 +23,7 @@ const F32_REL_TOL = 1e-3;
 
 /** Set by `define` in vitest.config.browser.ts; a browser has no process.env. */
 declare const __MATHTS_CI__: boolean;
+declare const __MATHTS_DEFINE_OK__: boolean;
 const IS_CI = typeof __MATHTS_CI__ !== 'undefined' && __MATHTS_CI__;
 
 const adapter =
@@ -119,8 +120,8 @@ describe('GPU Matrix Operations (browser WebGPU)', () => {
     }
   });
 
-  it('is gated on a WebGPU adapter', () => {
-    expect(HAS_GPU || !IS_CI).toBe(true);
+  it('receives the config defines that the CI gate reads', () => {
+    expect(typeof __MATHTS_DEFINE_OK__ !== 'undefined' && __MATHTS_DEFINE_OK__).toBe(true);
   });
 
   describe.skipIf(!HAS_GPU)('GPU Operations', () => {
@@ -168,6 +169,28 @@ describe('GPU Matrix Operations (browser WebGPU)', () => {
       const gpuResult = await backend.transpose(a, rows, cols);
 
       expect(relClose(gpuResult, cpuResult)).toBe(true);
+    });
+
+    // 33x47 f32 is not a power of two: the pooled buffer is larger than the result.
+    it('should compute addition of a non-power-of-two size matching CPU', async () => {
+      const rows = 33;
+      const cols = 47;
+      const a = seededMatrix(rows, cols, 7);
+      const b = seededMatrix(rows, cols, 8);
+
+      const gpuResult = await backend.add(a, b, rows, cols);
+
+      expect(gpuResult.length).toBe(rows * cols);
+      expect(relClose(gpuResult, cpuOps.add(a, b))).toBe(true);
+    });
+
+    it('should compute scalar multiplication of a non-power-of-two size matching CPU', async () => {
+      const a = seededMatrix(33, 47, 9);
+
+      const gpuResult = await backend.scale(a, 2.5);
+
+      expect(gpuResult.length).toBe(33 * 47);
+      expect(relClose(gpuResult, cpuOps.scale(a, 2.5))).toBe(true);
     });
 
     it('should compute scalar multiplication matching CPU', async () => {

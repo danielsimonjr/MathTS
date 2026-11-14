@@ -28,7 +28,9 @@ const isCI = !!process.env.CI;
 export default defineConfig({
   // A browser test cannot read process.env. Pass the CI flag as a compile-time
   // constant, so a test can fail on CI when no WebGPU adapter exists.
-  define: { __MATHTS_CI__: JSON.stringify(isCI) },
+  // __MATHTS_DEFINE_OK__ lets a test prove that these constants reach the browser:
+  // without it, a lost define would read as 'not CI' and the gate would skip.
+  define: { __MATHTS_CI__: JSON.stringify(isCI), __MATHTS_DEFINE_OK__: 'true' },
   // The browser bundle transitively pulls in `@danielsimonjr/mathts-workerpool`
   // (via matrix → parallel-matrix → parallel/ComputePool), which imports the
   // Node `workerpool` package. `workerpool`'s `import` export condition resolves
