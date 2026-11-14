@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BigNumber, Complex, Fraction, pairwiseSum } from '@danielsimonjr/mathts-core';
-import { matrix, sparse, sum } from '../src/index.js';
+import { matrix, max, min, sparse, sum } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
 const B = [new BigNumber('0.1000000000000000000001'), new BigNumber('0.2')];
@@ -176,5 +176,90 @@ describe('sum edge cases follow mathjs', () => {
     expect(() => sum([1, null])).toThrow(TypeError);
     expect(() => sum([1, undefined])).toThrow(TypeError);
     expect(() => sum([[1], [null]])).toThrow(TypeError);
+  });
+});
+
+const F0 = F[0];
+const F1 = F[1];
+const B0 = B[0];
+
+describe('min and max', () => {
+  it('throw for Complex values, which have no ordering', () => {
+    expect(() => min(C)).toThrow(/no ordering relation/);
+    expect(() => max(C)).toThrow(/no ordering relation/);
+  });
+
+  it('keep every digit of BigNumber values', () => {
+    const lo = min(B);
+    expect(lo).toBeInstanceOf(BigNumber);
+    expect(String(lo)).toBe('0.1000000000000000000001');
+    expect(String(max(B))).toBe('0.2');
+  });
+
+  it('return the exact Fraction', () => {
+    expect(ratio(min(F))).toEqual([1n, 6n]);
+    expect(ratio(max(F))).toEqual([1n, 3n]);
+  });
+
+  it('find a Fraction in a mixed array', () => {
+    expect(ratio(min([1, F0]))).toEqual([1n, 3n]);
+  });
+
+  it('read a nested number array and a Matrix', () => {
+    const grid = [
+      [1, 2],
+      [3, 4.5],
+    ];
+    expect(min(grid)).toBe(1);
+    expect(max(grid)).toBe(4.5);
+    expect(min(matrix(grid))).toBe(1);
+    expect(max(matrix(grid))).toBe(4.5);
+    expect(min(matrix([1, 2, 3.5]))).toBe(1);
+  });
+
+  it('reduce along a dimension', () => {
+    const grid = [
+      [1, 2],
+      [3, 0.5],
+    ];
+    expect(min(grid, 0)).toEqual([1, 0.5]);
+    expect(max(grid, 1)).toEqual([2, 3]);
+  });
+
+  it('return a Fraction or a BigNumber scalar unchanged', () => {
+    expect(min(F0)).toBe(F0);
+    expect(max(F0)).toBe(F0);
+    expect(min(B0)).toBe(B0);
+  });
+
+  it('keep exact values in a list of arguments', () => {
+    expect(ratio(min(F0, F1, F0))).toEqual([1n, 6n]);
+    expect(ratio(max(F0, F1, F0))).toEqual([1n, 3n]);
+    expect(ratio(min(F0, 1, 2))).toEqual([1n, 3n]);
+    expect(min(1, B0, 2)).toBe(B0);
+    expect(max(F0, 0, 0.1)).toBe(F0);
+    expect(min(1n, 2n, 3n)).toBe(1n);
+  });
+
+  it('compare booleans and numeric strings as mathjs does', () => {
+    expect(min([true, false])).toBe(false);
+    expect(min(['3', '2'])).toBe(2);
+  });
+});
+
+describe('min and max pins that hold before and after the fix', () => {
+  it('give Infinity and -Infinity for an empty array', () => {
+    expect(min([])).toBe(Infinity);
+    expect(max([])).toBe(-Infinity);
+  });
+
+  it('give NaN for an array that holds NaN', () => {
+    expect(min([1, Number.NaN, 0])).toBeNaN();
+  });
+
+  it('keep the number paths', () => {
+    expect(min(1, 2, 3, 4)).toBe(1);
+    expect(min(1n, 2n)).toBe(1n);
+    expect(max(new Float64Array([1, 2, 3.5]))).toBe(3.5);
   });
 });
