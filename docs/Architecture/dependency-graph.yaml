@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-14'
   totalFiles: 1333
   totalModules: 82
-  totalExports: 7289
+  totalExports: 7292
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -690,9 +690,9 @@ modules:
           imports:
             - isCollection
             - isMatrix
-        - file: ./error/DimensionError.js
+        - file: ./error/IndexError.js
           imports:
-            - DimensionError
+            - IndexError
         - file: ./array.js
           imports:
             - NestedArray
@@ -707,6 +707,7 @@ modules:
         - containsCollections
         - deepForEach
         - deepMap
+        - validateDimension
         - reduce
         - scatter
       functions:
@@ -717,6 +718,7 @@ modules:
         - deepMap
         - deepMap
         - deepMap
+        - validateDimension
         - reduce
         - reduce
         - reduce
@@ -1638,6 +1640,7 @@ modules:
             - deepForEach
             - reduce
             - scatter
+            - validateDimension
           reExport: true
         - file: ./switch.js
           imports:
@@ -1792,6 +1795,7 @@ modules:
         - deepForEach
         - reduce
         - scatter
+        - validateDimension
         - _switch
         - ObjectWrappingMap
         - PartitionedMap
@@ -1914,6 +1918,7 @@ modules:
         - containsCollections
         - reduce
         - scatter
+        - validateDimension
         - _switch
         - ObjectWrappingMap
         - PartitionedMap
@@ -17091,6 +17096,9 @@ modules:
         - file: ../utils/object.js
           imports:
             - clone
+        - file: ../utils/collection.js
+          imports:
+            - validateDimension
         - file: ../utils/array.js
           imports:
             - arraySize
@@ -17621,9 +17629,6 @@ modules:
         - file: ../utils/is.js
           imports:
             - isMatrix
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
         - file: ../types.js
           imports:
             - TypedFunction
@@ -17634,6 +17639,7 @@ modules:
           directory: core
           imports:
             - _switch
+            - validateDimension
           subpath: internal
       exports:
         - createMapSlices
@@ -21373,6 +21379,7 @@ modules:
         - file: ../utils/collection.js
           imports:
             - containsCollections
+            - validateDimension
         - file: ../utils/factory.js
           imports:
             - factory
@@ -21385,9 +21392,6 @@ modules:
         - file: ../utils/array.js
           imports:
             - arraySize
-        - file: ../error/DimensionError.js
-          imports:
-            - DimensionError
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -27526,6 +27530,7 @@ modules:
             - deepMap
             - reduce
             - scatter
+            - validateDimension
           subpath: internal
       exports:
         - containsCollections
@@ -27533,12 +27538,14 @@ modules:
         - deepMap
         - reduce
         - scatter
+        - validateDimension
       reExported:
         - containsCollections
         - deepForEach
         - deepMap
         - reduce
         - scatter
+        - validateDimension
     functions/src/utils/complex.ts:
       description: Test whether two complex values are equal provided a given relTol and absTol.
       externalDependencies: []
@@ -45914,15 +45921,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1333
   totalModules: 82
-  totalLinesOfCode: 230309
-  totalExports: 7289
+  totalLinesOfCode: 230315
+  totalExports: 7292
   totalClasses: 62
   totalInterfaces: 661
-  totalFunctions: 2496
+  totalFunctions: 2497
   totalTypeGuards: 178
   totalEnums: 0
   totalConstants: 1675
-  totalReExports: 3163
+  totalReExports: 3165
   totalTypeOnlyImports: 682
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

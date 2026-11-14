@@ -1,7 +1,7 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type { NestedArray } from '../src/array.js';
 import { deepForEach, deepMap, reduce } from '../src/collection.js';
-import { DimensionError } from '../src/error/DimensionError.js';
+import { IndexError } from '../src/error/IndexError.js';
 
 describe('collection nested types (runtime)', () => {
   it('deepMap preserves nested shape', () => {
@@ -32,9 +32,9 @@ describe('collection nested types (runtime)', () => {
     expect(reduce([], 0, (a, b) => Number(a) + Number(b))).toBeUndefined();
   });
 
-  it('throws DimensionError when dim is out of range', () => {
-    expect(() => reduce([1, 2, 3], 5, (a, b) => Number(a) + Number(b))).toThrow(DimensionError);
-    expect(() => reduce([1, 2, 3], -1, (a, b) => Number(a) + Number(b))).toThrow(DimensionError);
+  it('throws IndexError when dim is out of range', () => {
+    expect(() => reduce([1, 2, 3], 5, (a, b) => Number(a) + Number(b))).toThrow(IndexError);
+    expect(() => reduce([1, 2, 3], -1, (a, b) => Number(a) + Number(b))).toThrow(IndexError);
   });
 
   it('skipZeros: true leaves numeric zeros unchanged', () => {

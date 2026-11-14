@@ -810,7 +810,7 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
     );
   });
 
-  it('reduce (array branch) agrees across expression / functions / core, including the throwing path', () => {
+  it('reduce (array branch) agrees across expression / functions / core for every in-range dim', () => {
     assertEquivalent(
       'reduce(array)',
       [
@@ -854,9 +854,22 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
             maxLength: 3,
           }
         ),
-        fc.integer({ min: -1, max: 2 })
+        fc.integer({ min: 0, max: 1 })
       )
     );
+  });
+
+  it('reduce (array branch) throws a true IndexError for an out-of-range dim, where the frozen copies threw a false DimensionError (#1047)', () => {
+    const add = (acc: number, v: number) => (acc as number) + v;
+    const a = asDeclared<number[]>([
+      [0, 0],
+      [0, 0],
+    ]);
+    for (const frozen of [exprCollection.reduce, fnCollection.reduce]) {
+      expect(() => frozen(a, 2, add)).toThrow('Dimension mismatch (2 < 2)');
+    }
+    expect(() => coreReduce(a, 2, add)).toThrow('Index out of range (2 > 1)');
+    expect(() => coreReduce(a, -1, add)).toThrow('Index out of range (-1 < 0)');
   });
 });
 

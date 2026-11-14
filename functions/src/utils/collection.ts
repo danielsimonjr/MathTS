@@ -17,4 +17,5 @@ export {
   deepMap,
   reduce,
   scatter,
+  validateDimension,
 } from '@danielsimonjr/mathts-core/internal';

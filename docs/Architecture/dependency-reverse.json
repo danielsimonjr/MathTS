@@ -85,12 +85,12 @@
       "core/src/types/unit/unit-types.ts"
     ],
     "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
-    "core/src/error/DimensionError.ts": [
+    "core/src/error/DimensionError.ts": ["core/src/array.ts", "core/src/internal.ts"],
+    "core/src/error/IndexError.ts": [
       "core/src/array.ts",
       "core/src/collection.ts",
       "core/src/internal.ts"
     ],
-    "core/src/error/IndexError.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/object.ts": [
       "core/src/array.ts",
       "core/src/factory.ts",
@@ -1340,6 +1340,7 @@
       "functions/src/complex/im.ts",
       "functions/src/complex/re.ts",
       "functions/src/logical/not.ts",
+      "functions/src/matrix/concat.ts",
       "functions/src/probability/combinations.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/multinomial.ts",
@@ -2221,7 +2222,6 @@
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/resize.ts",
       "functions/src/matrix/subset.ts",
-      "functions/src/statistics/cumsum.ts",
       "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
       "functions/src/type/matrix/utils/matAlgo02xDS0.ts",
       "functions/src/type/matrix/utils/matAlgo03xDSf.ts",
@@ -2234,10 +2234,7 @@
       "functions/src/type/matrix/utils/matAlgo13xDD.ts",
       "functions/src/typed/trig-angle-unit.ts"
     ],
-    "functions/src/error/IndexError.ts": [
-      "functions/src/core/create.ts",
-      "functions/src/matrix/mapSlices.ts"
-    ],
+    "functions/src/error/IndexError.ts": ["functions/src/core/create.ts"],
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
     "functions/src/typed/expression-eval-barrel.ts": ["functions/src/factories/evaluate.ts"],

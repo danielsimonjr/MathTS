@@ -1,5 +1,6 @@
 import { isBigNumber, isMatrix, isNumber } from '../utils/is.js';
 import { clone } from '../utils/object.js';
+import { validateDimension } from '../utils/collection.js';
 import { arraySize, concat as _concat } from '../utils/array.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { factory } from '../utils/factory.js';
@@ -103,9 +104,7 @@ export const createConcat = /* #__PURE__ */ factory(
         }
 
         if (hasDim) {
-          if (dim < 0 || dim > prevDim) {
-            throw new DimensionError(dim, dim < 0 ? 0 : prevDim, dim < 0 ? '<' : '>');
-          }
+          validateDimension(dim, prevDim + 1);
         } else {
           dim = prevDim;
         }

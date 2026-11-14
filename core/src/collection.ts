@@ -14,7 +14,7 @@
  * `utils/switch.ts` remain untouched, a future dedup slice.
  */
 import { isCollection, isMatrix as isMatrixInstance } from './is.js';
-import { DimensionError } from './error/DimensionError.js';
+import { IndexError } from './error/IndexError.js';
 import {
   type NestedArray,
   arraySize,
@@ -130,6 +130,23 @@ export function deepMap<T, U>(
 }
 
 /**
+ * Check a dimension index against the number of dimensions of a collection.
+ *
+ * @param dim   The dimension index.
+ * @param ndims The number of dimensions.
+ * @throws {TypeError} When `dim` is not an integer.
+ * @throws {IndexError} When `dim` is less than 0 or not less than `ndims`.
+ */
+export function validateDimension(dim: number, ndims: number): void {
+  if (!Number.isInteger(dim)) {
+    throw new TypeError('Integer number expected for dimension');
+  }
+  if (dim < 0 || dim >= ndims) {
+    throw new IndexError(dim, 0, ndims);
+  }
+}
+
+/**
  * Reduce a nested array or matrix along one dimension.
  *
  * For a one-dimensional nested array and `dim === 0`, the result is a **scalar** (`U`), not a
@@ -157,9 +174,7 @@ export function reduce<T, U>(
   callback: (acc: U | T, val: T) => U
 ): U | NestedArray<U> | Matrix<U> {
   const size = Array.isArray(mat) ? arraySize(mat) : (mat as unknown as Matrix<T>).size();
-  if (dim < 0 || dim >= size.length) {
-    throw new DimensionError(dim, size.length, '<');
-  }
+  validateDimension(dim, size.length);
 
   if (isMatrixInstance(mat)) {
     const reduced = _reduce((mat as unknown as Matrix<T>).valueOf() as T[], dim, callback);
