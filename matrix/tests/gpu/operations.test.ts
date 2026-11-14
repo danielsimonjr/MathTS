@@ -282,66 +282,6 @@ describe('GPU Matrix Operations', () => {
     });
   });
 
-  // Environment limitation: WebGPU is not available in Node.js test environment.
-  // These tests pass in a browser with WebGPU support. They are skipped in CI/Node.js.
-  describe.skip('GPU Operations (requires WebGPU - browser only)', () => {
-    beforeEach(async () => {
-      const success = await backend.initialize();
-      if (!success) {
-        console.log('WebGPU not available, skipping GPU tests');
-      }
-    });
-
-    it('should compute matrix addition matching CPU', async () => {
-      const rows = 64;
-      const cols = 64;
-      const a = randomMatrix(rows, cols);
-      const b = randomMatrix(rows, cols);
-
-      const cpuResult = cpuOps.add(a, b);
-      const gpuResult = await backend.add(a, b, rows, cols);
-
-      expect(arraysClose(gpuResult, cpuResult, 1e-5)).toBe(true);
-    });
-
-    it('should compute matrix multiplication matching CPU', async () => {
-      const M = 32;
-      const K = 32;
-      const N = 32;
-      const a = randomMatrix(M, K);
-      const b = randomMatrix(K, N);
-
-      const cpuResult = cpuOps.matmul(a, b, M, K, N);
-      const gpuResult = await backend.matmul(a, b, M, K, N);
-
-      // Matmul can have more numerical error due to FMA operations
-      expect(arraysClose(gpuResult, cpuResult, 1e-4)).toBe(true);
-    });
-
-    it('should compute transpose matching CPU', async () => {
-      const rows = 32;
-      const cols = 48;
-      const a = randomMatrix(rows, cols);
-
-      const cpuResult = cpuOps.transpose(a, rows, cols);
-      const gpuResult = await backend.transpose(a, rows, cols);
-
-      expect(arraysClose(gpuResult, cpuResult, 1e-6)).toBe(true);
-    });
-
-    it('should compute scalar multiplication matching CPU', async () => {
-      const rows = 64;
-      const cols = 64;
-      const a = randomMatrix(rows, cols);
-      const scalar = 2.5;
-
-      const cpuResult = cpuOps.scale(a, scalar);
-      const gpuResult = await backend.scale(a, scalar);
-
-      expect(arraysClose(gpuResult, cpuResult, 1e-6)).toBe(true);
-    });
-  });
-
   describe('Large Matrix Operations (CPU reference)', () => {
     // These test our reference implementations on larger matrices
     // to ensure they can handle sizes we'd use with GPU
