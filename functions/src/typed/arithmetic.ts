@@ -55,7 +55,12 @@ import {
 } from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit, TypedFunction } from '@danielsimonjr/mathts-core';
-import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
+import {
+  DenseMatrix,
+  SparseMatrix,
+  backendManager,
+  singularValues,
+} from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
@@ -237,22 +242,55 @@ function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknow
   return fallback(a, b);
 }
 
+/**
+ * Element-wise operation on matrix operands. The result storage follows mathjs: two sparse
+ * operands give a sparse result; a sparse operand with a number gives a sparse result when
+ * `scalarKeepsSparse` is true (multiply, divide, mod: a zero stays zero) and a dense result
+ * otherwise (add, subtract: a zero becomes the number); a sparse operand with a dense one
+ * gives a dense result. A call with a public CSR `SparseMatrix` returns the public class,
+ * which stores numbers only; a result with another entry type stays a dense matrix.
+ */
 function elementwiseMatrixNumber(
   tf: object,
   fallback: ScalarOp,
   a: unknown,
-  b: unknown
-): MathJSDenseMatrix | MathJSSparseMatrix {
+  b: unknown,
+  scalarKeepsSparse = false
+): MathJSDenseMatrix | MathJSSparseMatrix | SparseMatrix {
   const data = elementwiseNumber(tf, fallback, toNested(a), toNested(b)) as unknown[][];
-  return isSparseStorage(a) || isSparseStorage(b)
-    ? new MathJSSparseMatrix(data)
-    : new MathJSDenseMatrix(data as number[][]);
+  const sparseA = isSparseStorage(a);
+  const sparseB = isSparseStorage(b);
+  const sparseOut =
+    (sparseA && sparseB) ||
+    (scalarKeepsSparse &&
+      ((sparseA && typeof b === 'number') || (sparseB && typeof a === 'number')));
+  if (!sparseOut) return new MathJSDenseMatrix(data as number[][]);
+  if (a instanceof SparseMatrix || b instanceof SparseMatrix) return publicSparseOrDense(data);
+  return new MathJSSparseMatrix(data);
 }
 
-/** True if `m` is a matrix in sparse storage. */
+/** The public `SparseMatrix` of nested numbers; a nested array with another entry type as a dense matrix. */
+function publicSparseOrDense(data: unknown[][]): SparseMatrix | MathJSDenseMatrix {
+  for (const row of data) {
+    for (const v of row) {
+      if (typeof v !== 'number') return new MathJSDenseMatrix(data as number[][]);
+    }
+  }
+  return SparseMatrix.fromDense(DenseMatrix.fromArray(data as number[][]));
+}
+
+/** True if `m` is a matrix in sparse storage (the public CSR class or the factory CSC class). */
 function isSparseStorage(m: unknown): boolean {
+  if (m instanceof SparseMatrix) return true;
   const s = (m as { storage?: () => string }).storage;
   return typeof s === 'function' && s.call(m) === 'sparse';
+}
+
+/** The product of two matrix operands of any storage, as nested numbers. */
+function matrixProduct(a: unknown, b: unknown): number[][] {
+  const A = DenseMatrix.fromArray(toNested(a) as number[][]);
+  const B = DenseMatrix.fromArray(toNested(b) as number[][]);
+  return backendManager.multiply(A, B).toArray();
 }
 
 /** A matrix operand → its dense nested array; a scalar passes through unchanged. */
@@ -303,10 +341,14 @@ interface CollectionKernels {
  * function (it holds the `number, number` row of the fast path) and `leaf` is the same
  * operation for any pair of scalars. Both are read at call time, after all are defined.
  */
-function elementwiseKernels(path: { fn?: object }, leaf: ScalarOp): CollectionKernels {
+function elementwiseKernels(
+  path: { fn?: object },
+  leaf: ScalarOp,
+  scalarKeepsSparse = false
+): CollectionKernels {
   return {
     array: (a, b) => elementwiseNumber(path.fn!, leaf, a, b),
-    matrix: (a, b) => elementwiseMatrixNumber(path.fn!, leaf, a, b),
+    matrix: (a, b) => elementwiseMatrixNumber(path.fn!, leaf, a, b, scalarKeepsSparse),
   };
 }
 
@@ -338,9 +380,9 @@ function scalarCollectionSignatures(
 
 const addKernels = elementwiseKernels(addForNumberPath, addOp);
 const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
-const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp);
-const divideKernels = elementwiseKernels(divideForNumberPath, divOp);
-const modKernels = elementwiseKernels(modForNumberPath, modOp);
+const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
+const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
+const modKernels = elementwiseKernels(modForNumberPath, modOp, true);
 
 /** The size of an Array or a matrix, in mathjs's shape: `[n]` for a vector, `[r, c]` otherwise. */
 function collectionSize(collection: unknown): number[] {
@@ -686,6 +728,19 @@ export const multiply = withBinaryScalarGuards(
       return new MathJSDenseMatrix(backendManager.multiply(A, B).toArray());
     },
 
+    // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
+    // operands and a dense matrix for a sparse and a dense operand.
+    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => {
+      const product = matrixProduct(a, b);
+      if (a instanceof SparseMatrix || b instanceof SparseMatrix)
+        return publicSparseOrDense(product);
+      return new MathJSSparseMatrix(product);
+    },
+    'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+      new MathJSDenseMatrix(matrixProduct(a, b) as number[][]),
+    'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+      new MathJSDenseMatrix(matrixProduct(a, b) as number[][]),
+
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
 
@@ -715,13 +770,13 @@ export const multiply = withBinaryScalarGuards(
     'number, Array': (a: f64, b: unknown[]): unknown =>
       elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
     'DenseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b, true),
     'number, DenseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b, true),
     'SparseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b, true),
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+      elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b, true),
 
     // The same scaling for a Unit, Complex, Fraction or BigNumber scalar, in either order
     // (#911). Before, `number` was the only scalar with a collection signature.

@@ -861,11 +861,6 @@ export const partitionSelect = createPartitionSelect(
 );
 factoryScope.partitionSelect = partitionSelect;
 
-// pinv: the typed/ layer owns the public `pinv` export (Slice 5.2).
-// Keep the factory internal so the factoryScope wiring still works.
-const pinv_factory = createPinv(factoryScope as Parameters<typeof createPinv>[0]);
-factoryScope.pinv = pinv_factory;
-
 export const qr = createQr(factoryScope as Parameters<typeof createQr>[0]);
 factoryScope.qr = qr;
 
@@ -1170,6 +1165,18 @@ const _ImmutableDenseMatrix = createImmutableDenseMatrixClass(
 );
 factoryScope.ImmutableDenseMatrix = _ImmutableDenseMatrix;
 
+// Upgrade add/multiply from scalar stubs to full typed implementations
+factoryScope.add = add;
+factoryScope.multiply = multiply;
+
+// pinv: the typed/ layer owns the public `pinv` export (Slice 5.2). Keep the factory
+// internal so the factoryScope wiring still works. It is created after add and multiply
+// are upgraded: it calls them on an Array or a matrix, and a scalar stub throws there
+// (`divide(scalar, matrix)` failed with "Class constructor Complex ..." and then with
+// "Unexpected type of argument in function addScalar").
+const pinv_factory = createPinv(factoryScope as Parameters<typeof createPinv>[0]);
+factoryScope.pinv = pinv_factory;
+
 export const factory_subtract = createSubtract(
   factoryScope as Parameters<typeof createSubtract>[0]
 );
@@ -1177,10 +1184,6 @@ factoryScope.subtract = factory_subtract;
 
 export const factory_divide = createDivide(factoryScope as Parameters<typeof createDivide>[0]);
 factoryScope.divide = factory_divide;
-
-// Upgrade add/multiply from scalar stubs to full typed implementations
-factoryScope.add = add;
-factoryScope.multiply = multiply;
 
 export const ifft = createIfft(factoryScope as Parameters<typeof createIfft>[0]);
 factoryScope.ifft = ifft;

@@ -44,7 +44,7 @@ interface MatrixConstructor {
 
 /** Complex number constructor */
 interface ComplexConstructor {
-  (re: number, im: number): Complex;
+  new (re: number, im: number): Complex;
 }
 
 /** Result of rank factorization */
@@ -265,14 +265,14 @@ export const createPinv = /* #__PURE__ */ factory(
 
     /** Check if a scalar value is zero (handles complex numbers) */
     function _isZero(x: Scalar): boolean {
-      return equal(add(x, Complex(1, 1)), add(0, Complex(1, 1)));
+      return equal(add(x, new Complex(1, 1)), add(0, new Complex(1, 1)));
     }
 
     /** Check if an array/matrix contains only zeros */
     function _isZeros(arr: Scalar[] | Scalar[][] | Matrix): boolean {
       return deepEqual(
-        add(arr, Complex(1, 1)),
-        add(multiply(arr, 0) as Scalar | Scalar[][], Complex(1, 1))
+        add(arr, new Complex(1, 1)),
+        add(multiply(arr, 0) as Scalar | Scalar[][], new Complex(1, 1))
       );
     }
   }
