@@ -1651,20 +1651,58 @@ export const compare = mathTyped('compare', {
 // =============================================================================
 
 /**
+ * The min or max of an array whose leaves are all numbers, at any depth. `init` is the result for
+ * an empty array. Returns `undefined` at the first non-number leaf, so the caller can use the exact
+ * function. A nested array gives the same value as its flat form.
+ */
+function numberExtremum(
+  arr: unknown[],
+  init: number,
+  pick: (m: number, x: number) => number
+): number | undefined {
+  let m = init;
+  const walk = (xs: unknown[]): boolean => {
+    for (let i = 0; i < xs.length; i++) {
+      const x = xs[i];
+      if (typeof x === 'number') m = pick(m, x);
+      else if (!Array.isArray(x) || !walk(x)) return false;
+    }
+    return true;
+  };
+  return walk(arr) ? m : undefined;
+}
+
+/**
  * Minimum of values. The Float64Array signature is synchronous.
  */
 export const min = mathTyped('min', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a < b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) < 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) < 0 ? a : b),
-  Array: (arr: f64[]): f64 => {
-    let m = Infinity;
-    for (let i = 0; i < arr.length; i++) m = Math.min(m, arr[i]);
-    return m;
+  Fraction: (a: Fraction): Fraction => a,
+  BigNumber: (a: BigNumber): BigNumber => a,
+  Array: (arr: unknown[]): unknown =>
+    numberExtremum(arr, Infinity, Math.min) ?? exactReductions('min').min(arr),
+  Matrix: (m: unknown): unknown => {
+    const v = (m as { valueOf(): unknown }).valueOf();
+    return (
+      (Array.isArray(v) ? numberExtremum(v, Infinity, Math.min) : undefined) ??
+      exactReductions('min').min(m)
+    );
   },
+  'Array, number | BigNumber': (arr: unknown, dim: unknown): unknown =>
+    exactReductions('min').min(arr, dim),
+  'Matrix, number | BigNumber': (m: unknown, dim: unknown): unknown =>
+    exactReductions('min').min(m, dim),
   number: (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
-  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.min(a, b, ...rest),
+  'number | Fraction | BigNumber | bigint, number | Fraction | BigNumber | bigint, ...number | Fraction | BigNumber | bigint':
+    (a: unknown, b: unknown, rest: unknown[]): unknown => {
+      const all = [a, b, ...rest];
+      return all.every((x) => typeof x === 'number')
+        ? Math.min(...(all as number[]))
+        : exactReductions('min').min(...all);
+    },
 
   // Float64Array min, synchronous. The worker versions are parallelStatMin / computePool.min.
   Float64Array: (a: Float64Array): f64 => {
@@ -1681,14 +1719,30 @@ export const max = mathTyped('max', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a > b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) > 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) > 0 ? a : b),
-  Array: (arr: f64[]): f64 => {
-    let m = -Infinity;
-    for (let i = 0; i < arr.length; i++) m = Math.max(m, arr[i]);
-    return m;
+  Fraction: (a: Fraction): Fraction => a,
+  BigNumber: (a: BigNumber): BigNumber => a,
+  Array: (arr: unknown[]): unknown =>
+    numberExtremum(arr, -Infinity, Math.max) ?? exactReductions('max').max(arr),
+  Matrix: (m: unknown): unknown => {
+    const v = (m as { valueOf(): unknown }).valueOf();
+    return (
+      (Array.isArray(v) ? numberExtremum(v, -Infinity, Math.max) : undefined) ??
+      exactReductions('max').max(m)
+    );
   },
+  'Array, number | BigNumber': (arr: unknown, dim: unknown): unknown =>
+    exactReductions('max').max(arr, dim),
+  'Matrix, number | BigNumber': (m: unknown, dim: unknown): unknown =>
+    exactReductions('max').max(m, dim),
   number: (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
-  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.max(a, b, ...rest),
+  'number | Fraction | BigNumber | bigint, number | Fraction | BigNumber | bigint, ...number | Fraction | BigNumber | bigint':
+    (a: unknown, b: unknown, rest: unknown[]): unknown => {
+      const all = [a, b, ...rest];
+      return all.every((x) => typeof x === 'number')
+        ? Math.max(...(all as number[]))
+        : exactReductions('max').max(...all);
+    },
 
   // Float64Array max, synchronous. The worker versions are parallelStatMax / computePool.max.
   Float64Array: (a: Float64Array): f64 => {
