@@ -1,5 +1,35 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.5.0
+
+### Minor Changes
+
+- ee3dff3: A binary `Tensor` op given a `TapedTensor` or `DualTensor` operand throws a `TypeError` that names the autograd op to use. Binary ops read a strided view operand by its logical values (#904).
+- ee3dff3: `Tensor` accepts `Float32Array` data. The values are copied to a new `Float64Array` (#941).
+- ee3dff3: Breaking for views: `Tensor.data` returns the logical values in row-major order. For a strided view (a `slice` with a step, an offset or a negative step) it is a dense copy. The raw parent storage is the new `buffer` field, read with `offset` and `strides`. Ops on a view read its logical values, `slice` keeps the label of an unchanged axis, and `TapedTensor.fromTensorAsInput` and `DualTensor.fromTensor` copy the logical values (#902).
+- b95de8a: **Breaking:** Node 20 is dropped (`engines.node` >=22.12); packed-consumer contract (#886, #888, #890, #893, #905, #912, #914, #916, #930).
+  
+  Every package sets `engines.node` to `>=22.12`, and CI tests 22.x and 24.x.
+  
+  Every `exports` entry gains a `default` condition equal to `import`, so `require()` of the ES build works at run time on Node >= 22.12 (`mathts-wasm` has top-level await and stays import-only). Node 22.12 prints an `ExperimentalWarning` for it; 22.13 and later do not. On Node 22.11 and earlier, `require()` reports `ERR_REQUIRE_ESM`; use `import()`. TypeScript accepts the `require()` of these packages from CommonJS under `moduleResolution: nodenext`; `node16` reports TS1471. Issue #736 closed docs-only because its acceptance allowed documenting ESM-only; the `default` condition is the `require(esm)` fix.
+  
+  Published `.d.ts` files name no Node, workerpool, DOM or WebGPU global, so strict `tsc` with no `@types/node` passes. The `mathts-gpu` handle types are the WebGPU global types when the consumer has them, and interfaces of the package when it has not. `mathts-workerpool` ships a `browser` build (the worker is one classic script), so a bundler pulls no Node builtin into `mathts-compat`. README code fences carry a runtime tag. `functions/evaluate` is not a size saving; use `mathts-expression` for a small bundle.
+
+### Patch Changes
+
+- Updated dependencies [a66847e]
+- Updated dependencies [e6a651b]
+- Updated dependencies [9188123]
+- Updated dependencies [2635bbb]
+- Updated dependencies [aa76758]
+- Updated dependencies [9188123]
+- Updated dependencies [799b0fe]
+- Updated dependencies [9188123]
+- Updated dependencies [b95de8a]
+- Updated dependencies [9188123]
+  - @danielsimonjr/mathts-matrix@0.11.0
+  - @danielsimonjr/mathts-core@0.28.0
+
 ## 0.4.0
 
 ### Minor Changes
