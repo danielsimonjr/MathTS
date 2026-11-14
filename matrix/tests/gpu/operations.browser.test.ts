@@ -14,14 +14,16 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { GPUBackend, destroyGlobalGPUBackend } from '../../src/backends/GPUBackend.js';
 
 /**
- * Relative f32 tolerance. Copied from `F32_REL_TOL` in
- * `functions/tests/helpers/gpu-hardware.ts` (software-adapter bound, 1e-3).
- * This value is looser than the real-GPU bound (1e-4), so it holds on every
- * adapter. Keep in sync with the source.
+ * Relative f32 tolerance: the software-adapter bound of `F32_REL_TOL` in
+ * `functions/tests/helpers/gpu-hardware.ts`. A test of one package cannot import
+ * the test helpers of another (tsc rootDir), so the value is copied. 1e-3 holds
+ * on a software adapter and on real silicon.
  */
 const F32_REL_TOL = 1e-3;
 
-const IS_CI = typeof process !== 'undefined' && !!process.env?.CI;
+/** Set by `define` in vitest.config.browser.ts; a browser has no process.env. */
+declare const __MATHTS_CI__: boolean;
+const IS_CI = typeof __MATHTS_CI__ !== 'undefined' && __MATHTS_CI__;
 
 const adapter =
   typeof navigator !== 'undefined' && 'gpu' in navigator
