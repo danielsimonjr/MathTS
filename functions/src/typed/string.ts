@@ -20,7 +20,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { format as formatValue } from '../utils/string.js';
 import { fillPrintTemplate } from '../utils/print.js';
 
@@ -199,11 +199,11 @@ export const oct = mathTyped('oct', {
  * ```
  */
 export const format = mathTyped('format', {
-  // Single-arg: format with defaults. For BigNumber, utils/string isBigNumber check
-  // may fail (core BigNumber uses .isBigNumber property but not on prototype), so
-  // we intercept BigNumber explicitly before delegating to formatValue.
+  // Single-arg: format with defaults. A BigNumber is formatted here, before `formatValue`,
+  // so that every digit is kept. `isBigNumber` reads the brand, which also matches a
+  // BigNumber of a second copy of core (#1033).
   any: (x: unknown): string => {
-    if (x instanceof BigNumber) {
+    if (isBigNumber(x)) {
       const bn = x as unknown as {
         isNaN: () => boolean;
         isFinite: () => boolean;
@@ -220,7 +220,7 @@ export const format = mathTyped('format', {
   // Two-arg: format with options/precision. For BigNumber+number we use toPrecision
   // directly; for everything else we delegate to formatValue.
   'any, any': (x: unknown, options: unknown): string => {
-    if (x instanceof BigNumber) {
+    if (isBigNumber(x)) {
       const bn = x as unknown as {
         isNaN: () => boolean;
         isFinite: () => boolean;

@@ -32,9 +32,9 @@ import {
 import { DEFAULT_CONFIG } from '../../config.js';
 import { isUnit } from '../../is.js';
 import { format, type FormatOptions } from '../../number.js';
-import { BigNumber } from '../bignumber.js';
-import { Complex, I as ComplexI } from '../complex.js';
-import { Fraction } from '../fraction.js';
+import { BigNumber, isBigNumber } from '../bignumber.js';
+import { Complex, I as ComplexI, isComplex } from '../complex.js';
+import { Fraction, isFraction } from '../fraction.js';
 import type {
   BigNumberConstructor,
   ComplexConstructor,
@@ -83,14 +83,15 @@ function formatValue(value: unknown, options?: unknown): string {
     return format(value, options as FormatOptions);
   }
   // A Fraction value prints as the ratio (`1/8 S`), as mathjs does; its toString is the decimal.
-  if (value instanceof Fraction) {
+  // The brand tests also match a value of a second copy of core (#1033).
+  if (isFraction(value)) {
     if ((options as { fraction?: string } | undefined)?.fraction === 'decimal')
       return value.toString();
     return value.denominator === 1n
       ? `${value.numerator}`
       : `${value.numerator}/${value.denominator}`;
   }
-  if (value instanceof BigNumber || value instanceof Complex) {
+  if (isBigNumber(value) || isComplex(value)) {
     return value.toString();
   }
   return String(value);

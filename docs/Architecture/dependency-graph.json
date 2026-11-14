@@ -3190,15 +3190,15 @@
           },
           {
             "file": "../bignumber.js",
-            "imports": ["BigNumber"]
+            "imports": ["BigNumber", "isBigNumber"]
           },
           {
             "file": "../complex.js",
-            "imports": ["Complex", "I"]
+            "imports": ["Complex", "I", "isComplex"]
           },
           {
             "file": "../fraction.js",
-            "imports": ["Fraction"]
+            "imports": ["Fraction", "isFraction"]
           },
           {
             "file": "./unit-types.js",
@@ -14106,6 +14106,7 @@
             "directory": "core",
             "imports": [
               "Fraction",
+              "isFraction",
               "SI_DIMENSION_LENGTH",
               "toSiDimensionVector",
               "Unit",
@@ -17217,7 +17218,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber"]
+            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber", "isBigNumber"]
           }
         ],
         "exports": ["factoryScope", "pushConfigOverlay", "popConfigOverlay"],
@@ -22031,7 +22032,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Complex"]
+            "imports": ["Complex", "isComplex"]
           }
         ],
         "exports": ["cheby1", "cheby2", "ellip", "bilinear", "buttord", "zpk2sos", "sosfilt"],
@@ -23015,7 +23016,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Complex"]
+            "imports": ["isComplex"]
           }
         ],
         "exports": ["rejectMisusedIndexedSum"],
@@ -28341,7 +28342,15 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "Complex", "BigNumber", "Fraction"]
+            "imports": [
+              "mathTyped",
+              "Complex",
+              "BigNumber",
+              "Fraction",
+              "isBigNumber",
+              "isComplex",
+              "isFraction"
+            ]
           }
         ],
         "exports": [
@@ -28849,7 +28858,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "BigNumber"]
+            "imports": ["mathTyped", "BigNumber", "isBigNumber"]
           }
         ],
         "exports": ["bin", "hex", "oct", "format", "print", "typedString"],
@@ -48558,7 +48567,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1332,
     "totalModules": 82,
-    "totalLinesOfCode": 229649,
+    "totalLinesOfCode": 229636,
     "totalExports": 7281,
     "totalClasses": 62,
     "totalInterfaces": 660,

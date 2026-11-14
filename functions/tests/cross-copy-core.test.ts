@@ -12,7 +12,7 @@
  */
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import * as core1 from '@danielsimonjr/mathts-core';
-import { add, divide, multiply, subtract } from '../src/index.js';
+import { add, divide, multiply, subtract, zpk2sos } from '../src/index.js';
 import '../src/factories/index.js';
 import { factoryScope } from '../src/factories/scope.js';
 
@@ -199,5 +199,70 @@ describe('an object with only a mathjs-style marker is not a core value', () => 
   it('is rejected by typed add', () => {
     expect(() => add(new core1.Fraction(1n, 3n), new MathjsFraction(1, 1, 3))).toThrow(TypeError);
     expect(() => add(new core1.BigNumber('1'), new MathjsBigNumber())).toThrow(TypeError);
+  });
+});
+
+describe('signal design with roots of a second copy', () => {
+  it('zpk2sos reads the parts of the poles of either copy', () => {
+    const p1 = [new core1.Complex(0.5, 0.25), new core1.Complex(0.5, -0.25)];
+    const p2 = [new core2.Complex(0.5, 0.25), new core2.Complex(0.5, -0.25)];
+    // The poles 0.5 +- 0.25i give the denominator z^2 - 1.0 z + 0.3125. A pole read as its
+    // magnitude 0.559 gives -1.118 for the middle coefficient.
+    for (const p of [p1, p2]) {
+      const [[b0, b1, b2, a0, a1, a2]] = zpk2sos([], p as never, 1);
+      expect([b0, b1, b2, a0]).toEqual([1, 0, 0, 1]);
+      expect(a1).toBeCloseTo(-1, 12);
+      expect(a2).toBeCloseTo(0.3125, 12);
+    }
+  });
+});
+
+describe('relational, string and scope functions with values of a second copy', () => {
+  const A = '1.000000000000000000000000000002';
+  const B = '1.000000000000000000000000000001';
+
+  it('compareNatural orders BigNumbers that differ in the last digit', async () => {
+    const { compareNatural } = await import('../src/typed/relational.js');
+    expect(compareNatural(new core2.BigNumber(A), new core2.BigNumber(B))).toBe(1);
+    expect(compareNatural(new core1.BigNumber(B), new core1.BigNumber(A))).toBe(-1);
+  });
+
+  it('compareNatural orders Fractions that differ past 2^53', async () => {
+    const { compareNatural } = await import('../src/typed/relational.js');
+    const big = new core2.Fraction(TWO_POW_60 + 1n, TWO_POW_60);
+    const small = new core2.Fraction(TWO_POW_60, TWO_POW_60 + 1n);
+    expect(compareNatural(big, small)).toBe(1);
+  });
+
+  it('compareNatural orders Complex values by their parts', async () => {
+    const { compareNatural } = await import('../src/typed/relational.js');
+    expect(compareNatural(new core2.Complex(1, 2), new core2.Complex(1, 3))).toBe(-1);
+  });
+
+  it('format writes every digit of a BigNumber', async () => {
+    const { format } = await import('../src/typed/string.js');
+    expect(format(new core2.BigNumber(A))).toBe(A);
+    expect(format(new core2.BigNumber('Infinity'))).toBe('Infinity');
+    expect(format(new core2.BigNumber(A), 3)).toBe('1.00');
+  });
+
+  it('the bignumber of the factory scope keeps every digit', () => {
+    const bn = (factoryScope as unknown as { bignumber(x: unknown): unknown }).bignumber(
+      new core2.BigNumber(A)
+    );
+    expect(String(bn)).toBe(A);
+  });
+
+  it('sum rejects the imaginary unit of a second copy as a dummy index', async () => {
+    const { rejectMisusedIndexedSum } = await import('../src/statistics/sum-indexed-guard.js');
+    const i = new core2.Complex(0, 1);
+    expect(() => rejectMisusedIndexedSum([i, 1, 3, i])).toThrow(/imaginary unit/);
+  });
+
+  it('a dimension vector of Fractions of a second copy is valid', async () => {
+    const { validateDimensionVector } = await import('../src/scalar-dimension.js');
+    const v = Array.from({ length: core1.SI_DIMENSION_LENGTH }, () => new core2.Fraction(0, 1));
+    expect(v).toHaveLength(7);
+    expect(() => validateDimensionVector(v as never)).not.toThrow();
   });
 });

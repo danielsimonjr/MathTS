@@ -22,7 +22,15 @@
  */
 
 import { naturalSort } from '../relational/natural-sort.js';
-import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
+import {
+  mathTyped,
+  Complex,
+  BigNumber,
+  Fraction,
+  isBigNumber,
+  isComplex,
+  isFraction,
+} from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
 
 // =============================================================================
@@ -77,9 +85,10 @@ function typeNameOf(x: unknown): string {
   if (typeof x === 'number') return 'number';
   if (typeof x === 'bigint') return 'bigint';
   if (typeof x === 'string') return 'string';
-  if (x instanceof Complex) return 'Complex';
-  if (x instanceof BigNumber) return 'BigNumber';
-  if (x instanceof Fraction) return 'Fraction';
+  // The brand tests also accept a value of a second copy of core (#1033).
+  if (isComplex(x)) return 'Complex';
+  if (isBigNumber(x)) return 'BigNumber';
+  if (isFraction(x)) return 'Fraction';
   if (Array.isArray(x)) return 'Array';
   if (typeof x === 'object') return 'Object';
   return typeof x;
@@ -372,34 +381,29 @@ function _compareNatural(x: unknown, y: unknown): number {
  * Compare two values of potentially mixed numeric types, returning -1, 0, or 1.
  */
 function _numericCompare(x: unknown, y: unknown): number {
-  // Coerce both to number for comparison (covers BigNumber, Fraction, bigint)
-  let nx: number;
-  let ny: number;
-
-  if (x instanceof BigNumber) {
-    nx = x.toNumber();
-  } else if (x instanceof Fraction) {
-    nx = (x as unknown as { valueOf(): number }).valueOf();
-  } else if (typeof x === 'bigint') {
-    nx = Number(x);
-  } else {
-    nx = x as number;
+  // Two values of one exact type compare exactly. A cast to number loses the digits past 2^53,
+  // so two BigNumbers or two Fractions that differ there would compare as equal.
+  if (isFraction(x) && isFraction(y)) return Fraction.compare(x, y);
+  if (typeof x === 'bigint' && typeof y === 'bigint') return x > y ? 1 : x < y ? -1 : 0;
+  if (isBigNumber(x) && isBigNumber(y) && !x.isNaN() && !y.isNaN()) {
+    return BigNumber.compare(x, y);
   }
 
-  if (y instanceof BigNumber) {
-    ny = y.toNumber();
-  } else if (y instanceof Fraction) {
-    ny = (y as unknown as { valueOf(): number }).valueOf();
-  } else if (typeof y === 'bigint') {
-    ny = Number(y);
-  } else {
-    ny = y as number;
-  }
-
+  // Mixed types compare as numbers. NaN sorts after every other value; two NaN values are equal.
+  const nx = _toNumber(x);
+  const ny = _toNumber(y);
   if (Number.isNaN(nx) && Number.isNaN(ny)) return 0;
   if (Number.isNaN(nx)) return 1;
   if (Number.isNaN(ny)) return -1;
   return nx > ny ? 1 : nx < ny ? -1 : 0;
+}
+
+/** The number value of a number, a bigint, a BigNumber or a Fraction. */
+function _toNumber(v: unknown): number {
+  if (isBigNumber(v)) return v.toNumber();
+  if (isFraction(v)) return (v as unknown as { valueOf(): number }).valueOf();
+  if (typeof v === 'bigint') return Number(v);
+  return v as number;
 }
 
 // =============================================================================

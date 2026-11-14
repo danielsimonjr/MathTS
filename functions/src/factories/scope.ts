@@ -5,7 +5,7 @@
  * typed, config, Complex, BigNumber, Fraction, matrix bridge, and helper constructors.
  */
 
-import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, Fraction, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG, type ConfigOptions } from '../core/config.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
@@ -253,7 +253,8 @@ export const factoryScope: Record<string, unknown> = {
     // to `BigNumber.fromNumber(x)` with `x` an object, which `fromNumber` read as non-finite and
     // turned into `Infinity` — corrupting e.g. `quantileSeq(BigNumber[], …)` (which re-wraps its
     // BigNumber result) and Fraction→BigNumber conversions in the relational operators.
-    if (x instanceof BigNumber) return x;
+    // `isBigNumber` reads the brand, so a BigNumber of a second copy of core keeps its digits.
+    if (isBigNumber(x)) return x as BigNumber;
     if (typeof x === 'string') return BigNumber.parse(x);
     if (typeof x === 'number') return BigNumber.fromNumber(x);
     return BigNumber.fromNumber(Number(x.valueOf())); // Fraction / other numeric-like

@@ -1167,9 +1167,9 @@ graph LR
 | `../../config.js`            | `DEFAULT_CONFIG`                                                                                                                                                    | Import             |
 | `../../is.js`                | `isUnit`                                                                                                                                                            | Import             |
 | `../../number.js`            | `format, FormatOptions`                                                                                                                                             | Import             |
-| `../bignumber.js`            | `BigNumber`                                                                                                                                                         | Import             |
-| `../complex.js`              | `Complex, I`                                                                                                                                                        | Import             |
-| `../fraction.js`             | `Fraction`                                                                                                                                                          | Import             |
+| `../bignumber.js`            | `BigNumber, isBigNumber`                                                                                                                                            | Import             |
+| `../complex.js`              | `Complex, I, isComplex`                                                                                                                                             | Import             |
+| `../fraction.js`             | `Fraction, isFraction`                                                                                                                                              | Import             |
 | `./unit-types.js`            | `BigNumberConstructor, ComplexConstructor, FractionConstructor, Numeric, ScalarBinaryOp, ScalarUnaryOp, SubtractScalar, UnitConfig, UnitDependencies, UnitInstance` | Import (type-only) |
 
 **Exports:**
@@ -5336,10 +5336,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                        |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `ScalarNode`                                                                                  |
-| `@danielsimonjr/mathts-core`       | `Fraction, SI_DIMENSION_LENGTH, toSiDimensionVector, Unit, UnitParseError, SiDimensionVector` |
+| Package                            | Import                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `ScalarNode`                                                                                              |
+| `@danielsimonjr/mathts-core`       | `Fraction, isFraction, SI_DIMENSION_LENGTH, toSiDimensionVector, Unit, UnitParseError, SiDimensionVector` |
 
 **Internal Dependencies:**
 
@@ -6352,9 +6352,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                    |
-| ---------------------------- | ----------------------------------------- |
-| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+| Package                      | Import                                                 |
+| ---------------------------- | ------------------------------------------------------ |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, isBigNumber` |
 
 **Internal Dependencies:**
 
@@ -9339,9 +9339,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import    |
-| ---------------------------- | --------- |
-| `@danielsimonjr/mathts-core` | `Complex` |
+| Package                      | Import               |
+| ---------------------------- | -------------------- |
+| `@danielsimonjr/mathts-core` | `Complex, isComplex` |
 
 **Internal Dependencies:**
 
@@ -9964,9 +9964,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import    |
-| ---------------------------- | --------- |
-| `@danielsimonjr/mathts-core` | `Complex` |
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `isComplex` |
 
 **Exports:**
 
@@ -12226,9 +12226,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                    |
-| ---------------------------- | ----------------------------------------- |
-| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction` |
+| Package                      | Import                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction, isBigNumber, isComplex, isFraction` |
 
 **Internal Dependencies:**
 
@@ -12352,9 +12352,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                 |
-| ---------------------------- | ---------------------- |
-| `@danielsimonjr/mathts-core` | `mathTyped, BigNumber` |
+| Package                      | Import                              |
+| ---------------------------- | ----------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, BigNumber, isBigNumber` |
 
 **Internal Dependencies:**
 
@@ -21228,7 +21228,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1332   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 229649 |
+| Total Lines of Code     | 229636 |
 | Total Exports           | 7281   |
 | Total Re-exports        | 3160   |
 | Total Classes           | 62     |

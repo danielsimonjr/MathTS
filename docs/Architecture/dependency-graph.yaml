@@ -3091,13 +3091,16 @@ modules:
         - file: ../bignumber.js
           imports:
             - BigNumber
+            - isBigNumber
         - file: ../complex.js
           imports:
             - Complex
             - I
+            - isComplex
         - file: ../fraction.js
           imports:
             - Fraction
+            - isFraction
         - file: ./unit-types.js
           imports:
             - BigNumberConstructor
@@ -13395,6 +13398,7 @@ modules:
           directory: core
           imports:
             - Fraction
+            - isFraction
             - SI_DIMENSION_LENGTH
             - toSiDimensionVector
             - Unit
@@ -16174,6 +16178,7 @@ modules:
             - Complex
             - Fraction
             - BigNumber
+            - isBigNumber
       exports:
         - factoryScope
         - pushConfigOverlay
@@ -20766,6 +20771,7 @@ modules:
           directory: core
           imports:
             - Complex
+            - isComplex
       exports:
         - cheby1
         - cheby2
@@ -21750,7 +21756,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
-            - Complex
+            - isComplex
       exports:
         - rejectMisusedIndexedSum
       functions:
@@ -26618,6 +26624,9 @@ modules:
             - Complex
             - BigNumber
             - Fraction
+            - isBigNumber
+            - isComplex
+            - isFraction
       exports:
         - equalScalar
         - unequal
@@ -27075,6 +27084,7 @@ modules:
           imports:
             - mathTyped
             - BigNumber
+            - isBigNumber
       exports:
         - bin
         - hex
@@ -45862,7 +45872,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1332
   totalModules: 82
-  totalLinesOfCode: 229649
+  totalLinesOfCode: 229636
   totalExports: 7281
   totalClasses: 62
   totalInterfaces: 660
