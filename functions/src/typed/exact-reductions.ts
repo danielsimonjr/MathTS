@@ -4,8 +4,10 @@
  * layer registers them once, when it is defined. This module is internal: it is not re-exported.
  */
 
+/** A factory reduction, called with the arguments of the public function. */
 export type ExactReductionFn = (...args: unknown[]) => unknown;
 
+/** The factory reductions that the typed reductions use for input that is not plain numbers. */
 export interface ExactReductions {
   sum: ExactReductionFn;
   mean: ExactReductionFn;

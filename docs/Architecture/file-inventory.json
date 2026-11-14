@@ -9067,7 +9067,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 46
+      "loc": 48
     },
     {
       "file": "functions/src/typed/expression-eval-barrel.ts",
