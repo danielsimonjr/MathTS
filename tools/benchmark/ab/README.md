@@ -1,15 +1,17 @@
 # Base-against-head benchmark (A/B)
 
 `run.mjs` times the base tree and the head tree of each case in separate processes. It prints
-the ratio head / base for each case and fails when a case is slower than the slow limit (1.02, or the value of `--slow-limit`). A `gain` case
-must also reach 0.95, unless `--slow-only` is set. The CI job "Benchmark baseline" runs the
-cases of `matmul`, `decomp` and `stats` on each pull request with `--slow-only`.
+the ratio head / base for each case and fails when a case is slower than the slow limit (1.02, or
+the value of `--slow-limit`). A `gain` case must also reach 0.95, unless `--slow-only` is set. The CI
+job "Benchmark baseline" runs the five cases that the section "Slow limit of the CI gate" lists on
+each pull request with `--slow-only`.
 
 Commands:
 
 - `node tools/benchmark/ab/make-base.mjs --ref <git-ref>` builds the base tree.
 - `node tools/benchmark/ab/run.mjs --slow-only --engine node --only "<name part>" <case files>`
-  runs the cases. `--only` may repeat.
+  runs the cases. `--only` may repeat. The run
+  fails when an `--only` value matches no case, so a renamed case cannot leave the gate unnoticed.
 
 ## Results that change on purpose
 
@@ -21,7 +23,7 @@ that case in `allowed-output-changes.json`:
 [
   {
     "case": "median n = 100,000",
-    "pr": "#971",
+    "pr": "#NNN",
     "reason": "the mean of the middle pair no longer overflows"
   }
 ]
@@ -34,7 +36,11 @@ Rules:
 3. The table shows `no, allowed by <pr>` in the Equal column, so a reviewer sees the entry.
 4. An entry for a case whose results are equal fails the run as stale. Remove the entry in the
    next pull request, after the base moves past the change.
-5. There is no environment switch and no flag that skips the check.
+5. An entry that names no known case of `cases/` fails the run, also when the case is not in the
+   run.
+6. There is no flag that skips the check. `run.mjs` sets the internal switch for one case that the
+   file names, and removes a value of the switch from the environment of the caller before it
+   starts a child.
 
 ## Slow limit of the CI gate
 
@@ -58,6 +64,10 @@ gave these ratios, with the lowest and highest per-run ratio in brackets:
 
 - The A/A ratio of the gated cases reaches 1.099 at most. The limit 1.02 would fail equal code.
   A first run of `qr 128×128` read 1.059 on equal code.
+- A reading above the limit is repeated with 9 runs, and the decision uses the processes of both
+  readings together.
+- These sessions ran on a busy developer machine, not on the runner of the CI job. The limit is
+  provisional until the A/A ratios of the runner are measured.
 - `sort n = 100,000` reached 1.239, within 1% of the limit, so it is not gated. A limit that
   noise can reach is not a gate.
 - The limit 1.25 leaves 14% above the highest A/A ratio of a gated case. It catches a slowdown

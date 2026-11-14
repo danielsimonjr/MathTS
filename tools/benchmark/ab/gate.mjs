@@ -95,3 +95,50 @@ export function failureOf(row, control, slowLimit = SLOW_LIMIT) {
   if (row.kind === 'gain' && row.ratio > GAIN_LIMIT) return 'gain';
   return null;
 }
+
+/**
+ * The environment of a child process: the inherited environment without the switch that skips
+ * the equality check, then `extra`. Only run.mjs may set that switch, for one case named in
+ * `allowed-output-changes.json`; a value in the environment of the caller must not reach a child.
+ * @param {Record<string, string | undefined>} inherited
+ * @param {Record<string, string>} extra
+ * @returns {Record<string, string | undefined>}
+ */
+export function childEnvironment(inherited, extra) {
+  const { PERF_ALLOW_UNEQUAL: _dropped, ...rest } = inherited;
+  return { ...rest, ...extra };
+}
+
+/**
+ * The estimate of a rerun: the samples of the first reading and of the rerun pooled, so the
+ * rerun does not discard the first reading. The medians run over all processes of both readings.
+ * @param {{ baseUs: number[], headUs: number[] }} first
+ * @param {{ baseUs: number[], headUs: number[] }} second
+ * @returns {ReturnType<typeof estimate>}
+ */
+export function pooledEstimate(first, second) {
+  return estimate([...first.baseUs, ...second.baseUs], [...first.headUs, ...second.headUs]);
+}
+
+/**
+ * The `--only` values that match no case name. A renamed case would otherwise leave the gate
+ * without complaint as long as another value still matched.
+ * @param {string[]} only
+ * @param {string[]} caseNames every case name of the case files that were loaded
+ * @returns {string[]}
+ */
+export function unmatchedOnly(only, caseNames) {
+  return only.filter((o) => !caseNames.some((name) => name.includes(o)));
+}
+
+/**
+ * The entries of `allowed-output-changes.json` that name no known case. Such an entry is stale
+ * (the case was renamed or removed) and fails the run, whether or not the case is in this run.
+ * @param {Iterable<string>} entryCases
+ * @param {string[]} caseNames every case name of the case files in `cases/`
+ * @returns {string[]}
+ */
+export function unknownAllowEntries(entryCases, caseNames) {
+  const known = new Set(caseNames);
+  return [...entryCases].filter((c) => !known.has(c));
+}

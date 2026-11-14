@@ -27,10 +27,14 @@ import {
   PROCESSES_PER_RUN,
   RERUN_RUNS,
   SLOW_LIMIT,
+  childEnvironment,
   estimate,
   failureOf,
   needsRerun,
+  pooledEstimate,
   twoTreeRatio,
+  unknownAllowEntries,
+  unmatchedOnly,
 } from './gate.mjs';
 import { preflightWorkspace } from './preflight.mjs';
 import { median, nodeBinary, perfBaseDir } from './util.mjs';
@@ -121,6 +125,24 @@ if (!control) {
   }
 }
 
+/** Every case name of every case file in `cases/`, for the checks on `--only` and on the allow file. */
+const knownCaseNames = [];
+for (const f of readdirSync(join(abDir, 'cases')).sort()) {
+  if (!f.endsWith('.mjs') || f === 'helpers.mjs') continue;
+  const all = await import(pathToFileURL(join(abDir, 'cases', f)).href);
+  for (const c of all.cases) knownCaseNames.push(c.name);
+}
+const staleEntries = unknownAllowEntries(allowedChanges.keys(), knownCaseNames);
+if (staleEntries.length > 0) {
+  console.error(`allowed-output-changes.json names no known case: ${staleEntries.join('; ')}`);
+  process.exit(1);
+}
+const unmatched = unmatchedOnly(only, knownCaseNames);
+if (unmatched.length > 0) {
+  console.error(`--only matches no case: ${unmatched.join('; ')}`);
+  process.exit(2);
+}
+
 /** @type {{ file: string, cases: { name: string, kind: string }[] }[]} */
 const specs = [];
 for (const cf of caseFiles) {
@@ -152,7 +174,7 @@ function spawnChild(engine, env) {
   const childPath = join(abDir, 'child.mjs');
   const options = {
     cwd: repoRoot,
-    env: { ...process.env, ...env },
+    env: childEnvironment(process.env, env),
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   };
@@ -249,6 +271,8 @@ function measure(engine, caseFile, caseDef, nRuns) {
     aaMedian: aaRatios.length ? median(aaRatios) : null,
     runs: nRuns,
     unequal,
+    baseUs,
+    headUs,
   };
 }
 
@@ -263,14 +287,29 @@ for (const { file, cases } of specs) {
         process.stderr.write(
           `${c.name} (${engine}): ${row.ratio.toFixed(3)}, rerun with R = ${RERUN_RUNS}\n`
         );
-        row = measure(engine, file, c, RERUN_RUNS);
+        const rerun = measure(engine, file, c, RERUN_RUNS);
+        if (rerun.fail) {
+          row = rerun;
+        } else {
+          // Pool both readings: the first reading is evidence too.
+          const est = pooledEstimate(row, rerun);
+          row = {
+            ...rerun,
+            ratio: est.ratio,
+            min: est.min,
+            max: est.max,
+            runs: row.runs + rerun.runs,
+            unequal: row.unequal || rerun.unequal,
+          };
+        }
       }
       if (row.fail) {
         allResults.push({ case: c.name, kind: c.kind, engine, fail: row.fail });
         process.stderr.write(`${c.name} (${engine}): FAIL ${row.fail}\n`);
         continue;
       }
-      allResults.push({ case: c.name, kind: c.kind, engine, ...row });
+      const { baseUs: _b, headUs: _h, ...kept } = row;
+      allResults.push({ case: c.name, kind: c.kind, engine, ...kept });
       process.stderr.write(`${c.name} (${engine}): ${row.ratio.toFixed(3)}\n`);
     }
   }

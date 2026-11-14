@@ -10,10 +10,14 @@ import {
   GAIN_LIMIT,
   PROCESSES_PER_RUN,
   SLOW_LIMIT,
+  childEnvironment,
   estimate,
   failureOf,
   needsRerun,
+  pooledEstimate,
   twoTreeRatio,
+  unknownAllowEntries,
+  unmatchedOnly,
 } from '../benchmark/ab/gate.mjs';
 import { checkResults, same } from '../benchmark/ab/same.mjs';
 import { geometricMean, median, nodeBinary } from '../benchmark/ab/util.mjs';
@@ -274,5 +278,67 @@ describe('nodeBinary()', () => {
       if (saved === undefined) delete process.env.PERF_NODE;
       else process.env.PERF_NODE = saved;
     }
+  });
+});
+
+describe('child environment', () => {
+  test('PERF_ALLOW_UNEQUAL in the inherited environment does not reach a child', () => {
+    const env = childEnvironment({ PERF_ALLOW_UNEQUAL: '1', PERF_NODE: '/n', PATH: 'p' }, {});
+    assert.equal('PERF_ALLOW_UNEQUAL' in env, false);
+    assert.equal(env.PERF_NODE, '/n');
+    assert.equal(env.PATH, 'p');
+  });
+
+  test('the runner can still set it for one case', () => {
+    const env = childEnvironment({ PERF_ALLOW_UNEQUAL: '0' }, { PERF_ALLOW_UNEQUAL: '1' });
+    assert.equal(env.PERF_ALLOW_UNEQUAL, '1');
+  });
+});
+
+describe('rerun pooling', () => {
+  const side = (v, n) => Array.from({ length: n }, () => v);
+
+  test('a bad first reading still counts after a good rerun', () => {
+    const first = { baseUs: side(100, 10), headUs: side(150, 10) };
+    const second = { baseUs: side(100, 18), headUs: side(100, 18) };
+    const pooled = pooledEstimate(first, second);
+    // 28 head samples: 10 at 150 and 18 at 100. The median is 100, so a mostly good rerun wins.
+    assert.equal(pooled.ratio, 1);
+    // Half the head samples at 150 and half at 100: the pooled median is 125.
+    const half = pooledEstimate(
+      { baseUs: side(100, 18), headUs: side(150, 18) },
+      { baseUs: side(100, 18), headUs: side(100, 18) }
+    );
+    assert.equal(half.ratio, 1.25);
+  });
+
+  test('a rerun that is also slow keeps the pooled ratio above the limit', () => {
+    const first = { baseUs: side(100, 10), headUs: side(150, 10) };
+    const second = { baseUs: side(100, 18), headUs: side(130, 18) };
+    assert.ok(pooledEstimate(first, second).ratio > 1.25);
+  });
+
+  test('the pooled ratio is not the rerun ratio alone', () => {
+    const first = { baseUs: side(100, 10), headUs: side(200, 10) };
+    const second = { baseUs: side(100, 4), headUs: side(100, 4) };
+    assert.notEqual(
+      pooledEstimate(first, second).ratio,
+      estimate(second.baseUs, second.headUs).ratio
+    );
+  });
+});
+
+describe('--only and the allow file', () => {
+  const names = ['median n = 100,000', 'qr 128×128'];
+
+  test('every --only value that matches no case is reported', () => {
+    assert.deepEqual(unmatchedOnly(['median', 'qr', 'lup 128'], names), ['lup 128']);
+    assert.deepEqual(unmatchedOnly(['median'], names), []);
+    assert.deepEqual(unmatchedOnly([], names), []);
+  });
+
+  test('an allow entry that names no known case is reported, run or not', () => {
+    assert.deepEqual(unknownAllowEntries(['qr 128×128', 'renamed case'], names), ['renamed case']);
+    assert.deepEqual(unknownAllowEntries([], names), []);
   });
 });
