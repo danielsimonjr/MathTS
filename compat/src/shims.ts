@@ -515,7 +515,7 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
   }
   if (isCompatBridgeMatrix(m)) {
     // The factory transpose takes the dense and the sparse matrix of the factory layer.
-    return _transpose(m as never) as CompatMatrixValue;
+    return _transpose(m as unknown) as CompatMatrixValue;
   }
   throw new TypeError('Expected matrix or 2D array');
 }
