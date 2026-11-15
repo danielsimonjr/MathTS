@@ -29,8 +29,17 @@ describe('#1049 exact element types in the public reduction types', () => {
     const sf: number = std(F);
     const sb: BigNumber = std([B, B]);
     const si: number = std(I);
+    // A Complex deviation counts as |d|^2, so the variance and std of Complex values are real.
+    const vc: number = variance(C);
+    const sc: number = std(C);
     expect([vf, vb, sb].map((x) => x.constructor)).toEqual([Fraction, BigNumber, BigNumber]);
-    expect([typeof vi, typeof sf, typeof si]).toEqual(['number', 'number', 'number']);
+    expect([typeof vi, typeof sf, typeof si, typeof vc, typeof sc]).toEqual([
+      'number',
+      'number',
+      'number',
+      'number',
+      'number',
+    ]);
   });
 
   it('median and mad', () => {

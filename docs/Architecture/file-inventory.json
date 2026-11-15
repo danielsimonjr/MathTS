@@ -12308,7 +12308,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 61
+      "loc": 64
     },
     {
       "file": "functions/tests/reductions-exact-types.test.ts",

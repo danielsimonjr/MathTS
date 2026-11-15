@@ -20,7 +20,7 @@
       "source": "src/typed/arithmetic.ts",
       "fallback": [
         "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
-        "(a: ExactData<bigint>): number;",
+        "(a: ExactData<Complex | bigint>): number;",
         "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
@@ -29,7 +29,7 @@
       "source": "src/typed/arithmetic.ts",
       "fallback": [
         "(a: ExactData<BigNumber>): BigNumber;",
-        "(a: ExactData<Fraction | bigint>): number;",
+        "(a: ExactData<Fraction | Complex | bigint>): number;",
         "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
