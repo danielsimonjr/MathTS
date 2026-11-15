@@ -1703,6 +1703,11 @@
       "functions/src/logical/or.ts",
       "functions/src/relational/compare.ts"
     ],
+    "functions/src/typed/complex-promotion.ts": [
+      "functions/src/arithmetic/sqrt.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/utils/bignumber/bitwise.ts": [
       "functions/src/bitwise/bitAnd.ts",
       "functions/src/bitwise/bitNot.ts",
@@ -2764,10 +2769,6 @@
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/typed/invalid-scalar-guards.ts": ["functions/src/typed/arithmetic.ts"],
-    "functions/src/typed/complex-promotion.ts": [
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/trigonometry.ts"
-    ],
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],

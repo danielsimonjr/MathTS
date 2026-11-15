@@ -2,7 +2,7 @@
  * mathjs-compatible complex promotion for real scalar kernels in the typed layer.
  * Reads the live factory config (including {@link runWithConfig} overlays).
  */
-import { Complex, Fraction } from '@danielsimonjr/mathts-core';
+import { BigNumber, Complex, Fraction } from '@danielsimonjr/mathts-core';
 import { isInteger, isPowZeroAtInfinity } from '../utils/number.js';
 import { nthRootNumber, powNumber } from '../plain/number/index.js';
 import { factoryScope } from '../factories/scope.js';
@@ -84,12 +84,36 @@ export function staysRealSqrt(x: number): boolean {
   return Number.isNaN(x) || x >= 0 || isPredictableMode();
 }
 
-/** Square root. Non-negative inputs and NaN never read config. */
-export function sqrtReal(x: number): number | Complex {
-  if (staysRealSqrt(x)) {
+/**
+ * Square root of a number, with the `predictable` option given. The typed `sqrt` and the factory
+ * `sqrt` share this kernel. NaN, a non-negative value or `predictable` gives `Math.sqrt(x)`. A
+ * negative value otherwise gives the Complex `sqrt(-x) i`.
+ */
+export function sqrtNumberWith(x: number, predictable: boolean): number | Complex {
+  if (Number.isNaN(x) || x >= 0 || predictable) {
     return Math.sqrt(x);
   }
   return new Complex(0, Math.sqrt(-x));
+}
+
+/**
+ * Square root of a BigNumber, with the `predictable` option given. A negative value goes to the
+ * number path and gives a Complex, as in mathjs. With `predictable`, the BigNumber square root
+ * is the result (NaN for a negative value).
+ */
+export function sqrtBigNumberWith(x: BigNumber, predictable: boolean): BigNumber | Complex {
+  if (!x.isNegative() || predictable) {
+    return x.sqrt();
+  }
+  return new Complex(0, Math.sqrt(-x.toNumber()));
+}
+
+/** Square root. Non-negative inputs and NaN never read config. */
+export function sqrtReal(x: number): number | Complex {
+  if (Number.isNaN(x) || x >= 0) {
+    return Math.sqrt(x);
+  }
+  return sqrtNumberWith(x, isPredictableMode());
 }
 
 /**
