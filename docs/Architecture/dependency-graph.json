@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-15",
-    "totalFiles": 1333,
+    "totalFiles": 1334,
     "totalModules": 82,
-    "totalExports": 7297
+    "totalExports": 7299
   },
   "entryPoints": [
     {
@@ -25634,6 +25634,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./number-matrix.js",
+            "imports": ["assertRectangular", "isNumberMatrix"]
+          },
+          {
             "file": "./euclid.js",
             "imports": ["euclidSnap"]
           },
@@ -27967,7 +27971,20 @@
         "description": "Typed Matrix Operations",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/scope.js",
+            "imports": ["factoryScope"]
+          },
+          {
+            "file": "./number-matrix.js",
+            "imports": ["isNumberMatrix"]
+          },
+          {
+            "file": "../factories/matrix-bridge.js",
+            "imports": ["MathJSDenseMatrix"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -28052,6 +28069,15 @@
         "workspaceDependencies": [],
         "exports": ["solveAugmentedNormalEquations"],
         "functions": ["solveAugmentedNormalEquations"]
+      },
+      "functions/src/typed/number-matrix.ts": {
+        "description": "Shape and entry checks for a 2-D array before a matrix operation picks its path.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["isNumberMatrix", "assertRectangular"],
+        "functions": ["isNumberMatrix", "assertRectangular"]
       },
       "functions/src/typed/numeric.ts": {
         "description": "Typed Numerical Methods Functions",
@@ -47851,6 +47877,7 @@
           "functions/src/typed/logical.ts",
           "functions/src/typed/matrix-ops.ts",
           "functions/src/typed/normal-equations-solve.ts",
+          "functions/src/typed/number-matrix.ts",
           "functions/src/typed/numeric.ts",
           "functions/src/typed/parallel-map.ts",
           "functions/src/typed/polynomial-ideal.ts",
@@ -48663,14 +48690,14 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1333,
+    "totalTypeScriptFiles": 1334,
     "totalModules": 82,
-    "totalLinesOfCode": 230349,
-    "totalExports": 7297,
+    "totalLinesOfCode": 230454,
+    "totalExports": 7299,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2500,
-    "totalTypeGuards": 178,
+    "totalFunctions": 2502,
+    "totalTypeGuards": 179,
     "totalEnums": 0,
     "totalConstants": 1675,
     "totalReExports": 3167,

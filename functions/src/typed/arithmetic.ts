@@ -14,6 +14,7 @@
  * @packageDocumentation
  */
 
+import { assertRectangular, isNumberMatrix } from './number-matrix.js';
 import {
   mathTyped,
   Complex,
@@ -296,10 +297,40 @@ function isSparseStorage(m: unknown): boolean {
 }
 
 /** The product of two matrix operands of any storage, as nested numbers. */
-function matrixProduct(a: unknown, b: unknown): number[][] {
-  const A = DenseMatrix.fromArray(toNested(a) as number[][]);
-  const B = DenseMatrix.fromArray(toNested(b) as number[][]);
+function matrixProduct(a: unknown, b: unknown): unknown[][] {
+  const na = toNested(a) as unknown[][];
+  const nb = toNested(b) as unknown[][];
+  // The numeric backend holds numbers only. A Complex, Fraction or BigNumber entry takes the
+  // generic product, which uses the scalar add and multiply (#1040).
+  if (!isNumberMatrix(na) || !isNumberMatrix(nb)) {
+    assertRectangular(na);
+    assertRectangular(nb);
+    return genericMatrixProduct(na, nb);
+  }
+  const A = DenseMatrix.fromArray(na as number[][]);
+  const B = DenseMatrix.fromArray(nb as number[][]);
   return backendManager.multiply(A, B).toArray();
+}
+
+/** The product of two 2-D arrays with any scalar entries, by the scalar add and multiply. */
+function genericMatrixProduct(a: unknown[][], b: unknown[][]): unknown[][] {
+  const rows = a.length;
+  const inner = rows > 0 ? a[0].length : 0;
+  const cols = b.length > 0 ? b[0].length : 0;
+  if (b.length !== inner) {
+    throw new Error(`Cannot multiply ${rows}×${inner} matrix with ${b.length}×${cols} matrix`);
+  }
+  const out: unknown[][] = [];
+  for (let i = 0; i < rows; i++) {
+    const row: unknown[] = [];
+    for (let j = 0; j < cols; j++) {
+      let acc: unknown = mulOp(a[i][0], b[0][j]);
+      for (let k = 1; k < inner; k++) acc = addOp(acc, mulOp(a[i][k], b[k][j]));
+      row.push(acc);
+    }
+    out.push(row);
+  }
+  return out;
 }
 
 /** A matrix operand → its dense nested array; a scalar passes through unchanged. */
@@ -716,15 +747,13 @@ export const multiply = withBinaryScalarGuards(
     // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
     // Previously `multiply(2DArray, 2DArray)` threw; this is additive. Non-2-D
     // Array operands throw a clear message pointing at the right primitive.
-    'Array, Array': (a: unknown[], b: unknown[]): number[][] => {
+    'Array, Array': (a: unknown[], b: unknown[]): unknown[][] => {
       if (!Array.isArray(a[0]) || !Array.isArray(b[0])) {
         throw new TypeError(
           'multiply(Array, Array) requires two 2-D matrices; use dot() for vector dot products'
         );
       }
-      const A = DenseMatrix.fromArray(a as number[][]);
-      const B = DenseMatrix.fromArray(b as number[][]);
-      return backendManager.multiply(A, B).toArray();
+      return matrixProduct(a, b);
     },
 
     // Matrix × matrix on boxed matrices returns a boxed matrix (mathjs parity) —
@@ -732,9 +761,7 @@ export const multiply = withBinaryScalarGuards(
     // reaching it via the Matrix~>Array conversion would strip the matrix type
     // (breaking callers like `sylvester` that call `.toArray()` on the product).
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      const A = DenseMatrix.fromArray((a as { toArray(): number[][] }).toArray());
-      const B = DenseMatrix.fromArray((b as { toArray(): number[][] }).toArray());
-      return new MathJSDenseMatrix(backendManager.multiply(A, B).toArray());
+      return new MathJSDenseMatrix(matrixProduct(a, b) as number[][]);
     },
 
     // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse

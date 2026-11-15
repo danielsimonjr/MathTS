@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
+import { promisify } from 'node:util';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +8,7 @@ import { createRequire } from 'node:module';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
+const execFileAsync = promisify(execFile);
 const { workspaceDirs } = require(join(REPO, 'tools/test/workspaces.mjs')) as {
   workspaceDirs: (root?: string) => string[];
 };
@@ -32,12 +34,12 @@ const SIDE_EFFECT_FREE = new Set([
 ]);
 
 describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
-  it('sync-package-packaging check passes', () => {
-    execFileSync('node', ['tools/sync-package-packaging.mjs', '--check'], {
-      cwd: REPO,
-      stdio: 'pipe',
-    });
-  });
+  // The script takes about 0.2 s alone. In the full parallel test run, the script competes
+  // with the other turbo tasks for the CPU. The script took 8.5 s, over the 5 s default. An async child does not
+  // block the worker, and the limit covers the contended case.
+  it('sync-package-packaging check passes', async () => {
+    await execFileAsync('node', ['tools/sync-package-packaging.mjs', '--check'], { cwd: REPO });
+  }, 60_000);
 
   it('#789 #790 #696 #741 packed tarballs include LICENSE and manifest fields', () => {
     for (const dir of PUBLIC_DIRS) {

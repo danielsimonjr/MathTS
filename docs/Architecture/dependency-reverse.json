@@ -1202,7 +1202,8 @@
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/factories/scope.ts",
       "functions/src/factories/sparse-adapter.ts",
-      "functions/src/typed/arithmetic.ts"
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/matrix-ops.ts"
     ],
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
@@ -1798,7 +1799,8 @@
       "functions/src/config-api.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/factories/index.ts",
-      "functions/src/typed/complex-promotion.ts"
+      "functions/src/typed/complex-promotion.ts",
+      "functions/src/typed/matrix-ops.ts"
     ],
     "functions/src/typed/arithmetic.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2725,6 +2727,10 @@
       "functions/src/typed/cas.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/typed/number-matrix.ts": [
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/matrix-ops.ts"
+    ],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/distributions.ts",
