@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import { assertRectangular, isNumberMatrix } from './number-matrix.js';
+import { assertRectangular, isNumberMatrix, numberVector } from './number-matrix.js';
 import {
   mathTyped,
   Complex,
@@ -1831,7 +1831,7 @@ export const max = mathTyped('max', extremumSignatures('max'));
  * large terms: conservation checks, residuals, long-running accumulators.
  */
 export const fsum = mathTyped('fsum', {
-  Array: (arr: f64[]): f64 => neumaierSum(arr),
+  Array: (arr: f64[]): f64 => neumaierSum(numberVector('fsum', arr)),
   Float64Array: (a: Float64Array): f64 => neumaierSum(a),
 });
 

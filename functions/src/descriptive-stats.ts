@@ -22,12 +22,12 @@ import { betaincScalar } from './wasm/special/scalars.js';
 import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
+import { numberVector } from './typed/number-matrix.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
 
 type Vec = readonly number[] | Float64Array;
 
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const mean = (x: number[]): number => _mean(x) as number;
 const stdPop = (x: number[]): number => _std(x, 'uncorrected') as number;
 const stdSample = (x: number[]): number => _std(x) as number; // default is unbiased (n-1)
@@ -66,7 +66,7 @@ function centralMoment(x: number[], k: number): number {
  * tied values receive the mean of the ranks they span. Ranks are 1-based.
  */
 export function rankdata(x: Vec): number[] {
-  const a = arr(x);
+  const a = numberVector('rankdata', x);
   const n = a.length;
   const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => a[i] - a[j]);
   const ranks = new Array<number>(n);
@@ -89,6 +89,8 @@ export function rankdata(x: Vec): number[] {
  * @throws if the inputs differ in length or a rank vector is constant.
  */
 export function spearman(x: Vec, y: Vec): number {
+  x = numberVector('spearman', x);
+  y = numberVector('spearman', y);
   const rx = rankdata(x);
   const ry = rankdata(y);
   const n = rx.length;
@@ -114,7 +116,7 @@ export function spearman(x: Vec, y: Vec): number {
 
 /** Geometric mean: `exp(mean(ln x))` (stable form). All entries must be > 0. */
 export function gmean(x: Vec): number {
-  const a = arr(x);
+  const a = numberVector('gmean', x);
   if (a.length === 0) return NaN; // empty is undefined (graceful NaN, numpy parity)
   if (a.some((v) => v <= 0)) throw new Error('gmean: all entries must be > 0');
   return Math.exp(mean(a.map(Math.log)));
@@ -122,7 +124,7 @@ export function gmean(x: Vec): number {
 
 /** Harmonic mean: `n / Σ(1/xᵢ)`. All entries must be > 0. */
 export function hmean(x: Vec): number {
-  const a = arr(x);
+  const a = numberVector('hmean', x);
   if (a.length === 0) return NaN; // empty is undefined (graceful NaN, numpy parity)
   if (a.some((v) => v <= 0)) throw new Error('hmean: all entries must be > 0');
   return a.length / sum(a.map((v) => 1 / v));
@@ -130,7 +132,7 @@ export function hmean(x: Vec): number {
 
 /** Raw or central k-th moment. `central` (default true) subtracts the mean first. */
 export function moment(x: Vec, k: number, central = true): number {
-  const a = arr(x);
+  const a = numberVector('moment', x);
   if (!central) {
     if (a.length === 0) return NaN;
     return mean(a.map((v) => Math.pow(v, k)));
@@ -143,7 +145,7 @@ export function moment(x: Vec, k: number, central = true): number {
  * (SciPy `bias=true`); pass `{ bias: false }` for the sample-corrected G₁.
  */
 export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
-  const a = arr(x);
+  const a = numberVector('skewness', x);
   const n = a.length;
   const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
   if (m2 === 0) throw new Error('skewness: variance is zero (constant input); skewness undefined');
@@ -163,7 +165,7 @@ export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
  * default; `{ bias: false }` applies the sample correction.
  */
 export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}): number {
-  const a = arr(x);
+  const a = numberVector('kurtosis', x);
   const n = a.length;
   const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
   if (m2 === 0) throw new Error('kurtosis: variance is zero (constant input); kurtosis undefined');
@@ -179,13 +181,14 @@ export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}
 
 /** Interquartile range: `Q3 − Q1` via `quantileSeq`. */
 export function iqr(x: Vec): number {
-  const a = arr(x);
+  // quantileSeq has an exact path and reads a nested array, so iqr keeps its input as is.
+  const a = (Array.isArray(x) ? x : Array.from(x)) as number[];
   return (_quantileSeq(a, 0.75) as number) - (_quantileSeq(a, 0.25) as number);
 }
 
 /** Standard error of the mean: `sampleStd / √n`. */
 export function sem(x: Vec): number {
-  const a = arr(x);
+  const a = numberVector('sem', x);
   if (a.length === 0) return NaN;
   return stdSample(a) / Math.sqrt(a.length);
 }
@@ -195,7 +198,7 @@ export function sem(x: Vec): number {
  * `ddof=0`). Returns an array the same length as the input.
  */
 export function zscore(x: Vec): number[] {
-  const a = arr(x);
+  const a = numberVector('zscore', x);
   if (a.length === 0) return []; // empty in → empty out (graceful)
   const m = mean(a);
   const s = stdPop(a);
@@ -252,8 +255,8 @@ export function cov(
     if (opts.rowvar === true) {
       throw new Error('cov: rowvar applies to the matrix form only (pass one matrix)');
     }
-    const a = arr(x as Vec);
-    const b = arr(y);
+    const a = numberVector('cov', x as Vec);
+    const b = numberVector('cov', y);
     if (a.length !== b.length) throw new Error(`cov: length mismatch ${a.length} vs ${b.length}`);
     if (a.length <= ddof)
       throw new Error(`cov: need more than ddof=${ddof} observations (got n=${a.length})`);
@@ -264,7 +267,7 @@ export function cov(
     return acc / (a.length - ddof);
   }
   // matrix form: rows = observations, columns = variables (rowvar=false)
-  const input = (x as number[][]).map((r) => Array.from(r));
+  const input = (x as number[][]).map((r, i) => numberVector(`cov row ${i}`, r));
   assertRectangular(input, 'cov');
   const M = opts.rowvar === true ? transposeMatrix(input) : input;
   const nObs = M.length;
@@ -295,6 +298,7 @@ export function cov(
  *     returns the 2×2 matrix `[[1,1],[1,1]]`.
  */
 export function corrcoef(matrix: number[][], opts: CovLayoutOptions = {}): number[][] {
+  matrix.forEach((r, i) => numberVector(`corrcoef row ${i}`, r));
   const c = cov(matrix, undefined, 1, opts) as number[][];
   const n = c.length;
   const d = c.map((row, i) => Math.sqrt(row[i]));
@@ -347,6 +351,8 @@ function _kendallTauCore(
 
 /** Kendall's rank correlation τ for paired samples (τ only; use `kendalltau` for p-value). */
 export function kendallTau(x: Vec, y: Vec): number {
+  x = numberVector('kendallTau', x);
+  y = numberVector('kendallTau', y);
   return _kendallTauCore(x, y).tau;
 }
 
@@ -382,7 +388,7 @@ export function linregress(x: Vec, y: Vec): LinRegressResult {
   const n = x.length;
   if (n !== y.length) throw new Error('linregress: x and y must have equal length');
   if (n < 3) throw new Error('linregress: need at least 3 points for inference');
-  const fit = fitLine(Array.from(x), Array.from(y));
+  const fit = fitLine(numberVector('linregress', x), numberVector('linregress', y));
   if (fit.sxx === 0) {
     const nan = Number.NaN;
     return {
@@ -433,8 +439,8 @@ function _pearsonPValue(r: number, n: number): number {
 
 /** Pearson r with scaled norms (matches SciPy `pearsonr`, avoids r === 1 flush). */
 function _pearson(x: Vec, y: Vec): number {
-  const xa = Array.from(x);
-  const ya = Array.from(y);
+  const xa = numberVector('pearsonr', x);
+  const ya = numberVector('pearsonr', y);
   const n = xa.length;
   if (n !== ya.length) throw new Error('pearsonr: inputs must have equal length');
   const mx = mean(xa);
@@ -471,6 +477,8 @@ function _pearson(x: Vec, y: Vec): number {
 
 /** Pearson correlation **test** (coefficient + two-tailed p, t-test). `scipy.stats.pearsonr`. */
 export function pearsonr(x: Vec, y: Vec): CorrelationTestResult {
+  x = numberVector('pearsonr', x);
+  y = numberVector('pearsonr', y);
   const r = _pearson(x, y);
   return { coefficient: r, pValue: _pearsonPValue(r, x.length) };
 }
@@ -487,6 +495,8 @@ function _corrTPValue(r: number, n: number): number {
 
 /** Spearman rank-correlation **test** (rho + two-tailed p, t-test). `scipy.stats.spearmanr`. */
 export function spearmanr(x: Vec, y: Vec): CorrelationTestResult {
+  x = numberVector('spearmanr', x);
+  y = numberVector('spearmanr', y);
   const rho = spearman(x, y);
   return { coefficient: rho, pValue: _corrTPValue(rho, x.length) };
 }
@@ -496,6 +506,8 @@ export function spearmanr(x: Vec, y: Vec): CorrelationTestResult {
  * (exact enumeration for n ≤ 33 without ties, else normal approximation).
  */
 export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
+  x = numberVector('kendalltau', x);
+  y = numberVector('kendalltau', y);
   const { tau, Q, hasTies, n } = _kendallTauCore(x, y);
   if (!hasTies && kendallShouldUseExact(n, Q)) {
     const n0 = (n * (n - 1)) / 2;
@@ -522,6 +534,8 @@ export interface KendallTauTestResult {
  * @example kendallTauTest([1,2,3,4,5], [1,2,3,4,5]) // { tau: 1, pValue: <small> }
  */
 export function kendallTauTest(x: Vec, y: Vec): KendallTauTestResult {
+  x = numberVector('kendallTauTest', x);
+  y = numberVector('kendallTauTest', y);
   const { coefficient, pValue } = kendalltau(x, y);
   return { tau: coefficient, pValue };
 }
@@ -532,7 +546,7 @@ export function kendallTauTest(x: Vec, y: Vec): KendallTauTestResult {
 
 /** Peak-to-peak / statistical range: max − min. (`np.ptp`; `range` is taken.) */
 export function ptp(x: Vec): number {
-  const a = Array.from(x);
+  const a = numberVector('ptp', x);
   if (a.length === 0) return NaN;
   let lo = a[0];
   let hi = a[0];
@@ -545,7 +559,7 @@ export function ptp(x: Vec): number {
 
 /** Coefficient of variation: population-std / mean (`scipy.stats.variation`, ddof=0). */
 export function variation(x: Vec): number {
-  const a = Array.from(x);
+  const a = numberVector('variation', x);
   return stdPop(a) / mean(a);
 }
 
@@ -554,7 +568,7 @@ export function trimmedMean(x: Vec, proportion: number): number {
   if (proportion < 0 || proportion >= 0.5) {
     throw new Error('trimmedMean: proportion must be in [0, 0.5)');
   }
-  const a = Array.from(x).sort((p, q) => p - q);
+  const a = numberVector('trimmedMean', x).sort((p, q) => p - q);
   const k = Math.floor(a.length * proportion);
   return mean(a.slice(k, a.length - k));
 }
@@ -585,7 +599,7 @@ export interface DescribeResult {
  * @throws Error if `x` is empty.
  */
 export function describe(x: Vec): DescribeResult {
-  const a = Array.from(x);
+  const a = numberVector('describe', x);
   const n = a.length;
   if (n < 1) throw new Error('describe: input must be non-empty');
   const m = mean(a);
@@ -634,7 +648,7 @@ export interface HistogramResult {
  * @throws Error if `x` is empty, or if `bins` is not a positive integer.
  */
 export function histogram(x: Vec, bins = 10): HistogramResult {
-  const a = Array.from(x);
+  const a = numberVector('histogram', x);
   if (a.length === 0) throw new Error('histogram: input must be non-empty');
   if (!Number.isInteger(bins) || bins < 1)
     throw new Error('histogram: bins must be a positive integer');

@@ -40,6 +40,7 @@
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { isDeterministic, pairwiseSum } from '@danielsimonjr/mathts-core';
+import { numberVector } from './number-matrix.js';
 
 // =============================================================================
 // Thresholds
@@ -248,6 +249,8 @@ const GL_WEIGHTS: Record<number, number[]> = {
  * trapz([0, 1, 0])             // => 1 (uniform spacing)
  */
 export function trapz(y: number[], x?: number[]): number {
+  numberVector('trapz', y);
+  if (x) numberVector('trapz', x);
   if (y.length < 2) {
     throw new Error('trapz requires at least 2 data points');
   }

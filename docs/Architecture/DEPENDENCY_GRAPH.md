@@ -4731,6 +4731,7 @@ graph LR
 | `./regression-extra.js`       | `fitLine, linregressFromFit`           | Import |
 | `./typed/distributions.js`    | `normalCDF`                            | Import |
 | `./kendall-exact.js`          | `kendallPExact, kendallShouldUseExact` | Import |
+| `./typed/number-matrix.js`    | `numberVector`                         | Import |
 
 **Exports:**
 
@@ -4867,6 +4868,7 @@ graph LR
 | `./distribution-functions.js` | `chiSquaredSF, fCDF, fSF`      | Import |
 | `./typed/distributions.js`    | `normalCDF, normalPDF`         | Import |
 | `./typed/special.js`          | `lgamma`                       | Import |
+| `./typed/number-matrix.js`    | `numberVector`                 | Import |
 
 **Exports:**
 
@@ -5126,10 +5128,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports         | Type   |
-| ----------------------- | --------------- | ------ |
-| `./factories/index.js`  | `inv, eigs, qr` | Import |
-| `./typed/arithmetic.js` | `multiply`      | Import |
+| File                       | Imports         | Type   |
+| -------------------------- | --------------- | ------ |
+| `./factories/index.js`     | `inv, eigs, qr` | Import |
+| `./typed/arithmetic.js`    | `multiply`      | Import |
+| `./typed/number-matrix.js` | `numberVector`  | Import |
 
 **Exports:**
 
@@ -5211,9 +5214,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports | Type   |
-| ----------------------- | ------- | ------ |
-| `./typed/arithmetic.js` | `sum`   | Import |
+| File                       | Imports                            | Type   |
+| -------------------------- | ---------------------------------- | ------ |
+| `./typed/arithmetic.js`    | `sum`                              | Import |
+| `./typed/number-matrix.js` | `assertNumberScalar, numberVector` | Import |
 
 **Exports:**
 
@@ -5266,6 +5270,7 @@ graph LR
 | File                          | Imports             | Type   |
 | ----------------------------- | ------------------- | ------ |
 | `./distribution-functions.js` | `studentTTwoSidedP` | Import |
+| `./typed/number-matrix.js`    | `numberVector`      | Import |
 
 **Exports:**
 
@@ -5489,10 +5494,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports     | Type   |
-| ---------------------- | ----------- | ------ |
-| `./factories/index.js` | `inv`       | Import |
-| `./linalg-extra.js`    | `companion` | Import |
+| File                       | Imports        | Type   |
+| -------------------------- | -------------- | ------ |
+| `./factories/index.js`     | `inv`          | Import |
+| `./linalg-extra.js`        | `companion`    | Import |
+| `./typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -5522,9 +5528,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports | Type   |
-| ----------------------- | ------- | ------ |
-| `./typed/arithmetic.js` | `mean`  | Import |
+| File                       | Imports        | Type   |
+| -------------------------- | -------------- | ------ |
+| `./typed/arithmetic.js`    | `mean`         | Import |
+| `./typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -9282,6 +9289,12 @@ graph LR
 
 ### `functions/src/signal/dtw.ts` - Dynamic time warping with an optional Sakoe-Chiba band.
 
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
+
 **Exports:**
 
 - Interfaces: `DtwOptions`, `DtwResult`
@@ -9337,6 +9350,7 @@ graph LR
 | `../signal-filter-extra.js` | `sinc`                     | Import |
 | `./conv.js`                 | `convDirect`               | Import |
 | `./remez-exchange.js`       | `remezExchange, RemezType` | Import |
+| `../typed/number-matrix.js` | `numberVector`             | Import |
 
 **Exports:**
 
@@ -9378,6 +9392,7 @@ graph LR
 | `../signal-filter-extra.js`     | `lfilter`                                                                      | Import |
 | `../wasm/special/scalars.js`    | `ellipticKScalar`                                                              | Import |
 | `../special/jacobi-elliptic.js` | `jacobiCN, jacobiDN, jacobiSN`                                                 | Import |
+| `../typed/number-matrix.js`     | `numberVector`                                                                 | Import |
 
 **Exports:**
 
@@ -9386,6 +9401,12 @@ graph LR
 ---
 
 ### `functions/src/signal/lomb-scargle.ts` - Lomb-Scargle periodogram for unevenly sampled data (classic Scargle form with
+
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -9429,6 +9450,7 @@ graph LR
 | --------------------------- | --------------- | ------------------ |
 | `../signal-filter-extra.js` | `lfilter`       | Import             |
 | `./fft.js`                  | `ComplexNumber` | Import (type-only) |
+| `../typed/number-matrix.js` | `numberVector`  | Import             |
 
 **Exports:**
 
@@ -9439,6 +9461,12 @@ graph LR
 ---
 
 ### `functions/src/signal/waveforms.ts` - Test waveform generators (scipy.signal.waveforms parity).
+
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -10069,6 +10097,12 @@ graph LR
 
 ### `functions/src/stats/distances.ts` - Distances between samples and discrete information measures (gap-analysis
 
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
+
 **Exports:**
 
 - Functions: `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`
@@ -10094,6 +10128,12 @@ graph LR
 ---
 
 ### `functions/src/stats/effect-sizes.ts` - Standardized effect sizes (gap-analysis 2026-11-04, Batch A).
+
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -10213,6 +10253,7 @@ graph LR
 | ------------------------------ | -------------- | ------ |
 | `../distribution-functions.js` | `chiSquaredSF` | Import |
 | `../typed/distributions.js`    | `normalCDF`    | Import |
+| `../typed/number-matrix.js`    | `numberVector` | Import |
 
 **Exports:**
 
@@ -10253,6 +10294,12 @@ graph LR
 
 ### `functions/src/stats/robust-stats.ts` - Generalized means, geometric standard deviation, robust regression slopes
 
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
+
 **Exports:**
 
 - Functions: `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`
@@ -10268,6 +10315,7 @@ graph LR
 | `../timeseries-extra.js`       | `acf`          | Import |
 | `../distribution-functions.js` | `chiSquaredSF` | Import |
 | `../ml/ols.js`                 | `ols`          | Import |
+| `../typed/number-matrix.js`    | `numberVector` | Import |
 
 **Exports:**
 
@@ -10277,6 +10325,12 @@ graph LR
 ---
 
 ### `functions/src/stats/weighted-stats.ts` - Weighted descriptive statistics (gap-analysis 2026-11-04, Batch A).
+
+**Internal Dependencies:**
+
+| File                        | Imports        | Type   |
+| --------------------------- | -------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector` | Import |
 
 **Exports:**
 
@@ -11445,7 +11499,7 @@ graph LR
 
 | File                            | Imports                                                                                                                                                     | Type               |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `./number-matrix.js`            | `assertRectangular, isNumberMatrix`                                                                                                                         | Import             |
+| `./number-matrix.js`            | `assertRectangular, isNumberMatrix, numberVector`                                                                                                           | Import             |
 | `./euclid.js`                   | `euclidSnap`                                                                                                                                                | Import             |
 | `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                             | Import             |
 | `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest` | Import             |
@@ -12076,6 +12130,12 @@ graph LR
 | `@danielsimonjr/mathts-parallel` | `computePool`                  |
 | `@danielsimonjr/mathts-core`     | `isDeterministic, pairwiseSum` |
 
+**Internal Dependencies:**
+
+| File                 | Imports        | Type   |
+| -------------------- | -------------- | ------ |
+| `./number-matrix.js` | `numberVector` | Import |
+
 **Exports:**
 
 - Interfaces: `GaussQuadOptions`, `RombergOptions`
@@ -12167,7 +12227,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isNumberMatrix`, `assertRectangular`
+- Functions: `isNumberMatrix`, `assertRectangular`, `assertNumberScalar`, `numberVector`
 
 ---
 
@@ -20371,6 +20431,7 @@ graph LR
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `core/src/internal`                                    | 22 files     | 0 files    |
+| `functions/src/typed/number-matrix`                    | 0 files      | 22 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -20382,7 +20443,6 @@ graph LR
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
-| `workbook/src/cli`                                     | 18 files     | 0 files    |
 
 ---
 
@@ -21283,12 +21343,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230542 |
-| Total Exports           | 7305   |
+| Total Lines of Code     | 230614 |
+| Total Exports           | 7307   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2504   |
+| Total Functions         | 2506   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

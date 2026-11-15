@@ -3,9 +3,9 @@
  *
  * @packageDocumentation
  */
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** Options for {@link dtw}. */
 export interface DtwOptions {
@@ -33,8 +33,8 @@ export interface DtwResult {
  * dtw([1, 2, 3], [1, 2, 2, 3]).distance; // 0
  */
 export function dtw(a: Vec, b: Vec, opts?: DtwOptions): DtwResult {
-  const x = arr(a);
-  const y = arr(b);
+  const x = numberVector('dtw', a);
+  const y = numberVector('dtw', b);
   const n = x.length;
   const m = y.length;
   if (n === 0 || m === 0) throw new RangeError('dtw: inputs must be non-empty');

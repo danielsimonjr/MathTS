@@ -5,9 +5,9 @@
  *
  * @packageDocumentation
  */
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const TWO_PI = 2 * Math.PI;
 
 /** Frequency sweep method for {@link chirp}. */
@@ -32,7 +32,7 @@ export function chirp(t: Vec, f0: number, t1: number, f1: number, opts?: ChirpOp
   const method = opts?.method ?? 'linear';
   const phi = opts?.phi ?? 0;
   const cyclesAt = cyclePhase(method, f0, t1, f1);
-  return arr(t).map((x) => Math.cos(TWO_PI * cyclesAt(x) + phi));
+  return numberVector('chirp', t).map((x) => Math.cos(TWO_PI * cyclesAt(x) + phi));
 }
 
 /** Integrated phase in cycles, f(t) being the instantaneous frequency. */
@@ -77,7 +77,7 @@ function cyclePhase(
  */
 export function squareWave(t: Vec, duty: number = 0.5): number[] {
   if (!(duty >= 0 && duty <= 1)) throw new RangeError('squareWave: duty must be in [0, 1]');
-  return arr(t).map((x) => {
+  return numberVector('squareWave', t).map((x) => {
     const x2 = x / TWO_PI;
     return x2 - Math.floor(x2) < duty ? 1 : -1;
   });
@@ -89,7 +89,7 @@ export function squareWave(t: Vec, duty: number = 0.5): number[] {
  */
 export function sawtooth(t: Vec, width: number = 1): number[] {
   if (!(width >= 0 && width <= 1)) throw new RangeError('sawtooth: width must be in [0, 1]');
-  return arr(t).map((x) => {
+  return numberVector('sawtooth', t).map((x) => {
     const tm = x - TWO_PI * Math.floor(x / TWO_PI);
     if (tm < width * TWO_PI) return tm / (Math.PI * width) - 1;
     return (Math.PI * (1 + width) - tm) / (Math.PI * (1 - width));
@@ -106,7 +106,7 @@ export function sawtooth(t: Vec, width: number = 1): number[] {
 export function gaussPulse(t: Vec, fc: number, bw: number = 0.5, bwr: number = -6): number[] {
   const ref = Math.pow(10, bwr / 20);
   const a = -((Math.PI * fc * bw) ** 2) / (4 * Math.log(ref));
-  return arr(t).map((x) => Math.exp(-a * x * x) * Math.cos(TWO_PI * fc * x));
+  return numberVector('gaussPulse', t).map((x) => Math.exp(-a * x * x) * Math.cos(TWO_PI * fc * x));
 }
 
 /**
@@ -130,7 +130,7 @@ export function unitImpulse(n: number, idx: number | 'mid' = 0): number[] {
 export function sweepPoly(t: Vec, polyCoeffs: readonly number[], phi: number = 0): number[] {
   if (polyCoeffs.length === 0) throw new RangeError('sweepPoly: polyCoeffs must be non-empty');
   const p = polyCoeffs.length - 1;
-  return arr(t).map((x) => {
+  return numberVector('sweepPoly', t).map((x) => {
     let cycles = 0;
     for (let k = 0; k <= p; k++) {
       const power = p - k + 1;

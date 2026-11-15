@@ -23,9 +23,7 @@
 import { acf } from '../timeseries-extra.js';
 import { chiSquaredSF } from '../distribution-functions.js';
 import { ols } from '../ml/ols.js';
-
-type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
+import { numberVector } from '../typed/number-matrix.js';
 
 /**
  * Partial autocorrelation function up to `nlags` (inclusive), via the
@@ -98,7 +96,7 @@ export function ljungBox(x: number[], lags: number): LjungBoxResult {
  * `statsmodels.stats.stattools.durbin_watson`.
  */
 export function durbinWatson(residuals: number[]): number {
-  const e = arr(residuals);
+  const e = numberVector('durbinWatson', residuals);
   const n = e.length;
   if (n < 2) throw new Error('durbinWatson: need at least 2 residuals');
   let num = 0;
@@ -180,7 +178,7 @@ function adfPValue(statistic: number, n: number): number {
  * adfuller(whiteNoiseSeries) // => { statistic: <very negative>, pValue: <small>, usedLag }
  */
 export function adfuller(x: number[], maxlag?: number): AdfullerResult {
-  const a = arr(x);
+  const a = numberVector('adfuller', x);
   const n = a.length;
   if (n < 4) throw new Error(`adfuller: series too short (length ${n})`);
 

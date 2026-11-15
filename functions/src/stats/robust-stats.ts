@@ -2,9 +2,8 @@
  * Generalized means, geometric standard deviation, robust regression slopes
  * and partial correlation (gap-analysis 2026-11-04, Batch A).
  */
+import { numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
-
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 const meanOf = (a: number[]): number => a.reduce((s, v) => s + v, 0) / a.length;
 
@@ -27,7 +26,7 @@ function stdOf(a: number[], ddof: number): number {
  * arithmetic mean and p = −1 the harmonic mean. Non-integer p requires x > 0.
  */
 export function pmean(x: Vec, p: number): number {
-  const a = arr(x);
+  const a = numberVector('pmean', x);
   if (a.length === 0) return NaN;
   if (!Number.isInteger(p) && a.some((v) => v <= 0)) {
     throw new RangeError('pmean: non-integer p requires all entries > 0');
@@ -45,7 +44,7 @@ export function pmean(x: Vec, p: number): number {
 
 /** Geometric standard deviation: exp(std(ln x)). Default ddof 1 (scipy). */
 export function gstd(x: Vec, opts?: { ddof?: number }): number {
-  const a = arr(x);
+  const a = numberVector('gstd', x);
   if (a.some((v) => v <= 0)) throw new RangeError('gstd: all entries must be > 0');
   if (a.length <= (opts?.ddof ?? 1)) throw new RangeError('gstd: needs more values than ddof');
   return Math.exp(stdOf(a.map(Math.log), opts?.ddof ?? 1));
@@ -53,7 +52,7 @@ export function gstd(x: Vec, opts?: { ddof?: number }): number {
 
 /** Geometric z-score: (ln xᵢ − mean(ln x)) / std(ln x). */
 export function gzscore(x: Vec, opts?: { ddof?: number }): number[] {
-  const a = arr(x);
+  const a = numberVector('gzscore', x);
   if (a.some((v) => v <= 0)) throw new RangeError('gzscore: all entries must be > 0');
   if (a.length <= (opts?.ddof ?? 1)) throw new RangeError('gzscore: needs more values than ddof');
   const logs = a.map(Math.log);
@@ -74,8 +73,8 @@ function pairwiseSlopes(x: number[], y: number[]): number[] {
 }
 
 function checkPairs(x: Vec, y: Vec, name: string): [number[], number[]] {
-  const xs = arr(x);
-  const ys = arr(y);
+  const xs = numberVector(name, x);
+  const ys = numberVector(name, y);
   if (xs.length !== ys.length) throw new RangeError(`${name}: x and y must have the same length`);
   if (xs.length < 2) throw new RangeError(`${name}: needs at least 2 points`);
   return [xs, ys];
@@ -128,9 +127,9 @@ function pearson(a: number[], b: number[]): number {
 
 /** Partial correlation of x and y controlling for z (first-order formula). */
 export function partialCorrelation(x: Vec, y: Vec, z: Vec): number {
-  const xs = arr(x);
-  const ys = arr(y);
-  const zs = arr(z);
+  const xs = numberVector('partialCorrelation', x);
+  const ys = numberVector('partialCorrelation', y);
+  const zs = numberVector('partialCorrelation', z);
   if (xs.length !== ys.length || xs.length !== zs.length) {
     throw new RangeError('partialCorrelation: x, y and z must have the same length');
   }

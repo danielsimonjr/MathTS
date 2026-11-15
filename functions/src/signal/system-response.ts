@@ -9,9 +9,9 @@
 
 import { lfilter } from '../signal-filter-extra.js';
 import type { ComplexNumber } from './fft.js';
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** Continuous or discrete state-space realisation. */
 export interface StateSpace {
@@ -139,12 +139,12 @@ export function stepResponse(b: Vec, a: Vec, n: number): number[] {
  * tf2ss([1], [1, 3, 2]); // A = [[-3, -2], [1, 0]], B = [[1], [0]], C = [[0, 1]], D = [[0]]
  */
 export function tf2ss(b: Vec, a: Vec): StateSpace {
-  const av = arr(a);
+  const av = numberVector('tf2ss', a);
   const a0 = av[0];
   if (a0 === undefined || a0 === 0)
     throw new RangeError('tf2ss: leading denominator coefficient must be non-zero');
   const an = av.map((v) => v / a0);
-  const bn = arr(b).map((v) => v / a0);
+  const bn = numberVector('tf2ss', b).map((v) => v / a0);
   const n = an.length - 1;
   if (bn.length > an.length) throw new RangeError('tf2ss: transfer function must be proper');
   if (n === 0) return { A: [], B: [], C: [], D: [[bn[bn.length - 1] ?? 0]] };
@@ -363,8 +363,8 @@ function polyRoots(coeffs: number[]): ComplexNumber[] {
  * poles are sorted by real then imaginary part.
  */
 export function tf2zpk(b: Vec, a: Vec): { z: ComplexNumber[]; p: ComplexNumber[]; k: number } {
-  const bn = trimLeading(arr(b));
-  const an = trimLeading(arr(a));
+  const bn = trimLeading(numberVector('tf2zpk', b));
+  const an = trimLeading(numberVector('tf2zpk', a));
   if (an.length === 0 || an[0] === 0)
     throw new RangeError('tf2zpk: denominator leading coefficient must be non-zero');
   return { z: polyRoots(bn), p: polyRoots(an), k: bn[0] / an[0] };

@@ -34,3 +34,53 @@ export function assertRectangular(m: readonly unknown[]): asserts m is unknown[]
     }
   }
 }
+
+/** The type name of a value, for an error message: the class name of an object. */
+function typeNameOf(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value !== 'object') return typeof value;
+  const ctor = (value as { constructor?: { name?: string } }).constructor;
+  return ctor?.name || 'object';
+}
+
+/**
+ * Checks that a number-only function gets a number scalar. A `Complex`, `Fraction` or
+ * `BigNumber` has no exact path in such a function, so the function rejects the value (#1042).
+ *
+ * @param name - The name of the function, for the error message.
+ * @param value - The input value.
+ * @throws A `TypeError` when `value` is not a number.
+ */
+export function assertNumberScalar(name: string, value: unknown): asserts value is number {
+  if (typeof value !== 'number') {
+    throw new TypeError(`${name}: expects number data, got a ${typeNameOf(value)}`);
+  }
+}
+
+/**
+ * Converts the vector input of a number-only function to a number array. A `Complex`,
+ * `Fraction` or `BigNumber` element has no exact path in such a function, so the function
+ * rejects the element (#1042). The function does not read the element as a double.
+ *
+ * @param name - The name of the function, for the error message.
+ * @param x - A number array or a typed array.
+ * @returns A new array with the elements of `x`. The function does not change `x`.
+ * @throws A `TypeError` when an element is not a number.
+ */
+export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
+  if (x instanceof BigInt64Array || x instanceof BigUint64Array) {
+    throw new TypeError(`${name}: expects number data, got a ${typeNameOf(x)}`);
+  }
+  if (ArrayBuffer.isView(x)) return Array.from(x as ArrayLike<number>);
+  // One pass reads each element once, checks it and copies it. The caller then reads the copy.
+  const src: ArrayLike<unknown> = Array.isArray(x) ? x : Array.from(x);
+  const out = new Array<number>(src.length);
+  for (let i = 0; i < src.length; i++) {
+    const v = src[i];
+    if (typeof v !== 'number') {
+      throw new TypeError(`${name}: expects number data, got a ${typeNameOf(v)} at index ${i}`);
+    }
+    out[i] = v;
+  }
+  return out;
+}

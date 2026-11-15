@@ -4,9 +4,9 @@
  *
  * @packageDocumentation
  */
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** Options for {@link lombScargle}. */
 export interface LombScargleOptions {
@@ -25,9 +25,9 @@ export interface LombScargleOptions {
  * @returns Power per frequency (unnormalized: 0.5 * sum of squared projections)
  */
 export function lombScargle(t: Vec, y: Vec, freqs: Vec, opts?: LombScargleOptions): number[] {
-  const times = arr(t);
-  const values = arr(y);
-  const omegas = arr(freqs);
+  const times = numberVector('lombScargle', t);
+  const values = numberVector('lombScargle', y);
+  const omegas = numberVector('lombScargle', freqs);
   if (times.length !== values.length) {
     throw new RangeError('lombScargle: t and y must have the same length');
   }

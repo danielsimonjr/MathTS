@@ -5,9 +5,9 @@
  */
 import { pairwiseDot, pairwiseSum, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import { studentTTwoSidedP } from './distribution-functions.js';
+import { numberVector } from './typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** The least-squares line through `(x, y)` and the sums its inference needs. */
 export interface LineFit {
@@ -63,8 +63,8 @@ export interface LinregressResult {
  * √(Σ(y − ŷ)² / ((n − 2)·Σ(x − x̄)²)), from the residuals. Mirrors `scipy.stats.linregress`.
  */
 export function linearRegression(x: Vec, y: Vec): LinregressResult {
-  const a = arr(x);
-  const b = arr(y);
+  const a = numberVector('linearRegression', x);
+  const b = numberVector('linearRegression', y);
   const n = a.length;
   if (b.length !== n) throw new Error(`linearRegression: length mismatch ${n} vs ${b.length}`);
   if (n < 3)

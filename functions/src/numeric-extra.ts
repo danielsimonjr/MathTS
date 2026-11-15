@@ -7,9 +7,9 @@
  * See `docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md` (C1, Wave A).
  */
 import { sum as _sum } from './typed/arithmetic.js';
+import { assertNumberScalar, numberVector } from './typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const toArr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /**
  * Spread-free maximum. `Math.max(...arr)` throws `RangeError: Maximum call stack
@@ -32,6 +32,10 @@ export function clamp(x: readonly number[], lo: number, hi: number): number[];
  */
 export function clamp(x: number | readonly number[], lo: number, hi: number): number | number[] {
   // Both v < NaN and v > NaN are false. When the bound is NaN, v passes through unchanged.
+  if (Array.isArray(x)) numberVector('clamp', x);
+  else assertNumberScalar('clamp', x);
+  assertNumberScalar('clamp', lo);
+  assertNumberScalar('clamp', hi);
   if (Number.isNaN(lo) || Number.isNaN(hi)) return Array.isArray(x) ? x.map(() => NaN) : NaN;
   const c = (v: number) => (v < lo ? lo : v > hi ? hi : v);
   return Array.isArray(x) ? x.map(c) : c(x as number);
@@ -45,6 +49,8 @@ export function sigmoid(x: readonly number[]): number[];
  * function does not change the input.
  */
 export function sigmoid(x: number | readonly number[]): number | number[] {
+  if (Array.isArray(x)) numberVector('sigmoid', x);
+  else assertNumberScalar('sigmoid', x);
   const s = (v: number) => (v >= 0 ? 1 / (1 + Math.exp(-v)) : Math.exp(v) / (1 + Math.exp(v)));
   return Array.isArray(x) ? x.map(s) : s(x as number);
 }
@@ -54,7 +60,7 @@ export function sigmoid(x: number | readonly number[]): number | number[] {
  * Reuses `max`/`sum`. The backbone of log-probability arithmetic.
  */
 export function logsumexp(x: Vec): number {
-  const a = toArr(x);
+  const a = numberVector('logsumexp', x);
   if (a.length === 0) return -Infinity;
   const m = maxOf(a);
   if (!Number.isFinite(m)) return m; // all -Inf → -Inf; any +Inf → +Inf
@@ -65,7 +71,7 @@ export function logsumexp(x: Vec): number {
 
 /** Softmax: `exp(xᵢ − max) / Σ exp(x − max)`. Returns a probability vector. */
 export function softmax(x: Vec): number[] {
-  const a = toArr(x);
+  const a = numberVector('softmax', x);
   if (a.length === 0) return [];
   const m = maxOf(a);
   const e = a.map((v) => Math.exp(v - m));
@@ -75,7 +81,7 @@ export function softmax(x: Vec): number[] {
 
 /** Cumulative product (running ∏). Output has the same length as the input. */
 export function cumprod(x: Vec): number[] {
-  const a = toArr(x);
+  const a = numberVector('cumprod', x);
   const out = new Array<number>(a.length);
   let p = 1;
   for (let i = 0; i < a.length; i++) {
@@ -92,11 +98,12 @@ export function cumprod(x: Vec): number[] {
  * because those relational operators are already false for NaN.
  */
 function cumulativeExtreme(
+  name: string,
   x: Vec,
   seed: number,
   replace: (value: number, extreme: number) => boolean
 ): number[] {
-  const a = toArr(x);
+  const a = numberVector(name, x);
   const out = new Array<number>(a.length);
   let extreme = seed;
   for (let i = 0; i < a.length; i++) {
@@ -108,12 +115,12 @@ function cumulativeExtreme(
 
 /** Cumulative maximum (running max). */
 export function cummax(x: Vec): number[] {
-  return cumulativeExtreme(x, -Infinity, (value, extreme) => value > extreme);
+  return cumulativeExtreme('cummax', x, -Infinity, (value, extreme) => value > extreme);
 }
 
 /** Cumulative minimum (running min). */
 export function cummin(x: Vec): number[] {
-  return cumulativeExtreme(x, Infinity, (value, extreme) => value < extreme);
+  return cumulativeExtreme('cummin', x, Infinity, (value, extreme) => value < extreme);
 }
 
 /**
@@ -122,13 +129,13 @@ export function cummin(x: Vec): number[] {
  * with a leading 0 (the MATLAB `cumtrapz` convention).
  */
 export function cumtrapz(y: Vec, x?: Vec | number): number[] {
-  const a = toArr(y);
+  const a = numberVector('cumtrapz', y);
   const out = new Array<number>(a.length).fill(0);
   let dxAt: (i: number) => number;
   if (typeof x === 'number') {
     dxAt = () => x;
   } else if (x !== undefined) {
-    const xs = toArr(x);
+    const xs = numberVector('cumtrapz', x);
     if (xs.length < a.length)
       throw new Error(
         `cumtrapz: abscissa x (length ${xs.length}) is shorter than y (length ${a.length})`

@@ -4,9 +4,8 @@
  * Weights are non-negative frequency-style weights. Zero-weight points never
  * contribute to a quantile.
  */
+import { numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
-
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** Validates matching lengths and weights; returns true when some weight is NaN. */
 function checkWeights(x: number[], w: number[]): boolean {
@@ -27,8 +26,8 @@ function checkWeights(x: number[], w: number[]): boolean {
 
 /** Weighted arithmetic mean: Σwᵢxᵢ / Σwᵢ. */
 export function weightedMean(x: Vec, w: Vec): number {
-  const xs = arr(x);
-  const ws = arr(w);
+  const xs = numberVector('weightedMean', x);
+  const ws = numberVector('weightedMean', w);
   if (checkWeights(xs, ws)) return NaN;
   let sw = 0;
   let swx = 0;
@@ -45,8 +44,8 @@ export function weightedMean(x: Vec, w: Vec): number {
  * n/(n−1) scaling, and it stays finite for normalised weights).
  */
 export function weightedVariance(x: Vec, w: Vec, opts?: { ddof?: 0 | 1 }): number {
-  const xs = arr(x);
-  const ws = arr(w);
+  const xs = numberVector('weightedVariance', x);
+  const ws = numberVector('weightedVariance', w);
   if (checkWeights(xs, ws)) return NaN;
   const ddof = opts?.ddof ?? 0;
   const m = weightedMean(xs, ws);
@@ -68,8 +67,8 @@ export function weightedVariance(x: Vec, w: Vec, opts?: { ddof?: 0 | 1 }): numbe
  * unless every weight is zero (which is rejected).
  */
 export function weightedQuantile(x: Vec, w: Vec, p: number): number {
-  const xs = arr(x);
-  const ws = arr(w);
+  const xs = numberVector('weightedQuantile', x);
+  const ws = numberVector('weightedQuantile', w);
   if (!(p >= 0 && p <= 1)) throw new RangeError('p must be in [0, 1]');
   if (checkWeights(xs, ws)) return NaN;
   if (xs.length === 1) return xs[0];

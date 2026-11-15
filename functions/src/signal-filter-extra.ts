@@ -7,11 +7,11 @@
 import { Complex } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
 import { companion } from './linalg-extra.js';
+import { numberVector } from './typed/number-matrix.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 export const sinc = (x: number): number => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
 
@@ -72,7 +72,11 @@ function lfilterState(
  * `x` (direct form II transposed). `a[0]` normalizes. Matches `scipy.signal.lfilter`.
  */
 export function lfilter(b: Vec, a: Vec, x: Vec): number[] {
-  return lfilterState(arr(b), arr(a), arr(x)).y;
+  return lfilterState(
+    numberVector('lfilter', b),
+    numberVector('lfilter', a),
+    numberVector('lfilter', x)
+  ).y;
 }
 
 /**
@@ -81,7 +85,7 @@ export function lfilter(b: Vec, a: Vec, x: Vec): number[] {
  * companion matrix of `a` and `B = b[1:] − a[1:]·b[0]`. Reuses `companion` + `inv`.
  */
 export function lfilterZi(b: Vec, a: Vec): number[] {
-  const { b: bb, a: aa, n } = padCoeffs(arr(b), arr(a));
+  const { b: bb, a: aa, n } = padCoeffs(numberVector('lfilterZi', b), numberVector('lfilterZi', a));
   if (n < 2) return [];
   const C = companion(aa); // (n−1)×(n−1) companion of the (monic) denominator
   const M = Array.from({ length: n - 1 }, (_, i) =>
@@ -111,9 +115,9 @@ export function lfilterZi(b: Vec, a: Vec): number[] {
  * magnitude response is applied with no phase distortion.
  */
 export function filtfilt(b: Vec, a: Vec, x: Vec): number[] {
-  const bb = arr(b);
-  const aa = arr(a);
-  const xx = arr(x);
+  const bb = numberVector('filtfilt', b);
+  const aa = numberVector('filtfilt', a);
+  const xx = numberVector('filtfilt', x);
   const n = xx.length;
   const ntaps = Math.max(aa.length, bb.length);
   const pad = 3 * ntaps; // scipy default padlen = 3·max(len a, len b)
