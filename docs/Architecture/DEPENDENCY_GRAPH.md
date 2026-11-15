@@ -4334,13 +4334,20 @@ graph LR
 
 ### `functions/src/arithmetic/sqrt.ts` - Calculate the square root of a value.
 
+**Workspace Dependencies:**
+
+| Package                      | Import               |
+| ---------------------------- | -------------------- |
+| `@danielsimonjr/mathts-core` | `BigNumber, Complex` |
+
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../core/config.js`         | `ConfigOptions` | Import (type-only) |
+| File                            | Imports                             | Type               |
+| ------------------------------- | ----------------------------------- | ------------------ |
+| `../utils/factory.js`           | `factory`                           | Import             |
+| `../core/function/typed.js`     | `TypedFunction`                     | Import (type-only) |
+| `../core/config.js`             | `ConfigOptions`                     | Import (type-only) |
+| `../typed/complex-promotion.js` | `sqrtBigNumberWith, sqrtNumberWith` | Import             |
 
 **Exports:**
 
@@ -11505,19 +11512,19 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                                                                                                                                                  | Type               |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `./number-matrix.js`            | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                        | Import             |
-| `../factories/scope.js`         | `factoryScope`                                                                                                                                                           | Import             |
-| `./euclid.js`                   | `euclidSnap`                                                                                                                                                             | Import             |
-| `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                          | Import             |
-| `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`              | Import             |
-| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                  | Import             |
-| `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                                                                                                                 | Import             |
-| `./divide-inverse.js`           | `divideInverse`                                                                                                                                                          | Import             |
-| `./exact-reductions.js`         | `exactReductions`                                                                                                                                                        | Import             |
-| `./public-type-exports.js`      | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                             | Import (type-only) |
-| `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, isPredictableMode, powBigNumberWith, sqrtReal, staysRealSqrt, powReal, nthRootReal` | Import             |
+| File                            | Imports                                                                                                                                                                                     | Type               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `./number-matrix.js`            | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                           | Import             |
+| `../factories/scope.js`         | `factoryScope`                                                                                                                                                                              | Import             |
+| `./euclid.js`                   | `euclidSnap`                                                                                                                                                                                | Import             |
+| `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                                             | Import             |
+| `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                 | Import             |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                     | Import             |
+| `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                                                                                                                                    | Import             |
+| `./divide-inverse.js`           | `divideInverse`                                                                                                                                                                             | Import             |
+| `./exact-reductions.js`         | `exactReductions`                                                                                                                                                                           | Import             |
+| `./public-type-exports.js`      | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                                | Import (type-only) |
+| `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, isPredictableMode, sqrtBigNumberWith, powBigNumberWith, sqrtReal, staysRealSqrt, powReal, nthRootReal` | Import             |
 
 **Exports:**
 
@@ -11634,7 +11641,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isPredictableMode`, `staysRealLog`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `staysRealLog1p`, `log1pReal`, `staysRealSqrt`, `powBigNumberWith`, `sqrtReal`, `powReal`, `nthRootReal`, `staysRealUnitInterval`, `staysRealAcosh`, `staysRealAbsAtLeastOne`, `acscReal`, `asecReal`
+- Functions: `isPredictableMode`, `staysRealLog`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `staysRealLog1p`, `log1pReal`, `staysRealSqrt`, `sqrtNumberWith`, `sqrtBigNumberWith`, `powBigNumberWith`, `sqrtReal`, `powReal`, `nthRootReal`, `staysRealUnitInterval`, `staysRealAcosh`, `staysRealAbsAtLeastOne`, `acscReal`, `asecReal`
 
 ---
 
@@ -21352,12 +21359,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231435 |
-| Total Exports           | 7309   |
+| Total Lines of Code     | 231423 |
+| Total Exports           | 7311   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2511   |
+| Total Functions         | 2513   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |
