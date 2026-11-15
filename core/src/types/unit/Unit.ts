@@ -2,7 +2,7 @@ import { isComplex, isUnit, typeOf } from '../../is.js';
 import { factory } from '../../factory.js';
 import { clone } from '../../object.js';
 import { endsWith, hasOwnProperty, warnOnce, isPollutingKey } from '../../shared.js';
-import { BIGNUMBER_PI } from '../bignumber.js';
+import { BigNumber as CoreBigNumber } from '../bignumber.js';
 import type {
   BaseUnitDef,
   BigNumberValue,
@@ -360,14 +360,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
     }
 
     /**
-     * An exact scale as a BigNumber at the configured precision (π from BIGNUMBER_PI), or
+     * An exact scale as a BigNumber at the configured precision (π from `piAt()`), or
      * undefined for a factor of any other irrational, which has no BigNumber constant here.
      */
     function exactToBigNumber(scale: ExactScale): Numeric | undefined {
       const powerOfPi = irrationalPower(scale, 'pi');
       if (Object.keys(scale.irrationals).length !== (powerOfPi === 0 ? 0 : 1)) return undefined;
       let v = bigNumberFromText(scale.num.toString()).div(bigNumberFromText(scale.den.toString()));
-      const pi = BIGNUMBER_PI as unknown as BigNumberValue;
+      if (powerOfPi === 0) return v as unknown as Numeric;
+      const pi = bigNumberFromText(CoreBigNumber.piAt().toString());
       for (let k = 0; k < Math.abs(powerOfPi); k++) v = powerOfPi > 0 ? v.times(pi) : v.div(pi);
       return v as unknown as Numeric;
     }

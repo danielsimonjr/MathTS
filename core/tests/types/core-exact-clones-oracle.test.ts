@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Scalar } from '../../src/types/interfaces';
 import { Fraction } from '../../src/types/fraction';
-import { BigNumber, BIGNUMBER_PI } from '../../src/types/bignumber';
+import { BigNumber } from '../../src/types/bignumber';
 
 function expectFractionEquals(result: Fraction, n: bigint, d: bigint): void {
   expect(result.numerator).toBe(n);
@@ -50,9 +50,12 @@ describe('M12 oracle — BigNumber.sin / cos (Taylor via public API)', () => {
   });
 
   it('sin(π/2) and cos(π/2) at default precision', () => {
-    const halfPi = BIGNUMBER_PI.divide(2);
+    // A 51-digit π literal, so cos(halfPi) is about 2.9e-51 and the series must cancel to that value.
+    const halfPi = BigNumber.parse('3.14159265358979323846264338327950288419716939937510').divide(
+      2
+    );
     expect(halfPi.sin().toString()).toBe('1');
-    // halfPi is the 51-digit literal / 2, so cos(halfPi) is about 2.9e-51. The value comes from
+    // cos(halfPi) is about 2.9e-51. The value comes from
     // a sum near 1, so the error bound is absolute: 64 digits plus guard digits give < 1e-72.
     // Reference from mpmath at 200 digits (#1043; the earlier pinned string was wrong from digit 12).
     const reference = BigNumber.parse(
