@@ -403,7 +403,8 @@ describe('mean, variance and std keep exact types', () => {
       [mean, [2, 3]],
       [variance, [2, 2]],
     ] as const) {
-      // The public type says number; exact data returns Fractions (#1049).
+      // The public matrix types hold numbers only. A matrix of Fractions has no public type.
+      // An exact array has element-typed overloads (#1049).
       const r = fn(m, 0) as unknown as Fraction[];
       expect(Array.isArray(r)).toBe(true);
       expect(r.map((x) => x.valueOf())).toEqual(want);

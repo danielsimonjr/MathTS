@@ -10,6 +10,8 @@
       "name": "mean",
       "source": "src/typed/arithmetic.ts",
       "fallback": [
+        "<T extends Fraction | BigNumber | Complex>(a: ExactData<T>): T;",
+        "(a: ExactData<bigint>): number;",
         "(a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;"
       ]
     },
@@ -17,6 +19,8 @@
       "name": "variance",
       "source": "src/typed/arithmetic.ts",
       "fallback": [
+        "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
+        "(a: ExactData<bigint>): number;",
         "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
@@ -24,6 +28,8 @@
       "name": "std",
       "source": "src/typed/arithmetic.ts",
       "fallback": [
+        "(a: ExactData<BigNumber>): BigNumber;",
+        "(a: ExactData<Fraction | bigint>): number;",
         "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
@@ -36,21 +42,34 @@
       "source": "src/statistics/median.ts",
       "mathTypedPattern": "return typed(name,",
       "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
-      "fallback": ["(...rest: number[]): number;", "(...rest: unknown[]): unknown;"]
+      "fallback": [
+        "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
+        "(a: ExactData<bigint>): Fraction;",
+        "(...rest: number[]): number;",
+        "(...rest: unknown[]): unknown;"
+      ]
     },
     {
       "name": "mode",
       "source": "src/statistics/mode.ts",
       "mathTypedPattern": "return typed(name,",
       "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
-      "fallback": ["(...rest: number[]): number[];", "(...rest: unknown[]): unknown;"]
+      "fallback": [
+        "<T extends Fraction | BigNumber | Complex | bigint>(a: ExactData<T>): T[];",
+        "(...rest: number[]): number[];",
+        "(...rest: unknown[]): unknown;"
+      ]
     },
     {
       "name": "mad",
       "source": "src/statistics/mad.ts",
       "mathTypedPattern": "return typed(name,",
       "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
-      "fallback": ["(...rest: unknown[]): unknown;"]
+      "fallback": [
+        "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
+        "(a: ExactData<bigint>): Fraction;",
+        "(...rest: unknown[]): unknown;"
+      ]
     },
     {
       "name": "parallelFFT",

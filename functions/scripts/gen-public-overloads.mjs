@@ -377,6 +377,8 @@ function buildFile(manifest) {
     '',
     'export type Matrix = DenseMatrix | SparseMatrix;',
     'export type ElementwiseLeaf = number | bigint | Complex | Fraction | BigNumber | UnitInstance | Dual;',
+    '/** A flat or nested array of exact values of one type, for the element-typed reduction overloads. */',
+    'export type ExactData<T> = readonly T[] | readonly (readonly T[])[];',
     '/** A typed array with number elements. A Float64Array parameter accepts each of these kinds. */',
     'export type NumberTypedArray =',
     '  | Float64Array',

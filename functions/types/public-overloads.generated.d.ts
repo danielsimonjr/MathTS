@@ -6,6 +6,8 @@ import type { PhysicsEvaluateOptions } from './physics-evaluate-options.js';
 
 export type Matrix = DenseMatrix | SparseMatrix;
 export type ElementwiseLeaf = number | bigint | Complex | Fraction | BigNumber | UnitInstance | Dual;
+/** A flat or nested array of exact values of one type, for the element-typed reduction overloads. */
+export type ExactData<T> = readonly T[] | readonly (readonly T[])[];
 /** A typed array with number elements. A Float64Array parameter accepts each of these kinds. */
 export type NumberTypedArray =
   | Float64Array
@@ -150,6 +152,8 @@ export interface MeanCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
+  <T extends Fraction | BigNumber | Complex>(a: ExactData<T>): T;
+  (a: ExactData<bigint>): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -180,6 +184,8 @@ export interface VarianceCallable {
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
+  <T extends Fraction | BigNumber>(a: ExactData<T>): T;
+  (a: ExactData<bigint>): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -209,6 +215,8 @@ export interface StdCallable {
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
+  (a: ExactData<BigNumber>): BigNumber;
+  (a: ExactData<Fraction | bigint>): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -283,6 +291,8 @@ export interface MedianCallable {
   (a: NumberTypedArray | Float32Array, b: StatReduceOptions): number;
   (a: number[] | number[][] | Matrix, b: number | BigNumber): number | number[];
   (a: number[] | number[][] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  <T extends Fraction | BigNumber>(a: ExactData<T>): T;
+  (a: ExactData<bigint>): Fraction;
   (...rest: number[]): number;
   (...rest: unknown[]): unknown;
   readonly name: string;
@@ -293,6 +303,7 @@ export type PublicMedian = MedianCallable;
 export interface ModeCallable {
   (a: number[] | number[][] | Matrix): number[] | number;
   (a: NumberTypedArray | Float32Array): number[] | number;
+  <T extends Fraction | BigNumber | Complex | bigint>(a: ExactData<T>): T[];
   (...rest: number[]): number[];
   (...rest: unknown[]): unknown;
   readonly name: string;
@@ -303,6 +314,8 @@ export type PublicMode = ModeCallable;
 export interface MadCallable {
   (a: number[] | number[][] | Matrix): number;
   (a: NumberTypedArray | Float32Array): number;
+  <T extends Fraction | BigNumber>(a: ExactData<T>): T;
+  (a: ExactData<bigint>): Fraction;
   (...rest: unknown[]): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
