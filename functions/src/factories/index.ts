@@ -1221,7 +1221,7 @@ import { createSpaClass } from '../type/matrix/Spa.js';
 import { createIntersect } from '../geometry/intersect.js';
 import { createMean } from '../statistics/mean.js';
 import { createMedian } from '../statistics/median.js';
-import { createVariance } from '../statistics/variance.js';
+import { createVariance, createVarianceDdof } from '../statistics/variance.js';
 import { createQuantileSeq } from '../statistics/quantileSeq.js';
 import { createKldivergence } from '../probability/kldivergence.js';
 import { createMultinomial } from '../probability/multinomial.js';
@@ -1404,6 +1404,8 @@ registerExactReductions({
   variance: factory_variance,
   sqrt: factory_sqrt,
   dot: factory_dot,
+  varianceDdof: createVarianceDdof(factoryScope as Parameters<typeof createVarianceDdof>[0]),
+  isNaN,
 });
 
 // setSymDifference (activated factory — superseded by typed/set; kept internal for factoryScope wiring)

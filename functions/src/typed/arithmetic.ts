@@ -2031,14 +2031,113 @@ function meanAlongData(
   return isNumberData(input) ? reduceNumericMatrix(input, dim, skipNaN, meanOfNumeric) : undefined;
 }
 
-/** A call with an options object needs number data. Exact data throws. */
-function numbersOnly<T>(value: T | undefined, name: string): T {
-  if (value === undefined) {
-    throw new TypeError(
-      `${name}: an options object needs number data (a number vector, a 2-d number matrix or a typed array)`
-    );
+/**
+ * The leaves of exact data at any depth, in order. With `skipNaN`, the function drops the leaves that the
+ * factory `isNaN` reports.
+ */
+function exactLeaves(
+  xs: ArrayLike<unknown>,
+  skipNaN: boolean,
+  isNaNOf: (x: unknown) => unknown
+): unknown[] {
+  const out: unknown[] = [];
+  const collect = (ys: ArrayLike<unknown>): void => {
+    for (let i = 0; i < ys.length; i++) {
+      const y = ys[i];
+      if (Array.isArray(y)) collect(y);
+      else if (!skipNaN || isNaNOf(y) !== true) out.push(y);
+    }
+  };
+  collect(xs);
+  return out;
+}
+
+/** The number of array levels of `xs`, read along its first elements. */
+function arrayDepth(xs: unknown): number {
+  let depth = 0;
+  for (let y = xs; Array.isArray(y); y = y[0]) depth++;
+  return depth;
+}
+
+/** Apply `reduce` to each slice of `xs` along `dim`. The result has one level less than `xs`. */
+function reduceSlices(xs: unknown[], dim: number, reduce: (slice: unknown[]) => unknown): unknown {
+  if (dim > 0) return xs.map((row) => reduceSlices(row as unknown[], dim - 1, reduce));
+  if (!Array.isArray(xs[0])) return reduce(xs);
+  return (xs[0] as unknown[]).map((_, j) =>
+    reduceSlices(
+      xs.map((row) => (row as unknown[])[j]),
+      0,
+      reduce
+    )
+  );
+}
+
+/**
+ * Reduce exact data for a call with an options object: the whole data, or each slice along `dim`.
+ * `reduce` gets the leaves of the data or the slice, with NaN dropped when `skipNaN`.
+ */
+function exactWithOptions(
+  name: string,
+  input: unknown,
+  dim: number | { valueOf(): number } | undefined,
+  skipNaN: boolean,
+  reduce: (leaves: unknown[]) => unknown
+): unknown {
+  const xs = statData(input);
+  if (xs === undefined) throw new TypeError(`${name}: expected an array or a matrix`);
+  const { isNaN: isNaNOf } = exactReductions(name);
+  const ofLeaves = (ys: ArrayLike<unknown>): unknown => reduce(exactLeaves(ys, skipNaN, isNaNOf));
+  if (dim === undefined) return ofLeaves(xs);
+  const d = Number(dim.valueOf());
+  const depth = arrayDepth(xs);
+  if (!Number.isInteger(d) || d < 0 || d >= depth) {
+    throw new RangeError(`${name}: dimension ${String(d)} is out of range for ${depth}-D data`);
   }
-  return value;
+  return reduceSlices(Array.from(xs), d, ofLeaves);
+}
+
+/** The exact mean of `leaves`. No leaves give NaN, as on number data. */
+function exactMeanOf(leaves: unknown[]): unknown {
+  return leaves.length === 0 ? NaN : exactReductions('mean').mean(leaves);
+}
+
+/**
+ * The exact variance of `leaves`. A `ddof` request divides the sum of squared deviations by
+ * `n - ddof` and gives NaN when the divisor is not positive, as on number data.
+ */
+function exactVarianceOf(leaves: unknown[], request: VarianceRequest): unknown {
+  const n = leaves.length;
+  const ex = exactReductions('variance');
+  if (request.kind === 'norm') return n === 0 ? NaN : ex.variance(leaves, request.norm);
+  const divisor = n - request.ddof;
+  if (divisor <= 0) return NaN;
+  return ex.varianceDdof(leaves, request.ddof);
+}
+
+/** The exact variance, or with `sqrt` the standard deviation, for a call with options. */
+function exactVarianceWith(
+  name: 'variance' | 'std',
+  input: unknown,
+  dim: number | { valueOf(): number } | undefined,
+  request: VarianceRequest,
+  skipNaN: boolean
+): unknown {
+  const of =
+    name === 'std'
+      ? (leaves: unknown[]): unknown => exactReductions(name).sqrt(exactVarianceOf(leaves, request))
+      : (leaves: unknown[]): unknown => exactVarianceOf(leaves, request);
+  return exactWithOptions(name, input, dim, skipNaN, of);
+}
+
+/** The mean for a call with an options object: the number path, else the exact path. */
+function meanWithOptions(
+  input: unknown,
+  dim: number | { valueOf(): number } | undefined,
+  opts: StatReduceOptions
+): number | number[] {
+  const { skipNaN } = normalizationFromSecondArg(opts);
+  const r = dim === undefined ? meanOfInput(input, skipNaN) : meanAlongData(input, dim, skipNaN);
+  return (r ?? exactWithOptions('mean', input, dim, skipNaN, exactMeanOf)) as number | number[];
 }
 
 /**
@@ -2064,7 +2163,7 @@ export const mean = mathTyped('mean', {
   // `unknown` fallback overloads in the manifest type it; the cast marks that split.
   Array: (arr: f64[]): f64 => (meanOfInput(arr, false) ?? exactMean(arr)) as f64,
   'Array, Object': (arr: f64[], opts: StatReduceOptions): f64 =>
-    numbersOnly(meanOfInput(arr, normalizationFromSecondArg(opts).skipNaN), 'mean'),
+    meanWithOptions(arr, undefined, opts) as f64,
   'Array, number | BigNumber': (
     arr: f64[],
     dim: number | { valueOf(): number }
@@ -2074,8 +2173,7 @@ export const mean = mathTyped('mean', {
     arr: f64[],
     dim: number | { valueOf(): number },
     opts: StatReduceOptions
-  ): number | number[] =>
-    numbersOnly(meanAlongData(arr, dim, normalizationFromSecondArg(opts).skipNaN), 'mean'),
+  ): number | number[] => meanWithOptions(arr, dim, opts),
 
   Float64Array: (a: Float64Array): f64 => meanOfNumeric(a),
   'Float64Array, Object': (a: Float64Array, opts: StatReduceOptions): f64 => {
@@ -2090,7 +2188,7 @@ export const mean = mathTyped('mean', {
 
   Matrix: (m: unknown): f64 => (meanOfInput(m, false) ?? exactMean(m)) as f64,
   'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 =>
-    numbersOnly(meanOfInput(m, normalizationFromSecondArg(opts).skipNaN), 'mean'),
+    meanWithOptions(m, undefined, opts) as f64,
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
@@ -2099,8 +2197,7 @@ export const mean = mathTyped('mean', {
     m: unknown,
     dim: number | { valueOf(): number },
     opts: StatReduceOptions
-  ): number | number[] =>
-    numbersOnly(meanAlongData(m, dim, normalizationFromSecondArg(opts).skipNaN), 'mean'),
+  ): number | number[] => meanWithOptions(m, dim, opts),
   // mean(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
   // computes the result, so an exact scalar type stays exact.
   '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
@@ -2206,11 +2303,13 @@ export const variance = mathTyped('variance', {
   },
   'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(varianceWith(arr, request, skipNaN), 'variance');
+    return (varianceWith(arr, request, skipNaN) ??
+      exactVarianceWith('variance', arr, undefined, request, skipNaN)) as f64;
   },
   'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return numbersOnly(varianceWith(arr, request, skipNaN), 'variance');
+    return (varianceWith(arr, request, skipNaN) ??
+      exactVarianceWith('variance', arr, undefined, request, skipNaN)) as f64;
   },
   'Array, number | BigNumber': (
     arr: f64[],
@@ -2232,7 +2331,8 @@ export const variance = mathTyped('variance', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(varianceAlongData(arr, dim, request, skipNaN), 'variance');
+    return (varianceAlongData(arr, dim, request, skipNaN) ??
+      exactVarianceWith('variance', arr, dim, request, skipNaN)) as number | number[];
   },
 
   Float64Array: (a: Float64Array): f64 => varianceOf(a, UNBIASED),
@@ -2269,11 +2369,13 @@ export const variance = mathTyped('variance', {
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(varianceWith(m, request, skipNaN), 'variance');
+    return (varianceWith(m, request, skipNaN) ??
+      exactVarianceWith('variance', m, undefined, request, skipNaN)) as f64;
   },
   'Matrix, string, Object': (m: unknown, norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return numbersOnly(varianceWith(m, request, skipNaN), 'variance');
+    return (varianceWith(m, request, skipNaN) ??
+      exactVarianceWith('variance', m, undefined, request, skipNaN)) as f64;
   },
   'Matrix, number | BigNumber': (
     m: unknown,
@@ -2295,7 +2397,8 @@ export const variance = mathTyped('variance', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(varianceAlongData(m, dim, request, skipNaN), 'variance');
+    return (varianceAlongData(m, dim, request, skipNaN) ??
+      exactVarianceWith('variance', m, dim, request, skipNaN)) as number | number[];
   },
   // variance(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
   // computes the result, so an exact scalar type stays exact.
@@ -2355,11 +2458,13 @@ export const std = mathTyped('std', {
   },
   'Array, Object': (arr: f64[], arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(sqrtNumber(varianceWith(arr, request, skipNaN)), 'std');
+    return (sqrtNumber(varianceWith(arr, request, skipNaN)) ??
+      exactVarianceWith('std', arr, undefined, request, skipNaN)) as f64;
   },
   'Array, string, Object': (arr: f64[], norm: string, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromStringAndOptions(norm, arg);
-    return numbersOnly(sqrtNumber(varianceWith(arr, request, skipNaN)), 'std');
+    return (sqrtNumber(varianceWith(arr, request, skipNaN)) ??
+      exactVarianceWith('std', arr, undefined, request, skipNaN)) as f64;
   },
   'Array, number | BigNumber': (
     arr: f64[],
@@ -2381,7 +2486,8 @@ export const std = mathTyped('std', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(stdAlongData(arr, dim, request, skipNaN), 'std');
+    return (stdAlongData(arr, dim, request, skipNaN) ??
+      exactVarianceWith('std', arr, dim, request, skipNaN)) as number | number[];
   },
 
   Float64Array: (a: Float64Array): f64 => Math.sqrt(varianceOf(a, UNBIASED)),
@@ -2418,7 +2524,8 @@ export const std = mathTyped('std', {
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(sqrtNumber(varianceWith(m, request, skipNaN)), 'std');
+    return (sqrtNumber(varianceWith(m, request, skipNaN)) ??
+      exactVarianceWith('std', m, undefined, request, skipNaN)) as f64;
   },
   'Matrix, number | BigNumber': (
     m: unknown,
@@ -2439,7 +2546,8 @@ export const std = mathTyped('std', {
     arg: StatReduceOptions
   ): number | number[] => {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
-    return numbersOnly(stdAlongData(m, dim, request, skipNaN), 'std');
+    return (stdAlongData(m, dim, request, skipNaN) ??
+      exactVarianceWith('std', m, dim, request, skipNaN)) as number | number[];
   },
   // std(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
   // computes the result, so an exact scalar type stays exact.
