@@ -8,7 +8,7 @@
     "packages/typed-function/dist/index.js": 4566,
     "packages/typed-function/package.json": 2215,
     "packages/workerpool/dist/index.js": 54752,
-    "packages/workerpool/dist/worker.js": 24823,
+    "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
     "core/dist/index.js": 230568,
     "core/dist/internal.js": 230923,
