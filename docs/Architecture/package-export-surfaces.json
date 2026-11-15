@@ -2341,6 +2341,7 @@
       "createUtil",
       "createVacuumImpedance",
       "createVariance",
+      "createVarianceDdof",
       "createWeakMixingAngle",
       "createWienDisplacement",
       "createXgcd",

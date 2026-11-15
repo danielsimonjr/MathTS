@@ -16,6 +16,8 @@ export interface ExactReductions {
   variance: ExactReductionFn;
   sqrt: ExactReductionFn;
   dot: ExactReductionFn;
+  varianceDdof: ExactReductionFn;
+  isNaN: ExactReductionFn;
 }
 
 const registered: { fns?: ExactReductions } = {};

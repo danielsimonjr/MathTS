@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-15'
   totalFiles: 1335
   totalModules: 82
-  totalExports: 7307
+  totalExports: 7308
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15481,6 +15481,7 @@ modules:
         - file: ../statistics/variance.js
           imports:
             - createVariance
+            - createVarianceDdof
         - file: ../statistics/quantileSeq.js
           imports:
             - createQuantileSeq
@@ -21967,8 +21968,10 @@ modules:
             - sumSquaredDeviations
       exports:
         - createVariance
+        - createVarianceDdof
       constants:
         - createVariance
+        - createVarianceDdof
   functions/stats:
     functions/src/stats/distances.ts:
       description: Distances between samples and discrete information measures (gap-analysis
@@ -46085,14 +46088,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1335
   totalModules: 82
-  totalLinesOfCode: 231191
-  totalExports: 7307
+  totalLinesOfCode: 231342
+  totalExports: 7308
   totalClasses: 62
   totalInterfaces: 663
   totalFunctions: 2506
   totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1678
+  totalConstants: 1679
   totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2

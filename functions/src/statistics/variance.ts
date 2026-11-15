@@ -45,6 +45,45 @@ type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
 
 const DEFAULT_NORMALIZATION: NormalizationType = 'unbiased';
 
+/** The operations that the exact sum of squared deviations needs. */
+type DeviationOps = Pick<
+  VarianceDependencies,
+  'add' | 'subtract' | 'multiply' | 'divide' | 'conj' | 're' | 'parseNumberWithConfig'
+>;
+
+/**
+ * The sum of squared deviations from the mean of every value of `array`, at any depth, and the
+ * number of values. A string value becomes a number of the configured type, as in `sum`. A
+ * Complex deviation contributes `diff * conj(diff)` (a real number).
+ */
+function sumOfSquaredDeviations(
+  array: unknown[] | MatrixType,
+  ops: DeviationOps
+): { sum: unknown; num: number } {
+  const { add, subtract, multiply, divide, conj, re, parseNumberWithConfig } = ops;
+  const toValue = (v: unknown): unknown => (typeof v === 'string' ? parseNumberWithConfig(v) : v);
+  let sum: unknown;
+  let num = 0;
+  deepForEach(array, function (value: unknown) {
+    try {
+      const x = toValue(value);
+      sum = sum === undefined ? x : add(sum, x);
+      num++;
+    } catch (err) {
+      throw improveErrorMessage(err, 'variance', value);
+    }
+  });
+  if (num === 0) throw new Error('Cannot calculate variance of an empty array');
+  const mean = divide(sum, num);
+  sum = undefined;
+  deepForEach(array, function (value: unknown) {
+    const diff = subtract(toValue(value), mean);
+    const sq = isComplex(diff) ? re(multiply(diff, conj(diff))) : multiply(diff, diff);
+    sum = sum === undefined ? sq : add(sum, sq);
+  });
+  return { sum, num };
+}
+
 const name = 'variance';
 const dependencies = [
   'typed',
@@ -74,12 +113,7 @@ export const createVariance = /* #__PURE__ */ factory(
     re,
     parseNumberWithConfig,
   }: VarianceDependencies) => {
-    /** A string value becomes a number of the configured type, as in `sum`. */
-    const toValue = (v: unknown): unknown => (typeof v === 'string' ? parseNumberWithConfig(v) : v);
-
-    /** A squared deviation: `diff * conj(diff)` for Complex (real, |diff|^2), else `diff * diff`. */
-    const squaredDeviation = (diff: unknown): unknown =>
-      isComplex(diff) ? re(multiply(diff, conj(diff))) : multiply(diff, diff);
+    const ops: DeviationOps = { add, subtract, multiply, divide, conj, re, parseNumberWithConfig };
 
     /**
      * Compute the variance of a matrix or a  list with values.
@@ -201,30 +235,7 @@ export const createVariance = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, and multi-dimensional input.
-      let sum: unknown;
-      let num = 0;
-
-      // calculate the mean and number of elements
-      deepForEach(array, function (value: unknown) {
-        try {
-          const x = toValue(value);
-          sum = sum === undefined ? x : add(sum, x);
-          num++;
-        } catch (err) {
-          throw improveErrorMessage(err, 'variance', value);
-        }
-      });
-      if (num === 0) throw new Error('Cannot calculate variance of an empty array');
-
-      const mean = divide(sum, num);
-
-      // calculate the variance
-      sum = undefined;
-      deepForEach(array, function (value: unknown) {
-        const diff = subtract(toValue(value), mean);
-        const sq = squaredDeviation(diff);
-        sum = sum === undefined ? sq : add(sum, sq);
-      });
+      const { sum, num } = sumOfSquaredDeviations(array, ops);
 
       if (mathIsNaN(sum)) {
         return sum;
@@ -279,4 +290,32 @@ export const createVariance = /* #__PURE__ */ factory(
       }
     }
   }
+);
+
+const ddofDependencies = [
+  'add',
+  'subtract',
+  'multiply',
+  'divide',
+  'isNaN',
+  'conj',
+  're',
+  'parseNumberWithConfig',
+];
+
+/**
+ * The variance with a NumPy `ddof`: the sum of squared deviations divided by `n - ddof`, with one
+ * division, so exact types stay exact. NaN when `n - ddof` is not positive. Internal: the typed
+ * `variance` and `std` use it for exact data with an options object.
+ */
+export const createVarianceDdof = /* #__PURE__ */ factory(
+  'varianceDdof',
+  ddofDependencies,
+  ({ isNaN: mathIsNaN, ...ops }: Omit<VarianceDependencies, 'typed' | 'mapSlices'>) =>
+    (array: unknown, ddof: unknown): unknown => {
+      const { sum, num } = sumOfSquaredDeviations(array as unknown[] | MatrixType, ops);
+      if (mathIsNaN(sum)) return sum;
+      const divisor = num - (ddof as number);
+      return divisor > 0 ? ops.divide(sum, divisor) : NaN;
+    }
 );

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-15",
     "totalFiles": 1335,
     "totalModules": 82,
-    "totalExports": 7307
+    "totalExports": 7308
   },
   "entryPoints": [
     {
@@ -16490,7 +16490,7 @@
           },
           {
             "file": "../statistics/variance.js",
-            "imports": ["createVariance"]
+            "imports": ["createVariance", "createVarianceDdof"]
           },
           {
             "file": "../statistics/quantileSeq.js",
@@ -23261,8 +23261,8 @@
             "imports": ["sumSquaredDeviations"]
           }
         ],
-        "exports": ["createVariance"],
-        "constants": ["createVariance"]
+        "exports": ["createVariance", "createVarianceDdof"],
+        "constants": ["createVariance", "createVarianceDdof"]
       }
     },
     "functions/stats": {
@@ -48835,14 +48835,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 231191,
-    "totalExports": 7307,
+    "totalLinesOfCode": 231342,
+    "totalExports": 7308,
     "totalClasses": 62,
     "totalInterfaces": 663,
     "totalFunctions": 2506,
     "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1678,
+    "totalConstants": 1679,
     "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,

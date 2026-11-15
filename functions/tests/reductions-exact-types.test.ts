@@ -368,12 +368,10 @@ describe('mean, variance and std keep exact types', () => {
     expect(ratio(variance(F, 'uncorrected'))).toEqual([1n, 144n]);
   });
 
-  it('an options object with exact data throws', () => {
-    expect(() => mean(F, { skipNaN: true })).toThrow(/options object needs number data/);
-    expect(() => variance(B, { ddof: 0 })).toThrow(/options object needs number data/);
-    expect(() => std(F, 'uncorrected', { skipNaN: true })).toThrow(
-      /options object needs number data/
-    );
+  it('an options object with exact data gives the exact result (#1050)', () => {
+    expect(String(mean(F, { skipNaN: true }))).toBe(String(mean(F)));
+    expect(String(variance(B, { ddof: 0 }))).toBe(String(variance(B, 'uncorrected')));
+    expect(String(std(F, 'uncorrected', { skipNaN: true }))).toBe(String(std(F, 'uncorrected')));
   });
 
   it('numeric strings and bigints follow mathjs', () => {
