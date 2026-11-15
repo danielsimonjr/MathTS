@@ -2,9 +2,8 @@
  * Distances between samples and discrete information measures (gap-analysis
  * 2026-11-04, Batch A).
  */
+import { numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
-
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /**
  * 1-D Wasserstein (earth mover's) distance: ∫|F_u(t) − F_v(t)| dt, computed
@@ -15,11 +14,11 @@ export function wassersteinDistance(
   v: Vec,
   opts?: { uWeights?: Vec; vWeights?: Vec }
 ): number {
-  const uv = arr(u);
-  const vv = arr(v);
+  const uv = numberVector('wassersteinDistance', u);
+  const vv = numberVector('wassersteinDistance', v);
   if (uv.length === 0 || vv.length === 0) throw new RangeError('wassersteinDistance: empty sample');
-  const uw = normWeights(uv, opts?.uWeights);
-  const vw = normWeights(vv, opts?.vWeights);
+  const uw = normWeights('wassersteinDistance', uv, opts?.uWeights);
+  const vw = normWeights('wassersteinDistance', vv, opts?.vWeights);
   // ∫|F_u − F_v| dt over the merged support, sweeping both sorted samples
   // once (O(n log n)); the two CDFs are running weight sums.
   const su = sortedWithWeights(uv, uw);
@@ -44,9 +43,9 @@ function sortedWithWeights(x: number[], w: number[]): Array<[number, number]> {
   return x.map((v, i): [number, number] => [v, w[i]]).sort((a, b) => a[0] - b[0]);
 }
 
-function normWeights(x: number[], w: Vec | undefined): number[] {
+function normWeights(name: string, x: number[], w: Vec | undefined): number[] {
   if (!w) return x.map(() => 1 / x.length);
-  const ws = arr(w);
+  const ws = numberVector(name, w);
   if (ws.length !== x.length) throw new RangeError('weights must match sample length');
   if (ws.some((v) => v < 0)) throw new RangeError('weights must be non-negative');
   const s = ws.reduce((acc, v) => acc + v, 0);
@@ -59,8 +58,8 @@ function normWeights(x: number[], w: Vec | undefined): number[] {
  * (diagonal pairs included).
  */
 export function energyDistance(u: Vec, v: Vec): number {
-  const uv = arr(u);
-  const vv = arr(v);
+  const uv = numberVector('energyDistance', u);
+  const vv = numberVector('energyDistance', v);
   if (uv.length === 0 || vv.length === 0) throw new RangeError('energyDistance: empty sample');
   const meanAbs = (a: number[], b: number[]): number => {
     let s = 0;
@@ -96,7 +95,7 @@ export function mutualInformation(x: readonly number[], y: readonly number[]): n
 
 /** Empirical CDF: step points and an `evaluate(t)` function (fraction of values ≤ t). */
 export function ecdf(x: Vec): { x: number[]; y: number[]; evaluate: (t: number) => number } {
-  const xs = arr(x)
+  const xs = numberVector('ecdf', x)
     .slice()
     .sort((a, b) => a - b);
   const n = xs.length;

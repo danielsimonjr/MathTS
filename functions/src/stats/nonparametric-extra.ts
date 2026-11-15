@@ -4,10 +4,10 @@
  */
 import { chiSquaredSF } from '../distribution-functions.js';
 import { normalCDF as _normalCDF } from '../typed/distributions.js';
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
 
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const normalCDF = (z: number): number => _normalCDF(z) as number;
 
 function median(a: number[]): number {
@@ -23,7 +23,7 @@ export function signTest(
   x: Vec,
   medianValue = 0
 ): { statistic: number; pValue: number; nPos: number; nNeg: number } {
-  const xs = arr(x);
+  const xs = numberVector('signTest', x);
   const nPos = xs.filter((v) => v > medianValue).length;
   const nNeg = xs.filter((v) => v < medianValue).length;
   const n = nPos + nNeg;
@@ -54,7 +54,7 @@ export function runsTest(
   if (x.length > 0 && typeof x[0] === 'boolean') {
     seq = (x as readonly boolean[]).slice();
   } else {
-    const nums = arr(x as Vec);
+    const nums = numberVector('runsTest', x as Vec);
     const cut = opts?.cutoff ?? median(nums);
     seq = nums.filter((v) => v !== cut).map((v) => v > cut);
   }
@@ -76,7 +76,7 @@ export function moodMedianTest(groups: readonly Vec[]): {
   pValue: number;
   grandMedian: number;
 } {
-  const gs = groups.map(arr);
+  const gs = groups.map((g) => numberVector('moodMedianTest', g));
   const grandMedian = median(gs.flat());
   const above = gs.map((g) => g.filter((v) => v > grandMedian).length);
   const below = gs.map((g, i) => g.length - above[i]);
@@ -105,9 +105,9 @@ export function powerDivergence(
   expected?: Vec,
   lambda = 1
 ): { statistic: number; pValue: number } {
-  const o = arr(observed);
+  const o = numberVector('powerDivergence', observed);
   const total = o.reduce((s, v) => s + v, 0);
-  const e = expected ? arr(expected) : o.map(() => total / o.length);
+  const e = expected ? numberVector('powerDivergence', expected) : o.map(() => total / o.length);
   if (e.length !== o.length) throw new RangeError('expected must match observed in length');
   if (lambda === -1) throw new RangeError('powerDivergence: lambda = -1 is singular');
   let stat = 0;
@@ -136,7 +136,7 @@ export function jackknife(
   x: Vec,
   stat: (sample: number[]) => number
 ): { estimate: number; bias: number; se: number } {
-  const xs = arr(x);
+  const xs = numberVector('jackknife', x);
   const n = xs.length;
   if (n < 2) throw new RangeError('jackknife needs at least 2 observations');
   const theta = stat(xs);

@@ -5,9 +5,9 @@
  * `autoCorrelation`).
  */
 import { mean as _mean } from './typed/arithmetic.js';
+import { numberVector } from './typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const mean = (x: number[]): number => _mean(x) as number;
 
 /**
@@ -15,7 +15,7 @@ const mean = (x: number[]): number => _mean(x) as number;
  * length `n − w + 1` (the "valid" convolution, like `numpy.convolve(..., 'valid')`).
  */
 export function movingAverage(x: Vec, w: number): number[] {
-  const a = arr(x);
+  const a = numberVector('movingAverage', x);
   if (w <= 0 || w > a.length) throw new Error(`movingAverage: window ${w} out of range`);
   const out: number[] = [];
   let sum = 0;
@@ -33,7 +33,7 @@ export function movingAverage(x: Vec, w: number): number[] {
  * adjust=False).mean()`. Output has the same length as the input.
  */
 export function ewma(x: Vec, alpha: number): number[] {
-  const a = arr(x);
+  const a = numberVector('ewma', x);
   if (alpha <= 0 || alpha > 1) throw new Error('ewma: alpha must be in (0, 1]');
   if (a.length === 0) throw new Error('ewma: input series is empty');
   const out = new Array<number>(a.length);
@@ -51,7 +51,7 @@ export function ewma(x: Vec, alpha: number): number[] {
  * `'constant'` subtracts the mean. Matches `scipy.signal.detrend`.
  */
 export function detrend(x: Vec, type: 'linear' | 'constant' = 'linear'): number[] {
-  const a = arr(x);
+  const a = numberVector('detrend', x);
   const n = a.length;
   if (type === 'constant') {
     const m = mean(a);
@@ -80,7 +80,7 @@ export function detrend(x: Vec, type: 'linear' | 'constant' = 'linear'): number[
  * (÷n, like `statsmodels.tsa.stattools.acf`). `acf[0] = 1`.
  */
 export function acf(x: Vec, nlags: number): number[] {
-  const a = arr(x);
+  const a = numberVector('acf', x);
   const n = a.length;
   if (nlags < 0 || nlags >= n)
     throw new Error(`acf: nlags ${nlags} out of range for series length ${n}`);

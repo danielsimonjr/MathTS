@@ -10,6 +10,7 @@
 import { DenseMatrix, lu, matrixSchur } from '@danielsimonjr/mathts-matrix';
 import { inv as _invRaw, eigs as _eigsRaw, qr as _qrRaw } from './factories/index.js';
 import { multiply as _multiplyRaw } from './typed/arithmetic.js';
+import { numberVector } from './typed/number-matrix.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 const _eigs = _eigsRaw as unknown as (m: number[][]) => {
@@ -38,7 +39,6 @@ function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
 }
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /**
  * Generalized eigenvalues of the pencil `A x = λ B x` (B nonsingular), via the
@@ -75,7 +75,7 @@ export function triu(A: readonly number[][], k = 0): number[][] {
  * `x.length`.
  */
 export function vander(x: Vec, n?: number, increasing = false): number[][] {
-  const v = arr(x);
+  const v = numberVector('vander', x);
   const N = n ?? v.length;
   return v.map((xi) =>
     Array.from({ length: N }, (_, j) => Math.pow(xi, increasing ? j : N - 1 - j))
@@ -87,8 +87,8 @@ export function vander(x: Vec, n?: number, increasing = false): number[][] {
  * along each diagonal. `T[i][j] = c[i-j]` for `i ≥ j`, else `r[j-i]`.
  */
 export function toeplitz(c: Vec, r?: Vec): number[][] {
-  const col = arr(c);
-  const row = r === undefined ? col : arr(r);
+  const col = numberVector('toeplitz', c);
+  const row = r === undefined ? col : numberVector('toeplitz', r);
   const m = col.length;
   const n = row.length;
   return Array.from({ length: m }, (_, i) =>
@@ -98,7 +98,7 @@ export function toeplitz(c: Vec, r?: Vec): number[][] {
 
 /** Circulant matrix: each row is the previous one rotated right by one. */
 export function circulant(c: Vec): number[][] {
-  const col = arr(c);
+  const col = numberVector('circulant', c);
   const n = col.length;
   return Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => col[(i - j + n) % n])
@@ -111,7 +111,7 @@ export function circulant(c: Vec): number[][] {
  * Its eigenvalues are the polynomial's roots.
  */
 export function companion(coeffs: Vec): number[][] {
-  const a = arr(coeffs);
+  const a = numberVector('companion', coeffs);
   const n = a.length - 1;
   if (n < 1) throw new Error('companion: need at least 2 coefficients');
   if (a[0] === 0) throw new Error('companion: leading coefficient must be nonzero');

@@ -1864,6 +1864,30 @@
       "functions/src/typed/index.ts"
     ],
     "functions/src/kendall-exact.ts": ["functions/src/descriptive-stats.ts"],
+    "functions/src/typed/number-matrix.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/linalg-extra.ts",
+      "functions/src/numeric-extra.ts",
+      "functions/src/regression-extra.ts",
+      "functions/src/signal-filter-extra.ts",
+      "functions/src/signal/dtw.ts",
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/iir-design.ts",
+      "functions/src/signal/lomb-scargle.ts",
+      "functions/src/signal/system-response.ts",
+      "functions/src/signal/waveforms.ts",
+      "functions/src/stats/distances.ts",
+      "functions/src/stats/effect-sizes.ts",
+      "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/stats/robust-stats.ts",
+      "functions/src/stats/timeseries.ts",
+      "functions/src/stats/weighted-stats.ts",
+      "functions/src/timeseries-extra.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/integration.ts",
+      "functions/src/typed/matrix-ops.ts"
+    ],
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
       "functions/src/stats/inference-extra2.ts",
@@ -2732,10 +2756,6 @@
       "functions/src/typed/cas.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
-    "functions/src/typed/number-matrix.ts": [
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/matrix-ops.ts"
-    ],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/distributions.ts",

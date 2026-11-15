@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2427,
+  "totalFiles": 2428,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1026,
+    "test": 1027,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1026,
+    "tests": 1027,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1089,
+    "@danielsimonjr/mathts-functions": 1090,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -569,7 +569,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 59
+      "loc": 90
     },
     {
       "file": "compat/tests/cross-copy-shims.test.ts",
@@ -6596,7 +6596,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 661
+      "loc": 675
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -7408,7 +7408,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 147
+      "loc": 154
     },
     {
       "file": "functions/src/numeric/adaptive-quad.ts",
@@ -8087,7 +8087,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 347
+      "loc": 351
     },
     {
       "file": "functions/src/signal/conv.ts",
@@ -8444,7 +8444,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 124
+      "loc": 123
     },
     {
       "file": "functions/src/stats/distributions-extra.ts",
@@ -8528,21 +8528,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 142
+      "loc": 141
     },
     {
       "file": "functions/src/stats/timeseries.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 223
+      "loc": 221
     },
     {
       "file": "functions/src/stats/weighted-stats.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 92
+      "loc": 91
     },
     {
       "file": "functions/src/string/bin.ts",
@@ -9018,7 +9018,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2670
+      "loc": 2669
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9228,7 +9228,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 662
+      "loc": 665
     },
     {
       "file": "functions/src/typed/interpolation.ts",
@@ -9270,7 +9270,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 37
+      "loc": 87
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -10173,7 +10173,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 64
+      "loc": 93
     },
     {
       "file": "functions/tests/curves.test.ts",
@@ -11854,6 +11854,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 47
+    },
+    {
+      "file": "functions/tests/number-only-stats-1042.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 210
     },
     {
       "file": "functions/tests/numbertheory-extra.test.ts",
@@ -14058,7 +14065,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 108
+      "loc": 128
     },
     {
       "file": "matrix/tests/decomposition/dogfood-g05-decomposition-inputs.test.ts",
@@ -14422,7 +14429,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 102
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

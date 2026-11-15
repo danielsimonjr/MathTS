@@ -29,9 +29,9 @@ import {
 import { lfilter } from '../signal-filter-extra.js';
 import { ellipticKScalar } from '../wasm/special/scalars.js';
 import { jacobiCN, jacobiDN, jacobiSN } from '../special/jacobi-elliptic.js';
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 // --- Chebyshev Type I prototype (scipy `cheb1ap`) ---------------------------
 
@@ -313,8 +313,8 @@ function trimLeadingZeros(coeffs: number[]): number[] {
  * `scipy.signal.bilinear(b, a, fs)`.
  */
 export function bilinear(bIn: Vec, aIn: Vec, fs: number): { b: number[]; a: number[] } {
-  const bTrim = trimLeadingZeros(arr(bIn));
-  const aTrim = trimLeadingZeros(arr(aIn));
+  const bTrim = trimLeadingZeros(numberVector('bilinear', bIn));
+  const aTrim = trimLeadingZeros(numberVector('bilinear', aIn));
   const Q = bTrim.length - 1;
   const P = aTrim.length - 1;
   const N = Math.max(P, Q);
@@ -662,7 +662,7 @@ export function zpk2sos(z: readonly ZpkRoot[], p: readonly ZpkRoot[], k: number)
  * Matches `scipy.signal.sosfilt(sos, x)`.
  */
 export function sosfilt(sos: readonly (readonly number[])[], x: Vec): number[] {
-  let y = arr(x);
+  let y = numberVector('sosfilt', x);
   for (const section of sos) {
     if (section.length !== 6)
       throw new Error('sosfilt: each section must have 6 coefficients [b0,b1,b2,a0,a1,a2]');

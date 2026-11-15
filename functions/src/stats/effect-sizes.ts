@@ -1,9 +1,9 @@
 /**
  * Standardized effect sizes (gap-analysis 2026-11-04, Batch A).
  */
+import { numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const meanOf = (a: number[]): number => a.reduce((s, v) => s + v, 0) / a.length;
 const varOf = (a: number[]): number => {
   const m = meanOf(a);
@@ -12,8 +12,8 @@ const varOf = (a: number[]): number => {
 
 /** Cohen's d with the pooled (ddof 1) standard deviation. */
 export function cohensD(a: Vec, b: Vec): number {
-  const xa = arr(a);
-  const xb = arr(b);
+  const xa = numberVector('cohensD', a);
+  const xb = numberVector('cohensD', b);
   const n1 = xa.length;
   const n2 = xb.length;
   if (n1 < 2 || n2 < 2) throw new RangeError('cohensD: each sample needs at least 2 values');
@@ -23,21 +23,21 @@ export function cohensD(a: Vec, b: Vec): number {
 
 /** Hedges' g: Cohen's d with the small-sample correction 1 − 3/(4(n₁+n₂) − 9). */
 export function hedgesG(a: Vec, b: Vec): number {
-  const n = arr(a).length + arr(b).length;
+  const n = numberVector('hedgesG', a).length + numberVector('hedgesG', b).length;
   return cohensD(a, b) * (1 - 3 / (4 * n - 9));
 }
 
 /** Glass's Δ: (mean a − mean b) / sd(b). */
 export function glassDelta(a: Vec, b: Vec): number {
-  const xb = arr(b);
-  if (arr(a).length < 1 || xb.length < 2)
+  const xb = numberVector('glassDelta', b);
+  if (numberVector('glassDelta', a).length < 1 || xb.length < 2)
     throw new RangeError('glassDelta: needs a non-empty a and at least 2 values in b');
-  return (meanOf(arr(a)) - meanOf(xb)) / Math.sqrt(varOf(xb));
+  return (meanOf(numberVector('glassDelta', a)) - meanOf(xb)) / Math.sqrt(varOf(xb));
 }
 
 /** η² = SS_between / SS_total across groups. */
 export function etaSquared(groups: readonly Vec[]): number {
-  const gs = groups.map(arr);
+  const gs = groups.map((g) => numberVector('etaSquared', g));
   const all = gs.flat();
   const grand = meanOf(all);
   let ssBetween = 0;
@@ -53,8 +53,8 @@ export function etaSquared(groups: readonly Vec[]): number {
  * 1 − 2U_b/(n₁n₂) with U_b = n₁n₂ − U_a.
  */
 export function rankBiserial(a: Vec, b: Vec): number {
-  const xa = arr(a);
-  const xb = arr(b);
+  const xa = numberVector('rankBiserial', a);
+  const xb = numberVector('rankBiserial', b);
   if (xa.length === 0 || xb.length === 0) throw new RangeError('rankBiserial: empty sample');
   let u = 0;
   for (const av of xa) {

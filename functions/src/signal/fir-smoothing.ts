@@ -8,9 +8,9 @@
 import { sinc } from '../signal-filter-extra.js';
 import { convDirect } from './conv.js';
 import { remezExchange, type RemezType } from './remez-exchange.js';
+import { numberVector } from '../typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
 /** Polynomial/deconvolution division result: `signal = conv(divisor, quotient) + remainder`. */
 export interface DeconvolveResult {
@@ -115,7 +115,7 @@ function evalPoly(c: readonly number[], t: number): number {
  * Exact on polynomials of degree <= `polyorder`.
  */
 export function savgol(x: Vec, windowLength: number, polyorder: number): number[] {
-  const xx = arr(x);
+  const xx = numberVector('savgol', x);
   const n = xx.length;
   if (!Number.isInteger(windowLength) || windowLength < 1 || windowLength % 2 === 0)
     throw new Error('savgol: windowLength must be a positive odd integer');
@@ -153,8 +153,8 @@ export function savgol(x: Vec, windowLength: number, polyorder: number): number[
  * `remainder` the same length as `signal` (zero when `divisor` exactly divides).
  */
 export function deconvolve(signal: Vec, divisor: Vec): DeconvolveResult {
-  const s = arr(signal);
-  const d = arr(divisor);
+  const s = numberVector('deconvolve', signal);
+  const d = numberVector('deconvolve', divisor);
   const N = s.length;
   const D = d.length;
   if (D === 0) throw new Error('deconvolve: divisor must be non-empty');
@@ -181,7 +181,7 @@ export function deconvolve(signal: Vec, divisor: Vec): DeconvolveResult {
  * `m + max(0, v−noise)/max(v, noise)·(x−m)` (0 where both `v` and `noise` are 0).
  */
 export function wiener(x: Vec, mysize = 3): number[] {
-  const xx = arr(x);
+  const xx = numberVector('wiener', x);
   const n = xx.length;
   if (!Number.isInteger(mysize) || mysize < 1)
     throw new Error('wiener: mysize must be a positive integer');

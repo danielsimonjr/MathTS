@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-15",
     "totalFiles": 1335,
     "totalModules": 82,
-    "totalExports": 7305
+    "totalExports": 7307
   },
   "entryPoints": [
     {
@@ -10392,6 +10392,10 @@
           {
             "file": "./kendall-exact.js",
             "imports": ["kendallPExact", "kendallShouldUseExact"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -10670,6 +10674,10 @@
           {
             "file": "./typed/special.js",
             "imports": ["lgamma"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -13788,6 +13796,10 @@
           {
             "file": "./typed/arithmetic.js",
             "imports": ["multiply"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [
@@ -13953,6 +13965,10 @@
           {
             "file": "./typed/arithmetic.js",
             "imports": ["sum"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["assertNumberScalar", "numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -14025,6 +14041,10 @@
           {
             "file": "./distribution-functions.js",
             "imports": ["studentTTwoSidedP"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [
@@ -14494,6 +14514,10 @@
           {
             "file": "./linalg-extra.js",
             "imports": ["companion"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [
@@ -14587,6 +14611,10 @@
           {
             "file": "./typed/arithmetic.js",
             "imports": ["mean"]
+          },
+          {
+            "file": "./typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -21952,7 +21980,12 @@
         "description": "Dynamic time warping with an optional Sakoe-Chiba band.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["dtw"],
         "interfaces": ["DtwOptions", "DtwResult"],
@@ -22064,6 +22097,10 @@
           {
             "file": "./remez-exchange.js",
             "imports": ["remezExchange", "RemezType"]
+          },
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -22119,6 +22156,10 @@
           {
             "file": "../special/jacobi-elliptic.js",
             "imports": ["jacobiCN", "jacobiDN", "jacobiSN"]
+          },
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [
@@ -22145,7 +22186,12 @@
         "description": "Lomb-Scargle periodogram for unevenly sampled data (classic Scargle form with",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["lombScargle"],
         "interfaces": ["LombScargleOptions"],
@@ -22200,6 +22246,10 @@
             "file": "./fft.js",
             "imports": ["ComplexNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -22231,7 +22281,12 @@
         "description": "Test waveform generators (scipy.signal.waveforms parity).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["chirp", "squareWave", "sawtooth", "gaussPulse", "unitImpulse", "sweepPoly"],
         "interfaces": ["ChirpOptions"],
@@ -23210,7 +23265,12 @@
         "description": "Distances between samples and discrete information measures (gap-analysis",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["wassersteinDistance", "energyDistance", "mutualInformation", "ecdf"],
         "functions": ["wassersteinDistance", "energyDistance", "mutualInformation", "ecdf"]
@@ -23279,7 +23339,12 @@
         "description": "Standardized effect sizes (gap-analysis 2026-11-04, Batch A).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["cohensD", "hedgesG", "glassDelta", "etaSquared", "rankBiserial"],
         "functions": ["cohensD", "hedgesG", "glassDelta", "etaSquared", "rankBiserial"]
@@ -23443,6 +23508,10 @@
           {
             "file": "../typed/distributions.js",
             "imports": ["normalCDF"]
+          },
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -23500,7 +23569,12 @@
         "description": "Generalized means, geometric standard deviation, robust regression slopes",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["pmean", "gstd", "gzscore", "theilSen", "siegelSlopes", "partialCorrelation"],
         "functions": ["pmean", "gstd", "gzscore", "theilSen", "siegelSlopes", "partialCorrelation"]
@@ -23521,6 +23595,10 @@
           {
             "file": "../ml/ols.js",
             "imports": ["ols"]
+          },
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -23532,7 +23610,12 @@
         "description": "Weighted descriptive statistics (gap-analysis 2026-11-04, Batch A).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["weightedMean", "weightedVariance", "weightedQuantile", "weightedMedian"],
         "functions": ["weightedMean", "weightedVariance", "weightedQuantile", "weightedMedian"]
@@ -25665,7 +25748,7 @@
         "internalDependencies": [
           {
             "file": "./number-matrix.js",
-            "imports": ["assertRectangular", "isNumberMatrix"]
+            "imports": ["assertRectangular", "isNumberMatrix", "numberVector"]
           },
           {
             "file": "./euclid.js",
@@ -27864,7 +27947,12 @@
         "description": "Numerical Integration Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./number-matrix.js",
+            "imports": ["numberVector"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -28113,8 +28201,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["isNumberMatrix", "assertRectangular"],
-        "functions": ["isNumberMatrix", "assertRectangular"]
+        "exports": ["isNumberMatrix", "assertRectangular", "assertNumberScalar", "numberVector"],
+        "functions": ["isNumberMatrix", "assertRectangular", "assertNumberScalar", "numberVector"]
       },
       "functions/src/typed/numeric.ts": {
         "description": "Typed Numerical Methods Functions",
@@ -48738,11 +48826,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 230542,
-    "totalExports": 7305,
+    "totalLinesOfCode": 230614,
+    "totalExports": 7307,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2504,
+    "totalFunctions": 2506,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1678,

@@ -11,9 +11,9 @@ import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
 import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
+import { numberVector } from './typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
-const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
 const mean = (x: number[]): number => _mean(x) as number;
 const normalCDF = (z: number): number => _normalCDF(z) as number;
@@ -59,8 +59,8 @@ export interface FTestResult {
  * variances; two-sided p-value `2·min(F_cdf, 1−F_cdf)`.
  */
 export function fTest(x: Vec, y: Vec): FTestResult {
-  const a = arr(x);
-  const b = arr(y);
+  const a = numberVector('fTest', x);
+  const b = numberVector('fTest', y);
   if (a.length < 2 || b.length < 2)
     throw new Error('fTest: each sample needs at least 2 observations');
   const df1 = a.length - 1;
@@ -90,7 +90,7 @@ export interface JarqueBeraResult {
  * `JB = n/6·(S² + K²/4)`, asymptotically χ²(2). Bridges descriptive stats ↔ tests.
  */
 export function jarqueBera(x: Vec): JarqueBeraResult {
-  const a = arr(x);
+  const a = numberVector('jarqueBera', x);
   const n = a.length;
   if (n < 2) throw new Error('jarqueBera: need at least 2 observations');
   const s = skewness(a); // population (SciPy bias=true); throws on constant input
@@ -115,7 +115,7 @@ export interface KruskalResult {
  * ranks via {@link rankdata}, and corrects for ties; H is asymptotically χ²(k−1).
  */
 export function kruskalWallis(...groups: Vec[]): KruskalResult {
-  const arrs = groups.map(arr).filter((g) => g.length > 0);
+  const arrs = groups.map((g) => numberVector('kruskalWallis', g)).filter((g) => g.length > 0);
   if (arrs.length < 2) throw new Error('kruskalWallis: need at least 2 non-empty groups');
   const pooled = arrs.flat();
   const N = pooled.length;
@@ -152,8 +152,8 @@ export interface WilcoxonResult {
  * `min(W⁺, W⁻)`.
  */
 export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
-  const a = arr(x);
-  const yy = y !== undefined ? arr(y) : undefined;
+  const a = numberVector('wilcoxon', x);
+  const yy = y !== undefined ? numberVector('wilcoxon', y) : undefined;
   if (yy !== undefined && yy.length !== a.length)
     throw new Error(
       `wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`
@@ -300,7 +300,7 @@ export interface TukeyComparison {
  * p-values from the studentized range distribution. Mirrors `scipy.stats.tukey_hsd`.
  */
 export function tukeyHSD(groups: Vec[], alpha = 0.05): TukeyComparison[] {
-  const gs = groups.map(arr);
+  const gs = groups.map((g) => numberVector('tukeyHSD', g));
   const k = gs.length;
   if (k < 2) throw new Error('tukeyHSD: need at least 2 groups');
   const means = gs.map(mean);
