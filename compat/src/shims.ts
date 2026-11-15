@@ -65,6 +65,7 @@ import {
   ceil as _ceil,
   matrix as _factoryMatrix,
   sparse as _factorySparse,
+  transpose as _transpose,
 } from '@danielsimonjr/mathts-functions';
 
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
@@ -513,7 +514,8 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
     return m.transpose();
   }
   if (isCompatBridgeMatrix(m)) {
-    return (m as { transpose(): CompatMatrixValue }).transpose();
+    // The factory transpose takes the dense and the sparse matrix of the factory layer.
+    return _transpose(m as never) as CompatMatrixValue;
   }
   throw new TypeError('Expected matrix or 2D array');
 }

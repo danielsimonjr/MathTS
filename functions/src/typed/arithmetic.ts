@@ -63,6 +63,7 @@ import {
   DenseMatrix,
   SparseMatrix,
   backendManager,
+  isDenseMatrix,
   isSparseMatrix,
   singularValues,
 } from '@danielsimonjr/mathts-matrix';
@@ -2676,10 +2677,33 @@ export function matmul(
 }
 
 /**
- * Transpose of a row-major `rows x cols` matrix. The result is a new `cols x rows` array.
- * @throws Error when `data` does not hold rows*cols elements
+ * Transpose. With `rows` and `cols`, `data` is a row-major `rows x cols` Float64Array and the
+ * result is a new `cols x rows` Float64Array. With one argument, `data` is a matrix or a nested
+ * array, and the result has the same storage, as in mathjs.
+ * @throws Error when a Float64Array does not hold rows*cols elements
  */
-export function transpose(data: Float64Array, rows: i32, cols: i32): Float64Array {
+export function transpose(data: Float64Array, rows: i32, cols: i32): Float64Array;
+export function transpose<T>(data: readonly (readonly T[])[]): T[][];
+export function transpose<T>(data: readonly T[]): T[];
+export function transpose(data: unknown): unknown;
+export function transpose(data: unknown, rows?: i32, cols?: i32): unknown {
+  if (rows === undefined && cols === undefined) {
+    if (ArrayBuffer.isView(data)) {
+      throw new TypeError(
+        'transpose: a typed array needs rows and cols: transpose(data, rows, cols)'
+      );
+    }
+    // A matrix of the matrix package has its own transpose, which keeps its class.
+    if (isDenseMatrix(data) || isSparseMatrix(data)) return data.transpose();
+    return exactReductions('transpose').transpose(data);
+  }
+  if (typeof rows !== 'number' || typeof cols !== 'number') {
+    throw new TypeError('transpose: pass one matrix, or data, rows and cols');
+  }
+  return transposeFlat(data as Float64Array, rows, cols);
+}
+
+function transposeFlat(data: Float64Array, rows: i32, cols: i32): Float64Array {
   if (data.length !== rows * cols) {
     throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
   }

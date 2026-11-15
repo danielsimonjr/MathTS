@@ -1406,6 +1406,7 @@ registerExactReductions({
   dot: factory_dot,
   varianceDdof: createVarianceDdof(factoryScope as Parameters<typeof createVarianceDdof>[0]),
   isNaN,
+  transpose: factory_transpose,
 });
 
 // setSymDifference (activated factory — superseded by typed/set; kept internal for factoryScope wiring)

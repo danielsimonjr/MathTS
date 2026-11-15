@@ -94,6 +94,16 @@ function _adaptCallbackArity(
 }
 
 /**
+ * The diagonal index `k` as an integer number, as in mathjs. A BigNumber becomes a number.
+ * @throws TypeError when `k` is not an integer
+ */
+function diagonalIndex(k: unknown): number {
+  const n = typeof k === 'number' ? k : Number((k as { valueOf(): unknown }).valueOf());
+  if (!Number.isInteger(n)) throw new TypeError('The parameter k must be an integer number');
+  return n;
+}
+
+/**
  * Dense matrix of numbers with the mathjs `DenseMatrix` interface that the activated
  * factory functions expect.
  *
@@ -413,11 +423,12 @@ export class MathJSDenseMatrix {
    * Extract the k-th diagonal as a new column vector matrix.
    * k=0 is main diagonal, k>0 is above, k<0 is below.
    */
-  diagonal(k: number = 0): MathJSDenseMatrix {
+  diagonal(kArg: number = 0): MathJSDenseMatrix {
+    const k = diagonalIndex(kArg);
     const [rows, cols] = this._size;
     const kRow = k < 0 ? -k : 0;
     const kCol = k > 0 ? k : 0;
-    const diagLen = Math.min(rows - kRow, cols - kCol);
+    const diagLen = Math.max(0, Math.min(rows - kRow, cols - kCol));
     const values: number[] = [];
     for (let i = 0; i < diagLen; i++) {
       values.push(this._data[kRow + i][kCol + i]);
@@ -666,6 +677,38 @@ export class MathJSSparseMatrix {
 
   storage(): string {
     return 'sparse';
+  }
+
+  /**
+   * The k-th diagonal as a sparse column of size [n, 1], as in mathjs. k=0 is the main diagonal.
+   * k>0 is above the main diagonal. k<0 is below the main diagonal. The column holds the stored entries of
+   * the diagonal; a pattern matrix gives a pattern column.
+   */
+  diagonal(kArg: number = 0): MathJSSparseMatrix {
+    const k = diagonalIndex(kArg);
+    const [rows, cols] = this._size;
+    const kRow = k < 0 ? -k : 0;
+    const kCol = k > 0 ? k : 0;
+    const n = Math.max(0, Math.min(rows - kRow, cols - kCol));
+    const values: unknown[] = [];
+    const index: number[] = [];
+    for (let t = 0; t < n; t++) {
+      const c = kCol + t;
+      for (let p = this._ptr[c]; p < this._ptr[c + 1]; p++) {
+        if (this._index[p] === kRow + t) {
+          if (this._values !== null) values.push(this._values[p]);
+          index.push(t);
+          break;
+        }
+      }
+    }
+    return new MathJSSparseMatrix({
+      values: this._values === null ? null : values,
+      index,
+      ptr: [0, index.length],
+      size: [n, 1],
+      datatype: this._datatype,
+    });
   }
 
   /** Share of stored entries: stored count divided by rows times columns (0 for an empty matrix). */
