@@ -1,21 +1,8 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
-
-// Type definitions for sqrt
-interface BigNumberType {
-  isNegative(): boolean;
-  toNumber(): number;
-  sqrt(): BigNumberType;
-}
-
-interface ComplexType {
-  sqrt(): ComplexType;
-}
-
-interface ComplexConstructor {
-  new (re: number, im: number): ComplexType;
-}
+import type { BigNumber, Complex } from '@danielsimonjr/mathts-core';
+import { sqrtBigNumberWith, sqrtNumberWith } from '../typed/complex-promotion.js';
 
 interface UnitType {
   pow(value: number): UnitType;
@@ -24,16 +11,15 @@ interface UnitType {
 interface SqrtDependencies {
   config: ConfigOptions;
   typed: TypedFunction;
-  Complex: ComplexConstructor;
 }
 
 const name = 'sqrt';
-const dependencies = ['config', 'typed', 'Complex'];
+const dependencies = ['config', 'typed'];
 
 export const createSqrt = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ config, typed, Complex }: SqrtDependencies) => {
+  ({ config, typed }: SqrtDependencies) => {
     /**
      * Calculate the square root of a value.
      *
@@ -61,47 +47,21 @@ export const createSqrt = /* #__PURE__ */ factory(
      *            Returns the square root of `x`
      */
     return typed('sqrt', {
-      number: _sqrtNumber,
+      number: (x: number): number | Complex => sqrtNumberWith(x, config.predictable),
 
-      Complex: function (x: ComplexType): ComplexType {
-        return x.sqrt();
-      },
+      Complex: (x: Complex): Complex => x.sqrt(),
 
-      BigNumber: function (x: BigNumberType): BigNumberType | number | ComplexType {
-        if (!x.isNegative() || config.predictable) {
-          return x.sqrt();
-        } else {
-          // negative value -> downgrade to number to do complex value computation
-          return _sqrtNumber(x.toNumber());
-        }
-      },
+      BigNumber: (x: BigNumber): BigNumber | Complex => sqrtBigNumberWith(x, config.predictable),
 
       // A Fraction has no exact square root in general. Use the number path. The result is a
       // number for x >= 0 and a Complex for x < 0 (#1044).
-      Fraction: function (x: { valueOf(): number }): number | ComplexType {
-        return _sqrtNumber(x.valueOf());
-      },
+      Fraction: (x: { valueOf(): number }): number | Complex =>
+        sqrtNumberWith(x.valueOf(), config.predictable),
 
       Unit: function (x: UnitType): UnitType {
         // Someday will work for complex units when they are implemented
         return x.pow(0.5);
       },
     });
-
-    /**
-     * Calculate sqrt for a number
-     * @param {number} x
-     * @returns {number | Complex} Returns the square root of x
-     * @private
-     */
-    function _sqrtNumber(x: number): number | ComplexType {
-      if (isNaN(x)) {
-        return NaN;
-      } else if (x >= 0 || config.predictable) {
-        return Math.sqrt(x);
-      } else {
-        return new Complex(x, 0).sqrt();
-      }
-    }
   }
 );
