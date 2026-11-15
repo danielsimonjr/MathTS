@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2420,
+  "totalFiles": 2421,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1307,
     "test-only": 0,
     "orphan": 0,
-    "test": 1021,
+    "test": 1022,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1333,
-    "tests": 1021,
+    "tests": 1022,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1085,
+    "@danielsimonjr/mathts-functions": 1086,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 141,
@@ -6274,7 +6274,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 102
+      "loc": 108
     },
     {
       "file": "functions/src/arithmetic/square.ts",
@@ -8346,7 +8346,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 302
+      "loc": 300
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -9011,7 +9011,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2639
+      "loc": 2642
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -12603,6 +12603,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 103
+    },
+    {
+      "file": "functions/tests/sqrt-fraction-1044.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
     },
     {
       "file": "functions/tests/statistics-extended.test.ts",
