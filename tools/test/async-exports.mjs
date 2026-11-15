@@ -12,6 +12,7 @@
  * when `.then/.catch/.finally` follows it, or when it is assigned to a name that is awaited or
  * chained later in the same fence. Any other call to an async export is reported.
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -343,20 +344,22 @@ export function unawaitedCalls(markdown, asyncNames) {
   return found;
 }
 
-/** Markdown files under `root`, without build output, dependencies and agent scratch. */
+/**
+ * The tracked Markdown files under `root` (`git ls-files`), without build output and agent scratch.
+ * Only tracked files ship, so an untracked note or a stray scratch file is not checked. The list
+ * also saves the stat of every directory entry that a tree walk makes.
+ */
 export function markdownFiles(
   root,
   skip = new Set(['node_modules', 'dist', '.git', '.claude', '.turbo', 'coverage', 'site'])
 ) {
-  const out = [];
-  const walk = (dir) => {
-    for (const entry of readdirSync(dir)) {
-      if (skip.has(entry)) continue;
-      const path = join(dir, entry);
-      if (statSync(path).isDirectory()) walk(path);
-      else if (entry.endsWith('.md')) out.push(path);
-    }
-  };
-  walk(root);
-  return out;
+  const listed = execFileSync('git', ['ls-files', '-z', '--', '*.md'], {
+    cwd: root,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  return listed
+    .split('\0')
+    .filter((rel) => rel !== '' && !rel.split('/').some((part) => skip.has(part)))
+    .map((rel) => join(root, rel));
 }

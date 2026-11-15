@@ -168,6 +168,8 @@ describe('#900 — every Markdown file of the repository awaits what it calls', 
     expect(files.length).toBeGreaterThan(200);
   });
 
+  // The scan reads about 15 MB of Markdown: about 0.3 s alone, but more than 5 s while
+  // `bun run test` runs about 48 package processes on the same cores. Hence the 60 s limit.
   it('has no unawaited call to an async export in any fenced sample', () => {
     const problems: string[] = [];
     for (const file of files) {
@@ -176,7 +178,7 @@ describe('#900 — every Markdown file of the repository awaits what it calls', 
       }
     }
     expect(problems).toEqual([]);
-  });
+  }, 60_000);
 
   it('statistics/README.md shows the awaited form of a Promise-returning test', () => {
     const markdown = readFileSync(join(repoRoot, 'statistics/README.md'), 'utf8');
