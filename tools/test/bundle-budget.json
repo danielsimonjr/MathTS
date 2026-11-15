@@ -10,8 +10,8 @@
     "packages/workerpool/dist/index.js": 54752,
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
-    "core/dist/index.js": 230568,
-    "core/dist/internal.js": 230923,
+    "core/dist/index.js": 237801,
+    "core/dist/internal.js": 238452,
     "core/package.json": 2024,
     "matrix/dist/index.js": 214249,
     "matrix/package.json": 2477,
@@ -197,7 +197,7 @@
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 258503
+      "bytes": 262196
     },
     {
       "label": "compat create(all)",

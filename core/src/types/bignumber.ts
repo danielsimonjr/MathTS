@@ -50,6 +50,64 @@ export type RoundingMode =
   | 'halfCeil' // Round half toward +Infinity
   | 'halfFloor'; // Round half toward -Infinity
 
+/** The decimal.js rounding codes 0 to 8, in order, as `RoundingMode` names. */
+const DECIMAL_JS_ROUNDING: readonly RoundingMode[] = [
+  'up',
+  'down',
+  'ceil',
+  'floor',
+  'halfUp',
+  'halfDown',
+  'halfEven',
+  'halfCeil',
+  'halfFloor',
+];
+
+/** Extra significant digits that a transcendental method uses before its final rounding. */
+const GUARD_DIGITS = 10;
+/** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
+const EXP_DECIMAL_LIMIT = 9e15;
+
+/**
+ * The safety limit on the terms of a series. Each series rounds its terms and partial sums to the
+ * working precision, and stops when a term no longer changes the sum. The slowest one (atan at
+ * |x| = 0.5) gains about 0.6 digits per term, so the limit allows 4 terms per digit (#1043).
+ */
+function seriesIterationLimit(precision: number): number {
+  return 4 * precision + 100;
+}
+
+/** The depth of nested guarded calls. Only the outermost call raises the precision. */
+let guardDepth = 0;
+
+/** Extra digits that a computed constant (π, ln 2, ln 10) uses before the final rounding. */
+const CONSTANT_GUARD_DIGITS = 10;
+
+/** `atan(1/n) · scale` as a bigint, by the alternating series. */
+function atanInv(n: bigint, scale: bigint): bigint {
+  const n2 = n * n;
+  let power = scale / n; // scale / n^(2k+1)
+  let sum = power;
+  for (let k = 1n; power !== 0n; k++) {
+    power /= n2;
+    const term = power / (2n * k + 1n);
+    sum = k % 2n === 1n ? sum - term : sum + term;
+  }
+  return sum;
+}
+
+/** `atanh(1/n) · scale` as a bigint, by the series Σ 1 / ((2k+1) n^(2k+1)). */
+function atanhInv(n: bigint, scale: bigint): bigint {
+  const n2 = n * n;
+  let power = scale / n;
+  let sum = power;
+  for (let k = 1n; power !== 0n; k++) {
+    power /= n2;
+    sum += power / (2n * k + 1n);
+  }
+  return sum;
+}
+
 // Default configuration
 const defaultConfig: BigNumberConfig = {
   precision: 64,
@@ -784,9 +842,23 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Power (integer exponent)
+   * Power. An integer exponent uses exact binary exponentiation. A fractional exponent, or a
+   * fractional BigNumber exponent, uses `exp(n * ln(this))` with guard digits, rounded to the
+   * configured precision (#1043). A negative base with a fractional exponent gives NaN.
    */
-  pow(n: number | bigint): BigNumber {
+  pow(n: number | bigint | BigNumber): BigNumber {
+    if (n instanceof BigNumber) {
+      if (n._isNaN) return n;
+      if (!n._isInfinite && n.isInteger() && Number.isSafeInteger(n.toNumber())) {
+        return this.pow(n.toNumber());
+      }
+      return this.#fractionalPow(n);
+    }
+    if (typeof n === 'number' && !Number.isInteger(n)) {
+      return Number.isNaN(n)
+        ? BigNumber.fromNumber(NaN)
+        : this.#fractionalPow(BigNumber.fromNumber(n));
+    }
     const exp = typeof n === 'bigint' ? Number(n) : n;
 
     if (this._isNaN) return this;
@@ -815,10 +887,50 @@ export class BigNumber implements MathTSValue {
     return result.roundToPrecision(globalConfig.precision);
   }
 
+  /** `this ** y` for a non-integer or infinite `y`: `exp(y * ln(this))` with guard digits. */
+  #fractionalPow(y: BigNumber): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === -1) {
+      // A negative base has a real power only for an integer or an infinite exponent.
+      if (y._isInfinite) return this.abs().#fractionalPow(y);
+      if (!y.isInteger()) return BigNumber.#allocate(0, 0n, 0, true);
+      const magnitude = this.abs().#fractionalPow(y);
+      const odd = !y.abs().mod(BigNumber.fromNumber(2)).isZero();
+      return odd ? magnitude.negate() : magnitude;
+    }
+    if (this._sign === 0) {
+      return y._sign === -1 ? BigNumber.#allocate(1, 0n, 0, false, true) : this;
+    }
+    return this.#guarded(() => y.multiply(this.ln()).exp());
+  }
+
+  /**
+   * Runs `compute` with GUARD_DIGITS more significant digits, then rounds its result to the
+   * configured precision, so the rounding error of each inner step stays below the last digit
+   * (#1043). A nested call (atan2 calls atan) runs at the precision already raised.
+   */
+  #guarded(compute: () => BigNumber): BigNumber {
+    if (guardDepth > 0) return compute();
+    const precision = globalConfig.precision;
+    const saved = globalConfig;
+    globalConfig = { ...saved, precision: precision + GUARD_DIGITS };
+    guardDepth++;
+    try {
+      return compute().roundToPrecision(precision);
+    } finally {
+      guardDepth--;
+      globalConfig = saved;
+    }
+  }
+
   /**
    * Square root
    */
   sqrt(): BigNumber {
+    return this.#guarded(() => this.#sqrtImpl());
+  }
+
+  #sqrtImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === -1) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
@@ -888,6 +1000,157 @@ export class BigNumber implements MathTSValue {
    */
   gt(other: BigNumber | number | string): boolean {
     return this.greaterThan(other);
+  }
+
+  // ============================================================
+  // decimal.js names (#1043)
+  // ============================================================
+  // The factory layer of `functions` was ported from mathjs, which uses decimal.js. These names
+  // keep that code on core's BigNumber. Each one calls the method with the long name.
+
+  /** decimal.js `gte`: true when this >= other. */
+  gte(other: BigNumber | number | string): boolean {
+    return this.greaterThanOrEqual(other);
+  }
+
+  /** decimal.js `lt`: true when this < other. */
+  lt(other: BigNumber | number | string): boolean {
+    return this.lessThan(other);
+  }
+
+  /** decimal.js `lte`: true when this <= other. */
+  lte(other: BigNumber | number | string): boolean {
+    return this.lessThanOrEqual(other);
+  }
+
+  /** decimal.js `eq`: true when this equals other. */
+  eq(other: BigNumber | number | string): boolean {
+    return this.equals(other);
+  }
+
+  /** decimal.js `cmp`: -1, 0 or 1, and NaN when an operand is NaN. */
+  cmp(other: BigNumber | number | string): number {
+    const o = this.ensureBigNumber(other);
+    if (this._isNaN || o._isNaN) return NaN;
+    return this.compareTo(o);
+  }
+
+  /** decimal.js `isInt`: true when this is an integer. */
+  isInt(): boolean {
+    return this.isInteger();
+  }
+
+  /** decimal.js `isNeg`: true when this is less than zero. */
+  isNeg(): boolean {
+    return this.isNegative();
+  }
+
+  /** decimal.js `isPos`: true when this is greater than zero. */
+  isPos(): boolean {
+    return this.isPositive();
+  }
+
+  /** decimal.js `minus`: this − other. */
+  minus(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.sub(other);
+  }
+
+  /** decimal.js `plus`: this + other. */
+  plus(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.add(other);
+  }
+
+  /** decimal.js `neg`: −this. */
+  neg(): BigNumber {
+    return this.negate();
+  }
+
+  /** decimal.js `dividedBy`: this / other. */
+  dividedBy(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.div(other);
+  }
+
+  /**
+   * decimal.js `toDecimalPlaces`: round to `decimalPlaces` digits after the point.
+   * `mode` is a decimal.js rounding code (0 up, 1 down, 2 ceil, 3 floor, 4 half up, 5 half down,
+   * 6 half even, 7 half ceil, 8 half floor) or a `RoundingMode` name. The default is the
+   * configured rounding mode.
+   */
+  toDecimalPlaces(decimalPlaces?: number, mode?: number | RoundingMode): BigNumber {
+    // decimal.js: with no decimal places, the value is returned unchanged.
+    if (decimalPlaces === undefined) return this.clone();
+    if (typeof mode === 'number') {
+      const name = DECIMAL_JS_ROUNDING[mode];
+      if (name === undefined) {
+        throw new RangeError(`toDecimalPlaces: rounding mode ${mode} is not 0 to 8`);
+      }
+      return this.round(decimalPlaces, name);
+    }
+    return this.round(decimalPlaces, mode ?? globalConfig.rounding);
+  }
+
+  /** decimal.js `log`: the logarithm to `base`, default 10. */
+  log(base?: BigNumber | number): BigNumber {
+    if (base === undefined) return this.log10();
+    const b = base instanceof BigNumber ? base : BigNumber.fromNumber(base);
+    if (b.equals(BigNumber.fromNumber(10))) return this.log10();
+    if (b.equals(BigNumber.fromNumber(2))) return this.log2();
+    return this.#guarded(() => this.ln().divide(b.ln()));
+  }
+
+  /** decimal.js static `atan2`: the angle of the point (x, y). */
+  static atan2(y: BigNumber, x: BigNumber): BigNumber {
+    return y.atan2(x);
+  }
+
+  /** decimal.js static `precision`: the configured number of significant digits. */
+  static get precision(): number {
+    return globalConfig.precision;
+  }
+
+  // ============================================================
+  // Constants at the configured precision (#1043)
+  // ============================================================
+  // The exported BigNumber.piAt() / _LN2 / _LN10 literals hold 51 digits, and the default precision
+  // is 64. The methods use these values instead, computed with bigint series to the precision
+  // asked for, plus guard digits, and kept in a cache per precision.
+
+  static #constantCache = new Map<string, BigNumber>();
+
+  /** A constant from a fixed-point series: `series(scale)` gives the value times `scale`. */
+  static #constant(name: string, precision: number, series: (scale: bigint) => bigint): BigNumber {
+    const key = `${name}:${precision}`;
+    const hit = BigNumber.#constantCache.get(key);
+    if (hit) return hit;
+    const digits = precision + CONSTANT_GUARD_DIGITS;
+    const value = BigNumber.#allocate(1, series(10n ** BigInt(digits)), -digits).roundToPrecision(
+      precision
+    );
+    BigNumber.#constantCache.set(key, value);
+    return value;
+  }
+
+  /** π to `precision` digits (Machin: 16·atan(1/5) − 4·atan(1/239)). */
+  static piAt(precision: number = globalConfig.precision): BigNumber {
+    return BigNumber.#constant(
+      'pi',
+      precision,
+      (s) => 16n * atanInv(5n, s) - 4n * atanInv(239n, s)
+    );
+  }
+
+  /** ln 2 to `precision` digits (2·atanh(1/3)). */
+  static ln2At(precision: number = globalConfig.precision): BigNumber {
+    return BigNumber.#constant('ln2', precision, (s) => 2n * atanhInv(3n, s));
+  }
+
+  /** ln 10 to `precision` digits (3·ln 2 + 2·atanh(1/9), since 10 = 2³ · 1.25). */
+  static ln10At(precision: number = globalConfig.precision): BigNumber {
+    return BigNumber.#constant(
+      'ln10',
+      precision,
+      (s) => 6n * atanhInv(3n, s) + 2n * atanhInv(9n, s)
+    );
   }
 
   // ============================================================
@@ -1058,6 +1321,10 @@ export class BigNumber implements MathTSValue {
    * Uses Taylor series: sin(x) = x - x^3/3! + x^5/5! - ...
    */
   sin(): BigNumber {
+    return this.#guarded(() => this.#sinImpl());
+  }
+
+  #sinImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
@@ -1072,6 +1339,10 @@ export class BigNumber implements MathTSValue {
    * Uses Taylor series: cos(x) = 1 - x^2/2! + x^4/4! - ...
    */
   cos(): BigNumber {
+    return this.#guarded(() => this.#cosImpl());
+  }
+
+  #cosImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return BigNumber.fromNumber(1);
@@ -1085,6 +1356,10 @@ export class BigNumber implements MathTSValue {
    * tan(x) = sin(x) / cos(x)
    */
   tan(): BigNumber {
+    return this.#guarded(() => this.#tanImpl());
+  }
+
+  #tanImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
@@ -1098,6 +1373,10 @@ export class BigNumber implements MathTSValue {
    * Returns value in [-PI/2, PI/2]
    */
   asin(): BigNumber {
+    return this.#guarded(() => this.#asinImpl());
+  }
+
+  #asinImpl(): BigNumber {
     if (this._isNaN) return this;
     // Domain: [-1, 1]
     const one = BigNumber.fromNumber(1);
@@ -1110,7 +1389,7 @@ export class BigNumber implements MathTSValue {
     const denominator = one.subtract(xSquared).sqrt();
     if (denominator.isZero()) {
       // |x| = 1 exactly
-      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
+      return this._sign === 1 ? BigNumber.piAt().divide(2) : BigNumber.piAt().divide(-2);
     }
     return this.divide(denominator).atan();
   }
@@ -1120,12 +1399,16 @@ export class BigNumber implements MathTSValue {
    * Returns value in [0, PI]
    */
   acos(): BigNumber {
+    return this.#guarded(() => this.#acosImpl());
+  }
+
+  #acosImpl(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
     if (this.abs().compareTo(one) > 0) return BigNumber.#allocate(0, 0n, 0, true);
 
     // acos(x) = PI/2 - asin(x)
-    return BIGNUMBER_PI.divide(2).subtract(this.asin());
+    return BigNumber.piAt().divide(2).subtract(this.asin());
   }
 
   /**
@@ -1134,17 +1417,21 @@ export class BigNumber implements MathTSValue {
    * Uses Taylor series with argument reduction for convergence.
    */
   atan(): BigNumber {
+    return this.#guarded(() => this.#atanImpl());
+  }
+
+  #atanImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) {
-      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
+      return this._sign === 1 ? BigNumber.piAt().divide(2) : BigNumber.piAt().divide(-2);
     }
 
     // For |x| > 1: atan(x) = sign(x)*PI/2 - atan(1/x)
     const one = BigNumber.fromNumber(1);
     if (this.abs().compareTo(one) > 0) {
       const reciprocal = one.divide(this);
-      const piHalf = BIGNUMBER_PI.divide(2);
+      const piHalf = BigNumber.piAt().divide(2);
       return this._sign === 1
         ? piHalf.subtract(reciprocal.atan())
         : piHalf.negate().subtract(reciprocal.atan());
@@ -1169,6 +1456,10 @@ export class BigNumber implements MathTSValue {
    * Returns angle in (-PI, PI]
    */
   atan2(x: BigNumber): BigNumber {
+    return this.#guarded(() => this.#atan2Impl(x));
+  }
+
+  #atan2Impl(x: BigNumber): BigNumber {
     if (this._isNaN || x._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
 
     // atan2(0, 0) = 0
@@ -1176,7 +1467,7 @@ export class BigNumber implements MathTSValue {
 
     // atan2(y, 0)
     if (x._sign === 0) {
-      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
+      return this._sign === 1 ? BigNumber.piAt().divide(2) : BigNumber.piAt().divide(-2);
     }
 
     const angle = this.divide(x).atan();
@@ -1184,9 +1475,9 @@ export class BigNumber implements MathTSValue {
     if (x.isPositive()) {
       return angle;
     } else if (this.isNegative()) {
-      return angle.subtract(BIGNUMBER_PI);
+      return angle.subtract(BigNumber.piAt());
     } else {
-      return angle.add(BIGNUMBER_PI);
+      return angle.add(BigNumber.piAt());
     }
   }
 
@@ -1198,6 +1489,10 @@ export class BigNumber implements MathTSValue {
    * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2
    */
   sinh(): BigNumber {
+    return this.#guarded(() => this.#sinhImpl());
+  }
+
+  #sinhImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return this;
     if (this._sign === 0) return this;
@@ -1211,6 +1506,10 @@ export class BigNumber implements MathTSValue {
    * Hyperbolic cosine: cosh(x) = (e^x + e^(-x)) / 2
    */
   cosh(): BigNumber {
+    return this.#guarded(() => this.#coshImpl());
+  }
+
+  #coshImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true); // +Infinity
     if (this._sign === 0) return BigNumber.fromNumber(1);
@@ -1224,19 +1523,29 @@ export class BigNumber implements MathTSValue {
    * Hyperbolic tangent: tanh(x) = sinh(x) / cosh(x)
    */
   tanh(): BigNumber {
+    return this.#guarded(() => this.#tanhImpl());
+  }
+
+  #tanhImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) return BigNumber.fromNumber(this._sign);
 
-    const ex = this.exp();
-    const enx = this.negate().exp();
-    return ex.subtract(enx).divide(ex.add(enx));
+    // tanh(|x|) = -expm1(-2|x|) / (2 + expm1(-2|x|)). The exponent is never positive,
+    // so a large |x| gives 1 and not Infinity / Infinity.
+    const t = this.abs().multiply(BigNumber.fromNumber(-2)).expm1();
+    const magnitude = t.negate().divide(t.add(BigNumber.fromNumber(2)));
+    return this._sign === 1 ? magnitude : magnitude.negate();
   }
 
   /**
    * Inverse hyperbolic sine: asinh(x) = ln(x + sqrt(x^2 + 1))
    */
   asinh(): BigNumber {
+    return this.#guarded(() => this.#asinhImpl());
+  }
+
+  #asinhImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._isInfinite) return this;
     if (this._sign === 0) return this;
@@ -1250,6 +1559,10 @@ export class BigNumber implements MathTSValue {
    * Domain: x >= 1
    */
   acosh(): BigNumber {
+    return this.#guarded(() => this.#acoshImpl());
+  }
+
+  #acoshImpl(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
     if (this.compareTo(one) < 0) return BigNumber.#allocate(0, 0n, 0, true);
@@ -1263,6 +1576,10 @@ export class BigNumber implements MathTSValue {
    * Domain: -1 < x < 1
    */
   atanh(): BigNumber {
+    return this.#guarded(() => this.#atanhImpl());
+  }
+
+  #atanhImpl(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
     const absVal = this.abs();
@@ -1289,16 +1606,42 @@ export class BigNumber implements MathTSValue {
    * With argument reduction: e^x = (e^(x/2^k))^(2^k) for faster convergence.
    */
   exp(): BigNumber {
+    return this.#guarded(() => this.#expImpl());
+  }
+
+  #expImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return BigNumber.fromNumber(1);
     if (this._isInfinite) {
       return this._sign === 1 ? this : BigNumber.fromNumber(0);
     }
 
-    // Argument reduction: reduce x to small range
-    // e^x = (e^(x/2^k))^(2^k)
+    // Decimal reduction: e^x = 10^m * e^r, with r = x - m*ln(10) and |r| <= ln(10)/2.
+    // Then e^r = (e^(r/2^k))^(2^k) with a small k, so the squarings add little error.
     const precision = globalConfig.precision;
-    const val = Math.abs(this.valueOf());
+    const magnitude = Math.abs(this.valueOf());
+    if (magnitude > EXP_DECIMAL_LIMIT * Math.LN10) {
+      return this._sign === 1
+        ? BigNumber.#allocate(1, 0n, 0, false, true)
+        : BigNumber.fromNumber(0);
+    }
+    if (magnitude > Math.LN10) {
+      const order = this._coefficient.toString().length + this._exponent;
+      const saved = globalConfig;
+      globalConfig = { ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS };
+      let m: number;
+      let r: BigNumber;
+      try {
+        const ln10 = BigNumber.ln10At();
+        m = this.divide(ln10).round(0, 'halfEven').toNumber();
+        r = this.subtract(ln10.multiply(BigNumber.fromNumber(m))).roundToPrecision(precision);
+      } finally {
+        globalConfig = saved;
+      }
+      const er = r.#expImpl();
+      return BigNumber.#allocate(er._sign, er._coefficient, er._exponent + m);
+    }
+    const val = magnitude;
 
     // Choose k so that |x/2^k| < 0.5
     let k = 0;
@@ -1312,11 +1655,11 @@ export class BigNumber implements MathTSValue {
     // Taylor series for small argument
     let sum = BigNumber.fromNumber(1);
     let term = BigNumber.fromNumber(1);
-    const maxIter = precision + 20;
+    const maxIter = seriesIterationLimit(precision);
 
     for (let n = 1; n <= maxIter; n++) {
       term = term.multiply(reduced).divide(BigNumber.fromNumber(n));
-      const newSum = sum.add(term);
+      const newSum = sum.add(term).roundToPrecision(precision);
       if (sum.equals(newSum)) break;
       sum = newSum;
     }
@@ -1343,6 +1686,11 @@ export class BigNumber implements MathTSValue {
     const one = BigNumber.fromNumber(1);
     if (this.equals(one)) return BigNumber.fromNumber(0);
 
+    return this.#guarded(() => this.#lnSeries(one));
+  }
+
+  /** The series part of `ln`, at the current (raised) precision. */
+  #lnSeries(one: BigNumber): BigNumber {
     const precision = globalConfig.precision;
 
     // Argument reduction: ln(x) = ln(x / 2^k) + k * ln(2)
@@ -1366,12 +1714,12 @@ export class BigNumber implements MathTSValue {
     const ySq = y.multiply(y);
     let term = y;
     let sum = y;
-    const maxIter = precision + 20;
+    const maxIter = seriesIterationLimit(precision);
 
     for (let n = 1; n <= maxIter; n++) {
-      term = term.multiply(ySq);
+      term = term.multiply(ySq).roundToPrecision(precision);
       const contribution = term.divide(BigNumber.fromNumber(2 * n + 1));
-      const newSum = sum.add(contribution);
+      const newSum = sum.add(contribution).roundToPrecision(precision);
       if (sum.equals(newSum)) break;
       sum = newSum;
     }
@@ -1380,24 +1728,32 @@ export class BigNumber implements MathTSValue {
 
     // Add back reduction: k * ln(2)
     if (k !== 0) {
-      sum = sum.add(BIGNUMBER_LN2.multiply(BigNumber.fromNumber(k)));
+      sum = sum.add(BigNumber.ln2At().multiply(BigNumber.fromNumber(k)));
     }
 
-    return sum.roundToPrecision(precision);
+    return sum;
   }
 
   /**
    * Base-10 logarithm: log10(x) = ln(x) / ln(10)
    */
   log10(): BigNumber {
-    return this.ln().divide(BIGNUMBER_LN10);
+    return this.#guarded(() => this.#log10Impl());
+  }
+
+  #log10Impl(): BigNumber {
+    return this.ln().divide(BigNumber.ln10At());
   }
 
   /**
    * Base-2 logarithm: log2(x) = ln(x) / ln(2)
    */
   log2(): BigNumber {
-    return this.ln().divide(BIGNUMBER_LN2);
+    return this.#guarded(() => this.#log2Impl());
+  }
+
+  #log2Impl(): BigNumber {
+    return this.ln().divide(BigNumber.ln2At());
   }
 
   /**
@@ -1405,6 +1761,10 @@ export class BigNumber implements MathTSValue {
    * Uses Newton-Raphson iteration.
    */
   cbrt(): BigNumber {
+    return this.#guarded(() => this.#cbrtImpl());
+  }
+
+  #cbrtImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) return this;
@@ -1444,6 +1804,10 @@ export class BigNumber implements MathTSValue {
    * Uses Taylor series directly: expm1(x) = x + x^2/2! + x^3/3! + ...
    */
   expm1(): BigNumber {
+    return this.#guarded(() => this.#expm1Impl());
+  }
+
+  #expm1Impl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) {
@@ -1459,11 +1823,11 @@ export class BigNumber implements MathTSValue {
     const precision = globalConfig.precision;
     let term = this.clone();
     let sum = this.clone();
-    const maxIter = precision + 20;
+    const maxIter = seriesIterationLimit(precision);
 
     for (let n = 2; n <= maxIter; n++) {
       term = term.multiply(this).divide(BigNumber.fromNumber(n));
-      const newSum = sum.add(term);
+      const newSum = sum.add(term).roundToPrecision(precision);
       if (sum.equals(newSum)) break;
       sum = newSum;
     }
@@ -1475,6 +1839,10 @@ export class BigNumber implements MathTSValue {
    * ln(1 + x) (more precise than ln(1 + x) for small x)
    */
   log1p(): BigNumber {
+    return this.#guarded(() => this.#log1pImpl());
+  }
+
+  #log1pImpl(): BigNumber {
     if (this._isNaN) return this;
     const one = BigNumber.fromNumber(1);
     const negOne = BigNumber.fromNumber(-1);
@@ -1500,27 +1868,33 @@ export class BigNumber implements MathTSValue {
   // Private Taylor Series Helpers
   // ============================================================
 
-  /** Reduce angle to [-PI, PI] range */
+  /**
+   * Reduce the angle to the range [-PI, PI].
+   * The reduction keeps every digit of the integer part of x / (2 PI), so the
+   * working precision grows with the magnitude of x.
+   */
   private _reduceAngle(): BigNumber {
-    const twoPi = BIGNUMBER_PI.multiply(BigNumber.fromNumber(2));
-
-    // Quick check if already in range
-    if (this.abs().compareTo(BIGNUMBER_PI) <= 0) {
+    if (this.abs().compareTo(BigNumber.piAt()) <= 0) {
       return this;
     }
-
-    // x mod 2PI, then shift to [-PI, PI]
-    const quotient = this.divide(twoPi).round(0, 'halfUp');
-    let reduced = this.subtract(twoPi.multiply(quotient));
-
-    // Ensure in [-PI, PI]
-    if (reduced.compareTo(BIGNUMBER_PI) > 0) {
-      reduced = reduced.subtract(twoPi);
-    } else if (reduced.compareTo(BIGNUMBER_PI.negate()) < 0) {
-      reduced = reduced.add(twoPi);
+    const precision = globalConfig.precision;
+    const order = this._coefficient.toString().length + this._exponent;
+    const saved = globalConfig;
+    globalConfig = { ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS };
+    try {
+      const pi = BigNumber.piAt();
+      const twoPi = pi.multiply(BigNumber.fromNumber(2));
+      const quotient = this.divide(twoPi).round(0, 'halfUp');
+      let reduced = this.subtract(twoPi.multiply(quotient));
+      if (reduced.compareTo(pi) > 0) {
+        reduced = reduced.subtract(twoPi);
+      } else if (reduced.compareTo(pi.negate()) < 0) {
+        reduced = reduced.add(twoPi);
+      }
+      return reduced.roundToPrecision(precision);
+    } finally {
+      globalConfig = saved;
     }
-
-    return reduced;
   }
 
   /**
@@ -1538,14 +1912,14 @@ export class BigNumber implements MathTSValue {
     let term = initialTerm;
     let sum = initialSum;
     const xSquared = this.multiply(this);
-    const maxIter = precision + 20;
+    const maxIter = seriesIterationLimit(precision);
 
     for (let n = 1; n <= maxIter; n++) {
       term = term
         .multiply(xSquared)
         .divide(BigNumber.fromNumber(denom(n)))
         .negate();
-      const newSum = sum.add(term);
+      const newSum = sum.add(term).roundToPrecision(precision);
       if (sum.equals(newSum)) break;
       sum = newSum;
     }
@@ -1573,12 +1947,12 @@ export class BigNumber implements MathTSValue {
     const xSquared = this.multiply(this);
     let term = this.clone();
     let sum = this.clone();
-    const maxIter = precision + 20;
+    const maxIter = seriesIterationLimit(precision);
 
     for (let n = 1; n <= maxIter; n++) {
-      term = term.multiply(xSquared).negate();
+      term = term.multiply(xSquared).negate().roundToPrecision(precision);
       const contribution = term.divide(BigNumber.fromNumber(2 * n + 1));
-      const newSum = sum.add(contribution);
+      const newSum = sum.add(contribution).roundToPrecision(precision);
       if (sum.equals(newSum)) break;
       sum = newSum;
     }

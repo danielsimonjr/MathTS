@@ -312,8 +312,27 @@ export const hypot = mathTyped('hypot', {
   number: (a: number) => Math.abs(a),
   'number, number': (a: number, b: number) => Math.hypot(a, b),
   'number, number, ...number': (a: number, b: number, rest: number[]) => Math.hypot(a, b, ...rest),
-  Array: (arr: number[]) => Math.hypot(...arr),
+  // BigNumber arguments keep a BigNumber result at the configured precision (#1043). A number
+  // mixed with a BigNumber converts to a BigNumber.
+  '...BigNumber': (xs: BigNumber[]) => (xs.length === 1 ? xs[0].abs() : bigHypot(xs)),
+  'BigNumber, number': (a: BigNumber, b: number) => bigHypot([a, b]),
+  'number, BigNumber': (a: number, b: BigNumber) => bigHypot([a, b]),
+  Array: (arr: unknown[]) =>
+    arr.every((x) => typeof x === 'number') ? Math.hypot(...(arr as number[])) : bigHypot(arr),
 });
+
+/** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision. */
+function bigHypot(xs: readonly unknown[]): BigNumber {
+  let sum = BigNumber.fromNumber(0);
+  for (const x of xs) {
+    if (typeof x !== 'number' && !(x instanceof BigNumber)) {
+      throw new TypeError('hypot: expects number or BigNumber values');
+    }
+    const b = typeof x === 'number' ? BigNumber.fromNumber(x) : x;
+    sum = sum.add(b.multiply(b));
+  }
+  return sum.sqrt();
+}
 
 // =============================================================================
 // Export all functions

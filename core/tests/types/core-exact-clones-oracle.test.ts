@@ -52,9 +52,13 @@ describe('M12 oracle — BigNumber.sin / cos (Taylor via public API)', () => {
   it('sin(π/2) and cos(π/2) at default precision', () => {
     const halfPi = BIGNUMBER_PI.divide(2);
     expect(halfPi.sin().toString()).toBe('1');
-    expect(halfPi.cos().toString()).toBe(
-      '0.00000000000000000000000000000000000000000000000000291048747229584649660642936936592380777499368967292782326355512'
+    // halfPi is the 51-digit literal / 2, so cos(halfPi) is about 2.9e-51. The value comes from
+    // a sum near 1, so the error bound is absolute: 64 digits plus guard digits give < 1e-72.
+    // Reference from mpmath at 200 digits (#1043; the earlier pinned string was wrong from digit 12).
+    const reference = BigNumber.parse(
+      '2.910487472296153908203143104499314017412671058533991074043256641e-51'
     );
+    expect(halfPi.cos().subtract(reference).abs().lessThan(BigNumber.parse('1e-72'))).toBe(true);
   });
 
   it('negative angle', () => {
