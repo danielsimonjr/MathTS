@@ -42,22 +42,24 @@ describe('arg', () => {
 
   it('arg(BigNumber positive) = 0', () => {
     const bn = BigNumber.fromNumber(5);
-    expect(arg(bn)).toBe(0);
+    expect(arg(bn)).toBeInstanceOf(BigNumber);
+    expect((arg(bn) as BigNumber).isZero()).toBe(true);
   });
 
   it('arg(BigNumber negative) = π', () => {
     const bn = BigNumber.fromNumber(-3);
-    expect(arg(bn)).toBeCloseTo(Math.PI);
+    expect(arg(bn)).toBeInstanceOf(BigNumber);
+    expect((arg(bn) as BigNumber).toNumber()).toBeCloseTo(Math.PI);
   });
 
   it('arg(BigNumber zero) = 0', () => {
     const bn = BigNumber.fromNumber(0);
-    expect(arg(bn)).toBe(0);
+    expect((arg(bn) as BigNumber).isZero()).toBe(true);
   });
 
   it('arg(BigNumber NaN) = NaN', () => {
     const bn = BigNumber.fromNumber(NaN);
-    expect(Number.isNaN(arg(bn))).toBe(true);
+    expect((arg(bn) as BigNumber).isNaN()).toBe(true);
   });
 
   it('arg(Complex(1, 1)) ≈ π/4', () => {

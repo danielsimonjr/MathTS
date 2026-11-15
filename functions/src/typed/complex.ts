@@ -63,12 +63,8 @@ export const arg = mathTyped('arg', {
     return 0; // x === 0n
   },
 
-  BigNumber: (x: BigNumber): number => {
-    if (x.isNaN()) return NaN;
-    if (x.isZero()) return 0;
-    if (x.isNegative()) return Math.PI;
-    return 0;
-  },
+  // A BigNumber gives a BigNumber angle (0 or π at the configured precision), as in mathjs.
+  BigNumber: (x: BigNumber): BigNumber => BigNumber.atan2(BigNumber.fromNumber(0), x),
 
   Complex: (x: Complex): number => x.arg(),
 

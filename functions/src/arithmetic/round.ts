@@ -6,6 +6,11 @@ import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
 import { roundNumber } from '../plain/number/index.js';
+import type { BigNumber } from '@danielsimonjr/mathts-core';
+import {
+  ROUND_DECIMALS_NOT_INTEGER,
+  roundBigNumberDecimals,
+} from '../utils/bignumber/round-decimals.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 
@@ -49,7 +54,7 @@ interface RoundDependencies {
   DenseMatrix: unknown;
 }
 
-const NO_INT = 'Number of decimals in function round must be an integer';
+const NO_INT = ROUND_DECIMALS_NOT_INTEGER;
 
 const name = 'round';
 const dependencies = [
@@ -178,16 +183,13 @@ export const createRound = /* #__PURE__ */ factory(
         if (!n.isInteger()) {
           throw new TypeError(NO_INT);
         }
-
-        // Same as BigNumber: unless user specifies more decimals than relTol
-        const epsilonExponent = toExponent(config.relTol);
-        if ((n as unknown as number) >= epsilonExponent) {
-          return x.toDecimalPlaces(n.toNumber());
-        }
-
-        const xEpsilon = x.toDecimalPlaces(epsilonExponent);
-        const xSelected = bigNearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
-        return xSelected.toDecimalPlaces(n.toNumber());
+        // The typed `round` shares this kernel.
+        return roundBigNumberDecimals(
+          x as unknown as BigNumber,
+          n.toNumber(),
+          config.relTol,
+          config.absTol
+        ) as unknown as BigNumberType;
       },
 
       // bigints can't be rounded

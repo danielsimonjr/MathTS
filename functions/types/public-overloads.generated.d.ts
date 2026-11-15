@@ -109,9 +109,10 @@ export type PublicExp = ExpCallable;
 export interface LogCallable {
   (a: number): number | Complex;
   (a: Complex): Complex;
-  (a: BigNumber): BigNumber;
+  (a: BigNumber): BigNumber | Complex;
   (a: Dual): Dual;
   (a: number, b: number): number | Complex;
+  (a: BigNumber, b: BigNumber): BigNumber | Complex;
   (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];
@@ -126,7 +127,7 @@ export type PublicLog = LogCallable;
 export interface Log10Callable {
   (a: number): number | Complex;
   (a: Complex): Complex;
-  (a: BigNumber): BigNumber;
+  (a: BigNumber): BigNumber | Complex;
   (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];
