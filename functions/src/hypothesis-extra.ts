@@ -236,6 +236,8 @@ export function studentizedRangeCDF(q: number, k: number, df: number): number {
   if (Number.isNaN(q) || Number.isNaN(k) || Number.isNaN(df)) return NaN;
   if (!(k >= 2)) throw new Error('studentizedRangeCDF: k (number of groups) must be >= 2');
   if (q <= 0) return 0;
+  // The range of infinitely many standard normals is infinite. No finite q bounds the range.
+  if (k === Infinity) return q === Infinity ? 1 : 0;
   if (!Number.isFinite(df)) return rangeProb(q, k);
   if (!(df > 0)) throw new Error('studentizedRangeCDF: df must be > 0');
   const nu = df;
@@ -260,11 +262,20 @@ export function studentizedRangeCDF(q: number, k: number, df: number): number {
 export function studentizedRangeQuantile(p: number, k: number, df: number): number {
   if (Number.isNaN(p) || Number.isNaN(k) || Number.isNaN(df)) return NaN;
   if (!(p > 0 && p < 1)) throw new Error('studentizedRangeQuantile: p must be in (0, 1)');
+  if (!(k >= 2)) throw new Error('studentizedRangeQuantile: k (number of groups) must be >= 2');
+  // The CDF is 0 at every finite q when k is infinite, so every quantile is Infinity.
+  if (k === Infinity) return Infinity;
   let lo = 0;
   // Bracket p by expanding hi geometrically until CDF(hi) >= p, rather than assuming a
   // fixed [0, 100] that silently clamps large quantiles to ~100 (unconverged).
   let hi = 1;
-  for (let iter = 0; studentizedRangeCDF(hi, k, df) < p; iter++) {
+  // A NaN CDF value fails every `< p` test, so the bisection would collapse to 0 silently.
+  const cdf = (q: number): number => {
+    const value = studentizedRangeCDF(q, k, df);
+    if (Number.isNaN(value)) throw new Error(`studentizedRangeQuantile: CDF is NaN at q=${q}`);
+    return value;
+  };
+  for (let iter = 0; cdf(hi) < p; iter++) {
     if (iter >= 60)
       throw new Error(`studentizedRangeQuantile: failed to bracket p=${p} (CDF plateaued below p)`);
     hi *= 2;
@@ -274,7 +285,7 @@ export function studentizedRangeQuantile(p: number, k: number, df: number): numb
   // count modest.
   for (let i = 0; i < 45; i++) {
     const mid = (lo + hi) / 2;
-    if (studentizedRangeCDF(mid, k, df) < p) lo = mid;
+    if (cdf(mid) < p) lo = mid;
     else hi = mid;
   }
   return (lo + hi) / 2;
