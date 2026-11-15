@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-15'
   totalFiles: 1335
   totalModules: 82
-  totalExports: 7308
+  totalExports: 7309
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9045,7 +9045,14 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
-      workspaceDependencies: []
+        - file: ../typed/complex-promotion.js
+          imports:
+            - powBigNumberWith
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
       exports:
         - createPow
       constants:
@@ -24257,6 +24264,8 @@ modules:
             - log1pReal
             - staysRealLog
             - staysRealLog1p
+            - isPredictableMode
+            - powBigNumberWith
             - sqrtReal
             - staysRealSqrt
             - powReal
@@ -24735,6 +24744,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - BigNumber
             - Complex
             - Fraction
       exports:
@@ -24747,6 +24757,7 @@ modules:
         - staysRealLog1p
         - log1pReal
         - staysRealSqrt
+        - powBigNumberWith
         - sqrtReal
         - powReal
         - nthRootReal
@@ -24765,6 +24776,7 @@ modules:
         - staysRealLog1p
         - log1pReal
         - staysRealSqrt
+        - powBigNumberWith
         - sqrtReal
         - powReal
         - nthRootReal
@@ -46094,11 +46106,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1335
   totalModules: 82
-  totalLinesOfCode: 231414
-  totalExports: 7308
+  totalLinesOfCode: 231435
+  totalExports: 7309
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2510
+  totalFunctions: 2511
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1679

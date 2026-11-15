@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-15",
     "totalFiles": 1335,
     "totalModules": 82,
-    "totalExports": 7308
+    "totalExports": 7309
   },
   "entryPoints": [
     {
@@ -9532,9 +9532,19 @@
             "file": "../core/config.js",
             "imports": ["ConfigOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "../typed/complex-promotion.js",
+            "imports": ["powBigNumberWith"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          }
+        ],
         "exports": ["createPow"],
         "constants": ["createPow"]
       },
@@ -25820,6 +25830,8 @@
               "log1pReal",
               "staysRealLog",
               "staysRealLog1p",
+              "isPredictableMode",
+              "powBigNumberWith",
               "sqrtReal",
               "staysRealSqrt",
               "powReal",
@@ -26336,7 +26348,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Complex", "Fraction"]
+            "imports": ["BigNumber", "Complex", "Fraction"]
           }
         ],
         "exports": [
@@ -26349,6 +26361,7 @@
           "staysRealLog1p",
           "log1pReal",
           "staysRealSqrt",
+          "powBigNumberWith",
           "sqrtReal",
           "powReal",
           "nthRootReal",
@@ -26368,6 +26381,7 @@
           "staysRealLog1p",
           "log1pReal",
           "staysRealSqrt",
+          "powBigNumberWith",
           "sqrtReal",
           "powReal",
           "nthRootReal",
@@ -48841,11 +48855,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 231414,
-    "totalExports": 7308,
+    "totalLinesOfCode": 231435,
+    "totalExports": 7309,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2510,
+    "totalFunctions": 2511,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1679,

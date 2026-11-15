@@ -108,6 +108,24 @@ export function sqrtBigNumberWith(x: BigNumber, predictable: boolean): BigNumber
   return new Complex(0, Math.sqrt(-x.toNumber()));
 }
 
+/**
+ * Raise a BigNumber to a BigNumber power, with the `predictable` option given. The typed `pow`
+ * and the factory `pow` share this kernel. An integer exponent, a non-negative base or
+ * `predictable` gives the BigNumber power (NaN for a negative base under `predictable`). A
+ * negative base with a non-integer exponent otherwise gives the Complex power of the number
+ * values, as in mathjs.
+ */
+export function powBigNumberWith(
+  x: BigNumber,
+  y: BigNumber,
+  predictable: boolean
+): BigNumber | Complex {
+  if (y.isInteger() || x.gte(0) || predictable) {
+    return x.pow(y);
+  }
+  return new Complex(x.toNumber(), 0).pow(y.toNumber());
+}
+
 /** Square root. Non-negative inputs and NaN never read config. */
 export function sqrtReal(x: number): number | Complex {
   if (Number.isNaN(x) || x >= 0) {
