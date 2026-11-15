@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-15'
-  totalFiles: 1334
+  totalFiles: 1335
   totalModules: 82
-  totalExports: 7299
+  totalExports: 7305
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5928,6 +5928,10 @@ modules:
         - file: ./dense/storage.js
           imports:
             - contiguousDenseData
+        - file: ./type-marker.js
+          imports:
+            - DENSE_MATRIX_BRAND
+            - defineMatrixBrand
       workspaceDependencies: []
       exports:
         - isDenseMatrix
@@ -5944,7 +5948,11 @@ modules:
       description: Matrix Base Class
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./type-marker.js
+          imports:
+            - MATRIX_BRAND
+            - defineMatrixBrand
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5956,12 +5964,14 @@ modules:
             - formatGeneric
           subpath: internal
       exports:
+        - isNativeMatrix
         - isMatrix
       interfaces:
         - MatrixIndex
         - SliceSpec
         - MatrixEntry
       functions:
+        - isNativeMatrix
         - isMatrix
     matrix/src/types/SparseMatrix.ts:
       description: Sparse Matrix Implementation (CSR Format)
@@ -5977,6 +5987,10 @@ modules:
           imports:
             - DenseMatrix
             - registerSparseMatrixFactory
+        - file: ./type-marker.js
+          imports:
+            - SPARSE_MATRIX_BRAND
+            - defineMatrixBrand
       workspaceDependencies: []
       exports:
         - isSparseMatrix
@@ -6095,6 +6109,7 @@ modules:
           imports:
             - Matrix
             - isMatrix
+            - isNativeMatrix
           reExport: true
         - file: ./DenseMatrix.js
           imports:
@@ -6124,6 +6139,7 @@ modules:
       exports:
         - Matrix
         - isMatrix
+        - isNativeMatrix
         - DenseMatrix
         - isDenseMatrix
         - DENSE_MATRIX_MAX_ELEMENTS
@@ -6138,6 +6154,7 @@ modules:
       reExported:
         - Matrix
         - isMatrix
+        - isNativeMatrix
         - DenseMatrix
         - isDenseMatrix
         - DENSE_MATRIX_MAX_ELEMENTS
@@ -6149,6 +6166,23 @@ modules:
         - SliceSpec
         - MatrixEntry
         - MatrixType
+    matrix/src/types/type-marker.ts:
+      description: Prototype brands that identify a matrix of this package across copies of the package.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - MATRIX_BRAND
+        - DENSE_MATRIX_BRAND
+        - SPARSE_MATRIX_BRAND
+        - defineMatrixBrand
+      functions:
+        - defineMatrixBrand
+      constants:
+        - MATRIX_BRAND
+        - DENSE_MATRIX_BRAND
+        - SPARSE_MATRIX_BRAND
   tensor:
     tensor/src/Tensor.ts:
       description: Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
@@ -16251,8 +16285,9 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
-            - DenseMatrix
             - SparseMatrix
+            - isDenseMatrix
+            - isSparseMatrix
       exports:
         - csrToCsc
         - cscToPublic
@@ -24197,6 +24232,7 @@ modules:
             - DenseMatrix
             - SparseMatrix
             - backendManager
+            - isSparseMatrix
             - singularValues
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -26234,7 +26270,7 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
-            - Matrix
+            - isNativeMatrix
       exports:
         - formatUnexpectedArgumentType
         - unexpectedArgumentType
@@ -26306,6 +26342,7 @@ modules:
             - LogmOptions
             - SqrtmOptions
             - DenseMatrix
+            - isDenseMatrix
             - matMul
             - transposeNestedArray
         - package: '@danielsimonjr/mathts-core'
@@ -43164,6 +43201,8 @@ modules:
           imports:
             - DenseMatrix
             - SparseMatrix
+            - isDenseMatrix
+            - isSparseMatrix
             - add
             - subtract
             - multiply
@@ -44621,6 +44660,7 @@ dependencyGraph:
         - matrix/src/types/dense/reduction.ts
         - matrix/src/types/dense/storage.ts
         - matrix/src/types/index.ts
+        - matrix/src/types/type-marker.ts
     - name: Tensor
       files:
         - tensor/src/Tensor.ts
@@ -45970,17 +46010,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1334
+  totalTypeScriptFiles: 1335
   totalModules: 82
-  totalLinesOfCode: 230463
-  totalExports: 7299
+  totalLinesOfCode: 230542
+  totalExports: 7305
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2502
-  totalTypeGuards: 179
+  totalFunctions: 2504
+  totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1675
-  totalReExports: 3167
+  totalConstants: 1678
+  totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

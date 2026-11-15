@@ -1,6 +1,3 @@
-import { copyFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 // A SparseMatrix from a second loaded copy of the package fails `instanceof`.
 // Every decomposition input must still accept it (issue #949 class).
@@ -22,19 +19,19 @@ const DENSE = [
 ];
 
 /**
- * Loads the built package a second time. The bundle files are copied to a cache folder
- * inside the package, so the copy is a different module with the same dependencies.
+ * Loads the built package a second time, with the shared helper of the repository. The copy is a
+ * different module with its own classes and the same dependencies.
  */
 async function secondCopy(): Promise<typeof first> {
-  const dist = fileURLToPath(new URL('../dist/', import.meta.url));
-  const copy = fileURLToPath(new URL('../node_modules/.cache/second-copy/', import.meta.url));
-  mkdirSync(copy, { recursive: true });
-  for (const name of readdirSync(dist)) {
-    if (name.endsWith('.js') || name.endsWith('.js.map'))
-      copyFileSync(join(dist, name), join(copy, name));
-  }
-  const url = pathToFileURL(join(copy, 'index.js')).href;
-  const second = (await import(/* @vite-ignore */ url)) as typeof first;
+  // The helper is untyped, so the test imports it through a URL that the type checker does not read.
+  const helper = new URL('../../tools/test/second-package-copy.mjs', import.meta.url).href;
+  const { importSecondPackageCopy } = (await import(helper)) as {
+    importSecondPackageCopy(dir: string, name: string): Promise<unknown>;
+  };
+  const second = (await importSecondPackageCopy(
+    'matrix',
+    'matrix-sparse-decomposition'
+  )) as typeof first;
   expect(second.SparseMatrix).not.toBe(first.SparseMatrix);
   return second;
 }

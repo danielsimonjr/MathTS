@@ -8,7 +8,7 @@
  * for values typed-function would convert or report as a missing argument.
  */
 import { isBigNumber, isComplex, isDual, isFraction } from '@danielsimonjr/mathts-core';
-import { Matrix } from '@danielsimonjr/mathts-matrix';
+import { isNativeMatrix } from '@danielsimonjr/mathts-matrix';
 
 /** Human-readable label for a rejected operand in a `TypeError` message. */
 export function formatUnexpectedArgumentType(value: unknown): string {
@@ -27,10 +27,10 @@ export function unexpectedArgumentType(fn: string, value: unknown, index: number
 
 function isAllowedObject(value: object): boolean {
   if (Array.isArray(value) || ArrayBuffer.isView(value)) return true;
-  // `instanceof Matrix` is the cheapest test, so it comes first. The type tests of core also accept
-  // a value of a second copy of core.
+  // The matrix brand test comes first. The matrix brand test and the type tests of core also
+  // accept a value of a second copy of the matrix package or of core (#1041, #1033).
   if (
-    value instanceof Matrix ||
+    isNativeMatrix(value) ||
     isComplex(value) ||
     isFraction(value) ||
     isBigNumber(value) ||

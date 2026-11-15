@@ -200,9 +200,10 @@ export function decompositionInputToDenseMatrix(input: DecompositionMatrixInput)
   }
   const dense = densifyForSolver(input);
   if (dense) {
-    // A second copy of the package returns its own DenseMatrix class: rebuild a local one.
+    // A DenseMatrix of any copy of the package carries the brand and has the same layout (#1041).
+    // Rebuild only a dense result that is not a DenseMatrix.
     const d: { rows: number; cols: number; toArray(): number[][] } = dense;
-    return d instanceof DenseMatrix ? d : new DenseMatrix(d.rows, d.cols, d.toArray());
+    return isDenseMatrix(d) ? d : new DenseMatrix(d.rows, d.cols, d.toArray());
   }
   if (input instanceof Float64Array) {
     const n = squareSize(input.length);

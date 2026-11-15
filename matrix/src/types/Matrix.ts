@@ -13,6 +13,7 @@
  */
 import type { MatrixDimensions } from '@danielsimonjr/mathts-core';
 import { formatGeneric } from '@danielsimonjr/mathts-core/internal';
+import { MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
 export type { MatrixDimensions };
 
 /**
@@ -295,12 +296,32 @@ export abstract class Matrix<T = number> {
   }
 }
 
+// The brand that `isNativeMatrix` reads. `DenseMatrix` and `SparseMatrix` inherit it.
+defineMatrixBrand(Matrix.prototype, MATRIX_BRAND);
+
 /**
- * Type guard to check if a value is a Matrix
+ * Tells if a value is a matrix of this package: a `DenseMatrix`, a `SparseMatrix` or another
+ * subclass of `Matrix`. The type guard reads the prototype brand, so a matrix of a second copy of
+ * the package passes too. An object with the same shape does not (#1041).
+ *
+ * @param value - The value to test.
+ * @returns `true` when the value carries the `Matrix` brand.
+ */
+export function isNativeMatrix(value: unknown): value is Matrix<number> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { [MATRIX_BRAND]?: unknown })[MATRIX_BRAND] === true
+  );
+}
+
+/**
+ * Type guard to check if a value is a Matrix: a matrix of this package (of any copy), or an
+ * object with the matrix shape. The matrix shape is `rows`, `cols`, `get` and a string `type`.
  */
 export function isMatrix<T = number>(value: unknown): value is Matrix<T> {
   return (
-    value instanceof Matrix ||
+    isNativeMatrix(value) ||
     (typeof value === 'object' &&
       value !== null &&
       'rows' in value &&

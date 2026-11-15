@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-15", "f": 1334, "e": 7299, "re": 3167 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-15", "f": 1335, "e": 7305, "re": 3168 },
   "s": {
-    "loc": 230463,
+    "loc": 230542,
     "cls": 62,
     "int": 663,
-    "fn": 2502,
-    "tg": 179,
+    "fn": 2504,
+    "tg": 180,
     "en": 0,
-    "co": 1675,
+    "co": 1678,
     "toi": 683
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -358,12 +358,13 @@
       ]
     },
     "matrix/types": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "isDenseMatrix",
         "registerSparseMatrixFactory",
         "denseContiguousData",
         "DenseMatrix",
+        "isNativeMatrix",
         "isMatrix",
         "isSparseMatrix",
         "SparseMatrix",
@@ -378,8 +379,7 @@
         "DENSE_MATRIX_MAX_ELEMENTS",
         "assertDenseMatrixSize",
         "sum",
-        "mean",
-        "min"
+        "mean"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry", "DenseReader"]

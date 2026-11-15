@@ -30,6 +30,7 @@ import {
   type LogmOptions,
   type SqrtmOptions,
   DenseMatrix,
+  isDenseMatrix,
   matMul as denseMatMul,
   transposeNestedArray as transpose,
 } from '@danielsimonjr/mathts-matrix';
@@ -1082,7 +1083,7 @@ export const pinv = mathTyped('pinv', {
  * A native DenseMatrix holds numbers only, so it gives `null`.
  */
 function denseEntries(A: unknown): unknown[][] | null {
-  if (A instanceof DenseMatrix) return null;
+  if (isDenseMatrix(A)) return null;
   const toArray = (A as { toArray?: () => unknown }).toArray;
   if (typeof toArray !== 'function') return null;
   const nested = toArray.call(A) as unknown[][];

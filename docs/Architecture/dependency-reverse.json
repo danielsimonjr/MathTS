@@ -379,6 +379,11 @@
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/index.ts"
     ],
+    "matrix/src/types/type-marker.ts": [
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/types/Matrix.ts",
+      "matrix/src/types/SparseMatrix.ts"
+    ],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",
       "tensor/src/contraction-sequence.ts",
