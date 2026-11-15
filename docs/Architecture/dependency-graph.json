@@ -3124,7 +3124,7 @@
           },
           {
             "file": "../bignumber.js",
-            "imports": ["BIGNUMBER_PI"]
+            "imports": ["BigNumber"]
           },
           {
             "file": "./unit-types.js",
@@ -48870,7 +48870,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 231423,
+    "totalLinesOfCode": 231437,
     "totalExports": 7311,
     "totalClasses": 62,
     "totalInterfaces": 663,
