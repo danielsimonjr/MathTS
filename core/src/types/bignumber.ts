@@ -1111,9 +1111,8 @@ export class BigNumber implements MathTSValue {
   // ============================================================
   // Constants at the configured precision (#1043)
   // ============================================================
-  // The exported BigNumber.piAt() / _LN2 / _LN10 literals hold 51 digits, and the default precision
-  // is 64. The methods use these values instead, computed with bigint series to the precision
-  // asked for, plus guard digits, and kept in a cache per precision.
+  // Each constant comes from a bigint series to the precision asked for, plus guard digits, and
+  // stays in a cache per precision. The exported BIGNUMBER_* constants use these series too.
 
   static #constantCache = new Map<string, BigNumber>();
 
@@ -1137,6 +1136,18 @@ export class BigNumber implements MathTSValue {
       precision,
       (s) => 16n * atanInv(5n, s) - 4n * atanInv(239n, s)
     );
+  }
+
+  /** e to `precision` digits (the sum of 1/k!). */
+  static eAt(precision: number = globalConfig.precision): BigNumber {
+    return BigNumber.#constant('e', precision, (s) => {
+      let sum = 0n;
+      for (let term = s, k = 1n; term > 0n; k++) {
+        sum += term;
+        term /= k;
+      }
+      return sum;
+    });
   }
 
   /** ln 2 to `precision` digits (2·atanh(1/3)). */
@@ -2068,12 +2079,14 @@ export const BIGNUMBER_ONE = BigNumber.fromNumber(1);
 export const BIGNUMBER_NEG_ONE = BigNumber.fromNumber(-1);
 export const BIGNUMBER_TEN = BigNumber.fromNumber(10);
 
-// Math constants with high precision
-export const BIGNUMBER_PI = BigNumber.parse('3.14159265358979323846264338327950288419716939937510');
-export const BIGNUMBER_E = BigNumber.parse('2.71828182845904523536028747135266249775724709369995');
-export const BIGNUMBER_LN2 = BigNumber.parse(
-  '0.69314718055994530941723212145817656807550013436026'
-);
-export const BIGNUMBER_LN10 = BigNumber.parse(
-  '2.30258509299404568401799145468436420760110148862877'
-);
+/**
+ * The number of significant digits of the exported constants below. A constant does not follow
+ * the `precision` option. For a value at the configured precision, use `BigNumber.piAt()`,
+ * `eAt()`, `ln2At()` or `ln10At()`.
+ */
+const BIGNUMBER_CONSTANT_DIGITS = 100;
+
+export const BIGNUMBER_PI = BigNumber.piAt(BIGNUMBER_CONSTANT_DIGITS);
+export const BIGNUMBER_E = BigNumber.eAt(BIGNUMBER_CONSTANT_DIGITS);
+export const BIGNUMBER_LN2 = BigNumber.ln2At(BIGNUMBER_CONSTANT_DIGITS);
+export const BIGNUMBER_LN10 = BigNumber.ln10At(BIGNUMBER_CONSTANT_DIGITS);
