@@ -14,6 +14,7 @@ import {
   pairwiseDot,
   scaledDistance,
   sumSquaredDeviations,
+  extrema,
 } from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
@@ -984,21 +985,7 @@ export class ComputePool {
       !this.shouldParallelize(data.length, 'minMax', force) &&
       !this.shouldParallelize(data.length, 'min', force)
     ) {
-      let min = Infinity;
-      let max = -Infinity;
-      let minIdx = -1;
-      let maxIdx = -1;
-      for (let i = 0; i < data.length; i++) {
-        if (data[i] < min) {
-          min = data[i];
-          minIdx = i;
-        }
-        if (data[i] > max) {
-          max = data[i];
-          maxIdx = i;
-        }
-      }
-      return this.seqResult({ min, max, minIdx, maxIdx });
+      return this.seqResult(extrema(data));
     }
     await this.ensureInitializedForParallel(data.length, 'minMax', force);
     return toParallelResult(

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-14",
+  "generated": "2026-11-15",
   "totalFiles": 2420,
   "byDisposition": {
     "reachable": 26,
@@ -800,7 +800,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 276
+      "loc": 278
     },
     {
       "file": "core/src/internal.ts",
@@ -849,7 +849,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 621
+      "loc": 659
     },
     {
       "file": "core/src/numeric/strides.ts",
@@ -9011,7 +9011,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2643
+      "loc": 2639
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -12791,7 +12791,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 253
+      "loc": 252
     },
     {
       "file": "functions/tests/typed-arithmetic.test.ts",
@@ -14576,7 +14576,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2497
+      "loc": 2469
     },
     {
       "file": "packages/workerpool/src/matmul-sequential.ts",
@@ -14618,14 +14618,14 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 247
+      "loc": 296
     },
     {
       "file": "packages/workerpool/src/worker.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 954
+      "loc": 937
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
@@ -14695,7 +14695,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 264
+      "loc": 279
     },
     {
       "file": "packages/workerpool/tests/root-helpers-public.test.ts",
@@ -14744,7 +14744,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 145
     },
     {
       "file": "packages/workerpool/tsdown.browser.config.ts",
@@ -14765,7 +14765,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1911
+      "loc": 1898
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -14926,7 +14926,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 232
+      "loc": 248
     },
     {
       "file": "parallel/tests/gemm-rows-oracle.test.ts",
@@ -16074,7 +16074,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 187
+      "loc": 189
     },
     {
       "file": "tests/docs/readme-fences.test.ts",

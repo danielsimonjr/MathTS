@@ -244,3 +244,52 @@ export function _workerCombineScaledSsq(parts: ReadonlyArray<readonly [number, n
   }
   return scale * Math.sqrt(ssq);
 }
+
+/** The minimum and the maximum of a range, with the index of each. */
+export interface WorkerExtrema {
+  min: number;
+  max: number;
+  minIdx: number;
+  maxIdx: number;
+}
+
+/**
+ * Copy of core `extrema`: the minimum and the maximum of `xs[start..end)`, with their indexes.
+ * NaN propagates: a range with a NaN gives NaN for the minimum and the maximum, at the index of the first NaN. An equal
+ * later value does not replace the first one. An empty range gives `Infinity`, `-Infinity` and -1.
+ * `tests/worker-numerics.test.ts` pins `_workerExtrema` to core.
+ */
+export function _workerExtrema(xs: ArrayLike<number>, start = 0, end = xs.length): WorkerExtrema {
+  let min = Infinity;
+  let max = -Infinity;
+  let minIdx = -1;
+  let maxIdx = -1;
+  for (let i = start; i < end; i++) {
+    const x = xs[i];
+    if (x !== x) return { min: NaN, max: NaN, minIdx: i, maxIdx: i };
+    if (x < min || minIdx < 0) {
+      min = x;
+      minIdx = i;
+    }
+    if (x > max || maxIdx < 0) {
+      max = x;
+      maxIdx = i;
+    }
+  }
+  return { min, max, minIdx, maxIdx };
+}
+
+/**
+ * Combine the extrema of consecutive chunks, in chunk order, with the rule of `_workerExtrema`.
+ * The first chunk that holds a NaN decides. On a tie, the earlier chunk keeps its value.
+ */
+export function _workerCombineExtrema(parts: ReadonlyArray<WorkerExtrema>): WorkerExtrema {
+  let out: WorkerExtrema = { min: Infinity, max: -Infinity, minIdx: -1, maxIdx: -1 };
+  for (const p of parts) {
+    if (p.minIdx < 0) continue; // an empty chunk
+    if (p.min !== p.min) return p;
+    if (p.min < out.min || out.minIdx < 0) out = { ...out, min: p.min, minIdx: p.minIdx };
+    if (p.max > out.max || out.maxIdx < 0) out = { ...out, max: p.max, maxIdx: p.maxIdx };
+  }
+  return out;
+}

@@ -228,4 +228,20 @@ describe('operations: forceParallel / forceSequential are honored', () => {
     expect(s.result).toBe(6);
     await idle.terminate();
   });
+
+  it('minMax propagates NaN on the sequential and the parallel path (#1048)', async () => {
+    const x = ramp(40, (i) => i + 1);
+    x[7] = NaN;
+    x[30] = NaN;
+    for (const [p, opts] of [
+      [pool, { forceParallel: true }],
+      [eager, { forceSequential: true }],
+    ] as const) {
+      const r = await p.minMax(x, opts);
+      expect(r.result.min).toBeNaN();
+      expect(r.result.max).toBeNaN();
+      expect(r.result.minIdx).toBe(7);
+      expect(r.result.maxIdx).toBe(7);
+    }
+  });
 });

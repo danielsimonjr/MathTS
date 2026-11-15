@@ -21,6 +21,7 @@ import {
   BigNumber,
   Dual,
   DimensionMismatchError,
+  extrema,
 } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
@@ -1757,14 +1758,9 @@ function extremumSignatures(name: 'min' | 'max'): Record<string, (...args: never
       },
 
     // Float64Array, synchronous. The worker versions are parallelStatMin/Max and computePool.
-    // The Float64Array version skips NaN, as the parallel `minMax` of ComputePool does. Issue
-    // #1048 tracks the NaN policy of the Float64Array family. An equal later value never replaces
-    // the first.
-    Float64Array: (a: Float64Array): f64 => {
-      let m = isMax ? -Infinity : Infinity;
-      for (let i = 0; i < a.length; i++) if (isMax ? a[i] > m : a[i] < m) m = a[i];
-      return m;
-    },
+    // All of the versions use the rule of core `extrema`: NaN propagates, and an equal later
+    // value does not replace the first value.
+    Float64Array: (a: Float64Array): f64 => (isMax ? extrema(a).max : extrema(a).min),
   };
   for (const x of EXTREMUM_TYPES) {
     for (const y of EXTREMUM_TYPES) {

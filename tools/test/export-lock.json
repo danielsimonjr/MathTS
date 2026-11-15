@@ -352,6 +352,9 @@
       "ExactScale": {
         "kind": "type"
       },
+      "Extrema": {
+        "kind": "type"
+      },
       "FRACTION_HALF": {
         "kind": "object"
       },
@@ -647,6 +650,9 @@
         "kind": "function"
       },
       "exactScalesEqual": {
+        "kind": "function"
+      },
+      "extrema": {
         "kind": "function"
       },
       "fix": {

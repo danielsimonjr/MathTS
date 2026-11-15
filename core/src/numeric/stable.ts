@@ -618,3 +618,41 @@ export function neumaierCumsum(xs: ArrayLike<number>, out: { [index: number]: nu
     out[i] = sum + c;
   }
 }
+
+/** The minimum and the maximum of a range, with the index of each. */
+export interface Extrema {
+  min: number;
+  max: number;
+  minIdx: number;
+  maxIdx: number;
+}
+
+/**
+ * The minimum and the maximum of `xs[start..end)`, with their indexes.
+ *
+ * NaN propagates, as in mathjs and NumPy (`np.min`). When the range holds a NaN, `min` and `max`
+ * are NaN, and both indexes are the index of the first NaN. An equal later value does not
+ * replace the first one. An empty range gives `Infinity`, `-Infinity` and index -1.
+ *
+ * The workers of `@danielsimonjr/mathts-workerpool` cannot import core, so they keep a copy
+ * (`_workerExtrema`). The parity test of that package compares core `extrema` and `_workerExtrema`.
+ */
+export function extrema(xs: ArrayLike<number>, start = 0, end = xs.length): Extrema {
+  let min = Infinity;
+  let max = -Infinity;
+  let minIdx = -1;
+  let maxIdx = -1;
+  for (let i = start; i < end; i++) {
+    const x = xs[i];
+    if (x !== x) return { min: NaN, max: NaN, minIdx: i, maxIdx: i };
+    if (x < min || minIdx < 0) {
+      min = x;
+      minIdx = i;
+    }
+    if (x > max || maxIdx < 0) {
+      max = x;
+      maxIdx = i;
+    }
+  }
+  return { min, max, minIdx, maxIdx };
+}

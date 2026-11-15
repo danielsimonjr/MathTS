@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-14",
+  "generated": "2026-11-15",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -611,6 +611,8 @@
       "exactScaleToNumber",
       "expm1",
       "extend",
+      "extrema",
+      "Extrema",
       "factory",
       "FactoryDependencies",
       "FactoryFunction",
@@ -4763,7 +4765,9 @@
     ],
     "packages/workerpool": [
       "_tdRowMajorStrides",
+      "_workerCombineExtrema",
       "_workerCombineScaledSsq",
+      "_workerExtrema",
       "_workerMulberry32",
       "_workerPairwiseDot",
       "_workerPairwiseSum",

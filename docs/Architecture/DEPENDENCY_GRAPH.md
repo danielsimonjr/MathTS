@@ -353,20 +353,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                                                                                                   | Type                  |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------- | --------------------- |
-| `./pool-types.js`              | `Transfer, Pool, PoolOptions, ExecOptions, PoolStats`                                                     | Import                |
-| `./compile-function-source.js` | `compileFunctionSource`                                                                                   | Import                |
-| `./chunk-typed.js`             | `chunkPairTyped, chunkTyped`                                                                              | Import                |
-| `./fft-core.js`                | `fftFrameInPlace`                                                                                         | Import                |
-| `./matmul-sequential.js`       | `assertMatmulBuffers, matmulSequential`                                                                   | Import                |
-| `./unary-kernels.js`           | `applyUnary, UnaryFn`                                                                                     | Import                |
-| `./worker-numerics.js`         | `_workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerCombineScaledSsq` | Import                |
-| `./chunk-typed.js`             | `chunkTyped, chunkPairTyped`                                                                              | Re-export             |
-| `./multi-index.js`             | `forEachMultiIndex`                                                                                       | Re-export             |
-| `./tensordot-range.js`         | `tensordotRange`                                                                                          | Re-export             |
-| `./matmul-sequential.js`       | `matmulSequential`                                                                                        | Re-export             |
-| `./pool-types.js`              | `TransferDescriptor, TransferableLike`                                                                    | Re-export (type-only) |
+| File                           | Imports                                                                                                                                          | Type                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `./pool-types.js`              | `Transfer, Pool, PoolOptions, ExecOptions, PoolStats`                                                                                            | Import                |
+| `./compile-function-source.js` | `compileFunctionSource`                                                                                                                          | Import                |
+| `./chunk-typed.js`             | `chunkPairTyped, chunkTyped`                                                                                                                     | Import                |
+| `./fft-core.js`                | `fftFrameInPlace`                                                                                                                                | Import                |
+| `./matmul-sequential.js`       | `assertMatmulBuffers, matmulSequential`                                                                                                          | Import                |
+| `./unary-kernels.js`           | `applyUnary, UnaryFn`                                                                                                                            | Import                |
+| `./worker-numerics.js`         | `_workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerCombineScaledSsq, _workerExtrema, _workerCombineExtrema` | Import                |
+| `./chunk-typed.js`             | `chunkTyped, chunkPairTyped`                                                                                                                     | Re-export             |
+| `./multi-index.js`             | `forEachMultiIndex`                                                                                                                              | Re-export             |
+| `./tensordot-range.js`         | `tensordotRange`                                                                                                                                 | Re-export             |
+| `./matmul-sequential.js`       | `matmulSequential`                                                                                                                               | Re-export             |
+| `./pool-types.js`              | `TransferDescriptor, TransferableLike`                                                                                                           | Re-export (type-only) |
 
 **Exports:**
 
@@ -439,7 +439,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `_tdRowMajorStrides`, `_workerMulberry32`, `_workerPairwiseSum`, `_workerPairwiseDot`, `_workerScaledSsq`, `_workerScaledSsqDiff`, `_workerCombineScaledSsq`
+- Interfaces: `WorkerExtrema`
+- Functions: `_tdRowMajorStrides`, `_workerMulberry32`, `_workerPairwiseSum`, `_workerPairwiseDot`, `_workerScaledSsq`, `_workerScaledSsqDiff`, `_workerCombineScaledSsq`, `_workerExtrema`, `_workerCombineExtrema`
 
 ---
 
@@ -453,14 +454,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                                                                                             | Type   |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- | ------ |
-| `./compile-function-source.js` | `compileFunctionSource`                                                                             | Import |
-| `./fft-core.js`                | `fftFrameInPlace`                                                                                   | Import |
-| `./matmul-sequential.js`       | `matmulRowBlock`                                                                                    | Import |
-| `./tensordot-range.js`         | `tensordotRange`                                                                                    | Import |
-| `./unary-kernels.js`           | `UNARY_KERNELS, UnaryFn`                                                                            | Import |
-| `./worker-numerics.js`         | `_workerMulberry32, _workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff` | Import |
+| File                           | Imports                                                                                                             | Type   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./compile-function-source.js` | `compileFunctionSource`                                                                                             | Import |
+| `./fft-core.js`                | `fftFrameInPlace`                                                                                                   | Import |
+| `./matmul-sequential.js`       | `matmulRowBlock`                                                                                                    | Import |
+| `./tensordot-range.js`         | `tensordotRange`                                                                                                    | Import |
+| `./unary-kernels.js`           | `UNARY_KERNELS, UnaryFn`                                                                                            | Import |
+| `./worker-numerics.js`         | `_workerMulberry32, _workerPairwiseSum, _workerPairwiseDot, _workerScaledSsq, _workerScaledSsqDiff, _workerExtrema` | Import |
 
 ---
 
@@ -634,7 +635,7 @@ graph LR
 | `./types/unit-prefixes.js`    | `SI_PREFIXES, BEST_PREFIXES, getPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
 | `./typed/index.js`            | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes`                                                                                                                                                                                                                                                                                                                                           | Re-export             |
 | `./factory/index.js`          | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export             |
-| `./numeric/stable.js`         | `pairwiseSum, pairwiseSumChecked, pairwiseDotChecked, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations, sumSquaredDeviationsChecked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
+| `./numeric/stable.js`         | `pairwiseSum, pairwiseSumChecked, pairwiseDotChecked, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations, sumSquaredDeviationsChecked, extrema`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
 | `./numeric/rng.js`            | `mulberry32, boxMuller, createSeededRng, SeededRng`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
 | `./numeric/strides.js`        | `rowMajorStrides`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export             |
 | `./deterministic.js`          | `setDeterministic, isDeterministic`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
@@ -648,11 +649,12 @@ graph LR
 | `./types/unit.js`             | `SiDimensionVector, SiDimensionOptions, SiDimensionExponent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export (type-only) |
 | `./typed/index.js`            | `TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Re-export (type-only) |
 | `./factory/index.js`          | `MathTSConfig, FactoryFunction, FactoryDependencies, FactoryImport`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./numeric/stable.js`         | `Extrema`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
 
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `unitReadingSearchSteps`, `MAX_UNIT_STRING_LENGTH`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `pairwiseSumChecked`, `pairwiseDotChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `sumSquaredDeviationsChecked`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `bignumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `AmbiguousUnitError`, `DIMENSIONLESS`, `dim`, `unitReadingSearchSteps`, `MAX_UNIT_STRING_LENGTH`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `AMBIGUOUS_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `pairwiseSumChecked`, `pairwiseDotChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `sumSquaredDeviationsChecked`, `extrema`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `setDeterministic`, `isDeterministic`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `UnitReadingFactor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`, `Extrema`
 
 ---
 
@@ -918,7 +920,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `pairwiseSum`, `pairwiseSumChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `pairwiseDotChecked`, `scaledDistance`, `sumSquaredDeviations`, `sumSquaredDeviationsChecked`, `neumaierCumsum`
+- Interfaces: `Extrema`
+- Functions: `pairwiseSum`, `pairwiseSumChecked`, `neumaierSum`, `norm2`, `pairwiseDot`, `pairwiseDotChecked`, `scaledDistance`, `sumSquaredDeviations`, `sumSquaredDeviationsChecked`, `neumaierCumsum`, `extrema`
 
 ---
 
@@ -11414,7 +11417,7 @@ graph LR
 
 | Package                          | Import                                                                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError`                                                                   |
+| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError, extrema`                                                          |
 | `@danielsimonjr/mathts-core`     | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, pairwiseDotChecked, sumSquaredDeviations, sumSquaredDeviationsChecked` |
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                                                                                  |
 | `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                                                                                             |
@@ -18666,7 +18669,7 @@ graph LR
 
 | Package                            | Import                                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `isDeterministic, pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations`             |
+| `@danielsimonjr/mathts-core`       | `isDeterministic, pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations, extrema`    |
 | `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, tensordotRange, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Internal Dependencies:**
@@ -21245,15 +21248,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1333   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230315 |
-| Total Exports           | 7292   |
-| Total Re-exports        | 3165   |
+| Total Lines of Code     | 230342 |
+| Total Exports           | 7297   |
+| Total Re-exports        | 3167   |
 | Total Classes           | 62     |
-| Total Interfaces        | 661    |
-| Total Functions         | 2497   |
+| Total Interfaces        | 663    |
+| Total Functions         | 2500   |
 | Total Type Guards       | 178    |
 | Total Enums             | 0      |
-| Type-only Imports       | 682    |
+| Type-only Imports       | 683    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

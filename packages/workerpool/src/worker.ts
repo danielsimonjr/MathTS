@@ -18,6 +18,7 @@ import {
   _workerPairwiseDot,
   _workerScaledSsq,
   _workerScaledSsqDiff,
+  _workerExtrema,
 } from './worker-numerics.js';
 import { worker, Transfer } from 'workerpool';
 
@@ -103,25 +104,7 @@ function minMaxChunk(
   start: number,
   length: number
 ): { min: number; max: number; minIdx: number; maxIdx: number } {
-  const data = new Float64Array(buffer);
-  let min = data[start];
-  let max = data[start];
-  let minIdx = start;
-  let maxIdx = start;
-
-  const end = start + length;
-  for (let i = start + 1; i < end; i++) {
-    if (data[i] < min) {
-      min = data[i];
-      minIdx = i;
-    }
-    if (data[i] > max) {
-      max = data[i];
-      maxIdx = i;
-    }
-  }
-
-  return { min, max, minIdx, maxIdx };
+  return _workerExtrema(new Float64Array(buffer), start, start + length);
 }
 
 /**
