@@ -1003,6 +1003,9 @@ export const sqrt = mathTyped('sqrt', {
   number: (a: f64): f64 | Complex => sqrtReal(a),
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber => a.sqrt(),
+  // A Fraction has no exact square root in general. Use the number path. The result is a
+  // number for x >= 0 and a Complex for x < 0 (#1044).
+  Fraction: (a: Fraction): f64 | Complex => sqrtReal(a.valueOf()),
   Dual: (a: Dual): Dual => a.sqrt(),
 
   // Float64Array sqrt (synchronous)

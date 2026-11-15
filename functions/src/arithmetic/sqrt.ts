@@ -55,7 +55,7 @@ export const createSqrt = /* #__PURE__ */ factory(
      *
      *    square, multiply, cube, cbrt, sqrtm
      *
-     * @param {number | BigNumber | Complex | Unit} x
+     * @param {number | BigNumber | Fraction | Complex | Unit} x
      *            Value for which to calculate the square root.
      * @return {number | BigNumber | Complex | Unit}
      *            Returns the square root of `x`
@@ -74,6 +74,12 @@ export const createSqrt = /* #__PURE__ */ factory(
           // negative value -> downgrade to number to do complex value computation
           return _sqrtNumber(x.toNumber());
         }
+      },
+
+      // A Fraction has no exact square root in general. Use the number path. The result is a
+      // number for x >= 0 and a Complex for x < 0 (#1044).
+      Fraction: function (x: { valueOf(): number }): number | ComplexType {
+        return _sqrtNumber(x.valueOf());
       },
 
       Unit: function (x: UnitType): UnitType {

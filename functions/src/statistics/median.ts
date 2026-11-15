@@ -182,19 +182,17 @@ export const createMedian = /* #__PURE__ */ factory(
 
     // helper function to type check the middle value of the array
     const middle = typed({
-      'number | BigNumber | Complex | Unit': function (value: unknown): unknown {
+      'number | BigNumber | Fraction | Complex | Unit': function (value: unknown): unknown {
         return value;
       },
     }) as (value: unknown) => unknown;
 
     // helper function to type check the two middle value of the array
     const middle2 = typed({
-      'number | BigNumber | Complex | Unit, number | BigNumber | Complex | Unit': function (
-        left: unknown,
-        right: unknown
-      ): unknown {
-        return divide(add(left, right), 2);
-      },
+      'number | BigNumber | Fraction | Complex | Unit, number | BigNumber | Fraction | Complex | Unit':
+        function (left: unknown, right: unknown): unknown {
+          return divide(add(left, right), 2);
+        },
     }) as (left: unknown, right: unknown) => unknown;
 
     /**
