@@ -16304,6 +16304,10 @@ modules:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -46081,7 +46085,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1335
   totalModules: 82
-  totalLinesOfCode: 231073
+  totalLinesOfCode: 231152
   totalExports: 7307
   totalClasses: 62
   totalInterfaces: 663

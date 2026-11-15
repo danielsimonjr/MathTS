@@ -104,5 +104,8 @@ describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
     };
     const readme = readFileSync(join(REPO, 'README.md'), 'utf8');
     expect(readme).toContain(`@danielsimonjr/mathts-functions\` ${version}`);
-  });
+    // The check spawns a Node process that takes 3.4 s on an idle machine. In a full test run
+    // the check exceeds the 5 s default. Thus the test has the 120 s limit of the other
+    // subprocess tests here.
+  }, 120_000);
 });
