@@ -73,6 +73,10 @@ import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/matht
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { divideInverse } from './divide-inverse.js';
 import { exactReductions } from './exact-reductions.js';
+import {
+  ROUND_DECIMALS_NOT_INTEGER,
+  roundBigNumberDecimals,
+} from '../utils/bignumber/round-decimals.js';
 import type {
   PublicAbs,
   PublicAdd,
@@ -95,6 +99,9 @@ import {
   isPredictableMode,
   sqrtBigNumberWith,
   powBigNumberWith,
+  logBigNumberWith,
+  log1pBigNumberWith,
+  liveConfig,
   sqrtReal,
   staysRealSqrt,
   powReal,
@@ -1122,8 +1129,10 @@ export const cbrt = mathTyped('cbrt', {
 export const nthRoot = mathTyped('nthRoot', {
   'number, number': (a: f64, n: f64): f64 => nthRootReal(a, n),
   number: (a: f64): f64 => nthRootReal(a, 2),
+  BigNumber: (a: BigNumber): BigNumber => bigNthRoot(a, 2),
   'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
   'BigNumber, number': (a: BigNumber, n: f64): BigNumber => bigNthRoot(a, n),
+  'BigNumber, BigNumber': (a: BigNumber, n: BigNumber): BigNumber => bigNthRoot(a, n.toNumber()),
 });
 
 /**
@@ -1171,12 +1180,41 @@ export const exp = mathTyped('exp', {
 /**
  * Natural logarithm (ln x). The Float64Array signature is synchronous.
  */
+/** log10 or log2 of a BigNumber; a negative value gives the Complex logarithm over `lnBase`. */
+function logBigNumberScaled(
+  a: BigNumber,
+  method: 'log10' | 'log2',
+  lnBase: number
+): BigNumber | Complex {
+  const ln = logBigNumberWith(a, isPredictableMode());
+  return ln instanceof Complex ? ln.divide(Complex.fromNumber(lnBase)) : a[method]();
+}
+
+/** log(a) / log(base) of two BigNumbers; a Complex logarithm makes the quotient Complex. */
+function logBigNumberBase(a: BigNumber, base: BigNumber): BigNumber | Complex {
+  const predictable = isPredictableMode();
+  const x = logBigNumberWith(a, predictable);
+  const y = logBigNumberWith(base, predictable);
+  if (x instanceof BigNumber && y instanceof BigNumber) return x.divide(y);
+  const cx = x instanceof Complex ? x : Complex.fromNumber(x.toNumber());
+  const cy = y instanceof Complex ? y : Complex.fromNumber(y.toNumber());
+  return cx.divide(cy);
+}
+
+/** A BigNumber rounded to `decimals` places with the live `relTol` and `absTol`. */
+function roundBigNumberLive(a: BigNumber, decimals: number): BigNumber {
+  const { relTol, absTol } = liveConfig();
+  return roundBigNumberDecimals(a, decimals, relTol, absTol);
+}
+
 export const log = mathTyped('log', {
   number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
-  BigNumber: (a: BigNumber): BigNumber => a.ln(),
+  BigNumber: (a: BigNumber): BigNumber | Complex => logBigNumberWith(a, isPredictableMode()),
   Dual: (a: Dual): Dual => a.log(),
   'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
+  'BigNumber, BigNumber': (a: BigNumber, base: BigNumber): BigNumber | Complex =>
+    logBigNumberBase(a, base),
 
   // Float64Array log (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'log', (x) => Math.log(x)),
@@ -1193,7 +1231,7 @@ export const log = mathTyped('log', {
 export const log10 = mathTyped('log10', {
   number: (a: f64): f64 | Complex => log10Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN10)),
-  BigNumber: (a: BigNumber): BigNumber => a.log10(),
+  BigNumber: (a: BigNumber): BigNumber | Complex => logBigNumberScaled(a, 'log10', Math.LN10),
 
   // Float64Array log10 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
@@ -1211,7 +1249,7 @@ export const log10 = mathTyped('log10', {
 export const log2 = mathTyped('log2', {
   number: (a: f64): f64 | Complex => log2Real(a),
   Complex: (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN2)),
-  BigNumber: (a: BigNumber): BigNumber => a.log2(),
+  BigNumber: (a: BigNumber): BigNumber | Complex => logBigNumberScaled(a, 'log2', Math.LN2),
 
   // Float64Array log2 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
@@ -1228,6 +1266,7 @@ export const log2 = mathTyped('log2', {
  */
 export const log1p = mathTyped('log1p', {
   number: (a: f64): f64 | Complex => log1pReal(a),
+  BigNumber: (a: BigNumber): BigNumber | Complex => log1pBigNumberWith(a, isPredictableMode()),
 
   // Float64Array log1p (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
@@ -1244,6 +1283,7 @@ export const log1p = mathTyped('log1p', {
  */
 export const expm1 = mathTyped('expm1', {
   number: (a: f64): f64 => Math.expm1(a),
+  BigNumber: (a: BigNumber): BigNumber => a.exp().subtract(1),
 
   // Float64Array expm1 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>
@@ -1269,6 +1309,11 @@ export const round = mathTyped('round', {
   'number, number': (a: f64, decimals: f64): f64 => {
     const factor = Math.pow(10, decimals);
     return Math.round(a * factor) / factor;
+  },
+  'BigNumber, number': (a: BigNumber, decimals: f64): BigNumber => roundBigNumberLive(a, decimals),
+  'BigNumber, BigNumber': (a: BigNumber, decimals: BigNumber): BigNumber => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return roundBigNumberLive(a, decimals.toNumber());
   },
 
   // Float64Array round, synchronous (nearest integer, matching the 'number' overload)

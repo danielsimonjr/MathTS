@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-15'
-  totalFiles: 1335
+  totalFiles: 1336
   totalModules: 82
-  totalExports: 7311
+  totalExports: 7316
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9087,6 +9087,10 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - roundNumber
+        - file: ../utils/bignumber/round-decimals.js
+          imports:
+            - ROUND_DECIMALS_NOT_INTEGER
+            - roundBigNumberDecimals
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -9095,7 +9099,11 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
       exports:
         - createRound
       constants:
@@ -24252,6 +24260,10 @@ modules:
         - file: ./exact-reductions.js
           imports:
             - exactReductions
+        - file: ../utils/bignumber/round-decimals.js
+          imports:
+            - ROUND_DECIMALS_NOT_INTEGER
+            - roundBigNumberDecimals
         - file: ./public-type-exports.js
           imports:
             - PublicAbs
@@ -24276,6 +24288,9 @@ modules:
             - isPredictableMode
             - sqrtBigNumberWith
             - powBigNumberWith
+            - logBigNumberWith
+            - log1pBigNumberWith
+            - liveConfig
             - sqrtReal
             - staysRealSqrt
             - powReal
@@ -24758,6 +24773,7 @@ modules:
             - Complex
             - Fraction
       exports:
+        - liveConfig
         - isPredictableMode
         - staysRealLog
         - logReal
@@ -24770,6 +24786,8 @@ modules:
         - sqrtNumberWith
         - sqrtBigNumberWith
         - powBigNumberWith
+        - logBigNumberWith
+        - log1pBigNumberWith
         - sqrtReal
         - powReal
         - nthRootReal
@@ -24779,6 +24797,7 @@ modules:
         - acscReal
         - asecReal
       functions:
+        - liveConfig
         - isPredictableMode
         - staysRealLog
         - logReal
@@ -24791,6 +24810,8 @@ modules:
         - sqrtNumberWith
         - sqrtBigNumberWith
         - powBigNumberWith
+        - logBigNumberWith
+        - log1pBigNumberWith
         - sqrtReal
         - powReal
         - nthRootReal
@@ -27689,6 +27710,29 @@ modules:
         - nearlyEqual
       functions:
         - nearlyEqual
+    functions/src/utils/bignumber/round-decimals.ts:
+      description: Round a BigNumber to `decimals` places after the point, as mathjs does. The typed `round` and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../number.js
+          imports:
+            - splitNumber
+        - file: ./nearlyEqual.js
+          imports:
+            - nearlyEqual
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+      exports:
+        - ROUND_DECIMALS_NOT_INTEGER
+        - roundBigNumberDecimals
+      functions:
+        - roundBigNumberDecimals
+      constants:
+        - ROUND_DECIMALS_NOT_INTEGER
     functions/src/utils/clone.ts:
       description: Clone an object. Will make a deep copy of the data.
       externalDependencies: []
@@ -45402,6 +45446,7 @@ dependencyGraph:
         - functions/src/utils/bigint.ts
         - functions/src/utils/bignumber/bitwise.ts
         - functions/src/utils/bignumber/nearlyEqual.ts
+        - functions/src/utils/bignumber/round-decimals.ts
         - functions/src/utils/clone.ts
         - functions/src/utils/collection.ts
         - functions/src/utils/complex.ts
@@ -46118,16 +46163,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1335
+  totalTypeScriptFiles: 1336
   totalModules: 82
-  totalLinesOfCode: 231437
-  totalExports: 7311
+  totalLinesOfCode: 231539
+  totalExports: 7316
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2513
+  totalFunctions: 2517
   totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1679
+  totalConstants: 1680
   totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2

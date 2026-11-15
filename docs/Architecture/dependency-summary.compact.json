@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-15", "f": 1335, "e": 7311, "re": 3168 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-15", "f": 1336, "e": 7316, "re": 3168 },
   "s": {
-    "loc": 231437,
+    "loc": 231539,
     "cls": 62,
     "int": 663,
-    "fn": 2513,
+    "fn": 2517,
     "tg": 180,
     "en": 0,
-    "co": 1679,
+    "co": 1680,
     "toi": 683
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1211,7 +1211,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 37,
+      "f": 38,
       "exp": [
         "arraySize",
         "validate",
@@ -1968,7 +1968,7 @@
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
     { "p": "utils/array.ts", "i": 0, "o": 47 },
-    { "p": "utils/number.ts", "i": 0, "o": 46 },
+    { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "typed/expression-eval-barrel.ts", "i": 41, "o": 1 }
   ]
 }

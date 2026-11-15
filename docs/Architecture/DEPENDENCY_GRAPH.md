@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 56 files
 - **functions/unit**: 2 files
-- **functions/utils**: 37 files
+- **functions/utils**: 38 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 577            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 578            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4280,20 +4280,27 @@ graph LR
 
 ### `functions/src/arithmetic/round.ts` - Round a value towards the nearest rounded value.
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
 **Internal Dependencies:**
 
-| File                                    | Imports                    | Type               |
-| --------------------------------------- | -------------------------- | ------------------ |
-| `../utils/factory.js`                   | `factory`                  | Import             |
-| `../utils/collection.js`                | `deepMap`                  | Import             |
-| `../utils/number.js`                    | `nearlyEqual, splitNumber` | Import             |
-| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`              | Import             |
-| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s`      | Import             |
-| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs`      | Import             |
-| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`       | Import             |
-| `../plain/number/index.js`              | `roundNumber`              | Import             |
-| `../core/function/typed.js`             | `TypedFunction`            | Import (type-only) |
-| `../core/config.js`                     | `ConfigOptions`            | Import (type-only) |
+| File                                    | Imports                                              | Type               |
+| --------------------------------------- | ---------------------------------------------------- | ------------------ |
+| `../utils/factory.js`                   | `factory`                                            | Import             |
+| `../utils/collection.js`                | `deepMap`                                            | Import             |
+| `../utils/number.js`                    | `nearlyEqual, splitNumber`                           | Import             |
+| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`                                        | Import             |
+| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s`                                | Import             |
+| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs`                                | Import             |
+| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`                                 | Import             |
+| `../plain/number/index.js`              | `roundNumber`                                        | Import             |
+| `../utils/bignumber/round-decimals.js`  | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals` | Import             |
+| `../core/function/typed.js`             | `TypedFunction`                                      | Import (type-only) |
+| `../core/config.js`                     | `ConfigOptions`                                      | Import (type-only) |
 
 **Exports:**
 
@@ -11512,19 +11519,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                                                                                                                                                                     | Type               |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `./number-matrix.js`            | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                           | Import             |
-| `../factories/scope.js`         | `factoryScope`                                                                                                                                                                              | Import             |
-| `./euclid.js`                   | `euclidSnap`                                                                                                                                                                                | Import             |
-| `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                                             | Import             |
-| `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                 | Import             |
-| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                     | Import             |
-| `./invalid-scalar-guards.js`    | `withBinaryScalarGuards`                                                                                                                                                                    | Import             |
-| `./divide-inverse.js`           | `divideInverse`                                                                                                                                                                             | Import             |
-| `./exact-reductions.js`         | `exactReductions`                                                                                                                                                                           | Import             |
-| `./public-type-exports.js`      | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                                | Import (type-only) |
-| `./complex-promotion.js`        | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, isPredictableMode, sqrtBigNumberWith, powBigNumberWith, sqrtReal, staysRealSqrt, powReal, nthRootReal` | Import             |
+| File                                   | Imports                                                                                                                                                                                                                                       | Type               |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `./number-matrix.js`                   | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                                                                             | Import             |
+| `../factories/scope.js`                | `factoryScope`                                                                                                                                                                                                                                | Import             |
+| `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
+| `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                                                                                               | Import             |
+| `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
+| `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
+| `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
+| `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
+| `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
+| `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
+| `./public-type-exports.js`             | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                                                                                  | Import (type-only) |
+| `./complex-promotion.js`               | `logReal, logRealBase, log10Real, log2Real, log1pReal, staysRealLog, staysRealLog1p, isPredictableMode, sqrtBigNumberWith, powBigNumberWith, logBigNumberWith, log1pBigNumberWith, liveConfig, sqrtReal, staysRealSqrt, powReal, nthRootReal` | Import             |
 
 **Exports:**
 
@@ -11641,7 +11649,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isPredictableMode`, `staysRealLog`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `staysRealLog1p`, `log1pReal`, `staysRealSqrt`, `sqrtNumberWith`, `sqrtBigNumberWith`, `powBigNumberWith`, `sqrtReal`, `powReal`, `nthRootReal`, `staysRealUnitInterval`, `staysRealAcosh`, `staysRealAbsAtLeastOne`, `acscReal`, `asecReal`
+- Functions: `liveConfig`, `isPredictableMode`, `staysRealLog`, `logReal`, `logRealBase`, `log10Real`, `log2Real`, `staysRealLog1p`, `log1pReal`, `staysRealSqrt`, `sqrtNumberWith`, `sqrtBigNumberWith`, `powBigNumberWith`, `logBigNumberWith`, `log1pBigNumberWith`, `sqrtReal`, `powReal`, `nthRootReal`, `staysRealUnitInterval`, `staysRealAcosh`, `staysRealAbsAtLeastOne`, `acscReal`, `asecReal`
 
 ---
 
@@ -12656,6 +12664,28 @@ graph LR
 **Exports:**
 
 - Functions: `nearlyEqual`
+
+---
+
+### `functions/src/utils/bignumber/round-decimals.ts` - Round a BigNumber to `decimals` places after the point, as mathjs does. The typed `round` and
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
+**Internal Dependencies:**
+
+| File               | Imports       | Type   |
+| ------------------ | ------------- | ------ |
+| `../number.js`     | `splitNumber` | Import |
+| `./nearlyEqual.js` | `nearlyEqual` | Import |
+
+**Exports:**
+
+- Functions: `roundBigNumberDecimals`
+- Constants: `ROUND_DECIMALS_NOT_INTEGER`
 
 ---
 
@@ -20431,7 +20461,7 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
-| `functions/src/utils/number`                           | 0 files      | 46 files   |
+| `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 42 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
@@ -20447,9 +20477,9 @@ graph LR
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `core/src/internal`                                    | 22 files     | 0 files    |
+| `functions/src/typed/arithmetic`                       | 12 files     | 10 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 22 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
-| `functions/src/typed/arithmetic`                       | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
@@ -21005,13 +21035,13 @@ graph TD
         N363[bigint]
         N364[bitwise]
         N365[nearlyEqual]
-        N366[clone]
-        N367[collection]
-        N368[complex]
-        N369[customs]
-        N370[emitter]
-        N371[factory]
-        N372[...27 more]
+        N366[round-decimals]
+        N367[clone]
+        N368[collection]
+        N369[complex]
+        N370[customs]
+        N371[emitter]
+        N372[...28 more]
     end
 
     subgraph Functions/wasm
@@ -21357,14 +21387,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1335   |
+| Total TypeScript Files  | 1336   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231437 |
-| Total Exports           | 7311   |
+| Total Lines of Code     | 231539 |
+| Total Exports           | 7316   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2513   |
+| Total Functions         | 2517   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

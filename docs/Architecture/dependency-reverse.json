@@ -1078,6 +1078,7 @@
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/relational.ts",
+      "functions/src/utils/bignumber/round-decimals.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts",
@@ -1438,6 +1439,7 @@
       "functions/src/relational/largerEq.ts",
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
+      "functions/src/utils/bignumber/round-decimals.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
     ],
@@ -1708,6 +1710,10 @@
       "functions/src/arithmetic/sqrt.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/trigonometry.ts"
+    ],
+    "functions/src/utils/bignumber/round-decimals.ts": [
+      "functions/src/arithmetic/round.ts",
+      "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/utils/bignumber/bitwise.ts": [
       "functions/src/bitwise/bitAnd.ts",

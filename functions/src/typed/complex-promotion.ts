@@ -8,7 +8,8 @@ import { nthRootNumber, powNumber } from '../plain/number/index.js';
 import { factoryScope } from '../factories/scope.js';
 import type { ConfigOptions } from '../core/config.js';
 
-function liveConfig(): ConfigOptions {
+/** The live factory config, including {@link runWithConfig} overlays. */
+export function liveConfig(): ConfigOptions {
   return factoryScope.config as ConfigOptions;
 }
 
@@ -124,6 +125,31 @@ export function powBigNumberWith(
     return x.pow(y);
   }
   return new Complex(x.toNumber(), 0).pow(y.toNumber());
+}
+
+/**
+ * Natural logarithm of a BigNumber, with the `predictable` option given. A non-negative value or
+ * `predictable` gives the BigNumber logarithm (NaN for a negative value under `predictable`). A
+ * negative value otherwise gives the Complex logarithm of the number value, as in mathjs.
+ */
+export function logBigNumberWith(x: BigNumber, predictable: boolean): BigNumber | Complex {
+  if (!x.isNegative() || predictable) {
+    return x.ln();
+  }
+  return new Complex(x.toNumber(), 0).log();
+}
+
+/**
+ * log(1 + x) of a BigNumber, with the `predictable` option given. When 1 + x is not negative, or
+ * with `predictable`, the result is the BigNumber logarithm of 1 + x. Otherwise the result is the
+ * Complex logarithm of the number value 1 + x, as in mathjs.
+ */
+export function log1pBigNumberWith(x: BigNumber, predictable: boolean): BigNumber | Complex {
+  const y = x.add(1);
+  if (!y.isNegative() || predictable) {
+    return y.ln();
+  }
+  return new Complex(y.toNumber(), 0).log();
 }
 
 /** Square root. Non-negative inputs and NaN never read config. */
