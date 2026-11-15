@@ -1,6 +1,7 @@
 /**
- * The exact (factory) reductions that the typed `sum` falls back to. The factory layer imports the
- * typed arithmetic module, so the typed module cannot import the factories itself. The factory
+ * The factory functions that the typed functions call for input that is not plain numbers: the
+ * exact reductions of `sum`, `mean` and the others, and the matrix `transpose`. The factory layer
+ * imports the typed arithmetic module, so the typed module cannot import the factories itself. The factory
  * layer registers them once, when it is defined. This module is internal: it is not re-exported.
  */
 
@@ -18,6 +19,7 @@ export interface ExactReductions {
   dot: ExactReductionFn;
   varianceDdof: ExactReductionFn;
   isNaN: ExactReductionFn;
+  transpose: ExactReductionFn;
 }
 
 const registered: { fns?: ExactReductions } = {};
