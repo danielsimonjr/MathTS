@@ -25872,6 +25872,7 @@
               "DenseMatrix",
               "SparseMatrix",
               "backendManager",
+              "isDenseMatrix",
               "isSparseMatrix",
               "singularValues"
             ]
@@ -25947,6 +25948,10 @@
           "nanvariance",
           "nanstd",
           "matmul",
+          "transpose",
+          "transpose",
+          "transpose",
+          "transpose",
           "transpose",
           "matvec",
           "outer",
@@ -26563,7 +26568,7 @@
         "functions": ["euclidSnap"]
       },
       "functions/src/typed/exact-reductions.ts": {
-        "description": "The exact (factory) reductions that the typed `sum` falls back to. The factory layer imports the",
+        "description": "The factory functions that the typed functions call for input that is not plain numbers: the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -45786,7 +45791,8 @@
               "floor",
               "ceil",
               "matrix",
-              "sparse"
+              "sparse",
+              "transpose"
             ]
           },
           {
@@ -48835,11 +48841,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 231342,
+    "totalLinesOfCode": 231414,
     "totalExports": 7308,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2506,
+    "totalFunctions": 2510,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1679,

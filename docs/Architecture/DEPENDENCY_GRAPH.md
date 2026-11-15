@@ -11493,7 +11493,7 @@ graph LR
 | `@danielsimonjr/mathts-core`     | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, pairwiseDotChecked, sumSquaredDeviations, sumSquaredDeviationsChecked` |
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                                                                                  |
 | `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                                                                                             |
-| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, SparseMatrix, backendManager, isSparseMatrix, singularValues`                                                               |
+| `@danielsimonjr/mathts-matrix`   | `DenseMatrix, SparseMatrix, backendManager, isDenseMatrix, isSparseMatrix, singularValues`                                                |
 | `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, matmulSequential`                                                                                              |
 
 **Internal Dependencies:**
@@ -11515,7 +11515,7 @@ graph LR
 **Exports:**
 
 - Types: `GcdFunction`, `VarNormalization`
-- Functions: `nanmean`, `nanvariance`, `nanstd`, `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
+- Functions: `nanmean`, `nanvariance`, `nanstd`, `matmul`, `transpose`, `transpose`, `transpose`, `transpose`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `fsum`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
 
 ---
@@ -11711,7 +11711,7 @@ graph LR
 
 ---
 
-### `functions/src/typed/exact-reductions.ts` - The exact (factory) reductions that the typed `sum` falls back to. The factory layer imports the
+### `functions/src/typed/exact-reductions.ts` - The factory functions that the typed functions call for input that is not plain numbers: the
 
 **Exports:**
 
@@ -19855,13 +19855,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                 |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                |
-| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                        |
-| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                  |
-| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse` |
-| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                    |
+| Package                           | Import                                                                                                                                                                            |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                           |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                                   |
+| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                             |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse, transpose` |
+| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                               |
 
 **Internal Dependencies:**
 
@@ -21345,12 +21345,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231342 |
+| Total Lines of Code     | 231414 |
 | Total Exports           | 7308   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2506   |
+| Total Functions         | 2510   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2435,
+  "totalFiles": 2437,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1034,
+    "test": 1036,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1034,
+    "tests": 1036,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
-    "@danielsimonjr/mathts-compat": 29,
+    "@danielsimonjr/mathts-compat": 30,
     "@danielsimonjr/mathts-core": 134,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1095,
+    "@danielsimonjr/mathts-functions": 1096,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -527,7 +527,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 818
+      "loc": 820
     },
     {
       "file": "compat/src/unary-fast-path.ts",
@@ -689,6 +689,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 40
+    },
+    {
+      "file": "compat/tests/transpose-sparse.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "compat/tests/unary-fast-path.test.ts",
@@ -6659,14 +6666,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1800
+      "loc": 1801
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1127
+      "loc": 1170
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -9032,7 +9039,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2845
+      "loc": 2869
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9109,7 +9116,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 50
+      "loc": 52
     },
     {
       "file": "functions/src/typed/expression-eval-barrel.ts",
@@ -12596,6 +12603,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 448
+    },
+    {
+      "file": "functions/tests/sparse-transpose-diag.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 194
     },
     {
       "file": "functions/tests/special-accuracy.test.ts",
