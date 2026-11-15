@@ -2911,6 +2911,9 @@
       "NormalizationType": {
         "kind": "type"
       },
+      "NumberTypedArray": {
+        "kind": "type"
+      },
       "NumericEquivalence": {
         "kind": "type"
       },

@@ -6,6 +6,17 @@ import type { PhysicsEvaluateOptions } from './physics-evaluate-options.js';
 
 export type Matrix = DenseMatrix | SparseMatrix;
 export type ElementwiseLeaf = number | bigint | Complex | Fraction | BigNumber | UnitInstance | Dual;
+/** A typed array with number elements. A Float64Array parameter accepts each of these kinds. */
+export type NumberTypedArray =
+  | Float64Array
+  | Float32Array
+  | Int32Array
+  | Uint32Array
+  | Int16Array
+  | Uint16Array
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray;
 
 export interface AddCallable {
   (a: number, b: number): number;
@@ -25,7 +36,7 @@ export interface AddCallable {
   (a: Fraction, b: number): Fraction;
   (a: number, b: BigNumber): BigNumber;
   (a: BigNumber, b: number): BigNumber;
-  (a: Float64Array, b: Float64Array): Float64Array;
+  (a: NumberTypedArray, b: NumberTypedArray): Float64Array;
   (a: number[], b: number[]): number[];
   (a: number[], b: number): number[];
   (a: number, b: number[]): number[];
@@ -49,7 +60,7 @@ export interface AbsCallable {
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
   (a: UnitInstance): UnitInstance;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): number[];
   (a: number[][]): number[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -66,7 +77,7 @@ export interface SqrtCallable {
   (a: BigNumber): BigNumber;
   (a: Fraction): number | Complex;
   (a: Dual): Dual;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -82,7 +93,7 @@ export interface ExpCallable {
   (a: Complex): Complex;
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): number[];
   (a: number[][]): number[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -99,7 +110,7 @@ export interface LogCallable {
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
   (a: number, b: number): number | Complex;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -114,7 +125,7 @@ export interface Log10Callable {
   (a: number): number | Complex;
   (a: Complex): Complex;
   (a: BigNumber): BigNumber;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -130,14 +141,15 @@ export interface MeanCallable {
   (a: number[] | number[][], b: StatReduceOptions): number;
   (a: number[] | number[][], b: number | BigNumber): number | number[];
   (a: number[] | number[][], b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: Float64Array): number;
-  (a: Float64Array, b: StatReduceOptions): number;
+  (a: NumberTypedArray): number;
+  (a: NumberTypedArray, b: StatReduceOptions): number;
   (a: Float32Array): number;
   (a: Float32Array, b: StatReduceOptions): number;
   (a: Matrix): number;
   (a: Matrix, b: StatReduceOptions): number;
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -152,13 +164,13 @@ export interface VarianceCallable {
   (a: number[] | number[][], b: number | BigNumber): number | number[];
   (a: number[] | number[][], b: number | BigNumber, c: string): number | number[];
   (a: number[] | number[][], b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: Float64Array): number;
+  (a: NumberTypedArray): number;
   (a: Float32Array): number;
-  (a: Float64Array, b: string): number;
+  (a: NumberTypedArray, b: string): number;
   (a: Float32Array, b: string): number;
-  (a: Float64Array, b: StatReduceOptions): number;
+  (a: NumberTypedArray, b: StatReduceOptions): number;
   (a: Float32Array, b: StatReduceOptions): number;
-  (a: Float64Array, b: string, c: StatReduceOptions): number;
+  (a: NumberTypedArray, b: string, c: StatReduceOptions): number;
   (a: Float32Array, b: string, c: StatReduceOptions): number;
   (a: Matrix): number;
   (a: Matrix, b: string): number;
@@ -167,6 +179,7 @@ export interface VarianceCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -181,13 +194,13 @@ export interface StdCallable {
   (a: number[] | number[][], b: number | BigNumber): number | number[];
   (a: number[] | number[][], b: number | BigNumber, c: string): number | number[];
   (a: number[] | number[][], b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (a: Float64Array): number;
+  (a: NumberTypedArray): number;
   (a: Float32Array): number;
-  (a: Float64Array, b: string): number;
+  (a: NumberTypedArray, b: string): number;
   (a: Float32Array, b: string): number;
-  (a: Float64Array, b: StatReduceOptions): number;
+  (a: NumberTypedArray, b: StatReduceOptions): number;
   (a: Float32Array, b: StatReduceOptions): number;
-  (a: Float64Array, b: string, c: StatReduceOptions): number;
+  (a: NumberTypedArray, b: string, c: StatReduceOptions): number;
   (a: Float32Array, b: string, c: StatReduceOptions): number;
   (a: Matrix): number;
   (a: Matrix, b: string): number;
@@ -195,6 +208,7 @@ export interface StdCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
   (a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -207,7 +221,7 @@ export interface SinCallable {
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
   (a: UnitInstance): number | Complex;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): number[];
   (a: number[][]): number[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -224,7 +238,7 @@ export interface CosCallable {
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
   (a: UnitInstance): number | Complex;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): number[];
   (a: number[][]): number[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -241,7 +255,7 @@ export interface TanCallable {
   (a: BigNumber): BigNumber;
   (a: Dual): Dual;
   (a: UnitInstance): number | Complex;
-  (a: Float64Array): Float64Array;
+  (a: NumberTypedArray): Float64Array;
   (a: number[]): number[];
   (a: number[][]): number[][];
   (a: readonly ElementwiseLeaf[]): unknown[];
@@ -264,9 +278,9 @@ export type PublicDet = DetCallable;
 
 export interface MedianCallable {
   (a: number[] | number[][] | Matrix): number;
-  (a: Float64Array | Float32Array): number;
+  (a: NumberTypedArray | Float32Array): number;
   (a: number[] | number[][] | Matrix, b: StatReduceOptions): number;
-  (a: Float64Array | Float32Array, b: StatReduceOptions): number;
+  (a: NumberTypedArray | Float32Array, b: StatReduceOptions): number;
   (a: number[] | number[][] | Matrix, b: number | BigNumber): number | number[];
   (a: number[] | number[][] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   (...rest: number[]): number;
@@ -278,7 +292,7 @@ export type PublicMedian = MedianCallable;
 
 export interface ModeCallable {
   (a: number[] | number[][] | Matrix): number[] | number;
-  (a: Float64Array | Float32Array): number[] | number;
+  (a: NumberTypedArray | Float32Array): number[] | number;
   (...rest: number[]): number[];
   (...rest: unknown[]): unknown;
   readonly name: string;
@@ -288,7 +302,7 @@ export type PublicMode = ModeCallable;
 
 export interface MadCallable {
   (a: number[] | number[][] | Matrix): number;
-  (a: Float64Array | Float32Array): number;
+  (a: NumberTypedArray | Float32Array): number;
   (...rest: unknown[]): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -297,7 +311,7 @@ export type PublicMad = MadCallable;
 
 export interface ParallelFFTCallable {
   (a: readonly number[]): { real: Float64Array; imag: Float64Array; originalLength: number };
-  (a: Float64Array): Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
+  (a: NumberTypedArray): Promise<{ real: Float64Array; imag: Float64Array; originalLength: number }>;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }

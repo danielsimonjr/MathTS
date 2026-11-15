@@ -57,6 +57,15 @@ const SIG_TYPE = {
   'Array | Matrix': 'number[] | Matrix',
 };
 
+/**
+ * Parameter types that differ from `SIG_TYPE`. Core converts a typed array of any other number
+ * kind to Float64Array, so a Float64Array parameter accepts each of those kinds. Return types keep
+ * `SIG_TYPE`.
+ */
+const PARAM_TYPE = {
+  Float64Array: 'NumberTypedArray',
+};
+
 const UNQUOTED_SIG_KEYS = new Set([
   'number',
   'bigint',
@@ -219,7 +228,7 @@ function containerTypes(scalar) {
  * an export that takes a vector only.
  */
 function mapSigType(part, overrides = {}) {
-  const lookup = (name) => overrides[name] ?? SIG_TYPE[name];
+  const lookup = (name) => overrides[name] ?? PARAM_TYPE[name] ?? SIG_TYPE[name];
   if (lookup(part)) return lookup(part);
   const alternatives = part.split('|').map((alt) => alt.trim());
   if (alternatives.length > 1 && alternatives.every((alt) => lookup(alt))) {
@@ -237,7 +246,9 @@ function paramsOf(parts, overrides) {
   parts.forEach((part, i) => {
     if (part.startsWith('...')) {
       const inner = part.slice(3);
-      rendered.push(`...rest: ${mapSigType(inner, overrides)}[]`);
+      const element = mapSigType(inner, overrides);
+      // `A | B[]` is A or an array of B; a union element needs parentheses.
+      rendered.push(`...rest: ${element.includes('|') ? `(${element})` : element}[]`);
       return;
     }
     const name = PARAM_NAMES[i] ?? `x${i}`;
@@ -366,6 +377,17 @@ function buildFile(manifest) {
     '',
     'export type Matrix = DenseMatrix | SparseMatrix;',
     'export type ElementwiseLeaf = number | bigint | Complex | Fraction | BigNumber | UnitInstance | Dual;',
+    '/** A typed array with number elements. A Float64Array parameter accepts each of these kinds. */',
+    'export type NumberTypedArray =',
+    '  | Float64Array',
+    '  | Float32Array',
+    '  | Int32Array',
+    '  | Uint32Array',
+    '  | Int16Array',
+    '  | Uint16Array',
+    '  | Int8Array',
+    '  | Uint8Array',
+    '  | Uint8ClampedArray;',
     '',
   ];
   for (const entry of manifest.exports) {

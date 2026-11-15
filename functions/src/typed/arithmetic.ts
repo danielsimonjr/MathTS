@@ -1926,6 +1926,10 @@ export const sum = mathTyped('sum', {
   // Synchronous pairwise sum on typed arrays (no worker pool).
   Float64Array: (a: Float64Array): f64 => pairwiseSum(a),
   Float32Array: (a: Float32Array): f64 => pairwiseSum(a),
+  // sum(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
+  // computes the result, so an exact scalar type stays exact.
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): unknown =>
+    sum(values) as unknown,
 });
 
 /**
@@ -2097,6 +2101,10 @@ export const mean = mathTyped('mean', {
     opts: StatReduceOptions
   ): number | number[] =>
     numbersOnly(meanAlongData(m, dim, normalizationFromSecondArg(opts).skipNaN), 'mean'),
+  // mean(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
+  // computes the result, so an exact scalar type stays exact.
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
+    mean(values) as f64,
 }) as PublicMean;
 
 /**
@@ -2289,6 +2297,10 @@ export const variance = mathTyped('variance', {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return numbersOnly(varianceAlongData(m, dim, request, skipNaN), 'variance');
   },
+  // variance(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
+  // computes the result, so an exact scalar type stays exact.
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
+    variance(values) as f64,
 }) as PublicVariance;
 
 /**
@@ -2429,6 +2441,10 @@ export const std = mathTyped('std', {
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return numbersOnly(stdAlongData(m, dim, request, skipNaN), 'std');
   },
+  // std(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
+  // computes the result, so an exact scalar type stays exact.
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
+    std(values) as f64,
 }) as PublicStd;
 
 type NanReduce = (

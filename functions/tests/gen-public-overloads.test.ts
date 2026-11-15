@@ -65,6 +65,22 @@ function generate(source: string, entry: Record<string, unknown>): Run {
   };
 }
 
+describe('gen-public-overloads: rest parameters', () => {
+  it('puts a union element of a rest parameter in parentheses', () => {
+    const SOURCE = [
+      "export const f = mathTyped('f', {",
+      "  '...number | Fraction': (values: unknown[]): number => values.length,",
+      "  '...number': (values: number[]): number => values.length,",
+      '});',
+      '',
+    ].join('\n');
+    const { out, error } = generate(SOURCE, { name: 'f' });
+    expect(error).toBe('');
+    expect(out).toContain('(...rest: (number | Fraction)[]): number;');
+    expect(out).toContain('(...rest: number[]): number;');
+  });
+});
+
 describe('gen-public-overloads: type aliases', () => {
   const SOURCE = [
     'type Poly = number[]; // ascending powers; a note with a semicolon',
@@ -83,7 +99,7 @@ describe('gen-public-overloads: type aliases', () => {
     expect(error).toBe('');
     expect(out).toContain('  (a: number): number[];');
     expect(out).toContain('  (a: string): [number, string];');
-    expect(out).toContain('  (a: Float64Array): { a: number; b: string };');
+    expect(out).toContain('  (a: NumberTypedArray): { a: number; b: string };');
   });
 });
 
@@ -149,7 +165,7 @@ describe('gen-public-overloads: the typed-return contract in the committed file'
   it('parallelFFT takes a vector: no 2-D overload', () => {
     const block = interfaceOf('ParallelFFTCallable');
     expect(block).toContain('(a: readonly number[]): {');
-    expect(block).toContain('(a: Float64Array): Promise<{');
+    expect(block).toContain('(a: NumberTypedArray): Promise<{');
     expect(block).not.toContain('number[][]');
   });
 
