@@ -72,7 +72,10 @@ describe('#1045 factory functions accept typed arrays', () => {
     const t = new Float64Array([1, 2]);
     expect(probe(t)).toBe('Float64Array');
     expect(probe(t, 1)).toBe('Array, number');
-    expect(probe(new Int32Array([1, 2]))).toBe('Array');
+    // Core converts another number typed array to Float64Array, so the typed-array signature
+    // matches and the wrapper keeps the typed array.
+    expect(probe(new Int32Array([1, 2]))).toBe('Float64Array');
+    expect(probe(new BigInt64Array([1n, 2n]))).toBe('Array');
     expect(probe(1, 2)).toBe('rest');
   });
 });

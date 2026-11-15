@@ -233,7 +233,9 @@ function signatureKeys(fn: unknown): string[] {
 
 /** Matches a signature parameter type `Array` (not `ArrayNode`) or a typed-array type. */
 const ARRAY_PARAM = /(?:^|[\s,|])Array(?:$|[\s,|])/;
-const TYPED_ARRAY_PARAM = /(?:Float|Int|Uint)\d+(?:Clamped)?Array/;
+// `NumericTypedArray` is the core type that converts to Float64Array; `resolve` names a converted
+// parameter by that type name.
+const TYPED_ARRAY_PARAM = /(?:Float|Int|Uint)\d+(?:Clamped)?Array|NumericTypedArray/;
 
 /** How the wrapper treats a typed-array argument of one typed function. */
 const enum TypedArrayMode {

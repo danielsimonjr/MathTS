@@ -171,6 +171,18 @@ export const isFloat64Array = (x: unknown): x is Float64Array => x instanceof Fl
 
 export const isFloat32Array = (x: unknown): x is Float32Array => x instanceof Float32Array;
 
+/**
+ * True for a typed array with number elements other than Float64Array: Float32Array, Int32Array,
+ * Int16Array, Uint8ClampedArray and the other kinds. BigInt64Array and BigUint64Array hold
+ * bigint elements, so this test excludes them.
+ */
+const isNumericTypedArray = (x: unknown): x is ArrayLike<number> =>
+  ArrayBuffer.isView(x) &&
+  !(x instanceof DataView) &&
+  !(x instanceof Float64Array) &&
+  !(x instanceof BigInt64Array) &&
+  !(x instanceof BigUint64Array);
+
 export const isInt32Array = (x: unknown): x is Int32Array => x instanceof Int32Array;
 
 export const isUint32Array = (x: unknown): x is Uint32Array => x instanceof Uint32Array;
@@ -270,6 +282,7 @@ export const MATHTS_TYPES: MathTSTypeDef[] = [
   { name: 'Int32Array', test: isInt32Array },
   { name: 'Uint32Array', test: isUint32Array },
   { name: 'Uint8Array', test: isUint8Array },
+  { name: 'NumericTypedArray', test: isNumericTypedArray },
 
   // Matrix types
   { name: 'DenseMatrix', test: isDenseMatrix },
@@ -452,6 +465,14 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
       }
       return result;
     },
+  },
+  // A typed array of another number kind converts to Float64Array, which holds each value
+  // exactly, so every Float64Array signature accepts that typed array. One supertype keeps the number of
+  // expanded signatures small: one conversion per Float64Array parameter.
+  {
+    from: 'NumericTypedArray',
+    to: 'Float64Array',
+    convert: (x: unknown) => Float64Array.from(x as ArrayLike<number>),
   },
 ];
 
