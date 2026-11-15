@@ -225,7 +225,8 @@ export const createNorm = /* #__PURE__ */ factory(
           x.forEach(function (value: number | BigNumberType | ComplexType) {
             n = add(pow(abs(value), p), n) as number | BigNumberType;
           }, true);
-          return pow(n, 1 / p) as number | BigNumberType;
+          // sqrt is exact for a perfect square and rounds once; pow(n, 0.5) goes through exp/ln.
+          return (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
         }
         return Number.POSITIVE_INFINITY;
       }

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2428,
+  "totalFiles": 2430,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1027,
+    "test": 1029,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1027,
+    "tests": 1029,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 29,
-    "@danielsimonjr/mathts-core": 132,
+    "@danielsimonjr/mathts-core": 133,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1090,
+    "@danielsimonjr/mathts-functions": 1091,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -926,7 +926,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1706
+      "loc": 2080
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1102,6 +1102,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 54
+    },
+    {
+      "file": "core/tests/bignumber-decimal-api-1043.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 433
     },
     {
       "file": "core/tests/BigNumber-formatter-api.test.ts",
@@ -1402,7 +1409,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 79
+      "loc": 83
     },
     {
       "file": "core/tests/types/cross-copy-unit-format.test.ts",
@@ -6232,14 +6239,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 369
+      "loc": 370
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 242
+      "loc": 256
     },
     {
       "file": "functions/src/arithmetic/nthRoots.ts",
@@ -9018,7 +9025,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2669
+      "loc": 2720
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9368,7 +9375,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 350
+      "loc": 369
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -9854,6 +9861,13 @@
       "loc": 27
     },
     {
+      "file": "functions/tests/bignumber-factory-1043.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
       "file": "functions/tests/bignumber-operations.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10075,7 +10089,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 407
+      "loc": 405
     },
     {
       "file": "functions/tests/cov-bitwise.test.ts",

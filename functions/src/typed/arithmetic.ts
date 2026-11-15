@@ -15,6 +15,7 @@
  */
 
 import { assertRectangular, isNumberMatrix, numberVector } from './number-matrix.js';
+import { factoryScope } from '../factories/scope.js';
 import {
   mathTyped,
   Complex,
@@ -1116,8 +1117,32 @@ export const nthRoot = mathTyped('nthRoot', {
   'number, number': (a: f64, n: f64): f64 => nthRootReal(a, n),
   number: (a: f64): f64 => nthRootReal(a, 2),
   'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
-  'BigNumber, number': (a: BigNumber, n: f64): BigNumber => a.pow(1 / n),
+  'BigNumber, number': (a: BigNumber, n: f64): BigNumber => bigNthRoot(a, n),
 });
+
+/**
+ * Real n-th root of a BigNumber. The function computes the exponent 1/n in BigNumber
+ * precision, not as a double. A negative base with an odd integer root gives
+ * a negative real root.
+ */
+function bigNthRoot(a: BigNumber, n: f64): BigNumber {
+  if (a.isNegative() && Number.isInteger(n) && Math.abs(n) % 2 === 1) {
+    return bigNthRoot(a.neg(), n).neg();
+  }
+  // The error of 1/n is multiplied by ln(a), so the exponent gets extra digits for its order.
+  const precision = BigNumber.precision;
+  const lnOrder =
+    a.isZero() || !a.isFinite() ? 0 : Math.ceil(Math.log10(Math.abs(a.abs().ln().toNumber()) + 1));
+  BigNumber.config({ precision: precision + NTH_ROOT_GUARD_DIGITS + lnOrder });
+  try {
+    return a.pow(new BigNumber(1).div(new BigNumber(n))).toSignificantDigits(precision);
+  } finally {
+    BigNumber.config({ precision });
+  }
+}
+
+/** Extra digits for the exponent 1/n in `bigNthRoot`. */
+const NTH_ROOT_GUARD_DIGITS = 10;
 
 // =============================================================================
 // Exponential and Logarithmic
@@ -1518,17 +1543,44 @@ function matrixNorm(data: f64[][], p: f64 | string = 'fro'): f64 {
 
 const matrixLike = (m: { toArray(): unknown }): f64[][] => m.toArray() as f64[][];
 
+/** True when every leaf of a 1-D or 2-D array is a number. */
+function isNumberArrayDeep(arr: readonly unknown[]): boolean {
+  return arr.every((x) =>
+    Array.isArray(x) ? x.every((y) => typeof y === 'number') : typeof x === 'number'
+  );
+}
+
+/**
+ * The norm of an array with exact entries, by the factory norm, which keeps a BigNumber result
+ * at the configured precision (#1043). The factory is read at call time from `factoryScope`.
+ */
+function exactNorm(arr: unknown[], p?: number | string): unknown {
+  const factoryNorm = factoryScope.norm as ((x: unknown, p?: unknown) => unknown) | undefined;
+  if (factoryNorm === undefined) throw new Error('norm: the factory norm is not loaded');
+  return p === undefined ? factoryNorm(arr) : factoryNorm(arr, p);
+}
+
 export const norm = mathTyped('norm', {
   number: (a: f64): f64 => Math.abs(a),
   Complex: (a: Complex): f64 => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
 
-  // Array: a flat vector uses the vector 2-norm; a 2-D array is a matrix (Frobenius).
-  Array: (arr: unknown[]): f64 =>
-    is2DArray(arr) ? matrixNorm(arr as f64[][]) : vectorNorm(arr as f64[]),
-  'Array, number': (arr: unknown[], p: f64): f64 =>
-    is2DArray(arr) ? matrixNorm(arr as f64[][], p) : vectorNorm(arr as f64[], p),
-  'Array, string': (arr: unknown[], p: string): f64 => matrixNorm(arr as f64[][], p),
+  // Array: a flat vector uses the vector 2-norm; a 2-D array is a matrix (Frobenius). An array
+  // with a BigNumber, Fraction or Complex entry takes the exact factory norm (#1043).
+  Array: (arr: unknown[]): unknown =>
+    !isNumberArrayDeep(arr)
+      ? exactNorm(arr)
+      : is2DArray(arr)
+        ? matrixNorm(arr as f64[][])
+        : vectorNorm(arr as f64[]),
+  'Array, number': (arr: unknown[], p: f64): unknown =>
+    !isNumberArrayDeep(arr)
+      ? exactNorm(arr, p)
+      : is2DArray(arr)
+        ? matrixNorm(arr as f64[][], p)
+        : vectorNorm(arr as f64[], p),
+  'Array, string': (arr: unknown[], p: string): unknown =>
+    !isNumberArrayDeep(arr) ? exactNorm(arr, p) : matrixNorm(arr as f64[][], p),
 
   // Matrix norms (mathjs parity): Frobenius / 1 / 2 / ∞.
   DenseMatrix: (m: unknown): f64 => matrixNorm(matrixLike(m as { toArray(): unknown })),

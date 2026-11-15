@@ -11500,6 +11500,7 @@ graph LR
 | File                            | Imports                                                                                                                                                     | Type               |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
 | `./number-matrix.js`            | `assertRectangular, isNumberMatrix, numberVector`                                                                                                           | Import             |
+| `../factories/scope.js`         | `factoryScope`                                                                                                                                              | Import             |
 | `./euclid.js`                   | `euclidSnap`                                                                                                                                                | Import             |
 | `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                             | Import             |
 | `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest` | Import             |
@@ -20433,9 +20434,9 @@ graph LR
 | `core/src/internal`                                    | 22 files     | 0 files    |
 | `functions/src/typed/number-matrix`                    | 0 files      | 22 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `functions/src/typed/arithmetic`                       | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
-| `functions/src/typed/arithmetic`                       | 10 files     | 10 files   |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
@@ -21343,7 +21344,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230614 |
+| Total Lines of Code     | 231073 |
 | Total Exports           | 7307   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |

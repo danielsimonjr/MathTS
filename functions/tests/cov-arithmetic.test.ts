@@ -165,12 +165,10 @@ describe('arithmetic — BigNumber scalar signatures', () => {
     expect((pow(B(2), B(5)) as BigNumber).toNumber()).toBeCloseTo(32, 8);
     expect((sqrt(B(16)) as BigNumber).toNumber()).toBeCloseTo(4, 8);
     expect((cbrt(B(27)) as BigNumber).toNumber()).toBeCloseTo(3, 8);
-    // NOTE: nthRoot(BigNumber, n) delegates to BigNumber.pow(1/n); the underlying
-    // decimal.js-backed BigNumber.pow truncates a fractional exponent to 0, so
-    // 8^(1/3) collapses to 8^0 = 1. This is a known core-layer limitation
-    // (BigNumber.pow lives in @danielsimonjr/mathts-core, not the typed layer).
-    // Use cbrt for real BigNumber roots. Asserting actual behavior here.
-    expect((nthRoot(B(8), 3) as BigNumber).toNumber()).toBe(1);
+    // nthRoot computes the exponent 1/n in BigNumber precision (#1043).
+    expect((nthRoot(B(8), 3) as BigNumber).toNumber()).toBe(2);
+    expect((nthRoot(B(-27), 3) as BigNumber).toNumber()).toBe(-3);
+    expect((nthRoot(B(-16), 2) as BigNumber).isNaN()).toBe(true);
   });
 
   it('exp / log family on BigNumber', () => {

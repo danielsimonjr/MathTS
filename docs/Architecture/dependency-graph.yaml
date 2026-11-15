@@ -24196,6 +24196,9 @@ modules:
             - assertRectangular
             - isNumberMatrix
             - numberVector
+        - file: ../factories/scope.js
+          imports:
+            - factoryScope
         - file: ./euclid.js
           imports:
             - euclidSnap
@@ -46078,7 +46081,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1335
   totalModules: 82
-  totalLinesOfCode: 230614
+  totalLinesOfCode: 231073
   totalExports: 7307
   totalClasses: 62
   totalInterfaces: 663

@@ -26,7 +26,7 @@ interface BigNumberType {
 interface BigNumberConstructor {
   new (value: number | string | BigNumberType): BigNumberType;
   precision: number;
-  clone(config: { precision: number }): BigNumberConstructor;
+  config(config: { precision: number }): unknown;
 }
 
 interface MatrixType {
@@ -206,11 +206,25 @@ export const createNthRoot = /* #__PURE__ */ factory(
      * @private
      */
     function _bigNthRoot(a: BigNumberType, root: BigNumberType): BigNumberType | number {
+      // mathjs computes with 2 extra digits (decimal.js `clone`), then rounds to the configured
+      // precision. core's BigNumber has one global precision, so the code raises the precision and then restores the precision (#1043).
       const precision = BigNumber.precision;
-      const Big = BigNumber.clone({ precision: precision + 2 });
+      BigNumber.config({ precision: precision + 2 });
+      try {
+        return _bigNthRootAt(a, root, precision);
+      } finally {
+        BigNumber.config({ precision });
+      }
+    }
+
+    function _bigNthRootAt(
+      a: BigNumberType,
+      root: BigNumberType,
+      precision: number
+    ): BigNumberType | number {
       const zero = new BigNumber(0);
 
-      const one = new Big(1);
+      const one = new BigNumber(1);
       const inv = root.isNegative();
       if (inv) {
         root = root.neg();
@@ -225,7 +239,7 @@ export const createNthRoot = /* #__PURE__ */ factory(
 
       // edge cases zero and infinity
       if (a.isZero()) {
-        return inv ? new Big(Infinity) : 0;
+        return inv ? new BigNumber(Infinity) : 0;
       }
       if (!a.isFinite()) {
         return inv ? zero : a;
