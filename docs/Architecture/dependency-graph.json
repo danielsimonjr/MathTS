@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-15",
     "totalFiles": 1335,
     "totalModules": 82,
-    "totalExports": 7309
+    "totalExports": 7311
   },
   "entryPoints": [
     {
@@ -9659,9 +9659,19 @@
             "file": "../core/config.js",
             "imports": ["ConfigOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "../typed/complex-promotion.js",
+            "imports": ["sqrtBigNumberWith", "sqrtNumberWith"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber", "Complex"]
+          }
+        ],
         "exports": ["createSqrt"],
         "constants": ["createSqrt"]
       },
@@ -25831,6 +25841,7 @@
               "staysRealLog",
               "staysRealLog1p",
               "isPredictableMode",
+              "sqrtBigNumberWith",
               "powBigNumberWith",
               "sqrtReal",
               "staysRealSqrt",
@@ -26361,6 +26372,8 @@
           "staysRealLog1p",
           "log1pReal",
           "staysRealSqrt",
+          "sqrtNumberWith",
+          "sqrtBigNumberWith",
           "powBigNumberWith",
           "sqrtReal",
           "powReal",
@@ -26381,6 +26394,8 @@
           "staysRealLog1p",
           "log1pReal",
           "staysRealSqrt",
+          "sqrtNumberWith",
+          "sqrtBigNumberWith",
           "powBigNumberWith",
           "sqrtReal",
           "powReal",
@@ -48855,11 +48870,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 231435,
-    "totalExports": 7309,
+    "totalLinesOfCode": 231423,
+    "totalExports": 7311,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2511,
+    "totalFunctions": 2513,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1679,

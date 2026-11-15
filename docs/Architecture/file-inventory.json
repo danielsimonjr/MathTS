@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2438,
+  "totalFiles": 2439,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1037,
+    "test": 1038,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1037,
+    "tests": 1038,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1097,
+    "@danielsimonjr/mathts-functions": 1098,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -6274,7 +6274,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 285
+      "loc": 287
     },
     {
       "file": "functions/src/arithmetic/round.ts",
@@ -6302,7 +6302,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 108
+      "loc": 68
     },
     {
       "file": "functions/src/arithmetic/square.ts",
@@ -9039,7 +9039,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2873
+      "loc": 2874
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9074,7 +9074,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 187
+      "loc": 212
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -12315,7 +12315,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 64
+      "loc": 70
     },
     {
       "file": "functions/tests/reductions-exact-types.test.ts",
@@ -12701,6 +12701,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 34
+    },
+    {
+      "file": "functions/tests/sqrt-one-kernel.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
     },
     {
       "file": "functions/tests/stat-options-exact-1050.test.ts",
