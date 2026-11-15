@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2437,
+  "totalFiles": 2438,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1036,
+    "test": 1037,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1036,
+    "tests": 1037,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1096,
+    "@danielsimonjr/mathts-functions": 1097,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -9039,7 +9039,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2869
+      "loc": 2873
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9074,7 +9074,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 170
+      "loc": 187
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -12155,6 +12155,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 108
+    },
+    {
+      "file": "functions/tests/pow-bignumber-kernel.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
     },
     {
       "file": "functions/tests/predicates.test.ts",

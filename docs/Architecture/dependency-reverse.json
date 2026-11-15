@@ -1704,7 +1704,7 @@
       "functions/src/relational/compare.ts"
     ],
     "functions/src/typed/complex-promotion.ts": [
-      "functions/src/arithmetic/sqrt.ts",
+      "functions/src/arithmetic/pow.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/trigonometry.ts"
     ],

@@ -4,6 +4,8 @@ import { arraySize as size } from '../utils/array.js';
 import { powNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
+import type { BigNumber } from '@danielsimonjr/mathts-core';
+import { powBigNumberWith } from '../typed/complex-promotion.js';
 
 // Type definitions for pow
 interface BigNumberType {
@@ -127,11 +129,11 @@ export const createPow = /* #__PURE__ */ factory(
         x: BigNumberType,
         y: BigNumberType
       ): BigNumberType | ComplexType {
-        if (y.isInteger() || x.gte(0) || config.predictable) {
-          return x.pow(y);
-        } else {
-          return new Complex(x.toNumber(), 0).pow(y.toNumber(), 0);
-        }
+        return powBigNumberWith(
+          x as unknown as BigNumber,
+          y as unknown as BigNumber,
+          config.predictable
+        ) as BigNumberType | ComplexType;
       },
 
       'bigint, bigint': (x: bigint, y: bigint): bigint => x ** y,

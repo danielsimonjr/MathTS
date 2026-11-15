@@ -94,6 +94,7 @@ import {
   staysRealLog1p,
   isPredictableMode,
   sqrtBigNumberWith,
+  powBigNumberWith,
   sqrtReal,
   staysRealSqrt,
   powReal,
@@ -985,9 +986,11 @@ export const pow = mathTyped('pow', {
   'Complex, number': (a: Complex, b: f64): Complex => corePow(a, b) as Complex,
   'Complex, Complex': (a: Complex, b: Complex): Complex => corePow(a, b) as Complex,
   'Fraction, number': (a: Fraction, b: f64): Fraction | f64 => corePow(a, b) as Fraction | f64,
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber | f64 => corePow(a, b) as BigNumber | f64,
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber | f64 =>
-    corePow(a, b) as BigNumber | f64,
+  // A BigNumber base takes the BigNumber kernel shared with the factory `pow` (mathjs rules).
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber | Complex =>
+    powBigNumberWith(a, BigNumber.fromNumber(b), isPredictableMode()),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber | Complex =>
+    powBigNumberWith(a, b, isPredictableMode()),
   // Dual numbers (forward-mode AD): constant or variable exponent.
   'Dual, number': (a: Dual, b: f64): Dual => a.powConst(b),
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.pow(b),
