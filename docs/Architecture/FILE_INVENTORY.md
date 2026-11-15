@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2423
+**Total files**: 2427
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1308 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1309 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1023 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1026 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2423** |                                                                                                                |
+| **Total**     | **2427** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    30 |
 | `examples` |     7 |
-| `src`      |  1334 |
-| `tests`    |  1023 |
+| `src`      |  1335 |
+| `tests`    |  1026 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -44,14 +44,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    30 |
-| `@danielsimonjr/mathts-compat`         |    28 |
+| `@danielsimonjr/mathts-compat`         |    29 |
 | `@danielsimonjr/mathts-core`           |   132 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   573 |
-| `@danielsimonjr/mathts-functions`      |  1088 |
+| `@danielsimonjr/mathts-functions`      |  1089 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
-| `@danielsimonjr/mathts-matrix`         |   141 |
+| `@danielsimonjr/mathts-matrix`         |   143 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    54 |
 | `@danielsimonjr/mathts-parser`         |     5 |
@@ -144,6 +144,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/tests/compat.test.ts`                                                     | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/coverage-gaps.test.ts`                                              | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/create.test.ts`                                                     | @danielsimonjr/mathts-compat         | tests    | test        |
+| `compat/tests/cross-copy-matrix-shims-1041.test.ts`                               | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/cross-copy-shims.test.ts`                                           | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/delegation.test.ts`                                                 | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-955-unit-paths.test.ts`                                     | @danielsimonjr/mathts-compat         | tests    | test        |
@@ -1515,6 +1516,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/cov-string.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-trigonometry.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cross-copy-core.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/cross-copy-matrix-1041.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/curves.test.ts`                                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dae.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dbscan-knn.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2053,6 +2055,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/types/index.ts`                                                       | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/Matrix.ts`                                                      | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/types/SparseMatrix.ts`                                                | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/types/type-marker.ts`                                                 | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/tests/audit-dense-sparse.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/as-alloc-typed-view-pin.test.ts`                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/as-typed-array-header.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -2068,6 +2071,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/backends/WasmLoader-browser.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WasmLoader-pool.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/config.test.ts`                                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/cross-copy-matrix-brand-1041.test.ts`                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/dogfood-g05-decomposition-inputs.test.ts`             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/eig-general-wasm.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/decomposition/eig-nonsymmetric.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |

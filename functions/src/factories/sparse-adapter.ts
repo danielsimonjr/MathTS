@@ -11,7 +11,7 @@
  * when a CSR argument was present (sparse in, sparse out). Nothing inside a factory sees CSR.
  */
 
-import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { SparseMatrix, isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from './matrix-bridge.js';
 
 /** Convert the public CSR `SparseMatrix` to the CSC form. Exact zeros are dropped. */
@@ -146,7 +146,7 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
     let converted: number[] | undefined;
     for (let i = 0; i < args.length; i++) {
       const a = args[i];
-      if (typeof a === 'object' && a !== null && a instanceof SparseMatrix) {
+      if (isSparseMatrix(a)) {
         adapted ??= args.slice();
         (converted ??= []).push(i);
         adapted[i] = csrToCsc(a);
@@ -156,7 +156,7 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
     // A call that mixes the public sparse and dense classes needs both in the factory form.
     for (let i = 0; i < adapted.length; i++) {
       const a = adapted[i];
-      if (a instanceof DenseMatrix) adapted[i] = MathJSDenseMatrix.fromNative(a);
+      if (isDenseMatrix(a)) adapted[i] = MathJSDenseMatrix.fromNative(a);
     }
     let result: unknown;
     try {

@@ -14,7 +14,7 @@ beforeAll(async () => {
   // A copy of the built core bundle in a new folder has its own classes under both bun test and
   // vitest. The helper is untyped, so the test imports it through a URL that the type checker does
   // not read.
-  const helper = new URL('../../tools/test/second-core-copy.mjs', import.meta.url).href;
+  const helper = new URL('../../tools/test/second-package-copy.mjs', import.meta.url).href;
   const { importSecondCoreCopy } = (await import(helper)) as {
     importSecondCoreCopy(name: string): Promise<unknown>;
   };

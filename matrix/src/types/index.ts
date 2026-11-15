@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 
-export { Matrix, isMatrix } from './Matrix.js';
+export { Matrix, isMatrix, isNativeMatrix } from './Matrix.js';
 export type {
   MatrixDimensions,
   MatrixIndex,

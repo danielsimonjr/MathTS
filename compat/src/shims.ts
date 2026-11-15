@@ -71,6 +71,8 @@ import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-p
 import {
   DenseMatrix,
   SparseMatrix,
+  isDenseMatrix,
+  isSparseMatrix,
   add as _matAdd,
   subtract as _matSubtract,
   multiply as _matMultiply,
@@ -159,7 +161,7 @@ export type CompatMatrixValue =
 
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
 function isCompatBridgeMatrix(x: unknown): boolean {
-  if (x instanceof DenseMatrix || x instanceof SparseMatrix) {
+  if (isDenseMatrix(x) || isSparseMatrix(x)) {
     return true;
   }
   if (typeof x === 'object' && x !== null) {
@@ -171,10 +173,10 @@ function isCompatBridgeMatrix(x: unknown): boolean {
 
 /** Normalize compat/matrix inputs to a native `DenseMatrix` for linear algebra shims. */
 function compatToDenseMatrix(m: unknown): DenseMatrix {
-  if (m instanceof DenseMatrix) {
+  if (isDenseMatrix(m)) {
     return m;
   }
-  if (m instanceof SparseMatrix) {
+  if (isSparseMatrix(m)) {
     return DenseMatrix.fromArray(m.toArray() as number[][]);
   }
   if (Array.isArray(m)) {
@@ -202,8 +204,8 @@ export function matrix(
   if (data === undefined && format === undefined) {
     return _factoryMatrix() as CompatMatrixValue;
   }
-  if (data instanceof DenseMatrix || data instanceof SparseMatrix) {
-    if (format === 'sparse' && data instanceof DenseMatrix) {
+  if (isDenseMatrix(data) || isSparseMatrix(data)) {
+    if (format === 'sparse' && isDenseMatrix(data)) {
       return _factorySparse(data.toArray()) as CompatMatrixValue;
     }
     return data;
@@ -240,9 +242,9 @@ const isMatrixLike = (x: unknown): x is MatrixLike =>
 const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 
 const unwrap = (r: unknown): unknown =>
-  isCompatBridgeMatrix(r) && !(r instanceof DenseMatrix)
+  isCompatBridgeMatrix(r) && !isDenseMatrix(r)
     ? (r as { toArray(): unknown }).toArray()
-    : r instanceof DenseMatrix
+    : isDenseMatrix(r)
       ? r.toArray()
       : r;
 
@@ -507,7 +509,7 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m).transpose().toArray();
   }
-  if (m instanceof DenseMatrix || m instanceof SparseMatrix) {
+  if (isDenseMatrix(m) || isSparseMatrix(m)) {
     return m.transpose();
   }
   if (isCompatBridgeMatrix(m)) {
@@ -526,7 +528,7 @@ export function det(m: CompatMatrixValue | number[][]): number {
   // routed math.matrix/math.sparse through the factory bridge. mathjs det()
   // accepts math.sparse() (that bridge matrix, converted below via toArray).
   // The native class stays rejected so existing callers keep the same error.
-  if (m instanceof SparseMatrix) {
+  if (isSparseMatrix(m)) {
     throw new TypeError('Expected DenseMatrix or 2D array');
   }
   const matrix = compatToDenseMatrix(m);

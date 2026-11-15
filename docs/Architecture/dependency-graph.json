@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-15",
-    "totalFiles": 1334,
+    "totalFiles": 1335,
     "totalModules": 82,
-    "totalExports": 7299
+    "totalExports": 7305
   },
   "entryPoints": [
     {
@@ -6134,6 +6134,10 @@
           {
             "file": "./dense/storage.js",
             "imports": ["contiguousDenseData"]
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["DENSE_MATRIX_BRAND", "defineMatrixBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -6150,7 +6154,12 @@
         "description": "Matrix Base Class",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./type-marker.js",
+            "imports": ["MATRIX_BRAND", "defineMatrixBrand"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -6164,9 +6173,9 @@
             "subpath": "internal"
           }
         ],
-        "exports": ["isMatrix"],
+        "exports": ["isNativeMatrix", "isMatrix"],
         "interfaces": ["MatrixIndex", "SliceSpec", "MatrixEntry"],
-        "functions": ["isMatrix"]
+        "functions": ["isNativeMatrix", "isMatrix"]
       },
       "matrix/src/types/SparseMatrix.ts": {
         "description": "Sparse Matrix Implementation (CSR Format)",
@@ -6180,6 +6189,10 @@
           {
             "file": "./DenseMatrix.js",
             "imports": ["DenseMatrix", "registerSparseMatrixFactory"]
+          },
+          {
+            "file": "./type-marker.js",
+            "imports": ["SPARSE_MATRIX_BRAND", "defineMatrixBrand"]
           }
         ],
         "workspaceDependencies": [],
@@ -6272,7 +6285,7 @@
         "internalDependencies": [
           {
             "file": "./Matrix.js",
-            "imports": ["Matrix", "isMatrix"],
+            "imports": ["Matrix", "isMatrix", "isNativeMatrix"],
             "reExport": true
           },
           {
@@ -6307,6 +6320,7 @@
         "exports": [
           "Matrix",
           "isMatrix",
+          "isNativeMatrix",
           "DenseMatrix",
           "isDenseMatrix",
           "DENSE_MATRIX_MAX_ELEMENTS",
@@ -6322,6 +6336,7 @@
         "reExported": [
           "Matrix",
           "isMatrix",
+          "isNativeMatrix",
           "DenseMatrix",
           "isDenseMatrix",
           "DENSE_MATRIX_MAX_ELEMENTS",
@@ -6334,6 +6349,21 @@
           "MatrixEntry",
           "MatrixType"
         ]
+      },
+      "matrix/src/types/type-marker.ts": {
+        "description": "Prototype brands that identify a matrix of this package across copies of the package.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "MATRIX_BRAND",
+          "DENSE_MATRIX_BRAND",
+          "SPARSE_MATRIX_BRAND",
+          "defineMatrixBrand"
+        ],
+        "functions": ["defineMatrixBrand"],
+        "constants": ["MATRIX_BRAND", "DENSE_MATRIX_BRAND", "SPARSE_MATRIX_BRAND"]
       }
     },
     "tensor": {
@@ -17302,7 +17332,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "SparseMatrix"]
+            "imports": ["SparseMatrix", "isDenseMatrix", "isSparseMatrix"]
           }
         ],
         "exports": ["csrToCsc", "cscToPublic", "adaptSparse", "acceptsMatrix"],
@@ -25746,7 +25776,13 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "SparseMatrix", "backendManager", "singularValues"]
+            "imports": [
+              "DenseMatrix",
+              "SparseMatrix",
+              "backendManager",
+              "isSparseMatrix",
+              "singularValues"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -27936,7 +27972,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["Matrix"]
+            "imports": ["isNativeMatrix"]
           }
         ],
         "exports": [
@@ -28007,6 +28043,7 @@
               "LogmOptions",
               "SqrtmOptions",
               "DenseMatrix",
+              "isDenseMatrix",
               "matMul",
               "transposeNestedArray"
             ]
@@ -45658,7 +45695,15 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "SparseMatrix", "add", "subtract", "multiply"]
+            "imports": [
+              "DenseMatrix",
+              "SparseMatrix",
+              "isDenseMatrix",
+              "isSparseMatrix",
+              "add",
+              "subtract",
+              "multiply"
+            ]
           }
         ],
         "exports": [
@@ -47171,7 +47216,8 @@
           "matrix/src/types/dense/limits.ts",
           "matrix/src/types/dense/reduction.ts",
           "matrix/src/types/dense/storage.ts",
-          "matrix/src/types/index.ts"
+          "matrix/src/types/index.ts",
+          "matrix/src/types/type-marker.ts"
         ]
       },
       {
@@ -48690,17 +48736,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1334,
+    "totalTypeScriptFiles": 1335,
     "totalModules": 82,
-    "totalLinesOfCode": 230463,
-    "totalExports": 7299,
+    "totalLinesOfCode": 230542,
+    "totalExports": 7305,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2502,
-    "totalTypeGuards": 179,
+    "totalFunctions": 2504,
+    "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1675,
-    "totalReExports": 3167,
+    "totalConstants": 1678,
+    "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

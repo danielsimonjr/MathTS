@@ -12,6 +12,7 @@ import * as arithmetic from './dense/arithmetic.js';
 import * as reduction from './dense/reduction.js';
 import { assertDenseMatrixSize } from './dense/limits.js';
 import { contiguousDenseData } from './dense/storage.js';
+import { DENSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
 
 /** Rectangular numeric matrix literal: reject empty, jagged, and non-numeric cells. */
 function readNestedMatrix(nested: readonly unknown[]): {
@@ -666,11 +667,19 @@ export class DenseMatrix extends Matrix<number> {
   }
 }
 
+// The brand that `isDenseMatrix` reads, so a DenseMatrix of a second copy of the package passes.
+defineMatrixBrand(DenseMatrix.prototype, DENSE_MATRIX_BRAND);
+
 /**
- * Type guard for DenseMatrix
+ * Type guard for DenseMatrix. The type guard reads the prototype brand, so a DenseMatrix of a
+ * second copy of the package passes too (#1041).
  */
 export function isDenseMatrix(value: unknown): value is DenseMatrix {
-  return value instanceof DenseMatrix;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { [DENSE_MATRIX_BRAND]?: unknown })[DENSE_MATRIX_BRAND] === true
+  );
 }
 
 type SparseFactory = (

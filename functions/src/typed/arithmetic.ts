@@ -62,6 +62,7 @@ import {
   DenseMatrix,
   SparseMatrix,
   backendManager,
+  isSparseMatrix,
   singularValues,
 } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
@@ -270,7 +271,7 @@ function elementwiseMatrixNumber(
     (scalarKeepsSparse === true &&
       ((sparseA && !isCollection(b)) || (sparseB && !isCollection(a))));
   if (!sparseOut) return new MathJSDenseMatrix(data as number[][]);
-  if (a instanceof SparseMatrix || b instanceof SparseMatrix) return publicSparseOrDense(data);
+  if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(data);
   return new MathJSSparseMatrix(data);
 }
 
@@ -291,7 +292,7 @@ function isCollection(x: unknown): boolean {
 
 /** True if `m` is a matrix in sparse storage (the public CSR class or the factory CSC class). */
 function isSparseStorage(m: unknown): boolean {
-  if (m instanceof SparseMatrix) return true;
+  if (isSparseMatrix(m)) return true;
   const s = (m as { storage?: () => string }).storage;
   return typeof s === 'function' && s.call(m) === 'sparse';
 }
@@ -768,8 +769,7 @@ export const multiply = withBinaryScalarGuards(
     // operands and a dense matrix for a sparse and a dense operand.
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => {
       const product = matrixProduct(a, b);
-      if (a instanceof SparseMatrix || b instanceof SparseMatrix)
-        return publicSparseOrDense(product);
+      if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(product);
       return new MathJSSparseMatrix(product);
     },
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>

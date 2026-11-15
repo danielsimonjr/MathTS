@@ -14,6 +14,7 @@
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import { DenseMatrix, registerSparseMatrixFactory } from './DenseMatrix.js';
+import { SPARSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
 
 /**
  * Sparse matrix using Compressed Sparse Row (CSR) format
@@ -575,7 +576,7 @@ export class SparseMatrix extends Matrix<number> {
   add(other: Matrix<number>): SparseMatrix {
     this.checkDimensionsMatch(other);
 
-    if (other instanceof SparseMatrix) {
+    if (isSparseMatrix(other)) {
       return this.addSparse(other);
     }
 
@@ -627,7 +628,7 @@ export class SparseMatrix extends Matrix<number> {
   subtract(other: Matrix<number>): SparseMatrix {
     this.checkDimensionsMatch(other);
 
-    if (other instanceof SparseMatrix) {
+    if (isSparseMatrix(other)) {
       return this.addSparse(other.scale(-1));
     }
 
@@ -670,7 +671,7 @@ export class SparseMatrix extends Matrix<number> {
   multiply(other: Matrix<number>): SparseMatrix {
     this.checkMultiplyDimensions(other);
 
-    if (other instanceof SparseMatrix) {
+    if (isSparseMatrix(other)) {
       return this.multiplySparse(other);
     }
 
@@ -991,9 +992,17 @@ registerSparseMatrixFactory(
     new SparseMatrix(rows, cols, values, colIndices, rowPointers)
 );
 
+// The brand that `isSparseMatrix` reads, so a SparseMatrix of a second copy of the package passes.
+defineMatrixBrand(SparseMatrix.prototype, SPARSE_MATRIX_BRAND);
+
 /**
- * Type guard for SparseMatrix
+ * Type guard for SparseMatrix. The type guard reads the prototype brand, so a SparseMatrix of a
+ * second copy of the package passes too (#1041).
  */
 export function isSparseMatrix(value: unknown): value is SparseMatrix {
-  return value instanceof SparseMatrix;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { [SPARSE_MATRIX_BRAND]?: unknown })[SPARSE_MATRIX_BRAND] === true
+  );
 }

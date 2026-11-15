@@ -1792,6 +1792,9 @@
       "isMatrix": {
         "kind": "function"
       },
+      "isNativeMatrix": {
+        "kind": "function"
+      },
       "isPackedMatrixDescriptor": {
         "kind": "function"
       },
