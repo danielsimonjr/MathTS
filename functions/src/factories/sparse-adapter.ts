@@ -11,6 +11,7 @@
  * when a CSR argument was present (sparse in, sparse out). Nothing inside a factory sees CSR.
  */
 
+import { mathTyped } from '@danielsimonjr/mathts-core';
 import { SparseMatrix, isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from './matrix-bridge.js';
 
@@ -132,7 +133,11 @@ function rejectsConvertedArgument(e: unknown, name: string, converted: number[])
 }
 
 /**
- * Wrap a typed function so that it accepts the public CSR `SparseMatrix`.
+ * Wrap a typed function so that the function accepts the public CSR `SparseMatrix`.
+ * The wrapper also accepts a typed array (Float64Array, Int32Array, ...), alone or as the rows
+ * of a plain array, for a function that declares `Array`. The function gets a plain array copy,
+ * so a typed array gives the same result as a plain array. A function that declares a
+ * typed-array type gets the typed array unchanged when one of its signatures matches the call.
  *
  * The wrapper is a plain function that carries the own properties of `fn` (`signatures`,
  * `find`, ...), not a `Proxy`: a `Proxy` apply trap costs about 70 ns on each call, more than
@@ -141,18 +146,31 @@ function rejectsConvertedArgument(e: unknown, name: string, converted: number[])
  */
 export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name: string): F {
   const target = fn as unknown as (this: unknown, ...args: unknown[]) => unknown;
+  const arrays = typedArrayMode(fn);
   const wrapped = function (this: unknown, ...args: unknown[]): unknown {
     let adapted: unknown[] | undefined;
     let converted: number[] | undefined;
+    let hasTyped = false;
     for (let i = 0; i < args.length; i++) {
       const a = args[i];
+      if (typeof a !== 'object' || a === null) continue;
       if (isSparseMatrix(a)) {
         adapted ??= args.slice();
         (converted ??= []).push(i);
         adapted[i] = csrToCsc(a);
+      } else if (arrays !== TypedArrayMode.Never && holdsTypedArray(a)) {
+        hasTyped = true;
       }
     }
+    if (
+      hasTyped &&
+      (arrays === TypedArrayMode.Always || !matchesTypedArraySignature(fn, adapted ?? args))
+    ) {
+      adapted ??= args.slice();
+      for (let i = 0; i < adapted.length; i++) adapted[i] = toPlainArrays(adapted[i]);
+    }
     if (adapted === undefined) return target.apply(this, args);
+    if (converted === undefined) return target.apply(this, adapted);
     // A call that mixes the public sparse and dense classes needs both in the factory form.
     for (let i = 0; i < adapted.length; i++) {
       const a = adapted[i];
@@ -179,12 +197,72 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
   return wrapped as unknown as F;
 }
 
-/** True when a typed function declares a matrix type in any signature. */
-export function acceptsMatrix(fn: unknown): boolean {
-  const sigs = (fn as { signatures?: Record<string, unknown> }).signatures;
-  if (!sigs) return false;
-  for (const key of Object.keys(sigs)) {
-    if (key.includes('Matrix')) return true;
+/** True for a typed array view (Float64Array, Int32Array, ...); false for a DataView. */
+function isTypedArray(x: unknown): x is ArrayLike<number> {
+  return ArrayBuffer.isView(x) && !(x instanceof DataView);
+}
+
+/** True for a typed array, or a plain array whose first row is a typed array. */
+function holdsTypedArray(x: object): boolean {
+  return isTypedArray(x) || (Array.isArray(x) && x.length > 0 && isTypedArray(x[0]));
+}
+
+/** A plain array copy of a typed array, or of the typed-array rows of a plain array. */
+function toPlainArrays(x: unknown): unknown {
+  if (isTypedArray(x)) return Array.from(x);
+  if (Array.isArray(x) && x.length > 0 && isTypedArray(x[0])) {
+    return x.map((row: unknown) => (isTypedArray(row) ? Array.from(row) : row));
   }
-  return false;
+  return x;
+}
+
+/**
+ * True when the signature that a call resolves to names a typed-array type. A `...` or `any`
+ * signature also matches a typed array, but the signature reads the typed array as one value.
+ */
+function matchesTypedArraySignature(fn: unknown, args: unknown[]): boolean {
+  const sig = mathTyped.resolve(fn as never, args);
+  return sig !== null && sig.params.some((p) => TYPED_ARRAY_PARAM.test(p.name));
+}
+
+/** The signature keys of a typed function, or an empty list. */
+function signatureKeys(fn: unknown): string[] {
+  const sigs = (fn as { signatures?: Record<string, unknown> }).signatures;
+  return sigs ? Object.keys(sigs) : [];
+}
+
+/** Matches a signature parameter type `Array` (not `ArrayNode`) or a typed-array type. */
+const ARRAY_PARAM = /(?:^|[\s,|])Array(?:$|[\s,|])/;
+const TYPED_ARRAY_PARAM = /(?:Float|Int|Uint)\d+(?:Clamped)?Array/;
+
+/** How the wrapper treats a typed-array argument of one typed function. */
+const enum TypedArrayMode {
+  /** The function declares no `Array`: the typed array goes through unchanged. */
+  Never,
+  /** The function declares `Array`, not a typed-array type: the wrapper converts each one. */
+  Always,
+  /**
+   * The function also declares a typed-array type: the wrapper converts only when no typed-array
+   * signature matches.
+   */
+  IfUnmatched,
+}
+
+function typedArrayMode(fn: unknown): TypedArrayMode {
+  const keys = signatureKeys(fn);
+  if (!keys.some((k) => ARRAY_PARAM.test(k))) return TypedArrayMode.Never;
+  return keys.some((k) => TYPED_ARRAY_PARAM.test(k))
+    ? TypedArrayMode.IfUnmatched
+    : TypedArrayMode.Always;
+}
+
+/**
+ * True when the factory layer must wrap a typed function. The function declares a matrix type,
+ * or the function declares `Array` and must accept a typed array.
+ */
+export function acceptsMatrix(fn: unknown): boolean {
+  return (
+    signatureKeys(fn).some((k) => k.includes('Matrix')) ||
+    typedArrayMode(fn) !== TypedArrayMode.Never
+  );
 }

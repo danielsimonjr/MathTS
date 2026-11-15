@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2430,
+  "totalFiles": 2431,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1029,
+    "test": 1030,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1029,
+    "tests": 1030,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1091,
+    "@danielsimonjr/mathts-functions": 1092,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -6673,7 +6673,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 191
+      "loc": 269
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -9025,7 +9025,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2720
+      "loc": 2721
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10713,6 +10713,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 273
+    },
+    {
+      "file": "functions/tests/factory-typed-arrays-1045.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 79
     },
     {
       "file": "functions/tests/fft-factory-correctness.test.ts",
@@ -16158,7 +16165,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 109
+      "loc": 112
     },
     {
       "file": "tests/integration/dogfood-g29-packaging.test.ts",

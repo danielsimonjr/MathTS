@@ -6412,6 +6412,7 @@ graph LR
 
 | Package                        | Import                                        |
 | ------------------------------ | --------------------------------------------- |
+| `@danielsimonjr/mathts-core`   | `mathTyped`                                   |
 | `@danielsimonjr/mathts-matrix` | `SparseMatrix, isDenseMatrix, isSparseMatrix` |
 
 **Internal Dependencies:**
@@ -21344,7 +21345,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231073 |
+| Total Lines of Code     | 231152 |
 | Total Exports           | 7307   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
