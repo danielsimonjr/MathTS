@@ -7114,7 +7114,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 279
+      "loc": 290
     },
     {
       "file": "functions/src/matrix/kron.ts",
@@ -9249,7 +9249,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1256
+      "loc": 1254
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -12063,7 +12063,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 101
+      "loc": 205
     },
     {
       "file": "functions/tests/poly-as-wasm.test.ts",

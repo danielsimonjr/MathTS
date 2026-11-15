@@ -66,7 +66,6 @@ interface Dependencies {
   det: TypedFunction<Scalar>;
   identity: IdentityFunction;
   abs: TypedFunction<number | BigNumber>;
-  isZero: (x: unknown) => boolean;
 }
 
 const name = 'inv';
@@ -80,7 +79,6 @@ const dependencies = [
   'det',
   'identity',
   'abs',
-  'isZero',
 ];
 
 export const createInv = /* #__PURE__ */ factory(
@@ -96,7 +94,6 @@ export const createInv = /* #__PURE__ */ factory(
     det,
     identity,
     abs,
-    isZero,
   }: Dependencies) => {
     /**
      * Calculate the inverse of a square matrix.
@@ -181,14 +178,14 @@ export const createInv = /* #__PURE__ */ factory(
       if (rows === 1) {
         // this is a 1 x 1 matrix
         value = mat[0][0];
-        if (isZero(value)) {
+        if (isExactZero(value)) {
           throw Error('Cannot calculate inverse, determinant is zero');
         }
         return [[divideScalar(1, value)]];
       } else if (rows === 2) {
         // this is a 2 x 2 matrix
         const d = det(mat);
-        if (isZero(d)) {
+        if (isExactZero(d)) {
           throw Error('Cannot calculate inverse, determinant is zero');
         }
         return [
@@ -225,7 +222,7 @@ export const createInv = /* #__PURE__ */ factory(
             }
             r++;
           }
-          if (isZero(ABig)) {
+          if (isExactZero(ABig)) {
             throw Error('Cannot calculate inverse, determinant is zero');
           }
           r = rBig;
@@ -276,3 +273,17 @@ export const createInv = /* #__PURE__ */ factory(
     }
   }
 );
+
+/**
+ * Tells if a scalar is exactly zero. A number uses `=== 0`. A Complex, Fraction or BigNumber
+ * uses its own exact `isZero()`. The tolerance of the `isZero` function does not apply, so a
+ * small invertible matrix such as `[[1e-16]]` does not count as singular (#1040).
+ *
+ * @param x - The scalar.
+ * @returns `true` when the scalar is exactly zero.
+ */
+function isExactZero(x: unknown): boolean {
+  if (typeof x === 'number') return x === 0;
+  const zero = (x as { isZero?: () => boolean } | null)?.isZero;
+  return typeof zero === 'function' ? zero.call(x) : x === 0;
+}
