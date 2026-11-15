@@ -102,3 +102,43 @@ describe('worker-numerics parity with core', () => {
     expect(norm2(Float64Array.of(1, Infinity))).toBe(Infinity);
   });
 });
+
+describe('extrema parity with core (#1048)', () => {
+  it('_workerExtrema equals core extrema, including NaN, ±0, ±Infinity and ranges', async () => {
+    const { extrema } = await import('@danielsimonjr/mathts-core');
+    const { _workerExtrema } = await import('../src/worker-numerics.js');
+    const rand = _workerMulberry32(7);
+    const pool = [NaN, 0, -0, Infinity, -Infinity, 1, -1, 2.5];
+    for (let t = 0; t < 500; t++) {
+      const n = Math.floor(rand() * 12);
+      const xs = Array.from({ length: n }, () =>
+        rand() < 0.4 ? pool[Math.floor(rand() * pool.length)] : rand() * 10 - 5
+      );
+      const s = Math.floor(rand() * (n + 1));
+      const e = s + Math.floor(rand() * (n - s + 1));
+      const a = extrema(xs, s, e);
+      const b = _workerExtrema(xs, s, e);
+      expect(Object.is(a.min, b.min) && Object.is(a.max, b.max)).toBe(true);
+      expect([b.minIdx, b.maxIdx]).toEqual([a.minIdx, a.maxIdx]);
+    }
+  });
+
+  it('_workerCombineExtrema over any chunking equals one pass', async () => {
+    const { _workerExtrema, _workerCombineExtrema } = await import('../src/worker-numerics.js');
+    const rand = _workerMulberry32(11);
+    for (let t = 0; t < 300; t++) {
+      const n = 1 + Math.floor(rand() * 30);
+      const xs = Array.from({ length: n }, () => (rand() < 0.1 ? NaN : Math.floor(rand() * 5)));
+      const parts = [];
+      for (let s = 0; s < n;) {
+        const e = Math.min(n, s + 1 + Math.floor(rand() * 7));
+        parts.push(_workerExtrema(xs, s, e));
+        s = e;
+      }
+      const whole = _workerExtrema(xs);
+      const c = _workerCombineExtrema(parts);
+      expect(Object.is(c.min, whole.min) && Object.is(c.max, whole.max)).toBe(true);
+      expect([c.minIdx, c.maxIdx]).toEqual([whole.minIdx, whole.maxIdx]);
+    }
+  });
+});

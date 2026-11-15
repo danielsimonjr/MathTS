@@ -28,6 +28,8 @@ import {
   _workerScaledSsq,
   _workerScaledSsqDiff,
   _workerCombineScaledSsq,
+  _workerExtrema,
+  _workerCombineExtrema,
 } from './worker-numerics.js';
 
 /**
@@ -1392,22 +1394,8 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      let min = data[0];
-      let max = data[0];
-      let minIdx = 0;
-      let maxIdx = 0;
-      for (let i = 1; i < data.length; i++) {
-        if (data[i] < min) {
-          min = data[i];
-          minIdx = i;
-        }
-        if (data[i] > max) {
-          max = data[i];
-          maxIdx = i;
-        }
-      }
       return {
-        result: { min, max, minIdx, maxIdx },
+        result: _workerExtrema(data),
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -1435,24 +1423,8 @@ export class MathWorkerPool {
       })
     );
 
-    // Reduce to find global min/max
-    let min = results[0].min;
-    let max = results[0].max;
-    let minIdx = results[0].minIdx;
-    let maxIdx = results[0].maxIdx;
-    for (let i = 1; i < results.length; i++) {
-      if (results[i].min < min) {
-        min = results[i].min;
-        minIdx = results[i].minIdx;
-      }
-      if (results[i].max > max) {
-        max = results[i].max;
-        maxIdx = results[i].maxIdx;
-      }
-    }
-
     return {
-      result: { min, max, minIdx, maxIdx },
+      result: _workerCombineExtrema(results),
       duration: performance.now() - start,
       chunks: chunks.length,
       parallelized: true,

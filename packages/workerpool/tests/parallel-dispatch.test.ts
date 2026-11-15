@@ -260,4 +260,19 @@ describe('stable kernels, transfers and view normalization (real workers)', () =
       expect(h.result.reduce((x: number, y: number) => x + y, 0)).toBe(11);
     }
   });
+
+  it('minMax propagates NaN on both paths, with the first NaN index (#1048)', async () => {
+    for (const at of [0, 33, 99]) {
+      const data = Float64Array.from({ length: 100 }, (_, i) => i + 1);
+      data[at] = NaN;
+      data[at === 99 ? 50 : 99] = NaN; // a second NaN later: the first one wins
+      for (const opts of [{ forceParallel: true }, { forceSequential: true }]) {
+        const mm = await pool.minMax(data, opts);
+        expect(mm.result.min).toBeNaN();
+        expect(mm.result.max).toBeNaN();
+        expect(mm.result.minIdx).toBe(Math.min(at, at === 99 ? 50 : 99));
+        expect(mm.result.maxIdx).toBe(Math.min(at, at === 99 ? 50 : 99));
+      }
+    }
+  });
 });

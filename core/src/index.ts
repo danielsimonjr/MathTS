@@ -267,7 +267,9 @@ export {
   neumaierCumsum,
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
+  extrema,
 } from './numeric/stable.js';
+export type { Extrema } from './numeric/stable.js';
 export { mulberry32, boxMuller, createSeededRng, type SeededRng } from './numeric/rng.js';
 export { rowMajorStrides } from './numeric/strides.js';
 

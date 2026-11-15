@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-14",
+    "lastUpdated": "2026-11-15",
     "totalFiles": 1333,
     "totalModules": 82,
-    "totalExports": 7292
+    "totalExports": 7297
   },
   "entryPoints": [
     {
@@ -309,7 +309,9 @@
               "_workerPairwiseDot",
               "_workerScaledSsq",
               "_workerScaledSsqDiff",
-              "_workerCombineScaledSsq"
+              "_workerCombineScaledSsq",
+              "_workerExtrema",
+              "_workerCombineExtrema"
             ]
           },
           {
@@ -492,8 +494,11 @@
           "_workerPairwiseDot",
           "_workerScaledSsq",
           "_workerScaledSsqDiff",
-          "_workerCombineScaledSsq"
+          "_workerCombineScaledSsq",
+          "_workerExtrema",
+          "_workerCombineExtrema"
         ],
+        "interfaces": ["WorkerExtrema"],
         "functions": [
           "_tdRowMajorStrides",
           "_workerMulberry32",
@@ -501,7 +506,9 @@
           "_workerPairwiseDot",
           "_workerScaledSsq",
           "_workerScaledSsqDiff",
-          "_workerCombineScaledSsq"
+          "_workerCombineScaledSsq",
+          "_workerExtrema",
+          "_workerCombineExtrema"
         ]
       },
       "packages/workerpool/src/worker.ts": {
@@ -541,7 +548,8 @@
               "_workerPairwiseSum",
               "_workerPairwiseDot",
               "_workerScaledSsq",
-              "_workerScaledSsqDiff"
+              "_workerScaledSsqDiff",
+              "_workerExtrema"
             ]
           }
         ],
@@ -1099,7 +1107,8 @@
               "scaledDistance",
               "neumaierCumsum",
               "sumSquaredDeviations",
-              "sumSquaredDeviationsChecked"
+              "sumSquaredDeviationsChecked",
+              "extrema"
             ],
             "reExport": true
           },
@@ -1207,6 +1216,12 @@
           {
             "file": "./factory/index.js",
             "imports": ["MathTSConfig", "FactoryFunction", "FactoryDependencies", "FactoryImport"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/stable.js",
+            "imports": ["Extrema"],
             "reExport": true,
             "typeOnly": true
           }
@@ -1361,6 +1376,7 @@
           "neumaierCumsum",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
+          "extrema",
           "mulberry32",
           "boxMuller",
           "createSeededRng",
@@ -1412,7 +1428,8 @@
           "MathTSConfig",
           "FactoryFunction",
           "FactoryDependencies",
-          "FactoryImport"
+          "FactoryImport",
+          "Extrema"
         ],
         "reExported": [
           "Complex",
@@ -1562,6 +1579,7 @@
           "neumaierCumsum",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
+          "extrema",
           "mulberry32",
           "boxMuller",
           "createSeededRng",
@@ -1612,7 +1630,8 @@
           "MathTSConfig",
           "FactoryFunction",
           "FactoryDependencies",
-          "FactoryImport"
+          "FactoryImport",
+          "Extrema"
         ],
         "constants": ["VERSION"]
       },
@@ -2556,8 +2575,10 @@
           "scaledDistance",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
-          "neumaierCumsum"
+          "neumaierCumsum",
+          "extrema"
         ],
+        "interfaces": ["Extrema"],
         "functions": [
           "pairwiseSum",
           "pairwiseSumChecked",
@@ -2568,7 +2589,8 @@
           "scaledDistance",
           "sumSquaredDeviations",
           "sumSquaredDeviationsChecked",
-          "neumaierCumsum"
+          "neumaierCumsum",
+          "extrema"
         ]
       },
       "core/src/numeric/strides.ts": {
@@ -25689,7 +25711,8 @@
               "Fraction",
               "BigNumber",
               "Dual",
-              "DimensionMismatchError"
+              "DimensionMismatchError",
+              "extrema"
             ]
           },
           {
@@ -41450,7 +41473,8 @@
               "norm2",
               "pairwiseDot",
               "scaledDistance",
-              "sumSquaredDeviations"
+              "sumSquaredDeviations",
+              "extrema"
             ]
           },
           {
@@ -48641,16 +48665,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1333,
     "totalModules": 82,
-    "totalLinesOfCode": 230315,
-    "totalExports": 7292,
+    "totalLinesOfCode": 230342,
+    "totalExports": 7297,
     "totalClasses": 62,
-    "totalInterfaces": 661,
-    "totalFunctions": 2497,
+    "totalInterfaces": 663,
+    "totalFunctions": 2500,
     "totalTypeGuards": 178,
     "totalEnums": 0,
     "totalConstants": 1675,
-    "totalReExports": 3165,
-    "totalTypeOnlyImports": 682,
+    "totalReExports": 3167,
+    "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

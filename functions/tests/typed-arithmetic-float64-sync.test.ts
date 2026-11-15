@@ -185,13 +185,12 @@ describe('reductions return a number synchronously', () => {
     expect(max(F())).toBe(-Infinity);
   });
 
-  it('min and max skip NaN (the pre-change sequential loop behaviour)', () => {
-    // The loop compares with `<` / `>`, and a comparison with NaN is false, so NaN never
-    // becomes the running value. This is the behaviour of the 'never'-gated path that ran
-    // before #384 and stays the same here; the plain-Array path uses Math.min and gives NaN.
-    expect(min(F(NaN, 2, 1))).toBe(1);
-    expect(max(F(1, NaN, 2))).toBe(2);
-    expect(min(F(NaN))).toBe(Infinity);
+  it('min and max propagate NaN, as the Array path and mathjs do (#1048)', () => {
+    expect(min(F(NaN, 2, 1))).toBeNaN();
+    expect(max(F(1, NaN, 2))).toBeNaN();
+    expect(min(F(1, 2, NaN))).toBeNaN();
+    expect(min(F(NaN))).toBeNaN();
+    expect(min([NaN, 2, 1])).toBeNaN();
   });
 
   it('dot is pairwise, not a naive left-to-right sum', () => {
