@@ -166,6 +166,9 @@ jobs:
       - name: Scratch folder tests
         run: node --test tools/test/make-scratch.test.mjs
 
+      - name: Consumer npm install argument tests
+        run: node --test tools/test/npm-install-args.test.mjs
+
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
