@@ -64,6 +64,7 @@ export interface SqrtCallable {
   (a: number): number | Complex;
   (a: Complex): Complex;
   (a: BigNumber): BigNumber;
+  (a: Fraction): number | Complex;
   (a: Dual): Dual;
   (a: Float64Array): Float64Array;
   (a: number[]): (number | Complex)[];
