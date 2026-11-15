@@ -66,6 +66,7 @@ interface Dependencies {
   det: TypedFunction<Scalar>;
   identity: IdentityFunction;
   abs: TypedFunction<number | BigNumber>;
+  isZero: (x: unknown) => boolean;
 }
 
 const name = 'inv';
@@ -79,6 +80,7 @@ const dependencies = [
   'det',
   'identity',
   'abs',
+  'isZero',
 ];
 
 export const createInv = /* #__PURE__ */ factory(
@@ -94,6 +96,7 @@ export const createInv = /* #__PURE__ */ factory(
     det,
     identity,
     abs,
+    isZero,
   }: Dependencies) => {
     /**
      * Calculate the inverse of a square matrix.
@@ -178,14 +181,14 @@ export const createInv = /* #__PURE__ */ factory(
       if (rows === 1) {
         // this is a 1 x 1 matrix
         value = mat[0][0];
-        if (value === 0) {
+        if (isZero(value)) {
           throw Error('Cannot calculate inverse, determinant is zero');
         }
         return [[divideScalar(1, value)]];
       } else if (rows === 2) {
         // this is a 2 x 2 matrix
         const d = det(mat);
-        if (d === 0) {
+        if (isZero(d)) {
           throw Error('Cannot calculate inverse, determinant is zero');
         }
         return [
@@ -222,7 +225,7 @@ export const createInv = /* #__PURE__ */ factory(
             }
             r++;
           }
-          if (ABig === 0) {
+          if (isZero(ABig)) {
             throw Error('Cannot calculate inverse, determinant is zero');
           }
           r = rBig;

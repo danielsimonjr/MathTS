@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 55 files
+- **functions/typed**: 56 files
 - **functions/unit**: 2 files
 - **functions/utils**: 37 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 57             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 576            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 577            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -11428,6 +11428,7 @@ graph LR
 
 | File                            | Imports                                                                                                                                                     | Type               |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `./number-matrix.js`            | `assertRectangular, isNumberMatrix`                                                                                                                         | Import             |
 | `./euclid.js`                   | `euclidSnap`                                                                                                                                                | Import             |
 | `./f64-kernels.js`              | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                             | Import             |
 | `../statistics/numeric-data.js` | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest` | Import             |
@@ -12121,6 +12122,14 @@ graph LR
 | `@danielsimonjr/mathts-matrix` | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul, transposeNestedArray` |
 | `@danielsimonjr/mathts-core`   | `mathTyped`                                                                                                                                                                                                                |
 
+**Internal Dependencies:**
+
+| File                            | Imports             | Type   |
+| ------------------------------- | ------------------- | ------ |
+| `../factories/scope.js`         | `factoryScope`      | Import |
+| `./number-matrix.js`            | `isNumberMatrix`    | Import |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix` | Import |
+
 **Exports:**
 
 - Interfaces: `CholeskyResult`, `HessenbergResult`, `PolarResult`, `JordanResult`
@@ -12134,6 +12143,14 @@ graph LR
 **Exports:**
 
 - Functions: `solveAugmentedNormalEquations`
+
+---
+
+### `functions/src/typed/number-matrix.ts` - Shape and entry checks for a 2-D array before a matrix operation picks its path.
+
+**Exports:**
+
+- Functions: `isNumberMatrix`, `assertRectangular`
 
 ---
 
@@ -20340,9 +20357,9 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
+| `functions/src/typed/arithmetic`                       | 10 files     | 10 files   |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `functions/src/typed/arithmetic`                       | 9 files      | 10 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
@@ -20881,7 +20898,7 @@ graph TD
         N355[complex-promotion]
         N356[complex]
         N357[dist-objects]
-        N358[...45 more]
+        N358[...46 more]
     end
 
     subgraph Functions/unit
@@ -21246,15 +21263,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1333   |
+| Total TypeScript Files  | 1334   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 230349 |
-| Total Exports           | 7297   |
+| Total Lines of Code     | 230454 |
+| Total Exports           | 7299   |
 | Total Re-exports        | 3167   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2500   |
-| Total Type Guards       | 178    |
+| Total Functions         | 2502   |
+| Total Type Guards       | 179    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |
 | Runtime Circular Deps   | 2      |

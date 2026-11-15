@@ -34,6 +34,9 @@ import {
   transposeNestedArray as transpose,
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { factoryScope } from '../factories/scope.js';
+import { isNumberMatrix } from './number-matrix.js';
+import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -1056,15 +1059,48 @@ function solveApprox(A: number[][], b: number[], n: i32): number[] {
  * const Ap2 = pinv(A, { rcond: 1e-6 });
  */
 export const pinv = mathTyped('pinv', {
-  DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => matrixPinv(A),
-  'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) =>
-    matrixPinv(A, opts),
+  DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => {
+    const nested = denseEntries(A);
+    return nested === null ? matrixPinv(A) : new MathJSDenseMatrix(genericPinv(nested) as never);
+  },
+  'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) => {
+    if (denseEntries(A) === null) return matrixPinv(A, opts);
+    throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
+  },
   // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
   // "expected DenseMatrix, actual Array" — the common call form was unsupported.
-  Array: (A: number[][]) => matrixPinv(DenseMatrix.fromArray(A)).toArray(),
-  'Array, Object': (A: number[][], opts: PinvOptions) =>
-    matrixPinv(DenseMatrix.fromArray(A), opts).toArray(),
+  Array: (A: unknown[][]) =>
+    isNumberMatrix(A) ? matrixPinv(DenseMatrix.fromArray(A)).toArray() : genericPinv(A),
+  'Array, Object': (A: unknown[][], opts: PinvOptions) => {
+    if (isNumberMatrix(A)) return matrixPinv(DenseMatrix.fromArray(A), opts).toArray();
+    throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
+  },
 });
+
+/**
+ * The entries of a boxed dense matrix when one entry is not a number, else `null`.
+ * A native DenseMatrix holds numbers only, so it gives `null`.
+ */
+function denseEntries(A: unknown): unknown[][] | null {
+  if (A instanceof DenseMatrix) return null;
+  const toArray = (A as { toArray?: () => unknown }).toArray;
+  if (typeof toArray !== 'function') return null;
+  const nested = toArray.call(A) as unknown[][];
+  return isNumberMatrix(nested) ? null : nested;
+}
+
+/**
+ * The pseudo-inverse of a matrix with a non-number entry (Complex, Fraction or BigNumber).
+ * The real SVD path cannot hold such an entry, so this path uses the mathjs rank
+ * factorization, which uses the generic arithmetic (#1040).
+ */
+function genericPinv(A: unknown[][]): unknown {
+  const factoryPinv = (factoryScope as { pinv?: (m: unknown[][]) => unknown }).pinv;
+  if (typeof factoryPinv !== 'function') {
+    throw new Error('pinv: the generic pinv factory is not registered');
+  }
+  return factoryPinv(A);
+}
 
 /**
  * Compute the condition number of a matrix (ratio σ_max / σ_min via SVD).
