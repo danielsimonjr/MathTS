@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-15",
-  "totalFiles": 2439,
+  "totalFiles": 2440,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1309,
     "test-only": 0,
     "orphan": 0,
-    "test": 1038,
+    "test": 1039,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1335,
-    "tests": 1038,
+    "tests": 1039,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 30,
-    "@danielsimonjr/mathts-core": 134,
+    "@danielsimonjr/mathts-core": 135,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
@@ -933,7 +933,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2080
+      "loc": 2093
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1059,7 +1059,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3671
+      "loc": 3672
     },
     {
       "file": "core/src/types/unit/va-var.ts",
@@ -1356,6 +1356,13 @@
       "loc": 57
     },
     {
+      "file": "core/tests/types/bignumber-constants-precision.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
       "file": "core/tests/types/bignumber-constructor.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1423,7 +1430,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 83
+      "loc": 86
     },
     {
       "file": "core/tests/types/cross-copy-unit-format.test.ts",

@@ -1145,7 +1145,7 @@ graph LR
 | `../../factory.js` | `factory`                                                                                                                                                                                                                                                                                                                                          | Import             |
 | `../../object.js`  | `clone`                                                                                                                                                                                                                                                                                                                                            | Import             |
 | `../../shared.js`  | `endsWith, hasOwnProperty, warnOnce, isPollutingKey`                                                                                                                                                                                                                                                                                               | Import             |
-| `../bignumber.js`  | `BIGNUMBER_PI`                                                                                                                                                                                                                                                                                                                                     | Import             |
+| `../bignumber.js`  | `BigNumber`                                                                                                                                                                                                                                                                                                                                        | Import             |
 | `./unit-types.js`  | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, ConvertOptions, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitReadingFactor, UnitSystem, UnitSystemEntry` | Import (type-only) |
 | `./unit-types.js`  | `LogarithmicUnitKind`                                                                                                                                                                                                                                                                                                                              | Import (type-only) |
 | `./errors.js`      | `AmbiguousUnitError, DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                                       | Import             |
@@ -21359,7 +21359,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1335   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231423 |
+| Total Lines of Code     | 231437 |
 | Total Exports           | 7311   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
