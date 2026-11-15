@@ -145,12 +145,54 @@ export function packWorkspace(packages, dest) {
 }
 
 /**
+ * A whole-number npm limit from the environment, or its default. Fails loudly on a bad value.
+ * @param {Record<string, string | undefined>} env
+ * @param {string} name environment variable
+ * @param {number} fallback default value
+ * @param {number} min smallest allowed value
+ * @returns {number}
+ */
+function npmLimit(env, name, fallback, min) {
+  const text = env[name];
+  if (text === undefined) return fallback;
+  const value = /^\d+$/.test(text) ? Number(text) : NaN;
+  if (!Number.isSafeInteger(value) || value < min) {
+    throw new Error(`${name} must be a whole number of at least ${min} (got '${text}')`);
+  }
+  return value;
+}
+
+/**
+ * The npm arguments of a consumer install. npm's default `fetch-timeout` (300000 ms) equals the
+ * limit of the slowest consumer test, so one stalled registry request used that whole limit. A
+ * bounded timeout makes a stalled request fail and retry in time.
+ * `MATHTS_CONSUMER_NPM_FETCH_TIMEOUT_MS` (default 60000) and `MATHTS_CONSUMER_NPM_FETCH_RETRIES`
+ * (default 4) replace the limits.
+ * @param {string[]} specs tarball paths, registry specs, and consumer-side tools
+ * @param {Record<string, string | undefined>} [env]
+ * @returns {string[]}
+ */
+export function npmInstallArgs(specs, env = process.env) {
+  const timeout = npmLimit(env, 'MATHTS_CONSUMER_NPM_FETCH_TIMEOUT_MS', 60000, 1);
+  const retries = npmLimit(env, 'MATHTS_CONSUMER_NPM_FETCH_RETRIES', 4, 0);
+  return [
+    'install',
+    '--no-audit',
+    '--no-fund',
+    '--loglevel=error',
+    `--fetch-timeout=${timeout}`,
+    `--fetch-retries=${retries}`,
+    ...specs,
+  ];
+}
+
+/**
  * Install packages into a consumer project.
  * @param {string} consumer absolute project folder (holds package.json)
  * @param {string[]} specs tarball paths, registry specs, and consumer-side tools such as `typescript@5`
  */
 export function installInto(consumer, specs) {
-  run('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', ...specs], consumer);
+  run('npm', npmInstallArgs(specs), consumer);
 }
 
 /**

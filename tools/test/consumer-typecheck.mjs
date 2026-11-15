@@ -45,7 +45,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { basename, dirname, join } from 'node:path';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 import { browserBundleProblems, loadProblems } from './consumer-checks.mjs';
-import { entrySpecifiers, makeScratch, readEntryPolicy } from './consumer-env.mjs';
+import { entrySpecifiers, installInto, makeScratch, readEntryPolicy } from './consumer-env.mjs';
 import { fenceProblems } from './readme-fences.mjs';
 
 /**
@@ -338,20 +338,12 @@ try {
   mkdirSync(consumer);
   for (const [name, text] of Object.entries(files)) writeFileSync(join(consumer, name), text);
 
-  run(
-    'npm',
-    [
-      'install',
-      '--no-audit',
-      '--no-fund',
-      '--loglevel=error',
-      `typescript@${tsVersion}`,
-      `@types/node@${nodeTypesVersion}`,
-      `esbuild@${installedVersion('esbuild')}`,
-      ...tgz.map((f) => join(tarballs, f)),
-    ],
-    consumer
-  );
+  installInto(consumer, [
+    `typescript@${tsVersion}`,
+    `@types/node@${nodeTypesVersion}`,
+    `esbuild@${installedVersion('esbuild')}`,
+    ...tgz.map((f) => join(tarballs, f)),
+  ]);
 
   console.log(
     `consumer-typecheck: ${packages.length} packages, ${specifiers.length} entry points, ` +
