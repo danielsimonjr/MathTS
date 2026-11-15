@@ -182,3 +182,48 @@ describe('#1040 the other inputs of the same paths', () => {
     expect(() => multiply([['a']] as never, [[2]] as never)).toThrow();
   });
 });
+
+describe('#1040 inv keeps an exact zero test', () => {
+  // isZero applies absTol (1e-15), so a small but invertible matrix must not count as singular.
+  it('inverts a small non-singular number matrix', () => {
+    const plain = (m: unknown) => (m as number[][]).map((r) => r.map((x) => x + 0));
+    expect(plain(inv([[1e-16]]))).toEqual([[1e16]]);
+    expect(
+      plain(
+        inv([
+          [1e-9, 0],
+          [0, 1e-9],
+        ])
+      )
+    ).toEqual([
+      [1e9, 0],
+      [0, 1e9],
+    ]);
+    expect(
+      plain(
+        inv([
+          [1e-16, 0, 0],
+          [0, 1, 0],
+          [0, 0, 1],
+        ])
+      )
+    ).toEqual([
+      [1e16, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  it('inverts a small non-singular Complex matrix', () => {
+    const r = inv([
+      [new Complex(1e-9, 0), 0],
+      [0, new Complex(0, 1e-9)],
+    ] as never) as unknown as unknown[][];
+    const d0 = r[0][0] as Complex;
+    const d1 = r[1][1] as Complex;
+    expect(d0.re).toBeCloseTo(1e9, 0);
+    expect(d0.im).toBe(0);
+    expect(d1.re).toBe(0);
+    expect(d1.im).toBeCloseTo(-1e9, 0);
+  });
+});
