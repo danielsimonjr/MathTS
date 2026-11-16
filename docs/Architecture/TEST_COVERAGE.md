@@ -1679,6 +1679,7 @@ The following 780 source files are not directly imported by any test file:
 | `tests/conversions-mathjs-parity.test.ts`                          | 173 files           |
 | `tests/conversions-parser.test.ts`                                 | 173 files           |
 | `function/import.test.ts`                                          | 2 files             |
+| `tests/cov-1d.test.ts`                                             | 0 files             |
 | `tests/cov-arithmetic.test.ts`                                     | 1 files             |
 | `tests/cov-bitwise.test.ts`                                        | 1 files             |
 | `tests/cov-cas.test.ts`                                            | 4 files             |

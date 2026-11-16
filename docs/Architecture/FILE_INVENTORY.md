@@ -1514,6 +1514,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/conversions-mathjs-parity.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/conversions-parser.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/core/function/import.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/cov-1d.test.ts`                                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-arithmetic.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-bitwise.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-cas.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |

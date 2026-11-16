@@ -237,6 +237,7 @@ function assertRectangular(M: number[][], fn: string): void {
 /**
  * Covariance.
  *   - `cov(x, y)` → scalar sample covariance of two equal-length vectors.
+ *   - `cov(x)` with a 1-D array → scalar sample variance (one variable, NumPy `np.cov`).
  *   - `cov(matrix)` → covariance matrix; rows are observations, columns are
  *     variables (NumPy `rowvar=false`). `ddof` defaults to 1 (sample).
  *   - `cov(matrix, undefined, ddof, { rowvar: true })` → rows are variables,
@@ -266,6 +267,11 @@ export function cov(
     for (let i = 0; i < a.length; i++) acc += (a[i] - ma) * (b[i] - mb);
     return acc / (a.length - ddof);
   }
+  // A 1-D array is one variable (NumPy np.cov): its covariance with itself is the
+  // sample variance. Only the first element decides the form, so a flat array of
+  // non-numbers reaches numberVector and throws instead of taking the matrix branch.
+  const isMatrixInput = x.length > 0 && (Array.isArray(x[0]) || ArrayBuffer.isView(x[0]));
+  if (!isMatrixInput) return cov(x as Vec, x as Vec, ddof) as number;
   // matrix form: rows = observations, columns = variables (rowvar=false)
   const input = (x as number[][]).map((r, i) => numberVector(`cov row ${i}`, r));
   assertRectangular(input, 'cov');
