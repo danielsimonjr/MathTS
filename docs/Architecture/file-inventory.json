@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2443,
+  "totalFiles": 2444,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1310,
     "test-only": 0,
     "orphan": 0,
-    "test": 1041,
+    "test": 1042,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1336,
-    "tests": 1041,
+    "tests": 1042,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 30,
-    "@danielsimonjr/mathts-core": 135,
+    "@danielsimonjr/mathts-core": 136,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 807
+      "loc": 834
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -1480,6 +1480,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 169
+    },
+    {
+      "file": "core/tests/types/fraction-string-bignumber.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 54
     },
     {
       "file": "core/tests/types/fraction.test.ts",
