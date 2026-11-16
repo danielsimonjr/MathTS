@@ -23,9 +23,9 @@ describe('clone oracle — foldIntegerRange (summation / symbolicProduct)', () =
     expect(symbolicProduct('k', 'k', 5, 4)).toBe(1);
   });
 
-  it('non-integer bounds step by 1 from a', () => {
-    expect(summation('k', 'k', 1.5, 3.5)).toBe(1.5 + 2.5 + 3.5);
-    expect(symbolicProduct('k', 'k', 1.5, 3.5)).toBe(1.5 * 2.5 * 3.5);
+  it('non-integer bounds throw RangeError (#1000)', () => {
+    expect(() => summation('k', 'k', 1.5, 3.5)).toThrow(RangeError);
+    expect(() => symbolicProduct('k', 'k', 1.5, 3.5)).toThrow(RangeError);
   });
 
   it('NaN bound throws Error with JSON.stringify(NaN) === null in the message', () => {

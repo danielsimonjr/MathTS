@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2450,
+  "totalFiles": 2451,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1311,
     "test-only": 0,
     "orphan": 0,
-    "test": 1047,
+    "test": 1048,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1337,
-    "tests": 1047,
+    "tests": 1048,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1106,
+    "@danielsimonjr/mathts-functions": 1107,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -9074,7 +9074,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3183
+      "loc": 3193
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -12834,6 +12834,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/summation-bounds.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
     },
     {
       "file": "functions/tests/summation-symbolic-bound.test.ts",

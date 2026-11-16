@@ -1630,15 +1630,18 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
 }
 
 /**
- * Fold {@code evalAt(expr, varName, k)} for {@code k = a, a+1, …} while
- * {@code k <= b} (non-integer bounds still step by 1 from {@code a}).
+ * Fold {@code evalAt(expr, varName, k)} for {@code k = a, a+1, …, b}.
+ *
+ * Both bounds must be finite integers. Finite-bound checks run first, so
+ * {@code NaN} and {@code Infinity} throw an {@code Error}. A non-integer
+ * bound throws a {@code RangeError} before any range check, so it never
+ * sums a fractional index (#1000).
  *
  * {@code a > b} returns {@code identity} without calling {@code evalAt}.
- * Finite-bound checks run first so {@code NaN} and {@code Infinity} throw.
  *
  * @param identity - Left identity of {@code op} (0 for sum, 1 for product)
  * @param op - Combining operator; applied once per visited k
- * @param fnName - Prefix for the finite-bounds error
+ * @param fnName - Prefix for the bounds errors
  */
 function foldIntegerRange(
   expr: string,
@@ -1652,6 +1655,11 @@ function foldIntegerRange(
   if (!Number.isFinite(a) || !Number.isFinite(b)) {
     throw new Error(
       `${fnName}: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
+    );
+  }
+  if (!Number.isInteger(a) || !Number.isInteger(b)) {
+    throw new RangeError(
+      `${fnName}: bounds must be integers (got lower bound ${a}, upper bound ${b})`
     );
   }
   if (a > b) {
@@ -1678,6 +1686,7 @@ function foldIntegerRange(
  * @param a - Lower bound (finite integer)
  * @param b - Upper bound (finite integer)
  * @returns Sum value
+ * @throws RangeError when a or b is not an integer (#1000)
  *
  * @example
  * summation('k', 'k', 1, 100)     // => 5050
@@ -1698,6 +1707,7 @@ export function summation(expr: string, varName: string, a: number, b: number): 
  * @param a - Lower bound (integer)
  * @param b - Upper bound (integer)
  * @returns Product value
+ * @throws RangeError when a or b is not an integer (#1000)
  *
  * @example
  * symbolicProduct('k', 'k', 1, 5)    // => 120 (= 5!)
