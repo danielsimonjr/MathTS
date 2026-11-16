@@ -15720,6 +15720,7 @@ modules:
             - isBigNumber
             - isFraction
             - isMatrix
+            - isUnit
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -16006,12 +16007,12 @@ modules:
         - bignumber
         - matrix
         - sparse
-        - number
-        - string
-        - boolean
         - cumsum
         - ctranspose
         - createUnit
+        - number
+        - string
+        - boolean
         - bigint
         - MathNode
         - StringOptions
@@ -16021,6 +16022,17 @@ modules:
         - StringOptions
         - SimplifyOptions
       functions:
+        - number
+        - number
+        - number
+        - number
+        - number
+        - string
+        - string
+        - string
+        - boolean
+        - boolean
+        - boolean
         - bigint
         - bigint
         - bigint
@@ -16272,9 +16284,6 @@ modules:
         - bignumber
         - matrix
         - sparse
-        - number
-        - string
-        - boolean
         - cumsum
         - ctranspose
         - createUnit
@@ -46202,14 +46211,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1337
   totalModules: 82
-  totalLinesOfCode: 231636
+  totalLinesOfCode: 231715
   totalExports: 7317
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2522
+  totalFunctions: 2533
   totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1679
+  totalConstants: 1676
   totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2
