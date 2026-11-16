@@ -6638,7 +6638,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 675
+      "loc": 681
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -10153,6 +10153,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 49
+    },
+    {
+      "file": "functions/tests/cov-1d.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 51
     },
     {
       "file": "functions/tests/cov-arithmetic.test.ts",
