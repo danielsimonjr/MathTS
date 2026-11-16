@@ -24,6 +24,8 @@
  * @module @danielsimonjr/mathts-core/types/unit/exact-scale
  */
 
+import { gcdBigInt } from '../bigint-gcd.js';
+
 /**
  * The named irrationals a scale may carry, each as a decimal truncated to 120
  * places. Rounding `r × Π c^k` through these rationals is off from rounding the
@@ -98,21 +100,7 @@ function powersEqual(a: IrrationalPowers, b: IrrationalPowers): boolean {
   return true;
 }
 
-const SAFE_GCD = 1n << 53n;
-
-function gcd(a: bigint, b: bigint): bigint {
-  let x = a < 0n ? -a : a;
-  let y = b < 0n ? -b : b;
-  if (x <= SAFE_GCD && y <= SAFE_GCD) {
-    // Both exact as doubles: Euclid in floating point is exact and much cheaper than BigInt.
-    let p = Number(x);
-    let q = Number(y);
-    while (q !== 0) [p, q] = [q, p % q];
-    return BigInt(p);
-  }
-  while (y !== 0n) [x, y] = [y, x % y];
-  return x;
-}
+const gcd = gcdBigInt;
 
 /** Whether `s` is exactly 1 (then a product or quotient can return the other operand). */
 function isOne(s: ExactScale): boolean {

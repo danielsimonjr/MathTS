@@ -47,3 +47,43 @@ describe('BigNumber radix conversions', () => {
     expect(BigNumber.fromNumber(-Infinity).toOctal()).toBe('-Infinity');
   });
 });
+
+// A non-terminating fraction rounds half-up to the configured precision, counted in significant
+// radix digits from the first nonzero digit. The integer part is always exact. (#BN-4)
+describe('BigNumber radix: non-terminating fractions', () => {
+  const sig = (s: string) =>
+    s
+      .replace(/^-?0[box]/, '')
+      .replace('.', '')
+      .replace(/^0+/, '').length;
+
+  it('rounds 0.1 to the configured precision of significant digits', () => {
+    const p = BigNumber.precision;
+    for (const s of [
+      BigNumber.parse('0.1').toBinary(),
+      BigNumber.parse('0.1').toHexadecimal(),
+      BigNumber.parse('0.1').toOctal(),
+    ]) {
+      expect(sig(s)).toBeLessThanOrEqual(p);
+      expect(sig(s)).toBeGreaterThan(p - 3);
+    }
+    expect(BigNumber.parse('0.1').toHexadecimal().endsWith('9a')).toBe(true);
+  });
+
+  it('carries a round-up across the point', () => {
+    expect(BigNumber.parse('0.' + '9'.repeat(90)).toHexadecimal()).toBe('0x1');
+    expect(BigNumber.parse('-0.' + '9'.repeat(90)).toBinary()).toBe('-0b1');
+  });
+
+  it('keeps every digit of an integer above the precision', () => {
+    const big = 2n ** 70n + 1n;
+    expect(BigNumber.parse(big.toString()).toBinary()).toBe('0b' + big.toString(2));
+    expect(BigNumber.parse(big.toString()).toHexadecimal()).toBe('0x' + big.toString(16));
+  });
+
+  it('keeps a terminating fraction exact', () => {
+    expect(BigNumber.parse('2.5').toBinary()).toBe('0b10.1');
+    expect(BigNumber.parse('1.75').toHexadecimal()).toBe('0x1.c');
+    expect(BigNumber.parse('-2.5').toOctal()).toBe('-0o2.4');
+  });
+});

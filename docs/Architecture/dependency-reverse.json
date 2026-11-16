@@ -164,6 +164,11 @@
       "core/src/types/dual.ts",
       "core/src/types/fraction.ts"
     ],
+    "core/src/types/bigint-gcd.ts": [
+      "core/src/types/bignumber.ts",
+      "core/src/types/fraction.ts",
+      "core/src/types/unit/exact-scale.ts"
+    ],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/va-var.ts": ["core/src/types/unit/Unit.ts"],
     "core/src/types/unit/exact-scale.ts": [
