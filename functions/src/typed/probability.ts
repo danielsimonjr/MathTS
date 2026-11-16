@@ -221,12 +221,40 @@ export const combinationsWithRep = mathTyped('combinationsWithRep', {
   },
 });
 
+/** 2^1024: every value at or above it is Infinity, since Number.MAX_VALUE < 2^1024. */
+const MULTINOMIAL_LIMIT = 1n << 1024n;
+
+/**
+ * Exact multinomial as a product of binomials. Each step multiplies in
+ * C(total + a, min(a, total)), so the partial products are exact integers.
+ * A binomial step grows the product by at least a factor of 2, because
+ * min(a, total) <= (total + a) / 2. The loop therefore stops after about 1024
+ * steps per entry, once the product reaches 2^1024.
+ */
+function multinomialExact(parts: number[]): number {
+  let total = 0n;
+  let result = 1n;
+  for (const ai of parts) {
+    const a = BigInt(ai);
+    const n = total + a;
+    const j = a < total ? a : total;
+    let binom = 1n;
+    for (let i = 1n; i <= j; i++) {
+      binom = (binom * (n - j + i)) / i;
+      if (result * binom >= MULTINOMIAL_LIMIT) return Infinity;
+    }
+    result *= binom;
+    total = n;
+  }
+  return Number(result);
+}
+
 /**
  * Compute the multinomial coefficient n! / (a1! * a2! * … * am!) where
  * n = a1 + a2 + … + am.
  *
  * @param a - Array of positive integers
- * @returns Multinomial coefficient as a number
+ * @returns Multinomial coefficient as a number; Infinity when it overflows
  *
  * @example
  * multinomial([2, 1, 1])  // 12  (= 4! / (2! * 1! * 1!))
@@ -239,19 +267,13 @@ export const multinomial = mathTyped('multinomial', {
     const a = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(
       Infinity
     ) as number[];
-    let sum = 0;
-    let denomLog = 0;
+    // Validate every entry before any early return, as mathjs does.
     for (const ai of a) {
       if (!Number.isInteger(ai) || ai < 1) {
-        throw new TypeError('Positive integer values expected in function multinomial');
+        throw new TypeError('Positive integer value expected in function multinomial');
       }
-      sum += ai;
-      // accumulate log(ai!) to avoid intermediate overflow
-      for (let j = 2; j <= ai; j++) denomLog += Math.log(j);
     }
-    let numLog = 0;
-    for (let j = 2; j <= sum; j++) numLog += Math.log(j);
-    return Math.round(Math.exp(numLog - denomLog));
+    return multinomialExact(a);
   },
 });
 
