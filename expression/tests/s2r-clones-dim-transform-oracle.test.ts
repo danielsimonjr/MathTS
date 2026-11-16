@@ -28,11 +28,12 @@ describe('cumsum transform dim oracle', () => {
     expect(val(evaluate('cumsum([1, 2, 3])'))).toEqual(val(cumsum([1, 2, 3])));
   });
 
-  it('2D dim 1 matches direct dim 0 (both reject nested Array along dim 0)', () => {
-    expect(() => evaluate('cumsum([[1, 2], [3, 4]], 1)')).toThrow(
-      /unexpected type of argument \(type: Array\)/
-    );
-    expect(() => cumsum(A, 0)).toThrow(/unexpected type of argument \(type: Array\)/);
+  it('2D dim 1 matches direct dim 0 (the rows are summed, as in mathjs)', () => {
+    expect(val(evaluate('cumsum([[1, 2], [3, 4]], 1)'))).toEqual([
+      [1, 2],
+      [4, 6],
+    ]);
+    expect(val(evaluate('cumsum([[1, 2], [3, 4]], 1)'))).toEqual(val(cumsum(A, 0)));
   });
 
   it('2D dim 2 matches direct dim 1', () => {
