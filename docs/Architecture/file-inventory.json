@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2457,
+  "totalFiles": 2458,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1312,
     "test-only": 0,
     "orphan": 0,
-    "test": 1053,
+    "test": 1054,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1338,
-    "tests": 1053,
+    "tests": 1054,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1112,
+    "@danielsimonjr/mathts-functions": 1113,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -7667,7 +7667,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1982
+      "loc": 2019
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -9333,7 +9333,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2396
+      "loc": 2404
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -12651,7 +12651,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 149
+      "loc": 322
     },
     {
       "file": "functions/tests/solveode-events.test.ts",
