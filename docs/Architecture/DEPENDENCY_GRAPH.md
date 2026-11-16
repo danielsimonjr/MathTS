@@ -13500,6 +13500,12 @@ graph LR
 
 ### `expression/src/default-math-scope.ts` - The default math scope that the public factories fall back to.
 
+**Workspace Dependencies:**
+
+| Package                      | Import                  |
+| ---------------------------- | ----------------------- |
+| `@danielsimonjr/mathts-core` | `Complex, I, isComplex` |
+
 **Internal Dependencies:**
 
 | File                                           | Imports                   | Type               |
@@ -21419,7 +21425,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1337   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231904 |
+| Total Lines of Code     | 231989 |
 | Total Exports           | 7319   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |

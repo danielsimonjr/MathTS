@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2452,
+  "totalFiles": 2454,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1311,
     "test-only": 0,
     "orphan": 0,
-    "test": 1049,
+    "test": 1051,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1337,
-    "tests": 1049,
+    "tests": 1051,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 137,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
-    "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1108,
+    "@danielsimonjr/mathts-expression": 574,
+    "@danielsimonjr/mathts-functions": 1109,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -1780,7 +1780,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 199
+      "loc": 263
     },
     {
       "file": "expression/src/embeddedDocs/constants/e.ts",
@@ -5260,6 +5260,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 197
+    },
+    {
+      "file": "expression/tests/default-scope-imaginary-unit.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 94
     },
     {
       "file": "expression/tests/DimensionError.test.ts",
@@ -9053,7 +9060,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1808
+      "loc": 1829
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -12904,6 +12911,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 68
+    },
+    {
+      "file": "functions/tests/trig-to-exp-evaluates.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 62
     },
     {
       "file": "functions/tests/type-breadth-gc16.test.ts",
