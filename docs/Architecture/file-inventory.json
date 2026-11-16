@@ -5546,7 +5546,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 149
+      "loc": 150
     },
     {
       "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
@@ -6687,7 +6687,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1922
+      "loc": 1929
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -6708,7 +6708,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 271
+      "loc": 300
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -10776,6 +10776,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 112
+    },
+    {
+      "file": "functions/tests/factory-native-dense.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 101
     },
     {
       "file": "functions/tests/factory-scope.test.ts",

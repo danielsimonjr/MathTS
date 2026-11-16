@@ -2439,6 +2439,7 @@
       "delaunayTriangulation",
       "deleteNode",
       "denseRightHandSide",
+      "denseToPublic",
       "dependencies",
       "derivative",
       "derivativeAt",

@@ -9,10 +9,19 @@
  * The factory functions work on the CSC form only. This module converts at the factory
  * boundary: a public CSR argument becomes CSC on entry, and a CSC result becomes CSR on exit
  * when a CSR argument was present (sparse in, sparse out). Nothing inside a factory sees CSR.
+ *
+ * The public `DenseMatrix` converts the same way. The public `DenseMatrix` becomes a
+ * `MathJSDenseMatrix` on entry. A dense result becomes the public class on exit (dense in,
+ * dense out). Nothing inside a factory sees the public dense class.
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { SparseMatrix, isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  DenseMatrix,
+  SparseMatrix,
+  isDenseMatrix,
+  isSparseMatrix,
+} from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from './matrix-bridge.js';
 
 /** Convert the public CSR `SparseMatrix` to the CSC form. Exact zeros are dropped. */
@@ -84,12 +93,27 @@ export function cscToPublic(m: MathJSSparseMatrix): SparseMatrix | unknown[][] {
   return new SparseMatrix(rows, cols, outValues, outCols, count);
 }
 
-function toPublicDeep(x: unknown): unknown {
+/**
+ * Output rule for a call that received a public `DenseMatrix` (dense in, dense out). A
+ * two-dimensional result of numbers becomes the public `DenseMatrix`. Any other result (a
+ * boolean, Complex, BigNumber or Fraction entry, or one dimension) is the nested `Array` of the
+ * same values. The public class stores a `Float64Array`, and cannot hold such a result.
+ */
+export function denseToPublic(m: MathJSDenseMatrix): DenseMatrix | unknown[] {
+  const data = m.toArray() as unknown[];
+  const numeric2d =
+    data.length > 0 &&
+    data.every((row) => Array.isArray(row) && row.every((x) => typeof x === 'number'));
+  return numeric2d ? DenseMatrix.fromArray(data as number[][]) : data;
+}
+
+function toPublicDeep(x: unknown, dense = false): unknown {
   if (x instanceof MathJSSparseMatrix) return cscToPublic(x);
+  if (dense && x instanceof MathJSDenseMatrix) return denseToPublic(x);
   if (Array.isArray(x)) {
     let changed = false;
     const out = x.map((e) => {
-      const r = toPublicDeep(e);
+      const r = toPublicDeep(e, dense);
       if (r !== e) changed = true;
       return r;
     });
@@ -100,7 +124,7 @@ function toPublicDeep(x: unknown): unknown {
     let changed = false;
     const out: Record<string, unknown> = {};
     for (const key of Object.keys(src)) {
-      out[key] = toPublicDeep(src[key]);
+      out[key] = toPublicDeep(src[key], dense);
       if (out[key] !== src[key]) changed = true;
     }
     return changed ? out : x;
@@ -151,6 +175,7 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
     let adapted: unknown[] | undefined;
     let converted: number[] | undefined;
     let hasTyped = false;
+    let denseIn = false;
     for (let i = 0; i < args.length; i++) {
       const a = args[i];
       if (typeof a !== 'object' || a === null) continue;
@@ -158,6 +183,12 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
         adapted ??= args.slice();
         (converted ??= []).push(i);
         adapted[i] = csrToCsc(a);
+      } else if (isDenseMatrix(a)) {
+        // The factory functions read the mathjs matrix API (`size()`, `datatype()`, `_data`),
+        // which the public class lacks, and core `deepMap` reads the public class as one leaf.
+        adapted ??= args.slice();
+        adapted[i] = MathJSDenseMatrix.fromNative(a);
+        denseIn = true;
       } else if (arrays !== TypedArrayMode.Never && holdsTypedArray(a)) {
         hasTyped = true;
       }
@@ -170,11 +201,9 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
       for (let i = 0; i < adapted.length; i++) adapted[i] = toPlainArrays(adapted[i]);
     }
     if (adapted === undefined) return target.apply(this, args);
-    if (converted === undefined) return target.apply(this, adapted);
-    // A call that mixes the public sparse and dense classes needs both in the factory form.
-    for (let i = 0; i < adapted.length; i++) {
-      const a = adapted[i];
-      if (isDenseMatrix(a)) adapted[i] = MathJSDenseMatrix.fromNative(a);
+    if (converted === undefined) {
+      const out = target.apply(this, adapted);
+      return denseIn ? toPublicDeep(out, true) : out;
     }
     let result: unknown;
     try {
@@ -189,7 +218,7 @@ export function adaptSparse<F extends (...args: never[]) => unknown>(fn: F, name
       }
       throw e;
     }
-    return toPublicDeep(result);
+    return toPublicDeep(result, denseIn);
   };
   const own = Object.getOwnPropertyDescriptors(fn);
   delete (own as Record<string, unknown>).prototype;

@@ -1603,6 +1603,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/factorization/render-bigint.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/square-free.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/zassenhaus.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/factory-native-dense.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factory-scope.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factory-typed-arrays-1045.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fft-factory-correctness.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |

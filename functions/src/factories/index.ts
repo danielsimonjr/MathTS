@@ -590,8 +590,6 @@ export const zpk2tf = createZpk2tf(factoryScope as Parameters<typeof createZpk2t
 factoryScope.zpk2tf = zpk2tf;
 
 // statistics (conflicting names use factory_ prefix)
-export const factory_cumsum = createCumSum(factoryScope as Parameters<typeof createCumSum>[0]);
-factoryScope.cumsum = factory_cumsum;
 
 export const factory_sum = createSum(factoryScope as Parameters<typeof createSum>[0]);
 factoryScope.sum = factory_sum;
@@ -727,8 +725,10 @@ factoryScope.mod = factory_mod;
 export const factory_nthRoot = createNthRoot(factoryScope as Parameters<typeof createNthRoot>[0]);
 factoryScope.nthRoot = factory_nthRoot;
 
-export const factory_pow = createPow(factoryScope as Parameters<typeof createPow>[0]);
-factoryScope.pow = factory_pow;
+// dotPow, gamma, stirlingS2 and fft need pow here, and call pow on scalars only. This early pow
+// holds the scalar add and multiply stubs. A matrix power calls multiply on the matrix, so the
+// code after the upgrade below creates the public factory_pow again.
+factoryScope.pow = createPow(factoryScope as Parameters<typeof createPow>[0]);
 
 export const factory_ceil = createCeil(factoryScope as Parameters<typeof createCeil>[0]);
 factoryScope.ceil = factory_ceil;
@@ -1185,6 +1185,13 @@ factoryScope.multiply = multiply;
 // "Unexpected type of argument in function addScalar").
 const pinv_factory = createPinv(factoryScope as Parameters<typeof createPinv>[0]);
 factoryScope.pinv = pinv_factory;
+
+// cumsum and pow also call add or multiply on an Array or a matrix, so they are created after
+// the upgrade too. cumsum of a 2-D array and pow of a square matrix threw on the scalar stubs.
+export const factory_cumsum = createCumSum(factoryScope as Parameters<typeof createCumSum>[0]);
+factoryScope.cumsum = factory_cumsum;
+export const factory_pow = createPow(factoryScope as Parameters<typeof createPow>[0]);
+factoryScope.pow = factory_pow;
 
 export const factory_subtract = createSubtract(
   factoryScope as Parameters<typeof createSubtract>[0]
