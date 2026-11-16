@@ -17520,6 +17520,8 @@ modules:
         - file: ../utils/array.js
           imports:
             - arraySize
+            - validate
+            - clone
         - file: ../signal/fft-core-f64.js
           imports:
             - fftExactFloat64
@@ -46243,7 +46245,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1337
   totalModules: 82
-  totalLinesOfCode: 231989
+  totalLinesOfCode: 232012
   totalExports: 7319
   totalClasses: 62
   totalInterfaces: 663

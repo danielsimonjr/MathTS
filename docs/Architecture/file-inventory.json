@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2454,
+  "totalFiles": 2455,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1311,
     "test-only": 0,
     "orphan": 0,
-    "test": 1051,
+    "test": 1052,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1337,
-    "tests": 1051,
+    "tests": 1052,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1109,
+    "@danielsimonjr/mathts-functions": 1110,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -6757,7 +6757,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 264
+      "loc": 266
     },
     {
       "file": "functions/src/geometry/delaunay.ts",
@@ -7114,7 +7114,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 314
+      "loc": 328
     },
     {
       "file": "functions/src/matrix/filter.ts",
@@ -7163,7 +7163,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 146
+      "loc": 148
     },
     {
       "file": "functions/src/matrix/inv.ts",
@@ -8164,7 +8164,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 142
+      "loc": 147
     },
     {
       "file": "functions/src/signal/fft.ts",
@@ -10594,6 +10594,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 94
+    },
+    {
+      "file": "functions/tests/empty-input-no-overflow.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 163
     },
     {
       "file": "functions/tests/erf-extra.test.ts",
