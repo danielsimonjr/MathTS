@@ -276,12 +276,13 @@ export const permutations = mathTyped('permutations', {
     if (k > n) {
       throw new TypeError('k must be less than or equal to n in function permutations');
     }
-    // product (n-k+1) * (n-k+2) * … * n. A count of k factors, not a bound on i: above 2^53,
-    // i + 1 === i, so a loop on `i <= n` never ends. Every factor is at least 1, so the
-    // product cannot fall again once it is Infinity.
+    // product (n-k+1) * … * n, in ascending order. Each factor is n - j, so it has one
+    // rounding above 2^53, where (n - k + 1) + j rounds twice. A count of k factors, not a
+    // bound on i, so the loop ends: above 2^53, i + 1 === i. k above 170 gives at least 171!,
+    // which is above Number.MAX_VALUE (and n - j would reach 0 for k = n).
+    if (k > 170) return Infinity;
     let r = 1;
-    const first = n - k + 1;
-    for (let j = 0; j < k && r !== Infinity; j++) r *= first + j;
+    for (let j = k - 1; j >= 0; j--) r *= n - j;
     return r;
   },
 });
