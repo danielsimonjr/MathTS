@@ -39,6 +39,8 @@ function toReIm(value: unknown): ComplexLike {
  */
 export function rfft(x: number[]): { re: number[]; im: number[] } {
   const n = x.length;
+  // An empty signal has no bins. floor(0/2)+1 would give one bin and read past the end (#988).
+  if (n === 0) return { re: [], im: [] };
   const full = callFft(x) as unknown[];
   const keep = Math.floor(n / 2) + 1;
   const re = new Array<number>(keep);
