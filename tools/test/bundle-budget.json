@@ -10,8 +10,8 @@
     "packages/workerpool/dist/index.js": 55218,
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
-    "core/dist/index.js": 239819,
-    "core/dist/internal.js": 240124,
+    "core/dist/index.js": 239825,
+    "core/dist/internal.js": 240130,
     "core/package.json": 2024,
     "matrix/dist/index.js": 215072,
     "matrix/package.json": 2569,
@@ -20,8 +20,8 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 69994,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 1962938,
-    "functions/dist/subpath-evaluate.js": 1262464,
+    "functions/dist/index.js": 1963509,
+    "functions/dist/subpath-evaluate.js": 1263035,
     "functions/package.json": 3607,
     "functions/dist/wasm/mathts-as.wasm": 62501,
     "expression/dist/index.js": 365157,
@@ -179,37 +179,37 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1231078
+      "bytes": 1231587
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1231403
+      "bytes": 1231912
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1240721
+      "bytes": 1241230
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 263810
+      "bytes": 263800
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1782050
+      "bytes": 1782559
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1791363
+      "bytes": 1791872
     }
   ]
 }

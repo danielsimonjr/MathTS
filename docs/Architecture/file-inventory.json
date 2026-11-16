@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2458,
+  "totalFiles": 2459,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1312,
     "test-only": 0,
     "orphan": 0,
-    "test": 1054,
+    "test": 1055,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1338,
-    "tests": 1054,
+    "tests": 1055,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1113,
+    "@danielsimonjr/mathts-functions": 1114,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
