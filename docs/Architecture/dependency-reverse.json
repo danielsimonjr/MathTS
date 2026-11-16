@@ -2653,6 +2653,10 @@
       "functions/src/probability/combinations.ts",
       "functions/src/probability/combinationsWithRep.ts"
     ],
+    "functions/src/probability/multinomial-exact.ts": [
+      "functions/src/probability/multinomial.ts",
+      "functions/src/typed/probability.ts"
+    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"

@@ -3368,6 +3368,7 @@
       "mulP",
       "multiExactDivide",
       "multinomial",
+      "multinomialExact",
       "multipleComparison",
       "multipleTest",
       "MultipleTestMethod",

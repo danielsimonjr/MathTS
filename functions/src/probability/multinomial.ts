@@ -1,5 +1,6 @@
 import { deepForEach } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
+import { multinomialExact } from './multinomial-exact.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for multinomial
@@ -43,17 +44,26 @@ export const createMultinomial = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix': function (a: unknown[] | object): unknown {
-        let sum: unknown = 0;
-        let denom: unknown = 1;
-
+        const parts: unknown[] = [];
+        let allNumbers = true;
         deepForEach(a as unknown[], function (ai: unknown) {
           if (!isInteger(ai) || !isPositive(ai)) {
             throw new TypeError('Positive integer value expected in function multinomial');
           }
+          if (typeof ai !== 'number') allNumbers = false;
+          parts.push(ai);
+        });
+        // Plain numbers use the exact kernel of the typed function, so parse() and
+        // evaluate() agree (#1001). Other entry types (BigNumber, boolean) keep the
+        // generic path.
+        if (allNumbers) return multinomialExact(parts as number[]);
+
+        let sum: unknown = 0;
+        let denom: unknown = 1;
+        for (const ai of parts) {
           sum = add(sum, ai);
           denom = multiply(denom, factorial(ai));
-        });
-
+        }
         return divide(factorial(sum), denom);
       },
     });

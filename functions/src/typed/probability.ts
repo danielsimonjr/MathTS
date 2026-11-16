@@ -35,6 +35,7 @@ import { deepMap } from '../utils/collection.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
+import { multinomialExact } from '../probability/multinomial-exact.js';
 
 // =============================================================================
 // Seeded-RNG helper (shared across random / randomInt / pickRandom)
@@ -220,34 +221,6 @@ export const combinationsWithRep = mathTyped('combinationsWithRep', {
     return combinationsExact(n + k - 1, k);
   },
 });
-
-/** 2^1024: every value at or above it is Infinity, since Number.MAX_VALUE < 2^1024. */
-const MULTINOMIAL_LIMIT = 1n << 1024n;
-
-/**
- * Exact multinomial as a product of binomials. Each step multiplies in
- * C(total + a, min(a, total)), so the partial products are exact integers.
- * A binomial step grows the product by at least a factor of 2, because
- * min(a, total) <= (total + a) / 2. The loop therefore stops after about 1024
- * steps per entry, once the product reaches 2^1024.
- */
-function multinomialExact(parts: number[]): number {
-  let total = 0n;
-  let result = 1n;
-  for (const ai of parts) {
-    const a = BigInt(ai);
-    const n = total + a;
-    const j = a < total ? a : total;
-    let binom = 1n;
-    for (let i = 1n; i <= j; i++) {
-      binom = (binom * (n - j + i)) / i;
-      if (result * binom >= MULTINOMIAL_LIMIT) return Infinity;
-    }
-    result *= binom;
-    total = n;
-  }
-  return Number(result);
-}
 
 /**
  * Compute the multinomial coefficient n! / (a1! * a2! * … * am!) where
