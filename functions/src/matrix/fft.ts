@@ -1,4 +1,4 @@
-import { arraySize } from '../utils/array.js';
+import { arraySize, validate, clone } from '../utils/array.js';
 import { fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { complexToSplit } from './complex-to-interleaved.js';
 import { factory } from '../utils/factory.js';
@@ -46,6 +46,7 @@ interface Matrix {
   size(): number[];
   getDataType(): string;
   create(data: unknown[], datatype?: string): Matrix;
+  clone(): Matrix;
   valueOf(): unknown[] | unknown[][];
 }
 
@@ -131,8 +132,18 @@ export const createFft = /* #__PURE__ */ factory(
      * @return {Array | Matrix}       N-dimensional Fourier transformation of the array
      */
     return typed(name, {
-      Array: _ndFft,
+      Array: function (arr: ComplexArrayND): unknown {
+        // A zero-length dimension has no elements to transform, so the result keeps the shape.
+        // `validate` rejects a jagged array, which `arraySize` (first row only) does not see.
+        const size = arraySize(arr);
+        if (size.includes(0)) {
+          validate(arr as unknown[], size);
+          return clone(arr as unknown[]);
+        }
+        return _ndFft(arr);
+      },
       Matrix: function (matrix: Matrix): Matrix {
+        if (matrix.size().includes(0)) return matrix.clone();
         return matrix.create(_ndFft(matrix.valueOf()) as unknown[], matrix._datatype);
       },
       Float64Array: function (arr: Float64Array): unknown[] {

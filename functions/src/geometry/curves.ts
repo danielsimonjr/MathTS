@@ -86,9 +86,11 @@ export function frechetDistance(p: readonly Pt[], q: readonly Pt[]): number {
  * Closest pair of points by divide and conquer, O(n log n). Returns the indices
  * (i < j) into `points` and their distance.
  *
+ * @throws TypeError if `points` is not an array (a Matrix has no `length`)
  * @throws RangeError if fewer than two points are given
  */
 export function closestPair(points: readonly Pt[]): { i: number; j: number; distance: number } {
+  if (!Array.isArray(points)) throw new TypeError('closestPair: points must be an array');
   const n = points.length;
   if (n < 2) throw new RangeError('closestPair: need at least two points');
   // Work on indices sorted by x; `order` maps sorted position -> original index.

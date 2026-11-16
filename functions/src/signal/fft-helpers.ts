@@ -63,6 +63,8 @@ export function rfft(x: number[]): { re: number[]; im: number[] } {
  * @returns Real-valued signal of length `n`
  */
 export function irfft(spec: { re: number[]; im: number[] }, n: number): number[] {
+  // A length-0 signal has no samples. floor(0/2)+1 would build one NaN bin (#988).
+  if (n === 0) return [];
   const halfLen = Math.floor(n / 2) + 1;
   const full: unknown[] = new Array(n);
   for (let i = 0; i < halfLen; i++) {
@@ -122,6 +124,7 @@ export function fftfreq(n: number, d: number = 1): number[] {
  * @param d Sample spacing (default 1)
  */
 export function rfftfreq(n: number, d: number = 1): number[] {
+  if (n === 0) return [];
   const half = Math.floor(n / 2);
   const result = new Array<number>(half + 1);
   for (let k = 0; k <= half; k++) {

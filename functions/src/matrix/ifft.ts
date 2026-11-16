@@ -97,6 +97,8 @@ export const createIfft = /* #__PURE__ */ factory(
       'Array | Matrix': function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
         const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
         const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
+        // Empty input: the transform of no elements has the same empty shape (fft validates it).
+        if (totalSize === 0) return fft(arr) as ComplexArrayND | Matrix;
 
         // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
         //
