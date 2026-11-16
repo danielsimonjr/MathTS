@@ -134,8 +134,19 @@ function binary(
 }
 
 /**
- * A real-only function. A Complex argument throws; it is never coerced to a
- * number, because `valueOf` returns the magnitude.
+ * A function of one argument with a real form and a Complex form. A Complex argument takes the
+ * Complex form. A real argument keeps the plain JS result.
+ */
+function unary(
+  real: (a: number) => number,
+  complex: (a: Complex) => Operand
+): (a: Operand) => Operand {
+  return (a) => (isComplex(a) ? complex(a) : real(a));
+}
+
+/**
+ * A real-only function (`mod`, `nthRoot`; mathjs also rejects a complex value for both).
+ * A Complex argument throws. It is never coerced to a number, because `valueOf` returns the magnitude.
  */
 function realOnly(name: string, fn: (...args: number[]) => number): (...args: Operand[]) => number {
   return (...args) => {
@@ -169,17 +180,20 @@ export const defaultMathScope: Record<string, unknown> = {
     (a, b) => a.pow(b)
   ),
   mod: realOnly('mod', (a, b) => a % b),
-  unaryMinus: (a: Operand): Operand => (isComplex(a) ? a.neg() : -a),
+  unaryMinus: unary(
+    (a) => -a,
+    (a) => a.neg()
+  ),
   unaryPlus: (a: Operand): Operand => (isComplex(a) ? a : +a),
-  sin: realOnly('sin', Math.sin),
-  cos: realOnly('cos', Math.cos),
-  tan: realOnly('tan', Math.tan),
-  sqrt: realOnly('sqrt', Math.sqrt),
-  cbrt: realOnly('cbrt', Math.cbrt),
+  sin: unary(Math.sin, (z) => z.sin()),
+  cos: unary(Math.cos, (z) => z.cos()),
+  tan: unary(Math.tan, (z) => z.tan()),
+  sqrt: unary(Math.sqrt, (z) => z.sqrt()),
+  cbrt: unary(Math.cbrt, (z) => z.pow(1 / 3)),
   nthRoot: realOnly('nthRoot', nthRoot),
-  abs: realOnly('abs', Math.abs),
-  exp: (a: Operand): Operand => (isComplex(a) ? a.exp() : Math.exp(a)),
-  log: realOnly('log', Math.log),
+  abs: unary(Math.abs, (z) => z.abs()),
+  exp: unary(Math.exp, (z) => z.exp()),
+  log: unary(Math.log, (z) => z.log()),
   pi: Math.PI,
   π: Math.PI,
   e: Math.E,

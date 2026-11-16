@@ -1464,18 +1464,39 @@ export function trigReduce(expr: string): string {
 /**
  * Convert trigonometric functions to exponential form using Euler's formula.
  *
+ * Each sin, cos and tan call is rewritten from the innermost argument outward. An
+ * argument that is not a bare name or number gets parentheses, and each result is
+ * parenthesised, so the output has the same value as the input at every operator
+ * precedence. Other functions (`asin`, `sinh`) pass through unchanged.
+ *
  * @param expr - Expression string
  * @returns Expression with trig replaced by exponentials
  */
 export function trigToExp(expr: string): string {
-  let result = expr;
-  result = result.replace(/sin\(([^)]+)\)/g, '(exp(i*$1) - exp(-i*$1))/(2*i)');
-  result = result.replace(/cos\(([^)]+)\)/g, '(exp(i*$1) + exp(-i*$1))/2');
-  result = result.replace(
-    /tan\(([^)]+)\)/g,
-    '(exp(i*$1) - exp(-i*$1))/(i*(exp(i*$1) + exp(-i*$1)))'
-  );
-  return result;
+  const group = (arg: string): string => (/^[A-Za-z0-9_.]+$/.test(arg) ? arg : `(${arg})`);
+  const rules: Record<string, (w: string) => string> = {
+    sin: (w) => `((exp(i*${w}) - exp(-i*${w}))/(2*i))`,
+    cos: (w) => `((exp(i*${w}) + exp(-i*${w}))/2)`,
+    tan: (w) => `((exp(i*${w}) - exp(-i*${w}))/(i*(exp(i*${w}) + exp(-i*${w}))))`,
+  };
+  const call = /(?<![\p{L}_$][\p{L}\p{N}_$]*)(sin|cos|tan)\s*\(/gu;
+  let out = '';
+  let last = 0;
+  for (let m = call.exec(expr); m !== null; m = call.exec(expr)) {
+    let depth = 1;
+    let end = call.lastIndex;
+    while (end < expr.length && depth > 0) {
+      if (expr[end] === '(') depth++;
+      else if (expr[end] === ')') depth--;
+      end++;
+    }
+    if (depth !== 0) break; // unbalanced: leave the rest as written
+    const arg = trigToExp(expr.slice(call.lastIndex, end - 1)).trim();
+    out += expr.slice(last, m.index) + rules[m[1]](group(arg));
+    last = end;
+    call.lastIndex = end;
+  }
+  return out + expr.slice(last);
 }
 
 /**
