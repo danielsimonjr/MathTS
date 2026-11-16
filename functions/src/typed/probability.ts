@@ -333,8 +333,8 @@ export function seedProbabilityRng(seed: string | number | null): void {
 type Draw = (...args: number[]) => unknown;
 
 /**
- * A signature that takes a size (an Array or a Matrix of dimension lengths) and fills an array
- * of that size with draws of the typed function itself. A Matrix size gives a matrix result.
+ * A signature that takes a size (an Array or a Matrix of dimension lengths). The signature fills
+ * an array of that size with draws of the typed function itself. A Matrix size gives a matrix.
  */
 function sized(draw: (self: Draw, ...args: number[]) => unknown) {
   return mathTyped.referToSelf((self) => (size: unknown[] | Matrix, ...args: number[]) => {
@@ -416,7 +416,7 @@ export const randomInt = mathTyped('randomInt', {
  * pickRandom(['a','b','c'], 1, [1, 3, 1]) // 'b' chosen 3× more often
  */
 export const pickRandom = mathTyped('pickRandom', {
-  // mathjs picks from all entries: a nested array or a matrix is flattened first.
+  // mathjs picks from all entries, and flattens a nested array or a matrix first.
   'Array | Matrix': (arr: unknown[] | Matrix): unknown => _pick(entries(arr), 1, undefined)[0],
   'Array | Matrix, number': (arr: unknown[] | Matrix, n: number): unknown[] =>
     _pick(entries(arr), n, undefined),
