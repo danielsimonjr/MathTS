@@ -4967,7 +4967,7 @@
     },
     {
       "name": "number",
-      "category": "constant+function",
+      "category": "function",
       "definers": [
         {
           "file": "core/src/arithmetic/scalar.ts",

@@ -1154,6 +1154,7 @@ import {
   isBigNumber as coreIsBigNumber,
   isFraction as coreIsFraction,
   isMatrix as coreIsMatrix,
+  isUnit as coreIsUnit,
 } from '@danielsimonjr/mathts-core';
 import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
@@ -1712,9 +1713,89 @@ export const fraction = factoryScope.fraction as (n: number, d?: number) => unkn
 export const bignumber = factoryScope.bignumber as (x: number | string) => unknown;
 export const matrix = factoryScope.matrix as (data?: unknown, format?: string) => unknown;
 export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => unknown;
-export const number = (x?: unknown): number => Number(x ?? 0);
-export const string = (x?: unknown): string => (x === undefined ? '' : String(x));
-export const boolean = (x?: unknown): boolean => Boolean(x);
+/**
+ * Map a conversion over an array or a matrix, element-wise. The function returns `undefined`
+ * when `x` is not an array and not a matrix. The caller then converts the scalar itself.
+ */
+function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
+  if (Array.isArray(x)) return x.map((v) => convert(v));
+  if (coreIsMatrix(x)) {
+    return (x as unknown as { map(cb: (v: unknown) => unknown): unknown }).map((v) => convert(v));
+  }
+  return undefined;
+}
+
+/**
+ * Convert a value to a number, as mathjs `number` does. A string that is not a number throws
+ * (`'NaN'` gives NaN). A unit with a valueless unit gives its value in that unit. A unit alone
+ * gives the same unit with a number value. An array or a matrix converts element-wise.
+ */
+export function number(
+  x?: number | string | boolean | bigint | null | CoreBigNumber | CoreFraction
+): number;
+export function number(x: unknown, valuelessUnit: string): number;
+export function number(x: readonly unknown[]): number[];
+export function number(x: unknown, valuelessUnit?: string): unknown;
+export function number(x?: unknown, valuelessUnit?: string): unknown {
+  if (valuelessUnit !== undefined && !coreIsUnit(x) && !Array.isArray(x) && !coreIsMatrix(x)) {
+    throw new TypeError('number(x, valuelessUnit) takes a unit, an array or a matrix as x');
+  }
+  if (x === undefined || x === null) return 0;
+  const mapped = mapCollection(x, (v) => number(v, valuelessUnit as string));
+  if (mapped !== undefined) return mapped;
+  if (coreIsUnit(x)) {
+    if (valuelessUnit === undefined) {
+      // mathjs gives the same unit and converts its value to a number.
+      const clone = (x as unknown as { clone(): { value: unknown } }).clone();
+      clone.value = number(clone.value);
+      return clone;
+    }
+    return number((x as unknown as { toNumeric(u: string): unknown }).toNumeric(valuelessUnit));
+  }
+  if (typeof x === 'string') {
+    if (x === 'NaN') return NaN;
+    const n = Number(x);
+    if (Number.isNaN(n)) throw new SyntaxError(`String "${x}" is not a valid number`);
+    return n;
+  }
+  if (coreIsBigNumber(x) || coreIsFraction(x)) return Number(x.valueOf());
+  return Number(x);
+}
+
+/** Convert a value to a string, as mathjs `string` does. An array or a matrix converts element-wise. */
+export function string(x?: unknown): string;
+export function string(x: readonly unknown[]): string[];
+export function string(x?: unknown): unknown {
+  if (x === undefined) return '';
+  const mapped = mapCollection(x, (v) => string(v));
+  if (mapped !== undefined) return mapped;
+  return String(x);
+}
+
+/**
+ * Convert a value to a boolean, as mathjs `boolean` does. The strings `'true'` and `'false'`
+ * (any case) give the matching value. Another string must be a number. Otherwise, the call throws. A zero
+ * BigNumber, Fraction or bigint is false. An array or a matrix converts element-wise.
+ */
+export function boolean(x?: unknown): boolean;
+export function boolean(x: readonly unknown[]): boolean[];
+export function boolean(x?: unknown): unknown {
+  if (x === undefined || x === null) return false;
+  const mapped = mapCollection(x, (v) => boolean(v));
+  if (mapped !== undefined) return mapped;
+  if (typeof x === 'string') {
+    const lower = x.toLowerCase();
+    if (lower === 'true') return true;
+    if (lower === 'false') return false;
+    const n = x === '' ? NaN : Number(x);
+    if (Number.isNaN(n)) throw new Error(`Cannot convert "${x}" to a boolean`);
+    return n !== 0;
+  }
+  if (coreIsBigNumber(x)) return !x.isZero();
+  if (coreIsFraction(x)) return x.numerator !== 0n;
+  if (typeof x === 'bigint') return x !== 0n;
+  return Boolean(x);
+}
 /** Round n/d to the nearest integer, half away from zero (mathjs `bigint` rounding). */
 const roundRatio = (n: bigint, d: bigint): bigint => {
   const neg = n < 0n !== d < 0n;
@@ -1736,10 +1817,8 @@ export function bigint(x: readonly unknown[]): unknown[];
 export function bigint(x: unknown): unknown;
 export function bigint(x?: unknown): unknown {
   if (x === undefined || x === null) return 0n;
-  if (Array.isArray(x)) return x.map((v) => bigint(v));
-  if (coreIsMatrix(x)) {
-    return (x as unknown as { map(cb: (v: unknown) => unknown): unknown }).map((v) => bigint(v));
-  }
+  const mapped = mapCollection(x, (v) => bigint(v));
+  if (mapped !== undefined) return mapped;
   if (coreIsFraction(x)) return roundRatio(x.numerator, x.denominator);
   if (coreIsBigNumber(x)) {
     // BigNumber.toString() is plain decimal text (no exponent), which Fraction.parse reads exactly.
