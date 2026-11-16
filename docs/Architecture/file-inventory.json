@@ -625,7 +625,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 163
+      "loc": 232
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -6694,7 +6694,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1186
+      "loc": 1217
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -12665,7 +12665,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 487
+      "loc": 530
     },
     {
       "file": "functions/tests/sparse-rhs-solve.test.ts",

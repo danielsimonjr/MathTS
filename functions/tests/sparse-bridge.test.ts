@@ -257,6 +257,53 @@ describe('MathJSSparseMatrix', () => {
   // ---- map / forEach ----
 
   describe('map', () => {
+    // Oracle (mathjs 15.2.0, SparseMatrix.map(callback, skipZeros)); s = math.sparse([[1,0],[0,2]]):
+    //   s.map(v => v + 1)                       => [[2,1],[1,3]]
+    //   s.map(v => v + 1, true)                 => [[2,0],[0,3]]
+    //   s.map((v, i) => i[0]*10 + i[1] + v)     => [[1,1],[10,13]]
+    //   math.sparse([[1],[0],[2]]).map(() => 7) => [[7],[7],[7]]
+    //   s.map(() => false)                      => no stored entries
+    it('visits every element when skipZeros is omitted (#985)', () => {
+      const s = new MathJSSparseMatrix([
+        [1, 0],
+        [0, 2],
+      ]);
+      expect(s.map((v) => (v as number) + 1).valueOf()).toEqual([
+        [2, 1],
+        [1, 3],
+      ]);
+      expect(s.map((v, i) => i[0] * 10 + i[1] + (v as number)).valueOf()).toEqual([
+        [1, 1],
+        [10, 13],
+      ]);
+      expect(new MathJSSparseMatrix([[1], [0], [2]]).map(() => 7).valueOf()).toEqual([
+        [7],
+        [7],
+        [7],
+      ]);
+    });
+
+    it('visits only the stored entries when skipZeros is true', () => {
+      const s = new MathJSSparseMatrix([
+        [1, 0],
+        [0, 2],
+      ]);
+      expect(s.map((v) => (v as number) + 1, true).valueOf()).toEqual([
+        [2, 0],
+        [0, 3],
+      ]);
+    });
+
+    it('does not store a result that equals zero', () => {
+      const s = new MathJSSparseMatrix([
+        [1, 0],
+        [0, 2],
+      ]);
+      expect(s.map(() => false)._values).toEqual([]);
+      expect(s.map(() => 0n)._values).toEqual([]);
+      expect(s.map(() => '0')._values).toEqual([]);
+    });
+
     it('maps non-zero values', () => {
       const s = new MathJSSparseMatrix([
         [1, 0],

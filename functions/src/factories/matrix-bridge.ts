@@ -549,6 +549,24 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
 // ---------------------------------------------------------------------------
 
 /**
+ * True when a map result is a zero that a sparse matrix does not store.
+ * Follows mathjs `equalScalar(value, 0)` for number, boolean, bigint, string, BigNumber, Complex
+ * and Fraction values, with an exact zero test (mathjs also drops values below absTol).
+ */
+function isZeroScalar(value: unknown): boolean {
+  if (typeof value === 'number') return value === 0;
+  if (typeof value === 'boolean') return value === false;
+  if (typeof value === 'bigint') return value === 0n;
+  if (typeof value === 'string') return Number(value) === 0;
+  if (value !== null && typeof value === 'object') {
+    const v = value as { isZero?: () => boolean; n?: unknown; d?: unknown };
+    if (typeof v.isZero === 'function') return v.isZero();
+    if ('n' in v && 'd' in v) return Number(v.n) === 0;
+  }
+  return false;
+}
+
+/**
  * mathjs-compatible sparse matrix using CSC format.
  *
  * Internal storage:
@@ -860,33 +878,46 @@ export class MathJSSparseMatrix {
   }
 
   /**
-   * Map over non-zero elements, producing a new sparse matrix.
+   * Create a new sparse matrix from the callback results, as mathjs `SparseMatrix.map` does.
+   * With `skipZeros` false (the default), the callback runs for every element, column by column.
+   * An unstored element goes to the callback as 0.
+   * With `skipZeros` true, the callback runs for the stored entries only.
+   * A result that equals zero is not stored.
    * Callback signature: (value, index, matrix) => newValue
    */
   map(
-    callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => unknown
+    callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => unknown,
+    skipZeros = false
   ): MathJSSparseMatrix {
     const [rows, cols] = this._size;
     const newValues: unknown[] = [];
     const newIndex: number[] = [];
     const newPtr: number[] = [0];
+    const store = (result: unknown, i: number): void => {
+      if (!isZeroScalar(result)) {
+        newValues.push(result);
+        newIndex.push(i);
+      }
+    };
 
     for (let j = 0; j < cols; j++) {
-      for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
-        const i = this._index[k];
-        const v = this._values ? this._values[k] : 1;
-        const result = callback(v, [i, j], this);
-        if (result !== 0) {
-          newValues.push(result);
-          newIndex.push(i);
+      if (skipZeros) {
+        for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
+          const i = this._index[k];
+          store(callback(this._values ? this._values[k] : 1, [i, j], this), i);
+        }
+      } else {
+        // Row indexes can be unordered, so index the stored entries, then visit every row.
+        const stored = new Map<number, unknown>();
+        for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
+          stored.set(this._index[k], this._values ? this._values[k] : 1);
+        }
+        for (let i = 0; i < rows; i++) {
+          store(callback(stored.has(i) ? stored.get(i) : 0, [i, j], this), i);
         }
       }
       newPtr.push(newValues.length);
     }
-
-    // Also call callback for zero entries if the caller expects full iteration
-    // (mathjs map iterates all entries for sparse matrices in some contexts)
-    // For now, only iterate non-zeros — this matches the common sparse usage.
 
     const m = new MathJSSparseMatrix({
       values: newValues,
