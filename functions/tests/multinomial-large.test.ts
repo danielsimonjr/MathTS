@@ -1,21 +1,16 @@
 /**
  * #1001: multinomial is exact for every result that fits a double, and returns
- * Infinity in bounded time for every result that does not.
+ * Infinity in a bounded number of steps for every result that does not.
  *
  * Expected values come from mathjs 15.2.0 where mathjs is finite, and from a BigInt
- * oracle where mathjs returns NaN. A synchronous hang cannot fail a vitest timeout,
- * so each timed case measures the elapsed time and asserts it is below 100 ms.
+ * oracle where mathjs returns NaN. The step counts of the exact kernel pin the work
+ * of each call. A wall-clock bound does not belong in a vitest file, and a
+ * synchronous hang cannot fail a vitest timeout.
  */
 import { describe, it, expect } from 'vitest';
 import { multinomial } from '../src/typed/probability.js';
-
-const BUDGET_MS = 100;
-
-const timed = (fn: () => unknown): { value: unknown; ms: number } => {
-  const t0 = performance.now();
-  const value = fn();
-  return { value, ms: performance.now() - t0 };
-};
+import { multinomialExact } from '../src/probability/multinomial-exact.js';
+import { parse, matrix, bignumber } from '../src/index.js';
 
 const bigFactorial = (n: number): bigint => {
   let r = 1n;
@@ -31,12 +26,19 @@ const bigMultinomial = (parts: number[]): bigint => {
   return bigFactorial(total) / denom;
 };
 
-describe('multinomial exact values (mathjs 15.2.0 is finite)', () => {
+const steps = (parts: number[]): number => {
+  const stats = { steps: 0 };
+  multinomialExact(parts, stats);
+  return stats.steps;
+};
+
+describe('multinomial equals mathjs 15.2.0 where mathjs is finite', () => {
   it('matches mathjs for small and moderate inputs', () => {
     expect(multinomial([2, 3, 4])).toBe(1260);
     expect(multinomial([1, 2, 1])).toBe(12);
     expect(multinomial([20, 20])).toBe(137846528820);
     expect(multinomial([2.0, 3])).toBe(10);
+    expect(multinomial([3, 5, 7, 11])).toBe(2784199017600);
     expect(
       multinomial([
         [1, 2],
@@ -48,69 +50,80 @@ describe('multinomial exact values (mathjs 15.2.0 is finite)', () => {
   it('is 1 for the empty array, as in mathjs', () => {
     expect(multinomial([])).toBe(1);
   });
-
-  it('is exact for [1,1e7] in bounded time', () => {
-    const a = timed(() => multinomial([1, 1e7]));
-    expect(a.value).toBe(10000001);
-    expect(a.ms).toBeLessThan(BUDGET_MS);
-  });
-
-  it('is exact for a large sum with a small result (1e9, hangs on main)', () => {
-    const b = timed(() => multinomial([1, 1e9]));
-    expect(b.value).toBe(1000000001);
-    expect(b.ms).toBeLessThan(BUDGET_MS);
-  });
-
-  it('is exact for [1e17, 2] in bounded time (hangs on main)', () => {
-    const n = 100000000000000002n;
-    const oracle = Number((n * (n - 1n)) / 2n);
-    const c = timed(() => multinomial([1e17, 2]));
-    expect(c.value).toBe(oracle);
-    expect(c.ms).toBeLessThan(BUDGET_MS);
-  });
 });
 
-describe('multinomial BigInt values (mathjs returns NaN above 170!)', () => {
+describe('multinomial is exact where mathjs returns NaN (deliberate difference)', () => {
+  it('a large sum with a small result is exact', () => {
+    expect(multinomial([1, 1e7])).toBe(10000001);
+    expect(multinomial([1, 1e9])).toBe(1000000001);
+    const n = 100000000000000002n;
+    expect(multinomial([1e17, 2])).toBe(Number((n * (n - 1n)) / 2n));
+  });
+
   it('[100,100] is the correctly rounded BigInt value', () => {
     expect(multinomial([100, 100])).toBe(Number(bigMultinomial([100, 100])));
+    expect(multinomial([100, 100])).toBe(9.054851465610328e58);
   });
 
-  it('[3,5,7,11] is the correctly rounded BigInt value', () => {
-    expect(multinomial([3, 5, 7, 11])).toBe(Number(bigMultinomial([3, 5, 7, 11])));
-  });
-});
-
-describe('multinomial of one entry of any size', () => {
-  it('[1e300] is 1 (the only arrangement), not Infinity (hangs on main)', () => {
-    const r = timed(() => multinomial([1e300]));
-    expect(r.value).toBe(1);
-    expect(r.ms).toBeLessThan(BUDGET_MS);
+  it('[1e300] is 1, the only arrangement', () => {
+    expect(multinomial([1e300])).toBe(1);
   });
 });
 
-describe('multinomial overflow returns Infinity in bounded time', () => {
-  it('[1e7,1e7] is Infinity in bounded time', () => {
-    const r = timed(() => multinomial([1e7, 1e7]));
-    expect(r.value).toBe(Infinity);
-    expect(r.ms).toBeLessThan(BUDGET_MS);
+describe('multinomial overflow returns Infinity', () => {
+  it('returns Infinity when the exact value rounds to Infinity', () => {
+    expect(multinomial([1e7, 1e7])).toBe(Infinity);
+    expect(multinomial([1e9, 1e9])).toBe(Infinity);
+    expect(multinomial([1e300, 1e300])).toBe(Infinity);
+    expect(multinomial([1e308, 1e308])).toBe(Infinity);
   });
 
-  it('[1e300,1e300] is Infinity in bounded time (hangs on main)', () => {
-    const r = timed(() => multinomial([1e300, 1e300]));
-    expect(r.value).toBe(Infinity);
-    expect(r.ms).toBeLessThan(BUDGET_MS);
+  it('the boundary is between [514,514] and [515,515]', () => {
+    expect(multinomial([514, 514])).toBe(7.156051054877897e307);
+    expect(multinomial([515, 515])).toBe(Infinity);
+  });
+});
+
+describe('the exact kernel stops after a bounded number of steps', () => {
+  it('pins the step count of each case', () => {
+    expect(steps([1e9, 1e9])).toBe(40);
+    expect(steps([1e7, 1e7])).toBe(55);
+    expect(steps([5000, 5000])).toBe(160);
+    expect(steps([512, 512])).toBe(512);
+    expect(steps([1e300, 1e300])).toBe(2);
+    expect(steps([1, 1e9])).toBe(1);
+    expect(steps([1e300])).toBe(0);
+    expect(steps(Array(200).fill(1))).toBe(170);
+  });
+});
+
+describe('parse() gives the same result as the typed function (#1001)', () => {
+  const both = (s: string): [unknown, unknown] => {
+    const node = parse(s) as { evaluate(): unknown; compile(): { evaluate(): unknown } };
+    return [node.evaluate(), node.compile().evaluate()];
+  };
+
+  it('plain-number entries use the exact kernel', () => {
+    expect(both('multinomial([1e9, 1e9])')).toStrictEqual([Infinity, Infinity]);
+    expect(both('multinomial([1e7, 1e7])')).toStrictEqual([Infinity, Infinity]);
+    expect(both('multinomial([100, 100])')).toStrictEqual([
+      9.054851465610328e58, 9.054851465610328e58,
+    ]);
+    expect(both('multinomial([1, 1e15])')).toStrictEqual([1000000000000001, 1000000000000001]);
+    expect(both('multinomial([2, 1, 1])')).toStrictEqual([12, 12]);
   });
 
-  it('[1e308,1e308] is Infinity when the sum overflows a double (hangs on main)', () => {
-    const r = timed(() => multinomial([1e308, 1e308]));
-    expect(r.value).toBe(Infinity);
-    expect(r.ms).toBeLessThan(BUDGET_MS);
+  it('a Matrix, BigNumber and boolean entries keep their results', () => {
+    const scope = { m: matrix([2, 3]), b: [bignumber(2), bignumber(3)] };
+    const p = (s: string): unknown =>
+      (parse(s) as { evaluate(scope: object): unknown }).evaluate(scope);
+    expect(p('multinomial(m)')).toBe(10);
+    expect(String(p('multinomial(b)'))).toBe('10');
+    expect(p('multinomial([true, true])')).toBe(2);
   });
 
-  it('[1e9,1e9] is Infinity in bounded time (hangs on main)', () => {
-    const r = timed(() => multinomial([1e9, 1e9]));
-    expect(r.value).toBe(Infinity);
-    expect(r.ms).toBeLessThan(BUDGET_MS);
+  it('rejects a zero entry', () => {
+    expect(() => both('multinomial([1e9, 0])')).toThrow(TypeError);
   });
 });
 
@@ -125,7 +138,7 @@ describe('multinomial rejects entries that are not positive integers, as mathjs 
     expect(() => multinomial([Infinity, 1])).toThrow(TypeError);
   });
 
-  it('throws even when an earlier entry would overflow (hangs on main)', () => {
+  it('throws even when an earlier entry would overflow', () => {
     expect(() => multinomial([1e9, 0])).toThrow(TypeError);
     expect(() => multinomial([1e9, 1.5])).toThrow(TypeError);
     expect(() => multinomial([1e308, 1e308, 0])).toThrow(TypeError);
