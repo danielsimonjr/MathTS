@@ -245,6 +245,9 @@ export const createFft = /* #__PURE__ */ factory(
      */
     function _fft(arr: ComplexArray, len?: number): ComplexArray {
       const length = len ?? arr.length;
+      // Base case for an empty input. Without it, the JS fallback below halves 0 to 0 and
+      // recurses on the same empty array forever (#988).
+      if (length === 0) return [];
       if (length === 1) return [arr[0]];
 
       // FAST PATH — 1-D, at least FAST_FFT_THRESHOLD values, plain numeric/Complex data.
