@@ -173,8 +173,8 @@ export function solveParabolicPDE(options: SolveParabolicPDEOptions): ParabolicP
   if (!(x1 > x0)) {
     throw new Error('solveParabolicPDE: require x1 > x0');
   }
-  if (!(T > 0)) {
-    throw new Error('solveParabolicPDE: require T > 0');
+  if (!(T > 0 && Number.isFinite(T))) {
+    throw new Error('solveParabolicPDE: require a finite T > 0');
   }
 
   if (typeof u0 !== 'function') {
