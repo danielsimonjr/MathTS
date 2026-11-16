@@ -26966,6 +26966,11 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "isDenseMatrix"]
           }
         ],
         "exports": ["f64Unary", "f64UnaryDispatched", "unaryCollection", "mapEachLeaf"],
@@ -28618,6 +28623,10 @@
           {
             "file": "../plain/number/probability.js",
             "imports": ["gammaNumber"]
+          },
+          {
+            "file": "../factories/matrix-bridge.js",
+            "imports": ["MathJSDenseMatrix"]
           }
         ],
         "workspaceDependencies": [
@@ -48983,7 +48992,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 231750,
+    "totalLinesOfCode": 231795,
     "totalExports": 7318,
     "totalClasses": 62,
     "totalInterfaces": 663,

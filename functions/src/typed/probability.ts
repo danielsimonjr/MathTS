@@ -34,6 +34,7 @@ import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
+import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
 
 // =============================================================================
 // Seeded-RNG helper (shared across random / randomInt / pickRandom)
@@ -329,6 +330,24 @@ export function seedProbabilityRng(seed: string | number | null): void {
  * random(100);    // uniform in [0, 100)
  * random(30, 40); // uniform in [30, 40)
  */
+type Draw = (...args: number[]) => unknown;
+
+/**
+ * A signature that takes a size (an Array or a Matrix of dimension lengths) and fills an array
+ * of that size with draws of the typed function itself. A Matrix size gives a matrix result.
+ */
+function sized(draw: (self: Draw, ...args: number[]) => unknown) {
+  return mathTyped.referToSelf((self) => (size: unknown[] | Matrix, ...args: number[]) => {
+    const dims = (Array.isArray(size) ? size : (size.toArray() as unknown[])) as number[];
+    const fill = (d: number): unknown =>
+      d === dims.length
+        ? draw(self as Draw, ...args)
+        : Array.from({ length: dims[d] }, () => fill(d + 1));
+    const out = fill(0);
+    return Array.isArray(size) ? out : new MathJSDenseMatrix(out as never);
+  });
+}
+
 export const random = mathTyped('random', {
   '': (): number => _rng(),
   number: (max: number): number => {
@@ -339,6 +358,10 @@ export const random = mathTyped('random', {
     if (max < min) throw new RangeError('max must be >= min');
     return min + _rng() * (max - min);
   },
+  // A size (an Array or a Matrix) gives an array of that size, as in mathjs.
+  'Array | Matrix': sized((self) => self()),
+  'Array | Matrix, number': sized((self, max) => self(max)),
+  'Array | Matrix, number, number': sized((self, min, max) => self(min, max)),
 });
 
 /**
@@ -370,6 +393,9 @@ export const randomInt = mathTyped('randomInt', {
     if (max <= min) throw new RangeError('max must be greater than min');
     return Math.floor(min + _rng() * (max - min));
   },
+  'Array | Matrix': sized((self) => self()),
+  'Array | Matrix, number': sized((self, max) => self(max)),
+  'Array | Matrix, number, number': sized((self, min, max) => self(min, max)),
 });
 
 /**
@@ -390,14 +416,22 @@ export const randomInt = mathTyped('randomInt', {
  * pickRandom(['a','b','c'], 1, [1, 3, 1]) // 'b' chosen 3× more often
  */
 export const pickRandom = mathTyped('pickRandom', {
-  Array: (arr: unknown[]): unknown => _pick(arr, 1, undefined)[0],
-  'Array, number': (arr: unknown[], n: number): unknown[] => _pick(arr, n, undefined),
-  'Array, Array': (arr: unknown[], weights: number[]): unknown => _pick(arr, 1, weights)[0],
-  'Array, number, Array': (arr: unknown[], n: number, weights: number[]): unknown[] =>
-    _pick(arr, n, weights),
-  'Array, Array, number': (arr: unknown[], weights: number[], n: number): unknown[] =>
-    _pick(arr, n, weights),
+  // mathjs picks from all entries: a nested array or a matrix is flattened first.
+  'Array | Matrix': (arr: unknown[] | Matrix): unknown => _pick(entries(arr), 1, undefined)[0],
+  'Array | Matrix, number': (arr: unknown[] | Matrix, n: number): unknown[] =>
+    _pick(entries(arr), n, undefined),
+  'Array | Matrix, Array': (arr: unknown[] | Matrix, weights: number[]): unknown =>
+    _pick(entries(arr), 1, weights)[0],
+  'Array | Matrix, number, Array': (arr: unknown[] | Matrix, n: number, weights: number[]) =>
+    _pick(entries(arr), n, weights),
+  'Array | Matrix, Array, number': (arr: unknown[] | Matrix, weights: number[], n: number) =>
+    _pick(entries(arr), n, weights),
 });
+
+/** All entries of an array or a matrix, in row order. */
+function entries(x: unknown[] | Matrix): unknown[] {
+  return (Array.isArray(x) ? x : (x.toArray() as unknown[])).flat(Infinity);
+}
 
 /**
  * Internal weighted/unweighted sampling with replacement.
