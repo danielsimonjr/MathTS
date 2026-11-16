@@ -7213,13 +7213,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports           | Type               |
-| ----------------------------- | ----------------- | ------------------ |
-| `../utils/array.js`           | `arraySize`       | Import             |
-| `../signal/fft-core-f64.js`   | `fftExactFloat64` | Import             |
-| `./complex-to-interleaved.js` | `complexToSplit`  | Import             |
-| `../utils/factory.js`         | `factory`         | Import             |
-| `../core/function/typed.js`   | `TypedFunction`   | Import (type-only) |
+| File                          | Imports                      | Type               |
+| ----------------------------- | ---------------------------- | ------------------ |
+| `../utils/array.js`           | `arraySize, validate, clone` | Import             |
+| `../signal/fft-core-f64.js`   | `fftExactFloat64`            | Import             |
+| `./complex-to-interleaved.js` | `complexToSplit`             | Import             |
+| `../utils/factory.js`         | `factory`                    | Import             |
+| `../core/function/typed.js`   | `TypedFunction`              | Import (type-only) |
 
 **Exports:**
 
@@ -21425,7 +21425,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1337   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231989 |
+| Total Lines of Code     | 232012 |
 | Total Exports           | 7319   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
