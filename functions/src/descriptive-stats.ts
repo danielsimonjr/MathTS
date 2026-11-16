@@ -265,7 +265,8 @@ export function cov(
     const mb = mean(b);
     let acc = 0;
     for (let i = 0; i < a.length; i++) acc += (a[i] - ma) * (b[i] - mb);
-    return acc / (a.length - ddof);
+    // NumPy np.cov scales by the reciprocal (c *= true_divide(1, fact)), so this does too.
+    return acc * (1 / (a.length - ddof));
   }
   // A 1-D array is one variable (NumPy np.cov): its covariance with itself is the
   // sample variance. Only the first element decides the form, so a flat array of
@@ -282,12 +283,13 @@ export function cov(
   const nVar = M[0].length;
   const cols = Array.from({ length: nVar }, (_, j) => M.map((r) => r[j]));
   const means = cols.map(mean);
+  const scale = 1 / (nObs - ddof);
   const out: number[][] = Array.from({ length: nVar }, () => new Array<number>(nVar).fill(0));
   for (let i = 0; i < nVar; i++) {
     for (let j = i; j < nVar; j++) {
       let acc = 0;
       for (let k = 0; k < nObs; k++) acc += (cols[i][k] - means[i]) * (cols[j][k] - means[j]);
-      const c = acc / (nObs - ddof);
+      const c = acc * scale;
       out[i][j] = c;
       out[j][i] = c;
     }
