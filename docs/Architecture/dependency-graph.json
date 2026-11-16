@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-16",
     "totalFiles": 1337,
     "totalModules": 82,
-    "totalExports": 7318
+    "totalExports": 7319
   },
   "entryPoints": [
     {
@@ -16916,7 +16916,6 @@
           "factory_log",
           "catalan",
           "zpk2tf",
-          "factory_cumsum",
           "factory_sum",
           "csCounts",
           "csSymperm",
@@ -16938,7 +16937,6 @@
           "factory_log1p",
           "factory_mod",
           "factory_nthRoot",
-          "factory_pow",
           "factory_ceil",
           "factory_floor",
           "expm",
@@ -16969,6 +16967,8 @@
           "splitUnit",
           "fft",
           "Chain",
+          "factory_cumsum",
+          "factory_pow",
           "factory_subtract",
           "factory_divide",
           "ifft",
@@ -17192,7 +17192,6 @@
           "factory_log",
           "catalan",
           "zpk2tf",
-          "factory_cumsum",
           "factory_sum",
           "csCounts",
           "csSymperm",
@@ -17214,7 +17213,6 @@
           "factory_log1p",
           "factory_mod",
           "factory_nthRoot",
-          "factory_pow",
           "factory_ceil",
           "factory_floor",
           "expm",
@@ -17245,6 +17243,8 @@
           "splitUnit",
           "fft",
           "Chain",
+          "factory_cumsum",
+          "factory_pow",
           "factory_subtract",
           "factory_divide",
           "ifft",
@@ -17435,11 +17435,11 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["SparseMatrix", "isDenseMatrix", "isSparseMatrix"]
+            "imports": ["DenseMatrix", "SparseMatrix", "isDenseMatrix", "isSparseMatrix"]
           }
         ],
-        "exports": ["csrToCsc", "cscToPublic", "adaptSparse", "acceptsMatrix"],
-        "functions": ["csrToCsc", "cscToPublic", "adaptSparse", "acceptsMatrix"]
+        "exports": ["csrToCsc", "cscToPublic", "denseToPublic", "adaptSparse", "acceptsMatrix"],
+        "functions": ["csrToCsc", "cscToPublic", "denseToPublic", "adaptSparse", "acceptsMatrix"]
       }
     },
     "functions/geometry": {
@@ -48992,11 +48992,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 231796,
-    "totalExports": 7318,
+    "totalLinesOfCode": 231832,
+    "totalExports": 7319,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2534,
+    "totalFunctions": 2535,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1676,
