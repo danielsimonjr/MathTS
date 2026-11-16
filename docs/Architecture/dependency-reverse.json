@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-15",
+  "generated": "2026-11-16",
   "dependents": {
     "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
