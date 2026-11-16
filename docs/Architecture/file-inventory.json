@@ -10327,7 +10327,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 113
+      "loc": 89
     },
     {
       "file": "functions/tests/distributions-extra.test.ts",
