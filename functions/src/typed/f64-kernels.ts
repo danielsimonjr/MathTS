@@ -7,6 +7,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { deepMap } from '../utils/collection.js';
 import {
   elementwiseUnaryDispatch,
   type WasmElementwiseOp,
@@ -153,4 +154,21 @@ export function unaryCollection(spec: UnaryRealSpec) {
     if (Array.isArray(value)) return unaryOnArray(value, self as Apply, spec);
     return unaryOnMatrix(value, self as Apply, spec);
   });
+}
+
+/** The typed function itself. It takes one leaf and the remaining arguments. */
+type ApplyMany = (...args: unknown[]) => unknown;
+
+/**
+ * One `Array | Matrix` signature (optionally followed by scalar arguments) that calls the typed
+ * function on each leaf. A nested array keeps its shape and a matrix keeps its class, as in
+ * mathjs. Use this signature when a leaf result is not a number (`not`). Use it also when a
+ * leaf must reach its own signature for its checks (`bitNot`).
+ */
+export function mapEachLeaf(leaf: (self: ApplyMany, x: unknown, ...rest: unknown[]) => unknown) {
+  return mathTyped.referToSelf(
+    (self) =>
+      (value: unknown, ...rest: unknown[]) =>
+        deepMap(value as unknown[], (x) => leaf(self as ApplyMany, x, ...rest))
+  );
 }

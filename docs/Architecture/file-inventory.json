@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2448,
+  "totalFiles": 2449,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1311,
     "test-only": 0,
     "orphan": 0,
-    "test": 1045,
+    "test": 1046,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1337,
-    "tests": 1045,
+    "tests": 1046,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1104,
+    "@danielsimonjr/mathts-functions": 1105,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -9060,14 +9060,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2919
+      "loc": 2917
     },
     {
       "file": "functions/src/typed/bitwise.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 419
+      "loc": 421
     },
     {
       "file": "functions/src/typed/cas.ts",
@@ -9151,7 +9151,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 157
+      "loc": 175
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -9291,14 +9291,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 234
+      "loc": 237
     },
     {
       "file": "functions/src/typed/matrix-ops.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1255
+      "loc": 1262
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -9340,7 +9340,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 458
+      "loc": 462
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 369
+      "loc": 372
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -11132,7 +11132,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 78
     },
     {
       "file": "functions/tests/gap-multiple-testing-consolidation.test.ts",
@@ -13113,7 +13113,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 471
+      "loc": 476
     },
     {
       "file": "functions/tests/typed-probability.test.ts",
@@ -13149,6 +13149,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 375
+    },
+    {
+      "file": "functions/tests/typed-shadow-mathjs-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
     },
     {
       "file": "functions/tests/typed-signal-wasm.test.ts",

@@ -33,6 +33,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
 import seedrandom from 'seedrandom';
+import { gammaNumber } from '../plain/number/probability.js';
 
 // =============================================================================
 // Seeded-RNG helper (shared across random / randomInt / pickRandom)
@@ -232,7 +233,11 @@ export const combinationsWithRep = mathTyped('combinationsWithRep', {
  * multinomial([3])        // 1
  */
 export const multinomial = mathTyped('multinomial', {
-  Array: (a: number[]): number => {
+  // A nested array or a matrix counts all of its entries, as in mathjs.
+  'Array | Matrix': (input: unknown[] | Matrix): number => {
+    const a = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(
+      Infinity
+    ) as number[];
     let sum = 0;
     let denomLog = 0;
     for (const ai of a) {
@@ -260,11 +265,10 @@ export const multinomial = mathTyped('multinomial', {
  * permutations(5, 3)  // 60   (= 5*4*3)
  */
 export const permutations = mathTyped('permutations', {
+  // n! of a non-integer n is gamma(n + 1), as in mathjs.
   number: (n: number): number => {
-    if (!Number.isInteger(n) || n < 0) {
-      throw new TypeError('Non-negative integer expected in function permutations');
-    }
-    return factorialExact(n);
+    if (n < 0) throw new RangeError('Value must be non-negative');
+    return Number.isInteger(n) ? factorialExact(n) : gammaNumber(n + 1);
   },
   'number, number': (n: number, k: number): number => {
     if (!Number.isInteger(n) || n < 0) {

@@ -113,8 +113,13 @@ describe('pinv (typed/)', () => {
     expect(Array.isArray(r)).toBe(true);
   });
 
-  it('throws for a genuinely unsupported input type (number)', () => {
-    expect(() => (pinv as (...args: unknown[]) => unknown)(5)).toThrow();
+  it('the pseudo-inverse of a scalar is its reciprocal, and of zero is zero (mathjs)', () => {
+    expect((pinv as (x: number) => number)(5)).toBeCloseTo(0.2, 15);
+    expect((pinv as (x: number) => number)(0)).toBe(0);
+  });
+
+  it('throws for a genuinely unsupported input type (a plain object)', () => {
+    expect(() => (pinv as (...args: unknown[]) => unknown)({})).toThrow();
   });
 });
 

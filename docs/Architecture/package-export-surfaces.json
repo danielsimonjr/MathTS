@@ -3259,6 +3259,7 @@
       "mannWhitneyTest",
       "map",
       "mapBinaryF64",
+      "mapEachLeaf",
       "mapObject",
       "mapSlices",
       "MASS_PROPERTY_SHAPES",

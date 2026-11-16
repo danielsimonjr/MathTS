@@ -11542,7 +11542,7 @@ graph LR
 | `./number-matrix.js`                   | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                                                                             | Import             |
 | `../factories/scope.js`                | `factoryScope`                                                                                                                                                                                                                                | Import             |
 | `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
-| `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, unaryCollection`                                                                                                                                                                                               | Import             |
+| `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection`                                                                                                                                                                                  | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
@@ -11573,6 +11573,7 @@ graph LR
 
 | File                             | Imports                                                             | Type   |
 | -------------------------------- | ------------------------------------------------------------------- | ------ |
+| `./f64-kernels.js`               | `mapEachLeaf`                                                       | Import |
 | `../wasm/bitwise/wasm-bridge.js` | `WASM_BITWISE_THRESHOLD, runBinaryBitwiseWasm, runUnaryBitwiseWasm` | Import |
 
 **Exports:**
@@ -11827,12 +11828,13 @@ graph LR
 
 | File                                 | Imports                                       | Type   |
 | ------------------------------------ | --------------------------------------------- | ------ |
+| `../utils/collection.js`             | `deepMap`                                     | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch, WasmElementwiseOp` | Import |
 
 **Exports:**
 
 - Interfaces: `UnaryRealSpec`
-- Functions: `f64Unary`, `f64UnaryDispatched`, `unaryCollection`
+- Functions: `f64Unary`, `f64UnaryDispatched`, `unaryCollection`, `mapEachLeaf`
 
 ---
 
@@ -12226,6 +12228,12 @@ graph LR
 | ---------------------------- | ------------------------------- |
 | `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber` |
 
+**Internal Dependencies:**
+
+| File               | Imports       | Type   |
+| ------------------ | ------------- | ------ |
+| `./f64-kernels.js` | `mapEachLeaf` | Import |
+
 **Exports:**
 
 - Constants: `not`, `and`, `or`, `xor`, `nullish`, `typedLogical`
@@ -12353,9 +12361,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports   | Type   |
-| ------------------------ | --------- | ------ |
-| `../utils/collection.js` | `deepMap` | Import |
+| File                             | Imports       | Type   |
+| -------------------------------- | ------------- | ------ |
+| `../utils/collection.js`         | `deepMap`     | Import |
+| `../plain/number/probability.js` | `gammaNumber` | Import |
 
 **Exports:**
 
@@ -20481,7 +20490,7 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/utils/collection`                       | 0 files      | 42 files   |
+| `functions/src/utils/collection`                       | 0 files      | 43 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21408,12 +21417,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1337   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231715 |
-| Total Exports           | 7317   |
+| Total Lines of Code     | 231750 |
+| Total Exports           | 7318   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2533   |
+| Total Functions         | 2534   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

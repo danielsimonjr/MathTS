@@ -317,8 +317,13 @@ export const hypot = mathTyped('hypot', {
   '...BigNumber': (xs: BigNumber[]) => (xs.length === 1 ? xs[0].abs() : bigHypot(xs)),
   'BigNumber, number': (a: BigNumber, b: number) => bigHypot([a, b]),
   'number, BigNumber': (a: number, b: BigNumber) => bigHypot([a, b]),
-  Array: (arr: unknown[]) =>
-    arr.every((x) => typeof x === 'number') ? Math.hypot(...(arr as number[])) : bigHypot(arr),
+  // An array or a matrix counts all of its entries, as in mathjs.
+  'Array | Matrix': (input: unknown[] | { toArray(): unknown }) => {
+    const arr = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(Infinity);
+    return arr.every((x) => typeof x === 'number')
+      ? Math.hypot(...(arr as number[]))
+      : bigHypot(arr);
+  },
 });
 
 /** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision. */
