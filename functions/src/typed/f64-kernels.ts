@@ -166,8 +166,9 @@ type ApplyMany = (...args: unknown[]) => unknown;
  * mathjs. Use this signature when a leaf result is not a number (`not`). Use it also when a
  * leaf must reach its own signature for its checks (`bitNot`).
  *
- * A DenseMatrix of the matrix package stores `Float64Array` data. Its result keeps the class
- * when every entry is a number, and is a nested array otherwise, as in `unaryOnMatrix`.
+ * A DenseMatrix of the matrix package stores `Float64Array` data. The result for such a matrix
+ * keeps the class when every entry is a number, and is a nested array otherwise, as in
+ * `unaryOnMatrix`.
  */
 export function mapEachLeaf(leaf: (self: ApplyMany, x: unknown, ...rest: unknown[]) => unknown) {
   return mathTyped.referToSelf((self) => (value: unknown, ...rest: unknown[]) => {
