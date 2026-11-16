@@ -21,6 +21,7 @@
  */
 
 import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
+import { formatBigNumber } from '@danielsimonjr/mathts-core/internal';
 import { format as formatValue } from '../utils/string.js';
 import { fillPrintTemplate } from '../utils/print.js';
 
@@ -61,17 +62,14 @@ function numberToBase(n: number, base: 2 | 8 | 16, wordSize?: number): string {
 }
 
 /**
- * Core binary formatting for a BigNumber.
- * Converts to a JS number via toNumber() and delegates to numberToBase.
- * This is safe for integers that fit within Number.MAX_SAFE_INTEGER.
- * For very large integers the BigNumber is verified to be integral first.
+ * Core binary formatting for a BigNumber. The result is exact for any value, because core's
+ * radix formatter works in BigNumber arithmetic. An integer above 2^53 keeps every digit. A
+ * non-integer formats as a radix fraction (`bin(bignumber(2.5))` is `0b10.1`). A word size
+ * needs an integer.
  */
 function bigNumberToBase(bn: BigNumber, base: 2 | 8 | 16, wordSize?: number): string {
-  if (!(bn as unknown as { isInteger: () => boolean }).isInteger()) {
-    throw new Error('Value must be an integer');
-  }
-  const n = bn.toNumber();
-  return numberToBase(n, base, wordSize);
+  const notation = base === 2 ? 'bin' : base === 8 ? 'oct' : 'hex';
+  return formatBigNumber(bn, wordSize === undefined ? { notation } : { notation, wordSize });
 }
 
 /**

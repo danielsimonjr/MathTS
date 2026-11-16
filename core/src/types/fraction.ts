@@ -5,6 +5,7 @@
 
 import type { Scalar, IFraction } from './interfaces.js';
 import { FRACTION_BRAND, defineTypeMarkers } from './type-marker.js';
+import { gcdBigInt } from './bigint-gcd.js';
 
 /** A BigNumber, seen through its type marker, so this module does not import the BigNumber module. */
 interface BigNumberLike {
@@ -33,19 +34,7 @@ export function isFraction(value: unknown): value is Fraction {
   );
 }
 
-/**
- * Calculate the Greatest Common Divisor using Euclidean algorithm
- */
-function gcd(a: bigint, b: bigint): bigint {
-  a = a < 0n ? -a : a;
-  b = b < 0n ? -b : b;
-  while (b !== 0n) {
-    const t = b;
-    b = a % b;
-    a = t;
-  }
-  return a;
-}
+const gcd = gcdBigInt;
 
 /** Reduce `num/den` to lowest terms with a positive denominator. */
 function reducePair(num: bigint, den: bigint): [bigint, bigint] {

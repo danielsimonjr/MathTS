@@ -66,8 +66,11 @@ describe('string — bin/hex/oct wordSize + integer validation', () => {
     expect(hex(-1, 8)).toBe('0xffi8');
     expect(oct(-1, 6)).toBe('0o77i6');
   });
-  it('BigNumber non-integer base conversion throws', () => {
-    expect(() => hex(BigNumber.fromNumber(2.5))).toThrow(/Value must be an integer/);
+  it('BigNumber non-integer base conversion is a radix fraction (mathjs parity)', () => {
+    expect(hex(BigNumber.fromNumber(2.5))).toBe('0x2.8');
+  });
+  it('BigNumber non-integer with a wordSize throws', () => {
+    expect(() => hex(BigNumber.fromNumber(2.5), 8)).toThrow(/Value must be an integer/);
   });
   it('BigNumber with wordSize', () => {
     expect(bin(BigNumber.fromNumber(-1), 4)).toBe('0b1111i4');

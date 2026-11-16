@@ -639,6 +639,7 @@
       "fromSiDimensions",
       "fromSiDimensionVector",
       "FunctionRegistry",
+      "gcdBigInt",
       "GeneralFormatOptions",
       "generalize",
       "get",

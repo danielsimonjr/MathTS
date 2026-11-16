@@ -5,6 +5,7 @@
 
 import type { Scalar, MathTSValue } from './interfaces.js';
 import { BIGNUMBER_BRAND, defineTypeMarkers } from './type-marker.js';
+import { gcdBigInt } from './bigint-gcd.js';
 
 /**
  * Check if a value is a BigNumber.
@@ -654,33 +655,53 @@ export class BigNumber implements MathTSValue {
 
   /**
    * Shared radix formatter for {@link toBinary}/{@link toOctal}/{@link toHexadecimal}.
-   * Integers and terminating fractions are exact; a non-terminating fraction is
-   * truncated at `maxFractionDigits` radix digits (a safety bound — the common
-   * use is integer formatting).
+   * The integer part is always exact. A fraction that terminates in the radix is exact.
+   * Any other fraction rounds half-up to the configured precision, counted in significant
+   * radix digits from the first nonzero digit. The rounding is one exact bigint step, so a
+   * carry crosses the point (0.999... -> 1).
    */
-  private toRadixString(radix: number, prefix: string, maxFractionDigits = 1100): string {
+  private toRadixString(radix: number, prefix: string): string {
     if (this._isNaN) return 'NaN';
     if (this._isInfinite) return (this._sign < 0 ? '-' : '') + 'Infinity';
     if (this._sign === 0) return prefix + '0';
 
-    const negative = this._sign < 0;
-    const absVal = this.abs();
-    const intPart = absVal.toBigInt(); // floor of |value|
-    let out = prefix + intPart.toString(radix);
+    const r = BigInt(radix);
+    // |value| = num / den, in lowest terms.
+    let num = this._coefficient;
+    let den = 1n;
+    if (this._exponent >= 0) num *= 10n ** BigInt(this._exponent);
+    else den = 10n ** BigInt(-this._exponent);
+    const g = gcdBigInt(num, den);
+    num /= g;
+    den /= g;
 
-    let frac = absVal.subtract(BigNumber.fromBigInt(intPart));
-    if (!frac.isZero()) {
-      const radixBN = BigNumber.fromNumber(radix);
-      let digits = '';
-      for (let i = 0; i < maxFractionDigits && !frac.isZero(); i++) {
-        frac = frac.multiply(radixBN);
-        const digit = frac.toBigInt(); // 0 .. radix-1
-        digits += Number(digit).toString(radix);
-        frac = frac.subtract(BigNumber.fromBigInt(digit));
+    const intPart = num / den;
+    let rem = num % den;
+    let digits: number; // radix digits kept after the point
+    if (rem === 0n) {
+      digits = 0;
+    } else if ((den & (den - 1n)) === 0n) {
+      // den is a power of two: the fraction terminates in radix 2, 8 and 16. Count the digits of the fraction.
+      digits = 0;
+      for (let f = rem; f !== 0n; f = (f * r) % den) digits++;
+    } else {
+      const intDigits = intPart === 0n ? 0 : intPart.toString(radix).length;
+      let leadingZeros = 0;
+      if (intPart === 0n) {
+        for (rem *= r; rem < den; rem *= r) leadingZeros++;
       }
-      out += '.' + digits;
+      digits = Math.max(1, leadingZeros + globalConfig.precision - intDigits);
     }
-    return (negative ? '-' : '') + out;
+
+    const scale = r ** BigInt(digits);
+    const scaled = (2n * num * scale + den) / (2n * den); // round half-up
+    let text = scaled.toString(radix).padStart(digits + 1, '0');
+    if (digits > 0) {
+      const head = text.slice(0, text.length - digits);
+      const tail = text.slice(text.length - digits).replace(/0+$/, '');
+      text = tail ? `${head}.${tail}` : head;
+    }
+    return (this._sign < 0 ? '-' : '') + prefix + text;
   }
 
   // ============================================================
