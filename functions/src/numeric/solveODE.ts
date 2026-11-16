@@ -512,6 +512,14 @@ function _linearlyImplicitDriver(
     }
     errNorm = Math.sqrt(errNorm / n);
 
+    // NaN data gives a NaN error that no step size can control. End the run at tf with the NaN
+    // state, so the loop ends and the NaN propagates (#991).
+    if (Number.isNaN(errNorm)) {
+      tOut.push(tf);
+      yOut.push(y.map(() => NaN));
+      break;
+    }
+
     if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
       t += h;
       y = yNew;
@@ -965,6 +973,13 @@ export function bdfSolve(
 
   while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
     attempts++;
+    // NaN data (y0 or f) gives a NaN step size, and the step-size check cannot see NaN. End the
+    // run at tf with the NaN state, so the loop ends and the NaN propagates (#991).
+    if (Number.isNaN(hAbs) || y.some((v) => Number.isNaN(v))) {
+      tOut.push(tf);
+      yOut.push(y.map(() => NaN));
+      break;
+    }
     const minStep = _minStep(t);
     if (hAbs > maxStep) {
       _bdfChangeD(D, order, maxStep / hAbs);
@@ -1285,6 +1300,13 @@ export function radauSolve(
 
   while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
     attempts++;
+    // NaN data (y0 or f) gives a NaN step size, and the step-size check cannot see NaN. End the
+    // run at tf with the NaN state, so the loop ends and the NaN propagates (#991).
+    if (Number.isNaN(hAbs) || y.some((v) => Number.isNaN(v))) {
+      tOut.push(tf);
+      yOut.push(y.map(() => NaN));
+      break;
+    }
     const minStep = _minStep(t);
     let hEntry: number;
     if (hAbs > maxStep) {
@@ -1549,16 +1571,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         y0: unknown[],
         options: ODEOptions
       ): SolveODESolution {
-        // adaptive runge kutta methods
-        const wrongTSpan = !(
-          tspan.length === 2 &&
-          (tspan.every(isNumOrBig) || tspan.every(isUnit))
-        );
-        if (wrongTSpan) {
-          throw new Error(
-            '"tspan" must be an Array of two numeric values or two units [tStart, tEnd]'
-          );
-        }
+        // adaptive runge kutta methods (tspan is checked once, by _solveODE)
         const t0 = tspan[0]; // initial time
         const tf = tspan[1]; // final time
         const isForwards = larger(tf, t0);
@@ -1685,6 +1698,13 @@ export const createSolveODE = /* #__PURE__ */ factory(
           // estimate the error by comparing solutions of different orders
           const errComb = stageCombo(deltaB, k);
           const errArr = Array.isArray(errComb) ? errComb : [errComb];
+          // NaN data (y0 or f) gives a NaN error, and no step size can then be chosen. End the run
+          // at tspan's end with the NaN state, so the loop ends and the NaN propagates (#991).
+          if (errArr.some((v) => typeof v === 'number' && Number.isNaN(v))) {
+            t.push(tf);
+            y.push((y[n] as unknown[]).map(() => NaN));
+            break;
+          }
           const TE = max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
 
           if (TE < tol && tol / TE > 1 / 4) {
@@ -1791,6 +1811,29 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return _rk(butcherTableau, 'RK45')(f, tspan, y0, options);
     }
 
+    /**
+     * The tspan check that every method passes through (#991). The RK path always checked the
+     * shape; the stiff engines read only `tspan[0]` and `tspan[1]`, so a length-3 tspan or a NaN
+     * entry reached them. A non-finite entry is a control argument and throws (the repo guard
+     * rule). Plain numbers and BigNumbers are checked; unit entries keep their own rules.
+     */
+    function _checkTspan(tspan: unknown[]): void {
+      const wrongShape = !(tspan.length === 2 && (tspan.every(isNumOrBig) || tspan.every(isUnit)));
+      if (wrongShape) {
+        throw new Error(
+          '"tspan" must be an Array of two numeric values or two units [tStart, tEnd]'
+        );
+      }
+      const nonFinite = tspan.some((v) =>
+        isNumber(v)
+          ? !Number.isFinite(v)
+          : isBigNumber(v) && !(v as unknown as BigNumber).isFinite()
+      );
+      if (nonFinite) {
+        throw new Error('"tspan" must contain finite numbers (NaN and Infinity are not allowed)');
+      }
+    }
+
     function _solveODE(
       f: ForcingFunction,
       tspan: unknown[],
@@ -1815,6 +1858,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         RADAU: radauSolve,
       };
       if (method.toUpperCase() in methods) {
+        _checkTspan(tspan);
         const methodOptions = { ...opt }; // clone the options object
         delete methodOptions.method; // delete the method as it won't be needed
         const sol = methods[method.toUpperCase() as keyof typeof methods](

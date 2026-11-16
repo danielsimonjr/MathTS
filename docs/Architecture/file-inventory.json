@@ -7667,7 +7667,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1938
+      "loc": 1982
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -12645,6 +12645,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "functions/tests/solve-ode-tspan-all-methods.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 149
     },
     {
       "file": "functions/tests/solveode-events.test.ts",
