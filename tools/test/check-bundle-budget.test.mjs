@@ -205,8 +205,8 @@ test('a missing budget file fails instead of passing', () => {
 });
 
 // A package inlined from two install folders at the same version is a stale, un-deduplicated copy
-// (a nested node_modules that the lock no longer names). It made every inlined bundle about 45 KB
-// larger on one machine than in CI, so the budget could not be checked or refreshed there.
+// (a nested node_modules that the lock no longer names). Such a copy made every inlined bundle about
+// 45 KB larger on one machine than in CI, so that machine could not check or refresh the budget.
 test('duplicateInstalls names a package inlined from two folders at one version', () => {
   const root = mkdtempSync(join(tmpdir(), 'bundle-dup-'));
   try {

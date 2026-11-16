@@ -185,8 +185,8 @@ globalThis.__keep = [${names.join(', ')}];
 /**
  * Packages that a bundle inlines from two or more install folders at the same version. Such a copy
  * is stale: a nested `node_modules` that the lock no longer names, which `bun install` does not
- * remove. Each copy is inlined, so the bundle grows by one copy and no longer matches CI. Two
- * different versions of one name can be correct, so only equal versions are reported.
+ * remove. The bundle inlines each copy, so the bundle grows by one copy and no longer matches CI.
+ * Two different versions of one name can be correct, so the report names only equal versions.
  * @param {string} root
  * @param {string[]} inputs metafile input paths, relative to `root`
  * @returns {{ name: string, version: string, dirs: string[] }[]}
