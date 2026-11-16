@@ -115,7 +115,7 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
 - **core/typed**: 3 files
-- **core/types**: 21 files
+- **core/types**: 22 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
 - **matrix/operations**: 23 files
@@ -200,7 +200,7 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 12             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 54             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 55             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
@@ -1001,6 +1001,14 @@ graph LR
 
 ## Core/types Dependencies
 
+### `core/src/types/bigint-gcd.ts` - The greatest common divisor of two bigints, always non-negative.
+
+**Exports:**
+
+- Functions: `gcdBigInt`
+
+---
+
 ### `core/src/types/bignumber.ts` - BigNumber (arbitrary precision decimal) implementation
 
 **Internal Dependencies:**
@@ -1009,6 +1017,7 @@ graph LR
 | ------------------ | ------------------------------------ | ------------------ |
 | `./interfaces.js`  | `Scalar, MathTSValue`                | Import (type-only) |
 | `./type-marker.js` | `BIGNUMBER_BRAND, defineTypeMarkers` | Import             |
+| `./bigint-gcd.js`  | `gcdBigInt`                          | Import             |
 
 **Exports:**
 
@@ -1072,6 +1081,7 @@ graph LR
 | ------------------ | ----------------------------------- | ------------------ |
 | `./interfaces.js`  | `Scalar, IFraction`                 | Import (type-only) |
 | `./type-marker.js` | `FRACTION_BRAND, defineTypeMarkers` | Import             |
+| `./bigint-gcd.js`  | `gcdBigInt`                         | Import             |
 
 **Exports:**
 
@@ -1190,6 +1200,12 @@ graph LR
 ---
 
 ### `core/src/types/unit/exact-scale.ts` - Exact unit scales.
+
+**Internal Dependencies:**
+
+| File               | Imports     | Type   |
+| ------------------ | ----------- | ------ |
+| `../bigint-gcd.js` | `gcdBigInt` | Import |
 
 **Exports:**
 
@@ -12495,6 +12511,7 @@ graph LR
 | Package                      | Import                              |
 | ---------------------------- | ----------------------------------- |
 | `@danielsimonjr/mathts-core` | `mathTyped, BigNumber, isBigNumber` |
+| `@danielsimonjr/mathts-core` | `formatBigNumber`                   |
 
 **Internal Dependencies:**
 
@@ -20586,17 +20603,17 @@ graph TD
     end
 
     subgraph Core/types
-        N35[bignumber]
-        N36[complex]
-        N37[dual-rules]
-        N38[dual]
-        N39[fraction]
-        N40[interfaces]
-        N41[Range]
-        N42[si-dimension-vector]
-        N43[type-marker]
-        N44[Unit]
-        N45[...11 more]
+        N35[bigint-gcd]
+        N36[bignumber]
+        N37[complex]
+        N38[dual-rules]
+        N39[dual]
+        N40[fraction]
+        N41[interfaces]
+        N42[Range]
+        N43[si-dimension-vector]
+        N44[type-marker]
+        N45[...12 more]
     end
 
     subgraph Matrix/backends
@@ -21316,9 +21333,9 @@ graph TD
     N8 --> N6
     N8 --> N10
     N12 --> N16
-    N12 --> N35
     N12 --> N36
-    N12 --> N39
+    N12 --> N37
+    N12 --> N40
     N13 --> N24
     N13 --> N25
     N15 --> N25
@@ -21326,13 +21343,13 @@ graph TD
     N27 --> N33
     N28 --> N27
     N20 --> N26
-    N21 --> N36
-    N21 --> N41
-    N21 --> N38
     N21 --> N37
-    N21 --> N17
+    N21 --> N42
     N21 --> N39
-    N21 --> N35
+    N21 --> N38
+    N21 --> N17
+    N21 --> N40
+    N21 --> N36
     N21 --> N12
     N21 --> N32
     N21 --> N28
@@ -21340,7 +21357,7 @@ graph TD
     N21 --> N29
     N21 --> N31
     N21 --> N19
-    N21 --> N40
+    N21 --> N41
     N22 --> N20
     N22 --> N16
     N22 --> N26
@@ -21351,25 +21368,25 @@ graph TD
     N22 --> N15
     N32 --> N33
     N32 --> N34
-    N33 --> N36
-    N33 --> N38
+    N33 --> N37
     N33 --> N39
-    N33 --> N35
+    N33 --> N40
+    N33 --> N36
+    N34 --> N37
+    N34 --> N40
     N34 --> N36
-    N34 --> N39
-    N34 --> N35
-    N35 --> N40
-    N35 --> N43
-    N36 --> N40
-    N36 --> N43
-    N38 --> N37
-    N38 --> N43
-    N39 --> N40
-    N39 --> N43
-    N41 --> N20
-    N42 --> N39
-    N44 --> N20
-    N44 --> N35
+    N36 --> N41
+    N36 --> N44
+    N36 --> N35
+    N37 --> N41
+    N37 --> N44
+    N39 --> N38
+    N39 --> N44
+    N40 --> N41
+    N40 --> N44
+    N40 --> N35
+    N42 --> N20
+    N43 --> N40
     N46 --> N72
     N47 --> N72
     N47 --> N46
@@ -21389,14 +21406,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1336   |
+| Total TypeScript Files  | 1337   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231619 |
-| Total Exports           | 7316   |
+| Total Lines of Code     | 231636 |
+| Total Exports           | 7317   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 663    |
-| Total Functions         | 2521   |
+| Total Functions         | 2522   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

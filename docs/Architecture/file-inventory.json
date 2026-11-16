@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-16",
-  "totalFiles": 2445,
+  "totalFiles": 2447,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1310,
+    "build-entry": 1311,
     "test-only": 0,
     "orphan": 0,
-    "test": 1043,
+    "test": 1044,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1336,
-    "tests": 1043,
+    "src": 1337,
+    "tests": 1044,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 30,
     "@danielsimonjr/mathts-compat": 30,
-    "@danielsimonjr/mathts-core": 136,
+    "@danielsimonjr/mathts-core": 137,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 573,
-    "@danielsimonjr/mathts-functions": 1102,
+    "@danielsimonjr/mathts-functions": 1103,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -929,11 +929,18 @@
       "loc": 58
     },
     {
+      "file": "core/src/types/bigint-gcd.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 21
+    },
+    {
       "file": "core/src/types/bignumber.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2093
+      "loc": 2114
     },
     {
       "file": "core/src/types/complex.ts",
@@ -961,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 834
+      "loc": 823
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -1031,7 +1038,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 534
+      "loc": 522
     },
     {
       "file": "core/src/types/unit/index.ts",
@@ -1395,7 +1402,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 90
     },
     {
       "file": "core/tests/types/bignumber.test.ts",
@@ -9389,7 +9396,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 287
+      "loc": 285
     },
     {
       "file": "functions/src/typed/trig-angle-unit.ts",
@@ -9924,6 +9931,13 @@
       "loc": 81
     },
     {
+      "file": "functions/tests/bin-hex-oct-bignumber.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
+    },
+    {
       "file": "functions/tests/binomial-test-equal-split.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10215,7 +10229,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 95
+      "loc": 98
     },
     {
       "file": "functions/tests/cov-trigonometry.test.ts",
