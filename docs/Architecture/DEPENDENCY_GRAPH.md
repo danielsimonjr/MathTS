@@ -11820,9 +11820,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import      |
-| ---------------------------- | ----------- |
-| `@danielsimonjr/mathts-core` | `mathTyped` |
+| Package                        | Import                       |
+| ------------------------------ | ---------------------------- |
+| `@danielsimonjr/mathts-core`   | `mathTyped`                  |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, isDenseMatrix` |
 
 **Internal Dependencies:**
 
@@ -12361,10 +12362,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports       | Type   |
-| -------------------------------- | ------------- | ------ |
-| `../utils/collection.js`         | `deepMap`     | Import |
-| `../plain/number/probability.js` | `gammaNumber` | Import |
+| File                             | Imports             | Type   |
+| -------------------------------- | ------------------- | ------ |
+| `../utils/collection.js`         | `deepMap`           | Import |
+| `../plain/number/probability.js` | `gammaNumber`       | Import |
+| `../factories/matrix-bridge.js`  | `MathJSDenseMatrix` | Import |
 
 **Exports:**
 
@@ -21417,7 +21419,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1337   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 231750 |
+| Total Lines of Code     | 231795 |
 | Total Exports           | 7318   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |

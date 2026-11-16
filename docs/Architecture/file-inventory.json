@@ -9151,7 +9151,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 175
+      "loc": 182
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -9298,7 +9298,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1262
+      "loc": 1264
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -9340,7 +9340,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 462
+      "loc": 496
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 372
+      "loc": 374
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -13155,7 +13155,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 89
+      "loc": 137
     },
     {
       "file": "functions/tests/typed-signal-wasm.test.ts",

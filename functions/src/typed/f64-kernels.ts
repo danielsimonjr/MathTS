@@ -7,6 +7,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { DenseMatrix, isDenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { deepMap } from '../utils/collection.js';
 import {
   elementwiseUnaryDispatch,
@@ -164,11 +165,17 @@ type ApplyMany = (...args: unknown[]) => unknown;
  * function on each leaf. A nested array keeps its shape and a matrix keeps its class, as in
  * mathjs. Use this signature when a leaf result is not a number (`not`). Use it also when a
  * leaf must reach its own signature for its checks (`bitNot`).
+ *
+ * A DenseMatrix of the matrix package stores `Float64Array` data. Its result keeps the class
+ * when every entry is a number, and is a nested array otherwise, as in `unaryOnMatrix`.
  */
 export function mapEachLeaf(leaf: (self: ApplyMany, x: unknown, ...rest: unknown[]) => unknown) {
-  return mathTyped.referToSelf(
-    (self) =>
-      (value: unknown, ...rest: unknown[]) =>
-        deepMap(value as unknown[], (x) => leaf(self as ApplyMany, x, ...rest))
-  );
+  return mathTyped.referToSelf((self) => (value: unknown, ...rest: unknown[]) => {
+    const one = (x: unknown): unknown => leaf(self as ApplyMany, x, ...rest);
+    if (!isDenseMatrix(value)) return deepMap(value as unknown[], one);
+    const nested = (value.toArray() as unknown[][]).map((row) => row.map(one));
+    return nested.every((row) => row.every((x) => typeof x === 'number'))
+      ? DenseMatrix.fromArray(nested as number[][])
+      : nested;
+  });
 }

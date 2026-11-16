@@ -1214,7 +1214,8 @@
       "functions/src/factories/scope.ts",
       "functions/src/factories/sparse-adapter.ts",
       "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/probability.ts"
     ],
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
