@@ -6,6 +6,14 @@
 import type { Scalar, IFraction } from './interfaces.js';
 import { FRACTION_BRAND, defineTypeMarkers } from './type-marker.js';
 
+/** A BigNumber, seen through its type marker, so this module does not import the BigNumber module. */
+interface BigNumberLike {
+  readonly isBigNumber: true;
+  toString(): string;
+}
+const isBigNumberLike = (x: unknown): x is BigNumberLike =>
+  typeof x === 'object' && x !== null && (x as { isBigNumber?: unknown }).isBigNumber === true;
+
 /** Longest repeating period `Fraction#toString` prints before it falls back to `n/d`. */
 const FRACTION_MAX_PERIOD_DIGITS = 1000;
 
@@ -71,8 +79,8 @@ export class Fraction implements IFraction {
   readonly denominator: bigint;
 
   constructor(
-    numerator: bigint | number | string | Fraction,
-    denominator: bigint | number | string | Fraction = 1n
+    numerator: bigint | number | string | Fraction | BigNumberLike,
+    denominator: bigint | number | string | Fraction | BigNumberLike = 1n
   ) {
     // Trusted path (Fraction.fromReduced): lowest terms, positive denominator, nothing to do.
     if (reducedPending) {
@@ -119,9 +127,17 @@ export class Fraction implements IFraction {
     // A Fraction argument is accepted directly (mathjs parity: `new Fraction(frac)`
     // clones it) — without this, `BigInt(frac)` collapses it to a lossy float and
     // throws for non-integer values.
-    const toRatio = (x: bigint | number | string | Fraction): [bigint, bigint] => {
+    // The constructor parses a string exactly ("0.5", "1/3", "0.(3)", "1e-3"). The constructor
+    // reads a BigNumber (marked `isBigNumber === true`, so no import of the BigNumber module) from
+    // its plain decimal text. The string and the BigNumber used to reach `BigInt(x)`, which throws
+    // for any non-integer.
+    const toRatio = (x: bigint | number | string | Fraction | BigNumberLike): [bigint, bigint] => {
       if (isFraction(x)) {
         return [x.numerator, x.denominator];
+      }
+      if (typeof x === 'string' || isBigNumberLike(x)) {
+        const f = Fraction.parse(String(x));
+        return [f.numerator, f.denominator];
       }
       if (typeof x === 'number' && !Number.isInteger(x)) {
         const f = Fraction.fromNumber(x);
@@ -263,6 +279,17 @@ export class Fraction implements IFraction {
     if (str.includes('/')) {
       const [numStr, denStr] = str.split('/');
       return new Fraction(BigInt(numStr.trim()), BigInt(denStr.trim()));
+    }
+
+    // Exponent format: "1e-3", "2.5E2". The mantissa is exact; the power of ten scales the mantissa.
+    const exp = str.match(/^([+-]?(?:\d+\.?\d*|\.\d+))[eE]([+-]?\d+)$/);
+    if (exp) {
+      const mantissa = Fraction.parse(exp[1]);
+      const e = Number(exp[2]);
+      const scale = 10n ** BigInt(Math.abs(e));
+      return e >= 0
+        ? new Fraction(mantissa.numerator * scale, mantissa.denominator)
+        : new Fraction(mantissa.numerator, mantissa.denominator * scale);
     }
 
     // Decimal format
