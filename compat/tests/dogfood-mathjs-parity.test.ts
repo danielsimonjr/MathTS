@@ -124,3 +124,39 @@ describe('dogfood mathjs parity (#889, #891, #892)', () => {
     }
   });
 });
+
+describe('compat prod of a sparse matrix (#985)', () => {
+  // Oracle (mathjs 15.2.0; run from the package root, node_modules/mathjs installed):
+  //   node -e "const {createRequire}=require('module');
+  //     const m=createRequire(process.cwd()+'/node_modules/mathjs/package.json')('mathjs');
+  //     console.log(m.prod(m.sparse([1,0,2])), m.prod(m.sparse([[1,0],[0,2]])),
+  //       m.prod(m.sparse([[2,1],[3,4]])), m.sum(m.sparse([1,0,2])))"
+  // Output: 0 0 24 3
+  it('a 1-D sparse matrix with an implicit zero has product 0', () => {
+    const math = create(all);
+    expect(math.prod(math.sparse([1, 0, 2] as never) as never)).toBe(0);
+  });
+
+  it('a 2-D sparse matrix with an implicit zero has product 0', () => {
+    const math = create(all);
+    const s = math.sparse([
+      [1, 0],
+      [0, 2],
+    ] as never);
+    expect(math.prod(s as never)).toBe(0);
+  });
+
+  it('a sparse matrix with no zero keeps the full product', () => {
+    const math = create(all);
+    const s = math.sparse([
+      [2, 1],
+      [3, 4],
+    ] as never);
+    expect(math.prod(s as never)).toBe(24);
+  });
+
+  it('sum of the same sparse matrix is unchanged', () => {
+    const math = create(all);
+    expect(math.sum(math.sparse([1, 0, 2] as never) as never)).toBe(3);
+  });
+});

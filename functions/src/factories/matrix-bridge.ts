@@ -899,16 +899,32 @@ export class MathJSSparseMatrix {
   }
 
   /**
-   * Iterate over non-zero elements.
+   * Iterate column by column, as mathjs `SparseMatrix.forEach` does.
+   * With `skipZeros` false (the default) every element is visited, and an unstored element
+   * is passed as 0. With `skipZeros` true only the stored entries are visited.
    * Callback signature: (value, index, matrix) => void
    */
-  forEach(callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => void): void {
-    const cols = this._size[1];
+  forEach(
+    callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => void,
+    skipZeros = false
+  ): void {
+    const [rows, cols] = this._size;
     for (let j = 0; j < cols; j++) {
+      if (skipZeros) {
+        for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
+          const i = this._index[k];
+          const v = this._values ? this._values[k] : 1;
+          callback(v, [i, j], this);
+        }
+        continue;
+      }
+      // Index the stored entries of this column. Row indexes may be unordered, so visit every row.
+      const stored = new Map<number, unknown>();
       for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
-        const i = this._index[k];
-        const v = this._values ? this._values[k] : 1;
-        callback(v, [i, j], this);
+        stored.set(this._index[k], this._values ? this._values[k] : 1);
+      }
+      for (let i = 0; i < rows; i++) {
+        callback(stored.has(i) ? stored.get(i) : 0, [i, j], this);
       }
     }
   }
