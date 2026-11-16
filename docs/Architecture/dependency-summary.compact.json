@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-16", "f": 1336, "e": 7316, "re": 3168 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-16", "f": 1337, "e": 7317, "re": 3168 },
   "s": {
-    "loc": 231619,
+    "loc": 231636,
     "cls": 62,
     "int": 663,
-    "fn": 2521,
+    "fn": 2522,
     "tg": 180,
     "en": 0,
     "co": 1679,
@@ -200,8 +200,9 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 21,
+      "f": 22,
       "exp": [
+        "gcdBigInt",
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",
         "BIGNUMBER_NEG_ONE",
@@ -220,8 +221,7 @@
         "isComplex",
         "Complex",
         "DUAL_UNARY_RULES",
-        "isDual",
-        "Dual"
+        "isDual"
       ],
       "cls": [
         "BigNumber",

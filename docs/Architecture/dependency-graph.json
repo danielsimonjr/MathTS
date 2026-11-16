@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-16",
-    "totalFiles": 1336,
+    "totalFiles": 1337,
     "totalModules": 82,
-    "totalExports": 7316
+    "totalExports": 7317
   },
   "entryPoints": [
     {
@@ -2880,6 +2880,15 @@
       }
     },
     "core/types": {
+      "core/src/types/bigint-gcd.ts": {
+        "description": "The greatest common divisor of two bigints, always non-negative.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gcdBigInt"],
+        "functions": ["gcdBigInt"]
+      },
       "core/src/types/bignumber.ts": {
         "description": "BigNumber (arbitrary precision decimal) implementation",
         "externalDependencies": [],
@@ -2893,6 +2902,10 @@
           {
             "file": "./type-marker.js",
             "imports": ["BIGNUMBER_BRAND", "defineTypeMarkers"]
+          },
+          {
+            "file": "./bigint-gcd.js",
+            "imports": ["gcdBigInt"]
           }
         ],
         "workspaceDependencies": [],
@@ -2987,6 +3000,10 @@
           {
             "file": "./type-marker.js",
             "imports": ["FRACTION_BRAND", "defineTypeMarkers"]
+          },
+          {
+            "file": "./bigint-gcd.js",
+            "imports": ["gcdBigInt"]
           }
         ],
         "workspaceDependencies": [],
@@ -3288,7 +3305,12 @@
         "description": "Exact unit scales.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../bigint-gcd.js",
+            "imports": ["gcdBigInt"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "NAMED_IRRATIONALS",
@@ -29156,6 +29178,12 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped", "BigNumber", "isBigNumber"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["formatBigNumber"],
+            "subpath": "internal"
           }
         ],
         "exports": ["bin", "hex", "oct", "format", "print", "typedString"],
@@ -47304,6 +47332,7 @@
       {
         "name": "Core/types",
         "files": [
+          "core/src/types/bigint-gcd.ts",
           "core/src/types/bignumber.ts",
           "core/src/types/complex.ts",
           "core/src/types/dual-rules.ts",
@@ -48922,13 +48951,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1336,
+    "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 231619,
-    "totalExports": 7316,
+    "totalLinesOfCode": 231636,
+    "totalExports": 7317,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2521,
+    "totalFunctions": 2522,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1679,

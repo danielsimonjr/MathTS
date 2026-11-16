@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-16'
-  totalFiles: 1336
+  totalFiles: 1337
   totalModules: 82
-  totalExports: 7316
+  totalExports: 7317
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -2764,6 +2764,16 @@ modules:
       functions:
         - registerNativeTypes
   core/types:
+    core/src/types/bigint-gcd.ts:
+      description: The greatest common divisor of two bigints, always non-negative.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - gcdBigInt
+      functions:
+        - gcdBigInt
     core/src/types/bignumber.ts:
       description: BigNumber (arbitrary precision decimal) implementation
       externalDependencies: []
@@ -2778,6 +2788,9 @@ modules:
           imports:
             - BIGNUMBER_BRAND
             - defineTypeMarkers
+        - file: ./bigint-gcd.js
+          imports:
+            - gcdBigInt
       workspaceDependencies: []
       exports:
         - BIGNUMBER_ZERO
@@ -2887,6 +2900,9 @@ modules:
           imports:
             - FRACTION_BRAND
             - defineTypeMarkers
+        - file: ./bigint-gcd.js
+          imports:
+            - gcdBigInt
       workspaceDependencies: []
       exports:
         - FRACTION_ZERO
@@ -3180,7 +3196,10 @@ modules:
       description: Exact unit scales.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../bigint-gcd.js
+          imports:
+            - gcdBigInt
       workspaceDependencies: []
       exports:
         - NAMED_IRRATIONALS
@@ -27356,6 +27375,11 @@ modules:
             - mathTyped
             - BigNumber
             - isBigNumber
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - formatBigNumber
+          subpath: internal
       exports:
         - bin
         - hex
@@ -44738,6 +44762,7 @@ dependencyGraph:
         - core/src/typed/type-bridge.ts
     - name: Core/types
       files:
+        - core/src/types/bigint-gcd.ts
         - core/src/types/bignumber.ts
         - core/src/types/complex.ts
         - core/src/types/dual-rules.ts
@@ -46175,13 +46200,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1336
+  totalTypeScriptFiles: 1337
   totalModules: 82
-  totalLinesOfCode: 231619
-  totalExports: 7316
+  totalLinesOfCode: 231636
+  totalExports: 7317
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2521
+  totalFunctions: 2522
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1679
