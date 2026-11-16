@@ -1870,6 +1870,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/signal/fftshift-parity.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/simplify-exact-fractions.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/simplify-foreign-nodes.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/solve-ode-tspan-all-methods.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solveode-events.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solveode-jspath.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solveode-stiff-driver-extended-pin.test.ts`                      | @danielsimonjr/mathts-functions      | tests    | test        |
