@@ -1511,6 +1511,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/clones-shapes-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics-extended.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/compat-hang-1002.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/constrained.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/control-equations.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/conversions-mathjs-parity.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |

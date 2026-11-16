@@ -940,7 +940,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2114
+      "loc": 2116
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1381,7 +1381,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 450
+      "loc": 448
     },
     {
       "file": "core/tests/types/bignumber-math.test.ts",
@@ -9074,7 +9074,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2917
+      "loc": 2927
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9354,7 +9354,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 491
+      "loc": 494
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -10132,6 +10132,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 176
+    },
+    {
+      "file": "functions/tests/compat-hang-1002.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 86
     },
     {
       "file": "functions/tests/constrained.test.ts",

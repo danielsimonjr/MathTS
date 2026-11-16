@@ -276,9 +276,12 @@ export const permutations = mathTyped('permutations', {
     if (k > n) {
       throw new TypeError('k must be less than or equal to n in function permutations');
     }
-    // product (n-k+1) * (n-k+2) * … * n
+    // product (n-k+1) * (n-k+2) * … * n. A count of k factors, not a bound on i: above 2^53,
+    // i + 1 === i, so a loop on `i <= n` never ends. Every factor is at least 1, so the
+    // product cannot fall again once it is Infinity.
     let r = 1;
-    for (let i = n - k + 1; i <= n; i++) r *= i;
+    const first = n - k + 1;
+    for (let j = 0; j < k && r !== Infinity; j++) r *= first + j;
     return r;
   },
 });
