@@ -2021,7 +2021,9 @@ export class BigNumber implements MathTSValue {
   }
 
   isInteger(): boolean {
-    if (this._isNaN || this._isInfinite || this._sign === 0) return this._sign === 0;
+    // NaN has sign 0 too, so test it first. NaN and Infinity are not integers, as in decimal.js.
+    if (this._isNaN || this._isInfinite) return false;
+    if (this._sign === 0) return true;
     return this._exponent >= 0;
   }
 

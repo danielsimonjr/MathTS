@@ -434,13 +434,11 @@ describe('BigNumber (coverage supplement)', () => {
   });
 
   describe('isInteger on special values', () => {
-    it('returns false for signed Infinity, true for zero-signed values (NaN/zero)', () => {
-      // Implementation short-circuits on NaN/Infinity/zero by returning
-      // `_sign === 0`. NaN and zero both carry sign 0; Infinity carries a
-      // nonzero sign and is therefore reported non-integer.
+    it('returns false for NaN and signed Infinity, true for zero', () => {
+      // NaN and Infinity are not integers, as in decimal.js (#1002). Zero is.
       expect(POS_INF.isInteger()).toBe(false);
       expect(NEG_INF.isInteger()).toBe(false);
-      expect(NAN.isInteger()).toBe(true);
+      expect(NAN.isInteger()).toBe(false);
       expect(BigNumber.fromNumber(0).isInteger()).toBe(true);
       expect(BigNumber.fromNumber(5).isInteger()).toBe(true);
       expect(BigNumber.parse('1.5').isInteger()).toBe(false);

@@ -1143,6 +1143,9 @@ export const nthRoot = mathTyped('nthRoot', {
  * a negative real root.
  */
 function bigNthRoot(a: BigNumber, n: f64): BigNumber {
+  if (n === 0) {
+    throw new Error('Root must be non-zero');
+  }
   if (a.isNegative() && Number.isInteger(n) && Math.abs(n) % 2 === 1) {
     return bigNthRoot(a.neg(), n).neg();
   }
@@ -1431,6 +1434,10 @@ export const gcd: GcdFunction = mathTyped('gcd', {
     return a;
   },
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    // NaN, Infinity and a fraction have no integer gcd. The loop below never ends on them.
+    if (!a.isInteger() || !b.isInteger()) {
+      throw new Error('Parameters in function gcd must be integer numbers');
+    }
     let x = a.abs();
     let y = b.abs();
     while (!y.isZero()) {
@@ -1465,6 +1472,9 @@ export const lcm = mathTyped('lcm', {
     return (absA * absB) / g;
   },
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    if (!a.isInteger() || !b.isInteger()) {
+      throw new Error('Parameters in function lcm must be integer numbers');
+    }
     const g = gcd(a, b);
     if (g.isZero()) return BigNumber.fromNumber(0);
     return a.abs().multiply(b.abs()).divide(g);
