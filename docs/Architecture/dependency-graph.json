@@ -31397,7 +31397,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Complex", "I", "isComplex"]
+          }
+        ],
         "exports": [
           "EXPRESSION_SCOPE_OMIT",
           "defaultMathScope",
@@ -48992,7 +48998,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 231904,
+    "totalLinesOfCode": 231989,
     "totalExports": 7319,
     "totalClasses": 62,
     "totalInterfaces": 663,
