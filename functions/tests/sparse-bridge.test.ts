@@ -281,7 +281,11 @@ describe('MathJSSparseMatrix', () => {
   });
 
   describe('forEach', () => {
-    it('iterates over non-zero elements', () => {
+    // Oracle (mathjs 15.2.0, SparseMatrix.forEach(callback, skipZeros)):
+    //   s = math.sparse([[1,0,3],[0,2,0]]); s.forEach((v,i)=>out.push([i[0],i[1],v]))
+    //   => [0,0,1],[1,0,0],[0,1,0],[1,1,2],[0,2,3],[1,2,0]   (column-major, zeros included)
+    //   with skipZeros=true => [0,0,1],[1,1,2],[0,2,3]
+    it('visits every element column by column when skipZeros is omitted (#985)', () => {
       const s = new MathJSSparseMatrix([
         [1, 0, 3],
         [0, 2, 0],
@@ -290,6 +294,25 @@ describe('MathJSSparseMatrix', () => {
       s.forEach((v, idx) => {
         entries.push([idx[0], idx[1], v as number]);
       });
+      expect(entries).toEqual([
+        [0, 0, 1],
+        [1, 0, 0],
+        [0, 1, 0],
+        [1, 1, 2],
+        [0, 2, 3],
+        [1, 2, 0],
+      ]);
+    });
+
+    it('visits only stored entries when skipZeros is true', () => {
+      const s = new MathJSSparseMatrix([
+        [1, 0, 3],
+        [0, 2, 0],
+      ]);
+      const entries: [number, number, number][] = [];
+      s.forEach((v, idx) => {
+        entries.push([idx[0], idx[1], v as number]);
+      }, true);
       expect(entries).toEqual([
         [0, 0, 1],
         [1, 1, 2],
