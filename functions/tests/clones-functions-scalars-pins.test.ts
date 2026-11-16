@@ -89,8 +89,8 @@ function aggregateOracle(vectors: Float64Array[]): { mean: number[]; std: number
 }
 
 describe('G35 — gcd floor-Euclid vs round-Euclid (iltGcd)', () => {
-  it('gcd(1.9, 1.2) uses floor snapping (both operands become 1)', () => {
-    expect(gcd(1.9, 1.2)).toBe(1);
+  it('gcd(1.9, 1.2) throws as in mathjs; euclidSnap floor-snaps both operands to 1', () => {
+    expect(() => gcd(1.9, 1.2)).toThrow('Parameters in function gcd must be integer numbers');
     expect(floorEuclidOracle(1.9, 1.2)).toBe(1);
     expect(euclidSnap(1.9, 1.2, Math.floor)).toBe(1);
     // round(1.9)=2, round(1.2)=1 → gcd 1 as well; snap still differs
@@ -98,8 +98,8 @@ describe('G35 — gcd floor-Euclid vs round-Euclid (iltGcd)', () => {
     expect(euclidSnap(1.9, 1.2, Math.round)).toBe(1);
   });
 
-  it('round-Euclid on 3.6, 2.4 differs from floor gcd (2 vs 1)', () => {
-    expect(gcd(3.6, 2.4)).toBe(1);
+  it('round-Euclid on 3.6, 2.4 differs from floor-Euclid (2 vs 1); gcd throws', () => {
+    expect(() => gcd(3.6, 2.4)).toThrow('Parameters in function gcd must be integer numbers');
     expect(floorEuclidOracle(3.6, 2.4)).toBe(1);
     expect(euclidSnap(3.6, 2.4, Math.floor)).toBe(1);
     expect(roundEuclidOracle(3.6, 2.4)).toBe(2);

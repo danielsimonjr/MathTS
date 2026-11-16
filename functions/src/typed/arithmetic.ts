@@ -1422,7 +1422,12 @@ export type GcdFunction = GcdOverloads & TypedFunction;
  * Greatest common divisor
  */
 export const gcd: GcdFunction = mathTyped('gcd', {
-  'number, number': (a: f64, b: f64): f64 => euclidSnap(a, b, Math.floor),
+  'number, number': (a: f64, b: f64): f64 => {
+    if (!Number.isInteger(a) || !Number.isInteger(b)) {
+      throw new Error('Parameters in function gcd must be integer numbers');
+    }
+    return euclidSnap(a, b, Math.floor);
+  },
   'bigint, bigint': (a: i64, b: i64): i64 => {
     a = a < 0n ? -a : a;
     b = b < 0n ? -b : b;
@@ -1461,6 +1466,9 @@ export const gcd: GcdFunction = mathTyped('gcd', {
  */
 export const lcm = mathTyped('lcm', {
   'number, number': (a: f64, b: f64): f64 => {
+    if (!Number.isInteger(a) || !Number.isInteger(b)) {
+      throw new Error('Parameters in function lcm must be integer numbers');
+    }
     const g = gcd(a, b);
     return g === 0 ? 0 : Math.abs(a * b) / g;
   },

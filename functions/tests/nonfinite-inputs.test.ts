@@ -95,6 +95,9 @@ const THROWS_ON_NAN: Record<string, string[]> = {
   factory_floor: ['RangeError'],
   factory_gcd: ['Error'],
   factory_lcm: ['Error'],
+  // #1002: the typed copies throw the mathjs integer error, as the factory copies do.
+  gcd: ['Error'],
+  lcm: ['Error'],
   factory_round: ['Error'],
   factory_xgcd: ['Error'],
   fallingFactorial: ['Error'],
@@ -236,7 +239,8 @@ for (const name of ['gcd', 'lcm', 'xgcd']) {
       [val, 4],
       [12, val],
     ]) {
-      const want = name === 'xgcd' ? '[NaN,NaN,NaN]' : 'NaN';
+      // #1002: gcd and lcm throw the mathjs integer error; xgcd keeps the NaN triple.
+      const want = name === 'xgcd' ? '[NaN,NaN,NaN]' : 'throws:Error';
       HANG_ROWS.push({
         job: { name, sig: 'number,number', args },
         expect: (o) => o === want,
