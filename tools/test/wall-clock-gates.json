@@ -16,6 +16,12 @@
       "needs": ["functions/dist/index.js"]
     },
     {
+      "name": "wasserstein-sweep",
+      "script": "functions/tests/helpers/wasserstein-sweep-perf-gate.mjs",
+      "limit": 2,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
       "name": "median-vs-sort",
       "script": "functions/tests/helpers/median-sort-perf-gate.mjs",
       "limit": 0.25,

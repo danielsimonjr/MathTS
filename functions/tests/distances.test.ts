@@ -83,30 +83,6 @@ describe('wassersteinDistance sweep (Copilot review)', () => {
     expect(d).toBeGreaterThanOrEqual(0);
     expect(reads.n).toBeLessThanOrEqual(4 * n);
   });
-  it('does not go quadratic in the sweep over the sorted copies', () => {
-    // The read count above sees only the inputs. The sweep works on sorted copies, so this check
-    // is a ratio of two clock reads, not an absolute budget. The n and 4n samples alternate in
-    // one process, so machine load slows both lanes together. Each lane keeps its fastest of 7
-    // samples. From n to 4n, O(n log n) grows the time about 4.5 times. O(n²) grows the time 16
-    // times.
-    const n = 8192;
-    const points = (len: number, f: (i: number) => number): number[] =>
-      Array.from({ length: len }, (_, i) => f(i));
-    const small: [number[], number[]] = [points(n, Math.sin), points(n, Math.cos)];
-    const large: [number[], number[]] = [points(4 * n, Math.sin), points(4 * n, Math.cos)];
-    const sample = ([a, b]: [number[], number[]]): number => {
-      const t0 = performance.now();
-      wassersteinDistance(a, b);
-      return performance.now() - t0;
-    };
-    sample(small);
-    sample(large);
-    let smallMs = Infinity;
-    let largeMs = Infinity;
-    for (let k = 0; k < 7; k++) {
-      smallMs = Math.min(smallMs, sample(small));
-      largeMs = Math.min(largeMs, sample(large));
-    }
-    expect(largeMs / Math.max(smallMs, 0.01)).toBeLessThan(10);
-  });
+  // The wall-clock check that the sweep stays O(n log n) is the gate "wasserstein-sweep" in
+  // tools/test/wall-clock-gates.json. The gate runs in its own Node process, away from the test load.
 });
