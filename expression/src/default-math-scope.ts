@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { Complex, I, isComplex } from '@danielsimonjr/mathts-core';
 import { compile } from './compiler/compile.js';
 import type { Scope } from './compiler/compile.js';
 import { compileInlineExpression } from './transform/utils/compileInlineExpression.js';
@@ -112,28 +113,77 @@ function nthRoot(a: number, n: number = 2): number {
   return negative ? -exact : exact;
 }
 
+/** A value of the default scope: a real number or a Complex. */
+type Operand = number | Complex;
+
+/** Lifts a real operand to Complex, so a Complex operation can take it on either side. */
+function complexOf(x: Operand): Complex {
+  return isComplex(x) ? x : Complex.fromNumber(x);
+}
+
+/**
+ * A binary operator. A Complex operand routes to Complex arithmetic; two real
+ * operands keep the plain JS result. Without this branch a Complex coerces to its
+ * magnitude through `valueOf`, so `1 + i` would return 2.
+ */
+function binary(
+  real: (a: number, b: number) => number,
+  complex: (a: Complex, b: Operand) => Complex
+): (a: Operand, b: Operand) => Operand {
+  return (a, b) => (isComplex(a) || isComplex(b) ? complex(complexOf(a), b) : real(a, b));
+}
+
+/**
+ * A real-only function. A Complex argument throws; it is never coerced to a
+ * number, because `valueOf` returns the magnitude.
+ */
+function realOnly(name: string, fn: (...args: number[]) => number): (...args: Operand[]) => number {
+  return (...args) => {
+    if (args.some((arg) => isComplex(arg))) {
+      throw new TypeError(`${name} does not take a complex value in the default scope`);
+    }
+    return fn(...(args as number[]));
+  };
+}
+
 /** Minimal math scope for arithmetic expressions (no matrix/functions barrel). */
 export const defaultMathScope: Record<string, unknown> = {
-  add: (a: number, b: number) => a + b,
-  subtract: (a: number, b: number) => a - b,
-  multiply: (a: number, b: number) => a * b,
-  divide: (a: number, b: number) => a / b,
-  pow: (a: number, b: number) => Math.pow(a, b),
-  mod: (a: number, b: number) => a % b,
-  unaryMinus: (a: number) => -a,
-  unaryPlus: (a: number) => +a,
-  sin: Math.sin,
-  cos: Math.cos,
-  tan: Math.tan,
-  sqrt: Math.sqrt,
-  cbrt: Math.cbrt,
-  nthRoot,
-  abs: Math.abs,
-  exp: Math.exp,
-  log: Math.log,
+  add: binary(
+    (a, b) => a + b,
+    (a, b) => a.add(complexOf(b))
+  ),
+  subtract: binary(
+    (a, b) => a - b,
+    (a, b) => a.sub(complexOf(b))
+  ),
+  multiply: binary(
+    (a, b) => a * b,
+    (a, b) => a.mul(complexOf(b))
+  ),
+  divide: binary(
+    (a, b) => a / b,
+    (a, b) => a.div(complexOf(b))
+  ),
+  pow: binary(
+    (a, b) => Math.pow(a, b),
+    (a, b) => a.pow(b)
+  ),
+  mod: realOnly('mod', (a, b) => a % b),
+  unaryMinus: (a: Operand): Operand => (isComplex(a) ? a.neg() : -a),
+  unaryPlus: (a: Operand): Operand => (isComplex(a) ? a : +a),
+  sin: realOnly('sin', Math.sin),
+  cos: realOnly('cos', Math.cos),
+  tan: realOnly('tan', Math.tan),
+  sqrt: realOnly('sqrt', Math.sqrt),
+  cbrt: realOnly('cbrt', Math.cbrt),
+  nthRoot: realOnly('nthRoot', nthRoot),
+  abs: realOnly('abs', Math.abs),
+  exp: (a: Operand): Operand => (isComplex(a) ? a.exp() : Math.exp(a)),
+  log: realOnly('log', Math.log),
   pi: Math.PI,
   π: Math.PI,
   e: Math.E,
+  i: I,
   Infinity: Infinity,
   NaN: NaN,
   true: true,
