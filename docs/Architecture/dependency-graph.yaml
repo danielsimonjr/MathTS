@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-16'
-  totalFiles: 1337
+  totalFiles: 1338
   totalModules: 82
-  totalExports: 7319
+  totalExports: 7320
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -19799,6 +19799,18 @@ modules:
         - createLgamma
       constants:
         - createLgamma
+    functions/src/probability/multinomial-exact.ts:
+      description: Exact multinomial of positive integers, as a product of binomials
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - multinomialExact
+      interfaces:
+        - MultinomialStats
+      functions:
+        - multinomialExact
     functions/src/probability/multinomial.ts:
       description: >-
         Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n`
@@ -19812,6 +19824,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./multinomial-exact.js
+          imports:
+            - multinomialExact
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -26885,6 +26900,9 @@ modules:
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+        - file: ../probability/multinomial-exact.js
+          imports:
+            - multinomialExact
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -45278,6 +45296,7 @@ dependencyGraph:
         - functions/src/probability/gamma.ts
         - functions/src/probability/kldivergence.ts
         - functions/src/probability/lgamma.ts
+        - functions/src/probability/multinomial-exact.ts
         - functions/src/probability/multinomial.ts
         - functions/src/probability/permutations.ts
         - functions/src/probability/pickRandom.ts
@@ -46242,13 +46261,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1337
+  totalTypeScriptFiles: 1338
   totalModules: 82
-  totalLinesOfCode: 232014
-  totalExports: 7319
+  totalLinesOfCode: 232057
+  totalExports: 7320
   totalClasses: 62
-  totalInterfaces: 663
-  totalFunctions: 2535
+  totalInterfaces: 664
+  totalFunctions: 2536
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1676
