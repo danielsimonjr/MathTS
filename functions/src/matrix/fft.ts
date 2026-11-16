@@ -1,4 +1,4 @@
-import { arraySize, validate, clone } from '../utils/array.js';
+import { arraySize, validate } from '../utils/array.js';
 import { fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { complexToSplit } from './complex-to-interleaved.js';
 import { factory } from '../utils/factory.js';
@@ -32,6 +32,9 @@ type ComplexNumber = { re: number; im: number } | number;
 /** Complex/number values flow through dynamically-dispatched scalar ops */
 type ComplexArray = unknown[];
 type ComplexArrayND = unknown;
+
+/** A copy of every nested array level, so a result row never aliases an input row. */
+const copyNested = (x: unknown): unknown => (Array.isArray(x) ? x.map(copyNested) : x);
 /** A scalar operation resolved from a typed-function */
 type ScalarFn = (...args: unknown[]) => unknown;
 
@@ -133,13 +136,12 @@ export const createFft = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (arr: ComplexArrayND): unknown {
-        // A zero-length dimension has no elements to transform, so the result keeps the shape.
-        // `validate` rejects a jagged array, which `arraySize` (first row only) does not see.
+        // `arraySize` reads the first row only, so `validate` rejects a jagged array
+        // (a DimensionError) before any transform runs.
         const size = arraySize(arr);
-        if (size.includes(0)) {
-          validate(arr as unknown[], size);
-          return clone(arr as unknown[]);
-        }
+        validate(arr as unknown[], size);
+        // A zero-length dimension has no elements to transform, so the result keeps the shape.
+        if (size.includes(0)) return copyNested(arr);
         return _ndFft(arr);
       },
       Matrix: function (matrix: Matrix): Matrix {
