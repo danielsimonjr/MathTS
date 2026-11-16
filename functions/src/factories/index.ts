@@ -1148,6 +1148,13 @@ import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
 import { createCreateUnit } from '../type/unit/function/createUnit.js';
 import { createUnitFunction } from '../type/unit/function/unit.js';
+import {
+  type BigNumber as CoreBigNumber,
+  Fraction as CoreFraction,
+  isBigNumber as coreIsBigNumber,
+  isFraction as coreIsFraction,
+  isMatrix as coreIsMatrix,
+} from '@danielsimonjr/mathts-core';
 import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
@@ -1708,7 +1715,42 @@ export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => unk
 export const number = (x?: unknown): number => Number(x ?? 0);
 export const string = (x?: unknown): string => (x === undefined ? '' : String(x));
 export const boolean = (x?: unknown): boolean => Boolean(x);
-export const bigint = (x?: unknown): bigint => BigInt((x ?? 0) as never);
+/** Round n/d to the nearest integer, half away from zero (mathjs `bigint` rounding). */
+const roundRatio = (n: bigint, d: bigint): bigint => {
+  const neg = n < 0n !== d < 0n;
+  const an = n < 0n ? -n : n;
+  const ad = d < 0n ? -d : d;
+  const q = (2n * an + ad) / (2n * ad);
+  return neg ? -q : q;
+};
+
+/**
+ * Convert a value to a bigint. A non-integer rounds to the nearest integer, half away from
+ * zero, as mathjs does. A BigNumber and a Fraction convert exactly, with no float step.
+ * An array or a matrix converts element-wise.
+ */
+export function bigint(
+  x?: number | string | boolean | bigint | null | CoreBigNumber | CoreFraction
+): bigint;
+export function bigint(x: readonly unknown[]): unknown[];
+export function bigint(x: unknown): unknown;
+export function bigint(x?: unknown): unknown {
+  if (x === undefined || x === null) return 0n;
+  if (Array.isArray(x)) return x.map((v) => bigint(v));
+  if (coreIsMatrix(x)) {
+    return (x as unknown as { map(cb: (v: unknown) => unknown): unknown }).map((v) => bigint(v));
+  }
+  if (coreIsFraction(x)) return roundRatio(x.numerator, x.denominator);
+  if (coreIsBigNumber(x)) {
+    // BigNumber.toString() is plain decimal text (no exponent), which Fraction.parse reads exactly.
+    const f = CoreFraction.parse(x.toString());
+    return roundRatio(f.numerator, f.denominator);
+  }
+  if (typeof x === 'number' && Number.isFinite(x) && !Number.isInteger(x)) {
+    return BigInt(Math.sign(x) * Math.round(Math.abs(x)));
+  }
+  return BigInt(x as never);
+}
 
 // ---------------------------------------------------------------------------
 // GC4 — mathjs canonical-name aliases. These functions exist but were only
