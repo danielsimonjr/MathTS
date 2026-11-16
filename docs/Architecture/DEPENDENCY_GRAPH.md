@@ -143,7 +143,7 @@ The codebase is organized into the following modules:
 - **functions/numbertheory**: 6 files
 - **functions/numeric**: 33 files
 - **functions/plain**: 10 files
-- **functions/probability**: 16 files
+- **functions/probability**: 17 files
 - **functions/relational**: 14 files
 - **functions/set**: 11 files
 - **functions/signal**: 17 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 578            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 579            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -8722,15 +8722,25 @@ graph LR
 
 ---
 
+### `functions/src/probability/multinomial-exact.ts` - Exact multinomial of positive integers, as a product of binomials
+
+**Exports:**
+
+- Interfaces: `MultinomialStats`
+- Functions: `multinomialExact`
+
+---
+
 ### `functions/src/probability/multinomial.ts` - Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/collection.js`    | `deepForEach`   | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports            | Type               |
+| --------------------------- | ------------------ | ------------------ |
+| `../utils/collection.js`    | `deepForEach`      | Import             |
+| `../utils/factory.js`       | `factory`          | Import             |
+| `./multinomial-exact.js`    | `multinomialExact` | Import             |
+| `../core/function/typed.js` | `TypedFunction`    | Import (type-only) |
 
 **Exports:**
 
@@ -12362,11 +12372,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports             | Type   |
-| -------------------------------- | ------------------- | ------ |
-| `../utils/collection.js`         | `deepMap`           | Import |
-| `../plain/number/probability.js` | `gammaNumber`       | Import |
-| `../factories/matrix-bridge.js`  | `MathJSDenseMatrix` | Import |
+| File                                  | Imports             | Type   |
+| ------------------------------------- | ------------------- | ------ |
+| `../utils/collection.js`              | `deepMap`           | Import |
+| `../plain/number/probability.js`      | `gammaNumber`       | Import |
+| `../factories/matrix-bridge.js`       | `MathJSDenseMatrix` | Import |
+| `../probability/multinomial-exact.js` | `multinomialExact`  | Import |
 
 **Exports:**
 
@@ -20922,9 +20933,9 @@ graph TD
         N250[gamma]
         N251[kldivergence]
         N252[lgamma]
-        N253[multinomial]
-        N254[permutations]
-        N255[...6 more]
+        N253[multinomial-exact]
+        N254[multinomial]
+        N255[...7 more]
     end
 
     subgraph Functions/relational
@@ -21423,14 +21434,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1337   |
+| Total TypeScript Files  | 1338   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232014 |
-| Total Exports           | 7319   |
+| Total Lines of Code     | 232057 |
+| Total Exports           | 7320   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
-| Total Interfaces        | 663    |
-| Total Functions         | 2535   |
+| Total Interfaces        | 664    |
+| Total Functions         | 2536   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |
