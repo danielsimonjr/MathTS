@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-16'
   totalFiles: 1337
   totalModules: 82
-  totalExports: 7318
+  totalExports: 7319
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15853,7 +15853,6 @@ modules:
         - factory_log
         - catalan
         - zpk2tf
-        - factory_cumsum
         - factory_sum
         - csCounts
         - csSymperm
@@ -15875,7 +15874,6 @@ modules:
         - factory_log1p
         - factory_mod
         - factory_nthRoot
-        - factory_pow
         - factory_ceil
         - factory_floor
         - expm
@@ -15906,6 +15904,8 @@ modules:
         - splitUnit
         - fft
         - Chain
+        - factory_cumsum
+        - factory_pow
         - factory_subtract
         - factory_divide
         - ifft
@@ -16130,7 +16130,6 @@ modules:
         - factory_log
         - catalan
         - zpk2tf
-        - factory_cumsum
         - factory_sum
         - csCounts
         - csSymperm
@@ -16152,7 +16151,6 @@ modules:
         - factory_log1p
         - factory_mod
         - factory_nthRoot
-        - factory_pow
         - factory_ceil
         - factory_floor
         - expm
@@ -16183,6 +16181,8 @@ modules:
         - splitUnit
         - fft
         - Chain
+        - factory_cumsum
+        - factory_pow
         - factory_subtract
         - factory_divide
         - ifft
@@ -16376,17 +16376,20 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
+            - DenseMatrix
             - SparseMatrix
             - isDenseMatrix
             - isSparseMatrix
       exports:
         - csrToCsc
         - cscToPublic
+        - denseToPublic
         - adaptSparse
         - acceptsMatrix
       functions:
         - csrToCsc
         - cscToPublic
+        - denseToPublic
         - adaptSparse
         - acceptsMatrix
   functions/geometry:
@@ -46234,11 +46237,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1337
   totalModules: 82
-  totalLinesOfCode: 231796
-  totalExports: 7318
+  totalLinesOfCode: 231832
+  totalExports: 7319
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2534
+  totalFunctions: 2535
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1676
