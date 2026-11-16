@@ -18678,7 +18678,7 @@
         "internalDependencies": [
           {
             "file": "../utils/array.js",
-            "imports": ["arraySize", "validate", "clone"]
+            "imports": ["arraySize", "validate"]
           },
           {
             "file": "../signal/fft-core-f64.js",
@@ -48998,7 +48998,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 232012,
+    "totalLinesOfCode": 232014,
     "totalExports": 7319,
     "totalClasses": 62,
     "totalInterfaces": 663,

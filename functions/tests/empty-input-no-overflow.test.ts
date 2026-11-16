@@ -88,6 +88,9 @@ describe('empty input does not overflow the stack (#988)', () => {
       expect(fft([[]] as never)).toStrictEqual([[]]);
       expect(fft([[], []] as never)).toStrictEqual([[], []]);
       expect(fft([[[]], [[]]] as never)).toStrictEqual([[[]], [[]]]);
+      const input: unknown[][] = [[]];
+      const out = fft(input as never) as unknown[][];
+      expect(out[0]).not.toBe(input[0]);
       expect(ifft([[]] as never)).toStrictEqual([[]]);
       expect(ifft([[[]], [[]]] as never)).toStrictEqual([[[]], [[]]]);
     });
@@ -103,6 +106,15 @@ describe('empty input does not overflow the stack (#988)', () => {
     it('a jagged array throws a DimensionError', () => {
       expect(() => fft([[], [1]] as never)).toThrow(/Dimension mismatch/);
       expect(() => ifft([[], [1]] as never)).toThrow(/Dimension mismatch/);
+      expect(() => fft([[1], []] as never)).toThrow(/Dimension mismatch/);
+      expect(() => ifft([[1], []] as never)).toThrow(/Dimension mismatch/);
+      expect(() =>
+        fft([
+          [1, 2],
+          [3, 4, 5],
+        ] as never)
+      ).toThrow(/Dimension mismatch/);
+      expect(() => fft([[1, 2], [3]] as never)).toThrow(/Dimension mismatch/);
     });
 
     it('fftn keeps the shape of a nested empty array', () => {
