@@ -1635,7 +1635,8 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
  * Both bounds must be finite integers. Finite-bound checks run first, so
  * {@code NaN} and {@code Infinity} throw an {@code Error}. A non-integer
  * bound throws a {@code RangeError} before any range check, so it never
- * sums a fractional index (#1000).
+ * sums a fractional index (#1000). A bound beyond 2^53 - 1 in magnitude also
+ * throws a {@code RangeError}, because the index cannot step there.
  *
  * {@code a > b} returns {@code identity} without calling {@code evalAt}.
  *
@@ -1662,6 +1663,12 @@ function foldIntegerRange(
       `${fnName}: bounds must be integers (got lower bound ${a}, upper bound ${b})`
     );
   }
+  // Above 2^53 - 1, k++ no longer changes k, so the loop below would never end.
+  if (!Number.isSafeInteger(a) || !Number.isSafeInteger(b)) {
+    throw new RangeError(
+      `${fnName}: bounds must be at most ${Number.MAX_SAFE_INTEGER} in magnitude (got lower bound ${a}, upper bound ${b})`
+    );
+  }
   if (a > b) {
     return identity;
   }
@@ -1677,7 +1684,7 @@ function foldIntegerRange(
  * Compute a finite numerical summation.
  *
  * Evaluates expr at each integer k from a to b (inclusive) and accumulates
- * the sum. Both bounds must be finite numbers; there is no symbolic or
+ * the sum. Both bounds must be integers of magnitude at most 2^53 - 1; there is no symbolic or
  * closed-form (e.g. Faulhaber) path — a non-numeric bound throws rather
  * than silently returning 0.
  *
@@ -1686,7 +1693,7 @@ function foldIntegerRange(
  * @param a - Lower bound (finite integer)
  * @param b - Upper bound (finite integer)
  * @returns Sum value
- * @throws RangeError when a or b is not an integer (#1000)
+ * @throws RangeError when a or b is not an integer or exceeds 2^53 - 1 in magnitude (#1000)
  *
  * @example
  * summation('k', 'k', 1, 100)     // => 5050
@@ -1707,7 +1714,7 @@ export function summation(expr: string, varName: string, a: number, b: number): 
  * @param a - Lower bound (integer)
  * @param b - Upper bound (integer)
  * @returns Product value
- * @throws RangeError when a or b is not an integer (#1000)
+ * @throws RangeError when a or b is not an integer or exceeds 2^53 - 1 in magnitude (#1000)
  *
  * @example
  * symbolicProduct('k', 'k', 1, 5)    // => 120 (= 5!)
