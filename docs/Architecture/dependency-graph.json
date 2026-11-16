@@ -16755,6 +16755,11 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
+            "imports": ["BigNumber", "Fraction", "isBigNumber", "isFraction", "isMatrix"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": ["createUnitClass"],
             "subpath": "internal"
           },
@@ -17046,15 +17051,16 @@
           "number",
           "string",
           "boolean",
-          "bigint",
           "cumsum",
           "ctranspose",
           "createUnit",
+          "bigint",
           "MathNode",
           "StringOptions",
           "SimplifyOptions"
         ],
         "reExported": ["MathNode", "StringOptions", "SimplifyOptions"],
+        "functions": ["bigint", "bigint", "bigint", "bigint"],
         "constants": [
           "addScalar",
           "multiplyScalar",
@@ -17305,7 +17311,6 @@
           "number",
           "string",
           "boolean",
-          "bigint",
           "cumsum",
           "ctranspose",
           "createUnit"
@@ -48919,14 +48924,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1336,
     "totalModules": 82,
-    "totalLinesOfCode": 231577,
+    "totalLinesOfCode": 231619,
     "totalExports": 7316,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2517,
+    "totalFunctions": 2521,
     "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1680,
+    "totalConstants": 1679,
     "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
