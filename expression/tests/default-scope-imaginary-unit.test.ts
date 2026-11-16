@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { Complex } from '@danielsimonjr/mathts-core';
 import { evaluate } from '../src/index.js';
 
 /** Real and imaginary parts of an evaluated result (a number or a Complex). */
@@ -46,9 +47,42 @@ describe('default scope binds the imaginary unit i (#1025)', () => {
     expect(Math.abs(got.im)).toBeLessThan(1e-12);
   });
 
-  it('a real-only function throws on a complex argument instead of coercing it', () => {
-    expect(() => evaluate('sin(i)')).toThrow(TypeError);
-    expect(() => evaluate('abs(i)')).toThrow(TypeError);
+  // Oracle: mathjs 15.2.0 evaluate(<expr>).
+  const complexFns: Array<[string, number, number]> = [
+    ['sin(i)', 0, 1.1752011936438014],
+    ['cos(i)', 1.5430806348152437, 0],
+    ['tan(i)', 0, 0.761594155955765],
+    ['sqrt(3+4i)', 2, 1],
+    ['cbrt(i)', 0.8660254037844387, 0.49999999999999994],
+    ['log(i)', 0, 1.5707963267948966],
+    ['log(3+4i)', 1.6094379124341003, 0.9272952180016122],
+    ['abs(3+4i)', 5, 0],
+    ['abs(i)', 1, 0],
+    ['sin(3+4i)', 3.853738037919377, -27.016813258003932],
+    ['cos(3+4i)', -27.034945603074224, -3.851153334811777],
+    ['tan(3+4i)', -0.00018734620462947842, 0.9993559873814732],
+  ];
+  for (const [expr, re, im] of complexFns) {
+    it(`${expr} matches mathjs (${re} + ${im}i)`, () => {
+      const got = parts(evaluate(expr));
+      expect(Math.abs(got.re - re)).toBeLessThan(1e-12);
+      expect(Math.abs(got.im - im)).toBeLessThan(1e-12);
+    });
+  }
+
+  it('abs of a Complex from the caller scope is its magnitude', () => {
+    expect(evaluate('abs(z)', { z: new Complex(3, 4) })).toBe(5);
+  });
+
+  it('mod and nthRoot throw on a complex value, as in mathjs', () => {
+    expect(() => evaluate('mod(i, 2)')).toThrow(TypeError);
+    expect(() => evaluate('nthRoot(i, 2)')).toThrow(TypeError);
+  });
+
+  it('real functions are unchanged', () => {
+    expect(evaluate('sqrt(4)')).toBe(2);
+    expect(evaluate('cbrt(-8)')).toBe(-2);
+    expect(evaluate('abs(-3)')).toBe(3);
   });
 
   it('real arithmetic is unchanged', () => {
