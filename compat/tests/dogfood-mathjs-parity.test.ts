@@ -160,3 +160,81 @@ describe('compat prod of a sparse matrix (#985)', () => {
     expect(math.sum(math.sparse([1, 0, 2] as never) as never)).toBe(3);
   });
 });
+
+describe('compat sparse matrix iteration matches mathjs (#985)', () => {
+  type Fns = Record<string, (...args: unknown[]) => unknown>;
+  const mt = create(all) as unknown as Fns;
+  const mj = mjCreate(mjAll) as unknown as Fns;
+  const arr = (x: unknown) => (x as { toArray(): unknown }).toArray();
+  const data = [
+    [1, 0],
+    [0, 2],
+  ];
+
+  // Oracle: live mathjs 15.2.0. log10 = [[0,-Infinity],[-Infinity,0.30103]]; not = [[0,true],[true,0]];
+  // boolean = [[true,0],[0,true]] (the zero test keeps false unstored).
+  it.each([
+    'ceil',
+    'floor',
+    'abs',
+    'log10',
+    'log2',
+    'bitNot',
+    'factorial',
+    'not',
+    'boolean',
+    'string',
+  ])('%s of a sparse matrix has the mathjs values', (name) => {
+    expect(arr(mt[name](mt.sparse(data)))).toEqual(arr(mj[name](mj.sparse(data))));
+  });
+
+  it('sum, min, max and prod of a sparse matrix equal mathjs', () => {
+    for (const name of ['sum', 'min', 'max', 'prod']) {
+      expect(mt[name](mt.sparse(data))).toBe(mj[name](mj.sparse(data)));
+    }
+  });
+
+  it('forEach visits every element column by column', () => {
+    const seen: unknown[] = [];
+    mt.forEach(mt.sparse(data), (v: unknown, i: unknown) => seen.push([v, i]));
+    expect(seen).toEqual([
+      [1, [0, 0]],
+      [0, [1, 0]],
+      [0, [0, 1]],
+      [2, [1, 1]],
+    ]);
+  });
+
+  it('map visits the implicit zeros', () => {
+    const f = (v: unknown, i: unknown) =>
+      (i as number[])[0] * 10 + (i as number[])[1] + (v as number);
+    expect(arr(mt.map(mt.sparse(data), f))).toEqual([
+      [1, 1],
+      [10, 13],
+    ]);
+  });
+
+  it('matrixFromFunction builds a sparse matrix and calls the generator for every cell', () => {
+    // mathjs: 4 calls, in the order [0,0] [1,0] [0,1] [1,1].
+    const calls: number[][] = [];
+    const m = mt.matrixFromFunction(
+      [2, 2],
+      (i: unknown) => {
+        calls.push(i as number[]);
+        return (i as number[])[0] + (i as number[])[1] + 1;
+      },
+      'sparse'
+    ) as { toArray(): unknown; storage(): string };
+    expect(m.toArray()).toEqual([
+      [1, 2],
+      [2, 3],
+    ]);
+    expect(m.storage()).toBe('sparse');
+    expect(calls).toEqual([
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ]);
+  });
+});
