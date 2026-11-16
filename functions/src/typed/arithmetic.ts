@@ -26,7 +26,7 @@ import {
   extrema,
 } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
-import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
+import { f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection } from './f64-kernels.js';
 import {
   pairwiseSum,
   pairwiseSumChecked,
@@ -1133,6 +1133,8 @@ export const nthRoot = mathTyped('nthRoot', {
   'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
   'BigNumber, number': (a: BigNumber, n: f64): BigNumber => bigNthRoot(a, n),
   'BigNumber, BigNumber': (a: BigNumber, n: BigNumber): BigNumber => bigNthRoot(a, n.toNumber()),
+  'Array | Matrix': mapEachLeaf((self, x) => self(x)),
+  'Array | Matrix, number': mapEachLeaf((self, x, n) => self(x, n)),
 });
 
 /**
@@ -1438,6 +1440,13 @@ export const gcd: GcdFunction = mathTyped('gcd', {
     }
     return x;
   },
+  // The gcd of the entries of a vector, as in mathjs. A matrix of two or more dimensions throws.
+  'Array | Matrix': mathTyped.referToSelf((self) => (input: unknown[] | { toArray(): unknown }) => {
+    const v = (Array.isArray(input) ? input : input.toArray()) as unknown[];
+    if (v.length === 0) throw new TypeError('gcd: expects at least one value');
+    if (v.some(Array.isArray)) throw new TypeError('gcd: expects a vector (1-D), not a matrix');
+    return v.reduce((acc, x) => (self as (a: unknown, b: unknown) => unknown)(acc, x));
+  }),
 }) as GcdFunction;
 
 /**
@@ -1553,12 +1562,11 @@ function vectorNorm(arr: f64[], p: f64 = 2): f64 {
 }
 
 /**
- * Matrix norm of a 2-D array. Supports Frobenius (`'fro'`/`'frobenius'`, the
- * default), the max-column-sum 1-norm, the max-row-sum ∞-norm, and the spectral
- * 2-norm (largest singular value). Previously the typed `norm` had no matrix
- * path, so `norm(matrix, 2)` returned `null` and `norm(matrix, 'fro')` threw.
+ * Matrix norm of a 2-D array. Supports Frobenius (`'fro'`/`'frobenius'`), the
+ * max-column-sum 1-norm, the max-row-sum ∞-norm, and the spectral 2-norm (largest
+ * singular value). The 2-norm is the default, as in mathjs.
  */
-function matrixNorm(data: f64[][], p: f64 | string = 'fro'): f64 {
+function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
   const rows = data.length;
   const cols = rows > 0 ? data[0].length : 0;
   if (p === 'fro' || p === 'frobenius') {
@@ -1592,8 +1600,6 @@ function matrixNorm(data: f64[][], p: f64 | string = 'fro'): f64 {
   throw new Error(`Unsupported matrix norm p=${String(p)} (use 'fro', 1, 2, or Infinity)`);
 }
 
-const matrixLike = (m: { toArray(): unknown }): f64[][] => m.toArray() as f64[][];
-
 /** True when every leaf of a 1-D or 2-D array is a number. */
 function isNumberArrayDeep(arr: readonly unknown[]): boolean {
   return arr.every((x) =>
@@ -1611,39 +1617,31 @@ function exactNorm(arr: unknown[], p?: number | string): unknown {
   return p === undefined ? factoryNorm(arr) : factoryNorm(arr, p);
 }
 
+/** The norm of a 1-D or 2-D array; see {@link norm}. */
+function arrayNorm(arr: unknown[], p?: f64 | string): unknown {
+  if (!isNumberArrayDeep(arr)) return exactNorm(arr, p);
+  if (is2DArray(arr)) return matrixNorm(arr as f64[][], p);
+  if (typeof p === 'string') return matrixNorm([arr as f64[]], p);
+  return vectorNorm(arr as f64[], p);
+}
+
 export const norm = mathTyped('norm', {
   number: (a: f64): f64 => Math.abs(a),
   Complex: (a: Complex): f64 => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
 
-  // Array: a flat vector uses the vector 2-norm; a 2-D array is a matrix (Frobenius). An array
-  // with a BigNumber, Fraction or Complex entry takes the exact factory norm (#1043).
-  Array: (arr: unknown[]): unknown =>
-    !isNumberArrayDeep(arr)
-      ? exactNorm(arr)
-      : is2DArray(arr)
-        ? matrixNorm(arr as f64[][])
-        : vectorNorm(arr as f64[]),
-  'Array, number': (arr: unknown[], p: f64): unknown =>
-    !isNumberArrayDeep(arr)
-      ? exactNorm(arr, p)
-      : is2DArray(arr)
-        ? matrixNorm(arr as f64[][], p)
-        : vectorNorm(arr as f64[], p),
-  'Array, string': (arr: unknown[], p: string): unknown =>
-    !isNumberArrayDeep(arr) ? exactNorm(arr, p) : matrixNorm(arr as f64[][], p),
-
-  // Matrix norms (mathjs parity): Frobenius / 1 / 2 / ∞.
-  DenseMatrix: (m: unknown): f64 => matrixNorm(matrixLike(m as { toArray(): unknown })),
-  'DenseMatrix, number': (m: unknown, p: f64): f64 =>
-    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
-  'DenseMatrix, string': (m: unknown, p: string): f64 =>
-    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
-  SparseMatrix: (m: unknown): f64 => matrixNorm(matrixLike(m as { toArray(): unknown })),
-  'SparseMatrix, number': (m: unknown, p: f64): f64 =>
-    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
-  'SparseMatrix, string': (m: unknown, p: string): f64 =>
-    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
+  // Array: a flat vector uses the vector norm; a 2-D array is a matrix, whose default is the
+  // 2-norm (largest singular value), as in mathjs. An array with a BigNumber, Fraction or Complex
+  // entry takes the exact factory norm (#1043). A matrix uses the same rows as its array.
+  Array: (arr: unknown[]): unknown => arrayNorm(arr),
+  'Array, number': (arr: unknown[], p: f64): unknown => arrayNorm(arr, p),
+  'Array, string': (arr: unknown[], p: string): unknown => arrayNorm(arr, p),
+  'DenseMatrix | SparseMatrix': (m: { toArray(): unknown }): unknown =>
+    arrayNorm(m.toArray() as unknown[]),
+  'DenseMatrix | SparseMatrix, number | string': (
+    m: { toArray(): unknown },
+    p: f64 | string
+  ): unknown => arrayNorm(m.toArray() as unknown[], p),
 
   // Float64Array norm (Euclidean), synchronous. The worker version is computePool.norm.
   Float64Array: (a: Float64Array): f64 => {

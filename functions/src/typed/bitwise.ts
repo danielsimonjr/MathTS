@@ -21,6 +21,7 @@
  */
 
 import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
+import { mapEachLeaf } from './f64-kernels.js';
 import {
   bitAnd as bitAndOp,
   bitOr as bitOrOp,
@@ -281,6 +282,7 @@ export const bitNot = mathTyped('bitNot', {
   },
 
   Int32Array: (a: Int32Array): Int32Array => i32Unary(a),
+  'Array | Matrix': mapEachLeaf((self, x) => self(x)),
 });
 
 // =============================================================================

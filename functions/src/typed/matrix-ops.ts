@@ -1060,13 +1060,28 @@ function solveApprox(A: number[][], b: number[], n: i32): number[] {
  * const Ap2 = pinv(A, { rcond: 1e-6 });
  */
 export const pinv = mathTyped('pinv', {
+  // The pseudo-inverse of a nonzero scalar is its reciprocal; of zero, zero (mathjs).
+  number: (x: number): number => (x === 0 ? 0 : 1 / x),
+  // A native DenseMatrix goes to the SVD path. A boxed matrix (from `matrix()`) of numbers goes
+  // to the same path and keeps its class; one with another entry type takes the generic path.
   DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => {
-    const nested = denseEntries(A);
-    return nested === null ? matrixPinv(A) : new MathJSDenseMatrix(genericPinv(nested) as never);
+    if (isDenseMatrix(A)) return matrixPinv(A);
+    const nested = boxedEntries(A);
+    return new MathJSDenseMatrix(
+      (isNumberMatrix(nested)
+        ? matrixPinv(DenseMatrix.fromArray(nested)).toArray()
+        : genericPinv(nested)) as never
+    );
   },
   'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) => {
-    if (denseEntries(A) === null) return matrixPinv(A, opts);
-    throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
+    if (isDenseMatrix(A)) return matrixPinv(A, opts);
+    const nested = boxedEntries(A);
+    if (!isNumberMatrix(nested)) {
+      throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
+    }
+    return new MathJSDenseMatrix(
+      matrixPinv(DenseMatrix.fromArray(nested), opts).toArray() as never
+    );
   },
   // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
   // "expected DenseMatrix, actual Array" — the common call form was unsupported.
@@ -1078,16 +1093,10 @@ export const pinv = mathTyped('pinv', {
   },
 });
 
-/**
- * The entries of a boxed dense matrix when one entry is not a number, else `null`.
- * A native DenseMatrix holds numbers only, so it gives `null`.
- */
-function denseEntries(A: unknown): unknown[][] | null {
-  if (isDenseMatrix(A)) return null;
-  const toArray = (A as { toArray?: () => unknown }).toArray;
-  if (typeof toArray !== 'function') return null;
-  const nested = toArray.call(A) as unknown[][];
-  return isNumberMatrix(nested) ? null : nested;
+/** The entries of a boxed dense matrix as a nested array. A 1-D matrix is one row. */
+function boxedEntries(A: unknown): unknown[][] {
+  const entries = (A as { toArray(): unknown[] }).toArray();
+  return (entries.length > 0 && !Array.isArray(entries[0]) ? [entries] : entries) as unknown[][];
 }
 
 /**

@@ -17,6 +17,7 @@
  */
 
 import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
+import { mapEachLeaf } from './f64-kernels.js';
 
 // =============================================================================
 // Internal helpers
@@ -66,6 +67,8 @@ export const not = mathTyped('not', {
   BigNumber: (x: BigNumber): boolean => !isTruthyBigNumber(x),
 
   Complex: (x: Complex): boolean => !isTruthyComplex(x),
+
+  'Array | Matrix': mapEachLeaf((self, x) => self(x)),
 });
 
 // =============================================================================

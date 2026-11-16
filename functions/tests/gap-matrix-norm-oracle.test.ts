@@ -6,8 +6,9 @@ import { matrix } from '../src/factories/index.js';
 /**
  * The public typed `norm` had no matrix support: `norm(matrix, 2)` returned
  * `null`, `norm(matrix, 'fro')` threw, because a 2-D operand fell through to the
- * flat-vector path. Matrix norms added: Frobenius (`'fro'` / default), 1 (max
- * column sum), ∞ (max row sum), 2 (spectral = largest singular value). Oracles
+ * flat-vector path. Matrix norms added: Frobenius (`'fro'`), 1 (max
+ * column sum), ∞ (max row sum), 2 (spectral = largest singular value, the default as in
+ * mathjs). Oracles
  * are exact hand-computed values.
  */
 
@@ -23,8 +24,8 @@ describe('norm — matrix (DenseMatrix + 2-D Array)', () => {
     expect(nm(A, 'fro')).toBeCloseTo(5, 12);
   });
 
-  it('default (no p) = Frobenius', () => {
-    expect(nm(A)).toBeCloseTo(5, 12);
+  it('default (no p) = the 2-norm, as in mathjs (#1034)', () => {
+    expect(nm(A)).toBeCloseTo(4, 9);
   });
 
   it('spectral 2-norm = largest singular value = 4', () => {

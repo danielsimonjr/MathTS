@@ -1369,6 +1369,7 @@
       "functions/src/statistics/variance.ts",
       "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
       "functions/src/type/unit/function/unit.ts",
+      "functions/src/typed/f64-kernels.ts",
       "functions/src/typed/probability.ts",
       "functions/src/utils/isInteger.ts",
       "functions/src/utils/isNaN.ts",
@@ -2642,7 +2643,8 @@
     "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/probability.ts": [
       "functions/src/plain/number/index.ts",
-      "functions/src/stats/multivariate-sampling.ts"
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/typed/probability.ts"
     ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
@@ -2776,7 +2778,9 @@
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/bitwise.ts",
       "functions/src/typed/distributions.ts",
+      "functions/src/typed/logical.ts",
       "functions/src/typed/special.ts",
       "functions/src/typed/trigonometry.ts"
     ],

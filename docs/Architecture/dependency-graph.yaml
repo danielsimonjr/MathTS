@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-16'
   totalFiles: 1337
   totalModules: 82
-  totalExports: 7317
+  totalExports: 7318
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -24277,6 +24277,7 @@ modules:
           imports:
             - f64Unary
             - f64UnaryDispatched
+            - mapEachLeaf
             - unaryCollection
         - file: ../statistics/numeric-data.js
           imports:
@@ -24512,6 +24513,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./f64-kernels.js
+          imports:
+            - mapEachLeaf
         - file: ../wasm/bitwise/wasm-bridge.js
           imports:
             - WASM_BITWISE_THRESHOLD
@@ -25299,6 +25303,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../utils/collection.js
+          imports:
+            - deepMap
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
@@ -25312,12 +25319,14 @@ modules:
         - f64Unary
         - f64UnaryDispatched
         - unaryCollection
+        - mapEachLeaf
       interfaces:
         - UnaryRealSpec
       functions:
         - f64Unary
         - f64UnaryDispatched
         - unaryCollection
+        - mapEachLeaf
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -26449,7 +26458,10 @@ modules:
       description: Typed Logical Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./f64-kernels.js
+          imports:
+            - mapEachLeaf
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -26858,6 +26870,9 @@ modules:
         - file: ../utils/collection.js
           imports:
             - deepMap
+        - file: ../plain/number/probability.js
+          imports:
+            - gammaNumber
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -46211,11 +46226,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1337
   totalModules: 82
-  totalLinesOfCode: 231715
-  totalExports: 7317
+  totalLinesOfCode: 231750
+  totalExports: 7318
   totalClasses: 62
   totalInterfaces: 663
-  totalFunctions: 2533
+  totalFunctions: 2534
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1676

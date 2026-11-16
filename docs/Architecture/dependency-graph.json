@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-16",
     "totalFiles": 1337,
     "totalModules": 82,
-    "totalExports": 7317
+    "totalExports": 7318
   },
   "entryPoints": [
     {
@@ -25835,7 +25835,7 @@
           },
           {
             "file": "./f64-kernels.js",
-            "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
+            "imports": ["f64Unary", "f64UnaryDispatched", "mapEachLeaf", "unaryCollection"]
           },
           {
             "file": "../statistics/numeric-data.js",
@@ -26095,6 +26095,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./f64-kernels.js",
+            "imports": ["mapEachLeaf"]
+          },
           {
             "file": "../wasm/bitwise/wasm-bridge.js",
             "imports": ["WASM_BITWISE_THRESHOLD", "runBinaryBitwiseWasm", "runUnaryBitwiseWasm"]
@@ -26949,6 +26953,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../utils/collection.js",
+            "imports": ["deepMap"]
+          },
+          {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch", "WasmElementwiseOp"]
           }
@@ -26960,9 +26968,9 @@
             "imports": ["mathTyped"]
           }
         ],
-        "exports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"],
+        "exports": ["f64Unary", "f64UnaryDispatched", "unaryCollection", "mapEachLeaf"],
         "interfaces": ["UnaryRealSpec"],
-        "functions": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
+        "functions": ["f64Unary", "f64UnaryDispatched", "unaryCollection", "mapEachLeaf"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -28186,7 +28194,12 @@
         "description": "Typed Logical Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./f64-kernels.js",
+            "imports": ["mapEachLeaf"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -28601,6 +28614,10 @@
           {
             "file": "../utils/collection.js",
             "imports": ["deepMap"]
+          },
+          {
+            "file": "../plain/number/probability.js",
+            "imports": ["gammaNumber"]
           }
         ],
         "workspaceDependencies": [
@@ -48966,11 +48983,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1337,
     "totalModules": 82,
-    "totalLinesOfCode": 231715,
-    "totalExports": 7317,
+    "totalLinesOfCode": 231750,
+    "totalExports": 7318,
     "totalClasses": 62,
     "totalInterfaces": 663,
-    "totalFunctions": 2533,
+    "totalFunctions": 2534,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1676,
