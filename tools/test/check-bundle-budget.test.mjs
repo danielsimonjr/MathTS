@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   compareBudget,
+  duplicateInstalls,
   exceedsTolerance,
   measureBudget,
   staticClosure,
@@ -200,5 +201,50 @@ test('a missing budget file fails instead of passing', () => {
     assert.match(result.stderr, /Missing/);
   } finally {
     fx.cleanup();
+  }
+});
+
+// A package inlined from two install folders at the same version is a stale, un-deduplicated copy
+// (a nested node_modules that the lock no longer names). It made every inlined bundle about 45 KB
+// larger on one machine than in CI, so the budget could not be checked or refreshed there.
+test('duplicateInstalls names a package inlined from two folders at one version', () => {
+  const root = mkdtempSync(join(tmpdir(), 'bundle-dup-'));
+  try {
+    const pkg = (dir, name, version) => {
+      mkdirSync(join(root, dir), { recursive: true });
+      writeFileSync(join(root, dir, 'package.json'), JSON.stringify({ name, version }));
+    };
+    pkg('node_modules/dep', 'dep', '1.0.0');
+    pkg('a/node_modules/dep', 'dep', '1.0.0');
+    pkg('b/node_modules/other', 'other', '1.0.0');
+    pkg('c/node_modules/other', 'other', '2.0.0');
+    const inputs = [
+      'node_modules/dep/index.js',
+      'a/node_modules/dep/lib/x.js',
+      'b/node_modules/other/index.js',
+      'c/node_modules/other/index.js',
+      'core/dist/index.js',
+    ];
+    const dups = duplicateInstalls(root, inputs);
+    assert.equal(dups.length, 1, JSON.stringify(dups));
+    assert.equal(dups[0].name, 'dep');
+    assert.equal(dups[0].version, '1.0.0');
+    assert.deepEqual(dups[0].dirs, ['a/node_modules/dep', 'node_modules/dep']);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('duplicateInstalls reads scoped names and ignores workspace sources', () => {
+  const root = mkdtempSync(join(tmpdir(), 'bundle-dup-'));
+  try {
+    for (const dir of ['node_modules/@s/p', 'x/node_modules/@s/p']) {
+      mkdirSync(join(root, dir), { recursive: true });
+      writeFileSync(join(root, dir, 'package.json'), JSON.stringify({ name: '@s/p', version: '3.0.0' }));
+    }
+    const dups = duplicateInstalls(root, ['node_modules/@s/p/a.js', 'x/node_modules/@s/p/b.js', 'packages/w/dist/i.js']);
+    assert.deepEqual(dups.map((d) => d.name), ['@s/p']);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });

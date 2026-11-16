@@ -169,8 +169,54 @@ globalThis.__keep = [${names.join(', ')}];
     write: false,
     logLevel: 'silent',
     absWorkingDir: root,
+    metafile: true,
   });
+  const dups = duplicateInstalls(root, Object.keys(result.metafile.inputs));
+  if (dups.length > 0) {
+    const lines = dups.map((d) => `  ${d.name}@${d.version}: ${d.dirs.join(', ')}`).join('\n');
+    throw new Error(
+      `bundle "${bundle.import}" inlines a package from more than one install folder:\n${lines}\n` +
+        'A nested copy that bun.lock does not name is stale; remove it, then run bun install.'
+    );
+  }
   return result.outputFiles[0].contents.length;
+}
+
+/**
+ * Packages that a bundle inlines from two or more install folders at the same version. Such a copy
+ * is stale: a nested `node_modules` that the lock no longer names, which `bun install` does not
+ * remove. Each copy is inlined, so the bundle grows by one copy and no longer matches CI. Two
+ * different versions of one name can be correct, so only equal versions are reported.
+ * @param {string} root
+ * @param {string[]} inputs metafile input paths, relative to `root`
+ * @returns {{ name: string, version: string, dirs: string[] }[]}
+ */
+export function duplicateInstalls(root, inputs) {
+  /** @type {Map<string, Set<string>>} */
+  const dirsByName = new Map();
+  for (const input of inputs) {
+    const path = input.replaceAll('\\', '/');
+    const m = path.match(/^(.*?node_modules\/(@[^/]+\/[^/]+|[^/@][^/]*))\//);
+    if (!m) continue;
+    const name = m[2];
+    if (!dirsByName.has(name)) dirsByName.set(name, new Set());
+    dirsByName.get(name).add(m[1]);
+  }
+  const out = [];
+  for (const [name, dirs] of dirsByName) {
+    if (dirs.size < 2) continue;
+    /** @type {Map<string, string[]>} */
+    const byVersion = new Map();
+    for (const dir of dirs) {
+      const manifest = join(root, dir, 'package.json');
+      const version = existsSync(manifest) ? String(JSON.parse(readFileSync(manifest, 'utf8')).version) : '?';
+      byVersion.set(version, [...(byVersion.get(version) ?? []), dir]);
+    }
+    for (const [version, list] of byVersion) {
+      if (list.length > 1) out.push({ name, version, dirs: list.sort() });
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
