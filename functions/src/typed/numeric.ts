@@ -1118,6 +1118,9 @@ export function solveODESystem(
   tspan: [f64, f64],
   opts?: { tol?: f64; maxSteps?: i32; dt?: f64 }
 ): ODESolution {
+  if (!_isNumericTspan(tspan)) {
+    throw new TypeError('solveODESystem: tspan must be a finite numeric pair [tStart, tEnd]');
+  }
   // Adaptive path when no explicit fixed step is requested (embedded RK45 error control).
   if (opts?.dt === undefined) {
     return _adaptiveRK45System(f, y0, tspan, opts?.tol ?? 1e-6, opts?.maxSteps);
@@ -1254,6 +1257,11 @@ export function stiffODESolver(
   }
   if (!Array.isArray(y0) || y0.length === 0 || !y0.every((v) => typeof v === 'number')) {
     throw new TypeError('stiffODESolver: y0 must be a non-empty numeric state vector');
+  }
+  if (!y0.every((v) => Number.isFinite(v))) {
+    throw new RangeError(
+      'stiffODESolver: y0 must contain finite numbers (NaN and Infinity are not allowed)'
+    );
   }
   return rosenbrockSolve((t, y) => f(t as number, y as number[]), tspan, y0, { tol: 1e-7 });
 }

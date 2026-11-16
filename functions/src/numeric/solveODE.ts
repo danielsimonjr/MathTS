@@ -210,6 +210,28 @@ function _fArr(f: ForcingFunction, t: number, y: number[]): number[] {
   return (Array.isArray(r) ? r : [r]) as number[];
 }
 
+function _allFinite(v: number[]): boolean {
+  for (let i = 0; i < v.length; i++) if (!Number.isFinite(v[i])) return false;
+  return true;
+}
+
+function _notFiniteError(method: string, t: unknown): Error {
+  return new Error(`solveODE ${method}: the derivative is not finite at t=${t}`);
+}
+
+function _underflowError(method: string, t: unknown, h: unknown): Error {
+  return new Error(
+    `solveODE ${method}: step size underflow at t=${t} (h=${h}); the step does not advance the independent variable.`
+  );
+}
+
+/** `f` at a point the solver accepts. A non-finite value there cannot be stepped around. */
+function _fAccepted(method: string, f: ForcingFunction, t: number, y: number[]): number[] {
+  const r = _fArr(f, t, y);
+  if (!_allFinite(r)) throw _notFiniteError(method, t);
+  return r;
+}
+
 /** Finite-difference Jacobian ∂fᵢ/∂yⱼ of the forcing function at (t, y), for the stiff method. */
 function _fdJacobian(f: ForcingFunction, t: number, y: number[], f0: number[]): number[][] {
   return numericJacobian((yj) => _fArr(f, t, yj), y, {
@@ -281,6 +303,11 @@ function _normalizeEvents(events: ODEEvents): NormalizedEvent[] {
         terminal: _terminalCount(spec.terminal),
         direction: _directionSign(spec.direction),
       };
+    }
+    if (typeof spec?.event !== 'function') {
+      throw new TypeError(
+        'solveODE: each "events" entry must be a function or an object with an "event" function'
+      );
     }
     return {
       g: spec.event,
@@ -486,9 +513,9 @@ function _linearlyImplicitDriver(
   if (options.firstStep) {
     h = dir * Math.abs(options.firstStep as number);
   } else {
-    const f0 = f(t, y) as number[];
+    const f0 = _fAccepted(name, f, t, y);
     const d0 = _rmsNorm(y);
-    const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
+    const d1 = _rmsNorm(f0);
     h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
   }
 
@@ -501,7 +528,8 @@ function _linearlyImplicitDriver(
   while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
     attempts++;
     if (Math.abs(h) > Math.abs(tf - t)) h = tf - t;
-    const F0 = _fArr(f, t, y);
+    if (t + h === t) throw _underflowError(name, t, h);
+    const F0 = _fAccepted(name, f, t, y);
     const J = _jacobianAt(f, t, y, F0, options);
     const { yNew, err } = step(t, y, h, F0, J);
 
@@ -512,15 +540,16 @@ function _linearlyImplicitDriver(
     }
     errNorm = Math.sqrt(errNorm / n);
 
-    // NaN data gives a NaN error that no step size can control. End the run at tf with the NaN
-    // state, so the loop ends and the NaN propagates (#991).
-    if (Number.isNaN(errNorm)) {
-      tOut.push(tf);
-      yOut.push(y.map(() => NaN));
-      break;
+    // A non-finite trial (a stage outside the domain of f) is rejected and the step shrinks.
+    // At the minimum step no smaller trial exists, so the run fails (#991).
+    const minStepR = options.minStep as number | undefined;
+    const trialFinite = Number.isFinite(errNorm) && _allFinite(yNew);
+    if (!trialFinite) {
+      if (minStepR && Math.abs(h) <= minStepR) throw _underflowError(name, t, h);
+      errNorm = Infinity;
     }
 
-    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
+    if (trialFinite && (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t))) {
       t += h;
       y = yNew;
       tOut.push(t);
@@ -532,7 +561,6 @@ function _linearlyImplicitDriver(
       Math.max(control.shrinkMin, 0.9 * Math.pow(errNorm || 1e-10, control.exponent))
     );
     const maxStepR = options.maxStep as number | undefined;
-    const minStepR = options.minStep as number | undefined;
     if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
     else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
     if (attempts >= attemptCap && (dir > 0 ? t < tf : t > tf)) {
@@ -785,7 +813,8 @@ function _selectInitialStep(
   h0 = Math.min(h0, interval);
   const y1 = y0.map((yi, i) => yi + h0 * dir * f0[i]);
   const f1 = _fArr(f, t0 + h0 * dir, y1);
-  const d2 = _rms(f1.map((v, i) => (v - f0[i]) / scale[i])) / h0;
+  // A non-finite probe value would make the first step NaN; the step control then shrinks it.
+  const d2 = _allFinite(f1) ? _rms(f1.map((v, i) => (v - f0[i]) / scale[i])) / h0 : 0;
   const h1 =
     d1 <= 1e-15 && d2 <= 1e-15
       ? Math.max(1e-6, h0 * 1e-3)
@@ -950,7 +979,7 @@ export function bdfSolve(
 
   let t = t0;
   let y = y0.slice();
-  const f0 = _fArr(f, t, y);
+  const f0 = _fAccepted('BDF', f, t, y);
   let hAbs = options.firstStep
     ? Math.abs(options.firstStep as number)
     : _selectInitialStep(f, t0, y0, tf, maxStep, f0, dir, 1, rtol, atol);
@@ -973,13 +1002,6 @@ export function bdfSolve(
 
   while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
     attempts++;
-    // NaN data (y0 or f) gives a NaN step size, and the step-size check cannot see NaN. End the
-    // run at tf with the NaN state, so the loop ends and the NaN propagates (#991).
-    if (Number.isNaN(hAbs) || y.some((v) => Number.isNaN(v))) {
-      tOut.push(tf);
-      yOut.push(y.map(() => NaN));
-      break;
-    }
     const minStep = _minStep(t);
     if (hAbs > maxStep) {
       _bdfChangeD(D, order, maxStep / hAbs);
@@ -994,7 +1016,7 @@ export function bdfSolve(
     // Jacobian is recomputed at the start of each step (analytic `jac` or finite-difference),
     // reused across the accept/reject retries below — simpler and more robust than scipy's lazy-J
     // (which only refreshes on Newton failure); efficiency-only difference, same numerics.
-    const F0 = _fArr(f, t, y);
+    const F0 = _fAccepted('BDF', f, t, y);
     const J = _jacobianAt(f, t, y, F0, options);
 
     let stepAccepted = false;
@@ -1005,9 +1027,7 @@ export function bdfSolve(
     let scale: number[] = new Array<number>(n).fill(1);
 
     while (!stepAccepted) {
-      if (hAbs < minStep) {
-        throw new Error('Required step size is less than spacing between numbers (BDF)');
-      }
+      if (!(hAbs >= minStep)) throw _underflowError('BDF', t, hAbs);
       let h = hAbs * dir;
       let tNew = t + h;
       if (dir * (tNew - tf) > 0) {
@@ -1047,6 +1067,7 @@ export function bdfSolve(
       const safety = (0.9 * (2 * BDF_NEWTON_MAXITER + 1)) / (2 * BDF_NEWTON_MAXITER + nIter);
       scale = yNew.map((v) => atol + rtol * Math.abs(v));
       errorNorm = _rms(dVec.map((v, i) => (BDF_ERROR_CONST[order] * v) / scale[i]));
+      if (!Number.isFinite(errorNorm)) errorNorm = Infinity;
       if (errorNorm > 1) {
         const factor = Math.max(BDF_MIN_FACTOR, safety * Math.pow(errorNorm, -1 / (order + 1)));
         hAbs *= factor;
@@ -1288,7 +1309,7 @@ export function radauSolve(
   let y = y0.slice();
   let hAbs = options.firstStep
     ? Math.abs(options.firstStep as number)
-    : _selectInitialStep(f, t0, y0, tf, maxStep, _fArr(f, t, y), dir, 3, rtol, atol);
+    : _selectInitialStep(f, t0, y0, tf, maxStep, _fAccepted('Radau', f, t, y), dir, 3, rtol, atol);
   let hAbsOld: number | null = null;
   let errNormOld: number | null = null;
 
@@ -1300,13 +1321,6 @@ export function radauSolve(
 
   while ((dir > 0 ? t < tf : t > tf) && acceptedSteps < maxIter) {
     attempts++;
-    // NaN data (y0 or f) gives a NaN step size, and the step-size check cannot see NaN. End the
-    // run at tf with the NaN state, so the loop ends and the NaN propagates (#991).
-    if (Number.isNaN(hAbs) || y.some((v) => Number.isNaN(v))) {
-      tOut.push(tf);
-      yOut.push(y.map(() => NaN));
-      break;
-    }
     const minStep = _minStep(t);
     let hEntry: number;
     if (hAbs > maxStep) {
@@ -1323,7 +1337,7 @@ export function radauSolve(
       hEntry = hAbs;
     }
 
-    const f0 = _fArr(f, t, y);
+    const f0 = _fAccepted('Radau', f, t, y);
     const J = _jacobianAt(f, t, y, f0, options);
 
     let stepAccepted = false;
@@ -1334,9 +1348,7 @@ export function radauSolve(
     let tNew = t;
 
     while (!stepAccepted) {
-      if (hAbs < minStep) {
-        throw new Error('Required step size is less than spacing between numbers (Radau)');
-      }
+      if (!(hAbs >= minStep)) throw _underflowError('Radau', t, hAbs);
       let h = hAbs * dir;
       tNew = t + h;
       if (dir * (tNew - tf) > 0) tNew = tf;
@@ -1364,11 +1376,16 @@ export function radauSolve(
       errNorm = _rms(error.map((v, r) => v / escale[r]));
       const safety = (0.9 * (2 * RADAU_NEWTON_MAXITER + 1)) / (2 * RADAU_NEWTON_MAXITER + nIter);
 
-      if (rejected && errNorm > 1) {
+      if (!Number.isFinite(errNorm)) errNorm = Infinity;
+      else if (rejected && errNorm > 1) {
         const yErr = y.map((yi, r) => yi + error[r]);
         const fErr = _fArr(f, t, yErr);
-        error = solveErr(fErr.map((v, r) => v + ze[r] - f0[r]));
-        errNorm = _rms(error.map((v, r) => v / escale[r]));
+        const refined = solveErr(fErr.map((v, r) => v + ze[r] - f0[r]));
+        const refinedNorm = _rms(refined.map((v, r) => v / escale[r]));
+        if (Number.isFinite(refinedNorm)) {
+          error = refined;
+          errNorm = refinedNorm;
+        }
       }
 
       if (errNorm > 1) {
@@ -1674,6 +1691,16 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
           const k: unknown[] = [];
 
+          // calculate the first value of k; a non-finite derivative at an accepted point fails
+          k.push(f(t[n] as MathNumericType, y[n] as MathNumericType | MathArray));
+          if (
+            (Array.isArray(k[0]) ? k[0] : [k[0]]).some(
+              (v) => typeof v === 'number' && !Number.isFinite(v)
+            )
+          ) {
+            throw _notFiniteError(rkMethod, t[n]);
+          }
+
           // trim the time step so that it doesn't overshoot
           h = trimStep(t[n], tf, h);
           if (typeof h === 'number' && typeof t[n] === 'number') {
@@ -1687,9 +1714,6 @@ export const createSolveODE = /* #__PURE__ */ factory(
             }
           }
 
-          // calculate the first value of k
-          k.push(f(t[n] as MathNumericType, y[n] as MathNumericType | MathArray));
-
           // calculate the rest of the values of k
           for (let i = 1; i < (c as unknown[]).length; ++i) {
             k.push(f(add(t[n], multiply(c[i], h)), add(y[n], multiply(h, stageCombo(a[i], k)))));
@@ -1698,14 +1722,14 @@ export const createSolveODE = /* #__PURE__ */ factory(
           // estimate the error by comparing solutions of different orders
           const errComb = stageCombo(deltaB, k);
           const errArr = Array.isArray(errComb) ? errComb : [errComb];
-          // NaN data (y0 or f) gives a NaN error, and no step size can then be chosen. End the run
-          // at tspan's end with the NaN state, so the loop ends and the NaN propagates (#991).
-          if (errArr.some((v) => typeof v === 'number' && Number.isNaN(v))) {
-            t.push(tf);
-            y.push((y[n] as unknown[]).map(() => NaN));
-            break;
+          // A non-finite trial is rejected (TE = Infinity) and the step shrinks (#991).
+          const trialBad = errArr.some((v) => typeof v === 'number' && !Number.isFinite(v));
+          if (trialBad && minStep && !larger(abs(h), minStep)) {
+            throw _underflowError(rkMethod, t[n], h);
           }
-          const TE = max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
+          const TE = trialBad
+            ? Infinity
+            : max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
 
           if (TE < tol && tol / TE > 1 / 4) {
             // push solution if within tol
@@ -1820,7 +1844,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     function _checkTspan(tspan: unknown[]): void {
       const wrongShape = !(tspan.length === 2 && (tspan.every(isNumOrBig) || tspan.every(isUnit)));
       if (wrongShape) {
-        throw new Error(
+        throw new TypeError(
           '"tspan" must be an Array of two numeric values or two units [tStart, tEnd]'
         );
       }
@@ -1830,7 +1854,9 @@ export const createSolveODE = /* #__PURE__ */ factory(
           : isBigNumber(v) && !(v as unknown as BigNumber).isFinite()
       );
       if (nonFinite) {
-        throw new Error('"tspan" must contain finite numbers (NaN and Infinity are not allowed)');
+        throw new RangeError(
+          '"tspan" must contain finite numbers (NaN and Infinity are not allowed)'
+        );
       }
     }
 
@@ -1859,6 +1885,17 @@ export const createSolveODE = /* #__PURE__ */ factory(
       };
       if (method.toUpperCase() in methods) {
         _checkTspan(tspan);
+        if (opt.events !== undefined) _normalizeEvents(opt.events);
+        const y0NonFinite = y0.some((v) =>
+          isNumber(v)
+            ? !Number.isFinite(v)
+            : isBigNumber(v) && !(v as unknown as BigNumber).isFinite()
+        );
+        if (y0NonFinite) {
+          throw new RangeError(
+            '"y0" must contain finite numbers (NaN and Infinity are not allowed)'
+          );
+        }
         const methodOptions = { ...opt }; // clone the options object
         delete methodOptions.method; // delete the method as it won't be needed
         const sol = methods[method.toUpperCase() as keyof typeof methods](
