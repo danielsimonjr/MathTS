@@ -248,6 +248,8 @@ function _besselY1(x: f64): f64 {
 // as in the JS scalar. The bridge keeps an order that would abort on the JS path, so it never
 // calls a kernel that would abort.
 const _BESSEL_J_MAX_SWEEP: f64 = 1200000000.0;
+// 2^-700, the exact rescale factor of the downward sweep. A constant, so no call computes it.
+const _BESSEL_J_DOWN: f64 = 1.90109156629516e-211;
 
 function _besselJn(n: i32, x: f64): f64 {
   // -n overflows for the smallest i32, and that order has no i32 absolute value.
@@ -285,7 +287,6 @@ function _besselJn(n: i32, x: f64): f64 {
     throw new RangeError('besselJ: the downward sweep exceeds the supported maximum');
   }
   const nStart: i32 = <i32>nStartF;
-  const down: f64 = Math.pow(2.0, -700.0);
   let jNext: f64 = 0.0;
   let jCurr: f64 = 1.0;
   let resultVal: f64 = 0.0;
@@ -298,9 +299,9 @@ function _besselJn(n: i32, x: f64): f64 {
     // The sweep grows as it goes down. Scaling by a power of 2 is exact, so it keeps the
     // sums finite. `resultVal` keeps its own scale, so it cannot underflow here.
     if (Math.abs(jCurr) > 1e200) {
-      jCurr *= down;
-      jNext *= down;
-      sum *= down;
+      jCurr *= _BESSEL_J_DOWN;
+      jNext *= _BESSEL_J_DOWN;
+      sum *= _BESSEL_J_DOWN;
       // Three shifts leave a value below 2^-1399, which is 0 (same bound as the JS scalar).
       if (k < ni) {
         shifts++;
@@ -313,7 +314,7 @@ function _besselJn(n: i32, x: f64): f64 {
   }
   sum = 2.0 * sum - jCurr;
   let r: f64 = resultVal / sum;
-  for (let i: i32 = 0; i < shifts && r != 0.0; i++) r *= down;
+  for (let i: i32 = 0; i < shifts && r != 0.0; i++) r *= _BESSEL_J_DOWN;
   return sign * r;
 }
 

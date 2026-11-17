@@ -29556,6 +29556,9 @@ modules:
         - file: ../policy.js
           imports:
             - wasmPolicyAllows
+        - file: ../../utils/limits.js
+          imports:
+            - MAX_BESSEL_J_SWEEP
       workspaceDependencies: []
       exports:
         - WASM_SPECIAL_THRESHOLD
@@ -46557,7 +46560,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 233644
+  totalLinesOfCode: 233734
   totalExports: 7346
   totalClasses: 62
   totalInterfaces: 666

@@ -267,6 +267,8 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
 /** Encode a double so that JSON keeps -0, NaN and the infinities. */
 const ENCODE = `(v) => (Object.is(v, -0) ? '-0' : String(v))`;
 const decode = (v: string): number => (v === '-0' ? -0 : Number(v));
+/** Format a double for a failure message; String(-0) is '0'. */
+const fmt = (v: number): string => (Object.is(v, -0) ? '-0' : String(v));
 
 /**
  * Call `bessel_jn_f64(n, xs)` once per order in a child process, with a time limit. Returns
@@ -320,9 +322,10 @@ describeIfBindings('#1113 kernel: early exits and signs match the JS scalar', ()
     cases.forEach(([n, xs], i) => {
       const want = besselJnJS(n, new Float64Array(xs));
       xs.forEach((x, j) => {
-        expect(Object.is(got![i][j], want[j]), `J_${n}(${x}): ${got![i][j]} vs ${want[j]}`).toBe(
-          true
-        );
+        expect(
+          Object.is(got![i][j], want[j]),
+          `J_${n}(${x}): ${fmt(got![i][j])} vs ${fmt(want[j])}`
+        ).toBe(true);
       });
     });
     // The JS path gives -0 for a negative odd order, so the kernel must too.
