@@ -77,6 +77,7 @@ describe('parallel callback helpers on the worker path (#1027)', () => {
     const r = await parallelForEach(data, () => {}, opts);
     expect(r.parallelized).toBe(true);
     expect(r.result.length).toBe(data.length);
+    expect(r.result.every((v) => v === undefined)).toBe(true);
   });
 
   it('parallelEvery and parallelForEach keep the sequential path correct', async () => {
@@ -87,9 +88,67 @@ describe('parallel callback helpers on the worker path (#1027)', () => {
   });
 
   it('parallelEvery keeps a closure on the sequential path', async () => {
-    const limit = 10;
+    // A mutable binding: Bun inlines a `const` number into the callback source, and the
+    // callback then captures nothing.
+    let limit = 0;
+    limit += 10;
     const r = await parallelEvery([1, 2, 3], (x) => x < limit, { pool, forceSequential: true });
     expect(r.result).toBe(true);
+    const below = await parallelEvery([1, 2, 30], (x) => x < limit, { pool });
+    expect(below.parallelized).toBe(false);
+    expect(below.result).toBe(false);
+  });
+
+  it('parallelEvery stops at the first failing item on the sequential path', async () => {
+    let calls = 0;
+    const r = await parallelEvery(
+      data,
+      (x) => {
+        calls++;
+        return x < 3;
+      },
+      { pool, forceSequential: true }
+    );
+    expect(r.result).toBe(false);
+    expect(calls).toBe(4);
+  });
+
+  it('rejects a closure on the worker path, as parallelMap does', async () => {
+    let limit = 0;
+    limit += 5000;
+    const usesOuter = (x: number) => x < limit;
+    await expect(parallelMap(data, usesOuter, opts)).rejects.toThrow('limit is not defined');
+    await expect(parallelEvery(data, usesOuter, opts)).rejects.toThrow('limit is not defined');
+    await expect(
+      parallelForEach(
+        data,
+        (x) => {
+          void (x < limit);
+        },
+        opts
+      )
+    ).rejects.toThrow('limit is not defined');
+  });
+
+  it('parallelEvery gives the worker a named function and a parameter named item', async () => {
+    const named = await parallelEvery(
+      data,
+      function atLeastZero(x) {
+        return x >= 0;
+      },
+      opts
+    );
+    expect(named.result).toBe(true);
+    expect((await parallelEvery(data, (item) => item !== 3000, opts)).result).toBe(false);
+  });
+
+  it('leaves the toString of the user callback unchanged', async () => {
+    const predicate = (x: number) => x >= 0;
+    const each = (_x: number) => {};
+    await parallelEvery(data, predicate, opts);
+    await parallelForEach(data, each, opts);
+    expect(Object.hasOwn(predicate, 'toString')).toBe(false);
+    expect(Object.hasOwn(each, 'toString')).toBe(false);
   });
 
   it('parallelForEach keeps a closure on the sequential path', async () => {
@@ -151,6 +210,7 @@ describe('ComputePool.workerCount after terminate (#1016)', () => {
       expect(pool.stats().totalWorkers).toBe(0);
       expect(pool.workerCount).toBe(0);
       expect(pool.isReady()).toBe(false);
+      await expect(pool.map([1], (x) => x)).rejects.toThrow('ComputePool has been terminated');
       await pool.initialize();
       expect(pool.workerCount).toBe(3);
     } finally {

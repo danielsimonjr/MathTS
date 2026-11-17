@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3064
+      "loc": 3065
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -15304,7 +15304,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 174
+      "loc": 234
     },
     {
       "file": "parallel/tests/chunk.test.ts",
