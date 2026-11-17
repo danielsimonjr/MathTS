@@ -327,11 +327,14 @@ export const createRange = /* #__PURE__ */ factory(
       const asNumber = (v: unknown): number =>
         typeof v === 'number'
           ? v
-          : v !== null && typeof (v as { toNumber?: unknown }).toNumber === 'function'
-            ? (v as { toNumber(): number }).toNumber()
-            : NaN;
+          : typeof v === 'bigint'
+            ? Number(v)
+            : v !== null && typeof (v as { toNumber?: unknown }).toNumber === 'function'
+              ? (v as { toNumber(): number }).toNumber()
+              : NaN;
       const span = (asNumber(end) - asNumber(start)) / asNumber(step);
-      if (span >= 0) assertAllocSize('range', [Math.floor(span) + 1]);
+      if (span >= 0)
+        assertAllocSize('range', [includeEnd ? Math.floor(span) + 1 : Math.ceil(span)]);
       let x = start;
       while (ongoing(x, end)) {
         array.push(x);

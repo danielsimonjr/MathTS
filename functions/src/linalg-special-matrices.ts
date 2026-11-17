@@ -48,7 +48,7 @@ export function invHilbertMatrix(n: number): number[][] {
  * @throws RangeError if n is not a positive power of 2, or if n by n exceeds the element limit
  */
 export function hadamardMatrix(n: number): number[][] {
-  if (!Number.isSafeInteger(n) || n < 1 || !Number.isInteger(Math.log2(n))) {
+  if (!Number.isSafeInteger(n) || n < 1 || 2 ** Math.round(Math.log2(n)) !== n) {
     throw new RangeError(`hadamardMatrix: n must be a power of 2, got ${n}`);
   }
   assertAllocSize('hadamardMatrix', [n, n]);
