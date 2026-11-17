@@ -1282,6 +1282,7 @@ export function windowFunction(n: i32 | string, type?: string | i32): number[] {
 }
 
 function windowFunctionCore(n: i32, type: string): number[] {
+  assertAllocSize('windowFunction', [n]);
   const w: number[] = new Array(n);
   const N1: f64 = n - 1;
   if (n === 1) {

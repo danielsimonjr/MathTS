@@ -32,7 +32,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
-import { assertLoopOrder } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
@@ -336,9 +336,10 @@ type Draw = (...args: number[]) => unknown;
  * A signature that takes a size (an Array or a Matrix of dimension lengths). The signature fills
  * an array of that size with draws of the typed function itself. A Matrix size gives a matrix.
  */
-function sized(draw: (self: Draw, ...args: number[]) => unknown) {
+function sized(fn: string, draw: (self: Draw, ...args: number[]) => unknown) {
   return mathTyped.referToSelf((self) => (size: unknown[] | Matrix, ...args: number[]) => {
     const dims = (Array.isArray(size) ? size : (size.toArray() as unknown[])) as number[];
+    assertAllocSize(fn, dims);
     const fill = (d: number): unknown =>
       d === dims.length
         ? draw(self as Draw, ...args)
@@ -359,9 +360,9 @@ export const random = mathTyped('random', {
     return min + _rng() * (max - min);
   },
   // A size (an Array or a Matrix) gives an array of that size, as in mathjs.
-  'Array | Matrix': sized((self) => self()),
-  'Array | Matrix, number': sized((self, max) => self(max)),
-  'Array | Matrix, number, number': sized((self, min, max) => self(min, max)),
+  'Array | Matrix': sized('random', (self) => self()),
+  'Array | Matrix, number': sized('random', (self, max) => self(max)),
+  'Array | Matrix, number, number': sized('random', (self, min, max) => self(min, max)),
 });
 
 /**
@@ -393,9 +394,9 @@ export const randomInt = mathTyped('randomInt', {
     if (max <= min) throw new RangeError('max must be greater than min');
     return Math.floor(min + _rng() * (max - min));
   },
-  'Array | Matrix': sized((self) => self()),
-  'Array | Matrix, number': sized((self, max) => self(max)),
-  'Array | Matrix, number, number': sized((self, min, max) => self(min, max)),
+  'Array | Matrix': sized('randomInt', (self) => self()),
+  'Array | Matrix, number': sized('randomInt', (self, max) => self(max)),
+  'Array | Matrix, number, number': sized('randomInt', (self, min, max) => self(min, max)),
 });
 
 /**

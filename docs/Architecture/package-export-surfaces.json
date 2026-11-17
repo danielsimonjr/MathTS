@@ -1678,6 +1678,7 @@
       "asReadReturnedI32",
       "assertAllocSize",
       "assertDependencies",
+      "assertFormatPrecision",
       "assertLoopOrder",
       "assertNumberScalar",
       "assertNumpyQuantileMethod",

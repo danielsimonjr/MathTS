@@ -98,7 +98,7 @@ export function mvnSample(
   if (!Number.isInteger(n) || n < 1) throw new Error('mvnSample: n must be a positive integer');
   const { meanArr, covArr } = normalizeMvnInputs(mean, cov);
   const k = meanArr.length;
-  assertAllocSize('mvnSample', [n, k]);
+  assertAllocSize('mvnSample', [n, k + 8]);
   const { L } = cholesky(covArr);
   const rng = createRng(opts?.seed ?? null);
 

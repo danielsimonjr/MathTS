@@ -1,6 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { isNumber } from '../utils/is.js';
-import { assertAllocSize } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 
@@ -27,6 +27,12 @@ interface StirlingS2Dependencies {
 
 /** Largest table (rows times columns) that the call keeps in the shared cache. */
 const CACHE_MAX_ENTRIES = 1_000_000;
+
+/** Largest BigNumber table (rows times columns) that the call keeps in the shared cache. */
+const BIG_CACHE_MAX_ENTRIES = 10_000;
+
+/** Largest BigNumber table (rows times columns) that the call computes. */
+const BIG_MAX_ENTRIES = 300_000;
 
 const name = 'stirlingS2';
 const dependencies = [
@@ -113,16 +119,21 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
         if (cache[nn] && cache[nn].length > nk) {
           return cache[nn][nk];
         }
+        if (big) {
+          assertLoopOrder('stirlingS2', '(n + 1) * (k + 1)', (nn + 1) * (nk + 1), BIG_MAX_ENTRIES);
+        }
         assertAllocSize('stirlingS2', [nn + 1, nk + 1]);
         /* A large table is computed row by row and is not kept, so memory stays O(k). */
-        if ((nn + 1) * (nk + 1) > CACHE_MAX_ENTRIES) {
+        if ((nn + 1) * (nk + 1) > (big ? BIG_CACHE_MAX_ENTRIES : CACHE_MAX_ENTRIES)) {
           let prev: NumericValue[] = [make(1)];
           for (let m = 1; m <= nn; ++m) {
             const row: NumericValue[] = [make(0)];
             for (let i = 1; i <= m && i <= nk; ++i) {
-              row[i] = i === m ? 1 : addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1]);
+              row[i] = i === m ? make(1) : addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1]);
             }
             prev = row;
+            /* S(m, k) does not decrease in m, so an Infinity stays Infinity. */
+            if (!big && m >= nk && row[nk] === Infinity) return Infinity;
           }
           return prev[nk];
         }
@@ -136,7 +147,7 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
           const prev = cache[m - 1];
           for (let i = row.length; i <= m && i <= nk; ++i) {
             if (i === m) {
-              row[i] = 1;
+              row[i] = make(1);
             } else {
               row[i] = addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1]);
             }
