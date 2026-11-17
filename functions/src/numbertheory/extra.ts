@@ -173,6 +173,42 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
 const MAX_BABY_STEPS = 2 ** 24;
 
 /**
+ * Discrete logarithm for a modulus too large for the baby-step table: walk the powers of
+ * `g` up to its order, when that order is at most {@link MAX_BABY_STEPS}.
+ *
+ * @throws RangeError if the order of `g` is above the limit (or `g` and `p` share a factor)
+ */
+function discreteLogSmallOrder(
+  G: bigint,
+  H: bigint,
+  P: bigint,
+  p: number,
+  mNumber: number
+): number {
+  let order = 0;
+  let c = G;
+  for (let j = 1; j <= MAX_BABY_STEPS; j++) {
+    if (c === 1n) {
+      order = j;
+      break;
+    }
+    c = (c * G) % P;
+  }
+  if (order === 0) {
+    throw new RangeError(
+      `discreteLog: p = ${p} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
+    );
+  }
+  const target = Number(H);
+  let cur = 1n;
+  for (let j = 0; j < order; j++) {
+    if (Number(cur) === target) return j;
+    cur = (cur * G) % P;
+  }
+  return -1;
+}
+
+/**
  * Discrete logarithm via baby-step giant-step: the smallest `x >= 0` such
  * that `g^x === h (mod p)`, or `-1` if none exists within `[0, p-1]`.
  *
@@ -184,6 +220,8 @@ const MAX_BABY_STEPS = 2 ** 24;
  * @param h - Target
  * @param p - Prime modulus
  * @returns The smallest non-negative `x` with `g^x === h (mod p)`, or `-1`
+ * @throws RangeError if `p` is not a safe integer, or if `p` needs more than 2^24 baby
+ *   steps and the order of `g` is above 2^24
  *
  * @example
  * discreteLog(2, 3, 5) // => 3   (2^3 = 8 === 3 mod 5)
@@ -192,16 +230,17 @@ export function discreteLog(g: number, h: number, p: number): number {
   if (!Number.isInteger(g) || !Number.isInteger(h) || !Number.isInteger(p) || p < 2) {
     throw new Error('discreteLog requires integer g, h and a modulus p >= 2');
   }
-  const mNumber = Math.max(1, Math.ceil(Math.sqrt(p - 1)));
-  // A Map holds at most 2^24 entries, so a larger table cannot exist (and p must stay below 2^53).
-  if (mNumber > MAX_BABY_STEPS) {
-    throw new RangeError(
-      `discreteLog: p = ${p} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
-    );
+  // Every residue must convert to a number key exactly.
+  if (!Number.isSafeInteger(p)) {
+    throw new RangeError('discreteLog: p must be a safe integer (at most 9007199254740991)');
   }
+  const mNumber = Math.max(1, Math.ceil(Math.sqrt(p - 1)));
   const P = BigInt(p);
   const G = ((BigInt(g) % P) + P) % P;
   const H = ((BigInt(h) % P) + P) % P;
+  // A Map holds at most 2^24 entries, so a larger table cannot exist. Find the order L of g
+  // first, with no table: L <= 2^24 means g^0 .. g^(L-1) are all the values that g reaches.
+  if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, p, mNumber);
   const m = BigInt(mNumber);
 
   // Baby steps: g^j mod p for j = 0..m-1, keeping the smallest j per value.

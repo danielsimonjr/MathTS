@@ -14,8 +14,8 @@
 
 import { assertLoopOrder } from '../utils/limits.js';
 
-/** Largest `n` for `rootsLegendre` (the cost grows with n squared: n = 10000 takes about 15 s). */
-const MAX_LEGENDRE_NODES = 10_000;
+/** Largest `n` for `rootsLegendre` (the cost grows with n squared: n = 14000 took 20.7 s). */
+const MAX_LEGENDRE_NODES = 14_000;
 
 const NEWTON_MAX_ITERATIONS = 100;
 const NEWTON_TOLERANCE = 1e-15;

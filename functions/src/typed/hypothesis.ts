@@ -47,8 +47,8 @@ import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
 import { assertLoopOrder } from '../utils/limits.js';
 
-/** Largest `n` that `binomialTest` sums (4e7 terms take about 18 s). */
-const MAX_BINOMIAL_TEST_N = 40_000_000;
+/** Largest `n` that `binomialTest` accepts (`binomialTest(5e10 + 1e5, 1e11)` takes 7.1 s). */
+const MAX_BINOMIAL_TEST_N = 100_000_000_000;
 
 // =============================================================================
 // Type Definitions
@@ -1721,9 +1721,17 @@ export function binomialTest(
   // not sum to exactly 1 (the sum is 0.9999999999998926 at n = 1000). Divide
   // the included mass by the computed total: the common error cancels, and
   // when every outcome is included the two sums are the same float, so p = 1.
+  // Every k with |k - n p| > sqrt(375 n) has pmf <= exp(-2 (k - n p)^2 / n) < e^-750
+  // (Hoeffding), which the log-gamma pmf rounds to exactly 0. The loop skips those terms,
+  // so the sums do not change. A NaN or out-of-range p keeps the whole range.
+  const half = Math.sqrt(375 * n) + 1;
+  const centre = n * p;
+  const inRange = p > 0 && p < 1;
+  const lo = inRange ? Math.max(0, Math.floor(centre - half)) : 0;
+  const hi = inRange ? Math.min(n, Math.ceil(centre + half)) : n;
   let included = 0;
   let total = 0;
-  for (let k = 0; k <= n; k++) {
+  for (let k = lo; k <= hi; k++) {
     const pk = _binomPmf(k, n, p);
     total += pk;
     if (pk <= dObs * rel) included += pk;

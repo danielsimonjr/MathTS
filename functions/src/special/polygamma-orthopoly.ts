@@ -26,8 +26,8 @@
 import { digamma } from '../typed/special.js';
 import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
 
-/** Largest argument shift that `polygamma` runs (1e9 steps take about 11 s). */
-const MAX_POLYGAMMA_SHIFT = 1_500_000_000;
+/** Largest argument shift that `polygamma` runs (a shift of 2.5e9 took 24.2 s). */
+const MAX_POLYGAMMA_SHIFT = 2_000_000_000;
 
 /** Argument threshold above which the Bernoulli asymptotic series is accurate. */
 const SHIFT_THRESHOLD = 12;

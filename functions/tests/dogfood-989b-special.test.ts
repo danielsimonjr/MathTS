@@ -39,22 +39,65 @@ import {
 import { mathieuA, mathieuB, mathieuCe, mathieuSe } from '../src/special/mathieu.js';
 import { discreteLog } from '../src/numbertheory/extra.js';
 import { gaussQuad } from '../src/typed/integration.js';
+import { workerKernel } from '../src/typed/worker-kernels.js';
+import { MAX_RECURRENCE_ORDER } from '../src/utils/limits.js';
 
 const MAX = Number.MAX_VALUE;
-const RECURRENCE = /exceeds the supported maximum of 1000000000/;
+const RECURRENCE = new RegExp(`exceeds the supported maximum of ${MAX_RECURRENCE_ORDER}$`);
+const CHEBYSHEV = /exceeds the supported maximum of 4000000000$/;
 
-describe('three-term recurrences refuse an order above 1e9 (#989)', () => {
+/** Relative error of `got` against a reference value. */
+function rel(got: unknown, want: number): number {
+  return Math.abs((got as number) / want - 1);
+}
+
+describe('three-term recurrences refuse an order above the limit (#989)', () => {
+  it('the limit is 2.5e9', () => {
+    expect(MAX_RECURRENCE_ORDER).toBe(2_500_000_000);
+  });
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
     ['besselY', () => besselY(MAX, 2)],
-    ['besselK', () => besselK(MAX, 2)],
-    ['chebyshevT', () => chebyshevT(MAX, 0.5)],
-    ['hermiteH', () => hermiteH(MAX, MAX)],
     ['laguerreL', () => laguerreL(MAX, 0.5)],
     ['legendreP', () => legendreP(MAX, 0.5)],
   ])('%s(MAX, x) throws a RangeError (hang before the fix)', (_name, call) => {
     expect(call).toThrow(RangeError);
     expect(call).toThrow(RECURRENCE);
+  });
+  it('chebyshevT has its own limit of 4e9 (hang before the fix)', () => {
+    expect(() => chebyshevT(MAX, 0.5)).toThrow(CHEBYSHEV);
+    expect(() => chebyshevT(4e9 + 1, 0.5)).toThrow(CHEBYSHEV);
+  });
+  it.each(['besselJ', 'besselY', 'laguerreL', 'legendreP'])(
+    'the %s worker kernel holds the shared limit',
+    (name) => {
+      expect(workerKernel(name, 5)).toContain(String(MAX_RECURRENCE_ORDER));
+    }
+  );
+  it('the chebyshevT worker kernel holds its limit', () => {
+    expect(workerKernel('chebyshevT', 5)).toContain('4000000000');
+  });
+  it('besselK(MAX, 2) is Infinity at the first overflow (no order limit)', () => {
+    expect(besselK(MAX, 2)).toBe(Infinity);
+  });
+  it('besselK(MAX, 1e4) is 0 at two zeros in a row (no order limit)', () => {
+    expect(besselK(MAX, 1e4)).toBe(0);
+  });
+  it('hermiteH(MAX, MAX) is NaN at the first NaN (no order limit)', () => {
+    expect(hermiteH(MAX, MAX)).toBeNaN();
+  });
+  it('besselJ(-1e9 - 5, 3) is -0 at once (NaN after 9.6 s before the fix)', () => {
+    expect(besselJ(-1e9 - 5, 3)).toBe(-0);
+  });
+  it.each([
+    [10, 1e-10, 2.691144455467373e-110],
+    [30, 1e-6, 3.511074584737299e-222],
+    [20, 1e-6, 3.919904349624741e-145],
+    [50, 1e-3, 2.920285702604064e-230],
+    [200, 5, 4.76001008800229e-296],
+    [5, 1e-10, 2.6041666666666672e-54],
+  ])('besselJ(%d, %d) matches mpmath', (n, x, want) => {
+    expect(rel(besselJ(n, x), want)).toBeLessThan(1e-12);
   });
 
   it('legendreP(1e7, 0.5) matches SciPy', () => {
@@ -65,10 +108,6 @@ describe('three-term recurrences refuse an order above 1e9 (#989)', () => {
   });
   it('besselJ(1e9, 5) is 0 once the downward sweep overflows (hang before the fix)', () => {
     expect(besselJ(1e9, 5)).toBe(0);
-  });
-  it('besselJ(200, 5) and besselJ(5, 1e-10) match mpmath (NaN before the fix)', () => {
-    expect(Math.abs((besselJ(200, 5) as number) / 4.76001008800229e-296 - 1)).toBeLessThan(1e-12);
-    expect(Math.abs((besselJ(5, 1e-10) as number) / 2.604166666666667e-54 - 1)).toBeLessThan(1e-12);
   });
   it('besselJ keeps its non-finite order rule', () => {
     expect(besselJ(Infinity, 1)).toBeNaN();
@@ -145,15 +184,22 @@ describe('sums and exponential integrals (#989)', () => {
   it('expn(2, 1) is unchanged', () => {
     expect(expn(2, 1)).toBeCloseTo(0.14849550677592205, 14);
   });
-  it('siegelZ(1e6) refuses the height (hang before the fix)', () => {
-    expect(() => siegelZ(1e6)).toThrow(RangeError);
+  it('siegelZ(1e6) is NaN at once: the Borwein coefficients overflow (hang before the fix)', () => {
+    expect(siegelZ(1e6)).toBeNaN();
   });
   it('siegelZ(15) is unchanged', () => {
     expect(siegelZ(15)).toBeCloseTo(0.7199423913, 6);
   });
-  it('zipfPMF(1, 1, 1e12) and binomialTest(1e9, 1e9) refuse n (hang before the fix)', () => {
-    expect(() => zipfPMF(1, 1, 1e12)).toThrow(RangeError);
-    expect(() => binomialTest(1e9, 1e9)).toThrow(RangeError);
+  it('zipfPMF(1, 1, 1e12) matches mpmath (hang before the fix)', () => {
+    expect(rel(zipfPMF(1, 1, 1e12), 0.03545063832843207)).toBeLessThan(1e-13);
+  });
+  it('binomialTest(1e9, 1e9) returns (hang before the fix)', () => {
+    const r = binomialTest(1e9, 1e9);
+    expect(r.statistic).toBe(1);
+    expect(r.pValue).toBe(0);
+  });
+  it('binomialTest refuses n above 1e11', () => {
+    expect(() => binomialTest(5, 1e11 + 2)).toThrow(RangeError);
   });
   it('zipfPMF(1, 1, 3) is 6/11', () => {
     expect(zipfPMF(1, 1, 3)).toBeCloseTo(6 / 11, 14);
@@ -171,8 +217,11 @@ describe('node rules and quadrature (#989)', () => {
     expect(() => gaussHermiteIntegrate((x) => x, 1e9)).toThrow(RangeError);
   });
   it('gaussQuad refuses a huge or infinite n (hang before the fix)', () => {
-    expect(() => gaussQuad((x) => x, 0, 1, 1e9)).toThrow(RangeError);
+    expect(() => gaussQuad((x) => x, 0, 1, 1e10)).toThrow(RangeError);
     expect(() => gaussQuad((x) => x, 0, 1, Infinity)).toThrow(RangeError);
+  });
+  it('gaussQuad gives NaN for a NaN interval count', () => {
+    expect(gaussQuad((x) => x, 0, 1, NaN)).toBeNaN();
   });
   it('gaussQuad(x => x, 0, 1, 1000) is 1/2', () => {
     expect(gaussQuad((x) => x, 0, 1, 1000)).toBeCloseTo(0.5, 12);
@@ -198,6 +247,14 @@ describe('Mathieu order and discrete logarithm (#989)', () => {
   it('discreteLog refuses a modulus that needs more than 2^24 baby steps (hang before the fix)', () => {
     const s = 2 ** 53 - 1;
     expect(() => discreteLog(s, s, s)).toThrow(RangeError);
+  });
+  it('discreteLog finds a small order of g first for a large p (RangeError before the fix)', () => {
+    expect(discreteLog(50154588067499, 266974891273491, 282000011339987)).toBe(12345);
+    expect(discreteLog(1, 1, 1e15 + 37)).toBe(0);
+    expect(discreteLog(1, 2, 1e15 + 37)).toBe(-1);
+  });
+  it('discreteLog refuses a p above 2^53 - 1', () => {
+    expect(() => discreteLog(2, 3, 2 ** 53 + 2)).toThrow(RangeError);
   });
   it('discreteLog keeps its small answers', () => {
     expect(discreteLog(2, 3, 5)).toBe(3);

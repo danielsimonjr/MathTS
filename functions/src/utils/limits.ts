@@ -16,9 +16,10 @@ export const MAX_LOOP_ORDER = 10_000_000;
 /**
  * Maximum order that a cheap scalar three-term recurrence accepts.
  *
- * One step costs about 10 to 20 ns, so a recurrence of this order runs for about 10 to 20 s.
+ * The limit is the order where the slowest of these recurrences ran for about 20 s before
+ * the limit existed (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s).
  */
-export const MAX_RECURRENCE_ORDER = 1_000_000_000;
+export const MAX_RECURRENCE_ORDER = 2_500_000_000;
 
 /**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
