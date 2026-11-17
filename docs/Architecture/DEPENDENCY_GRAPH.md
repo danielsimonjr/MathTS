@@ -7994,7 +7994,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `QuadOptions`, `QuadResult`
-- Functions: `checkFiniteLimits`, `quad`
+- Functions: `checkFiniteLimits`, `quad`, `quadValue`
 
 ---
 
@@ -11618,7 +11618,7 @@ graph LR
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                              | Import |
 | `../plain/number/arithmetic.js`  | `gcdNumber`                                                                       | Import |
 | `../cas/real-roots.js`           | `realRoots`                                                                       | Import |
-| `../numeric/adaptive-quad.js`    | `quad`                                                                            | Import |
+| `../numeric/adaptive-quad.js`    | `quadValue`                                                                       | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                    | Import |
 | `./numeric.js`                   | `findRoot`                                                                        | Import |
 
@@ -12308,7 +12308,7 @@ graph LR
 | `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/ode-step-limit.js`     | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
-| `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
+| `../numeric/adaptive-quad.js`      | `quadValue`                                                                                                                        | Import    |
 | `../optimization-extra.js`         | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
 | `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
 | `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
@@ -21437,12 +21437,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1338   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232227 |
-| Total Exports           | 7321   |
+| Total Lines of Code     | 232319 |
+| Total Exports           | 7322   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 664    |
-| Total Functions         | 2537   |
+| Total Functions         | 2538   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

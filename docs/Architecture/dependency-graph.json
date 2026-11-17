@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-17",
     "totalFiles": 1338,
     "totalModules": 82,
-    "totalExports": 7321
+    "totalExports": 7322
   },
   "entryPoints": [
     {
@@ -19893,9 +19893,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["checkFiniteLimits", "quad"],
+        "exports": ["checkFiniteLimits", "quad", "quadValue"],
         "interfaces": ["QuadOptions", "QuadResult"],
-        "functions": ["checkFiniteLimits", "quad"]
+        "functions": ["checkFiniteLimits", "quad", "quadValue"]
       },
       "functions/src/numeric/bfgs.ts": {
         "description": "BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.",
@@ -26229,7 +26229,7 @@
           },
           {
             "file": "../numeric/adaptive-quad.js",
-            "imports": ["quad"]
+            "imports": ["quadValue"]
           },
           {
             "file": "../numeric/numeric-jacobian.js",
@@ -28367,7 +28367,7 @@
           },
           {
             "file": "../numeric/adaptive-quad.js",
-            "imports": ["quad"]
+            "imports": ["quadValue"]
           },
           {
             "file": "../optimization-extra.js",
@@ -49023,11 +49023,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1338,
     "totalModules": 82,
-    "totalLinesOfCode": 232227,
-    "totalExports": 7321,
+    "totalLinesOfCode": 232319,
+    "totalExports": 7322,
     "totalClasses": 62,
     "totalInterfaces": 664,
-    "totalFunctions": 2537,
+    "totalFunctions": 2538,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1676,
