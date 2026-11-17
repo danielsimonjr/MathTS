@@ -13,7 +13,7 @@
  */
 
 import { eig } from '@danielsimonjr/mathts-matrix';
-import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
+import { assertLoopOrder, MAX_FERRERS_ORDER } from '../utils/limits.js';
 
 type f64 = number;
 
@@ -37,7 +37,7 @@ export function ferrersP(n: number, m: number, x: f64): f64 {
   // The recurrences below count up to m and n, so a non-finite degree or order never ends.
   if (Number.isNaN(x) || !Number.isFinite(n) || !Number.isFinite(m)) return NaN;
   if (m < 0 || n < m) return 0;
-  assertLoopOrder('ferrersP', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('ferrersP', 'n', n, MAX_FERRERS_ORDER);
   const s = Math.max(0, 1 - x * x);
   const somx2 = Math.sqrt(s);
   let pmm = 1;

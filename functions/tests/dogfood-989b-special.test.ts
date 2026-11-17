@@ -40,7 +40,15 @@ import { mathieuA, mathieuB, mathieuCe, mathieuSe } from '../src/special/mathieu
 import { discreteLog } from '../src/numbertheory/extra.js';
 import { gaussQuad } from '../src/typed/integration.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
-import { MAX_RECURRENCE_ORDER } from '../src/utils/limits.js';
+import {
+  MAX_RECURRENCE_ORDER,
+  MAX_JACOBI_ORDER,
+  MAX_GEGENBAUER_ORDER,
+  MAX_FERRERS_ORDER,
+  MAX_EXPN_ORDER,
+  MAX_LAGUERRE_ORDER,
+  MAX_SPHERICAL_BESSEL_ORDER,
+} from '../src/utils/limits.js';
 
 const MAX = Number.MAX_VALUE;
 const RECURRENCE = new RegExp(`exceeds the supported maximum of ${MAX_RECURRENCE_ORDER}$`);
@@ -58,7 +66,6 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
     ['besselY', () => besselY(MAX, 2)],
-    ['laguerreL', () => laguerreL(MAX, 0.5)],
     ['legendreP', () => legendreP(MAX, 0.5)],
   ])('%s(MAX, x) throws a RangeError (hang before the fix)', (_name, call) => {
     expect(call).toThrow(RangeError);
@@ -68,7 +75,29 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
     expect(() => chebyshevT(MAX, 0.5)).toThrow(CHEBYSHEV);
     expect(() => chebyshevT(4e9 + 1, 0.5)).toThrow(CHEBYSHEV);
   });
-  it.each(['besselJ', 'besselY', 'laguerreL', 'legendreP'])(
+  it('the laguerreL worker kernel holds its own limit', () => {
+    expect(workerKernel('laguerreL', 5)).toContain(String(MAX_LAGUERRE_ORDER));
+  });
+  // Each family limit is the order that returns in about 20 s; one step past it throws.
+  it.each([
+    ['laguerreL', MAX_LAGUERRE_ORDER, (n: number) => laguerreL(n, 0.5)],
+    ['jacobiP', MAX_JACOBI_ORDER, (n: number) => jacobiP(n, 0.5, 0.5, 0.3)],
+    ['gegenbauerC', MAX_GEGENBAUER_ORDER, (n: number) => gegenbauerC(n, 0.7, 0.3)],
+    ['ferrersP', MAX_FERRERS_ORDER, (n: number) => ferrersP(n, 2, 0.3)],
+    ['expn', MAX_EXPN_ORDER, (n: number) => expn(n, 0.5)],
+    ['sphericalBesselJ', MAX_SPHERICAL_BESSEL_ORDER, (n: number) => sphericalBesselJ(n, 5)],
+    ['sphericalBesselY', MAX_SPHERICAL_BESSEL_ORDER, (n: number) => sphericalBesselY(n, 5)],
+    ['sphericalBesselI', MAX_SPHERICAL_BESSEL_ORDER, (n: number) => sphericalBesselI(n, 5)],
+    ['sphericalBesselK', MAX_SPHERICAL_BESSEL_ORDER, (n: number) => sphericalBesselK(n, 5)],
+  ])('%s throws one step above its limit', (_name, limit, call) => {
+    expect(() => call((limit as number) + 1)).toThrow(
+      new RegExp(`exceeds the supported maximum of ${limit as number}$`)
+    );
+  });
+  it('sphericalBesselI refuses max(n, |x|) one step above the limit', () => {
+    expect(() => sphericalBesselI(5, MAX_SPHERICAL_BESSEL_ORDER + 1)).toThrow(RangeError);
+  });
+  it.each(['besselJ', 'besselY', 'legendreP'])(
     'the %s worker kernel holds the shared limit',
     (name) => {
       expect(workerKernel(name, 5)).toContain(String(MAX_RECURRENCE_ORDER));
@@ -122,11 +151,11 @@ describe('spherical Bessel functions (#989)', () => {
   it('sphericalBesselK(3, 2.5) matches mpmath', () => {
     expect(Math.abs(sphericalBesselK(3, 2.5) / 0.3486505539304314 - 1)).toBeLessThan(1e-14);
   });
-  it('sphericalBesselY(1e9, 5) is NaN at the first overflow (hang before the fix)', () => {
-    expect(sphericalBesselY(1e9, 5)).toBeNaN();
+  it('sphericalBesselY(4e8, 5) is NaN at the first overflow (hang before the fix)', () => {
+    expect(sphericalBesselY(4e8, 5)).toBeNaN();
   });
-  it('sphericalBesselK(1e9, 5) is Infinity at the first overflow (hang before the fix)', () => {
-    expect(sphericalBesselK(1e9, 5)).toBe(Infinity);
+  it('sphericalBesselK(4e8, 5) is Infinity at the first overflow (hang before the fix)', () => {
+    expect(sphericalBesselK(4e8, 5)).toBe(Infinity);
   });
   it('sphericalBesselY and K give NaN for a non-number x', () => {
     expect(sphericalBesselY(3, 'a' as unknown as number)).toBeNaN();

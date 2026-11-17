@@ -332,8 +332,9 @@ function laguerreLScalar(n: f64, x: f64): f64 {
   if (ni === 0) return 1;
   if (ni === 1) return 1 - x;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 2500000000) {
-    throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 2500000000`);
+  // The literal is MAX_LAGUERRE_ORDER of utils/limits.ts.
+  if (ni > 1000000000) {
+    throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 1000000000`);
   }
   let prev = 1,
     curr = 1 - x;

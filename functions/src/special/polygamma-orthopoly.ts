@@ -24,7 +24,7 @@
  */
 
 import { digamma } from '../typed/special.js';
-import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
+import { assertLoopOrder, MAX_GEGENBAUER_ORDER, MAX_JACOBI_ORDER } from '../utils/limits.js';
 
 /** Largest argument shift that `polygamma` runs (a shift of 2.5e9 took 24.2 s). */
 const MAX_POLYGAMMA_SHIFT = 2_000_000_000;
@@ -133,7 +133,7 @@ export function jacobiP(n: number, alpha: number, beta: number, x: number): numb
   let pPrev = 1; // P_0
   let pCurr = alpha + 1 + ((alpha + beta + 2) * (x - 1)) / 2; // P_1
   if (n === 1) return pCurr;
-  assertLoopOrder('jacobiP', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('jacobiP', 'n', n, MAX_JACOBI_ORDER);
 
   for (let k = 2; k <= n; k++) {
     const a1 = 2 * k * (k + alpha + beta) * (2 * k + alpha + beta - 2);
@@ -170,7 +170,7 @@ export function gegenbauerC(n: number, alpha: number, x: number): number {
   let cPrev = 1; // C_0
   let cCurr = 2 * alpha * x; // C_1
   if (n === 1) return cCurr;
-  assertLoopOrder('gegenbauerC', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('gegenbauerC', 'n', n, MAX_GEGENBAUER_ORDER);
 
   for (let k = 2; k <= n; k++) {
     const cNext = (2 * x * (k + alpha - 1) * cCurr - (k + 2 * alpha - 2) * cPrev) / k;

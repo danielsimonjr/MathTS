@@ -8,7 +8,7 @@
 
 import { Complex } from '@danielsimonjr/mathts-core';
 import { besselJ, besselY } from '../typed/special.js';
-import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
+import { assertLoopOrder, MAX_SPHERICAL_BESSEL_ORDER } from '../utils/limits.js';
 
 /** Largest `k * max(1, |nu|)` that `besselJZeros` accepts (the cost grows with this product). */
 const MAX_ZEROS_WORK = 100_000_000;
@@ -35,7 +35,7 @@ function assertOrder(n: number, name: string): void {
  */
 function millerDownward(n: number, x: number, sign: 1 | -1, f0: number): number {
   const big = Math.max(n, Math.abs(x));
-  assertLoopOrder('sphericalBessel', 'max(n, |x|)', big, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('sphericalBessel', 'max(n, |x|)', big, MAX_SPHERICAL_BESSEL_ORDER);
   const start = Math.ceil(big) + 30 + Math.ceil(Math.sqrt(40 * (big + 1)));
   // Only f_n and f_0 are needed, so the sweep keeps two live values and the one at order n.
   // Each rescale multiplies every stored value, so the kept values scale together.
@@ -121,28 +121,28 @@ function sphBesselK(n: number, x: number): number {
 /** Spherical Bessel function of the first kind `j_n(x)`. */
 export function sphericalBesselJ(n: number, x: number): number {
   assertOrder(n, 'sphericalBesselJ');
-  assertLoopOrder('sphericalBesselJ', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('sphericalBesselJ', 'n', n, MAX_SPHERICAL_BESSEL_ORDER);
   return typeof x !== 'number' || Number.isNaN(x) ? NaN : sphBesselJ(n, x);
 }
 
 /** Spherical Bessel function of the second kind `y_n(x)`. */
 export function sphericalBesselY(n: number, x: number): number {
   assertOrder(n, 'sphericalBesselY');
-  assertLoopOrder('sphericalBesselY', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('sphericalBesselY', 'n', n, MAX_SPHERICAL_BESSEL_ORDER);
   return typeof x !== 'number' || Number.isNaN(x) ? NaN : sphBesselY(n, x);
 }
 
 /** Modified spherical Bessel function of the first kind `i_n(x)`. */
 export function sphericalBesselI(n: number, x: number): number {
   assertOrder(n, 'sphericalBesselI');
-  assertLoopOrder('sphericalBesselI', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('sphericalBesselI', 'n', n, MAX_SPHERICAL_BESSEL_ORDER);
   return typeof x !== 'number' || Number.isNaN(x) ? NaN : sphBesselI(n, x);
 }
 
 /** Modified spherical Bessel function of the second kind `k_n(x)`. */
 export function sphericalBesselK(n: number, x: number): number {
   assertOrder(n, 'sphericalBesselK');
-  assertLoopOrder('sphericalBesselK', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('sphericalBesselK', 'n', n, MAX_SPHERICAL_BESSEL_ORDER);
   return typeof x !== 'number' || Number.isNaN(x) ? NaN : sphBesselK(n, x);
 }
 

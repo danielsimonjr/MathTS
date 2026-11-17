@@ -21,9 +21,15 @@ Also fixed:
 
 BREAKING (each call returned before and now throws `RangeError`; the time is the old-build time at or above the limit):
 
-- `besselJ`, `besselY`, `laguerreL`, `legendreP`, `jacobiP`, `gegenbauerC`, `ferrersP`, `sphericalBesselJ/Y/I/K` and `expn` with an order above 2500000000 (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s). `besselJ` with a small `x` returns 0 at any order.
+- `besselJ`, `besselY` and `legendreP` with an order above 2500000000 (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s on the old build). `besselJ` with a small `x` returns 0 at any order.
+- Each other recurrence family has a limit set from its run time on this build (the time at the limit in brackets):
+  - `jacobiP` above 1000000000 (14 s to 18 s; the old build took 5.1 s at 1e8).
+  - `gegenbauerC` above 1000000000 (13 s to 21 s; old build 3.3 s at 1e8).
+  - `ferrersP` above 1000000000 (19 s; old build 3.7 s at 1e8).
+  - `expn` above 1200000000 for `0 < x <= 1` (13 s; `expn(1e9, 0.5)` took 23.6 s on the old build).
+  - `laguerreL` above 1000000000 (17 s to 18 s).
+  - `sphericalBesselJ/Y/I/K` with an order above 500000000, and `sphericalBesselJ/I` with `max(n, |x|)` above 500000000 (5 s to 6 s; 1e9 took 25 s to 36 s).
 - `chebyshevT` with an order above 4000000000 (`chebyshevT(3.5e9, 0.5)` took 17.5 s).
-- `sphericalBesselJ` and `sphericalBesselI` with `max(n, |x|)` above 2500000000 (before, an array of that size).
 - `polygamma(n, x)` with `x` below -2000000000 (a shift of 2.5e9 took 24.2 s).
 - `besselJZeros(nu, k)` with `k` above 7000000 (`k = 7.5e6` took 22.3 s) or `k * max(1, |nu|)` above 100000000 (`besselJZeros(1e8, 1)` took 22.9 s).
 - `binomialTest(x, n)` with `n` above 100000000000.
