@@ -56,6 +56,7 @@ import {
   ellipticECompleteScalar,
 } from './scalars.js';
 import { wasmPolicyAllows } from '../policy.js';
+import { MAX_BESSEL_J_SWEEP } from '../../utils/limits.js';
 
 /**
  * Element-count threshold above which we attempt the WASM Bessel kernels.
@@ -168,15 +169,36 @@ export const besselJ1Dispatch = makeUnaryArrayDispatch({
   js: besselJ1JS,
 });
 
+/** The largest order that an AS kernel takes: its order is an i32. */
+const AS_MAX_ORDER = 2147483647;
+
+/**
+ * Whether the AS `bessel_jn_f64` kernel gives the JS result for `order`. The kernel takes an
+ * i32, so a non-integer or larger order would wrap or truncate. Its downward sweep has the
+ * limit of the JS scalar and aborts above it, so an order whose sweep exceeds that limit stays
+ * on the JS path, which throws the RangeError (or returns 0 for a small x) for each element.
+ */
+function besselJKernelTakes(order: number): boolean {
+  if (!Number.isInteger(order)) return false;
+  const ni = Math.abs(order);
+  return ni + 2 * Math.max(10, Math.ceil(Math.sqrt(40 * ni))) <= MAX_BESSEL_J_SWEEP;
+}
+
+/** Whether the AS `bessel_yn_f64` kernel gives the JS result for `order` (an i32 integer). */
+function besselYKernelTakes(order: number): boolean {
+  return Number.isInteger(order) && Math.abs(order) <= AS_MAX_ORDER;
+}
+
 /** Order-`n` (`n ≥ 2`) variant of an AS managed `<name>(order, xs)` kernel. */
 function besselOrderDispatch(
   order: number,
   xs: Float64Array,
   asName: string,
-  js: (n: number, xs: Float64Array) => Float64Array
+  js: (n: number, xs: Float64Array) => Float64Array,
+  kernelTakes: (order: number) => boolean
 ): Float64Array {
   const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD && wasmPolicyAllows(asName, n)) {
+  if (n >= WASM_SPECIAL_THRESHOLD && kernelTakes(order) && wasmPolicyAllows(asName, n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -197,7 +219,7 @@ function besselOrderDispatch(
 export function besselJDispatch(order: number, xs: Float64Array): Float64Array {
   if (order === 0) return besselJ0Dispatch(xs);
   if (order === 1) return besselJ1Dispatch(xs);
-  return besselOrderDispatch(order, xs, 'bessel_jn_f64', besselJnJS);
+  return besselOrderDispatch(order, xs, 'bessel_jn_f64', besselJnJS, besselJKernelTakes);
 }
 
 export const besselY0Dispatch = makeUnaryArrayDispatch({
@@ -215,7 +237,7 @@ export const besselY1Dispatch = makeUnaryArrayDispatch({
 export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
   if (order === 0) return besselY0Dispatch(xs);
   if (order === 1) return besselY1Dispatch(xs);
-  return besselOrderDispatch(order, xs, 'bessel_yn_f64', besselYnJS);
+  return besselOrderDispatch(order, xs, 'bessel_yn_f64', besselYnJS, besselYKernelTakes);
 }
 
 /**

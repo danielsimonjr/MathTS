@@ -1760,7 +1760,8 @@
       "functions/src/typed/probability.ts",
       "functions/src/typed/signal.ts",
       "functions/src/typed/statistics.ts",
-      "functions/src/utils/print.ts"
+      "functions/src/utils/print.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/typed/complex-promotion.ts": [
       "functions/src/arithmetic/pow.ts",
