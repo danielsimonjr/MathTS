@@ -6,6 +6,7 @@
  * Fiedler, Leslie and Helmert matrices.
  */
 import { Complex } from '@danielsimonjr/mathts-core';
+import { assertAllocSize } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -44,12 +45,13 @@ export function invHilbertMatrix(n: number): number[][] {
 /**
  * Hadamard matrix of order n by the Sylvester construction. n must be a power of 2.
  *
- * @throws RangeError if n is not a positive power of 2
+ * @throws RangeError if n is not a positive power of 2, or if n by n exceeds the element limit
  */
 export function hadamardMatrix(n: number): number[][] {
-  if (!Number.isInteger(n) || n < 1 || (n & (n - 1)) !== 0) {
+  if (!Number.isSafeInteger(n) || n < 1 || !Number.isInteger(Math.log2(n))) {
     throw new RangeError(`hadamardMatrix: n must be a power of 2, got ${n}`);
   }
+  assertAllocSize('hadamardMatrix', [n, n]);
   let H: number[][] = [[1]];
   while (H.length < n) {
     const m = H.length;

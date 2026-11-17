@@ -27,7 +27,6 @@ export {
   validateIndexSourceSize,
   validateIndex,
   isEmptyIndex,
-  resize,
   reshape,
   processSizesWildcard,
   squeeze,
@@ -53,3 +52,17 @@ export {
   deepForEachArray as deepForEach,
   cloneArray as clone,
 } from '@danielsimonjr/mathts-core/internal';
+
+import { resize as coreResize } from '@danielsimonjr/mathts-core/internal';
+import { assertAllocSize } from './limits.js';
+
+/**
+ * Resize a multi dimensional array, as core does, but throw a RangeError before it
+ * allocates when the new size holds more than the element limit.
+ *
+ * @throws RangeError if the new size holds more than the element limit
+ */
+export const resize: typeof coreResize = (array, size, defaultValue) => {
+  if (Array.isArray(size)) assertAllocSize('resize', size);
+  return coreResize(array, size, defaultValue);
+};

@@ -13,6 +13,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
@@ -366,6 +367,7 @@ export class MathJSDenseMatrix {
    */
   resize(newSize: number[], defaultValue?: number): MathJSDenseMatrix {
     const fill = defaultValue ?? 0;
+    assertAllocSize('resize', newSize);
 
     if (newSize.length === 1) {
       // 1D resize

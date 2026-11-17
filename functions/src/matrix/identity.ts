@@ -2,6 +2,7 @@ import { isBigNumber } from '../utils/is.js';
 import { resize } from '../utils/array.js';
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
+import { assertAllocSize } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions
@@ -175,6 +176,7 @@ export const createIdentity = /* #__PURE__ */ factory(
       const one = Big ? new BigNumber(1) : 1;
       const defaultValue = Big ? new Big(0) : 0;
       const size = [rows as number, cols as number];
+      if (format !== 'sparse') assertAllocSize('identity', size);
 
       // check we need to return a matrix
       if (format) {

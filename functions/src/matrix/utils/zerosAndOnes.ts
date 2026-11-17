@@ -1,6 +1,7 @@
 import { isBigNumber } from '../../utils/is.js';
 import { isInteger } from '../../utils/number.js';
 import { resize } from '../../utils/array.js';
+import { assertAllocSize } from '../../utils/limits.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -104,6 +105,7 @@ export function createZerosAndOnes(
     const hasBigNumbers = _normalize(size as number[]);
     const dflt = hasBigNumbers ? new BigNumber(defaultValue) : defaultValue;
     _validate(size as number[]);
+    if (format !== 'sparse') assertAllocSize(name, size as number[]);
 
     if (format) {
       // return a matrix

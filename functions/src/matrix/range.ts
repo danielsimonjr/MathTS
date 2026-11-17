@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { noBignumber, noMatrix } from '../utils/noop.js';
+import { assertAllocSize } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { MathJsConfig } from '../core/config.js';
 
@@ -323,6 +324,14 @@ export const createRange = /* #__PURE__ */ factory(
         // An infinite bound gives an infinite range, so the loop below never ends.
         throw new RangeError('range: an infinite start or end gives an unbounded range');
       }
+      const asNumber = (v: unknown): number =>
+        typeof v === 'number'
+          ? v
+          : v !== null && typeof (v as { toNumber?: unknown }).toNumber === 'function'
+            ? (v as { toNumber(): number }).toNumber()
+            : NaN;
+      const span = (asNumber(end) - asNumber(start)) / asNumber(step);
+      if (span >= 0) assertAllocSize('range', [Math.floor(span) + 1]);
       let x = start;
       while (ongoing(x, end)) {
         array.push(x);
