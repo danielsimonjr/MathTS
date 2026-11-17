@@ -38,9 +38,10 @@ function typeNameOf(value: unknown): string {
 }
 
 /**
- * Checks that `xs` is array-like: an object with a numeric `length`. A number has no
- * `length`, so a loop or a range split that reads `xs.length` would not end or would read
- * an empty range (#1011).
+ * Checks that `xs` is array-like: an object whose `length` is a non-negative integer.
+ * A number has no `length`, and a `length` of NaN or Infinity is not a count. A loop or a
+ * range split that reads such a `length` does not end or reads an empty range (#1011).
+ * A string is not number data: `+` joins its characters.
  *
  * @param name - The name of the caller, for the message.
  * @param xs - The value to check.
@@ -49,8 +50,9 @@ function typeNameOf(value: unknown): string {
 function assertArrayLike(name: string, xs: unknown): void {
   if (
     xs === null ||
-    (typeof xs !== 'object' && typeof xs !== 'string') ||
-    typeof (xs as { length?: unknown }).length !== 'number'
+    typeof xs !== 'object' ||
+    !Number.isInteger((xs as { length?: unknown }).length) ||
+    (xs as { length: number }).length < 0
   ) {
     throw new TypeError(`${name}: expects an array of numbers, got a ${typeNameOf(xs)}`);
   }
