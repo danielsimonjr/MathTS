@@ -10488,7 +10488,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 389
+      "loc": 390
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
