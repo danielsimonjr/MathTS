@@ -15,7 +15,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { decompositionInputToDenseMatrix } from './as-packed.js';
 import { lu } from './lu.js';
-import { ldexp, pow2ScaleExponent } from './common.js';
+import { ldexp, entryRange, withPow2Scale, SQUARED } from './common.js';
 
 /** Solve `A x = b` given `A`'s LU factors (`P · A = L · U`). */
 function luSolve(
@@ -133,25 +133,25 @@ export function condest(input: DenseMatrix | SparseMatrix, p: number = 1): numbe
   if (p !== 1) {
     throw new Error(`condest: only the 1-norm estimator (p=1) is implemented (got p=${p})`);
   }
-  let A = decompositionInputToDenseMatrix(input);
+  const A = decompositionInputToDenseMatrix(input);
   const n = A.rows;
   if (A.cols !== n) {
     throw new Error(`condest: matrix must be square (got ${A.rows}×${A.cols})`);
   }
   if (n === 0) return 0;
 
-  // The condition number does not change when A is scaled, so an extreme matrix is
-  // scaled by an exact power of 2 and not scaled back (#1104): ‖A‖₁ · ‖A⁻¹‖₁ would
-  // otherwise overflow or underflow.
-  let flat = A.toFloat64Array();
-  let amax = 0;
-  for (let i = 0; i < flat.length; i++) if (Math.abs(flat[i]) > amax) amax = Math.abs(flat[i]);
-  const e = pow2ScaleExponent(amax);
-  if (e !== 0) {
-    flat = flat.map((v) => ldexp(v, e));
-    A = new DenseMatrix(n, n, flat);
-  }
+  // The condition number does not change when A is scaled. ‖A‖₁ · ‖A⁻¹‖₁ overflows or
+  // underflows outside 2^±SQUARED, so the input is scaled into that window (#1104).
+  const flat = A.toFloat64Array();
+  return withPow2Scale(entryRange(flat), -SQUARED, SQUARED, (e) => {
+    if (e === 0) return condestKernel(A, flat, n);
+    const scaled = flat.map((v) => ldexp(v, e));
+    return condestKernel(new DenseMatrix(n, n, scaled), scaled, n);
+  });
+}
 
+/** The 1-norm condition estimate of the n×n matrix `A` (row-major `flat`), without scaling. */
+function condestKernel(A: DenseMatrix, flat: Float64Array, n: number): number {
   // ‖A‖₁ = max absolute column sum.
   let norm1A = 0;
   for (let j = 0; j < n; j++) {

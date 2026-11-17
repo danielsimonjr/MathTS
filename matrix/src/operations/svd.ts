@@ -15,9 +15,12 @@ import {
   applyHouseholderRight,
   ldexp,
   ldexpMatrix,
-  normInf,
-  pow2ScaleExponent,
+  entryRange,
+  withPow2Scale,
+  SQUARED,
+  FOURTH,
 } from './common.js';
+import { sqrtOfSumSquares } from '../types/dense/reduction.js';
 import { applyGivensCols, givensRotation } from './givens.js';
 import {
   decompositionSource,
@@ -389,6 +392,36 @@ export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}):
  * (`pinv`, `lowRankApprox`, `svdWasm`) does not convert the input again.
  */
 export function svdOfSource(source: DecompositionSource, options: SVDOptions = {}): SVDResult {
+  return svdScaled(
+    source,
+    (src) => svdKernel(src, options),
+    (r, e) => ({ ...r, S: r.S.map((v) => ldexp(v, -e)) })
+  );
+}
+
+/**
+ * Run `call` on the SVD kernel with the input scaled into [2^-SQUARED, 2^FOURTH] (#1104).
+ * The bidiagonal QR step forms fourth powers of the entries; its absolute deflation
+ * cutoffs set no lower bound beyond the squared one. `unscale(r, e)` takes the result
+ * for 2^e · A back to the result for A. The rank comes from the scaled values, so a
+ * singular value that underflows when it is scaled back still counts.
+ */
+function svdScaled<T>(
+  source: DecompositionSource,
+  call: (src: DecompositionSource) => T,
+  unscale: (r: T, e: number) => T
+): T {
+  const rows = source.copyRows(false);
+  return withPow2Scale(entryRange(rows), -SQUARED, FOURTH, (e) => {
+    if (e === 0) return call(source);
+    const scaledRows = rows.map((row) => row.slice());
+    ldexpMatrix(scaledRows, e);
+    return unscale(call(decompositionSource(scaledRows)), e);
+  });
+}
+
+/** The SVD kernel, without scaling. */
+function svdKernel(source: DecompositionSource, options: SVDOptions): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -411,16 +444,7 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   }
 
   // Bidiagonalize
-  // An extreme matrix is scaled by an exact power of 2 (#1104); S is scaled back below.
-  // The exponent comes from the first copy, and the Jacobi fallback copy reuses it.
-  let scaleExp = 0;
-  const workCopy = (): number[][] => {
-    const rows = source.copyRows(transposed);
-    if (scaleExp === 0) scaleExp = pow2ScaleExponent(normInf(rows));
-    if (scaleExp !== 0) ldexpMatrix(rows, scaleExp);
-    return rows;
-  };
-  const { B, U, V } = bidiagonalize(workCopy());
+  const { B, U, V } = bidiagonalize(source.copyRows(transposed));
 
   // Extract diagonal and superdiagonal
   const minMN = Math.min(m, n);
@@ -495,7 +519,7 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   const maxAbsD = d.reduce((mx, x) => Math.max(mx, Math.abs(x)), 0);
   if (maxAbsD > 0 && d.some((x) => Math.abs(x) <= rankTolerance * maxAbsD)) {
     // bidiagonalize consumed its copy, so the fallback takes a new one from the source.
-    const jac = jacobiSVD(workCopy());
+    const jac = jacobiSVD(source.copyRows(transposed));
     dFinal = jac.d;
     uFinal = jac.U;
     vFinal = jac.V;
@@ -515,7 +539,7 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   const indices = Array.from({ length: dFinal.length }, (_, i) => i);
   indices.sort((a, b) => dFinal[b] - dFinal[a]);
 
-  const sortedS = indices.map((i) => (scaleExp === 0 ? dFinal[i] : ldexp(dFinal[i], -scaleExp)));
+  const sortedS = indices.map((i) => dFinal[i]);
   const sortedU = uFinal.map((row) => indices.map((i) => row[i]));
   const sortedV = vFinal.map((row) => indices.map((i) => row[i]));
 
@@ -562,19 +586,36 @@ export function singularValues(
   matrix: DecompositionMatrixInput,
   options?: Omit<SVDOptions, 'fullMatrices'>
 ): number[] {
-  return svd(matrix, { ...options }).S;
+  return svdScaled(
+    decompositionSource(matrix),
+    (src) => svdKernel(src, { ...options }).S,
+    (S, e) => S.map((v) => ldexp(v, -e))
+  );
 }
 
 /**
  * Compute the pseudoinverse (Moore-Penrose inverse) using SVD
  */
 export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): number[][] {
-  const source = decompositionSource(matrix);
-  const { U, S, V, rank } = svdOfSource(source, options);
+  // pinv(2^e · A) = 2^-e · pinv(A).
+  return svdScaled(
+    decompositionSource(matrix),
+    (src) => pinvOfSvd(svdKernel(src, options ?? {}), src.rows, src.cols, options),
+    (P, e) => {
+      ldexpMatrix(P, e);
+      return P;
+    }
+  );
+}
 
+/** V · S⁺ · Uᵀ from an SVD of an m×n matrix. */
+function pinvOfSvd(
+  { U, S, V, rank }: SVDResult,
+  m: number,
+  n: number,
+  options?: SVDOptions
+): number[][] {
   if (rank === 0) {
-    const m = source.rows;
-    const n = source.cols;
     return Array.from({ length: n }, () => new Array(m).fill(0));
   }
 
@@ -582,18 +623,18 @@ export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): nu
   const maxS = S[0];
 
   // Compute V * S^{-1} * U^T
-  const m = U.length;
-  const n = V.length;
+  const um = U.length;
+  const vn = V.length;
   const k = S.length;
 
   // S^{-1} for non-negligible singular values
   const Sinv = S.map((s) => (s > tolerance * maxS ? 1 / s : 0));
 
   // Result is n x m
-  const result = Array.from({ length: n }, () => new Array(m).fill(0));
+  const result = Array.from({ length: vn }, () => new Array(um).fill(0));
 
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < m; j++) {
+  for (let i = 0; i < vn; i++) {
+    for (let j = 0; j < um; j++) {
       let sum = 0;
       for (let l = 0; l < k; l++) {
         sum += V[i][l] * Sinv[l] * U[j][l];
@@ -614,11 +655,18 @@ export function lowRankApprox(
   r: number,
   options?: SVDOptions
 ): number[][] {
-  const source = decompositionSource(matrix);
-  const { U, S, V } = svdOfSource(source, options);
+  return svdScaled(
+    decompositionSource(matrix),
+    (src) => lowRankOfSvd(svdKernel(src, options ?? {}), src.rows, src.cols, r),
+    (M, e) => {
+      ldexpMatrix(M, -e);
+      return M;
+    }
+  );
+}
 
-  const m = source.rows;
-  const n = source.cols;
+/** U_r · S_r · V_rᵀ from an SVD of an m×n matrix. */
+function lowRankOfSvd({ U, S, V }: SVDResult, m: number, n: number, r: number): number[][] {
   const k = Math.min(r, S.length);
 
   // Reconstruct with top k singular values
@@ -641,13 +689,15 @@ export function lowRankApprox(
  * Compute condition number using SVD
  */
 export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
-  const S = singularValues(matrix, options);
-
-  if (S.length === 0 || S[S.length - 1] === 0) {
-    return Infinity;
-  }
-
-  return S[0] / S[S.length - 1];
+  // The condition number does not change when A is scaled.
+  return svdScaled(
+    decompositionSource(matrix),
+    (src) => {
+      const S = svdKernel(src, { ...options }).S;
+      return S.length === 0 || S[S.length - 1] === 0 ? Infinity : S[0] / S[S.length - 1];
+    },
+    (c) => c
+  );
 }
 
 /**
@@ -655,8 +705,11 @@ export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): nu
  * Returns the spectral norm (largest singular value)
  */
 export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
-  const S = singularValues(matrix, options);
-  return S[0] || 0;
+  return svdScaled(
+    decompositionSource(matrix),
+    (src) => svdKernel(src, { ...options }).S[0] || 0,
+    (s, e) => ldexp(s, -e)
+  );
 }
 
 /**
@@ -665,15 +718,5 @@ export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): n
  */
 export function normFro(matrix: DecompositionMatrixInput): number {
   const source = decompositionSource(matrix);
-  const sum = source.sumOfSquares();
-  // The sum of squares overflows above about 1e154 and loses its digits below about
-  // 1e-150 (#1104). Only then is the scaled sum taken, so an ordinary result is unchanged.
-  if (sum < Infinity && sum >= 2 ** -800) return Math.sqrt(sum);
-  const rows = source.copyRows(false);
-  const e = pow2ScaleExponent(normInf(rows));
-  if (e === 0) return Math.sqrt(sum);
-  ldexpMatrix(rows, e);
-  let scaledSum = 0;
-  for (const row of rows) for (const v of row) scaledSum += v * v;
-  return ldexp(Math.sqrt(scaledSum), -e);
+  return sqrtOfSumSquares(source.sumOfSquares(), () => source.copyRows(false).flat());
 }

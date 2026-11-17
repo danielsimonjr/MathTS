@@ -675,7 +675,7 @@ export const parallelMatrixNorm: TypedFunction = mathTyped('parallelMatrixNorm',
     for (let i: i32 = 0; i < arr.length; i++) {
       sum += arr[i] * arr[i];
     }
-    return sqrtOfSumSquares(sum, arr);
+    return sqrtOfSumSquares(sum, () => arr);
   },
 } as Signatures);
 

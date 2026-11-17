@@ -209,7 +209,7 @@ export const norm: TypedFunction = mathTyped('norm', {
   Array: (arr: number[]) =>
     sqrtOfSumSquares(
       arr.reduce((acc, v) => acc + v * v, 0),
-      arr
+      () => arr
     ),
 } as Signatures);
 

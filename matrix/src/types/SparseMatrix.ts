@@ -811,7 +811,7 @@ export class SparseMatrix extends Matrix<number> {
     for (let i = 0; i < this._data.length; i++) {
       sumSq += this._data[i] * this._data[i];
     }
-    return sqrtOfSumSquares(sumSq, this._data);
+    return sqrtOfSumSquares(sumSq, () => this._data);
   }
 
   /**

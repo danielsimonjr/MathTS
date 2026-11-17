@@ -253,6 +253,7 @@
     ],
     "matrix/src/types/dense/reduction.ts": [
       "matrix/src/backends/JSBackend.ts",
+      "matrix/src/operations/svd.ts",
       "matrix/src/parallel-matrix.ts",
       "matrix/src/typed-operations.ts",
       "matrix/src/types/DenseMatrix.ts",
@@ -327,6 +328,7 @@
       "matrix/src/operations/expm.ts",
       "matrix/src/operations/index.ts",
       "matrix/src/operations/logm.ts",
+      "matrix/src/operations/lstsq.ts",
       "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/qr.ts",
       "matrix/src/operations/schur.ts",
