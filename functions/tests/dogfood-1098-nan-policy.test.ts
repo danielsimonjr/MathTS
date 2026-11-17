@@ -140,7 +140,7 @@ describe('quantileSeq NaN policy with BigNumber (#1098)', () => {
   it('honours skipNaN', () => {
     expect(Number(q([1, NaN, 3], B(0.5), { skipNaN: true }))).toBe(2);
     expect(Number(q([B(1), B(NaN), B(3)], 0.5, { skipNaN: true }))).toBe(2);
-    expect(String(q([1, NaN, 2, 3], B(3), { skipNaN: true }))).toBe(String(q([1, 2, 3], B(3))));
+    expect(q([1, NaN, 2, 3], 3, { skipNaN: true })).toEqual([1.5, 2, 2.5]); // np.nanquantile([1,nan,2,3],[.25,.5,.75])
     expect(num(q([1, NaN, 3], [B(0.5)], { skipNaN: true }))).toEqual([2]);
   });
   it('propagates NaN', () => {
