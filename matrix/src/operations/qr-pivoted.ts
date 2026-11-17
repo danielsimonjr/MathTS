@@ -135,15 +135,9 @@ function qrPivotedKernel(W: number[][], m: number, n: number, tol: number): QRPi
     // --- Householder reflection zeroing W[c+1..m-1][c] ---
     const col: number[] = [];
     for (let i = c; i < m; i++) col.push(W[i][c]);
-    // degenerateBeta=2: for a column already antiparallel to e_1 (sigma===0,
-    // x[0]<0), the only valid *orthogonal* reflection is H = I - 2·e1·e1ᵀ
-    // (beta ∈ {0, 2} are the sole solutions to (1-beta)² = 1). The shared
-    // helper's default (-2, tuned for eig/svd's degenerate-branch usage,
-    // which never triggers it on a length-1 sub-column) is NOT orthogonal
-    // here — a length-1 sub-column is exactly this degenerate case, and it
-    // is reached on this algorithm's last pivot step whenever that trailing
-    // diagonal entry is negative.
-    const { v, beta } = householder(col, 2);
+    // A length-1 sub-column with a negative entry is the degenerate case of `householder`
+    // (beta = 2). The last pivot step reaches it when the trailing diagonal entry is negative.
+    const { v, beta } = householder(col);
     if (beta !== 0) {
       applyHouseholderLeft(W, v, beta, c, c);
       applyHouseholderRight(Qacc, v, beta, 0, c);

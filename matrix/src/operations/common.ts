@@ -9,9 +9,8 @@ import { gemmF64 } from '../types/dense/gemm-f64.js';
  * to the per-file copies they replace.
  *
  * NOTE on `householder`: the degenerate "x is a negative multiple of e_1"
- * branch returns a parameterized `beta`. The default is `beta = 2`
- * (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, …, 1)). H = I − beta·v·vᵀ is orthogonal only for
- * `beta` 0 or 2, so no other value is valid here (#1082).
+ * branch returns `beta = 2` (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, …, 1)).
+ * H = I − beta·v·vᵀ is orthogonal only for `beta` 0 or 2 (#1082).
  */
 
 // ---------------------------------------------------------------------------
@@ -400,14 +399,11 @@ export function norm1(A: number[][]): number {
  * Compute the Householder reflection vector for a column.
  *
  * For the degenerate case where `x` is a negative multiple of e_1
- * (`sigma === 0 && x[0] < 0`), the returned `beta` is `degenerateBeta`. The default is `2`,
- * the only orthogonal reflection besides the identity (beta 0). Before #1082 the default was
- * `-2`, which scaled the row by 3 and gave wrong singular values.
+ * (`sigma === 0 && x[0] < 0`), the returned `beta` is `2`. This is the only orthogonal
+ * reflection besides the identity (beta 0), and it makes the leading entry positive, as
+ * the general branch does.
  */
-export function householder(
-  x: number[],
-  degenerateBeta: number = 2
-): { v: number[]; beta: number } {
+export function householder(x: number[]): { v: number[]; beta: number } {
   const n = x.length;
   let sigma = 0;
   for (let i = 1; i < n; i++) {
@@ -420,7 +416,7 @@ export function householder(
   if (sigma === 0 && x[0] >= 0) {
     return { v, beta: 0 };
   } else if (sigma === 0 && x[0] < 0) {
-    return { v, beta: degenerateBeta };
+    return { v, beta: 2 };
   } else {
     const mu = Math.sqrt(x[0] * x[0] + sigma);
     if (x[0] <= 0) {

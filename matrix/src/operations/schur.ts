@@ -31,11 +31,6 @@ import { applyGivensRight, givensRotation } from './givens.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
-//
-// NOTE: schur passes `beta = 2` to `householder` for the degenerate
-// negative-x0 branch (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, ..., 1)) — a deliberate
-// divergence from eig/svd (which use the default −2). Preserved at the two
-// call sites below.
 // ---------------------------------------------------------------------------
 
 function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
@@ -47,7 +42,7 @@ function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
     const x: number[] = [];
     for (let i = k + 1; i < n; i++) x.push(H[i][k]);
 
-    const { v, beta } = householder(x, 2);
+    const { v, beta } = householder(x);
 
     if (beta !== 0) {
       applyHouseholderLeft(H, v, beta, k + 1, k);
@@ -122,7 +117,7 @@ function qrStepDouble(H: number[][], Q: number[][], start: number, end: number):
   let z = H[start + 1][start] * H[start + 2][start + 1];
 
   for (let k = start; k <= end - 2; k++) {
-    const { v, beta } = householder([x, y, z], 2);
+    const { v, beta } = householder([x, y, z]);
 
     const q = Math.max(start, k - 1);
 
