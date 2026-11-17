@@ -137,9 +137,11 @@ export function fraction(numerator?: number | string | Fraction, denominator?: n
  * bignumber([1, 2]) // [BigNumber 1, BigNumber 2]
  */
 export function bignumber(
+  value: readonly unknown[] | CompatMatrixValue | { readonly isUnit: boolean }
+): unknown;
+export function bignumber(
   value?: number | string | bigint | boolean | null | BigNumber | Fraction
 ): BigNumber;
-export function bignumber(value: unknown): unknown;
 export function bignumber(value?: unknown): unknown {
   if (value === undefined) {
     return BigNumber.fromNumber(0);
