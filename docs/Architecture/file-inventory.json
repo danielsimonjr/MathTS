@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-17",
-  "totalFiles": 2477,
+  "totalFiles": 2478,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1314,
     "test-only": 0,
     "orphan": 0,
-    "test": 1071,
+    "test": 1072,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1340,
-    "tests": 1071,
+    "tests": 1072,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1129,
+    "@danielsimonjr/mathts-functions": 1130,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 145,
@@ -212,7 +212,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 167
+      "loc": 194
     },
     {
       "file": "assembly/src/ops/tensor.ts",
@@ -247,7 +247,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 855
+      "loc": 896
     },
     {
       "file": "assembly/src/tridiag.ts",
@@ -9837,7 +9837,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 795
+      "loc": 817
     },
     {
       "file": "functions/src/wasm/WasmLoader.ts",
@@ -10484,6 +10484,13 @@
       "loc": 63
     },
     {
+      "file": "functions/tests/dogfood-1113-wasm-order-limits.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 389
+    },
+    {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10509,7 +10516,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 322
+      "loc": 336
     },
     {
       "file": "functions/tests/dogfood-989c-eigs-non-finite.test.ts",

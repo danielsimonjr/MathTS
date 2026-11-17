@@ -13570,12 +13570,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                                                                                                                                                                       | Type   |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../WasmLoader.js`     | `wasmLoader`                                                                                                                                                                  | Import |
-| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, makeUnaryArrayDispatch, RawWasm`                                                                                            | Import |
-| `./scalars.js`         | `_lgamma, besselJ0Scalar, besselJ1Scalar, besselJScalar, besselY0Scalar, besselY1Scalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar` | Import |
-| `../policy.js`         | `wasmPolicyAllows`                                                                                                                                                            | Import |
+| File                    | Imports                                                                                                                                                                       | Type   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../WasmLoader.js`      | `wasmLoader`                                                                                                                                                                  | Import |
+| `../bridges/common.js`  | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, makeUnaryArrayDispatch, RawWasm`                                                                                            | Import |
+| `./scalars.js`          | `_lgamma, besselJ0Scalar, besselJ1Scalar, besselJScalar, besselY0Scalar, besselY1Scalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar` | Import |
+| `../policy.js`          | `wasmPolicyAllows`                                                                                                                                                            | Import |
+| `../../utils/limits.js` | `MAX_BESSEL_J_SWEEP`                                                                                                                                                          | Import |
 
 **Exports:**
 
@@ -20644,7 +20645,7 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
-| `functions/src/utils/limits`                           | 0 files      | 41 files   |
+| `functions/src/utils/limits`                           | 0 files      | 42 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21570,7 +21571,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 233644 |
+| Total Lines of Code     | 233734 |
 | Total Exports           | 7346   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |

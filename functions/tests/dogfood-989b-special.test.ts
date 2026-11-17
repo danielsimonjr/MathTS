@@ -69,13 +69,14 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
     // The AS source cannot import limits.ts, so it holds its own copies of the literals.
     const literal = (file: string, name: string): number => {
       const text = readFileSync(new URL(`../../assembly/src/${file}`, import.meta.url), 'utf8');
-      const m = new RegExp(`const ${name}: f64 = ([0-9.]+);`).exec(text);
+      const m = new RegExp(`const ${name}: f64 = ([0-9.e+-]+);`).exec(text);
       if (!m) throw new Error(`${name} not found in assembly/src/${file}`);
       return Number(m[1]);
     };
     expect(literal('special.ts', '_BESSEL_J_MAX_SWEEP')).toBe(MAX_BESSEL_J_SWEEP);
     expect(literal('ops/special.ts', '_ORDER_MAX_LAGUERRE')).toBe(MAX_LAGUERRE_ORDER);
     expect(literal('ops/special.ts', '_ORDER_MAX_I32')).toBe(2 ** 31 - 2);
+    expect(Object.is(literal('special.ts', '_BESSEL_J_DOWN'), 2 ** -700)).toBe(true);
   });
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
