@@ -8437,7 +8437,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 326
     },
     {
       "file": "functions/src/statistics/prod.ts",
