@@ -8173,9 +8173,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports           | Type   |
-| -------------------- | ----------------- | ------ |
-| `../utils/limits.js` | `assertAllocSize` | Import |
+| File                 | Imports                            | Type   |
+| -------------------- | ---------------------------------- | ------ |
+| `../utils/limits.js` | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -8185,6 +8185,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/gauss-nodes.ts` - Gauss-Legendre quadrature nodes and weights.
+
+**Internal Dependencies:**
+
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `../utils/limits.js` | `assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -9694,6 +9700,12 @@ graph LR
 
 ### `functions/src/special/exp-integrals.ts` - Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).
 
+**Internal Dependencies:**
+
+| File                 | Imports                           | Type   |
+| -------------------- | --------------------------------- | ------ |
+| `../utils/limits.js` | `assertLoopOrder, MAX_EXPN_ORDER` | Import |
+
 **Exports:**
 
 - Functions: `expn`, `expIntegralE1`, `sinhIntegral`, `coshIntegral`
@@ -9748,9 +9760,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports   | Type   |
-| --------------------- | --------- | ------ |
-| `../typed/special.js` | `digamma` | Import |
+| File                  | Imports                                                   | Type   |
+| --------------------- | --------------------------------------------------------- | ------ |
+| `../typed/special.js` | `digamma`                                                 | Import |
+| `../utils/limits.js`  | `assertLoopOrder, MAX_GEGENBAUER_ORDER, MAX_JACOBI_ORDER` | Import |
 
 **Exports:**
 
@@ -9768,9 +9781,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports            | Type   |
-| --------------------- | ------------------ | ------ |
-| `../typed/special.js` | `besselJ, besselY` | Import |
+| File                  | Imports                                       | Type   |
+| --------------------- | --------------------------------------------- | ------ |
+| `../typed/special.js` | `besselJ, besselY`                            | Import |
+| `../utils/limits.js`  | `assertLoopOrder, MAX_SPHERICAL_BESSEL_ORDER` | Import |
 
 **Exports:**
 
@@ -9785,6 +9799,12 @@ graph LR
 | Package                        | Import |
 | ------------------------------ | ------ |
 | `@danielsimonjr/mathts-matrix` | `eig`  |
+
+**Internal Dependencies:**
+
+| File                 | Imports                              | Type   |
+| -------------------- | ------------------------------------ | ------ |
+| `../utils/limits.js` | `assertLoopOrder, MAX_FERRERS_ORDER` | Import |
 
 **Exports:**
 
@@ -12163,6 +12183,7 @@ graph LR
 | `./parallel-map.js`            | `kernelSource`                                                                  | Import |
 | `../distribution-functions.js` | `studentTQuantile, normalQuantile`                                              | Import |
 | `../stats/inference-extra.js`  | `multipleTest`                                                                  | Import |
+| `../utils/limits.js`           | `assertLoopOrder`                                                               | Import |
 
 **Exports:**
 
@@ -12255,9 +12276,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports        | Type   |
-| -------------------- | -------------- | ------ |
-| `./number-matrix.js` | `numberVector` | Import |
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `./number-matrix.js` | `numberVector`    | Import |
+| `../utils/limits.js` | `assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -13089,7 +13111,7 @@ graph LR
 **Exports:**
 
 - Functions: `assertAllocSize`, `assertLoopOrder`
-- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`
 
 ---
 
@@ -20607,8 +20629,8 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
+| `functions/src/utils/limits`                           | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
-| `functions/src/utils/limits`                           | 0 files      | 34 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
@@ -21533,8 +21555,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232959 |
-| Total Exports           | 7328   |
+| Total Lines of Code     | 233260 |
+| Total Exports           | 7336   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 665    |

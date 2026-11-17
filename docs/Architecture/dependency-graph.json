@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-17",
     "totalFiles": 1340,
     "totalModules": 82,
-    "totalExports": 7328
+    "totalExports": 7336
   },
   "entryPoints": [
     {
@@ -20123,7 +20123,7 @@
         "internalDependencies": [
           {
             "file": "../utils/limits.js",
-            "imports": ["assertAllocSize"]
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -20151,7 +20151,12 @@
         "description": "Gauss-Legendre quadrature nodes and weights.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["rootsLegendre"],
         "interfaces": ["RootsLegendreResult"],
@@ -22669,7 +22674,12 @@
         "description": "Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder", "MAX_EXPN_ORDER"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["expn", "expIntegralE1", "sinhIntegral", "coshIntegral"],
         "functions": ["expn", "expIntegralE1", "sinhIntegral", "coshIntegral"]
@@ -22729,6 +22739,10 @@
           {
             "file": "../typed/special.js",
             "imports": ["digamma"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder", "MAX_GEGENBAUER_ORDER", "MAX_JACOBI_ORDER"]
           }
         ],
         "workspaceDependencies": [],
@@ -22743,6 +22757,10 @@
           {
             "file": "../typed/special.js",
             "imports": ["besselJ", "besselY"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder", "MAX_SPHERICAL_BESSEL_ORDER"]
           }
         ],
         "workspaceDependencies": [
@@ -22775,7 +22793,12 @@
         "description": "Prolate spheroidal wave functions — angular characteristic values",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder", "MAX_FERRERS_ORDER"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -27726,6 +27749,10 @@
           {
             "file": "../stats/inference-extra.js",
             "imports": ["multipleTest"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -28233,6 +28260,10 @@
           {
             "file": "./number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -30376,9 +30407,33 @@
             "imports": ["DENSE_MATRIX_MAX_ELEMENTS"]
           }
         ],
-        "exports": ["MAX_ALLOC_ELEMENTS", "MAX_LOOP_ORDER", "assertAllocSize", "assertLoopOrder"],
+        "exports": [
+          "MAX_ALLOC_ELEMENTS",
+          "MAX_LOOP_ORDER",
+          "MAX_RECURRENCE_ORDER",
+          "MAX_JACOBI_ORDER",
+          "MAX_GEGENBAUER_ORDER",
+          "MAX_FERRERS_ORDER",
+          "MAX_EXPN_ORDER",
+          "MAX_LAGUERRE_ORDER",
+          "MAX_SPHERICAL_BESSEL_ORDER",
+          "MAX_BESSEL_J_SWEEP",
+          "assertAllocSize",
+          "assertLoopOrder"
+        ],
         "functions": ["assertAllocSize", "assertLoopOrder"],
-        "constants": ["MAX_ALLOC_ELEMENTS", "MAX_LOOP_ORDER"]
+        "constants": [
+          "MAX_ALLOC_ELEMENTS",
+          "MAX_LOOP_ORDER",
+          "MAX_RECURRENCE_ORDER",
+          "MAX_JACOBI_ORDER",
+          "MAX_GEGENBAUER_ORDER",
+          "MAX_FERRERS_ORDER",
+          "MAX_EXPN_ORDER",
+          "MAX_LAGUERRE_ORDER",
+          "MAX_SPHERICAL_BESSEL_ORDER",
+          "MAX_BESSEL_J_SWEEP"
+        ]
       },
       "functions/src/utils/map.ts": {
         "description": "A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition",
@@ -49220,14 +49275,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 232959,
-    "totalExports": 7328,
+    "totalLinesOfCode": 233260,
+    "totalExports": 7336,
     "totalClasses": 62,
     "totalInterfaces": 665,
     "totalFunctions": 2544,
     "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1678,
+    "totalConstants": 1686,
     "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
