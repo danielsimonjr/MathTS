@@ -1951,6 +1951,7 @@
       "functions/src/statistics/median.ts",
       "functions/src/statistics/mode.ts",
       "functions/src/statistics/nan-reductions.ts",
+      "functions/src/statistics/quantile-numpy-methods.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/typed/arithmetic.ts"
     ],
