@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-17",
-  "totalFiles": 2476,
+  "totalFiles": 2477,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1314,
     "test-only": 0,
     "orphan": 0,
-    "test": 1070,
+    "test": 1071,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1340,
-    "tests": 1070,
+    "tests": 1071,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1128,
+    "@danielsimonjr/mathts-functions": 1129,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 145,
@@ -8458,7 +8458,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 196
+      "loc": 202
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
@@ -10463,6 +10463,13 @@
       "loc": 55
     },
     {
+      "file": "functions/tests/dogfood-1110-quantile-methods.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 165
+    },
+    {
       "file": "functions/tests/dogfood-1112-bignumber-collections.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10649,7 +10656,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 131
+      "loc": 132
     },
     {
       "file": "functions/tests/dogfood-g32a-724.test.ts",
