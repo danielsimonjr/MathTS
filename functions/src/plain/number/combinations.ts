@@ -1,5 +1,6 @@
 import { isInteger } from '../../utils/number.js';
 import { product } from '../../utils/product.js';
+import { assertLoopOrder } from '../../utils/limits.js';
 
 /**
  * Return the number of ways to choose `k` items from `n` items, without order.
@@ -8,6 +9,7 @@ import { product } from '../../utils/product.js';
  * as possible.
  *
  * @throws TypeError if `n` or `k` is not a non-negative integer, or if `k > n`.
+ * @throws RangeError if `n` is not a safe integer, or if `min(k, n - k)` is above the loop bound
  */
 export function combinationsNumber(n: number, k: number): number {
   if (!isInteger(n) || n < 0) {
@@ -20,7 +22,15 @@ export function combinationsNumber(n: number, k: number): number {
     throw new TypeError('k must be less than or equal to n');
   }
 
+  // Above 2^53 the counter `++nextnumerator` does not change the value, so the loop never ends.
+  if (!Number.isSafeInteger(n)) {
+    throw new RangeError(
+      `combinations: n must be a safe integer (at most ${Number.MAX_SAFE_INTEGER})`
+    );
+  }
+
   const nMinusk = n - k;
+  assertLoopOrder('combinations', 'min(k, n - k)', Math.min(k, nMinusk));
 
   let answer = 1;
   const firstnumerator = k < nMinusk ? nMinusk + 1 : k + 1;

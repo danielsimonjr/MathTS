@@ -4,6 +4,11 @@
  * prime-power tests, exact integer roots, digit sums, Collatz and primorial.
  */
 
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest `n` for primorial (n = 1e6 takes about 3.5 s). */
+const PRIMORIAL_MAX_N = 1_000_000;
+
 function assertPositiveInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n) || n < 1) throw new RangeError(`${name} must be a positive integer`);
 }
@@ -24,15 +29,6 @@ function factorize(n: number): Array<[number, number]> {
   }
   if (m > 1) out.push([m, 1]);
   return out;
-}
-
-function mobius(n: number): -1 | 0 | 1 {
-  let sign: -1 | 1 = 1;
-  for (const [, e] of factorize(n)) {
-    if (e > 1) return 0;
-    sign = sign === 1 ? -1 : 1;
-  }
-  return sign === 1 ? 1 : -1;
 }
 
 /** Sum of the divisors of n (sigma), computed from the factorization. */
@@ -86,11 +82,33 @@ export function vonMangoldt(n: number): number {
   return f.length === 1 ? Math.log(f[0][0]) : 0;
 }
 
-/** Mertens function M(n) = sum of mu(k) for k = 1..n. */
+/** Mertens function M(n) = sum of mu(k) for k = 1..n. Throws RangeError for n above 10000000. */
 export function mertens(n: number): number {
   assertPositiveInt(n, 'n');
-  let total = 0;
-  for (let k = 1; k <= n; k++) total += mobius(k);
+  assertLoopOrder('mertens', 'n', n);
+  // Linear sieve: each composite is marked once, by its smallest prime factor.
+  const mu = new Int8Array(n + 1);
+  const composite = new Uint8Array(n + 1);
+  const primes: number[] = [];
+  mu[1] = 1;
+  let total = 1;
+  for (let i = 2; i <= n; i++) {
+    if (composite[i] === 0) {
+      primes.push(i);
+      mu[i] = -1;
+    }
+    for (const p of primes) {
+      const ip = i * p;
+      if (ip > n) break;
+      composite[ip] = 1;
+      if (i % p === 0) {
+        mu[ip] = 0;
+        break;
+      }
+      mu[ip] = -mu[i];
+    }
+    total += mu[i];
+  }
   return total;
 }
 
@@ -100,15 +118,33 @@ export function isPerfect(n: number): boolean {
   return n >= 2 && sigma(n) - n === n;
 }
 
-/** Floor of the square root of a non-negative bigint (Newton iteration). */
-export function integerSqrt(n: bigint): bigint {
+/**
+ * Floor of the square root of a non-negative bigint (Newton iteration). A number is
+ * accepted when it is a safe integer.
+ */
+export function integerSqrt(value: bigint | number): bigint {
+  let n: bigint;
+  if (typeof value === 'number') {
+    if (!Number.isSafeInteger(value)) {
+      throw new RangeError(
+        `integerSqrt: n must be a safe integer (at most ${Number.MAX_SAFE_INTEGER})`
+      );
+    }
+    n = BigInt(value);
+  } else {
+    n = value;
+  }
   if (n < 0n) throw new RangeError('integerSqrt requires a non-negative argument');
   if (n < 2n) return n;
-  let x = BigInt(Math.floor(Math.sqrt(Number(n))));
-  // Correct the float estimate, then refine with Newton steps.
-  while (x * x > n) x--;
-  while ((x + 1n) * (x + 1n) <= n) x++;
-  return x;
+  // Newton iteration from a power of two that is not below the root. The sequence
+  // decreases until it reaches floor(sqrt(n)). A float estimate is wrong for a big
+  // bigint, so the code does not use one.
+  let x = 1n << BigInt((n.toString(2).length + 1) >> 1);
+  for (;;) {
+    const y = (x + n / x) >> 1n;
+    if (y >= x) return x;
+    x = y;
+  }
 }
 
 /** Floor of the k-th root of a non-negative bigint (binary search). */
@@ -186,10 +222,11 @@ export function collatzSteps(n: number): number {
   return steps;
 }
 
-/** Primorial n# = product of all primes <= n (n >= 0). */
+/** Primorial n# = product of all primes <= n (n >= 0). Throws RangeError for n above 1000000. */
 export function primorial(n: number): bigint {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new RangeError('primorial requires a non-negative integer');
+  assertLoopOrder('primorial', 'n', n, PRIMORIAL_MAX_N);
   let result = 1n;
   for (let k = 2; k <= n; k++) {
     let prime = true;

@@ -4,6 +4,21 @@
  * generators, Gray code, and binomial coefficients mod a prime (Lucas).
  */
 
+import { assertLoopOrder } from '../utils/limits.js';
+
+/**
+ * Largest index whose value is a finite double. The next index rounds to Infinity
+ * (checked against exact integer arithmetic), so a larger index returns Infinity.
+ */
+const MOTZKIN_MAX_FINITE = 654;
+const SCHRODER_MAX_FINITE = 407;
+const PELL_MAX_FINITE = 806;
+const TRIBONACCI_MAX_FINITE = 1167;
+/** D(m, n) is not below D(405, 405), which is Infinity, once min(m, n) is 405 or more. */
+const DELANNOY_FIRST_INFINITE = 405;
+/** Largest n for integerPartitionsGen (p(70) = 4087968 lists). */
+const PARTITIONS_GEN_MAX = 70;
+
 function assertNonNegInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new RangeError(`${name} must be a non-negative integer`);
@@ -20,10 +35,11 @@ function binomialBig(n: number, k: number): bigint {
   return c;
 }
 
-/** Motzkin number M(n): number of Motzkin paths of length n. */
+/** Motzkin number M(n): number of Motzkin paths of length n. Infinity for n > 654. */
 export function motzkin(n: number): number {
   assertNonNegInt(n, 'n');
   if (n < 2) return 1;
+  if (n > MOTZKIN_MAX_FINITE) return Infinity;
   let m0 = 1n;
   let m1 = 1n;
   for (let k = 2; k <= n; k++) {
@@ -41,11 +57,12 @@ export function narayana(n: number, k: number): number {
   return Number((binomialBig(n, k) * binomialBig(n, k - 1)) / BigInt(n));
 }
 
-/** Large Schroder number S(n) (1, 2, 6, 22, 90, ...). */
+/** Large Schroder number S(n) (1, 2, 6, 22, 90, ...). Infinity for n > 407. */
 export function schroder(n: number): number {
   assertNonNegInt(n, 'n');
   if (n === 0) return 1;
   if (n === 1) return 2;
+  if (n > SCHRODER_MAX_FINITE) return Infinity;
   let s0 = 1n;
   let s1 = 2n;
   for (let k = 2; k <= n; k++) {
@@ -57,10 +74,11 @@ export function schroder(n: number): number {
   return Number(s1);
 }
 
-/** Delannoy number D(m, n) = sum_k C(m,k) C(n,k) 2^k. */
+/** Delannoy number D(m, n) = sum_k C(m,k) C(n,k) 2^k. Infinity when min(m, n) >= 405. */
 export function delannoy(m: number, n: number): number {
   assertNonNegInt(m, 'm');
   assertNonNegInt(n, 'n');
+  if (Math.min(m, n) >= DELANNOY_FIRST_INFINITE) return Infinity;
   let total = 0n;
   for (let k = 0; k <= Math.min(m, n); k++) {
     total += binomialBig(m, k) * binomialBig(n, k) * (1n << BigInt(k));
@@ -68,9 +86,10 @@ export function delannoy(m: number, n: number): number {
   return Number(total);
 }
 
-/** Pell number P(n): P0 = 0, P1 = 1, P(n) = 2 P(n-1) + P(n-2). */
+/** Pell number P(n): P0 = 0, P1 = 1, P(n) = 2 P(n-1) + P(n-2). Infinity for n > 806. */
 export function pell(n: number): number {
   assertNonNegInt(n, 'n');
+  if (n > PELL_MAX_FINITE) return Infinity;
   let a = 0n;
   let b = 1n;
   for (let k = 0; k < n; k++) {
@@ -79,9 +98,10 @@ export function pell(n: number): number {
   return Number(a);
 }
 
-/** Tribonacci number T(n) with T(0) = 0, T(1) = 0, T(2) = 1. */
+/** Tribonacci number T(n) with T(0) = 0, T(1) = 0, T(2) = 1. Infinity for n > 1167. */
 export function tribonacci(n: number): number {
   assertNonNegInt(n, 'n');
+  if (n > TRIBONACCI_MAX_FINITE) return Infinity;
   let a = 0n;
   let b = 0n;
   let c = 1n;
@@ -117,9 +137,14 @@ export function lahNumber(n: number, k: number): number {
   return Number(binomialBig(n - 1, k - 1) * prod);
 }
 
-/** All integer partitions of n, in descending lexicographic order. */
+/**
+ * All integer partitions of n, in descending lexicographic order.
+ *
+ * @throws RangeError if `n` is above 70
+ */
 export function integerPartitionsGen(n: number): number[][] {
   assertNonNegInt(n, 'n');
+  assertLoopOrder('integerPartitionsGen', 'n', n, PARTITIONS_GEN_MAX);
   const out: number[][] = [];
   const cur: number[] = [];
   const walk = (rem: number, maxPart: number): void => {
