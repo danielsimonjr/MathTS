@@ -84,7 +84,7 @@ export function isVarianceNorm(value: unknown): value is VarianceNorm {
   return typeof value === 'string' && VARIANCE_NORMS.has(value);
 }
 
-function readSkip(o: StatReduceOptions): boolean | undefined {
+export function readSkip(o: StatReduceOptions): boolean | undefined {
   const a = o.skipNaN;
   const b = o.skipna;
   if (a !== undefined && typeof a !== 'boolean') {

@@ -4759,16 +4759,17 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                | Type   |
-| ----------------------------- | -------------------------------------- | ------ |
-| `./typed/arithmetic.js`       | `mean, std, sum`                       | Import |
-| `./factories/index.js`        | `quantileSeq`                          | Import |
-| `./distribution-functions.js` | `studentTCDF`                          | Import |
-| `./wasm/special/scalars.js`   | `betaincScalar`                        | Import |
-| `./regression-extra.js`       | `fitLine, linregressFromFit`           | Import |
-| `./typed/distributions.js`    | `normalCDF`                            | Import |
-| `./kendall-exact.js`          | `kendallPExact, kendallShouldUseExact` | Import |
-| `./typed/number-matrix.js`    | `numberVector`                         | Import |
+| File                           | Imports                                | Type   |
+| ------------------------------ | -------------------------------------- | ------ |
+| `./typed/arithmetic.js`        | `mean, std, sum`                       | Import |
+| `./factories/index.js`         | `quantileSeq`                          | Import |
+| `./distribution-functions.js`  | `studentTCDF`                          | Import |
+| `./wasm/special/scalars.js`    | `betaincScalar`                        | Import |
+| `./regression-extra.js`        | `fitLine, linregressFromFit`           | Import |
+| `./typed/distributions.js`     | `normalCDF`                            | Import |
+| `./kendall-exact.js`           | `kendallPExact, kendallShouldUseExact` | Import |
+| `./typed/number-matrix.js`     | `numberVector`                         | Import |
+| `./statistics/numeric-data.js` | `readSkip`                             | Import |
 
 **Exports:**
 
@@ -9996,7 +9997,7 @@ graph LR
 **Exports:**
 
 - Types: `FloatTyped`, `NumericVectorInput`, `VarianceNorm`, `StatReduceOptions`, `VarianceRequest`
-- Functions: `isFloatTyped`, `copyToNumberArray`, `flattenForStatistics`, `finiteNumbers`, `isVarianceNorm`, `parseStatOptions`, `normalizationFromSecondArg`, `normalizationFromStringAndOptions`, `numberGrid`, `flattenNumeric`, `reduceNumericMatrix`, `isConstantArrayLike`, `typedArrayPairToNumbers`
+- Functions: `isFloatTyped`, `copyToNumberArray`, `flattenForStatistics`, `finiteNumbers`, `isVarianceNorm`, `readSkip`, `parseStatOptions`, `normalizationFromSecondArg`, `normalizationFromStringAndOptions`, `numberGrid`, `flattenNumeric`, `reduceNumericMatrix`, `isConstantArrayLike`, `typedArrayPairToNumbers`
 
 ---
 
@@ -21436,12 +21437,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1338   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232170 |
-| Total Exports           | 7320   |
+| Total Lines of Code     | 232207 |
+| Total Exports           | 7321   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 664    |
-| Total Functions         | 2536   |
+| Total Functions         | 2537   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

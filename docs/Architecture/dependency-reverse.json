@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-16",
+  "generated": "2026-11-17",
   "dependents": {
     "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
@@ -1908,6 +1908,16 @@
       "functions/src/typed/integration.ts",
       "functions/src/typed/matrix-ops.ts"
     ],
+    "functions/src/statistics/numeric-data.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/statistics/corr.ts",
+      "functions/src/statistics/mad.ts",
+      "functions/src/statistics/median.ts",
+      "functions/src/statistics/mode.ts",
+      "functions/src/statistics/nan-reductions.ts",
+      "functions/src/statistics/quantileSeq.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
       "functions/src/stats/inference-extra2.ts",
@@ -2699,15 +2709,6 @@
       "functions/src/special/zeta-extra.ts",
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
-    ],
-    "functions/src/statistics/numeric-data.ts": [
-      "functions/src/statistics/corr.ts",
-      "functions/src/statistics/mad.ts",
-      "functions/src/statistics/median.ts",
-      "functions/src/statistics/mode.ts",
-      "functions/src/statistics/nan-reductions.ts",
-      "functions/src/statistics/quantileSeq.ts",
-      "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
