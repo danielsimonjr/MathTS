@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { isNumber } from '../utils/is.js';
+import { assertAllocSize } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 
@@ -109,6 +110,7 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
         if (cache[nn] && cache[nn].length > nk) {
           return cache[nn][nk];
         }
+        assertAllocSize('stirlingS2', [nn + 1, nk + 1]);
         /* Fill the cache */
         for (let m = 0; m <= nn; ++m) {
           if (!cache[m]) {

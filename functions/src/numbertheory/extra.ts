@@ -12,6 +12,7 @@
  * @packageDocumentation
  */
 
+import { assertAllocSize } from '../utils/limits.js';
 import { chooseScalar } from '../wasm/special/scalars.js';
 
 // =============================================================================
@@ -111,6 +112,7 @@ export function stirlingS1(n: number, k: number): number {
     throw new Error('stirlingS1 requires non-negative integers');
   }
   if (k > n) return 0;
+  assertAllocSize('stirlingS1', [n + 1, n + 1]);
   const s: number[][] = Array.from({ length: n + 1 }, () => new Array(n + 1).fill(0));
   s[0][0] = 1;
   for (let i = 1; i <= n; i++) {
