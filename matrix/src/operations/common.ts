@@ -332,16 +332,6 @@ export function entryRange(values: readonly (readonly number[])[] | ArrayLike<nu
   return { amax, amin, finite: true };
 }
 
-/** The largest |entry| of a flat array. */
-export function maxAbs(values: ArrayLike<number>): number {
-  let amax = 0;
-  for (let i = 0; i < values.length; i++) {
-    const x = Math.abs(values[i]);
-    if (x > amax) amax = x;
-  }
-  return amax;
-}
-
 /** True when every number in a result (number, array, typed array or plain object) is finite. */
 export function allFinite(x: unknown): boolean {
   if (typeof x === 'number') return Number.isFinite(x);

@@ -32,7 +32,13 @@ import {
   parallelMatrixNorm,
   norm as typedNorm,
 } from '../src/index.js';
-import { ldexp } from '../src/operations/common.js';
+import {
+  ldexp,
+  pow2ScaleExponent,
+  SQUARED,
+  FOURTH,
+  ABS_CUTOFF_LO,
+} from '../src/operations/common.js';
 
 const A0 = [
   [2, 1, 0.5],
@@ -537,6 +543,32 @@ describe('#1104 window edges', () => {
     expectBits(sqrtmF(pow2(S2, -21)), by(sqrtmF(pow2(S2, -1)), -10));
     expectClose(sqrtmF(pow2(S2, 400)), by(sqrtmF(S2), 200));
     expectClose(sqrtmF(pow2(S2, -20)), by(sqrtmF(S2), -10));
+  });
+
+  it.each([
+    ['schur', -FOURTH, FOURTH],
+    ['svd family', -SQUARED, FOURTH],
+    ['logm', ABS_CUTOFF_LO, FOURTH],
+    ['qr family and sqrtm', ABS_CUTOFF_LO, SQUARED],
+    ['qrPivoted and condest', -SQUARED, SQUARED],
+  ])('%s: the scale exponent is 0 exactly on [2^lo, 2^hi]', (_name, lo, hi) => {
+    expect(pow2ScaleExponent(ldexp(1, lo), lo, hi)).toBe(0);
+    expect(pow2ScaleExponent(ldexp(1, hi), lo, hi)).toBe(0);
+    // The adjacent doubles outside the window.
+    const below = ldexp(1 - 2 ** -53, lo);
+    const above = ldexp(1 + 2 ** -52, hi);
+    for (const x of [below, above]) {
+      // Scaled, the value is inside the window (Math.log2 may round it to [0.5, 1)).
+      const e = pow2ScaleExponent(x, lo, hi);
+      expect(e).not.toBe(0);
+      expect(ldexp(x, e)).toBeGreaterThanOrEqual(0.5);
+      expect(ldexp(x, e)).toBeLessThanOrEqual(ldexp(1, hi));
+    }
+    expect(pow2ScaleExponent(ldexp(1, hi + 1), lo, hi)).toBe(-2);
+    expect(pow2ScaleExponent(ldexp(1, lo - 1), lo, hi)).toBe(-lo + 1);
+    expect(pow2ScaleExponent(NaN, lo, hi)).toBe(0);
+    expect(pow2ScaleExponent(Infinity, lo, hi)).toBe(0);
+    expect(pow2ScaleExponent(0, lo, hi)).toBe(0);
   });
 });
 
