@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-17",
-  "totalFiles": 2463,
+  "totalFiles": 2466,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1313,
     "test-only": 0,
     "orphan": 0,
-    "test": 1058,
+    "test": 1061,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1339,
-    "tests": 1058,
+    "tests": 1061,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1118,
+    "@danielsimonjr/mathts-functions": 1120,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 143,
+    "@danielsimonjr/mathts-matrix": 144,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -7219,7 +7219,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 176
+      "loc": 178
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -10447,6 +10447,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-989c-eigs-non-finite.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 16
+    },
+    {
+      "file": "functions/tests/dogfood-989c-mathieu-huge-q.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
     },
     {
       "file": "functions/tests/dogfood-990-alloc-cap.test.ts",
@@ -14009,7 +14023,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 721
+      "loc": 752
     },
     {
       "file": "matrix/src/operations/expm.ts",
@@ -14409,6 +14423,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 184
+    },
+    {
+      "file": "matrix/tests/eig-iteration-limit-989c.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 87
     },
     {
       "file": "matrix/tests/eig-jordan-blocks.test.ts",
