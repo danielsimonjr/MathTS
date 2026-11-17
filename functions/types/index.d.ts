@@ -2933,8 +2933,16 @@ export interface MathJsInstance extends MathJsFactory {
    * Numeric functions
    ************************************************************************/
 
-  /** Numerically integrate f(x) over [a, b]. */
-  nintegrate(f: (x: number) => number, a: number, b: number, tol?: number): number;
+  /**
+   * Numerically integrate f(x) over [a, b] (adaptive Gauss-Kronrod).
+   * @throws RangeError when the result is not finite or the integral does not converge.
+   */
+  nintegrate(
+    f: (x: number) => number,
+    a: number,
+    b: number,
+    opts?: { tol?: number; maxDepth?: number }
+  ): number;
   /** Numerically differentiate f(x) at x. */
   ndiff(f: (x: number) => number, x: number, h?: number): number;
   /** Find a root of f(x) near x0 using Newton-Raphson. */

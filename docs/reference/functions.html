@@ -2449,7 +2449,7 @@
       | `romberg(f, a, b[, tol])`                                 | Romberg integration                                                                                                |
       | `parallelGaussQuad(f, a, b[, n, order, { workerCount }])` | Async `gaussQuad` with a worker fan-out                                                                            |
       | `parallelRomberg(f, a, b[, tol, { workerCount }])`        | Async `romberg` with a worker fan-out                                                                              |
-      | `nintegrate(f, a, b[, tol])`                              | Adaptive numerical integration                                                                                     |
+      | `nintegrate(f, a, b[, { tol, maxDepth }])`                | Adaptive numerical integration; throws `RangeError` when the integral does not converge                            |
       | `quad(f, a, b[, opts])`                                   | Adaptive Gauss–Kronrod (G7-K15) quadrature                                                                         |
       | `rootsLegendre(n)`                                        | Gauss–Legendre quadrature nodes/weights on `[-1, 1]`                                                               |
       | `monteCarloIntegrate(f, bounds[, opts])`                  | Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box (`opts.method: 'uniform'\|'halton'\|'sobol'`) |
@@ -2496,8 +2496,11 @@
         (G7-K15) scheme that compares a 15-point Kronrod estimate against its
         embedded 7-point Gauss estimate on each subinterval, bisecting where the two
         disagree. It resolves endpoint singularities (e.g. `x^-1/2` near 0) far more
-        accurately than fixed-order adaptive rules — call `quad` directly for the
-        `{ value, error }` result shape.
+        accurately than fixed-order adaptive rules. `nintegrate` and `integrate(fn, a, b)`
+        throw a `RangeError` when the result is not finite or the integral does not
+        converge (for example `1/x` on `[0, 1]`). Call `quad` directly for the
+        `{ value, error, converged }` result shape: `quad` never throws for
+        convergence and sets `converged` to `false` instead.
 
       ### Background & History
 

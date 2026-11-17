@@ -1555,6 +1555,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1004-describe-nan.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-688-lusolve-singular.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-960-divide-scalar-matrix.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-998-nintegrate-divergent.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g01-complex-promotion-edges.test.ts`                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g01-complex-promotion.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-g02-unit-trig-complex.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |

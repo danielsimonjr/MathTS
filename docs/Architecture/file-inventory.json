@@ -7464,7 +7464,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 161
+      "loc": 222
     },
     {
       "file": "functions/src/numeric/bfgs.ts",
@@ -7639,7 +7639,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 189
+      "loc": 201
     },
     {
       "file": "functions/src/numeric/rational-nullspace.ts",
@@ -9333,7 +9333,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2404
+      "loc": 2406
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -10440,6 +10440,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-998-nintegrate-divergent.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 72
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

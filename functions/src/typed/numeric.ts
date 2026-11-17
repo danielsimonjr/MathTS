@@ -15,7 +15,7 @@ import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matri
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
-import { quad } from '../numeric/adaptive-quad.js';
+import { quadValue } from '../numeric/adaptive-quad.js';
 import { levenbergMarquardt, nelderMead } from '../optimization-extra.js';
 export {
   rationalNullspace,
@@ -404,6 +404,8 @@ export function leastSquares(A: number[][], b: number[]): number[] {
  * @param b - Upper bound
  * @param opts - Options (tol, maxDepth for max subdivisions)
  * @returns Approximate integral
+ * @throws RangeError when the result is not finite or the integral does not converge
+ *   (a divergent integrand, a NaN integrand, or a `maxDepth` that leaves unresolved error)
  */
 export function nintegrate(
   f: (x: f64) => f64,
@@ -411,7 +413,7 @@ export function nintegrate(
   b: f64,
   opts?: { tol?: f64; maxDepth?: i32 }
 ): f64 {
-  return quad(f, a, b, opts).value;
+  return quadValue('nintegrate', f, a, b, opts);
 }
 
 /**

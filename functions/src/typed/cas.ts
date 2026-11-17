@@ -52,7 +52,7 @@ import { closedFormRoots, snapRoot } from '../cas/closed-form-roots.js';
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
 import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
-import { quad } from '../numeric/adaptive-quad.js';
+import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
 
@@ -333,7 +333,7 @@ export function integrate(
         'integrate(fn, a, b) requires numeric bounds; integrate(expr, var) is symbolic — use quad(fn, a, b) for numeric quadrature'
       );
     }
-    return quad(expr, varNameOrA, a).value;
+    return quadValue('integrate', expr, varNameOrA, a);
   }
   const varName = varNameOrA as string;
   const trimmed = expr.trim();
