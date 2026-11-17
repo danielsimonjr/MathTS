@@ -1717,7 +1717,13 @@ export const fermiCoupling = createFermiCoupling(
 
 export const complex = factoryScope.complex as (re?: number, im?: number) => unknown;
 export const fraction = factoryScope.fraction as (n: number, d?: number) => unknown;
-export const bignumber = factoryScope.bignumber as (x: number | string) => unknown;
+/**
+ * Convert a value to BigNumber. An Array or a Matrix converts element by element, a Unit
+ * converts its value, a Fraction and a bigint convert without loss, and null gives 0.
+ */
+export const bignumber = factoryScope.bignumber as (
+  x: number | string | bigint | boolean | null | object
+) => unknown;
 export const matrix = factoryScope.matrix as (data?: unknown, format?: string) => unknown;
 export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => unknown;
 /**

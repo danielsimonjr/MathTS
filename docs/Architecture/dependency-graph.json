@@ -17447,7 +17447,14 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber", "isBigNumber"]
+            "imports": [
+              "mathTyped",
+              "Complex",
+              "Fraction",
+              "BigNumber",
+              "isBigNumber",
+              "isFraction"
+            ]
           }
         ],
         "exports": ["factoryScope", "pushConfigOverlay", "popConfigOverlay"],
@@ -46156,7 +46163,8 @@
               "ceil",
               "matrix",
               "sparse",
-              "transpose"
+              "transpose",
+              "bignumber"
             ]
           },
           {
@@ -46239,6 +46247,8 @@
         "functions": [
           "complex",
           "fraction",
+          "bignumber",
+          "bignumber",
           "bignumber",
           "matrix",
           "sparse",
@@ -49210,11 +49220,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 232923,
+    "totalLinesOfCode": 232950,
     "totalExports": 7328,
     "totalClasses": 62,
     "totalInterfaces": 665,
-    "totalFunctions": 2542,
+    "totalFunctions": 2544,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1678,

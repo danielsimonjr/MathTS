@@ -16,13 +16,19 @@ describe('quantileSeq with a BigNumber N (#1112)', () => {
     expect(num(q([1, 2, 3, 4], B(3)))).toEqual([1.75, 2.5, 3.25]);
   });
   it('handles BigNumber data and Matrix data', () => {
-    expect(num(q([1, 2, 3].map(B), B(3)))).toEqual([1.5, 2, 2.5]);
+    const big = q([1, 2, 3].map(B), B(3)) as unknown[];
+    expect(big.every(isBig)).toBe(true);
+    expect(num(big)).toEqual([1.5, 2, 2.5]);
     expect(num(q([1, 2, 3, 4, 5].map(B), B(4)))).toEqual([1.8, 2.6, 3.4, 4.2]);
-    expect(num(q(matrix([1, 2, 3]), B(3)))).toEqual([1.5, 2, 2.5]);
+    const mat = q(matrix([1, 2, 3]), B(3)) as unknown[];
+    expect(mat.every(isBig)).toBe(true);
+    expect(num(mat)).toEqual([1.5, 2, 2.5]);
   });
   it('handles sorted, method and options', () => {
     expect(num(q([1, 2, 3], B(3), true))).toEqual([1.5, 2, 2.5]);
-    expect(num(q([1, 2, 3], B(3), 'lower'))).toEqual([1, 2, 2]);
+    const lower = q([1, 2, 3], B(3), 'lower') as unknown[];
+    expect(lower.every(isBig)).toBe(true);
+    expect(num(lower)).toEqual([1, 2, 2]);
     expect(num(q([1, 2, 3], B(3), { method: 'higher' }))).toEqual([2, 2, 3]);
     expect(num(q([1, NaN, 3], B(3), { skipNaN: true }))).toEqual([1.5, 2, 2.5]);
     const nan = q([1, NaN, 3], B(3)) as unknown[];
@@ -39,8 +45,11 @@ describe('quantileSeq with a BigNumber N (#1112)', () => {
     expect(() => q([1, 2, 3], B(2.5))).toThrow(/positive integer/);
     expect(() => q([1, 2, 3], B(Infinity))).toThrow(/positive integer/);
   });
-  it('gives a Fraction N the same quantiles', () => {
-    expect(num(q([1, 2, 3], (fraction as (x: unknown) => unknown)(3)))).toEqual([1.5, 2, 2.5]);
+  // MathTS decision: a Fraction N returns the N quantiles as BigNumbers (mathjs 15.2.0 throws).
+  it('gives a Fraction N the same quantiles (MathTS decision; mathjs throws)', () => {
+    const r = q([1, 2, 3], (fraction as (x: unknown) => unknown)(3)) as unknown[];
+    expect(r.every(isBig)).toBe(true);
+    expect(num(r)).toEqual([1.5, 2, 2.5]);
   });
   it('is stable across repeated calls with mixed number and BigNumber data', () => {
     const run = (): string =>

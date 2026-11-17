@@ -66,6 +66,7 @@ import {
   matrix as _factoryMatrix,
   sparse as _factorySparse,
   transpose as _transpose,
+  bignumber as _bignumber,
 } from '@danielsimonjr/mathts-functions';
 
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
@@ -128,22 +129,22 @@ export function fraction(numerator?: number | string | Fraction, denominator?: n
 }
 
 /**
- * Create a BigNumber (mathjs-compatible)
+ * Create a BigNumber (mathjs-compatible). An Array or a Matrix converts element by element,
+ * a Unit converts its value, and no value gives 0.
  * @example
  * bignumber('123.456')
  * bignumber(123)
+ * bignumber([1, 2]) // [BigNumber 1, BigNumber 2]
  */
-export function bignumber(value?: number | string | BigNumber): BigNumber {
+export function bignumber(
+  value?: number | string | bigint | boolean | null | BigNumber | Fraction
+): BigNumber;
+export function bignumber(value: unknown): unknown;
+export function bignumber(value?: unknown): unknown {
   if (value === undefined) {
     return BigNumber.fromNumber(0);
   }
-  if (isBigNumber(value)) {
-    return value as BigNumber;
-  }
-  if (typeof value === 'string') {
-    return BigNumber.parse(value);
-  }
-  return BigNumber.fromNumber(value);
+  return _bignumber(value as object);
 }
 
 /** Matrix values returned from the compat `matrix` shim (native or mathjs bridge). */
