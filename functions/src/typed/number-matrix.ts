@@ -57,10 +57,15 @@ export function assertNumberScalar(name: string, value: unknown): asserts value 
   }
 }
 
-/** Tells if `x` can be read as a vector: an array-like or an iterable object. */
+/**
+ * Tells if `x` can be read as a vector: an iterable object, or an array-like whose `length`
+ * is a non-negative integer. `Array.from` reads a `length` of NaN or -1 as an empty vector.
+ */
 function isVectorInput(x: unknown): boolean {
   if (typeof x !== 'object' || x === null) return false;
-  return typeof (x as { length?: unknown }).length === 'number' || Symbol.iterator in (x as object);
+  if (Symbol.iterator in x) return true;
+  const length = (x as { length?: unknown }).length;
+  return Number.isInteger(length) && (length as number) >= 0;
 }
 
 /**
@@ -69,7 +74,7 @@ function isVectorInput(x: unknown): boolean {
  * rejects the element (#1042). The function does not read the element as a double.
  *
  * @param name - The name of the function, for the error message.
- * @param x - A number array or a typed array.
+ * @param x - A number array, a typed array, an array-like object or an iterable object.
  * @returns A new array with the elements of `x`. The function does not change `x`.
  * @throws A `TypeError` when `x` is not a vector or an element is not a number.
  */

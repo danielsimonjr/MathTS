@@ -60,6 +60,10 @@ describe('numberVector rejects a scalar (#1083)', () => {
       expect(() => numberVector('myFn', x as never)).toThrow(/myFn/);
     }
   );
+  it.each([NaN, -1, Infinity])('rejects an array-like with length %s', (length) => {
+    expect(() => numberVector('myFn', { length } as never)).toThrow(TypeError);
+    expect(() => numberVector('myFn', { length } as never)).toThrow(/^myFn: expects an array/);
+  });
   it('still copies arrays, typed arrays and array-likes', () => {
     expect(numberVector('f', [1, 2])).toEqual([1, 2]);
     expect(numberVector('f', new Float64Array([1, 2]))).toEqual([1, 2]);
