@@ -169,7 +169,13 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
 // discreteLog — baby-step giant-step
 // =============================================================================
 
-/** Largest baby-step count: the entry limit of a `Map` (2^24). */
+/**
+ * Largest baby-step count: the entry limit of a `Map` (2^24).
+ *
+ * A call at this limit (a modulus near 2^48, no solution) took 17.5 s at 31% machine load
+ * and 23.5 s at 45%, with a peak resident memory of about 1 GB. A modulus near 2^47 took
+ * 16.2 s, so a lower limit refuses calls that return in less than 20 s.
+ */
 const MAX_BABY_STEPS = 2 ** 24;
 
 /**
@@ -210,11 +216,14 @@ function discreteLogSmallOrder(
 
 /**
  * Discrete logarithm via baby-step giant-step: the smallest `x >= 0` such
- * that `g^x === h (mod p)`, or `-1` if none exists within `[0, p-1]`.
+ * that `g^x === h (mod p)`, or `-1` if none exists.
  *
  * Uses `BigInt` internally for modular exponentiation/inversion to avoid
- * overflow. `m = ceil(sqrt(p-1))` baby steps are stored in a map; the giant
- * steps multiply by `g^(-m) mod p` each round.
+ * overflow. When `g` and `p` share a factor, the common factors are first divided out of
+ * `h` and `p`, one power of `g` per division. Then `m = ceil(sqrt(N-1))` baby steps for the
+ * reduced modulus `N` are stored in a map; the giant steps multiply by `g^(-m) mod N` each
+ * round. The return value includes the divided-out powers, so it is an exponent for the
+ * original `p`.
  *
  * @param g - Base
  * @param h - Target
@@ -239,7 +248,9 @@ export function discreteLog(g: number, h: number, p: number): number {
   let b = ((BigInt(h) % N) + N) % N;
   if (b === 1n) return 0;
   // Non-coprime reduction: while gcd(g, N) = d > 1, a solution needs d | h. Divide d out of h
-  // and N and fold g/d into a running factor. A hit before the loop ends is a solution x = count.
+  // and N and fold g/d into a running factor: g^x === h (mod p) becomes
+  // factor * g^(x - count) === b (mod N). Thus `factor === b` is the solution x = count, and
+  // it is the smallest one, because each smaller x failed this test. b stays below N.
   let count = 0;
   let factor = 1n;
   for (let d = gcdBig(a, N); d !== 1n; d = gcdBig(a, N)) {
@@ -248,7 +259,7 @@ export function discreteLog(g: number, h: number, p: number): number {
     N /= d;
     count++;
     factor = (factor * (a / d)) % N;
-    if (factor === b % N) return count;
+    if (factor === b) return count;
     a %= N;
   }
   // g is now invertible modulo N: solve g^x === b / factor, then add the stripped steps.

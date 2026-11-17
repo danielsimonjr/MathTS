@@ -316,9 +316,11 @@ describe('Mathieu order and discrete logarithm (#989)', () => {
     expect(Math.abs(mathieuA(99, 1) / 9801.002551012194 - 1)).toBeLessThan(1e-12);
   });
   it('discreteLog refuses a modulus that needs more than 2^24 baby steps (hang before the fix)', () => {
-    const q = 2 ** 53 - 111; // a prime: g = 3 has a huge order
+    const q = 2 ** 53 - 111; // a prime, and the order of g = 3 is above 2^24
     expect(() => discreteLog(3, 5, q)).toThrow(RangeError);
-    const s = 2 ** 53 - 1; // g === 0 mod s: 0^1 === 0 (#1114 fixed the throw)
+  });
+  it('discreteLog returns for g === 0 (mod p) at the largest p (RangeError before #1114)', () => {
+    const s = 2 ** 53 - 1; // 0^1 === 0
     expect(discreteLog(s, s, s)).toBe(1);
   });
   it('discreteLog finds a small order of g first for a large p (RangeError before the fix)', () => {
