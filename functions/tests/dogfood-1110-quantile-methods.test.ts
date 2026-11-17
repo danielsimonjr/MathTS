@@ -132,6 +132,25 @@ describe('quantileSeq NumPy methods at low and high probability (#1110)', () => 
     expect(q([4, 1, 3, 2, 6, 5, 9], 0.5, 'closest_observation')).toBe(4);
   });
 
+  it('clips both ends to the last element at p = 1 (index at or above n - 1)', () => {
+    // NumPy 2.3.5: np.quantile(a, 1, method=m) for each sample.
+    for (const m of ['weibull', 'hazen', 'median_unbiased', 'normal_unbiased']) {
+      expect(q([1, 2, 3], 1, m)).toBe(3);
+      expect(q([5], 1, m)).toBe(5);
+      expect(q([1, 2, 3, 4], 1, m)).toBe(4);
+    }
+  });
+
+  it('resolves a closest_observation tie to the even order statistic (Hyndman-Fan type 3)', () => {
+    // NumPy 2.3.5 values. NumPy 1.26.4 took the odd order statistic.
+    const ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    expect(q([1, 2, 3, 4, 5, 6, 7], 0.5, 'closest_observation')).toBe(4);
+    expect(q(ten, 0.25, 'closest_observation')).toBe(2);
+    expect(q(ten, 0.75, 'closest_observation')).toBe(8);
+    expect(q([1, 2, 3, 4], 0.625, 'closest_observation')).toBe(2);
+    expect(q([1, 2, 3, 4], 0.875, 'closest_observation')).toBe(4);
+  });
+
   it('gives NaN when the clipped boundary element is infinite, as NumPy', () => {
     expect(q([-Infinity, 1, 2], 0, 'hazen')).toBeNaN();
     expect(q([-Infinity, 1], 0.25, 'weibull')).toBeNaN();
