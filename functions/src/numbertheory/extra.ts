@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { assertAllocSize } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import { chooseScalar } from '../wasm/special/scalars.js';
 
 // =============================================================================
@@ -58,6 +58,9 @@ function binomialExact(n: number, k: number): number {
   return Math.round(chooseScalar(n, k));
 }
 
+/** Largest `n` for eulerNumbers (the work grows with n squared; every E_m past 270 is not finite). */
+const EULER_NUMBERS_MAX_N = 1000;
+
 /**
  * Euler numbers `E_0..E_n` (the coefficients in the secant Maclaurin series).
  *
@@ -66,6 +69,7 @@ function binomialExact(n: number, k: number): number {
  *
  * @param n - Non-negative integer: compute E_0 through E_n
  * @returns Array of length `n + 1`: `[E_0, E_1, ..., E_n]`
+ * @throws RangeError if `n` is above 1000
  *
  * @example
  * eulerNumbers(6) // => [1, 0, -1, 0, 5, 0, -61]
@@ -74,6 +78,7 @@ export function eulerNumbers(n: number): number[] {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error('eulerNumbers requires a non-negative integer');
   }
+  assertLoopOrder('eulerNumbers', 'n', n, EULER_NUMBERS_MAX_N);
   const E: number[] = new Array(n + 1).fill(0);
   E[0] = 1;
   for (let m = 1; m <= n; m++) {

@@ -68,6 +68,9 @@ function makeRng(seed: string | number | null): RngFn {
 // NOTE: B_1 = -1/2 per the convention used in most CAS systems.
 // =============================================================================
 
+/** Largest even index n with a finite B_n as a double. */
+const BERNOULLI_MAX_FINITE_INDEX = 258;
+
 /** Cache entry: [cotangent coefficient a_n, prefactor, B_{2n}] */
 type BernoulliEntry = [number, number, number];
 
@@ -89,6 +92,9 @@ function bernoulliNumber(n: number): number {
   if (n === 0) return 1;
   if (n === 1) return -0.5;
   if (n % 2 === 1) return 0;
+  // |B_n| is above the largest double from n = 260 (B_258 = 1.3e306 is the last finite
+  // value). The sign of B_2m is (-1)^(m+1).
+  if (n > BERNOULLI_MAX_FINITE_INDEX) return (n / 2) % 2 === 0 ? -Infinity : Infinity;
 
   // Seed cache with B_2 = 1/6
   if (_bernoulliCache.length === 1) {
@@ -139,6 +145,7 @@ function factorialExact(n: number): number {
 
 /**
  * Binomial coefficient C(n, k) for non-negative integers n, k with k ≤ n.
+ * Returns `Infinity` as soon as the running product overflows.
  * Uses the multiplicative formula to avoid overflow for moderate n.
  */
 function combinationsExact(n: number, k: number): number {
@@ -157,6 +164,9 @@ function combinationsExact(n: number, k: number): number {
   let r = 1;
   for (let i = 0; i < kk; i++) {
     r = (r * (n - i)) / (i + 1);
+    // C(n, i) grows at least like 2^i, so an infinity comes within about 1030 steps. The
+    // value stays infinite, so the loop does not need to run on.
+    if (r === Infinity) return Infinity;
   }
   return Math.round(r);
 }
@@ -169,7 +179,9 @@ function combinationsExact(n: number, k: number): number {
  * Return the n-th Bernoulli number.
  *
  * B_0=1, B_1=-1/2, B_{odd>1}=0.
- * For even n, uses the cotangent-coefficient recursion.
+ * For even n, uses the cotangent-coefficient recursion. For an even `n` above 258,
+ * `|B_n|` is above the largest double, and the result is `-Infinity` when `n / 2` is
+ * even and `Infinity` when it is odd.
  *
  * @example
  * bernoulli(0)  // 1

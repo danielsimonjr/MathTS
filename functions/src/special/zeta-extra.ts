@@ -3,6 +3,10 @@
  */
 
 import { bernoulli, combinations } from '../typed/probability.js';
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest degree for the Bernoulli and Euler polynomials (n = 10000 takes about 0.4 s). */
+const BERNOULLI_POLYNOMIAL_MAX_N = 10_000;
 
 function asNumber(value: unknown, name: string): number {
   if (typeof value !== 'number') {
@@ -78,14 +82,20 @@ export function dirichletEta(s: number): number {
 
 /**
  * Bernoulli polynomial `B_n(x) = Σ_k C(n,k) B_k x^{n−k}` (with `B_1 = −1/2`).
+ * Throws RangeError for `n` above 10000.
  *
  * @example
- * bernoulliPolynomial(2, 0.5) // -0.08333333333333333
+ * bernoulliPolynomial(2, 0.5) // -0.08333333333333334
  */
 export function bernoulliPolynomial(n: number, x: number): number {
   if (!Number.isInteger(n) || n < 0) {
     throw new RangeError('bernoulliPolynomial: n must be a non-negative integer');
   }
+  assertLoopOrder('bernoulliPolynomial', 'n', n, BERNOULLI_POLYNOMIAL_MAX_N);
+  return bernoulliPolynomialSum(n, x);
+}
+
+function bernoulliPolynomialSum(n: number, x: number): number {
   let sum = 0;
   for (let k = 0; k <= n; k += 1) {
     const bk = asNumber(bernoulli(k), 'bernoulliPolynomial');
@@ -97,6 +107,7 @@ export function bernoulliPolynomial(n: number, x: number): number {
 
 /**
  * Euler polynomial `E_n(x) = 2/(n+1) · (B_{n+1}(x) − 2^{n+1} B_{n+1}(x/2))`.
+ * Throws RangeError for `n` above 10000.
  *
  * @example
  * eulerPolynomial(2, 0.5) // -0.25
@@ -106,6 +117,9 @@ export function eulerPolynomial(n: number, x: number): number {
   if (!Number.isInteger(n) || n < 0) {
     throw new RangeError('eulerPolynomial: n must be a non-negative integer');
   }
+  assertLoopOrder('eulerPolynomial', 'n', n, BERNOULLI_POLYNOMIAL_MAX_N);
   const m = n + 1;
-  return (2 / m) * (bernoulliPolynomial(m, x) - Math.pow(2, m) * bernoulliPolynomial(m, x / 2));
+  return (
+    (2 / m) * (bernoulliPolynomialSum(m, x) - Math.pow(2, m) * bernoulliPolynomialSum(m, x / 2))
+  );
 }

@@ -4,6 +4,11 @@
  * sums of two squares, Egyptian fractions and Farey sequences.
  */
 
+import { assertAllocSize } from '../utils/limits.js';
+
+/** Number of continued-fraction steps after which pellSolve stops. */
+const PELL_MAX_STEPS = 20000;
+
 function assertInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n)) throw new RangeError(`${name} must be a safe integer`);
 }
@@ -58,7 +63,8 @@ export function linearDiophantine(
 /**
  * Fundamental solution (x, y) of Pell's equation x^2 - d y^2 = 1 for a positive
  * non-square integer d, via the continued fraction of sqrt(d). Returns null for
- * non-positive or perfect-square d.
+ * non-positive or perfect-square d. Throws RangeError when the solution needs more
+ * than 20000 continued-fraction steps.
  */
 export function pellSolve(d: number): { x: bigint; y: bigint } | null {
   assertInt(d, 'd');
@@ -84,7 +90,13 @@ export function pellSolve(d: number): { x: bigint; y: bigint } | null {
   let p = a0;
   let qPrev = 0n;
   let q = 1n;
+  let steps = 0;
   while (p * p - D * q * q !== 1n) {
+    if (++steps > PELL_MAX_STEPS) {
+      throw new RangeError(
+        `pellSolve: no solution within ${PELL_MAX_STEPS} continued-fraction steps for d = ${d}`
+      );
+    }
     m = dd * a - m;
     dd = (D - m * m) / dd;
     a = (a0 + m) / dd;
@@ -199,9 +211,14 @@ export function egyptianFraction(p: number, q: number): number[] {
   return out;
 }
 
-/** Farey sequence F_n: reduced fractions [num, den] in [0, 1] with den <= n, ascending. */
+/**
+ * Farey sequence F_n: reduced fractions [num, den] in [0, 1] with den <= n, ascending.
+ * Throws RangeError when 3 n^2 exceeds the allocation limit (n above 5773).
+ */
 export function fareySequence(n: number): Array<[number, number]> {
   if (!Number.isSafeInteger(n) || n < 1) throw new RangeError('n must be a positive integer');
+  // F_n holds about 0.304 n^2 fractions.
+  assertAllocSize('fareySequence', [n, n, 3]);
   let a = 0;
   let b = 1;
   let c = 1;
