@@ -25,7 +25,7 @@ Also fixed:
 BREAKING (each call returned before and now throws `RangeError`; the time is the old-build time at or above the limit):
 
 - `besselJ`, `besselY` and `legendreP` with an order above 2500000000 (`besselJ(2.5e9, 5e9)` took 21.1 s, `legendreP(2.5e9, 0.5)` 29.2 s on the old build). `besselJ` with a small `x` returns 0 at any order.
-- `besselJ(n, x)` with `x <= n` (the downward sweep) when the sweep starts above order 1200000000 (`besselJ(5e8, 5e8 - 1)` took 8.0 s and returned `NaN` on the old build; `besselJ(2.5e9, 2.5e9 - 1)` did not finish in 60 s). `hankelH1` and `hankelH2` follow.
+- `besselJ(n, x)` with `x <= n` (the downward sweep) when the sweep starts above order 1200000000 (`besselJ(5e8, 5e8 - 1)` took 6.0 s and returned `NaN` on the old build; `besselJ(2.5e9, 2.5e9 - 1)` did not finish in 60 s). `hankelH1` and `hankelH2` follow.
 - Each other recurrence family has its own limit (old-build time at 1e9 in brackets; the limit is below the old 20 s point where that time is under 20 s):
   - `jacobiP` above 1000000000 (19.9 s).
   - `gegenbauerC` above 1000000000 (16.5 s).
