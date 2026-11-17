@@ -4775,7 +4775,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `CovLayoutOptions`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`
+- Interfaces: `NaNPolicyOptions`, `CovLayoutOptions`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`
 - Functions: `rankdata`, `spearman`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`
 
 ---
@@ -10071,6 +10071,12 @@ graph LR
 ---
 
 ### `functions/src/statistics/quantile-numpy-methods.ts` - NumPy 2.x `method=` quantile definitions (Hyndman–Fan + legacy names).
+
+**Internal Dependencies:**
+
+| File                | Imports    | Type   |
+| ------------------- | ---------- | ------ |
+| `./numeric-data.js` | `readSkip` | Import |
 
 **Exports:**
 
@@ -21527,11 +21533,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232835 |
+| Total Lines of Code     | 232918 |
 | Total Exports           | 7328   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
-| Total Interfaces        | 664    |
+| Total Interfaces        | 665    |
 | Total Functions         | 2542   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |

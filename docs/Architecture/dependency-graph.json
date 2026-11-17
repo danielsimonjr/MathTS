@@ -10489,6 +10489,7 @@
           "histogram"
         ],
         "interfaces": [
+          "NaNPolicyOptions",
           "CovLayoutOptions",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -23281,7 +23282,12 @@
         "description": "NumPy 2.x `method=` quantile definitions (Hyndman–Fan + legacy names).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./numeric-data.js",
+            "imports": ["readSkip"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["assertNumpyQuantileMethod", "quantileOfSorted", "parseQuantileThirdArg"],
         "interfaces": ["QuantileSeqOptions"],
@@ -49204,10 +49210,10 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 232835,
+    "totalLinesOfCode": 232918,
     "totalExports": 7328,
     "totalClasses": 62,
-    "totalInterfaces": 664,
+    "totalInterfaces": 665,
     "totalFunctions": 2542,
     "totalTypeGuards": 180,
     "totalEnums": 0,
