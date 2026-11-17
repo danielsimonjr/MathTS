@@ -1734,6 +1734,7 @@ The following 780 source files are not directly imported by any test file:
 | `tests/dogfood-1135-1136-discretelog.test.ts`                      | 173 files           |
 | `tests/dogfood-688-lusolve-singular.test.ts`                       | 9 files             |
 | `tests/dogfood-960-divide-scalar-matrix.test.ts`                   | 173 files           |
+| `tests/dogfood-979-nonfinite-hangs.test.ts`                        | 0 files             |
 | `tests/dogfood-989a-sequences.test.ts`                             | 173 files           |
 | `tests/dogfood-989b-special.test.ts`                               | 16 files            |
 | `tests/dogfood-989c-eigs-non-finite.test.ts`                       | 173 files           |

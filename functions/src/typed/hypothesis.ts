@@ -937,6 +937,19 @@ export async function mannWhitneyTest(
   const n2 = sample2.length;
   const nTotal = n1 + n2;
 
+  // SciPy `nan_policy='propagate'`: NaN has no rank, and the tie scan below cannot pass it.
+  if (sample1.some((v) => v !== v) || sample2.some((v) => v !== v)) {
+    const B = opts?.bootstrap ?? 0;
+    if (B <= 0) return { uStatistic: NaN, pValue: NaN };
+    return {
+      uStatistic: NaN,
+      pValueEmpirical: NaN,
+      bootstrapStatistics: new Float64Array(B).fill(NaN),
+      bootstrapMean: NaN,
+      bootstrapStd: NaN,
+    } satisfies MWBootstrapResult;
+  }
+
   // Combine and rank via argsortF64Dispatch above WASM_SORT_THRESHOLD; argsort
   // has no wasmPolicyAllows band (`functions/src/wasm/policy.ts`) so JS runs.
   const combined: { value: f64; group: number }[] = [];
@@ -962,7 +975,7 @@ export async function mannWhitneyTest(
   let hasTies = false;
   let i = 0;
   while (i < nTotal) {
-    let j = i;
+    let j = i + 1;
     while (j < nTotal && combined[j].value === combined[i].value) j++;
     if (j - i > 1) hasTies = true;
     const avgRank = (i + 1 + j) / 2;
@@ -1846,12 +1859,15 @@ export function friedmanTest(groups: f64[][]): {
     if (g.length !== n) throw new Error('friedmanTest: all groups must be the same length');
   const rankSums = new Array<number>(k).fill(0);
   let tieCorrection = 0;
+  if (groups.some((g) => g.some((v) => v !== v))) {
+    return { statistic: NaN, pValue: NaN, degreesOfFreedom: k - 1 };
+  }
   for (let block = 0; block < n; block++) {
     const row = groups.map((g) => g[block]);
     const order = row.map((_, i) => i).sort((i, j) => row[i] - row[j]);
     const ranks = new Array<number>(k);
     for (let i = 0; i < k;) {
-      let j = i;
+      let j = i + 1;
       while (j < k && row[order[j]] === row[order[i]]) j++;
       const avg = (i + 1 + j) / 2;
       const t = j - i;

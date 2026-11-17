@@ -6673,7 +6673,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 781
+      "loc": 791
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -6967,7 +6967,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 345
+      "loc": 347
     },
     {
       "file": "functions/src/index.ts",
@@ -8528,7 +8528,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 123
+      "loc": 125
     },
     {
       "file": "functions/src/stats/distributions-extra.ts",
@@ -9298,7 +9298,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2151
+      "loc": 2167
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1632
+      "loc": 1639
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10538,6 +10538,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-979-nonfinite-hangs.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 108
     },
     {
       "file": "functions/tests/dogfood-989a-sequences.test.ts",

@@ -565,6 +565,13 @@ export function unwrapPhase(phase: number[]): number[] {
   const result = [...phase];
   for (let i: i32 = 1; i < result.length; i++) {
     let diff: f64 = result[i] - result[i - 1];
+    // numpy.unwrap: a non-finite step has no wrapped value, so it and all later entries are NaN.
+    if (!Number.isFinite(diff)) {
+      result[i] = NaN;
+      continue;
+    }
+    // A huge finite step would need about |diff| / 2π loop turns: jump close to range first.
+    if (Math.abs(diff) > 1e3) diff -= 2 * Math.PI * Math.round(diff / (2 * Math.PI));
     while (diff > Math.PI) diff -= 2 * Math.PI;
     while (diff < -Math.PI) diff += 2 * Math.PI;
     result[i] = result[i - 1] + diff;
