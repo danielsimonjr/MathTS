@@ -266,10 +266,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
           probArr.push(_quantileSeq(dataArr, prob, sorted, mode, skipNaN));
         }
 
-        // A BigNumber N returns BigNumber quantiles. bignumber() does not map over an
-        // array (it returned NaN, #1112), so convert each number element; a BigNumber
-        // or Unit element stays as is.
-        return isNumber(probOrN) ? probArr : probArr.map((v) => (isNumber(v) ? bignumber!(v) : v));
+        return isNumber(probOrN) ? probArr : bignumber!(probArr);
       }
 
       return undefined;

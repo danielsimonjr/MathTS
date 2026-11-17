@@ -2,4 +2,8 @@
 '@danielsimonjr/mathts-functions': patch
 ---
 
-quantileSeq with a BigNumber N returns the N evenly spaced quantiles as BigNumbers. It returned a BigNumber NaN, because bignumber() was applied to the whole result array (#1112).
+`bignumber` converts an Array or a Matrix element by element and keeps the shape and storage. It converts the value of a Unit and keeps the unit. `bignumber(null)` returns 0. A Fraction converts at the BigNumber precision (it had 16 digits), also through `numeric(x, 'BigNumber')`. A bigint converts without loss. Before, an Array, a Matrix or a Unit gave a BigNumber NaN and null threw.
+
+quantileSeq with a BigNumber N returns the N quantiles (it returned a BigNumber NaN, #1112). With a BigNumber N or a BigNumber probability, number, bigint and Fraction data give BigNumbers, and Unit data gives Units with a BigNumber value.
+
+solveODE accepts BigNumber `tspan` and `y0` (it threw "multiply: unexpected type undefined").

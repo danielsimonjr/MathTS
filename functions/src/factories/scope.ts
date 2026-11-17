@@ -5,7 +5,14 @@
  * typed, config, Complex, BigNumber, Fraction, matrix bridge, and helper constructors.
  */
 
-import { mathTyped, Complex, Fraction, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
+import {
+  mathTyped,
+  Complex,
+  Fraction,
+  BigNumber,
+  isBigNumber,
+  isFraction,
+} from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG, type ConfigOptions } from '../core/config.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
@@ -230,6 +237,41 @@ const factoryTyped = new Proxy(mathTyped, {
   },
 });
 
+/**
+ * Convert a value to BigNumber, as mathjs `bignumber` does.
+ * An Array or a Matrix converts element by element and keeps its shape and storage.
+ * A Unit keeps its unit; the value of the Unit converts.
+ * A Fraction converts as numerator / denominator at the BigNumber precision.
+ * null converts to 0.
+ */
+function toBigNumber(x: unknown): unknown {
+  // `isBigNumber` reads the brand, so a BigNumber of a second copy of core keeps its digits.
+  if (isBigNumber(x)) return x;
+  if (x === null) return BigNumber.fromNumber(0); // as mathjs; a Butcher tableau holds null
+  if (typeof x === 'string') return BigNumber.parse(x);
+  if (typeof x === 'number') return BigNumber.fromNumber(x);
+  if (typeof x === 'bigint') return BigNumber.fromBigInt(x);
+  if (Array.isArray(x)) return x.map(toBigNumber);
+  if (isFraction(x)) {
+    return BigNumber.fromBigInt(x.numerator).div(BigNumber.fromBigInt(x.denominator));
+  }
+  const o = x as {
+    isMatrix?: boolean;
+    isUnit?: boolean;
+    map(f: (v: unknown) => unknown): unknown;
+    clone(): { value: unknown };
+    value: unknown;
+    valueOf(): unknown;
+  };
+  if (o.isMatrix === true) return o.map(toBigNumber);
+  if (o.isUnit === true) {
+    const u = o.clone();
+    u.value = toBigNumber(o.value);
+    return u;
+  }
+  return BigNumber.fromNumber(Number(o.valueOf())); // boolean / other numeric-like
+}
+
 export const factoryScope: Record<string, unknown> = {
   typed: factoryTyped,
   config: configView,
@@ -248,17 +290,7 @@ export const factoryScope: Record<string, unknown> = {
 
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
   complex: (re: number, im: number) => new Complex(re, im),
-  bignumber: (x: number | string | BigNumber | { valueOf(): number }) => {
-    // Idempotent: a BigNumber passed back in must return unchanged. Previously this fell through
-    // to `BigNumber.fromNumber(x)` with `x` an object, which `fromNumber` read as non-finite and
-    // turned into `Infinity` — corrupting e.g. `quantileSeq(BigNumber[], …)` (which re-wraps its
-    // BigNumber result) and Fraction→BigNumber conversions in the relational operators.
-    // `isBigNumber` reads the brand, so a BigNumber of a second copy of core keeps its digits.
-    if (isBigNumber(x)) return x as BigNumber;
-    if (typeof x === 'string') return BigNumber.parse(x);
-    if (typeof x === 'number') return BigNumber.fromNumber(x);
-    return BigNumber.fromNumber(Number(x.valueOf())); // Fraction / other numeric-like
-  },
+  bignumber: toBigNumber,
   fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
   number: Number,
 

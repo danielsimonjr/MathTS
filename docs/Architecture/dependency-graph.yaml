@@ -16381,6 +16381,7 @@ modules:
             - Fraction
             - BigNumber
             - isBigNumber
+            - isFraction
       exports:
         - factoryScope
         - pushConfigOverlay
@@ -43609,6 +43610,7 @@ modules:
             - matrix
             - sparse
             - transpose
+            - bignumber
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -43684,6 +43686,8 @@ modules:
       functions:
         - complex
         - fraction
+        - bignumber
+        - bignumber
         - bignumber
         - matrix
         - sparse
@@ -46430,11 +46434,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 232923
+  totalLinesOfCode: 232950
   totalExports: 7328
   totalClasses: 62
   totalInterfaces: 665
-  totalFunctions: 2542
+  totalFunctions: 2544
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1678
