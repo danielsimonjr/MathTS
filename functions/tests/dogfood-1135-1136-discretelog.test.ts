@@ -79,14 +79,21 @@ describe('discreteLog baby-step table (#1135)', () => {
     expect(performance.now() - start).toBeLessThan(1000);
   });
 
-  it('separates two baby steps that share their low 32 bits', () => {
-    // 3^102200 = 36657430730 and 3^143299 = 2297692362 (mod 68719476731). The two values
-    // differ by 8 * 2^32, so they have the same 32-bit table key.
+  it('separates two baby steps that share their 32-bit table key', () => {
+    // 3^13825 = 39112975671 and 3^102725 = 60996404640 (mod 68719476731) have the same
+    // 32-bit hash in the table. A lookup must compare the full values.
     const p = 68719476731;
-    expect(36657430730 - 2297692362).toBe(8 * 2 ** 32);
-    expect(discreteLog(3, 36657430730, p)).toBe(102200);
-    expect(discreteLog(3, 2297692362, p)).toBe(143299);
+    expect(discreteLog(3, 39112975671, p)).toBe(13825);
+    expect(discreteLog(3, 60996404640, p)).toBe(102725);
   });
+
+  it('keeps short probe chains when the powers of g differ only above bit 32', () => {
+    // The powers of 2^22 + 1 modulo 2^44 are 1 + j * 2^22: 2^22 values with 1024 distinct
+    // low halves. A table key of the low 32 bits only takes more than 20 s here.
+    const start = performance.now();
+    expect(discreteLog(2 ** 22 + 1, 3, 2 ** 44)).toBe(-1);
+    expect(performance.now() - start).toBeLessThan(10_000);
+  }, 100_000);
 
   it('stores no baby step in a Map', () => {
     const set = Map.prototype.set;
