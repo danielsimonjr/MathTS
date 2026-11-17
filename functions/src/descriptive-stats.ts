@@ -88,10 +88,13 @@ function centralMoment(x: number[], k: number): number {
 export function rankdata(x: Vec): number[] {
   const a = numberVector('rankdata', x);
   const n = a.length;
+  // SciPy `nan_policy='propagate'`: a NaN has no rank, so no entry has one. NaN breaks the
+  // sort comparator, and `NaN === NaN` is false, so the tie scan below would not advance.
+  if (a.some((v) => v !== v)) return new Array<number>(n).fill(NaN);
   const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => a[i] - a[j]);
   const ranks = new Array<number>(n);
   for (let i = 0; i < n;) {
-    let j = i;
+    let j = i + 1;
     while (j < n && a[order[j]] === a[order[i]]) j++;
     const avg = (i + 1 + j) / 2; // mean of 1-based ranks i+1 … j
     for (let k = i; k < j; k++) ranks[order[k]] = avg;
@@ -355,6 +358,10 @@ function _kendallTauCore(
   const n = x.length;
   if (n !== y.length) throw new Error('kendallTau: inputs must have equal length');
   if (n < 2) return { tau: NaN, P: 0, Q: 0, hasTies: false, n };
+  // SciPy `nan_policy='propagate'`: `Math.sign(NaN)` is NaN, and the pair count skipped it.
+  if (x.some((v) => v !== v) || y.some((v) => v !== v)) {
+    return { tau: NaN, P: 0, Q: 0, hasTies: false, n };
+  }
   let P = 0;
   let Q = 0;
   for (let i = 0; i < n; i++) {
@@ -540,6 +547,9 @@ export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
   x = numberVector('kendalltau', x);
   y = numberVector('kendalltau', y);
   const { tau, Q, hasTies, n } = _kendallTauCore(x, y);
+  if (n >= 2 && (x.some((v) => v !== v) || y.some((v) => v !== v))) {
+    return { coefficient: NaN, pValue: NaN };
+  }
   if (!hasTies && kendallShouldUseExact(n, Q)) {
     const n0 = (n * (n - 1)) / 2;
     return { coefficient: tau, pValue: kendallPExact(n, Math.min(Q, n0 - Q)) };

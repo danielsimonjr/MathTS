@@ -34,7 +34,7 @@ function tieTerm(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   let term = 0;
   for (let i = 0; i < sorted.length;) {
-    let j = i;
+    let j = i + 1; // `NaN === NaN` is false: start past `i` so the scan always advances
     while (j < sorted.length && sorted[j] === sorted[i]) j++;
     const t = j - i;
     term += t * t * t - t;
@@ -119,6 +119,7 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
   if (arrs.length < 2) throw new Error('kruskalWallis: need at least 2 non-empty groups');
   const pooled = arrs.flat();
   const N = pooled.length;
+  if (pooled.some((v) => v !== v)) return { statistic: NaN, pValue: NaN, df: arrs.length - 1 };
   const ranks = rankdata(pooled);
   let offset = 0;
   let sumRanksSq = 0;
@@ -159,6 +160,7 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
       `wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`
     );
   const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
+  if (diffs.some((v) => v !== v)) return { statistic: NaN, pValue: NaN, zStatistic: NaN };
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
   if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');

@@ -21,6 +21,8 @@ export function wassersteinDistance(
   const vw = normWeights('wassersteinDistance', vv, opts?.vWeights);
   // ∫|F_u − F_v| dt over the merged support, sweeping both sorted samples
   // once (O(n log n)); the two CDFs are running weight sums.
+  // SciPy gives NaN. A NaN sample point cannot be ordered, and the sweep below would not advance.
+  if (uv.some((v) => v !== v) || vv.some((v) => v !== v)) return NaN;
   const su = sortedWithWeights(uv, uw);
   const sv = sortedWithWeights(vv, vw);
   let iu = 0;
