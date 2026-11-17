@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { quantileSeq } from '../src/factories/index.js';
-import { ptp, histogram, iqr } from '../src/descriptive-stats.js';
+import { bignumber } from '../src/factories/index.js';
+import { ptp, histogram, iqr, describe as describeStats } from '../src/descriptive-stats.js';
+
+const B = bignumber as (x: number) => unknown;
+const num = (v: unknown): unknown => (Array.isArray(v) ? v.map(num) : Number(v));
 
 const q = quantileSeq as (...a: unknown[]) => unknown;
 
@@ -26,7 +30,7 @@ describe('quantileSeq NaN and Infinity policy (#1098)', () => {
     expect(q([NaN, 1, 2, 3], [0.25, 0.75], { skipNaN: true })).toEqual([1.5, 2.5]);
     expect(q([1, NaN, 2, 3], 0.5, { skipNaN: true, method: 'lower' })).toBe(2);
     expect(q([NaN, NaN], 0.5, { skipNaN: true })).toBeNaN();
-    expect(q([1, NaN, Infinity], 1, { skipNaN: true })).toBe(Infinity);
+    expect(q([NaN, -Infinity, 1], 0.5, { skipNaN: true })).toBe(-Infinity);
   });
 
   it('rejects bad skip options', () => {
@@ -38,9 +42,9 @@ describe('quantileSeq NaN and Infinity policy (#1098)', () => {
     expect(q([-Infinity, Infinity, 2, 3], 0.25)).toBe(-Infinity);
     expect(q([-Infinity, Infinity, 2, 3], 0.5)).toBe(2.5);
     expect(q([-Infinity, Infinity, 2, 3], 0.75)).toBe(Infinity);
-    expect(q([1, Infinity], 0)).toBe(1);
-    expect(q([Infinity, Infinity, 2, 3], 0.75)).toBe(Infinity);
-    expect(q([-Infinity, -Infinity], 0.5)).toBe(-Infinity);
+    expect(q([1, Infinity], 0)).toBeNaN();
+    expect(q([Infinity, Infinity, 2, 3], 0.75)).toBeNaN();
+    expect(q([-Infinity, -Infinity], 0.5)).toBeNaN();
   });
 
   it('keeps finite results', () => {
@@ -101,5 +105,80 @@ describe('iqr NaN policy (#1098, shares quantileSeq)', () => {
     expect(iqr([1, NaN, 2, 3], { skipNaN: true })).toBe(1);
     expect(iqr([1, NaN, 2, 3], { skipna: true })).toBe(1);
     expect(iqr([1, 2, 3, 4])).toBe(1.5);
+  });
+});
+
+describe('quantileSeq interpolation edges (#1098)', () => {
+  it('keeps signed zero and the fallback for one infinite end', () => {
+    expect(Object.is(q([-0, 0], 0.5), 0)).toBe(true);
+    expect(q([1, Infinity], 0.5)).toBe(Infinity);
+    expect(q([-Infinity, Infinity, 2, 3], 0.75, 'midpoint')).toBe(Infinity);
+  });
+  it('honours sorted with NaN', () => {
+    expect(q([1, 2, 3, NaN], 0.5, true)).toBeNaN();
+    expect(q([1, 2, 3, NaN], 0.5, { sorted: true, skipNaN: true })).toBe(2);
+  });
+  it('gives -Infinity for each method as NumPy', () => {
+    const a = [-Infinity, Infinity, 2, 3];
+    for (const m of ['lower', 'higher', 'nearest', 'inverted_cdf', 'closest_observation']) {
+      expect(q(a, 0, m)).toBe(-Infinity);
+    }
+    expect(q(a, 0.1, 'midpoint')).toBe(-Infinity);
+    expect(q(a, 0.25, 'averaged_inverted_cdf')).toBe(-Infinity);
+    expect(q(a, 0.25, 'hazen')).toBe(-Infinity);
+    expect(q([-Infinity, 1], 0.75, 'interpolated_inverted_cdf')).toBe(-Infinity);
+    for (const m of ['weibull', 'median_unbiased', 'normal_unbiased']) {
+      expect(q([-Infinity, 1], 0.5, m)).toBe(-Infinity);
+    }
+  });
+  it('describe q25 agrees', () => {
+    expect(describeStats([-Infinity, Infinity, 2, 3]).q25).toBe(-Infinity);
+  });
+});
+
+describe('quantileSeq NaN policy with BigNumber (#1098)', () => {
+  it('honours skipNaN', () => {
+    expect(Number(q([1, NaN, 3], B(0.5), { skipNaN: true }))).toBe(2);
+    expect(Number(q([B(1), B(NaN), B(3)], 0.5, { skipNaN: true }))).toBe(2);
+    expect(String(q([1, NaN, 2, 3], B(3), { skipNaN: true }))).toBe(String(q([1, 2, 3], B(3))));
+    expect(num(q([1, NaN, 3], [B(0.5)], { skipNaN: true }))).toEqual([2]);
+  });
+  it('propagates NaN', () => {
+    expect(Number(q([1, 2, 3, NaN], B(0.5), true))).toBeNaN();
+    expect(Number(q([B(1), B(2), B(3), B(NaN)], 0.5, { sorted: true }))).toBeNaN();
+  });
+});
+
+describe('a last argument that is not an object is ignored (#1098)', () => {
+  it('keeps the old results', () => {
+    expect(
+      [
+        [1, 2],
+        [3, 5],
+      ].map(ptp as (x: number[]) => number)
+    ).toEqual([1, 2]);
+    expect(
+      [
+        [1, 2],
+        [3, 5],
+      ].map(iqr as (x: number[]) => number)
+    ).toEqual([0.5, 1]);
+    expect(ptp([1, 2], null as never)).toBe(1);
+    expect(iqr([1, 2, 3, 4], 1 as never)).toBe(1.5);
+    expect(histogram([1, 2, 3], 3, null as never).counts).toEqual([1, 1, 1]);
+  });
+});
+
+describe('ptp and histogram edges (#1098)', () => {
+  it('ptp', () => {
+    expect(ptp([5])).toBe(0);
+    expect(ptp([NaN, 5], { skipNaN: true })).toBe(0);
+    expect(ptp([1, NaN, Infinity])).toBeNaN();
+  });
+  it('histogram with a Float64Array', () => {
+    expect(() => histogram(new Float64Array([1, NaN, 2, 3]), 3)).toThrow();
+    expect(histogram(new Float64Array([1, NaN, 2, 3]), 3, { skipNaN: true }).counts).toEqual([
+      1, 1, 1,
+    ]);
   });
 });

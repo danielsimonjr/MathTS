@@ -160,11 +160,11 @@ export function quantileOfSorted(
   let gamma = vi - Math.floor(vi);
   if (leftIdx === rightIdx) gamma = 0;
   gamma = fixGamma(method, gamma, vi);
-  // Equal ends (this includes the same Infinity) give that value. Gamma 0 gives the left end.
-  if (gamma === 0 || left === right) return left;
   // NumPy `_lerp`: blend from the nearer end, so an infinite end does not give inf - inf.
   const diff = right - left;
-  return gamma >= 0.5 ? right - diff * (1 - gamma) : left + diff * gamma;
+  const r = gamma >= 0.5 ? right - diff * (1 - gamma) : left + diff * gamma;
+  // One infinite end gives inf - inf above; the plain blend keeps that end (as mathjs).
+  return r !== r ? left + gamma * diff : r;
 }
 
 /** Third argument to `quantileSeq`: NumPy-style `{ method, sorted }` or legacy forms. */
