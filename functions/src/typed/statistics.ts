@@ -16,6 +16,7 @@ import { mathTyped, neumaierCumsum } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace } from '../utils/median-numbers.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -727,6 +728,7 @@ export function parallelStatPercentile(data: Float64Array, p: f64): f64 {
 export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
   // Float64Array with number of bins
   'Float64Array, number': async (data: Float64Array, bins: f64): Promise<number[]> => {
+    assertAllocSize('parallelStatHistogram', [bins]);
     const result = await computePool.histogram(data, bins as i32);
     return result.result;
   },
@@ -738,12 +740,14 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
     min: f64,
     max: f64
   ): Promise<number[]> => {
+    assertAllocSize('parallelStatHistogram', [bins]);
     const result = await computePool.histogram(data, bins as i32, min, max);
     return result.result;
   },
 
   // Number array
   'Array, number': async (arr: number[], bins: f64): Promise<number[]> => {
+    assertAllocSize('parallelStatHistogram', [bins]);
     return parallelStatHistogram(toFloat64Array(arr), bins) as Promise<number[]>;
   },
 });

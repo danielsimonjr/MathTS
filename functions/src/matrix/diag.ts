@@ -1,6 +1,7 @@
 import { isMatrix } from '../utils/is.js';
 import { arraySize } from '../utils/array.js';
 import { isInteger } from '../utils/number.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type BigNumber from 'bignumber.js';
@@ -188,6 +189,9 @@ export const createDiag = /* #__PURE__ */ factory(
       if (format && format !== 'sparse' && format !== 'dense') {
         throw new TypeError(`Unknown matrix type ${format}"`);
       }
+
+      // a dense result holds every entry
+      if (format !== 'sparse') assertAllocSize('diag', ms);
 
       // create diagonal matrix
       const m =

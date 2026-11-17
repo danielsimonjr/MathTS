@@ -1712,6 +1712,37 @@
       "functions/src/logical/or.ts",
       "functions/src/relational/compare.ts"
     ],
+    "functions/src/utils/limits.ts": [
+      "functions/src/arithmetic/nthRoots.ts",
+      "functions/src/combinatorics/bellNumbers.ts",
+      "functions/src/combinatorics/stirlingS2.ts",
+      "functions/src/descriptive-stats.ts",
+      "functions/src/factories/matrix-bridge.ts",
+      "functions/src/linalg-extra.ts",
+      "functions/src/linalg-special-matrices.ts",
+      "functions/src/matrix/diag.ts",
+      "functions/src/matrix/identity.ts",
+      "functions/src/matrix/range.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/utils/zerosAndOnes.ts",
+      "functions/src/numbertheory/extra.ts",
+      "functions/src/numeric/gauss-nodes-extra.ts",
+      "functions/src/signal-filter-extra.ts",
+      "functions/src/signal/fft-helpers.ts",
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/iir-design.ts",
+      "functions/src/signal/system-response.ts",
+      "functions/src/signal/waveforms.ts",
+      "functions/src/signal/windows-extra.ts",
+      "functions/src/statistics/quantileSeq.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts",
+      "functions/src/typed/graph.ts",
+      "functions/src/typed/probability.ts",
+      "functions/src/typed/signal.ts",
+      "functions/src/typed/statistics.ts",
+      "functions/src/typed/string.ts"
+    ],
     "functions/src/typed/complex-promotion.ts": [
       "functions/src/arithmetic/pow.ts",
       "functions/src/arithmetic/sqrt.ts",
@@ -2223,17 +2254,6 @@
       "functions/src/stats/mvn.ts",
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
-    ],
-    "functions/src/utils/limits.ts": [
-      "functions/src/combinatorics/bellNumbers.ts",
-      "functions/src/combinatorics/stirlingS2.ts",
-      "functions/src/factories/matrix-bridge.ts",
-      "functions/src/linalg-special-matrices.ts",
-      "functions/src/matrix/identity.ts",
-      "functions/src/matrix/range.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/utils/zerosAndOnes.ts",
-      "functions/src/numbertheory/extra.ts"
     ],
     "functions/src/scalar-batch-task.ts": [
       "functions/src/scalar-batch-parallel.ts",
@@ -2791,6 +2811,11 @@
       "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
+    ],
+    "functions/src/utils/samples.ts": [
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/interpolation.ts",
+      "functions/src/typed/signal.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/f64-kernels.ts": [

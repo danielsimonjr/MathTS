@@ -13,6 +13,7 @@
 import { multivariateNormal } from '../typed/dist-objects.js';
 import { cholesky } from '../typed/matrix-ops.js';
 import { createRng } from '../probability/util/seededRNG.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 /** A vector given either as a scalar (1-D case) or an array (k-D case). */
 export type MvnVector = number | readonly number[];
@@ -97,6 +98,7 @@ export function mvnSample(
   if (!Number.isInteger(n) || n < 1) throw new Error('mvnSample: n must be a positive integer');
   const { meanArr, covArr } = normalizeMvnInputs(mean, cov);
   const k = meanArr.length;
+  assertAllocSize('mvnSample', [n, k]);
   const { L } = cholesky(covArr);
   const rng = createRng(opts?.seed ?? null);
 

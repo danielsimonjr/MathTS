@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import { assertAllocSize } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { MathJsConfig } from '../core/config.js';
 
@@ -65,6 +66,8 @@ export const createNthRoots = /* #__PURE__ */ factory(
       if (root === 0) throw new Error('Root must be non-zero');
       if (root % 1 !== 0) throw new Error('Root must be an integer');
       if (a === 0 || (a as ComplexType).abs() === 0) return [new Complex(0, 0)];
+      // one Complex per root, about eight times the size of a number
+      assertAllocSize('nthRoots', [root, 8]);
       const aIsNumeric = typeof a === 'number';
       // NaN sentinel for off-axis complex values (no exact half-pi offset);
       // (NaN + 4k)/root is NaN, so the exact-result branch below is skipped —

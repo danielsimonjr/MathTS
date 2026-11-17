@@ -30,6 +30,7 @@ import { lfilter } from '../signal-filter-extra.js';
 import { ellipticKScalar } from '../wasm/special/scalars.js';
 import { jacobiCN, jacobiDN, jacobiSN } from '../special/jacobi-elliptic.js';
 import { numberVector } from '../typed/number-matrix.js';
+import { assertLoopOrder } from '../utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -62,6 +63,7 @@ export function cheby1(
   btype: FilterBtype = 'low'
 ): { b: number[]; a: number[] } {
   if (!Number.isInteger(N) || N < 1) throw new Error('cheby1: order N must be a positive integer');
+  assertLoopOrder('cheby1', 'N', N, 1000);
   if (!(rp > 0)) throw new Error('cheby1: rp (passband ripple, dB) must be positive');
   return analogToDigital(cheb1ap(N, rp), Wn, btype);
 }
@@ -109,6 +111,7 @@ export function cheby2(
   btype: FilterBtype = 'low'
 ): { b: number[]; a: number[] } {
   if (!Number.isInteger(N) || N < 1) throw new Error('cheby2: order N must be a positive integer');
+  assertLoopOrder('cheby2', 'N', N, 1000);
   if (!(rs > 0)) throw new Error('cheby2: rs (stopband attenuation, dB) must be positive');
   return analogToDigital(cheb2ap(N, rs), Wn, btype);
 }

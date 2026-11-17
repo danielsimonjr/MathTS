@@ -11,6 +11,7 @@ import { DenseMatrix, lu, matrixSchur } from '@danielsimonjr/mathts-matrix';
 import { inv as _invRaw, eigs as _eigsRaw, qr as _qrRaw } from './factories/index.js';
 import { multiply as _multiplyRaw } from './typed/arithmetic.js';
 import { numberVector } from './typed/number-matrix.js';
+import { assertAllocSize } from './utils/limits.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 const _eigs = _eigsRaw as unknown as (m: number[][]) => {
@@ -77,6 +78,7 @@ export function triu(A: readonly number[][], k = 0): number[][] {
 export function vander(x: Vec, n?: number, increasing = false): number[][] {
   const v = numberVector('vander', x);
   const N = n ?? v.length;
+  assertAllocSize('vander', [v.length, N]);
   return v.map((xi) =>
     Array.from({ length: N }, (_, j) => Math.pow(xi, increasing ? j : N - 1 - j))
   );

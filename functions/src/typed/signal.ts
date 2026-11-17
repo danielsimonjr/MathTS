@@ -16,6 +16,8 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { assertAllocSize } from '../utils/limits.js';
+import { toSamples } from '../utils/samples.js';
 import type { PublicParallelFFT } from './public-type-exports.js';
 import { fftCoreFloat64, fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
@@ -1021,7 +1023,7 @@ export function periodogram(
  * @returns Filtered signal
  */
 export function lowpassFilter(x: number[], cutoff: f64, order: i32 = 31): number[] {
-  const h = _sincFilter(order, cutoff, 'lowpass');
+  const h = _sincFilter('lowpassFilter', order, cutoff, 'lowpass');
   return _convolve(x, h);
 }
 
@@ -1034,7 +1036,7 @@ export function lowpassFilter(x: number[], cutoff: f64, order: i32 = 31): number
  * @returns Filtered signal
  */
 export function highpassFilter(x: number[], cutoff: f64, order: i32 = 31): number[] {
-  const h = _sincFilter(order, cutoff, 'highpass');
+  const h = _sincFilter('highpassFilter', order, cutoff, 'highpass');
   return _convolve(x, h);
 }
 
@@ -1048,15 +1050,16 @@ export function highpassFilter(x: number[], cutoff: f64, order: i32 = 31): numbe
  * @returns Filtered signal
  */
 export function bandpassFilter(x: number[], low: f64, high: f64, order: i32 = 31): number[] {
-  const hLow = _sincFilter(order, low, 'highpass');
-  const hHigh = _sincFilter(order, high, 'lowpass');
+  const hLow = _sincFilter('bandpassFilter', order, low, 'highpass');
+  const hHigh = _sincFilter('bandpassFilter', order, high, 'lowpass');
   // Combine: bandpass = lowpass(high) * highpass(low) via convolution
   const mid = _convolve(x, hHigh);
   return _convolve(mid, hLow);
 }
 
 /** Create windowed sinc FIR filter coefficients */
-function _sincFilter(order: i32, cutoff: f64, type: 'lowpass' | 'highpass'): number[] {
+function _sincFilter(fn: string, order: i32, cutoff: f64, type: 'lowpass' | 'highpass'): number[] {
+  assertAllocSize(fn, [order]);
   if (order % 2 === 0) order += 1;
   const mid: i32 = Math.floor(order / 2);
   const h: number[] = new Array(order);
@@ -1166,6 +1169,7 @@ function resampleFftToLength(x: number[], num: i32): number[] {
 function resampleLinear(x: number[], newRate: f64, oldRate: f64): number[] {
   const ratio: f64 = oldRate / newRate;
   const newLen: i32 = Math.round(x.length / ratio);
+  assertAllocSize('resample', [newLen]);
   const result: number[] = new Array(newLen);
 
   for (let i: i32 = 0; i < newLen; i++) {
@@ -1191,12 +1195,14 @@ function resampleLinear(x: number[], newRate: f64, oldRate: f64): number[] {
  * @returns Resampled signal
  */
 export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
+  toSamples('resample', x, 'x');
   if (oldRate === undefined) {
     if (!Number.isFinite(newRate) || !Number.isInteger(newRate) || newRate < 1) {
       throw new TypeError(
         'resample(x, num): num must be a positive integer (SciPy Fourier resample), or pass resample(x, newRate, oldRate) for linear rate interpolation'
       );
     }
+    assertAllocSize('resample', [newRate]);
     return resampleFftToLength(x, newRate);
   }
   if (!Number.isFinite(oldRate) || oldRate <= 0 || !Number.isFinite(newRate) || newRate <= 0) {
@@ -1220,7 +1226,7 @@ export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
  */
 export function medfilt(x: number[], n: i32 = 3): number[] {
   if (n % 2 === 0) n += 1;
-  const half: i32 = Math.floor(n / 2);
+  const half: i32 = Math.min(Math.floor(n / 2), x.length);
   const result: number[] = new Array(x.length);
 
   for (let i: i32 = 0; i < x.length; i++) {
@@ -1424,7 +1430,7 @@ export function welchPSD(
   signal: number[] | Float64Array,
   opts?: { frameLength?: i32; overlap?: i32; window?: string }
 ): { psd: number[]; frequencies: number[]; frameLength: number } {
-  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const samples = toSamples('welchPSD', signal);
   const frameLength: i32 = resolvePsdFrameLength(samples.length, opts?.frameLength);
   const overlap: i32 = opts?.overlap ?? Math.floor(frameLength / 2);
   const window = opts?.window ?? 'hann';
@@ -1451,7 +1457,7 @@ export function bartlettPSD(
   signal: number[] | Float64Array,
   opts?: { frameLength?: i32 }
 ): { psd: number[]; frequencies: number[]; frameLength: number } {
-  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const samples = toSamples('bartlettPSD', signal);
   const frameLength: i32 = resolvePsdFrameLength(samples.length, opts?.frameLength);
 
   assertPsdFrameLength(samples.length, frameLength, 'bartlettPSD');
@@ -1476,7 +1482,7 @@ export function multiTaperPSD(
   signal: number[] | Float64Array,
   opts?: { nfft?: i32; K?: i32 }
 ): { psd: number[]; frequencies: number[] } {
-  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const samples = toSamples('multiTaperPSD', signal);
   const n: i32 = samples.length;
   const nfft: i32 = opts?.nfft ?? (Math.pow(2, Math.ceil(Math.log2(n))) as i32);
   const K: i32 = opts?.K ?? 5;
@@ -1528,7 +1534,7 @@ export function multiTaperPSD(
  * @returns |X[k]|² (unnormalized power at the target frequency)
  */
 export function goertzel(signal: number[] | Float64Array, targetFreq: f64, sampleRate: f64): f64 {
-  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const samples = toSamples('goertzel', signal);
   return goertzelDispatch(samples, targetFreq, sampleRate);
 }
 
@@ -1554,7 +1560,8 @@ export function chirpZTransform(
   phiStart: f64 = 0,
   phiStep: f64 = -1 / (signal instanceof Float64Array ? signal.length : signal.length)
 ): { re: Float64Array; im: Float64Array } {
-  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const samples = toSamples('chirpZTransform', signal);
+  assertAllocSize('chirpZTransform', [m]);
   // Convert turns to complex exponentials
   const twoPi = 2 * Math.PI;
   const phiStartRe: f64 = Math.cos(twoPi * phiStart);

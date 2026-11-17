@@ -24,6 +24,7 @@ import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { formatBigNumber } from '@danielsimonjr/mathts-core/internal';
 import { format as formatValue } from '../utils/string.js';
 import { fillPrintTemplate } from '../utils/print.js';
+import { assertLoopOrder } from '../utils/limits.js';
 
 // =============================================================================
 // Internal helpers
@@ -177,6 +178,24 @@ export const oct = mathTyped('oct', {
 // format — polymorphic value-to-string formatter
 // =============================================================================
 
+/** Largest precision (digit count) that `format` accepts. */
+const MAX_FORMAT_PRECISION = 1_000_000;
+
+/**
+ * Throw a RangeError when the precision in `options` (a number, a BigNumber or the
+ * `precision` option) exceeds {@link MAX_FORMAT_PRECISION}, because the formatter pads
+ * the result to that many digits.
+ */
+function assertFormatPrecision(options: unknown): void {
+  const raw =
+    typeof options === 'object' && options !== null && !isBigNumber(options)
+      ? (options as { precision?: unknown }).precision
+      : options;
+  if (typeof raw === 'number' || isBigNumber(raw)) {
+    assertLoopOrder('format', 'precision', Number(raw), MAX_FORMAT_PRECISION);
+  }
+}
+
 /**
  * Format a value of any type into a string.
  *
@@ -218,6 +237,7 @@ export const format = mathTyped('format', {
   // Two-arg: format with options/precision. For BigNumber+number we use toPrecision
   // directly; for everything else we delegate to formatValue.
   'any, any': (x: unknown, options: unknown): string => {
+    assertFormatPrecision(options);
     if (isBigNumber(x)) {
       const bn = x as unknown as {
         isNaN: () => boolean;

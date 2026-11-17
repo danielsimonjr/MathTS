@@ -32,6 +32,7 @@
  */
 
 import { mulberry32 } from '@danielsimonjr/mathts-core';
+import { assertAllocSize } from '../utils/limits.js';
 import { aggregateRestartVectors, type RestartAggregation } from './aggregate-restart.js';
 import { CENTRALITY_WORKER_THRESHOLD, runCentralityRestarts } from './centrality-restarts.js';
 
@@ -61,6 +62,7 @@ export function adjacencyMatrix(
   if (n < 0 || !Number.isInteger(n)) {
     throw new Error('adjacencyMatrix: n must be a non-negative integer');
   }
+  assertAllocSize('adjacencyMatrix', [n, n]);
   const adj: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   for (const edge of edges) {
     const u = edge[0];

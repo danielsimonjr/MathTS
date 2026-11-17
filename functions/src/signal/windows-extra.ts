@@ -9,6 +9,7 @@
 
 import { windowFunction } from '../typed/signal.js';
 import { besselIScalar } from '../wasm/special/scalars.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 
 /** Window names accepted by {@link getWindow}. */
 export type ExtraWindowName =
@@ -41,6 +42,7 @@ function buildWindow(
   if (!Number.isInteger(n) || n < 0) {
     throw new RangeError(`window length must be a non-negative integer, got ${n}`);
   }
+  assertAllocSize('window', [n]);
   if (n === 0) return [];
   const sym = opts?.sym ?? true;
   const M = sym || n <= 1 ? n : n + 1;
@@ -69,6 +71,7 @@ function cosineSum(M: number, a: readonly number[]): number[] {
  * kaiserWindow(5, 0); // [1, 1, 1, 1, 1]
  */
 export function kaiserWindow(n: number, beta: number, opts?: WindowOptions): number[] {
+  assertLoopOrder('kaiserWindow', 'n', n, 1_000_000);
   return buildWindow(n, opts, (M) => {
     const alpha = (M - 1) / 2;
     const denom = besselIScalar(0, beta);

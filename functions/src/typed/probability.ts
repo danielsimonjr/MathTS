@@ -32,6 +32,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
+import { assertLoopOrder } from '../utils/limits.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
@@ -440,6 +441,7 @@ function _pick(arr: unknown[], n: number, weights: number[] | undefined): unknow
   if (!Number.isInteger(n) || n < 1) {
     throw new RangeError('number of picks must be a positive integer');
   }
+  assertLoopOrder('pickRandom', 'n', n);
   if (weights !== undefined) {
     if (weights.length !== arr.length) {
       throw new RangeError('weights must have the same length as the array');

@@ -33,6 +33,7 @@ import {
   legendreBasisRow,
 } from '../wasm/poly/wasm-bridge.js';
 import { solveAugmentedNormalEquations } from './normal-equations-solve.js';
+import { toSamples } from '../utils/samples.js';
 
 // =============================================================================
 // linearInterp - Linear Interpolation
@@ -183,8 +184,8 @@ export function newtonInterp(xs: number[], ys: number[], x: number): number {
     throw new Error('newtonInterp requires at least 1 data point with matching lengths');
   }
 
-  const xsF = new Float64Array(xs);
-  const ysF = new Float64Array(ys);
+  const xsF = toSamples('newtonInterp', xs, 'xs');
+  const ysF = toSamples('newtonInterp', ys, 'ys');
 
   // WASM-dispatched divided-difference (falls back to JS below threshold).
   let coeffs: Float64Array;
@@ -506,10 +507,12 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
   if (xs.length !== ys.length || xs.length < degree + 1) {
     throw new Error('polyFit requires more data points than polynomial degree');
   }
+  const xsF = toSamples('polyFit', xs, 'xs');
+  const ysF = toSamples('polyFit', ys, 'ys');
 
   if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
     try {
-      const result = polyFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      const result = polyFitDispatch(xsF, ysF, degree);
       return Array.from(result);
     } catch {
       // fall through to JS path
@@ -589,10 +592,12 @@ function fitOrthogonalSeries(
   if (xs.length !== ys.length || xs.length < degree + 1) {
     throw new Error(`${name} requires more data points than polynomial degree`);
   }
+  const xsF = toSamples(name, xs, 'xs');
+  const ysF = toSamples(name, ys, 'ys');
 
   if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
     try {
-      const result = dispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      const result = dispatch(xsF, ysF, degree);
       return Array.from(result);
     } catch {
       // fall through to JS path

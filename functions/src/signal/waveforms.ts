@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 import { numberVector } from '../typed/number-matrix.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 const TWO_PI = 2 * Math.PI;
@@ -114,6 +115,7 @@ export function gaussPulse(t: Vec, fc: number, bw: number = 0.5, bwr: number = -
  */
 export function unitImpulse(n: number, idx: number | 'mid' = 0): number[] {
   if (!Number.isInteger(n) || n < 0) throw new RangeError(`unitImpulse: invalid length ${n}`);
+  assertAllocSize('unitImpulse', [n]);
   const pos = idx === 'mid' ? Math.floor(n / 2) : idx;
   if (!Number.isInteger(pos) || pos < 0 || pos >= n) {
     throw new RangeError(`unitImpulse: index ${String(idx)} out of range for length ${n}`);

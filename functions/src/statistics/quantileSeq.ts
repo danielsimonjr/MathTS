@@ -1,6 +1,7 @@
 import { isNumber, isBigNumber } from '../utils/is.js';
 import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { isFloatTyped, copyToNumberArray, type FloatTyped } from './numeric-data.js';
 import {
@@ -241,6 +242,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
           );
         }
 
+        assertLoopOrder('quantileSeq', 'N', Number(probOrN));
         const nPlusOne = add(probOrN, 1);
         probArr = [];
 

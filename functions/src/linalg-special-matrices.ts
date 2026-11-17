@@ -23,6 +23,7 @@ function binom(n: number, k: number): number {
 
 /** Hilbert matrix H_ij = 1 / (i + j + 1) (0-based). */
 export function hilbertMatrix(n: number): number[][] {
+  assertAllocSize('hilbertMatrix', [n, n]);
   return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => 1 / (i + j + 1)));
 }
 
@@ -31,6 +32,7 @@ export function hilbertMatrix(n: number): number[][] {
  * (1-based indices): (-1)^(i+j) (i+j-1) C(n+i-1, n-j) C(n+j-1, n-i) C(i+j-2, i-1)^2.
  */
 export function invHilbertMatrix(n: number): number[][] {
+  assertAllocSize('invHilbertMatrix', [n, n]);
   return Array.from({ length: n }, (_, a) =>
     Array.from({ length: n }, (_, b) => {
       const i = a + 1;
@@ -76,6 +78,7 @@ export function pascalMatrix(
   n: number,
   kind: 'symmetric' | 'lower' | 'upper' = 'symmetric'
 ): number[][] {
+  assertAllocSize('pascalMatrix', [n, n]);
   return Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => {
       if (kind === 'symmetric') return binom(i + j, i);
@@ -90,6 +93,7 @@ export function pascalMatrix(
  * 'none' = 1, 'sqrtn' = 1/sqrt(n), 'n' = 1/n.
  */
 export function dftMatrix(n: number, opts: { scale?: 'none' | 'sqrtn' | 'n' } = {}): Complex[][] {
+  assertAllocSize('dftMatrix', [n, n, 8]);
   const scale = opts.scale ?? 'none';
   const factor = scale === 'sqrtn' ? 1 / Math.sqrt(n) : scale === 'n' ? 1 / n : 1;
   return Array.from({ length: n }, (_, j) =>
@@ -183,6 +187,7 @@ export function leslieMatrix(f: Vec, s: Vec): number[][] {
  * n x n orthogonal matrix when `full` is true (first row 1/sqrt(n)).
  */
 export function helmertMatrix(n: number, full = false): number[][] {
+  assertAllocSize('helmertMatrix', [n, n]);
   const rows: number[][] = [];
   if (full) rows.push(new Array<number>(n).fill(1 / Math.sqrt(n)));
   for (let k = 1; k <= n - 1; k++) {
