@@ -605,20 +605,25 @@ export interface DescribeResult {
  * The variance is the sample variance (ddof = 1). The skewness and the excess kurtosis are
  * the biased estimates.
  *
- * NaN policy follows `scipy.stats.describe`. By default, a NaN in `x` gives `nobs = x.length`
- * and NaN in every other field. With `{ skipNaN: true }` (or `{ skipna: true }`), the NaN values
- * are dropped and `nobs` counts the values that remain. If none remain, `nobs` is 0 and the
- * other fields are NaN. `Infinity` is kept. Unknown options throw `TypeError`.
+ * The default NaN policy follows `scipy.stats.describe` (`nan_policy='propagate'`): a NaN in `x`
+ * gives `nobs = x.length` and NaN in every other field. With `{ skipNaN: true }`, the result is
+ * `describe` of the values that are not NaN, and `nobs` counts them. If none remain, `nobs` is 0
+ * and the other fields are NaN. `Infinity` is kept, which differs from SciPy `nan_policy='omit'`.
  *
+ * @param x - The sample.
+ * @param opts - `{ skipNaN?: boolean; skipna?: boolean }`. The two names are aliases.
  * @throws Error if `x` is empty.
+ * @throws TypeError if `opts` is not a plain object, holds an unknown option, or holds a
+ *   non-boolean or conflicting `skipNaN` / `skipna`.
  */
 export function describe(x: Vec, opts?: { skipNaN?: boolean; skipna?: boolean }): DescribeResult {
   let skip = false;
   if (opts !== undefined) {
-    if (opts === null || typeof opts !== 'object' || Array.isArray(opts)) {
+    if (opts === null || typeof opts !== 'object' || (opts as object).constructor !== Object) {
       throw new TypeError('describe: options must be an object with skipNaN or skipna (boolean)');
     }
-    for (const key of Object.keys(opts)) {
+    // for...in also sees inherited keys, which readSkip reads too.
+    for (const key in opts) {
       if (key !== 'skipNaN' && key !== 'skipna') {
         throw new TypeError(
           `describe: unknown option "${key}"; the options are skipNaN and skipna (boolean)`
@@ -637,10 +642,10 @@ export function describe(x: Vec, opts?: { skipNaN?: boolean; skipna?: boolean })
     }
   }
   if (hasNaN) {
-    const nobs = skip ? a.filter((v) => v === v).length : a.length;
-    if (!skip || nobs === 0) {
+    const kept = skip ? a.filter((v) => v === v) : [];
+    if (kept.length === 0) {
       return {
-        nobs,
+        nobs: skip ? 0 : a.length,
         min: NaN,
         max: NaN,
         mean: NaN,
@@ -653,7 +658,7 @@ export function describe(x: Vec, opts?: { skipNaN?: boolean; skipna?: boolean })
         kurtosis: NaN,
       };
     }
-    a = a.filter((v) => v === v);
+    a = kept;
   }
   const n = a.length;
   const m = mean(a);

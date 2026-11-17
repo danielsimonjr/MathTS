@@ -97,4 +97,62 @@ suite('describe NaN policy (#1004)', () => {
       ] as never)
     ).toThrow(TypeError);
   });
+
+  it('gives the SciPy values for a NaN-free input', () => {
+    // SciPy 1.16.3 describe([1,2,3]) and np.quantile.
+    expect(describe([1, 2, 3])).toEqual({
+      nobs: 3,
+      min: 1,
+      max: 3,
+      mean: 2,
+      variance: 1,
+      std: 1,
+      q25: 1.5,
+      q50: 2,
+      q75: 2.5,
+      skewness: 0,
+      kurtosis: -1.5,
+    });
+  });
+
+  it('skip gives describe of the values that are not NaN', () => {
+    // np.nanmean, np.nanquantile: Infinity is kept, unlike SciPy nan_policy='omit'.
+    const r = describe([1, Infinity, NaN, 2, 3], { skipNaN: true });
+    expect(r.nobs).toBe(4);
+    expect(r.min).toBe(1);
+    expect(r.max).toBe(Infinity);
+    expect(r.mean).toBe(Infinity);
+    expect(r.variance).toBeNaN();
+    expect(r.q25).toBe(1.75);
+    expect(r.q50).toBe(2.5);
+    expect(r.q75).toBe(Infinity);
+    expect(describe([NaN, 5], { skipNaN: true })).toEqual(describe([5]));
+    const f = describe(new Float32Array([1, NaN, 2, 3]) as never, { skipNaN: true });
+    expect(f.nobs).toBe(3);
+    expect(f.mean).toBe(2);
+    expect(describe([1, NaN, 2], Object.freeze({ skipna: true })).nobs).toBe(2);
+  });
+
+  it('a false or undefined skip option propagates NaN', () => {
+    expectNaNFields(describe([1, NaN, 2, 3], { skipNaN: false }) as never, 4);
+    expectNaNFields(describe([1, NaN, 2, 3], { skipNaN: undefined }) as never, 4);
+  });
+
+  it('does not change the input', () => {
+    const x = [1, NaN, 2];
+    describe(x, { skipNaN: true });
+    expect(x).toHaveLength(3);
+    expect(x[0]).toBe(1);
+    expect(x[1]).toBeNaN();
+    expect(x[2]).toBe(2);
+  });
+
+  it('rejects options that are not a plain object, as mean does', () => {
+    expect(() => describe([1, NaN], new Map([['skipNaN', true]]) as never)).toThrow(TypeError);
+    expect(() => describe([1, 2], new Date() as never)).toThrow(TypeError);
+    expect(() => describe([1, 2], Object.create(null) as never)).toThrow(TypeError);
+    expect(() => describe([1, 2], Object.create({ ddof: 1 }) as never)).toThrow(
+      'unknown option "ddof"'
+    );
+  });
 });
