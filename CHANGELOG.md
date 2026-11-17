@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `functions`: `discreteLog` returns a small answer for a modulus above 2^48, where it threw a `RangeError` (Fixes #1136).
+- `functions`: the `discreteLog` baby-step table uses typed arrays: peak memory at the 2^24 limit falls from about 1,058 MB to about 331 MB, and a base of small order returns at once (Fixes #1135).
 - `core`: `pairwiseSum`, `sumSquaredDeviations` and the other stable sums throw a `TypeError` naming the function for a non-array, a string or a bad `length` (Fixes #1011).
 - `parallel`: `parallelMean`, `parallelVariance` and `parallelStd` throw that `TypeError` for a non-array on the sequential path, where `parallelMean(1)` returned `0` (#1011).
 - `functions`: statistics and signal functions that take a vector throw a `TypeError` for a number or a string, where `zscore(5)` returned `[]` and `skewness(5)` returned `NaN` (Fixes #1083).
