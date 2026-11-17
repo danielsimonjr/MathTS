@@ -2,7 +2,8 @@
  * Dogfood #1136 and #1135: discreteLog above 2^48 and the baby-step table.
  *
  * #1136: a small answer above 2^48 returned a RangeError, because the order of g was searched
- * before h. #1135: the baby-step Map peaked at about 1 GB; a typed-array table replaces it.
+ * before h. #1135: the baby-step Map peaked at about 1 GB; a typed-array table replaces it,
+ * and the baby steps stop when the powers of g return to 1.
  * Expected values come from a brute-force loop over the powers of g (smallest x >= 0 with
  * g^x === h mod p; -1 when none exists).
  */
@@ -76,6 +77,30 @@ describe('discreteLog baby-step table (#1135)', () => {
     expect(discreteLog(2, 2 ** 43, p)).toBe(43);
     expect(discreteLog(2, 1, p)).toBe(0);
     expect(performance.now() - start).toBeLessThan(1000);
+  });
+
+  it('separates two baby steps that share their low 32 bits', () => {
+    // 3^102200 = 36657430730 and 3^143299 = 2297692362 (mod 68719476731). The two values
+    // differ by 8 * 2^32, so they have the same 32-bit table key.
+    const p = 68719476731;
+    expect(36657430730 - 2297692362).toBe(8 * 2 ** 32);
+    expect(discreteLog(3, 36657430730, p)).toBe(102200);
+    expect(discreteLog(3, 2297692362, p)).toBe(143299);
+  });
+
+  it('stores no baby step in a Map', () => {
+    const set = Map.prototype.set;
+    let calls = 0;
+    Map.prototype.set = function (this: Map<unknown, unknown>, key: unknown, value: unknown) {
+      calls++;
+      return set.call(this, key, value);
+    } as typeof set;
+    try {
+      expect(discreteLog(7, 12345, 1000003)).toBeGreaterThan(0);
+    } finally {
+      Map.prototype.set = set;
+    }
+    expect(calls).toBe(0);
   });
 
   it('finds the smallest x when the powers of g repeat', () => {
