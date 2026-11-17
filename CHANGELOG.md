@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `core`: `pairwiseSum`, `sumSquaredDeviations` and the other stable sums throw a `TypeError` naming the function for a non-array, a string or a bad `length` (Fixes #1011).
+- `parallel`: `parallelMean`, `parallelVariance` and `parallelStd` throw that `TypeError` for a non-array on the sequential path, where `parallelMean(1)` returned `0` (#1011).
+- `functions`: statistics and signal functions that take a vector throw a `TypeError` for a number or a string, where `zscore(5)` returned `[]` and `skewness(5)` returned `NaN` (Fixes #1083).
+- `matrix`: the Householder reflector is orthogonal when a column is a negative multiple of e1, so `svd`, `pinv`, `cond` and `norm(A, 2)` are correct: `norm([[-3, 0], [0, 1]])` is 3, was 9 (Fixes #1082, #995).
 - `parallel`: `parallelEvery` and `parallelForEach` run on workers; a closure still works on the sequential path (Fixes #1027).
 - `parallel`: `ComputePool.workerCount` is 0 after `terminate()`, and `liveWorkerCount` gives the live worker count (Fixes #1016).
 - `autograd`: the docs state that `binaryCrossEntropy` takes logits and does not reduce (Fixes #1017).
