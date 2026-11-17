@@ -6,7 +6,7 @@
  * Fiedler, Leslie and Helmert matrices.
  */
 import { Complex } from '@danielsimonjr/mathts-core';
-import { assertAllocSize } from './utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -33,6 +33,7 @@ export function hilbertMatrix(n: number): number[][] {
  */
 export function invHilbertMatrix(n: number): number[][] {
   assertAllocSize('invHilbertMatrix', [n, n]);
+  assertLoopOrder('invHilbertMatrix', 'n', n, 1000);
   return Array.from({ length: n }, (_, a) =>
     Array.from({ length: n }, (_, b) => {
       const i = a + 1;
@@ -79,6 +80,7 @@ export function pascalMatrix(
   kind: 'symmetric' | 'lower' | 'upper' = 'symmetric'
 ): number[][] {
   assertAllocSize('pascalMatrix', [n, n]);
+  assertLoopOrder('pascalMatrix', 'n', n, 2000);
   return Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => {
       if (kind === 'symmetric') return binom(i + j, i);

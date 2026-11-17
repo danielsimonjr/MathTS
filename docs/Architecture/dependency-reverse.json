@@ -1730,6 +1730,7 @@
       "functions/src/signal-filter-extra.ts",
       "functions/src/signal/fft-helpers.ts",
       "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/freqz.ts",
       "functions/src/signal/iir-design.ts",
       "functions/src/signal/system-response.ts",
       "functions/src/signal/waveforms.ts",
@@ -1741,7 +1742,7 @@
       "functions/src/typed/probability.ts",
       "functions/src/typed/signal.ts",
       "functions/src/typed/statistics.ts",
-      "functions/src/typed/string.ts"
+      "functions/src/utils/print.ts"
     ],
     "functions/src/typed/complex-promotion.ts": [
       "functions/src/arithmetic/pow.ts",

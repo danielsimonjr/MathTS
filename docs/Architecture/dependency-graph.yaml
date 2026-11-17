@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-17'
-  totalFiles: 1339
+  totalFiles: 1340
   totalModules: 82
-  totalExports: 7326
+  totalExports: 7328
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9025,6 +9025,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -9828,6 +9831,9 @@ modules:
         - file: ./typed/number-matrix.js
           imports:
             - numberVector
+        - file: ./utils/limits.js
+          imports:
+            - assertAllocSize
         - file: ./statistics/numeric-data.js
           imports:
             - readSkip
@@ -13141,6 +13147,9 @@ modules:
         - file: ./typed/number-matrix.js
           imports:
             - numberVector
+        - file: ./utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -13201,6 +13210,7 @@ modules:
         - file: ./utils/limits.js
           imports:
             - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -13813,6 +13823,10 @@ modules:
         - file: ./typed/number-matrix.js
           imports:
             - numberVector
+        - file: ./utils/limits.js
+          imports:
+            - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -14384,6 +14398,7 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
+            - assertLoopOrder
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -17397,6 +17412,9 @@ modules:
         - file: ../utils/number.js
           imports:
             - isInteger
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
         - file: ../utils/factory.js
           imports:
             - factory
@@ -18852,7 +18870,10 @@ modules:
       description: Gauss quadrature nodes and weights for classical weight functions.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - rootsHermite
@@ -20852,6 +20873,9 @@ modules:
             - fft
             - ifft
             - complex
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
         - file: ./fft.js
           imports:
             - fftshift
@@ -20937,6 +20961,10 @@ modules:
         - file: ../typed/number-matrix.js
           imports:
             - numberVector
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - firwinBandpass
@@ -20968,6 +20996,9 @@ modules:
             - Complex
             - TypedFunction
           typeOnly: true
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - createFreqz
@@ -21003,6 +21034,9 @@ modules:
         - file: ../typed/number-matrix.js
           imports:
             - numberVector
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -21108,6 +21142,9 @@ modules:
         - file: ../typed/number-matrix.js
           imports:
             - numberVector
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - impulseResponse
@@ -21140,6 +21177,9 @@ modules:
         - file: ../typed/number-matrix.js
           imports:
             - numberVector
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - chirp
@@ -21212,6 +21252,10 @@ modules:
         - file: ../wasm/special/scalars.js
           imports:
             - besselIScalar
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - kaiserWindow
@@ -21952,6 +21996,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -22305,6 +22352,9 @@ modules:
         - file: ../plain/number/probability.js
           imports:
             - lgammaNumber
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - dirichletSample
@@ -22330,6 +22380,9 @@ modules:
         - file: ../probability/util/seededRNG.js
           imports:
             - createRng
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies: []
       exports:
         - mvnPdf
@@ -24220,6 +24273,9 @@ modules:
         - file: ./euclid.js
           imports:
             - euclidSnap
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
         - file: ../cas/render-polynomial.js
           imports:
             - renderPolynomial
@@ -25878,6 +25934,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
         - file: ./aggregate-restart.js
           imports:
             - aggregateRestartVectors
@@ -26463,6 +26522,9 @@ modules:
         - file: ./normal-equations-solve.js
           imports:
             - solveAugmentedNormalEquations
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
       workspaceDependencies: []
       exports:
         - WASM_INTERP_THRESHOLD
@@ -26928,6 +26990,10 @@ modules:
         - file: ../utils/collection.js
           imports:
             - deepMap
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
+            - assertLoopOrder
         - file: ../plain/number/probability.js
           imports:
             - gammaNumber
@@ -27065,6 +27131,12 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
         - file: ./public-type-exports.js
           imports:
             - PublicParallelFFT
@@ -27370,6 +27442,9 @@ modules:
         - file: ../utils/median-numbers.js
           imports:
             - medianInPlace
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -27455,6 +27530,7 @@ modules:
             - format
         - file: ../utils/print.js
           imports:
+            - assertFormatPrecision
             - fillPrintTemplate
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
@@ -28715,7 +28791,7 @@ modules:
       constants:
         - createParseNumberWithConfig
     functions/src/utils/print.ts:
-      description: Interpolate values into a string template (`$key` / `$key.nested`).
+      description: Throw a RangeError when the precision in `options` (a number, a BigNumber or the
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -28724,12 +28800,18 @@ modules:
             - format
         - file: ./is.js
           imports:
+            - isBigNumber
             - isString
+        - file: ./limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - printTemplate
+        - assertFormatPrecision
         - fillPrintTemplate
       functions:
+        - assertFormatPrecision
         - fillPrintTemplate
       constants:
         - printTemplate
@@ -28743,6 +28825,16 @@ modules:
         - product
       functions:
         - product
+    functions/src/utils/samples.ts:
+      description: Shared argument helper for the signal and curve-fit functions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - toSamples
+      functions:
+        - toSamples
     functions/src/utils/sort-numbers.ts:
       description: Sort a plain `number[]` in place (ascending). Uses native `Float64Array.sort`
       externalDependencies: []
@@ -45629,6 +45721,7 @@ dependencyGraph:
         - functions/src/utils/parseNumber.ts
         - functions/src/utils/print.ts
         - functions/src/utils/product.ts
+        - functions/src/utils/samples.ts
         - functions/src/utils/sort-numbers.ts
         - functions/src/utils/string.ts
         - functions/src/utils/switch.ts
@@ -46317,13 +46410,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1339
+  totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 232445
-  totalExports: 7326
+  totalLinesOfCode: 232602
+  totalExports: 7328
   totalClasses: 62
   totalInterfaces: 664
-  totalFunctions: 2540
+  totalFunctions: 2542
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1678

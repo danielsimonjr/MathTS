@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { Matrix, Complex, TypedFunction } from '../types.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 const name = 'freqz';
 
@@ -64,6 +65,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         if (w < 0) {
           throw new Error('w must be a positive number');
         }
+        assertAllocSize('freqz', [w]);
         const w2 = createBins(w);
         return _freqz(b, a, w2);
       },
@@ -90,6 +92,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         if (w < 0) {
           throw new Error('w must be a positive number');
         }
+        assertAllocSize('freqz', [w]);
         const _w = createBins(w);
         const { h } = _freqz(b.valueOf() as number[], a.valueOf() as number[], _w);
         return {

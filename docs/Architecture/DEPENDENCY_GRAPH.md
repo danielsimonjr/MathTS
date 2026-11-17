@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 56 files
 - **functions/unit**: 2 files
-- **functions/utils**: 39 files
+- **functions/utils**: 40 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 580            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 581            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4256,11 +4256,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../core/config.js`         | `MathJsConfig`  | Import (type-only) |
+| File                        | Imports           | Type               |
+| --------------------------- | ----------------- | ------------------ |
+| `../utils/factory.js`       | `factory`         | Import             |
+| `../utils/limits.js`        | `assertAllocSize` | Import             |
+| `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
+| `../core/config.js`         | `MathJsConfig`    | Import (type-only) |
 
 **Exports:**
 
@@ -4769,6 +4770,7 @@ graph LR
 | `./typed/distributions.js`     | `normalCDF`                            | Import |
 | `./kendall-exact.js`           | `kendallPExact, kendallShouldUseExact` | Import |
 | `./typed/number-matrix.js`     | `numberVector`                         | Import |
+| `./utils/limits.js`            | `assertAllocSize`                      | Import |
 | `./statistics/numeric-data.js` | `readSkip`                             | Import |
 
 **Exports:**
@@ -5166,11 +5168,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports         | Type   |
-| -------------------------- | --------------- | ------ |
-| `./factories/index.js`     | `inv, eigs, qr` | Import |
-| `./typed/arithmetic.js`    | `multiply`      | Import |
-| `./typed/number-matrix.js` | `numberVector`  | Import |
+| File                       | Imports           | Type   |
+| -------------------------- | ----------------- | ------ |
+| `./factories/index.js`     | `inv, eigs, qr`   | Import |
+| `./typed/arithmetic.js`    | `multiply`        | Import |
+| `./typed/number-matrix.js` | `numberVector`    | Import |
+| `./utils/limits.js`        | `assertAllocSize` | Import |
 
 **Exports:**
 
@@ -5202,9 +5205,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports           | Type   |
-| ------------------- | ----------------- | ------ |
-| `./utils/limits.js` | `assertAllocSize` | Import |
+| File                | Imports                            | Type   |
+| ------------------- | ---------------------------------- | ------ |
+| `./utils/limits.js` | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -5538,11 +5541,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports        | Type   |
-| -------------------------- | -------------- | ------ |
-| `./factories/index.js`     | `inv`          | Import |
-| `./linalg-extra.js`        | `companion`    | Import |
-| `./typed/number-matrix.js` | `numberVector` | Import |
+| File                       | Imports                            | Type   |
+| -------------------------- | ---------------------------------- | ------ |
+| `./factories/index.js`     | `inv`                              | Import |
+| `./linalg-extra.js`        | `companion`                        | Import |
+| `./typed/number-matrix.js` | `numberVector`                     | Import |
+| `./utils/limits.js`        | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -5847,13 +5851,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports           | Type               |
-| -------------------------------- | ----------------- | ------------------ |
-| `../utils/factory.js`            | `factory`         | Import             |
-| `../utils/is.js`                 | `isNumber`        | Import             |
-| `../utils/limits.js`             | `assertAllocSize` | Import             |
-| `../core/function/typed.js`      | `TypedFunction`   | Import (type-only) |
-| `../type/bignumber/BigNumber.js` | `BigNumber`       | Import (type-only) |
+| File                             | Imports                            | Type               |
+| -------------------------------- | ---------------------------------- | ------------------ |
+| `../utils/factory.js`            | `factory`                          | Import             |
+| `../utils/is.js`                 | `isNumber`                         | Import             |
+| `../utils/limits.js`             | `assertAllocSize, assertLoopOrder` | Import             |
+| `../core/function/typed.js`      | `TypedFunction`                    | Import (type-only) |
+| `../type/bignumber/BigNumber.js` | `BigNumber`                        | Import (type-only) |
 
 **Exports:**
 
@@ -7100,13 +7104,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/is.js`            | `isMatrix`      | Import             |
-| `../utils/array.js`         | `arraySize`     | Import             |
-| `../utils/number.js`        | `isInteger`     | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports           | Type               |
+| --------------------------- | ----------------- | ------------------ |
+| `../utils/is.js`            | `isMatrix`        | Import             |
+| `../utils/array.js`         | `arraySize`       | Import             |
+| `../utils/number.js`        | `isInteger`       | Import             |
+| `../utils/limits.js`        | `assertAllocSize` | Import             |
+| `../utils/factory.js`       | `factory`         | Import             |
+| `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
 
 **Exports:**
 
@@ -8147,6 +8152,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/gauss-nodes-extra.ts` - Gauss quadrature nodes and weights for classical weight functions.
+
+**Internal Dependencies:**
+
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `../utils/limits.js` | `assertAllocSize` | Import |
 
 **Exports:**
 
@@ -9383,6 +9394,7 @@ graph LR
 | File                    | Imports               | Type   |
 | ----------------------- | --------------------- | ------ |
 | `../factories/index.js` | `fft, ifft, complex`  | Import |
+| `../utils/limits.js`    | `assertAllocSize`     | Import |
 | `./fft.js`              | `fftshift, ifftshift` | Import |
 
 **Exports:**
@@ -9410,12 +9422,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                    | Type   |
-| --------------------------- | -------------------------- | ------ |
-| `../signal-filter-extra.js` | `sinc`                     | Import |
-| `./conv.js`                 | `convDirect`               | Import |
-| `./remez-exchange.js`       | `remezExchange, RemezType` | Import |
-| `../typed/number-matrix.js` | `numberVector`             | Import |
+| File                        | Imports                            | Type   |
+| --------------------------- | ---------------------------------- | ------ |
+| `../signal-filter-extra.js` | `sinc`                             | Import |
+| `./conv.js`                 | `convDirect`                       | Import |
+| `./remez-exchange.js`       | `remezExchange, RemezType`         | Import |
+| `../typed/number-matrix.js` | `numberVector`                     | Import |
+| `../utils/limits.js`        | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -9432,6 +9445,7 @@ graph LR
 | --------------------- | -------------------------------- | ------------------ |
 | `../utils/factory.js` | `factory`                        | Import             |
 | `../types.js`         | `Matrix, Complex, TypedFunction` | Import (type-only) |
+| `../utils/limits.js`  | `assertAllocSize`                | Import             |
 
 **Exports:**
 
@@ -9458,6 +9472,7 @@ graph LR
 | `../wasm/special/scalars.js`    | `ellipticKScalar`                                                              | Import |
 | `../special/jacobi-elliptic.js` | `jacobiCN, jacobiDN, jacobiSN`                                                 | Import |
 | `../typed/number-matrix.js`     | `numberVector`                                                                 | Import |
+| `../utils/limits.js`            | `assertLoopOrder`                                                              | Import |
 
 **Exports:**
 
@@ -9511,11 +9526,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../signal-filter-extra.js` | `lfilter`       | Import             |
-| `./fft.js`                  | `ComplexNumber` | Import (type-only) |
-| `../typed/number-matrix.js` | `numberVector`  | Import             |
+| File                        | Imports           | Type               |
+| --------------------------- | ----------------- | ------------------ |
+| `../signal-filter-extra.js` | `lfilter`         | Import             |
+| `./fft.js`                  | `ComplexNumber`   | Import (type-only) |
+| `../typed/number-matrix.js` | `numberVector`    | Import             |
+| `../utils/limits.js`        | `assertAllocSize` | Import             |
 
 **Exports:**
 
@@ -9529,9 +9545,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports        | Type   |
-| --------------------------- | -------------- | ------ |
-| `../typed/number-matrix.js` | `numberVector` | Import |
+| File                        | Imports           | Type   |
+| --------------------------- | ----------------- | ------ |
+| `../typed/number-matrix.js` | `numberVector`    | Import |
+| `../utils/limits.js`        | `assertAllocSize` | Import |
 
 **Exports:**
 
@@ -9571,10 +9588,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports          | Type   |
-| ---------------------------- | ---------------- | ------ |
-| `../typed/signal.js`         | `windowFunction` | Import |
-| `../wasm/special/scalars.js` | `besselIScalar`  | Import |
+| File                         | Imports                            | Type   |
+| ---------------------------- | ---------------------------------- | ------ |
+| `../typed/signal.js`         | `windowFunction`                   | Import |
+| `../wasm/special/scalars.js` | `besselIScalar`                    | Import |
+| `../utils/limits.js`         | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -10053,6 +10071,7 @@ graph LR
 | `../utils/is.js`              | `isNumber, isBigNumber`                                                                                       | Import             |
 | `../utils/array.js`           | `flatten`                                                                                                     | Import             |
 | `../utils/factory.js`         | `factory`                                                                                                     | Import             |
+| `../utils/limits.js`          | `assertLoopOrder`                                                                                             | Import             |
 | `../core/function/typed.js`   | `TypedFunction`                                                                                               | Import (type-only) |
 | `./numeric-data.js`           | `isFloatTyped, copyToNumberArray, FloatTyped`                                                                 | Import             |
 | `./quantile-numpy-methods.js` | `assertNumpyQuantileMethod, quantileOfSorted, parseQuantileThirdArg, NumpyQuantileMethod, QuantileSeqOptions` | Import             |
@@ -10284,6 +10303,7 @@ graph LR
 | `../probability/util/seededRNG.js`   | `createRng`                       | Import |
 | `../probability/util/gammaSample.js` | `gammaSampleRng, normalSampleRng` | Import |
 | `../plain/number/probability.js`     | `lgammaNumber`                    | Import |
+| `../utils/limits.js`                 | `assertAllocSize`                 | Import |
 
 **Exports:**
 
@@ -10301,6 +10321,7 @@ graph LR
 | `../typed/dist-objects.js`         | `multivariateNormal` | Import |
 | `../typed/matrix-ops.js`           | `cholesky`           | Import |
 | `../probability/util/seededRNG.js` | `createRng`          | Import |
+| `../utils/limits.js`               | `assertAllocSize`    | Import |
 
 **Exports:**
 
@@ -11535,6 +11556,7 @@ graph LR
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                         | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                          | Import |
 | `./euclid.js`                     | `euclidSnap`                                                                                        | Import |
+| `../utils/samples.js`             | `toSamples`                                                                                         | Import |
 | `../cas/render-polynomial.js`     | `renderPolynomial`                                                                                  | Import |
 | `../cas/polynomial-limits.js`     | `PolynomialDegreeError, polynomialDegreeMessage`                                                    | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
@@ -12080,6 +12102,7 @@ graph LR
 
 | File                       | Imports                                              | Type   |
 | -------------------------- | ---------------------------------------------------- | ------ |
+| `../utils/limits.js`       | `assertAllocSize`                                    | Import |
 | `./aggregate-restart.js`   | `aggregateRestartVectors, RestartAggregation`        | Import |
 | `./centrality-restarts.js` | `CENTRALITY_WORKER_THRESHOLD, runCentralityRestarts` | Import |
 
@@ -12224,6 +12247,7 @@ graph LR
 | `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`                                          | Import |
 | `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD, chebBasisRow, legendreBasisRow` | Import |
 | `./normal-equations-solve.js`          | `solveAugmentedNormalEquations`                                                                                  | Import |
+| `../utils/samples.js`                  | `toSamples`                                                                                                      | Import |
 
 **Exports:**
 
@@ -12387,12 +12411,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                  | Imports             | Type   |
-| ------------------------------------- | ------------------- | ------ |
-| `../utils/collection.js`              | `deepMap`           | Import |
-| `../plain/number/probability.js`      | `gammaNumber`       | Import |
-| `../factories/matrix-bridge.js`       | `MathJSDenseMatrix` | Import |
-| `../probability/multinomial-exact.js` | `multinomialExact`  | Import |
+| File                                  | Imports                            | Type   |
+| ------------------------------------- | ---------------------------------- | ------ |
+| `../utils/collection.js`              | `deepMap`                          | Import |
+| `../utils/limits.js`                  | `assertAllocSize, assertLoopOrder` | Import |
+| `../plain/number/probability.js`      | `gammaNumber`                      | Import |
+| `../factories/matrix-bridge.js`       | `MathJSDenseMatrix`                | Import |
+| `../probability/multinomial-exact.js` | `multinomialExact`                 | Import |
 
 **Exports:**
 
@@ -12469,6 +12494,8 @@ graph LR
 
 | File                            | Imports                                                                                                                                    | Type               |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `../utils/limits.js`            | `assertAllocSize`                                                                                                                          | Import             |
+| `../utils/samples.js`           | `toSamples`                                                                                                                                | Import             |
 | `./public-type-exports.js`      | `PublicParallelFFT`                                                                                                                        | Import (type-only) |
 | `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import             |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import             |
@@ -12524,6 +12551,7 @@ graph LR
 | ----------------------------- | ----------------- | ------ |
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch` | Import |
 | `../utils/median-numbers.js`  | `medianInPlace`   | Import |
+| `../utils/limits.js`          | `assertAllocSize` | Import |
 
 **Exports:**
 
@@ -12552,10 +12580,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports             | Type   |
-| -------------------- | ------------------- | ------ |
-| `../utils/string.js` | `format`            | Import |
-| `../utils/print.js`  | `fillPrintTemplate` | Import |
+| File                 | Imports                                    | Type   |
+| -------------------- | ------------------------------------------ | ------ |
+| `../utils/string.js` | `format`                                   | Import |
+| `../utils/print.js`  | `assertFormatPrecision, fillPrintTemplate` | Import |
 
 **Exports:**
 
@@ -13160,18 +13188,19 @@ graph LR
 
 ---
 
-### `functions/src/utils/print.ts` - Interpolate values into a string template (`$key` / `$key.nested`).
+### `functions/src/utils/print.ts` - Throw a RangeError when the precision in `options` (a number, a BigNumber or the
 
 **Internal Dependencies:**
 
-| File          | Imports    | Type   |
-| ------------- | ---------- | ------ |
-| `./string.js` | `format`   | Import |
-| `./is.js`     | `isString` | Import |
+| File          | Imports                 | Type   |
+| ------------- | ----------------------- | ------ |
+| `./string.js` | `format`                | Import |
+| `./is.js`     | `isBigNumber, isString` | Import |
+| `./limits.js` | `assertLoopOrder`       | Import |
 
 **Exports:**
 
-- Functions: `fillPrintTemplate`
+- Functions: `assertFormatPrecision`, `fillPrintTemplate`
 - Constants: `printTemplate`
 
 ---
@@ -13181,6 +13210,14 @@ graph LR
 **Exports:**
 
 - Functions: `product`
+
+---
+
+### `functions/src/utils/samples.ts` - Shared argument helper for the signal and curve-fit functions.
+
+**Exports:**
+
+- Functions: `toSamples`
 
 ---
 
@@ -20545,6 +20582,7 @@ graph LR
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
+| `functions/src/utils/limits`                           | 0 files      | 30 files   |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `matrix/src/types/DenseMatrix`                         | 6 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
@@ -20565,7 +20603,6 @@ graph LR
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
-| `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 
 ---
 
@@ -21118,7 +21155,7 @@ graph TD
         N369[complex]
         N370[customs]
         N371[emitter]
-        N372[...29 more]
+        N372[...30 more]
     end
 
     subgraph Functions/wasm
@@ -21464,14 +21501,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1339   |
+| Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232445 |
-| Total Exports           | 7326   |
+| Total Lines of Code     | 232602 |
+| Total Exports           | 7328   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 664    |
-| Total Functions         | 2540   |
+| Total Functions         | 2542   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

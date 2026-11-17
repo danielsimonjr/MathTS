@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-17",
-    "totalFiles": 1339,
+    "totalFiles": 1340,
     "totalModules": 82,
-    "totalExports": 7326
+    "totalExports": 7328
   },
   "entryPoints": [
     {
@@ -9510,6 +9510,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -10448,6 +10452,10 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "./utils/limits.js",
+            "imports": ["assertAllocSize"]
           },
           {
             "file": "./statistics/numeric-data.js",
@@ -13856,6 +13864,10 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "./utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [
@@ -13923,7 +13935,7 @@
         "internalDependencies": [
           {
             "file": "./utils/limits.js",
-            "imports": ["assertAllocSize"]
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -14579,6 +14591,10 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "./utils/limits.js",
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -15176,7 +15192,7 @@
           },
           {
             "file": "../utils/limits.js",
-            "imports": ["assertAllocSize"]
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           },
           {
             "file": "../core/function/typed.js",
@@ -18542,6 +18558,10 @@
             "imports": ["isInteger"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -20077,7 +20097,12 @@
         "description": "Gauss quadrature nodes and weights for classical weight functions.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "rootsHermite",
@@ -22154,6 +22179,10 @@
             "imports": ["fft", "ifft", "complex"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "./fft.js",
             "imports": ["fftshift", "ifftshift"]
           }
@@ -22231,6 +22260,10 @@
           {
             "file": "../typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -22251,6 +22284,10 @@
             "file": "../types.js",
             "imports": ["Matrix", "Complex", "TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [],
@@ -22290,6 +22327,10 @@
           {
             "file": "../typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -22380,6 +22421,10 @@
           {
             "file": "../typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [],
@@ -22415,6 +22460,10 @@
           {
             "file": "../typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [],
@@ -22472,6 +22521,10 @@
           {
             "file": "../wasm/special/scalars.js",
             "imports": ["besselIScalar"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -23237,6 +23290,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -23598,6 +23655,10 @@
           {
             "file": "../plain/number/probability.js",
             "imports": ["lgammaNumber"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [],
@@ -23621,6 +23682,10 @@
           {
             "file": "../probability/util/seededRNG.js",
             "imports": ["createRng"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [],
@@ -25779,6 +25844,10 @@
             "imports": ["euclidSnap"]
           },
           {
+            "file": "../utils/samples.js",
+            "imports": ["toSamples"]
+          },
+          {
             "file": "../cas/render-polynomial.js",
             "imports": ["renderPolynomial"]
           },
@@ -27527,6 +27596,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "./aggregate-restart.js",
             "imports": ["aggregateRestartVectors", "RestartAggregation"]
           },
@@ -28195,6 +28268,10 @@
           {
             "file": "./normal-equations-solve.js",
             "imports": ["solveAugmentedNormalEquations"]
+          },
+          {
+            "file": "../utils/samples.js",
+            "imports": ["toSamples"]
           }
         ],
         "workspaceDependencies": [],
@@ -28678,6 +28755,10 @@
             "imports": ["deepMap"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize", "assertLoopOrder"]
+          },
+          {
             "file": "../plain/number/probability.js",
             "imports": ["gammaNumber"]
           },
@@ -28842,6 +28923,14 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
+            "file": "../utils/samples.js",
+            "imports": ["toSamples"]
+          },
           {
             "file": "./public-type-exports.js",
             "imports": ["PublicParallelFFT"],
@@ -29177,6 +29266,10 @@
           {
             "file": "../utils/median-numbers.js",
             "imports": ["medianInPlace"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [
@@ -29270,7 +29363,7 @@
           },
           {
             "file": "../utils/print.js",
-            "imports": ["fillPrintTemplate"]
+            "imports": ["assertFormatPrecision", "fillPrintTemplate"]
           }
         ],
         "workspaceDependencies": [
@@ -30622,7 +30715,7 @@
         "constants": ["createParseNumberWithConfig"]
       },
       "functions/src/utils/print.ts": {
-        "description": "Interpolate values into a string template (`$key` / `$key.nested`).",
+        "description": "Throw a RangeError when the precision in `options` (a number, a BigNumber or the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -30632,12 +30725,16 @@
           },
           {
             "file": "./is.js",
-            "imports": ["isString"]
+            "imports": ["isBigNumber", "isString"]
+          },
+          {
+            "file": "./limits.js",
+            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["printTemplate", "fillPrintTemplate"],
-        "functions": ["fillPrintTemplate"],
+        "exports": ["printTemplate", "assertFormatPrecision", "fillPrintTemplate"],
+        "functions": ["assertFormatPrecision", "fillPrintTemplate"],
         "constants": ["printTemplate"]
       },
       "functions/src/utils/product.ts": {
@@ -30648,6 +30745,15 @@
         "workspaceDependencies": [],
         "exports": ["product"],
         "functions": ["product"]
+      },
+      "functions/src/utils/samples.ts": {
+        "description": "Shared argument helper for the signal and curve-fit functions.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["toSamples"],
+        "functions": ["toSamples"]
       },
       "functions/src/utils/sort-numbers.ts": {
         "description": "Sort a plain `number[]` in place (ascending). Uses native `Float64Array.sort`",
@@ -48321,6 +48427,7 @@
           "functions/src/utils/parseNumber.ts",
           "functions/src/utils/print.ts",
           "functions/src/utils/product.ts",
+          "functions/src/utils/samples.ts",
           "functions/src/utils/sort-numbers.ts",
           "functions/src/utils/string.ts",
           "functions/src/utils/switch.ts",
@@ -49075,13 +49182,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1339,
+    "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 232445,
-    "totalExports": 7326,
+    "totalLinesOfCode": 232602,
+    "totalExports": 7328,
     "totalClasses": 62,
     "totalInterfaces": 664,
-    "totalFunctions": 2540,
+    "totalFunctions": 2542,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1678,

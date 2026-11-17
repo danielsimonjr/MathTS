@@ -14,15 +14,16 @@ interface BellNumbersDependencies {
   isNegative: (x: NumericValue) => boolean;
   isInteger: (x: NumericValue) => boolean;
   stirlingS2: (n: NumericValue, k: NumericValue) => NumericValue;
+  bignumber?: (x: number) => BigNumberType;
 }
 
 const name = 'bellNumbers';
-const dependencies = ['typed', 'addScalar', 'isNegative', 'isInteger', 'stirlingS2'];
+const dependencies = ['typed', 'addScalar', 'isNegative', 'isInteger', 'stirlingS2', '?bignumber'];
 
 export const createBellNumbers = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, addScalar, isNegative, isInteger, stirlingS2 }: BellNumbersDependencies) => {
+  ({ typed, addScalar, isNegative, isInteger, stirlingS2, bignumber }: BellNumbersDependencies) => {
     /**
      * The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is S.
      * bellNumbers only takes integer arguments.
@@ -52,14 +53,22 @@ export const createBellNumbers = /* #__PURE__ */ factory(
 
         // B(219) overflows a double, so every larger number saturates.
         if (typeof n === 'number' && n > 218) return Infinity;
+        // A BigNumber uses the Bell triangle: O(n^2) additions and O(n) memory.
         if (typeof n !== 'number') {
           const nn = n.toNumber();
           assertLoopOrder('bellNumbers', 'n', nn, 2000);
+          let row: NumericValue[] = [bignumber!(1)];
+          for (let m = 1; m <= nn; m++) {
+            const next: NumericValue[] = [row[row.length - 1]];
+            for (let j = 0; j < row.length; j++) next.push(addScalar(next[j], row[j]));
+            row = next;
+          }
+          return row[0];
         }
 
         // Sum (k=0, n) S(n,k).
         let result: NumericValue = 0;
-        for (let i = 0; i <= (n as number); i++) {
+        for (let i = 0; i <= n; i++) {
           result = addScalar(result, stirlingS2(n, i));
         }
 

@@ -9,7 +9,7 @@ import { sinc } from '../signal-filter-extra.js';
 import { convDirect } from './conv.js';
 import { remezExchange, type RemezType } from './remez-exchange.js';
 import { numberVector } from '../typed/number-matrix.js';
-import { assertAllocSize } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -330,6 +330,7 @@ export function firls(
   desired: readonly number[]
 ): number[] {
   validateBandsDesired(numtaps, bands, desired);
+  assertLoopOrder('firls', 'numtaps', numtaps, 3001);
   const basis = makeBasis(numtaps);
   const pts = sampleBands(bands, desired);
   const coeffs = solveWeightedBasis(

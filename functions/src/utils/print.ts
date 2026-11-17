@@ -1,5 +1,21 @@
 import { format } from './string.js';
-import { isString } from './is.js';
+import { isBigNumber, isString } from './is.js';
+import { assertLoopOrder } from './limits.js';
+
+/**
+ * Throw a RangeError when the precision in `options` (a number, a BigNumber or the
+ * `precision` option) exceeds MAX_LOOP_ORDER (10000000), because the formatter pads
+ * the result to that many digits.
+ */
+export function assertFormatPrecision(options: unknown): void {
+  const raw =
+    typeof options === 'object' && options !== null && !isBigNumber(options)
+      ? (options as { precision?: unknown }).precision
+      : options;
+  if (typeof raw === 'number' || isBigNumber(raw)) {
+    assertLoopOrder('format', 'precision', Number(raw));
+  }
+}
 
 export const printTemplate = /\$([\w.]+)/g;
 
@@ -12,6 +28,7 @@ export function fillPrintTemplate(
   values: Record<string, unknown> | unknown[],
   options?: number | Record<string, unknown>
 ): string {
+  if (options !== undefined) assertFormatPrecision(options);
   return template.replace(printTemplate, function (original: string, key: string): string {
     const keys = key.split('.');
     let value: unknown = (values as Record<string, unknown>)[keys.shift()!];

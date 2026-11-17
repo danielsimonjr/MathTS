@@ -59,7 +59,7 @@ export function dirichletSample(
     throw new Error('dirichletSample: n must be a positive integer');
   }
   const k = alpha.length;
-  assertAllocSize('dirichletSample', [n, k]);
+  assertAllocSize('dirichletSample', [n, k + 8]);
   const rng = createRng(opts?.seed ?? null);
   const samples: number[][] = new Array(n);
   for (let s = 0; s < n; s++) {
