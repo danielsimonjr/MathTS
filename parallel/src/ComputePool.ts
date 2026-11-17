@@ -1002,10 +1002,12 @@ export class ComputePool {
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
     this.assertActive();
     if (!this.shouldParallelize(data.length, 'variance', force)) {
-      const n = data.length;
       // Corrected two-pass (pairwise mean + (Σd)²/n correction). A naive mean and an uncorrected
       // Σ(x-mean)² lost ~7 digits on large-mean data — variance was ~1e-7 relErr vs NumPy's ~1e-13.
-      const mean = n > 0 ? pairwiseSum(data) / n : 0;
+      // pairwiseSum runs before the `n > 0` guard: it throws a TypeError for a non-array (#1011).
+      const sum = pairwiseSum(data);
+      const n = data.length;
+      const mean = n > 0 ? sum / n : 0;
       const variance = n > 0 ? sumSquaredDeviations(data) / n : 0; // population (matches the worker)
       return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
     }
