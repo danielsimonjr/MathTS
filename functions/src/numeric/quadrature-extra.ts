@@ -78,14 +78,18 @@ export function tanhSinh(
   let prev = levelSum(1);
   let value = prev;
   let error = Number.POSITIVE_INFINITY;
+  let converged = false;
   for (let level = 1; level <= maxLevel; level++) {
     const h = Math.pow(2, -level);
     value = levelSum(h);
     error = Math.abs(value - prev);
-    if (error <= tol * Math.max(1, Math.abs(value))) break;
+    if (error <= tol * Math.max(1, Math.abs(value))) {
+      converged = true;
+      break;
+    }
     prev = value;
   }
-  return { value, error };
+  return { value, error, converged };
 }
 
 /**
@@ -140,13 +144,16 @@ export function dblquad(
   opts?: QuadOptions
 ): QuadResult {
   checkFiniteLimits(ax, bx, 'dblquad');
+  let innerConverged = true;
   const inner = (x: number): number => {
     const lo = asLimit1(gy, x);
     const hi = asLimit1(hy, x);
-    return quad((y) => f(y, x), lo, hi, opts).value;
+    const r = quad((y) => f(y, x), lo, hi, opts);
+    if (!r.converged) innerConverged = false;
+    return r.value;
   };
   const outer = quad(inner, ax, bx, opts);
-  return { value: outer.value, error: outer.error };
+  return { value: outer.value, error: outer.error, converged: outer.converged && innerConverged };
 }
 
 /**
@@ -167,22 +174,27 @@ export function tplquad(
   opts?: QuadOptions
 ): QuadResult {
   checkFiniteLimits(ax, bx, 'tplquad');
+  let innerConverged = true;
   const asLimit2 = (v: Limit2, x: number, y: number): number =>
     typeof v === 'number' ? v : v(x, y);
   const inner = (x: number): number => {
     const lo = asLimit1(gy, x);
     const hi = asLimit1(hy, x);
-    return quad(
+    const mid = quad(
       (y) => {
         const zLo = asLimit2(qz, x, y);
         const zHi = asLimit2(rz, x, y);
-        return quad((z) => f(z, y, x), zLo, zHi, opts).value;
+        const r = quad((z) => f(z, y, x), zLo, zHi, opts);
+        if (!r.converged) innerConverged = false;
+        return r.value;
       },
       lo,
       hi,
       opts
-    ).value;
+    );
+    if (!mid.converged) innerConverged = false;
+    return mid.value;
   };
   const outer = quad(inner, ax, bx, opts);
-  return { value: outer.value, error: outer.error };
+  return { value: outer.value, error: outer.error, converged: outer.converged && innerConverged };
 }

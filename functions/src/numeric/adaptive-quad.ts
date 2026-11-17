@@ -37,6 +37,13 @@ export interface QuadResult {
   value: f64;
   /** Sum of the absolute per-panel `|K - G|` error estimates. */
   error: f64;
+  /**
+   * `true` when the value and error are finite and the error of panels that
+   * stopped only at `maxDepth` is negligible (below `1e-6` of the summed
+   * `|K|`, or the absolute floor). `false` for a divergent or non-finite
+   * integral. {@link quad} never throws for convergence; it reports it here.
+   */
+  converged: boolean;
 }
 
 // Standard QUADPACK 15-point Gauss-Kronrod abscissae (positive half only —
@@ -100,6 +107,8 @@ function gaussKronrod15(f: (x: f64) => f64, a: f64, b: f64): { k: f64; g: f64 } 
 }
 
 const ABS_FLOOR = 1e-14;
+/** Unresolved error allowed, relative to the sum of the panels' `|K|`. Not scaled by the caller's `tol`. */
+const CONVERGENCE_RTOL = 1e-6;
 
 /**
  * Throw a RangeError when a bound is NaN or infinite. The quadrature rules here
@@ -126,7 +135,7 @@ export function checkFiniteLimits(a: number, b: number, name: string): void {
  * @param a - Lower bound
  * @param b - Upper bound
  * @param opts - Options (tol, maxDepth)
- * @returns `{ value, error }` — the estimated integral and summed panel error
+ * @returns `{ value, error, converged }` — the estimated integral, summed panel error and convergence flag
  *
  * @example
  * ```typescript
@@ -135,18 +144,40 @@ export function checkFiniteLimits(a: number, b: number, name: string): void {
  * ```
  */
 export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): QuadResult {
-  checkFiniteLimits(a, b, 'quad');
+  const { value, error, converged } = quadDetail('quad', f, a, b, opts);
+  return { value, error, converged };
+}
+
+interface QuadDetail extends QuadResult {
+  unresolved: f64;
+  limit: f64;
+}
+
+function quadDetail(
+  name: string,
+  f: (x: f64) => f64,
+  a: f64,
+  b: f64,
+  opts?: QuadOptions
+): QuadDetail {
+  checkFiniteLimits(a, b, name);
   const tol = opts?.tol ?? 1e-10;
   const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;
 
-  function panel(a: f64, b: f64, depth: i32): QuadResult {
+  let absSum = 0;
+  let unresolved = 0;
+
+  function panel(a: f64, b: f64, depth: i32): { value: f64; error: f64 } {
     const { k, g } = gaussKronrod15(f, a, b);
     const panelError = Math.abs(k - g);
     // A NaN error never meets the tolerance, so stop here and do not bisect to maxDepth.
     if (panelError !== panelError) return { value: NaN, error: NaN };
 
-    if (depth >= maxDepth || panelError <= Math.max(tol * Math.abs(k), atol)) {
+    const limit = Math.max(tol * Math.abs(k), atol);
+    if (depth >= maxDepth || panelError <= limit) {
+      absSum += Math.abs(k);
+      if (panelError > limit) unresolved += panelError;
       return { value: k, error: panelError };
     }
 
@@ -156,5 +187,35 @@ export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): Qu
     return { value: left.value + right.value, error: left.error + right.error };
   }
 
-  return panel(a, b, 0);
+  const r = panel(a, b, 0);
+  const convergenceLimit = Math.max(CONVERGENCE_RTOL * absSum, atol);
+  const converged =
+    Number.isFinite(r.value) && Number.isFinite(r.error) && unresolved <= convergenceLimit;
+  return { value: r.value, error: r.error, converged, unresolved, limit: convergenceLimit };
+}
+
+/**
+ * Integrate with {@link quad} and return the value, or throw a RangeError when
+ * the result is not finite or the integral did not converge.
+ * @internal
+ */
+export function quadValue(
+  name: string,
+  f: (x: f64) => f64,
+  a: f64,
+  b: f64,
+  opts?: QuadOptions
+): f64 {
+  const r = quadDetail(name, f, a, b, opts);
+  if (!Number.isFinite(r.value) || !Number.isFinite(r.error)) {
+    throw new RangeError(
+      `${name}: the result is not finite (value ${r.value}, error estimate ${r.error})`
+    );
+  }
+  if (!r.converged) {
+    throw new RangeError(
+      `${name}: the integral did not converge: unresolved error ${r.unresolved} is above the limit ${r.limit} (value ${r.value}, error estimate ${r.error})`
+    );
+  }
+  return r.value;
 }
