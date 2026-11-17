@@ -173,7 +173,7 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
  * Largest baby-step count (2^24). The table is two `Uint32Array`s of twice this size: 268 MB
  * at the limit.
  *
- * A call at this limit (a modulus near 2^48) takes about 14 s on an idle machine, with a
+ * A call at this limit (a modulus near 2^48) took 13.4 to 15.5 s when measured, with a
  * peak resident memory of about 330 MB. A lower limit refuses calls that return in less
  * than 20 s.
  */
@@ -203,9 +203,15 @@ function discreteLogSmallOrder(
   );
 }
 
-/** Hash slot of a 32-bit key in a table of `2^bits` slots (multiplicative hash, top bits). */
-function slotOf(key: number, bits: number): number {
-  return Math.imul(key, 0x9e3779b1) >>> (32 - bits);
+/**
+ * 32-bit hash of an integer in [0, 2^53). Both halves of the value change every bit of the
+ * hash, so values that differ only above bit 32 (the powers of 2^22 + 1 modulo 2^44) get
+ * different hashes.
+ */
+function hash32(value: number): number {
+  const hi = Math.floor(value / 4294967296);
+  const h = Math.imul((value >>> 0) ^ Math.imul(hi, 0x9e3779b1), 0x85ebca6b);
+  return (h ^ (h >>> 15)) >>> 0;
 }
 
 /**
@@ -283,19 +289,19 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   // Baby steps: g^j mod p for j = 0..m-1. The loop stops when the powers return to 1, so the
   // stored values are distinct and each has its smallest j.
   // Open addressing, linear probing, load factor at most 1/2, 8 bytes per slot. A slot holds
-  // the low 32 bits of the value (every value is below 2^53, so `>>> 0` is exact) and j + 1;
-  // 0 marks an empty slot. Two values can share their low 32 bits, so a lookup confirms a
-  // key match with g^j.
+  // the 32-bit hash of the value and j + 1; 0 marks an empty slot. The top bits of the hash
+  // select the slot. Two values can share a hash, so a lookup confirms a key match with g^j.
   let bits = 1;
   while (2 ** bits < 2 * mNumber) bits++;
   const mask = 2 ** bits - 1;
+  const shift = 32 - bits;
   const keys = new Uint32Array(2 ** bits);
   const steps = new Uint32Array(2 ** bits);
   let cur = 1n;
   let cycled = false;
   for (let j = 0; j < mNumber && !cycled; j++) {
-    const key = Number(cur) >>> 0;
-    let s = slotOf(key, bits);
+    const key = hash32(Number(cur));
+    let s = key >>> shift;
     while (steps[s] !== 0) s = (s + 1) & mask;
     keys[s] = key;
     steps[s] = j + 1;
@@ -310,8 +316,8 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
   for (let i = 0n; i < rounds; i++) {
-    const key = Number(gamma) >>> 0;
-    let s = slotOf(key, bits);
+    const key = hash32(Number(gamma));
+    let s = key >>> shift;
     while (steps[s] !== 0) {
       if (keys[s] === key) {
         const j = BigInt(steps[s] - 1);
