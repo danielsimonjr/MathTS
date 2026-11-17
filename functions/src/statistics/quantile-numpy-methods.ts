@@ -55,6 +55,15 @@ export function assertNumpyQuantileMethod(mode: string): NumpyQuantileMethod {
   return mapped;
 }
 
+/** Methods that return one observation and never interpolate. */
+const DISCRETE_METHODS: ReadonlySet<NumpyQuantileMethod> = new Set<NumpyQuantileMethod>([
+  'lower',
+  'higher',
+  'nearest',
+  'inverted_cdf',
+  'closest_observation',
+]);
+
 function roundHalfToEven(v: number): number {
   const f = Math.floor(v);
   const frac = v - f;
@@ -109,14 +118,15 @@ function discreteInvertedCdf(n: number, p: number): number {
 }
 
 function closestObservation(n: number, p: number): number {
-  // NumPy `_closest_observation`: index = n*p - 1.5; take floor only when the
-  // fractional part is 0 and floor(index) is odd (the even
-  // 1-based order statistic), otherwise ceil. Negative
-  // indexes clip to 0 (`_discret_interpolation_to_boundaries`).
+  // NumPy `_closest_observation` (Hyndman-Fan type 3): index = n*p - 1.5. Take
+  // floor(index) only when the fractional part is 0 and floor(index) is odd, which
+  // is the even 1-based order statistic. Otherwise take the ceiling. A negative
+  // index clips to 0 (`_discret_interpolation_to_boundaries`), so the sign of
+  // `prev % 2` does not change the result.
   const index = n * p - 1 - 0.5;
   const prev = Math.floor(index);
   const gamma = index - prev;
-  let idx = gamma === 0 && Math.abs(prev % 2) === 1 ? prev : prev + 1;
+  let idx = gamma === 0 && prev % 2 !== 0 ? prev : prev + 1;
   if (idx < 0) idx = 0;
   return idx;
 }
@@ -144,16 +154,11 @@ export function quantileOfSorted(
   if (n === 0) throw new Error('Cannot calculate quantile of an empty sequence');
   if (p < 0 || p > 1) throw new Error('N/prob must be non-negative');
   const vi = virtualIndexFor(method, n, p);
-  if (method === 'lower' || method === 'higher' || method === 'nearest') {
-    const idx = Math.max(0, Math.min(n - 1, vi));
-    return sorted[idx];
-  }
-  if (method === 'inverted_cdf' || method === 'closest_observation') {
-    const idx = Math.max(0, Math.min(n - 1, vi));
-    return sorted[idx];
-  }
+  // These methods select one observation: the virtual index is an integer.
+  if (DISCRETE_METHODS.has(method)) return sorted[Math.max(0, Math.min(n - 1, vi))];
   // NumPy `_get_indexes`: an index at or above n - 1, or below 0, clips BOTH ends to the
-  // boundary element; gamma is then taken from the clipped left index.
+  // boundary element. The blend below then gives that element for each gamma. An
+  // infinite boundary element gives NaN (inf - inf), as NumPy.
   let leftIdx = Math.floor(vi);
   let rightIdx = leftIdx + 1;
   if (vi >= n - 1) leftIdx = rightIdx = n - 1;
