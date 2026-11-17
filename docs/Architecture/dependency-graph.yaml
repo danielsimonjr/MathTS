@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-17'
   totalFiles: 1338
   totalModules: 82
-  totalExports: 7321
+  totalExports: 7322
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18643,12 +18643,14 @@ modules:
       exports:
         - checkFiniteLimits
         - quad
+        - quadValue
       interfaces:
         - QuadOptions
         - QuadResult
       functions:
         - checkFiniteLimits
         - quad
+        - quadValue
     functions/src/numeric/bfgs.ts:
       description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
       externalDependencies: []
@@ -24638,7 +24640,7 @@ modules:
             - realRoots
         - file: ../numeric/adaptive-quad.js
           imports:
-            - quad
+            - quadValue
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -26642,7 +26644,7 @@ modules:
             - odeMaxStepsError
         - file: ../numeric/adaptive-quad.js
           imports:
-            - quad
+            - quadValue
         - file: ../optimization-extra.js
           imports:
             - levenbergMarquardt
@@ -46268,11 +46270,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1338
   totalModules: 82
-  totalLinesOfCode: 232227
-  totalExports: 7321
+  totalLinesOfCode: 232319
+  totalExports: 7322
   totalClasses: 62
   totalInterfaces: 664
-  totalFunctions: 2537
+  totalFunctions: 2538
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1676
