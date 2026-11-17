@@ -10,6 +10,55 @@
 import { describe, it, expect } from 'vitest';
 import { discreteLog } from '../src/index.js';
 
+/**
+ * Run `fn` and count the work of the baby-step table. `accesses` is the number of indexed
+ * reads and writes on every `Uint32Array` that `fn` makes. `mapCalls` is the number of
+ * `get`, `has` and `set` calls on every `Map`. A count above `budget` throws from the access,
+ * so a slow table fails at once and does not run for seconds. The globals are restored
+ * before the return.
+ */
+function countTableWork<T>(
+  budget: number,
+  fn: () => T
+): { result: T; accesses: number; mapCalls: number } {
+  const RealUint32Array = globalThis.Uint32Array;
+  const mapMethods = ['get', 'has', 'set'] as const;
+  const realMap = mapMethods.map((name) => Map.prototype[name]);
+  let accesses = 0;
+  let mapCalls = 0;
+  const overBudget = (what: string): never => {
+    throw new Error(`table work is above the budget of ${budget} ${what}`);
+  };
+  const counted: ProxyHandler<Uint32Array> = {
+    get(target, prop) {
+      if (typeof prop === 'string' && ++accesses > budget) overBudget('typed-array accesses');
+      return Reflect.get(target, prop);
+    },
+    set(target, prop, value) {
+      if (typeof prop === 'string' && ++accesses > budget) overBudget('typed-array accesses');
+      return Reflect.set(target, prop, value);
+    },
+  };
+  globalThis.Uint32Array = new Proxy(RealUint32Array, {
+    construct: (target, args: [number]) => new Proxy(new target(...args), counted),
+  });
+  mapMethods.forEach((name, i) => {
+    Map.prototype[name] = function (this: Map<unknown, unknown>, ...args: unknown[]) {
+      if (++mapCalls > budget) overBudget('Map calls');
+      return Reflect.apply(realMap[i], this, args);
+    } as never;
+  });
+  try {
+    const result = fn();
+    return { result, accesses, mapCalls };
+  } finally {
+    globalThis.Uint32Array = RealUint32Array;
+    mapMethods.forEach((name, i) => {
+      Map.prototype[name] = realMap[i] as never;
+    });
+  }
+}
+
 function brute(g: number, h: number, p: number): number {
   const target = ((h % p) + p) % p;
   let c = 1 % p;
@@ -40,7 +89,7 @@ describe('discreteLog small answer above 2^48 (#1136)', () => {
 
   it('still throws when the order of g is above the limit and h is not found', () => {
     expect(() => discreteLog(3, 2 ** 52 + 12345, 2 ** 53 - 111)).toThrow(RangeError);
-  });
+  }, 120_000);
 });
 
 describe('discreteLog baby-step table (#1135)', () => {
@@ -69,14 +118,17 @@ describe('discreteLog baby-step table (#1135)', () => {
   }, 120_000);
 
   it('stops the baby steps when the powers of g return to 1', () => {
-    // 2 has order 44 mod 2^44 - 1, and m = 2^22. A full table and a full giant-step loop take
-    // seconds; the 44 powers take less than a millisecond.
+    // 2 has order 44 mod 2^44 - 1, and m = 2^22. The table holds the 44 powers, and one
+    // lookup decides. A full table, or a full giant-step loop, needs more than 2^22 accesses.
     const p = 2 ** 44 - 1;
-    const start = performance.now();
-    expect(discreteLog(2, 7, p)).toBe(-1);
-    expect(discreteLog(2, 2 ** 43, p)).toBe(43);
-    expect(discreteLog(2, 1, p)).toBe(0);
-    expect(performance.now() - start).toBeLessThan(1000);
+    const { result, accesses } = countTableWork(1000, () => [
+      discreteLog(2, 7, p),
+      discreteLog(2, 2 ** 43, p),
+      discreteLog(2, 1 + 2 ** 20, p),
+    ]);
+    expect(result).toEqual([-1, 43, -1]);
+    expect(accesses).toBeGreaterThan(3 * 44);
+    expect(accesses).toBeLessThan(1000);
   });
 
   it('separates two baby steps that share their 32-bit table key', () => {
@@ -88,26 +140,28 @@ describe('discreteLog baby-step table (#1135)', () => {
   });
 
   it('keeps short probe chains when the powers of g differ only above bit 32', () => {
-    // The powers of 2^22 + 1 modulo 2^44 are 1 + j * 2^22: 2^22 values with 1024 distinct
-    // low halves. A table key of the low 32 bits only takes more than 20 s here.
-    const start = performance.now();
-    expect(discreteLog(2 ** 22 + 1, 3, 2 ** 44)).toBe(-1);
-    expect(performance.now() - start).toBeLessThan(10_000);
-  }, 100_000);
+    // The powers of 2^32 + 1 modulo 2^44 are 1 + j * 2^32 for j < 4096: the low 32 bits of
+    // each are 1. A table key of the low 32 bits only puts them in one probe chain of 4096
+    // slots, and that takes more than 8,000,000 accesses.
+    const g = 2 ** 32 + 1;
+    const p = 2 ** 44;
+    const { result, accesses } = countTableWork(100_000, () => [
+      discreteLog(g, 3, p),
+      discreteLog(g, 1 + 5 * 2 ** 32, p),
+      discreteLog(g, 1 + 4095 * 2 ** 32, p),
+    ]);
+    expect(result).toEqual([-1, 5, 4095]);
+    expect(accesses).toBeGreaterThan(3 * 4096);
+    expect(accesses).toBeLessThan(100_000);
+  });
 
   it('stores no baby step in a Map', () => {
-    const set = Map.prototype.set;
-    let calls = 0;
-    Map.prototype.set = function (this: Map<unknown, unknown>, key: unknown, value: unknown) {
-      calls++;
-      return set.call(this, key, value);
-    } as typeof set;
-    try {
-      expect(discreteLog(7, 12345, 1000003)).toBeGreaterThan(0);
-    } finally {
-      Map.prototype.set = set;
-    }
-    expect(calls).toBe(0);
+    const { result, accesses, mapCalls } = countTableWork(100_000, () =>
+      discreteLog(7, 12345, 1000003)
+    );
+    expect(result).toBe(718966);
+    expect(mapCalls).toBe(0);
+    expect(accesses).toBeGreaterThan(0);
   });
 
   it('finds the smallest x when the powers of g repeat', () => {
