@@ -15185,7 +15185,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1902
+      "loc": 1912
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -15227,7 +15227,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 276
+      "loc": 288
     },
     {
       "file": "parallel/src/operations/matmul.ts",
@@ -15304,7 +15304,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 174
     },
     {
       "file": "parallel/tests/chunk.test.ts",

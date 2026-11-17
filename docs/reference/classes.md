@@ -637,6 +637,8 @@ await computePool.sum(new Float64Array([1, 2, 3])); // same call on the shared i
 | `isReady()`                                                                 | `boolean`                    | Whether workers are ready          |
 | `shouldParallelize(n, op?, force?)`                                         | `boolean`                    | Dispatch decision for an operation |
 | `stats()`                                                                   | `PoolStats`                  | Pool statistics                    |
+| `workerCount`                                                               | `number`                     | Fan-out width (0 after terminate)  |
+| `liveWorkerCount`                                                           | `number`                     | Workers that run now               |
 | `exec(method, params, options?)`                                            | `Promise<T>`                 | Run a named worker method directly |
 | `sum` `prod` `mean` `std` `variance` `norm` `minMax` `distance` `histogram` | `Promise<ParallelResult<…>>` | Reductions                         |
 | `dot` `matmul` `matvec` `outer` `transpose` `tensordot`                     | `Promise<ParallelResult<…>>` | Linear algebra                     |

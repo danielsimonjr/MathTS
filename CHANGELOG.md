@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `parallel`: `parallelEvery` and `parallelForEach` run on workers; a closure still works on the sequential path (Fixes #1027).
+- `parallel`: `ComputePool.workerCount` is 0 after `terminate()`, and `liveWorkerCount` gives the live worker count (Fixes #1016).
+- `autograd`: the docs state that `binaryCrossEntropy` takes logits and does not reduce (Fixes #1017).
 - `functions`: `discreteLog` solves `g^x = h (mod p)` when `g` and `p` share a factor (Fixes #1114).
 - `wasm`: the WASM Bessel and polynomial kernels use the JS order limits and NaN exits, and the bridge sends only orders the kernel matches JS on (Fixes #1113).
 - `functions`: every NumPy `quantileSeq` method matches NumPy 2.3.5 at low and high probability for number input; `closest_observation` ties follow Hyndman-Fan type 3 (Fixes #1110).
