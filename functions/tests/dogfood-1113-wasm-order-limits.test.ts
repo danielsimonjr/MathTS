@@ -129,6 +129,12 @@ describeIfAS('#1113 bridge: the WASM kernel gets only the inputs that match the 
     }
   });
 
+  it('the stub sees a call for an order that the kernel takes (positive control)', () => {
+    const xs = new Float64Array(N).map((_, i) => 1 + (i % 9));
+    const { calls } = withStubbedKernel('bessel_jn_f64', () => besselJDispatch(7, xs));
+    expect(calls).toBeGreaterThan(0);
+  });
+
   it('an ordinary order still runs on the AS kernel and matches the JS value', () => {
     const xs = new Float64Array(N).map((_, i) => 0.5 + (i % 50) * 0.3);
     const j = countExportCalls(['bessel_jn_f64'], () => besselJDispatch(7, xs));
@@ -256,4 +262,125 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     );
     expect(callKernel('laguerreL', 3, 2).value).toBeCloseTo(-1 / 3, 12);
   }, 30_000);
+});
+
+/** Encode a double so that JSON keeps -0, NaN and the infinities. */
+const ENCODE = `(v) => (Object.is(v, -0) ? '-0' : String(v))`;
+const decode = (v: string): number => (v === '-0' ? -0 : Number(v));
+
+/**
+ * Call `bessel_jn_f64(n, xs)` once per order in a child process, with a time limit. Returns
+ * the values in the order of `cases`, or null when the child timed out or failed.
+ */
+function jnBatch(cases: [number, number[]][], timeoutMs = 30_000): number[][] | null {
+  const script = `
+    const m = await import(${JSON.stringify(pathToFileURL(AS_BINDINGS).href)});
+    const enc = ${ENCODE};
+    const out = ${JSON.stringify(cases)}.map(([n, xs]) =>
+      Array.from(m.bessel_jn_f64(n, new Float64Array(xs)), enc));
+    console.log(JSON.stringify(out));`;
+  const r = spawnSync(
+    process.execPath,
+    ['--max-old-space-size=300', '--input-type=module', '-e', script],
+    { timeout: timeoutMs, encoding: 'utf8' }
+  );
+  if (r.error || r.status !== 0) return null;
+  const out = JSON.parse(r.stdout.trim().split('\n').pop()!) as string[][];
+  return out.map((row) => row.map(decode));
+}
+
+describeIfBindings('#1113 kernel: early exits and signs match the JS scalar', () => {
+  it('bessel_yn_f64 and bessel_jn_f64 stop at the first NaN', () => {
+    // Before the fix each call ran the whole recurrence: about 2 s for an order of 1e8.
+    for (const r of [
+      yn(2_147_483_647, 1),
+      jn(1_000_000_000, Infinity),
+      yn(100_000_000, Infinity),
+    ]) {
+      expect(r.timedOut).toBe(false);
+      expect(r.ok).toBe(true);
+      expect(r.value).toBeNaN();
+      expect(r.ms).toBeLessThan(500);
+    }
+  }, 60_000);
+
+  it('Miller path (|x| <= |n|): the kernel is bit-identical to the JS path, signed zeros included', () => {
+    const orders = [2, 3, 4, 7, 10, 37, 100, 151, 299, 300];
+    const cases: [number, number[]][] = [];
+    for (const m of orders) {
+      for (const n of [m, -m]) {
+        const xs = [0, 1e-16, 0.01, 0.1, 0.5, 0.9, 1].flatMap((f) => [f * m, -f * m]);
+        cases.push([n, xs]);
+      }
+    }
+    // Zero returns: x = 0, the zero bound and three rescales after J_n is captured.
+    cases.push([-3, [0]], [-1001, [5]], [-10001, [7000]], [10000, [7000]], [800, [300]]);
+    const got = jnBatch(cases);
+    expect(got).not.toBeNull();
+    cases.forEach(([n, xs], i) => {
+      const want = besselJnJS(n, new Float64Array(xs));
+      xs.forEach((x, j) => {
+        expect(Object.is(got![i][j], want[j]), `J_${n}(${x}): ${got![i][j]} vs ${want[j]}`).toBe(
+          true
+        );
+      });
+    });
+    // The JS path gives -0 for a negative odd order, so the kernel must too.
+    expect(Object.is(got![cases.length - 5][0], -0)).toBe(true);
+  }, 60_000);
+
+  it('forward path (|x| > |n|): the kernel agrees with the JS path to 1e-11 relative', () => {
+    const cases: [number, number[]][] = [
+      [2, [2.5, 3, 10, -7.25]],
+      [5, [5.5, 10.5, 33.3, -12]],
+      [20, [21, 50, 123.4]],
+      [-7, [7.5, 9.1, 15, 40.2, -7.5, -9.1, -15, -40.2]],
+      [-324, [-354.92, 354.92, 400]],
+      [100, [101, 250, 1000]],
+    ];
+    const got = jnBatch(cases);
+    expect(got).not.toBeNull();
+    cases.forEach(([n, xs], i) => {
+      const want = besselJnJS(n, new Float64Array(xs));
+      xs.forEach((x, j) => {
+        const err = Math.abs(got![i][j] / want[j] - 1);
+        expect(err, `J_${n}(${x}): ${got![i][j]} vs ${want[j]}`).toBeLessThanOrEqual(1e-11);
+      });
+    });
+  }, 60_000);
+});
+
+/**
+ * The bridge with the real kernel runs in a Bun child (Bun loads the TypeScript source), so a
+ * kernel with no NaN exit times out the child instead of hanging the run.
+ */
+describeIfAS('#1113 bridge: besselY with a huge order on the real kernel', () => {
+  it('besselYDispatch(2e9, ones) equals the JS path and finishes', () => {
+    const src = (rel: string): string => JSON.stringify(pathToFileURL(resolve(here, rel)).href);
+    const script = `
+      const { wasmLoader } = await import(${src('../src/wasm/WasmLoader.ts')});
+      const { overrideWasmPolicy } = await import(${src('../src/wasm/policy.ts')});
+      const { besselYDispatch } = await import(${src('../src/wasm/special/wasm-bridge.ts')});
+      const { countExportCalls } = await import(${src('./helpers/wasm-spy.ts')});
+      await wasmLoader.load(${JSON.stringify(AS_WASM_PATH)});
+      overrideWasmPolicy({ '*': { min: 0 } });
+      const enc = ${ENCODE};
+      const r = countExportCalls(['bessel_yn_f64'], () =>
+        besselYDispatch(2e9, new Float64Array(${N}).fill(1)));
+      console.log(JSON.stringify({ calls: r.counts.bessel_yn_f64, values: Array.from(r.result, enc) }));`;
+    const r = spawnSync('bun', ['--eval', script], {
+      timeout: 60_000,
+      encoding: 'utf8',
+      cwd: resolve(here, '..'),
+    });
+    expect(r.error, r.stderr).toBeUndefined();
+    expect(r.status, r.stderr).toBe(0);
+    const out = JSON.parse(r.stdout.trim().split('\n').pop()!) as {
+      calls: number;
+      values: string[];
+    };
+    expect(out.calls).toBeGreaterThan(0);
+    const want = besselYnJS(2e9, filled(1));
+    out.values.forEach((v, i) => expect(Object.is(decode(v), want[i])).toBe(true));
+  }, 90_000);
 });
