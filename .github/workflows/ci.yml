@@ -122,9 +122,11 @@ jobs:
 
       - name: Audit (high+)
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
-        # `npm audit --audit-level=high` gate. The tree currently audits clean at
-        # every level (`bun audit` with no floor reports 0). Retries registry outages only
-        # (`tools/test/bun-audit-retry.mjs`); a real high+ advisory still fails on first try.
+        # `npm audit --audit-level=high` gate. Two audits run: the full tree skips each
+        # advisory in tools/test/audit-ignore.json (each entry names its issue and its
+        # removal condition), and the production tree (`--prod`) skips none. Retries
+        # registry outages only (`tools/test/bun-audit-retry.mjs`); a real high+ advisory
+        # still fails on first try.
         run: node tools/test/bun-audit-retry.mjs
 
       - name: Re-export types append tool

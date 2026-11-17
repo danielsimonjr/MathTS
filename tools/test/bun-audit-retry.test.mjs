@@ -1,6 +1,90 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BUN_AUDIT_ARGS, classifyAttempt, runAuditWithRetry } from './bun-audit-retry.mjs';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  BUN_AUDIT_ARGS,
+  DEFAULT_IGNORE_FILE,
+  buildAuditArgs,
+  classifyAttempt,
+  loadIgnores,
+  runAudits,
+  runAuditWithRetry,
+} from './bun-audit-retry.mjs';
+
+async function withFile(text, fn) {
+  const dir = mkdtempSync(join(tmpdir(), 'audit-ignore-'));
+  const file = join(dir, 'ignore.json');
+  if (text !== null) writeFileSync(file, text);
+  try {
+    return await fn(file);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const ENTRY = {
+  id: 'GHSA-fc5q-39xc-vjpf',
+  package: 'picomatch',
+  reason: 'r',
+  remove: 'x',
+  issue: 1,
+};
+
+test('the committed ignore file loads, and each entry names an issue', () => {
+  const ignores = loadIgnores(DEFAULT_IGNORE_FILE);
+  for (const entry of ignores) assert.equal(typeof entry.issue, 'number');
+});
+
+test('loadIgnores throws on a missing file, bad JSON, no array, a missing field or a bad id', async () => {
+  await withFile(null, (f) => assert.throws(() => loadIgnores(f), /cannot read/));
+  await withFile('{', (f) => assert.throws(() => loadIgnores(f), /cannot read/));
+  await withFile('{}', (f) => assert.throws(() => loadIgnores(f), /no "ignores" array/));
+  for (const field of ['id', 'package', 'reason', 'remove', 'issue']) {
+    const entry = { ...ENTRY };
+    delete entry[field];
+    await withFile(JSON.stringify({ ignores: [entry] }), (f) =>
+      assert.throws(() => loadIgnores(f), new RegExp(`no "${field}"`))
+    );
+  }
+  await withFile(JSON.stringify({ ignores: [{ ...ENTRY, id: 'CVE-2026-1' }] }), (f) =>
+    assert.throws(() => loadIgnores(f), /not a GHSA id/)
+  );
+});
+
+test('buildAuditArgs: the full tree takes each ignore; the production audit takes none', () => {
+  assert.deepEqual(buildAuditArgs([ENTRY]), [...BUN_AUDIT_ARGS, '--ignore=GHSA-fc5q-39xc-vjpf']);
+  assert.deepEqual(buildAuditArgs([ENTRY], { production: true }), [...BUN_AUDIT_ARGS, '--prod']);
+  assert.deepEqual(buildAuditArgs([]), BUN_AUDIT_ARGS);
+});
+
+test('runAudits runs both audits and fails when either fails', async () => {
+  await withFile(JSON.stringify({ ignores: [ENTRY] }), async (f) => {
+    const seen = [];
+    const ok = await runAudits({ ignoreFile: f, run: async (a) => (seen.push(a), 0) });
+    assert.equal(ok, 0);
+    assert.deepEqual(seen, [
+      buildAuditArgs([ENTRY]),
+      buildAuditArgs([ENTRY], { production: true }),
+    ]);
+    const prodFails = await runAudits({
+      ignoreFile: f,
+      run: async (a) => (a.includes('--prod') ? 1 : 0),
+    });
+    assert.equal(prodFails, 1);
+    const fullFails = await runAudits({
+      ignoreFile: f,
+      run: async (a) => (a.includes('--prod') ? 0 : 1),
+    });
+    assert.equal(fullFails, 1);
+  });
+});
+
+test('runAuditWithRetry passes its args to the default runner', async () => {
+  const code = await runAuditWithRetry({ args: ['--version'], backoffMs: [0, 0] });
+  assert.equal(code, 0);
+});
 
 test('BUN_AUDIT_ARGS keeps the high floor', () => {
   assert.deepEqual(BUN_AUDIT_ARGS, ['audit', '--audit-level=high']);
