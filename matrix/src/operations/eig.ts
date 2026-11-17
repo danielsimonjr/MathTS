@@ -150,6 +150,9 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
   }
 }
 
+/** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
+const MAX_QR_ITERATIONS = 1000;
+
 /**
  * General real non-symmetric eigendecomposition (JAMA `orthes` + `hqr2`).
  *
@@ -311,6 +314,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
       }
 
       iter = iter + 1;
+      if (iter > MAX_QR_ITERATIONS) throw new RangeError('eig: QR iteration did not converge');
 
       // Look for two consecutive small sub-diagonal elements.
       let m = nIdx - 2;
