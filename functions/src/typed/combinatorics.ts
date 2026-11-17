@@ -15,7 +15,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { assertAllocSize, assertLoopOrder, MAX_LOOP_ORDER } from '../utils/limits.js';
+import { assertLoopOrder } from '../utils/limits.js';
 
 /** Largest n with a finite n!! as a double (301!! overflows). */
 const DOUBLE_FACTORIAL_MAX_FINITE = 300;
@@ -25,10 +25,16 @@ const SUBFACTORIAL_MAX_FINITE = 170;
 const LUCAS_MAX_FINITE = 1474;
 /** Smallest n with p(n) above the largest double. */
 const PARTITIONS_FIRST_INFINITE = 79446;
-/** Above this n, harmonicNumber uses the asymptotic series (error below 1e-28). */
-const HARMONIC_SERIES_FROM = 1e7;
+/** Above this n, harmonicNumber uses the asymptotic series. */
+const HARMONIC_SERIES_FROM = 100;
 /** The Euler-Mascheroni constant. */
 const EULER_GAMMA = 0.5772156649015329;
+/** Largest sieve limit for prime and primePi (a limit of 1e9 takes about 8 s). */
+const PRIME_SIEVE_MAX = 1_000_000_000;
+/** Largest block of the segmented sieve. */
+const SIEVE_SEGMENT = 262144;
+/** Largest sqrt(n) for the trial-division loop of divisors and divisorSigma. */
+const DIVISOR_LOOP_MAX = 1e9;
 
 // =============================================================================
 // fibonacci - Fibonacci Number (Fast Doubling)
@@ -175,7 +181,6 @@ export const doubleFactorial = mathTyped('doubleFactorial', {
  * @param x - Base value
  * @param n - Number of terms (non-negative integer)
  * @returns The rising factorial
- * @throws RangeError if `n` is above 10000000 and the product has not settled to NaN, zero or an infinity
  *
  * @example
  * risingFactorial(3, 4) // => 3*4*5*6 = 360
@@ -189,13 +194,20 @@ export const risingFactorial = mathTyped('risingFactorial', {
     if (n === 0) return 1;
 
     // A NaN stays NaN. A zero stays a zero, because every later factor is positive and
-    // finite. An infinity stays an infinity when every later factor is positive.
+    // finite. After an infinity, only a zero factor and the signs of the later factors count.
     let result = 1;
     for (let i = 0; i < n; i++) {
       result *= x + i;
       if (Number.isNaN(result)) return NaN;
-      if (result === 0 || (Math.abs(result) === Infinity && x + (i + 1) > 0)) return result;
-      if (i >= MAX_LOOP_ORDER) assertLoopOrder('risingFactorial', 'n', n);
+      if (result === 0) return result;
+      if (Math.abs(result) === Infinity) {
+        // Factors i+1 .. n-1 remain. The factor x + j is negative for j < -x and zero for j = -x.
+        const zeroAt = -x;
+        if (Number.isInteger(x) && zeroAt > i && zeroAt <= n - 1) return NaN;
+        const lastNegative = Math.min(n - 1, Math.ceil(zeroAt) - 1);
+        if (lastNegative <= i) return result;
+        return lastNegative % 2 === i % 2 ? result : -result;
+      }
     }
     return result;
   },
@@ -215,7 +227,6 @@ export const risingFactorial = mathTyped('risingFactorial', {
  * @param x - Base value
  * @param n - Number of terms (non-negative integer)
  * @returns The falling factorial
- * @throws RangeError if `n` is above 10000000 and the product has not settled to NaN, zero or an infinity
  *
  * @example
  * fallingFactorial(5, 3) // => 5*4*3 = 60
@@ -229,16 +240,20 @@ export const fallingFactorial = mathTyped('fallingFactorial', {
     if (n === 0) return 1;
 
     // A NaN stays NaN. After a zero, every later factor is a finite negative number, so
-    // the zero only changes its sign. An infinity stays an infinity when every factor
-    // after it is positive, that is, when the last factor is positive.
-    const lastFactorPositive = x - (n - 1) > 0;
+    // the zero only changes its sign. After an infinity, only a zero factor and the signs
+    // of the later factors count.
     let result = 1;
     for (let i = 0; i < n; i++) {
       result *= x - i;
       if (Number.isNaN(result)) return NaN;
       if (result === 0) return (n - i - 1) % 2 === 0 ? result : -result;
-      if (Math.abs(result) === Infinity && lastFactorPositive) return result;
-      if (i >= MAX_LOOP_ORDER) assertLoopOrder('fallingFactorial', 'n', n);
+      if (Math.abs(result) === Infinity) {
+        // Factors i+1 .. n-1 remain. The factor x - j is negative for j > x and zero for j = x.
+        if (Number.isInteger(x) && x > i && x <= n - 1) return NaN;
+        const firstNegative = Math.max(i + 1, Math.floor(x) + 1);
+        if (firstNegative > n - 1) return result;
+        return n % 2 === firstNegative % 2 ? result : -result;
+      }
     }
     return result;
   },
@@ -299,11 +314,11 @@ export const subfactorial = mathTyped('subfactorial', {
  * Return the nth prime number (1-indexed).
  *
  * Uses a sieve-based approach. For n <= 6, returns from lookup.
- * For larger n, estimates an upper bound and sieves.
+ * For larger n, sieves in segments up to the Rosser bound n (ln n + ln ln n).
  *
  * @param n - Positive integer index (1-indexed)
  * @returns The nth prime number
- * @throws RangeError if the sieve needs more than 100000000 entries
+ * @throws RangeError if the sieve limit is above 1000000000 (n above 48607823)
  *
  * @example
  * prime(1)  // => 2
@@ -320,13 +335,13 @@ export const prime = mathTyped('prime', {
 
     // Upper bound for nth prime: p_n < n * (ln(n) + ln(ln(n))) for n >= 6
     const lnN = Math.log(n);
-    const limit = Math.ceil(n * (lnN + Math.log(lnN)) * 1.3);
-    assertAllocSize('prime', [limit + 1]);
-    const sieve = _sieveOfEratosthenes(limit);
-    if (n > sieve.length) {
+    const limit = Math.ceil(n * (lnN + Math.log(lnN)));
+    assertLoopOrder('prime', 'sieve limit', limit, PRIME_SIEVE_MAX);
+    const { nth } = _walkPrimes(limit, n);
+    if (nth === 0) {
       throw new Error('prime: sieve too small (internal error)');
     }
-    return sieve[n - 1];
+    return nth;
   },
 });
 
@@ -347,6 +362,28 @@ function _sieveOfEratosthenes(limit: number): number[] {
     }
   }
   return primes;
+}
+
+/**
+ * Segmented sieve over 2..limit. Returns the count of primes, and the target-th prime
+ * (0 when the count stays below target).
+ */
+function _walkPrimes(limit: number, target: number): { count: number; nth: number } {
+  const base = _sieveOfEratosthenes(Math.floor(Math.sqrt(limit)));
+  const block = new Uint8Array(Math.min(SIEVE_SEGMENT, limit - 1));
+  let count = 0;
+  for (let lo = 2; lo <= limit; lo += SIEVE_SEGMENT) {
+    const hi = Math.min(lo + SIEVE_SEGMENT - 1, limit);
+    block.fill(0);
+    for (const p of base) {
+      if (p * p > hi) break;
+      for (let j = Math.max(p * p, Math.ceil(lo / p) * p); j <= hi; j += p) block[j - lo] = 1;
+    }
+    for (let j = lo; j <= hi; j++) {
+      if (block[j - lo] === 0 && ++count === target) return { count, nth: j };
+    }
+  }
+  return { count, nth: 0 };
 }
 
 // =============================================================================
@@ -402,7 +439,7 @@ function _isPrime(n: number): boolean {
  *
  * @param n - Non-negative integer
  * @returns Number of primes not exceeding n
- * @throws RangeError if `n` is 100000000 or more
+ * @throws RangeError if `n` is above 1000000000
  *
  * @example
  * primePi(10) // => 4 (primes: 2, 3, 5, 7)
@@ -413,9 +450,8 @@ export const primePi = mathTyped('primePi', {
     if (n !== n) return NaN;
     if (n < 2) return 0;
     const limit = Math.floor(n);
-    assertAllocSize('primePi', [limit + 1]);
-    const sieve = _sieveOfEratosthenes(limit);
-    return sieve.length;
+    assertLoopOrder('primePi', 'n', limit, PRIME_SIEVE_MAX);
+    return _walkPrimes(limit, Infinity).count;
   },
 });
 
@@ -457,19 +493,12 @@ export const primeFactors = mathTyped('primeFactors', {
 // divisors - List All Divisors
 // =============================================================================
 
-/** Throw a RangeError when n is above the largest safe integer. */
-function assertSafeInteger(fn: string, n: number): void {
-  if (!Number.isSafeInteger(n)) {
-    throw new RangeError(`${fn}: n must be a safe integer (at most ${Number.MAX_SAFE_INTEGER})`);
-  }
-}
-
 /**
  * Return all positive divisors of n, sorted ascending.
  *
  * @param n - Positive integer
  * @returns Sorted array of divisors
- * @throws RangeError if `n` is not a safe integer
+ * @throws RangeError if `sqrt(n)` is above 1000000000
  *
  * @example
  * divisors(12) // => [1, 2, 3, 4, 6, 12]
@@ -480,7 +509,7 @@ export const divisors = mathTyped('divisors', {
     if (n < 1 || !Number.isInteger(n)) {
       throw new Error('divisors requires a positive integer');
     }
-    assertSafeInteger('divisors', n);
+    assertLoopOrder('divisors', 'sqrt(n)', Math.sqrt(n), DIVISOR_LOOP_MAX);
     const small: number[] = [];
     const large: number[] = [];
     for (let i = 1; i * i <= n; i++) {
@@ -545,7 +574,7 @@ export const eulerPhi = mathTyped('eulerPhi', {
  * divisorSigma(12, 0)  // => 6 (number of divisors)
  * divisorSigma(12, 2)  // => 210
  *
- * @throws RangeError if `n` is not a safe integer
+ * @throws RangeError if `sqrt(n)` is above 1000000000
  */
 export const divisorSigma = mathTyped('divisorSigma', {
   number: (n: number): number => {
@@ -560,7 +589,7 @@ function _divisorSigmaImpl(n: number, k: number): number {
   if (n < 1 || !Number.isInteger(n)) {
     throw new Error('divisorSigma requires a positive integer');
   }
-  assertSafeInteger('divisorSigma', n);
+  assertLoopOrder('divisorSigma', 'sqrt(n)', Math.sqrt(n), DIVISOR_LOOP_MAX);
   if (k < 0 || !Number.isInteger(k)) {
     throw new Error('divisorSigma: k must be a non-negative integer');
   }
@@ -880,7 +909,7 @@ export const partitions = mathTyped('partitions', {
  * Compute the nth harmonic number H(n) = 1 + 1/2 + 1/3 + ... + 1/n.
  *
  * @param n - Positive integer
- * @returns H(n); for `n > 1e7` the series ln n + gamma + 1/(2n) - 1/(12 n^2)
+ * @returns H(n); for `n > 100` the asymptotic series in 1/n up to 1/(252 n^6)
  *
  * @example
  * harmonicNumber(1) // => 1
@@ -892,8 +921,9 @@ export const harmonicNumber = mathTyped('harmonicNumber', {
       throw new Error('harmonicNumber requires a positive integer');
     }
     if (n > HARMONIC_SERIES_FROM) {
-      // H(n) = ln n + gamma + 1/(2n) - 1/(12 n^2) + O(1/n^4)
-      return Math.log(n) + EULER_GAMMA + 1 / (2 * n) - 1 / (12 * n * n);
+      // H(n) = ln n + gamma + 1/(2n) - 1/(12 n^2) + 1/(120 n^4) - 1/(252 n^6) + O(1/n^8)
+      const r = 1 / (n * n);
+      return Math.log(n) + EULER_GAMMA + 1 / (2 * n) - r * (1 / 12 - r * (1 / 120 - r * (1 / 252)));
     }
     let sum = 0;
     for (let i = 1; i <= n; i++) {

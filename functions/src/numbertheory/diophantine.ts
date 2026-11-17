@@ -4,10 +4,10 @@
  * sums of two squares, Egyptian fractions and Farey sequences.
  */
 
-import { assertAllocSize } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 
 /** Number of continued-fraction steps after which pellSolve stops. */
-const PELL_MAX_STEPS = 20000;
+const PELL_MAX_STEPS = 100000;
 
 function assertInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n)) throw new RangeError(`${name} must be a safe integer`);
@@ -64,7 +64,7 @@ export function linearDiophantine(
  * Fundamental solution (x, y) of Pell's equation x^2 - d y^2 = 1 for a positive
  * non-square integer d, via the continued fraction of sqrt(d). Returns null for
  * non-positive or perfect-square d. Throws RangeError when the solution needs more
- * than 20000 continued-fraction steps.
+ * than 100000 continued-fraction steps.
  */
 export function pellSolve(d: number): { x: bigint; y: bigint } | null {
   assertInt(d, 'd');
@@ -90,20 +90,22 @@ export function pellSolve(d: number): { x: bigint; y: bigint } | null {
   let p = a0;
   let qPrev = 0n;
   let q = 1n;
+  // After k steps, p^2 - D q^2 = (-1)^(k+1) * (the next denominator dd). The loop tests
+  // that small value and does not square p and q.
   let steps = 0;
-  while (p * p - D * q * q !== 1n) {
+  for (;;) {
+    m = dd * a - m;
+    dd = (D - m * m) / dd;
+    if (dd === 1n && steps % 2 === 1) return { x: p, y: q };
     if (++steps > PELL_MAX_STEPS) {
       throw new RangeError(
         `pellSolve: no solution within ${PELL_MAX_STEPS} continued-fraction steps for d = ${d}`
       );
     }
-    m = dd * a - m;
-    dd = (D - m * m) / dd;
     a = (a0 + m) / dd;
     [pPrev, p] = [p, a * p + pPrev];
     [qPrev, q] = [q, a * q + qPrev];
   }
-  return { x: p, y: q };
 }
 
 /**
@@ -186,7 +188,11 @@ export function egyptianFraction(p: number, q: number): number[] {
   }
   let num = BigInt(p);
   let den = BigInt(q);
-  const out: number[] = [];
+  // The whole part gives floor(p / q) terms of 1.
+  const whole = num / den;
+  assertLoopOrder('egyptianFraction', 'floor(p / q)', Number(whole));
+  const out: number[] = new Array<number>(Number(whole)).fill(1);
+  num -= whole * den;
   const bgcd = (x: bigint, y: bigint): bigint => {
     let a = x < 0n ? -x : x;
     let b = y < 0n ? -y : y;
