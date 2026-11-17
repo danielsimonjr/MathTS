@@ -93,7 +93,8 @@ function bernoulliNumber(n: number): number {
   if (n === 1) return -0.5;
   if (n % 2 === 1) return 0;
   // |B_n| is above the largest double from n = 260 (B_258 = 1.3e306 is the last finite
-  // value). The sign of B_2m is (-1)^(m+1).
+  // value). The sign of B_2m is (-1)^(m+1). The recursion below already returns an
+  // infinity from n = 198 (#1102); this return keeps the sign for every larger even n.
   if (n > BERNOULLI_MAX_FINITE_INDEX) return (n / 2) % 2 === 0 ? -Infinity : Infinity;
 
   // Seed cache with B_2 = 1/6

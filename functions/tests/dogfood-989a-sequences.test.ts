@@ -9,6 +9,8 @@ import {
   divisors,
   divisorSigma,
   doubleFactorial,
+  egyptianFraction,
+  eulerianNumber,
   eulerNumbers,
   eulerPolynomial,
   fallingFactorial,
@@ -16,9 +18,11 @@ import {
   harmonicNumber,
   integerPartitionsGen,
   integerSqrt,
+  lahNumber,
   lucasL,
   mertens,
   motzkin,
+  narayana,
   partitions,
   pell,
   pellSolve,
@@ -100,16 +104,19 @@ describe('saturated sequences (#989)', () => {
     expect(bernoulli(262)).toBe(Infinity);
     expect(bernoulli(1e6 + 1)).toBe(0);
     expect(bernoulli(20)).toBe(-529.1242424242421);
+    expect(bernoulli(652)).toBe(-Infinity);
+    expect(bernoulli(1000)).toBe(-Infinity);
   });
 
-  it('harmonicNumber uses the asymptotic series above 1e7 [slow]', () => {
+  it('harmonicNumber uses the asymptotic series above 100 [slow]', () => {
     const exact = 35.11599205981222; // mpmath harmonic(10**15)
     expect(Math.abs((harmonicNumber(1e15) as number) - exact) / exact).toBeLessThan(1e-13);
     const big = harmonicNumber(1e308) as number;
     expect(Math.abs(big - (Math.log(1e308) + 0.5772156649015329))).toBeLessThan(1e-9);
-    // the series and the sum agree at the switch
-    const sum = harmonicNumber(1e7) as number;
-    expect(Math.abs((harmonicNumber(1e7 + 1) as number) - sum - 1 / (1e7 + 1))).toBeLessThan(1e-9);
+    // mpmath harmonic(n), absolute error 4e-15 (one ulp is 3.6e-15 at 17)
+    expect(Math.abs((harmonicNumber(101) as number) - 5.19727850773863)).toBeLessThan(4e-15);
+    expect(Math.abs((harmonicNumber(1e6) as number) - 14.392726722865724)).toBeLessThan(4e-15);
+    expect(Math.abs((harmonicNumber(2e7) as number) - 17.3884585214198)).toBeLessThan(4e-15);
     expect(harmonicNumber(4)).toBeCloseTo(2.0833333333333335, 14);
   });
 });
@@ -127,27 +134,36 @@ describe('rising and falling factorial (#989)', () => {
     expect(risingFactorial(NaN, 1e9)).toBeNaN();
   });
 
-  it('throws when the product has not settled within the bound', () => {
-    expect(() => risingFactorial(-Infinity, 1e9)).toThrow(RangeError);
-    expect(() => risingFactorial(-Infinity, 1e9)).toThrow(
-      'risingFactorial: n = 1000000000 exceeds the supported maximum of 10000000'
-    );
-    expect(() => fallingFactorial(Infinity, 1e9)).not.toThrow();
+  it('gives the sign and the zero of the remaining factors once the product is infinite [slow]', () => {
+    expect(fallingFactorial(5.5, 1e9)).toBe(Infinity);
+    expect(fallingFactorial(5.5, 1e9 + 1)).toBe(-Infinity);
+    expect(risingFactorial(-2e9 + 0.5, 1e9)).toBe(Infinity);
+    expect(risingFactorial(-Infinity, 1e9 + 1)).toBe(-Infinity);
+    expect(fallingFactorial(1e9, 2e9)).toBeNaN();
+    expect(fallingFactorial(1e9 + 0.5, 2e9)).toBe(-Infinity);
+    expect(fallingFactorial(Infinity, 1e9)).toBe(Infinity);
   });
 });
 
 describe('number theory with a huge argument (#989)', () => {
-  it('divisors and divisorSigma need a safe integer [slow]', () => {
-    expect(() => divisors(1e308)).toThrow(/safe integer/);
-    expect(() => divisorSigma(1e308)).toThrow(/safe integer/);
+  it('divisors and divisorSigma bound sqrt(n) [slow]', () => {
+    expect(() => divisors(1e308)).toThrow(/sqrt\(n\)/);
+    expect(() => divisorSigma(1e308)).toThrow(/sqrt\(n\)/);
+    const d = divisors(2 ** 53 + 2) as number[];
+    expect(d.length).toBe(16);
+    expect(d.slice(0, 6)).toEqual([1, 2, 17, 34, 858001, 1716002]);
     expect(() => divisorSigma(1e308, 2)).toThrow(RangeError);
     expect(divisors(12)).toEqual([1, 2, 3, 4, 6, 12]);
     expect(divisorSigma(12)).toBe(28);
   });
 
-  it('prime and primePi bound the sieve', () => {
-    expect(() => prime(5e6)).toThrow(/prime: result too large/);
-    expect(() => primePi(1e308)).toThrow(/primePi: result too large/);
+  it('prime and primePi use a segmented sieve with a bound [slow]', () => {
+    expect(prime(5e6)).toBe(86028121);
+    expect(primePi(1e8)).toBe(5761455);
+    expect(() => prime(5e7)).toThrow(/sieve limit/);
+    expect(() => primePi(1e308)).toThrow(/primePi: n = 1e\+308 exceeds/);
+    expect(prime(7)).toBe(17);
+    expect(primePi(2)).toBe(1);
     expect(prime(10)).toBe(29);
     expect(primePi(100)).toBe(25);
   });
@@ -156,7 +172,7 @@ describe('number theory with a huge argument (#989)', () => {
     expect(mertens(1e6)).toBe(212);
     expect(() => mertens(1e9)).toThrow(RangeError);
     expect(() => mertens(1e9)).toThrow(
-      'mertens: n = 1000000000 exceeds the supported maximum of 10000000'
+      'mertens: n = 1000000000 exceeds the supported maximum of 100000000'
     );
     const direct = [1, 0, -1, -1, -2, -1, -2, -2, -2, -1, -2, -2, -3];
     direct.forEach((m, i) => expect(mertens(i + 1)).toBe(m));
@@ -168,17 +184,31 @@ describe('number theory with a huge argument (#989)', () => {
     expect(integerSqrt(16)).toBe(4n);
     expect(integerSqrt(16n)).toBe(4n);
     expect(integerSqrt(0n)).toBe(0n);
-    expect(() => integerSqrt(1e308)).toThrow(/safe integer/);
+    const big = integerSqrt(1e308);
+    expect(typeof big).toBe('bigint');
+    expect(big.toString().length).toBe(155);
+    expect(integerSqrt(1e30)).toBe(10n ** 15n);
+    expect(integerSqrt(2.5)).toBe(1n);
+    expect(integerSqrt(1)).toBe(1n);
+    expect(() => integerSqrt(Infinity)).toThrow(/finite/);
+    expect(() => integerSqrt(NaN)).toThrow(/finite/);
+    expect(() => integerSqrt(-1)).toThrow(/non-negative/);
     expect(() => integerSqrt(-1n)).toThrow(RangeError);
   });
 
   it('pellSolve gives the fundamental solution and stops on a very long period', () => {
     expect(pellSolve(61)).toEqual({ x: 1766319049n, y: 226153980n });
     expect(pellSolve(2)).toEqual({ x: 3n, y: 2n });
-    expect(() => pellSolve(1000000017)).toThrow(
-      'pellSolve: no solution within 20000 continued-fraction steps for d = 1000000017'
+    const s = pellSolve(1000000017)!;
+    expect(s.x.toString().length).toBe(15570);
+    expect(s.x * s.x - 1000000017n * s.y * s.y).toBe(1n);
+  });
+
+  it('pellSolve stops on a very long period [slow]', () => {
+    expect(() => pellSolve(2 ** 53 - 1)).toThrow(
+      `pellSolve: no solution within 100000 continued-fraction steps for d = ${2 ** 53 - 1}`
     );
-  }, 30_000); // the 20000-step bound takes about 4 s: the bigint grows by about 1.18 nats per step
+  });
 
   it('combinations and the functions built on it stop at a huge argument [slow]', () => {
     expect(() => composition(1e308, 3)).toThrow(RangeError);
@@ -193,7 +223,9 @@ describe('number theory with a huge argument (#989)', () => {
       'eulerNumbers: n = 1001 exceeds the supported maximum of 1000'
     );
     expect(eulerNumbers(6)).toEqual([1, 0, -1, 0, 5, 0, -61]);
-    expect(() => primorial(1_000_001)).toThrow(RangeError);
+    expect(() => primorial(10_000_001)).toThrow(
+      'primorial: n = 10000001 exceeds the supported maximum of 10000000'
+    );
     expect(primorial(10)).toBe(210n);
     expect(() => integerPartitionsGen(71)).toThrow(
       'integerPartitionsGen: n = 71 exceeds the supported maximum of 70'
@@ -215,5 +247,39 @@ describe('number theory with a huge argument (#989)', () => {
     );
     expect(bernoulliPolynomial(2, 0.5)).toBeCloseTo(-1 / 12, 14);
     expect(eulerPolynomial(2, 0.5)).toBe(-0.25);
+  });
+});
+
+describe('sequences with a large n and a small k (#989)', () => {
+  it('lahNumber returns Infinity when n - k is above 170 [slow]', () => {
+    expect(lahNumber(5, 2)).toBe(240);
+    expect(lahNumber(171, 1)).toBe(Infinity);
+    expect(lahNumber(172, 1)).toBe(Infinity);
+    expect(lahNumber(1e7, 3)).toBe(Infinity);
+  });
+
+  it('narayana returns Infinity when min(k, n + 1 - k) is 262 or more [slow]', () => {
+    expect(narayana(5, 2)).toBe(10);
+    expect(narayana(521, 261)).toBe(1.102075601799376e308);
+    expect(narayana(523, 262)).toBe(Infinity);
+    expect(narayana(1e7, 5e6)).toBe(Infinity);
+  });
+
+  it('eulerianNumber returns Infinity from n = 1024 for 1 <= k <= n - 2 [slow]', () => {
+    expect(eulerianNumber(5, 2)).toBe(66);
+    expect(eulerianNumber(1023, 1)).toBe(8.98846567431158e307);
+    expect(eulerianNumber(1024, 1)).toBe(Infinity);
+    expect(eulerianNumber(1024, 1023)).toBe(1);
+    expect(eulerianNumber(1024, 0)).toBe(1);
+    expect(eulerianNumber(1e9, 3)).toBe(Infinity);
+  });
+
+  it('egyptianFraction takes the whole part first and bounds it [slow]', () => {
+    expect(egyptianFraction(4, 13)).toEqual([4, 18, 468]);
+    expect(egyptianFraction(7, 3)).toEqual([1, 1, 3]);
+    expect(() => egyptianFraction(1e7 + 1, 1)).toThrow(
+      'egyptianFraction: floor(p / q) = 10000001 exceeds the supported maximum of 10000000'
+    );
+    expect(() => egyptianFraction(2 ** 53 - 1, 3)).toThrow(RangeError);
   });
 });

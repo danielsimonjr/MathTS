@@ -4,10 +4,10 @@
  * prime-power tests, exact integer roots, digit sums, Collatz and primorial.
  */
 
-import { assertLoopOrder } from '../utils/limits.js';
+import { assertLoopOrder, MAX_ALLOC_ELEMENTS } from '../utils/limits.js';
 
-/** Largest `n` for primorial (n = 1e6 takes about 3.5 s). */
-const PRIMORIAL_MAX_N = 1_000_000;
+/** Largest `n` for primorial (n = 1e7 takes about 2 s). */
+const PRIMORIAL_MAX_N = 10_000_000;
 
 function assertPositiveInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n) || n < 1) throw new RangeError(`${name} must be a positive integer`);
@@ -82,10 +82,10 @@ export function vonMangoldt(n: number): number {
   return f.length === 1 ? Math.log(f[0][0]) : 0;
 }
 
-/** Mertens function M(n) = sum of mu(k) for k = 1..n. Throws RangeError for n above 10000000. */
+/** Mertens function M(n) = sum of mu(k) for k = 1..n. Throws RangeError for n above 100000000. */
 export function mertens(n: number): number {
   assertPositiveInt(n, 'n');
-  assertLoopOrder('mertens', 'n', n);
+  assertLoopOrder('mertens', 'n', n, MAX_ALLOC_ELEMENTS);
   // Linear sieve: each composite is marked once, by its smallest prime factor.
   const mu = new Int8Array(n + 1);
   const composite = new Uint8Array(n + 1);
@@ -119,18 +119,14 @@ export function isPerfect(n: number): boolean {
 }
 
 /**
- * Floor of the square root of a non-negative bigint (Newton iteration). A number is
- * accepted when it is a safe integer.
+ * Floor of the square root of a non-negative bigint (Newton iteration). A finite number
+ * is floored first, so the result is always a bigint.
  */
 export function integerSqrt(value: bigint | number): bigint {
   let n: bigint;
   if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value)) {
-      throw new RangeError(
-        `integerSqrt: n must be a safe integer (at most ${Number.MAX_SAFE_INTEGER})`
-      );
-    }
-    n = BigInt(value);
+    if (!Number.isFinite(value)) throw new RangeError('integerSqrt: n must be finite');
+    n = BigInt(Math.floor(value));
   } else {
     n = value;
   }
@@ -222,21 +218,27 @@ export function collatzSteps(n: number): number {
   return steps;
 }
 
-/** Primorial n# = product of all primes <= n (n >= 0). Throws RangeError for n above 1000000. */
+/** Primorial n# = product of all primes <= n (n >= 0). Throws RangeError for n above 10000000. */
 export function primorial(n: number): bigint {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new RangeError('primorial requires a non-negative integer');
   assertLoopOrder('primorial', 'n', n, PRIMORIAL_MAX_N);
-  let result = 1n;
-  for (let k = 2; k <= n; k++) {
-    let prime = true;
-    for (let d = 2; d * d <= k; d++) {
-      if (k % d === 0) {
-        prime = false;
-        break;
-      }
+  // Sieve the primes, then multiply them in a balanced tree so that the operands stay
+  // equal in size.
+  const composite = new Uint8Array(n + 1);
+  let level: bigint[] = [];
+  for (let i = 2; i <= n; i++) {
+    if (composite[i] === 0) {
+      level.push(BigInt(i));
+      for (let j = i * i; j <= n; j += i) composite[j] = 1;
     }
-    if (prime) result *= BigInt(k);
   }
-  return result;
+  if (level.length === 0) return 1n;
+  while (level.length > 1) {
+    const next: bigint[] = [];
+    for (let i = 0; i + 1 < level.length; i += 2) next.push(level[i] * level[i + 1]);
+    if (level.length % 2 === 1) next.push(level[level.length - 1]);
+    level = next;
+  }
+  return level[0];
 }
