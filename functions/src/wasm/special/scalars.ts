@@ -496,9 +496,14 @@ export function besselJScalar(n: f64, x: f64): f64 {
 
   if (Math.abs(x) < 1e-15) return 0;
   if (Number.isNaN(x)) return NaN;
+  // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so
+  // ln|J_n(x)| <= n * (1 + ln(|x| / 2) - ln n). Below ln(2^-1075) = -745.14 the value rounds to 0.
+  // The two logarithms stay separate: 2 * n overflows for n near the largest double.
+  // This test comes before the limit, so a huge order with a small x returns 0 at once.
+  if (Math.abs(x) <= ni && ni * (1 + Math.log(Math.abs(x) / 2) - Math.log(ni)) < -745.2) return 0;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`besselJ: n = ${ni} exceeds the supported maximum of 1000000000`);
+  if (ni > 2500000000) {
+    throw new RangeError(`besselJ: n = ${ni} exceeds the supported maximum of 2500000000`);
   }
 
   // Upward recurrence is stable only when x > n; otherwise it amplifies
@@ -515,33 +520,34 @@ export function besselJScalar(n: f64, x: f64): f64 {
     return jCurr;
   } else {
     const nStart = ni + 2 * Math.max(10, Math.ceil(Math.sqrt(40 * ni)));
+    const down = Math.pow(2, -700);
     let jNext = 0;
     let jCurr = 1;
     let result = 0;
     let sum = 0;
-    let scaled = 0;
+    let shifts = 0; // rescales made after J_ni was captured
     for (let k = nStart; k >= 0; k--) {
       const jPrev = ((2 * (k + 1)) / x) * jCurr - jNext;
       jNext = jCurr;
       jCurr = jPrev;
-      // The sweep grows as it goes down. Scaling by a power of 2 is exact, so it keeps the sums
-      // finite and does not change the final ratio. A sweep that has grown by 1e400 before it
-      // reaches order n leaves J_n below the smallest double, so its value is 0.
+      // The sweep grows as it goes down. Scaling by a power of 2 is exact, so it keeps the
+      // sums finite. `result` keeps its own scale, so it cannot underflow here.
       if (Math.abs(jCurr) > 1e200) {
-        if (k > ni && ++scaled >= 2) return 0;
-        const down = Math.pow(2, -700);
         jCurr *= down;
         jNext *= down;
-        result *= down;
         sum *= down;
+        // The final value is (result / sum) * 2^(-700 * shifts), and result / sum < 2^701
+        // (|result| <= 1e200, |sum| >= 1e200 * 2^-700), so three shifts leave a value below 2^-1399.
+        if (k < ni && ++shifts === 3) return 0;
       }
-      if (!Number.isFinite(jCurr)) return 0;
       // After the assignments jCurr = J_k and jNext = J_{k+1}; capture J_ni.
       if (k === ni) result = jCurr;
       if (k % 2 === 0) sum += jCurr;
     }
     sum = 2 * sum - jCurr;
-    return result / sum;
+    let r = result / sum;
+    for (let i = 0; i < shifts && r !== 0; i++) r *= down;
+    return r;
   }
 }
 
@@ -564,8 +570,8 @@ export function besselYScalar(n: f64, x: f64): f64 {
   if (ni === 1) return besselY1Scalar(x);
 
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`besselY: n = ${ni} exceeds the supported maximum of 1000000000`);
+  if (ni > 2500000000) {
+    throw new RangeError(`besselY: n = ${ni} exceeds the supported maximum of 2500000000`);
   }
   let yPrev: f64 = besselY0Scalar(x);
   let yCurr: f64 = besselY1Scalar(x);

@@ -16,8 +16,8 @@ import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 /** Largest `n` for the root-scan rules. Above about 450 the scan throws, so the limit costs no result. */
 const MAX_SCAN_DEGREE = 500;
 
-/** Largest `n` for `rootsJacobi` (n = 800 takes about 18 s). */
-const MAX_JACOBI_NODES = 800;
+/** Largest `n` for `rootsJacobi` (n = 1200 took 14.0 s). */
+const MAX_JACOBI_NODES = 1300;
 
 /** Nodes (ascending) and matching weights. */
 export interface GaussRule {

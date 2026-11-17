@@ -8,10 +8,50 @@ import { gammainc as _gammainc, lgamma as _lgamma } from '../typed/special.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { besselIScalar } from '../wasm/special/scalars.js';
 import { erfcx } from '../special/erf-extra.js';
-import { assertLoopOrder } from '../utils/limits.js';
 
-/** Largest `n` that `zipfPMF` sums (1e8 terms take about 12 s). */
-const MAX_ZIPF_N = 150_000_000;
+/** Largest `n` that `harmonicGeneral` sums term by term, so these results do not change. */
+const ZIPF_DIRECT = 100_000_000;
+
+/** Head length of the Euler-Maclaurin form for a larger `n`. */
+const ZIPF_HEAD = 1_000_000;
+
+/**
+ * Generalized harmonic number H_{n,s} = sum_{i=1}^{n} i^-s.
+ *
+ * Up to {@link ZIPF_DIRECT} terms the sum is direct. Above, a compensated sum of the first
+ * {@link ZIPF_HEAD} terms plus an Euler-Maclaurin tail gives about 1e-13 relative accuracy.
+ */
+function harmonicGeneral(n: number, s: number): number {
+  if (n <= ZIPF_DIRECT) {
+    let direct = 0;
+    for (let i = 1; i <= n; i++) direct += Math.pow(i, -s);
+    return direct;
+  }
+  const N = ZIPF_HEAD;
+  // Neumaier compensated sum of the head.
+  let h = 0;
+  let comp = 0;
+  for (let i = 1; i <= N; i++) {
+    const v = Math.pow(i, -s);
+    const t = h + v;
+    comp += Math.abs(h) >= Math.abs(v) ? h - t + v : v - t + h;
+    h = t;
+  }
+  h += comp;
+  // sum_{i=N+1}^{n} f(i), f(t) = t^-s:
+  //   integral_N^n f + (f(n) - f(N)) / 2 + (f'(n) - f'(N)) / 12 - (f'''(n) - f'''(N)) / 720
+  const fN = Math.pow(N, -s);
+  const fn = Math.pow(n, -s);
+  const L = Math.log(n / N);
+  // integral = N^(1-s) * (e^((1-s) L) - 1) / (1 - s); the limit at s = 1 is L.
+  const a = (1 - s) * L;
+  const integral = N * fN * (Math.abs(a) < 1e-8 ? L * (1 + a / 2) : Math.expm1(a) / (1 - s));
+  const d1 = (t: number, ft: number): number => (-s * ft) / t; // f'
+  const d3 = (t: number, ft: number): number => (-s * (s + 1) * (s + 2) * ft) / (t * t * t); // f'''
+  return (
+    h + integral + (fn - fN) / 2 + (d1(n, fn) - d1(N, fN)) / 12 - (d3(n, fn) - d3(N, fN)) / 720
+  );
+}
 
 const normalPDF = (z: number): number => _normalPDF(z) as number;
 const lgamma = (v: number): number => _lgamma(v) as number;
@@ -185,10 +225,7 @@ export function zipfPMF(k: number, s: number, n: number): number {
   // The normalising sum runs from 1 to n. An infinite n makes the sum run forever.
   if (n === Infinity) throw new RangeError('zipfPMF: n must be finite');
   if (!Number.isInteger(k) || k < 1 || k > n) return 0;
-  assertLoopOrder('zipfPMF', 'n', n, MAX_ZIPF_N);
-  let h = 0;
-  for (let i = 1; i <= n; i++) h += Math.pow(i, -s);
-  return Math.pow(k, -s) / h;
+  return Math.pow(k, -s) / harmonicGeneral(n, s);
 }
 
 /** Nakagami PDF: 2 m^m x^(2m−1) e^(−m x²/ω) / (Γ(m) ω^m), x > 0. */

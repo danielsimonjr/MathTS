@@ -43,8 +43,8 @@ import { isDeterministic, pairwiseSum } from '@danielsimonjr/mathts-core';
 import { numberVector } from './number-matrix.js';
 import { assertLoopOrder } from '../utils/limits.js';
 
-/** Largest sub-interval count that `gaussQuad` runs (2e8 sub-intervals of a trivial `f` take about 17 s). */
-const MAX_GAUSS_QUAD_INTERVALS = 200_000_000;
+/** Largest sub-interval count that `gaussQuad` runs (n = 1e9 of a trivial `f` took 26.1 s). */
+const MAX_GAUSS_QUAD_INTERVALS = 800_000_000;
 
 // =============================================================================
 // Thresholds
@@ -458,6 +458,7 @@ export function gaussQuad(
   options: GaussQuadOptions = {}
 ): number {
   refuseWorkerCount('gaussQuad', 'parallelGaussQuad', options);
+  if (Number.isNaN(n)) return NaN;
 
   // Single-interval mode
   if (n >= 2 && n <= 5) {

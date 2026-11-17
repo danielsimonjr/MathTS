@@ -18,10 +18,11 @@
 
 import { _lgamma } from '../wasm/special/scalars.js';
 import { hyp1f1 } from './hypergeometric.js';
-import { assertLoopOrder } from '../utils/limits.js';
-
-/** Largest |t| that `siegelZ` accepts. The cost grows with t squared (t = 1700 took 22 s before the change). */
-const MAX_SIEGEL_T = 1700;
+/**
+ * Smallest Borwein term count `n` whose coefficients overflow. From n = 76 the zeta sum is
+ * NaN, so `siegelZ` returns NaN at once instead of summing n^2 terms.
+ */
+const SIEGEL_NAN_TERMS = 76;
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -144,6 +145,11 @@ function borweinD(k: number, n: number): number {
   return n * S;
 }
 
+/** Borwein term count for zeta(1/2 + it). */
+function borweinTerms(t: f64): number {
+  return Math.round(1.3 * 20 + 0.9 * Math.abs(t));
+}
+
 /**
  * ζ(1/2 + it) on the critical line via the Borwein acceleration of the
  * alternating (eta) series — the same algorithm the factory `zeta` uses, here
@@ -151,7 +157,7 @@ function borweinD(k: number, n: number): number {
  * it needs no Complex constructor. Accurate to ~1e-13 for |t| up to ~40.
  */
 function zetaCriticalLine(t: f64): Cx {
-  const n = Math.round(1.3 * 20 + 0.9 * Math.abs(t));
+  const n = borweinTerms(t);
 
   // 2^{1-s} = 2^{1/2} · (cos(t ln2) − i sin(t ln2)); 1 − 2^{1-s}.
   const ln2 = Math.LN2;
@@ -201,7 +207,7 @@ export function siegelZ(t: f64): f64 {
   // Z(t) oscillates with no limit as |t| grows, and the zeta sum never ends at Infinity.
   if (!Number.isFinite(t)) return NaN;
   const at = Math.abs(t);
-  assertLoopOrder('siegelZ', '|t|', at, MAX_SIEGEL_T);
+  if (borweinTerms(at) >= SIEGEL_NAN_TERMS) return NaN;
   const z = zetaCriticalLine(at);
   const th = riemannSiegelTheta(at);
   return Math.cos(th) * z.re - Math.sin(th) * z.im;

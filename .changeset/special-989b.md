@@ -2,29 +2,33 @@
 '@danielsimonjr/mathts-functions': minor
 ---
 
-Recurrences, series sums, node rules, `gaussQuad` and `discreteLog` check the size of their input before they loop, and throw a `RangeError` instead of running for ever or out of memory (Closes #989). The limits are the measured point where the call took about 20 s before this change. Each recurrence also stops at its first `NaN` (and `sphericalBesselK` at its first `Infinity`), so a huge order with an overflowing argument returns at once.
+Recurrences, series sums, node rules, `gaussQuad` and `discreteLog` check the size of their input before they loop, and throw a `RangeError` instead of running for ever or out of memory (Closes #989). Each limit is the measured point where the call took about 20 s before this change. Each recurrence also stops at its first `NaN` (and `besselK` and `sphericalBesselK` at their first `Infinity`), so a huge order with an overflowing argument returns at once.
 
 Also fixed:
 
-- `besselJ(n, x)` with `|x| < n` rescaled its downward sweep too late and returned `NaN` when the sweep overflowed (`besselJ(200, 5)`, `besselJ(5, 1e-10)`, `besselJ(1e7, 5)`). It now scales by a power of 2 and returns the correct value (`4.76e-296`, `2.604e-54`) or `0` when J_n is below the smallest double.
+- `besselJ(n, x)` with `|x| < n` rescaled its downward sweep too late and returned `NaN` when the sweep overflowed (`besselJ(200, 5)`, `besselJ(5, 1e-10)`, `besselJ(1e7, 5)`). It now scales by a power of 2. `besselJ(n, x)` for integer `n >= 2` returns the value to about 1e-13, and 0 only when J_n is below the smallest double (`besselJ(10, 1e-10)` is `2.69e-110`, `besselJ(1e9, 5)` is `0` at once).
 - `sphericalBesselJ(n, x)` and `sphericalBesselI(n, x)` no longer allocate an array of `max(n, |x|)` elements, and no longer rescale that array on every overflow (`sphericalBesselJ(1e6, 5)` took 33.7 s and now takes 12 ms).
 - `discreteLog` keys its baby-step table by number, not by string: `p = 1e14 + 31` takes 13.8 s and 1.1 GB (26.5 s and 2 GB before).
+- `discreteLog` for a large `p` first finds the order of `g`. A base of order at most 2^24 returns its answer (`discreteLog(50154588067499, 266974891273491, 282000011339987)` is `12345` in 0.3 s to 2 s; it took 14.5 s before).
+- `zipfPMF(k, s, n)` with `n` above 1e8 sums the first 1e6 terms and an Euler-Maclaurin tail (relative error about 3e-14), so every `n` returns at once. `n` up to 1e8 gives the same value as before.
+- `binomialTest` sums only the terms within `sqrt(375 n)` of `n p`; every other term is exactly 0, so the results do not change.
+- `siegelZ(t)` returns `NaN` at once from `|t|` about 55 (the Borwein coefficients overflow). It returned the same `NaN` before, after a time that grew with t squared.
+- `hermiteH` and `besselK` have no order limit; they return at the first `NaN` or `Infinity` (`besselK` also at two zeros in a row).
+- `gaussQuad` returns `NaN` for a `NaN` interval count.
 - `sphericalBesselY`, `sphericalBesselK` and `expn` return `NaN` for a non-number `x`.
 - `polygamma(n, x)` and the factorial in `sphericalHarmonic` return `Infinity` for a factorial above 170 at once.
 - `mathieuA`, `mathieuB`, `mathieuCe` and `mathieuSe` throw a `RangeError` (`order n must be at most 99, got 100`) where they threw a `TypeError` from an undefined mode.
 
-BREAKING (each call returned before and now throws `RangeError`; the old time is the measured time at the limit):
+BREAKING (each call returned before and now throws `RangeError`; the time is the old-build time at or above the limit):
 
-- `besselJ`, `besselY`, `besselK`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `jacobiP`, `gegenbauerC`, `ferrersP`, `sphericalBesselJ/Y/I/K` with an order above 1000000000. `legendreP(1e9, 0.5)` took 18.9 s, `besselJ(1e9, 2e9)` 9.6 s, `jacobiP(1e9, ...)` 15.6 s, `ferrersP(1e9, 2, x)` 13.5 s.
-- `sphericalBesselJ` and `sphericalBesselI` with `max(n, |x|)` above 1000000000 (before, an array of that size).
-- `expn(n, x)` with `n` above 1000000000 and `0 < x <= 1` (`expn(1e9, 0.5)` took 23.6 s).
-- `polygamma(n, x)` with `x` below -1500000000 (`polygamma(1, -1e9 + 0.5)` took 10.9 s).
-- `besselJZeros(nu, k)` with `k` above 4000000 or `k * max(1, |nu|)` above 100000000 (`besselJZeros(0, 1e6)` took 4.3 s, `besselJZeros(1e8, 1)` 22.9 s).
-- `siegelZ(t)` with `|t|` above 1700 (`siegelZ(1700)` took 22.4 s and returned `NaN`).
-- `zipfPMF(k, s, n)` with `n` above 150000000 and `1 <= k <= n` (`zipfPMF(1, 1, 1e8)` took 11.5 s).
-- `binomialTest(x, n)` with `n` above 40000000 (`binomialTest(5, 4e7)` took 18.2 s).
-- `rootsLegendre(n)` with `n` above 10000 (`rootsLegendre(10000)` took 15.4 s).
-- `rootsJacobi(n, a, b)` with `n` above 800 (`rootsJacobi(700, 0, 0)` took 13.2 s).
-- `gaussQuad(f, a, b, n)` with `n` above 200000000 (`n = 2e8` took 17.1 s with a trivial `f`).
-- `discreteLog(g, h, p)` with `ceil(sqrt(p - 1))` above 2^24 (`p` above about 2.8e14). The baby-step `Map` cannot hold more entries, so the call could not finish.
+- `besselJ`, `besselY`, `laguerreL`, `legendreP`, `jacobiP`, `gegenbauerC`, `ferrersP`, `sphericalBesselJ/Y/I/K` and `expn` with an order above 2500000000 (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s). `besselJ` with a small `x` returns 0 at any order.
+- `chebyshevT` with an order above 4000000000 (`chebyshevT(3.5e9, 0.5)` took 17.5 s).
+- `sphericalBesselJ` and `sphericalBesselI` with `max(n, |x|)` above 2500000000 (before, an array of that size).
+- `polygamma(n, x)` with `x` below -2000000000 (a shift of 2.5e9 took 24.2 s).
+- `besselJZeros(nu, k)` with `k` above 7000000 (`k = 7.5e6` took 22.3 s) or `k * max(1, |nu|)` above 100000000 (`besselJZeros(1e8, 1)` took 22.9 s).
+- `binomialTest(x, n)` with `n` above 100000000000.
+- `rootsLegendre(n)` with `n` above 14000 (`rootsLegendre(14000)` took 20.7 s).
+- `rootsJacobi(n, a, b)` with `n` above 1300 (`rootsJacobi(1200, 0, 0)` took 14.0 s).
+- `gaussQuad(f, a, b, n)` with `n` above 800000000 (`n = 1e9` took 26.1 s with a trivial `f`).
+- `discreteLog(g, h, p)` throws when `p` needs more than 2^24 baby steps and the order of `g` is above 2^24 (or `g` and `p` share a factor). A base of smaller order still returns. A `p` above 2^53 - 1 also throws.
 - `rootsHermite(n)` and `rootsLaguerre(n)` with `n` above 500 now throw `RangeError` at once. They threw an `Error` ("root scan found ...") after 3.5 s to 14 s before, for every `n` above about 200 (`rootsHermite`) and about 450 (`rootsLaguerre`), so no returning call changes.

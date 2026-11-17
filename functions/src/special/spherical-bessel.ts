@@ -14,7 +14,7 @@ import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
 const MAX_ZEROS_WORK = 100_000_000;
 
 /** Largest zero count that `besselJZeros` accepts. */
-const MAX_ZEROS_COUNT = 4_000_000;
+const MAX_ZEROS_COUNT = 7_000_000;
 
 function asNumber(value: unknown, name: string): number {
   if (typeof value !== 'number') {

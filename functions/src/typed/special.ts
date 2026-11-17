@@ -245,11 +245,9 @@ function besselKScalar(n: f64, x: f64): f64 {
   const k1 = k01[1];
   if (ni === 0) return k0;
   if (ni === 1) return k1;
-  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`besselK: n = ${ni} exceeds the supported maximum of 1000000000`);
-  }
-  // Upward recurrence in order is stable for K (K_n grows with n).
+  // Upward recurrence in order is stable for K (K_n grows with n). The loop has no order
+  // limit: it returns within a few thousand steps at the first Infinity or NaN, or at two
+  // zeros in a row (an underflowed K_0 and K_1 keep every later value at 0).
   let kPrev = k0;
   let kCurr = k1;
   for (let k = 1; k < ni; k++) {
@@ -258,6 +256,7 @@ function besselKScalar(n: f64, x: f64): f64 {
     kCurr = kNext;
     // Every term is positive, so an overflow to Infinity stays Infinity, and a NaN stays NaN.
     if (!(kCurr < Infinity)) return kCurr;
+    if (kCurr === 0 && kPrev === 0) return 0;
   }
   return kCurr;
 }
@@ -291,8 +290,9 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
   if (ni === 0) return 1;
   if (ni === 1) return x;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`chebyshevT: n = ${ni} exceeds the supported maximum of 1000000000`);
+  // chebyshevT has its own limit: one step is cheaper (chebyshevT(3.5e9, 0.5) took 17.5 s).
+  if (ni > 4000000000) {
+    throw new RangeError(`chebyshevT: n = ${ni} exceeds the supported maximum of 4000000000`);
   }
   let prev = 1,
     curr = x;
@@ -312,10 +312,7 @@ function hermiteHScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
-  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`hermiteH: n = ${ni} exceeds the supported maximum of 1000000000`);
-  }
+  // No order limit: the values overflow and give NaN within a few hundred steps for every x.
   let prev = 1,
     curr = 2 * x;
   for (let k = 2; k <= ni; k++) {
@@ -335,8 +332,8 @@ function laguerreLScalar(n: f64, x: f64): f64 {
   if (ni === 0) return 1;
   if (ni === 1) return 1 - x;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 1000000000`);
+  if (ni > 2500000000) {
+    throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 2500000000`);
   }
   let prev = 1,
     curr = 1 - x;
@@ -357,8 +354,8 @@ function legendrePScalar(n: f64, x: f64): f64 {
   if (ni === 0) return 1;
   if (ni === 1) return x;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
-  if (ni > 1000000000) {
-    throw new RangeError(`legendreP: n = ${ni} exceeds the supported maximum of 1000000000`);
+  if (ni > 2500000000) {
+    throw new RangeError(`legendreP: n = ${ni} exceeds the supported maximum of 2500000000`);
   }
   let prev = 1,
     curr = x;
