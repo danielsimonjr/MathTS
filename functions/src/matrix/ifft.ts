@@ -75,24 +75,7 @@ export const createIfft = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, fft, dotDivide, conj, complex }: Dependencies) => {
-    /**
-     * Calculate N-dimensional inverse Fourier transform
-     *
-     * Syntax:
-     *
-     *     math.ifft(arr)
-     *
-     * Examples:
-     *
-     *    math.ifft([[2, 2], [0, 0]]) // returns [[{re:1, im:0}, {re:0, im:0}], [{re:1, im:0}, {re:0, im:0}]]
-     *
-     * See Also:
-     *
-     *      fft
-     *
-     * @param {Array | Matrix} arr    An array or matrix
-     * @return {Array | Matrix}       N-dimensional inverse Fourier transformation of the array
-     */
+    /** The inverse transform of a whole array or Matrix (every axis). */
     const inverse = function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
       const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
       const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
@@ -142,6 +125,27 @@ export const createIfft = /* #__PURE__ */ factory(
       return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
     };
 
+    /**
+     * Calculate N-dimensional inverse Fourier transform
+     *
+     * Syntax:
+     *
+     *     math.ifft(arr)
+     *     math.ifft(arr, n)
+     *
+     * Examples:
+     *
+     *    math.ifft([[2, 2], [0, 0]]) // returns [[{re:1, im:0}, {re:0, im:0}], [{re:1, im:0}, {re:0, im:0}]]
+     *
+     * See Also:
+     *
+     *      fft
+     *
+     * @param {Array | Matrix} arr    An array or matrix
+     * @param {number} [n]            Number of bins (1-D input only). The input is cropped
+     *                                or zero-padded to `n` values, as NumPy does.
+     * @return {Array | Matrix}       N-dimensional inverse Fourier transformation of the array
+     */
     return typed(name, {
       'Array | Matrix': inverse,
       // NumPy `ifft(a, n)`: the input is cropped or zero-padded to length `n` first, so the
