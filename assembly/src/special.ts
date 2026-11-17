@@ -242,9 +242,11 @@ function _besselY1(x: f64): f64 {
 // The kernels below follow besselJScalar / besselYScalar in
 // functions/src/wasm/special/scalars.ts. The order of an i32 kernel is at most 2147483647,
 // which is below MAX_RECURRENCE_ORDER (2.5e9) of functions/src/utils/limits.ts, so only the
-// downward sweep (MAX_BESSEL_J_SWEEP) needs a limit here. A kernel that exceeds it aborts
-// with a RangeError message, as the JS scalar throws. The bridge keeps such inputs on the
-// JS path, so it never calls a kernel that would abort.
+// downward sweep (MAX_BESSEL_J_SWEEP) needs a limit here. A kernel that exceeds it aborts (the
+// binding throws an `Error`; the message names the function), where the JS scalar throws a
+// RangeError. A loop stops at the first NaN and a zero result keeps the sign of the order,
+// as in the JS scalar. The bridge keeps an order that would abort on the JS path, so it never
+// calls a kernel that would abort.
 const _BESSEL_J_MAX_SWEEP: f64 = 1200000000.0;
 
 function _besselJn(n: i32, x: f64): f64 {
@@ -254,13 +256,13 @@ function _besselJn(n: i32, x: f64): f64 {
   const sign: f64 = n < 0 && ni % 2 != 0 ? -1.0 : 1.0;
   if (ni == 0) return sign * _besselJ0(x);
   if (ni == 1) return sign * _besselJ1(x);
-  if (Math.abs(x) < 1e-15) return 0.0;
+  if (Math.abs(x) < 1e-15) return sign * 0.0;
   if (isNaN(x)) return NaN;
   const nf: f64 = <f64>ni;
   const ax: f64 = Math.abs(x);
   // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so below ln(2^-1075) = -745.14 the
   // value rounds to 0. This test comes before the limits, as in the JS scalar.
-  if (ax <= nf && nf * (1.0 + Math.log(ax / 2.0) - Math.log(nf)) < -745.2) return 0.0;
+  if (ax <= nf && nf * (1.0 + Math.log(ax / 2.0) - Math.log(nf)) < -745.2) return sign * 0.0;
   // Upward recurrence is stable only when x > n; otherwise it amplifies
   // round-off (J_n decays in n for n > x). Use Miller's backward recurrence
   // in that regime.
@@ -270,6 +272,7 @@ function _besselJn(n: i32, x: f64): f64 {
     let jCurr: f64 = _besselJ1(x);
     for (let k: i32 = 1; k < ni; k++) {
       const jNext: f64 = (2.0 * <f64>k / x) * jCurr - jPrev;
+      if (isNaN(jNext)) return NaN;
       jPrev = jCurr;
       jCurr = jNext;
     }
@@ -301,7 +304,7 @@ function _besselJn(n: i32, x: f64): f64 {
       // Three shifts leave a value below 2^-1399, which is 0 (same bound as the JS scalar).
       if (k < ni) {
         shifts++;
-        if (shifts == 3) return 0.0;
+        if (shifts == 3) return sign * 0.0;
       }
     }
     // After the assignments jCurr = J_k and jNext = J_{k+1}; capture J_ni.
@@ -329,6 +332,7 @@ function _besselYn(n: i32, x: f64): f64 {
   let yCurr: f64 = _besselY1(x);
   for (let k: i32 = 1; k < ni; k++) {
     const yNext: f64 = (2.0 * <f64>k / x) * yCurr - yPrev;
+    if (isNaN(yNext)) return NaN;
     yPrev = yCurr;
     yCurr = yNext;
   }

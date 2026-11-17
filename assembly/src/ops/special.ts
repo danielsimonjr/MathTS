@@ -9,10 +9,12 @@ const EULER: f64 = 0.5772156649015329;
 
 // These kernels follow chebyshevTScalar, hermiteHScalar, laguerreLScalar and legendrePScalar
 // in functions/src/typed/special.ts: a non-finite order gives NaN, a loop stops at the first
-// NaN, and an order above the family limit of functions/src/utils/limits.ts aborts with a
-// RangeError message, as the JS scalar throws. The loop counter is an i32, so no order can
-// exceed 2147483646. The limits of Chebyshev (4e9), Legendre (2.5e9) and Hermite (none) are
-// above that, so 2147483646 is their limit here. No bridge calls these kernels.
+// NaN, and an order above the family limit of functions/src/utils/limits.ts aborts (the
+// binding throws an `Error`; the message names the function), where the JS scalar throws a
+// RangeError. The loop counter is an i32, so no order can exceed 2147483646. That cap is
+// below the JS limits of Chebyshev (4e9) and Legendre (2.5e9), and Hermite has no JS limit,
+// so for an order above 2147483646 a raw caller aborts where JS computes. No bridge calls
+// these kernels.
 const _ORDER_MAX_I32: f64 = 2147483646.0;
 const _ORDER_MAX_LAGUERRE: f64 = 1000000000.0;
 

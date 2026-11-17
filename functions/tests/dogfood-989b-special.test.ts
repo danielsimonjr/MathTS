@@ -6,6 +6,7 @@
  * from SciPy 1.16.3 and mpmath.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   besselJ,
   besselY,
@@ -63,6 +64,18 @@ function rel(got: unknown, want: number): number {
 describe('three-term recurrences refuse an order above the limit (#989)', () => {
   it('the limit is 2.5e9', () => {
     expect(MAX_RECURRENCE_ORDER).toBe(2_500_000_000);
+  });
+  it('the AS kernels hold the same limits as utils/limits.ts (#1113)', () => {
+    // The AS source cannot import limits.ts, so it holds its own copies of the literals.
+    const literal = (file: string, name: string): number => {
+      const text = readFileSync(new URL(`../../assembly/src/${file}`, import.meta.url), 'utf8');
+      const m = new RegExp(`const ${name}: f64 = ([0-9.]+);`).exec(text);
+      if (!m) throw new Error(`${name} not found in assembly/src/${file}`);
+      return Number(m[1]);
+    };
+    expect(literal('special.ts', '_BESSEL_J_MAX_SWEEP')).toBe(MAX_BESSEL_J_SWEEP);
+    expect(literal('ops/special.ts', '_ORDER_MAX_LAGUERRE')).toBe(MAX_LAGUERRE_ORDER);
+    expect(literal('ops/special.ts', '_ORDER_MAX_I32')).toBe(2 ** 31 - 2);
   });
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
