@@ -170,19 +170,20 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
 // =============================================================================
 
 /**
- * Largest baby-step count: the entry limit of a `Map` (2^24).
+ * Largest baby-step count (2^24). The table is two typed arrays of twice this size (about
+ * 400 MB at the limit). A Map of this size peaked at about 1 GB.
  *
  * A call at this limit (a modulus near 2^48, no solution) took 17.5 s at 31% machine load
- * and 23.5 s at 45%, with a peak resident memory of about 1 GB. A modulus near 2^47 took
- * 16.2 s, so a lower limit refuses calls that return in less than 20 s.
+ * and 23.5 s at 45% with the Map. A modulus near 2^47 took 16.2 s, so a lower limit refuses
+ * calls that return in less than 20 s.
  */
 const MAX_BABY_STEPS = 2 ** 24;
 
 /**
  * Discrete logarithm for a modulus too large for the baby-step table: walk the powers of
- * `g` up to its order, when that order is at most {@link MAX_BABY_STEPS}.
+ * `g` once. Return `j` at the first `g^j === h`, and `-1` when the walk returns to 1.
  *
- * @throws RangeError if the order of `g` is above the limit
+ * @throws RangeError if neither happens within {@link MAX_BABY_STEPS} steps
  */
 function discreteLogSmallOrder(
   G: bigint,
@@ -191,27 +192,22 @@ function discreteLogSmallOrder(
   p: number,
   mNumber: number
 ): number {
-  let order = 0;
-  let c = G;
-  for (let j = 1; j <= MAX_BABY_STEPS; j++) {
-    if (c === 1n) {
-      order = j;
-      break;
-    }
-    c = (c * G) % P;
-  }
-  if (order === 0) {
-    throw new RangeError(
-      `discreteLog: p = ${p}${P === BigInt(p) ? '' : ` (reduced modulus N = ${P})`} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
-    );
-  }
-  const target = Number(H);
   let cur = 1n;
-  for (let j = 0; j < order; j++) {
-    if (Number(cur) === target) return j;
+  for (let j = 0; j < MAX_BABY_STEPS; j++) {
+    if (cur === H) return j;
     cur = (cur * G) % P;
+    if (cur === 1n) return -1;
   }
-  return -1;
+  throw new RangeError(
+    `discreteLog: p = ${p}${P === BigInt(p) ? '' : ` (reduced modulus N = ${P})`} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
+  );
+}
+
+/** Hash slot of a key below 2^53 in a table of `2^bits` slots. */
+function slotOf(key: number, bits: number): number {
+  const hi = Math.floor(key / 4294967296);
+  const h = Math.imul((key >>> 0) ^ Math.imul(hi, 0x9e3779b1), 0x85ebca6b);
+  return (h ^ (h >>> 15)) >>> (32 - bits);
 }
 
 /**
@@ -281,18 +277,28 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   // H has no inverse modulo P, so no power of the unit G equals it.
   if (gcdBig(H, P) !== 1n) return -1;
   const mNumber = Math.max(1, Math.ceil(Math.sqrt(Number(P) - 1)));
-  // A Map holds at most 2^24 entries, so a larger table cannot exist. Find the order L of g
-  // first, with no table: L <= 2^24 means g^0 .. g^(L-1) are all the values that g reaches.
+  // The table holds at most 2^24 entries. Above that, walk the powers of g with no table.
   if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, pOriginal, mNumber);
   const m = BigInt(mNumber);
 
   // Baby steps: g^j mod p for j = 0..m-1, keeping the smallest j per value.
   // Every value is below p < 2^53, so a number key is exact and cheaper than a string key.
-  const table = new Map<number, number>();
+  // Open addressing, linear probing, load factor at most 1/2. A key is a residue of g, so it
+  // is at least 1 and 0 marks an empty slot.
+  let bits = 1;
+  while (2 ** bits < 2 * mNumber) bits++;
+  const mask = 2 ** bits - 1;
+  const keys = new Float64Array(2 ** bits);
+  const vals = new Uint32Array(2 ** bits);
   let cur = 1n;
   for (let j = 0; j < mNumber; j++) {
     const key = Number(cur);
-    if (!table.has(key)) table.set(key, j);
+    let s = slotOf(key, bits);
+    while (keys[s] !== 0 && keys[s] !== key) s = (s + 1) & mask;
+    if (keys[s] === 0) {
+      keys[s] = key;
+      vals[s] = j;
+    }
     cur = (cur * G) % P;
   }
 
@@ -301,9 +307,11 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
   for (let i = 0n; i < m; i++) {
-    const j = table.get(Number(gamma));
-    if (j !== undefined) {
-      return Number(i * m + BigInt(j));
+    const key = Number(gamma);
+    let s = slotOf(key, bits);
+    while (keys[s] !== 0) {
+      if (keys[s] === key) return Number(i * m + BigInt(vals[s]));
+      s = (s + 1) & mask;
     }
     gamma = (gamma * gInvM) % P;
   }
