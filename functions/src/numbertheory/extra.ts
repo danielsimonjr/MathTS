@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { chooseScalar } from '../wasm/special/scalars.js';
 
 // =============================================================================
@@ -58,8 +58,8 @@ function binomialExact(n: number, k: number): number {
   return Math.round(chooseScalar(n, k));
 }
 
-/** Largest `n` for eulerNumbers (the work grows with n squared; every E_m past 270 is not finite). */
-const EULER_NUMBERS_MAX_N = 1000;
+/** First index from which every even Euler number is NaN in double (the recurrence sums opposite infinities). */
+const EULER_NUMBERS_NAN_FROM = 188;
 
 /**
  * Euler numbers `E_0..E_n` (the coefficients in the secant Maclaurin series).
@@ -69,7 +69,9 @@ const EULER_NUMBERS_MAX_N = 1000;
  *
  * @param n - Non-negative integer: compute E_0 through E_n
  * @returns Array of length `n + 1`: `[E_0, E_1, ..., E_n]`
- * @throws RangeError if `n` is above 1000
+ * From index 188 the even entries are `NaN` and the odd entries are 0.
+ *
+ * @throws RangeError if the result has more than 100000000 elements
  *
  * @example
  * eulerNumbers(6) // => [1, 0, -1, 0, 5, 0, -61]
@@ -78,10 +80,11 @@ export function eulerNumbers(n: number): number[] {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error('eulerNumbers requires a non-negative integer');
   }
-  assertLoopOrder('eulerNumbers', 'n', n, EULER_NUMBERS_MAX_N);
+  assertAllocSize('eulerNumbers', [n + 1]);
   const E: number[] = new Array(n + 1).fill(0);
   E[0] = 1;
-  for (let m = 1; m <= n; m++) {
+  const last = Math.min(n, EULER_NUMBERS_NAN_FROM);
+  for (let m = 1; m <= last; m++) {
     if (m % 2 === 1) {
       E[m] = 0;
       continue;
@@ -92,6 +95,7 @@ export function eulerNumbers(n: number): number[] {
     }
     E[m] = -sum;
   }
+  for (let m = EULER_NUMBERS_NAN_FROM + 2; m <= n; m += 2) E[m] = NaN;
   return E;
 }
 

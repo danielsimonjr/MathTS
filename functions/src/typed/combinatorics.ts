@@ -34,7 +34,7 @@ const PRIME_SIEVE_MAX = 1_000_000_000;
 /** Largest block of the segmented sieve. */
 const SIEVE_SEGMENT = 262144;
 /** Largest sqrt(n) for the trial-division loop of divisors and divisorSigma. */
-const DIVISOR_LOOP_MAX = 1e9;
+const DIVISOR_LOOP_MAX = 2e9;
 
 // =============================================================================
 // fibonacci - Fibonacci Number (Fast Doubling)
@@ -498,7 +498,7 @@ export const primeFactors = mathTyped('primeFactors', {
  *
  * @param n - Positive integer
  * @returns Sorted array of divisors
- * @throws RangeError if `sqrt(n)` is above 1000000000
+ * @throws RangeError if `sqrt(n)` is above 2000000000
  *
  * @example
  * divisors(12) // => [1, 2, 3, 4, 6, 12]
@@ -574,7 +574,7 @@ export const eulerPhi = mathTyped('eulerPhi', {
  * divisorSigma(12, 0)  // => 6 (number of divisors)
  * divisorSigma(12, 2)  // => 210
  *
- * @throws RangeError if `sqrt(n)` is above 1000000000
+ * @throws RangeError if `sqrt(n)` is above 2000000000
  */
 export const divisorSigma = mathTyped('divisorSigma', {
   number: (n: number): number => {

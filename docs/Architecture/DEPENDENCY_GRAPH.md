@@ -7981,10 +7981,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                            | Type   |
-| ---------------------------- | ---------------------------------- | ------ |
-| `../utils/limits.js`         | `assertAllocSize, assertLoopOrder` | Import |
-| `../wasm/special/scalars.js` | `chooseScalar`                     | Import |
+| File                         | Imports           | Type   |
+| ---------------------------- | ----------------- | ------ |
+| `../utils/limits.js`         | `assertAllocSize` | Import |
+| `../wasm/special/scalars.js` | `chooseScalar`    | Import |
 
 **Exports:**
 
@@ -8535,11 +8535,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports           | Type   |
-| ------------------------ | ----------------- | ------ |
-| `../../utils/number.js`  | `isInteger`       | Import |
-| `../../utils/product.js` | `product`         | Import |
-| `../../utils/limits.js`  | `assertLoopOrder` | Import |
+| File                     | Imports     | Type   |
+| ------------------------ | ----------- | ------ |
+| `../../utils/number.js`  | `isInteger` | Import |
+| `../../utils/product.js` | `product`   | Import |
 
 **Exports:**
 
@@ -9817,7 +9816,6 @@ graph LR
 | File                      | Imports                   | Type   |
 | ------------------------- | ------------------------- | ------ |
 | `../typed/probability.js` | `bernoulli, combinations` | Import |
-| `../utils/limits.js`      | `assertLoopOrder`         | Import |
 
 **Exports:**
 
@@ -20603,8 +20601,8 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
-| `functions/src/utils/limits`                           | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
+| `functions/src/utils/limits`                           | 0 files      | 34 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
@@ -21529,7 +21527,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232832 |
+| Total Lines of Code     | 232835 |
 | Total Exports           | 7328   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |

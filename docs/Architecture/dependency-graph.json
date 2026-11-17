@@ -19868,7 +19868,7 @@
         "internalDependencies": [
           {
             "file": "../utils/limits.js",
-            "imports": ["assertAllocSize", "assertLoopOrder"]
+            "imports": ["assertAllocSize"]
           },
           {
             "file": "../wasm/special/scalars.js",
@@ -20634,10 +20634,6 @@
           {
             "file": "../../utils/product.js",
             "imports": ["product"]
-          },
-          {
-            "file": "../../utils/limits.js",
-            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -22832,10 +22828,6 @@
           {
             "file": "../typed/probability.js",
             "imports": ["bernoulli", "combinations"]
-          },
-          {
-            "file": "../utils/limits.js",
-            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -49212,7 +49204,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 232832,
+    "totalLinesOfCode": 232835,
     "totalExports": 7328,
     "totalClasses": 62,
     "totalInterfaces": 664,
