@@ -88,7 +88,7 @@ describe('G30 #778 quantileSeq options + NumPy method names', () => {
   });
 
   it('every NumPy method matches np.quantile on [1..10]', () => {
-    // numpy 1.26.4, np.arange(1, 11), probabilities 0.1 / 0.25 / 0.5 / 0.75.
+    // numpy 2.3.5, np.arange(1, 11), probabilities 0.1 / 0.25 / 0.5 / 0.75.
     const oracle: Record<string, [number, number, number, number]> = {
       linear: [1.9, 3.25, 5.5, 7.75],
       lower: [1, 3, 5, 7],
@@ -97,7 +97,8 @@ describe('G30 #778 quantileSeq options + NumPy method names', () => {
       midpoint: [1.5, 3.5, 5.5, 7.5],
       inverted_cdf: [1, 3, 5, 8],
       averaged_inverted_cdf: [1.5, 3, 5.5, 8],
-      closest_observation: [1, 3, 5, 7],
+      // NumPy 2.3.5 value; NumPy 1.26.4 gave [1, 3, 5, 7] (tie parity differs).
+      closest_observation: [1, 2, 5, 8],
       interpolated_inverted_cdf: [1, 2.5, 5, 7.5],
       hazen: [1.5, 3, 5.5, 8],
       weibull: [1.1, 2.75, 5.5, 8.25],

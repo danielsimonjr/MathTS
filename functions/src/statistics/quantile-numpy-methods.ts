@@ -110,12 +110,13 @@ function discreteInvertedCdf(n: number, p: number): number {
 
 function closestObservation(n: number, p: number): number {
   // NumPy `_closest_observation`: index = n*p - 1.5; take floor only when the
-  // fractional part is 0 and floor(index) is even, otherwise ceil. Negative
+  // fractional part is 0 and floor(index) is odd (the even
+  // 1-based order statistic), otherwise ceil. Negative
   // indexes clip to 0 (`_discret_interpolation_to_boundaries`).
   const index = n * p - 1 - 0.5;
   const prev = Math.floor(index);
   const gamma = index - prev;
-  let idx = gamma === 0 && prev % 2 === 0 ? prev : prev + 1;
+  let idx = gamma === 0 && Math.abs(prev % 2) === 1 ? prev : prev + 1;
   if (idx < 0) idx = 0;
   return idx;
 }
@@ -151,15 +152,15 @@ export function quantileOfSorted(
     const idx = Math.max(0, Math.min(n - 1, vi));
     return sorted[idx];
   }
+  // NumPy `_get_indexes`: an index at or above n - 1, or below 0, clips BOTH ends to the
+  // boundary element; gamma is then taken from the clipped left index.
   let leftIdx = Math.floor(vi);
-  if (vi >= n - 1) leftIdx = n - 1;
-  else if (vi < 0) leftIdx = 0;
-  const rightIdx = Math.min(n - 1, leftIdx + 1);
+  let rightIdx = leftIdx + 1;
+  if (vi >= n - 1) leftIdx = rightIdx = n - 1;
+  else if (vi < 0) leftIdx = rightIdx = 0;
   const left = sorted[leftIdx];
   const right = sorted[rightIdx];
-  let gamma = vi - Math.floor(vi);
-  if (leftIdx === rightIdx) gamma = 0;
-  gamma = fixGamma(method, gamma, vi);
+  const gamma = fixGamma(method, vi - leftIdx, vi);
   // NumPy `_lerp`: blend from the nearer end, so an infinite end does not give inf - inf.
   const diff = right - left;
   const r = gamma >= 0.5 ? right - diff * (1 - gamma) : left + diff * gamma;
