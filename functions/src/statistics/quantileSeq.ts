@@ -50,16 +50,16 @@ function _assertMode(mode: string): QuantileMode {
 function _resolveSortedAndMode(
   third?: boolean | string | QuantileSeqOptions,
   fourth?: string
-): { sorted: boolean; mode: QuantileMode } {
+): { sorted: boolean; mode: QuantileMode; skipNaN: boolean } {
   if (typeof third === 'boolean') {
-    return { sorted: third, mode: fourth ? _assertMode(fourth) : 'linear' };
+    return { sorted: third, mode: fourth ? _assertMode(fourth) : 'linear', skipNaN: false };
   }
   if (typeof third === 'string') {
-    return { sorted: false, mode: _assertMode(third) };
+    return { sorted: false, mode: _assertMode(third), skipNaN: false };
   }
   const parsed = parseQuantileThirdArg(third);
   if (parsed) return parsed;
-  return { sorted: false, mode: 'linear' };
+  return { sorted: false, mode: 'linear', skipNaN: false };
 }
 
 const name = 'quantileSeq';
@@ -183,6 +183,14 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         p: unknown[] | MatrixType,
         mode: string
       ): unknown => _quantileSeqProbCollection(data, p, false, _assertMode(mode)),
+      'Array | Matrix, Array | Matrix, Object': (
+        data: unknown[] | MatrixType,
+        p: unknown[] | MatrixType,
+        options: QuantileSeqOptions
+      ): unknown => {
+        const o = parseQuantileThirdArg(options)!;
+        return _quantileSeqProbCollection(data, p, o.sorted, o.mode, o.skipNaN);
+      },
       'Array | Matrix, Array | Matrix, boolean': _quantileSeqProbCollection,
       'Array | Matrix, Array | Matrix, boolean, number': (
         data: unknown[] | MatrixType,
@@ -214,7 +222,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       third?: boolean | string | QuantileSeqOptions,
       fourth?: string
     ): unknown {
-      const { sorted, mode } = _resolveSortedAndMode(third, fourth);
+      const { sorted, mode, skipNaN } = _resolveSortedAndMode(third, fourth);
       let probArr: unknown[];
       const dataArr = isFloatTyped(data)
         ? (copyToNumberArray(data) as unknown[])
@@ -225,8 +233,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       if (smallerEq(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], prob[,sorted])
         return isNumber(probOrN)
-          ? _quantileSeq(dataArr, probOrN, sorted, mode)
-          : bignumber!(_quantileSeq(dataArr, probOrN, sorted, mode));
+          ? _quantileSeq(dataArr, probOrN, sorted, mode, skipNaN)
+          : bignumber!(_quantileSeq(dataArr, probOrN, sorted, mode, skipNaN));
       }
       if (larger(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], N[,sorted])
@@ -248,7 +256,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
 
         for (let i = 0; smaller(i, probOrN); i++) {
           const prob = divide(i + 1, nPlusOne);
-          probArr.push(_quantileSeq(dataArr, prob, sorted, mode));
+          probArr.push(_quantileSeq(dataArr, prob, sorted, mode, skipNaN));
         }
 
         return isNumber(probOrN) ? probArr : bignumber!(probArr);
@@ -271,14 +279,17 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       data: unknown[] | MatrixType,
       probOrN: unknown[] | MatrixType,
       sorted: boolean,
-      mode: QuantileMode = 'linear'
+      mode: QuantileMode = 'linear',
+      skipNaN = false
     ): unknown {
       const dataArr = (data as MatrixType).valueOf() as unknown[];
       // quantileSeq([a, b, c, d, ...], [prob1, prob2, ...][,sorted])
       const probOrNArr = (probOrN as MatrixType).valueOf() as unknown[];
       const probArr: unknown[] = [];
       for (let i = 0; i < probOrNArr.length; ++i) {
-        probArr.push(_quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted, mode));
+        probArr.push(
+          _quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted, mode, skipNaN)
+        );
       }
       return probArr;
     }
@@ -296,7 +307,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       array: unknown[],
       prob: number | BigNumberType,
       sorted: boolean,
-      mode: QuantileMode = 'linear'
+      mode: QuantileMode = 'linear',
+      skipNaN = false
     ): unknown {
       const flat = flatten(array) as unknown[];
       const len = flat.length;
@@ -305,7 +317,13 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       }
 
       if (isNumber(prob) && flat.every((v) => isNumber(v))) {
-        const nums = flat as number[];
+        let nums = flat as number[];
+        if (nums.some((v) => v !== v)) {
+          // NaN policy of mean and median: propagate, or omit with skipNaN / skipna.
+          if (!skipNaN) return NaN;
+          nums = nums.filter((v) => v === v);
+          if (nums.length === 0) return NaN;
+        }
         const sortedNums = sorted ? nums : nums.slice().sort((a, b) => a - b);
         return quantileOfSorted(sortedNums, prob, mode);
       }

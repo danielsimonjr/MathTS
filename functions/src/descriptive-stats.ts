@@ -26,7 +26,27 @@ import { numberVector } from './typed/number-matrix.js';
 import { assertAllocSize } from './utils/limits.js';
 import { readSkip } from './statistics/numeric-data.js';
 
-const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
+const _quantileSeq = _quantileSeqRaw as (
+  data: readonly number[],
+  p: number,
+  opts?: { skipNaN?: boolean }
+) => number;
+
+/** Options of the functions that follow the NaN policy of `mean` and `median`. */
+export interface NaNPolicyOptions {
+  /** Omit NaN values. `±Infinity` is kept. */
+  skipNaN?: boolean;
+  /** Pandas spelling of {@link NaNPolicyOptions.skipNaN}. */
+  skipna?: boolean;
+}
+
+function skipOf(name: string, opts: NaNPolicyOptions | undefined): boolean {
+  if (opts === undefined) return false;
+  if (opts === null || typeof opts !== 'object') {
+    throw new TypeError(`${name}: options must be an object with skipNaN or skipna (boolean)`);
+  }
+  return readSkip(opts) ?? false;
+}
 
 type Vec = readonly number[] | Float64Array;
 
@@ -182,10 +202,13 @@ export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}
 }
 
 /** Interquartile range: `Q3 − Q1` via `quantileSeq`. */
-export function iqr(x: Vec): number {
+export function iqr(x: Vec, opts?: NaNPolicyOptions): number {
+  const skipNaN = skipOf('iqr', opts);
   // quantileSeq has an exact path and reads a nested array, so iqr keeps its input as is.
   const a = (Array.isArray(x) ? x : Array.from(x)) as number[];
-  return (_quantileSeq(a, 0.75) as number) - (_quantileSeq(a, 0.25) as number);
+  return (
+    (_quantileSeq(a, 0.75, { skipNaN }) as number) - (_quantileSeq(a, 0.25, { skipNaN }) as number)
+  );
 }
 
 /** Standard error of the mean: `sampleStd / √n`. */
@@ -555,16 +578,27 @@ export function kendallTauTest(x: Vec, y: Vec): KendallTauTestResult {
 // ===========================================================================
 
 /** Peak-to-peak / statistical range: max − min. (`np.ptp`; `range` is taken.) */
-export function ptp(x: Vec): number {
+export function ptp(x: Vec, opts?: NaNPolicyOptions): number {
+  const skipNaN = skipOf('ptp', opts);
   const a = numberVector('ptp', x);
   if (a.length === 0) return NaN;
-  let lo = a[0];
-  let hi = a[0];
+  let lo = Infinity;
+  let hi = -Infinity;
+  let seen = false;
   for (const v of a) {
+    if (v !== v) {
+      if (skipNaN) continue;
+      return NaN;
+    }
+    if (!seen) {
+      lo = hi = v;
+      seen = true;
+      continue;
+    }
     if (v < lo) lo = v;
     if (v > hi) hi = v;
   }
-  return hi - lo;
+  return seen ? hi - lo : NaN;
 }
 
 /** Coefficient of variation: population-std / mean (`scipy.stats.variation`, ddof=0). */
@@ -705,10 +739,20 @@ export interface HistogramResult {
  * The last bin includes the maximum. If all values are equal, the range is that value
  * plus and minus 0.5.
  *
- * @throws Error if `x` is empty, or if `bins` is not a positive integer.
+ * NaN throws, as `numpy.histogram`. With `{ skipNaN: true }` or `{ skipna: true }`, NaN is omitted.
+ * An infinite value throws, because the range is not finite.
+ *
+ * @throws Error if `x` is empty (after the NaN skip), has NaN, or has an infinite value; if `bins` is not a positive integer.
  */
-export function histogram(x: Vec, bins = 10): HistogramResult {
-  const a = numberVector('histogram', x);
+export function histogram(x: Vec, bins = 10, opts?: NaNPolicyOptions): HistogramResult {
+  const skipNaN = skipOf('histogram', opts);
+  let a = numberVector('histogram', x);
+  if (a.some((v) => v !== v)) {
+    if (!skipNaN) {
+      throw new Error('histogram: input contains NaN; pass { skipNaN: true } to omit it');
+    }
+    a = a.filter((v) => v === v);
+  }
   if (a.length === 0) throw new Error('histogram: input must be non-empty');
   if (!Number.isInteger(bins) || bins < 1)
     throw new Error('histogram: bins must be a positive integer');
@@ -718,6 +762,9 @@ export function histogram(x: Vec, bins = 10): HistogramResult {
   for (const v of a) {
     if (v < lo) lo = v;
     if (v > hi) hi = v;
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) {
+    throw new Error('histogram: the range of the input is not finite');
   }
   if (lo === hi) {
     lo -= 0.5;

@@ -1,8 +1,9 @@
+import { readSkip } from './numeric-data.js';
+
 /**
  * NumPy 2.x `method=` quantile definitions (Hyndman–Fan + legacy names).
  * Virtual-index recipes match `numpy/lib/_function_base_impl.py` (`_QuantileMethods`).
  */
-
 export type NumpyQuantileMethod =
   | 'linear'
   | 'lower'
@@ -159,26 +160,36 @@ export function quantileOfSorted(
   let gamma = vi - Math.floor(vi);
   if (leftIdx === rightIdx) gamma = 0;
   gamma = fixGamma(method, gamma, vi);
-  return left + gamma * (right - left);
+  // Equal ends (this includes the same Infinity) give that value. Gamma 0 gives the left end.
+  if (gamma === 0 || left === right) return left;
+  // NumPy `_lerp`: blend from the nearer end, so an infinite end does not give inf - inf.
+  const diff = right - left;
+  return gamma >= 0.5 ? right - diff * (1 - gamma) : left + diff * gamma;
 }
 
 /** Third argument to `quantileSeq`: NumPy-style `{ method, sorted }` or legacy forms. */
 export interface QuantileSeqOptions {
   method?: string;
   sorted?: boolean;
+  /** Omit NaN values, as `numpy.nanquantile`. `±Infinity` is kept. */
+  skipNaN?: boolean;
+  /** Pandas spelling of {@link skipNaN}. */
+  skipna?: boolean;
 }
 
 /** Normalize `quantileSeq`'s optional third argument to `{ sorted, mode }`. */
 export function parseQuantileThirdArg(
   third: unknown
-): { sorted: boolean; mode: NumpyQuantileMethod } | null {
+): { sorted: boolean; mode: NumpyQuantileMethod; skipNaN: boolean } | null {
   if (third === null || third === undefined) return null;
-  if (typeof third === 'boolean') return { sorted: third, mode: 'linear' };
-  if (typeof third === 'string') return { sorted: false, mode: assertNumpyQuantileMethod(third) };
+  if (typeof third === 'boolean') return { sorted: third, mode: 'linear', skipNaN: false };
+  if (typeof third === 'string') {
+    return { sorted: false, mode: assertNumpyQuantileMethod(third), skipNaN: false };
+  }
   if (typeof third === 'object' && !Array.isArray(third)) {
     const o = third as QuantileSeqOptions;
     const mode = assertNumpyQuantileMethod(o.method ?? 'linear');
-    return { sorted: o.sorted ?? false, mode };
+    return { sorted: o.sorted ?? false, mode, skipNaN: readSkip(o) ?? false };
   }
   return null;
 }
