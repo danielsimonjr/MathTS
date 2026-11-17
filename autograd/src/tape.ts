@@ -430,7 +430,8 @@ export class TapedTensor {
    * This function exists only as a `TapedTensor` method; the package has no free
    * `binaryCrossEntropy` function.
    *
-   * @throws Error when the target shape or length differs from this tensor
+   * @throws Error when the target shape or length differs from this tensor, or when a
+   *   `TapedTensor` target belongs to another tape
    */
   binaryCrossEntropy(targets: TapedTensor | Float64Array | ReadonlyArray<number>): TapedTensor {
     if (targets instanceof TapedTensor) {
