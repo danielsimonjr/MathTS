@@ -315,7 +315,7 @@ const assumptions: Map<string, Set<string>> = new Map();
  * @param a - Lower bound for definite integral, or upper bound when first argument is a function
  * @param b - Upper bound for definite integral
  * @returns Symbolic antiderivative string or numerical result
- * @throws {RangeError} For `integrate(fn, a, b)` when the integral does not converge or the result is not finite
+ * @throws RangeError for `integrate(fn, a, b)` when the integral does not converge or the result is not finite
  *
  * @example
  * integrate('x^2', 'x')          // => 'x^3/3'
