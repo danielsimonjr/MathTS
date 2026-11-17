@@ -76,6 +76,10 @@ export function lstsq(
   const out = Array.from({ length: n }, () => new Array<number>(k).fill(0));
   const finish = (): number[] | number[][] => (vectorRhs ? out.map((r) => r[0] ?? 0) : out);
   if (sA === 0 || sB === 0 || n === 0) return finish();
+  // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
+  // sB / sA is taken first then (#1104). An ordinary pair keeps the original order.
+  const inWindow = (v: number): boolean => v >= 2 ** -400 && v <= 2 ** 400;
+  const ratioInWindow = inWindow(sA) && inWindow(sB);
   for (let i = 0; i < R.length; i++) R[i] /= sA;
   for (let i = 0; i < Y.length; i++) Y[i] /= sB;
 
@@ -100,7 +104,8 @@ export function lstsq(
     } else if (rank > 0) {
       minNormSolve(R, n, rank, Y, k, col, z);
     }
-    for (let j = 0; j < n; j++) out[perm[j]][col] = (z[j] * sB) / sA;
+    for (let j = 0; j < n; j++)
+      out[perm[j]][col] = ratioInWindow ? (z[j] * sB) / sA : z[j] * (sB / sA);
   }
   return finish();
 }

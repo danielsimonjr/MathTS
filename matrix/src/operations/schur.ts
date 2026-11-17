@@ -19,6 +19,9 @@ import { decompositionSource, type DecompositionMatrixInput } from './as-packed.
 import {
   eye,
   cloneMatrix,
+  ldexpMatrix,
+  normInf,
+  pow2ScaleExponent,
   householder,
   applyHouseholderLeft,
   applyHouseholderRight,
@@ -264,6 +267,17 @@ function schurRaw(
 
   if (n === 1) {
     return { H: [[A[0][0]]], Q: [[1]] };
+  }
+
+  // An extreme matrix is scaled by an exact power of 2 (#1104); T is scaled back
+  // at the end and Q is scale-free. The caller's array is never changed.
+  const e = pow2ScaleExponent(normInf(A));
+  if (e !== 0) {
+    const scaledA = cloneMatrix(A);
+    ldexpMatrix(scaledA, e);
+    const res = schurRaw(scaledA, maxIterations, tolerance);
+    ldexpMatrix(res.H, -e);
+    return res;
   }
 
   const { H, Q } = hessenbergReduce(A);

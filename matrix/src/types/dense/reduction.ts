@@ -1,5 +1,16 @@
 import type { Matrix } from '../Matrix.js';
+import { norm2 } from '@danielsimonjr/mathts-core';
 import { contiguousDenseData } from './storage.js';
+
+/**
+ * `sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that
+ * is finite and at least 2^-800 is exact enough and gives the same bits as before; any
+ * other sum lost digits or overflowed, so the norm is recomputed with a running scale.
+ */
+export function sqrtOfSumSquares(sumSquared: number, values: ArrayLike<number>): number {
+  if (sumSquared >= 2 ** -800 && sumSquared < Infinity) return Math.sqrt(sumSquared);
+  return norm2(values);
+}
 
 /**
  * Add all elements of a matrix.
@@ -94,15 +105,17 @@ export function norm(a: Matrix<number>): number {
   const d = contiguousDenseData(a);
   if (d !== null) {
     for (let i = 0; i < d.length; i++) sumSquared += d[i] * d[i];
-    return Math.sqrt(sumSquared);
+    return sqrtOfSumSquares(sumSquared, d);
   }
+  const values: number[] = [];
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       const val = a.get(i, j);
       sumSquared += val * val;
+      values.push(val);
     }
   }
-  return Math.sqrt(sumSquared);
+  return sqrtOfSumSquares(sumSquared, values);
 }
 
 /**

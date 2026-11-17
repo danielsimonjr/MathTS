@@ -17,6 +17,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
+import { ldexp, pow2ScaleExponent } from './common.js';
 
 /**
  * Result of `qr`: the factors Q and R, where A = Q · R.
@@ -62,7 +63,12 @@ export function qr(A: DecompositionMatrixInput, opts?: QROptions): QRResult {
     };
   }
 
-  const aFlat = dense.toFloat64Array();
+  let aFlat = dense.toFloat64Array();
+  // An extreme matrix is scaled by an exact power of 2 (#1104); R is scaled back at the end.
+  let amax = 0;
+  for (let i = 0; i < aFlat.length; i++) if (Math.abs(aFlat[i]) > amax) amax = Math.abs(aFlat[i]);
+  const e = pow2ScaleExponent(amax);
+  if (e !== 0) aFlat = aFlat.map((v) => ldexp(v, e));
   const k = Math.min(m, n);
 
   // Column-major scratch space for Q: index Qcm[i + j * m] for row i, col j.
@@ -187,6 +193,8 @@ export function qr(A: DecompositionMatrixInput, opts?: QROptions): QRResult {
       qRowMajor[i * qWidth + j] = Qcm[i + j * m];
     }
   }
+
+  if (e !== 0) for (let i = 0; i < R.length; i++) R[i] = ldexp(R[i], -e);
 
   return {
     Q: new DenseMatrix(m, qWidth, qRowMajor),

@@ -8,7 +8,16 @@
  *   - V: n x n orthogonal matrix (right singular vectors)
  */
 
-import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
+import {
+  eye,
+  householder,
+  applyHouseholderLeft,
+  applyHouseholderRight,
+  ldexp,
+  ldexpMatrix,
+  normInf,
+  pow2ScaleExponent,
+} from './common.js';
 import { applyGivensCols, givensRotation } from './givens.js';
 import {
   decompositionSource,
@@ -402,7 +411,16 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   }
 
   // Bidiagonalize
-  const { B, U, V } = bidiagonalize(source.copyRows(transposed));
+  // An extreme matrix is scaled by an exact power of 2 (#1104); S is scaled back below.
+  // The exponent comes from the first copy, and the Jacobi fallback copy reuses it.
+  let scaleExp = 0;
+  const workCopy = (): number[][] => {
+    const rows = source.copyRows(transposed);
+    if (scaleExp === 0) scaleExp = pow2ScaleExponent(normInf(rows));
+    if (scaleExp !== 0) ldexpMatrix(rows, scaleExp);
+    return rows;
+  };
+  const { B, U, V } = bidiagonalize(workCopy());
 
   // Extract diagonal and superdiagonal
   const minMN = Math.min(m, n);
@@ -477,7 +495,7 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   const maxAbsD = d.reduce((mx, x) => Math.max(mx, Math.abs(x)), 0);
   if (maxAbsD > 0 && d.some((x) => Math.abs(x) <= rankTolerance * maxAbsD)) {
     // bidiagonalize consumed its copy, so the fallback takes a new one from the source.
-    const jac = jacobiSVD(source.copyRows(transposed));
+    const jac = jacobiSVD(workCopy());
     dFinal = jac.d;
     uFinal = jac.U;
     vFinal = jac.V;
@@ -497,7 +515,7 @@ export function svdOfSource(source: DecompositionSource, options: SVDOptions = {
   const indices = Array.from({ length: dFinal.length }, (_, i) => i);
   indices.sort((a, b) => dFinal[b] - dFinal[a]);
 
-  const sortedS = indices.map((i) => dFinal[i]);
+  const sortedS = indices.map((i) => (scaleExp === 0 ? dFinal[i] : ldexp(dFinal[i], -scaleExp)));
   const sortedU = uFinal.map((row) => indices.map((i) => row[i]));
   const sortedV = vFinal.map((row) => indices.map((i) => row[i]));
 
@@ -646,6 +664,16 @@ export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): n
  * Equals sqrt(sum of squared singular values)
  */
 export function normFro(matrix: DecompositionMatrixInput): number {
-  const sum = decompositionSource(matrix).sumOfSquares();
-  return Math.sqrt(sum);
+  const source = decompositionSource(matrix);
+  const sum = source.sumOfSquares();
+  // The sum of squares overflows above about 1e154 and loses its digits below about
+  // 1e-150 (#1104). Only then is the scaled sum taken, so an ordinary result is unchanged.
+  if (sum < Infinity && sum >= 2 ** -800) return Math.sqrt(sum);
+  const rows = source.copyRows(false);
+  const e = pow2ScaleExponent(normInf(rows));
+  if (e === 0) return Math.sqrt(sum);
+  ldexpMatrix(rows, e);
+  let scaledSum = 0;
+  for (const row of rows) for (const v of row) scaledSum += v * v;
+  return ldexp(Math.sqrt(scaledSum), -e);
 }

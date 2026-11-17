@@ -22,7 +22,17 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
-import { eye, matMul, transpose, matInv, gaussJordanSolve } from './common.js';
+import {
+  eye,
+  matMul,
+  transpose,
+  matInv,
+  gaussJordanSolve,
+  ldexp,
+  ldexpMatrix,
+  normInf,
+  pow2ScaleExponent,
+} from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -453,7 +463,16 @@ export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
     return DenseMatrix.fromArray([[Math.sqrt(val)]]);
   }
 
-  const Aarr = A.toArray();
+  let Aarr = A.toArray();
+
+  // An extreme matrix is scaled by an exact power of 2 (#1104). The exponent is even,
+  // so sqrtm(2^e · A) = 2^(e/2) · sqrtm(A) is exact.
+  let e = pow2ScaleExponent(normInf(Aarr));
+  if (e % 2 !== 0) e += 1;
+  if (e !== 0) {
+    Aarr = Aarr.map((row) => row.slice());
+    ldexpMatrix(Aarr, e);
+  }
 
   // Detect symmetry
   const forceSymmetric = opts?.assumeSymmetric ?? false;
@@ -477,7 +496,10 @@ export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
   }
 
   const data = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = result[i][j];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++)
+      data[i * n + j] = e === 0 ? result[i][j] : ldexp(result[i][j], -e / 2);
+  }
 
   return new DenseMatrix(n, n, data);
 }

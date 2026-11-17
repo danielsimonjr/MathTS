@@ -82,10 +82,10 @@ describe('S2R batch3 — Frobenius norm (G52 oracle)', () => {
     expect(jsBackend.norm(empty)).toBe(0);
   });
 
-  it('naive sum-of-squares overflows to Infinity at 1e200', () => {
+  it('stays finite at 1e200, where the naive sum of squares overflows (#1104)', () => {
     // 1e200² overflows IEEE-754 to Infinity; Math.hypot(1e200, 1e200) stays finite.
     const a = DenseMatrix.fromArray([[1e200, 1e200]]);
-    expect(jsBackend.norm(a)).toBe(Infinity);
+    expect(jsBackend.norm(a) / 1e200).toBeCloseTo(Math.SQRT2, 12);
   });
 });
 
