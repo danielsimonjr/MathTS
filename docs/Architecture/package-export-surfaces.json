@@ -3318,6 +3318,7 @@
       "MAX_ALLOC_ELEMENTS",
       "MAX_LOOP_ORDER",
       "MAX_POLYNOMIAL_DEGREE",
+      "MAX_RECURRENCE_ORDER",
       "maxClique",
       "maxFlow",
       "MaxFlowResult",

@@ -11,7 +11,13 @@
  * @packageDocumentation
  */
 
-import { assertAllocSize } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
+
+/** Largest `n` for the root-scan rules. Above about 450 the scan throws, so the limit costs no result. */
+const MAX_SCAN_DEGREE = 500;
+
+/** Largest `n` for `rootsJacobi` (n = 800 takes about 18 s). */
+const MAX_JACOBI_NODES = 800;
 
 /** Nodes (ascending) and matching weights. */
 export interface GaussRule {
@@ -19,10 +25,11 @@ export interface GaussRule {
   weights: number[];
 }
 
-function checkDegree(n: number, name: string): void {
+function checkDegree(n: number, name: string, max?: number): void {
   if (!Number.isInteger(n) || n < 1) {
     throw new RangeError(`${name}: n must be a positive integer`);
   }
+  if (max !== undefined) assertLoopOrder(name, 'n', n, max);
 }
 
 function checkExponent(a: number, name: string): void {
@@ -138,7 +145,7 @@ function jacobiValues(n: number, alpha: number, beta: number, x: number): number
  * rootsHermite(2).nodes // [-0.7071067811865476, 0.7071067811865476]
  */
 export function rootsHermite(n: number): GaussRule {
-  checkDegree(n, 'rootsHermite');
+  checkDegree(n, 'rootsHermite', MAX_SCAN_DEGREE);
   const bound = Math.sqrt(2 * n + 1) + 1;
   const nodes = scanRoots((x) => hermiteValues(n, x)[n], -bound, bound, n);
   const weights = nodes.map((x) => {
@@ -160,7 +167,7 @@ export function rootsHermite(n: number): GaussRule {
  * rootsLaguerre(2).nodes // [0.5857864376269049, 3.414213562373095]
  */
 export function rootsLaguerre(n: number, alpha = 0): GaussRule {
-  checkDegree(n, 'rootsLaguerre');
+  checkDegree(n, 'rootsLaguerre', MAX_SCAN_DEGREE);
   checkExponent(alpha, 'rootsLaguerre');
   const upper = 4 * n + 2 * alpha + 4;
   const nodes = scanRoots((x) => laguerreValues(n, alpha, x)[n], 0, upper, n);
@@ -227,7 +234,7 @@ export function rootsChebyshevU(n: number): GaussRule {
  * rootsJacobi(3, 0, 0) // Legendre: nodes ±√(3/5), 0
  */
 export function rootsJacobi(n: number, alpha: number, beta: number): GaussRule {
-  checkDegree(n, 'rootsJacobi');
+  checkDegree(n, 'rootsJacobi', MAX_JACOBI_NODES);
   checkExponent(alpha, 'rootsJacobi');
   checkExponent(beta, 'rootsJacobi');
   const nodes = scanRoots((x) => jacobiValues(n, alpha, beta, x)[n], -1, 1, n);

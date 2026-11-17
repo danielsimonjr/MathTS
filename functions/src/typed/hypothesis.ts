@@ -45,6 +45,10 @@ import { erfcScalar } from './special.js';
 import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest `n` that `binomialTest` sums (4e7 terms take about 18 s). */
+const MAX_BINOMIAL_TEST_N = 40_000_000;
 
 // =============================================================================
 // Type Definitions
@@ -1710,6 +1714,7 @@ export function binomialTest(
   if (!Number.isInteger(successes) || !Number.isInteger(n) || successes < 0 || successes > n) {
     throw new Error('binomialTest: successes must be an integer in [0, n]');
   }
+  assertLoopOrder('binomialTest', 'n', n, MAX_BINOMIAL_TEST_N);
   const dObs = _binomPmf(successes, n, p);
   const rel = 1 + 1e-7;
   // Each log-gamma pmf term carries a rounding error, so the n + 1 terms do

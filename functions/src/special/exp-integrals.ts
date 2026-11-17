@@ -2,10 +2,15 @@
  * Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).
  */
 
+import { assertLoopOrder } from '../utils/limits.js';
+
 const EULER_GAMMA = 0.5772156649015329;
 const EPS = 1e-16;
 const FPMIN = 1e-300;
 const MAX_ITER = 1000;
+
+/** Largest order that the `expn` recurrence runs (1e9 steps take about 24 s). */
+const MAX_EXPN_ORDER = 1_000_000_000;
 
 /** E_n(x) for n ≥ 1 and x > 1 via the modified Lentz continued fraction. */
 function expnContinuedFraction(n: number, x: number): number {
@@ -37,7 +42,9 @@ function expnContinuedFraction(n: number, x: number): number {
  * expn(3, 0)  // 0.5
  */
 export function expn(n: number, x: number): number {
-  if (!Number.isInteger(n) || n < 0 || Number.isNaN(x) || x < 0) return NaN;
+  if (typeof x !== 'number' || !Number.isInteger(n) || n < 0 || Number.isNaN(x) || x < 0) {
+    return NaN;
+  }
   if (n === 0) return x === 0 ? Infinity : Math.exp(-x) / x;
   if (x === 0) return n === 1 ? Infinity : 1 / (n - 1);
   if (x > 1) return expnContinuedFraction(n, x);
@@ -50,10 +57,12 @@ export function expn(n: number, x: number): number {
     series += add;
     if (Math.abs(add) <= EPS * Math.abs(series)) break;
   }
+  assertLoopOrder('expn', 'n', n, MAX_EXPN_ORDER);
   let e = -EULER_GAMMA - Math.log(x) + series;
   const ex = Math.exp(-x);
   for (let k = 1; k < n; k += 1) {
     e = (ex - x * e) / k;
+    if (Number.isNaN(e)) return NaN;
   }
   return e;
 }

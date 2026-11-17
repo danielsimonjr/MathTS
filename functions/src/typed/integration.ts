@@ -41,6 +41,10 @@
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { isDeterministic, pairwiseSum } from '@danielsimonjr/mathts-core';
 import { numberVector } from './number-matrix.js';
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest sub-interval count that `gaussQuad` runs (2e8 sub-intervals of a trivial `f` take about 17 s). */
+const MAX_GAUSS_QUAD_INTERVALS = 200_000_000;
 
 // =============================================================================
 // Thresholds
@@ -465,6 +469,7 @@ export function gaussQuad(
   }
 
   // Composite Gauss-Legendre: split [a, b] into n sub-intervals
+  assertLoopOrder('gaussQuad', 'n', n, MAX_GAUSS_QUAD_INTERVALS);
   const clampedOrder = order >= 2 && order <= 5 ? order : 5;
   const nodes = GL_NODES[clampedOrder];
   const weights = GL_WEIGHTS[clampedOrder];
