@@ -10,7 +10,7 @@ import { discreteLog } from '../src/index.js';
 describe('discreteLog with gcd(g, p) > 1 (#1114)', () => {
   it.each([
     // [g, h, p, expected]
-    [2, 6, 10, 4], // 2^4 = 16 === 6 (old: -1)
+    [2, 6, 10, 4], // 2^4 = 16 === 6 (old: 5)
     [2, 4, 6, 2],
     [0, 0, 2, 1], // old: -1
     [0, 0, 7, 1],
