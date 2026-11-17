@@ -1801,9 +1801,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports       | Type   |
-| ------------------------ | ------------- | ------ |
-| `./types/DenseMatrix.js` | `DenseMatrix` | Import |
+| File                         | Imports            | Type   |
+| ---------------------------- | ------------------ | ------ |
+| `./types/DenseMatrix.js`     | `DenseMatrix`      | Import |
+| `./types/dense/reduction.js` | `sqrtOfSumSquares` | Import |
 
 **Exports:**
 
@@ -1824,9 +1825,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports       | Type   |
-| ------------------------ | ------------- | ------ |
-| `./types/DenseMatrix.js` | `DenseMatrix` | Import |
+| File                         | Imports            | Type   |
+| ---------------------------- | ------------------ | ------ |
+| `./types/DenseMatrix.js`     | `DenseMatrix`      | Import |
+| `./types/dense/reduction.js` | `sqrtOfSumSquares` | Import |
 
 **Exports:**
 
@@ -1883,7 +1885,9 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Interfaces: `EntryRange`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Constants: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`
 
 ---
 
@@ -1891,12 +1895,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                           | Type               |
-| -------------------------- | --------------------------------- | ------------------ |
-| `../types/DenseMatrix.js`  | `DenseMatrix`                     | Import             |
-| `../types/SparseMatrix.js` | `SparseMatrix`                    | Import (type-only) |
-| `./as-packed.js`           | `decompositionInputToDenseMatrix` | Import             |
-| `./lu.js`                  | `lu`                              | Import             |
+| File                       | Imports                                     | Type               |
+| -------------------------- | ------------------------------------------- | ------------------ |
+| `../types/DenseMatrix.js`  | `DenseMatrix`                               | Import             |
+| `../types/SparseMatrix.js` | `SparseMatrix`                              | Import (type-only) |
+| `./as-packed.js`           | `decompositionInputToDenseMatrix`           | Import             |
+| `./lu.js`                  | `lu`                                        | Import             |
+| `./common.js`              | `ldexp, entryRange, withPow2Scale, SQUARED` | Import             |
 
 **Exports:**
 
@@ -2027,13 +2032,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                         | Type   |
-| ------------------------- | ------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                   | Import |
-| `./eig.js`                | `eig`                                                                           | Import |
-| `./schur.js`              | `schurInternal`                                                                 | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                      | Import |
+| File                      | Imports                                                                                                                                        | Type   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                  | Import |
+| `./eig.js`                | `eig`                                                                                                                                          | Import |
+| `./schur.js`              | `schurInternal`                                                                                                                                | Import |
+| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                                                                                     | Import |
 
 **Exports:**
 
@@ -2050,6 +2055,7 @@ graph LR
 | ----------------- | ----------------------------------------------------------- | ------ |
 | `./as-packed.js`  | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
 | `./pivoted-qr.js` | `applyReflector, columnPivotedQr, columnReflector`          | Import |
+| `./common.js`     | `SQUARED`                                                   | Import |
 
 **Exports:**
 
@@ -2118,11 +2124,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                         | Type   |
-| ------------------------- | --------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                   | Import |
-| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                 | Import |
-| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| File                      | Imports                                                                                                                 | Type   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                           | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                         | Import |
+| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight, ldexp, ldexpMatrix, entryRange, withPow2Scale, SQUARED` | Import |
 
 **Exports:**
 
@@ -2139,6 +2145,7 @@ graph LR
 | ------------------------- | ----------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
 | `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
+| `./common.js`             | `ldexp, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED`  | Import |
 
 **Exports:**
 
@@ -2151,12 +2158,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                      | Type   |
-| ------------------------- | ---------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
-| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                              | Import |
-| `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
-| `./givens.js`             | `applyGivensRight, givensRotation`                                           | Import |
+| File                      | Imports                                                                                                                      | Type   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                              | Import |
+| `./common.js`             | `eye, cloneMatrix, ldexpMatrix, entryRange, withPow2Scale, FOURTH, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js`             | `applyGivensRight, givensRotation`                                                                                           | Import |
 
 **Exports:**
 
@@ -2169,12 +2176,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                            | Type   |
-| ------------------------- | -------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                      | Import |
-| `./eig.js`                | `eig`                                              | Import |
-| `./schur.js`              | `schurInternal`                                    | Import |
-| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve` | Import |
+| File                      | Imports                                                                                                            | Type   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                      | Import |
+| `./eig.js`                | `eig`                                                                                                              | Import |
+| `./schur.js`              | `schurInternal`                                                                                                    | Import |
+| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
@@ -2202,11 +2209,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports                                                              | Type   |
-| ---------------- | -------------------------------------------------------------------- | ------ |
-| `./common.js`    | `eye, householder, applyHouseholderLeft, applyHouseholderRight`      | Import |
-| `./givens.js`    | `applyGivensCols, givensRotation`                                    | Import |
-| `./as-packed.js` | `decompositionSource, DecompositionMatrixInput, DecompositionSource` | Import |
+| File                          | Imports                                                                                                                         | Type   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./common.js`                 | `eye, householder, applyHouseholderLeft, applyHouseholderRight, ldexp, ldexpMatrix, entryRange, withPow2Scale, SQUARED, FOURTH` | Import |
+| `../types/dense/reduction.js` | `sqrtOfSumSquares`                                                                                                              | Import |
+| `./givens.js`                 | `applyGivensCols, givensRotation`                                                                                               | Import |
+| `./as-packed.js`              | `decompositionSource, DecompositionMatrixInput, DecompositionSource`                                                            | Import |
 
 **Exports:**
 
@@ -2266,11 +2274,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                    | Type   |
-| ------------------ | ------------------------------------------ | ------ |
-| `./Matrix.js`      | `Matrix, MatrixEntry, SliceSpec`           | Import |
-| `./DenseMatrix.js` | `DenseMatrix, registerSparseMatrixFactory` | Import |
-| `./type-marker.js` | `SPARSE_MATRIX_BRAND, defineMatrixBrand`   | Import |
+| File                   | Imports                                    | Type   |
+| ---------------------- | ------------------------------------------ | ------ |
+| `./Matrix.js`          | `Matrix, MatrixEntry, SliceSpec`           | Import |
+| `./DenseMatrix.js`     | `DenseMatrix, registerSparseMatrixFactory` | Import |
+| `./dense/reduction.js` | `sqrtOfSumSquares`                         | Import |
+| `./type-marker.js`     | `SPARSE_MATRIX_BRAND, defineMatrixBrand`   | Import |
 
 **Exports:**
 
@@ -2314,7 +2323,13 @@ graph LR
 
 ---
 
-### `matrix/src/types/dense/reduction.ts` - Add all elements of a matrix.
+### `matrix/src/types/dense/reduction.ts` - `sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Internal Dependencies:**
 
@@ -2325,7 +2340,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `sum`, `mean`, `min`, `max`, `norm`, `trace`
+- Functions: `sqrtOfSumSquares`, `sum`, `mean`, `min`, `max`, `norm`, `trace`
 
 ---
 
@@ -21555,12 +21570,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 233261 |
-| Total Exports           | 7336   |
+| Total Lines of Code     | 233638 |
+| Total Exports           | 7346   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
-| Total Interfaces        | 665    |
-| Total Functions         | 2544   |
+| Total Interfaces        | 666    |
+| Total Functions         | 2551   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

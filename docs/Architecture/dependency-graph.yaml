@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-17'
   totalFiles: 1340
   totalModules: 82
-  totalExports: 7336
+  totalExports: 7346
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4937,6 +4937,9 @@ modules:
         - file: ./types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./types/dense/reduction.js
+          imports:
+            - sqrtOfSumSquares
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5050,6 +5053,9 @@ modules:
         - file: ./types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./types/dense/reduction.js
+          imports:
+            - sqrtOfSumSquares
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -5190,6 +5196,9 @@ modules:
             - gemmF64
       workspaceDependencies: []
       exports:
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
         - eye
         - cloneMatrix
         - transpose
@@ -5202,10 +5211,18 @@ modules:
         - matSub
         - matScale
         - normInf
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
         - norm1
         - householder
         - applyHouseholderLeft
         - applyHouseholderRight
+      interfaces:
+        - EntryRange
       functions:
         - eye
         - cloneMatrix
@@ -5219,10 +5236,20 @@ modules:
         - matSub
         - matScale
         - normInf
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
         - norm1
         - householder
         - applyHouseholderLeft
         - applyHouseholderRight
+      constants:
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
     matrix/src/operations/condest.ts:
       description: Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)
       externalDependencies: []
@@ -5241,6 +5268,12 @@ modules:
         - file: ./lu.js
           imports:
             - lu
+        - file: ./common.js
+          imports:
+            - ldexp
+            - entryRange
+            - withPow2Scale
+            - SQUARED
       workspaceDependencies: []
       exports:
         - condest
@@ -5638,6 +5671,11 @@ modules:
             - norm1
             - matInv
             - gaussJordanContinue
+            - ldexpMatrix
+            - entryRange
+            - withPow2Scale
+            - ABS_CUTOFF_LO
+            - FOURTH
         - file: ./sqrtm.js
           imports:
             - matrixSqrtNewtonInternal
@@ -5662,6 +5700,9 @@ modules:
             - applyReflector
             - columnPivotedQr
             - columnReflector
+        - file: ./common.js
+          imports:
+            - SQUARED
       workspaceDependencies: []
       exports:
         - lstsq
@@ -5772,6 +5813,11 @@ modules:
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
+            - ldexp
+            - ldexpMatrix
+            - entryRange
+            - withPow2Scale
+            - SQUARED
       workspaceDependencies: []
       exports:
         - qrPivoted
@@ -5792,6 +5838,13 @@ modules:
           imports:
             - decompositionInputToDenseMatrix
             - DecompositionMatrixInput
+        - file: ./common.js
+          imports:
+            - ldexp
+            - entryRange
+            - withPow2Scale
+            - ABS_CUTOFF_LO
+            - SQUARED
       workspaceDependencies: []
       exports:
         - qr
@@ -5816,6 +5869,10 @@ modules:
           imports:
             - eye
             - cloneMatrix
+            - ldexpMatrix
+            - entryRange
+            - withPow2Scale
+            - FOURTH
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
@@ -5854,6 +5911,11 @@ modules:
             - transpose
             - matInv
             - gaussJordanSolve
+            - ldexpMatrix
+            - entryRange
+            - withPow2Scale
+            - ABS_CUTOFF_LO
+            - SQUARED
       workspaceDependencies: []
       exports:
         - matrixSqrtm
@@ -5893,6 +5955,15 @@ modules:
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
+            - ldexp
+            - ldexpMatrix
+            - entryRange
+            - withPow2Scale
+            - SQUARED
+            - FOURTH
+        - file: ../types/dense/reduction.js
+          imports:
+            - sqrtOfSumSquares
         - file: ./givens.js
           imports:
             - applyGivensCols
@@ -6006,6 +6077,9 @@ modules:
           imports:
             - DenseMatrix
             - registerSparseMatrixFactory
+        - file: ./dense/reduction.js
+          imports:
+            - sqrtOfSumSquares
         - file: ./type-marker.js
           imports:
             - SPARSE_MATRIX_BRAND
@@ -6075,7 +6149,7 @@ modules:
       constants:
         - DENSE_MATRIX_MAX_ELEMENTS
     matrix/src/types/dense/reduction.ts:
-      description: Add all elements of a matrix.
+      description: '`sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6086,8 +6160,13 @@ modules:
         - file: ./storage.js
           imports:
             - contiguousDenseData
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
+        - sqrtOfSumSquares
         - sum
         - mean
         - min
@@ -6095,6 +6174,7 @@ modules:
         - norm
         - trace
       functions:
+        - sqrtOfSumSquares
         - sum
         - mean
         - min
@@ -46477,14 +46557,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 233261
-  totalExports: 7336
+  totalLinesOfCode: 233638
+  totalExports: 7346
   totalClasses: 62
-  totalInterfaces: 665
-  totalFunctions: 2544
+  totalInterfaces: 666
+  totalFunctions: 2551
   totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1686
+  totalConstants: 1689
   totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2

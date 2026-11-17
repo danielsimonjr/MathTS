@@ -13,15 +13,15 @@
     "core/dist/index.js": 239825,
     "core/dist/internal.js": 240130,
     "core/package.json": 2024,
-    "matrix/dist/index.js": 215769,
+    "matrix/dist/index.js": 221021,
     "matrix/package.json": 2569,
     "matrix/dist/wasm/mathts-as.wasm": 62501,
     "tensor/dist/index.js": 87222,
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 69994,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 1983485,
-    "functions/dist/subpath-evaluate.js": 1273758,
+    "functions/dist/index.js": 1985026,
+    "functions/dist/subpath-evaluate.js": 1275074,
     "functions/package.json": 3607,
     "functions/dist/wasm/mathts-as.wasm": 62501,
     "expression/dist/index.js": 365157,
@@ -54,7 +54,7 @@
     "assembly/build/mathts.wasm": 62501,
     "assembly/build/mathts-debug.wasm": 122393,
     "assembly/package.json": 2432,
-    "compat/dist/index.js": 19527,
+    "compat/dist/index.js": 19438,
     "compat/package.json": 2274,
     "gpu/dist/index.js": 18116,
     "gpu/package.json": 2189,
@@ -179,19 +179,19 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1237870
+      "bytes": 1240762
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1238195
+      "bytes": 1241087
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1247529
+      "bytes": 1250421
     },
     {
       "label": "expression evaluate",
@@ -203,13 +203,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1793913
+      "bytes": 1797476
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1803217
+      "bytes": 1806780
     }
   ]
 }

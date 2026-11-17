@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-17",
     "totalFiles": 1340,
     "totalModules": 82,
-    "totalExports": 7336
+    "totalExports": 7346
   },
   "entryPoints": [
     {
@@ -5144,6 +5144,10 @@
           {
             "file": "./types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./types/dense/reduction.js",
+            "imports": ["sqrtOfSumSquares"]
           }
         ],
         "workspaceDependencies": [
@@ -5264,6 +5268,10 @@
           {
             "file": "./types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./types/dense/reduction.js",
+            "imports": ["sqrtOfSumSquares"]
           }
         ],
         "workspaceDependencies": [
@@ -5421,6 +5429,9 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "SQUARED",
+          "FOURTH",
+          "ABS_CUTOFF_LO",
           "eye",
           "cloneMatrix",
           "transpose",
@@ -5433,11 +5444,18 @@
           "matSub",
           "matScale",
           "normInf",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale",
           "norm1",
           "householder",
           "applyHouseholderLeft",
           "applyHouseholderRight"
         ],
+        "interfaces": ["EntryRange"],
         "functions": [
           "eye",
           "cloneMatrix",
@@ -5451,11 +5469,18 @@
           "matSub",
           "matScale",
           "normInf",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale",
           "norm1",
           "householder",
           "applyHouseholderLeft",
           "applyHouseholderRight"
-        ]
+        ],
+        "constants": ["SQUARED", "FOURTH", "ABS_CUTOFF_LO"]
       },
       "matrix/src/operations/condest.ts": {
         "description": "Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)",
@@ -5478,6 +5503,10 @@
           {
             "file": "./lu.js",
             "imports": ["lu"]
+          },
+          {
+            "file": "./common.js",
+            "imports": ["ldexp", "entryRange", "withPow2Scale", "SQUARED"]
           }
         ],
         "workspaceDependencies": [],
@@ -5868,7 +5897,12 @@
               "normInf",
               "norm1",
               "matInv",
-              "gaussJordanContinue"
+              "gaussJordanContinue",
+              "ldexpMatrix",
+              "entryRange",
+              "withPow2Scale",
+              "ABS_CUTOFF_LO",
+              "FOURTH"
             ]
           },
           {
@@ -5893,6 +5927,10 @@
           {
             "file": "./pivoted-qr.js",
             "imports": ["applyReflector", "columnPivotedQr", "columnReflector"]
+          },
+          {
+            "file": "./common.js",
+            "imports": ["SQUARED"]
           }
         ],
         "workspaceDependencies": [],
@@ -5984,7 +6022,17 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
+            "imports": [
+              "eye",
+              "householder",
+              "applyHouseholderLeft",
+              "applyHouseholderRight",
+              "ldexp",
+              "ldexpMatrix",
+              "entryRange",
+              "withPow2Scale",
+              "SQUARED"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -6004,6 +6052,10 @@
           {
             "file": "./as-packed.js",
             "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          },
+          {
+            "file": "./common.js",
+            "imports": ["ldexp", "entryRange", "withPow2Scale", "ABS_CUTOFF_LO", "SQUARED"]
           }
         ],
         "workspaceDependencies": [],
@@ -6029,6 +6081,10 @@
             "imports": [
               "eye",
               "cloneMatrix",
+              "ldexpMatrix",
+              "entryRange",
+              "withPow2Scale",
+              "FOURTH",
               "householder",
               "applyHouseholderLeft",
               "applyHouseholderRight"
@@ -6063,7 +6119,18 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose", "matInv", "gaussJordanSolve"]
+            "imports": [
+              "eye",
+              "matMul",
+              "transpose",
+              "matInv",
+              "gaussJordanSolve",
+              "ldexpMatrix",
+              "entryRange",
+              "withPow2Scale",
+              "ABS_CUTOFF_LO",
+              "SQUARED"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -6096,7 +6163,22 @@
         "internalDependencies": [
           {
             "file": "./common.js",
-            "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
+            "imports": [
+              "eye",
+              "householder",
+              "applyHouseholderLeft",
+              "applyHouseholderRight",
+              "ldexp",
+              "ldexpMatrix",
+              "entryRange",
+              "withPow2Scale",
+              "SQUARED",
+              "FOURTH"
+            ]
+          },
+          {
+            "file": "../types/dense/reduction.js",
+            "imports": ["sqrtOfSumSquares"]
           },
           {
             "file": "./givens.js",
@@ -6213,6 +6295,10 @@
             "imports": ["DenseMatrix", "registerSparseMatrixFactory"]
           },
           {
+            "file": "./dense/reduction.js",
+            "imports": ["sqrtOfSumSquares"]
+          },
+          {
             "file": "./type-marker.js",
             "imports": ["SPARSE_MATRIX_BRAND", "defineMatrixBrand"]
           }
@@ -6266,7 +6352,7 @@
         "constants": ["DENSE_MATRIX_MAX_ELEMENTS"]
       },
       "matrix/src/types/dense/reduction.ts": {
-        "description": "Add all elements of a matrix.",
+        "description": "`sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6280,9 +6366,15 @@
             "imports": ["contiguousDenseData"]
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["sum", "mean", "min", "max", "norm", "trace"],
-        "functions": ["sum", "mean", "min", "max", "norm", "trace"]
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
+        "exports": ["sqrtOfSumSquares", "sum", "mean", "min", "max", "norm", "trace"],
+        "functions": ["sqrtOfSumSquares", "sum", "mean", "min", "max", "norm", "trace"]
       },
       "matrix/src/types/dense/storage.ts": {
         "description": "The private storage fields of `DenseMatrix` that the in-package kernels read.",
@@ -49275,14 +49367,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 233261,
-    "totalExports": 7336,
+    "totalLinesOfCode": 233638,
+    "totalExports": 7346,
     "totalClasses": 62,
-    "totalInterfaces": 665,
-    "totalFunctions": 2544,
+    "totalInterfaces": 666,
+    "totalFunctions": 2551,
     "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1686,
+    "totalConstants": 1689,
     "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
