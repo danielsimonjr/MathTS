@@ -1,0 +1,49 @@
+/**
+ * #1112: compat `bignumber` converts collections and keeps a BigNumber return type for a scalar.
+ * `tsc -p tsconfig.test.json` compiles the type lines; `bun test` runs the value checks.
+ */
+import { describe, it, expect } from 'vitest';
+import type { BigNumber } from '@danielsimonjr/mathts-core';
+import { bignumber, fraction, matrix } from '../src/shims.js';
+
+// Type fixtures: each line compiles only when a scalar call returns BigNumber.
+const xs: BigNumber[] = [1, 2].map(bignumber);
+type Ret = ReturnType<typeof bignumber>;
+const one: BigNumber = bignumber(1) as Ret;
+const single: BigNumber = bignumber(1);
+
+const isBig = (v: unknown): boolean => !!v && (v as { isBigNumber?: boolean }).isBigNumber === true;
+const str = (v: unknown): string => String(v);
+
+describe('compat bignumber (#1112)', () => {
+  it('keeps the BigNumber type for a scalar', () => {
+    expect(xs.map(str)).toEqual(['1', '2']);
+    expect(str(one)).toBe('1');
+    expect(str(single)).toBe('1');
+  });
+  it('converts an Array element by element', () => {
+    const r = bignumber([1, 2]) as unknown[];
+    expect(Array.isArray(r)).toBe(true);
+    expect(r.every(isBig)).toBe(true);
+    expect(r.map(str)).toEqual(['1', '2']);
+  });
+  it('converts a Matrix element by element', () => {
+    const m = bignumber(matrix([[1, 2]])) as { isMatrix?: boolean; toArray(): unknown[][] };
+    expect(m.isMatrix).toBe(true);
+    expect(m.toArray()[0].every(isBig)).toBe(true);
+    expect(m.toArray()[0].map(str)).toEqual(['1', '2']);
+  });
+  it('returns 0 for no value and keeps a BigNumber', () => {
+    expect(str(bignumber())).toBe('0');
+    const b = bignumber(7);
+    expect(bignumber(b)).toBe(b);
+  });
+  it('converts null, a boolean, a bigint and a Fraction (the old shim gave +-Infinity)', () => {
+    expect(str(bignumber(null))).toBe('0');
+    expect(str(bignumber(true))).toBe('1');
+    expect(str(bignumber(5n))).toBe('5');
+    expect(str(bignumber(fraction(1, 3)))).toBe(
+      '0.3333333333333333333333333333333333333333333333333333333333333333'
+    );
+  });
+});
