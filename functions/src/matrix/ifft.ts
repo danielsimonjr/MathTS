@@ -93,54 +93,75 @@ export const createIfft = /* #__PURE__ */ factory(
      * @param {Array | Matrix} arr    An array or matrix
      * @return {Array | Matrix}       N-dimensional inverse Fourier transformation of the array
      */
-    return typed(name, {
-      'Array | Matrix': function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
-        const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
-        const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
-        // Empty input: the transform of no elements has the same empty shape (fft validates it).
-        if (totalSize === 0) return fft(arr) as ComplexArrayND | Matrix;
+    const inverse = function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
+      const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
+      const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
+      // Empty input: the transform of no elements has the same empty shape (fft validates it).
+      if (totalSize === 0) return fft(arr) as ComplexArrayND | Matrix;
 
-        // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
-        //
-        // The fallback below is `dotDivide(conj(fft(conj(arr))), n)`: three full passes
-        // over the data through typed-function dispatch, on top of the forward transform.
-        // The flat Float64Array core does the inverse directly, and already applies the
-        // 1/n scaling.
-        //
-        // This used to route to the AssemblyScript WASM kernel, which is ~6x SLOWER than
-        // the flat JS core (1039 ms vs 170 ms at n=2^20).
-        //
-        // `complexToInterleaved` returns null for anything not representable as f64
-        // (BigNumber, Fraction, Unit), so those fall through and keep exact semantics.
-        if (size.length === 1) {
-          const length = size[0];
-          if (length >= FAST_IFFT_THRESHOLD && isPowerOf2(length)) {
-            const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
-            const interleaved = complexToInterleaved(arrData as unknown[], complex);
-            if (interleaved) {
-              const real = new Float64Array(length);
-              const imag = new Float64Array(length);
-              for (let i = 0; i < length; i++) {
-                real[i] = interleaved[i * 2];
-                imag[i] = interleaved[i * 2 + 1];
-              }
-              const out = fftCoreFloat64(real, imag, true); // inverse: scales by 1/n
-              const packed = new Float64Array(length * 2);
-              for (let i = 0; i < length; i++) {
-                packed[i * 2] = out.real[i];
-                packed[i * 2 + 1] = out.imag[i];
-              }
-              const result = interleavedToComplex(packed, length, complex);
-              if (isMatrix(arr)) {
-                return (arr as Matrix).create(result);
-              }
-              return result as ComplexArrayND;
+      // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
+      //
+      // The fallback below is `dotDivide(conj(fft(conj(arr))), n)`: three full passes
+      // over the data through typed-function dispatch, on top of the forward transform.
+      // The flat Float64Array core does the inverse directly, and already applies the
+      // 1/n scaling.
+      //
+      // This used to route to the AssemblyScript WASM kernel, which is ~6x SLOWER than
+      // the flat JS core (1039 ms vs 170 ms at n=2^20).
+      //
+      // `complexToInterleaved` returns null for anything not representable as f64
+      // (BigNumber, Fraction, Unit), so those fall through and keep exact semantics.
+      if (size.length === 1) {
+        const length = size[0];
+        if (length >= FAST_IFFT_THRESHOLD && isPowerOf2(length)) {
+          const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
+          const interleaved = complexToInterleaved(arrData as unknown[], complex);
+          if (interleaved) {
+            const real = new Float64Array(length);
+            const imag = new Float64Array(length);
+            for (let i = 0; i < length; i++) {
+              real[i] = interleaved[i * 2];
+              imag[i] = interleaved[i * 2 + 1];
             }
+            const out = fftCoreFloat64(real, imag, true); // inverse: scales by 1/n
+            const packed = new Float64Array(length * 2);
+            for (let i = 0; i < length; i++) {
+              packed[i * 2] = out.real[i];
+              packed[i * 2 + 1] = out.imag[i];
+            }
+            const result = interleavedToComplex(packed, length, complex);
+            if (isMatrix(arr)) {
+              return (arr as Matrix).create(result);
+            }
+            return result as ComplexArrayND;
           }
         }
+      }
 
-        // JavaScript fallback
-        return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
+      // JavaScript fallback
+      return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
+    };
+
+    return typed(name, {
+      'Array | Matrix': inverse,
+      // NumPy `ifft(a, n)`: the input is cropped or zero-padded to length `n` first, so the
+      // result has `n` bins. One axis only; an N-dimensional input has no single length to set.
+      'Array | Matrix, number': function (
+        arr: ComplexArrayND | Matrix,
+        n: number
+      ): ComplexArrayND | Matrix {
+        if (!Number.isInteger(n) || n < 1) {
+          throw new RangeError(`ifft: n must be a positive integer (got ${n})`);
+        }
+        const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
+        if (size.length !== 1) {
+          throw new RangeError(`ifft: n is only supported for 1-D input (got ${size.length}-D)`);
+        }
+        const data = (isMatrix(arr) ? (arr as Matrix).valueOf() : arr) as unknown[];
+        const sized = data.slice(0, n);
+        while (sized.length < n) sized.push(complex(0, 0));
+        const out = inverse(sized as ComplexArrayND);
+        return isMatrix(arr) ? (arr as Matrix).create(out as unknown[]) : out;
       },
     });
   }
