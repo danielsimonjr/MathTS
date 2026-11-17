@@ -281,7 +281,8 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, pOriginal, mNumber);
   const m = BigInt(mNumber);
 
-  // Baby steps: g^j mod p for j = 0..m-1, keeping the smallest j per value.
+  // Baby steps: g^j mod p for j = 0..m-1. The loop stops when the powers return to 1, so the
+  // stored values are distinct and each has its smallest j.
   // Every value is below p < 2^53, so a number key is exact and cheaper than a string key.
   // Open addressing, linear probing, load factor at most 1/2. A key is a residue of g, so it
   // is at least 1 and 0 marks an empty slot.
@@ -291,22 +292,23 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   const keys = new Float64Array(2 ** bits);
   const vals = new Uint32Array(2 ** bits);
   let cur = 1n;
-  for (let j = 0; j < mNumber; j++) {
-    const key = Number(cur);
-    let s = slotOf(key, bits);
-    while (keys[s] !== 0 && keys[s] !== key) s = (s + 1) & mask;
-    if (keys[s] === 0) {
-      keys[s] = key;
-      vals[s] = j;
-    }
+  let cycled = false;
+  for (let j = 0; j < mNumber && !cycled; j++) {
+    let s = slotOf(Number(cur), bits);
+    while (keys[s] !== 0) s = (s + 1) & mask;
+    keys[s] = Number(cur);
+    vals[s] = j;
     cur = (cur * G) % P;
+    cycled = cur === 1n;
   }
 
-  // Giant steps: gamma_i = h * (g^-m)^i mod p.
+  // Giant steps: gamma_i = h * (g^-m)^i mod p. When the baby steps returned to 1, the table
+  // holds every power of g, so the first lookup decides.
+  const rounds = cycled ? 1n : m;
   const gm = modPowBig(G, m, P);
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
-  for (let i = 0n; i < m; i++) {
+  for (let i = 0n; i < rounds; i++) {
     const key = Number(gamma);
     let s = slotOf(key, bits);
     while (keys[s] !== 0) {

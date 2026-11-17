@@ -67,6 +67,17 @@ describe('discreteLog baby-step table (#1135)', () => {
     expect(mismatches).toEqual([]);
   }, 120_000);
 
+  it('stops the baby steps when the powers of g return to 1', () => {
+    // 2 has order 44 mod 2^44 - 1, and m = 2^22. A full table and a full giant-step loop take
+    // seconds; the 44 powers take less than a millisecond.
+    const p = 2 ** 44 - 1;
+    const start = performance.now();
+    expect(discreteLog(2, 7, p)).toBe(-1);
+    expect(discreteLog(2, 2 ** 43, p)).toBe(43);
+    expect(discreteLog(2, 1, p)).toBe(0);
+    expect(performance.now() - start).toBeLessThan(1000);
+  });
+
   it('finds the smallest x when the powers of g repeat', () => {
     // 3 has order 4 mod 80, so its powers repeat from x = 4.
     expect(discreteLog(3, 1, 80)).toBe(0);
