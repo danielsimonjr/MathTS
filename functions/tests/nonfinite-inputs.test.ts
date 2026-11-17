@@ -178,7 +178,6 @@ const PLAIN_NOT_SCALAR: Record<string, string> = {
   integerNthRoot: 'takes a bigint',
   invFourier: 'takes a coefficient array',
   lagrangeInterp: 'takes node and value arrays',
-  logsumexp: 'takes an array',
   manhattanDistance: 'takes two point arrays',
   minkowskiDistance: 'takes two point arrays',
   mutualInformation: 'takes two sample arrays',
@@ -189,7 +188,6 @@ const PLAIN_NOT_SCALAR: Record<string, string> = {
   polyval: 'takes a coefficient array',
   replacer: 'JSON replacer; takes a key and a value',
   reviver: 'JSON reviver; takes a key and a value',
-  trapz: 'takes sample arrays',
   trapzF64: 'takes a Float64Array',
 };
 
@@ -197,7 +195,9 @@ const PLAIN_NOT_SCALAR: Record<string, string> = {
 const PLAIN_THROWS_ON_NAN: Record<string, string[]> = {
   clebschGordan: ['RangeError'],
   integerSqrt: ['RangeError'],
+  logsumexp: ['TypeError'],
   mvnPdf: ['Error'],
+  trapz: ['TypeError'],
   truncatedNormalMean: ['RangeError'],
   wigner3j: ['RangeError'],
   wigner6j: ['RangeError'],

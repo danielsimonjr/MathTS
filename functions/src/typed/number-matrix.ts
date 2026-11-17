@@ -57,6 +57,13 @@ export function assertNumberScalar(name: string, value: unknown): asserts value 
   }
 }
 
+/** Tells if `x` can be read as a vector: a string, an array-like or an iterable object. */
+function isVectorInput(x: unknown): boolean {
+  if (typeof x === 'string') return true;
+  if (typeof x !== 'object' || x === null) return false;
+  return typeof (x as { length?: unknown }).length === 'number' || Symbol.iterator in (x as object);
+}
+
 /**
  * Converts the vector input of a number-only function to a number array. A `Complex`,
  * `Fraction` or `BigNumber` element has no exact path in such a function, so the function
@@ -65,9 +72,14 @@ export function assertNumberScalar(name: string, value: unknown): asserts value 
  * @param name - The name of the function, for the error message.
  * @param x - A number array or a typed array.
  * @returns A new array with the elements of `x`. The function does not change `x`.
- * @throws A `TypeError` when an element is not a number.
+ * @throws A `TypeError` when `x` is not a vector or an element is not a number.
  */
 export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
+  // `Array.from(5)` is `[]`, so a number would read as an empty vector and give a silent wrong
+  // value (#1083). An array-like has a numeric `length`; an iterable is also read as before.
+  if (!isVectorInput(x)) {
+    throw new TypeError(`${name}: expects an array of numbers, got a ${typeNameOf(x)}`);
+  }
   if (x instanceof BigInt64Array || x instanceof BigUint64Array) {
     throw new TypeError(`${name}: expects number data, got a ${typeNameOf(x)}`);
   }
