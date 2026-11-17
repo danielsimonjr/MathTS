@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-16",
+    "lastUpdated": "2026-11-17",
     "totalFiles": 1338,
     "totalModules": 82,
-    "totalExports": 7320
+    "totalExports": 7321
   },
   "entryPoints": [
     {
@@ -10448,6 +10448,10 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["numberVector"]
+          },
+          {
+            "file": "./statistics/numeric-data.js",
+            "imports": ["readSkip"]
           }
         ],
         "workspaceDependencies": [],
@@ -23105,6 +23109,7 @@
           "flattenForStatistics",
           "finiteNumbers",
           "isVarianceNorm",
+          "readSkip",
           "parseStatOptions",
           "normalizationFromSecondArg",
           "normalizationFromStringAndOptions",
@@ -23120,6 +23125,7 @@
           "flattenForStatistics",
           "finiteNumbers",
           "isVarianceNorm",
+          "readSkip",
           "parseStatOptions",
           "normalizationFromSecondArg",
           "normalizationFromStringAndOptions",
@@ -49017,11 +49023,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1338,
     "totalModules": 82,
-    "totalLinesOfCode": 232170,
-    "totalExports": 7320,
+    "totalLinesOfCode": 232207,
+    "totalExports": 7321,
     "totalClasses": 62,
     "totalInterfaces": 664,
-    "totalFunctions": 2536,
+    "totalFunctions": 2537,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1676,

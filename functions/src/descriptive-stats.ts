@@ -23,6 +23,7 @@ import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
 import { numberVector } from './typed/number-matrix.js';
+import { readSkip } from './statistics/numeric-data.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
 
@@ -604,12 +605,57 @@ export interface DescribeResult {
  * The variance is the sample variance (ddof = 1). The skewness and the excess kurtosis are
  * the biased estimates.
  *
+ * NaN policy follows `scipy.stats.describe`. By default, a NaN in `x` gives `nobs = x.length`
+ * and NaN in every other field. With `{ skipNaN: true }` (or `{ skipna: true }`), the NaN values
+ * are dropped and `nobs` counts the values that remain. If none remain, `nobs` is 0 and the
+ * other fields are NaN. `Infinity` is kept. Unknown options throw `TypeError`.
+ *
  * @throws Error if `x` is empty.
  */
-export function describe(x: Vec): DescribeResult {
-  const a = numberVector('describe', x);
+export function describe(x: Vec, opts?: { skipNaN?: boolean; skipna?: boolean }): DescribeResult {
+  let skip = false;
+  if (opts !== undefined) {
+    if (opts === null || typeof opts !== 'object' || Array.isArray(opts)) {
+      throw new TypeError('describe: options must be an object with skipNaN or skipna (boolean)');
+    }
+    for (const key of Object.keys(opts)) {
+      if (key !== 'skipNaN' && key !== 'skipna') {
+        throw new TypeError(
+          `describe: unknown option "${key}"; the options are skipNaN and skipna (boolean)`
+        );
+      }
+    }
+    skip = readSkip(opts) ?? false;
+  }
+  let a = numberVector('describe', x);
+  if (a.length < 1) throw new Error('describe: input must be non-empty');
+  let hasNaN = false;
+  for (const v of a) {
+    if (v !== v) {
+      hasNaN = true;
+      break;
+    }
+  }
+  if (hasNaN) {
+    const nobs = skip ? a.filter((v) => v === v).length : a.length;
+    if (!skip || nobs === 0) {
+      return {
+        nobs,
+        min: NaN,
+        max: NaN,
+        mean: NaN,
+        variance: NaN,
+        std: NaN,
+        q25: NaN,
+        q50: NaN,
+        q75: NaN,
+        skewness: NaN,
+        kurtosis: NaN,
+      };
+    }
+    a = a.filter((v) => v === v);
+  }
   const n = a.length;
-  if (n < 1) throw new Error('describe: input must be non-empty');
   const m = mean(a);
   let m2 = 0;
   let m3 = 0;

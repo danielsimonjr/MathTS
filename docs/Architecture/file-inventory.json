@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-16",
-  "totalFiles": 2459,
+  "generated": "2026-11-17",
+  "totalFiles": 2460,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1312,
     "test-only": 0,
     "orphan": 0,
-    "test": 1055,
+    "test": 1056,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1338,
-    "tests": 1055,
+    "tests": 1056,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1114,
+    "@danielsimonjr/mathts-functions": 1115,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 143,
@@ -6645,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 683
+      "loc": 720
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -10419,6 +10419,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 51
+    },
+    {
+      "file": "functions/tests/dogfood-1004-describe-nan.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 85
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
