@@ -58,8 +58,12 @@ export function expn(n: number, x: number): number {
   let e = -EULER_GAMMA - Math.log(x) + series;
   const ex = Math.exp(-x);
   for (let k = 1; k < n; k += 1) {
-    e = (ex - x * e) / k;
+    const num = ex - x * e;
+    e = num / k;
     if (Number.isNaN(e)) return NaN;
+    // From here every e is ex / k, which only shrinks, so x * e stays below the rounding
+    // of ex and each later step gives exactly ex / k. The last step gives ex / (n - 1).
+    if (num === ex && e >= 0) return ex / (n - 1);
   }
   return e;
 }

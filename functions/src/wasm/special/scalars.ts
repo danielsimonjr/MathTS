@@ -520,6 +520,13 @@ export function besselJScalar(n: f64, x: f64): f64 {
     return jCurr;
   } else {
     const nStart = ni + 2 * Math.max(10, Math.ceil(Math.sqrt(40 * ni)));
+    // One downward step costs more than one upward step, so the sweep has its own limit
+    // (MAX_BESSEL_J_SWEEP of utils/limits.ts). The zero bound above runs first.
+    if (nStart > 1200000000) {
+      throw new RangeError(
+        `besselJ: the downward sweep from order ${nStart} exceeds the supported maximum of 1200000000`
+      );
+    }
     const down = Math.pow(2, -700);
     let jNext = 0;
     let jCurr = 1;

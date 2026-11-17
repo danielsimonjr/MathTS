@@ -114,6 +114,8 @@ function sphBesselK(n: number, x: number): number {
     if (!(next < Infinity) && x > 0) return next;
     km = k;
     k = next;
+    // Two zeros in a row (an underflowed k_0 and k_1) keep every later value at 0.
+    if (k === 0 && km === 0) return 0;
   }
   return k;
 }
