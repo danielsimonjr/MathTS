@@ -412,8 +412,25 @@ export class TapedTensor {
   }
 
   /**
-   * Binary cross-entropy with logits: BCEWithLogits(this, targets).
-   * `targets` in [0,1], same shape as this.
+   * Binary cross-entropy with logits: `BCEWithLogits(this, targets)`.
+   *
+   * This tensor holds raw logits (pre-sigmoid scores), NOT probabilities. The method
+   * applies the sigmoid itself, in the stable form
+   * `max(x, 0) - t * x + log1p(exp(-|x|))` per element. To use probabilities, pass
+   * `log(p / (1 - p))` as the logits.
+   *
+   * `targets` holds labels in [0, 1] with the same shape as this tensor, as a
+   * `TapedTensor`, a `Float64Array` or a number array. Gradients flow to this tensor
+   * only, as `sigmoid(x) - t`. The method does not reduce: it returns one loss per
+   * element, so call `.mean()` or `.sum()` for a scalar loss.
+   *
+   * Example: logits `[0.8, 0.3]` with targets `[1, 0]` give `[0.3711, 0.8544]`.
+   * Probabilities `[0.8, 0.3]` would give `[0.2231, 0.3567]`.
+   *
+   * This function exists only as a `TapedTensor` method; the package has no free
+   * `binaryCrossEntropy` function.
+   *
+   * @throws Error when the target shape or length differs from this tensor
    */
   binaryCrossEntropy(targets: TapedTensor | Float64Array | ReadonlyArray<number>): TapedTensor {
     if (targets instanceof TapedTensor) {
