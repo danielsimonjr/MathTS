@@ -176,7 +176,7 @@ const MAX_BABY_STEPS = 2 ** 24;
  * Discrete logarithm for a modulus too large for the baby-step table: walk the powers of
  * `g` up to its order, when that order is at most {@link MAX_BABY_STEPS}.
  *
- * @throws RangeError if the order of `g` is above the limit (or `g` and `p` share a factor)
+ * @throws RangeError if the order of `g` is above the limit
  */
 function discreteLogSmallOrder(
   G: bigint,
@@ -218,10 +218,10 @@ function discreteLogSmallOrder(
  *
  * @param g - Base
  * @param h - Target
- * @param p - Prime modulus
+ * @param p - Modulus (any integer >= 2; `g` need not be coprime to it)
  * @returns The smallest non-negative `x` with `g^x === h (mod p)`, or `-1`
  * @throws RangeError if `p` is not a safe integer, or if `p` needs more than 2^24 baby
- *   steps and the order of `g` is above 2^24
+ *   steps and the order of `g` (after common factors with `p` are divided out) is above 2^24
  *
  * @example
  * discreteLog(2, 3, 5) // => 3   (2^3 = 8 === 3 mod 5)
@@ -234,10 +234,39 @@ export function discreteLog(g: number, h: number, p: number): number {
   if (!Number.isSafeInteger(p)) {
     throw new RangeError('discreteLog: p must be a safe integer (at most 9007199254740991)');
   }
+  let N = BigInt(p);
+  let a = ((BigInt(g) % N) + N) % N;
+  let b = ((BigInt(h) % N) + N) % N;
+  if (b === 1n) return 0;
+  // Non-coprime reduction: while gcd(g, N) = d > 1, a solution needs d | h. Divide d out of h
+  // and N and fold g/d into a running factor. A hit before the loop ends is a solution x = count.
+  let count = 0;
+  let factor = 1n;
+  for (let d = gcdBig(a, N); d !== 1n; d = gcdBig(a, N)) {
+    if (b % d !== 0n) return -1;
+    b /= d;
+    N /= d;
+    count++;
+    factor = (factor * (a / d)) % N;
+    if (factor === b % N) return count;
+    a %= N;
+  }
+  // g is now invertible modulo N: solve g^x === b / factor, then add the stripped steps.
+  const x = discreteLogCoprime(a, (b * modInverseBig(factor, N)) % N, N);
+  return x < 0 ? -1 : x + count;
+}
+
+/** Greatest common divisor of two non-negative BigInts. */
+function gcdBig(x: bigint, y: bigint): bigint {
+  while (y !== 0n) [x, y] = [y, x % y];
+  return x;
+}
+
+/** Smallest `x >= 0` with `G^x === H (mod P)` for `gcd(G, P) = 1` (or `P = 1`), else `-1`. */
+function discreteLogCoprime(G: bigint, H: bigint, P: bigint): number {
+  const p = Number(P);
+  if (P === 1n) return 0;
   const mNumber = Math.max(1, Math.ceil(Math.sqrt(p - 1)));
-  const P = BigInt(p);
-  const G = ((BigInt(g) % P) + P) % P;
-  const H = ((BigInt(h) % P) + P) % P;
   // A Map holds at most 2^24 entries, so a larger table cannot exist. Find the order L of g
   // first, with no table: L <= 2^24 means g^0 .. g^(L-1) are all the values that g reaches.
   if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, p, mNumber);
