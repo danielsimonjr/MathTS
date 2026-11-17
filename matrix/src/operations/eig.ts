@@ -50,7 +50,7 @@ export interface EigResult {
  * Options for eigenvalue computation
  */
 export interface EigOptions {
-  /** Maximum number of QR iterations */
+  /** QR iterations for one eigenvalue, default 1000 */
   maxIterations?: number;
   /** Convergence tolerance */
   tolerance?: number;
@@ -153,6 +153,20 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
 /** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
 const MAX_QR_ITERATIONS = 1000;
 
+/** hqr2 squares entries; entries are scaled into 2^±EIG_SCALE_EXP so those squares stay in range. */
+const EIG_SCALE_EXP = 400;
+
+/** Power-of-2 factor that brings the largest entry of `A` into 2^±EIG_SCALE_EXP (1 when it is already there). */
+function eigScale(A: number[][]): number {
+  let amax = 0;
+  for (const row of A) for (const v of row) amax = Math.max(amax, Math.abs(v));
+  if (amax === 0) return 1;
+  const k = Math.floor(Math.log2(amax));
+  if (k > EIG_SCALE_EXP) return 2 ** (EIG_SCALE_EXP - k);
+  if (k < -EIG_SCALE_EXP) return 2 ** (-EIG_SCALE_EXP - k);
+  return 1;
+}
+
 /**
  * General real non-symmetric eigendecomposition (JAMA `orthes` + `hqr2`).
  *
@@ -169,14 +183,21 @@ const MAX_QR_ITERATIONS = 1000;
  *
  * The input `A` is not mutated.
  */
-function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean): EigResult {
+function eigGeneral(
+  A: number[][],
+  computeVectors: boolean,
+  symmetric: boolean,
+  maxIterations: number
+): EigResult {
   const nn = A.length;
   const eps = EIG_GEN_EPS;
+  // Scaling by a power of 2 is exact; eigenvalues are divided by sc at the end.
+  const sc = eigScale(A);
 
   // Working Hessenberg/Schur matrix H, transform V, eigenvalue parts d/e.
   const H = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) {
-    for (let j = 0; j < nn; j++) H[i * nn + j] = A[i][j];
+    for (let j = 0; j < nn; j++) H[i * nn + j] = A[i][j] * sc;
   }
   const V = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) V[i * nn + i] = 1.0;
@@ -314,7 +335,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
       }
 
       iter = iter + 1;
-      if (iter > MAX_QR_ITERATIONS) throw new RangeError('eig: QR iteration did not converge');
+      if (iter > maxIterations) throw new RangeError('eig: QR iteration did not converge');
 
       // Look for two consecutive small sub-diagonal elements.
       let m = nIdx - 2;
@@ -411,6 +432,12 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
           }
         }
       }
+    }
+  }
+
+  for (let j = 0; j < nn; j++) {
+    if (!Number.isFinite(d[j] / sc) || !Number.isFinite(e[j] / sc)) {
+      throw new RangeError('eig: an eigenvalue is not finite');
     }
   }
 
@@ -539,7 +566,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
 
   // --- Assemble EigResult ---------------------------------------------------
   const values: Array<{ re: number; im: number }> = [];
-  for (let j = 0; j < nn; j++) values.push({ re: d[j], im: e[j] });
+  for (let j = 0; j < nn; j++) values.push({ re: d[j] / sc, im: e[j] / sc });
 
   let vectors: number[][];
   let vectorsIm: number[][];
@@ -621,9 +648,9 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
  * @throws {RangeError} if an entry is `NaN` or infinite.
  */
 export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}): EigResult {
-  // maxIterations / tolerance are accepted for API compatibility but the
-  // general solver (orthes/hqr2) manages its own iteration/convergence.
-  const { computeVectors = true } = options;
+  // maxIterations bounds the QR iterations for one eigenvalue; tolerance is
+  // accepted for API compatibility (hqr2 uses machine epsilon).
+  const { computeVectors = true, maxIterations = MAX_QR_ITERATIONS } = options;
 
   const A = decompositionInputToNestedArray(matrix);
 
@@ -662,7 +689,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   // the tridiagonal [[2,-1,0],[-1,2,-1],[0,-1,2]] gave [19.05, 2, 0.94]
   // (sum 22 ≠ trace 6) instead of [0.586, 2, 3.414]. hqr2 is correct for
   // symmetric input too (verified vs numpy), so the buggy fast path is removed.
-  return eigGeneral(A, computeVectors, symmetric);
+  return eigGeneral(A, computeVectors, symmetric, maxIterations);
 }
 
 /**

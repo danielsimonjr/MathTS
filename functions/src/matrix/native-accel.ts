@@ -143,8 +143,9 @@ export function isNumericSquare(a: unknown): a is number[][] {
  * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
  * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
  * numeric square matrices through it and emit the factory's `{ values,
- * eigenvectors }` shape. Non-(numeric square) inputs and any native error fall
- * back to the factory.
+ * eigenvectors }` shape. Non-(numeric square) inputs and any native error
+ * other than a RangeError fall back to the factory; a RangeError from the native
+ * solver propagates (a non-finite entry, a non-finite eigenvalue, no convergence).
  */
 export function correctEigs(
   a: unknown,
@@ -169,7 +170,8 @@ export function correctEigs(
     pairs.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
     const values = pairs.map((p) => p.value);
     return wantVectors ? { values, eigenvectors: pairs } : { values };
-  } catch {
+  } catch (e) {
+    if (e instanceof RangeError) throw e;
     return toFactory();
   }
 }
