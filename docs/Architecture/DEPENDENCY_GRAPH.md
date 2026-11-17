@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 56 files
 - **functions/unit**: 2 files
-- **functions/utils**: 38 files
+- **functions/utils**: 39 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 579            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 580            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5200,6 +5200,12 @@ graph LR
 | ---------------------------- | --------- |
 | `@danielsimonjr/mathts-core` | `Complex` |
 
+**Internal Dependencies:**
+
+| File                | Imports           | Type   |
+| ------------------- | ----------------- | ------ |
+| `./utils/limits.js` | `assertAllocSize` | Import |
+
 **Exports:**
 
 - Functions: `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`
@@ -5792,11 +5798,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports         | Type               |
-| -------------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`            | `factory`       | Import             |
-| `../core/function/typed.js`      | `TypedFunction` | Import (type-only) |
-| `../type/bignumber/BigNumber.js` | `BigNumber`     | Import (type-only) |
+| File                             | Imports           | Type               |
+| -------------------------------- | ----------------- | ------------------ |
+| `../utils/factory.js`            | `factory`         | Import             |
+| `../utils/limits.js`             | `assertLoopOrder` | Import             |
+| `../core/function/typed.js`      | `TypedFunction`   | Import (type-only) |
+| `../type/bignumber/BigNumber.js` | `BigNumber`       | Import (type-only) |
 
 **Exports:**
 
@@ -5840,12 +5847,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports         | Type               |
-| -------------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`            | `factory`       | Import             |
-| `../utils/is.js`                 | `isNumber`      | Import             |
-| `../core/function/typed.js`      | `TypedFunction` | Import (type-only) |
-| `../type/bignumber/BigNumber.js` | `BigNumber`     | Import (type-only) |
+| File                             | Imports           | Type               |
+| -------------------------------- | ----------------- | ------------------ |
+| `../utils/factory.js`            | `factory`         | Import             |
+| `../utils/is.js`                 | `isNumber`        | Import             |
+| `../utils/limits.js`             | `assertAllocSize` | Import             |
+| `../core/function/typed.js`      | `TypedFunction`   | Import (type-only) |
+| `../type/bignumber/BigNumber.js` | `BigNumber`       | Import (type-only) |
 
 **Exports:**
 
@@ -6411,9 +6419,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports  | Type   |
-| ---------------- | -------- | ------ |
-| `../utils/is.js` | `typeOf` | Import |
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `../utils/is.js`     | `typeOf`          | Import |
+| `../utils/limits.js` | `assertAllocSize` | Import |
 
 **Exports:**
 
@@ -7313,13 +7322,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/is.js`            | `isBigNumber`   | Import             |
-| `../utils/array.js`         | `resize`        | Import             |
-| `../utils/number.js`        | `isInteger`     | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports           | Type               |
+| --------------------------- | ----------------- | ------------------ |
+| `../utils/is.js`            | `isBigNumber`     | Import             |
+| `../utils/array.js`         | `resize`          | Import             |
+| `../utils/number.js`        | `isInteger`       | Import             |
+| `../utils/factory.js`       | `factory`         | Import             |
+| `../utils/limits.js`        | `assertAllocSize` | Import             |
+| `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
 
 **Exports:**
 
@@ -7550,6 +7560,7 @@ graph LR
 | --------------------------- | ----------------------- | ------------------ |
 | `../utils/factory.js`       | `factory`               | Import             |
 | `../utils/noop.js`          | `noBignumber, noMatrix` | Import             |
+| `../utils/limits.js`        | `assertAllocSize`       | Import             |
 | `../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 | `../core/config.js`         | `MathJsConfig`          | Import (type-only) |
 
@@ -7588,6 +7599,7 @@ graph LR
 | `../utils/object.js`         | `clone`                 | Import             |
 | `../utils/array.js`          | `resize`                | Import             |
 | `../utils/factory.js`        | `factory`               | Import             |
+| `../utils/limits.js`         | `assertAllocSize`       | Import             |
 | `../core/config.js`          | `MathJsConfig`          | Import (type-only) |
 | `../core/function/typed.js`  | `TypedFunction`         | Import (type-only) |
 
@@ -7809,12 +7821,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type               |
-| ------------------------------ | --------------- | ------------------ |
-| `../../utils/is.js`            | `isBigNumber`   | Import             |
-| `../../utils/number.js`        | `isInteger`     | Import             |
-| `../../utils/array.js`         | `resize`        | Import             |
-| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                           | Imports           | Type               |
+| ------------------------------ | ----------------- | ------------------ |
+| `../../utils/is.js`            | `isBigNumber`     | Import             |
+| `../../utils/number.js`        | `isInteger`       | Import             |
+| `../../utils/array.js`         | `resize`          | Import             |
+| `../../utils/limits.js`        | `assertAllocSize` | Import             |
+| `../../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
 
 **Exports:**
 
@@ -7951,9 +7964,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports        | Type   |
-| ---------------------------- | -------------- | ------ |
-| `../wasm/special/scalars.js` | `chooseScalar` | Import |
+| File                         | Imports           | Type   |
+| ---------------------------- | ----------------- | ------ |
+| `../utils/limits.js`         | `assertAllocSize` | Import |
+| `../wasm/special/scalars.js` | `chooseScalar`    | Import |
 
 **Exports:**
 
@@ -13003,6 +13017,21 @@ graph LR
 **Exports:**
 
 - Constants: `createIsZero`
+
+---
+
+### `functions/src/utils/limits.ts` - Shared size limits that guard allocation and loop length (DoS guard).
+
+**Workspace Dependencies:**
+
+| Package                        | Import                      |
+| ------------------------------ | --------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DENSE_MATRIX_MAX_ELEMENTS` |
+
+**Exports:**
+
+- Functions: `assertAllocSize`, `assertLoopOrder`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`
 
 ---
 
@@ -21089,7 +21118,7 @@ graph TD
         N369[complex]
         N370[customs]
         N371[emitter]
-        N372[...28 more]
+        N372[...29 more]
     end
 
     subgraph Functions/wasm
@@ -21435,14 +21464,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1338   |
+| Total TypeScript Files  | 1339   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232320 |
-| Total Exports           | 7322   |
+| Total Lines of Code     | 232412 |
+| Total Exports           | 7326   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 664    |
-| Total Functions         | 2538   |
+| Total Functions         | 2540   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |
