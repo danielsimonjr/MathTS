@@ -51,7 +51,8 @@ export const MAX_SPHERICAL_BESSEL_ORDER = 1_800_000_000;
 
 /**
  * Maximum start order of the `besselJ` downward sweep (x just below n). The old build ran
- * `besselJ(5e8, 5e8 - 1)` in 8.0 s, so 1.2e9 is near its 20 s point. The scalar is
+ * `besselJ(5e8, 5e8 - 1)` in 6.0 s; the new build runs `besselJ(1.19e9, 1.19e9 - 1)` in
+ * 13.7 s, so 1.2e9 is below the 20 s point. The scalar is
  * serialized into worker kernels, so `besselJScalar` repeats this value as a literal.
  */
 export const MAX_BESSEL_J_SWEEP = 1_200_000_000;

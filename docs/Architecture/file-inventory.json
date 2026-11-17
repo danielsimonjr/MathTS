@@ -9634,7 +9634,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 101
     },
     {
       "file": "functions/src/utils/map.ts",
