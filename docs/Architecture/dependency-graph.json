@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-17",
-    "totalFiles": 1338,
+    "totalFiles": 1339,
     "totalModules": 82,
-    "totalExports": 7322
+    "totalExports": 7326
   },
   "entryPoints": [
     {
@@ -13920,7 +13920,12 @@
         "description": "Special matrix constructors (Gap-analysis 2026-11-04 Batch E7).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/limits.js",
+            "imports": ["assertAllocSize"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -15090,6 +15095,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertLoopOrder"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -15164,6 +15173,10 @@
           {
             "file": "../utils/is.js",
             "imports": ["isNumber"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           },
           {
             "file": "../core/function/typed.js",
@@ -17363,6 +17376,10 @@
           {
             "file": "../utils/is.js",
             "imports": ["typeOf"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           }
         ],
         "workspaceDependencies": [
@@ -18846,6 +18863,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -19183,6 +19204,10 @@
             "imports": ["noBignumber", "noMatrix"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -19252,6 +19277,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
           },
           {
             "file": "../core/config.js",
@@ -19601,6 +19630,10 @@
             "imports": ["resize"]
           },
           {
+            "file": "../../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
+          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -19803,6 +19836,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "../utils/limits.js",
+            "imports": ["assertAllocSize"]
+          },
           {
             "file": "../wasm/special/scalars.js",
             "imports": ["chooseScalar"]
@@ -30200,6 +30237,22 @@
         "workspaceDependencies": [],
         "exports": ["createIsZero"],
         "constants": ["createIsZero"]
+      },
+      "functions/src/utils/limits.ts": {
+        "description": "Shared size limits that guard allocation and loop length (DoS guard).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DENSE_MATRIX_MAX_ELEMENTS"]
+          }
+        ],
+        "exports": ["MAX_ALLOC_ELEMENTS", "MAX_LOOP_ORDER", "assertAllocSize", "assertLoopOrder"],
+        "functions": ["assertAllocSize", "assertLoopOrder"],
+        "constants": ["MAX_ALLOC_ELEMENTS", "MAX_LOOP_ORDER"]
       },
       "functions/src/utils/map.ts": {
         "description": "A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition",
@@ -48256,6 +48309,7 @@
           "functions/src/utils/isPositive.ts",
           "functions/src/utils/isPrime.ts",
           "functions/src/utils/isZero.ts",
+          "functions/src/utils/limits.ts",
           "functions/src/utils/map.ts",
           "functions/src/utils/median-numbers.ts",
           "functions/src/utils/node.ts",
@@ -49021,16 +49075,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1338,
+    "totalTypeScriptFiles": 1339,
     "totalModules": 82,
-    "totalLinesOfCode": 232320,
-    "totalExports": 7322,
+    "totalLinesOfCode": 232412,
+    "totalExports": 7326,
     "totalClasses": 62,
     "totalInterfaces": 664,
-    "totalFunctions": 2538,
+    "totalFunctions": 2540,
     "totalTypeGuards": 180,
     "totalEnums": 0,
-    "totalConstants": 1676,
+    "totalConstants": 1678,
     "totalReExports": 3168,
     "totalTypeOnlyImports": 683,
     "runtimeCircularDeps": 2,
