@@ -194,7 +194,11 @@ describe('parallel callback helpers on the worker path (#1027)', () => {
   });
 
   it("keeps '$&' in the callback source on the worker path", async () => {
-    const r = await parallelEvery(data, (x) => '$&'.length === 2 && x >= 0, opts);
+    // The literal joins a runtime value: Bun folds a constant expression such as
+    // `'$&'.length === 2`, and the callback source then holds no '$&'.
+    const predicate = (x: number) => ('$&' + x).length === 2 + String(x).length;
+    expect(predicate.toString()).toContain('$&');
+    const r = await parallelEvery(data, predicate, opts);
     expect(r.result).toBe(true);
   });
 });
