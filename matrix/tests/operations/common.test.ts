@@ -3,7 +3,7 @@
  *
  * These guard the behavior-preserving extraction (Clusters F + G of the
  * duplication audit). The most important invariant is the parameterized
- * `householder` degenerate-branch beta: the default is 2, the only orthogonal reflection (#1082).
+ * `householder` degenerate-branch beta: 2, the only orthogonal reflection (#1082).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -133,13 +133,10 @@ describe('operations/common — householder', () => {
     expect(householder([5, 0, 0]).beta).toBe(0);
   });
 
-  it('degenerate negative-x0 branch uses parameterized beta (default 2, orthogonal)', () => {
+  it('degenerate negative-x0 branch gives beta 2 (orthogonal)', () => {
     const xNeg = [-5, 0, 0];
-    // Default: beta = 2, so H = I - 2 e1 e1^T is orthogonal
+    // beta = 2, so H = I - 2 e1 e1^T is orthogonal
     expect(householder(xNeg).beta).toBe(2);
-    expect(householder(xNeg, 2).beta).toBe(2);
-    // Same reflection vector in both cases
-    expect(householder(xNeg).v).toEqual(householder(xNeg, 2).v);
     expect(householder(xNeg).v).toEqual([1, 0, 0]);
   });
 
