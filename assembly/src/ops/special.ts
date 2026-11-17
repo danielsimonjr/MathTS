@@ -7,16 +7,29 @@ const EULER: f64 = 0.5772156649015329;
 
 // --- Orthogonal polynomials -------------------------------------------------
 
+// These kernels follow chebyshevTScalar, hermiteHScalar, laguerreLScalar and legendrePScalar
+// in functions/src/typed/special.ts: a non-finite order gives NaN, a loop stops at the first
+// NaN, and an order above the family limit of functions/src/utils/limits.ts aborts with a
+// RangeError message, as the JS scalar throws. The loop counter is an i32, so no order can
+// exceed 2147483646. The limits of Chebyshev (4e9), Legendre (2.5e9) and Hermite (none) are
+// above that, so 2147483646 is their limit here. No bridge calls these kernels.
+const _ORDER_MAX_I32: f64 = 2147483646.0;
+const _ORDER_MAX_LAGUERRE: f64 = 1000000000.0;
+
 /** Chebyshev polynomial of the first kind, T_n(x). */
 export function chebyshevT(n: f64, x: f64): f64 {
-  const ni: i32 = <i32>Math.round(n);
-  if (ni < 0) return NaN;
+  if (!isFinite(n)) return NaN;
+  const nr: f64 = Math.round(n);
+  if (nr < 0.0) return NaN;
+  if (nr > _ORDER_MAX_I32) throw new RangeError('chebyshevT: order exceeds the supported maximum');
+  const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;
   if (ni == 1) return x;
   let prev: f64 = 1.0;
   let curr: f64 = x;
   for (let k: i32 = 2; k <= ni; k++) {
     const next: f64 = 2.0 * x * curr - prev;
+    if (isNaN(next)) return NaN;
     prev = curr;
     curr = next;
   }
@@ -25,14 +38,18 @@ export function chebyshevT(n: f64, x: f64): f64 {
 
 /** Hermite polynomial H_n(x) (physicists' convention). */
 export function hermiteH(n: f64, x: f64): f64 {
-  const ni: i32 = <i32>Math.round(n);
-  if (ni < 0) return NaN;
+  if (!isFinite(n)) return NaN;
+  const nr: f64 = Math.round(n);
+  if (nr < 0.0) return NaN;
+  if (nr > _ORDER_MAX_I32) throw new RangeError('hermiteH: order exceeds the supported maximum');
+  const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;
   if (ni == 1) return 2.0 * x;
   let prev: f64 = 1.0;
   let curr: f64 = 2.0 * x;
   for (let k: i32 = 2; k <= ni; k++) {
     const next: f64 = 2.0 * x * curr - 2.0 * <f64>(k - 1) * prev;
+    if (isNaN(next)) return NaN;
     prev = curr;
     curr = next;
   }
@@ -41,8 +58,11 @@ export function hermiteH(n: f64, x: f64): f64 {
 
 /** Laguerre polynomial L_n(x). */
 export function laguerreL(n: f64, x: f64): f64 {
-  const ni: i32 = <i32>Math.round(n);
-  if (ni < 0) return NaN;
+  if (!isFinite(n)) return NaN;
+  const nr: f64 = Math.round(n);
+  if (nr < 0.0) return NaN;
+  if (nr > _ORDER_MAX_LAGUERRE) throw new RangeError('laguerreL: order exceeds the supported maximum');
+  const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;
   if (ni == 1) return 1.0 - x;
   let prev: f64 = 1.0;
@@ -50,6 +70,7 @@ export function laguerreL(n: f64, x: f64): f64 {
   for (let k: i32 = 2; k <= ni; k++) {
     const kf: f64 = <f64>k;
     const next: f64 = ((2.0 * kf - 1.0 - x) * curr - (kf - 1.0) * prev) / kf;
+    if (isNaN(next)) return NaN;
     prev = curr;
     curr = next;
   }
@@ -58,8 +79,11 @@ export function laguerreL(n: f64, x: f64): f64 {
 
 /** Legendre polynomial P_n(x). */
 export function legendreP(n: f64, x: f64): f64 {
-  const ni: i32 = <i32>Math.round(n);
-  if (ni < 0) return NaN;
+  if (!isFinite(n)) return NaN;
+  const nr: f64 = Math.round(n);
+  if (nr < 0.0) return NaN;
+  if (nr > _ORDER_MAX_I32) throw new RangeError('legendreP: order exceeds the supported maximum');
+  const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;
   if (ni == 1) return x;
   let prev: f64 = 1.0;
@@ -67,6 +91,7 @@ export function legendreP(n: f64, x: f64): f64 {
   for (let k: i32 = 2; k <= ni; k++) {
     const kf: f64 = <f64>k;
     const next: f64 = ((2.0 * kf - 1.0) * x * curr - (kf - 1.0) * prev) / kf;
+    if (isNaN(next)) return NaN;
     prev = curr;
     curr = next;
   }

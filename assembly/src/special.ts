@@ -239,16 +239,32 @@ function _besselY1(x: f64): f64 {
 // Bessel Jn scalar (general integer order, forward/backward recurrence)
 // ---------------------------------------------------------------------------
 
+// The kernels below follow besselJScalar / besselYScalar in
+// functions/src/wasm/special/scalars.ts. The order of an i32 kernel is at most 2147483647,
+// which is below MAX_RECURRENCE_ORDER (2.5e9) of functions/src/utils/limits.ts, so only the
+// downward sweep (MAX_BESSEL_J_SWEEP) needs a limit here. A kernel that exceeds it aborts
+// with a RangeError message, as the JS scalar throws. The bridge keeps such inputs on the
+// JS path, so it never calls a kernel that would abort.
+const _BESSEL_J_MAX_SWEEP: f64 = 1200000000.0;
+
 function _besselJn(n: i32, x: f64): f64 {
+  // -n overflows for the smallest i32, and that order has no i32 absolute value.
+  if (n == i32.MIN_VALUE) throw new RangeError('besselJ: order exceeds the supported maximum');
   const ni: i32 = n < 0 ? -n : n;
   const sign: f64 = n < 0 && ni % 2 != 0 ? -1.0 : 1.0;
   if (ni == 0) return sign * _besselJ0(x);
   if (ni == 1) return sign * _besselJ1(x);
   if (Math.abs(x) < 1e-15) return 0.0;
+  if (isNaN(x)) return NaN;
+  const nf: f64 = <f64>ni;
+  const ax: f64 = Math.abs(x);
+  // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so below ln(2^-1075) = -745.14 the
+  // value rounds to 0. This test comes before the limits, as in the JS scalar.
+  if (ax <= nf && nf * (1.0 + Math.log(ax / 2.0) - Math.log(nf)) < -745.2) return 0.0;
   // Upward recurrence is stable only when x > n; otherwise it amplifies
   // round-off (J_n decays in n for n > x). Use Miller's backward recurrence
   // in that regime.
-  if (Math.abs(x) > <f64>ni) {
+  if (ax > nf) {
     // Forward recurrence
     let jPrev: f64 = _besselJ0(x);
     let jCurr: f64 = _besselJ1(x);
@@ -259,24 +275,43 @@ function _besselJn(n: i32, x: f64): f64 {
     }
     return sign * jCurr;
   }
-  // Miller backward recurrence
-  const isqrt: i32 = <i32>Math.sqrt(40.0 * <f64>ni);
-  const extra: i32 = isqrt < 10 ? 10 : isqrt;
-  const nStart: i32 = ni + 2 * extra;
+  // Miller backward recurrence. The start order is computed in f64, so it cannot wrap.
+  const extra: f64 = Math.max(10.0, Math.ceil(Math.sqrt(40.0 * nf)));
+  const nStartF: f64 = nf + 2.0 * extra;
+  if (nStartF > _BESSEL_J_MAX_SWEEP) {
+    throw new RangeError('besselJ: the downward sweep exceeds the supported maximum');
+  }
+  const nStart: i32 = <i32>nStartF;
+  const down: f64 = Math.pow(2.0, -700.0);
   let jNext: f64 = 0.0;
   let jCurr: f64 = 1.0;
   let resultVal: f64 = 0.0;
   let sum: f64 = 0.0;
+  let shifts: i32 = 0; // rescales made after J_ni was captured
   for (let k: i32 = nStart; k >= 0; k--) {
     const jPrev: f64 = (2.0 * <f64>(k + 1) / x) * jCurr - jNext;
     jNext = jCurr;
     jCurr = jPrev;
+    // The sweep grows as it goes down. Scaling by a power of 2 is exact, so it keeps the
+    // sums finite. `resultVal` keeps its own scale, so it cannot underflow here.
+    if (Math.abs(jCurr) > 1e200) {
+      jCurr *= down;
+      jNext *= down;
+      sum *= down;
+      // Three shifts leave a value below 2^-1399, which is 0 (same bound as the JS scalar).
+      if (k < ni) {
+        shifts++;
+        if (shifts == 3) return 0.0;
+      }
+    }
     // After the assignments jCurr = J_k and jNext = J_{k+1}; capture J_ni.
     if (k == ni) resultVal = jCurr;
     if (k % 2 == 0) sum += jCurr;
   }
   sum = 2.0 * sum - jCurr;
-  return sign * (resultVal / sum);
+  let r: f64 = resultVal / sum;
+  for (let i: i32 = 0; i < shifts && r != 0.0; i++) r *= down;
+  return sign * r;
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +320,7 @@ function _besselJn(n: i32, x: f64): f64 {
 
 function _besselYn(n: i32, x: f64): f64 {
   if (x <= 0.0) return NaN;
+  if (n == i32.MIN_VALUE) throw new RangeError('besselY: order exceeds the supported maximum');
   const ni: i32 = n < 0 ? -n : n;
   const sign: f64 = n < 0 && ni % 2 != 0 ? -1.0 : 1.0;
   if (ni == 0) return sign * _besselY0(x);
