@@ -25,6 +25,9 @@ interface StirlingS2Dependencies {
   larger: (x: NumericValue, y: NumericValue) => boolean;
 }
 
+/** Largest table (rows times columns) that the call keeps in the shared cache. */
+const CACHE_MAX_ENTRIES = 1_000_000;
+
 const name = 'stirlingS2';
 const dependencies = [
   'typed',
@@ -111,6 +114,18 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
           return cache[nn][nk];
         }
         assertAllocSize('stirlingS2', [nn + 1, nk + 1]);
+        /* A large table is computed row by row and is not kept, so memory stays O(k). */
+        if ((nn + 1) * (nk + 1) > CACHE_MAX_ENTRIES) {
+          let prev: NumericValue[] = [make(1)];
+          for (let m = 1; m <= nn; ++m) {
+            const row: NumericValue[] = [make(0)];
+            for (let i = 1; i <= m && i <= nk; ++i) {
+              row[i] = i === m ? 1 : addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1]);
+            }
+            prev = row;
+          }
+          return prev[nk];
+        }
         /* Fill the cache */
         for (let m = 0; m <= nn; ++m) {
           if (!cache[m]) {

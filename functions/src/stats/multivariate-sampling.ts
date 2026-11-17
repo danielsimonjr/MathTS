@@ -20,6 +20,7 @@ import { cholesky } from '../typed/matrix-ops.js';
 import { createRng } from '../probability/util/seededRNG.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 import { lgammaNumber } from '../plain/number/probability.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 /** Options for the multivariate samplers (shared shape with mvnSample). */
 export interface SampleSeedOptions {
@@ -58,6 +59,7 @@ export function dirichletSample(
     throw new Error('dirichletSample: n must be a positive integer');
   }
   const k = alpha.length;
+  assertAllocSize('dirichletSample', [n, k]);
   const rng = createRng(opts?.seed ?? null);
   const samples: number[][] = new Array(n);
   for (let s = 0; s < n; s++) {

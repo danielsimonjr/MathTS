@@ -10,6 +10,7 @@
 import { lfilter } from '../signal-filter-extra.js';
 import type { ComplexNumber } from './fft.js';
 import { numberVector } from '../typed/number-matrix.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -118,6 +119,7 @@ function expm(M: number[][]): number[][] {
 /** Impulse response h[0..n-1] of the filter b / a. */
 export function impulseResponse(b: Vec, a: Vec, n: number): number[] {
   if (!(a.length > 0 && a[0] !== 0)) throw new RangeError('impulseResponse: a[0] must be nonzero');
+  assertAllocSize('impulseResponse', [n]);
   const x = new Array<number>(n).fill(0);
   if (n > 0) x[0] = 1;
   return lfilter(b, a, x);
@@ -125,6 +127,7 @@ export function impulseResponse(b: Vec, a: Vec, n: number): number[] {
 
 /** Step response y[0..n-1] of the filter b / a. */
 export function stepResponse(b: Vec, a: Vec, n: number): number[] {
+  assertAllocSize('stepResponse', [n]);
   return lfilter(b, a, new Array<number>(n).fill(1));
 }
 

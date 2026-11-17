@@ -11,6 +11,8 @@
  * @packageDocumentation
  */
 
+import { assertAllocSize } from '../utils/limits.js';
+
 /** Nodes (ascending) and matching weights. */
 export interface GaussRule {
   nodes: number[];
@@ -186,6 +188,7 @@ export function rootsLaguerre(n: number, alpha = 0): GaussRule {
  */
 export function rootsChebyshevT(n: number): GaussRule {
   checkDegree(n, 'rootsChebyshevT');
+  assertAllocSize('rootsChebyshevT', [n, 2]);
   const nodes: number[] = [];
   const weights: number[] = [];
   for (let i = n; i >= 1; i--) {
@@ -204,6 +207,7 @@ export function rootsChebyshevT(n: number): GaussRule {
  */
 export function rootsChebyshevU(n: number): GaussRule {
   checkDegree(n, 'rootsChebyshevU');
+  assertAllocSize('rootsChebyshevU', [n, 2]);
   const nodes: number[] = [];
   const weights: number[] = [];
   for (let i = n; i >= 1; i--) {

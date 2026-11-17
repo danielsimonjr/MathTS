@@ -9,6 +9,7 @@ import { sinc } from '../signal-filter-extra.js';
 import { convDirect } from './conv.js';
 import { remezExchange, type RemezType } from './remez-exchange.js';
 import { numberVector } from '../typed/number-matrix.js';
+import { assertAllocSize } from '../utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 
@@ -185,6 +186,7 @@ export function wiener(x: Vec, mysize = 3): number[] {
   const n = xx.length;
   if (!Number.isInteger(mysize) || mysize < 1)
     throw new Error('wiener: mysize must be a positive integer');
+  assertAllocSize('wiener', [mysize]);
 
   const kernel = new Array<number>(mysize).fill(1 / mysize);
   const lMean = convDirect(xx, kernel, 'same');

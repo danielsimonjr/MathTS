@@ -23,6 +23,7 @@ import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
 import { numberVector } from './typed/number-matrix.js';
+import { assertAllocSize } from './utils/limits.js';
 import { readSkip } from './statistics/numeric-data.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
@@ -711,6 +712,7 @@ export function histogram(x: Vec, bins = 10): HistogramResult {
   if (a.length === 0) throw new Error('histogram: input must be non-empty');
   if (!Number.isInteger(bins) || bins < 1)
     throw new Error('histogram: bins must be a positive integer');
+  assertAllocSize('histogram', [bins + 1]);
   let lo = a[0];
   let hi = a[0];
   for (const v of a) {

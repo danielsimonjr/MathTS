@@ -32,6 +32,7 @@ import {
 } from './factorization/index.js';
 import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
+import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
 import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
@@ -249,10 +250,12 @@ export function polyadd(a: number[], b: number[]): number[] {
  * ```
  */
 export function polymul(a: number[], b: number[]): number[] {
-  if (a.length === 0 || b.length === 0) return [0];
+  const af = toSamples('polymul', a, 'a');
+  const bf = toSamples('polymul', b, 'b');
+  if (af.length === 0 || bf.length === 0) return [0];
   // One path: polyMulDispatch applies the size threshold and the WASM policy itself
   // (JS `polyMulJS` below the threshold or when the policy has no band).
-  return trimPoly(Array.from(polyMulDispatch(new Float64Array(a), new Float64Array(b))));
+  return trimPoly(Array.from(polyMulDispatch(af, bf)));
 }
 
 /**

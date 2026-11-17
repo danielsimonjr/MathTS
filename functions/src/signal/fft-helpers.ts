@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import { fft, ifft, complex } from '../factories/index.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { fftshift as fftshiftGeneric, ifftshift as ifftshiftGeneric } from './fft.js';
 
 /** Minimal complex shape used to normalize typed-function outputs (number or Complex). */
@@ -105,6 +106,7 @@ export function ifftshift(x: number[]): number[] {
  * @param d Sample spacing (default 1)
  */
 export function fftfreq(n: number, d: number = 1): number[] {
+  assertAllocSize('fftfreq', [n]);
   const result = new Array<number>(n);
   const posCount = Math.ceil(n / 2);
   const negCount = Math.floor(n / 2);
@@ -124,6 +126,7 @@ export function fftfreq(n: number, d: number = 1): number[] {
  * @param d Sample spacing (default 1)
  */
 export function rfftfreq(n: number, d: number = 1): number[] {
+  assertAllocSize('rfftfreq', [n]);
   if (n === 0) return [];
   const half = Math.floor(n / 2);
   const result = new Array<number>(half + 1);

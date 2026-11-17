@@ -4122,6 +4122,7 @@
       "toPrecision",
       "toRadians",
       "toRadicals",
+      "toSamples",
       "totalDegree",
       "tournamentSelect",
       "tplquad",

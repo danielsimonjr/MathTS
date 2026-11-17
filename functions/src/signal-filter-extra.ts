@@ -8,6 +8,7 @@ import { Complex } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
 import { companion } from './linalg-extra.js';
 import { numberVector } from './typed/number-matrix.js';
+import { assertAllocSize, assertLoopOrder } from './utils/limits.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
@@ -23,6 +24,7 @@ export const sinc = (x: number): number => (x === 0 ? 1 : Math.sin(Math.PI * x) 
 export function firwin(numtaps: number, cutoff: number): number[] {
   if (!Number.isInteger(numtaps) || numtaps < 2)
     throw new Error('firwin: numtaps must be an integer >= 2');
+  assertAllocSize('firwin', [numtaps]);
   const M = numtaps - 1;
   const h = new Array<number>(numtaps);
   for (let n = 0; n <= M; n++) {
@@ -346,5 +348,6 @@ export function butter(
   btype: FilterBtype = 'low'
 ): { b: number[]; a: number[] } {
   if (!Number.isInteger(N) || N < 1) throw new Error('butter: order N must be a positive integer');
+  assertLoopOrder('butter', 'N', N, 1000);
   return analogToDigital(buttap(N), Wn, btype);
 }
