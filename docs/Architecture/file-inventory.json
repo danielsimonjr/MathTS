@@ -15227,7 +15227,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 259
+      "loc": 276
     },
     {
       "file": "parallel/src/operations/matmul.ts",

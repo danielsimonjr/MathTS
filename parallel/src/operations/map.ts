@@ -23,22 +23,27 @@ export interface MapOptions {
 }
 
 /**
- * Build a function whose own source embeds the user's function.
+ * Give a wrapper a worker-safe source text.
  *
- * The worker pool sends `fn.toString()` to the workers. A wrapper that calls the
- * user's function through a closure variable has source text with a free variable,
- * and the worker throws `ReferenceError`. This helper inlines the user's source
- * into the wrapper source, so the wrapper stays self-contained.
+ * The worker pool calls `wrapper(item)` on the sequential path and sends
+ * `wrapper.toString()` to the workers on the parallel path. The source of a wrapper
+ * that calls the user's function through a closure variable has a free variable, and
+ * the worker throws `ReferenceError`. This helper overrides `toString()` so that the
+ * text embeds the source of the user's function. The wrapper itself stays a closure,
+ * so the sequential path accepts every callable (closures, bound, native and method
+ * functions), and the main thread compiles no code from a string.
  *
+ * @param wrapper - Closure over `fn`; runs on the sequential path
  * @param fn - User function
- * @param body - Wrapper body; `F` stands for the user's function
+ * @param source - Builds the wrapper source from the parenthesised source of `fn`
  */
-function inlineWrapper<A extends unknown[], R>(
+function withInlinedSource<W extends (...args: never[]) => unknown>(
+  wrapper: W,
   fn: (...args: never[]) => unknown,
-  body: string
-): (...args: A) => R {
-  const source = body.replace('F', `(${fn.toString()})`);
-  return new Function(`return (${source});`)() as (...args: A) => R;
+  source: (fnSource: string) => string
+): W {
+  wrapper.toString = () => source(`(${fn.toString()})`);
+  return wrapper;
 }
 
 /**
@@ -151,8 +156,9 @@ export async function parallelSort<T>(
  * Parallel forEach (for side effects)
  *
  * Note: This executes the function for side effects only.
- * The function is serialized to workers, so it cannot access
- * closures or external state. Pass a self-contained function.
+ * On the worker path the function is serialized to workers, so it cannot access
+ * closures or external state, and its side effects occur in the worker.
+ * Pass a self-contained function.
  *
  * @param data - Array to iterate
  * @param fn - Function to apply to each element
@@ -164,7 +170,14 @@ export async function parallelForEach<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<void[]>> {
   const pool = options.pool ?? computePool;
-  const wrapped = inlineWrapper<[T], undefined>(fn, '(item) => { F(item); return undefined; }');
+  const wrapped = withInlinedSource(
+    (item: T): undefined => {
+      fn(item);
+      return undefined;
+    },
+    fn,
+    (f) => `(item) => { ${f}(item); return undefined; }`
+  );
   const result = await pool.map(data, wrapped, options);
   return {
     ...result,
@@ -214,7 +227,11 @@ export async function parallelEvery<T>(
   // Find an element that doesn't pass - if found, not all pass
   const findResult = await pool.find(
     data,
-    inlineWrapper<[T], boolean>(predicate, '(item) => !F(item)'),
+    withInlinedSource(
+      (item: T) => !predicate(item),
+      predicate,
+      (f) => `(item) => !${f}(item)`
+    ),
     options
   );
   return {
