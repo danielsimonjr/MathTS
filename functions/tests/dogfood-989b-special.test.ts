@@ -48,6 +48,7 @@ import {
   MAX_EXPN_ORDER,
   MAX_LAGUERRE_ORDER,
   MAX_SPHERICAL_BESSEL_ORDER,
+  MAX_BESSEL_J_SWEEP,
 } from '../src/utils/limits.js';
 
 const MAX = Number.MAX_VALUE;
@@ -103,6 +104,18 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
       expect(workerKernel(name, 5)).toContain(String(MAX_RECURRENCE_ORDER));
     }
   );
+  it('the besselJ worker kernel holds the downward-sweep limit', () => {
+    expect(workerKernel('besselJ', 5)).toContain(String(MAX_BESSEL_J_SWEEP));
+  });
+  it('besselJ refuses a downward sweep above its limit (over 60 s before the fix)', () => {
+    const n = MAX_BESSEL_J_SWEEP;
+    expect(() => besselJ(n, n - 1)).toThrow(
+      new RegExp(`exceeds the supported maximum of ${MAX_BESSEL_J_SWEEP}$`)
+    );
+  });
+  it('besselJ with a small x still returns 0 at once above the sweep limit', () => {
+    expect(besselJ(2e9, 5)).toBe(0);
+  });
   it('the chebyshevT worker kernel holds its limit', () => {
     expect(workerKernel('chebyshevT', 5)).toContain('4000000000');
   });
@@ -161,7 +174,7 @@ describe('spherical Bessel functions (#989)', () => {
     expect(sphericalBesselY(3, 'a' as unknown as number)).toBeNaN();
     expect(sphericalBesselK(3, 'a' as unknown as number)).toBeNaN();
   });
-  it('sphericalBesselJ and I refuse a sweep above 1e9 (hang before the fix)', () => {
+  it('sphericalBesselJ and I refuse a sweep above their limit (hang before the fix)', () => {
     expect(() => sphericalBesselJ(1e12, 5)).toThrow(RangeError);
     expect(() => sphericalBesselI(5, 1e12)).toThrow(RangeError);
   });
@@ -226,6 +239,21 @@ describe('sums and exponential integrals (#989)', () => {
     const r = binomialTest(1e9, 1e9);
     expect(r.statistic).toBe(1);
     expect(r.pValue).toBe(0);
+  });
+  it.each([0, 1, NaN, -0.5, 1.5])(
+    'binomialTest with p = %d returns a NaN p-value at once (over 60 s before the fix)',
+    (p) => {
+      const r = binomialTest(5, 1e9, p);
+      expect(r.statistic).toBe(5e-9);
+      expect(r.pValue).toBeNaN();
+    }
+  );
+  it('expn with a tiny x exits the recurrence at once (over 60 s before the fix)', () => {
+    const n = MAX_EXPN_ORDER;
+    expect(expn(n, 1e-300)).toBe(Math.exp(-1e-300) / (n - 1));
+  });
+  it('sphericalBesselK(limit, 1e4) is 0 at two zeros in a row', () => {
+    expect(sphericalBesselK(MAX_SPHERICAL_BESSEL_ORDER, 1e4)).toBe(0);
   });
   it('binomialTest refuses n above 1e11', () => {
     expect(() => binomialTest(5, 1e11 + 2)).toThrow(RangeError);

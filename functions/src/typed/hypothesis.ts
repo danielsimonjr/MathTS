@@ -1714,6 +1714,8 @@ export function binomialTest(
   if (!Number.isInteger(successes) || !Number.isInteger(n) || successes < 0 || successes > n) {
     throw new Error('binomialTest: successes must be an integer in [0, n]');
   }
+  // A p outside (0, 1) or NaN makes every log-gamma term NaN, so the p-value is NaN.
+  if (!(p > 0 && p < 1)) return { statistic: successes / n, pValue: NaN };
   assertLoopOrder('binomialTest', 'n', n, MAX_BINOMIAL_TEST_N);
   const dObs = _binomPmf(successes, n, p);
   const rel = 1 + 1e-7;
@@ -1723,12 +1725,11 @@ export function binomialTest(
   // when every outcome is included the two sums are the same float, so p = 1.
   // Every k with |k - n p| > sqrt(375 n) has pmf <= exp(-2 (k - n p)^2 / n) < e^-750
   // (Hoeffding), which the log-gamma pmf rounds to exactly 0. The loop skips those terms,
-  // so the sums do not change. A NaN or out-of-range p keeps the whole range.
+  // so the sums do not change.
   const half = Math.sqrt(375 * n) + 1;
   const centre = n * p;
-  const inRange = p > 0 && p < 1;
-  const lo = inRange ? Math.max(0, Math.floor(centre - half)) : 0;
-  const hi = inRange ? Math.min(n, Math.ceil(centre + half)) : n;
+  const lo = Math.max(0, Math.floor(centre - half));
+  const hi = Math.min(n, Math.ceil(centre + half));
   let included = 0;
   let total = 0;
   for (let k = lo; k <= hi; k++) {
