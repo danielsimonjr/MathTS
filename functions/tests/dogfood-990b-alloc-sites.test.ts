@@ -282,6 +282,9 @@ describe('dogfood #990 allocation sites', () => {
     expect(() => getWindow('hann', 1e9)).toThrow(/windowFunction: result too large/);
     expect(() => freqz([1], [1], 1e9)).toThrow(/freqz: result too large/);
     expect(() => freqz(matrix([1]), matrix([1]), 1e9)).toThrow(/freqz: result too large/);
+    // Each point costs about 215 bytes, so the count is eight elements a point: 3e7 aborted the process at the default heap.
+    expect(() => freqz([1], [1], 3e7)).toThrow(/freqz: result too large \(30000000×8 exceeds/);
+    expect(freqz([1], [1], 4).w).toHaveLength(4);
     expect(() => random([1e5, 1e5])).toThrow(/random: result too large/);
     expect(() => randomInt([1e5, 1e5])).toThrow(/randomInt: result too large/);
     expect(() => firls(1e9 + 1, [0, 0.2, 0.3, 1], [1, 1, 0, 0])).toThrow(
