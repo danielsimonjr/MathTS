@@ -246,6 +246,18 @@ export const createNorm = /* #__PURE__ */ factory(
       x.forEach(function (value: number | BigNumberType | ComplexType) {
         fro = add(fro, multiply(value, conj(value))) as number | BigNumberType;
       });
+      // A sum of squares of plain numbers overflows above about 1e154 and loses its
+      // digits below about 1e-150 (#1104). Then the scaled norm of the entries is
+      // returned. A NaN, infinite, complex or BigNumber entry keeps the plain sum.
+      if (typeof fro === 'number' && !(fro >= 2 ** -800 && fro < Infinity)) {
+        const entries: number[] = [];
+        let plain = true;
+        x.forEach(function (value: number | BigNumberType | ComplexType) {
+          if (typeof value === 'number' && Number.isFinite(value)) entries.push(value);
+          else plain = false;
+        });
+        if (plain) return norm2(entries);
+      }
       return abs(sqrt(fro)) as number | BigNumberType;
     }
 

@@ -29,7 +29,10 @@ import {
   matInv,
   gaussJordanContinue,
   ldexpMatrix,
-  pow2ScaleExponent,
+  entryRange,
+  withPow2Scale,
+  ABS_CUTOFF_LO,
+  FOURTH,
 } from './common.js';
 import { matrixSqrtNewtonInternal } from './sqrtm.js';
 
@@ -358,29 +361,30 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   if (n === 0) return DenseMatrix.zeros(0, 0);
 
   const tol = opts?.nearIdentityTol ?? 0.25;
-  let Aarr = A.toArray();
+  // The Schur-Padé path forms fourth powers and its cutoffs are absolute, so the
+  // window is [2^ABS_CUTOFF_LO, 2^FOURTH] (#1104). logm(2^e · A) = logm(A) + e·ln 2 · I,
+  // so the shift is taken off the diagonal.
+  const logM = withPow2Scale(entryRange(A.toFloat64Array()), ABS_CUTOFF_LO, FOURTH, (e) => {
+    const Aarr = A.toArray();
+    if (e === 0) return logmKernel(Aarr, tol);
+    ldexpMatrix(Aarr, e);
+    const r = logmKernel(Aarr, tol);
+    for (let i = 0; i < n; i++) r[i][i] -= e * Math.LN2;
+    return r;
+  });
 
-  // An extreme matrix is scaled by an exact power of 2 (#1104). logm(2^e · A) = logm(A) + e·ln 2 · I,
-  // so the shift is taken off the diagonal at the end.
-  const scaleExp = pow2ScaleExponent(normInf(Aarr));
-  if (scaleExp !== 0) {
-    Aarr = Aarr.map((row) => row.slice());
-    ldexpMatrix(Aarr, scaleExp);
-  }
-  const shiftBack = (M: number[][]): void => {
-    if (scaleExp !== 0) for (let i = 0; i < n; i++) M[i][i] -= scaleExp * Math.LN2;
-  };
+  const data = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
+  return new DenseMatrix(n, n, data);
+}
 
+/** The logarithm of an n×n array (n ≥ 1), without scaling. */
+function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
   // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
   // Falls through (returns null) for complex-eigenvalue Schur blocks.
   const schurResult = logmSchur(Aarr, tol);
-  if (schurResult !== null) {
-    shiftBack(schurResult);
-    const data = new Float64Array(n * n);
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = schurResult[i][j];
-    return new DenseMatrix(n, n, data);
-  }
+  if (schurResult !== null) return schurResult;
 
   // ----- Eig-based fallback -----
   // Validates eigenvalues (throws for non-positive or complex) and uses
@@ -417,9 +421,5 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
     logM = matScale(logM, Math.pow(2, numSqrt));
   }
 
-  shiftBack(logM);
-  const data = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
-
-  return new DenseMatrix(n, n, data);
+  return logM;
 }

@@ -24,8 +24,9 @@ import {
   applyHouseholderRight,
   ldexp,
   ldexpMatrix,
-  normInf,
-  pow2ScaleExponent,
+  entryRange,
+  withPow2Scale,
+  SQUARED,
 } from './common.js';
 
 /**
@@ -73,11 +74,29 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
     };
   }
 
-  // Working copy (row-major number[][], mirrors A's contents).
-  const W = source.copyRows(false);
-  // An extreme matrix is scaled by an exact power of 2 (#1104); R is scaled back at the end.
-  const e = pow2ScaleExponent(normInf(W));
-  if (e !== 0) ldexpMatrix(W, e);
+  // The Householder steps square the entries, so the window is 2^±SQUARED (#1104).
+  // R is scaled back; Q, P and the rank are scale-free.
+  const A0 = source.copyRows(false);
+  return withPow2Scale(entryRange(A0), -SQUARED, SQUARED, (e) => {
+    // Working copy (row-major number[][], mirrors A's contents).
+    const W = A0.map((row) => row.slice());
+    if (e === 0) return qrPivotedKernel(W, m, n, tol);
+    ldexpMatrix(W, e);
+    const r = qrPivotedKernel(W, m, n, tol);
+    return {
+      ...r,
+      R: new DenseMatrix(
+        k,
+        n,
+        r.R.toFloat64Array().map((v) => ldexp(v, -e))
+      ),
+    };
+  });
+}
+
+/** Householder QR with column pivoting on the working copy `W` (overwritten), without scaling. */
+function qrPivotedKernel(W: number[][], m: number, n: number, tol: number): QRPivotedResult {
+  const k = Math.min(m, n);
   // Accumulates Q = H_0 · H_1 · … · H_{k-1} (product of Householder reflectors).
   const Qacc = eye(m);
   const perm = Array.from({ length: n }, (_, i) => i);
@@ -148,7 +167,7 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
 
   const rData = new Float64Array(k * n);
   for (let i = 0; i < k; i++) {
-    for (let j = 0; j < n; j++) rData[i * n + j] = e === 0 ? W[i][j] : ldexp(W[i][j], -e);
+    for (let j = 0; j < n; j++) rData[i * n + j] = W[i][j];
   }
 
   const qData = new Float64Array(m * k);

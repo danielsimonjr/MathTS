@@ -1590,7 +1590,11 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
   if (p === 'fro' || p === 'frobenius') {
     let s = 0;
     for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) s += data[i][j] * data[i][j];
-    return Math.sqrt(s);
+    // The sum of squares overflows above about 1e154 and loses its digits below about
+    // 1e-150 (#1104). Then the scaled norm of the finite entries is returned.
+    if (s >= 2 ** -800 && s < Infinity) return Math.sqrt(s);
+    const entries = data.flat();
+    return entries.every(Number.isFinite) ? norm2(entries) : Math.sqrt(s);
   }
   if (p === 1) {
     let max = 0;

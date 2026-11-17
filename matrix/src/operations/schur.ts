@@ -20,8 +20,9 @@ import {
   eye,
   cloneMatrix,
   ldexpMatrix,
-  normInf,
-  pow2ScaleExponent,
+  entryRange,
+  withPow2Scale,
+  FOURTH,
   householder,
   applyHouseholderLeft,
   applyHouseholderRight,
@@ -269,17 +270,25 @@ function schurRaw(
     return { H: [[A[0][0]]], Q: [[1]] };
   }
 
-  // An extreme matrix is scaled by an exact power of 2 (#1104); T is scaled back
-  // at the end and Q is scale-free. The caller's array is never changed.
-  const e = pow2ScaleExponent(normInf(A));
-  if (e !== 0) {
+  // The QR shifts form fourth powers of the entries, so the window is 2^±FOURTH (#1104).
+  // T is scaled back and Q is scale-free. The caller's array is never changed.
+  return withPow2Scale(entryRange(A), -FOURTH, FOURTH, (e) => {
+    if (e === 0) return schurKernel(A, maxIterations, tolerance);
     const scaledA = cloneMatrix(A);
     ldexpMatrix(scaledA, e);
-    const res = schurRaw(scaledA, maxIterations, tolerance);
+    const res = schurKernel(scaledA, maxIterations, tolerance);
     ldexpMatrix(res.H, -e);
     return res;
-  }
+  });
+}
 
+/** The Schur kernel of `schurRaw`, for n ≥ 2, without scaling. */
+function schurKernel(
+  A: number[][],
+  maxIterations: number,
+  tolerance: number
+): { H: number[][]; Q: number[][] } {
+  const n = A.length;
   const { H, Q } = hessenbergReduce(A);
 
   let end = n - 1;

@@ -10,6 +10,7 @@
 
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
+import { SQUARED } from './common.js';
 
 /** Machine epsilon for double precision (2^-52). */
 const LSTSQ_EPS = 2.220446049250313e-16;
@@ -78,7 +79,7 @@ export function lstsq(
   if (sA === 0 || sB === 0 || n === 0) return finish();
   // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
   // sB / sA is taken first then (#1104). An ordinary pair keeps the original order.
-  const inWindow = (v: number): boolean => v >= 2 ** -400 && v <= 2 ** 400;
+  const inWindow = (v: number): boolean => v >= 2 ** -SQUARED && v <= 2 ** SQUARED;
   const ratioInWindow = inWindow(sA) && inWindow(sB);
   for (let i = 0; i < R.length; i++) R[i] /= sA;
   for (let i = 0; i < Y.length; i++) Y[i] /= sB;

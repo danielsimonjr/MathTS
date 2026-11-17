@@ -28,10 +28,11 @@ import {
   transpose,
   matInv,
   gaussJordanSolve,
-  ldexp,
   ldexpMatrix,
-  normInf,
-  pow2ScaleExponent,
+  entryRange,
+  withPow2Scale,
+  ABS_CUTOFF_LO,
+  SQUARED,
 } from './common.js';
 
 // ---------------------------------------------------------------------------
@@ -463,17 +464,33 @@ export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
     return DenseMatrix.fromArray([[Math.sqrt(val)]]);
   }
 
-  let Aarr = A.toArray();
+  // The symmetry test and the pivot floors are absolute cutoffs, so the window is
+  // [2^ABS_CUTOFF_LO, 2^SQUARED]; the inner Schur step scales itself (#1104). The
+  // exponent is even, so sqrtm(2^e · A) = 2^(e/2) · sqrtm(A) is exact.
+  const range = entryRange(A.toFloat64Array());
+  const result = withPow2Scale(
+    range,
+    ABS_CUTOFF_LO,
+    SQUARED,
+    (e) => {
+      const Aarr = A.toArray();
+      if (e === 0) return sqrtmKernel(Aarr, opts);
+      ldexpMatrix(Aarr, e);
+      const r = sqrtmKernel(Aarr, opts);
+      ldexpMatrix(r, -e / 2);
+      return r;
+    },
+    true
+  );
 
-  // An extreme matrix is scaled by an exact power of 2 (#1104). The exponent is even,
-  // so sqrtm(2^e · A) = 2^(e/2) · sqrtm(A) is exact.
-  let e = pow2ScaleExponent(normInf(Aarr));
-  if (e % 2 !== 0) e += 1;
-  if (e !== 0) {
-    Aarr = Aarr.map((row) => row.slice());
-    ldexpMatrix(Aarr, e);
-  }
+  const data = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = result[i][j];
 
+  return new DenseMatrix(n, n, data);
+}
+
+/** The square root of an n×n array (n ≥ 2), without scaling. */
+function sqrtmKernel(Aarr: number[][], opts?: SqrtmOptions): number[][] {
   // Detect symmetry
   const forceSymmetric = opts?.assumeSymmetric ?? false;
   const isSymm = forceSymmetric || isSymmetricMatrix(Aarr);
@@ -495,13 +512,7 @@ export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
     }
   }
 
-  const data = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++)
-      data[i * n + j] = e === 0 ? result[i][j] : ldexp(result[i][j], -e / 2);
-  }
-
-  return new DenseMatrix(n, n, data);
+  return result;
 }
 
 /** Check if a matrix is symmetric to within tolerance. */

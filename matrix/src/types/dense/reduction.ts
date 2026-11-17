@@ -4,12 +4,16 @@ import { contiguousDenseData } from './storage.js';
 
 /**
  * `sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that
- * is finite and at least 2^-800 is exact enough and gives the same bits as before; any
- * other sum lost digits or overflowed, so the norm is recomputed with a running scale.
+ * is finite and at least 2^-800 keeps all its digits, so its square root is returned.
+ * Any other sum overflowed or lost digits: the norm of `values()` is then recomputed
+ * with a running scale. `values` is called only in that case.
  */
-export function sqrtOfSumSquares(sumSquared: number, values: ArrayLike<number>): number {
+export function sqrtOfSumSquares(sumSquared: number, values: () => ArrayLike<number>): number {
   if (sumSquared >= 2 ** -800 && sumSquared < Infinity) return Math.sqrt(sumSquared);
-  return norm2(values);
+  const v = values();
+  // A NaN or infinite entry keeps the plain result (NaN or Infinity).
+  for (let i = 0; i < v.length; i++) if (!Number.isFinite(v[i])) return Math.sqrt(sumSquared);
+  return norm2(v);
 }
 
 /**
@@ -105,17 +109,19 @@ export function norm(a: Matrix<number>): number {
   const d = contiguousDenseData(a);
   if (d !== null) {
     for (let i = 0; i < d.length; i++) sumSquared += d[i] * d[i];
-    return sqrtOfSumSquares(sumSquared, d);
+    return sqrtOfSumSquares(sumSquared, () => d);
   }
-  const values: number[] = [];
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       const val = a.get(i, j);
       sumSquared += val * val;
-      values.push(val);
     }
   }
-  return sqrtOfSumSquares(sumSquared, values);
+  return sqrtOfSumSquares(sumSquared, () => {
+    const values: number[] = [];
+    for (let i = 0; i < a.rows; i++) for (let j = 0; j < a.cols; j++) values.push(a.get(i, j));
+    return values;
+  });
 }
 
 /**
