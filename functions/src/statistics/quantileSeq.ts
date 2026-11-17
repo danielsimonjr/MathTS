@@ -43,6 +43,13 @@ interface QuantileSeqDependencies {
 
 type QuantileMode = NumpyQuantileMethod;
 
+/** True for a number NaN or a BigNumber NaN. Fraction and Unit values are never NaN here. */
+function isNaNValue(v: unknown): boolean {
+  return (
+    (isNumber(v) && v !== v) || (isBigNumber(v) && (v as unknown as { isNaN(): boolean }).isNaN())
+  );
+}
+
 function _assertMode(mode: string): QuantileMode {
   return assertNumpyQuantileMethod(mode);
 }
@@ -310,20 +317,22 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       mode: QuantileMode = 'linear',
       skipNaN = false
     ): unknown {
-      const flat = flatten(array) as unknown[];
-      const len = flat.length;
-      if (len === 0) {
+      let flat = flatten(array) as unknown[];
+      if (flat.length === 0) {
         throw new Error('Cannot calculate quantile of an empty sequence');
       }
+      // NaN policy of mean and median: propagate, or omit with skipNaN / skipna.
+      // A number or BigNumber NaN is returned as is, so the result keeps its type.
+      const firstNaN = flat.find(isNaNValue);
+      if (firstNaN !== undefined) {
+        if (!skipNaN) return firstNaN;
+        flat = flat.filter((v) => !isNaNValue(v));
+        if (flat.length === 0) return firstNaN;
+      }
+      const len = flat.length;
 
       if (isNumber(prob) && flat.every((v) => isNumber(v))) {
-        let nums = flat as number[];
-        if (nums.some((v) => v !== v)) {
-          // NaN policy of mean and median: propagate, or omit with skipNaN / skipna.
-          if (!skipNaN) return NaN;
-          nums = nums.filter((v) => v === v);
-          if (nums.length === 0) return NaN;
-        }
+        const nums = flat as number[];
         const sortedNums = sorted ? nums : nums.slice().sort((a, b) => a - b);
         return quantileOfSorted(sortedNums, prob, mode);
       }

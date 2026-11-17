@@ -40,11 +40,9 @@ export interface NaNPolicyOptions {
   skipna?: boolean;
 }
 
-function skipOf(name: string, opts: NaNPolicyOptions | undefined): boolean {
-  if (opts === undefined) return false;
-  if (opts === null || typeof opts !== 'object') {
-    throw new TypeError(`${name}: options must be an object with skipNaN or skipna (boolean)`);
-  }
+function skipOf(opts: NaNPolicyOptions | undefined): boolean {
+  // A last argument that is not an object (an Array.map index, null) is no options.
+  if (opts === null || typeof opts !== 'object') return false;
   return readSkip(opts) ?? false;
 }
 
@@ -203,7 +201,7 @@ export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}
 
 /** Interquartile range: `Q3 − Q1` via `quantileSeq`. */
 export function iqr(x: Vec, opts?: NaNPolicyOptions): number {
-  const skipNaN = skipOf('iqr', opts);
+  const skipNaN = skipOf(opts);
   // quantileSeq has an exact path and reads a nested array, so iqr keeps its input as is.
   const a = (Array.isArray(x) ? x : Array.from(x)) as number[];
   return (
@@ -579,7 +577,7 @@ export function kendallTauTest(x: Vec, y: Vec): KendallTauTestResult {
 
 /** Peak-to-peak / statistical range: max − min. (`np.ptp`; `range` is taken.) */
 export function ptp(x: Vec, opts?: NaNPolicyOptions): number {
-  const skipNaN = skipOf('ptp', opts);
+  const skipNaN = skipOf(opts);
   const a = numberVector('ptp', x);
   if (a.length === 0) return NaN;
   let lo = Infinity;
@@ -745,7 +743,7 @@ export interface HistogramResult {
  * @throws Error if `x` is empty (after the NaN skip), has NaN, or has an infinite value; if `bins` is not a positive integer.
  */
 export function histogram(x: Vec, bins = 10, opts?: NaNPolicyOptions): HistogramResult {
-  const skipNaN = skipOf('histogram', opts);
+  const skipNaN = skipOf(opts);
   let a = numberVector('histogram', x);
   if (a.some((v) => v !== v)) {
     if (!skipNaN) {
