@@ -21,6 +21,30 @@ export const MAX_LOOP_ORDER = 10_000_000;
  */
 export const MAX_RECURRENCE_ORDER = 2_500_000_000;
 
+// Each family below has its own limit: the largest order that returns in about 20 s on the
+// current build. A step of these recurrences costs more than one of the plain recurrences.
+
+/** Maximum order for `jacobiP` (n = 1e9 takes 14 s to 18 s). */
+export const MAX_JACOBI_ORDER = 1_000_000_000;
+
+/** Maximum order for `gegenbauerC` (n = 1e9 takes about 21 s). */
+export const MAX_GEGENBAUER_ORDER = 1_000_000_000;
+
+/** Maximum degree and order for `ferrersP` (n = 1e9 takes about 19 s). */
+export const MAX_FERRERS_ORDER = 1_000_000_000;
+
+/** Maximum order for `expn` (n = 1.2e9 takes about 19 s). */
+export const MAX_EXPN_ORDER = 1_200_000_000;
+
+/**
+ * Maximum order for `laguerreL` (n = 1e9 takes about 18 s). The scalar is serialized
+ * into worker kernels, so `laguerreLScalar` repeats this value as a literal.
+ */
+export const MAX_LAGUERRE_ORDER = 1_000_000_000;
+
+/** Maximum `n` and `max(n, |x|)` for the spherical Bessel functions (5e8 takes about 6 s; 1e9 took 25 s to 36 s). */
+export const MAX_SPHERICAL_BESSEL_ORDER = 500_000_000;
+
 /**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
  *

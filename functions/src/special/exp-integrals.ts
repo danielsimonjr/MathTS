@@ -2,7 +2,7 @@
  * Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).
  */
 
-import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
+import { assertLoopOrder, MAX_EXPN_ORDER } from '../utils/limits.js';
 
 const EULER_GAMMA = 0.5772156649015329;
 const EPS = 1e-16;
@@ -54,7 +54,7 @@ export function expn(n: number, x: number): number {
     series += add;
     if (Math.abs(add) <= EPS * Math.abs(series)) break;
   }
-  assertLoopOrder('expn', 'n', n, MAX_RECURRENCE_ORDER);
+  assertLoopOrder('expn', 'n', n, MAX_EXPN_ORDER);
   let e = -EULER_GAMMA - Math.log(x) + series;
   const ex = Math.exp(-x);
   for (let k = 1; k < n; k += 1) {
