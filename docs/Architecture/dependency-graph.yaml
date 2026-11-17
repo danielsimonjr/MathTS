@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-17'
   totalFiles: 1340
   totalModules: 82
-  totalExports: 7328
+  totalExports: 7336
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18887,6 +18887,7 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - rootsHermite
@@ -18910,7 +18911,10 @@ modules:
       description: Gauss-Legendre quadrature nodes and weights.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - rootsLegendre
@@ -21388,7 +21392,11 @@ modules:
       description: 'Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
+            - MAX_EXPN_ORDER
       workspaceDependencies: []
       exports:
         - expn
@@ -21481,6 +21489,11 @@ modules:
         - file: ../typed/special.js
           imports:
             - digamma
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
+            - MAX_GEGENBAUER_ORDER
+            - MAX_JACOBI_ORDER
       workspaceDependencies: []
       exports:
         - polygamma
@@ -21501,6 +21514,10 @@ modules:
           imports:
             - besselJ
             - besselY
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
+            - MAX_SPHERICAL_BESSEL_ORDER
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -21526,7 +21543,11 @@ modules:
       description: Prolate spheroidal wave functions — angular characteristic values
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
+            - MAX_FERRERS_ORDER
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -26037,6 +26058,9 @@ modules:
         - file: ../stats/inference-extra.js
           imports:
             - multipleTest
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -26479,6 +26503,9 @@ modules:
         - file: ./number-matrix.js
           imports:
             - numberVector
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -28463,6 +28490,14 @@ modules:
       exports:
         - MAX_ALLOC_ELEMENTS
         - MAX_LOOP_ORDER
+        - MAX_RECURRENCE_ORDER
+        - MAX_JACOBI_ORDER
+        - MAX_GEGENBAUER_ORDER
+        - MAX_FERRERS_ORDER
+        - MAX_EXPN_ORDER
+        - MAX_LAGUERRE_ORDER
+        - MAX_SPHERICAL_BESSEL_ORDER
+        - MAX_BESSEL_J_SWEEP
         - assertAllocSize
         - assertLoopOrder
       functions:
@@ -28471,6 +28506,14 @@ modules:
       constants:
         - MAX_ALLOC_ELEMENTS
         - MAX_LOOP_ORDER
+        - MAX_RECURRENCE_ORDER
+        - MAX_JACOBI_ORDER
+        - MAX_GEGENBAUER_ORDER
+        - MAX_FERRERS_ORDER
+        - MAX_EXPN_ORDER
+        - MAX_LAGUERRE_ORDER
+        - MAX_SPHERICAL_BESSEL_ORDER
+        - MAX_BESSEL_J_SWEEP
     functions/src/utils/map.ts:
       description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
@@ -46434,14 +46477,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 232959
-  totalExports: 7328
+  totalLinesOfCode: 233260
+  totalExports: 7336
   totalClasses: 62
   totalInterfaces: 665
   totalFunctions: 2544
   totalTypeGuards: 180
   totalEnums: 0
-  totalConstants: 1678
+  totalConstants: 1686
   totalReExports: 3168
   totalTypeOnlyImports: 683
   runtimeCircularDeps: 2
