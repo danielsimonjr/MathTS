@@ -308,13 +308,14 @@ const assumptions: Map<string, Set<string>> = new Map();
  *
  * For basic symbolic forms (polynomials, trig, exp), returns the symbolic
  * antiderivative. For definite integrals (a, b provided), falls back to
- * numerical integration using Simpson's rule.
+ * numerical integration using adaptive Gauss-Kronrod.
  *
  * @param expr - Expression string or integrand function (see overload)
  * @param varNameOrA - Integration variable (symbolic) or lower bound (numeric `integrate(fn, a, b)`)
  * @param a - Lower bound for definite integral, or upper bound when first argument is a function
  * @param b - Upper bound for definite integral
  * @returns Symbolic antiderivative string or numerical result
+ * @throws {RangeError} For `integrate(fn, a, b)` when the integral does not converge or the result is not finite
  *
  * @example
  * integrate('x^2', 'x')          // => 'x^3/3'
@@ -338,7 +339,7 @@ export function integrate(
   const varName = varNameOrA as string;
   const trimmed = expr.trim();
 
-  // Definite integral via numerical integration (Simpson's rule)
+  // Definite integral via numerical integration (adaptive Gauss-Kronrod)
   if (a !== undefined && b !== undefined) {
     const n = 1000;
     const h = (b - a) / n;

@@ -42,6 +42,7 @@ export interface QuadResult {
    * stopped only at `maxDepth` is negligible (below `1e-6` of the summed
    * `|K|`, or the absolute floor). `false` for a divergent or non-finite
    * integral. {@link quad} never throws for convergence; it reports it here.
+   * `tanhSinh` uses its own rule: the change between two levels is within `tol`.
    */
   converged: boolean;
 }
@@ -116,6 +117,7 @@ const CONVERGENCE_RTOL = 1e-6;
  * @internal
  */
 export function checkFiniteLimits(a: number, b: number, name: string): void {
+  if (a !== a || b !== b) throw new RangeError(`${name}: a limit is NaN`);
   if (!Number.isFinite(a) || !Number.isFinite(b)) {
     throw new RangeError(`${name}: infinite limits are not supported`);
   }
@@ -214,7 +216,7 @@ export function quadValue(
   }
   if (!r.converged) {
     throw new RangeError(
-      `${name}: the integral did not converge: unresolved error ${r.unresolved} is above the limit ${r.limit} (value ${r.value}, error estimate ${r.error})`
+      `${name}: the integral did not converge: unresolved error ${r.unresolved} is above the limit ${r.limit} (value ${r.value}, error estimate ${r.error}); raise maxDepth if the integral is convergent, or call quad for the unconverged estimate`
     );
   }
   return r.value;

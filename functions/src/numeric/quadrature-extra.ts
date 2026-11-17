@@ -36,8 +36,13 @@ const TANH_SINH_T_MAX = 6;
  * trapezoid rule in `t` with step `2^{-k}`. Each level's error estimate is the
  * change from the previous level.
  *
+ * @returns `{ value, error, converged }`. `converged` is true when the change
+ * between two levels is within `tol`, and false when no node gave a finite
+ * value.
+ *
  * @example
  * tanhSinh((x) => 1 / Math.sqrt(1 - x * x), -1, 1).value // ~π
+ * // converged is false at the default tol: the error is 1.35e-10, above 1e-12.
  */
 export function tanhSinh(
   f: (x: number) => number,
@@ -54,7 +59,11 @@ export function tanhSinh(
   const maxLevel = opts.maxLevel ?? 10;
   const half = 0.5 * (b - a);
 
+  let kept = 0;
+  let dropped = 0;
   const levelSum = (h: number): number => {
+    kept = 0;
+    dropped = 0;
     const N = Math.floor(TANH_SINH_T_MAX / h);
     let s = 0;
     for (let j = -N; j <= N; j++) {
@@ -70,7 +79,10 @@ export function tanhSinh(
       // Never evaluate at an endpoint: nodes that round onto one are skipped.
       if (!(x > a && x < b)) continue;
       const fx = f(x);
-      if (Number.isFinite(fx)) s += w * fx;
+      if (Number.isFinite(fx)) {
+        s += w * fx;
+        kept++;
+      } else dropped++;
     }
     return h * s;
   };
@@ -84,7 +96,7 @@ export function tanhSinh(
     value = levelSum(h);
     error = Math.abs(value - prev);
     if (error <= tol * Math.max(1, Math.abs(value))) {
-      converged = true;
+      converged = !(kept === 0 && dropped > 0);
       break;
     }
     prev = value;
@@ -131,6 +143,7 @@ function asLimit1(v: Limit1, x: number): number {
  * Iterated integral `∫_{ax}^{bx} ∫_{gy(x)}^{hy(x)} f(y, x) dy dx`, with both
  * levels integrated by {@link quad}. Returns the outer `error` estimate, and
  * the value is the sum of the outer integrals of the inner results.
+ * `converged` is true only when the outer flag and every inner flag are true.
  *
  * @example
  * dblquad((y, x) => x * y, 0, 1, 0, 1).value // 0.25
@@ -159,6 +172,7 @@ export function dblquad(
 /**
  * Triple iterated integral `∫_{ax}^{bx} ∫_{gy(x)}^{hy(x)} ∫_{qz(x,y)}^{rz(x,y)}
  * f(z, y, x) dz dy dx`, each level integrated by {@link quad}.
+ * `converged` is true only when the outer flag and every inner flag are true.
  *
  * @example
  * tplquad((z, y, x) => x * y * z, 0, 1, 0, 1, 0, 1).value // 0.125
