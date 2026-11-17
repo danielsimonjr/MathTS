@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   BUN_AUDIT_ARGS,
   DEFAULT_IGNORE_FILE,
@@ -258,4 +260,71 @@ test('advisory stdout is forwarded and not retried into a pass', async () => {
   } finally {
     process.stdout.write = origWrite;
   }
+});
+
+test('loadIgnores rejects null, blank and wrong-type fields', async () => {
+  for (const field of ['id', 'package', 'reason', 'remove', 'issue']) {
+    for (const bad of [null, '', ' ', 5, ['x']]) {
+      if (field === 'issue' && bad === 5) continue;
+      await withFile(JSON.stringify({ ignores: [{ ...ENTRY, [field]: bad }] }), (f) =>
+        assert.throws(() => loadIgnores(f), new RegExp(`no "${field}"|not a GHSA id`))
+      );
+    }
+  }
+  for (const issue of ['soon', 0, -1, 1.5]) {
+    await withFile(JSON.stringify({ ignores: [{ ...ENTRY, issue }] }), (f) =>
+      assert.throws(() => loadIgnores(f), /no "issue"/)
+    );
+  }
+});
+
+test('loadIgnores accepts only GHSA ids in the GitHub alphabet', async () => {
+  for (const id of ['GHSA-23hx-9wcf-pqrv', 'GHSA-fc5q-39xc-vjpf']) {
+    await withFile(JSON.stringify({ ignores: [{ ...ENTRY, id }] }), (f) =>
+      assert.equal(loadIgnores(f).length, 1)
+    );
+  }
+  for (const id of [
+    'GHSA-0c5q-39xc-vjpf',
+    'GHSA-ac5q-39xc-vjpf',
+    'GHSA-FC5Q-39XC-VJPF',
+    'GHSA-fc5q-39xc',
+    'GHSA-fc5q-39xc-vjpf-pqrv',
+    'GHSA-fc5-39xc-vjpf',
+    'GHSA-fc5q-39xc-vjpf --prod',
+    'CVE-2026-1',
+  ]) {
+    await withFile(JSON.stringify({ ignores: [{ ...ENTRY, id }] }), (f) =>
+      assert.throws(() => loadIgnores(f), /not a GHSA id/)
+    );
+  }
+});
+
+test('runAudits reads MATHTS_AUDIT_IGNORE_FILE when no file is given', async () => {
+  await withFile(JSON.stringify({ ignores: [] }), async (f) => {
+    const saved = process.env.MATHTS_AUDIT_IGNORE_FILE;
+    process.env.MATHTS_AUDIT_IGNORE_FILE = f;
+    try {
+      const seen = [];
+      await runAudits({ run: async (a) => (seen.push(a), 0) });
+      assert.deepEqual(seen[0], BUN_AUDIT_ARGS);
+    } finally {
+      if (saved === undefined) delete process.env.MATHTS_AUDIT_IGNORE_FILE;
+      else process.env.MATHTS_AUDIT_IGNORE_FILE = saved;
+    }
+  });
+});
+
+test('the script exits 1 on a malformed ignore file', async () => {
+  const script = fileURLToPath(new URL('./bun-audit-retry.mjs', import.meta.url));
+  await withFile('{', (f) => {
+    assert.throws(
+      () =>
+        execFileSync(process.execPath, [script], {
+          env: { ...process.env, MATHTS_AUDIT_IGNORE_FILE: f },
+          stdio: 'pipe',
+        }),
+      (err) => err.status === 1 && /cannot read/.test(String(err.stderr))
+    );
+  });
 });

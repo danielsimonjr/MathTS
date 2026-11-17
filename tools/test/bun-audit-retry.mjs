@@ -23,7 +23,7 @@ export const DEFAULT_IGNORE_FILE = join(
 );
 
 const ADVISORY_ID_RE = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/;
-const REQUIRED_FIELDS = ['id', 'package', 'reason', 'remove', 'issue'];
+const TEXT_FIELDS = ['id', 'package', 'reason', 'remove'];
 
 /**
  * Reads and checks the ignore file. Throws when the file is missing, is not JSON,
@@ -42,10 +42,13 @@ export function loadIgnores(file) {
     throw new Error(`bun audit: ${file} has no "ignores" array`);
   }
   for (const entry of parsed.ignores) {
-    for (const field of REQUIRED_FIELDS) {
-      if (entry?.[field] === undefined || entry[field] === '') {
+    for (const field of TEXT_FIELDS) {
+      if (typeof entry?.[field] !== 'string' || entry[field].trim() === '') {
         throw new Error(`bun audit: an entry in ${file} has no "${field}"`);
       }
+    }
+    if (!Number.isInteger(entry.issue) || entry.issue <= 0) {
+      throw new Error(`bun audit: an entry in ${file} has no "issue" (a positive issue number)`);
     }
     if (!ADVISORY_ID_RE.test(entry.id)) {
       throw new Error(`bun audit: "${entry.id}" in ${file} is not a GHSA id`);
