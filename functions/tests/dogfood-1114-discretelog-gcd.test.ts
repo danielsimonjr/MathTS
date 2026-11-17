@@ -21,6 +21,11 @@ describe('discreteLog with gcd(g, p) > 1 (#1114)', () => {
     [3, 9, 18, 2],
     [5, 25, 50, 2],
     [2, 8, 12, 3],
+    [6, 6, 10, 1],
+    [6, 36, 100, 2],
+    [18, 12, 30, 3],
+    [2, 4, 32, 2],
+    [2, 8, 48, 3],
   ])('discreteLog(%i, %i, %i) = %i', (g, h, p, expected) => {
     expect(discreteLog(g, h, p)).toBe(expected);
   });
@@ -46,5 +51,15 @@ describe('discreteLog with gcd(g, p) > 1 (#1114)', () => {
   it('returns for a huge power-of-two modulus (the reduction ends the walk)', () => {
     expect(discreteLog(2, 2 ** 40, 2 ** 52)).toBe(40);
     expect(discreteLog(2, 3, 2 ** 52)).toBe(-1);
+  });
+
+  it('returns -1 without a RangeError when the target has no inverse modulo the reduced modulus', () => {
+    expect(discreteLog(6, 0, 2 ** 53 - 1)).toBe(-1);
+    expect(discreteLog(3, 0, 2 ** 53 - 111)).toBe(-1);
+    expect(discreteLog(5, 6361, 2 ** 53 - 1)).toBe(-1);
+  });
+
+  it("names the caller's modulus in the RangeError", () => {
+    expect(() => discreteLog(2, 6, 9007199254740898)).toThrow(/9007199254740898/);
   });
 });

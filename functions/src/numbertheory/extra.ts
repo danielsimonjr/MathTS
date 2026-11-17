@@ -202,7 +202,7 @@ function discreteLogSmallOrder(
   }
   if (order === 0) {
     throw new RangeError(
-      `discreteLog: p = ${p} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
+      `discreteLog: p = ${p}${P === BigInt(p) ? '' : ` (reduced modulus N = ${P})`} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
     );
   }
   const target = Number(H);
@@ -263,7 +263,7 @@ export function discreteLog(g: number, h: number, p: number): number {
     a %= N;
   }
   // g is now invertible modulo N: solve g^x === b / factor, then add the stripped steps.
-  const x = discreteLogCoprime(a, (b * modInverseBig(factor, N)) % N, N);
+  const x = discreteLogCoprime(a, (b * modInverseBig(factor, N)) % N, N, p);
   return x < 0 ? -1 : x + count;
 }
 
@@ -273,14 +273,17 @@ function gcdBig(x: bigint, y: bigint): bigint {
   return x;
 }
 
-/** Smallest `x >= 0` with `G^x === H (mod P)` for `gcd(G, P) = 1` (or `P = 1`), else `-1`. */
-function discreteLogCoprime(G: bigint, H: bigint, P: bigint): number {
-  const p = Number(P);
-  if (P === 1n) return 0;
-  const mNumber = Math.max(1, Math.ceil(Math.sqrt(p - 1)));
+/**
+ * Smallest `x >= 0` with `G^x === H (mod P)` for `gcd(G, P) = 1` and `P >= 2`, else `-1`.
+ * `pOriginal` is the caller's modulus, for the error message.
+ */
+function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number): number {
+  // H has no inverse modulo P, so no power of the unit G equals it.
+  if (gcdBig(H, P) !== 1n) return -1;
+  const mNumber = Math.max(1, Math.ceil(Math.sqrt(Number(P) - 1)));
   // A Map holds at most 2^24 entries, so a larger table cannot exist. Find the order L of g
   // first, with no table: L <= 2^24 means g^0 .. g^(L-1) are all the values that g reaches.
-  if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, p, mNumber);
+  if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, pOriginal, mNumber);
   const m = BigInt(mNumber);
 
   // Baby steps: g^j mod p for j = 0..m-1, keeping the smallest j per value.
