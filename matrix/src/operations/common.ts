@@ -9,9 +9,9 @@ import { gemmF64 } from '../types/dense/gemm-f64.js';
  * to the per-file copies they replace.
  *
  * NOTE on `householder`: the degenerate "x is a negative multiple of e_1"
- * branch returns a parameterized `beta`. eig/svd use `beta = -2` (the default);
- * schur deliberately uses `beta = 2` (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, …, 1)).
- * This intentional divergence is preserved by passing the desired value.
+ * branch returns a parameterized `beta`. The default is `beta = 2`
+ * (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, …, 1)). H = I − beta·v·vᵀ is orthogonal only for
+ * `beta` 0 or 2, so no other value is valid here (#1082).
  */
 
 // ---------------------------------------------------------------------------
@@ -400,13 +400,13 @@ export function norm1(A: number[][]): number {
  * Compute the Householder reflection vector for a column.
  *
  * For the degenerate case where `x` is a negative multiple of e_1
- * (`sigma === 0 && x[0] < 0`), the returned `beta` is `degenerateBeta`:
- *   - eig / svd use the default `-2`.
- *   - schur passes `2` (its deliberate divergence — see module header).
+ * (`sigma === 0 && x[0] < 0`), the returned `beta` is `degenerateBeta`. The default is `2`,
+ * the only orthogonal reflection besides the identity (beta 0). Before #1082 the default was
+ * `-2`, which scaled the row by 3 and gave wrong singular values.
  */
 export function householder(
   x: number[],
-  degenerateBeta: number = -2
+  degenerateBeta: number = 2
 ): { v: number[]; beta: number } {
   const n = x.length;
   let sigma = 0;

@@ -30,6 +30,32 @@
  */
 const PAIRWISE_BLOCK = 128;
 
+/** The type name of a value, for an error message. */
+function typeNameOf(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value !== 'object') return typeof value;
+  return (value as { constructor?: { name?: string } }).constructor?.name || 'object';
+}
+
+/**
+ * Checks that `xs` is array-like: an object with a numeric `length`. A number has no
+ * `length`, so a loop or a range split that reads `xs.length` would not end or would read
+ * an empty range (#1011).
+ *
+ * @param name - The name of the caller, for the message.
+ * @param xs - The value to check.
+ * @throws A `TypeError` that names the caller when `xs` is not array-like.
+ */
+function assertArrayLike(name: string, xs: unknown): void {
+  if (
+    xs === null ||
+    (typeof xs !== 'object' && typeof xs !== 'string') ||
+    typeof (xs as { length?: unknown }).length !== 'number'
+  ) {
+    throw new TypeError(`${name}: expects an array of numbers, got a ${typeNameOf(xs)}`);
+  }
+}
+
 /**
  * Sum with **pairwise (cascade) summation** — the algorithm behind `np.sum`.
  *
@@ -43,7 +69,17 @@ const PAIRWISE_BLOCK = 128;
  *
  * Not exact: for that, use {@link neumaierSum}. Pairwise is the right default because it is free.
  */
-export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length, shift = 0): number {
+export function pairwiseSum(xs: ArrayLike<number>, start = 0, end?: number, shift = 0): number {
+  assertArrayLike('pairwiseSum', xs);
+  return pairwiseSumRange(xs, start, end ?? xs.length, shift);
+}
+
+function pairwiseSumRange(
+  xs: ArrayLike<number>,
+  start: number,
+  end: number,
+  shift: number
+): number {
   const n = end - start;
 
   if (n <= PAIRWISE_BLOCK) {
@@ -94,7 +130,10 @@ export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length, s
 
   // Split on an even boundary so both halves stay block-aligned.
   const half = (n >> 1) - ((n >> 1) % 8);
-  return pairwiseSum(xs, start, start + half, shift) + pairwiseSum(xs, start + half, end, shift);
+  return (
+    pairwiseSumRange(xs, start, start + half, shift) +
+    pairwiseSumRange(xs, start + half, end, shift)
+  );
 }
 
 /**
@@ -104,6 +143,7 @@ export function pairwiseSum(xs: ArrayLike<number>, start = 0, end = xs.length, s
  * reads as `undefined` and also gives `undefined`. For number input the bits equal `pairwiseSum`.
  */
 export function pairwiseSumChecked(xs: ArrayLike<unknown>): number | undefined {
+  assertArrayLike('pairwiseSumChecked', xs);
   return pairwiseSumCheckedRange(xs, 0, xs.length);
 }
 
@@ -193,6 +233,7 @@ function pairwiseSumCheckedRange(
  * larger than the running sum, which is precisely the `1e16` case.)
  */
 export function neumaierSum(xs: ArrayLike<number>): number {
+  assertArrayLike('neumaierSum', xs);
   let sum = 0;
   let c = 0; // running compensation for the lost low-order bits
 
@@ -222,6 +263,7 @@ export function neumaierSum(xs: ArrayLike<number>): number {
  * so the accumulator only ever holds ratios in [0, 1].
  */
 export function norm2(xs: ArrayLike<number>): number {
+  assertArrayLike('norm2', xs);
   let scale = 0;
   let ssq = 1;
 
@@ -260,7 +302,18 @@ export function pairwiseDot(
   a: ArrayLike<number>,
   b: ArrayLike<number>,
   start = 0,
-  end = a.length
+  end?: number
+): number {
+  assertArrayLike('pairwiseDot', a);
+  assertArrayLike('pairwiseDot', b);
+  return pairwiseDotRange(a, b, start, end ?? a.length);
+}
+
+function pairwiseDotRange(
+  a: ArrayLike<number>,
+  b: ArrayLike<number>,
+  start: number,
+  end: number
 ): number {
   const n = end - start;
 
@@ -296,7 +349,7 @@ export function pairwiseDot(
   }
 
   const half = (n >> 1) - ((n >> 1) % 8);
-  return pairwiseDot(a, b, start, start + half) + pairwiseDot(a, b, start + half, end);
+  return pairwiseDotRange(a, b, start, start + half) + pairwiseDotRange(a, b, start + half, end);
 }
 
 /**
@@ -310,6 +363,8 @@ export function pairwiseDotChecked(
   a: ArrayLike<unknown>,
   b: ArrayLike<unknown>
 ): number | undefined {
+  assertArrayLike('pairwiseDotChecked', a);
+  assertArrayLike('pairwiseDotChecked', b);
   return pairwiseDotCheckedRange(a, b, 0, a.length);
 }
 
@@ -408,6 +463,8 @@ function pairwiseDotCheckedRange(
  * The two ranges are assumed the same length; callers guard that.
  */
 export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): number {
+  assertArrayLike('scaledDistance', a);
+  assertArrayLike('scaledDistance', b);
   let scale = 0;
   let ssq = 1;
 
@@ -456,6 +513,7 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
  * corresponding variance. Returns 0 for fewer than two elements.
  */
 export function sumSquaredDeviations(xs: ArrayLike<number>): number {
+  assertArrayLike('sumSquaredDeviations', xs);
   const n = xs.length;
   if (n < 2) return 0;
 
@@ -479,6 +537,7 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
  * `sumSquaredDeviations`.
  */
 export function sumSquaredDeviationsChecked(xs: ArrayLike<unknown>): number | undefined {
+  assertArrayLike('sumSquaredDeviationsChecked', xs);
   const n = xs.length;
   if (n < 2) return n === 0 || typeof xs[0] === 'number' ? 0 : undefined;
 
@@ -607,6 +666,7 @@ function pairwiseDeviationSums(
  * Writes `out[i]` for `i` in `[0, xs.length)`; `out` may be a `number[]` or a `Float64Array`.
  */
 export function neumaierCumsum(xs: ArrayLike<number>, out: { [index: number]: number }): void {
+  assertArrayLike('neumaierCumsum', xs);
   let sum = 0;
   let c = 0; // running compensation for the lost low-order bits
 
@@ -637,7 +697,9 @@ export interface Extrema {
  * The workers of `@danielsimonjr/mathts-workerpool` cannot import core, so they keep a copy
  * (`_workerExtrema`). The parity test of that package compares core `extrema` and `_workerExtrema`.
  */
-export function extrema(xs: ArrayLike<number>, start = 0, end = xs.length): Extrema {
+export function extrema(xs: ArrayLike<number>, start = 0, end?: number): Extrema {
+  assertArrayLike('extrema', xs);
+  end ??= xs.length;
   let min = Infinity;
   let max = -Infinity;
   let minIdx = -1;
