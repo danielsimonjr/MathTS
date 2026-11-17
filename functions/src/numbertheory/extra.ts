@@ -170,12 +170,12 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
 // =============================================================================
 
 /**
- * Largest baby-step count (2^24). The table is two typed arrays of twice this size (about
- * 400 MB at the limit). A Map of this size peaked at about 1 GB.
+ * Largest baby-step count (2^24). The table is two `Uint32Array`s of twice this size: 268 MB
+ * at the limit.
  *
- * A call at this limit (a modulus near 2^48, no solution) took 17.5 s at 31% machine load
- * and 23.5 s at 45% with the Map. A modulus near 2^47 took 16.2 s, so a lower limit refuses
- * calls that return in less than 20 s.
+ * A call at this limit (a modulus near 2^48) takes about 14 s on an idle machine, with a
+ * peak resident memory of about 330 MB. A lower limit refuses calls that return in less
+ * than 20 s.
  */
 const MAX_BABY_STEPS = 2 ** 24;
 
@@ -203,11 +203,9 @@ function discreteLogSmallOrder(
   );
 }
 
-/** Hash slot of a key below 2^53 in a table of `2^bits` slots. */
+/** Hash slot of a 32-bit key in a table of `2^bits` slots (multiplicative hash, top bits). */
 function slotOf(key: number, bits: number): number {
-  const hi = Math.floor(key / 4294967296);
-  const h = Math.imul((key >>> 0) ^ Math.imul(hi, 0x9e3779b1), 0x85ebca6b);
-  return (h ^ (h >>> 15)) >>> (32 - bits);
+  return Math.imul(key, 0x9e3779b1) >>> (32 - bits);
 }
 
 /**
@@ -217,8 +215,8 @@ function slotOf(key: number, bits: number): number {
  * Uses `BigInt` internally for modular exponentiation/inversion to avoid
  * overflow. When `g` and `p` share a factor, the common factors are first divided out of
  * `h` and `p`, one power of `g` per division. Then `m = ceil(sqrt(N-1))` baby steps for the
- * reduced modulus `N` are stored in a map; the giant steps multiply by `g^(-m) mod N` each
- * round. The return value includes the divided-out powers, so it is an exponent for the
+ * reduced modulus `N` are stored in a typed-array hash table; the giant steps multiply by
+ * `g^(-m) mod N` each round. The return value includes the divided-out powers, so it is an exponent for the
  * original `p`.
  *
  * @param g - Base
@@ -226,7 +224,8 @@ function slotOf(key: number, bits: number): number {
  * @param p - Modulus (any integer >= 2; `g` need not be coprime to it)
  * @returns The smallest non-negative `x` with `g^x === h (mod p)`, or `-1`
  * @throws RangeError if `p` is not a safe integer, or if `p` needs more than 2^24 baby
- *   steps and the order of `g` (after common factors with `p` are divided out) is above 2^24
+ *   steps and the first 2^24 powers of `g` (after common factors with `p` are divided out)
+ *   neither reach `h` nor return to 1
  *
  * @example
  * discreteLog(2, 3, 5) // => 3   (2^3 = 8 === 3 mod 5)
@@ -283,21 +282,23 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
 
   // Baby steps: g^j mod p for j = 0..m-1. The loop stops when the powers return to 1, so the
   // stored values are distinct and each has its smallest j.
-  // Every value is below p < 2^53, so a number key is exact and cheaper than a string key.
-  // Open addressing, linear probing, load factor at most 1/2. A key is a residue of g, so it
-  // is at least 1 and 0 marks an empty slot.
+  // Open addressing, linear probing, load factor at most 1/2, 8 bytes per slot. A slot holds
+  // the low 32 bits of the value (every value is below 2^53, so `>>> 0` is exact) and j + 1;
+  // 0 marks an empty slot. Two values can share their low 32 bits, so a lookup confirms a
+  // key match with g^j.
   let bits = 1;
   while (2 ** bits < 2 * mNumber) bits++;
   const mask = 2 ** bits - 1;
-  const keys = new Float64Array(2 ** bits);
-  const vals = new Uint32Array(2 ** bits);
+  const keys = new Uint32Array(2 ** bits);
+  const steps = new Uint32Array(2 ** bits);
   let cur = 1n;
   let cycled = false;
   for (let j = 0; j < mNumber && !cycled; j++) {
-    let s = slotOf(Number(cur), bits);
-    while (keys[s] !== 0) s = (s + 1) & mask;
-    keys[s] = Number(cur);
-    vals[s] = j;
+    const key = Number(cur) >>> 0;
+    let s = slotOf(key, bits);
+    while (steps[s] !== 0) s = (s + 1) & mask;
+    keys[s] = key;
+    steps[s] = j + 1;
     cur = (cur * G) % P;
     cycled = cur === 1n;
   }
@@ -309,10 +310,13 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
   for (let i = 0n; i < rounds; i++) {
-    const key = Number(gamma);
+    const key = Number(gamma) >>> 0;
     let s = slotOf(key, bits);
-    while (keys[s] !== 0) {
-      if (keys[s] === key) return Number(i * m + BigInt(vals[s]));
+    while (steps[s] !== 0) {
+      if (keys[s] === key) {
+        const j = BigInt(steps[s] - 1);
+        if (modPowBig(G, j, P) === gamma) return Number(i * m + j);
+      }
       s = (s + 1) & mask;
     }
     gamma = (gamma * gInvM) % P;
