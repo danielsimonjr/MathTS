@@ -211,6 +211,7 @@ async function pDivide(a: Float64Array, b: Float64Array): Promise<ParallelResult
   return computePool.divide(a, b);
 }
 import { DenseMatrix } from './types/DenseMatrix.js';
+import { sqrtOfSumSquares } from './types/dense/reduction.js';
 import type { SignatureFunction } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
@@ -674,7 +675,7 @@ export const parallelMatrixNorm: TypedFunction = mathTyped('parallelMatrixNorm',
     for (let i: i32 = 0; i < arr.length; i++) {
       sum += arr[i] * arr[i];
     }
-    return Math.sqrt(sum);
+    return sqrtOfSumSquares(sum, arr);
   },
 } as Signatures);
 

@@ -11,6 +11,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import type { SignatureFunction } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from './types/DenseMatrix.js';
+import { sqrtOfSumSquares } from './types/dense/reduction.js';
 
 // Helper type for signature records with proper typing
 type Signatures = Record<string, SignatureFunction>;
@@ -205,7 +206,11 @@ export const max: TypedFunction = mathTyped('max', {
  */
 export const norm: TypedFunction = mathTyped('norm', {
   DenseMatrix: (a: DenseMatrix) => a.norm(),
-  Array: (arr: number[]) => Math.sqrt(arr.reduce((acc, v) => acc + v * v, 0)),
+  Array: (arr: number[]) =>
+    sqrtOfSumSquares(
+      arr.reduce((acc, v) => acc + v * v, 0),
+      arr
+    ),
 } as Signatures);
 
 /**

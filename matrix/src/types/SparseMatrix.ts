@@ -14,6 +14,7 @@
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import { DenseMatrix, registerSparseMatrixFactory } from './DenseMatrix.js';
+import { sqrtOfSumSquares } from './dense/reduction.js';
 import { SPARSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
 
 /**
@@ -810,7 +811,7 @@ export class SparseMatrix extends Matrix<number> {
     for (let i = 0; i < this._data.length; i++) {
       sumSq += this._data[i] * this._data[i];
     }
-    return Math.sqrt(sumSq);
+    return sqrtOfSumSquares(sumSq, this._data);
   }
 
   /**

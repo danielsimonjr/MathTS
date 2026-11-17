@@ -17,7 +17,16 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionSource, type DecompositionMatrixInput } from './as-packed.js';
-import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
+import {
+  eye,
+  householder,
+  applyHouseholderLeft,
+  applyHouseholderRight,
+  ldexp,
+  ldexpMatrix,
+  normInf,
+  pow2ScaleExponent,
+} from './common.js';
 
 /**
  * Result of `qrPivoted`: the factors Q and R, the column permutation P, and
@@ -66,6 +75,9 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
 
   // Working copy (row-major number[][], mirrors A's contents).
   const W = source.copyRows(false);
+  // An extreme matrix is scaled by an exact power of 2 (#1104); R is scaled back at the end.
+  const e = pow2ScaleExponent(normInf(W));
+  if (e !== 0) ldexpMatrix(W, e);
   // Accumulates Q = H_0 · H_1 · … · H_{k-1} (product of Householder reflectors).
   const Qacc = eye(m);
   const perm = Array.from({ length: n }, (_, i) => i);
@@ -136,7 +148,7 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
 
   const rData = new Float64Array(k * n);
   for (let i = 0; i < k; i++) {
-    for (let j = 0; j < n; j++) rData[i * n + j] = W[i][j];
+    for (let j = 0; j < n; j++) rData[i * n + j] = e === 0 ? W[i][j] : ldexp(W[i][j], -e);
   }
 
   const qData = new Float64Array(m * k);

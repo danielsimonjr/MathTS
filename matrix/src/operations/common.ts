@@ -264,6 +264,43 @@ export function normInf(A: number[][]): number {
   return mx;
 }
 
+/**
+ * The kernels square entries (norms, Givens and Householder vectors, shifts), so an
+ * entry above about 2^512 overflows and one below about 2^-512 loses its digits to
+ * underflow. A matrix whose largest entry lies outside 2^±POW2_SCALE_LIMIT is scaled
+ * by an exact power of 2 to a largest entry in [1, 2) and the result is scaled back.
+ * A matrix inside the window is not touched, so its result stays bit-identical.
+ */
+const POW2_SCALE_LIMIT = 400;
+
+/** Exponent `e` such that `amax · 2^e` is in [1, 2), or 0 when `amax` is inside the window (or not a positive finite number). */
+export function pow2ScaleExponent(amax: number): number {
+  if (!(amax > 0) || amax === Infinity) return 0;
+  const k = Math.floor(Math.log2(amax));
+  return Math.abs(k) > POW2_SCALE_LIMIT ? -k : 0;
+}
+
+/** `x · 2^e`, exact; the factor is split in two so that 2^e itself cannot overflow. */
+export function ldexp(x: number, e: number): number {
+  const h = Math.trunc(e / 2);
+  return x * 2 ** h * 2 ** (e - h);
+}
+
+/** Scale every entry of `A` by 2^e in place. */
+export function ldexpMatrix(A: number[][], e: number): void {
+  for (const row of A) for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], e);
+}
+
+/**
+ * Scale `A` in place into the window when it lies outside it; returns the exponent
+ * applied (0 when `A` was left alone). Undo with `ldexpMatrix(result, -e)`.
+ */
+export function pow2ScaleInPlace(A: number[][]): number {
+  const e = pow2ScaleExponent(normInf(A));
+  if (e !== 0) ldexpMatrix(A, e);
+  return e;
+}
+
 /** 1-norm of a matrix (max column sum of absolute values). */
 export function norm1(A: number[][]): number {
   const m = A.length;
