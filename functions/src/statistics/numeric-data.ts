@@ -84,6 +84,12 @@ export function isVarianceNorm(value: unknown): value is VarianceNorm {
   return typeof value === 'string' && VARIANCE_NORMS.has(value);
 }
 
+/**
+ * Read the NaN-skip option of `o`. `skipNaN` and `skipna` are aliases.
+ *
+ * @returns The skip value, or `undefined` when neither name is set.
+ * @throws TypeError if a value is not a boolean, or if the two names disagree.
+ */
 export function readSkip(o: StatReduceOptions): boolean | undefined {
   const a = o.skipNaN;
   const b = o.skipna;
