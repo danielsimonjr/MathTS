@@ -1878,6 +1878,16 @@ export class ComputePool {
   }
 
   /**
+   * Number of workers that run now, equal to `stats().totalWorkers`.
+   *
+   * Equals 0 before the first worker starts and after {@link terminate}. Use
+   * {@link workerCount} for the fan-out width.
+   */
+  get liveWorkerCount(): number {
+    return this.stats().totalWorkers;
+  }
+
+  /**
    * Get the underlying MathWorkerPool for advanced operations
    */
   getWorkerPool(): MathWorkerPool {

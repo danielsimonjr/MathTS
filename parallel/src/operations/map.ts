@@ -51,6 +51,9 @@ function withInlinedSource<W extends (...args: never[]) => unknown>(
  *
  * Applies a function to each element in parallel.
  *
+ * On the worker path the function is serialized to workers, so it cannot access
+ * closures or external state. Pass a self-contained function.
+ *
  * @param data - Array to map over
  * @param fn - Function to apply to each element
  * @param options - Optional configuration
@@ -76,6 +79,9 @@ export async function parallelMap<T, R>(
  * Parallel filter operation
  *
  * Filters elements based on a predicate in parallel.
+ *
+ * On the worker path the function is serialized to workers, so it cannot access
+ * closures or external state. Pass a self-contained function.
  *
  * @param data - Array to filter
  * @param predicate - Function that returns true for elements to keep
@@ -190,6 +196,9 @@ export async function parallelForEach<T>(
  *
  * Tests whether at least one element passes the predicate.
  *
+ * On the worker path the function is serialized to workers, so it cannot access
+ * closures or external state. Pass a self-contained function.
+ *
  * @param data - Array to test
  * @param predicate - Test function
  * @param options - Optional configuration
@@ -212,6 +221,9 @@ export async function parallelSome<T>(
  * Parallel every operation
  *
  * Tests whether all elements pass the predicate.
+ *
+ * On the worker path the function is serialized to workers, so it cannot access
+ * closures or external state. Pass a self-contained function.
  *
  * @param data - Array to test
  * @param predicate - Test function

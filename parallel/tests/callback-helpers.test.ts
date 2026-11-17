@@ -85,20 +85,89 @@ describe('parallel callback helpers on the worker path (#1027)', () => {
     expect((await parallelEvery(data, (x) => x < 5, seq)).result).toBe(false);
     expect((await parallelForEach([1, 2], () => {}, seq)).result.length).toBe(2);
   });
+
+  it('parallelEvery keeps a closure on the sequential path', async () => {
+    const limit = 10;
+    const r = await parallelEvery([1, 2, 3], (x) => x < limit, { pool, forceSequential: true });
+    expect(r.result).toBe(true);
+  });
+
+  it('parallelForEach keeps a closure on the sequential path', async () => {
+    let seen = 0;
+    const r = await parallelForEach(
+      [1, 2, 3],
+      (x) => {
+        seen += x;
+      },
+      { pool, forceSequential: true }
+    );
+    expect(seen).toBe(6);
+    expect(r.result).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('runs the issue inputs with no force option', async () => {
+    const big = Array.from({ length: 200000 }, (_, i) => i);
+    const every = await parallelEvery(big, (x) => x >= 0, { pool });
+    expect(every.result).toBe(true);
+    expect(every.parallelized).toBe(true);
+    const each = await parallelForEach(big, () => {}, { pool });
+    expect(each.result.length).toBe(200000);
+  });
+
+  it('accepts method, bound and native callables on the sequential path only', async () => {
+    const o = {
+      p(x: number) {
+        return x >= 0;
+      },
+    };
+    const callables: Array<(x: number) => boolean> = [
+      o.p,
+      ((x: number) => x >= 0).bind(null),
+      Number.isFinite,
+    ];
+    for (const fn of callables) {
+      expect((await parallelEvery([1, 2, 3], fn, { pool, forceSequential: true })).result).toBe(
+        true
+      );
+      await expect(parallelEvery(data, fn, opts)).rejects.toThrow();
+      await expect(parallelMap(data, fn, opts)).rejects.toThrow();
+    }
+  });
+
+  it("keeps '$&' in the callback source on the worker path", async () => {
+    const r = await parallelEvery(data, (x) => '$&'.length === 2 && x >= 0, opts);
+    expect(r.result).toBe(true);
+  });
 });
 
 // #1016
 describe('ComputePool.workerCount after terminate (#1016)', () => {
   it('agrees with stats().totalWorkers once terminated, and recovers on initialize()', async () => {
     const pool = new ComputePool({ maxWorkers: 3, minWorkers: 1 });
-    expect(pool.workerCount).toBe(3); // configured capacity before any start
-    await pool.initialize();
-    await pool.terminate(true);
-    expect(pool.stats().totalWorkers).toBe(0);
-    expect(pool.workerCount).toBe(0);
-    expect(pool.isReady()).toBe(false);
-    await pool.initialize();
-    expect(pool.workerCount).toBe(3);
-    await pool.terminate(true);
+    try {
+      expect(pool.workerCount).toBe(3); // configured capacity before any start
+      await pool.initialize();
+      await pool.terminate(true);
+      expect(pool.stats().totalWorkers).toBe(0);
+      expect(pool.workerCount).toBe(0);
+      expect(pool.isReady()).toBe(false);
+      await pool.initialize();
+      expect(pool.workerCount).toBe(3);
+    } finally {
+      await pool.terminate(true);
+    }
+  });
+
+  it('liveWorkerCount is 0 fresh, at least 1 after initialize(), 0 after terminate()', async () => {
+    const pool = new ComputePool({ maxWorkers: 2, minWorkers: 1 });
+    try {
+      expect(pool.liveWorkerCount).toBe(0);
+      await pool.initialize();
+      expect(pool.liveWorkerCount).toBeGreaterThanOrEqual(1);
+      await pool.terminate(true);
+      expect(pool.liveWorkerCount).toBe(0);
+    } finally {
+      await pool.terminate(true);
+    }
   });
 });
