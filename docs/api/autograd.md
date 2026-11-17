@@ -129,6 +129,19 @@ Reductions: `sum`, `mean`, `prod`, `max`, `min(axis?, {keepDims?})`, and
 `norm(opts?: {p: 1 | 2 | 'fro' | 'inf', axis?, keepDims?})` (first-wins
 tie-break for max/min/inf-norm gradient scatter).
 
+Losses:
+
+| Method               | Signature                                                           | Description                                                                                          |
+| -------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `crossEntropy`       | `(targets: number[], axis?) => TapedTensor`                         | Log-softmax and negative log-likelihood. This tensor holds logits. `targets` holds class indices.    |
+| `binaryCrossEntropy` | `(targets: TapedTensor \| Float64Array \| number[]) => TapedTensor` | Binary cross-entropy with logits. This tensor holds logits, not probabilities. One loss per element. |
+
+`binaryCrossEntropy` applies the sigmoid itself. Pass `log(p / (1 - p))` when you have
+probabilities `p`. For logits `[0.8, 0.3]` and targets `[1, 0]`, the result is
+`[0.3711, 0.8544]`; probabilities `[0.8, 0.3]` would give `[0.2231, 0.3567]`. The method
+does not reduce, so call `.mean()` or `.sum()` for a scalar loss. It exists only as a
+`TapedTensor` method; the package has no free function with this name.
+
 Elementary functions (each with a documented adjoint, ~26 ops): `log`, `exp`,
 `sin`, `cos`, `tan`, `sqrt`, `square`, `pow(k: number | TapedTensor)`,
 `reciprocal`, `abs`, `sinh`, `cosh`, `tanh`, `asin`, `acos`, `atan`, `asinh`,

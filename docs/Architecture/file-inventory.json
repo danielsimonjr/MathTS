@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 30,
+    "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 31,
     "@danielsimonjr/mathts-core": 137,
     "@danielsimonjr/mathts-evaluator": 5,
@@ -35,7 +35,7 @@
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
-    "@danielsimonjr/mathts-parallel": 54,
+    "@danielsimonjr/mathts-parallel": 55,
     "@danielsimonjr/mathts-parser": 5,
     "@danielsimonjr/mathts-plot": 51,
     "@danielsimonjr/mathts-signal": 4,
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3047
+      "loc": 3064
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -353,6 +353,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 68
+    },
+    {
+      "file": "autograd/tests/binary-cross-entropy-contract.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "autograd/tests/dogfood-g13.test.ts",
@@ -15178,7 +15185,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1898
+      "loc": 1902
     },
     {
       "file": "parallel/src/gemm-rows.ts",
@@ -15220,7 +15227,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 242
+      "loc": 259
     },
     {
       "file": "parallel/src/operations/matmul.ts",
@@ -15291,6 +15298,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 310
+    },
+    {
+      "file": "parallel/tests/callback-helpers.test.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "parallel/tests/chunk.test.ts",

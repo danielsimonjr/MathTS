@@ -43,7 +43,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `(root)`                               |    70 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
-| `@danielsimonjr/mathts-autograd`       |    30 |
+| `@danielsimonjr/mathts-autograd`       |    31 |
 | `@danielsimonjr/mathts-compat`         |    31 |
 | `@danielsimonjr/mathts-core`           |   137 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
@@ -53,7 +53,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   145 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
-| `@danielsimonjr/mathts-parallel`       |    54 |
+| `@danielsimonjr/mathts-parallel`       |    55 |
 | `@danielsimonjr/mathts-parser`         |     5 |
 | `@danielsimonjr/mathts-plot`           |    51 |
 | `@danielsimonjr/mathts-signal`         |     4 |
@@ -114,6 +114,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/src/tape.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/tests/ad-wasm-interop.test.ts`                                          | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/assert-same-shape.test.ts`                                        | @danielsimonjr/mathts-autograd       | tests    | test        |
+| `autograd/tests/binary-cross-entropy-contract.test.ts`                            | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/dogfood-g13.test.ts`                                              | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/dual-elementwise-ad.test.ts`                                      | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/forward-grad.test.ts`                                             | @danielsimonjr/mathts-autograd       | tests    | test        |
@@ -2248,6 +2249,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/src/validate.ts`                                                        | @danielsimonjr/mathts-parallel       | src      | build-entry |
 | `parallel/src/WorkerPool.ts`                                                      | @danielsimonjr/mathts-parallel       | src      | build-entry |
 | `parallel/tests/benchmark.test.ts`                                                | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/callback-helpers.test.ts`                                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/chunk.test.ts`                                                    | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.cost-model.test.ts`                                   | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.coverage.test.ts`                                     | @danielsimonjr/mathts-parallel       | tests    | test        |

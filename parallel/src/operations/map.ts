@@ -23,6 +23,25 @@ export interface MapOptions {
 }
 
 /**
+ * Build a function whose own source embeds the user's function.
+ *
+ * The worker pool sends `fn.toString()` to the workers. A wrapper that calls the
+ * user's function through a closure variable has source text with a free variable,
+ * and the worker throws `ReferenceError`. This helper inlines the user's source
+ * into the wrapper source, so the wrapper stays self-contained.
+ *
+ * @param fn - User function
+ * @param body - Wrapper body; `F` stands for the user's function
+ */
+function inlineWrapper<A extends unknown[], R>(
+  fn: (...args: never[]) => unknown,
+  body: string
+): (...args: A) => R {
+  const source = body.replace('F', `(${fn.toString()})`);
+  return new Function(`return (${source});`)() as (...args: A) => R;
+}
+
+/**
  * Parallel map operation
  *
  * Applies a function to each element in parallel.
@@ -133,7 +152,7 @@ export async function parallelSort<T>(
  *
  * Note: This executes the function for side effects only.
  * The function is serialized to workers, so it cannot access
- * closures or external state.
+ * closures or external state. Pass a self-contained function.
  *
  * @param data - Array to iterate
  * @param fn - Function to apply to each element
@@ -145,14 +164,8 @@ export async function parallelForEach<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<void[]>> {
   const pool = options.pool ?? computePool;
-  const result = await pool.map(
-    data,
-    (item: T) => {
-      fn(item);
-      return undefined;
-    },
-    options
-  );
+  const wrapped = inlineWrapper<[T], undefined>(fn, '(item) => { F(item); return undefined; }');
+  const result = await pool.map(data, wrapped, options);
   return {
     ...result,
     result: result.result as unknown as void[],
@@ -199,7 +212,11 @@ export async function parallelEvery<T>(
 ): Promise<ParallelResult<boolean>> {
   const pool = options.pool ?? computePool;
   // Find an element that doesn't pass - if found, not all pass
-  const findResult = await pool.find(data, (item: T) => !predicate(item), options);
+  const findResult = await pool.find(
+    data,
+    inlineWrapper<[T], boolean>(predicate, '(item) => !F(item)'),
+    options
+  );
   return {
     ...findResult,
     result: !findResult.result.found,

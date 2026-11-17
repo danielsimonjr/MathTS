@@ -1866,11 +1866,15 @@ export class ComputePool {
   }
 
   /**
-   * Maximum number of workers configured for this pool.
-   * Used by distribution sampling fan-out to determine chunk count.
+   * Number of workers this pool can use for fan-out (chunk count of block and
+   * distribution sampling operations).
+   *
+   * Equals the configured `maxWorkers` while the pool is active, also before the first
+   * worker starts. Equals 0 after {@link terminate}, in agreement with
+   * `stats().totalWorkers`, until {@link initialize} runs again.
    */
   get workerCount(): number {
-    return this.config.maxWorkers;
+    return this.terminated ? 0 : this.config.maxWorkers;
   }
 
   /**
