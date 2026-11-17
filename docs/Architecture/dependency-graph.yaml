@@ -18524,7 +18524,11 @@ modules:
       description: 'Arithmetic functions and integer power / root helpers: squarefree tests,'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
+            - MAX_ALLOC_ELEMENTS
       workspaceDependencies: []
       exports:
         - isSquarefree
@@ -18564,7 +18568,11 @@ modules:
       description: 'Diophantine and lattice-style integer problems: linear Diophantine equations,'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertAllocSize
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - linearDiophantine
@@ -18590,6 +18598,7 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
+            - assertLoopOrder
         - file: ../wasm/special/scalars.js
           imports:
             - chooseScalar
@@ -18650,7 +18659,10 @@ modules:
       description: 'Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - motzkin
@@ -19443,6 +19455,9 @@ modules:
         - file: ../../utils/product.js
           imports:
             - product
+        - file: ../../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - combinationsNumber
@@ -21571,6 +21586,9 @@ modules:
           imports:
             - bernoulli
             - combinations
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - hurwitzZeta
@@ -24848,7 +24866,10 @@ modules:
       description: Extended Combinatorics Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -46412,7 +46433,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 232602
+  totalLinesOfCode: 232832
   totalExports: 7328
   totalClasses: 62
   totalInterfaces: 664

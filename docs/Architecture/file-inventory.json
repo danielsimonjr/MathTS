@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-17",
-  "totalFiles": 2468,
+  "totalFiles": 2469,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1314,
     "test-only": 0,
     "orphan": 0,
-    "test": 1062,
+    "test": 1063,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1340,
-    "tests": 1062,
+    "tests": 1063,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1122,
+    "@danielsimonjr/mathts-functions": 1123,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 144,
@@ -7408,21 +7408,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 206
+      "loc": 245
     },
     {
       "file": "functions/src/numbertheory/diophantine.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 217
+      "loc": 240
     },
     {
       "file": "functions/src/numbertheory/extra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 474
+      "loc": 479
     },
     {
       "file": "functions/src/numbertheory/integer-matrices.ts",
@@ -7443,7 +7443,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 195
+      "loc": 238
     },
     {
       "file": "functions/src/numeric-equivalence.ts",
@@ -7723,7 +7723,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 45
+      "loc": 55
     },
     {
       "file": "functions/src/plain/number/constants.ts",
@@ -8353,7 +8353,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 112
+      "loc": 126
     },
     {
       "file": "functions/src/special/zeta.ts",
@@ -9102,7 +9102,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 895
+      "loc": 978
     },
     {
       "file": "functions/src/typed/complex-promotion.ts",
@@ -9354,7 +9354,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 498
+      "loc": 511
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -10454,6 +10454,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-989a-sequences.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 286
     },
     {
       "file": "functions/tests/dogfood-989c-eigs-non-finite.test.ts",

@@ -7951,6 +7951,12 @@ graph LR
 
 ### `functions/src/numbertheory/arithmetic-functions.ts` - Arithmetic functions and integer power / root helpers: squarefree tests,
 
+**Internal Dependencies:**
+
+| File                 | Imports                               | Type   |
+| -------------------- | ------------------------------------- | ------ |
+| `../utils/limits.js` | `assertLoopOrder, MAX_ALLOC_ELEMENTS` | Import |
+
 **Exports:**
 
 - Functions: `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `integerSqrt`, `integerNthRoot`, `isPerfectPower`, `isPrimePower`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`
@@ -7958,6 +7964,12 @@ graph LR
 ---
 
 ### `functions/src/numbertheory/diophantine.ts` - Diophantine and lattice-style integer problems: linear Diophantine equations,
+
+**Internal Dependencies:**
+
+| File                 | Imports                            | Type   |
+| -------------------- | ---------------------------------- | ------ |
+| `../utils/limits.js` | `assertAllocSize, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -7969,10 +7981,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports           | Type   |
-| ---------------------------- | ----------------- | ------ |
-| `../utils/limits.js`         | `assertAllocSize` | Import |
-| `../wasm/special/scalars.js` | `chooseScalar`    | Import |
+| File                         | Imports                            | Type   |
+| ---------------------------- | ---------------------------------- | ------ |
+| `../utils/limits.js`         | `assertAllocSize, assertLoopOrder` | Import |
+| `../wasm/special/scalars.js` | `chooseScalar`                     | Import |
 
 **Exports:**
 
@@ -7997,6 +8009,12 @@ graph LR
 ---
 
 ### `functions/src/numbertheory/sequences.ts` - Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,
+
+**Internal Dependencies:**
+
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `../utils/limits.js` | `assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -8517,10 +8535,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports     | Type   |
-| ------------------------ | ----------- | ------ |
-| `../../utils/number.js`  | `isInteger` | Import |
-| `../../utils/product.js` | `product`   | Import |
+| File                     | Imports           | Type   |
+| ------------------------ | ----------------- | ------ |
+| `../../utils/number.js`  | `isInteger`       | Import |
+| `../../utils/product.js` | `product`         | Import |
+| `../../utils/limits.js`  | `assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -9798,6 +9817,7 @@ graph LR
 | File                      | Imports                   | Type   |
 | ------------------------- | ------------------------- | ------ |
 | `../typed/probability.js` | `bernoulli, combinations` | Import |
+| `../utils/limits.js`      | `assertLoopOrder`         | Import |
 
 **Exports:**
 
@@ -11689,6 +11709,12 @@ graph LR
 | Package                      | Import      |
 | ---------------------------- | ----------- |
 | `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                 | Imports           | Type   |
+| -------------------- | ----------------- | ------ |
+| `../utils/limits.js` | `assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -20577,12 +20603,12 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
+| `functions/src/utils/limits`                           | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
-| `functions/src/utils/limits`                           | 0 files      | 30 files   |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `matrix/src/types/DenseMatrix`                         | 6 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
@@ -21503,7 +21529,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 232602 |
+| Total Lines of Code     | 232832 |
 | Total Exports           | 7328   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
