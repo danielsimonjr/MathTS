@@ -35,6 +35,24 @@ type ComplexArrayND = unknown;
 
 /** A copy of every nested array level, so a result row never aliases an input row. */
 const copyNested = (x: unknown): unknown => (Array.isArray(x) ? x.map(copyNested) : x);
+/** True when a value is NaN, or a Complex with a NaN part. */
+const isNaNValue = (v: unknown): boolean =>
+  typeof v === 'number'
+    ? Number.isNaN(v)
+    : typeof v === 'object' &&
+      v !== null &&
+      !Array.isArray(v) &&
+      (Number.isNaN((v as { re?: number }).re) || Number.isNaN((v as { im?: number }).im));
+
+/** True when any leaf of a nested array is NaN (in either part of a Complex). */
+const hasNaN = (x: unknown): boolean => (Array.isArray(x) ? x.some(hasNaN) : isNaNValue(x));
+
+/**
+ * Same shape as the nested array `x`, with every leaf replaced by `map(leaf)`.
+ */
+const mapLeaves = (x: unknown, map: (leaf: unknown) => unknown): unknown =>
+  Array.isArray(x) ? x.map((v) => mapLeaves(v, map)) : map(x);
+
 /** A scalar operation resolved from a typed-function */
 type ScalarFn = (...args: unknown[]) => unknown;
 
@@ -134,6 +152,21 @@ export const createFft = /* #__PURE__ */ factory(
      * @param {Array | Matrix} arr    An array or matrix
      * @return {Array | Matrix}       N-dimensional Fourier transformation of the array
      */
+    /**
+     * Final shaping of a spectrum.
+     *
+     * - A NaN anywhere in the input makes every bin NaN in BOTH parts. The radix-2 recursion
+     *   left imaginary parts of 0, 2, 0, -2 beside a NaN real part for short inputs, while
+     *   inputs of 64 or more values (flat kernel) gave NaN in both. One rule now holds for
+     *   every length (#1010).
+     * - A length-1 transform returns its input value unchanged from the recursion base case,
+     *   which can be a plain number. Every bin of the public result is a Complex (#1010).
+     */
+    function finish(input: unknown, result: unknown): unknown {
+      if (hasNaN(input)) return mapLeaves(result, () => complex(NaN, NaN));
+      return mapLeaves(result, (v) => (typeof v === 'number' ? complex(v, 0) : v));
+    }
+
     return typed(name, {
       Array: function (arr: ComplexArrayND): unknown {
         // `arraySize` reads the first row only, so `validate` rejects a jagged array
@@ -142,15 +175,17 @@ export const createFft = /* #__PURE__ */ factory(
         validate(arr as unknown[], size);
         // A zero-length dimension has no elements to transform, so the result keeps the shape.
         if (size.includes(0)) return copyNested(arr);
-        return _ndFft(arr);
+        return finish(arr, _ndFft(arr));
       },
       Matrix: function (matrix: Matrix): Matrix {
         if (matrix.size().includes(0)) return matrix.clone();
-        return matrix.create(_ndFft(matrix.valueOf()) as unknown[], matrix._datatype);
+        const data = matrix.valueOf();
+        return matrix.create(finish(data, _ndFft(data)) as unknown[], matrix._datatype);
       },
       Float64Array: function (arr: Float64Array): unknown[] {
         const n = arr.length;
         if (n === 0) return [];
+        if (arr.some(Number.isNaN)) return new Array(n).fill(null).map(() => complex(NaN, NaN));
         const out = fftExactFloat64(arr, new Float64Array(n), false);
         return boxSpectrum(out.real, out.imag, complex);
       },

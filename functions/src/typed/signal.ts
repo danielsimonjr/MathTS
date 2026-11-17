@@ -750,7 +750,12 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
  */
 export function fft2d(x: number[][]): { real: number[][]; imag: number[][] } {
   const rows: i32 = x.length;
+  // No elements, no spectrum: keep the input shape. Padding 0 to a power of two would give 1x1.
+  if (rows === 0) return { real: [], imag: [] };
   const cols: i32 = x[0].length;
+  if (cols === 0) {
+    return { real: x.map(() => []), imag: x.map(() => []) };
+  }
   const paddedCols: i32 = nextPowerOf2(cols);
   const paddedRows: i32 = nextPowerOf2(rows);
 
@@ -1005,6 +1010,8 @@ export function periodogram(
   x: number[],
   opts?: { nfft?: i32; window?: string }
 ): { psd: number[]; frequencies: number[] } {
+  // SciPy: an empty signal has an empty spectrum.
+  if (x.length === 0) return { psd: [], frequencies: [] };
   const nfft: i32 = opts?.nfft ?? nextPowerOf2(x.length);
   const winType = opts?.window ?? 'hann';
 
@@ -1021,7 +1028,7 @@ export function periodogram(
 
   const result = fftCoreFloat64(real, imag, false);
 
-  const nFreqs: i32 = nfft / 2 + 1;
+  const nFreqs: i32 = Math.floor(nfft / 2) + 1;
   const psd: number[] = new Array<number>(nFreqs);
   const frequencies: number[] = new Array<number>(nFreqs);
 
@@ -1514,7 +1521,7 @@ export function multiTaperPSD(
 
   // Approximate Slepian tapers via discrete cosine windows.
   // Taper k: w_k[n] = sin((k+1) * pi * n / (N+1)) — a sine-family taper.
-  const psdLen: i32 = nfft / 2 + 1;
+  const psdLen: i32 = Math.floor(nfft / 2) + 1;
   const accumPsd = new Float64Array(psdLen);
 
   for (let k: i32 = 0; k < K; k++) {

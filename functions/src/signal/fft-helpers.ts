@@ -9,6 +9,7 @@
  */
 import { fft, ifft, complex } from '../factories/index.js';
 import { assertAllocSize } from '../utils/limits.js';
+import { isMatrix } from '../utils/is.js';
 import { fftshift as fftshiftGeneric, ifftshift as ifftshiftGeneric } from './fft.js';
 
 /** Minimal complex shape used to normalize typed-function outputs (number or Complex). */
@@ -31,14 +32,19 @@ function toReIm(value: unknown): ComplexLike {
   return { re: c.re, im: c.im };
 }
 
-/**
- * Real FFT: compute the full FFT of a real signal and keep only the first
- * `floor(n/2)+1` bins — the non-redundant half of the conjugate-symmetric spectrum.
- *
- * @param x Real input signal
- * @returns `{ re, im }` arrays of length `floor(n/2)+1`
- */
-export function rfft(x: number[]): { re: number[]; im: number[] } {
+/** A Matrix becomes its nested-array data; a plain array passes through. */
+function unwrapInput(fn: string, x: unknown): unknown[] {
+  const data = isMatrix(x) ? (x as { valueOf(): unknown }).valueOf() : x;
+  if (ArrayBuffer.isView(data) && !(data instanceof DataView)) {
+    return Array.from(data as unknown as ArrayLike<number>);
+  }
+  if (!Array.isArray(data)) {
+    throw new TypeError(`${fn}: expected an array or Matrix (got ${typeof data})`);
+  }
+  return data;
+}
+
+function rfft1d(x: unknown[]): { re: number[]; im: number[] } {
   const n = x.length;
   // An empty signal has no bins. floor(0/2)+1 would give one bin and read past the end (#988).
   if (n === 0) return { re: [], im: [] };
@@ -52,6 +58,29 @@ export function rfft(x: number[]): { re: number[]; im: number[] } {
     im[i] = c.im;
   }
   return { re, im };
+}
+
+function rfftNd(x: unknown[]): { re: unknown[]; im: unknown[] } {
+  if (x.length > 0 && Array.isArray(x[0])) {
+    const parts = x.map((row) => rfftNd(row as unknown[]));
+    return { re: parts.map((p) => p.re), im: parts.map((p) => p.im) };
+  }
+  return rfft1d(x);
+}
+
+/**
+ * Real FFT: compute the full FFT of a real signal and keep only the first
+ * `floor(n/2)+1` bins — the non-redundant half of the conjugate-symmetric spectrum.
+ * A 2-D (or deeper) input transforms along its last axis, as NumPy does. A Matrix is
+ * unwrapped; the result is always plain arrays.
+ *
+ * @param x Real input signal (1-D array, N-D nested array or Matrix)
+ * @returns `{ re, im }`, with the last axis of length `floor(n/2)+1`
+ */
+export function rfft(x: number[]): { re: number[]; im: number[] };
+export function rfft(x: number[][] | unknown): { re: number[][]; im: number[][] };
+export function rfft(x: unknown): { re: unknown[]; im: unknown[] } {
+  return rfftNd(unwrapInput('rfft', x));
 }
 
 /**
@@ -136,14 +165,20 @@ export function rfftfreq(n: number, d: number = 1): number[] {
   return result;
 }
 
+/** Split a nested array of Complex bins into nested re and im arrays of the same shape. */
+function splitComplex(x: unknown, part: 're' | 'im'): unknown {
+  return Array.isArray(x) ? x.map((v) => splitComplex(v, part)) : toReIm(x)[part];
+}
+
 /**
- * 2-D FFT: FFT each row, then FFT each column of the result. Delegates directly to
- * the package's N-dimensional `fft`, which already performs exactly this row-then-
- * column transform when given a 2-D array.
+ * N-D FFT over every axis, as NumPy `fftn`: a 1-D input equals `fft`, a 2-D input runs rows
+ * and then columns. Delegates to the package's N-dimensional `fft`. A Matrix is unwrapped;
+ * the result is always plain arrays.
  */
-export function fftn(x: number[][]): { re: number[][]; im: number[][] } {
-  const full = callFft(x) as unknown[][];
-  const re = full.map((row) => row.map((v) => toReIm(v).re));
-  const im = full.map((row) => row.map((v) => toReIm(v).im));
-  return { re, im };
+export function fftn(x: number[]): { re: number[]; im: number[] };
+export function fftn(x: number[][]): { re: number[][]; im: number[][] };
+export function fftn(x: unknown): { re: unknown; im: unknown };
+export function fftn(x: unknown): { re: unknown; im: unknown } {
+  const full = callFft(unwrapInput('fftn', x));
+  return { re: splitComplex(full, 're'), im: splitComplex(full, 'im') };
 }
