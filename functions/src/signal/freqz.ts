@@ -65,7 +65,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         if (w < 0) {
           throw new Error('w must be a positive number');
         }
-        assertAllocSize('freqz', [w]);
+        assertAllocSize('freqz', [w, 8]);
         const w2 = createBins(w);
         return _freqz(b, a, w2);
       },
@@ -92,7 +92,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         if (w < 0) {
           throw new Error('w must be a positive number');
         }
-        assertAllocSize('freqz', [w]);
+        assertAllocSize('freqz', [w, 8]);
         const _w = createBins(w);
         const { h } = _freqz(b.valueOf() as number[], a.valueOf() as number[], _w);
         return {
