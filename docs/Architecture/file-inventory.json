@@ -15304,7 +15304,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 234
+      "loc": 238
     },
     {
       "file": "parallel/tests/chunk.test.ts",
