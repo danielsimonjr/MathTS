@@ -13,6 +13,7 @@ import * as F from '../src/index.js';
 import { norm } from '../src/typed/arithmetic.js';
 import { singularValues } from '../src/typed/matrix-ops.js';
 import { numberVector } from '../src/typed/number-matrix.js';
+import { factory_norm } from '../src/factories/index.js';
 
 const V = [1, 2, 3, 4, 5, 6];
 const fn = (name: string): ((...a: unknown[]) => unknown) =>
@@ -52,7 +53,7 @@ const SCALAR_SECOND: Array<[string, unknown[]]> = [
 ];
 
 describe('numberVector rejects a scalar (#1083)', () => {
-  it.each([5, 0, null, undefined, true, {}])(
+  it.each([5, 0, null, undefined, true, {}, '', 'abc'])(
     'numberVector(%j) throws a TypeError with the name',
     (x) => {
       expect(() => numberVector('myFn', x as never)).toThrow(TypeError);
@@ -64,6 +65,7 @@ describe('numberVector rejects a scalar (#1083)', () => {
     expect(numberVector('f', new Float64Array([1, 2]))).toEqual([1, 2]);
     expect(numberVector('f', { length: 2, 0: 7, 1: 8 })).toEqual([7, 8]);
     expect(numberVector('f', [])).toEqual([]);
+    expect(numberVector('f', new Set([7, 8]) as never)).toEqual([7, 8]);
   });
   it.each(SCALAR_FIRST)('%s(scalar) throws a TypeError that names it', (name, args) => {
     expect(() => fn(name)(...args)).toThrow(TypeError);
@@ -112,11 +114,8 @@ describe('norm of a matrix with a negative entry (#1082, #995)', () => {
     ).toBeCloseTo(2, 12);
   });
   it('the factory norm agrees', () => {
-    const fnorm = (F as unknown as Record<string, (x: unknown, p?: unknown) => number>)
-      .factory_norm;
-    if (fnorm) {
-      expect(fnorm(A, 2)).toBeCloseTo(3, 12);
-      expect(fnorm(A)).toBeCloseTo(3, 12);
-    }
+    const fnorm = factory_norm as unknown as (x: unknown, p?: unknown) => number;
+    expect(fnorm(A, 2)).toBeCloseTo(3, 12);
+    expect(fnorm(A)).toBeCloseTo(3, 12);
   });
 });
