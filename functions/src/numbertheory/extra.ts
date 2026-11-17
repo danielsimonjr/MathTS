@@ -169,6 +169,9 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
 // discreteLog — baby-step giant-step
 // =============================================================================
 
+/** Largest baby-step count: the entry limit of a `Map` (2^24). */
+const MAX_BABY_STEPS = 2 ** 24;
+
 /**
  * Discrete logarithm via baby-step giant-step: the smallest `x >= 0` such
  * that `g^x === h (mod p)`, or `-1` if none exists within `[0, p-1]`.
@@ -189,16 +192,24 @@ export function discreteLog(g: number, h: number, p: number): number {
   if (!Number.isInteger(g) || !Number.isInteger(h) || !Number.isInteger(p) || p < 2) {
     throw new Error('discreteLog requires integer g, h and a modulus p >= 2');
   }
+  const mNumber = Math.max(1, Math.ceil(Math.sqrt(p - 1)));
+  // A Map holds at most 2^24 entries, so a larger table cannot exist (and p must stay below 2^53).
+  if (mNumber > MAX_BABY_STEPS) {
+    throw new RangeError(
+      `discreteLog: p = ${p} needs ${mNumber} baby steps, above the supported maximum of ${MAX_BABY_STEPS}`
+    );
+  }
   const P = BigInt(p);
   const G = ((BigInt(g) % P) + P) % P;
   const H = ((BigInt(h) % P) + P) % P;
-  const m = BigInt(Math.max(1, Math.ceil(Math.sqrt(p - 1))));
+  const m = BigInt(mNumber);
 
   // Baby steps: g^j mod p for j = 0..m-1, keeping the smallest j per value.
-  const table = new Map<string, bigint>();
+  // Every value is below p < 2^53, so a number key is exact and cheaper than a string key.
+  const table = new Map<number, number>();
   let cur = 1n;
-  for (let j = 0n; j < m; j++) {
-    const key = cur.toString();
+  for (let j = 0; j < mNumber; j++) {
+    const key = Number(cur);
     if (!table.has(key)) table.set(key, j);
     cur = (cur * G) % P;
   }
@@ -208,10 +219,9 @@ export function discreteLog(g: number, h: number, p: number): number {
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
   for (let i = 0n; i < m; i++) {
-    const key = gamma.toString();
-    const j = table.get(key);
+    const j = table.get(Number(gamma));
     if (j !== undefined) {
-      return Number(i * m + j);
+      return Number(i * m + BigInt(j));
     }
     gamma = (gamma * gInvM) % P;
   }

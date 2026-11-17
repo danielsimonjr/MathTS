@@ -495,6 +495,11 @@ export function besselJScalar(n: f64, x: f64): f64 {
   if (ni === 1) return besselJ1Scalar(x);
 
   if (Math.abs(x) < 1e-15) return 0;
+  if (Number.isNaN(x)) return NaN;
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (ni > 1000000000) {
+    throw new RangeError(`besselJ: n = ${ni} exceeds the supported maximum of 1000000000`);
+  }
 
   // Upward recurrence is stable only when x > n; otherwise it amplifies
   // round-off (J_n decays in n for n > x), so use Miller's backward recurrence.
@@ -503,6 +508,7 @@ export function besselJScalar(n: f64, x: f64): f64 {
     let jCurr: f64 = besselJ1Scalar(x);
     for (let k = 1; k < ni; k++) {
       const jNext = ((2 * k) / x) * jCurr - jPrev;
+      if (Number.isNaN(jNext)) return NaN;
       jPrev = jCurr;
       jCurr = jNext;
     }
@@ -513,10 +519,23 @@ export function besselJScalar(n: f64, x: f64): f64 {
     let jCurr = 1;
     let result = 0;
     let sum = 0;
+    let scaled = 0;
     for (let k = nStart; k >= 0; k--) {
       const jPrev = ((2 * (k + 1)) / x) * jCurr - jNext;
       jNext = jCurr;
       jCurr = jPrev;
+      // The sweep grows as it goes down. Scaling by a power of 2 is exact, so it keeps the sums
+      // finite and does not change the final ratio. A sweep that has grown by 1e400 before it
+      // reaches order n leaves J_n below the smallest double, so its value is 0.
+      if (Math.abs(jCurr) > 1e200) {
+        if (k > ni && ++scaled >= 2) return 0;
+        const down = Math.pow(2, -700);
+        jCurr *= down;
+        jNext *= down;
+        result *= down;
+        sum *= down;
+      }
+      if (!Number.isFinite(jCurr)) return 0;
       // After the assignments jCurr = J_k and jNext = J_{k+1}; capture J_ni.
       if (k === ni) result = jCurr;
       if (k % 2 === 0) sum += jCurr;
@@ -544,10 +563,15 @@ export function besselYScalar(n: f64, x: f64): f64 {
   if (ni === 0) return besselY0Scalar(x);
   if (ni === 1) return besselY1Scalar(x);
 
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (ni > 1000000000) {
+    throw new RangeError(`besselY: n = ${ni} exceeds the supported maximum of 1000000000`);
+  }
   let yPrev: f64 = besselY0Scalar(x);
   let yCurr: f64 = besselY1Scalar(x);
   for (let k = 1; k < ni; k++) {
     const yNext = ((2 * k) / x) * yCurr - yPrev;
+    if (Number.isNaN(yNext)) return NaN;
     yPrev = yCurr;
     yCurr = yNext;
   }

@@ -24,6 +24,10 @@
  */
 
 import { digamma } from '../typed/special.js';
+import { assertLoopOrder, MAX_RECURRENCE_ORDER } from '../utils/limits.js';
+
+/** Largest argument shift that `polygamma` runs (1e9 steps take about 11 s). */
+const MAX_POLYGAMMA_SHIFT = 1_500_000_000;
 
 /** Argument threshold above which the Bernoulli asymptotic series is accurate. */
 const SHIFT_THRESHOLD = 12;
@@ -33,6 +37,8 @@ const BERNOULLI_EVEN = [1 / 6, -1 / 30, 1 / 42, -1 / 30];
 
 /** Factorial of a small nonnegative integer (exact for n <= ~20, double-precision beyond). */
 function factorial(n: number): number {
+  // 171! exceeds the largest double, so every larger factorial is Infinity.
+  if (n > 170) return Infinity;
   let result = 1;
   for (let i = 2; i <= n; i++) result *= i;
   return result;
@@ -69,6 +75,7 @@ export function polygamma(n: number, x: number): number {
   const sign = n % 2 === 1 ? 1 : -1;
   const nFactorial = factorial(n);
 
+  assertLoopOrder('polygamma', '-x', -x, MAX_POLYGAMMA_SHIFT);
   let recurrenceSum = 0;
   let shifted = x;
   while (shifted < SHIFT_THRESHOLD) {
@@ -126,6 +133,7 @@ export function jacobiP(n: number, alpha: number, beta: number, x: number): numb
   let pPrev = 1; // P_0
   let pCurr = alpha + 1 + ((alpha + beta + 2) * (x - 1)) / 2; // P_1
   if (n === 1) return pCurr;
+  assertLoopOrder('jacobiP', 'n', n, MAX_RECURRENCE_ORDER);
 
   for (let k = 2; k <= n; k++) {
     const a1 = 2 * k * (k + alpha + beta) * (2 * k + alpha + beta - 2);
@@ -134,6 +142,7 @@ export function jacobiP(n: number, alpha: number, beta: number, x: number): numb
       ((2 * k + alpha + beta) * (2 * k + alpha + beta - 2) * x + alpha * alpha - beta * beta);
     const a3 = 2 * (k + alpha - 1) * (k + beta - 1) * (2 * k + alpha + beta);
     const pNext = (a2 * pCurr - a3 * pPrev) / a1;
+    if (Number.isNaN(pNext)) return NaN;
     pPrev = pCurr;
     pCurr = pNext;
   }
@@ -161,9 +170,11 @@ export function gegenbauerC(n: number, alpha: number, x: number): number {
   let cPrev = 1; // C_0
   let cCurr = 2 * alpha * x; // C_1
   if (n === 1) return cCurr;
+  assertLoopOrder('gegenbauerC', 'n', n, MAX_RECURRENCE_ORDER);
 
   for (let k = 2; k <= n; k++) {
     const cNext = (2 * x * (k + alpha - 1) * cCurr - (k + 2 * alpha - 2) * cPrev) / k;
+    if (Number.isNaN(cNext)) return NaN;
     cPrev = cCurr;
     cCurr = cNext;
   }

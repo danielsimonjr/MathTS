@@ -18,6 +18,10 @@
 
 import { _lgamma } from '../wasm/special/scalars.js';
 import { hyp1f1 } from './hypergeometric.js';
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest |t| that `siegelZ` accepts. The cost grows with t squared (t = 1700 took 22 s before the change). */
+const MAX_SIEGEL_T = 1700;
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -197,6 +201,7 @@ export function siegelZ(t: f64): f64 {
   // Z(t) oscillates with no limit as |t| grows, and the zeta sum never ends at Infinity.
   if (!Number.isFinite(t)) return NaN;
   const at = Math.abs(t);
+  assertLoopOrder('siegelZ', '|t|', at, MAX_SIEGEL_T);
   const z = zetaCriticalLine(at);
   const th = riemannSiegelTheta(at);
   return Math.cos(th) * z.re - Math.sin(th) * z.im;

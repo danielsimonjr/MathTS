@@ -152,9 +152,13 @@ function solveClass(cls: MathieuClass, q: f64): MathieuMode[] {
 }
 
 /** Validate an order argument is a nonnegative integer. */
-function checkOrder(n: number, min: number, name: string): void {
+function checkOrder(n: number, min: number, max: number, name: string): void {
   if (!Number.isInteger(n) || n < min) {
     throw new Error(`${name}: order n must be an integer ≥ ${min}, got ${n}`);
+  }
+  // Each parity class solves N modes, so the highest order is 2N - 1 (2N for the sine classes).
+  if (n > max) {
+    throw new RangeError(`${name}: order n must be at most ${max}, got ${n}`);
   }
 }
 
@@ -166,7 +170,7 @@ function checkOrder(n: number, min: number, name: string): void {
  * @param q - Mathieu parameter.
  */
 export function mathieuA(n: number, q: f64): f64 {
-  checkOrder(n, 0, 'mathieuA');
+  checkOrder(n, 0, 2 * N - 1, 'mathieuA');
   const cls: MathieuClass = n % 2 === 0 ? 'even-cos' : 'odd-cos';
   const m = Math.floor(n / 2);
   return solveClass(cls, q)[m].a;
@@ -180,7 +184,7 @@ export function mathieuA(n: number, q: f64): f64 {
  * @param q - Mathieu parameter.
  */
 export function mathieuB(n: number, q: f64): f64 {
-  checkOrder(n, 1, 'mathieuB');
+  checkOrder(n, 1, 2 * N, 'mathieuB');
   const cls: MathieuClass = n % 2 === 0 ? 'even-sin' : 'odd-sin';
   const m = Math.floor((n - (n % 2 === 0 ? 2 : 1)) / 2);
   return solveClass(cls, q)[m].a;
@@ -204,7 +208,7 @@ function evalSeries(mode: MathieuMode, x: f64, basis: (t: number) => number): f6
  * @param x - Argument in radians.
  */
 export function mathieuCe(n: number, q: f64, x: f64): f64 {
-  checkOrder(n, 0, 'mathieuCe');
+  checkOrder(n, 0, 2 * N - 1, 'mathieuCe');
   const cls: MathieuClass = n % 2 === 0 ? 'even-cos' : 'odd-cos';
   const m = Math.floor(n / 2);
   return evalSeries(solveClass(cls, q)[m], x, Math.cos);
@@ -220,7 +224,7 @@ export function mathieuCe(n: number, q: f64, x: f64): f64 {
  * @param x - Argument in radians.
  */
 export function mathieuSe(n: number, q: f64, x: f64): f64 {
-  checkOrder(n, 1, 'mathieuSe');
+  checkOrder(n, 1, 2 * N, 'mathieuSe');
   const cls: MathieuClass = n % 2 === 0 ? 'even-sin' : 'odd-sin';
   const m = Math.floor((n - (n % 2 === 0 ? 2 : 1)) / 2);
   return evalSeries(solveClass(cls, q)[m], x, Math.sin);

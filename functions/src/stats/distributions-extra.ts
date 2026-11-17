@@ -8,6 +8,10 @@ import { gammainc as _gammainc, lgamma as _lgamma } from '../typed/special.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { besselIScalar } from '../wasm/special/scalars.js';
 import { erfcx } from '../special/erf-extra.js';
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest `n` that `zipfPMF` sums (1e8 terms take about 12 s). */
+const MAX_ZIPF_N = 150_000_000;
 
 const normalPDF = (z: number): number => _normalPDF(z) as number;
 const lgamma = (v: number): number => _lgamma(v) as number;
@@ -181,6 +185,7 @@ export function zipfPMF(k: number, s: number, n: number): number {
   // The normalising sum runs from 1 to n. An infinite n makes the sum run forever.
   if (n === Infinity) throw new RangeError('zipfPMF: n must be finite');
   if (!Number.isInteger(k) || k < 1 || k > n) return 0;
+  assertLoopOrder('zipfPMF', 'n', n, MAX_ZIPF_N);
   let h = 0;
   for (let i = 1; i <= n; i++) h += Math.pow(i, -s);
   return Math.pow(k, -s) / h;

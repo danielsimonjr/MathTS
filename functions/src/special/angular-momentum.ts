@@ -19,6 +19,8 @@ function assertHalfInteger(value: number, name: string): void {
 function fact(n: number): number {
   const m = Math.round(n);
   if (m < 0) throw new RangeError('factorial of a negative integer');
+  // 171! exceeds the largest double, so every larger factorial is Infinity.
+  if (m > 170) return Infinity;
   let r = 1;
   for (let i = 2; i <= m; i += 1) r *= i;
   return r;

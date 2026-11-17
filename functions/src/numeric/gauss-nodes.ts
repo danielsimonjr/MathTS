@@ -12,6 +12,11 @@
  * @packageDocumentation
  */
 
+import { assertLoopOrder } from '../utils/limits.js';
+
+/** Largest `n` for `rootsLegendre` (the cost grows with n squared: n = 10000 takes about 15 s). */
+const MAX_LEGENDRE_NODES = 10_000;
+
 const NEWTON_MAX_ITERATIONS = 100;
 const NEWTON_TOLERANCE = 1e-15;
 
@@ -142,6 +147,7 @@ export function rootsLegendre(n: number): RootsLegendreResult {
   if (!Number.isInteger(n) || n < 1) {
     throw new Error('rootsLegendre: n must be a positive integer');
   }
+  assertLoopOrder('rootsLegendre', 'n', n, MAX_LEGENDRE_NODES);
 
   const nodes: number[] = [];
   const weights: number[] = [];

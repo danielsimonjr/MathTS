@@ -14,6 +14,13 @@ export const MAX_ALLOC_ELEMENTS: number = DENSE_MATRIX_MAX_ELEMENTS;
 export const MAX_LOOP_ORDER = 10_000_000;
 
 /**
+ * Maximum order that a cheap scalar three-term recurrence accepts.
+ *
+ * One step costs about 10 to 20 ns, so a recurrence of this order runs for about 10 to 20 s.
+ */
+export const MAX_RECURRENCE_ORDER = 1_000_000_000;
+
+/**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
  *
  * The test divides step by step, so the product cannot overflow. A NaN or negative
