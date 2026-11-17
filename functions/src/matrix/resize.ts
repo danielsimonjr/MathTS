@@ -5,6 +5,7 @@ import { format } from '../utils/string.js';
 import { clone } from '../utils/object.js';
 import { resize as arrayResize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { assertAllocSize } from '../utils/limits.js';
 import type { MathJsConfig } from '../core/config.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
@@ -109,6 +110,7 @@ export const createResize = /* #__PURE__ */ factory(
       } else {
         // output an array/matrix
         let arr: unknown[] = !Array.isArray(x) ? [x] : x;
+        assertAllocSize('resize', sz as number[]);
         arr = clone(arr);
 
         const res = arrayResize(arr, sz as number[], defaultValue);
@@ -141,6 +143,7 @@ export const createResize = /* #__PURE__ */ factory(
           'Invalid size, must contain positive integers ' + '(size: ' + format(size, {}) + ')'
         );
       }
+      assertAllocSize('resize', [len]);
 
       if (str.length > len) {
         return str.substring(0, len);

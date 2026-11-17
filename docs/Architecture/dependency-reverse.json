@@ -2231,9 +2231,9 @@
       "functions/src/linalg-special-matrices.ts",
       "functions/src/matrix/identity.ts",
       "functions/src/matrix/range.ts",
+      "functions/src/matrix/resize.ts",
       "functions/src/matrix/utils/zerosAndOnes.ts",
-      "functions/src/numbertheory/extra.ts",
-      "functions/src/utils/array.ts"
+      "functions/src/numbertheory/extra.ts"
     ],
     "functions/src/scalar-batch-task.ts": [
       "functions/src/scalar-batch-parallel.ts",

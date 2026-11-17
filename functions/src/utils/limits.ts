@@ -17,14 +17,15 @@ export const MAX_LOOP_ORDER = 10_000_000;
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
  *
  * The test divides step by step, so the product cannot overflow. A NaN or negative
- * dimension passes through, so the existing argument validation reports it. A zero
- * dimension gives an empty result and passes.
+ * dimension passes through, so the existing argument validation reports it. The
+ * dimensions before a zero dimension still count, because each one allocates a
+ * container. The dimensions after the first zero do not count.
  *
  * @throws RangeError if the result would hold more than MAX_ALLOC_ELEMENTS elements
  */
 export function assertAllocSize(fn: string, dims: readonly number[]): void {
   for (const d of dims) {
-    if (Number.isNaN(d) || d <= 0) return;
+    if (Number.isNaN(d) || d < 0) return;
   }
   let room = MAX_ALLOC_ELEMENTS;
   for (const d of dims) {
@@ -33,6 +34,7 @@ export function assertAllocSize(fn: string, dims: readonly number[]): void {
         `${fn}: result too large (${dims.join('×')} exceeds limit of ${MAX_ALLOC_ELEMENTS} elements)`
       );
     }
+    if (d === 0) return;
     room = Math.floor(room / d);
   }
 }

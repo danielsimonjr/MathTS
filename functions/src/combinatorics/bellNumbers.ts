@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { assertAllocSize } from '../utils/limits.js';
+import { assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 
@@ -54,7 +54,7 @@ export const createBellNumbers = /* #__PURE__ */ factory(
         if (typeof n === 'number' && n > 218) return Infinity;
         if (typeof n !== 'number') {
           const nn = n.toNumber();
-          assertAllocSize('bellNumbers', [nn + 1, nn + 1]);
+          assertLoopOrder('bellNumbers', 'n', nn, 2000);
         }
 
         // Sum (k=0, n) S(n,k).
