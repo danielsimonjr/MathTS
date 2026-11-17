@@ -153,6 +153,10 @@ describe('number theory with a huge argument (#989)', () => {
     expect(d.length).toBe(16);
     expect(d.slice(0, 6)).toEqual([1, 2, 17, 34, 858001, 1716002]);
     expect(() => divisorSigma(1e308, 2)).toThrow(RangeError);
+    // The bound is 2e9 for sqrt(n): divisors(1e18 + 2 ** 10) returned 44 divisors before (14 s).
+    expect(() => divisors(4.1e18)).toThrow(
+      'divisors: sqrt(n) = 2024845673.1316588 exceeds the supported maximum of 2000000000'
+    );
     expect(divisors(12)).toEqual([1, 2, 3, 4, 6, 12]);
     expect(divisorSigma(12)).toBe(28);
   });
@@ -212,16 +216,23 @@ describe('number theory with a huge argument (#989)', () => {
 
   it('combinations and the functions built on it stop at a huge argument [slow]', () => {
     expect(() => composition(1e308, 3)).toThrow(RangeError);
-    expect(() => catalan(1e9)).toThrow(RangeError);
+    expect(catalan(1e9)).toBe(Infinity);
+    expect(catalan(2e7)).toBe(Infinity);
+    expect(composition(3e7, 1.5e7)).toBe(Infinity);
     expect(combinations(10, 3)).toBe(120);
     expect(combinations(1e9, 5e8)).toBe(Infinity);
     expect(catalan(10)).toBe(16796);
   });
 
   it('list and table builders carry an order bound', () => {
-    expect(() => eulerNumbers(1001)).toThrow(
-      'eulerNumbers: n = 1001 exceeds the supported maximum of 1000'
-    );
+    // From index 188 every even Euler number is NaN in double, and every odd one is 0.
+    const e = eulerNumbers(4000);
+    expect(e).toHaveLength(4001);
+    expect(e[186]).toBe(-3.2455474583892485e306);
+    expect(e[188]).toBeNaN();
+    expect(e[3999]).toBe(0);
+    expect(e[4000]).toBeNaN();
+    expect(() => eulerNumbers(1e9)).toThrow(RangeError);
     expect(eulerNumbers(6)).toEqual([1, 0, -1, 0, 5, 0, -61]);
     expect(() => primorial(10_000_001)).toThrow(
       'primorial: n = 10000001 exceeds the supported maximum of 10000000'
@@ -239,12 +250,11 @@ describe('number theory with a huge argument (#989)', () => {
       [2, 3],
       [1, 1],
     ]);
-    expect(() => bernoulliPolynomial(10001, 0.5)).toThrow(
-      'bernoulliPolynomial: n = 10001 exceeds the supported maximum of 10000'
-    );
-    expect(() => eulerPolynomial(10001, 0.5)).toThrow(
-      'eulerPolynomial: n = 10001 exceeds the supported maximum of 10000'
-    );
+    // The sum is NaN from degree 262, so a degree above 10000 returns NaN at once.
+    expect(bernoulliPolynomial(10001, 0.5)).toBeNaN();
+    expect(eulerPolynomial(10001, 0.5)).toBeNaN();
+    expect(bernoulliPolynomial(1e15, 2)).toBeNaN();
+    expect(eulerPolynomial(1e15, 2)).toBeNaN();
     expect(bernoulliPolynomial(2, 0.5)).toBeCloseTo(-1 / 12, 14);
     expect(eulerPolynomial(2, 0.5)).toBe(-0.25);
   });

@@ -1,15 +1,14 @@
 import { isInteger } from '../../utils/number.js';
 import { product } from '../../utils/product.js';
-import { assertLoopOrder } from '../../utils/limits.js';
 
 /**
  * Return the number of ways to choose `k` items from `n` items, without order.
  *
  * The loop alternates multiplication and division to keep intermediate values exact as long
- * as possible.
+ * as possible. The result is `Infinity` as soon as the product overflows.
  *
  * @throws TypeError if `n` or `k` is not a non-negative integer, or if `k > n`.
- * @throws RangeError if `n` is not a safe integer, or if `min(k, n - k)` is above the loop bound
+ * @throws RangeError if `n` is not a safe integer
  */
 export function combinationsNumber(n: number, k: number): number {
   if (!isInteger(n) || n < 0) {
@@ -30,7 +29,6 @@ export function combinationsNumber(n: number, k: number): number {
   }
 
   const nMinusk = n - k;
-  assertLoopOrder('combinations', 'min(k, n - k)', Math.min(k, nMinusk));
 
   let answer = 1;
   const firstnumerator = k < nMinusk ? nMinusk + 1 : k + 1;
@@ -40,6 +38,8 @@ export function combinationsNumber(n: number, k: number): number {
   // in exact-integer range as long as possible
   for (let nextnumerator = firstnumerator; nextnumerator <= n; ++nextnumerator) {
     answer *= nextnumerator;
+    // The divisions cannot make an infinite product finite again.
+    if (answer === Infinity) return Infinity;
     while (nextdivisor <= lastdivisor && answer % nextdivisor === 0) {
       answer /= nextdivisor;
       ++nextdivisor;

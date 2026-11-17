@@ -7422,7 +7422,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 479
+      "loc": 483
     },
     {
       "file": "functions/src/numbertheory/integer-matrices.ts",
@@ -8353,7 +8353,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 126
+      "loc": 125
     },
     {
       "file": "functions/src/special/zeta.ts",
@@ -10460,7 +10460,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 286
+      "loc": 294
     },
     {
       "file": "functions/tests/dogfood-989c-eigs-non-finite.test.ts",
