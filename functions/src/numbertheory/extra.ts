@@ -173,9 +173,10 @@ function modInverseBig(a: bigint, mod: bigint): bigint {
  * Largest baby-step count (2^24). The table is two `Uint32Array`s of twice this size: 268 MB
  * at the limit.
  *
- * A call at this limit (a modulus near 2^48) took 13.4 to 15.5 s when measured, with a
- * peak resident memory of about 330 MB. A lower limit refuses calls that return in less
- * than 20 s.
+ * A call at this limit (a modulus near 2^48) took 12 to 27 s when measured, by machine load.
+ * The peak resident memory was about 330 MB in a process that loads this function alone, and
+ * about 480 MB in a process that loads the full package. A lower limit refuses calls that
+ * return in less than 20 s at a low load.
  */
 const MAX_BABY_STEPS = 2 ** 24;
 
