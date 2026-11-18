@@ -988,6 +988,10 @@
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
     ],
+    "functions/src/utils/isExactZero.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/matrix/inv.ts"
+    ],
     "functions/src/utils/is.ts": [
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/algebra/derivative.ts",

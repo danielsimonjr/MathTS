@@ -1,6 +1,7 @@
 import { isMatrix } from '../utils/is.js';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { isExactZero } from '../utils/isExactZero.js';
 import { format } from '../utils/string.js';
 import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
 
@@ -293,17 +294,3 @@ export const createInv = /* #__PURE__ */ factory(
     }
   }
 );
-
-/**
- * Tells if a scalar is exactly zero. A number uses `=== 0`. A Complex, Fraction or BigNumber
- * uses its own exact `isZero()`. The tolerance of the `isZero` function does not apply, so a
- * small invertible matrix such as `[[1e-16]]` does not count as singular (#1040).
- *
- * @param x - The scalar.
- * @returns `true` when the scalar is exactly zero.
- */
-function isExactZero(x: unknown): boolean {
-  if (typeof x === 'number') return x === 0;
-  const zero = (x as { isZero?: () => boolean } | null)?.isZero;
-  return typeof zero === 'function' ? zero.call(x) : x === 0;
-}
