@@ -110,7 +110,7 @@ The codebase is organized into the following modules:
 - **packages/typed-function**: 1 file
 - **packages/workerpool**: 12 files
 - **core/arithmetic**: 1 file
-- **core**: 21 files
+- **core**: 22 files
 - **core/error**: 3 files
 - **core/factory**: 2 files
 - **core/numeric**: 3 files
@@ -200,11 +200,11 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 12             | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 55             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 56             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 582            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 582            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -258,8 +258,8 @@ graph LR
     P4 --> P3
     P5 --> P4
     P5 --> P2
-    P6 --> P3
     P6 --> P2
+    P6 --> P3
     P6 --> P7
     P6 --> P22
     P6 --> P18
@@ -683,16 +683,18 @@ graph LR
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
 | `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./node-module-import.js`    | `importModule`                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./pow2-scale.js`            | `SQUARED, FOURTH, ABS_CUTOFF_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale`                                                                                                                                                                                                                                                                                                                               | Re-export             |
 | `./platform-types.js`        | `WasmMemoryHandle, CompiledWasmModule, AbortSignalLike`                                                                                                                                                                                                                                                                                                                                                                                     | Re-export (type-only) |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, ConvertOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
 | `./array.js`                 | `NestedArray, IdentifiedValue`                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
 | `./types/wasm-loader.js`     | `LoadingMetrics, WasmManifest`                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./pow2-scale.js`            | `EntryRange`                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `EntryRange`
 
 ---
 
@@ -767,6 +769,16 @@ graph LR
 
 - Interfaces: `AbortSignalLike`
 - Types: `WasmMemoryHandle`, `CompiledWasmModule`
+
+---
+
+### `core/src/pow2-scale.ts` - Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122).
+
+**Exports:**
+
+- Interfaces: `EntryRange`
+- Functions: `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`
+- Constants: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`
 
 ---
 
@@ -1878,6 +1890,12 @@ graph LR
 
 ### `matrix/src/operations/common.ts` - Shared decomposition helpers (number[][] dense algebra)
 
+**Workspace Dependencies:**
+
+| Package                      | Import                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `SQUARED, FOURTH, ABS_CUTOFF_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale, EntryRange` |
+
 **Internal Dependencies:**
 
 | File                         | Imports   | Type   |
@@ -1886,9 +1904,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `EntryRange`
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
-- Constants: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Re-exports: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `EntryRange`
 
 ---
 
@@ -3004,6 +3021,12 @@ graph LR
 ---
 
 ### `functions/src/algebra/decomposition/qr.ts` - Householder step loop for plain number storage. Scalar work per step uses the
+
+**Workspace Dependencies:**
+
+| Package                      | Import                                                     |
+| ---------------------------- | ---------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, withPow2Scale` |
 
 **Internal Dependencies:**
 
@@ -7387,6 +7410,12 @@ graph LR
 | `bignumber.js` | `BigNumber` |
 | `complex.js`   | `Complex`   |
 
+**Workspace Dependencies:**
+
+| Package                      | Import                                      |
+| ---------------------------- | ------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `SQUARED, entryRange, ldexp, withPow2Scale` |
+
 **Internal Dependencies:**
 
 | File                  | Imports     | Type   |
@@ -7746,6 +7775,12 @@ graph LR
 | -------------- | ----------- |
 | `bignumber.js` | `BigNumber` |
 | `complex.js`   | `Complex`   |
+
+**Workspace Dependencies:**
+
+| Package                      | Import                                                                |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `ABS_CUTOFF_LO, SQUARED, allFinite, entryRange, ldexp, withPow2Scale` |
 
 **Internal Dependencies:**
 
@@ -12418,9 +12453,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                           |
-| ------------------------------ | -------------------------------- |
-| `@danielsimonjr/mathts-matrix` | `densifyForSolver, SparseMatrix` |
+| Package                        | Import                                                         |
+| ------------------------------ | -------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver, SparseMatrix`                               |
+| `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, pow2ScaleExponent` |
 
 **Internal Dependencies:**
 
@@ -20674,9 +20710,9 @@ graph LR
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
+| `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
-| `core/src/internal`                                    | 22 files     | 0 files    |
 | `functions/src/typed/arithmetic`                       | 12 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
@@ -20755,7 +20791,7 @@ graph TD
         N20[factory]
         N21[index]
         N22[internal]
-        N23[...11 more]
+        N23[...12 more]
     end
 
     subgraph Core/error
@@ -21585,17 +21621,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1341   |
+| Total TypeScript Files  | 1342   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 234825 |
-| Total Exports           | 7351   |
-| Total Re-exports        | 3168   |
+| Total Lines of Code     | 235059 |
+| Total Exports           | 7371   |
+| Total Re-exports        | 3188   |
 | Total Classes           | 62     |
 | Total Interfaces        | 666    |
 | Total Functions         | 2562   |
 | Total Type Guards       | 181    |
 | Total Enums             | 0      |
-| Type-only Imports       | 683    |
+| Type-only Imports       | 684    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 
