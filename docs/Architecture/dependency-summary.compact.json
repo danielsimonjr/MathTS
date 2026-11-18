@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1342, "e": 7371, "re": 3188 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1343, "e": 7372, "re": 3188 },
   "s": {
-    "loc": 235236,
+    "loc": 235354,
     "cls": 62,
-    "int": 666,
-    "fn": 2562,
+    "int": 667,
+    "fn": 2563,
     "tg": 181,
     "en": 0,
     "co": 1689,
@@ -1212,7 +1212,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 40,
+      "f": 41,
       "exp": [
         "arraySize",
         "validate",
@@ -1236,6 +1236,7 @@
         "last"
       ],
       "int": [
+        "PrecisionClass",
         "EmitterMixin",
         "FactoryFunction",
         "BigNumber",
@@ -1244,8 +1245,7 @@
         "Unit",
         "Matrix",
         "DenseMatrix",
-        "SparseMatrix",
-        "Range"
+        "SparseMatrix"
       ]
     },
     "functions/wasm": {

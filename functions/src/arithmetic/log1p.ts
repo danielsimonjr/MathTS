@@ -15,9 +15,8 @@ interface ComplexConstructor {
 }
 
 interface BigNumberType {
-  plus(n: number): BigNumberType;
-  isNegative(): boolean;
-  ln(): BigNumberType;
+  lt(n: number): boolean;
+  log1p(): BigNumberType;
   toNumber(): number;
 }
 
@@ -80,9 +79,10 @@ export const createLog1p = /* #__PURE__ */ factory(
       Complex: _log1pComplex,
 
       BigNumber: function (x: BigNumberType): BigNumberType | ComplexType {
-        const y = x.plus(1);
-        if (!y.isNegative() || config.predictable) {
-          return y.ln();
+        // x.plus(1) rounds to the precision (#1118) and loses a small x. The log1p method of the
+        // BigNumber keeps it.
+        if (!x.lt(-1) || config.predictable) {
+          return x.log1p();
         } else {
           // downgrade to number, return Complex valued result
           return _log1pComplex(new Complex(x.toNumber(), 0));

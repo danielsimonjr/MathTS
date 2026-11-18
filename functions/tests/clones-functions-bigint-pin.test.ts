@@ -44,7 +44,10 @@ function legacyBnCoerce(x: BigNumberBinomialType | number): bigint {
 
 function legacyBn(value: number | bigint, integer = true): LegacyBn {
   const n = typeof value === 'bigint' ? value : BigInt(value);
+  // The fake is exact at every precision, so `config` has no effect and no result rounds.
   class LegacyBigNumberCtor {
+    static precision = 64;
+    static config(): void {}
     constructor(v: number) {
       return legacyBn(BigInt(v));
     }
@@ -79,6 +82,8 @@ function legacyBn(value: number | bigint, integer = true): LegacyBn {
       return n >= legacyBnCoerce(x);
     },
     isInteger: () => integer,
+    e: (n < 0n ? -n : n).toString().length - 1,
+    toSignificantDigits: () => self,
   };
   return self;
 }

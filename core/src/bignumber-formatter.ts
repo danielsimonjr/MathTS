@@ -303,12 +303,15 @@ export function toEngineering<T extends BigNumberValue<T>>(value: T, precision?:
   const e = value.e;
   const newExp = e % 3 === 0 ? e : e < 0 ? e - 3 - (e % 3) : e - (e % 3);
 
-  // find difference in exponents, and calculate the value without exponent
-  const valueWithoutExp = value.mul(Math.pow(10, -newExp));
+  // The value without the exponent: the same digits with the exponent e - newExp. A product
+  // with a power of ten rounds to the configured precision (#1118); the constructor keeps
+  // every digit.
+  const BigNumberCtor = ctorOf(value);
+  const digits = value.toExponential().replace(/e.*$/, '');
+  const valueWithoutExp = new BigNumberCtor(`${digits}e${e - newExp}`);
 
   let valueStr = valueWithoutExp.toPrecision(precision);
   if (valueStr.includes('e')) {
-    const BigNumberCtor = ctorOf(value);
     valueStr = new BigNumberCtor(valueStr).toFixed();
   }
 

@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { gammaG, gammaNumber, gammaP } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
 
 // Type definitions for gamma
 interface ComplexType {
@@ -28,9 +29,10 @@ interface BigNumberType {
   sub(n: number | BigNumberType): BigNumberType;
   mul(n: number | BigNumberType): BigNumberType;
   toNumber(): number;
+  toSignificantDigits(digits: number): BigNumberType;
 }
 
-interface BigNumberConstructor {
+interface BigNumberConstructor extends PrecisionClass {
   fromNumber(n: number): BigNumberType;
 }
 
@@ -144,9 +146,10 @@ export const createGamma = /* #__PURE__ */ factory(
 
     /**
      * Calculate factorial for a BigNumber.
-     * core's BigNumber is bigint-backed, so the integer product is exact — no precision-cloning
-     * (the decimal.js `BigNumber.clone({precision})` API core does not have) is needed. Uses core's
-     * `.mul` (not decimal.js `.times`) and `.fromNumber` (core's constructor is private).
+     * BigNumber multiply rounds to the precision (#1118), so the product runs with guard digits
+     * and the result rounds one time. Each partial product is not larger than the result. Thus a
+     * factorial that fits the precision is exact. Uses core's `.mul` (not decimal.js `.times`)
+     * and `.fromNumber` (core's constructor is private).
      * @param {BigNumber} n
      * @returns {BigNumber} Returns the factorial of n
      */
@@ -156,11 +159,15 @@ export const createGamma = /* #__PURE__ */ factory(
         return BigNumber.fromNumber([1, 1, 2, 6, 24, 120, 720, 5040][nNum]);
       }
 
-      let prod = BigNumber.fromNumber(1);
-      for (let k = 2; k <= nNum; k++) {
-        prod = prod.mul(k);
-      }
-      return prod;
+      // The guard digits hold the factor of one step and the rounding error of the nNum steps.
+      const guardDigits = String(nNum).length + 10;
+      return atWorkPrecision(BigNumber, BigNumber.precision + guardDigits, () => {
+        let prod = BigNumber.fromNumber(1);
+        for (let k = 2; k <= nNum; k++) {
+          prod = prod.mul(k);
+        }
+        return prod;
+      });
     }
   }
 );
