@@ -683,7 +683,7 @@ graph LR
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                                         | Re-export             |
 | `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./node-module-import.js`    | `importModule`                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
-| `./pow2-scale.js`            | `SQUARED, FOURTH, ABS_CUTOFF_LO, UNIT_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale`                                                                                                                                                                                                                                                                                                                      | Re-export             |
+| `./pow2-scale.js`            | `SQUARED, FOURTH, ABS_CUTOFF_LO, UNIT_LO, UNIT_FLOOR_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale`                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./platform-types.js`        | `WasmMemoryHandle, CompiledWasmModule, AbortSignalLike`                                                                                                                                                                                                                                                                                                                                                                                     | Re-export (type-only) |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
@@ -694,7 +694,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `EntryRange`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `UNIT_FLOOR_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `EntryRange`
 
 ---
 
@@ -778,7 +778,7 @@ graph LR
 
 - Interfaces: `EntryRange`
 - Functions: `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`
-- Constants: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`
+- Constants: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `UNIT_FLOOR_LO`
 
 ---
 
@@ -3030,9 +3030,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                     |
-| ---------------------------- | ---------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, withPow2Scale` |
+| Package                      | Import                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexpMatrix, withPow2Scale` |
 
 **Internal Dependencies:**
 
@@ -21668,9 +21668,9 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1344   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235908 |
-| Total Exports           | 7379   |
-| Total Re-exports        | 3190   |
+| Total Lines of Code     | 235918 |
+| Total Exports           | 7381   |
+| Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
 | Total Functions         | 2567   |

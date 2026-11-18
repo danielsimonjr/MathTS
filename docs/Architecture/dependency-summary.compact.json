@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1344, "e": 7379, "re": 3190 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1344, "e": 7381, "re": 3191 },
   "s": {
-    "loc": 235908,
+    "loc": 235918,
     "cls": 62,
     "int": 668,
     "fn": 2567,
     "tg": 181,
     "en": 0,
-    "co": 1690,
+    "co": 1691,
     "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
