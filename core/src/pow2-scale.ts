@@ -1,0 +1,122 @@
+/**
+ * Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122).
+ * One implementation: `matrix` and `functions` both import it from here.
+ */
+
+/**
+ * Scale windows for the largest entry |a|max of a matrix, as exponents of 2 (#1104).
+ * - `SQUARED`: a kernel that squares entries (norms, Householder and Givens vectors)
+ *   overflows above about 2^512 and loses digits below about 2^-512.
+ * - `FOURTH`: a kernel that forms fourth powers (the Wilkinson shift, sigma^2 of a
+ *   bidiagonal step) overflows above about 2^256.
+ * - `ABS_CUTOFF_LO`: a kernel with absolute cutoffs (1e-8 symmetry test, 1e-14 pivot
+ *   floors) reads a tiny matrix as zero, so its window starts at 2^-20.
+ */
+export const SQUARED = 400;
+export const FOURTH = 128;
+export const ABS_CUTOFF_LO = -20;
+
+/**
+ * The exponent `e` that moves `amax` into the window [2^lo, 2^hi]. It is 0 inside the
+ * window and for a zero or non-finite `amax`. A larger `amax` goes to the top of the
+ * window, [2^(hi-1), 2^hi); a smaller one goes to [1, 2). The edges are compared
+ * directly, so a value at an edge is inside the window.
+ */
+export function pow2ScaleExponent(amax: number, lo: number, hi: number): number {
+  if (!(amax > 0) || amax === Infinity) return 0;
+  if (amax >= 2 ** lo && amax <= 2 ** hi) return 0;
+  const k = Math.floor(Math.log2(amax));
+  return amax > 2 ** hi ? hi - 1 - k : -k;
+}
+
+/** `x · 2^e`, exact; the factor is split in two so that 2^e itself cannot overflow. */
+export function ldexp(x: number, e: number): number {
+  const h = Math.trunc(e / 2);
+  return x * 2 ** h * 2 ** (e - h);
+}
+
+/** Scale every entry of `A` by 2^e in place. */
+export function ldexpMatrix(A: number[][], e: number): void {
+  for (const row of A) for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], e);
+}
+
+/** The largest and the smallest nonzero |entry|; `finite` is false when an entry is NaN or infinite. */
+export interface EntryRange {
+  amax: number;
+  amin: number;
+  finite: boolean;
+}
+
+/** The entry range of a nested matrix or a flat array. It stops at the first NaN or infinite entry. */
+export function entryRange(values: readonly (readonly number[])[] | ArrayLike<number>): EntryRange {
+  let amax = 0;
+  let amin = Infinity;
+  const visit = (v: number): boolean => {
+    const x = Math.abs(v);
+    if (!(x < Infinity)) return false;
+    if (x > amax) amax = x;
+    if (x > 0 && x < amin) amin = x;
+    return true;
+  };
+  const len = values.length;
+  for (let i = 0; i < len; i++) {
+    const item = (values as ArrayLike<number | readonly number[]>)[i];
+    if (typeof item === 'number') {
+      if (!visit(item)) return { amax, amin, finite: false };
+    } else {
+      for (let j = 0; j < item.length; j++)
+        if (!visit(item[j])) return { amax, amin, finite: false };
+    }
+  }
+  return { amax, amin, finite: true };
+}
+
+/** True when every number in a result (number, array, typed array or plain object) is finite. */
+export function allFinite(x: unknown): boolean {
+  if (typeof x === 'number') return Number.isFinite(x);
+  if (x === null || typeof x !== 'object') return true;
+  const t = x as { toFloat64Array?: () => Float64Array };
+  if (typeof t.toFloat64Array === 'function') return allFinite(t.toFloat64Array());
+  if (Array.isArray(x) || ArrayBuffer.isView(x)) {
+    const a = x as unknown as ArrayLike<unknown>;
+    for (let i = 0; i < a.length; i++) if (!allFinite(a[i])) return false;
+    return true;
+  }
+  return Object.values(x).every(allFinite);
+}
+
+/**
+ * Run a kernel with the input scaled into the window [2^lo, 2^hi] (#1104).
+ * `run(e)` computes the result for the input times 2^e and returns it scaled back;
+ * `run(0)` is the unscaled kernel. The rules:
+ * - A matrix with a NaN or infinite entry, or one inside the window, takes `run(0)`.
+ * - `even` makes `e` even (lower by one), so a square root of 2^e is exact.
+ * - When 2^e would push a nonzero entry below 2^-1022 (the entries span more than the
+ *   double range), the unscaled result is kept when it is finite and `accept` agrees
+ *   (`accept` defaults to true); else `run(e)`. A finite result can still be wrong
+ *   (#1129), so a kernel that can tell passes its own judge.
+ */
+export function withPow2Scale<T>(
+  range: EntryRange,
+  lo: number,
+  hi: number,
+  run: (e: number) => T,
+  even = false,
+  accept: (unscaled: T) => boolean = () => true
+): T {
+  if (!range.finite) return run(0);
+  let e = pow2ScaleExponent(range.amax, lo, hi);
+  if (even && e % 2 !== 0) e -= 1;
+  if (e === 0) return run(0);
+  if (e < 0 && ldexp(range.amin, e) < 2 ** -1022) {
+    let unscaled: T | undefined;
+    let ok = true;
+    try {
+      unscaled = run(0);
+    } catch {
+      ok = false;
+    }
+    if (ok && allFinite(unscaled) && accept(unscaled as T)) return unscaled as T;
+  }
+  return run(e);
+}

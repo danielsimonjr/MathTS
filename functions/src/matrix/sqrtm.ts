@@ -2,6 +2,13 @@ import { isMatrix } from '../utils/is.js';
 import { format } from '../utils/string.js';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import {
+  ABS_CUTOFF_LO,
+  SQUARED,
+  entryRange,
+  ldexp,
+  withPow2Scale,
+} from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
@@ -104,6 +111,32 @@ export const createSqrtm = /* #__PURE__ */ factory(
     }
 
     /**
+     * `_denmanBeavers` of a matrix of plain numbers, scaled by an even power of 2 when the
+     * largest entry is outside [2^-20, 2^400]. The stop test `_tolerance` is absolute, so a
+     * tiny matrix stops at once, and a huge one overflows in the inverses.
+     * sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122). An ordinary matrix is not scaled.
+     */
+    function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
+      const data = (isMatrix(A) ? (A as Matrix).valueOf() : A) as Scalar[][];
+      if (!data.every((row) => row.every((v) => typeof v === 'number'))) {
+        return _denmanBeavers(A);
+      }
+      return withPow2Scale(
+        entryRange(data as unknown as number[][]),
+        ABS_CUTOFF_LO,
+        SQUARED,
+        (e) => {
+          if (e === 0) return _denmanBeavers(A);
+          const root = _denmanBeavers(
+            map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
+          );
+          return map(root, (v: unknown) => ldexp(v as number, -e / 2)) as Scalar[][] | Matrix;
+        },
+        true
+      );
+    }
+
+    /**
      * Calculate the principal square root of a square matrix.
      * The principal square root matrix `X` of another matrix `A` is such that `X * X = A`.
      *
@@ -145,7 +178,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
             const rows = sizeArray[0];
             const cols = sizeArray[1];
             if (rows === cols) {
-              return _denmanBeavers(A as Scalar[][] | Matrix);
+              return _sqrtmScaled(A as Scalar[][] | Matrix);
             } else {
               throw new RangeError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'

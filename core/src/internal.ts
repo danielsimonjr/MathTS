@@ -220,3 +220,17 @@ export {
 
 export { allocAsHeader } from './wasm-as-header.js';
 export { importModule } from './node-module-import.js';
+
+// Power-of-2 scaling for kernels that square their entries, shared by matrix and functions (#1104, #1122).
+export {
+  SQUARED,
+  FOURTH,
+  ABS_CUTOFF_LO,
+  pow2ScaleExponent,
+  ldexp,
+  ldexpMatrix,
+  entryRange,
+  allFinite,
+  withPow2Scale,
+} from './pow2-scale.js';
+export type { EntryRange } from './pow2-scale.js';

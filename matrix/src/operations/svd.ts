@@ -412,16 +412,39 @@ function svdScaled<T>(
   unscale: (r: T, e: number) => T
 ): T {
   const rows = source.copyRows(false);
-  return withPow2Scale(entryRange(rows), -SQUARED, FOURTH, (e) => {
-    if (e === 0) return call(source);
-    const scaledRows = rows.map((row) => row.slice());
-    ldexpMatrix(scaledRows, e);
-    return unscale(call(decompositionSource(scaledRows)), e);
-  });
+  return withPow2Scale(
+    entryRange(rows),
+    -SQUARED,
+    FOURTH,
+    (e) => {
+      if (e === 0) return call(source);
+      const scaledRows = rows.map((row) => row.slice());
+      ldexpMatrix(scaledRows, e);
+      return unscale(call(decompositionSource(scaledRows)), e);
+    },
+    false,
+    // An entry span beyond the double range keeps the unscaled run only when its
+    // singular values are finite and the largest is nonzero (#1129). A finite derived
+    // result (a pinv of zeros) can come from NaN singular values.
+    () => singularValuesUsable(lastKernelS)
+  );
 }
 
-/** The SVD kernel, without scaling. */
+/** The singular values of the latest `svdKernel` run; `svdScaled` reads them to judge an unscaled run. */
+let lastKernelS: readonly number[] = [];
+
+function singularValuesUsable(S: readonly number[]): boolean {
+  return S.length > 0 && S[0] > 0 && S.every(Number.isFinite);
+}
+
+/** The SVD kernel, without scaling. It records its singular values for `svdScaled`. */
 function svdKernel(source: DecompositionSource, options: SVDOptions): SVDResult {
+  const result = svdKernelRun(source, options);
+  lastKernelS = result.S;
+  return result;
+}
+
+function svdKernelRun(source: DecompositionSource, options: SVDOptions): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,

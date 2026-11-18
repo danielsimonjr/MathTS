@@ -143,6 +143,7 @@
     "core/src/wasm-loader.ts": ["core/src/internal.ts"],
     "core/src/wasm-as-header.ts": ["core/src/internal.ts"],
     "core/src/node-module-import.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
+    "core/src/pow2-scale.ts": ["core/src/internal.ts"],
     "core/src/platform-types.ts": [
       "core/src/internal.ts",
       "core/src/wasm-as-header.ts",
