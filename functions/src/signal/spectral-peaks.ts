@@ -155,7 +155,12 @@ export function peakWidths(
   peaks: readonly number[],
   relHeight = 0.5
 ): number[] {
-  return peaks.map((i) => {
+  return peaks.map((i, k) => {
+    // A NaN, infinite, fractional or out-of-range index made the crossing walk run forever
+    // or read outside x.
+    if (!(Number.isInteger(i) && i >= 0 && i < x.length)) {
+      throw new RangeError(`peakWidths: peak ${k} is not a valid index for x`);
+    }
     const prom = peakProminence(x, i);
     const refHeight = x[i] - relHeight * prom;
     const left = interpolateCrossing(x, i, -1, refHeight);
