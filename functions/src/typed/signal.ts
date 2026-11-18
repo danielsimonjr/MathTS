@@ -749,13 +749,25 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
  * @returns `{ real: number[][], imag: number[][] }`
  */
 export function fft2d(x: number[][]): { real: number[][]; imag: number[][] } {
-  if (!Array.isArray(x) || (x.length > 0 && !Array.isArray(x[0]))) {
-    throw new TypeError('fft2d: expected a 2-D array');
-  }
+  if (!Array.isArray(x)) throw new TypeError('fft2d: expected a 2-D array');
   const rows: i32 = x.length;
   // No elements, no spectrum: keep the input shape. Padding 0 to a power of two would give 1x1.
   if (rows === 0) return { real: [], imag: [] };
-  const cols: i32 = x[0].length;
+  // Each row is an array or a typed array of values. A 1-D or 3-D input, or rows of unequal
+  // length, would read `undefined` or an array as a sample and give NaN or a cropped spectrum.
+  const isRow = (row: unknown): boolean =>
+    Array.isArray(row) || (ArrayBuffer.isView(row) && !(row instanceof DataView));
+  const cols: i32 = isRow(x[0]) ? x[0].length : 0;
+  for (let r: i32 = 0; r < rows; r++) {
+    if (!isRow(x[r]) || Array.isArray(x[r][0])) {
+      throw new TypeError('fft2d: expected a 2-D array');
+    }
+    if (x[r].length !== cols) {
+      throw new RangeError(
+        `fft2d: every row must have ${cols} values (row ${r} has ${x[r].length})`
+      );
+    }
+  }
   if (cols === 0) {
     return { real: x.map(() => []), imag: x.map(() => []) };
   }
@@ -1018,6 +1030,10 @@ export function periodogram(
   x: number[] | Float64Array,
   opts?: { nfft?: i32; window?: string }
 ): { psd: number[]; frequencies: number[] } {
+  // A nested array is not a signal: its rows would be read as NaN samples.
+  if (Array.isArray(x) && Array.isArray(x[0])) {
+    throw new TypeError('periodogram: signal must be a 1-D array or a typed array');
+  }
   const samples = toSamples('periodogram', x);
   // SciPy: an empty signal has an empty spectrum.
   if (samples.length === 0) return { psd: [], frequencies: [] };
