@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-18",
-  "totalFiles": 2499,
+  "totalFiles": 2500,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1317,
     "test-only": 0,
     "orphan": 0,
-    "test": 1090,
+    "test": 1091,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1343,
-    "tests": 1090,
+    "tests": 1091,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1141,
+    "@danielsimonjr/mathts-functions": 1142,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 146,
@@ -5924,7 +5924,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 667
+      "loc": 709
     },
     {
       "file": "functions/src/algebra/simplifyCore.ts",
@@ -9123,7 +9123,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1851
+      "loc": 1942
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -10622,6 +10622,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 240
+    },
+    {
+      "file": "functions/tests/dogfood-986-987-symbolic-constants.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 159
     },
     {
       "file": "functions/tests/dogfood-989a-sequences.test.ts",
