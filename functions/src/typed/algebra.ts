@@ -1522,7 +1522,11 @@ export function expToTrig(expr: string): string {
     const sign = factors[at].startsWith('-') ? '-' : '+';
     factors.splice(at, 1);
     // Only the angle is scanned again. A call that stays as written is not scanned again.
-    const angle = expToTrig(factors.join('*'));
+    // A factor that ends with a dot (`2.`) gets a space, because `2.*x` reads as `2 .* x`.
+    const product = factors.reduce(
+      (left, right) => `${left}${left.endsWith('.') ? ' ' : ''}*${right}`
+    );
+    const angle = expToTrig(product);
     const w = /^[A-Za-z0-9_.]+$/.test(angle) || isParenthesised(angle) ? angle : `(${angle})`;
     return `(cos(${w}) ${sign} i*sin(${w}))`;
   });

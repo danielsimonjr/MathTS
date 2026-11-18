@@ -9095,7 +9095,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1845
+      "loc": 1849
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
