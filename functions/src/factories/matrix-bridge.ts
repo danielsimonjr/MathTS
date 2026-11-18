@@ -13,6 +13,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
+import { arraySize } from '../utils/array.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
@@ -1208,11 +1209,8 @@ export function createMatrixBridge() {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Infer size from nested array. Handles 1D and 2D. */
+/** The size of a nested array, one entry per axis. */
 function inferSize(data: unknown[]): number[] {
-  if (data.length === 0) return [0];
-  if (Array.isArray(data[0])) {
-    return [data.length, (data[0] as unknown[]).length];
-  }
-  return [data.length];
+  // `[[[]], [[]]]` is 2x1x0, as in mathjs.
+  return arraySize(data);
 }

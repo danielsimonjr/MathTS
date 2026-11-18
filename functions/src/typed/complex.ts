@@ -81,7 +81,7 @@ export const arg = mathTyped('arg', {
  * For real numbers (number, bigint, BigNumber), the value is returned as-is
  * (real numbers are self-conjugate).
  *
- * For arrays, the function is applied element-wise.
+ * For arrays and matrices, the function is applied element-wise. A Matrix gives a Matrix.
  *
  * @example
  * ```typescript
@@ -100,6 +100,10 @@ export const conj = mathTyped('conj', {
   Complex: (x: Complex): Complex => x.conjugate(),
 
   Array: (x: unknown[]): unknown[] => deepMapArray(x, (item) => conj(item as number)),
+
+  // A Matrix gives a Matrix of the same storage, as mathjs does.
+  Matrix: (x: { map(fn: (v: unknown) => unknown): unknown }): unknown =>
+    x.map((item) => conj(item as number)),
 });
 
 // =============================================================================
