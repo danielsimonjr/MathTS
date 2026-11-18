@@ -127,20 +127,29 @@ export function acceleratedInv<T>(a: unknown, factoryInv: (m: unknown) => T): T 
   }
 }
 
-/**
- * A computed eigenvalue of a real matrix counts as real when |im| <= EIG_IM_TOL * max|A_ij|.
- * The tolerance is relative: the rounding noise in the imaginary part of a real eigenvalue is of
- * order eps * ||A||, so it grows and shrinks with the matrix. A fixed absolute bound turned the
- * pair of a small matrix into a real 0 and left the noise of a large matrix as a complex pair.
- * 1e-10 is about 5e5 eps, and it is far below the sqrt(eps) split of a defective real pair.
- */
-const EIG_IM_TOL = 1e-10;
-
-/** Largest absolute entry of a numeric matrix: the scale of its spectrum, free of overflow. */
+/** Largest absolute entry of a numeric matrix: the scale of its spectrum. */
 function maxAbsEntry(a: number[][]): number {
   let m = 0;
   for (const row of a) for (const x of row) if (Math.abs(x) > m) m = Math.abs(x);
   return m;
+}
+
+/**
+ * The real part of eigenvector `i`, or, for a pair that rounds to a repeated real eigenvalue, a
+ * real eigenvector of that eigenvalue. The two members of a pair share the real part
+ * `vectors[i]`, so the member with im < 0 takes the imaginary part `vectorsIm[i]` instead, scaled
+ * to unit norm. The pair then keeps two independent eigenvectors.
+ */
+function realVector(
+  ne: { values: Array<{ re: number; im: number }>; vectors: number[][]; vectorsIm: number[][] },
+  i: number,
+  isReal: (im: number) => boolean
+): number[] {
+  const im = ne.values[i].im;
+  if (im >= 0 || !isReal(im)) return ne.vectors[i];
+  const v = ne.vectorsIm[i];
+  const norm = Math.hypot(...v) || 1;
+  return v.map((x) => x / norm);
 }
 
 /** True for a square `number[][]` of any size ≥ 1. */
@@ -242,14 +251,22 @@ export function correctEigs(
     }
     // As in mathjs, one complex eigenvalue makes every eigenvector a Complex[];
     // a real spectrum keeps number[] vectors.
-    const imTol = EIG_IM_TOL * maxAbsEntry(a);
+    // A real eigenvalue of a real matrix has an im of exactly 0, except when it is repeated: the
+    // copies of a repeated real eigenvalue can come out as a conjugate pair with an im of rounding
+    // size (measured: at most 1.6 * n * eps * max|A_ij|). A genuine pair, however near to real,
+    // has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)). The test uses the
+    // eigenvalue alone, so `values` does not depend on `eigenvectors`.
+    const imTol = 8 * ne.values.length * Number.EPSILON * maxAbsEntry(a);
     const isReal = (im: number): boolean => Math.abs(im) <= imTol;
     const anyComplex = ne.values.some((v) => !isReal(v.im));
+    const vectorOf = (v: { im: number }, i: number): number[] | Complex[] => {
+      const re = realVector(ne, i, isReal);
+      if (!anyComplex) return re;
+      return re.map((x, j) => new Complex(x, isReal(v.im) ? 0 : ne.vectorsIm[i][j]));
+    };
     const all = ne.values.map((v, i) => ({
       value: (isReal(v.im) ? v.re : new Complex(v.re, v.im)) as number | Complex,
-      vector: (anyComplex
-        ? ne.vectors[i].map((re, j) => new Complex(re, isReal(v.im) ? 0 : ne.vectorsIm[i][j]))
-        : ne.vectors[i]) as number[] | Complex[],
+      vector: wantVectors ? vectorOf(v, i) : [],
       i,
     }));
     const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
