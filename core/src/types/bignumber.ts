@@ -1041,6 +1041,19 @@ export class BigNumber implements MathTSValue {
     return this.#guarded(() => this.#sqrtImpl());
   }
 
+  /**
+   * A double-precision start for a Newton root of a positive finite value. The value is split as
+   * m * 10^(n*k) with m in [0.1, 10^(n-1)), so the double root of m is finite and the root of the
+   * value is that seed times 10^k, for every exponent the type holds (#1201).
+   */
+  #rootSeed(n: number, root: (x: number) => number): BigNumber {
+    const order = digitCount(this._coefficient) + this._exponent;
+    const k = Math.floor(order / n);
+    const mantissa = BigNumber.#allocate(1, this._coefficient, this._exponent - n * k);
+    const seed = BigNumber.fromNumber(root(mantissa.valueOf()));
+    return BigNumber.#allocate(seed._sign, seed._coefficient, seed._exponent + k);
+  }
+
   #sqrtImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === -1) return BigNumber.#allocate(0, 0n, 0, true);
@@ -1049,7 +1062,7 @@ export class BigNumber implements MathTSValue {
 
     // Newton-Raphson iteration
     const precision = globalConfig.precision;
-    let guess = BigNumber.fromNumber(Math.sqrt(this.valueOf()));
+    let guess = this.#rootSeed(2, Math.sqrt);
 
     for (let i = 0; i < 100; i++) {
       const newGuess = guess.add(this.divide(guess)).divide(BigNumber.fromNumber(2));
@@ -1940,7 +1953,7 @@ export class BigNumber implements MathTSValue {
 
     const precision = globalConfig.precision;
     const three = BigNumber.fromNumber(3);
-    let guess = BigNumber.fromNumber(Math.cbrt(this.valueOf()));
+    let guess = this.#rootSeed(3, Math.cbrt);
 
     // Newton's method: x_{n+1} = (2*x_n + a / x_n^2) / 3
     for (let i = 0; i < 100; i++) {
