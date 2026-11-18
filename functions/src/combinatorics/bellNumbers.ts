@@ -2,6 +2,7 @@ import { factory } from '../utils/factory.js';
 import { assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
 
 // Type definitions for combinatorics
 type BigNumberType = BigNumber;
@@ -57,13 +58,22 @@ export const createBellNumbers = /* #__PURE__ */ factory(
         if (typeof n !== 'number') {
           const nn = n.toNumber();
           assertLoopOrder('bellNumbers', 'n', nn, 2000);
-          let row: NumericValue[] = [bignumber!(1)];
-          for (let m = 1; m <= nn; m++) {
-            const next: NumericValue[] = [row[row.length - 1]];
-            for (let j = 0; j < row.length; j++) next.push(addScalar(next[j], row[j]));
-            row = next;
-          }
-          return row[0];
+          // BigNumber add rounds to the precision (#1118). No entry of the triangle is larger than
+          // the result, so a result that fits the precision is exact. The guard digits hold the
+          // rounding error of the 2 n additions behind an entry, and the result rounds one time.
+          const C = bignumber!(1).constructor as unknown as PrecisionClass;
+          const guardDigits = String(nn).length + 11;
+          return atWorkPrecision(C, C.precision + guardDigits, () => {
+            let row: BigNumberType[] = [bignumber!(1)];
+            for (let m = 1; m <= nn; m++) {
+              const next: BigNumberType[] = [row[row.length - 1]];
+              for (let j = 0; j < row.length; j++) {
+                next.push(addScalar(next[j], row[j]) as BigNumberType);
+              }
+              row = next;
+            }
+            return row[0];
+          });
         }
 
         // Sum (k=0, n) S(n,k).

@@ -1707,6 +1707,7 @@
       "atanhNumber",
       "atanNumber",
       "atomicMass",
+      "atWorkPrecision",
       "autocorr",
       "autoCorrelation",
       "avogadro",

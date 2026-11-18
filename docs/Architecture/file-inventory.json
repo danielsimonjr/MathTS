@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-18",
-  "totalFiles": 2498,
+  "totalFiles": 2499,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1316,
+    "build-entry": 1317,
     "test-only": 0,
     "orphan": 0,
     "test": 1090,
@@ -12,7 +12,7 @@
     "example": 7
   },
   "byArea": {
-    "src": 1342,
+    "src": 1343,
     "tests": 1090,
     "config": 30,
     "examples": 7,
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1140,
+    "@danielsimonjr/mathts-functions": 1141,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 146,
@@ -751,7 +751,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 346
     },
     {
       "file": "core/src/collection.ts",
@@ -968,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2246
+      "loc": 2275
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1178,7 +1178,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 190
+      "loc": 375
     },
     {
       "file": "core/tests/bignumber-round-modes-1118.test.ts",
@@ -6288,7 +6288,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 134
+      "loc": 144
     },
     {
       "file": "functions/src/arithmetic/log.ts",
@@ -6603,14 +6603,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 80
+      "loc": 90
     },
     {
       "file": "functions/src/combinatorics/catalan.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 75
+      "loc": 83
     },
     {
       "file": "functions/src/combinatorics/composition.ts",
@@ -7842,7 +7842,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 54
+      "loc": 66
     },
     {
       "file": "functions/src/probability/combinations.ts",
@@ -7870,7 +7870,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 167
+      "loc": 174
     },
     {
       "file": "functions/src/probability/kldivergence.ts",
@@ -9130,7 +9130,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2939
+      "loc": 2942
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9565,6 +9565,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 33
+    },
+    {
+      "file": "functions/src/utils/bignumber/work-precision.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 36
     },
     {
       "file": "functions/src/utils/clone.ts",
@@ -10012,7 +10019,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 81
+      "loc": 161
     },
     {
       "file": "functions/tests/bignumber-operations.test.ts",
@@ -10173,7 +10180,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 268
+      "loc": 273
     },
     {
       "file": "functions/tests/clones-functions-scalars-pins.test.ts",

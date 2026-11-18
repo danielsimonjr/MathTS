@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-18",
-    "totalFiles": 1342,
+    "totalFiles": 1343,
     "totalModules": 82,
-    "totalExports": 7371
+    "totalExports": 7372
   },
   "entryPoints": [
     {
@@ -9400,6 +9400,10 @@
           {
             "file": "../plain/number/index.js",
             "imports": ["lcmNumber"]
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -15319,6 +15323,10 @@
             "file": "../type/bignumber/BigNumber.js",
             "imports": ["BigNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -15343,6 +15351,10 @@
             "file": "../type/bignumber/BigNumber.js",
             "imports": ["BigNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -21139,7 +21151,12 @@
         "description": "Shared BigNumber binomial product `C(total, choose)` via the short multiplicative",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["isPositiveInteger", "binomialProductBigNumber"],
         "interfaces": ["BigNumberBinomialType"],
@@ -21247,6 +21264,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -26285,6 +26306,10 @@
             "imports": ["withBinaryScalarGuards"]
           },
           {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision"]
+          },
+          {
             "file": "./divide-inverse.js",
             "imports": ["divideInverse"]
           },
@@ -30120,6 +30145,16 @@
         "exports": ["ROUND_DECIMALS_NOT_INTEGER", "roundBigNumberDecimals"],
         "functions": ["roundBigNumberDecimals"],
         "constants": ["ROUND_DECIMALS_NOT_INTEGER"]
+      },
+      "functions/src/utils/bignumber/work-precision.ts": {
+        "description": "Runs `compute` with at least `workPrecision` significant digits, restores the precision of the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["atWorkPrecision"],
+        "interfaces": ["PrecisionClass"],
+        "functions": ["atWorkPrecision"]
       },
       "functions/src/utils/clone.ts": {
         "description": "Clone an object. Will make a deep copy of the data.",
@@ -48776,6 +48811,7 @@
           "functions/src/utils/bignumber/bitwise.ts",
           "functions/src/utils/bignumber/nearlyEqual.ts",
           "functions/src/utils/bignumber/round-decimals.ts",
+          "functions/src/utils/bignumber/work-precision.ts",
           "functions/src/utils/clone.ts",
           "functions/src/utils/collection.ts",
           "functions/src/utils/complex.ts",
@@ -49560,13 +49596,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1342,
+    "totalTypeScriptFiles": 1343,
     "totalModules": 82,
-    "totalLinesOfCode": 235236,
-    "totalExports": 7371,
+    "totalLinesOfCode": 235354,
+    "totalExports": 7372,
     "totalClasses": 62,
-    "totalInterfaces": 666,
-    "totalFunctions": 2562,
+    "totalInterfaces": 667,
+    "totalFunctions": 2563,
     "totalTypeGuards": 181,
     "totalEnums": 0,
     "totalConstants": 1689,

@@ -145,11 +145,11 @@ export function logBigNumberWith(x: BigNumber, predictable: boolean): BigNumber 
  * Complex logarithm of the number value 1 + x, as in mathjs.
  */
 export function log1pBigNumberWith(x: BigNumber, predictable: boolean): BigNumber | Complex {
-  const y = x.add(1);
-  if (!y.isNegative() || predictable) {
-    return y.ln();
+  // x.add(1) rounds to the precision (#1118) and loses a small x. The log1p method keeps it.
+  if (!x.lessThan(-1) || predictable) {
+    return x.log1p();
   }
-  return new Complex(y.toNumber(), 0).log();
+  return new Complex(x.add(1).toNumber(), 0).log();
 }
 
 /** Square root. Non-negative inputs and NaN never read config. */

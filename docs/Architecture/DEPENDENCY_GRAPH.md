@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 40 files
+- **functions/utils**: 41 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 582            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 583            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4117,16 +4117,17 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                           | Imports                      | Type               |
-| ---------------------------------------------- | ---------------------------- | ------------------ |
-| `../utils/factory.js`                          | `factory`                    | Import             |
-| `../core/function/typed.js`                    | `TypedFunction`              | Import (type-only) |
-| `../type/matrix/types.js`                      | `AlgorithmFunction`          | Import (type-only) |
-| `../type/matrix/utils/matAlgo02xDS0.js`        | `createMatAlgo02xDS0`        | Import             |
-| `../type/matrix/utils/matAlgo06xS0S0.js`       | `createMatAlgo06xS0S0`       | Import             |
-| `../type/matrix/utils/matAlgo11xS0s.js`        | `createMatAlgo11xS0s`        | Import             |
-| `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import             |
-| `../plain/number/index.js`                     | `lcmNumber`                  | Import             |
+| File                                           | Imports                           | Type               |
+| ---------------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                          | `factory`                         | Import             |
+| `../core/function/typed.js`                    | `TypedFunction`                   | Import (type-only) |
+| `../type/matrix/types.js`                      | `AlgorithmFunction`               | Import (type-only) |
+| `../type/matrix/utils/matAlgo02xDS0.js`        | `createMatAlgo02xDS0`             | Import             |
+| `../type/matrix/utils/matAlgo06xS0S0.js`       | `createMatAlgo06xS0S0`            | Import             |
+| `../type/matrix/utils/matAlgo11xS0s.js`        | `createMatAlgo11xS0s`             | Import             |
+| `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite`      | Import             |
+| `../plain/number/index.js`                     | `lcmNumber`                       | Import             |
+| `../utils/bignumber/work-precision.js`         | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -5841,12 +5842,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports           | Type               |
-| -------------------------------- | ----------------- | ------------------ |
-| `../utils/factory.js`            | `factory`         | Import             |
-| `../utils/limits.js`             | `assertLoopOrder` | Import             |
-| `../core/function/typed.js`      | `TypedFunction`   | Import (type-only) |
-| `../type/bignumber/BigNumber.js` | `BigNumber`       | Import (type-only) |
+| File                                   | Imports                           | Type               |
+| -------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                  | `factory`                         | Import             |
+| `../utils/limits.js`                   | `assertLoopOrder`                 | Import             |
+| `../core/function/typed.js`            | `TypedFunction`                   | Import (type-only) |
+| `../type/bignumber/BigNumber.js`       | `BigNumber`                       | Import (type-only) |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -5858,11 +5860,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports         | Type               |
-| -------------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`            | `factory`       | Import             |
-| `../core/function/typed.js`      | `TypedFunction` | Import (type-only) |
-| `../type/bignumber/BigNumber.js` | `BigNumber`     | Import (type-only) |
+| File                                   | Imports                           | Type               |
+| -------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                  | `factory`                         | Import             |
+| `../core/function/typed.js`            | `TypedFunction`                   | Import (type-only) |
+| `../type/bignumber/BigNumber.js`       | `BigNumber`                       | Import (type-only) |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -8718,6 +8721,12 @@ graph LR
 
 ### `functions/src/probability/bigint-binomial.ts` - Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
 
+**Internal Dependencies:**
+
+| File                                   | Imports                           | Type   |
+| -------------------------------------- | --------------------------------- | ------ |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import |
+
 **Exports:**
 
 - Interfaces: `BigNumberBinomialType`
@@ -8781,11 +8790,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                       | Type               |
-| --------------------------- | ----------------------------- | ------------------ |
-| `../utils/factory.js`       | `factory`                     | Import             |
-| `../plain/number/index.js`  | `gammaG, gammaNumber, gammaP` | Import             |
-| `../core/function/typed.js` | `TypedFunction`               | Import (type-only) |
+| File                                   | Imports                           | Type               |
+| -------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                  | `factory`                         | Import             |
+| `../plain/number/index.js`             | `gammaG, gammaNumber, gammaP`     | Import             |
+| `../core/function/typed.js`            | `TypedFunction`                   | Import (type-only) |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -11693,6 +11703,7 @@ graph LR
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
 | `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
 | `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
@@ -12889,6 +12900,15 @@ graph LR
 
 - Functions: `roundBigNumberDecimals`
 - Constants: `ROUND_DECIMALS_NOT_INTEGER`
+
+---
+
+### `functions/src/utils/bignumber/work-precision.ts` - Runs `compute` with at least `workPrecision` significant digits, restores the precision of the
+
+**Exports:**
+
+- Interfaces: `PrecisionClass`
+- Functions: `atWorkPrecision`
 
 ---
 
@@ -20712,8 +20732,8 @@ graph LR
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
+| `functions/src/typed/arithmetic`                       | 13 files     | 10 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
-| `functions/src/typed/arithmetic`                       | 12 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -21270,12 +21290,12 @@ graph TD
         N364[bitwise]
         N365[nearlyEqual]
         N366[round-decimals]
-        N367[clone]
-        N368[collection]
-        N369[complex]
-        N370[customs]
-        N371[emitter]
-        N372[...30 more]
+        N367[work-precision]
+        N368[clone]
+        N369[collection]
+        N370[complex]
+        N371[customs]
+        N372[...31 more]
     end
 
     subgraph Functions/wasm
@@ -21621,14 +21641,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1342   |
+| Total TypeScript Files  | 1343   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235236 |
-| Total Exports           | 7371   |
+| Total Lines of Code     | 235354 |
+| Total Exports           | 7372   |
 | Total Re-exports        | 3188   |
 | Total Classes           | 62     |
-| Total Interfaces        | 666    |
-| Total Functions         | 2562   |
+| Total Interfaces        | 667    |
+| Total Functions         | 2563   |
 | Total Type Guards       | 181    |
 | Total Enums             | 0      |
 | Type-only Imports       | 684    |

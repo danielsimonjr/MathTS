@@ -71,6 +71,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
+import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
 import { divideInverse } from './divide-inverse.js';
 import { exactReductions } from './exact-reductions.js';
 import {
@@ -1485,7 +1486,9 @@ export const lcm = mathTyped('lcm', {
     }
     const g = gcd(a, b);
     if (g.isZero()) return BigNumber.fromNumber(0);
-    return a.abs().multiply(b.abs()).divide(g);
+    // The product rounds to the precision (#1118). With the digits of a and b together, the
+    // product and the quotient are exact, and the result rounds one time.
+    return atWorkPrecision(BigNumber, a.e + b.e + 4, () => a.abs().multiply(b.abs()).divide(g));
   },
 });
 

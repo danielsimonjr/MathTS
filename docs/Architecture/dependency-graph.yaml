@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-18'
-  totalFiles: 1342
+  totalFiles: 1343
   totalModules: 82
-  totalExports: 7371
+  totalExports: 7372
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8948,6 +8948,10 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - lcmNumber
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
+            - PrecisionClass
       workspaceDependencies: []
       exports:
         - createLcm
@@ -14516,6 +14520,10 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
+            - PrecisionClass
       workspaceDependencies: []
       exports:
         - createBellNumbers
@@ -14537,6 +14545,10 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
+            - PrecisionClass
       workspaceDependencies: []
       exports:
         - createCatalan
@@ -19923,7 +19935,11 @@ modules:
       description: Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
+            - PrecisionClass
       workspaceDependencies: []
       exports:
         - isPositiveInteger
@@ -20026,6 +20042,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
+            - PrecisionClass
       workspaceDependencies: []
       exports:
         - createGamma
@@ -24666,6 +24686,9 @@ modules:
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
+        - file: ../utils/bignumber/work-precision.js
+          imports:
+            - atWorkPrecision
         - file: ./divide-inverse.js
           imports:
             - divideInverse
@@ -28234,6 +28257,18 @@ modules:
         - roundBigNumberDecimals
       constants:
         - ROUND_DECIMALS_NOT_INTEGER
+    functions/src/utils/bignumber/work-precision.ts:
+      description: Runs `compute` with at least `workPrecision` significant digits, restores the precision of the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - atWorkPrecision
+      interfaces:
+        - PrecisionClass
+      functions:
+        - atWorkPrecision
     functions/src/utils/clone.ts:
       description: Clone an object. Will make a deep copy of the data.
       externalDependencies: []
@@ -46017,6 +46052,7 @@ dependencyGraph:
         - functions/src/utils/bignumber/bitwise.ts
         - functions/src/utils/bignumber/nearlyEqual.ts
         - functions/src/utils/bignumber/round-decimals.ts
+        - functions/src/utils/bignumber/work-precision.ts
         - functions/src/utils/clone.ts
         - functions/src/utils/collection.ts
         - functions/src/utils/complex.ts
@@ -46735,13 +46771,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1342
+  totalTypeScriptFiles: 1343
   totalModules: 82
-  totalLinesOfCode: 235236
-  totalExports: 7371
+  totalLinesOfCode: 235354
+  totalExports: 7372
   totalClasses: 62
-  totalInterfaces: 666
-  totalFunctions: 2562
+  totalInterfaces: 667
+  totalFunctions: 2563
   totalTypeGuards: 181
   totalEnums: 0
   totalConstants: 1689

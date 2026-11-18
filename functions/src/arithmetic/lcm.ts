@@ -6,9 +6,14 @@ import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { lcmNumber } from '../plain/number/index.js';
+import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
 
 // Type definitions for lcm
 interface BigNumberType {
+  constructor: PrecisionClass;
+  /** The decimal exponent of the first digit. */
+  e: number;
+  toSignificantDigits(digits: number): BigNumberType;
   isInt(): boolean;
   isZero(): boolean;
   times(other: BigNumberType): BigNumberType;
@@ -119,15 +124,20 @@ export const createLcm = /* #__PURE__ */ factory(
         return b;
       }
 
-      // https://en.wikipedia.org/wiki/Euclidean_algorithm
-      // evaluate lcm here inline to reduce overhead
-      const prod = a.times(b);
-      while (!b.isZero()) {
-        const t = b;
-        b = a.mod(t);
-        a = t;
-      }
-      return prod.div(a).abs();
+      // BigNumber multiply rounds to the precision (#1118). The product a * b has no more digits
+      // than a and b together, so with that precision the product and the quotient are exact. The
+      // result rounds one time to the precision of the call.
+      return atWorkPrecision(a.constructor, a.e + b.e + 4, () => {
+        // https://en.wikipedia.org/wiki/Euclidean_algorithm
+        // evaluate lcm here inline to reduce overhead
+        const prod = a.times(b);
+        while (!b.isZero()) {
+          const t = b;
+          b = a.mod(t);
+          a = t;
+        }
+        return prod.div(a).abs();
+      });
     }
   }
 );

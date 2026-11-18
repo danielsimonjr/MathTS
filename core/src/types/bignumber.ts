@@ -130,6 +130,9 @@ function digitCount(coefficient: bigint, min = 1): number {
   return digits;
 }
 
+/** At or above this coefficient, `normalize` tests the low bit before it divides by ten. */
+const BIT_TEST_LIMIT = 10n ** 40n;
+
 /** True when `10^precision` comes from the cache, so a comparison with it is cheap. */
 function cachedPrecision(precision: number): boolean {
   return Number.isInteger(precision) && precision > 0 && precision < POW10_CACHE_SIZE - 3;
@@ -505,22 +508,22 @@ export class BigNumber implements MathTSValue {
   }
 
   private static compareMagnitude(a: BigNumber, b: BigNumber): -1 | 0 | 1 {
-    // Normalize to same exponent for comparison
-    const aDigits = a._coefficient.toString();
-    const bDigits = b._coefficient.toString();
-    const aOrder = aDigits.length + a._exponent;
-    const bOrder = bDigits.length + b._exponent;
+    const aOrder = digitCount(a._coefficient) + a._exponent;
+    const bOrder = digitCount(b._coefficient) + b._exponent;
 
     if (aOrder !== bOrder) {
       return aOrder > bOrder ? 1 : -1;
     }
 
-    // Same order of magnitude - compare digit by digit
-    const aFull = aDigits + '0'.repeat(Math.max(0, a._exponent));
-    const bFull = bDigits + '0'.repeat(Math.max(0, b._exponent));
+    // Same order of magnitude: the exponents differ by the difference of the digit counts, so
+    // the coefficients compare as integers at the smaller exponent. No string of the exponent
+    // length is built (#1118: mod compares two values with an exponent up to 1e9).
+    const shift = a._exponent - b._exponent;
+    const aCoef = shift > 0 ? a._coefficient * pow10(shift) : a._coefficient;
+    const bCoef = shift < 0 ? b._coefficient * pow10(-shift) : b._coefficient;
 
-    if (aFull === bFull) return 0;
-    return aFull > bFull ? 1 : -1;
+    if (aCoef === bCoef) return 0;
+    return aCoef > bCoef ? 1 : -1;
   }
 
   // ============================================================
@@ -1526,8 +1529,8 @@ export class BigNumber implements MathTSValue {
 
     // For |x| close to 1: asin(x) = PI/2 - 2*asin(sqrt((1-x)/2)) * sign(x)
     // For small x use Taylor series via atan: asin(x) = atan(x / sqrt(1 - x^2))
-    const xSquared = this.multiply(this);
-    const denominator = one.subtract(xSquared).sqrt();
+    // 1 - x^2 as (1 - x) * (1 + x): the square of x rounds, and it loses 1 - x when |x| is near 1.
+    const denominator = one.subtract(this).multiply(one.add(this)).sqrt();
     if (denominator.isZero()) {
       // |x| = 1 exactly
       return this._sign === 1 ? BigNumber.piAt().divide(2) : BigNumber.piAt().divide(-2);
@@ -1548,6 +1551,13 @@ export class BigNumber implements MathTSValue {
     const one = BigNumber.fromNumber(1);
     if (this.abs().compareTo(one) > 0) return BigNumber.#allocate(0, 0n, 0, true);
 
+    // For |x| > 0.5: acos(|x|) = 2 * asin(sqrt((1 - |x|) / 2)). The difference PI/2 - asin(x)
+    // loses the digits of a result near 0, because each subtraction rounds (#1118).
+    const magnitude = this.abs();
+    if (magnitude.compareTo(BigNumber.fromNumber(0.5)) > 0) {
+      const angle = one.subtract(magnitude).divide(2).sqrt().asin().multiply(2);
+      return this._sign === 1 ? angle : BigNumber.piAt().subtract(angle);
+    }
     // acos(x) = PI/2 - asin(x)
     return BigNumber.piAt().divide(2).subtract(this.asin());
   }
@@ -1691,8 +1701,13 @@ export class BigNumber implements MathTSValue {
     if (this._isInfinite) return this;
     if (this._sign === 0) return this;
 
+    // asinh(|x|) = log1p(|x| + x^2 / (1 + sqrt(x^2 + 1))). The sum x + sqrt(x^2 + 1) rounds, and
+    // it loses a small x (#1118).
     const one = BigNumber.fromNumber(1);
-    return this.add(this.multiply(this).add(one).sqrt()).ln();
+    const magnitude = this.abs();
+    const square = magnitude.multiply(magnitude);
+    const result = magnitude.add(square.divide(one.add(square.add(one).sqrt()))).log1p();
+    return this._sign === 1 ? result : result.negate();
   }
 
   /**
@@ -1709,7 +1724,10 @@ export class BigNumber implements MathTSValue {
     if (this.compareTo(one) < 0) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite) return this;
 
-    return this.add(this.multiply(this).subtract(one).sqrt()).ln();
+    // acosh(x) = log1p(d + sqrt(d * (x + 1))) with d = x - 1. The sum x + sqrt(x^2 - 1) rounds,
+    // and it loses the digits of a result near 0 (#1118).
+    const d = this.subtract(one);
+    return d.add(d.multiply(this.add(one)).sqrt()).log1p();
   }
 
   /**
@@ -1733,8 +1751,10 @@ export class BigNumber implements MathTSValue {
     }
     if (this._sign === 0) return this;
 
+    // atanh(|x|) = log1p(2 |x| / (1 - |x|)) / 2. The quotient (1 + x) / (1 - x) loses a small x.
     const half = BigNumber.fromNumber(0.5);
-    return one.add(this).divide(one.subtract(this)).ln().multiply(half);
+    const result = absVal.multiply(2).divide(one.subtract(absVal)).log1p().multiply(half);
+    return this._sign === 1 ? result : result.negate();
   }
 
   // ============================================================
@@ -1832,8 +1852,6 @@ export class BigNumber implements MathTSValue {
 
   /** The series part of `ln`, at the current (raised) precision. */
   #lnSeries(one: BigNumber): BigNumber {
-    const precision = globalConfig.precision;
-
     // Argument reduction: ln(x) = ln(x / 2^k) + k * ln(2)
     // Bring x into range [0.5, 2] for better convergence
     let x = this.clone();
@@ -1851,10 +1869,22 @@ export class BigNumber implements MathTSValue {
     }
 
     // Series: ln(x) = 2 * sum_{n=0}^{inf} (1/(2n+1)) * ((x-1)/(x+1))^(2n+1)
-    const y = x.subtract(one).divide(x.add(one));
-    const ySq = y.multiply(y);
-    let term = y;
-    let sum = y;
+    let sum = x.subtract(one).divide(x.add(one)).#twiceAtanhSeries();
+
+    // Add back reduction: k * ln(2)
+    if (k !== 0) {
+      sum = sum.add(BigNumber.ln2At().multiply(BigNumber.fromNumber(k)));
+    }
+
+    return sum;
+  }
+
+  /** `2 * atanh(this)` by the series 2 * (y + y^3/3 + y^5/5 + ...), at the current precision. */
+  #twiceAtanhSeries(): BigNumber {
+    const precision = globalConfig.precision;
+    const ySq = this.multiply(this);
+    let term = this.clone();
+    let sum = this.clone();
     const maxIter = seriesIterationLimit(precision);
 
     for (let n = 1; n <= maxIter; n++) {
@@ -1865,14 +1895,7 @@ export class BigNumber implements MathTSValue {
       sum = newSum;
     }
 
-    sum = sum.multiply(two);
-
-    // Add back reduction: k * ln(2)
-    if (k !== 0) {
-      sum = sum.add(BigNumber.ln2At().multiply(BigNumber.fromNumber(k)));
-    }
-
-    return sum;
+    return sum.multiply(BigNumber.fromNumber(2));
   }
 
   /**
@@ -1977,7 +2000,7 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * ln(1 + x) (more precise than ln(1 + x) for small x)
+   * ln(1 + x), with the full precision for a small x
    */
   log1p(): BigNumber {
     return this.#guarded(() => this.#log1pImpl());
@@ -1992,6 +2015,11 @@ export class BigNumber implements MathTSValue {
     if (this.equals(negOne)) return BigNumber.#allocate(-1, 0n, 0, false, true);
     if (this._sign === 0) return this;
 
+    // 1 + x rounds to the precision and loses a small x (#1118). For |x| < 0.5 the series runs
+    // on x / (x + 2): ln(1 + x) = 2 * atanh(x / (x + 2)).
+    if (this.abs().compareTo(BigNumber.fromNumber(0.5)) < 0) {
+      return this.divide(this.add(BigNumber.fromNumber(2))).#twiceAtanhSeries();
+    }
     return one.add(this).ln();
   }
 
@@ -2200,8 +2228,9 @@ export class BigNumber implements MathTSValue {
     // Remove trailing zeros
     let coef = coefficient;
     let exp = exponent;
-    // An odd coefficient has no trailing zero: the bit test is much cheaper than a division.
-    while ((coef & 1n) === 0n && coef % 10n === 0n) {
+    // An odd coefficient has no trailing zero. For a long coefficient the bit test is much
+    // cheaper than a division. For a short one the division is cheaper than the bit test.
+    while ((coef < BIT_TEST_LIMIT || (coef & 1n) === 0n) && coef % 10n === 0n) {
       coef = coef / 10n;
       exp++;
     }
