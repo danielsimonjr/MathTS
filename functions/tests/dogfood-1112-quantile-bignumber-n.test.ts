@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { quantileSeq, bignumber, fraction, matrix } from '../src/factories/index.js';
 
 const q = quantileSeq as (...a: unknown[]) => unknown;
-const B = bignumber as (x: unknown) => unknown;
+// One argument per call: `bignumber` throws on extra arguments, as mathjs, so `.map(B)` fails.
+const B = (x: unknown) => (bignumber as (x: unknown) => unknown)(x);
 const num = (v: unknown): unknown => (Array.isArray(v) ? v.map(num) : Number(v));
 const isBig = (v: unknown): boolean => !!v && (v as { isBigNumber?: boolean }).isBigNumber === true;
 
