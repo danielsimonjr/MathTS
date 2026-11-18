@@ -749,6 +749,9 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
  * @returns `{ real: number[][], imag: number[][] }`
  */
 export function fft2d(x: number[][]): { real: number[][]; imag: number[][] } {
+  if (!Array.isArray(x) || (x.length > 0 && !Array.isArray(x[0]))) {
+    throw new TypeError('fft2d: expected a 2-D array');
+  }
   const rows: i32 = x.length;
   // No elements, no spectrum: keep the input shape. Padding 0 to a power of two would give 1x1.
   if (rows === 0) return { real: [], imag: [] };
@@ -1002,38 +1005,52 @@ export function spectrogram(
 /**
  * Estimate power spectral density using periodogram method.
  *
- * @param x - Input signal
+ * `nfft` can be any positive integer (default: the next power of two). A signal longer
+ * than `nfft` is cropped to its first `nfft` samples, as SciPy does.
+ *
+ * @param x - Input signal (an array or a typed array)
  * @param opts - { nfft, window }
  * @returns `{ psd: number[], frequencies: number[] }`
+ * @throws TypeError if x is not an array or a typed array
+ * @throws RangeError if nfft is not a positive integer
  */
 export function periodogram(
-  x: number[],
+  x: number[] | Float64Array,
   opts?: { nfft?: i32; window?: string }
 ): { psd: number[]; frequencies: number[] } {
+  const samples = toSamples('periodogram', x);
   // SciPy: an empty signal has an empty spectrum.
-  if (x.length === 0) return { psd: [], frequencies: [] };
-  const nfft: i32 = opts?.nfft ?? nextPowerOf2(x.length);
+  if (samples.length === 0) return { psd: [], frequencies: [] };
+  const nfftOpt = opts?.nfft;
+  if (nfftOpt !== undefined && !(Number.isInteger(nfftOpt) && nfftOpt >= 1)) {
+    throw new RangeError(`periodogram: nfft must be a positive integer (got ${nfftOpt})`);
+  }
+  const nfft: i32 = nfftOpt ?? nextPowerOf2(samples.length);
+  // SciPy crops the signal to nfft before the window and the normalisation.
+  const seg = nfft < samples.length ? samples.subarray(0, nfft) : samples;
+  const n: i32 = seg.length;
   const winType = opts?.window ?? 'hann';
 
-  const win = windowFunction(x.length, winType);
+  const win = windowFunction(n, winType);
   let winPower: f64 = 0;
-  for (let i: i32 = 0; i < x.length; i++) winPower += win[i] * win[i];
-  winPower /= x.length;
+  for (let i: i32 = 0; i < n; i++) winPower += win[i] * win[i];
+  winPower /= n;
 
   const real = new Float64Array(nfft);
   const imag = new Float64Array(nfft);
-  for (let i: i32 = 0; i < x.length; i++) {
-    real[i] = x[i] * win[i];
+  for (let i: i32 = 0; i < n; i++) {
+    real[i] = seg[i] * win[i];
   }
 
-  const result = fftCoreFloat64(real, imag, false);
+  // Any length: nfft need not be a power of two.
+  const result = fftExactFloat64(real, imag, false);
 
   const nFreqs: i32 = Math.floor(nfft / 2) + 1;
   const psd: number[] = new Array<number>(nFreqs);
   const frequencies: number[] = new Array<number>(nFreqs);
 
   for (let i: i32 = 0; i < nFreqs; i++) {
-    const power: f64 = (result.real[i] ** 2 + result.imag[i] ** 2) / (x.length * winPower);
+    const power: f64 = (result.real[i] ** 2 + result.imag[i] ** 2) / (n * winPower);
     psd[i] = i > 0 && i < nfft / 2 ? 2 * power : power;
     frequencies[i] = i / nfft;
   }
@@ -1508,7 +1525,8 @@ export function bartlettPSD(
  *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
- * @returns `{ psd: number[], frequencies: number[] }`
+ * @returns `{ psd: number[], frequencies: number[] }`; empty for an empty signal
+ * @throws RangeError if the signal has exactly one sample
  */
 export function multiTaperPSD(
   signal: number[] | Float64Array,
@@ -1516,6 +1534,10 @@ export function multiTaperPSD(
 ): { psd: number[]; frequencies: number[] } {
   const samples = toSamples('multiTaperPSD', signal);
   const n: i32 = samples.length;
+  if (n === 0) return { psd: [], frequencies: [] };
+  if (n === 1) {
+    throw new RangeError('multiTaperPSD: signal must have at least 2 samples (got 1)');
+  }
   const nfft: i32 = opts?.nfft ?? (Math.pow(2, Math.ceil(Math.log2(n))) as i32);
   const K: i32 = opts?.K ?? 5;
 
