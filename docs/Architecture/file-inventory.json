@@ -7282,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 178
+      "loc": 244
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -10615,6 +10615,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 239
+    },
+    {
+      "file": "functions/tests/dogfood-926-eigs-defective.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 69
     },
     {
       "file": "functions/tests/dogfood-960-divide-scalar-matrix.test.ts",
@@ -14233,7 +14240,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 315
+      "loc": 318
     },
     {
       "file": "matrix/src/operations/eig-wasm.ts",
