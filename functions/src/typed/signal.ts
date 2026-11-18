@@ -555,7 +555,17 @@ export function groupDelay(
 // =============================================================================
 
 /**
+ * Largest step that `unwrapPhase` reduces by repeated subtraction of 2π: 2^20 turns.
+ * A larger step is reduced with one exact remainder. Results for steps at or below
+ * the limit are bit-identical to the repeated subtraction.
+ */
+const UNWRAP_SUBTRACT_LIMIT: f64 = 2 * Math.PI * 2 ** 20;
+
+/**
  * Unwrap phase angles by adding +/-2*pi to remove discontinuities.
+ *
+ * A non-finite step (NaN, Infinity, or a difference that overflows) has no wrapped
+ * value: that entry and every later entry are NaN, as in `numpy.unwrap`.
  *
  * @param phase - Array of phase values in radians
  * @returns Unwrapped phase array
@@ -565,15 +575,20 @@ export function unwrapPhase(phase: number[]): number[] {
   const result = [...phase];
   for (let i: i32 = 1; i < result.length; i++) {
     let diff: f64 = result[i] - result[i - 1];
-    // numpy.unwrap: a non-finite step has no wrapped value, so it and all later entries are NaN.
     if (!Number.isFinite(diff)) {
       result[i] = NaN;
       continue;
     }
-    // A huge finite step would need about |diff| / 2π loop turns: jump close to range first.
-    if (Math.abs(diff) > 1e3) diff -= 2 * Math.PI * Math.round(diff / (2 * Math.PI));
-    while (diff > Math.PI) diff -= 2 * Math.PI;
-    while (diff < -Math.PI) diff += 2 * Math.PI;
+    if (Math.abs(diff) > UNWRAP_SUBTRACT_LIMIT) {
+      // `%` is exact and leaves |diff| < 2π, so one correction is sufficient. Subtraction
+      // in a loop needs |diff| / 2π turns, and does not end when 2π is below one ulp of diff.
+      diff %= 2 * Math.PI;
+      if (diff > Math.PI) diff -= 2 * Math.PI;
+      else if (diff < -Math.PI) diff += 2 * Math.PI;
+    } else {
+      while (diff > Math.PI) diff -= 2 * Math.PI;
+      while (diff < -Math.PI) diff += 2 * Math.PI;
+    }
     result[i] = result[i - 1] + diff;
   }
   return result;

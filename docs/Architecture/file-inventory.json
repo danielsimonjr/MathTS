@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-17",
+  "generated": "2026-11-18",
   "totalFiles": 2487,
   "byDisposition": {
     "reachable": 26,
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1639
+      "loc": 1654
     },
     {
       "file": "functions/src/typed/special.ts",
