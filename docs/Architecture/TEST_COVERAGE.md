@@ -11,7 +11,7 @@
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
 | Total Source Files                     | 1340                  |
-| Total Test Files                       | 1052                  |
+| Total Test Files                       | 1053                  |
 | Source Files with Tests                | 560                   |
 | Source Files without Tests             | 780                   |
 | Coverage (raw, direct-import)          | **41.8%**             |

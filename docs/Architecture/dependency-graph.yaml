@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-17'
+  lastUpdated: '2026-11-18'
   totalFiles: 1340
   totalModules: 82
-  totalExports: 7346
+  totalExports: 7347
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9910,6 +9910,7 @@ modules:
             - kendallShouldUseExact
         - file: ./typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
         - file: ./utils/limits.js
           imports:
@@ -10200,6 +10201,7 @@ modules:
             - lgamma
         - file: ./typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
       workspaceDependencies: []
       exports:
@@ -22261,6 +22263,7 @@ modules:
       internalDependencies:
         - file: ../typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
       workspaceDependencies: []
       exports:
@@ -22333,6 +22336,7 @@ modules:
       internalDependencies:
         - file: ../typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
       workspaceDependencies: []
       exports:
@@ -22580,6 +22584,7 @@ modules:
       internalDependencies:
         - file: ../typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
       workspaceDependencies: []
       exports:
@@ -26141,6 +26146,9 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertLoopOrder
+        - file: ./number-matrix.js
+          imports:
+            - hasNaN
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -26835,11 +26843,13 @@ modules:
         - isNumberMatrix
         - assertRectangular
         - assertNumberScalar
+        - hasNaN
         - numberVector
       functions:
         - isNumberMatrix
         - assertRectangular
         - assertNumberScalar
+        - hasNaN
         - numberVector
     functions/src/typed/numeric.ts:
       description: Typed Numerical Methods Functions
@@ -46560,11 +46570,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1340
   totalModules: 82
-  totalLinesOfCode: 233943
-  totalExports: 7346
+  totalLinesOfCode: 234027
+  totalExports: 7347
   totalClasses: 62
   totalInterfaces: 666
-  totalFunctions: 2551
+  totalFunctions: 2552
   totalTypeGuards: 180
   totalEnums: 0
   totalConstants: 1689
