@@ -244,18 +244,56 @@ const factoryTyped = new Proxy(mathTyped, {
  * A Fraction converts as numerator / denominator at the BigNumber precision.
  * null converts to 0.
  */
+const RADIX_BITS: Record<string, number> = { b: 1, o: 3, x: 4 };
+
+/**
+ * Parse a BigNumber string. Beyond decimal text it reads the mathjs forms 0b / 0o / 0x (with an
+ * optional fraction part, exact because the radix is a power of 2) and the word-size suffix
+ * `0xFFi8` (two's complement, as mathjs).
+ */
+function parseBigNumberString(text: string): BigNumber {
+  const m = /^\s*([+-]?)0([box])([0-9a-f]*)(?:\.([0-9a-f]*))?(?:i(\d+))?\s*$/i.exec(text);
+  if (!m) return BigNumber.parse(text);
+  const [, sign, radixChar, intDigits, fracDigits = '', size] = m;
+  const radix = radixChar.toLowerCase();
+  const valid = { b: /^[01]*$/, o: /^[0-7]*$/, x: /^[0-9a-f]*$/i }[radix] as RegExp;
+  if (!valid.test(intDigits) || !valid.test(fracDigits) || (intDigits + fracDigits).length === 0) {
+    throw new SyntaxError(`BigNumber cannot parse '${text}'`);
+  }
+  const bits = RADIX_BITS[radix];
+  const prefix = `0${radix}`;
+  const scale = bits * fracDigits.length;
+  // value = N / 2^scale = N * 5^scale / 10^scale
+  const n = BigInt(prefix + (intDigits + fracDigits || '0')) * 5n ** BigInt(scale);
+  let digits = n.toString();
+  if (scale > 0) {
+    digits = digits.padStart(scale + 1, '0');
+    digits = digits.slice(0, -scale) + '.' + digits.slice(-scale);
+  }
+  let value = BigNumber.parse(digits);
+  if (size !== undefined) {
+    const two = BigNumber.fromNumber(2);
+    const twoPowSize = two.pow(Number(size));
+    if (value.compareTo(twoPowSize.subtract(BigNumber.fromNumber(1))) > 0) {
+      throw new SyntaxError(`String "${text.trim()}" is out of range`);
+    }
+    if (value.compareTo(two.pow(Number(size) - 1)) >= 0) value = value.subtract(twoPowSize);
+  }
+  return sign === '-' ? value.negate() : value;
+}
+
 function toBigNumber(x: unknown): unknown {
   // `isBigNumber` reads the brand, so a BigNumber of a second copy of core keeps its digits.
   if (isBigNumber(x)) return x;
   if (x === null) return BigNumber.fromNumber(0); // as mathjs; a Butcher tableau holds null
-  if (typeof x === 'string') return BigNumber.parse(x);
+  if (typeof x === 'string') return parseBigNumberString(x);
   if (typeof x === 'number') return BigNumber.fromNumber(x);
   if (typeof x === 'bigint') return BigNumber.fromBigInt(x);
   if (Array.isArray(x)) return x.map(toBigNumber);
   if (isFraction(x)) {
     return BigNumber.fromBigInt(x.numerator).div(BigNumber.fromBigInt(x.denominator));
   }
-  const o = x as {
+  const o = (x ?? {}) as {
     isMatrix?: boolean;
     isUnit?: boolean;
     map(f: (v: unknown) => unknown): unknown;
@@ -269,7 +307,18 @@ function toBigNumber(x: unknown): unknown {
     u.value = toBigNumber(o.value);
     return u;
   }
-  return BigNumber.fromNumber(Number(o.valueOf())); // boolean / other numeric-like
+  if (typeof x === 'boolean') return BigNumber.fromNumber(x ? 1 : 0);
+  // As mathjs: Complex, a plain object and undefined have no BigNumber form.
+  throw new TypeError(
+    `Unexpected type of argument in function bignumber (expected: number or string or BigNumber or bigint or Fraction or Unit or null or boolean or Array or Matrix, actual: ${
+      x === undefined ? 'undefined' : ((x as { type?: string }).type ?? typeof x)
+    }, index: 0)`
+  );
+}
+
+/** `bignumber()` with no argument gives 0; `bignumber(undefined)` throws, as in mathjs. */
+function bignumberFn(...args: unknown[]): unknown {
+  return args.length === 0 ? BigNumber.fromNumber(0) : toBigNumber(args[0]);
 }
 
 export const factoryScope: Record<string, unknown> = {
@@ -290,7 +339,7 @@ export const factoryScope: Record<string, unknown> = {
 
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
   complex: (re: number, im: number) => new Complex(re, im),
-  bignumber: toBigNumber,
+  bignumber: bignumberFn,
   fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
   number: Number,
 

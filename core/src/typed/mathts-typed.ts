@@ -384,7 +384,12 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   {
     from: 'Fraction',
     to: 'BigNumber',
-    convert: (f: unknown) => BigNumber.fromNumber((f as Fraction).toNumber()),
+    convert: (f: unknown) => {
+      // numerator / denominator in BigNumber, rounded to the configured precision (#1117);
+      // the numerator carries the sign, the denominator is positive.
+      const { numerator, denominator } = f as Fraction;
+      return BigNumber.fromBigInt(numerator).divide(BigNumber.fromBigInt(denominator));
+    },
   },
 
   // -------------------------------------------------------------------------

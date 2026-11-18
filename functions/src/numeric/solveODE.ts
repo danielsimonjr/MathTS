@@ -133,6 +133,38 @@ function _rmsNorm(v: number[]): number {
   return Math.sqrt(s / v.length);
 }
 
+/** A plain number from a number or a BigNumber; NaN for any other type. */
+function _plainNumber(v: unknown): number {
+  if (typeof v === 'number') return v;
+  return isBigNumber(v) ? (v as unknown as BigNumber).toNumber() : NaN;
+}
+
+/**
+ * The magnitude of the first step of the adaptive Runge-Kutta methods (Hairer's heuristic,
+ * h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖, capped at the span), or undefined when the state, the time span or
+ * the derivative holds a Unit or another non-numeric type, or does not convert to a finite number.
+ * One implementation serves the number and the BigNumber path of RK23 and RK45.
+ */
+function _firstStepGuess(
+  f: ForcingFunction,
+  t0: unknown,
+  tf: unknown,
+  y0: unknown[],
+  tspan: unknown[]
+): number | undefined {
+  if (tspan.some(isUnit)) return undefined;
+  const y0n = y0.map(_plainNumber);
+  const span = Math.abs(_plainNumber(tf) - _plainNumber(t0));
+  if (!y0n.every(Number.isFinite) || !Number.isFinite(span)) return undefined;
+  const f0 = f(t0 as MathNumericType, y0 as MathNumericType | MathArray);
+  const f0n = (Array.isArray(f0) ? f0 : [f0]).map(_plainNumber);
+  if (!f0n.every(Number.isFinite)) return undefined;
+  const d0 = _rmsNorm(y0n);
+  const d1 = _rmsNorm(f0n);
+  const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
+  return Math.min(h0, span);
+}
+
 /**
  * Inline dense solve of `A·x = b` by Gaussian elimination with partial pivoting (A and b copied,
  * not mutated). Retained for the *small* iteration matrices the stiff solvers actually use.
@@ -1626,26 +1658,18 @@ export const createSolveODE = /* #__PURE__ */ factory(
           : [butcherTableau.a, butcherTableau.c, butcherTableau.b, butcherTableau.bp];
 
         let h;
+        const firstStepGuess = firstStep ? undefined : _firstStepGuess(f, t0, tf, y0, tspan);
         if (firstStep) {
           h = isForwards ? firstStep : unaryMinus(firstStep);
-        } else if (
-          !hasBigNumbers &&
-          !tspan.some(isUnit) &&
-          (y0 as unknown[]).every((v) => typeof v === 'number')
-        ) {
+        } else if (firstStepGuess !== undefined) {
           // Choose a sensible first step (Hairer's heuristic h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖) rather than
           // spanning the whole interval. A whole-interval first step can slip past an embedded error
           // test — e.g. BS23/RK23 on y'=-y, whose 3rd-2nd-order estimate vanishes exactly at h=span —
-          // and silently accept a crude low-order result (y(1)=1/3 instead of e⁻¹). Gated on plain
-          // numeric state — `_rmsNorm` would produce NaN on Unit/Complex/BigNumber elements — so those
-          // fall through to the whole-interval step below.
-          const f0 = f(t0 as MathNumericType, y0 as MathNumericType | MathArray);
-          const f0arr = (Array.isArray(f0) ? f0 : [f0]) as number[];
-          const d0 = _rmsNorm(y0 as number[]);
-          const d1 = _rmsNorm(f0arr);
-          const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
-          const hMag = Math.min(h0, Math.abs((tf as number) - (t0 as number)));
-          h = isForwards ? hMag : -hMag;
+          // and silently accept a crude low-order result (y(1)=1/3 instead of e⁻¹). The norms run on
+          // plain numbers, for a number and for a BigNumber state alike (#1120): the guess only
+          // sizes the first step, and the error control that follows runs in the state's own type.
+          h = hasBigNumbers ? bignumber(firstStepGuess) : firstStepGuess;
+          if (!isForwards) h = unaryMinus(h);
         } else {
           h = divide(subtract(tf, t0), steps); // fallback first step size
         }

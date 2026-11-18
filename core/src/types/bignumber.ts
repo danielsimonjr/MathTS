@@ -6,6 +6,7 @@
 import type { Scalar, MathTSValue } from './interfaces.js';
 import { BIGNUMBER_BRAND, defineTypeMarkers } from './type-marker.js';
 import { gcdBigInt } from './bigint-gcd.js';
+import { isFraction } from './fraction.js';
 
 /**
  * Check if a value is a BigNumber.
@@ -2049,6 +2050,10 @@ export class BigNumber implements MathTSValue {
     if (isBigNumber(value)) return value;
     if (typeof value === 'number') return BigNumber.fromNumber(value);
     if (typeof value === 'string') return BigNumber.parse(value);
+    if (isFraction(value)) {
+      // numerator / denominator at the configured precision, not through a 16-digit number (#1117)
+      return BigNumber.fromBigInt(value.numerator).divide(BigNumber.fromBigInt(value.denominator));
+    }
     return BigNumber.fromNumber(Number(value.valueOf()));
   }
 
