@@ -135,6 +135,55 @@ export function isNumericSquare(a: unknown): a is number[][] {
 }
 
 /**
+ * The `count` members of `group` whose eigenvectors are the most independent: a greedy
+ * pivoted Gram-Schmidt over complex vectors that takes the largest remaining residual
+ * first. The copies of a defective eigenvalue are almost parallel, so the first pick
+ * decides little and the rest are dropped.
+ */
+function independentColumns(
+  re: number[][],
+  im: number[][],
+  group: number[],
+  count: number
+): Set<number> {
+  const chosen = new Set<number>();
+  const residual = group.map((i) => ({ re: re[i].slice(), im: im[i].slice() }));
+  while (chosen.size < count && chosen.size < group.length) {
+    let best = -1;
+    let bestNorm = -1;
+    residual.forEach((r, k) => {
+      if (chosen.has(group[k])) return;
+      let sum = 0;
+      for (let j = 0; j < r.re.length; j++) sum += r.re[j] * r.re[j] + r.im[j] * r.im[j];
+      if (sum > bestNorm) {
+        bestNorm = sum;
+        best = k;
+      }
+    });
+    chosen.add(group[best]);
+    const norm = Math.sqrt(bestNorm) || 1;
+    const q = {
+      re: residual[best].re.map((x) => x / norm),
+      im: residual[best].im.map((x) => x / norm),
+    };
+    for (const r of residual) {
+      // r -= (q^H r) q
+      let pr = 0;
+      let pi = 0;
+      for (let j = 0; j < q.re.length; j++) {
+        pr += q.re[j] * r.re[j] + q.im[j] * r.im[j];
+        pi += q.re[j] * r.im[j] - q.im[j] * r.re[j];
+      }
+      for (let j = 0; j < q.re.length; j++) {
+        r.re[j] -= pr * q.re[j] - pi * q.im[j];
+        r.im[j] -= pr * q.im[j] + pi * q.re[j];
+      }
+    }
+  }
+  return chosen;
+}
+
+/**
  * Correct eigendecomposition for the public `eigs`.
  *
  * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
@@ -157,19 +206,36 @@ export function correctEigs(
   if (!isNumericSquare(a)) return toFactory();
   const wantVectors = options?.eigenvectors !== false;
   try {
-    const ne = eig(a, { computeVectors: wantVectors }) as {
-      values: Array<{ re: number; im: number }>;
-      vectors: number[][];
-    };
-    const pairs = ne.values.map((v, i) => ({
+    const ne = eig(a, { computeVectors: wantVectors });
+    // A defective eigenvalue has fewer independent eigenvectors than copies. The list holds
+    // one pair per independent direction, as the documented contract of `eigs` says.
+    const keep = new Set<number>(ne.values.map((_, i) => i));
+    if (wantVectors) {
+      for (const group of ne.repeatedEigenvalues) {
+        if (group.defective) {
+          const chosen = independentColumns(
+            ne.vectors,
+            ne.vectorsIm,
+            group.indices,
+            group.independentEigenvectors
+          );
+          for (const i of group.indices) if (!chosen.has(i)) keep.delete(i);
+        }
+      }
+    }
+    const all = ne.values.map((v, i) => ({
       value: (Math.abs(v.im) < EIG_IM_TOL ? v.re : new Complex(v.re, v.im)) as number | Complex,
       vector: ne.vectors[i],
+      i,
     }));
     const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
     const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
-    pairs.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
-    const values = pairs.map((p) => p.value);
-    return wantVectors ? { values, eigenvectors: pairs } : { values };
+    all.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
+    const values = all.map((p) => p.value);
+    const pairs = all.filter((p) => keep.has(p.i));
+    return wantVectors
+      ? { values, eigenvectors: pairs.map(({ value, vector }) => ({ value, vector })) }
+      : { values };
   } catch (e) {
     if (e instanceof RangeError) throw e;
     return toFactory();

@@ -44,6 +44,8 @@ export interface RepeatedEigenvalue {
   independentEigenvectors: number;
   /** True when `independentEigenvectors < algebraicMultiplicity` (a Jordan block). */
   defective: boolean;
+  /** Positions in `values` of the computed copies of this eigenvalue, in ascending order. */
+  indices: number[];
 }
 
 /** Machine epsilon for double precision. */
@@ -307,6 +309,7 @@ export function repeatedEigenvalueReport(
         algebraicMultiplicity: m,
         independentEigenvectors: independent,
         defective: independent < m,
+        indices: cluster.members,
       },
     });
   }
