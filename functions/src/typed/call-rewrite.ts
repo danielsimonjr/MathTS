@@ -23,10 +23,8 @@ const RADIX_WORD = /^0(?:x[0-9a-fA-F]+|b[01]+|o[0-7]+)$/;
 const DIGIT = /\d/;
 
 /**
- * Find the position after the group that opens at a position of a text.
- *
- * @param pos - Position of a `(` or a `[`
- * @returns The position after the closing character, or -1 when the group does not close
+ * A function that takes the position of a `(` or a `[` in a text. It returns the
+ * position after the closing character, or -1 when the group does not close.
  */
 export type GroupEnd = (pos: number) => number;
 
@@ -170,7 +168,8 @@ function endsConstant(expr: string, stop: number): boolean {
  * @param structure - The structure of `expr`
  * @returns True when the call at `index` must stay as written
  */
-function readsAsCall(expr: string, index: number, { partner, marks }: Structure): boolean {
+function readsAsCall(expr: string, index: number, structure: Structure): boolean {
+  const { partner, marks } = structure;
   let stop = index;
   while (stop > 0 && expr[stop - 1].trim() === '' && marks[stop - 1] !== SEPARATOR) stop--;
   if (stop === 0) return false;
