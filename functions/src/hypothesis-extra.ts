@@ -12,7 +12,6 @@ import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
 import { hasNaN, numberVector } from './typed/number-matrix.js';
-import { assertLoopOrder } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
@@ -198,8 +197,8 @@ function logChoose(n: number, k: number): number {
  * observed table's), matching `scipy.stats.fisher_exact`. `oddsRatio` is the sample
  * ratio `ad/bc` (SciPy reports the conditional-MLE estimate; the p-value matches).
  *
- * @throws A `RangeError` when an entry is not a finite number `>= 0`, when a marginal total
- *   is above 2^53 - 1, or when the table has more than 10,000,000 possible tables.
+ * @throws A `RangeError` when an entry is not a finite number `>= 0`, or when the smaller
+ *   of the first row total and the first column total is above 2^53 - 1.
  */
 export function fisherExact(
   table: readonly [readonly number[], readonly number[]]
@@ -220,14 +219,12 @@ export function fisherExact(
   const logPObs = logHyper(a);
   const lo = Math.max(0, c1 - r2);
   const hi = Math.min(r1, c1);
-  // `k++` does not change a `k` above 2^53, so the loop below would not end. The loop
-  // computes one table in about 10 µs, so the default limit is near 100 s.
+  // `k++` does not change a `k` above 2^53, so the loop below would not end.
   if (hi > Number.MAX_SAFE_INTEGER) {
     throw new RangeError(
       `fisherExact: a marginal total of ${hi} exceeds the supported maximum of 2^53 - 1`
     );
   }
-  assertLoopOrder('fisherExact', 'the number of possible tables', hi - lo + 1);
   let p = 0;
   for (let k = lo; k <= hi; k++) {
     const lp = logHyper(k);
