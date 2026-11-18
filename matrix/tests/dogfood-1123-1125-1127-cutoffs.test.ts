@@ -313,6 +313,27 @@ describe('#1125 matrixLogm of a large non-symmetric matrix', () => {
     [-0.05946578399619151, -1.1239482521376205, 13.730516432310395],
   ];
 
+  // The Schur form of this graded matrix at 2^40 keeps residue above 1e-12 below its
+  // diagonal. The Schur path gives an error of 1.5e-12 and the Newton path 7e-15; the
+  // Newton result agrees with the Schur result, so it is kept.
+  it('a graded matrix·2^40 keeps the Newton accuracy', () => {
+    const G = [
+      [3212169.3124976046, -660700.232568496, -14134.602758667621, 3716.585283999683],
+      [-660700.232568496, 468928.2308662234, 72105.44239057656, -30523.52264561726],
+      [-14134.602758667621, 72105.44239057656, 20995.950544789375, -12345.20289383199],
+      [3716.585283999683, -30523.522645617257, -12345.20289383199, 11302.887047334152],
+    ];
+    // mpmath, 40 digits: logm(G) + 40·ln 2·I.
+    const ref = [
+      [42.633077807776715, -0.5361915791649691, 0.13287986665238535, -0.023380260261963697],
+      [-0.5361915791649691, 40.37254703170481, 0.8343429107864396, -0.14592072172390894],
+      [0.13287986665238535, 0.8343429107864396, 36.03847181704347, -1.177954563668173],
+      [-0.023380260261963683, -0.14592072172390885, -1.177954563668173, 36.31096871467894],
+    ];
+    const r = nested(matrixLogm(DenseMatrix.fromArray(scale(G, 2 ** 40))));
+    expect(maxDiff(r, ref)).toBeLessThan(1e-13);
+  });
+
   it.each([0, 50, 120])('logm(A·2^%i) = logm(A) + k·ln 2·I', (k) => {
     const r = nested(matrixLogm(DenseMatrix.fromArray(scale(A, 2 ** k))));
     const want = ref.map((row, i) => row.map((v, j) => (i === j ? v + k * Math.LN2 : v)));
