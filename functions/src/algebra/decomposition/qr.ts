@@ -6,7 +6,7 @@ import {
   UNIT_FLOOR_LO,
   SQUARED,
   entryRange,
-  ldexp,
+  ldexpMatrix,
   withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
 
@@ -494,13 +494,9 @@ export const createQr = /* #__PURE__ */ factory(
       return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
         if (e === 0) return _denseQRimpl(m);
         const scaled = m.clone();
-        for (const row of scaled._data as number[][]) {
-          for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], e);
-        }
+        ldexpMatrix(scaled._data as number[][], e);
         const ret = _denseQRimpl(scaled);
-        for (const row of ret.R._data as number[][]) {
-          for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], -e);
-        }
+        ldexpMatrix(ret.R._data as number[][], -e);
         return ret;
       });
     }

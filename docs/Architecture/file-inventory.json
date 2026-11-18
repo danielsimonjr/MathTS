@@ -912,7 +912,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 141
+      "loc": 147
     },
     {
       "file": "core/src/shared.ts",
@@ -5840,7 +5840,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 531
+      "loc": 527
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
