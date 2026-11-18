@@ -2844,6 +2844,7 @@
       "functions/src/typed/signal.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/typed/call-rewrite.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/f64-kernels.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/bitwise.ts",
