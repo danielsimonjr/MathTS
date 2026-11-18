@@ -57,6 +57,7 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
     'exp(-2*i*x)',
     'exp(x*i*y)',
     'exp(2/3*i*x)',
+    'exp(i*2. * x)',
     'exp(x*-i)',
     'exp(- i*x)',
     'exp(i*x*i)',
@@ -132,6 +133,8 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
       'exp(x * -i * y)': '(cos((x*y)) - i*sin((x*y)))',
       'exp(i*1e-3)': '(cos((1e-3)) + i*sin((1e-3)))',
       'exp(i*0.5)': '(cos(0.5) + i*sin(0.5))',
+      // `2.*x` reads as `2 .* x`, so the factor `2.` keeps a space.
+      'exp(i*2. * x)': '(cos((2. *x)) + i*sin((2. *x)))',
       'exp(ix*-i)': '(cos(ix) - i*sin(ix))',
       'exp(i*exp(i*x))': '(cos((cos(x) + i*sin(x))) + i*sin((cos(x) + i*sin(x))))',
       'exp(x+exp(i*y))': 'exp(x+(cos(y) + i*sin(y)))',
