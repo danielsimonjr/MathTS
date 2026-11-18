@@ -5,15 +5,7 @@
  * eigenvector extraction using inverse iteration.
  */
 
-import {
-  ABS_CUTOFF_LO,
-  SQUARED,
-  entryRange,
-  eye,
-  isSymmetric,
-  ldexp,
-  pow2ScaleExponent,
-} from './common.js';
+import { SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent } from './common.js';
 import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
@@ -103,7 +95,8 @@ function cdiv(xr: number, xi: number, yr: number, yi: number): { r: number; i: n
 /**
  * Householder reduction of `H` (nn x nn, flat row-major) to upper Hessenberg
  * form, accumulating the orthogonal transform into `V` (identity on entry).
- * `ort` is scratch of length `nn`. (JAMA `orthes`.)
+ * `ort` is scratch of length `nn`. (JAMA `orthes`; each reflector is applied to `V`
+ * as it is formed, in place of the `ortran` pass.)
  */
 function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: number): void {
   const low = 0;
@@ -138,31 +131,37 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
         f = f / h;
         for (let j = m; j <= high; j++) H[i * nn + j] -= f * ort[j];
       }
-      ort[m] = scale * ort[m];
+      // V = V·(I - u·u'/h). u and h are read before they are scaled back, so a column of
+      // subnormal entries keeps full precision in V.
+      for (let i = 0; i <= high; i++) {
+        let f = 0.0;
+        for (let j = high; j >= m; j--) f += ort[j] * V[i * nn + j];
+        f = f / h;
+        for (let j = m; j <= high; j++) V[i * nn + j] -= f * ort[j];
+      }
       H[m * nn + (m - 1)] = scale * g;
     }
   }
+}
 
-  // Accumulate transformations (Algol's ortran). V already = identity.
-  for (let m = high - 1; m >= low + 1; m--) {
-    if (H[m * nn + (m - 1)] !== 0.0) {
-      for (let i = m + 1; i <= high; i++) ort[i] = H[i * nn + (m - 1)];
-      for (let j = m; j <= high; j++) {
-        let g = 0.0;
-        for (let i = m; i <= high; i++) g += ort[i] * V[i * nn + j];
-        // Double division avoids possible underflow.
-        const g1 = g / ort[m];
-        g = g1 / H[m * nn + (m - 1)];
-        if (Number.isFinite(g)) {
-          for (let i = m; i <= high; i++) V[i * nn + j] += g * ort[i];
-        } else {
-          // A column of subnormal entries gives a reflector scale near 2^-1074, so 1 / scale
-          // overflows. ort[i] and H[m][m-1] carry that scale; their ratio does not.
-          for (let i = m; i <= high; i++) V[i * nn + j] += g1 * (ort[i] / H[m * nn + (m - 1)]);
-        }
-      }
+/** Relative tolerance of the symmetry test. */
+const SYMMETRY_RTOL = 1e-10;
+
+/**
+ * True when every |a_ij - a_ji| / max|a| is at most {@link SYMMETRY_RTOL}. The test is
+ * relative, so it gives the same answer for a matrix at every power-of-2 scale. A matrix
+ * with a non-finite entry uses the absolute test of `isSymmetric`.
+ */
+function isRelativelySymmetric(A: number[][]): boolean {
+  const range = entryRange(A);
+  if (!range.finite || range.amax === 0) return isSymmetric(A);
+  const n = A.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (Math.abs(A[i][j] - A[j][i]) / range.amax > SYMMETRY_RTOL) return false;
     }
   }
+  return true;
 }
 
 /** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
@@ -671,8 +670,8 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   const { computeVectors = true } = options;
   const maxIterations =
     options.maxIterations === undefined ? MAX_QR_ITERATIONS : options.maxIterations;
-  if (!Number.isInteger(maxIterations) || maxIterations < 1) {
-    throw new RangeError('eig: maxIterations must be a positive integer');
+  if (!(maxIterations === Infinity || Number.isInteger(maxIterations)) || maxIterations < 1) {
+    throw new RangeError('eig: maxIterations must be a positive integer or Infinity');
   }
 
   const A = decompositionInputToNestedArray(matrix);
@@ -692,11 +691,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
     }
   }
 
-  // The symmetry test has an absolute tolerance, so it reads the matrix at a fixed scale: a
-  // tiny non-symmetric matrix is not symmetric.
-  const symRange = entryRange(A);
-  const symE = symRange.finite ? pow2ScaleExponent(symRange.amax, ABS_CUTOFF_LO, SQUARED) : 0;
-  const symmetric = isSymmetric(symE === 0 ? A : A.map((row) => row.map((x) => ldexp(x, symE))));
+  const symmetric = isRelativelySymmetric(A);
 
   // Special cases
   if (n === 1) {
