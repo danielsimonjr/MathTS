@@ -770,8 +770,7 @@
     "functions/src/utils/typed-impl.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/algebra/solver/lsolve.ts",
-      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/utils/solveNumberOps.ts",
       "functions/src/matrix/partitionSelect.ts",
       "functions/src/matrix/sort.ts",
       "functions/src/statistics/max.ts",
@@ -798,6 +797,7 @@
       "functions/src/algebra/solver/lsolve.ts",
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/utils/solveNumberOps.ts",
       "functions/src/algebra/sparse/csAmd.ts",
       "functions/src/algebra/sparse/csChol.ts",
       "functions/src/algebra/sparse/csCounts.ts",
@@ -1218,6 +1218,10 @@
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
       "functions/src/algebra/solver/usolveAll.ts"
+    ],
+    "functions/src/algebra/solver/utils/solveNumberOps.ts": [
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/usolve.ts"
     ],
     "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
     "functions/src/factories/matrix-bridge.ts": [
@@ -2212,7 +2216,10 @@
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
     "functions/src/stats/weighted-stats.ts": ["functions/src/index.ts"],
-    "functions/src/stats/robust-stats.ts": ["functions/src/index.ts"],
+    "functions/src/stats/robust-stats.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/nonparametric-extra.ts"
+    ],
     "functions/src/stats/effect-sizes.ts": ["functions/src/index.ts"],
     "functions/src/stats/distributions-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/nonparametric-extra.ts": ["functions/src/index.ts"],
@@ -2230,7 +2237,10 @@
     "functions/src/numeric/gauss-nodes-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/quadrature-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/finite-differences.ts": ["functions/src/index.ts"],
-    "functions/src/numbertheory/modular.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/modular.ts": [
+      "functions/src/index.ts",
+      "functions/src/numbertheory/arithmetic-functions.ts"
+    ],
     "functions/src/numbertheory/arithmetic-functions.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/sequences.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/diophantine.ts": ["functions/src/index.ts"],

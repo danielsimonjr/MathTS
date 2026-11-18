@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-18'
-  totalFiles: 1343
+  totalFiles: 1344
   totalModules: 82
-  totalExports: 7372
+  totalExports: 7376
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7783,9 +7783,10 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
-        - file: ../../utils/typed-impl.js
+        - file: ./utils/solveNumberOps.js
           imports:
-            - findTypedImpl
+            - createSolveNumberOps
+            - SolveNumberOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7903,9 +7904,10 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
-        - file: ../../utils/typed-impl.js
+        - file: ./utils/solveNumberOps.js
           imports:
-            - findTypedImpl
+            - createSolveNumberOps
+            - SolveNumberOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7946,6 +7948,25 @@ modules:
         - DenseMatrix
       constants:
         - createUsolveAll
+    functions/src/algebra/solver/utils/solveNumberOps.ts:
+      description: Make the getter of the `number, number` scalar implementations for one solver instance.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
+        - file: ../../../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - createSolveNumberOps
+      interfaces:
+        - SolveScalarDependencies
+      functions:
+        - createSolveNumberOps
     functions/src/algebra/solver/utils/solveValidation.ts:
       description: Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
       externalDependencies: []
@@ -14027,6 +14048,7 @@ modules:
         - lfilter
         - lfilterZi
         - filtfilt
+        - realPolyMul
         - polyFromRoots
         - zpkToTf
         - analogToDigital
@@ -14038,6 +14060,7 @@ modules:
         - lfilter
         - lfilterZi
         - filtfilt
+        - realPolyMul
         - polyFromRoots
         - zpkToTf
         - analogToDigital
@@ -18747,6 +18770,9 @@ modules:
           imports:
             - assertLoopOrder
             - MAX_ALLOC_ELEMENTS
+        - file: ./modular.js
+          imports:
+            - trialFactorize
       workspaceDependencies: []
       exports:
         - isSquarefree
@@ -18865,12 +18891,14 @@ modules:
         - prevPrime
         - legendreSymbol
         - sqrtMod
+        - trialFactorize
         - isCarmichael
       functions:
         - modPow
         - prevPrime
         - legendreSymbol
         - sqrtMod
+        - trialFactorize
         - isCarmichael
     functions/src/numbertheory/sequences.ts:
       description: 'Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,'
@@ -21272,6 +21300,7 @@ modules:
             - cMul
             - cScale
             - polyFromRoots
+            - realPolyMul
             - AnalogProto
             - FilterBtype
         - file: ../signal-filter-extra.js
@@ -21389,6 +21418,7 @@ modules:
         - file: ../signal-filter-extra.js
           imports:
             - lfilter
+            - realPolyMul
         - file: ./fft.js
           imports:
             - ComplexNumber
@@ -22682,6 +22712,9 @@ modules:
         - file: ../typed/number-matrix.js
           imports:
             - numberVector
+        - file: ./robust-stats.js
+          imports:
+            - medianOf
       workspaceDependencies: []
       exports:
         - signTest
@@ -22743,6 +22776,7 @@ modules:
             - numberVector
       workspaceDependencies: []
       exports:
+        - medianOf
         - pmean
         - gstd
         - gzscore
@@ -22750,6 +22784,7 @@ modules:
         - siegelSlopes
         - partialCorrelation
       functions:
+        - medianOf
         - pmean
         - gstd
         - gzscore
@@ -45476,6 +45511,7 @@ dependencyGraph:
         - functions/src/algebra/solver/pivot-tolerance.ts
         - functions/src/algebra/solver/usolve.ts
         - functions/src/algebra/solver/usolveAll.ts
+        - functions/src/algebra/solver/utils/solveNumberOps.ts
         - functions/src/algebra/solver/utils/solveValidation.ts
         - functions/src/algebra/solver/validate-u-pivots.ts
         - functions/src/algebra/sparse/csAmd.ts
@@ -46772,18 +46808,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1343
+  totalTypeScriptFiles: 1344
   totalModules: 82
-  totalLinesOfCode: 235487
-  totalExports: 7372
+  totalLinesOfCode: 235538
+  totalExports: 7376
   totalClasses: 62
-  totalInterfaces: 667
-  totalFunctions: 2563
+  totalInterfaces: 668
+  totalFunctions: 2567
   totalTypeGuards: 181
   totalEnums: 0
   totalConstants: 1689
   totalReExports: 3188
-  totalTypeOnlyImports: 684
+  totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0
