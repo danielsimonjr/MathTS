@@ -5,7 +5,7 @@
  * eigenvector extraction using inverse iteration.
  */
 
-import { isSymmetric, eye } from './common.js';
+import { SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent } from './common.js';
 import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
@@ -153,20 +153,6 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
 /** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
 const MAX_QR_ITERATIONS = 1000;
 
-/** hqr2 squares entries; entries are scaled into 2^±EIG_SCALE_EXP so those squares stay in range. */
-const EIG_SCALE_EXP = 400;
-
-/** Power-of-2 factor that brings the largest entry of `A` into 2^±EIG_SCALE_EXP (1 when it is already there). */
-function eigScale(A: number[][]): number {
-  let amax = 0;
-  for (const row of A) for (const v of row) amax = Math.max(amax, Math.abs(v));
-  if (amax === 0) return 1;
-  const k = Math.floor(Math.log2(amax));
-  if (k > EIG_SCALE_EXP) return 2 ** (EIG_SCALE_EXP - k);
-  if (k < -EIG_SCALE_EXP) return 2 ** (-EIG_SCALE_EXP - k);
-  return 1;
-}
-
 /**
  * General real non-symmetric eigendecomposition (JAMA `orthes` + `hqr2`).
  *
@@ -191,13 +177,15 @@ function eigGeneral(
 ): EigResult {
   const nn = A.length;
   const eps = EIG_GEN_EPS;
-  // Scaling by a power of 2 is exact; eigenvalues are divided by sc at the end.
-  const sc = eigScale(A);
+  // hqr2 squares entries, so they are scaled into [2^-400, 2^400]. Scaling by a power of 2
+  // is exact; the eigenvalues are scaled back at the end.
+  const range = entryRange(A);
+  const scE = range.finite ? pow2ScaleExponent(range.amax, -SQUARED, SQUARED) : 0;
 
   // Working Hessenberg/Schur matrix H, transform V, eigenvalue parts d/e.
   const H = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) {
-    for (let j = 0; j < nn; j++) H[i * nn + j] = A[i][j] * sc;
+    for (let j = 0; j < nn; j++) H[i * nn + j] = ldexp(A[i][j], scE);
   }
   const V = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) V[i * nn + i] = 1.0;
@@ -436,7 +424,7 @@ function eigGeneral(
   }
 
   for (let j = 0; j < nn; j++) {
-    if (!Number.isFinite(d[j] / sc) || !Number.isFinite(e[j] / sc)) {
+    if (!Number.isFinite(ldexp(d[j], -scE)) || !Number.isFinite(ldexp(e[j], -scE))) {
       throw new RangeError('eig: an eigenvalue is not finite');
     }
   }
@@ -566,7 +554,7 @@ function eigGeneral(
 
   // --- Assemble EigResult ---------------------------------------------------
   const values: Array<{ re: number; im: number }> = [];
-  for (let j = 0; j < nn; j++) values.push({ re: d[j] / sc, im: e[j] / sc });
+  for (let j = 0; j < nn; j++) values.push({ re: ldexp(d[j], -scE), im: ldexp(e[j], -scE) });
 
   let vectors: number[][];
   let vectorsIm: number[][];

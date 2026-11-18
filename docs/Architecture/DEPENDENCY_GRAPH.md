@@ -1977,11 +1977,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports                                                     | Type   |
-| ----------------------- | ----------------------------------------------------------- | ------ |
-| `./common.js`           | `isSymmetric, eye`                                          | Import |
-| `./eig-multiplicity.js` | `repeatedEigenvalueReport, RepeatedEigenvalue`              | Import |
-| `./as-packed.js`        | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| File                    | Imports                                                           | Type   |
+| ----------------------- | ----------------------------------------------------------------- | ------ |
+| `./common.js`           | `SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent` | Import |
+| `./eig-multiplicity.js` | `repeatedEigenvalueReport, RepeatedEigenvalue`                    | Import |
+| `./as-packed.js`        | `decompositionInputToNestedArray, DecompositionMatrixInput`       | Import |
 
 **Exports:**
 
@@ -21623,7 +21623,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1342   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235059 |
+| Total Lines of Code     | 235047 |
 | Total Exports           | 7371   |
 | Total Re-exports        | 3188   |
 | Total Classes           | 62     |

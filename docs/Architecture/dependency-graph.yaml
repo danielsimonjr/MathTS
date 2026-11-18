@@ -5428,8 +5428,12 @@ modules:
       internalDependencies:
         - file: ./common.js
           imports:
-            - isSymmetric
+            - SQUARED
+            - entryRange
             - eye
+            - isSymmetric
+            - ldexp
+            - pow2ScaleExponent
         - file: ./eig-multiplicity.js
           imports:
             - repeatedEigenvalueReport
@@ -46733,7 +46737,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1342
   totalModules: 82
-  totalLinesOfCode: 235059
+  totalLinesOfCode: 235047
   totalExports: 7371
   totalClasses: 62
   totalInterfaces: 666
