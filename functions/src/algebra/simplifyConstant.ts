@@ -198,10 +198,27 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       return isComplex(value) && value.im === 0 ? value.re : value;
     }
 
-    function _isInexactNumber(value: unknown, options: Options): boolean {
+    // True when no Fraction has the exact value of the number. The test does not read the
+    // `exactFractions` and `fractionsLimit` options: they select the output form of a number,
+    // not the numbers that a Fraction can hold.
+    function _isInexactNumber(value: unknown): boolean {
       return (
-        typeof value === 'number' && isFinite(value) && !isFraction(_exactFraction(value, options))
+        typeof value === 'number' &&
+        isFinite(value) &&
+        fraction !== undefined &&
+        fraction(value).valueOf() !== value
       );
+    }
+
+    // True when the value, or an entry of the array or matrix, passes the test.
+    function _someEntry(thing: unknown, test: (entry: unknown) => boolean): boolean {
+      if (thing instanceof Array) {
+        return thing.some((entry) => _someEntry(entry, test));
+      }
+      if (isMatrix(thing)) {
+        return _someEntry(thing.valueOf(), test);
+      }
+      return test(thing);
     }
 
     function _eval(fnname: string, args: unknown[], options: Options): unknown {
@@ -209,7 +226,10 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       // A number that no exact Fraction represents (a folded 2^(1/2), say) must not meet a
       // Fraction here. The typed conversion would approximate it with a Fraction of
       // limited precision, and the result would drift (2^(1/2)*2^(1/2) gave 2.0000000000045).
-      if (args.some(isFraction) && args.some((a) => _isInexactNumber(a, options))) {
+      if (
+        args.some((arg) => _someEntry(arg, isFraction)) &&
+        args.some((arg) => _someEntry(arg, _isInexactNumber))
+      ) {
         args = args.map(_removeFractions);
       }
       try {
