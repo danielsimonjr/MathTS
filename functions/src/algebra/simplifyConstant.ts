@@ -1,4 +1,5 @@
 import {
+  isComplex,
   isFraction,
   isMatrix,
   isNode,
@@ -190,14 +191,35 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       return thing;
     }
 
+    // A Complex with a zero imaginary part (exp(1), log(2), sin(1) come back this way) is a
+    // real number, so fold it to a plain number. A Complex with a non-zero imaginary part has
+    // no node form: it stays Complex, and the caller refuses it as before (as mathjs does).
+    function _realPart(value: unknown): unknown {
+      return isComplex(value) && value.im === 0 ? value.re : value;
+    }
+
+    function _isInexactNumber(value: unknown, options: Options): boolean {
+      return (
+        typeof value === 'number' && isFinite(value) && !isFraction(_exactFraction(value, options))
+      );
+    }
+
     function _eval(fnname: string, args: unknown[], options: Options): unknown {
+      let result: unknown;
+      // A number that no exact Fraction represents (a folded 2^(1/2), say) must not meet a
+      // Fraction here. The typed conversion would approximate it with a Fraction of
+      // limited precision, and the result would drift (2^(1/2)*2^(1/2) gave 2.0000000000045).
+      if (args.some(isFraction) && args.some((a) => _isInexactNumber(a, options))) {
+        args = args.map(_removeFractions);
+      }
       try {
-        return mathWithTransform[fnname].apply(null, args);
+        result = mathWithTransform[fnname].apply(null, args);
       } catch {
         // sometimes the implicit type conversion causes the evaluation to fail, so we'll try again after removing Fractions
         args = args.map(_removeFractions);
-        return _toNumber(mathWithTransform[fnname].apply(null, args), options);
+        result = _toNumber(mathWithTransform[fnname].apply(null, args), options);
       }
+      return _realPart(result);
     }
 
     const _toNode = typed({

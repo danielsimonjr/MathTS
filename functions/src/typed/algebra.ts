@@ -824,6 +824,59 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
 }
 
 /**
+ * Replace each constant subexpression that has no variable in it (`sqrt(2)`, `exp(1)`, `pi`,
+ * `e`) with a placeholder name, so the polynomial reader sees an opaque factor.
+ *
+ * @returns The rewritten text, and a map from each placeholder to the source text it replaced
+ */
+function abstractConstantCalls(expr: string): { text: string; atoms: Map<string, string> } {
+  const atoms = new Map<string, string>();
+  const known = new Map<string, string>();
+  const place = (source: string): string => {
+    let name = known.get(source);
+    if (name === undefined) {
+      name = `__k${atoms.size}__`;
+      known.set(source, name);
+      atoms.set(name, source);
+    }
+    return name;
+  };
+  let text = '';
+  let i = 0;
+  while (i < expr.length) {
+    const word = /^[A-Za-z_]\w*/.exec(expr.slice(i));
+    if (!word || (i > 0 && /[\w.]/.test(expr[i - 1]))) {
+      text += expr[i++];
+      continue;
+    }
+    const end = i + word[0].length;
+    let after = end;
+    while (after < expr.length && expr[after] === ' ') after++;
+    if (expr[after] === '(' && MATH_KEYWORDS.has(word[0])) {
+      let depth = 0;
+      let close = after;
+      for (; close < expr.length; close++) {
+        if (expr[close] === '(') depth++;
+        else if (expr[close] === ')' && --depth === 0) break;
+      }
+      const call = expr.slice(i, close + 1);
+      if (close < expr.length && variables(call).length === 0) {
+        text += place(call);
+        i = close + 1;
+        continue;
+      }
+    } else if ((word[0] === 'pi' || word[0] === 'e') && expr[after] !== '(') {
+      text += place(word[0]);
+      i = end;
+      continue;
+    }
+    text += word[0];
+    i = end;
+  }
+  return { text, atoms };
+}
+
+/**
  * Expand an expression string by distributing multiplication over addition.
  *
  * **Polynomials in one OR MORE variables** (integer/non-negative-integer
@@ -853,7 +906,13 @@ export function expand(expr: string): string {
   const vars = variables(expr);
   if (vars.length >= 1) {
     try {
-      return idealPolyToString(polyFromExpression(expr, vars), vars);
+      // A constant call such as sqrt(2) or exp(1) is one opaque factor: expand it as an extra
+      // variable that sorts first, then write the call back.
+      const { text, atoms } = abstractConstantCalls(expr);
+      const names = [...atoms.keys(), ...vars];
+      let out = idealPolyToString(polyFromExpression(text, names), names);
+      for (const [name, call] of atoms) out = out.split(name).join(call);
+      return out;
     } catch (error) {
       // A polynomial above the degree limit has no fallback: say so, as the CAS reader does.
       if (error instanceof PolynomialDegreeError) {
@@ -866,8 +925,9 @@ export function expand(expr: string): string {
 
   let result = expr;
 
+  // A group is a bare "(...)": the "(" of a function call such as sin(x) opens an argument list.
   // Handle (expr)^2 => (expr)*(expr)
-  result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
+  result = result.replace(/(?<![\w.^])\(([^()]+)\)\^2/g, '($1)*($1)');
 
   // Split a factor into its additive terms, treating binary subtraction as a
   // signed term: "x - 2" → ["x", "-2"] (NOT ["x - 2"]). Without this the minus
@@ -880,7 +940,7 @@ export function expand(expr: string): string {
       .filter((t) => t !== '');
 
   // Handle (a±b)*(c±d) by distributing
-  const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
+  const mulPattern = /(?<![\w.^])\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
   let match: RegExpExecArray | null;
 
   while ((match = mulPattern.exec(result)) !== null) {
