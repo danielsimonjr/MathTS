@@ -118,7 +118,8 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * has its largest entry in [1, 4); when that scale would push a nonzero entry below
      * 2^-1022, the window scale of `withPow2Scale` is used. Above 2^400 the unscaled run
      * is tried first and kept when it is finite: it stops only at a fixed point, so it is
-     * more accurate than the scaled run. sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122).
+     * more accurate than the scaled run. A scaled run that is not finite throws.
+     * sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122).
      * An ordinary matrix is not scaled.
      */
     function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
@@ -153,6 +154,10 @@ export const createSqrtm = /* #__PURE__ */ factory(
           const root = _denmanBeavers(
             map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
           );
+          // The stop test passes a NaN error, so a scaled run that overflowed returns NaN.
+          if (!allFinite(root)) {
+            throw new Error('computing square root of matrix: iterative method could not converge');
+          }
           return map(root, (v: unknown) => ldexp(v as number, -e / 2)) as Scalar[][] | Matrix;
         },
         true
