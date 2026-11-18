@@ -58,4 +58,29 @@ describe('qr small-matrix absolute cutoff (#1168)', () => {
     const r = math.qr(math.matrix(A)) as unknown as { Q: MatLike; R: MatLike };
     expect(relErr(A, r.Q.valueOf(), r.R.valueOf())).toBeLessThan(1e-14);
   });
+
+  // amax exactly on the window edges: the diagonal is 1 - d, every other entry 1.
+  const edge = (d: number, e: number) =>
+    [
+      [1, 1, 1],
+      [1, 1 - d, 1],
+      [1, 1, 1 - d],
+    ].map((r) => r.map((x) => x * 2 ** e));
+  it('amax = 2^-20 is scaled and reconstructs', () => {
+    const A = edge(3e-10, -20);
+    const { Q, R } = math.qr(A);
+    expect(relErr(A, Q, R)).toBeLessThan(1e-14);
+  });
+  it('amax = 1 is inside the window and reconstructs', () => {
+    const A = edge(3e-10, 0);
+    const { Q, R } = math.qr(A);
+    expect(relErr(A, Q, R)).toBeLessThan(1e-14);
+  });
+  it('amax = 1 - 2^-53 is scaled by 2 and gives the factors of 2A exactly', () => {
+    const A = edge(3e-10, 0).map((r) => r.map((x) => x * (1 - 2 ** -53)));
+    const s = math.qr(A);
+    const t = math.qr(A.map((r) => r.map((x) => 2 * x)));
+    expect(s.Q).toEqual(t.Q);
+    expect(s.R).toEqual(t.R.map((r) => r.map((x) => x / 2)));
+  });
 });
