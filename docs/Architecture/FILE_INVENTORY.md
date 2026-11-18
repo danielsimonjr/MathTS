@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |  1146 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
-| `@danielsimonjr/mathts-matrix`         |   147 |
+| `@danielsimonjr/mathts-matrix`         |   148 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    56 |
 | `@danielsimonjr/mathts-parser`         |     5 |
@@ -2156,6 +2156,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/dense-multiply-zero-inf.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/DenseMatrix.test.ts`                                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-1104-schur-scale.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/dogfood-1107-eig-subnormal.test.ts`                                 | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-1123-1125-1127-cutoffs.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-a1-svd-negative-lead.test.ts`                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-g24-densematrix.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |

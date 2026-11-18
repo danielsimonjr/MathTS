@@ -5,7 +5,15 @@
  * eigenvector extraction using inverse iteration.
  */
 
-import { SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent } from './common.js';
+import {
+  ABS_CUTOFF_LO,
+  SQUARED,
+  entryRange,
+  eye,
+  isSymmetric,
+  ldexp,
+  pow2ScaleExponent,
+} from './common.js';
 import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
@@ -143,8 +151,15 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
         let g = 0.0;
         for (let i = m; i <= high; i++) g += ort[i] * V[i * nn + j];
         // Double division avoids possible underflow.
-        g = g / ort[m] / H[m * nn + (m - 1)];
-        for (let i = m; i <= high; i++) V[i * nn + j] += g * ort[i];
+        const g1 = g / ort[m];
+        g = g1 / H[m * nn + (m - 1)];
+        if (Number.isFinite(g)) {
+          for (let i = m; i <= high; i++) V[i * nn + j] += g * ort[i];
+        } else {
+          // A column of subnormal entries gives a reflector scale near 2^-1074, so 1 / scale
+          // overflows. ort[i] and H[m][m-1] carry that scale; their ratio does not.
+          for (let i = m; i <= high; i++) V[i * nn + j] += g1 * (ort[i] / H[m * nn + (m - 1)]);
+        }
       }
     }
   }
@@ -616,11 +631,26 @@ function eigGeneral(
   }
 
   const result = { values, vectors, vectorsIm, isSymmetric: symmetric } as EigResult;
-  // The report factors the matrix, so it is computed on first read and cached.
+  // The report factors the matrix, so it is computed on first read and cached. It reads the
+  // matrix at the scale of the solver: the factorization squares entries, which underflows
+  // for a tiny matrix and overflows for a huge one.
   let report: RepeatedEigenvalue[] | undefined;
+  const scaledReport = (): RepeatedEigenvalue[] => {
+    if (scE === 0) return repeatedEigenvalueReport(A, values, symmetric);
+    const scaled = repeatedEigenvalueReport(
+      A.map((row) => row.map((x) => ldexp(x, scE))),
+      values.map((v) => ({ re: ldexp(v.re, scE), im: ldexp(v.im, scE) })),
+      symmetric
+    );
+    // The mean of the copies is a power-of-2 scaling of the unscaled mean: scale it back.
+    return scaled.map((r) => ({
+      ...r,
+      value: { re: ldexp(r.value.re, -scE), im: ldexp(r.value.im, -scE) },
+    }));
+  };
   Object.defineProperty(result, 'repeatedEigenvalues', {
     enumerable: true,
-    get: () => (report ??= repeatedEigenvalueReport(A, values, symmetric)),
+    get: () => (report ??= scaledReport()),
   });
   return result;
 }
@@ -638,7 +668,12 @@ function eigGeneral(
 export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}): EigResult {
   // maxIterations bounds the QR iterations for one eigenvalue; tolerance is
   // accepted for API compatibility (hqr2 uses machine epsilon).
-  const { computeVectors = true, maxIterations = MAX_QR_ITERATIONS } = options;
+  const { computeVectors = true } = options;
+  const maxIterations =
+    options.maxIterations === undefined ? MAX_QR_ITERATIONS : options.maxIterations;
+  if (!Number.isInteger(maxIterations) || maxIterations < 1) {
+    throw new RangeError('eig: maxIterations must be a positive integer');
+  }
 
   const A = decompositionInputToNestedArray(matrix);
 
@@ -657,7 +692,11 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
     }
   }
 
-  const symmetric = isSymmetric(A);
+  // The symmetry test has an absolute tolerance, so it reads the matrix at a fixed scale: a
+  // tiny non-symmetric matrix is not symmetric.
+  const symRange = entryRange(A);
+  const symE = symRange.finite ? pow2ScaleExponent(symRange.amax, ABS_CUTOFF_LO, SQUARED) : 0;
+  const symmetric = isSymmetric(symE === 0 ? A : A.map((row) => row.map((x) => ldexp(x, symE))));
 
   // Special cases
   if (n === 1) {
