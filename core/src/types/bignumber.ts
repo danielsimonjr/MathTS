@@ -730,24 +730,26 @@ export class BigNumber implements MathTSValue {
     }
     if (this._isInfinite) return this;
     if (b._isInfinite) return b;
-    if (this._sign === 0) return b;
-    if (b._sign === 0) return this;
+    // Like decimal.js, every result rounds to the configured precision (#1118).
+    const precision = globalConfig.precision;
+    if (this._sign === 0) return b.roundToPrecision(precision);
+    if (b._sign === 0) return this.roundToPrecision(precision);
 
     // Align exponents
     const [aCoef, bCoef, exp] = this.alignExponents(this, b);
 
+    let sum: BigNumber;
     if (this._sign === b._sign) {
       // Same sign: add coefficients
-      return this.normalize(this._sign, aCoef + bCoef, exp);
-    } else {
+      sum = this.normalize(this._sign, aCoef + bCoef, exp);
+    } else if (aCoef >= bCoef) {
       // Different signs: subtract coefficients
-      if (aCoef >= bCoef) {
-        const diff = aCoef - bCoef;
-        return this.normalize(diff === 0n ? 0 : this._sign, diff, exp);
-      } else {
-        return this.normalize(b._sign, bCoef - aCoef, exp);
-      }
+      const diff = aCoef - bCoef;
+      sum = this.normalize(diff === 0n ? 0 : this._sign, diff, exp);
+    } else {
+      sum = this.normalize(b._sign, bCoef - aCoef, exp);
     }
+    return sum.roundToPrecision(precision);
   }
 
   /**
@@ -783,7 +785,7 @@ export class BigNumber implements MathTSValue {
     const coefficient = this._coefficient * b._coefficient;
     const exponent = this._exponent + b._exponent;
 
-    return this.normalize(sign, coefficient, exponent);
+    return this.normalize(sign, coefficient, exponent).roundToPrecision(globalConfig.precision);
   }
 
   /**
@@ -897,24 +899,28 @@ export class BigNumber implements MathTSValue {
       if (exp < 0) return BigNumber.#allocate(1, 0n, 0, false, true); // 0^(-n) = Infinity
       return this;
     }
-    if (exp < 0) {
-      return BigNumber.fromNumber(1).divide(this.pow(-exp));
-    }
-
-    // Binary exponentiation
-    let result = BigNumber.fromNumber(1);
-    let base: BigNumber = this.clone();
-    let e = exp;
-
-    while (e > 0) {
-      if (e % 2 === 1) {
-        result = result.multiply(base);
+    // Each product rounds, so the loop runs with guard digits (more for a larger exponent: the
+    // error grows with the number of products) and the final result rounds once (#1118).
+    const precision = globalConfig.precision;
+    const saved = globalConfig;
+    const extra = GUARD_DIGITS + String(Math.abs(exp)).length;
+    globalConfig = { ...saved, precision: precision + extra };
+    try {
+      let result = BigNumber.fromNumber(1);
+      let base: BigNumber = this.clone();
+      let e = Math.abs(exp);
+      while (e > 0) {
+        if (e % 2 === 1) {
+          result = result.multiply(base);
+        }
+        e = Math.floor(e / 2);
+        if (e > 0) base = base.multiply(base);
       }
-      base = base.multiply(base);
-      e = Math.floor(e / 2);
+      if (exp < 0) result = BigNumber.fromNumber(1).divide(result);
+      return result.roundToPrecision(precision, saved.rounding);
+    } finally {
+      globalConfig = saved;
     }
-
-    return result.roundToPrecision(globalConfig.precision);
   }
 
   /** `this ** y` for a non-integer or infinite `y`: `exp(y * ln(this))` with guard digits. */
