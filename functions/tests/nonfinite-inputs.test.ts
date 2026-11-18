@@ -9,8 +9,9 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Worker } from 'node:worker_threads';
-import { existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+// @ts-expect-error -- untyped repo tool module; tests are outside the tsc project.
+import { preflightPackage } from '../../tools/generate-functions-reference.mjs';
 import * as fns from '../src/index.js';
 import { erfc, normalCDF, primePi, compare, factory_compare, zeta, isPrime } from '../src/index.js';
 import { parallelStatMedian } from '../src/typed/statistics.js';
@@ -208,9 +209,19 @@ const isScalarOut = (out: string) => /^-?(\d|Infinity)/.test(out);
  * gets one finite base call, then one non-finite value per parameter. Every call is
  * checked for hangs. When the base call returns a number, a NaN argument must give NaN.
  */
+/**
+ * Plain exports that the sweep does not call. Each entry gives the reason.
+ */
+const PLAIN_SKIP: Record<string, string> = {
+  loadWasm:
+    'a non-string path loads the packaged WASM module, which switches every later call ' +
+    'in the worker to the WASM path; the result depends on whether copy-wasm ran',
+};
+
 function plainFunctionJobs(values: string[]): Job[] {
   const jobs: Job[] = [];
   for (const [name, v] of Object.entries(fns)) {
+    if (name in PLAIN_SKIP) continue;
     if (typeof v !== 'function' || 'signatures' in v || v.length === 0) continue;
     if (/^class\b/.test(Function.prototype.toString.call(v))) continue;
     const proto = (v as { prototype?: object }).prototype;
@@ -363,10 +374,24 @@ let hangError: string | null = null;
 
 beforeAll(async () => {
   // The worker loads the built package, the same entry point that users load. The turbo
-  // `test` task builds it first, so the hook does no bundling. A missing build fails here.
+  // `test` task builds it first, so the hook does no bundling. A missing or stale build
+  // (a src file newer than dist, or a different export list) fails here.
   const distEntry = fileURLToPath(new URL('../dist/index.js', import.meta.url));
-  if (!existsSync(distEntry)) {
-    throw new Error(`${distEntry} is missing. Run \`bun run build\` in functions first.`);
+  const pkgDir = fileURLToPath(new URL('..', import.meta.url));
+  const pre = await preflightPackage(pkgDir);
+  if (!pre.ok) {
+    throw new Error(pre.errors.map((e: { message: string }) => e.message).join('\n'));
+  }
+  const dist = (await import(pathToFileURL(distEntry).href)) as Record<string, unknown>;
+  const srcKeys = Object.keys(fns).sort();
+  const distKeys = Object.keys(dist).sort();
+  const onlySrc = srcKeys.filter((k) => !(k in dist));
+  const onlyDist = distKeys.filter((k) => !(k in fns));
+  if (onlySrc.length || onlyDist.length) {
+    throw new Error(
+      `dist exports differ from src. Only in src: ${onlySrc.join(', ') || '-'}. ` +
+        `Only in dist: ${onlyDist.join(', ') || '-'}. Run \`bun run build\` in functions.`
+    );
   }
   const jobs = [
     ...allNumberJobs(['NaN', 'Inf', '-Inf']),

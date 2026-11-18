@@ -21,7 +21,10 @@ function describe(v) {
 for (const job of workerData.jobs) {
   parentPort.postMessage({ type: 'start', job });
   const target = m[job.name];
-  const fn = job.sig ? target.signatures[job.sig] : target;
+  const fn = job.sig ? target?.signatures?.[job.sig] : target;
+  if (typeof fn !== 'function') {
+    throw new Error(`dist has no callable ${job.name}${job.sig ? `(${job.sig})` : ''}`);
+  }
   const args = job.args.map((a) =>
     a === 'NaN' ? NaN : a === 'Inf' ? Infinity : a === '-Inf' ? -Infinity : a
   );
