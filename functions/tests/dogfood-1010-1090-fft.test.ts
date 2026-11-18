@@ -374,6 +374,38 @@ describe('review fixes (#1010, #1090)', () => {
         .size()
     ).toEqual([2]);
   });
+  it('F11: an empty matrix has size [0], and map keeps an empty size (mathjs)', () => {
+    expect(A.matrix().size()).toEqual([0]);
+    expect(
+      A.matrix()
+        .map((v: number) => v)
+        .size()
+    ).toEqual([0]);
+    expect(A.abs(A.matrix()).size()).toEqual([0]);
+    expect(A.conj(A.matrix()).size()).toEqual([0]);
+    expect(A.abs(A.zeros(0, 3)).size()).toEqual([0, 3]);
+  });
+  it('F11: forEach and map give one index entry per axis, in row-major order', () => {
+    const seen: Array<[number, number[]]> = [];
+    A.matrix([
+      [1, 2],
+      [3, 4],
+    ]).forEach((v: number, i: number[]) => seen.push([v, [...i]]));
+    expect(seen).toEqual([
+      [1, [0, 0]],
+      [2, [0, 1]],
+      [3, [1, 0]],
+      [4, [1, 1]],
+    ]);
+    const one: number[][] = [];
+    A.matrix([5, 6]).forEach((_v: number, i: number[]) => one.push([...i]));
+    expect(one).toEqual([[0], [1]]);
+    expect(
+      A.matrix([[[1, 2]], [[3, 4]]])
+        .map((v: number, i: number[]) => v * 100 + i[0] * 10 + i[2])
+        .valueOf()
+    ).toEqual([[[100, 201]], [[310, 411]]]);
+  });
   it('fft2d takes typed-array rows and rejects 1-D, 3-D and ragged input', () => {
     expect(nz(A.fft2d([new Float64Array([1, 2]), new Float64Array([3, 4])]))).toEqual({
       real: [

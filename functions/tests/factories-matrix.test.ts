@@ -71,7 +71,8 @@ describe('MathJSDenseMatrix', () => {
   it('creates empty matrix when called with no args', () => {
     const m = new MathJSDenseMatrix();
     expect(m._data).toEqual([]);
-    expect(m._size).toEqual([0, 0]);
+    // One axis of length 0, as in mathjs.
+    expect(m._size).toEqual([0]);
   });
 
   it('storage() returns "dense"', () => {
