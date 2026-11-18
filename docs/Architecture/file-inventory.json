@@ -6967,7 +6967,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 353
+      "loc": 365
     },
     {
       "file": "functions/src/index.ts",
@@ -10544,7 +10544,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 219
+      "loc": 244
     },
     {
       "file": "functions/tests/dogfood-989a-sequences.test.ts",

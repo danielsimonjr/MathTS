@@ -4924,6 +4924,7 @@ graph LR
 | `./typed/distributions.js`    | `normalCDF, normalPDF`         | Import |
 | `./typed/special.js`          | `lgamma`                       | Import |
 | `./typed/number-matrix.js`    | `hasNaN, numberVector`         | Import |
+| `./utils/limits.js`           | `assertLoopOrder`              | Import |
 
 **Exports:**
 
@@ -20646,7 +20647,7 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
-| `functions/src/utils/limits`                           | 0 files      | 42 files   |
+| `functions/src/utils/limits`                           | 0 files      | 43 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21572,7 +21573,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 234027 |
+| Total Lines of Code     | 234039 |
 | Total Exports           | 7347   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
