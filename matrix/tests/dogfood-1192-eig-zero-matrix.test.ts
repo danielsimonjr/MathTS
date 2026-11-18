@@ -19,20 +19,32 @@ const blockDiag = (a: number[][], b: number[][]): number[][] => {
   return m;
 };
 
+// Max |A v - lambda v| over all eigenpairs. Eigenvectors are ROWS:
+// vectors[k] + i*vectorsIm[k] belongs to values[k].
 const residual = (A: number[][], r: ReturnType<typeof eig>): number => {
   const n = A.length;
   let worst = 0;
-  const V = r.vectors;
   for (let k = 0; k < n; k++) {
-    const lam = r.values[k].re;
+    const { re: lr, im: li } = r.values[k];
+    const vr = r.vectors[k];
+    const vi = r.vectorsIm[k];
     for (let i = 0; i < n; i++) {
-      let av = 0;
-      for (let j = 0; j < n; j++) av += A[i][j] * V[j][k];
-      worst = Math.max(worst, Math.abs(av - lam * V[i][k]));
+      let ar = 0;
+      let ai = 0;
+      for (let j = 0; j < n; j++) {
+        ar += A[i][j] * vr[j];
+        ai += A[i][j] * vi[j];
+      }
+      const er = ar - (lr * vr[i] - li * vi[i]);
+      const ei = ai - (lr * vi[i] + li * vr[i]);
+      worst = Math.max(worst, Math.hypot(er, ei));
     }
   }
   return worst;
 };
+
+const allFinite = (r: ReturnType<typeof eig>): boolean =>
+  [...r.vectors, ...r.vectorsIm].every((row) => row.every(Number.isFinite));
 
 const reOf = (v: unknown): number => (typeof v === 'number' ? v : (v as { re: number }).re);
 
@@ -50,7 +62,7 @@ describe('eig of zero matrices (#1192)', () => {
     });
   }
 
-  it('handles zero blocks inside non-zero matrices', () => {
+  it('handles zero blocks, nilpotent and rotation-plus-zero matrices', () => {
     const cases: number[][][] = [
       [
         [0, 0, 0, 0],
@@ -67,6 +79,28 @@ describe('eig of zero matrices (#1192)', () => {
         [0, 0, 1],
         [0, 0, 0],
       ],
+      [
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+        [0, 0, 0, 0],
+      ],
+      [
+        [0, 1, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ],
+      [
+        [0, -1, 0],
+        [1, 0, 0],
+        [0, 0, 0],
+      ],
+      // Sub-diagonal exactly eps * s: deflates under <= (was one more QR sweep under <).
+      [
+        [1, 0, 0],
+        [2 ** -51, 1, 0],
+        [0, 3, 2],
+      ],
       blockDiag(
         [
           [1, 2],
@@ -80,6 +114,8 @@ describe('eig of zero matrices (#1192)', () => {
       expect(r.values).toHaveLength(A.length);
       const trace = A.reduce((t, row, i) => t + row[i], 0);
       expect(r.values.reduce((t: number, v) => t + reOf(v), 0)).toBeCloseTo(trace, 10);
+      expect(allFinite(r)).toBe(true);
+      expect(residual(A, r)).toBeLessThan(1e-12);
     }
   });
 });
