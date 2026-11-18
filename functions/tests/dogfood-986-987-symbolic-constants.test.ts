@@ -80,6 +80,29 @@ describe('#987 expand and simplify keep constants intact', () => {
     for (const x of XS) expect(at(out, x)).toBeCloseTo(at(e, x), 9);
   });
 
+  it('expand keeps a variable whose name looks like a placeholder', () => {
+    const scope = { x: 1.3, __k0__: 0.7, __k_0__: 0.9 };
+    for (const e of ['__k0__*sqrt(2)*(x+1)', '__k_0__*__k0__*sqrt(2)*(x+1)']) {
+      const out = String(expand(e));
+      expect(out).toContain('__k0__');
+      expect(evaluate(out, scope)).toBeCloseTo(evaluate(e, scope) as number, 9);
+    }
+    expect(String(expand('__k0__*sqrt(2)*(x+1)'))).toBe('sqrt(2)*__k0__*x + sqrt(2)*__k0__');
+  });
+
+  it('expand distributes pi and e as constants', () => {
+    expect(String(expand('(pi+x)^2'))).toBe('pi^2 + 2*pi*x + x^2');
+    expect(String(expand('e^2*(x+1)'))).toBe('e^2*x + e^2');
+    sameValues(String(expand('(pi+x)^2')), '(pi+x)^2');
+    sameValues(String(expand('e^2*(x+1)')), 'e^2*(x+1)');
+  });
+
+  it('expand with no variable leaves a call argument and an exponent group whole', () => {
+    for (const e of ['sin(1+2)^2', '2^(1+2)*(3+4)']) {
+      expect(evaluate(String(expand(e)))).toBeCloseTo(evaluate(e) as number, 9);
+    }
+  });
+
   it('simplify of 2^(1/2)*2^(1/2) is 2 to double precision, not a huge ratio', () => {
     const out = String(simplify('2^(1/2)*2^(1/2)'));
     expect(out).not.toContain('/');
