@@ -227,6 +227,7 @@ export {
   FOURTH,
   ABS_CUTOFF_LO,
   UNIT_LO,
+  UNIT_FLOOR_LO,
   pow2ScaleExponent,
   ldexp,
   ldexpMatrix,

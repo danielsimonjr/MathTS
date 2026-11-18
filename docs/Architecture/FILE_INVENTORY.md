@@ -1579,6 +1579,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1117-1119-1120-bignumber.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1122-1124-1129-extreme.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1135-1136-discretelog.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1168-qr-small-matrix.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-688-lusolve-singular.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-926-eigs-defective.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-960-divide-scalar-matrix.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
