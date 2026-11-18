@@ -83,6 +83,36 @@ describe('#1191 eig isSymmetric', () => {
     ).toBe(true);
   });
 
+  it.each([20, 50])('reports a computed Q*D*Q^T (n = %i, D over 8 decades) as symmetric', (n) => {
+    // Q: product of Givens rotations (orthogonal); D: eigenvalues from 1e-4 to 1e4.
+    const Q = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0) as number)
+    );
+    for (let k = 0; k < 3 * n; k++) {
+      const p = k % n;
+      const q = (7 * k + 3) % n;
+      if (p === q) continue;
+      const t = 0.37 * k + 0.11;
+      const c = Math.cos(t);
+      const s = Math.sin(t);
+      for (const row of Q) {
+        const a = row[p];
+        const b = row[q];
+        row[p] = c * a - s * b;
+        row[q] = s * a + c * b;
+      }
+    }
+    const d = Array.from({ length: n }, (_, i) => 10 ** (-4 + (8 * i) / (n - 1)));
+    const A = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => {
+        let sum = 0;
+        for (let k = 0; k < n; k++) sum += Q[i][k] * d[k] * Q[j][k];
+        return sum;
+      })
+    );
+    expect(eig(A).isSymmetric).toBe(true);
+  });
+
   it('keeps the flag consistent across a power-of-2 scaling', () => {
     const A = [
       [1, 1e-12],
