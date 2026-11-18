@@ -237,6 +237,64 @@ const factoryTyped = new Proxy(mathTyped, {
   },
 });
 
+const RADIX_BITS: Record<string, number> = { b: 1, o: 3, x: 4 };
+/** The largest magnitude of the binary exponent `p` in a radix string. */
+const MAX_BINARY_EXPONENT = 100_000;
+
+/**
+ * Parse a BigNumber string. Beyond decimal text it reads the mathjs forms 0b / 0o / 0x, with an
+ * optional fraction part and an optional binary exponent `p` (`0x1p3` is 8). These are exact,
+ * because the radix is a power of 2. It also reads the word-size suffix `0xFFi8` (two's
+ * complement, as mathjs). Departures from mathjs 15.2.0: a sign applies after the word-size
+ * conversion (`-0xFFi8` is 1; mathjs drops the sign and gives -1). The binary exponent must be in
+ * [-MAX_BINARY_EXPONENT, MAX_BINARY_EXPONENT].
+ */
+function parseBigNumberString(text: string): BigNumber {
+  const m =
+    /^([+-]?)0([bBoOxX])([0-9a-fA-F]*)(?:(?:\.([0-9a-fA-F]*))?(?:[pP]([+-]?\d+))?|i(\d+))$/.exec(
+      text
+    );
+  if (!m) return BigNumber.parse(text);
+  const [, sign, radixChar, intDigits, fracDigits = '', expText, size] = m;
+  const radix = radixChar.toLowerCase();
+  const valid = { b: /^[01]*$/, o: /^[0-7]*$/, x: /^[0-9a-f]*$/i }[radix] as RegExp;
+  const binaryExp = expText === undefined ? 0 : Number(expText);
+  if (
+    !valid.test(intDigits) ||
+    !valid.test(fracDigits) ||
+    (intDigits + fracDigits).length === 0 ||
+    Math.abs(binaryExp) > MAX_BINARY_EXPONENT
+  ) {
+    throw new SyntaxError(`BigNumber cannot parse '${text}'`);
+  }
+  const prefix = `0${radix}`;
+  let n = BigInt(prefix + (intDigits + fracDigits || '0'));
+  if (size !== undefined) {
+    // Two's complement in BigInt. 2^size is built only when size <= the bit length of n, so a
+    // huge size such as 0xFFi999999999 costs nothing (n < 2^(size-1) gives n unchanged).
+    const s = Number(size);
+    const bitLength = n === 0n ? 0 : n.toString(2).length;
+    if (s <= bitLength) {
+      const twoPowSize = 1n << BigInt(s);
+      if (n > twoPowSize - 1n) throw new SyntaxError(`String "${text}" is out of range`);
+      if (s > 0 && n >= twoPowSize >> 1n) n -= twoPowSize;
+    }
+    return BigNumber.fromBigInt(sign === '-' ? -n : n).roundToPrecision(BigNumber.precision);
+  }
+  // value = n * 2^(binaryExp - bits * fracDigits) = n * 5^scale / 10^scale for scale >= 0
+  const scale = RADIX_BITS[radix] * fracDigits.length - binaryExp;
+  if (scale < 0) n <<= BigInt(-scale);
+  else n *= 5n ** BigInt(scale);
+  let digits = n.toString();
+  if (scale > 0) {
+    digits = digits.padStart(scale + 1, '0');
+    digits = digits.slice(0, -scale) + '.' + digits.slice(-scale);
+  }
+  // rounded to the configured precision, as mathjs: 0x1p1000 has 302 digits
+  const value = BigNumber.parse(digits).roundToPrecision(BigNumber.precision);
+  return sign === '-' ? value.negate() : value;
+}
+
 /**
  * Convert a value to BigNumber, as mathjs `bignumber` does.
  * An Array or a Matrix converts element by element and keeps its shape and storage.
@@ -244,44 +302,6 @@ const factoryTyped = new Proxy(mathTyped, {
  * A Fraction converts as numerator / denominator at the BigNumber precision.
  * null converts to 0.
  */
-const RADIX_BITS: Record<string, number> = { b: 1, o: 3, x: 4 };
-
-/**
- * Parse a BigNumber string. Beyond decimal text it reads the mathjs forms 0b / 0o / 0x (with an
- * optional fraction part, exact because the radix is a power of 2) and the word-size suffix
- * `0xFFi8` (two's complement, as mathjs).
- */
-function parseBigNumberString(text: string): BigNumber {
-  const m = /^\s*([+-]?)0([box])([0-9a-f]*)(?:\.([0-9a-f]*))?(?:i(\d+))?\s*$/i.exec(text);
-  if (!m) return BigNumber.parse(text);
-  const [, sign, radixChar, intDigits, fracDigits = '', size] = m;
-  const radix = radixChar.toLowerCase();
-  const valid = { b: /^[01]*$/, o: /^[0-7]*$/, x: /^[0-9a-f]*$/i }[radix] as RegExp;
-  if (!valid.test(intDigits) || !valid.test(fracDigits) || (intDigits + fracDigits).length === 0) {
-    throw new SyntaxError(`BigNumber cannot parse '${text}'`);
-  }
-  const bits = RADIX_BITS[radix];
-  const prefix = `0${radix}`;
-  const scale = bits * fracDigits.length;
-  // value = N / 2^scale = N * 5^scale / 10^scale
-  const n = BigInt(prefix + (intDigits + fracDigits || '0')) * 5n ** BigInt(scale);
-  let digits = n.toString();
-  if (scale > 0) {
-    digits = digits.padStart(scale + 1, '0');
-    digits = digits.slice(0, -scale) + '.' + digits.slice(-scale);
-  }
-  let value = BigNumber.parse(digits);
-  if (size !== undefined) {
-    const two = BigNumber.fromNumber(2);
-    const twoPowSize = two.pow(Number(size));
-    if (value.compareTo(twoPowSize.subtract(BigNumber.fromNumber(1))) > 0) {
-      throw new SyntaxError(`String "${text.trim()}" is out of range`);
-    }
-    if (value.compareTo(two.pow(Number(size) - 1)) >= 0) value = value.subtract(twoPowSize);
-  }
-  return sign === '-' ? value.negate() : value;
-}
-
 function toBigNumber(x: unknown): unknown {
   // `isBigNumber` reads the brand, so a BigNumber of a second copy of core keeps its digits.
   if (isBigNumber(x)) return x;
@@ -291,7 +311,7 @@ function toBigNumber(x: unknown): unknown {
   if (typeof x === 'bigint') return BigNumber.fromBigInt(x);
   if (Array.isArray(x)) return x.map(toBigNumber);
   if (isFraction(x)) {
-    return BigNumber.fromBigInt(x.numerator).div(BigNumber.fromBigInt(x.denominator));
+    return BigNumber.fromFraction(x);
   }
   const o = (x ?? {}) as {
     isMatrix?: boolean;
@@ -316,8 +336,16 @@ function toBigNumber(x: unknown): unknown {
   );
 }
 
-/** `bignumber()` with no argument gives 0; `bignumber(undefined)` throws, as in mathjs. */
+/**
+ * `bignumber()` with no argument gives 0; `bignumber(undefined)` and a second argument throw, as in
+ * mathjs. The check is here, not in `toBigNumber`, because `Array.map` calls that with 3 arguments.
+ */
 function bignumberFn(...args: unknown[]): unknown {
+  if (args.length > 1) {
+    throw new TypeError(
+      `Too many arguments in function bignumber (expected: 1, actual: ${args.length})`
+    );
+  }
   return args.length === 0 ? BigNumber.fromNumber(0) : toBigNumber(args[0]);
 }
 

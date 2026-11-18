@@ -351,6 +351,14 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
+   * Create from a fraction as numerator / denominator, rounded to the configured precision
+   * (#1117). The numerator carries the sign; the denominator is positive.
+   */
+  static fromFraction(f: { numerator: bigint; denominator: bigint }): BigNumber {
+    return BigNumber.fromBigInt(f.numerator).divide(BigNumber.fromBigInt(f.denominator));
+  }
+
+  /**
    * Create from bigint
    */
   static fromBigInt(n: bigint): BigNumber {
@@ -2052,7 +2060,7 @@ export class BigNumber implements MathTSValue {
     if (typeof value === 'string') return BigNumber.parse(value);
     if (isFraction(value)) {
       // numerator / denominator at the configured precision, not through a 16-digit number (#1117)
-      return BigNumber.fromBigInt(value.numerator).divide(BigNumber.fromBigInt(value.denominator));
+      return BigNumber.fromFraction(value);
     }
     return BigNumber.fromNumber(Number(value.valueOf()));
   }

@@ -150,3 +150,81 @@ describe('#1120 solveODE RK23 and RK45 with BigNumber input', () => {
     });
   }
 });
+
+describe('#1120 review: a BigNumber state rounds to precision and large states start finite', () => {
+  type Sol = { t: unknown[]; y: unknown[] };
+  const f = (_t: unknown, y: unknown) => unaryMinus(y as never);
+  const solve = (fn: unknown, y0: unknown, options: Record<string, unknown>) =>
+    solveODE(fn as never, [0, 1] as never, y0 as never, options as never) as unknown as Sol;
+  it('RK23 with bignumber(1): every accepted y keeps at most precision + 3 characters', () => {
+    // BigNumber add keeps every digit (#1118); without the rounding y(1) had 10205 characters.
+    const r = solve(f, bn(1), { method: 'RK23' });
+    const precision = BigNumber.config().precision;
+    expect(String(r.y[r.y.length - 1]).length).toBeLessThanOrEqual(precision + 3);
+    expect(String(r.t[r.t.length - 1]).length).toBeLessThanOrEqual(precision + 3);
+  });
+  it('RK23 with bignumber(1e2) finishes with the 177 points of the number path', () => {
+    // Before the rounding this call did not finish in 8 s (107k digits after 271 f calls).
+    const r = solve(f, bn('1e2'), { method: 'RK23' });
+    expect(r.t.length).toBe(177);
+  });
+  for (const method of ['RK23', 'RK45']) {
+    for (const [label, y0] of [
+      ['number', 1e160],
+      ['BigNumber', bn('1e160')],
+    ] as const) {
+      it(`${method}: a ${label} y0 of 1e160 gives a finite first step`, () => {
+        // The squares of the RMS norm overflowed, so h0 was NaN and f was called with t = NaN.
+        const g = (t: unknown, y: unknown) => {
+          if (Number.isNaN(Number(String(t)))) throw new Error('f called with t = NaN');
+          return unaryMinus(y as never);
+        };
+        const r = solve(g, y0, { method, tol: 1e157 });
+        expect(Number(String(r.t[1]))).toBeGreaterThan(0);
+        expect(Number(String(r.t[r.t.length - 1]))).toBe(1);
+      });
+    }
+  }
+});
+
+describe('#1119 review: bignumber() extra arguments and radix strings', () => {
+  const b = bignumber as (...a: unknown[]) => unknown;
+  const s = (x: string) => String(b(x));
+  it('a second argument throws a TypeError, as mathjs', () => {
+    expect(() => b(1, 2)).toThrow(TypeError);
+    expect(() => b(1, 2)).toThrow(
+      'Too many arguments in function bignumber (expected: 1, actual: 2)'
+    );
+  });
+  it('an array still converts element by element', () => {
+    expect((b([1, 2, 3]) as unknown[]).map(String)).toEqual(['1', '2', '3']);
+  });
+  it('a huge word size costs nothing and keeps the value, as mathjs', () => {
+    expect(s('0xFFi999999999')).toBe('255');
+    expect(s('0xFFi1000000')).toBe('255');
+  });
+  it('the binary exponent p reads as in mathjs', () => {
+    expect(s('0x1p3')).toBe('8');
+    expect(s('0x1P3')).toBe('8');
+    expect(s('-0x1p3')).toBe('-8');
+    expect(s('0x1p-2')).toBe('0.25');
+    expect(s('0x1.8p1')).toBe('3');
+    // rounded to the configured precision, as mathjs: at most 64 significant digits
+    expect(s('0x1p1000').replace(/0+$/, '').length).toBeLessThanOrEqual(
+      BigNumber.config().precision
+    );
+    expect(s('0x1p1000').length).toBe(302);
+  });
+  it('a fraction with a word size and surrounding spaces throw, as mathjs', () => {
+    expect(() => b('0x1.8i8')).toThrow(SyntaxError);
+    expect(() => b(' 0x1F ')).toThrow(SyntaxError);
+    expect(() => b('0xFFI8')).toThrow(SyntaxError);
+  });
+  it('departures from mathjs 15.2.0 are pinned', () => {
+    // A sign applies after the word-size conversion; mathjs ignores the sign and gives -1.
+    expect(s('-0xFFi8')).toBe('1');
+    expect(s('-0x80i8')).toBe('128');
+    // The binary exponent is bounded; mathjs reads any exponent.
+    expect(() => b('0x1p100001')).toThrow(SyntaxError);
+  });
+});
