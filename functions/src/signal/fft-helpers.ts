@@ -10,6 +10,7 @@
 import { fft, ifft, complex } from '../factories/index.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { isMatrix } from '../utils/is.js';
+import { arraySize, validate } from '../utils/array.js';
 import { fftshift as fftshiftGeneric, ifftshift as ifftshiftGeneric } from './fft.js';
 
 /** Minimal complex shape used to normalize typed-function outputs (number or Complex). */
@@ -78,9 +79,13 @@ function rfftNd(x: unknown[]): { re: unknown[]; im: unknown[] } {
  * @returns `{ re, im }`, with the last axis of length `floor(n/2)+1`
  */
 export function rfft(x: number[]): { re: number[]; im: number[] };
-export function rfft(x: number[][] | unknown): { re: number[][]; im: number[][] };
-export function rfft(x: unknown): { re: unknown[]; im: unknown[] } {
-  return rfftNd(unwrapInput('rfft', x));
+export function rfft(x: number[][]): { re: number[][]; im: number[][] };
+export function rfft(x: unknown): { re: unknown; im: unknown };
+export function rfft(x: unknown): { re: unknown; im: unknown } {
+  const data = unwrapInput('rfft', x);
+  // `arraySize` reads the first row only, so `validate` rejects a ragged array, as `fft` does.
+  validate(data, arraySize(data));
+  return rfftNd(data);
 }
 
 /**
@@ -88,17 +93,20 @@ export function rfft(x: unknown): { re: unknown[]; im: unknown[] } {
  * from the non-redundant half produced by {@link rfft} (bins `n/2+1..n-1` are the
  * conjugates of bins `n/2-1..1`), inverse-FFT it, and return the real parts.
  *
- * @param spec `{ re, im }` half-spectrum (bins `0..floor(n/2)`)
+ * @param spec `{ re, im }` half-spectrum (bins `0..floor(n/2)`); each part is an array, a
+ *   typed array or a Matrix
  * @param n Length of the reconstructed real signal
  * @returns Real-valued signal of length `n`
  */
-export function irfft(spec: { re: number[]; im: number[] }, n: number): number[] {
+export function irfft(spec: { re: unknown; im: unknown }, n: number): number[] {
   // A length-0 signal has no samples. floor(0/2)+1 would build one NaN bin (#988).
   if (n === 0) return [];
+  const re = unwrapInput('irfft', spec.re) as number[];
+  const im = unwrapInput('irfft', spec.im) as number[];
   const halfLen = Math.floor(n / 2) + 1;
   const full: unknown[] = new Array(n);
   for (let i = 0; i < halfLen; i++) {
-    full[i] = complex(spec.re[i], spec.im[i]);
+    full[i] = complex(re[i], im[i]);
   }
   for (let i = halfLen; i < n; i++) {
     const mirror = toReIm(full[n - i]);
