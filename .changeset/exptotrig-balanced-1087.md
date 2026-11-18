@@ -2,7 +2,14 @@
 '@danielsimonjr/mathts-functions': patch
 ---
 
-`expToTrig` keeps the value of its input (#1087). It pairs the parentheses, so a nested argument is no longer cut at the first `)`, and it adds parentheses around the angle. `expToTrig('exp(i*(x+1))')` now returns `(cos((x+1)) + i*sin((x+1)))`; it returned `(cos((x+1) + i*sin((x+1)))` before (the angle `(x+1` lost its parenthesis, so `cos` closed early). A call is rewritten when its argument is a product with a factor `i` or `-i`, so `exp(x*i)`, `exp(2*i*x)` and `exp(x*-i*y)` are also rewritten. A call stays as written when its exponent is a sum (`exp(i*x+1)`), has an operator other than `*`, `/`, `^`, `!` and `'` (`exp(i*x?1:2)`), or does not balance.
+`expToTrig` keeps the value of its input (#1087). It pairs the parentheses, so a nested argument is no longer cut at the first `)`, and it adds parentheses around the angle. `expToTrig('exp(i*(x+1))')` now returns `(cos((x+1)) + i*sin((x+1)))`; it returned `(cos((x+1) + i*sin((x+1)))` before (the angle `(x+1` lost its parenthesis, so `cos` closed early). A call is rewritten when its argument is a product with a factor `i` or `-i`, so `exp(x*i)`, `exp(2*i*x)` and `exp(x*-i*y)` are also rewritten. A factor can be an implicit product, so `exp(i*2 x)` gives `(cos((2 x)) + i*sin((2 x)))`. A call stays as written when its exponent is a sum (`exp(i*x+1)`), has an operator other than `*`, `/`, `^`, `!` and `'` (`exp(i*x?1:2)`), or does not balance.
+
+`expToTrig` rewrote these calls before and now leaves them as written:
+
+- A call with a second argument (`exp(i*x, y)`). `exp` uses only its first argument, so the old output had the same value.
+- An exponent with a word operator (`exp(i*x mod 2)`). The exponent is `(i*x) mod 2`, and the old output used `x mod 2` as the angle.
+- An exponent with a matrix or a string as a factor (`exp(i*[1, 2])`, `exp(i*"a")`). The result is `NaN` before and after a rewrite, so no value is lost.
+- An expression where a `%` comes directly before a `'` (`3%'a'`). The scanner cannot tell a transpose from a string there, so the whole expression stays as written.
 
 `trigToExp` and `expToTrig` share one internal scanner, `functions/src/typed/call-rewrite.ts`. The scanner pairs the brackets in one pass, so a deep nest of calls that stay as written takes linear time. In both functions these calls now stay as written, because the output did not parse or changed value before:
 

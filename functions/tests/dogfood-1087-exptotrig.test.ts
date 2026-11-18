@@ -67,6 +67,12 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
     'exp(index*i)',
     'exp(i*x?1:2)',
     'exp(i*x y)',
+    'exp(i*2 x)',
+    'exp(2 x*i)',
+    'exp(i*1/2 x)',
+    'exp(i*x/2 y*x)',
+    'exp(i*2 x^2 y)',
+    'exp(x y*-i*2)',
     'x exp(i*y)',
     '2 exp(i*y)',
     '(x) exp(i*y)',
@@ -109,7 +115,8 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
       'exp(i*x mod 2)',
       'exp(i*x==y)',
       'exp(i*x.*y)',
-      'exp(i*x y)',
+      'exp(i*x to y)',
+      'exp(i*not x)',
       'exp(i*x1e-3)',
       'x exp(i*y)',
       'x[1] exp(i*y)',
@@ -136,6 +143,13 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
       // `2.*x` reads as `2 .* x`, so the factor `2.` keeps a space.
       'exp(i*2. * x)': '(cos((2. *x)) + i*sin((2. *x)))',
       'exp(ix*-i)': '(cos(ix) - i*sin(ix))',
+      // An implicit product binds tighter than `*`, so it stays in its factor.
+      'exp(i*2 x)': '(cos((2 x)) + i*sin((2 x)))',
+      'exp(x y*-i)': '(cos((x y)) - i*sin((x y)))',
+      'exp(i*1/2 x*y)': '(cos((1/2 x*y)) + i*sin((1/2 x*y)))',
+      // A comma in the argument list of a call in the exponent is not a second argument of exp.
+      'exp(i*atan2(y, x))': '(cos((atan2(y, x))) + i*sin((atan2(y, x))))',
+      'exp(i*2 f(x, y))': '(cos((2 f(x, y))) + i*sin((2 f(x, y))))',
       'exp(i*exp(i*x))': '(cos((cos(x) + i*sin(x))) + i*sin((cos(x) + i*sin(x))))',
       'exp(x+exp(i*y))': 'exp(x+(cos(y) + i*sin(y)))',
       'x exp(i*exp(i*y))': 'x exp(i*(cos(y) + i*sin(y)))',
@@ -368,7 +382,22 @@ describe('call-rewrite helpers (#1087)', () => {
     expect(topLevelFactors('2 * i*(x+1)')).toEqual(['2', 'i', '(x+1)']);
     expect(topLevelFactors('-i*x^-2/3')).toEqual(['-i', 'x^-2/3']);
     expect(topLevelFactors('1e-3*sin(x, y)')).toEqual(['1e-3', 'sin(x, y)']);
-    const refused = ['', 'x+1', 'x - 1', 'x,y', 'x y', 'x*', '*x', 'x%2', 'x.*y', '(x', 'x1e-3'];
+    expect(topLevelFactors('i*2 x')).toEqual(['i', '2 x']);
+    expect(topLevelFactors('x y*i*1/2 z')).toEqual(['x y', 'i', '1/2 z']);
+    const refused = [
+      '',
+      'x+1',
+      'x - 1',
+      'x,y',
+      'x mod y',
+      'not x',
+      'x*',
+      '*x',
+      'x%2',
+      'x.*y',
+      '(x',
+    ];
+    refused.push('x1e-3', '2 in x', 'x to y');
     for (const text of refused) {
       expect(topLevelFactors(text), text).toBeUndefined();
     }
