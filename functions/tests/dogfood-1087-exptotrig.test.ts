@@ -1,7 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { evaluate } from '@danielsimonjr/mathts-expression';
 import { expToTrig, trigToExp } from '../src/typed/algebra.js';
 import { topLevelFactors, isParenthesised } from '../src/typed/call-rewrite.js';
+
+// Count the scans of rewriteCalls, so the nesting test does not depend on the wall clock.
+const scans = vi.hoisted(() => ({ count: 0 }));
+vi.mock('../src/typed/call-rewrite.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/typed/call-rewrite.js')>();
+  return {
+    ...actual,
+    rewriteCalls: (...args: Parameters<typeof actual.rewriteCalls>) => {
+      scans.count++;
+      return actual.rewriteCalls(...args);
+    },
+  };
+});
 
 function parts(value: unknown): { re: number; im: number } {
   if (typeof value === 'number') return { re: value, im: 0 };
@@ -127,12 +140,12 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
   });
 
   it('scans a nested call that is not rewritten one time', () => {
-    // When each level is scanned two times, depth 20 takes about 3 s.
+    // When each level is scanned again, depth 20 makes 2^20 scans.
     let input = 'x';
     for (let depth = 0; depth < 20; depth++) input = `exp(x+${input})`;
-    const start = performance.now();
+    scans.count = 0;
     expect(expToTrig(input)).toBe(input);
-    expect(performance.now() - start).toBeLessThan(1000);
+    expect(scans.count).toBe(1);
   });
 });
 
