@@ -329,6 +329,51 @@ describe('review fixes (#1010, #1090)', () => {
     expect(r.valueOf()).toEqual([1, 2]);
     expect(A.conj(A.matrix([A.complex(1, 2)])).valueOf()[0].im).toBe(-2);
   });
+  it('F11: a Matrix of 3 or more axes has one size entry per axis (mathjs)', () => {
+    const data = () => [
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ];
+    const m = A.matrix(data());
+    expect(m.size()).toEqual([2, 2, 2]);
+    expect(A.matrix([[[]], [[]]]).size()).toEqual([2, 1, 0]);
+    expect(A.matrix([[[[1]]]]).size()).toEqual([1, 1, 1, 1]);
+    // Every method walks every axis: a value is a number, not an inner row.
+    expect(m.get([1, 0, 1])).toBe(6);
+    const seen: unknown[] = [];
+    m.forEach((v: unknown, index: number[]) => seen.push([v, index]));
+    expect(seen).toHaveLength(8);
+    expect(seen[5]).toEqual([6, [1, 0, 1]]);
+    const doubled = m.map((v: number) => v * 2);
+    expect(doubled.size()).toEqual([2, 2, 2]);
+    expect(doubled.valueOf()[1][0][1]).toBe(12);
+    const copy = m.clone();
+    copy.set([1, 0, 1], 60);
+    expect(copy.get([1, 0, 1])).toBe(60);
+    expect(m.get([1, 0, 1])).toBe(6);
+    const arr = m.toArray();
+    arr[0][0][0] = 99;
+    expect(m.get([0, 0, 0])).toBe(1);
+    expect(A.dotDivide(A.matrix(data()), 2).valueOf()[1][1]).toEqual([3.5, 4]);
+  });
+  it('F11: map keeps the size when the callback returns an array (mathjs)', () => {
+    expect(
+      A.matrix([[1, 2]])
+        .map((v: number) => [v, v])
+        .size()
+    ).toEqual([1, 2]);
+    expect(
+      A.matrix([1, 2])
+        .map((v: number) => [v, v])
+        .size()
+    ).toEqual([2]);
+  });
   it('F7: rfft of a Matrix or a Float64Array types as unknown, not number[][]', () => {
     const fromMatrix: unknown = F.rfft(F.matrix([1, 2, 3, 4])).re;
     const fromTyped: unknown = F.rfft(new Float64Array([1, 2, 3, 4])).re;

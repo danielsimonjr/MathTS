@@ -161,12 +161,9 @@ export class MathJSDenseMatrix {
   }
 
   toArray(): number[][] | number[] {
-    // 1-D matrices (e.g. cbrt(x, true) returning the 3 cube roots) store a
-    // flat _data array; spreading each element would throw "not iterable".
-    if (this._size.length === 1) {
-      return [...(this._data as unknown as number[])];
-    }
-    return this._data.map((row) => [...row]);
+    // A copy of every axis: a 1-D matrix (e.g. cbrt(x, true) returning the 3 cube roots)
+    // stores a flat _data array, and a 3-D matrix has one more level than its rows.
+    return copyAxes(this._data, this._size.length) as number[][] | number[];
   }
 
   toJSON(): { mathjs: string; data: number[][]; size: number[] } {
@@ -218,21 +215,15 @@ export class MathJSDenseMatrix {
     callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => number
   ): MathJSDenseMatrix {
     const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
-    if (this._size.length === 1) {
-      const flat = (this._data as unknown as number[]).map(
-        (val, i) => cb(val, [i], this) as number
-      );
-      // Keep the 1-D layout: constructing from the flat array would let
-      // inferSize re-shape it as an n×1 column (nested rows), which breaks
-      // toArray()/valueOf() for vectors.
-      const m = new MathJSDenseMatrix({
-        data: flat as unknown as number[][],
-        size: [...this._size],
-      });
-      return m;
-    }
-    const result = this._data.map((row, i) => row.map((val, j) => cb(val, [i, j], this) as number));
-    return new MathJSDenseMatrix(result);
+    // The result keeps the size of this matrix, as in mathjs. Inferring the size from the
+    // result would add an axis when the callback returns an array, and would re-shape a
+    // vector of arrays as a matrix.
+    return new MathJSDenseMatrix({
+      data: walkAxes(this._data, this._size.length, [], (val, index) =>
+        cb(val, index, this)
+      ) as number[][],
+      size: [...this._size],
+    });
   }
 
   /**
@@ -240,13 +231,7 @@ export class MathJSDenseMatrix {
    */
   forEach(callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => void): void {
     const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
-    if (this._size.length === 1) {
-      (this._data as unknown as number[]).forEach((val, i) => cb(val, [i], this));
-      return;
-    }
-    this._data.forEach((row, i) => {
-      row.forEach((val, j) => cb(val, [i, j], this));
-    });
+    walkAxes(this._data, this._size.length, [], (val, index) => cb(val, index, this));
   }
 
   /**
@@ -261,6 +246,12 @@ export class MathJSDenseMatrix {
    * fall back to Array conversion (core calls `matrix.get(i, j)`).
    */
   get(indexOrRow: number[] | number, col?: number): number {
+    if (Array.isArray(indexOrRow) && this._size.length > 2) {
+      // One index per axis.
+      let level: unknown = this._data;
+      for (const i of indexOrRow) level = (level as unknown[])[i];
+      return level as number;
+    }
     const row = Array.isArray(indexOrRow) ? indexOrRow[0] : indexOrRow;
     if (this._size.length === 1) {
       return this._data[row] as unknown as number;
@@ -275,8 +266,13 @@ export class MathJSDenseMatrix {
   set(index: number[], value: number, _defaultValue?: number): MathJSDenseMatrix {
     if (this._size.length === 1) {
       (this._data as unknown as number[])[index[0]] = value;
-    } else {
+    } else if (this._size.length === 2) {
       this._data[index[0]][index[1]] = value;
+    } else {
+      // One index per axis.
+      let level: unknown[] = this._data;
+      for (let k = 0; k < index.length - 1; k++) level = level[index[k]] as unknown[];
+      level[index[index.length - 1]] = value;
     }
     return this;
   }
@@ -352,10 +348,7 @@ export class MathJSDenseMatrix {
    * Deep clone.
    */
   clone(): MathJSDenseMatrix {
-    const copy =
-      this._size.length === 1
-        ? [...(this._data as unknown as number[])]
-        : this._data.map((row) => [...row]);
+    const copy = copyAxes(this._data, this._size.length);
     const m = new MathJSDenseMatrix(copy as unknown as number[][]);
     m._size = [...this._size];
     m._datatype = this._datatype;
@@ -1208,6 +1201,33 @@ export function createMatrixBridge() {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * A copy of nested data that has `axes` axes. The values are not copied. A level that is
+ * not an array (ragged data) is kept as a value.
+ */
+function copyAxes(data: unknown, axes: number): unknown {
+  if (!Array.isArray(data)) return data;
+  return axes <= 1 ? [...data] : data.map((sub) => copyAxes(sub, axes - 1));
+}
+
+/**
+ * Call `fn(value, index)` for every value of nested data that has `axes` axes, in row-major
+ * order, and return the results in the same nested shape. `index` has one entry per axis.
+ * A level that is not an array (ragged data) is passed to `fn` as a value.
+ */
+function walkAxes(
+  data: unknown[],
+  axes: number,
+  index: number[],
+  fn: (value: unknown, index: number[]) => unknown
+): unknown[] {
+  return data.map((sub, i) =>
+    axes > 1 && Array.isArray(sub)
+      ? walkAxes(sub, axes - 1, [...index, i], fn)
+      : fn(sub, [...index, i])
+  );
+}
 
 /** The size of a nested array, one entry per axis. */
 function inferSize(data: unknown[]): number[] {
