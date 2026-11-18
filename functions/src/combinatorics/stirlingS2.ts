@@ -99,11 +99,44 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
      * @param {Number | BigNumber} k    Number of objects in the subset
      * @return {Number | BigNumber}     S(n,k)
      */
+    /**
+     * BigNumber add and multiply round to the precision (#1118). The table runs with enough digits
+     * to be exact (S(n, k) <= k^n), so the cache holds exact values for every precision. The result
+     * rounds to the precision of the call.
+     */
+    function exactBig(nn: number, nk: number, compute: () => NumericValue): NumericValue {
+      const C = bignumber!(1).constructor as unknown as {
+        precision: number;
+        config(options: { precision: number }): unknown;
+      };
+      const precision = C.precision;
+      const digits = Math.ceil(nn * Math.log10(Math.max(nk, 2))) + 10;
+      C.config({ precision: Math.max(precision, digits) });
+      let value: NumericValue;
+      try {
+        value = compute();
+      } finally {
+        C.config({ precision });
+      }
+      return (value as BigNumberType).toSignificantDigits(precision) as unknown as NumericValue;
+    }
+
     return typed(name, {
       'number | BigNumber, number | BigNumber': function (
         n: NumericValue,
         k: NumericValue
       ): NumericValue {
+        if (!(isNumber(n) && isNumber(k)) && isInteger(n) && isInteger(k)) {
+          if (!isNegative(n) && !isNegative(k) && !larger(k, n)) {
+            return exactBig(number(n), number(k), () => table(n, k));
+          }
+        }
+        return table(n, k);
+      },
+    });
+
+    function table(n: NumericValue, k: NumericValue): NumericValue {
+      {
         if (!isInteger(n) || isNegative(n) || !isInteger(k) || isNegative(k)) {
           throw new TypeError('Non-negative integer value expected in function stirlingS2');
         } else if (larger(k, n)) {
@@ -154,7 +187,7 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
           }
         }
         return cache[nn][nk];
-      },
-    });
+      }
+    }
   }
 );
