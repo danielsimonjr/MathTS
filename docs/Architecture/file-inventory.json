@@ -14247,7 +14247,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 367
+      "loc": 389
     },
     {
       "file": "matrix/src/operations/eig-wasm.ts",
@@ -14786,7 +14786,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 136
+      "loc": 211
     },
     {
       "file": "matrix/tests/issue-926-eig-defective.test.ts",
