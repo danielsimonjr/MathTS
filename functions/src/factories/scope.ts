@@ -243,11 +243,13 @@ const MAX_BINARY_EXPONENT = 100_000;
 
 /**
  * Parse a BigNumber string. Beyond decimal text it reads the mathjs forms 0b / 0o / 0x, with an
- * optional fraction part and an optional binary exponent `p` (`0x1p3` is 8). These are exact,
- * because the radix is a power of 2. It also reads the word-size suffix `0xFFi8` (two's
- * complement, as mathjs). Departures from mathjs 15.2.0: a sign applies after the word-size
- * conversion (`-0xFFi8` is 1; mathjs drops the sign and gives -1). The binary exponent must be in
- * [-MAX_BINARY_EXPONENT, MAX_BINARY_EXPONENT].
+ * optional fraction part and an optional binary exponent `p` (`0x1p3` is 8). The conversion is
+ * exact, because the radix is a power of 2; the result then rounds to the configured precision.
+ * It also reads the word-size suffix `0xFFi8` (two's complement, as mathjs). Departures from
+ * mathjs 15.2.0: a sign applies after the word-size conversion (`-0xFFi8` is 1; mathjs drops the
+ * sign and gives -1). The binary exponent must be in [-MAX_BINARY_EXPONENT, MAX_BINARY_EXPONENT].
+ * The result rounds to the precision (mathjs keeps every digit of a radix string, and 20 digits
+ * when the string has a binary exponent). `0x1i8p3` and `0xFFi8.0` throw (mathjs reads them).
  */
 function parseBigNumberString(text: string): BigNumber {
   const m =
@@ -290,7 +292,7 @@ function parseBigNumberString(text: string): BigNumber {
     digits = digits.padStart(scale + 1, '0');
     digits = digits.slice(0, -scale) + '.' + digits.slice(-scale);
   }
-  // rounded to the configured precision, as mathjs: 0x1p1000 has 302 digits
+  // rounded to the configured precision: 0x1p1000 has 302 digits, and 64 are significant
   const value = BigNumber.parse(digits).roundToPrecision(BigNumber.precision);
   return sign === '-' ? value.negate() : value;
 }
@@ -320,6 +322,11 @@ function toBigNumber(x: unknown): unknown {
     clone(): { value: unknown };
     value: unknown;
     valueOf(): unknown;
+    isBigNumber?: boolean;
+    isFraction?: boolean;
+    s?: unknown;
+    n?: unknown;
+    d?: unknown;
   };
   if (o.isMatrix === true) return o.map(toBigNumber);
   if (o.isUnit === true) {
@@ -328,6 +335,16 @@ function toBigNumber(x: unknown): unknown {
     return u;
   }
   if (typeof x === 'boolean') return BigNumber.fromNumber(x ? 1 : 0);
+  // A BigNumber or a Fraction of another library (decimal.js, fraction.js, mathjs) has the
+  // marker but not the brand of core. The decimal text keeps every digit of the BigNumber.
+  if (o.isBigNumber === true) return BigNumber.parse(String(x));
+  if (o.isFraction === true) {
+    const { s: sign, n, d } = o;
+    if (typeof n === 'bigint' && typeof d === 'bigint') {
+      return BigNumber.fromFraction({ numerator: (sign as bigint) < 0n ? -n : n, denominator: d });
+    }
+    return BigNumber.fromNumber(Number(o.valueOf()));
+  }
   // As mathjs: Complex, a plain object and undefined have no BigNumber form.
   throw new TypeError(
     `Unexpected type of argument in function bignumber (expected: number or string or BigNumber or bigint or Fraction or Unit or null or boolean or Array or Matrix, actual: ${
@@ -337,10 +354,30 @@ function toBigNumber(x: unknown): unknown {
 }
 
 /**
+ * True when the arguments have the shape that a collection gives to its callback:
+ * `(value, index, collection)`. The index is a number (`Array.prototype.map`) or an array of
+ * numbers (`map`, `forEach`, `filter` and the `map` method of a Matrix).
+ */
+function isCollectionCallbackCall(args: unknown[]): boolean {
+  if (args.length !== 3) return false;
+  const [, index, collection] = args;
+  const indexOk =
+    typeof index === 'number' ||
+    (Array.isArray(index) && index.every((i) => typeof i === 'number'));
+  return (
+    indexOk &&
+    (Array.isArray(collection) || (collection as { isMatrix?: boolean } | null)?.isMatrix === true)
+  );
+}
+
+/**
  * `bignumber()` with no argument gives 0; `bignumber(undefined)` and a second argument throw, as in
- * mathjs. The check is here, not in `toBigNumber`, because `Array.map` calls that with 3 arguments.
+ * mathjs. One exception keeps `bignumber` usable as a callback: the call shape
+ * `(value, index, collection)` converts the value, so `map(x, bignumber)`, `forEach`, `filter`,
+ * `matrix.map(bignumber)` and `[1, 2].map(bignumber)` work (mathjs throws for the last one only).
  */
 function bignumberFn(...args: unknown[]): unknown {
+  if (isCollectionCallbackCall(args)) return toBigNumber(args[0]);
   if (args.length > 1) {
     throw new TypeError(
       `Too many arguments in function bignumber (expected: 1, actual: ${args.length})`
