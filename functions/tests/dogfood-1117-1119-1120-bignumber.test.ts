@@ -253,7 +253,7 @@ describe('#1119 review: bignumber() extra arguments and radix strings', () => {
     const strs = (v: unknown) =>
       ((v as { toArray?: () => unknown[] }).toArray?.() ?? (v as unknown[])).flat().map(String);
     const isBig = (v: unknown) => v instanceof BigNumber;
-    const fromMap = map([1, 2] as never, bignumber as never) as unknown[];
+    const fromMap = map([1, 2] as never, bignumber as never) as unknown as unknown[];
     expect(fromMap.every(isBig)).toBe(true);
     expect(strs(fromMap)).toEqual(['1', '2']);
     expect(strs(map(matrix([1, 2]) as never, bignumber as never))).toEqual(['1', '2']);
