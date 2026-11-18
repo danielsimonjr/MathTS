@@ -192,12 +192,16 @@ function isStrictlyUpperTriangular(T: number[][]): boolean {
  *
  * Returns null if the matrix cannot be handled by the Schur-triangular path.
  */
-function logmSchur(A: number[][], tol: number): number[][] | null {
+function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boolean } | null {
   const { H: T, Q } = schurInternal(A);
 
   // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
   // require a more involved 2×2 block log (deferred; eig path throws instead).
   if (!isStrictlyUpperTriangular(T)) return null;
+  // A subdiagonal entry above an absolute 1e-12 that passed the relative test is residue
+  // of the Schur form of a large matrix.
+  let residue = false;
+  for (let i = 1; i < T.length; i++) if (Math.abs(T[i][i - 1]) > 1e-12) residue = true;
 
   // Check that all diagonal entries are strictly positive
   // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
@@ -244,7 +248,19 @@ function logmSchur(A: number[][], tol: number): number[][] | null {
 
   // Rotate: logm(A) = Q * logm(T) * Q^T
   const Qt = transpose(Q);
-  return matMul(matMul(Q, logT), Qt);
+  return { logm: matMul(matMul(Q, logT), Qt), residue };
+}
+
+/** The largest entry of `X - Y`, divided by the largest entry of `Y`. */
+function relativeDifference(X: number[][], Y: number[][]): number {
+  let d = 0;
+  let m = 0;
+  for (let i = 0; i < Y.length; i++)
+    for (let j = 0; j < Y.length; j++) {
+      d = Math.max(d, Math.abs(X[i][j] - Y[i][j]));
+      m = Math.max(m, Math.abs(Y[i][j]));
+    }
+  return m > 0 ? d / m : d;
 }
 
 // ---------------------------------------------------------------------------
@@ -404,9 +420,25 @@ function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
   // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
   // Falls through (returns null) for complex-eigenvalue Schur blocks.
-  const schurResult = logmSchur(Aarr, tol);
-  if (schurResult !== null) return schurResult;
+  const schur = logmSchur(Aarr, tol);
+  if (schur !== null) {
+    if (!schur.residue) return schur.logm;
+    // For a matrix with Schur residue, the Newton path is more accurate (about 1e-16
+    // against 1e-14) when it converges, and it can be wrong by 1e11 when it does not
+    // (#1125). Its result is kept only when it agrees with the Schur result to 1e-8.
+    let newton: number[][] | null = null;
+    try {
+      newton = logmNewton(Aarr, tol);
+    } catch {
+      newton = null;
+    }
+    return newton !== null && relativeDifference(newton, schur.logm) < 1e-8 ? newton : schur.logm;
+  }
+  return logmNewton(Aarr, tol);
+}
 
+/** The eigenvalue check and the Newton inverse-scaling path of `logmKernel`. */
+function logmNewton(Aarr: number[][], tol: number): number[][] {
   // ----- Eig-based fallback -----
   // Validates eigenvalues (throws for non-positive or complex) and uses
   // V * diag(log λ) * V^{-1} for diagonalisable matrices.

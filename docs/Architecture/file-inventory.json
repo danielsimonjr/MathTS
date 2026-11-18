@@ -14275,7 +14275,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 447
+      "loc": 479
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
@@ -14639,7 +14639,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 532
+      "loc": 553
     },
     {
       "file": "matrix/tests/dogfood-a1-svd-negative-lead.test.ts",
