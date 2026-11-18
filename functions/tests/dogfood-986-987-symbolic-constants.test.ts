@@ -115,4 +115,44 @@ describe('#987 expand and simplify keep constants intact', () => {
     expect(out).not.toContain('/');
     expect(Number(out)).toBeCloseTo(2, 12);
   });
+
+  it('simplify keeps an exact fraction when a number is above fractionsLimit, as mathjs does', () => {
+    expect(String(simplify('1/3 + 100', {}, { fractionsLimit: 50 }))).toBe('301 / 3');
+    expect(String(simplify('x/3*200', {}, { fractionsLimit: 50 }))).toBe('x * 200 / 3');
+    expect(String(simplify('1/3*100000', {}, { fractionsLimit: 1000 }))).toBe('1e+5 / 3');
+  });
+
+  it('simplify folds a matrix of fractions times an irrational constant to decimals', () => {
+    expect(String(simplify('[1/3,2]*sqrt(2)'))).toBe('[0.4714045207910317, 2.8284271247461903]');
+    expect(String(simplify('[1/3,2]*3'))).toBe('[1, 6]');
+  });
+
+  it('expand keeps the whitespace that separates two tokens of a constant call', () => {
+    const scope = { x: 1.3 };
+    const input = 'sqrt(2 e -3)*(x+1)';
+    const out = String(expand(input));
+    expect(out).toBe('sqrt(2 e -3)*x + sqrt(2 e -3)');
+    expect(evaluate(out, scope)).toBeCloseTo(evaluate(input, scope) as number, 9);
+    // `2 e -3` is 2*e - 3 and `2e-3` is 0.002: two constants, not one.
+    const two = 'sqrt(2 e -3)*x + sqrt(2e-3)*x';
+    expect(String(expand(two))).toBe('sqrt(2 e -3)*x + sqrt(2e-3)*x');
+    expect(String(expand('log(2, 10)*(x+1) + log( 2,10 )'))).toBe('log(2,10)*x + 2*log(2,10)');
+  });
+
+  it('expand leaves a call that holds a string as written', () => {
+    const input = 'sqrt("4  ")*(x+1)';
+    expect(String(expand(input))).toBe(input);
+  });
+
+  it('expand throws the degree error only for a polynomial in the variables', () => {
+    for (const e of [
+      '(pi+x)^1001',
+      'pi*(x+1)^1001',
+      'sqrt(2)*(x+1)^1001',
+      '(pi*x)^600*(pi*x)^600',
+    ]) {
+      expect(String(expand(e))).toBe(e);
+    }
+    expect(() => expand('(x+1)^1001')).toThrow(/degree above 1000/);
+  });
 });

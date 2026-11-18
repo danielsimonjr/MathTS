@@ -869,9 +869,14 @@ function abstractConstantCalls(expr: string): {
         if (expr[close] === '(') depth++;
         else if (expr[close] === ')' && --depth === 0) break;
       }
-      // Whitespace carries no meaning in a call, so `sqrt(2)` and `sqrt( 2)` are one atom.
-      const call = expr.slice(i, close + 1).replace(/\s+/g, '');
-      if (close < expr.length && variables(call).length === 0) {
+      // Whitespace next to "(", ")" or "," separates no tokens, so `sqrt(2)` and `sqrt( 2)` are
+      // one atom. Other whitespace can separate two tokens (`2 e -3` is not `2e-3`), so one
+      // space stays there. A quote can open a string, where each space has meaning.
+      const call = expr
+        .slice(i, close + 1)
+        .replace(/\s+/g, ' ')
+        .replace(/ ?([(),]) ?/g, '$1');
+      if (close < expr.length && !/["']/.test(call) && variables(call).length === 0) {
         text += place(call);
         i = close + 1;
         continue;
@@ -899,9 +904,16 @@ function abstractConstantCalls(expr: string): {
  * `expand('(x+y)^2')` → `'x^2 + 2*x*y + y^2'`;
  * `expand('(x+y)*(x-y)')` → `'x^2 - y^2'` (the `x*y` terms cancel).
  *
- * Everything else (function calls like `sin`, non-integer exponents, division
- * by a variable) falls back to the original regex-based distributor below,
- * which does NOT collect like terms.
+ * A constant counts as one more variable of the polynomial: `pi`, `e`, and a call to a
+ * mathematical function that contains no variable (`sqrt(2)`, `exp(1)`, `log(2, 10)`). The
+ * constant is kept as text and sorts before the variables:
+ * `expand('sqrt(2)*(x+1)')` → `'sqrt(2)*x + sqrt(2)'`;
+ * `expand('(pi+x)^2')` → `'pi^2 + 2*pi*x + x^2'`.
+ * Each constant adds to the size of the result as a variable does.
+ *
+ * Everything else (a function call that contains a variable, such as `sin(x)`, non-integer
+ * exponents, division by a variable or by a constant call) falls back to the original
+ * regex-based distributor below, which does NOT collect like terms.
  *
  * @param expr - Expression string
  * @returns Expanded expression string
@@ -920,9 +932,18 @@ export function expand(expr: string): string {
       // A constant call such as sqrt(2) or exp(1) is one opaque factor: expand it as an extra
       // variable that sorts first, then write the call back.
       const { text, atoms, placeholder } = abstractConstantCalls(expr);
-      const names = [...atoms.keys(), ...vars];
-      const out = idealPolyToString(polyFromExpression(text, names), names);
-      return out.replace(placeholder, (name) => atoms.get(name) ?? name);
+      if (atoms.size > 0) {
+        try {
+          const names = [...atoms.keys(), ...vars];
+          const out = idealPolyToString(polyFromExpression(text, names), names);
+          return out.replace(placeholder, (name) => atoms.get(name) ?? name);
+        } catch (error) {
+          if (!(error instanceof PolynomialDegreeError)) throw error;
+          // Above the degree limit with the constants as factors: read the text without them
+          // below, so the degree error is thrown only for a polynomial in the variables.
+        }
+      }
+      return idealPolyToString(polyFromExpression(expr, vars), vars);
     } catch (error) {
       // A polynomial above the degree limit has no fallback: say so, as the CAS reader does.
       if (error instanceof PolynomialDegreeError) {
