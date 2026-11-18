@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isFraction } from '../../utils/is.js';
@@ -69,8 +70,6 @@ interface Dependencies {
   matrix: MatrixConstructor;
   zeros: ZerosFunction;
   identity: IdentityFunction;
-  isZero: TypedFunction;
-  equal: TypedFunction;
   sign: TypedFunction;
   sqrt: TypedFunction;
   conj: TypedFunction;
@@ -88,8 +87,6 @@ const dependencies = [
   'matrix',
   'zeros',
   'identity',
-  'isZero',
-  'equal',
   'sign',
   'sqrt',
   'conj',
@@ -109,8 +106,6 @@ export const createQr = /* #__PURE__ */ factory(
     matrix,
     zeros,
     identity,
-    isZero,
-    equal,
     sign,
     sqrt,
     conj,
@@ -178,7 +173,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       for (let k = kStart; k < limit; ++k) {
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
+        const sgn = unaryMinus(isExactZero(pivot) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
@@ -189,7 +184,7 @@ export const createQr = /* #__PURE__ */ factory(
 
         const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
-        if (!isZero(alpha)) {
+        if (!isExactZero(alpha)) {
           const u1 = subtractScalar(pivot, alpha);
 
           w[k] = 1;
@@ -385,7 +380,7 @@ export const createQr = /* #__PURE__ */ factory(
          */
 
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
+        const sgn = unaryMinus(isExactZero(pivot) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
@@ -396,7 +391,7 @@ export const createQr = /* #__PURE__ */ factory(
 
         const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
-        if (!isZero(alpha)) {
+        if (!isExactZero(alpha)) {
           // first element in vector u
           const u1 = subtractScalar(pivot, alpha);
 
@@ -483,10 +478,9 @@ export const createQr = /* #__PURE__ */ factory(
     /**
      * Householder QR of a matrix of plain numbers, scaled by an exact power of 2 when the
      * largest entry is outside [2^0, 2^400]. Above the window the squares of the
-     * Householder step overflow. Below the window the absolute `isZero` test reads a residual
-     * column norm of 1e-15 or less as zero and skips the reflection, so a column was lost
-     * (#1122, #1168). Q is orthogonal, so only R is scaled back (#1122). A matrix inside the window
-     * is not scaled. A matrix with an entry that is not a plain number is not scaled (#1188).
+     * Householder step overflow. Below the window the squares of the column norm underflow
+     * (#1122, #1168). The Householder loop tests the column norm for an exact zero only (#1188). Q is orthogonal, so only R is scaled back
+     * (#1122). A matrix inside the window is not scaled. A matrix with an entry that is not a plain number is not scaled (#1188).
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
       const data = m._data as unknown[][];
