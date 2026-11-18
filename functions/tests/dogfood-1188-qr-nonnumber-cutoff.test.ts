@@ -111,6 +111,28 @@ describe('qr keeps a nearly dependent column of non-number matrices (#1188)', ()
     expect(orthErr(Q)).toBeLessThan(1e-12);
   });
 
+  const full = [
+    [1, 2, 3],
+    [4, 5, 6.5],
+    [7, 8, 10],
+  ];
+  for (const s of [1e-150, 1e-200, 1e-300, 1e300]) {
+    for (const kind of ['complex(x,0)', 'complex(x,x/3)', 'mixed']) {
+      it(`a ${kind} matrix scaled by ${s} reconstructs and Q is unitary`, () => {
+        const A = full.map((r, i) =>
+          r.map((x, j) =>
+            kind === 'mixed' && i + j === 0
+              ? x * s
+              : complex(x * s, kind === 'complex(x,x/3)' ? (x * s) / 3 : 0)
+          )
+        );
+        const { Q, R } = run(A);
+        expect(reconErr(toZ(A), Q, R)).toBeLessThan(1e-14);
+        expect(orthErr(Q)).toBeLessThan(1e-14);
+      });
+    }
+  }
+
   it('a zero matrix still factors', () => {
     const A = [
       [bignumber(0), bignumber(0)],

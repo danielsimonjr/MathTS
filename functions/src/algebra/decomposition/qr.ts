@@ -2,11 +2,12 @@ import { factory } from '../../utils/factory.js';
 import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
-import { isFraction } from '../../utils/is.js';
+import { isComplex, isFraction } from '../../utils/is.js';
 import {
   UNIT_FLOOR_LO,
   SQUARED,
   entryRange,
+  ldexp,
   ldexpMatrix,
   withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
@@ -197,8 +198,7 @@ export const createQr = /* #__PURE__ */ factory(
       rows: number,
       cols: number,
       kStart: number,
-      ops: QRNumberOps,
-      plain: boolean
+      ops: QRNumberOps
     ): number {
       const limit = Math.min(cols, rows);
       let i: number;
@@ -206,7 +206,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       for (let k = kStart; k < limit; ++k) {
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(zeroPivot(pivot, plain) ? 1 : sign(pivot));
+        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
@@ -217,7 +217,7 @@ export const createQr = /* #__PURE__ */ factory(
 
         const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
-        if (!negligibleNorm(alpha, alphaSquared, plain)) {
+        if (!isZero(alpha)) {
           const u1 = subtractScalar(pivot, alpha);
 
           w[k] = 1;
@@ -356,7 +356,7 @@ export const createQr = /* #__PURE__ */ factory(
       }
     }
 
-    function _denseQRimpl(m: DenseMatrix): QRResult {
+    function _denseQRimpl(m: DenseMatrix, plain: boolean): QRResult {
       // rows & columns (m x n)
       const rows = m._size[0]; // m
       const cols = m._size[1]; // n
@@ -364,10 +364,8 @@ export const createQr = /* #__PURE__ */ factory(
       const Q = identity([rows], 'dense');
       const Qdata = Q._data as unknown[][];
 
-      const plain = matrixAllNumbers(m._data as unknown[][]);
       const R = m.clone();
       const Rdata = R._data as unknown[][];
-      promoteFractionEntries(Rdata);
 
       // vars
       let i: number, j: number, k: number;
@@ -376,7 +374,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       let kStart = 0;
       const numberOps = getQrNumberOps();
-      if (numberOps && matrixAllNumbers(Rdata) && matrixAllNumbers(Qdata)) {
+      if (numberOps && plain && matrixAllNumbers(Qdata)) {
         kStart = _denseQRNumber(
           Rdata as number[][],
           Qdata as number[][],
@@ -384,8 +382,7 @@ export const createQr = /* #__PURE__ */ factory(
           rows,
           cols,
           0,
-          numberOps,
-          plain
+          numberOps
         );
       }
 
@@ -511,21 +508,73 @@ export const createQr = /* #__PURE__ */ factory(
     }
 
     /**
-     * Householder QR of a matrix of plain numbers, scaled by an exact power of 2 when the
-     * largest entry is outside [2^0, 2^400]. Above the window the squares of the
-     * Householder step overflow. Below the window the squares of the column norm underflow
-     * (#1122, #1168). The Householder loop tests the column norm for an exact zero only (#1188). Q is orthogonal, so only R is scaled back
-     * (#1122). A matrix inside the window is not scaled. A matrix with an entry that is not a plain number is not scaled and tests the column norm without the absolute tolerance (#1188).
+     * The real and imaginary parts of every entry when each entry is a number or a Complex,
+     * else `null`. The scale window of a Complex matrix uses them.
+     */
+    function complexParts(data: unknown[][]): number[] | null {
+      const parts: number[] = [];
+      for (const row of data) {
+        for (const v of row) {
+          if (typeof v === 'number') parts.push(v);
+          else if (isComplex(v) && typeof v.re === 'number' && typeof v.im === 'number')
+            parts.push(v.re, v.im);
+          else return null;
+        }
+      }
+      return parts;
+    }
+
+    /** Scale every number or Complex entry by 2^e in place. The scale is exact. */
+    function ldexpEntries(data: unknown[][], e: number): void {
+      for (const row of data) {
+        for (let j = 0; j < row.length; j++) {
+          const v = row[j];
+          if (typeof v === 'number') row[j] = ldexp(v, e);
+          else {
+            const z = v as { re: number; im: number };
+            row[j] = complex(ldexp(z.re, e), ldexp(z.im, e));
+          }
+        }
+      }
+    }
+
+    /**
+     * Householder QR, scaled by an exact power of 2 when the largest entry (the largest real
+     * or imaginary part for Complex) is outside [2^0, 2^400]. Above the window the squares of
+     * the Householder step overflow. Below the window the squares of the column norm lose
+     * precision, and the absolute `isZero` test of a number matrix drops a small residual
+     * column (#1122, #1168). Q is unitary, so only R is scaled back (#1122). A Fraction entry is
+     * converted to a number first, so a number or Fraction matrix takes the number path. A
+     * number or Complex matrix with a Complex entry is scaled the same way and its Householder
+     * step tests the column norm for an exact zero (#1188). Any other matrix (for example
+     * BigNumber) is not scaled and also tests for an exact zero (#1188).
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
-      const data = m._data as unknown[][];
-      if (data.length === 0 || !matrixAllNumbers(data)) return _denseQRimpl(m);
-      return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
-        if (e === 0) return _denseQRimpl(m);
-        const scaled = m.clone();
-        ldexpMatrix(scaled._data as number[][], e);
-        const ret = _denseQRimpl(scaled);
-        ldexpMatrix(ret.R._data as number[][], -e);
+      let src = m;
+      if ((m._data as unknown[][]).some((row) => row.some(isFraction))) {
+        src = m.clone();
+        promoteFractionEntries(src._data as unknown[][]);
+      }
+      const data = src._data as unknown[][];
+      if (data.length === 0) return _denseQRimpl(src, true);
+      if (matrixAllNumbers(data)) {
+        return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
+          if (e === 0) return _denseQRimpl(src, true);
+          const scaled = src.clone();
+          ldexpMatrix(scaled._data as number[][], e);
+          const ret = _denseQRimpl(scaled, true);
+          ldexpMatrix(ret.R._data as number[][], -e);
+          return ret;
+        });
+      }
+      const parts = complexParts(data);
+      if (parts === null) return _denseQRimpl(src, false);
+      return withPow2Scale(entryRange(parts), UNIT_FLOOR_LO, SQUARED, (e) => {
+        if (e === 0) return _denseQRimpl(src, false);
+        const scaled = src.clone();
+        ldexpEntries(scaled._data as unknown[][], e);
+        const ret = _denseQRimpl(scaled, false);
+        ldexpEntries(ret.R._data as unknown[][], -e);
         return ret;
       });
     }
