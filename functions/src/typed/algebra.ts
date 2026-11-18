@@ -827,15 +827,25 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
  * Replace each constant subexpression that has no variable in it (`sqrt(2)`, `exp(1)`, `pi`,
  * `e`) with a placeholder name, so the polynomial reader sees an opaque factor.
  *
- * @returns The rewritten text, and a map from each placeholder to the source text it replaced
+ * Each placeholder starts with a prefix that the input does not contain. Thus no name in the
+ * input, and no source text that the caller writes back, can match a placeholder.
+ *
+ * @returns The rewritten text, a map from each placeholder to the source text it replaced, and
+ *   a pattern that matches every placeholder
  */
-function abstractConstantCalls(expr: string): { text: string; atoms: Map<string, string> } {
+function abstractConstantCalls(expr: string): {
+  text: string;
+  atoms: Map<string, string>;
+  placeholder: RegExp;
+} {
+  let prefix = '__k';
+  while (expr.includes(prefix)) prefix += '_';
   const atoms = new Map<string, string>();
   const known = new Map<string, string>();
   const place = (source: string): string => {
     let name = known.get(source);
     if (name === undefined) {
-      name = `__k${atoms.size}__`;
+      name = `${prefix}${atoms.size}__`;
       known.set(source, name);
       atoms.set(name, source);
     }
@@ -873,7 +883,7 @@ function abstractConstantCalls(expr: string): { text: string; atoms: Map<string,
     text += word[0];
     i = end;
   }
-  return { text, atoms };
+  return { text, atoms, placeholder: new RegExp(`${prefix}\\d+__`, 'g') };
 }
 
 /**
@@ -908,11 +918,10 @@ export function expand(expr: string): string {
     try {
       // A constant call such as sqrt(2) or exp(1) is one opaque factor: expand it as an extra
       // variable that sorts first, then write the call back.
-      const { text, atoms } = abstractConstantCalls(expr);
+      const { text, atoms, placeholder } = abstractConstantCalls(expr);
       const names = [...atoms.keys(), ...vars];
-      let out = idealPolyToString(polyFromExpression(text, names), names);
-      for (const [name, call] of atoms) out = out.split(name).join(call);
-      return out;
+      const out = idealPolyToString(polyFromExpression(text, names), names);
+      return out.replace(placeholder, (name) => atoms.get(name) ?? name);
     } catch (error) {
       // A polynomial above the degree limit has no fallback: say so, as the CAS reader does.
       if (error instanceof PolynomialDegreeError) {
