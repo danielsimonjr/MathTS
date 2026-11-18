@@ -1192,7 +1192,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 60
+      "loc": 135
     },
     {
       "file": "core/tests/collection-dim-validation.test.ts",
