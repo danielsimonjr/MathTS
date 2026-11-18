@@ -17487,6 +17487,10 @@
             "imports": ["typeOf"]
           },
           {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
+          },
+          {
             "file": "../utils/limits.js",
             "imports": ["assertAllocSize"]
           }
@@ -18820,6 +18824,10 @@
           {
             "file": "../utils/array.js",
             "imports": ["arraySize", "validate"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isBigNumber", "isFraction"]
           },
           {
             "file": "../signal/fft-core-f64.js",
@@ -22303,13 +22311,35 @@
             "imports": ["assertAllocSize"]
           },
           {
+            "file": "../utils/is.js",
+            "imports": ["isMatrix"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["arraySize", "validate"]
+          },
+          {
             "file": "./fft.js",
             "imports": ["fftshift", "ifftshift"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["rfft", "irfft", "fftshift", "ifftshift", "fftfreq", "rfftfreq", "fftn"],
-        "functions": ["rfft", "irfft", "fftshift", "ifftshift", "fftfreq", "rfftfreq", "fftn"]
+        "functions": [
+          "rfft",
+          "rfft",
+          "rfft",
+          "rfft",
+          "irfft",
+          "fftshift",
+          "ifftshift",
+          "fftfreq",
+          "rfftfreq",
+          "fftn",
+          "fftn",
+          "fftn",
+          "fftn"
+        ]
       },
       "functions/src/signal/fft.ts": {
         "description": "Fast Fourier Transform (FFT)",
@@ -49387,11 +49417,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 234036,
+    "totalLinesOfCode": 234263,
     "totalExports": 7347,
     "totalClasses": 62,
     "totalInterfaces": 666,
-    "totalFunctions": 2552,
+    "totalFunctions": 2558,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1689,
