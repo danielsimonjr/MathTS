@@ -869,7 +869,8 @@ function abstractConstantCalls(expr: string): {
         if (expr[close] === '(') depth++;
         else if (expr[close] === ')' && --depth === 0) break;
       }
-      const call = expr.slice(i, close + 1);
+      // Whitespace carries no meaning in a call, so `sqrt(2)` and `sqrt( 2)` are one atom.
+      const call = expr.slice(i, close + 1).replace(/\s+/g, '');
       if (close < expr.length && variables(call).length === 0) {
         text += place(call);
         i = close + 1;
