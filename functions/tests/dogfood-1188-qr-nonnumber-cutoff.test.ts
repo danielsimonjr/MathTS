@@ -144,7 +144,12 @@ describe('qr keeps a nearly dependent column of non-number matrices (#1188)', ()
   });
   it('Matrix input matches array input', () => {
     const A = base.map((r) => r.map((x) => complex(x * E, 0)));
-    const m = qr(matrix(A as never) as never) as unknown as { Q: unknown; R: unknown };
-    expect(m.Q).toBeDefined();
+    const m = qr(matrix(A as never) as never) as unknown as {
+      Q: { toArray: () => unknown[][] };
+      R: { toArray: () => unknown[][] };
+    };
+    const a = run(A);
+    expect(toZ(m.Q.toArray())).toEqual(a.Q);
+    expect(toZ(m.R.toArray())).toEqual(a.R);
   });
 });
