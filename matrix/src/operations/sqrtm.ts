@@ -103,13 +103,13 @@ function gramSchmidt(A: number[][]): number[][] {
 function sqrtmSymmetric(A: number[][]): number[][] {
   const n = A.length;
   const Asym = symmetrize(A); // ensure exact symmetry
-  const amax = Math.min(1, normInf(Asym));
+  const tol = eigenvalueTolerance(1e-8, normInf(Asym));
 
   // Validate eigenvalues (eig on the symmetrized version)
   const { values, vectors } = eig(Asym, { computeVectors: true });
 
   for (const v of values) {
-    if (v.re < -1e-8 * amax) {
+    if (v.re < -tol) {
       throw new Error(
         `matrixSqrtm: negative eigenvalue (${v.re}) — matrix is not positive semi-definite`
       );
@@ -161,6 +161,17 @@ function newtonSqrtUpdate(A: number[][], Y: number[][]): { next: number[][]; dif
 }
 
 /**
+ * The size below which a negative real part or an imaginary part of a computed eigenvalue
+ * is rounding noise, for a matrix of norm `anorm`. It is `base` and, below `anorm = 1`,
+ * relative to `anorm` (#1125). The noise of an eigenvalue grows with the norm, so the
+ * tolerance is never below 1e-13 of it: a singular matrix has a real root at each
+ * magnitude. The two forms meet at `anorm = base / 1e-13`.
+ */
+function eigenvalueTolerance(base: number, anorm: number): number {
+  return Math.max(base * Math.min(1, anorm), 1e-13 * anorm);
+}
+
+/**
  * Stop tolerance of the Newton step for an iterate of largest entry `ymax`: 1e-13 and,
  * below `ymax = 1`, relative to `ymax` (#1125).
  */
@@ -192,7 +203,7 @@ function sqrtmNewton(A: number[][]): number[][] | null {
   for (let i = 0; i < n; i++)
     for (let j = 0; j < n; j++) err = Math.max(err, Math.abs(Y2[i][j] - A[i][j]));
 
-  return err < 1e-6 * Math.min(1, normInf(A)) ? Y : null;
+  return err < 1e-6 ? Y : null;
 }
 
 /**
@@ -206,13 +217,13 @@ function sqrtmNewton(A: number[][]): number[][] | null {
 function sqrtmGeneral(A: number[][]): number[][] {
   const n = A.length;
   const { values, vectors } = eig(A, { computeVectors: true });
-  const amax = Math.min(1, normInf(A));
+  const tol = eigenvalueTolerance(1e-7, normInf(A));
 
   for (const v of values) {
-    if (Math.abs(v.im) > 1e-7 * amax) {
+    if (Math.abs(v.im) > tol) {
       throw new Error('matrixSqrtm: complex eigenvalues detected — real square root not supported');
     }
-    if (v.re < -1e-7 * amax) {
+    if (v.re < -tol) {
       throw new Error(
         `matrixSqrtm: negative eigenvalue (${v.re}) — principal square root not real`
       );
@@ -317,7 +328,7 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
       if (tauSq < 0) return null;
       const tau = Math.sqrt(tauSq);
 
-      if (tauSq < 1e-28 * Math.max(Math.abs(trM), 2 * sqrtDet)) return null;
+      if (Math.abs(tau) < 1e-14) return null;
 
       U[r][r] = (a + sqrtDet) / tau;
       U[r][r + 1] = b2 / tau;
