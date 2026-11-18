@@ -201,6 +201,12 @@ export function fisherExact(
   table: readonly [readonly number[], readonly number[]]
 ): FisherExactResult {
   const [[a, b], [c, d]] = table;
+  // SciPy raises for a negative entry. A NaN or an infinite entry made the loop below run forever.
+  for (const v of [a, b, c, d]) {
+    if (!(Number.isFinite(v) && v >= 0)) {
+      throw new RangeError('fisherExact: every table entry must be a finite number >= 0');
+    }
+  }
   const r1 = a + b;
   const r2 = c + d;
   const c1 = a + c;
