@@ -127,15 +127,20 @@ export type ForcingFunction = (
 ) => MathNumericType | MathArray;
 
 /**
- * Root-mean-square norm of a plain-number state vector, used for initial-step selection. The sum
- * runs on the vector divided by its largest magnitude, so a state near 1e160 does not overflow
- * the squares to Infinity (which made the first step NaN).
+ * Root-mean-square norm of a plain-number state vector, used for initial-step selection. When the
+ * squares overflow (a state near 1e160), the sum runs on the vector divided by its largest
+ * magnitude; an Infinity norm made the first step NaN. Every other vector takes the plain sum, so
+ * its result keeps the same bits.
  */
 function _rmsNorm(v: number[]): number {
+  let s = 0;
+  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+  const plain = Math.sqrt(s / v.length);
+  if (Number.isFinite(plain)) return plain;
   let m = 0;
   for (let i = 0; i < v.length; i++) m = Math.max(m, Math.abs(v[i]));
-  if (m === 0 || !Number.isFinite(m)) return m;
-  let s = 0;
+  if (!Number.isFinite(m)) return m;
+  s = 0;
   for (let i = 0; i < v.length; i++) s += (v[i] / m) * (v[i] / m);
   return m * Math.sqrt(s / v.length);
 }

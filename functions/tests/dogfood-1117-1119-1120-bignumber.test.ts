@@ -10,10 +10,15 @@ import {
   add,
   bignumber,
   complex,
+  evaluate,
+  filter,
+  forEach,
   fraction,
+  map,
   matrix,
   quantileSeq,
   solveODE,
+  sparse,
   unaryMinus,
   unit,
 } from '@danielsimonjr/mathts-functions';
@@ -163,10 +168,54 @@ describe('#1120 review: a BigNumber state rounds to precision and large states s
     expect(String(r.y[r.y.length - 1]).length).toBeLessThanOrEqual(precision + 3);
     expect(String(r.t[r.t.length - 1]).length).toBeLessThanOrEqual(precision + 3);
   });
-  it('RK23 with bignumber(1e2) finishes with the 177 points of the number path', () => {
-    // Before the rounding this call did not finish in 8 s (107k digits after 271 f calls).
-    const r = solve(f, bn('1e2'), { method: 'RK23' });
+  it('RK23 with bignumber(1e2) takes the 177 points of the number path', () => {
+    // With the first-step guess and no rounding, the digits grow on each step (107k digits after
+    // 271 f calls) and the call does not return. The forcing function throws on the first long
+    // state, so that fault fails this test at once and cannot hold the run. A stage state inside
+    // one step is not rounded: it has at most 280 characters here.
+    const limit = 16 * BigNumber.config().precision;
+    const guarded = (_t: unknown, y: unknown) => {
+      if (String(y).length > limit) throw new Error(`the state has ${String(y).length} characters`);
+      return unaryMinus(y as never);
+    };
+    const r = solve(guarded, bn('1e2'), { method: 'RK23' });
     expect(r.t.length).toBe(177);
+  });
+  it('the rounding follows a precision below the default', () => {
+    const saved = BigNumber.config().precision;
+    try {
+      BigNumber.config({ precision: 30 });
+      const r = solve(f, bn(1), { method: 'RK23' });
+      expect(r.t.length).toBe(22);
+      for (const v of [...r.t, ...r.y]) expect(String(v).length).toBeLessThanOrEqual(33);
+      expect(Math.abs(Number(String(r.y[21])) - 0.3678768529675089)).toBeLessThan(1e-12);
+    } finally {
+      BigNumber.config({ precision: saved });
+    }
+  });
+  it('the number path keeps the bits of its first step for a state of several components', () => {
+    // The first-step norm of [10, 5] must be the plain root mean square. A norm that divides by
+    // the largest magnitude differs in the last bit and moves every later step.
+    const lotka = (_t: number, y: number[]) => [1.5 * y[0] - y[0] * y[1], -3 * y[1] + y[0] * y[1]];
+    const pins = {
+      RK23: [1484, 1.695738981724208, 0.024856252611085185],
+      RK45: [78, 1.6960526167765109, 0.02486327719504714],
+      Rosenbrock: [163, 1.6875446651377084, 0.02468177984245949],
+      RODAS: [86, 1.696027298254404, 0.024859989732582632],
+    } as const;
+    for (const [method, [points, y0, y1]] of Object.entries(pins)) {
+      const r = solveODE(
+        lotka as never,
+        [0, 7] as never,
+        [10, 5] as never,
+        { method } as never
+      ) as {
+        t: number[];
+        y: number[][];
+      };
+      expect(r.t.length).toBe(points);
+      expect(r.y[r.y.length - 1]).toEqual([y0, y1]);
+    }
   });
   for (const method of ['RK23', 'RK45']) {
     for (const [label, y0] of [
@@ -199,6 +248,48 @@ describe('#1119 review: bignumber() extra arguments and radix strings', () => {
   it('an array still converts element by element', () => {
     expect((b([1, 2, 3]) as unknown[]).map(String)).toEqual(['1', '2', '3']);
   });
+  it('bignumber is a callback of map, forEach, filter and the map method of a matrix', () => {
+    // A collection calls its callback with (value, index, collection).
+    const strs = (v: unknown) =>
+      ((v as { toArray?: () => unknown[] }).toArray?.() ?? (v as unknown[])).flat().map(String);
+    const isBig = (v: unknown) => v instanceof BigNumber;
+    const fromMap = map([1, 2] as never, bignumber as never) as unknown[];
+    expect(fromMap.every(isBig)).toBe(true);
+    expect(strs(fromMap)).toEqual(['1', '2']);
+    expect(strs(map(matrix([1, 2]) as never, bignumber as never))).toEqual(['1', '2']);
+    expect(strs((matrix([1, 2]) as { map(f: unknown): unknown }).map(bignumber))).toEqual([
+      '1',
+      '2',
+    ]);
+    const sp = sparse([
+      [1, 0],
+      [0, 2],
+    ] as never) as unknown as { map(f: unknown): unknown };
+    expect(strs(sp.map(bignumber))).toEqual(['1', '0', '0', '2']);
+    expect(strs(filter([1, 0] as never, bignumber as never))).toEqual(['1', '0']);
+    expect(() => forEach([1, 4] as never, bignumber as never)).not.toThrow();
+    expect(strs(evaluate('map([1, 2], bignumber)'))).toEqual(['1', '2']);
+    expect([1, 2, 3].map(b).every(isBig)).toBe(true);
+    // Any other extra argument throws.
+    expect(() => b(1, 0)).toThrow(/Too many arguments/);
+    expect(() => b(1, 0, 3)).toThrow(/Too many arguments/);
+    expect(() => b(1, 'a', [1])).toThrow(/Too many arguments/);
+    expect(() => b(1, 0, [1], 4)).toThrow(/Too many arguments/);
+    expect(() => evaluate('bignumber(1, 2)')).toThrow(/Too many arguments/);
+  });
+  it('a BigNumber or a Fraction of another library converts', () => {
+    // decimal.js and fraction.js (mathjs) values have the marker, not the brand of core.
+    const digits = '1.' + '234567891'.repeat(5);
+    expect(String(b({ isBigNumber: true, toString: () => digits }))).toBe(digits);
+    expect(String(b({ isBigNumber: true, toString: () => '-1.5e+30' }))).toBe(
+      String(bn('-1.5e30'))
+    );
+    near(
+      b({ isFraction: true, s: -1n, n: 1n, d: 3n, valueOf: () => -1 / 3 }),
+      '-0.' + '3'.repeat(70)
+    );
+    expect(String(b({ isFraction: true, s: 1, n: 1, d: 4, valueOf: () => 0.25 }))).toBe('0.25');
+  });
   it('a huge word size costs nothing and keeps the value, as mathjs', () => {
     expect(s('0xFFi999999999')).toBe('255');
     expect(s('0xFFi1000000')).toBe('255');
@@ -226,5 +317,13 @@ describe('#1119 review: bignumber() extra arguments and radix strings', () => {
     expect(s('-0x80i8')).toBe('128');
     // The binary exponent is bounded; mathjs reads any exponent.
     expect(() => b('0x1p100001')).toThrow(SyntaxError);
+    // A radix string rounds to the configured precision. mathjs keeps the 97 digits of this
+    // integer, and keeps 20 digits when the string has a binary exponent.
+    expect(s('0x' + 'f'.repeat(80)).replace(/0+$/, '')).toBe(
+      '2135987035920910082395021706169552114602704522356652769947041608'
+    );
+    // mathjs reads these two by accident ('0x1i8p3' is 1, '0xFFi8.0' is -1).
+    expect(() => b('0x1i8p3')).toThrow(SyntaxError);
+    expect(() => b('0xFFi8.0')).toThrow(SyntaxError);
   });
 });
