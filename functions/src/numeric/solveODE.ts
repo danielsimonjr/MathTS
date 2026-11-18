@@ -126,11 +126,32 @@ export type ForcingFunction = (
   y: MathNumericType | MathArray
 ) => MathNumericType | MathArray;
 
-/** Root-mean-square norm of a plain-number state vector, used for initial-step selection. */
+/**
+ * Root-mean-square norm of a plain-number state vector, used for initial-step selection. The sum
+ * runs on the vector divided by its largest magnitude, so a state near 1e160 does not overflow
+ * the squares to Infinity (which made the first step NaN).
+ */
 function _rmsNorm(v: number[]): number {
+  let m = 0;
+  for (let i = 0; i < v.length; i++) m = Math.max(m, Math.abs(v[i]));
+  if (m === 0 || !Number.isFinite(m)) return m;
   let s = 0;
-  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-  return Math.sqrt(s / v.length);
+  for (let i = 0; i < v.length; i++) s += (v[i] / m) * (v[i] / m);
+  return m * Math.sqrt(s / v.length);
+}
+
+/**
+ * A BigNumber (or each BigNumber of an array) rounded to the precision of its own class. BigNumber
+ * `add` keeps every digit, so without this the digits of t, y and h grow on each RK step.
+ */
+function _roundBig<T>(v: T): T {
+  if (Array.isArray(v)) return v.map(_roundBig) as T;
+  if (!isBigNumber(v)) return v;
+  const b = v as unknown as {
+    roundToPrecision(p: number): unknown;
+    constructor: { precision: number };
+  };
+  return b.roundToPrecision(b.constructor.precision) as T;
 }
 
 /** A plain number from a number or a BigNumber; NaN for any other type. */
@@ -162,7 +183,7 @@ function _firstStepGuess(
   const d0 = _rmsNorm(y0n);
   const d1 = _rmsNorm(f0n);
   const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
-  return Math.min(h0, span);
+  return Number.isFinite(h0) ? Math.min(h0, span) : undefined;
 }
 
 /**
@@ -1757,8 +1778,9 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
           if (TE < tol && tol / TE > 1 / 4) {
             // push solution if within tol
-            t.push(add(t[n], h));
-            y.push(add(y[n], multiply(h, stageCombo(b, k))));
+            t.push(hasBigNumbers ? _roundBig(add(t[n], h)) : add(t[n], h));
+            const yNext = add(y[n], multiply(h, stageCombo(b, k)));
+            y.push(hasBigNumbers ? _roundBig(yNext) : yNext);
             n++;
           }
 
@@ -1772,7 +1794,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
 
           delta = hasBigNumbers ? bignumber(delta) : delta;
-          h = multiply(h, delta);
+          h = hasBigNumbers ? _roundBig(multiply(h, delta)) : multiply(h, delta);
 
           if (maxStep && larger(abs(h), maxStep)) {
             h = isForwards ? maxStep : unaryMinus(maxStep);
