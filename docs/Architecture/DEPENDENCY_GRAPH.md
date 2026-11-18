@@ -4784,7 +4784,7 @@ graph LR
 | `./regression-extra.js`        | `fitLine, linregressFromFit`           | Import |
 | `./typed/distributions.js`     | `normalCDF`                            | Import |
 | `./kendall-exact.js`           | `kendallPExact, kendallShouldUseExact` | Import |
-| `./typed/number-matrix.js`     | `numberVector`                         | Import |
+| `./typed/number-matrix.js`     | `hasNaN, numberVector`                 | Import |
 | `./utils/limits.js`            | `assertAllocSize`                      | Import |
 | `./statistics/numeric-data.js` | `readSkip`                             | Import |
 
@@ -4923,7 +4923,7 @@ graph LR
 | `./distribution-functions.js` | `chiSquaredSF, fCDF, fSF`      | Import |
 | `./typed/distributions.js`    | `normalCDF, normalPDF`         | Import |
 | `./typed/special.js`          | `lgamma`                       | Import |
-| `./typed/number-matrix.js`    | `numberVector`                 | Import |
+| `./typed/number-matrix.js`    | `hasNaN, numberVector`         | Import |
 
 **Exports:**
 
@@ -10242,9 +10242,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports        | Type   |
-| --------------------------- | -------------- | ------ |
-| `../typed/number-matrix.js` | `numberVector` | Import |
+| File                        | Imports                | Type   |
+| --------------------------- | ---------------------- | ------ |
+| `../typed/number-matrix.js` | `hasNaN, numberVector` | Import |
 
 **Exports:**
 
@@ -10274,9 +10274,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports        | Type   |
-| --------------------------- | -------------- | ------ |
-| `../typed/number-matrix.js` | `numberVector` | Import |
+| File                        | Imports                | Type   |
+| --------------------------- | ---------------------- | ------ |
+| `../typed/number-matrix.js` | `hasNaN, numberVector` | Import |
 
 **Exports:**
 
@@ -10441,9 +10441,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports        | Type   |
-| --------------------------- | -------------- | ------ |
-| `../typed/number-matrix.js` | `numberVector` | Import |
+| File                        | Imports                | Type   |
+| --------------------------- | ---------------------- | ------ |
+| `../typed/number-matrix.js` | `hasNaN, numberVector` | Import |
 
 **Exports:**
 
@@ -12199,6 +12199,7 @@ graph LR
 | `../distribution-functions.js` | `studentTQuantile, normalQuantile`                                              | Import |
 | `../stats/inference-extra.js`  | `multipleTest`                                                                  | Import |
 | `../utils/limits.js`           | `assertLoopOrder`                                                               | Import |
+| `./number-matrix.js`           | `hasNaN`                                                                        | Import |
 
 **Exports:**
 
@@ -12394,7 +12395,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isNumberMatrix`, `assertRectangular`, `assertNumberScalar`, `numberVector`
+- Functions: `isNumberMatrix`, `assertRectangular`, `assertNumberScalar`, `hasNaN`, `numberVector`
 
 ---
 
@@ -20659,9 +20660,9 @@ graph LR
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
+| `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `core/src/internal`                                    | 22 files     | 0 files    |
 | `functions/src/typed/arithmetic`                       | 12 files     | 10 files   |
-| `functions/src/typed/number-matrix`                    | 0 files      | 22 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -21571,12 +21572,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 233943 |
-| Total Exports           | 7346   |
+| Total Lines of Code     | 234027 |
+| Total Exports           | 7347   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 666    |
-| Total Functions         | 2551   |
+| Total Functions         | 2552   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

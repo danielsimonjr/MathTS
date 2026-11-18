@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-17",
+    "lastUpdated": "2026-11-18",
     "totalFiles": 1340,
     "totalModules": 82,
-    "totalExports": 7346
+    "totalExports": 7347
   },
   "entryPoints": [
     {
@@ -10543,7 +10543,7 @@
           },
           {
             "file": "./typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           },
           {
             "file": "./utils/limits.js",
@@ -10834,7 +10834,7 @@
           },
           {
             "file": "./typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -23600,7 +23600,7 @@
         "internalDependencies": [
           {
             "file": "../typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -23674,7 +23674,7 @@
         "internalDependencies": [
           {
             "file": "../typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -23912,7 +23912,7 @@
         "internalDependencies": [
           {
             "file": "../typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           }
         ],
         "workspaceDependencies": [],
@@ -27845,6 +27845,10 @@
           {
             "file": "../utils/limits.js",
             "imports": ["assertLoopOrder"]
+          },
+          {
+            "file": "./number-matrix.js",
+            "imports": ["hasNaN"]
           }
         ],
         "workspaceDependencies": [
@@ -28615,8 +28619,20 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["isNumberMatrix", "assertRectangular", "assertNumberScalar", "numberVector"],
-        "functions": ["isNumberMatrix", "assertRectangular", "assertNumberScalar", "numberVector"]
+        "exports": [
+          "isNumberMatrix",
+          "assertRectangular",
+          "assertNumberScalar",
+          "hasNaN",
+          "numberVector"
+        ],
+        "functions": [
+          "isNumberMatrix",
+          "assertRectangular",
+          "assertNumberScalar",
+          "hasNaN",
+          "numberVector"
+        ]
       },
       "functions/src/typed/numeric.ts": {
         "description": "Typed Numerical Methods Functions",
@@ -49371,11 +49387,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 233943,
-    "totalExports": 7346,
+    "totalLinesOfCode": 234027,
+    "totalExports": 7347,
     "totalClasses": 62,
     "totalInterfaces": 666,
-    "totalFunctions": 2551,
+    "totalFunctions": 2552,
     "totalTypeGuards": 180,
     "totalEnums": 0,
     "totalConstants": 1689,
