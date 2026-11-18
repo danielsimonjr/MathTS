@@ -127,6 +127,19 @@ describe('#1118 mod is exact, and the digit count has no decimal string', () => 
     );
   });
 
+  it('mod does not round a remainder that is longer than the precision', () => {
+    BigNumber.config({ precision: 20 });
+    // Python: a % b. The Euclidean algorithm on the pair gives math.gcd(a, b) == 987654321987.
+    const a = bn('987654321987000000115555555672479');
+    const b = bn('9876543219906543209913519');
+    expect(a.mod(b).toString()).toBe('9872888899030746865585998');
+    let x = a;
+    let y = b;
+    while (!y.isZero()) [x, y] = [y, x.mod(y)];
+    expect(x.toString()).toBe('987654321987');
+    expect(b.mod(a).toString()).toBe('9876543219906543209913519');
+  });
+
   it('mod keeps the usual cases: fractions, a smaller dividend, a zero remainder', () => {
     BigNumber.config({ precision: 20 });
     expect(bn('5.5').mod(bn('0.2')).toString()).toBe('0.1');

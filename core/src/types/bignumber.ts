@@ -1394,8 +1394,9 @@ export class BigNumber implements MathTSValue {
    * Result has the same sign as the dividend (this).
    *
    * The remainder is exact: it comes from the two coefficients as integers, not from a rounded
-   * quotient or a rounded product. Only the result rounds to the configured precision, and that
-   * changes it only when the divisor has more digits than the precision (#1118).
+   * quotient or a rounded product. The result does not round to the configured precision, so the
+   * Euclidean algorithm stays correct for integers longer than the precision. The remainder has
+   * no more digits than the divisor, or it is the dividend itself (#1118).
    */
   mod(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
@@ -1404,19 +1405,18 @@ export class BigNumber implements MathTSValue {
     if (b._isInfinite) return this;
     if (this._sign === 0) return this;
 
-    const precision = globalConfig.precision;
     // |a| < |b|: the remainder is a.
-    if (BigNumber.compareMagnitude(this, b) < 0) return this.roundToPrecision(precision);
+    if (BigNumber.compareMagnitude(this, b) < 0) return this;
 
     const shift = this._exponent - b._exponent;
     if (shift >= 0) {
       // a = aCoef * 10^shift at the exponent of b. Reduce 10^shift modulo bCoef first.
       const remainder = (this._coefficient * pow10Mod(shift, b._coefficient)) % b._coefficient;
-      return this.normalize(this._sign, remainder, b._exponent).roundToPrecision(precision);
+      return this.normalize(this._sign, remainder, b._exponent);
     }
     // b = bCoef * 10^-shift at the exponent of a. |a| >= |b| bounds this power by the size of a.
     const remainder = this._coefficient % (b._coefficient * pow10(-shift));
-    return this.normalize(this._sign, remainder, this._exponent).roundToPrecision(precision);
+    return this.normalize(this._sign, remainder, this._exponent);
   }
 
   // ============================================================
