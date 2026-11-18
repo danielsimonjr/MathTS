@@ -6441,6 +6441,7 @@ graph LR
 | File                 | Imports           | Type   |
 | -------------------- | ----------------- | ------ |
 | `../utils/is.js`     | `typeOf`          | Import |
+| `../utils/array.js`  | `arraySize`       | Import |
 | `../utils/limits.js` | `assertAllocSize` | Import |
 
 **Exports:**
@@ -7243,13 +7244,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports               | Type               |
-| ----------------------------- | --------------------- | ------------------ |
-| `../utils/array.js`           | `arraySize, validate` | Import             |
-| `../signal/fft-core-f64.js`   | `fftExactFloat64`     | Import             |
-| `./complex-to-interleaved.js` | `complexToSplit`      | Import             |
-| `../utils/factory.js`         | `factory`             | Import             |
-| `../core/function/typed.js`   | `TypedFunction`       | Import (type-only) |
+| File                          | Imports                   | Type               |
+| ----------------------------- | ------------------------- | ------------------ |
+| `../utils/array.js`           | `arraySize, validate`     | Import             |
+| `../utils/is.js`              | `isBigNumber, isFraction` | Import             |
+| `../signal/fft-core-f64.js`   | `fftExactFloat64`         | Import             |
+| `./complex-to-interleaved.js` | `complexToSplit`          | Import             |
+| `../utils/factory.js`         | `factory`                 | Import             |
+| `../core/function/typed.js`   | `TypedFunction`           | Import (type-only) |
 
 **Exports:**
 
@@ -9434,11 +9436,13 @@ graph LR
 | ----------------------- | --------------------- | ------ |
 | `../factories/index.js` | `fft, ifft, complex`  | Import |
 | `../utils/limits.js`    | `assertAllocSize`     | Import |
+| `../utils/is.js`        | `isMatrix`            | Import |
+| `../utils/array.js`     | `arraySize, validate` | Import |
 | `./fft.js`              | `fftshift, ifftshift` | Import |
 
 **Exports:**
 
-- Functions: `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`
+- Functions: `rfft`, `rfft`, `rfft`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `fftn`, `fftn`, `fftn`
 
 ---
 
@@ -20638,12 +20642,12 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 205 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
-| `functions/src/utils/is`                               | 0 files      | 59 files   |
+| `functions/src/utils/is`                               | 0 files      | 61 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
+| `functions/src/utils/array`                            | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
-| `functions/src/utils/array`                            | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 43 files   |
 | `functions/src/utils/limits`                           | 0 files      | 42 files   |
@@ -21572,12 +21576,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1340   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 234036 |
+| Total Lines of Code     | 234263 |
 | Total Exports           | 7347   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
 | Total Interfaces        | 666    |
-| Total Functions         | 2552   |
+| Total Functions         | 2558   |
 | Total Type Guards       | 180    |
 | Total Enums             | 0      |
 | Type-only Imports       | 683    |

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-18",
-  "totalFiles": 2488,
+  "totalFiles": 2489,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1314,
     "test-only": 0,
     "orphan": 0,
-    "test": 1082,
+    "test": 1083,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1340,
-    "tests": 1082,
+    "tests": 1083,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1134,
+    "@danielsimonjr/mathts-functions": 1135,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 146,
@@ -6729,7 +6729,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1219
+      "loc": 1261
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -7142,7 +7142,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 330
+      "loc": 398
     },
     {
       "file": "functions/src/matrix/filter.ts",
@@ -7191,7 +7191,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 148
+      "loc": 173
     },
     {
       "file": "functions/src/matrix/inv.ts",
@@ -8199,7 +8199,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 150
+      "loc": 193
     },
     {
       "file": "functions/src/signal/fft.ts",
@@ -9144,7 +9144,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 178
+      "loc": 182
     },
     {
       "file": "functions/src/typed/dist-objects.ts",
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1656
+      "loc": 1701
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10470,6 +10470,13 @@
       "loc": 159
     },
     {
+      "file": "functions/tests/dogfood-1010-1090-fft.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 456
+    },
+    {
       "file": "functions/tests/dogfood-1098-nan-policy.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10859,7 +10866,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 584
+      "loc": 585
     },
     {
       "file": "functions/tests/factories-tier2.test.ts",

@@ -1,10 +1,10 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1340, "e": 7347, "re": 3168 },
   "s": {
-    "loc": 234036,
+    "loc": 234263,
     "cls": 62,
     "int": 666,
-    "fn": 2552,
+    "fn": 2558,
     "tg": 180,
     "en": 0,
     "co": 1689,
@@ -1962,13 +1962,13 @@
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 205 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 59 },
+    { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
+    { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
-    { "p": "utils/array.ts", "i": 0, "o": 47 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "utils/collection.ts", "i": 0, "o": 43 }
   ]
