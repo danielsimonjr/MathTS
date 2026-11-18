@@ -178,6 +178,17 @@ describe('#1122 functions kernels on extreme matrices', () => {
     expect(got).toEqual(want.map((row) => row.map((v) => v * 2 ** 225)));
   });
 
+  it('sqrtm above 2^400 with no real root throws; it does not return NaN', () => {
+    // Before #1122 this threw. The scaled run overflowed to NaN, and NaN passed the stop test.
+    expect(() =>
+      sqrtm([
+        [-2.6864495061931746e183, 2.2387079218276453e183, -3.5819326749242326e183],
+        [0, -3.1341910905587034e183, 4.477415843655291e182],
+        [0, 0, 1.89018605435142e-251],
+      ])
+    ).toThrow(/could not converge/);
+  });
+
   it('sqrtm of a subnormal matrix', () => {
     expectEachClose(
       sqrtm([
