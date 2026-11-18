@@ -14198,7 +14198,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 752
+      "loc": 740
     },
     {
       "file": "matrix/src/operations/expm.ts",
