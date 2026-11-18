@@ -10,7 +10,7 @@
 
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
-import { SQUARED, ldexp, pow2ScaleExponent } from './common.js';
+import { SQUARED } from './common.js';
 
 /** Machine epsilon for double precision (2^-52). */
 const LSTSQ_EPS = 2.220446049250313e-16;
@@ -79,22 +79,30 @@ export function lstsq(
   const out = Array.from({ length: n }, () => new Array<number>(k).fill(0));
   const finish = (): number[] | number[][] => (vectorRhs ? out.map((r) => r[0] ?? 0) : out);
   if (sA === 0 || sB === 0 || n === 0) return finish();
-  // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
-  // sB / sA is taken first then (#1104). An ordinary pair keeps the original order.
-  const inWindow = (v: number): boolean => v >= 2 ** -SQUARED && v <= 2 ** SQUARED;
-  // The right-hand side is divided by its largest entry, unless that division would push
-  // a nonzero entry below 2^-1022 and flush its bits (#1124). Then b is divided by the
-  // exact power of 2 that brings the largest entry into the window, or by 1 when that
-  // exponent is 0 or would push a nonzero entry below 2^-1022. A Householder step forms no
-  // squares of b, so the unscaled b is safe when the entries span the double range.
-  let sBScale = sB;
+  // Dividing b by its largest entry would push a nonzero entry below 2^-1022 and flush
+  // its bits (#1124). The solution is linear in b, so b is split into the entries that
+  // keep their bits and the entries that do not, and the two solutions are added. The
+  // second part has a smaller largest entry, so the split ends after at most 3 levels.
   if (bMin / sB < 2 ** -1022) {
-    const e = pow2ScaleExponent(sB, -SQUARED, SQUARED);
-    sBScale = e !== 0 && ldexp(bMin, e) >= 2 ** -1022 ? ldexp(1, -e) : 1;
+    const part = (kept: boolean): number[][] =>
+      bRows.map((row) => row.map((v) => (Math.abs(v) / sB >= 2 ** -1022 === kept ? v : 0)));
+    const large = lstsq(rows, part(true));
+    const small = lstsq(rows, part(false));
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < k; j++)
+        out[i][j] = small[i][j] === 0 ? large[i][j] : large[i][j] + small[i][j];
+    return finish();
   }
-  const ratioInWindow = inWindow(sA) && inWindow(sBScale);
+  // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
+  // sB / sA is taken first then (#1104). A quotient below 2^-1022 has lost bits, so
+  // z / sA is taken first for it (#1124). An ordinary pair keeps the original order.
+  const inWindow = (v: number): boolean => v >= 2 ** -SQUARED && v <= 2 ** SQUARED;
+  const ratioInWindow = inWindow(sA) && inWindow(sB);
+  const ratio = sB / sA;
+  const unscale = (z: number): number =>
+    ratioInWindow ? (z * sB) / sA : ratio < 2 ** -1022 ? (z / sA) * sB : z * ratio;
   for (let i = 0; i < R.length; i++) R[i] /= sA;
-  for (let i = 0; i < Y.length; i++) Y[i] /= sBScale;
+  for (let i = 0; i < Y.length; i++) Y[i] /= sB;
 
   // Column-pivoted Householder QR. perm[j] is the original index of working column j.
   const steps = Math.min(m, n);
@@ -117,8 +125,7 @@ export function lstsq(
     } else if (rank > 0) {
       minNormSolve(R, n, rank, Y, k, col, z);
     }
-    for (let j = 0; j < n; j++)
-      out[perm[j]][col] = ratioInWindow ? (z[j] * sBScale) / sA : z[j] * (sBScale / sA);
+    for (let j = 0; j < n; j++) out[perm[j]][col] = unscale(z[j]);
   }
   return finish();
 }

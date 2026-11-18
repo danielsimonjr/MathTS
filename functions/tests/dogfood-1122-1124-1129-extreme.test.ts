@@ -317,6 +317,48 @@ describe('#1124 lstsq keeps small right-hand-side entries', () => {
     expect(lstsq(I, [3, 1e-310])).toEqual([3, 1e-310]);
   });
 
+  it('a right-hand side on three levels: 1.7e308, 1e-20 and 5e-324', () => {
+    const I = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ];
+    expect(lstsq(I, [1.7e308, 1e-20, 5e-324])).toEqual([1.7e308, 1e-20, 5e-324]);
+    expect(lstsq(I, [1e300, 1e-10, 1e-320])).toEqual([1e300, 1e-10, 1e-320]);
+  });
+
+  it('a small entry in a row that no large entry reaches is solved alone', () => {
+    const A = [
+      [3, 0, 1],
+      [0, 2, 0],
+      [1, 0, 2],
+    ];
+    const x = lstsq(A, [1e57, 3e-251, 2e57]);
+    expect(x[1]).toBe(1.5e-251);
+    // The other entries have the bits of the solve without the small entry.
+    const large = lstsq(A, [1e57, 0, 2e57]);
+    expect(x[0]).toBe(large[0]);
+    expect(x[2]).toBe(large[2]);
+  });
+
+  it('a small entry that cannot change the solution leaves its bits', () => {
+    const A = [
+      [2, 1],
+      [1, 3],
+      [1, 1],
+    ];
+    expect(lstsq(A, [3e200, 7e199, 1e-200])).toEqual(lstsq(A, [3e200, 7e199, 0]));
+  });
+
+  it('a subnormal right-hand side with a matrix entry above 1', () => {
+    const A = [
+      [9, -2],
+      [0, 1],
+    ];
+    expect(lstsq(A, [0, 1e-323])).toEqual([0, 1e-323]);
+    expect(lstsq(A, [-7e-5, 1e-323])).toEqual([-0.000007777777777777777, 1e-323]);
+  });
+
   it('an extreme right-hand side with no small entry keeps the old bits', () => {
     const A = [
       [2, 1],

@@ -127,13 +127,20 @@ export const createSqrtm = /* #__PURE__ */ factory(
         return _denmanBeavers(A);
       }
       const range = entryRange(data as unknown as number[][]);
+      // True after the unscaled run failed once, so it is not made a second time.
+      let unscaledFailed = false;
       return withPow2Scale(
         range,
         ABS_CUTOFF_LO,
         SQUARED,
         (windowE) => {
-          if (windowE === 0) return _denmanBeavers(A);
-          if (windowE < 0) {
+          if (windowE === 0) {
+            unscaledFailed = true;
+            const unscaled = _denmanBeavers(A);
+            unscaledFailed = !allFinite(unscaled);
+            return unscaled;
+          }
+          if (windowE < 0 && !unscaledFailed) {
             try {
               const unscaled = _denmanBeavers(A);
               if (allFinite(unscaled)) return unscaled;
