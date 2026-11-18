@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-18",
-  "totalFiles": 2495,
+  "totalFiles": 2498,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1316,
     "test-only": 0,
     "orphan": 0,
-    "test": 1087,
+    "test": 1090,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1342,
-    "tests": 1087,
+    "tests": 1090,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 32,
-    "@danielsimonjr/mathts-core": 140,
+    "@danielsimonjr/mathts-core": 142,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1139,
+    "@danielsimonjr/mathts-functions": 1140,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 146,
@@ -968,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2129
+      "loc": 2246
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1172,6 +1172,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 43
+    },
+    {
+      "file": "core/tests/bignumber-round-1118.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 190
+    },
+    {
+      "file": "core/tests/bignumber-round-modes-1118.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "core/tests/collection-dim-validation.test.ts",
@@ -6309,7 +6323,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 163
+      "loc": 178
     },
     {
       "file": "functions/src/arithmetic/multiplyScalar.ts",
@@ -6421,7 +6435,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 183
+      "loc": 197
     },
     {
       "file": "functions/src/bitwise/bitAnd.ts",
@@ -7709,7 +7723,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2070
+      "loc": 2071
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -9662,7 +9676,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 188
+      "loc": 197
     },
     {
       "file": "functions/src/utils/isZero.ts",
@@ -9992,6 +10006,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 126
+    },
+    {
+      "file": "functions/tests/bignumber-mod-gcd-1118.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 81
     },
     {
       "file": "functions/tests/bignumber-operations.test.ts",
