@@ -1559,6 +1559,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/docs-reference-completeness.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/docs-sync.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1004-describe-nan.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1010-1090-fft.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1098-nan-policy.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1104-norm-fro.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1110-quantile-methods.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
