@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 // Issue #1180: the rank tolerance of the repeated-eigenvalue report was a fixed
 // sqrt(eps) * ||A||_F. A defective block whose coupling lay below that size (but far above
 // n * eps * ||A||_F) was reported as non-defective. The tolerance now follows the
-// measured radius of the cluster, down to a floor of 8 * n * eps * ||A||_F.
+// measured radius of the cluster, down to a floor of 8 * n * eps * ||A||_F, and a
+// singular value counts as a coupling only with a clear gap above the noise.
 import { eig } from '../src/index.js';
 
 type M = number[][];
@@ -44,6 +45,61 @@ const S5: M = [
   [0.3, -0.1, 0.2, 1, -0.2],
   [0, 0.2, -0.3, 0.1, 1],
 ];
+// 2I after a similarity with a graded S: rounding leaves R entries of A - 2I up to
+// about 6 times the cluster radius, with no gap between them.
+// A - 2I is stored; 2 + d is exact for every diagonal entry.
+const GRADED_2I: M = (
+  [
+    [
+      -7.105427357601002e-14, -1.7763568394002505e-14, 3.552713678800501e-15,
+      -3.552713678800501e-14, -6.661338147750939e-16, 8.881784197001252e-15, 2.1316282072803006e-14,
+      3.552713678800501e-14,
+    ],
+    [
+      4.263256414560601e-14, 1.4210854715202004e-14, 1.0658141036401503e-14, 0,
+      -4.440892098500626e-16, -5.329070518200751e-15, -1.4210854715202004e-14,
+      -1.4210854715202004e-14,
+    ],
+    [
+      -1.0658141036401503e-13,
+      -1.7763568394002505e-14,
+      -1.7763568394002505e-14,
+      -(2 ** -44),
+      -1.5543122344752192e-15,
+      1.0658141036401503e-14,
+      1.4210854715202004e-14,
+      2.842170943040401e-14,
+    ],
+    [
+      2 ** -44,
+      2.842170943040401e-14,
+      1.4210854715202004e-14,
+      2.842170943040401e-14,
+      1.7763568394002505e-15,
+      -1.0658141036401503e-14,
+      -2.842170943040401e-14,
+      -4.263256414560601e-14,
+    ],
+    [
+      -4.973799150320701e-14, -3.552713678800501e-15, 5.329070518200751e-15, -2.842170943040401e-14,
+      -4.440892098500626e-16, 4.440892098500626e-15, 1.4210854715202004e-14, 7.105427357601002e-15,
+    ],
+    [
+      -2.842170943040401e-14, -3.552713678800501e-14, 0, -1.4210854715202004e-14,
+      -1.7763568394002505e-15, 3.552713678800501e-15, 1.4210854715202004e-14, 2.842170943040401e-14,
+    ],
+    [
+      1.4210854715202004e-14, 1.0658141036401503e-14, 7.105427357601002e-15, 1.4210854715202004e-14,
+      4.440892098500626e-16, -5.329070518200751e-15, -1.0658141036401503e-14,
+      -7.105427357601002e-15,
+    ],
+    [
+      -9.947598300641403e-14, -1.4210854715202004e-14, -2.1316282072803006e-14,
+      -4.263256414560601e-14, -1.7763568394002505e-15, 3.552713678800501e-15,
+      1.4210854715202004e-14, 7.105427357601002e-14,
+    ],
+  ] as M
+).map((row, i) => row.map((v, j) => (i === j ? 2 + v : v)));
 const scaled = (A: M, s: number): M => A.map((r) => r.map((v) => v * s));
 
 /** The report of the single repeated eigenvalue of `A`. */
@@ -62,7 +118,7 @@ describe('eig repeated eigenvalue: coupling below sqrt(eps) * ||A|| (#1180)', ()
     expect(shape(jordan(2, 1, c))).toEqual([1, 2]);
   });
 
-  it('does not pull in the 1e-9 coupling for the [[1,1e-9],[0,1]] example of the issue', () => {
+  it('reports the [[1,1e-9],[0,1]] example of the issue as defective', () => {
     const g = group([
       [1, 1e-9],
       [0, 1],
@@ -131,5 +187,24 @@ describe('eig repeated eigenvalue: coupling below sqrt(eps) * ||A|| (#1180)', ()
     const J5 = jordan(5, 2, 0);
     J5[0][1] = c;
     expect(shape(similar(J5, S5))).toEqual([4, 5]);
+  });
+
+  it.each([10, 20])('Jordan block of size %s: coupling 1e-9 and 1e-12 stay defective', (n) => {
+    expect(shape(jordan(n, 1, 1e-9))).toEqual([1, n]);
+    expect(shape(jordan(n, 1, 1e-12))).toEqual([1, n]);
+    expect(shape(jordan(n, 1, 0))).toEqual([n, n]);
+  });
+
+  it.each([1, 1e6])(
+    'floor at n = 10, scale %s: 3 times the floor resolves, 0.3 times does not',
+    (s) => {
+      const floor = 8 * 10 * 2.220446049250313e-16 * Math.sqrt(10) * s;
+      expect(shape(jordan(10, s, 3 * floor))).toEqual([1, 10]);
+      expect(shape(jordan(10, s, 0.3 * floor))).toEqual([10, 10]);
+    }
+  );
+
+  it('keeps a non-defective eigenvalue after a graded similarity non-defective', () => {
+    expect(shape(GRADED_2I)).toEqual([8, 8]);
   });
 });

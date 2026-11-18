@@ -15,16 +15,18 @@
  *    members all lie within `sqrt(eps) * ||A||_F` of the mean needs the first stage
  *    only. The staircase counts a singular value as zero at or below the rank tolerance
  *    of the cluster: 4 times its radius, within `[8 * n * eps * ||A||_F,
- *    sqrt(eps) * ||A||_F]`. A coupling below the floor cannot be told from rounding.
+ *    sqrt(eps) * ||A||_F]`. A larger singular value counts as zero too when it is less
+ *    than 16 times the largest one below the tolerance. A coupling below the floor cannot
+ *    be told from rounding.
  *
  * The largest accepted cluster wins. A rejected cluster hands its sub-clusters to the
  * same test. The result does not depend on the order of the eigenvalues.
  *
  * "Repeated" is a statement to working precision: a change of about
  * `sqrt(eps) * ||A||_F` in `A` makes the group one exact eigenvalue with the reported
- * structure. Copies that agree to a smaller radius resolve a smaller coupling than that. Distinct eigenvalues with almost parallel eigenvectors are reported as a
- * defective eigenvalue for that reason. A Jordan block larger than
- * `MAX_TRACKED_BLOCK`, or one whose ring reaches an unrelated eigenvalue, may be missed.
+ * structure. Copies that agree to a smaller radius resolve a smaller coupling. Distinct
+ * eigenvalues with almost parallel eigenvectors are reported as a defective eigenvalue
+ * for that reason. A Jordan block larger than `MAX_TRACKED_BLOCK`, or one whose ring reaches an unrelated eigenvalue, may be missed.
  *
  * Cost: one column-pivoted QR of `A - mean * I` for each group (about `4/3 n^3` flops),
  * and two more factorizations of that size for each further stage of a wide cluster.
@@ -73,16 +75,24 @@ const MAX_TRACKED_BLOCK = 6;
 const SCREEN_FACTOR = 64;
 
 /**
- * The rank tolerance of a cluster is `RANK_RADIUS_FACTOR * radius`, but not below
- * `RANK_FLOOR_FACTOR * n * eps * ||A||_F`.
+ * Signal-to-noise ratio that a coupling of a cluster must have to count as a rank.
  *
- * The computed eigenvalues are exact for `A + E` with `||E||_F` of order `n * eps *
- * ||A||_F`. The mean of the cluster misses an eigenvalue of `A + E` by at most the
- * cluster radius, so `A - mean * I` has a rank error of at most `radius + ||E||`. A
- * smaller tolerance cannot tell a rank deficiency from rounding. A larger one hides a
- * coupling that the computation can resolve.
+ * A Jordan block of size 2 with coupling `c` in a matrix with noise `nu` splits into two
+ * eigenvalues at distance `sqrt(c * nu)` from their mean. So the two tests below state one
+ * requirement, `c >= RANK_SIGNAL^2 * nu`:
+ *
+ * - The rank tolerance of a cluster is `RANK_SIGNAL * radius` (`c >= RANK_SIGNAL * sqrt(c * nu)`),
+ *   but not below `RANK_FLOOR_FACTOR * n * eps * ||A||_F`.
+ * - A diagonal entry of R above that tolerance counts as a rank only when it is at least
+ *   `RANK_SIGNAL^2` times the largest entry below it (the noise).
+ *
+ * The second test is necessary because the noise of `A - mean * I` is not always smaller
+ * than the radius. A matrix with a non-normal rounding error (for example
+ * `S * (2I) * S^-1` with a graded `S`) has R entries up to about 5 times the radius, but
+ * with no gap between them. A true coupling stands at least 250 times above the next
+ * entry in the same tests. The value 4 is a choice inside that margin, not a derived number.
  */
-const RANK_RADIUS_FACTOR = 4;
+const RANK_SIGNAL = 4;
 const RANK_FLOOR_FACTOR = 8;
 
 /** Link tolerance for a cluster of `m` eigenvalues of a matrix with Frobenius norm `normF`. */
@@ -97,7 +107,7 @@ function linkTolerance(m: number, normF: number): number {
  * tighter tolerance, so a coupling above it still counts as a rank.
  */
 function clusterRankTol(radius: number, n: number, normF: number, capTol: number): number {
-  return Math.min(capTol, Math.max(rankFloor(n, normF), RANK_RADIUS_FACTOR * radius));
+  return Math.min(capTol, Math.max(rankFloor(n, normF), RANK_SIGNAL * radius));
 }
 
 /** Smallest rank tolerance: the rounding error of a backward-stable `eig`. */
@@ -206,7 +216,9 @@ function linkageTree(values: Array<{ re: number; im: number }>, maxHeight: numbe
  * Multiplicity of the eigenvalue `lambda` of `A` by an orthogonal staircase.
  *
  * Each stage factors `B` (first `A - lambda I`) by column-pivoted QR and counts the
- * diagonal entries of R at or below `thr`: the nullity of the stage. The next `B` is
+ * diagonal entries of R at or below `thr`: the nullity of the stage. An entry above `thr`
+ * and at most `cap` that is less than `RANK_SIGNAL^2` times the largest entry below it is
+ * counted with them. The next `B` is
  * `Q1^T B Q1`, where `Q1` spans the range of `B`. The stages stop when a stage has
  * nullity 0 or the nullities sum to `target`. The first nullity is the number of
  * independent eigenvectors, and the sum is the algebraic multiplicity.
@@ -218,7 +230,8 @@ function staircase(
   A: number[][],
   lambda: { re: number; im: number },
   target: number,
-  thr: number
+  thr: number,
+  cap: number
 ): { nullity: number; multiplicity: number } {
   const n = A.length;
   const real = lambda.im === 0;
@@ -244,6 +257,13 @@ function staircase(
     const perm = columnPivotedQr(B, k, k, (c, v, vv) => reflectors.push({ c, v, vv }));
     let rank = 0;
     while (rank < k && Math.abs(B[rank * k + rank]) > thr) rank++;
+    // An entry counts as a coupling only when it stands clear of the largest entry below
+    // the threshold (see RANK_SIGNAL). Entries at or below `cap` that do not are noise.
+    while (rank > 0 && rank < k) {
+      const kept = Math.abs(B[(rank - 1) * k + rank - 1]);
+      if (kept > cap || kept >= RANK_SIGNAL ** 2 * Math.abs(B[rank * k + rank])) break;
+      rank--;
+    }
     const nullity = k - rank;
     if (first < 0) first = nullity;
     total += nullity;
@@ -280,22 +300,23 @@ function staircase(
  *
  * @param A - The square matrix.
  * @param values - The computed eigenvalues of `A`.
- * @param symmetricFlag - True when `A` is symmetric (the report also needs the asymmetry
- *   of `A` below the rank floor, because the caller's test uses an absolute tolerance). A symmetric matrix has no Jordan
- *   block: its groups use the tolerance of a double eigenvalue for every size and have
- *   as many independent eigenvectors as members, with no factorization.
+ * @param _symmetricFlag - The symmetry flag of the caller. The report does not use it: the
+ *   flag uses a looser tolerance than the report can resolve. The report treats `A` as
+ *   symmetric when `|a_ij - a_ji|` is at most `RANK_FLOOR_FACTOR * n * eps * ||A||_F` for
+ *   every pair. A symmetric matrix has no Jordan block: its groups use the tolerance of a
+ *   double eigenvalue for every size and have as many independent eigenvectors as
+ *   members, with no factorization.
  * @returns One entry per repeated eigenvalue, ordered by its first member in `values`.
  */
 export function repeatedEigenvalueReport(
   A: number[][],
   values: Array<{ re: number; im: number }>,
-  symmetricFlag: boolean
+  _symmetricFlag: boolean
 ): RepeatedEigenvalue[] {
   let normF = 0;
   for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
-  // The caller's flag uses an absolute tolerance. A matrix is symmetric here only when
-  // its asymmetry is below the rank floor: a smaller coupling cannot be resolved anyway.
-  const symmetric = symmetricFlag && asymmetry(A) <= rankFloor(A.length, normF);
+  // A smaller asymmetry than the rank floor cannot be told from rounding.
+  const symmetric = asymmetry(A) <= rankFloor(A.length, normF);
   const baseTol = linkTolerance(2, normF);
   const rankTol = Math.sqrt(EIG_EPS) * normF;
   const screenLimit = (SCREEN_FACTOR * rankTol) ** 2;
@@ -342,7 +363,8 @@ export function repeatedEigenvalueReport(
           A,
           { re, im },
           need,
-          clusterRankTol(radius, A.length, normF, rankTol)
+          clusterRankTol(radius, A.length, normF, rankTol),
+          rankTol
         );
         if (multiplicity >= need) independent = Math.min(nullity, m);
       }
