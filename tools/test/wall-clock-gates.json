@@ -56,6 +56,12 @@
       "script": "compat/tests/helpers/compat-add-perf-gate.mjs",
       "limit": 2.0,
       "needs": ["compat/dist/index.js"]
+    },
+    {
+      "name": "bignumber-sum",
+      "script": "functions/tests/helpers/bignumber-sum-perf-gate.mjs",
+      "limit": 1.5,
+      "needs": ["core/dist/index.js"]
     }
   ]
 }
