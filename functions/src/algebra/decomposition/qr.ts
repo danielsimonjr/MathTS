@@ -2,7 +2,13 @@ import { factory } from '../../utils/factory.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isFraction } from '../../utils/is.js';
-import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
+import {
+  ABS_CUTOFF_LO,
+  SQUARED,
+  entryRange,
+  ldexp,
+  withPow2Scale,
+} from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 interface MatrixConstructor {
@@ -476,13 +482,16 @@ export const createQr = /* #__PURE__ */ factory(
 
     /**
      * Householder QR of a matrix of plain numbers, scaled by an exact power of 2 when the
-     * largest entry is outside [2^-400, 2^400] (the Householder step squares the entries);
-     * Q is orthogonal, so only R is scaled back (#1122). An ordinary matrix is not scaled.
+     * largest entry is outside [2^-20, 2^400]. Above the window the squares of the
+     * Householder step overflow. Below the window the absolute `isZero` test reads a column
+     * norm of 1e-15 or less as zero and skips the reflection, so R was the upper triangle
+     * of A. Q is orthogonal, so only R is scaled back (#1122). A matrix inside the window
+     * is not scaled.
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
       const data = m._data as unknown[][];
       if (data.length === 0 || !matrixAllNumbers(data)) return _denseQRimpl(m);
-      return withPow2Scale(entryRange(data as number[][]), -SQUARED, SQUARED, (e) => {
+      return withPow2Scale(entryRange(data as number[][]), ABS_CUTOFF_LO, SQUARED, (e) => {
         if (e === 0) return _denseQRimpl(m);
         const scaled = m.clone();
         for (const row of scaled._data as number[][]) {

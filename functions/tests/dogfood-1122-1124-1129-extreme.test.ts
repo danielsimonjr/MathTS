@@ -64,6 +64,42 @@ describe('#1122 functions kernels on extreme matrices', () => {
     ]);
   });
 
+  it('qr of a matrix near 2^-60 reflects every column', () => {
+    // Before: R was the upper triangle of A, because isZero read each column norm as zero.
+    const A = [
+      [1.3, -0.4, 0.7],
+      [0.2, 2.1, -1.1],
+      [-0.9, 0.5, 1.6],
+    ].map((row) => row.map((v) => v * 2 ** -60));
+    const { R } = qr(A) as { R: number[][] };
+    // NumPy returns the first two rows with the opposite sign.
+    expectClose(
+      R.map((row) => row.map((v) => v * 2 ** 60)),
+      [
+        [1.5937377450509227, -0.3451006928259873, -0.4705918538536188],
+        [0, 2.1681571695361535, -0.9004889508175455],
+        [0, 0, 1.7965697750274356],
+      ]
+    );
+  });
+
+  it('qr is exact under a power-of-2 scale across the lower window edge', () => {
+    const A = [
+      [1.3, -0.4, 0.7],
+      [0.2, 2.1, -1.1],
+      [-0.9, 0.5, 1.6],
+    ];
+    const want = qr(A) as { Q: number[][]; R: number[][] };
+    for (const k of [-19, -20, -21, -22, -51, -400, -401, -1000]) {
+      const got = qr(A.map((row) => row.map((v) => v * 2 ** k))) as {
+        Q: number[][];
+        R: number[][];
+      };
+      expect(got.Q).toEqual(want.Q);
+      expect(got.R.map((row) => row.map((v) => v / 2 ** k))).toEqual(want.R);
+    }
+  });
+
   it('sqrtm of a matrix near 1e200', () => {
     expectClose(
       sqrtm([
