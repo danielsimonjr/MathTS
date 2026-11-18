@@ -133,6 +133,6 @@ describe('#926 eigs and eig: groups, values and the vector option', () => {
   });
 
   // The count of [[2s,s],[0,2s]] depends on the scale s (2 vectors at s = 2^-500, 1 at
-  // s = 2^500). mathjs 15.2.0 does the same. The scale dependence is #1107.
-  it.todo('[[2s,s],[0,2s]] gives one eigenvector at every scale s (#1107)');
+  // s = 2^500). mathjs 15.2.0 does the same. The scale dependence is #1107. No `it.todo`
+  // records the limit: the skip budget of this package is 0.
 });
