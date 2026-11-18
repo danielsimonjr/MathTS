@@ -7282,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 285
+      "loc": 286
     },
     {
       "file": "functions/src/matrix/ones.ts",
