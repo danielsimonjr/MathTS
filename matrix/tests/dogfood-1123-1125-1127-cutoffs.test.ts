@@ -123,6 +123,215 @@ describe('#1125 qr keeps a column that is small against the largest entry', () =
   });
 });
 
+describe('#1125 matrixSqrtm: a negative or complex eigenvalue is rejected at each magnitude', () => {
+  const sqrtmOf = (a: number[][], f: number): number[][] =>
+    nested(matrixSqrtm(DenseMatrix.fromArray(scale(a, f))));
+
+  it.each([2 ** -20, 1, 2 ** 40])('symmetric, eigenvalue -0.01·%s', (f) => {
+    expect(() =>
+      sqrtmOf(
+        [
+          [1, 0],
+          [0, -0.01],
+        ],
+        f
+      )
+    ).toThrow(/negative eigenvalue/);
+  });
+
+  it.each([2 ** -20, 1, 2 ** 40])('non-symmetric, eigenvalue -0.01·%s', (f) => {
+    expect(() =>
+      sqrtmOf(
+        [
+          [1, 2],
+          [0, -0.01],
+        ],
+        f
+      )
+    ).toThrow(/negative eigenvalue/);
+  });
+
+  it.each([2 ** -20, 1, 2 ** 40])('complex pair 1 ± 0.001i beside -0.01, times %s', (f) => {
+    expect(() =>
+      sqrtmOf(
+        [
+          [1, -0.001, 0],
+          [0.001, 1, 0],
+          [0, 0, -0.01],
+        ],
+        f
+      )
+    ).toThrow(/complex eigenvalues/);
+  });
+});
+
+describe('#1125 matrixSqrtm: a singular matrix has its root at each magnitude', () => {
+  const relResidual = (a: number[][]): number => {
+    const r = nested(matrixSqrtm(DenseMatrix.fromArray(a)));
+    return maxDiff(mul(r, r), a) / maxAbs(a);
+  };
+
+  // Rank 2, non-symmetric; SciPy gives a real root at each k. An absolute -1e-7 read the
+  // rounding noise of the zero eigenvalue as a negative eigenvalue from 2^30.
+  it.each([-40, -20, 0, 20, 30, 40, 60, 200])('non-symmetric rank-2 matrix·2^%i', (k) => {
+    const A = scale(
+      [
+        [5, 1, 2],
+        [1, 0.5, 0.1],
+        [10, 2, 4],
+      ],
+      2 ** k
+    );
+    expect(relResidual(A)).toBeLessThan(1e-7);
+  });
+
+  // Rank 2, symmetric positive semi-definite (U·Uᵀ).
+  it.each([-40, -20, 0, 20, 40, 60, 128, 200])('symmetric rank-2 matrix·2^%i', (k) => {
+    const A = scale(
+      [
+        [5, 4, 1],
+        [4, 5, -1],
+        [1, -1, 2],
+      ],
+      2 ** k
+    );
+    expect(relResidual(A)).toBeLessThan(1e-7);
+  });
+
+  // The Newton step stopped at an absolute 1e-13: a relative residual of 5e-8 at 4e-6.
+  it('a positive definite matrix of entries about 4e-6 has a residual below 1e-14', () => {
+    const A = [
+      [
+        0.000003813867491344354, -9.841513004266744e-7, -0.0000017118065710494081,
+        -2.6223755567215794e-7,
+      ],
+      [
+        -9.841513004266744e-7, 0.0000041349239167993805, 5.905785984194268e-7,
+        -0.0000024486224537905343,
+      ],
+      [
+        -0.0000017118065710494081, 5.905785984194268e-7, 0.0000012116631905430532,
+        -6.042381847729672e-7,
+      ],
+      [
+        -2.6223755567215794e-7, -0.0000024486224537905343, -6.042381847729672e-7,
+        0.0000026215503024026625,
+      ],
+    ];
+    expect(relResidual(A)).toBeLessThan(1e-14);
+  });
+});
+
+describe('#1125 matrixLogm rejects a singular matrix', () => {
+  it('a rank-1 2×2 matrix throws', () => {
+    expect(() =>
+      matrixLogm(
+        DenseMatrix.fromArray([
+          [0.3618395826551426, 1.8211066011476398],
+          [0.05335828610720117, 0.26854753242505963],
+        ])
+      )
+    ).toThrow(/non-positive eigenvalue/);
+  });
+});
+
+describe('#1125 matrixLogm: a small eigenvalue of a triangular matrix', () => {
+  const logmOf = (m: number[][]): number[][] => nested(matrixLogm(DenseMatrix.fromArray(m)));
+
+  it('[[1e-20, 1], [0, 1]] is [[-46.0517, 46.0517], [0, 0]] (SciPy)', () => {
+    const r = logmOf([
+      [1e-20, 1],
+      [0, 1],
+    ]);
+    expect(r[0][0]).toBeCloseTo(-46.051701859880914, 9);
+    expect(r[0][1]).toBeCloseTo(46.051701859880914, 9);
+    expect(r[1][0]).toBe(0);
+    expect(r[1][1]).toBeCloseTo(0, 12);
+  });
+
+  // log([[a, b], [0, a]]) = [[ln a, b/a], [0, ln a]]. The root recurrence divides by the sum
+  // of two diagonal entries of about 1e-15; an absolute 1e-14 test set the quotient to 0.
+  // The entry 1 keeps the matrix inside the scaling window.
+  it('a block [[1e-30, 1e-20], [0, 1e-30]] has the off-diagonal entry 1e10', () => {
+    const r = logmOf([
+      [1e-30, 1e-20, 0],
+      [0, 1e-30, 0],
+      [0, 0, 1],
+    ]);
+    // The block is far from normal (b/a = 1e10), so the diagonal keeps about 9 digits.
+    expect(r[0][0]).toBeCloseTo(-69.07755278982137, 6);
+    expect(r[0][1] / 1e10).toBeCloseTo(1, 9);
+    expect(r[2][2]).toBe(0);
+  });
+
+  it('the message names the floor for a positive eigenvalue below it', () => {
+    expect(() =>
+      logmOf([
+        [1, 1],
+        [1, 1 + 1e-14],
+      ])
+    ).toThrow(/non-positive eigenvalue.*not above the floor 1e-14/);
+  });
+});
+
+describe('#1125 matrixLogm of a large non-symmetric matrix', () => {
+  // The Schur form of a large matrix keeps residue above an absolute 1e-12 below its
+  // diagonal. The absolute test sent the matrix to the Newton path: an error of 5e5 at
+  // 2^120 for this matrix.
+  const A = [
+    [20024917.398208477, -1928743.611125782, -7002042.169364643],
+    [5556725.288284881, 10102.919974043085, -2107337.8945354274],
+    [-2128627.5478277775, -563868.5877630396, 1722821.1071258693],
+  ];
+  // SciPy logm(A).
+  const ref = [
+    [16.89564851998866, -0.7432493596868418, -1.1774173732628286],
+    [1.0577514667385077, 12.918980177564473, -0.4941534613397401],
+    [-0.05946578399619151, -1.1239482521376205, 13.730516432310395],
+  ];
+
+  it.each([0, 50, 120])('logm(A·2^%i) = logm(A) + k·ln 2·I', (k) => {
+    const r = nested(matrixLogm(DenseMatrix.fromArray(scale(A, 2 ** k))));
+    const want = ref.map((row, i) => row.map((v, j) => (i === j ? v + k * Math.LN2 : v)));
+    expect(maxDiff(r, want)).toBeLessThan(1e-8);
+  });
+});
+
+describe('#1125 qr of dependent columns', () => {
+  it('the zero matrix has R = 0 and a finite Q', () => {
+    const { Q, R } = qr(DenseMatrix.zeros(2, 2));
+    expect(nested(R)).toEqual([
+      [0, 0],
+      [0, 0],
+    ]);
+    expect(nested(Q).flat().every(Number.isFinite)).toBe(true);
+  });
+
+  // Column 3 = column 1 + column 2. The rank is 2 at each magnitude below 1.
+  it.each([1, 2 ** -10, 2 ** -19])('a dependent column at %s gives R[2][2] = 0 to 1e-14', (f) => {
+    const A = scale(
+      [
+        [1, 2, 3],
+        [4, 5, 9],
+        [7, 8.5, 15.5],
+      ],
+      f
+    );
+    const { Q, R } = qr(DenseMatrix.fromArray(A));
+    const q = nested(Q);
+    const r = nested(R);
+    expect(maxDiff(mul(q, r), A) / maxAbs(A)).toBeLessThan(1e-14);
+    expect(Math.abs(r[2][2]) / maxAbs(A)).toBeLessThan(1e-14);
+    expect(
+      maxDiff(mul(transpose(q), q), [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ])
+    ).toBeLessThan(1e-12);
+  });
+});
+
 describe.each([
   ['JS path', false],
   ['AssemblyScript path', true],

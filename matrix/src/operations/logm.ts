@@ -123,21 +123,6 @@ function schurBackwardError(A: number[][], T: number[][], Q: number[][]): number
   return e;
 }
 
-/**
- * The eigenvalue at or below which the Schur path reads an eigenvalue as zero: 1e-14 of the
- * smallest row scale, capped at 1e-14. A matrix with a small row, such as diag(1, 1e-20),
- * has a small eigenvalue that is not noise (#1125).
- */
-function eigenvalueFloor(A: number[][]): number {
-  let rowScale = Infinity;
-  for (const row of A) {
-    let m = 0;
-    for (const v of row) if (Math.abs(v) > m) m = Math.abs(v);
-    if (m < rowScale) rowScale = m;
-  }
-  return rowScale > 0 && rowScale < 1 ? 1e-14 * rowScale : 1e-14;
-}
-
 // ---------------------------------------------------------------------------
 // Upper-triangular square root (Björck recurrence) for Schur-based logm
 // ---------------------------------------------------------------------------
@@ -207,7 +192,7 @@ function isStrictlyUpperTriangular(T: number[][]): boolean {
  *
  * Returns null if the matrix cannot be handled by the Schur-triangular path.
  */
-function logmSchur(A: number[][], tol: number, floor: number): number[][] | null {
+function logmSchur(A: number[][], tol: number): number[][] | null {
   const { H: T, Q } = schurInternal(A);
 
   // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
@@ -215,15 +200,15 @@ function logmSchur(A: number[][], tol: number, floor: number): number[][] | null
   if (!isStrictlyUpperTriangular(T)) return null;
 
   // Check that all diagonal entries are strictly positive
-  // An eigenvalue at or below 1e-14 is accepted only when it is above the row-scale floor
-  // and 1e8 times above the backward error of the Schur form, so its logarithm has a
-  // relative error of at most 1e-8 (#1125).
+  // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
+  // backward error of the Schur form, so its logarithm has a relative error of at most
+  // 1e-8 (#1125). The rounding noise of a zero eigenvalue is of the size of that error.
   const n = T.length;
   let backwardError = -1;
   for (let i = 0; i < n; i++) {
     const d = T[i][i];
     if (d <= 1e-14) {
-      if (d <= floor) return null;
+      if (d <= 0) return null;
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
       if (d < 1e8 * backwardError) return null;
     }
@@ -281,11 +266,12 @@ function validateEigenvalues(A: number[][]): void {
       );
     }
     if (v.re <= 1e-14) {
+      // A positive value at or below the floor is not told from 0.
       throw new Error(
         'matrixLogm: non-positive eigenvalue detected — principal logarithm is undefined ' +
           '(eigenvalue ≈ ' +
           v.re +
-          ')'
+          (v.re > 0 ? ', which is not above the floor 1e-14)' : ')')
       );
     }
   }
@@ -418,8 +404,7 @@ function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
   // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
   // Falls through (returns null) for complex-eigenvalue Schur blocks.
-  const floor = eigenvalueFloor(Aarr);
-  const schurResult = logmSchur(Aarr, tol, floor);
+  const schurResult = logmSchur(Aarr, tol);
   if (schurResult !== null) return schurResult;
 
   // ----- Eig-based fallback -----
