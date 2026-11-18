@@ -58,7 +58,7 @@ import {
   evaluate,
   matrix,
 } from '../src/index.js';
-import { isBigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 
 describe('dogfood #990 allocation sites', () => {
   it('windows and 1-D outputs throw before they allocate', () => {
@@ -201,15 +201,29 @@ describe('dogfood #990 allocation sites', () => {
   });
 
   it('BigNumber stirlingS2 gives exact values on the cache and the row-by-row paths', () => {
-    // Exact integer DP in Python
-    const s120 = (
-      stirlingS2(bignumber(120), bignumber(60)) as unknown as { toFixed(): string }
-    ).toFixed();
-    expect(s120).toBe(S_120_60);
-    const s400 = (
-      stirlingS2(bignumber(400), bignumber(200)) as unknown as { toFixed(): string }
-    ).toFixed();
-    expect(s400).toBe(S_400_200);
+    // Exact integer DP in Python. The result rounds to config.precision (#1118); the table is
+    // exact, so a call at a precision above the digit count gives every digit.
+    const at = (precision: number, n: number, k: number): string => {
+      BigNumber.config({ precision });
+      try {
+        return (
+          stirlingS2(bignumber(n), bignumber(k)) as unknown as { toFixed(): string }
+        ).toFixed();
+      } finally {
+        BigNumber.config({ precision: 64 });
+      }
+    };
+    const rounded = (exact: string): string => {
+      BigNumber.config({ precision: 1000 });
+      const r = BigNumber.parse(exact).toSignificantDigits(64).toFixed();
+      BigNumber.config({ precision: 64 });
+      return r;
+    };
+    expect(at(64, 120, 60)).toBe(rounded(S_120_60));
+    expect(at(1000, 120, 60)).toBe(S_120_60);
+    // A cached table filled at precision 64 still gives every digit at a higher precision.
+    expect(at(1000, 400, 200)).toBe(S_400_200);
+    expect(at(64, 400, 200)).toBe(rounded(S_400_200));
     expect(isBigNumber(stirlingS2(bignumber(150), bignumber(150)))).toBe(true);
     expect(isBigNumber(stirlingS2(bignumber(5), bignumber(5)))).toBe(true);
     expect(() => stirlingS2(bignumber(1000), bignumber(998))).toThrow(
