@@ -99,6 +99,18 @@ describe('qr keeps a nearly dependent column of non-number matrices (#1188)', ()
     expect(reconErr(toZ(A), Q, R)).toBeLessThan(1e-14);
   });
 
+  it('a column whose square underflows does not break the unitary Q', () => {
+    const A = [
+      [0, 0, 0, 0, 0],
+      [-75.70759923902897, 0, -6.865303596696373e-140, 0, 0],
+      [0, 2.782236043930641e-74, 0, 0, 0],
+      [6.411946772654541e-17, 1.2654562611809476e-72, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+    ].map((r) => r.map((x) => complex(x, 0)));
+    const { Q } = run(A);
+    expect(orthErr(Q)).toBeLessThan(1e-12);
+  });
+
   it('a zero matrix still factors', () => {
     const A = [
       [bignumber(0), bignumber(0)],
