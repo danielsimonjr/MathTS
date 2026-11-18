@@ -36,6 +36,7 @@ import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
 import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
+import { rewriteCalls, hasTopLevelAdditive } from './call-rewrite.js';
 import {
   collapseIdenticalFactors,
   tryPolynomialCanonicalForm,
@@ -1482,37 +1483,35 @@ export function trigToExp(expr: string): string {
     cos: (w) => `((exp(i*${w}) + exp(-i*${w}))/2)`,
     tan: (w) => `((exp(i*${w}) - exp(-i*${w}))/(i*(exp(i*${w}) + exp(-i*${w}))))`,
   };
-  const call = /(?<![\p{L}_$][\p{L}\p{N}_$]*)(sin|cos|tan)\s*\(/gu;
-  let out = '';
-  let last = 0;
-  for (let m = call.exec(expr); m !== null; m = call.exec(expr)) {
-    let depth = 1;
-    let end = call.lastIndex;
-    while (end < expr.length && depth > 0) {
-      if (expr[end] === '(') depth++;
-      else if (expr[end] === ')') depth--;
-      end++;
-    }
-    if (depth !== 0) break; // unbalanced: leave the rest as written
-    const arg = trigToExp(expr.slice(call.lastIndex, end - 1)).trim();
-    out += expr.slice(last, m.index) + rules[m[1]](group(arg));
-    last = end;
-    call.lastIndex = end;
-  }
-  return out + expr.slice(last);
+  return rewriteCalls(expr, ['sin', 'cos', 'tan'], (name, raw) =>
+    rules[name](group(trigToExp(raw).trim()))
+  );
 }
 
 /**
  * Convert exponential expressions to trigonometric form.
  *
+ * Each `exp(i*A)`, `exp(-i*A)` and `exp(A*i)` call is rewritten, where `A` is a product
+ * (a sum stays as written). The angle is parenthesised when it is not a bare name or
+ * number, and each result is parenthesised, so the output has the value of the input.
+ * Unbalanced input stays as written.
+ *
  * @param expr - Expression string
  * @returns Expression with exponentials replaced by trig
  */
 export function expToTrig(expr: string): string {
-  let result = expr;
-  result = result.replace(/exp\(i\s*\*\s*([^)]+)\)/g, '(cos($1) + i*sin($1))');
-  result = result.replace(/exp\(-i\s*\*\s*([^)]+)\)/g, '(cos($1) - i*sin($1))');
-  return result;
+  return rewriteCalls(expr, ['exp'], (_name, raw) => {
+    const arg = expToTrig(raw).trim();
+    // Match i*A, -i*A or A*i; A must not be a sum, as the angle is the whole product.
+    const m = /^(-?)i\s*\*\s*([^]+)$/.exec(arg) ?? /^([^]+?)\s*\*\s*(-?)i$/.exec(arg);
+    if (m === null) return undefined;
+    const prefixed = /^-?i/.test(arg);
+    const neg = (prefixed ? m[1] : m[2]) === '-';
+    const angle = (prefixed ? m[2] : m[1]).trim();
+    if (angle === '' || hasTopLevelAdditive(angle)) return undefined;
+    const w = /^[A-Za-z0-9_.]+$/.test(angle) ? angle : `(${angle})`;
+    return `(cos(${w}) ${neg ? '-' : '+'} i*sin(${w}))`;
+  });
 }
 
 // =============================================================================
