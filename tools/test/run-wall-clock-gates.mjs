@@ -23,7 +23,7 @@
  *
  * Each result line shows the median ratio, its confidence bounds, the headroom
  * (limit / median: the slowdown of the candidate that brings the median to the
- * limit) and the rounds taken.
+ * limit), the rounds taken and the median ms of the baseline and candidate arms.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -141,8 +141,10 @@ function main() {
       : res.verdict === 'fail'
         ? '  (at the round cap: the interval holds the limit, the median is at or above it)'
         : '  (at the round cap: the interval holds the limit, the median is below it)';
+    // Median ms of each arm: a shifted ratio shows which arm moved (#1198).
+    const arms = `  arms ${fmt(res.baselineMs)} / ${fmt(res.candidateMs)} ms`;
     console.log(
-      `${tag}  ${gate.name}  limit ${res.limit}  ${bound}${headroom}  rounds ${res.rounds}  ${res.seconds.toFixed(1)} s${note}`
+      `${tag}  ${gate.name}  limit ${res.limit}  ${bound}${headroom}  rounds ${res.rounds}${arms}  ${res.seconds.toFixed(1)} s${note}`
     );
     if (res.verdict === 'fail') {
       failed++;
