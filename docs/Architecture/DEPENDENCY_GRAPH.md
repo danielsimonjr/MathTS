@@ -123,7 +123,7 @@ The codebase is organized into the following modules:
 - **tensor**: 5 files
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
-- **functions/algebra**: 48 files
+- **functions/algebra**: 49 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 583            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 584            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3291,12 +3291,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| File                           | Imports                                | Type               |
+| ------------------------------ | -------------------------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`                              | Import             |
+| `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
+| `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
+| `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
 
 **Exports:**
 
@@ -3373,13 +3373,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                    | Type               |
-| ------------------------------ | -------------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`                  | Import             |
-| `./utils/solveValidation.js`   | `createSolveValidation`    | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`            | Import             |
-| `../../core/function/typed.js` | `TypedFunction`            | Import (type-only) |
-| `./pivot-tolerance.js`         | `LUSOLVE_SINGULAR_MESSAGE` | Import             |
+| File                           | Imports                                | Type               |
+| ------------------------------ | -------------------------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`                              | Import             |
+| `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
+| `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
+| `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
+| `./pivot-tolerance.js`         | `LUSOLVE_SINGULAR_MESSAGE`             | Import             |
 
 **Exports:**
 
@@ -3406,6 +3406,23 @@ graph LR
 
 - Interfaces: `DenseMatrix`
 - Constants: `createUsolveAll`
+
+---
+
+### `functions/src/algebra/solver/utils/solveNumberOps.ts` - Make the getter of the `number, number` scalar implementations for one solver instance.
+
+**Internal Dependencies:**
+
+| File                              | Imports         | Type               |
+| --------------------------------- | --------------- | ------------------ |
+| `../../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `SolveScalarDependencies`
+- Types: `SolveNumberOps`
+- Functions: `createSolveNumberOps`
 
 ---
 
@@ -5592,7 +5609,7 @@ graph LR
 
 - Interfaces: `AnalogProto`
 - Types: `FilterBtype`
-- Functions: `firwin`, `lfilter`, `lfilterZi`, `filtfilt`, `polyFromRoots`, `zpkToTf`, `analogToDigital`, `butter`
+- Functions: `firwin`, `lfilter`, `lfilterZi`, `filtfilt`, `realPolyMul`, `polyFromRoots`, `zpkToTf`, `analogToDigital`, `butter`
 - Constants: `sinc`, `cAdd`, `cSub`, `cMul`, `cDiv`, `cScale`
 
 ---
@@ -8012,6 +8029,7 @@ graph LR
 | File                 | Imports                               | Type   |
 | -------------------- | ------------------------------------- | ------ |
 | `../utils/limits.js` | `assertLoopOrder, MAX_ALLOC_ELEMENTS` | Import |
+| `./modular.js`       | `trialFactorize`                      | Import |
 
 **Exports:**
 
@@ -8060,7 +8078,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`
+- Functions: `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `trialFactorize`, `isCarmichael`
 
 ---
 
@@ -9554,14 +9572,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                                                        | Type   |
-| ------------------------------- | ------------------------------------------------------------------------------ | ------ |
-| `../signal-filter-extra.js`     | `analogToDigital, cDiv, cMul, cScale, polyFromRoots, AnalogProto, FilterBtype` | Import |
-| `../signal-filter-extra.js`     | `lfilter`                                                                      | Import |
-| `../wasm/special/scalars.js`    | `ellipticKScalar`                                                              | Import |
-| `../special/jacobi-elliptic.js` | `jacobiCN, jacobiDN, jacobiSN`                                                 | Import |
-| `../typed/number-matrix.js`     | `numberVector`                                                                 | Import |
-| `../utils/limits.js`            | `assertLoopOrder`                                                              | Import |
+| File                            | Imports                                                                                     | Type   |
+| ------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| `../signal-filter-extra.js`     | `analogToDigital, cDiv, cMul, cScale, polyFromRoots, realPolyMul, AnalogProto, FilterBtype` | Import |
+| `../signal-filter-extra.js`     | `lfilter`                                                                                   | Import |
+| `../wasm/special/scalars.js`    | `ellipticKScalar`                                                                           | Import |
+| `../special/jacobi-elliptic.js` | `jacobiCN, jacobiDN, jacobiSN`                                                              | Import |
+| `../typed/number-matrix.js`     | `numberVector`                                                                              | Import |
+| `../utils/limits.js`            | `assertLoopOrder`                                                                           | Import |
 
 **Exports:**
 
@@ -9615,12 +9633,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports           | Type               |
-| --------------------------- | ----------------- | ------------------ |
-| `../signal-filter-extra.js` | `lfilter`         | Import             |
-| `./fft.js`                  | `ComplexNumber`   | Import (type-only) |
-| `../typed/number-matrix.js` | `numberVector`    | Import             |
-| `../utils/limits.js`        | `assertAllocSize` | Import             |
+| File                        | Imports                | Type               |
+| --------------------------- | ---------------------- | ------------------ |
+| `../signal-filter-extra.js` | `lfilter, realPolyMul` | Import             |
+| `./fft.js`                  | `ComplexNumber`        | Import (type-only) |
+| `../typed/number-matrix.js` | `numberVector`         | Import             |
+| `../utils/limits.js`        | `assertAllocSize`      | Import             |
 
 **Exports:**
 
@@ -10449,6 +10467,7 @@ graph LR
 | `../distribution-functions.js` | `chiSquaredSF` | Import |
 | `../typed/distributions.js`    | `normalCDF`    | Import |
 | `../typed/number-matrix.js`    | `numberVector` | Import |
+| `./robust-stats.js`            | `medianOf`     | Import |
 
 **Exports:**
 
@@ -10497,7 +10516,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`
+- Functions: `medianOf`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`
 
 ---
 
@@ -20706,7 +20725,7 @@ graph LR
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/factories/index`                        | 248 files    | 15 files   |
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
-| `functions/src/core/function/typed`                    | 3 files      | 205 files  |
+| `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
@@ -20942,7 +20961,7 @@ graph TD
         N112[polynomialRoot]
         N113[rationalize]
         N114[resolve]
-        N115[...38 more]
+        N115[...39 more]
     end
 
     subgraph Functions/arithmetic
@@ -21641,17 +21660,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1343   |
+| Total TypeScript Files  | 1344   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235487 |
-| Total Exports           | 7372   |
+| Total Lines of Code     | 235538 |
+| Total Exports           | 7376   |
 | Total Re-exports        | 3188   |
 | Total Classes           | 62     |
-| Total Interfaces        | 667    |
-| Total Functions         | 2563   |
+| Total Interfaces        | 668    |
+| Total Functions         | 2567   |
 | Total Type Guards       | 181    |
 | Total Enums             | 0      |
-| Type-only Imports       | 684    |
+| Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 
