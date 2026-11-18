@@ -5,8 +5,12 @@
  * eigenvector extraction using inverse iteration.
  */
 
-import { SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent } from './common.js';
-import { repeatedEigenvalueReport, type RepeatedEigenvalue } from './eig-multiplicity.js';
+import { SQUARED, entryRange, eye, ldexp, pow2ScaleExponent } from './common.js';
+import {
+  isRoundingSymmetric,
+  repeatedEigenvalueReport,
+  type RepeatedEigenvalue,
+} from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 
 export type { RepeatedEigenvalue };
@@ -42,7 +46,11 @@ export interface EigResult {
    * `sqrt(sum(re_i^2 + im_i^2))`.
    */
   vectorsIm: number[][];
-  /** Whether the matrix was symmetric */
+  /**
+   * Whether the matrix is symmetric up to the rounding of its entries: every
+   * `|a_ij - a_ji|` is at most `8 * n * eps * ||A||_F`. The test is relative, so it does
+   * not depend on the scale of the matrix. The flag does not change the solver.
+   */
   isSymmetric: boolean;
 }
 
@@ -142,26 +150,6 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
       H[m * nn + (m - 1)] = scale * g;
     }
   }
-}
-
-/** Relative tolerance of the symmetry test. */
-const SYMMETRY_RTOL = 1e-10;
-
-/**
- * True when every |a_ij - a_ji| / max|a| is at most {@link SYMMETRY_RTOL}. The test is
- * relative, so it gives the same answer for a matrix at every power-of-2 scale. A matrix
- * with a non-finite entry uses the absolute test of `isSymmetric`.
- */
-function isRelativelySymmetric(A: number[][]): boolean {
-  const range = entryRange(A);
-  if (!range.finite || range.amax === 0) return isSymmetric(A);
-  const n = A.length;
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (Math.abs(A[i][j] - A[j][i]) / range.amax > SYMMETRY_RTOL) return false;
-    }
-  }
-  return true;
 }
 
 /** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
@@ -692,7 +680,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
     }
   }
 
-  const symmetric = isRelativelySymmetric(A);
+  const symmetric = isRoundingSymmetric(A);
 
   // Special cases
   if (n === 1) {
