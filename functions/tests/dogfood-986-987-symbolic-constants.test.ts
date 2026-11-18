@@ -64,6 +64,13 @@ describe('#987 expand and simplify keep constants intact', () => {
     sameValues(String(expand('log(2)*(x+1)^2')), 'log(2)*(x+1)^2');
   });
 
+  it('expand collects one constant call written with different spacing', () => {
+    const input = 'sqrt(2)*(x+1)+sqrt( 2)*x';
+    const out = String(expand(input));
+    expect(out).toBe('2*sqrt(2)*x + sqrt(2)');
+    sameValues(out, input);
+  });
+
   it('expand never glues a function name to its argument', () => {
     for (const e of ['sin(x)*(x+1)', 'sin(x)^2', 'sqrt(x)*(x-1)', '(x+1)*(sin(x)+1)']) {
       const out = String(expand(e));
