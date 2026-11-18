@@ -13,7 +13,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 const DIST = pathToFileURL(resolve(__dirname, '../dist/index.js')).href;
 /** Time limit for one call in the child. */
-const CASE_TIMEOUT_MS = 5000;
+const CASE_TIMEOUT_MS = 2000;
 /** Time limit for the child process. A cold `import` of dist is slow under a full parallel run. */
 const CHILD_TIMEOUT_MS = 120000;
 
@@ -49,12 +49,17 @@ const CASES: Record<string, string> = {
   fisherInf: 'S.fisherExact([[Infinity, 0], [0, 5]])',
   fisherNaN: 'S.fisherExact([[NaN, 1], [2, 5]])',
   fisherNegative: 'S.fisherExact([[-1, 1], [2, 5]])',
+  fisherHuge: 'S.fisherExact([[1e300, 0], [0, 5]])',
+  fisherUnsafe: 'S.fisherExact([[2 ** 60, 3], [4, 5]])',
+  fisherLong: 'S.fisherExact([[1e10, 1e10], [1e10, 1e10]])',
+  fisherWideMargin: 'S.fisherExact([[5, 2 ** 40], [3, 4]])',
   fisherValid: 'S.fisherExact([[3, 1], [2, 5]])',
   peakWidthsInf: 'S.peakWidths([1, 3, 1], [Infinity])',
   peakWidthsNegInf: 'S.peakWidths([1], [-Infinity])',
   peakWidthsHigh: 'S.peakWidths([1, 3, 1], [7])',
   peakWidthsNegative: 'S.peakWidths([1, 3, 1], [-1])',
   peakWidthsFraction: 'S.peakWidths([1, 3, 1], [1.5])',
+  peakWidthsSecond: 'S.peakWidths([1, 3, 1], [1, 7])',
   peakWidthsValid: 'S.peakWidths([1, 3, 1], [1])',
   theilSenNaNx: 'S.theilSen([1, NaN, 2, 3], [1, 2, 3, 4])',
   theilSenNaNy: 'S.theilSen([1, 2, 3, 4], [1, NaN, 2, 3])',
@@ -111,7 +116,11 @@ describe('#979 non-finite input returns instead of hanging', () => {
       timeout: CHILD_TIMEOUT_MS,
       encoding: 'utf8',
     });
-    if (r.error) throw new Error(`child did not end within ${CHILD_TIMEOUT_MS} ms`);
+    if (r.error) {
+      throw new Error(
+        `child did not end within ${CHILD_TIMEOUT_MS} ms, or did not start: ${r.error.message}`
+      );
+    }
     if (r.status !== 0) throw new Error(`child failed: ${r.stderr}`);
     results = JSON.parse(r.stdout) as Record<string, Outcome>;
   }, CHILD_TIMEOUT_MS + 10000);
@@ -192,6 +201,21 @@ describe('#979 non-finite input returns instead of hanging', () => {
     }
     expect((value('fisherValid') as { pValue: number }).pValue).toBe(0.24242424242424324);
   });
+  it('fisherExact throws a RangeError for a table whose loop does not end', () => {
+    expect(error('fisherHuge').message).toBe(
+      'fisherExact: a marginal total of 1e+300 exceeds the supported maximum of 2^53 - 1'
+    );
+    expect(error('fisherUnsafe').message).toMatch(/^fisherExact: a marginal total of /);
+    expect(error('fisherLong').message).toBe(
+      'fisherExact: the number of possible tables = 20000000001 exceeds the supported maximum of 10000000'
+    );
+    for (const name of ['fisherHuge', 'fisherUnsafe', 'fisherLong']) {
+      expect(error(name).error, name).toBe('RangeError');
+    }
+  });
+  it('pin: fisherExact accepts a large entry when the margins keep the loop short', () => {
+    expect((value('fisherWideMargin') as { pValue: number }).pValue).toBe(8.823114100281055e-33);
+  });
   it('peakWidths throws a RangeError for an index that is not an integer in range', () => {
     const cases: [string, number][] = [
       ['peakWidthsInf', 0],
@@ -199,6 +223,7 @@ describe('#979 non-finite input returns instead of hanging', () => {
       ['peakWidthsHigh', 0],
       ['peakWidthsNegative', 0],
       ['peakWidthsFraction', 0],
+      ['peakWidthsSecond', 1],
     ];
     for (const [name, i] of cases) {
       const e = error(name);
