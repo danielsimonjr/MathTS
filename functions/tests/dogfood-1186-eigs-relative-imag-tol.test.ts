@@ -105,3 +105,82 @@ describe('eigs keeps a complex pair at every matrix scale (#1186)', () => {
     ).toEqual([0, 0]);
   });
 });
+
+/** Rank of a list of complex vectors (Gram-Schmidt with a 1e-6 cut). */
+function rank(vectors: unknown[][]): number {
+  const basis: C[][] = [];
+  for (const v of vectors) {
+    let r = v.map(asC);
+    for (const q of basis) {
+      let pr = 0;
+      let pi = 0;
+      for (let j = 0; j < r.length; j++) {
+        pr += q[j].re * r[j].re + q[j].im * r[j].im;
+        pi += q[j].re * r[j].im - q[j].im * r[j].re;
+      }
+      r = r.map((x, j) => ({
+        re: x.re - (pr * q[j].re - pi * q[j].im),
+        im: x.im - (pr * q[j].im + pi * q[j].re),
+      }));
+    }
+    const norm = Math.hypot(...r.flatMap((x) => [x.re, x.im]));
+    if (norm > 1e-6) basis.push(r.map((x) => ({ re: x.re / norm, im: x.im / norm })));
+  }
+  return basis.length;
+}
+
+describe('eigs keeps a genuine near-real pair and rounds only rounding noise (#1186)', () => {
+  it.each([1, 1e6, 1e300])('a pair with relative im 1e-12 at scale %s stays complex', (s) => {
+    const A = [
+      [s, -1e-12 * s],
+      [1e-12 * s, s],
+    ];
+    const r = eigsOf(A);
+    for (const v of r.values) {
+      expect(typeof v).not.toBe('number');
+      expect(Math.abs(asC(v).im) / s).toBeCloseTo(1e-12, 18);
+    }
+    expect(rank(r.eigenvectors.map((p) => p.vector))).toBe(2);
+    for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-14);
+  });
+
+  it('[[1, -1e-12], [1e-12, 1]] returns 1 - 1e-12i and 1 + 1e-12i, as NumPy does', () => {
+    const r = eigsOf([
+      [1, -1e-12],
+      [1e-12, 1],
+    ]);
+    expect(r.values.map(asC)).toEqual([
+      { re: 1, im: -1e-12 },
+      { re: 1, im: 1e-12 },
+    ]);
+  });
+
+  it('a similarity-transformed Jordan block that splits into a pair stays a pair', () => {
+    // P * [[1, 1], [0, 1]] * inv(P): the solver splits the defective 1 into 1 +- 2.1e-8i.
+    const A = [
+      [2.3013132018361397, -1.2122386417804276],
+      [1.3969329065322387, -0.30131320183613985],
+    ];
+    const r = eigsOf(A);
+    for (const v of r.values) {
+      expect(typeof v).not.toBe('number');
+      expect(Math.abs(asC(v).im)).toBeGreaterThan(1e-9);
+    }
+    for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-14);
+  });
+
+  it('a repeated real eigenvalue whose copies come out as a noise pair is real, with independent vectors', () => {
+    // P * diag(1, 1, 2) * inv(P): the solver returns 1 +- 2.0e-15i for the double eigenvalue.
+    const A = [
+      [4.666666666666669, -5.166666666666669, 3.166666666666668],
+      [4.88888888888889, -5.88888888888889, 4.222222222222223],
+      [4.888888888888891, -6.888888888888891, 5.222222222222223],
+    ];
+    const r = eigsOf(A);
+    for (const v of r.values) expect(typeof v).toBe('number');
+    expect(r.values as number[]).toEqual([expect.closeTo(1, 12), expect.closeTo(1, 12), 2]);
+    expect((eigs(A, { eigenvectors: false }) as { values: unknown[] }).values).toEqual(r.values);
+    expect(rank(r.eigenvectors.map((p) => p.vector))).toBe(3);
+    for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-14);
+  });
+});
