@@ -12,14 +12,17 @@
  * 2. A second-moment screen drops the candidates that no repeated eigenvalue can give.
  * 3. An orthogonal staircase on `A - mean * I` counts the multiplicity of the cluster
  *    mean. The candidate is accepted when that count reaches `m`. A cluster whose
- *    members all lie within the rank tolerance of the mean needs the first stage only.
+ *    members all lie within `sqrt(eps) * ||A||_F` of the mean needs the first stage
+ *    only. The staircase counts a singular value as zero at or below the rank tolerance
+ *    of the cluster: 4 times its radius, within `[8 * n * eps * ||A||_F,
+ *    sqrt(eps) * ||A||_F]`. A coupling below the floor cannot be told from rounding.
  *
  * The largest accepted cluster wins. A rejected cluster hands its sub-clusters to the
  * same test. The result does not depend on the order of the eigenvalues.
  *
  * "Repeated" is a statement to working precision: a change of about
  * `sqrt(eps) * ||A||_F` in `A` makes the group one exact eigenvalue with the reported
- * structure. Distinct eigenvalues with almost parallel eigenvectors are reported as a
+ * structure. Copies that agree to a smaller radius resolve a smaller coupling than that. Distinct eigenvalues with almost parallel eigenvectors are reported as a
  * defective eigenvalue for that reason. A Jordan block larger than
  * `MAX_TRACKED_BLOCK`, or one whose ring reaches an unrelated eigenvalue, may be missed.
  *
@@ -69,9 +72,46 @@ const MAX_TRACKED_BLOCK = 6;
  */
 const SCREEN_FACTOR = 64;
 
+/**
+ * The rank tolerance of a cluster is `RANK_RADIUS_FACTOR * radius`, but not below
+ * `RANK_FLOOR_FACTOR * n * eps * ||A||_F`.
+ *
+ * The computed eigenvalues are exact for `A + E` with `||E||_F` of order `n * eps *
+ * ||A||_F`. The mean of the cluster misses an eigenvalue of `A + E` by at most the
+ * cluster radius, so `A - mean * I` has a rank error of at most `radius + ||E||`. A
+ * smaller tolerance cannot tell a rank deficiency from rounding. A larger one hides a
+ * coupling that the computation can resolve.
+ */
+const RANK_RADIUS_FACTOR = 4;
+const RANK_FLOOR_FACTOR = 8;
+
 /** Link tolerance for a cluster of `m` eigenvalues of a matrix with Frobenius norm `normF`. */
 function linkTolerance(m: number, normF: number): number {
   return 2 * Math.pow(EIG_EPS, 1 / Math.min(m, MAX_TRACKED_BLOCK)) * normF;
+}
+
+/**
+ * Rank tolerance for the staircase of one cluster. It never exceeds `capTol`, the fixed
+ * `sqrt(eps) * ||A||_F` bound that a Jordan block with an O(1) coupling needs when its
+ * copies spread by `sqrt(eps)`. Copies that agree closely (small `radius`) get a
+ * tighter tolerance, so a coupling above it still counts as a rank.
+ */
+function clusterRankTol(radius: number, n: number, normF: number, capTol: number): number {
+  return Math.min(capTol, Math.max(rankFloor(n, normF), RANK_RADIUS_FACTOR * radius));
+}
+
+/** Smallest rank tolerance: the rounding error of a backward-stable `eig`. */
+function rankFloor(n: number, normF: number): number {
+  return RANK_FLOOR_FACTOR * n * EIG_EPS * normF;
+}
+
+/** Largest `|a_ij - a_ji|`. */
+function asymmetry(A: number[][]): number {
+  let worst = 0;
+  for (let i = 0; i < A.length; i++) {
+    for (let j = i + 1; j < A.length; j++) worst = Math.max(worst, Math.abs(A[i][j] - A[j][i]));
+  }
+  return worst;
 }
 
 /** One node of the single-linkage tree. */
@@ -240,7 +280,8 @@ function staircase(
  *
  * @param A - The square matrix.
  * @param values - The computed eigenvalues of `A`.
- * @param symmetric - True when `A` is symmetric. A symmetric matrix has no Jordan
+ * @param symmetricFlag - True when `A` is symmetric (the report also needs the asymmetry
+ *   of `A` below the rank floor, because the caller's test uses an absolute tolerance). A symmetric matrix has no Jordan
  *   block: its groups use the tolerance of a double eigenvalue for every size and have
  *   as many independent eigenvectors as members, with no factorization.
  * @returns One entry per repeated eigenvalue, ordered by its first member in `values`.
@@ -248,10 +289,13 @@ function staircase(
 export function repeatedEigenvalueReport(
   A: number[][],
   values: Array<{ re: number; im: number }>,
-  symmetric: boolean
+  symmetricFlag: boolean
 ): RepeatedEigenvalue[] {
   let normF = 0;
   for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
+  // The caller's flag uses an absolute tolerance. A matrix is symmetric here only when
+  // its asymmetry is below the rank floor: a smaller coupling cannot be resolved anyway.
+  const symmetric = symmetricFlag && asymmetry(A) <= rankFloor(A.length, normF);
   const baseTol = linkTolerance(2, normF);
   const rankTol = Math.sqrt(EIG_EPS) * normF;
   const screenLimit = (SCREEN_FACTOR * rankTol) ** 2;
@@ -294,7 +338,12 @@ export function repeatedEigenvalueReport(
         // proof of the multiplicity, and one stage counts the eigenvectors. A wider
         // cluster must reach its multiplicity in the staircase.
         const need = radius <= rankTol ? 1 : m;
-        const { nullity, multiplicity } = staircase(A, { re, im }, need, rankTol);
+        const { nullity, multiplicity } = staircase(
+          A,
+          { re, im },
+          need,
+          clusterRankTol(radius, A.length, normF, rankTol)
+        );
         if (multiplicity >= need) independent = Math.min(nullity, m);
       }
     }
