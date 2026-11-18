@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-18",
-    "totalFiles": 1341,
+    "totalFiles": 1342,
     "totalModules": 82,
-    "totalExports": 7351
+    "totalExports": 7371
   },
   "entryPoints": [
     {
@@ -1790,6 +1790,21 @@
             "reExport": true
           },
           {
+            "file": "./pow2-scale.js",
+            "imports": [
+              "SQUARED",
+              "FOURTH",
+              "ABS_CUTOFF_LO",
+              "pow2ScaleExponent",
+              "ldexp",
+              "ldexpMatrix",
+              "entryRange",
+              "allFinite",
+              "withPow2Scale"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./platform-types.js",
             "imports": ["WasmMemoryHandle", "CompiledWasmModule", "AbortSignalLike"],
             "reExport": true,
@@ -1851,6 +1866,12 @@
           {
             "file": "./types/wasm-loader.js",
             "imports": ["LoadingMetrics", "WasmManifest"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./pow2-scale.js",
+            "imports": ["EntryRange"],
             "reExport": true,
             "typeOnly": true
           }
@@ -1932,6 +1953,15 @@
           "WasmModuleLoader",
           "allocAsHeader",
           "importModule",
+          "SQUARED",
+          "FOURTH",
+          "ABS_CUTOFF_LO",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale",
           "format",
           "toEngineering",
           "toExponential",
@@ -1977,7 +2007,8 @@
           "NestedArray",
           "IdentifiedValue",
           "LoadingMetrics",
-          "WasmManifest"
+          "WasmManifest",
+          "EntryRange"
         ],
         "reExported": [
           "* from ./is.js",
@@ -2056,6 +2087,15 @@
           "WasmModuleLoader",
           "allocAsHeader",
           "importModule",
+          "SQUARED",
+          "FOURTH",
+          "ABS_CUTOFF_LO",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale",
           "WasmMemoryHandle",
           "CompiledWasmModule",
           "AbortSignalLike",
@@ -2093,7 +2133,8 @@
           "NestedArray",
           "IdentifiedValue",
           "LoadingMetrics",
-          "WasmManifest"
+          "WasmManifest",
+          "EntryRange"
         ]
       },
       "core/src/is.ts": {
@@ -2334,6 +2375,34 @@
         "workspaceDependencies": [],
         "exports": [],
         "interfaces": ["AbortSignalLike"]
+      },
+      "core/src/pow2-scale.ts": {
+        "description": "Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "SQUARED",
+          "FOURTH",
+          "ABS_CUTOFF_LO",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale"
+        ],
+        "interfaces": ["EntryRange"],
+        "functions": [
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale"
+        ],
+        "constants": ["SQUARED", "FOURTH", "ABS_CUTOFF_LO"]
       },
       "core/src/shared.ts": {
         "description": "Shared utility functions used across core utility modules.",
@@ -5431,11 +5500,36 @@
             "imports": ["gemmF64"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": [
+              "SQUARED",
+              "FOURTH",
+              "ABS_CUTOFF_LO",
+              "pow2ScaleExponent",
+              "ldexp",
+              "ldexpMatrix",
+              "entryRange",
+              "allFinite",
+              "withPow2Scale",
+              "EntryRange"
+            ],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
           "SQUARED",
           "FOURTH",
           "ABS_CUTOFF_LO",
+          "pow2ScaleExponent",
+          "ldexp",
+          "ldexpMatrix",
+          "entryRange",
+          "allFinite",
+          "withPow2Scale",
+          "EntryRange",
           "eye",
           "cloneMatrix",
           "transpose",
@@ -5448,18 +5542,23 @@
           "matSub",
           "matScale",
           "normInf",
+          "norm1",
+          "householder",
+          "applyHouseholderLeft",
+          "applyHouseholderRight"
+        ],
+        "reExported": [
+          "SQUARED",
+          "FOURTH",
+          "ABS_CUTOFF_LO",
           "pow2ScaleExponent",
           "ldexp",
           "ldexpMatrix",
           "entryRange",
           "allFinite",
           "withPow2Scale",
-          "norm1",
-          "householder",
-          "applyHouseholderLeft",
-          "applyHouseholderRight"
+          "EntryRange"
         ],
-        "interfaces": ["EntryRange"],
         "functions": [
           "eye",
           "cloneMatrix",
@@ -5473,18 +5572,11 @@
           "matSub",
           "matScale",
           "normInf",
-          "pow2ScaleExponent",
-          "ldexp",
-          "ldexpMatrix",
-          "entryRange",
-          "allFinite",
-          "withPow2Scale",
           "norm1",
           "householder",
           "applyHouseholderLeft",
           "applyHouseholderRight"
-        ],
-        "constants": ["SQUARED", "FOURTH", "ABS_CUTOFF_LO"]
+        ]
       },
       "matrix/src/operations/condest.ts": {
         "description": "Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)",
@@ -7524,7 +7616,14 @@
             "imports": ["isFraction"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["ABS_CUTOFF_LO", "SQUARED", "entryRange", "ldexp", "withPow2Scale"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createQr"],
         "constants": ["createQr"]
       },
@@ -19069,7 +19168,14 @@
             "imports": ["format"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["SQUARED", "entryRange", "ldexp", "withPow2Scale"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createInv"],
         "constants": ["createInv"]
       },
@@ -19612,7 +19718,21 @@
             "imports": ["factory"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": [
+              "ABS_CUTOFF_LO",
+              "SQUARED",
+              "allFinite",
+              "entryRange",
+              "ldexp",
+              "withPow2Scale"
+            ],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createSqrtm"],
         "interfaces": ["Matrix"],
         "constants": ["createSqrtm"]
@@ -28760,6 +28880,12 @@
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["densifyForSolver", "SparseMatrix"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["ABS_CUTOFF_LO", "SQUARED", "entryRange", "ldexp", "pow2ScaleExponent"],
+            "subpath": "internal"
           }
         ],
         "exports": [
@@ -47772,6 +47898,7 @@
           "core/src/number.ts",
           "core/src/object.ts",
           "core/src/platform-types.ts",
+          "core/src/pow2-scale.ts",
           "core/src/shared.ts",
           "core/src/string.ts",
           "core/src/switch.ts",
@@ -49433,18 +49560,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1341,
+    "totalTypeScriptFiles": 1342,
     "totalModules": 82,
-    "totalLinesOfCode": 234825,
-    "totalExports": 7351,
+    "totalLinesOfCode": 235059,
+    "totalExports": 7371,
     "totalClasses": 62,
     "totalInterfaces": 666,
     "totalFunctions": 2562,
     "totalTypeGuards": 181,
     "totalEnums": 0,
     "totalConstants": 1689,
-    "totalReExports": 3168,
-    "totalTypeOnlyImports": 683,
+    "totalReExports": 3188,
+    "totalTypeOnlyImports": 684,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

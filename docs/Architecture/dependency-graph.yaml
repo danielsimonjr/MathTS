@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-18'
-  totalFiles: 1341
+  totalFiles: 1342
   totalModules: 82
-  totalExports: 7351
+  totalExports: 7371
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1692,6 +1692,18 @@ modules:
           imports:
             - importModule
           reExport: true
+        - file: ./pow2-scale.js
+          imports:
+            - SQUARED
+            - FOURTH
+            - ABS_CUTOFF_LO
+            - pow2ScaleExponent
+            - ldexp
+            - ldexpMatrix
+            - entryRange
+            - allFinite
+            - withPow2Scale
+          reExport: true
         - file: ./platform-types.js
           imports:
             - WasmMemoryHandle
@@ -1752,6 +1764,11 @@ modules:
           imports:
             - LoadingMetrics
             - WasmManifest
+          reExport: true
+          typeOnly: true
+        - file: ./pow2-scale.js
+          imports:
+            - EntryRange
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -1831,6 +1848,15 @@ modules:
         - WasmModuleLoader
         - allocAsHeader
         - importModule
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
         - format
         - toEngineering
         - toExponential
@@ -1877,6 +1903,7 @@ modules:
         - IdentifiedValue
         - LoadingMetrics
         - WasmManifest
+        - EntryRange
       reExported:
         - '* from ./is.js'
         - '* from ./number.js'
@@ -1954,6 +1981,15 @@ modules:
         - WasmModuleLoader
         - allocAsHeader
         - importModule
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
         - WasmMemoryHandle
         - CompiledWasmModule
         - AbortSignalLike
@@ -1992,6 +2028,7 @@ modules:
         - IdentifiedValue
         - LoadingMetrics
         - WasmManifest
+        - EntryRange
     core/src/is.ts:
       description: Shape of a BigNumber value that the duck-typing guards in this module read.
       externalDependencies: []
@@ -2226,6 +2263,35 @@ modules:
       exports: []
       interfaces:
         - AbortSignalLike
+    core/src/pow2-scale.ts:
+      description: 'Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122).'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
+      interfaces:
+        - EntryRange
+      functions:
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
+      constants:
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
     core/src/shared.ts:
       description: Shared utility functions used across core utility modules.
       externalDependencies: []
@@ -5197,11 +5263,32 @@ modules:
         - file: ../types/dense/gemm-f64.js
           imports:
             - gemmF64
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - SQUARED
+            - FOURTH
+            - ABS_CUTOFF_LO
+            - pow2ScaleExponent
+            - ldexp
+            - ldexpMatrix
+            - entryRange
+            - allFinite
+            - withPow2Scale
+            - EntryRange
+          subpath: internal
       exports:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - pow2ScaleExponent
+        - ldexp
+        - ldexpMatrix
+        - entryRange
+        - allFinite
+        - withPow2Scale
+        - EntryRange
         - eye
         - cloneMatrix
         - transpose
@@ -5214,17 +5301,20 @@ modules:
         - matSub
         - matScale
         - normInf
+        - norm1
+        - householder
+        - applyHouseholderLeft
+        - applyHouseholderRight
+      reExported:
+        - SQUARED
+        - FOURTH
+        - ABS_CUTOFF_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
         - entryRange
         - allFinite
         - withPow2Scale
-        - norm1
-        - householder
-        - applyHouseholderLeft
-        - applyHouseholderRight
-      interfaces:
         - EntryRange
       functions:
         - eye
@@ -5239,20 +5329,10 @@ modules:
         - matSub
         - matScale
         - normInf
-        - pow2ScaleExponent
-        - ldexp
-        - ldexpMatrix
-        - entryRange
-        - allFinite
-        - withPow2Scale
         - norm1
         - householder
         - applyHouseholderLeft
         - applyHouseholderRight
-      constants:
-        - SQUARED
-        - FOURTH
-        - ABS_CUTOFF_LO
     matrix/src/operations/condest.ts:
       description: Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)
       externalDependencies: []
@@ -7263,7 +7343,16 @@ modules:
         - file: ../../utils/is.js
           imports:
             - isFraction
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ABS_CUTOFF_LO
+            - SQUARED
+            - entryRange
+            - ldexp
+            - withPow2Scale
+          subpath: internal
       exports:
         - createQr
       constants:
@@ -17850,7 +17939,15 @@ modules:
         - file: ../utils/string.js
           imports:
             - format
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - SQUARED
+            - entryRange
+            - ldexp
+            - withPow2Scale
+          subpath: internal
       exports:
         - createInv
       constants:
@@ -18339,7 +18436,17 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ABS_CUTOFF_LO
+            - SQUARED
+            - allFinite
+            - entryRange
+            - ldexp
+            - withPow2Scale
+          subpath: internal
       exports:
         - createSqrtm
       interfaces:
@@ -26968,6 +27075,15 @@ modules:
           imports:
             - densifyForSolver
             - SparseMatrix
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ABS_CUTOFF_LO
+            - SQUARED
+            - entryRange
+            - ldexp
+            - pow2ScaleExponent
+          subpath: internal
       exports:
         - rationalNullspace
         - RationalNullspaceOptions
@@ -45146,6 +45262,7 @@ dependencyGraph:
         - core/src/number.ts
         - core/src/object.ts
         - core/src/platform-types.ts
+        - core/src/pow2-scale.ts
         - core/src/shared.ts
         - core/src/string.ts
         - core/src/switch.ts
@@ -46614,18 +46731,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1341
+  totalTypeScriptFiles: 1342
   totalModules: 82
-  totalLinesOfCode: 234825
-  totalExports: 7351
+  totalLinesOfCode: 235059
+  totalExports: 7371
   totalClasses: 62
   totalInterfaces: 666
   totalFunctions: 2562
   totalTypeGuards: 181
   totalEnums: 0
   totalConstants: 1689
-  totalReExports: 3168
-  totalTypeOnlyImports: 683
+  totalReExports: 3188
+  totalTypeOnlyImports: 684
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0
