@@ -555,9 +555,11 @@ export function groupDelay(
 // =============================================================================
 
 /**
- * Largest step that `unwrapPhase` reduces by repeated subtraction of 2π: 2^20 turns.
- * A larger step is reduced with one exact remainder. Results for steps at or below
- * the limit are bit-identical to the repeated subtraction.
+ * Largest difference that `unwrapPhase` reduces by repeated subtraction of 2π: 2^20 turns.
+ * The difference is `phase[i]` minus the previous unwrapped value, not the raw sample
+ * step, so a long ramp of small steps also reaches the limit. A larger difference is
+ * reduced with one exact remainder. Results at or below the limit are bit-identical to
+ * the repeated subtraction.
  */
 const UNWRAP_SUBTRACT_LIMIT: f64 = 2 * Math.PI * 2 ** 20;
 

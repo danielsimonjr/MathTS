@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1654
+      "loc": 1656
     },
     {
       "file": "functions/src/typed/special.ts",
