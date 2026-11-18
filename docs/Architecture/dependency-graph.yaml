@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-18'
   totalFiles: 1344
   totalModules: 82
-  totalExports: 7381
+  totalExports: 7382
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5413,10 +5413,12 @@ modules:
             - columnPivotedQr
       workspaceDependencies: []
       exports:
+        - isRoundingSymmetric
         - repeatedEigenvalueReport
       interfaces:
         - RepeatedEigenvalue
       functions:
+        - isRoundingSymmetric
         - repeatedEigenvalueReport
     matrix/src/operations/eig-wasm.ts:
       description: '`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API'
@@ -5453,11 +5455,11 @@ modules:
             - SQUARED
             - entryRange
             - eye
-            - isSymmetric
             - ldexp
             - pow2ScaleExponent
         - file: ./eig-multiplicity.js
           imports:
+            - isRoundingSymmetric
             - repeatedEigenvalueReport
             - RepeatedEigenvalue
         - file: ./as-packed.js
@@ -46833,12 +46835,12 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1344
   totalModules: 82
-  totalLinesOfCode: 235919
-  totalExports: 7381
+  totalLinesOfCode: 235920
+  totalExports: 7382
   totalClasses: 62
   totalInterfaces: 668
-  totalFunctions: 2567
-  totalTypeGuards: 181
+  totalFunctions: 2568
+  totalTypeGuards: 182
   totalEnums: 0
   totalConstants: 1691
   totalReExports: 3191
