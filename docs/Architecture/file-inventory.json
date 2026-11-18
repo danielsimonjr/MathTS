@@ -12252,7 +12252,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 666
+      "loc": 651
     },
     {
       "file": "functions/tests/nonparametric-extra.test.ts",

@@ -1,9 +1,9 @@
 // Worker for tests/nonfinite-inputs.test.ts.
-// It loads a bundle of functions/src and runs each job in order.
+// It loads the built functions package (dist/index.js) and runs each job in order.
 // Before each call it posts the job, so the parent can name a call that does not return.
 import { parentPort, workerData } from 'node:worker_threads';
 
-const m = await import(workerData.bundleUrl);
+const m = await import(workerData.entryUrl);
 
 function describe(v) {
   if (typeof v === 'number') return Number.isNaN(v) ? 'NaN' : String(v);
