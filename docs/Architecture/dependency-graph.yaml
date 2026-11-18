@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-18'
   totalFiles: 1344
   totalModules: 82
-  totalExports: 7376
+  totalExports: 7379
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1697,6 +1697,7 @@ modules:
             - SQUARED
             - FOURTH
             - ABS_CUTOFF_LO
+            - UNIT_LO
             - pow2ScaleExponent
             - ldexp
             - ldexpMatrix
@@ -1851,6 +1852,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
@@ -1984,6 +1986,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
@@ -2273,6 +2276,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
@@ -2292,6 +2296,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
     core/src/shared.ts:
       description: Shared utility functions used across core utility modules.
       externalDependencies: []
@@ -4262,7 +4267,16 @@ modules:
         - file: ./wasm/integrity.js
           imports: []
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - UNIT_LO
+            - SQUARED
+            - entryRange
+            - ldexp
+            - withPow2Scale
+          subpath: internal
       exports:
         - wasmBackend
         - createWASMBackend
@@ -5270,6 +5284,7 @@ modules:
             - SQUARED
             - FOURTH
             - ABS_CUTOFF_LO
+            - UNIT_LO
             - pow2ScaleExponent
             - ldexp
             - ldexpMatrix
@@ -5282,6 +5297,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
@@ -5309,6 +5325,7 @@ modules:
         - SQUARED
         - FOURTH
         - ABS_CUTOFF_LO
+        - UNIT_LO
         - pow2ScaleExponent
         - ldexp
         - ldexpMatrix
@@ -5999,6 +6016,7 @@ modules:
             - matInv
             - gaussJordanSolve
             - ldexpMatrix
+            - normInf
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
@@ -46810,15 +46828,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1344
   totalModules: 82
-  totalLinesOfCode: 235538
-  totalExports: 7376
+  totalLinesOfCode: 235724
+  totalExports: 7379
   totalClasses: 62
   totalInterfaces: 668
   totalFunctions: 2567
   totalTypeGuards: 181
   totalEnums: 0
-  totalConstants: 1689
-  totalReExports: 3188
+  totalConstants: 1690
+  totalReExports: 3190
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
