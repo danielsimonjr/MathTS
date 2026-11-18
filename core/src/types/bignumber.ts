@@ -79,6 +79,58 @@ function seriesIterationLimit(precision: number): number {
   return 4 * precision + 100;
 }
 
+/** The powers of ten below this exponent stay in a cache. */
+const POW10_CACHE_SIZE = 2048;
+const pow10Cache: bigint[] = [];
+/** The last power of ten at or above the cache size: a large precision asks for one such power. */
+let largePow10: { exponent: number; value: bigint } | undefined;
+
+/**
+ * `10^n` as a bigint. Each add, multiply and rounding step needs a power of ten, so the small
+ * ones come from a cache (#1118).
+ */
+function pow10(n: number): bigint {
+  if (n < POW10_CACHE_SIZE) return (pow10Cache[n] ??= 10n ** BigInt(n));
+  if (largePow10?.exponent !== n) largePow10 = { exponent: n, value: 10n ** BigInt(n) };
+  return largePow10.value;
+}
+
+const LOG10_2 = Math.log10(2);
+
+/**
+ * The number of decimal digits of a positive bigint. The bit length comes from the hexadecimal
+ * string, which is much cheaper to build than the decimal string, and gives the count to within
+ * one digit. A comparison with a power of ten then makes the count exact (#1118).
+ */
+function digitCount(coefficient: bigint): number {
+  const hex = coefficient.toString(16);
+  const bits = (hex.length - 1) * 4 + (32 - Math.clz32(parseInt(hex[0], 16)));
+  let digits = Math.floor((bits - 1) * LOG10_2) + 1;
+  while (coefficient >= pow10(digits)) digits++;
+  while (digits > 1 && coefficient < pow10(digits - 1)) digits--;
+  return digits;
+}
+
+/**
+ * True when a positive coefficient has no more than `precision` digits. One comparison with a
+ * power of ten decides for a usual precision, with no digit count (#1118).
+ */
+function fitsPrecision(coefficient: bigint, precision: number): boolean {
+  if (Number.isSafeInteger(precision) && precision > 0) return coefficient < pow10(precision);
+  return digitCount(coefficient) <= precision;
+}
+
+/** `10^n mod m` by binary exponentiation, so a large `n` builds no large power. */
+function pow10Mod(n: number, m: bigint): bigint {
+  let result = 1n % m;
+  let base = 10n % m;
+  for (let e = n; e > 0; e = Math.floor(e / 2)) {
+    if (e % 2 === 1) result = (result * base) % m;
+    base = (base * base) % m;
+  }
+  return result;
+}
+
 /** The depth of nested guarded calls. Only the outermost call raises the precision. */
 let guardDepth = 0;
 
@@ -738,18 +790,13 @@ export class BigNumber implements MathTSValue {
     // Align exponents
     const [aCoef, bCoef, exp] = this.alignExponents(this, b);
 
-    let sum: BigNumber;
     if (this._sign === b._sign) {
       // Same sign: add coefficients
-      sum = this.normalize(this._sign, aCoef + bCoef, exp);
-    } else if (aCoef >= bCoef) {
-      // Different signs: subtract coefficients
-      const diff = aCoef - bCoef;
-      sum = this.normalize(diff === 0n ? 0 : this._sign, diff, exp);
-    } else {
-      sum = this.normalize(b._sign, bCoef - aCoef, exp);
+      return this.rounded(this._sign, aCoef + bCoef, exp);
     }
-    return sum.roundToPrecision(precision);
+    // Different signs: subtract coefficients
+    if (aCoef >= bCoef) return this.rounded(this._sign, aCoef - bCoef, exp);
+    return this.rounded(b._sign, bCoef - aCoef, exp);
   }
 
   /**
@@ -785,7 +832,7 @@ export class BigNumber implements MathTSValue {
     const coefficient = this._coefficient * b._coefficient;
     const exponent = this._exponent + b._exponent;
 
-    return this.normalize(sign, coefficient, exponent).roundToPrecision(globalConfig.precision);
+    return this.rounded(sign, coefficient, exponent);
   }
 
   /**
@@ -836,11 +883,10 @@ export class BigNumber implements MathTSValue {
     // previously-correct division changes; it only repairs the large-divisor case.
     // Root cause of catastrophic `cbrt(bignumber(2)) -> ~0` and the ~11-digit
     // `sqrt`/`asinh` precision loss (both iterate `x / bigCoefficient`).
-    const aDigits = this._coefficient.toString().length;
-    const bDigits = b._coefficient.toString().length;
+    const aDigits = digitCount(this._coefficient);
+    const bDigits = digitCount(b._coefficient);
     const scaleDigits = precision + 10 + Math.max(0, bDigits - aDigits);
-    const scale = BigInt(10) ** BigInt(scaleDigits);
-    const scaledDividend = this._coefficient * scale;
+    const scaledDividend = this._coefficient * pow10(scaleDigits);
     const quotient = scaledDividend / b._coefficient;
     const exponent = this._exponent - b._exponent - scaleDigits;
 
@@ -874,7 +920,8 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Power. An integer exponent uses exact binary exponentiation. A fractional exponent, or a
+   * Power. An integer exponent uses binary exponentiation with guard digits and rounds the
+   * result once to the configured precision (#1118). A fractional exponent, or a
    * fractional BigNumber exponent, uses `exp(n * ln(this))` with guard digits, rounded to the
    * configured precision (#1043). A negative base with a fractional exponent gives NaN.
    */
@@ -1270,14 +1317,13 @@ export class BigNumber implements MathTSValue {
   roundToPrecision(precision: number, mode: RoundingMode = globalConfig.rounding): BigNumber {
     if (this._isNaN || this._isInfinite || this._sign === 0) return this;
 
-    const digits = this._coefficient.toString();
-    if (digits.length <= precision) return this;
+    if (fitsPrecision(this._coefficient, precision)) return this;
 
     // Calculate how many digits to remove from the coefficient
-    const digitsToRemove = digits.length - precision;
-    const divisor = BigInt(10) ** BigInt(digitsToRemove);
+    const digitsToRemove = digitCount(this._coefficient) - precision;
+    const divisor = pow10(digitsToRemove);
     const quotient = this._coefficient / divisor;
-    const remainder = this._coefficient % divisor;
+    const remainder = this._coefficient - quotient * divisor;
     const halfDivisor = divisor / 2n;
 
     let rounded = quotient;
@@ -1346,6 +1392,10 @@ export class BigNumber implements MathTSValue {
   /**
    * Modulo (remainder after division)
    * Result has the same sign as the dividend (this).
+   *
+   * The remainder is exact: it comes from the two coefficients as integers, not from a rounded
+   * quotient or a rounded product. Only the result rounds to the configured precision, and that
+   * changes it only when the divisor has more digits than the precision (#1118).
    */
   mod(other: Scalar | BigNumber | number | string): BigNumber {
     const b = this.ensureBigNumber(other);
@@ -1354,9 +1404,19 @@ export class BigNumber implements MathTSValue {
     if (b._isInfinite) return this;
     if (this._sign === 0) return this;
 
-    // a mod b = a - b * trunc(a / b)
-    const quotient = this.divide(b).trunc();
-    return this.subtract(b.multiply(quotient));
+    const precision = globalConfig.precision;
+    // |a| < |b|: the remainder is a.
+    if (BigNumber.compareMagnitude(this, b) < 0) return this.roundToPrecision(precision);
+
+    const shift = this._exponent - b._exponent;
+    if (shift >= 0) {
+      // a = aCoef * 10^shift at the exponent of b. Reduce 10^shift modulo bCoef first.
+      const remainder = (this._coefficient * pow10Mod(shift, b._coefficient)) % b._coefficient;
+      return this.normalize(this._sign, remainder, b._exponent).roundToPrecision(precision);
+    }
+    // b = bCoef * 10^-shift at the exponent of a. |a| >= |b| bounds this power by the size of a.
+    const remainder = this._coefficient % (b._coefficient * pow10(-shift));
+    return this.normalize(this._sign, remainder, this._exponent).roundToPrecision(precision);
   }
 
   // ============================================================
@@ -2076,10 +2136,23 @@ export class BigNumber implements MathTSValue {
     const aShift = a._exponent - minExp;
     const bShift = b._exponent - minExp;
 
-    const aCoef = aShift > 0 ? a._coefficient * BigInt(10) ** BigInt(aShift) : a._coefficient;
-    const bCoef = bShift > 0 ? b._coefficient * BigInt(10) ** BigInt(bShift) : b._coefficient;
+    const aCoef = aShift > 0 ? a._coefficient * pow10(aShift) : a._coefficient;
+    const bCoef = bShift > 0 ? b._coefficient * pow10(bShift) : b._coefficient;
 
     return [aCoef, bCoef, minExp];
+  }
+
+  /**
+   * The result of an add or a multiply from its exact coefficient: rounded to the configured
+   * precision, with no trailing zeros. A zero coefficient gives zero.
+   */
+  private rounded(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {
+    const precision = globalConfig.precision;
+    if (coefficient === 0n || fitsPrecision(coefficient, precision)) {
+      return this.normalize(sign, coefficient, exponent);
+    }
+    // The rounding step strips the trailing zeros, so the exact value needs no normalize first.
+    return BigNumber.#allocate(sign, coefficient, exponent).roundToPrecision(precision);
   }
 
   private normalize(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {
