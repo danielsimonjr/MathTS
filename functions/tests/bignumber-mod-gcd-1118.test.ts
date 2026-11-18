@@ -37,6 +37,20 @@ describe('#1118 factory mod and gcd of integers longer than the precision', () =
     });
   }
 
+  it('factory_xgcd and factory_invmod stay exact at precision 20', () => {
+    BigNumber.config({ precision: 20 });
+    const res = fn('factory_xgcd')(b(X), b(Y)) as { toArray?: () => unknown[] } | unknown[];
+    const [g, s, t] = (Array.isArray(res) ? res : res.toArray!()) as BigNumber[];
+    expect([g, s, t].map(String)).toEqual(['3', '5330323120803', '-42642585355004793538465']);
+    BigNumber.config({ precision: 100 });
+    expect(b(X).multiply(s).add(b(Y).multiply(t)).toString()).toBe('3');
+    BigNumber.config({ precision: 20 });
+    expect(str(fn('invmod')(b('3'), b('100000000000000000000000000007')))).toBe(
+      '33333333333333333333333333336'
+    );
+    expect(BigNumber.precision).toBe(20);
+  });
+
   it('the precision is restored after the floored add', () => {
     BigNumber.config({ precision: 20 });
     fn('factory_mod')(b('-1'), b('1e30'));
@@ -50,6 +64,9 @@ describe('#1118 isPrime of a BigNumber above 2^32', () => {
     ['100000000000000000039', true],
     ['100000000000000000041', false],
     [String((2n ** 31n - 1n) * (2n ** 61n - 1n)), false],
+    // Above 3.3e24 the large-n branch runs: 2^89 - 1 and 2^127 - 1.
+    ['618970019642690137449562111', true],
+    [String(2n ** 127n - 1n), true],
   ];
   for (const precision of [20, 64]) {
     it(`gives the Miller-Rabin answer at precision ${precision}`, () => {
