@@ -260,11 +260,13 @@ const NAME = /[\p{L}_$][\p{L}\p{N}_$]*/uy;
  *
  * The text is a product when its top level holds only names, numbers, parenthesis
  * groups, calls, indexes (`v[1]`), properties (`x.y`), the postfix operators `!` and
- * `'`, `*`, `/`, `^` and unary signs. A sign is unary at the start or right after `*`,
+ * `'`, `*`, `/`, `^` and unary signs. Two operands side by side are an implicit
+ * product (`2 x`), which the parser binds tighter than `*`, so each factor keeps
+ * its implicit products. A sign is unary at the start or right after `*`,
  * `/`, `^` or another sign; a number keeps the sign of its exponent (`1e-3`). Any
  * other top-level content gives `undefined`: a binary `+` or `-`, a comma, a string,
- * a matrix, another operator, two operands separated only by a space, or a group
- * that does not close.
+ * a matrix, a word operator (`mod`, `to`, `in`, `and`, `xor`, `or`, `not`), another
+ * operator, or a group that does not close.
  *
  * @param text - Expression fragment
  * @param groupEnd - The group ends of `text`. The default reads them from `text`.
@@ -275,18 +277,15 @@ export function topLevelFactors(text: string, groupEnd?: GroupEnd): string[] | u
   const factors: string[] = [];
   let start = 0;
   let operand = false; // the last token is an operand
-  let spaced = false; // white space follows the last token
   let pos = 0;
   while (pos < text.length) {
     const ch = text[pos];
     if (ch.trim() === '') {
-      spaced = true;
       pos++;
       continue;
     }
     let next = pos + 1;
     let isOperand = true;
-    let postfix = false; // the token belongs to the operand before it
     if (ch === '(' || ch === '[') {
       if (endOf === undefined) {
         const structure = readStructure(text);
@@ -296,10 +295,7 @@ export function topLevelFactors(text: string, groupEnd?: GroupEnd): string[] | u
       }
       next = endOf(pos);
       if (next < 0) return undefined;
-      if (ch === '[') {
-        if (!operand) return undefined; // a matrix
-        postfix = true;
-      }
+      if (ch === '[' && !operand) return undefined; // a matrix
     } else if ('*/^+-'.includes(ch)) {
       if (ch === '+' || ch === '-') {
         if (operand) return undefined; // binary: the text is a sum
@@ -311,22 +307,18 @@ export function topLevelFactors(text: string, groupEnd?: GroupEnd): string[] | u
       }
     } else if (ch === "'" || ch === '!') {
       if (!operand || (ch === '!' && text[next] === '=')) return undefined;
-      postfix = true;
     } else {
       NUMBER.lastIndex = NAME.lastIndex = pos;
       let token = NUMBER.exec(text) ?? NAME.exec(text);
       if (token === null && ch === '.' && operand) {
         NAME.lastIndex = pos + 1;
-        token = NAME.exec(text);
-        postfix = true; // a property
+        token = NAME.exec(text); // a property
         next++;
       }
-      if (token === null) return undefined;
+      if (token === null || WORD_OPERATORS.has(token[0])) return undefined;
       next += token[0].length - 1;
     }
-    if (isOperand && operand && spaced && !postfix) return undefined;
     operand = isOperand;
-    spaced = false;
     pos = next;
   }
   if (!operand) return undefined;

@@ -1504,8 +1504,10 @@ export function trigToExp(expr: string): string {
  *
  * An `exp` call is rewritten when its argument is a product with a factor `i` or `-i`
  * (`exp(i*x)`, `exp(-i*(x+1))`, `exp(2*i*x)`, `exp(x*i)`). The other factors are the
- * angle. Any other call stays as written: a sum (`exp(i*x+1)`), an argument with an
- * operator other than `*`, `/`, `^`, `!` and `'`, unbalanced input, a method call
+ * angle. A factor can be an implicit product (`exp(i*2 x)`). Any other call stays as
+ * written: a sum (`exp(i*x+1)`), an argument with an operator other than `*`, `/`,
+ * `^`, `!` and `'`, a word operator (`exp(i*x mod 2)`), a matrix or a string in the
+ * product, a second argument (`exp(i*x, y)`), unbalanced input, a method call
  * (`x.exp(i*y)`), text in a string literal or a comment, and a call that is the right
  * side of an implicit product after a name or an index (`x exp(i*y)`). The angle is
  * parenthesised when it is not a bare name, a number or already in parentheses, and
