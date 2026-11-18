@@ -49,9 +49,15 @@ export function ldexp(x: number, e: number): number {
   return x * 2 ** h * 2 ** (e - h);
 }
 
-/** Scale every entry of `A` by 2^e in place. */
+/**
+ * Scale every entry of `A` by 2^e in place. Each entry gets the same two products as
+ * `ldexp`; the two factors are computed one time for the matrix, not one time for each entry.
+ */
 export function ldexpMatrix(A: number[][], e: number): void {
-  for (const row of A) for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], e);
+  const h = Math.trunc(e / 2);
+  const f1 = 2 ** h;
+  const f2 = 2 ** (e - h);
+  for (const row of A) for (let j = 0; j < row.length; j++) row[j] = row[j] * f1 * f2;
 }
 
 /** The largest and the smallest nonzero |entry|; `finite` is false when an entry is NaN or infinite. */
