@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-18",
-  "totalFiles": 2491,
+  "totalFiles": 2493,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1315,
     "test-only": 0,
     "orphan": 0,
-    "test": 1084,
+    "test": 1086,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1341,
-    "tests": 1084,
+    "tests": 1086,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 32,
-    "@danielsimonjr/mathts-core": 138,
+    "@danielsimonjr/mathts-core": 139,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1137,
+    "@danielsimonjr/mathts-functions": 1138,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 146,
@@ -940,7 +940,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 659
+      "loc": 660
     },
     {
       "file": "core/src/typed/type-bridge.ts",
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2116
+      "loc": 2129
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1158,6 +1158,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 204
+    },
+    {
+      "file": "core/tests/bignumber-fraction-1117.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
     },
     {
       "file": "core/tests/collection-dim-validation.test.ts",
@@ -6736,7 +6743,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 303
+      "loc": 417
     },
     {
       "file": "functions/src/factories/sparse-adapter.ts",
@@ -7695,7 +7702,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2019
+      "loc": 2070
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -10516,7 +10523,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 133
+      "loc": 134
     },
     {
       "file": "functions/tests/dogfood-1112-quantile-bignumber-n.test.ts",
@@ -10538,6 +10545,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 66
+    },
+    {
+      "file": "functions/tests/dogfood-1117-1119-1120-bignumber.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 339
     },
     {
       "file": "functions/tests/dogfood-1135-1136-discretelog.test.ts",
