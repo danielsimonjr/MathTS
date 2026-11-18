@@ -240,7 +240,8 @@ function eigGeneral(
     while (l > low) {
       s = Math.abs(H[(l - 1) * nn + (l - 1)]) + Math.abs(H[l * nn + l]);
       if (s === 0.0) s = norm;
-      if (Math.abs(H[l * nn + (l - 1)]) < eps * s) break;
+      // <= so an exactly zero sub-diagonal deflates even when s (and norm) is 0.
+      if (Math.abs(H[l * nn + (l - 1)]) <= eps * s) break;
       l--;
     }
 
