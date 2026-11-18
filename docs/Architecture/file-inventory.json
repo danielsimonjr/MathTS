@@ -14247,7 +14247,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 318
+      "loc": 367
     },
     {
       "file": "matrix/src/operations/eig-wasm.ts",
@@ -14780,6 +14780,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "matrix/tests/issue-1180-eig-small-coupling.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 136
     },
     {
       "file": "matrix/tests/issue-926-eig-defective.test.ts",

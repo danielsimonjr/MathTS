@@ -2175,6 +2175,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/gpu/operations.test.ts`                                             | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gpu/run-shader-readback.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/helpers/stub-global.ts`                                             | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/issue-1180-eig-small-coupling.test.ts`                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/issue-926-eig-defective.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/JSBackend.test.ts`                                                  | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/lstsq-robust.test.ts`                                               | @danielsimonjr/mathts-matrix         | tests    | test        |
