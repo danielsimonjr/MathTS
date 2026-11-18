@@ -4586,6 +4586,7 @@
       "isMatrix",
       "isNativeMatrix",
       "isPackedMatrixDescriptor",
+      "isRoundingSymmetric",
       "isSharedMemoryAvailable",
       "isSparseMatrix",
       "isSymmetric",

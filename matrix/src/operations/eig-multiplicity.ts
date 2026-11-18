@@ -115,13 +115,26 @@ function rankFloor(n: number, normF: number): number {
   return RANK_FLOOR_FACTOR * n * EIG_EPS * normF;
 }
 
-/** Largest `|a_ij - a_ji|`. */
-function asymmetry(A: number[][]): number {
+/**
+ * True when every `|a_ij - a_ji|` is at most the rank floor
+ * `RANK_FLOOR_FACTOR * n * eps * ||A||_F`: a smaller asymmetry cannot be told from the
+ * rounding of the input. The test is relative, so it gives the same answer at every
+ * scale. The matrix must be square and finite.
+ */
+export function isRoundingSymmetric(A: number[][]): boolean {
+  let amax = 0;
+  for (const row of A) for (const v of row) amax = Math.max(amax, Math.abs(v));
+  if (amax === 0) return true;
+  // Work in units of amax so that ||A||_F and the differences cannot overflow.
+  let normF = 0;
+  for (const row of A) for (const v of row) normF = Math.hypot(normF, v / amax);
   let worst = 0;
   for (let i = 0; i < A.length; i++) {
-    for (let j = i + 1; j < A.length; j++) worst = Math.max(worst, Math.abs(A[i][j] - A[j][i]));
+    for (let j = i + 1; j < A.length; j++) {
+      worst = Math.max(worst, Math.abs(A[i][j] / amax - A[j][i] / amax));
+    }
   }
-  return worst;
+  return worst <= rankFloor(A.length, normF);
 }
 
 /** One node of the single-linkage tree. */
@@ -316,7 +329,7 @@ export function repeatedEigenvalueReport(
   let normF = 0;
   for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
   // A smaller asymmetry than the rank floor cannot be told from rounding.
-  const symmetric = asymmetry(A) <= rankFloor(A.length, normF);
+  const symmetric = isRoundingSymmetric(A);
   const baseTol = linkTolerance(2, normF);
   const rankTol = Math.sqrt(EIG_EPS) * normF;
   const screenLimit = (SCREEN_FACTOR * rankTol) ** 2;
