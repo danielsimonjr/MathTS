@@ -631,7 +631,7 @@ export async function preflightPackage(pkgDir, options = {}) {
       path: srcPath,
       message:
         `${pkgName}: ${srcPath} is newer than dist entry (${distPath}). ` +
-        `Run \`bunx turbo build --filter=${pkgName}\`.`,
+        `Run \`bunx turbo build --force --filter=${pkgName}\`.`,
     });
   }
 
