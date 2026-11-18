@@ -115,18 +115,19 @@ describe('quantileSeq with a BigNumber N or probability returns one type (#1112)
 describe('solveODE with BigNumber input (#1112)', () => {
   // The BigNumber path converts the Butcher tableau with bignumber(); tableau c holds a null.
   const f = (_t: unknown, y: unknown): unknown => (multiply as Any)(-1, y);
-  const first64 = '0.36788579700682765059975326076704962599598511254987580482993941';
+  // RK45 starts from the first-step heuristic, as the number path does (#1120): 5 steps, y(1) = 0.3678805744341225 (number path).
+  const first64 = '0.36788057443412245541986884420576302195736409491568977934073905';
   it('RK45 on y′ = −y with a BigNumber y0 returns BigNumber steps', () => {
     const r = (solveODE as Any)(f, [0, 1], [B(1)]) as { t: unknown[]; y: unknown[][] };
-    expect(r.t.length).toBe(4);
-    expect(isBig(r.t[3])).toBe(true);
-    expect(str(r.t[3])).toBe('1');
-    expect(isBig(r.y[3][0])).toBe(true);
-    expect(str(r.y[3][0]).startsWith(first64)).toBe(true);
+    expect(r.t.length).toBe(6);
+    expect(isBig(r.t[5])).toBe(true);
+    expect(str(r.t[5])).toBe('1');
+    expect(isBig(r.y[5][0])).toBe(true);
+    expect(str(r.y[5][0]).startsWith(first64)).toBe(true);
   });
   it('RK45 with a BigNumber tspan returns the same result', () => {
     const r = (solveODE as Any)(f, [B(0), B(1)], [1]) as { t: unknown[]; y: unknown[][] };
-    expect(r.t.length).toBe(4);
-    expect(str(r.y[3][0]).startsWith(first64)).toBe(true);
+    expect(r.t.length).toBe(6);
+    expect(str(r.y[5][0]).startsWith(first64)).toBe(true);
   });
 });
