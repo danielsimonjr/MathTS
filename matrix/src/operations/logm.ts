@@ -114,6 +114,30 @@ function logPade(X: number[][]): number[][] {
   return result;
 }
 
+/** The largest entry of `A - Q·T·Qᵀ`: the backward error of a computed Schur form. */
+function schurBackwardError(A: number[][], T: number[][], Q: number[][]): number {
+  const R = matMul(matMul(Q, T), transpose(Q));
+  let e = 0;
+  for (let i = 0; i < A.length; i++)
+    for (let j = 0; j < A.length; j++) e = Math.max(e, Math.abs(R[i][j] - A[i][j]));
+  return e;
+}
+
+/**
+ * The eigenvalue at or below which the Schur path reads an eigenvalue as zero: 1e-14 of the
+ * smallest row scale, capped at 1e-14. A matrix with a small row, such as diag(1, 1e-20),
+ * has a small eigenvalue that is not noise (#1125).
+ */
+function eigenvalueFloor(A: number[][]): number {
+  let rowScale = Infinity;
+  for (const row of A) {
+    let m = 0;
+    for (const v of row) if (Math.abs(v) > m) m = Math.abs(v);
+    if (m < rowScale) rowScale = m;
+  }
+  return rowScale > 0 && rowScale < 1 ? 1e-14 * rowScale : 1e-14;
+}
+
 // ---------------------------------------------------------------------------
 // Upper-triangular square root (Björck recurrence) for Schur-based logm
 // ---------------------------------------------------------------------------
@@ -146,7 +170,7 @@ function sqrtUpperTriangular(T: number[][]): number[][] | null {
       let sum = 0;
       for (let k = i + 1; k < j; k++) sum += U[i][k] * U[k][j];
       const denom = U[i][i] + U[j][j];
-      U[i][j] = Math.abs(denom) < 1e-14 ? 0 : (T[i][j] - sum) / denom;
+      U[i][j] = denom === 0 ? 0 : (T[i][j] - sum) / denom;
     }
   }
 
@@ -161,7 +185,9 @@ function sqrtUpperTriangular(T: number[][]): number[][] | null {
 function isStrictlyUpperTriangular(T: number[][]): boolean {
   const n = T.length;
   for (let i = 1; i < n; i++) {
-    if (Math.abs(T[i][i - 1]) > 1e-12) return false;
+    // Compared with the neighbouring diagonal, like the Schur deflation test (#1125).
+    if (Math.abs(T[i][i - 1]) > 1e-12 * (Math.abs(T[i][i]) + Math.abs(T[i - 1][i - 1])))
+      return false;
   }
   return true;
 }
@@ -181,7 +207,7 @@ function isStrictlyUpperTriangular(T: number[][]): boolean {
  *
  * Returns null if the matrix cannot be handled by the Schur-triangular path.
  */
-function logmSchur(A: number[][], tol: number): number[][] | null {
+function logmSchur(A: number[][], tol: number, floor: number): number[][] | null {
   const { H: T, Q } = schurInternal(A);
 
   // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
@@ -189,9 +215,18 @@ function logmSchur(A: number[][], tol: number): number[][] | null {
   if (!isStrictlyUpperTriangular(T)) return null;
 
   // Check that all diagonal entries are strictly positive
+  // An eigenvalue at or below 1e-14 is accepted only when it is above the row-scale floor
+  // and 1e8 times above the backward error of the Schur form, so its logarithm has a
+  // relative error of at most 1e-8 (#1125).
   const n = T.length;
+  let backwardError = -1;
   for (let i = 0; i < n; i++) {
-    if (T[i][i] <= 1e-14) return null;
+    const d = T[i][i];
+    if (d <= 1e-14) {
+      if (d <= floor) return null;
+      if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+      if (d < 1e8 * backwardError) return null;
+    }
   }
 
   // Inverse-scaling phase: repeatedly take upper-triangular sqrt of T
@@ -383,7 +418,8 @@ function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
   // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
   // Falls through (returns null) for complex-eigenvalue Schur blocks.
-  const schurResult = logmSchur(Aarr, tol);
+  const floor = eigenvalueFloor(Aarr);
+  const schurResult = logmSchur(Aarr, tol, floor);
   if (schurResult !== null) return schurResult;
 
   // ----- Eig-based fallback -----

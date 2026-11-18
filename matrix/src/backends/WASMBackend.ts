@@ -52,6 +52,13 @@
 import type { MatrixBackend, BackendType } from './Backend.js';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { jsBackend } from './JSBackend.js';
+import {
+  UNIT_LO,
+  SQUARED,
+  entryRange,
+  ldexp,
+  withPow2Scale,
+} from '@danielsimonjr/mathts-core/internal';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
 
 /**
@@ -572,6 +579,11 @@ export class WASMBackend implements MatrixBackend {
   // the JS path until the artifact is rebuilt.
   // =========================================================================
 
+  /**
+   * LU decomposition. The kernels floor a pivot at an absolute 1e-14, so a matrix whose
+   * largest entry is outside [2^-3, 2^400] runs scaled by an exact power of 2: L and the
+   * permutation are scale-free, and U is scaled back (#1123).
+   */
   async luDecomposition(a: DenseMatrix): Promise<{
     lu: DenseMatrix;
     perm: Int32Array;
@@ -581,6 +593,24 @@ export class WASMBackend implements MatrixBackend {
     if (n !== a.cols) {
       throw new Error('LU decomposition requires a square matrix');
     }
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.luUnscaled(a);
+      const r = this.luUnscaled(scaleDense(a, e));
+      if (r.singular) return r;
+      // lu holds L below the diagonal and U on and above it.
+      const flat = r.lu.toFloat64Array().slice();
+      for (let i = 0; i < n; i++)
+        for (let j = i; j < n; j++) flat[i * n + j] = ldexp(flat[i * n + j], -e);
+      return { lu: new DenseMatrix(n, n, flat), perm: r.perm, singular: false };
+    });
+  }
+
+  private luUnscaled(a: DenseMatrix): {
+    lu: DenseMatrix;
+    perm: Int32Array;
+    singular: boolean;
+  } {
+    const n = a.rows;
     const mod = this.wasmModule;
     if (!mod || typeof mod.matrix_lu_decompose !== 'function') {
       return this.luDecompositionJS(a);
@@ -682,7 +712,20 @@ export class WASMBackend implements MatrixBackend {
     return { lu: new DenseMatrix(n, n, data), perm, singular: false };
   }
 
+  /**
+   * QR decomposition. The Householder steps skip a column whose norm is below an absolute
+   * 1e-14 and square the entries, so a matrix whose largest entry is outside [2^-3, 2^400]
+   * runs scaled by an exact power of 2. Q is scale-free; R is scaled back (#1123).
+   */
   async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.qrUnscaled(a);
+      const res = this.qrUnscaled(scaleDense(a, e));
+      return { q: res.q, r: scaleDense(res.r, -e) };
+    });
+  }
+
+  private qrUnscaled(a: DenseMatrix): { q: DenseMatrix; r: DenseMatrix } {
     const m = a.rows;
     const n = a.cols;
     const mod = this.wasmModule;
@@ -777,11 +820,21 @@ export class WASMBackend implements MatrixBackend {
     };
   }
 
+  /** Inverse. A matrix outside [2^-3, 2^400] runs scaled; inv(2^e A) = 2^-e inv(A) (#1123). */
   async inverse(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
     const n = a.rows;
     if (n !== a.cols) {
       throw new Error('Matrix inverse requires a square matrix');
     }
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.inverseUnscaled(a);
+      const r = this.inverseUnscaled(scaleDense(a, e));
+      return r.singular ? r : { inverse: scaleDense(r.inverse, e), singular: false };
+    });
+  }
+
+  private inverseUnscaled(a: DenseMatrix): { inverse: DenseMatrix; singular: boolean } {
+    const n = a.rows;
     const mod = this.wasmModule;
     if (!mod || typeof mod.matrix_inverse !== 'function') {
       return this.inverseJS(a);
@@ -979,4 +1032,13 @@ export const wasmBackend = new WASMBackend();
  */
 export function createWASMBackend(config?: WASMBackendConfig): WASMBackend {
   return new WASMBackend(config);
+}
+
+/** A copy of `a` with every entry multiplied by 2^e (exact). */
+function scaleDense(a: DenseMatrix, e: number): DenseMatrix {
+  return new DenseMatrix(
+    a.rows,
+    a.cols,
+    a.toFloat64Array().map((v) => ldexp(v, e))
+  );
 }

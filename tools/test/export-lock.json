@@ -1035,6 +1035,9 @@
       "TypeConverters": {
         "kind": "type"
       },
+      "UNIT_LO": {
+        "kind": "number"
+      },
       "Unit": {
         "kind": "type"
       },

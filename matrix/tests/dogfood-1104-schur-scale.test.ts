@@ -715,7 +715,7 @@ describe('#1104 guard inputs keep the unscaled result', () => {
       cond: '"Infinity"',
       pinv: '[[0,0],[0,0]]',
       lowRankApprox: '[[0,0],[0,0]]',
-      sqrtm: '[[5.684341886080802e-14,0],[0,5.684341886080802e-14]]',
+      sqrtm: '[[0,0],[0,0]]',
       logm: 'throws',
       condest: '0',
     },

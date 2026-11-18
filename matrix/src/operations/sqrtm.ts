@@ -29,6 +29,7 @@ import {
   matInv,
   gaussJordanSolve,
   ldexpMatrix,
+  normInf,
   entryRange,
   withPow2Scale,
   ABS_CUTOFF_LO,
@@ -102,12 +103,13 @@ function gramSchmidt(A: number[][]): number[][] {
 function sqrtmSymmetric(A: number[][]): number[][] {
   const n = A.length;
   const Asym = symmetrize(A); // ensure exact symmetry
+  const amax = Math.min(1, normInf(Asym));
 
   // Validate eigenvalues (eig on the symmetrized version)
   const { values, vectors } = eig(Asym, { computeVectors: true });
 
   for (const v of values) {
-    if (v.re < -1e-8) {
+    if (v.re < -1e-8 * amax) {
       throw new Error(
         `matrixSqrtm: negative eigenvalue (${v.re}) — matrix is not positive semi-definite`
       );
@@ -159,6 +161,14 @@ function newtonSqrtUpdate(A: number[][], Y: number[][]): { next: number[][]; dif
 }
 
 /**
+ * Stop tolerance of the Newton step for an iterate of largest entry `ymax`: 1e-13 and,
+ * below `ymax = 1`, relative to `ymax` (#1125).
+ */
+function newtonTolerance(ymax: number): number {
+  return 1e-13 * Math.min(1, ymax);
+}
+
+/**
  * Square root via Newton iteration: Y_{k+1} = (Y_k + A * Y_k^{-1}) / 2.
  * Starting point: Y_0 = I.
  * Converges for matrices with no eigenvalues on the negative real axis.
@@ -173,7 +183,7 @@ function sqrtmNewton(A: number[][]): number[][] | null {
     const step = newtonSqrtUpdate(A, Y);
     if (step === null) return null;
     Y = step.next;
-    if (step.diff < 1e-13) return Y;
+    if (step.diff < newtonTolerance(normInf(Y))) return Y;
   }
 
   // Check convergence: does Y * Y ≈ A?
@@ -182,7 +192,7 @@ function sqrtmNewton(A: number[][]): number[][] | null {
   for (let i = 0; i < n; i++)
     for (let j = 0; j < n; j++) err = Math.max(err, Math.abs(Y2[i][j] - A[i][j]));
 
-  return err < 1e-6 ? Y : null;
+  return err < 1e-6 * Math.min(1, normInf(A)) ? Y : null;
 }
 
 /**
@@ -196,12 +206,13 @@ function sqrtmNewton(A: number[][]): number[][] | null {
 function sqrtmGeneral(A: number[][]): number[][] {
   const n = A.length;
   const { values, vectors } = eig(A, { computeVectors: true });
+  const amax = Math.min(1, normInf(A));
 
   for (const v of values) {
-    if (Math.abs(v.im) > 1e-7) {
+    if (Math.abs(v.im) > 1e-7 * amax) {
       throw new Error('matrixSqrtm: complex eigenvalues detected — real square root not supported');
     }
-    if (v.re < -1e-7) {
+    if (v.re < -1e-7 * amax) {
       throw new Error(
         `matrixSqrtm: negative eigenvalue (${v.re}) — principal square root not real`
       );
@@ -257,7 +268,12 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
 
   let i = 0;
   while (i < n) {
-    if (i === n - 1 || Math.abs(T[i + 1][i]) < 1e-12) {
+    // A subdiagonal entry that Schur left non-zero below its deflation tolerance
+    // (1e-12 of the neighbouring diagonal) is Hessenberg residue, not a 2×2 block (#1127).
+    if (
+      i === n - 1 ||
+      Math.abs(T[i + 1][i]) <= 1e-12 * (Math.abs(T[i][i]) + Math.abs(T[i + 1][i + 1]))
+    ) {
       blockStart.push(i);
       blockSize.push(1);
       i++;
@@ -301,7 +317,7 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
       if (tauSq < 0) return null;
       const tau = Math.sqrt(tauSq);
 
-      if (Math.abs(tau) < 1e-14) return null;
+      if (tauSq < 1e-28 * Math.max(Math.abs(trM), 2 * sqrtDet)) return null;
 
       U[r][r] = (a + sqrtDet) / tau;
       U[r][r + 1] = b2 / tau;
@@ -493,7 +509,11 @@ export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
 function sqrtmKernel(Aarr: number[][], opts?: SqrtmOptions): number[][] {
   // Detect symmetry
   const forceSymmetric = opts?.assumeSymmetric ?? false;
-  const isSymm = forceSymmetric || isSymmetricMatrix(Aarr);
+  const amax = normInf(Aarr);
+  // sqrtm of the zero matrix is the zero matrix; Newton from I only halves toward it.
+  if (amax === 0) return Aarr.map((row) => row.map(() => 0));
+  // The tolerances are relative to the largest entry below 1 and absolute above it (#1125).
+  const isSymm = forceSymmetric || isSymmetricMatrix(Aarr, 1e-8 * Math.min(1, amax));
 
   let result: number[][];
 
