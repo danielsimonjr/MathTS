@@ -127,7 +127,7 @@ describe('#1125 matrixSqrtm: a negative or complex eigenvalue is rejected at eac
   const sqrtmOf = (a: number[][], f: number): number[][] =>
     nested(matrixSqrtm(DenseMatrix.fromArray(scale(a, f))));
 
-  it.each([2 ** -20, 1, 2 ** 40])('symmetric, eigenvalue -0.01·%s', (f) => {
+  it.each([2 ** -20, 1, 2 ** 40])('symmetric, eigenvalue -0.01·%p', (f) => {
     expect(() =>
       sqrtmOf(
         [
@@ -139,7 +139,7 @@ describe('#1125 matrixSqrtm: a negative or complex eigenvalue is rejected at eac
     ).toThrow(/negative eigenvalue/);
   });
 
-  it.each([2 ** -20, 1, 2 ** 40])('non-symmetric, eigenvalue -0.01·%s', (f) => {
+  it.each([2 ** -20, 1, 2 ** 40])('non-symmetric, eigenvalue -0.01·%p', (f) => {
     expect(() =>
       sqrtmOf(
         [
@@ -151,7 +151,7 @@ describe('#1125 matrixSqrtm: a negative or complex eigenvalue is rejected at eac
     ).toThrow(/negative eigenvalue/);
   });
 
-  it.each([2 ** -20, 1, 2 ** 40])('complex pair 1 ± 0.001i beside -0.01, times %s', (f) => {
+  it.each([2 ** -20, 1, 2 ** 40])('complex pair 1 ± 0.001i beside -0.01, times %p', (f) => {
     expect(() =>
       sqrtmOf(
         [
@@ -308,7 +308,7 @@ describe('#1125 qr of dependent columns', () => {
   });
 
   // Column 3 = column 1 + column 2. The rank is 2 at each magnitude below 1.
-  it.each([1, 2 ** -10, 2 ** -19])('a dependent column at %s gives R[2][2] = 0 to 1e-14', (f) => {
+  it.each([1, 2 ** -10, 2 ** -19])('a dependent column at %p gives R[2][2] = 0 to 1e-14', (f) => {
     const A = scale(
       [
         [1, 2, 3],
@@ -368,7 +368,7 @@ describe.each([
   });
 
   it.each([1e-100, 1e-15, 1e-8, 3e200])(
-    'qr of [[3,1],[4,2]]·%s: Q^T·R = A, R triangular',
+    'qr of [[3,1],[4,2]]·%p: Q^T·R = A, R triangular',
     async (s) => {
       await init();
       const A = scale(base, s);
@@ -390,7 +390,7 @@ describe.each([
     }
   );
 
-  it.each([1e-100, 1e-15, 3e200])('lu of the matrix·%s is regular and P·A = L·U', async (s) => {
+  it.each([1e-100, 1e-15, 3e200])('lu of the matrix·%p is regular and P·A = L·U', async (s) => {
     await init();
     const A = scale(base, s);
     const { lu, perm, singular } = await backend.luDecomposition(DenseMatrix.fromArray(A));
@@ -402,7 +402,7 @@ describe.each([
     expect(maxDiff(mul(L, U), PA) / maxAbs(A)).toBeLessThan(1e-14);
   });
 
-  it.each([1e-100, 1e-15, 3e200])('inverse of the matrix·%s is the SciPy inverse', async (s) => {
+  it.each([1e-100, 1e-15, 3e200])('inverse of the matrix·%p is the SciPy inverse', async (s) => {
     await init();
     const { inverse, singular } = await backend.inverse(DenseMatrix.fromArray(scale(base, s)));
     expect(singular).toBe(false);
