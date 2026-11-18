@@ -69,6 +69,20 @@ function isVectorInput(x: unknown): boolean {
 }
 
 /**
+ * Tells if `a` holds a NaN. A NaN is the only value that is not equal to itself.
+ *
+ * @param a - A number array or a typed array.
+ * @returns `true` when one element of `a` is NaN.
+ */
+export function hasNaN(a: ArrayLike<number>): boolean {
+  for (let i = 0; i < a.length; i++) {
+    const v = a[i];
+    if (v !== v) return true;
+  }
+  return false;
+}
+
+/**
  * Converts the vector input of a number-only function to a number array. A `Complex`,
  * `Fraction` or `BigNumber` element has no exact path in such a function, so the function
  * rejects the element (#1042). The function does not read the element as a double.

@@ -1956,6 +1956,7 @@
       "functions/src/stats/weighted-stats.ts",
       "functions/src/timeseries-extra.ts",
       "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/hypothesis.ts",
       "functions/src/typed/integration.ts",
       "functions/src/typed/matrix-ops.ts"
     ],

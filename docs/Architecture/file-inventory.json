@@ -6967,7 +6967,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 347
+      "loc": 353
     },
     {
       "file": "functions/src/index.ts",
@@ -8248,7 +8248,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 441
+      "loc": 446
     },
     {
       "file": "functions/src/signal/system-response.ts",
@@ -8542,7 +8542,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 68
+      "loc": 69
     },
     {
       "file": "functions/src/stats/fit-distribution.ts",
@@ -8612,7 +8612,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 141
+      "loc": 142
     },
     {
       "file": "functions/src/stats/timeseries.ts",
@@ -9298,7 +9298,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2167
+      "loc": 2170
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -9354,7 +9354,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 103
+      "loc": 117
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -10544,7 +10544,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 108
+      "loc": 219
     },
     {
       "file": "functions/tests/dogfood-989a-sequences.test.ts",

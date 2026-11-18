@@ -11,7 +11,7 @@ import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
 import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
-import { numberVector } from './typed/number-matrix.js';
+import { hasNaN, numberVector } from './typed/number-matrix.js';
 
 type Vec = readonly number[] | Float64Array;
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
@@ -119,7 +119,7 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
   if (arrs.length < 2) throw new Error('kruskalWallis: need at least 2 non-empty groups');
   const pooled = arrs.flat();
   const N = pooled.length;
-  if (pooled.some((v) => v !== v)) return { statistic: NaN, pValue: NaN, df: arrs.length - 1 };
+  if (hasNaN(pooled)) return { statistic: NaN, pValue: NaN, df: arrs.length - 1 };
   const ranks = rankdata(pooled);
   let offset = 0;
   let sumRanksSq = 0;
@@ -160,7 +160,7 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
       `wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`
     );
   const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
-  if (diffs.some((v) => v !== v)) return { statistic: NaN, pValue: NaN, zStatistic: NaN };
+  if (hasNaN(diffs)) return { statistic: NaN, pValue: NaN, zStatistic: NaN };
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
   if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');

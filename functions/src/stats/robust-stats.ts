@@ -2,7 +2,7 @@
  * Generalized means, geometric standard deviation, robust regression slopes
  * and partial correlation (gap-analysis 2026-11-04, Batch A).
  */
-import { numberVector } from '../typed/number-matrix.js';
+import { hasNaN, numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
 const meanOf = (a: number[]): number => a.reduce((s, v) => s + v, 0) / a.length;
@@ -86,6 +86,7 @@ function checkPairs(x: Vec, y: Vec, name: string): [number[], number[]] {
  */
 export function theilSen(x: Vec, y: Vec): { slope: number; intercept: number } {
   const [xs, ys] = checkPairs(x, y, 'theilSen');
+  if (hasNaN(xs) || hasNaN(ys)) return { slope: NaN, intercept: NaN };
   const slopes = pairwiseSlopes(xs, ys);
   if (slopes.length === 0) throw new RangeError('theilSen: all x values are equal');
   const slope = medianOf(slopes);

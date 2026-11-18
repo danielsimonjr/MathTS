@@ -1,7 +1,7 @@
 /**
  * Standardized effect sizes (gap-analysis 2026-11-04, Batch A).
  */
-import { numberVector } from '../typed/number-matrix.js';
+import { hasNaN, numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
 const meanOf = (a: number[]): number => a.reduce((s, v) => s + v, 0) / a.length;
@@ -56,6 +56,7 @@ export function rankBiserial(a: Vec, b: Vec): number {
   const xa = numberVector('rankBiserial', a);
   const xb = numberVector('rankBiserial', b);
   if (xa.length === 0 || xb.length === 0) throw new RangeError('rankBiserial: empty sample');
+  if (hasNaN(xa) || hasNaN(xb)) return NaN;
   let u = 0;
   for (const av of xa) {
     for (const bv of xb) {
