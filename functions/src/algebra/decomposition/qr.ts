@@ -2,6 +2,7 @@ import { factory } from '../../utils/factory.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isFraction } from '../../utils/is.js';
+import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 interface MatrixConstructor {
@@ -473,8 +474,30 @@ export const createQr = /* #__PURE__ */ factory(
       };
     }
 
+    /**
+     * Householder QR of a matrix of plain numbers, scaled by an exact power of 2 when the
+     * largest entry is outside [2^-400, 2^400] (the Householder step squares the entries);
+     * Q is orthogonal, so only R is scaled back (#1122). An ordinary matrix is not scaled.
+     */
+    function _denseQRScaled(m: DenseMatrix): QRResult {
+      const data = m._data as unknown[][];
+      if (data.length === 0 || !matrixAllNumbers(data)) return _denseQRimpl(m);
+      return withPow2Scale(entryRange(data as number[][]), -SQUARED, SQUARED, (e) => {
+        if (e === 0) return _denseQRimpl(m);
+        const scaled = m.clone();
+        for (const row of scaled._data as number[][]) {
+          for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], e);
+        }
+        const ret = _denseQRimpl(scaled);
+        for (const row of ret.R._data as number[][]) {
+          for (let j = 0; j < row.length; j++) row[j] = ldexp(row[j], -e);
+        }
+        return ret;
+      });
+    }
+
     function _denseQR(m: DenseMatrix): QRResult {
-      const ret = _denseQRimpl(m);
+      const ret = _denseQRScaled(m);
       const Rdata = ret.R._data as unknown[][];
       if ((m._data as unknown[][]).length > 0) {
         const zero = (Rdata[0][0] as { type?: string }).type === 'Complex' ? complex(0) : 0;

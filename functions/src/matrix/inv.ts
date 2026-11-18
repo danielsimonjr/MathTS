@@ -2,6 +2,7 @@ import { isMatrix } from '../utils/is.js';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { format } from '../utils/string.js';
+import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
@@ -140,10 +141,10 @@ export const createInv = /* #__PURE__ */ factory(
               if (isMatrix(x)) {
                 const matX = x as Matrix;
                 const storage = matX.storage() as 'dense' | 'sparse';
-                return matrix(_inv(matX.valueOf() as Scalar[][], rows, cols), storage);
+                return matrix(_invScaled(matX.valueOf() as Scalar[][], rows, cols), storage);
               } else {
                 // return an Array
-                return _inv(x as Scalar[][], rows, cols) as unknown as Scalar[];
+                return _invScaled(x as Scalar[][], rows, cols) as unknown as Scalar[];
               }
             } else {
               throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
@@ -163,6 +164,25 @@ export const createInv = /* #__PURE__ */ factory(
         return divideScalar(1, x); // FIXME: create a BigNumber one when configured for bignumbers
       },
     });
+
+    /**
+     * `_inv` of a matrix of plain numbers, scaled by an exact power of 2 when the largest
+     * entry is outside [2^-400, 2^400]: the 2 x 2 determinant forms products of entries,
+     * which underflow or overflow there. inv(2^e A) = 2^-e inv(A) (#1122). An ordinary
+     * matrix, and a matrix with another entry type, is not scaled.
+     */
+    function _invScaled(mat: Scalar[][], rows: number, cols: number): Scalar[][] {
+      if (!mat.every((row) => row.every((v) => typeof v === 'number'))) {
+        return _inv(mat, rows, cols);
+      }
+      const nums = mat as unknown as number[][];
+      return withPow2Scale(entryRange(nums), -SQUARED, SQUARED, (e) => {
+        if (e === 0) return _inv(mat, rows, cols);
+        const scaled = nums.map((row) => row.map((v) => ldexp(v, e)));
+        const result = _inv(scaled as unknown as Scalar[][], rows, cols) as unknown as number[][];
+        return result.map((row) => row.map((v) => ldexp(v, e))) as unknown as Scalar[][];
+      });
+    }
 
     /**
      * Calculate the inverse of a square matrix

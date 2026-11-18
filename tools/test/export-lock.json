@@ -864,6 +864,9 @@
       }
     },
     "./internal": {
+      "ABS_CUTOFF_LO": {
+        "kind": "number"
+      },
       "AbortSignalLike": {
         "kind": "type"
       },
@@ -923,6 +926,12 @@
       },
       "DimensionError": {
         "kind": "function"
+      },
+      "EntryRange": {
+        "kind": "type"
+      },
+      "FOURTH": {
+        "kind": "number"
       },
       "FactoryFunction": {
         "kind": "type"
@@ -1005,6 +1014,9 @@
       "Range": {
         "kind": "type"
       },
+      "SQUARED": {
+        "kind": "number"
+      },
       "ScalarBinaryOp": {
         "kind": "type"
       },
@@ -1069,6 +1081,9 @@
         "kind": "function"
       },
       "acosh": {
+        "kind": "function"
+      },
+      "allFinite": {
         "kind": "function"
       },
       "allocAsHeader": {
@@ -1171,6 +1186,9 @@
         "kind": "function"
       },
       "endsWith": {
+        "kind": "function"
+      },
+      "entryRange": {
         "kind": "function"
       },
       "escape": {
@@ -1326,6 +1344,12 @@
       "lazy": {
         "kind": "function"
       },
+      "ldexp": {
+        "kind": "function"
+      },
+      "ldexpMatrix": {
+        "kind": "function"
+      },
       "loadWasmManifest": {
         "kind": "function"
       },
@@ -1357,6 +1381,9 @@
         "kind": "function"
       },
       "pickShallow": {
+        "kind": "function"
+      },
+      "pow2ScaleExponent": {
         "kind": "function"
       },
       "processSizesWildcard": {
@@ -1468,6 +1495,9 @@
         "kind": "function"
       },
       "warnOnce": {
+        "kind": "function"
+      },
+      "withPow2Scale": {
         "kind": "function"
       }
     }

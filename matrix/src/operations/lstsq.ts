@@ -10,7 +10,7 @@
 
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
-import { SQUARED } from './common.js';
+import { SQUARED, ldexp, pow2ScaleExponent } from './common.js';
 
 /** Machine epsilon for double precision (2^-52). */
 const LSTSQ_EPS = 2.220446049250313e-16;
@@ -61,6 +61,7 @@ export function lstsq(
   }
   const Y = new Float64Array(m * k);
   let sB = 0;
+  let bMin = Infinity;
   for (let i = 0; i < m; i++) {
     if (bRows[i].length !== k) {
       throw new TypeError('lstsq: b must be a vector or a rectangular matrix');
@@ -72,6 +73,7 @@ export function lstsq(
       }
       Y[i * k + j] = v;
       sB = Math.max(sB, Math.abs(v));
+      if (v !== 0) bMin = Math.min(bMin, Math.abs(v));
     }
   }
   const out = Array.from({ length: n }, () => new Array<number>(k).fill(0));
@@ -80,9 +82,19 @@ export function lstsq(
   // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
   // sB / sA is taken first then (#1104). An ordinary pair keeps the original order.
   const inWindow = (v: number): boolean => v >= 2 ** -SQUARED && v <= 2 ** SQUARED;
-  const ratioInWindow = inWindow(sA) && inWindow(sB);
+  // The right-hand side is divided by its largest entry (an ordinary b), by an exact power
+  // of 2 that brings that entry to the top of the window (an extreme b), or by 1 when that
+  // power would push a nonzero entry below 2^-1022. Division by the largest entry would
+  // flush the small entries of an extreme b to zero (#1124); a Householder step forms no
+  // squares of b, so the unscaled b is safe when the entries span the double range.
+  let sBScale = sB;
+  if (!inWindow(sB)) {
+    const e = pow2ScaleExponent(sB, -SQUARED, SQUARED);
+    sBScale = ldexp(bMin, e) < 2 ** -1022 ? 1 : ldexp(1, -e);
+  }
+  const ratioInWindow = inWindow(sA) && inWindow(sBScale);
   for (let i = 0; i < R.length; i++) R[i] /= sA;
-  for (let i = 0; i < Y.length; i++) Y[i] /= sB;
+  for (let i = 0; i < Y.length; i++) Y[i] /= sBScale;
 
   // Column-pivoted Householder QR. perm[j] is the original index of working column j.
   const steps = Math.min(m, n);
@@ -106,7 +118,7 @@ export function lstsq(
       minNormSolve(R, n, rank, Y, k, col, z);
     }
     for (let j = 0; j < n; j++)
-      out[perm[j]][col] = ratioInWindow ? (z[j] * sB) / sA : z[j] * (sB / sA);
+      out[perm[j]][col] = ratioInWindow ? (z[j] * sBScale) / sA : z[j] * (sBScale / sA);
   }
   return finish();
 }

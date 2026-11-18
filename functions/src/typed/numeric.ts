@@ -12,6 +12,13 @@
  */
 
 import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  ABS_CUTOFF_LO,
+  SQUARED,
+  entryRange,
+  ldexp,
+  pow2ScaleExponent,
+} from '@danielsimonjr/mathts-core/internal';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -1498,19 +1505,33 @@ export function eventDetection(
 // =============================================================================
 
 /**
+ * A copy of `A` scaled by an exact power of 2 so that its largest entry is inside
+ * [2^-20, 2^400]. The pivot tests of `rank` and `nullspace` compare to an absolute
+ * cutoff, so a matrix of tiny entries reads as zero (#1122). A matrix inside the window,
+ * or one with a NaN or infinite entry, is copied unchanged.
+ */
+function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
+  const range = entryRange(A);
+  const e = range.finite ? pow2ScaleExponent(range.amax, ABS_CUTOFF_LO, SQUARED) : 0;
+  return e === 0 ? A.map((row) => row.slice()) : A.map((row) => row.map((v) => ldexp(v, e)));
+}
+
+/**
  * Numerical rank of a matrix using SVD-like approach.
  *
  * @param A - Matrix (m x n)
- * @param tol - Tolerance for zero singular values (default 1e-10)
+ * @param tol - Absolute pivot tolerance. Without it, the matrix is first scaled by a power
+ *   of 2 into [2^-20, 2^400] and the tolerance is 1e-10.
  * @returns Numerical rank
  */
-export function rank(A: number[][], tol: f64 = 1e-10): i32 {
+export function rank(A: number[][], tol?: f64): i32 {
   const m = A.length;
   if (m === 0) return 0;
   const n = A[0].length;
 
   // Use Gaussian elimination to count pivots
-  const M = A.map((row) => row.slice());
+  const M = tol === undefined ? scaledCopyForAbsoluteCutoff(A) : A.map((row) => row.slice());
+  tol ??= 1e-10;
   let r = 0;
 
   for (let col = 0; col < n && r < m; col++) {
@@ -1547,7 +1568,7 @@ export function nullspace(A: number[][]): number[][] {
   const n = A[0].length;
 
   // RREF
-  const M = A.map((row) => row.slice());
+  const M = scaledCopyForAbsoluteCutoff(A);
   const pivotCols: i32[] = [];
   let r = 0;
 
