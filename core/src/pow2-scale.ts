@@ -24,6 +24,13 @@ export const ABS_CUTOFF_LO = -20;
 export const UNIT_LO = -3;
 
 /**
+ * `UNIT_FLOOR_LO`: a kernel with an absolute zero test of about 1e-15 on a residual that can
+ * be 1e-10 of the largest entry. The window starts at 2^0, so the largest entry is at least 1
+ * and the test is at most 1e-15 relative (#1168).
+ */
+export const UNIT_FLOOR_LO = 0;
+
+/**
  * The exponent `e` that moves `amax` into the window [2^lo, 2^hi]. It is 0 inside the
  * window and for a zero or non-finite `amax`. A larger `amax` goes to the top of the
  * window, [2^(hi-1), 2^hi); a smaller one goes to [1, 2). The edges are compared

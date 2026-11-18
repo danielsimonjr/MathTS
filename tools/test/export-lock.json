@@ -1035,6 +1035,9 @@
       "TypeConverters": {
         "kind": "type"
       },
+      "UNIT_FLOOR_LO": {
+        "kind": "number"
+      },
       "UNIT_LO": {
         "kind": "number"
       },
