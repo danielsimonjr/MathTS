@@ -161,10 +161,9 @@ export const createIsPrime = /* #__PURE__ */ factory(
               n.toNumber() - 2,
               Math.floor(2 * Math.pow(n.toFixed(0).length * Math.log(10), 2))
             );
-            bases = [];
-            for (let i = 2; i <= max; i += 1) {
-              bases.push(max);
-            }
+            // The list from mathjs holds the one value `max`, repeated (#1164). One test with that
+            // base gives the same answer as the repeats, which took 2 minutes for 2^127 - 1.
+            bases = max >= 2 ? [max] : [];
           }
           for (let i = 0; i < bases.length; i += 1) {
             const a = bases[i];

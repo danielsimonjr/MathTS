@@ -14,9 +14,12 @@ interface BigNumberType {
   floor(): BigNumberType;
   subtract(other: BigNumberType): BigNumberType;
   times(other: BigNumberType): BigNumberType;
+  toFixed(digits: number): string;
 }
 
 interface BigNumberConstructor {
+  precision: number;
+  config(options: { precision: number }): unknown;
   fromNumber(value: number): BigNumberType;
 }
 
@@ -158,7 +161,18 @@ export const createXgcd = /* #__PURE__ */ factory(
     }
 
     function _xgcdBigNumber(a: BigNumberType, b: BigNumberType): unknown {
-      return _xgcdRing(bigNumberRing, a, b);
+      // BigNumber add and multiply round to the precision (#1118). Every quotient and Bezout
+      // coefficient is at most |a| or |b|, so with twice their digits the steps stay exact.
+      const precision = BigNumber.precision;
+      if (a.isInteger() && b.isInteger()) {
+        const digits = a.toFixed(0).length + b.toFixed(0).length;
+        BigNumber.config({ precision: Math.max(precision, 2 * digits + 10) });
+      }
+      try {
+        return _xgcdRing(bigNumberRing, a, b);
+      } finally {
+        BigNumber.config({ precision });
+      }
     }
 
     function _xgcdFraction(a: FractionType, b: FractionType): unknown {
