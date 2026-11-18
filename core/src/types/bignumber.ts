@@ -95,14 +95,33 @@ function pow10(n: number): bigint {
   return largePow10.value;
 }
 
+const pow10HalfCache: bigint[] = [];
+
+/** `10^n / 2` for `n >= 1`: the half of a rounding divisor. */
+function pow10Half(n: number): bigint {
+  if (n < POW10_CACHE_SIZE) return (pow10HalfCache[n] ??= pow10(n) / 2n);
+  return pow10(n) / 2n;
+}
+
 const LOG10_2 = Math.log10(2);
+/** Below this value a coefficient converts to a finite double. */
+const NUMBER_DIGIT_LIMIT = 10n ** 300n;
 
 /**
  * The number of decimal digits of a positive bigint. The bit length comes from the hexadecimal
  * string, which is much cheaper to build than the decimal string, and gives the count to within
  * one digit. A comparison with a power of ten then makes the count exact (#1118).
  */
-function digitCount(coefficient: bigint): number {
+function digitCount(coefficient: bigint, min = 1): number {
+  // A sum has a few digits more than the precision: compare with the next powers of ten first.
+  for (let d = min; d < min + 3; d++) if (coefficient < pow10(d)) return d;
+  if (coefficient < NUMBER_DIGIT_LIMIT) {
+    // A double holds the value to about 16 digits, so log10 gives the count to within one digit.
+    let digits = Math.floor(Math.log10(Number(coefficient))) + 1;
+    while (coefficient >= pow10(digits)) digits++;
+    while (digits > 1 && coefficient < pow10(digits - 1)) digits--;
+    return digits;
+  }
   const hex = coefficient.toString(16);
   const bits = (hex.length - 1) * 4 + (32 - Math.clz32(parseInt(hex[0], 16)));
   let digits = Math.floor((bits - 1) * LOG10_2) + 1;
@@ -111,12 +130,18 @@ function digitCount(coefficient: bigint): number {
   return digits;
 }
 
+/** True when `10^precision` comes from the cache, so a comparison with it is cheap. */
+function cachedPrecision(precision: number): boolean {
+  return Number.isInteger(precision) && precision > 0 && precision < POW10_CACHE_SIZE - 3;
+}
+
 /**
  * True when a positive coefficient has no more than `precision` digits. One comparison with a
  * power of ten decides for a usual precision, with no digit count (#1118).
  */
 function fitsPrecision(coefficient: bigint, precision: number): boolean {
-  if (Number.isSafeInteger(precision) && precision > 0) return coefficient < pow10(precision);
+  if (cachedPrecision(precision)) return coefficient < pow10(precision);
+  // A very large precision (1e9 in the bitwise helpers) must not build its power of ten.
   return digitCount(coefficient) <= precision;
 }
 
@@ -1318,18 +1343,27 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN || this._isInfinite || this._sign === 0) return this;
 
     if (fitsPrecision(this._coefficient, precision)) return this;
+    return this.roundExcessDigits(precision, mode);
+  }
 
-    // Calculate how many digits to remove from the coefficient
-    const digitsToRemove = digitCount(this._coefficient) - precision;
+  /** Rounds a finite, nonzero value whose coefficient has more than `precision` digits. */
+  private roundExcessDigits(precision: number, mode: RoundingMode): BigNumber {
+    // The coefficient does not fit, so it has at least precision + 1 digits.
+    const lowest = cachedPrecision(precision) ? precision + 1 : 1;
+    const digitsToRemove = digitCount(this._coefficient, lowest) - precision;
     const divisor = pow10(digitsToRemove);
-    const quotient = this._coefficient / divisor;
-    const remainder = this._coefficient - quotient * divisor;
-    const halfDivisor = divisor / 2n;
-
-    let rounded = quotient;
-    const shouldRoundUp = this.shouldRound(remainder, halfDivisor, divisor, quotient, mode);
-    if (shouldRoundUp) {
-      rounded += 1n;
+    const halfDivisor = pow10Half(digitsToRemove);
+    let rounded: bigint;
+    if (mode === 'halfUp') {
+      // A tie rounds away from zero, so one division of the coefficient plus a half decides.
+      rounded = (this._coefficient + halfDivisor) / divisor;
+    } else if (mode === 'down') {
+      rounded = this._coefficient / divisor;
+    } else {
+      const quotient = this._coefficient / divisor;
+      const remainder = this._coefficient - quotient * divisor;
+      rounded = quotient;
+      if (this.shouldRound(remainder, halfDivisor, divisor, quotient, mode)) rounded += 1n;
     }
 
     // Adjust exponent to account for removed digits
@@ -2152,7 +2186,10 @@ export class BigNumber implements MathTSValue {
       return this.normalize(sign, coefficient, exponent);
     }
     // The rounding step strips the trailing zeros, so the exact value needs no normalize first.
-    return BigNumber.#allocate(sign, coefficient, exponent).roundToPrecision(precision);
+    return BigNumber.#allocate(sign, coefficient, exponent).roundExcessDigits(
+      precision,
+      globalConfig.rounding
+    );
   }
 
   private normalize(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {
@@ -2163,7 +2200,8 @@ export class BigNumber implements MathTSValue {
     // Remove trailing zeros
     let coef = coefficient;
     let exp = exponent;
-    while (coef % 10n === 0n && coef !== 0n) {
+    // An odd coefficient has no trailing zero: the bit test is much cheaper than a division.
+    while ((coef & 1n) === 0n && coef % 10n === 0n) {
       coef = coef / 10n;
       exp++;
     }

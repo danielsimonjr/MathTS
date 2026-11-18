@@ -4,10 +4,11 @@ import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isPrime.
 // Uses MathTS core's BigNumber method names (lessThanOrEqual/lessThan/equals/toBigInt), not
-// decimal.js's (lte/lt/eq). Core's BigNumber is bigint-backed, so integer arithmetic is already
-// exact — the decimal.js precision-cloning dance (constructor.clone) that this used to do is
-// unnecessary and its API does not exist on core's BigNumber.
+// decimal.js's (lte/lt/eq). Core's BigNumber rounds a product to the configured precision, like
+// decimal.js. Core has one global precision and no constructor.clone, so the Miller-Rabin test
+// raises the global precision and then restores it.
 interface BigNumberType {
+  constructor: { precision: number; config(options: { precision: number }): unknown };
   lessThanOrEqual(n: number): boolean;
   gt(n: number): boolean;
   lessThan(n: number): boolean;
@@ -136,45 +137,54 @@ export const createIsPrime = /* #__PURE__ */ factory(
           return accumulator;
         }
 
-        // https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Deterministic_variants
-        // core's BigNumber is bigint-backed → integer mul/mod are already exact, so no precision
-        // clone is needed (decimal.js's constructor.clone does not exist on it).
-        let r = 0;
-        let d = n.sub(1);
-        while (d.mod(2).equals(0)) {
-          d = d.div(2);
-          r += 1;
-        }
-        let bases: number[] | null;
-        // https://en.wikipedia.org/wiki/Miller–Rabin_primality_test#Testing_against_small_sets_of_bases
-        if (n.toBigInt() < 3317044064679887385961981n) {
-          bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41].filter((x) => x < n.toNumber());
-        } else {
-          const max = Math.min(
-            n.toNumber() - 2,
-            Math.floor(2 * Math.pow(n.toFixed(0).length * Math.log(10), 2))
-          );
-          bases = [];
-          for (let i = 2; i <= max; i += 1) {
-            bases.push(max);
+        // A product of two values below n has at most twice the digits of n. With that precision
+        // every product, mod and halving is exact (#1118).
+        const BigNumber = n.constructor;
+        const precision = BigNumber.precision;
+        BigNumber.config({ precision: 2 * n.toFixed(0).length + 10 });
+        try {
+          let r = 0;
+
+          let d = n.sub(1);
+          while (d.mod(2).equals(0)) {
+            d = d.div(2);
+            r += 1;
           }
-        }
-        for (let i = 0; i < bases.length; i += 1) {
-          const a = bases[i];
-          const adn = modPow(n.sub(n).add(a), d, n);
-          if (!(adn as BigNumberType).equals(1)) {
-            for (
-              let i = 0, x = adn as BigNumberType;
-              !x.equals(n.sub(1) as unknown as number);
-              i += 1, x = x.mul(x).mod(n as unknown as number) as unknown as BigNumberType
-            ) {
-              if (i === r - 1) {
-                return false;
+          let bases: number[] | null;
+          // https://en.wikipedia.org/wiki/Miller–Rabin_primality_test#Testing_against_small_sets_of_bases
+          if (n.toBigInt() < 3317044064679887385961981n) {
+            bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41].filter(
+              (x) => x < n.toNumber()
+            );
+          } else {
+            const max = Math.min(
+              n.toNumber() - 2,
+              Math.floor(2 * Math.pow(n.toFixed(0).length * Math.log(10), 2))
+            );
+            bases = [];
+            for (let i = 2; i <= max; i += 1) {
+              bases.push(max);
+            }
+          }
+          for (let i = 0; i < bases.length; i += 1) {
+            const a = bases[i];
+            const adn = modPow(n.sub(n).add(a), d, n);
+            if (!(adn as BigNumberType).equals(1)) {
+              for (
+                let i = 0, x = adn as BigNumberType;
+                !x.equals(n.sub(1) as unknown as number);
+                i += 1, x = x.mul(x).mod(n as unknown as number) as unknown as BigNumberType
+              ) {
+                if (i === r - 1) {
+                  return false;
+                }
               }
             }
           }
+          return true;
+        } finally {
+          BigNumber.config({ precision });
         }
-        return true;
       },
 
       'Array | Matrix': typed.referToSelf(
