@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1344, "e": 7376, "re": 3188 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-18", "f": 1344, "e": 7379, "re": 3190 },
   "s": {
-    "loc": 235538,
+    "loc": 235724,
     "cls": 62,
     "int": 668,
     "fn": 2567,
     "tg": 181,
     "en": 0,
-    "co": 1689,
+    "co": 1690,
     "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -331,6 +331,7 @@
         "SQUARED",
         "FOURTH",
         "ABS_CUTOFF_LO",
+        "UNIT_LO",
         "pow2ScaleExponent",
         "ldexp",
         "ldexpMatrix",
@@ -341,8 +342,7 @@
         "eye",
         "cloneMatrix",
         "transpose",
-        "matInv",
-        "gaussJordanSolve"
+        "matInv"
       ],
       "int": [
         "PackedMatrixDescriptor",
