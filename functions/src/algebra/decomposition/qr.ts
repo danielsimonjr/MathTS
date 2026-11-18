@@ -70,6 +70,8 @@ interface Dependencies {
   matrix: MatrixConstructor;
   zeros: ZerosFunction;
   identity: IdentityFunction;
+  isZero: TypedFunction;
+  equal: TypedFunction;
   sign: TypedFunction;
   sqrt: TypedFunction;
   conj: TypedFunction;
@@ -81,12 +83,17 @@ interface Dependencies {
   complex: ComplexFunction;
 }
 
+/** Below this square of a column norm a double has lost its relative precision (2^-1022 * 2^53). */
+const DOUBLE_NORM_FLOOR = 2 ** -969;
+
 const name = 'qr';
 const dependencies = [
   'typed',
   'matrix',
   'zeros',
   'identity',
+  'isZero',
+  'equal',
   'sign',
   'sqrt',
   'conj',
@@ -106,6 +113,8 @@ export const createQr = /* #__PURE__ */ factory(
     matrix,
     zeros,
     identity,
+    isZero,
+    equal,
     sign,
     sqrt,
     conj,
@@ -154,6 +163,29 @@ export const createQr = /* #__PURE__ */ factory(
     }
 
     /**
+     * Tells if the column norm of a Householder step is too small to reflect. Householder only
+     * needs a nonzero norm to avoid a division by zero. A plain number matrix is scaled to
+     * amax >= 1 first (#1168), so the absolute tolerance of `isZero` is a test relative to
+     * amax and keeps its behavior. For any other storage the tolerance dropped a nearly dependent
+     * column (#1188), so only an exact zero counts. A norm held in doubles also counts as zero
+     * when its square is below `DOUBLE_NORM_FLOOR`: the square then has lost its relative
+     * precision and a reflection built from it is not orthogonal.
+     */
+    function zeroPivot(pivot: unknown, plain: boolean): boolean {
+      return plain ? (equal(pivot, 0) as boolean) : isExactZero(pivot);
+    }
+
+    function negligibleNorm(alpha: unknown, alphaSquared: unknown, plain: boolean): boolean {
+      if (plain) return isZero(alpha) as boolean;
+      if (isExactZero(alpha)) return true;
+      const sq =
+        typeof alphaSquared === 'number'
+          ? alphaSquared
+          : (alphaSquared as { re?: unknown } | null)?.re;
+      return typeof sq === 'number' && sq < DOUBLE_NORM_FLOOR;
+    }
+
+    /**
      * Householder step loop for plain number storage. Scalar work per step uses the
      * same typed calls as `_denseQRimpl`; inner R/Q updates use cached number ops.
      * Returns the first step index to finish on the generic path (may be `limit`).
@@ -165,7 +197,8 @@ export const createQr = /* #__PURE__ */ factory(
       rows: number,
       cols: number,
       kStart: number,
-      ops: QRNumberOps
+      ops: QRNumberOps,
+      plain: boolean
     ): number {
       const limit = Math.min(cols, rows);
       let i: number;
@@ -173,7 +206,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       for (let k = kStart; k < limit; ++k) {
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(isExactZero(pivot) ? 1 : sign(pivot));
+        const sgn = unaryMinus(zeroPivot(pivot, plain) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
@@ -184,7 +217,7 @@ export const createQr = /* #__PURE__ */ factory(
 
         const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
-        if (!isExactZero(alpha)) {
+        if (!negligibleNorm(alpha, alphaSquared, plain)) {
           const u1 = subtractScalar(pivot, alpha);
 
           w[k] = 1;
@@ -331,6 +364,7 @@ export const createQr = /* #__PURE__ */ factory(
       const Q = identity([rows], 'dense');
       const Qdata = Q._data as unknown[][];
 
+      const plain = matrixAllNumbers(m._data as unknown[][]);
       const R = m.clone();
       const Rdata = R._data as unknown[][];
       promoteFractionEntries(Rdata);
@@ -350,7 +384,8 @@ export const createQr = /* #__PURE__ */ factory(
           rows,
           cols,
           0,
-          numberOps
+          numberOps,
+          plain
         );
       }
 
@@ -380,7 +415,7 @@ export const createQr = /* #__PURE__ */ factory(
          */
 
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(isExactZero(pivot) ? 1 : sign(pivot));
+        const sgn = unaryMinus(zeroPivot(pivot, plain) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
@@ -391,7 +426,7 @@ export const createQr = /* #__PURE__ */ factory(
 
         const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
-        if (!isExactZero(alpha)) {
+        if (!negligibleNorm(alpha, alphaSquared, plain)) {
           // first element in vector u
           const u1 = subtractScalar(pivot, alpha);
 
@@ -480,7 +515,7 @@ export const createQr = /* #__PURE__ */ factory(
      * largest entry is outside [2^0, 2^400]. Above the window the squares of the
      * Householder step overflow. Below the window the squares of the column norm underflow
      * (#1122, #1168). The Householder loop tests the column norm for an exact zero only (#1188). Q is orthogonal, so only R is scaled back
-     * (#1122). A matrix inside the window is not scaled. A matrix with an entry that is not a plain number is not scaled (#1188).
+     * (#1122). A matrix inside the window is not scaled. A matrix with an entry that is not a plain number is not scaled and tests the column norm without the absolute tolerance (#1188).
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
       const data = m._data as unknown[][];
