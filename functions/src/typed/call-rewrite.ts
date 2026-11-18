@@ -10,19 +10,23 @@ const WORD_OPERATORS = new Set(['mod', 'to', 'in', 'and', 'xor', 'or', 'not']);
 const NAME_CHAR = /[\p{L}\p{N}_$]/u;
 
 /**
- * Return the run of name characters that ends at the white space before `index`.
+ * Report whether a parenthesised replacement at `index` reads as a call of the text
+ * before it. This is true after an index (`x[1]`) and after a name and white space
+ * (`x `), but not after a number or a word operator (`mod`).
  *
  * @param expr - Expression string
  * @param index - Position of a call
- * @returns The run, or an empty string when no white space is before `index`
+ * @returns True when the call at `index` must stay as written
  */
-function wordBeforeSpace(expr: string, index: number): string {
+function readsAsCall(expr: string, index: number): boolean {
   let stop = index;
   while (stop > 0 && expr[stop - 1].trim() === '') stop--;
-  if (stop === index) return '';
+  if (stop > 0 && expr[stop - 1] === ']') return true;
+  if (stop === index) return false;
   let begin = stop;
   while (begin > 0 && NAME_CHAR.test(expr[begin - 1])) begin--;
-  return expr.slice(begin, stop);
+  const word = expr.slice(begin, stop);
+  return /[^\p{N}]/u.test(word) && !WORD_OPERATORS.has(word);
 }
 
 /**
@@ -30,9 +34,9 @@ function wordBeforeSpace(expr: string, index: number): string {
  *
  * The scan counts parentheses, so a nested argument such as `(x+1)` stays whole.
  * A call preceded by an identifier character (for example `myexp(`) is not a match.
- * A call that follows a name and white space (`x exp(y)`, an implicit product) stays
- * as written, because a parenthesised replacement after a name reads as a call of
- * that name. A call after a word operator (`x mod exp(y)`) is rewritten.
+ * A call that follows a name and white space (`x exp(y)`) or an index (`x[1] exp(y)`)
+ * is an implicit product. It stays as written, because a parenthesised replacement
+ * there reads as a call. A call after a word operator (`x mod exp(y)`) is rewritten.
  * When `rewrite` returns `undefined`, the call stays as written and the scan goes on
  * inside it. When the parentheses do not balance, the rest of the text stays as written.
  *
@@ -58,8 +62,7 @@ export function rewriteCalls(
       end++;
     }
     if (depth !== 0) break; // unbalanced: leave the rest as written
-    const word = wordBeforeSpace(expr, m.index);
-    if (/[^\p{N}]/u.test(word) && !WORD_OPERATORS.has(word)) continue; // implicit product
+    if (readsAsCall(expr, m.index)) continue; // implicit product
     const replaced = rewrite(m[1], expr.slice(call.lastIndex, end - 1));
     if (replaced === undefined) continue;
     out += expr.slice(last, m.index) + replaced;
