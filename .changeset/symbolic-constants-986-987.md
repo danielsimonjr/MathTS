@@ -14,6 +14,7 @@ Before and after:
 - A fraction next to an irrational constant now folds to a decimal, as in mathjs. `simplify('sqrt(2)/3*x')`: `x * 6.65857e+5 / 1.412496e+6`, now `0.4714045207910317 * x`. `simplify('1/3+sqrt(2)')`: `2.74267e+5 / 1.56944e+5`, now `1.7475468957064284`. An exact result stays a fraction (`simplify('sqrt(4)/3')` is `2 / 3`).
 - `expand('sqrt(2)*(x+1)')`: `sqrt2*x + 2*1`, now `sqrt(2)*x + sqrt(2)`.
 - `expand('exp(1)*(x+1)')`: `exp1*x + 1*1`, now `exp(1)*x + exp(1)`.
+- `expand('sqrt(2)*(x+1)+sqrt( 2)*x')`: the two spellings of `sqrt(2)` now collect, to `2*sqrt(2)*x + sqrt(2)`.
 - `expand('sin(x)*(x+1)')`: `sinx*x + x*1`, now returned unchanged.
 - `expand('2^(1/2)*(8 + x)')`: gave a wrong value, now returned unchanged.
 - `expand('sin(1+2)^2')`: `sin1*1 + 1*2 + 2*1 + 2*2`, now returned unchanged.
