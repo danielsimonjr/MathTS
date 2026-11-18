@@ -7,21 +7,18 @@
  * 3. No call loops forever. The sweep runs in a worker, and a call that does not
  *    return in its budget fails the test with the name of that call.
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { Worker } from 'node:worker_threads';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { build } from 'esbuild';
 import * as fns from '../src/index.js';
 import { erfc, normalCDF, primePi, compare, factory_compare, zeta, isPrime } from '../src/index.js';
 import { parallelStatMedian } from '../src/typed/statistics.js';
 
 /**
  * Budgets for the sweep worker. A call that does not return in its budget fails the test.
- * Measured on an idle machine: the bundle loads in about 1 s, the slowest call takes 2 ms,
- * and the full sweep of 1,344 calls takes about 1 s. The budgets allow for CI load.
+ * Measured on an idle machine: the built package loads in about 1 s, the slowest call takes
+ * 2 ms, and the full sweep takes about 1 s. The budgets allow for CI load.
  */
 const LOAD_BUDGET_MS = 30_000;
 const CALL_BUDGET_MS = 10_000;
@@ -360,25 +357,17 @@ HANG_ROWS.push(
   }
 );
 
-let bundleDir = '';
 let results: Result[] = [];
 let sweepJobCount = -1;
 let hangError: string | null = null;
 
 beforeAll(async () => {
-  bundleDir = mkdtempSync(join(tmpdir(), 'mathts-nonfinite-'));
-  const outfile = join(bundleDir, 'functions.mjs');
-  await build({
-    entryPoints: [fileURLToPath(new URL('../src/index.ts', import.meta.url))],
-    bundle: true,
-    format: 'esm',
-    platform: 'node',
-    outfile,
-    logLevel: 'error',
-    banner: {
-      js: "import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);",
-    },
-  });
+  // The worker loads the built package, the same entry point that users load. The turbo
+  // `test` task builds it first, so the hook does no bundling. A missing build fails here.
+  const distEntry = fileURLToPath(new URL('../dist/index.js', import.meta.url));
+  if (!existsSync(distEntry)) {
+    throw new Error(`${distEntry} is missing. Run \`bun run build\` in functions first.`);
+  }
   const jobs = [
     ...allNumberJobs(['NaN', 'Inf', '-Inf']),
     ...plainFunctionJobs(['NaN', 'Inf', '-Inf']),
@@ -386,7 +375,7 @@ beforeAll(async () => {
   ];
   sweepJobCount = jobs.length;
   const worker = new Worker(new URL('./helpers/nonfinite-sweep.worker.mjs', import.meta.url), {
-    workerData: { bundleUrl: pathToFileURL(outfile).href, jobs },
+    workerData: { entryUrl: pathToFileURL(distEntry).href, jobs },
     stdout: true,
     stderr: true,
   });
@@ -400,7 +389,7 @@ beforeAll(async () => {
         resolve();
       }, budget);
     };
-    arm('loading the bundle', LOAD_BUDGET_MS);
+    arm('loading the built package', LOAD_BUDGET_MS);
     worker.on('message', (msg: { type: string; job?: Job; out?: string }) => {
       if (msg.type === 'result' && msg.job) {
         results.push({ job: msg.job, out: msg.out ?? '' });
@@ -421,10 +410,6 @@ beforeAll(async () => {
     });
   });
 }, 120_000);
-
-afterAll(() => {
-  if (bundleDir) rmSync(bundleDir, { recursive: true, force: true });
-});
 
 describe('non-finite inputs: sweep of typed signatures and plain functions', () => {
   it('no call loops forever', () => {
