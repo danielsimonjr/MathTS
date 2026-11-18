@@ -7282,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 249
+      "loc": 254
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -10635,7 +10635,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 109
     },
     {
       "file": "functions/tests/dogfood-979-nonfinite-hangs.test.ts",
