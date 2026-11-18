@@ -2906,6 +2906,10 @@
           {
             "file": "./bigint-gcd.js",
             "imports": ["gcdBigInt"]
+          },
+          {
+            "file": "./fraction.js",
+            "imports": ["isFraction"]
           }
         ],
         "workspaceDependencies": [],
@@ -49431,7 +49435,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1341,
     "totalModules": 82,
-    "totalLinesOfCode": 234646,
+    "totalLinesOfCode": 234825,
     "totalExports": 7351,
     "totalClasses": 62,
     "totalInterfaces": 666,

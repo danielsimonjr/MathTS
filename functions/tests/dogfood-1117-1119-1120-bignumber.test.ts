@@ -130,9 +130,10 @@ describe('#1120 solveODE RK23 and RK45 with BigNumber input', () => {
   };
   for (const method of ['RK23', 'RK45'] as const) {
     it(`${method}: the number path keeps its steps and its result`, () => {
+      // Not a bit pin: the step-size factor uses `**`, and Node 22 differs from Node 24 by 1 ulp.
       const r = solve(fNum, [0, 1], 1, method);
       expect(r.t.length).toBe(pins[method].points);
-      expect(last(r)).toBe(pins[method].y);
+      expect(Math.abs(last(r) - pins[method].y)).toBeLessThan(1e-12);
     });
     it(`${method}: a BigNumber y0 takes the steps of the number path`, () => {
       const r = solve(f, [0, 1], bn(1), method);
@@ -194,16 +195,14 @@ describe('#1120 review: a BigNumber state rounds to precision and large states s
     }
   });
   it('the number path keeps the bits of its first step for a state of several components', () => {
-    // The first-step norm of [10, 5] must be the plain root mean square. A norm that divides by
-    // the largest magnitude differs in the last bit and moves every later step.
+    // The first-step norm must be the plain root mean square. A norm that divides by the largest
+    // magnitude gives 0.0022587697572631284 here, and that moves every later step. The first step
+    // uses only +, *, / and sqrt, so its bits are the same on every engine.
     const lotka = (_t: number, y: number[]) => [1.5 * y[0] - y[0] * y[1], -3 * y[1] + y[0] * y[1]];
-    const pins = {
-      RK23: [1484, 1.695738981724208, 0.024856252611085185],
-      RK45: [78, 1.6960526167765109, 0.02486327719504714],
-      Rosenbrock: [163, 1.6875446651377084, 0.02468177984245949],
-      RODAS: [86, 1.696027298254404, 0.024859989732582632],
-    } as const;
-    for (const [method, [points, y0, y1]] of Object.entries(pins)) {
+    const rms = (v: number[]) => Math.sqrt(v.reduce((sum, x) => sum + x * x, 0) / v.length);
+    const h0 = 0.01 * (rms([10, 5]) / rms(lotka(0, [10, 5])));
+    expect(h0).toBe(0.002258769757263128);
+    for (const method of ['RK45', 'Rosenbrock', 'RODAS']) {
       const r = solveODE(
         lotka as never,
         [0, 7] as never,
@@ -211,10 +210,8 @@ describe('#1120 review: a BigNumber state rounds to precision and large states s
         { method } as never
       ) as {
         t: number[];
-        y: number[][];
       };
-      expect(r.t.length).toBe(points);
-      expect(r.y[r.y.length - 1]).toEqual([y0, y1]);
+      expect(r.t[1]).toBe(h0);
     }
   });
   for (const method of ['RK23', 'RK45']) {
@@ -233,6 +230,18 @@ describe('#1120 review: a BigNumber state rounds to precision and large states s
         expect(Number(String(r.t[r.t.length - 1]))).toBe(1);
       });
     }
+  }
+  for (const method of ['Rosenbrock', 'RODAS']) {
+    it(`${method}: a number y0 of 1e160 gives a finite first step`, () => {
+      // The stiff engines take the same norm. f throws on a NaN state, so a fault fails at once.
+      const g = (_t: number, y: number[]) => {
+        if (y.some(Number.isNaN)) throw new Error('f called with y = NaN');
+        return y.map((v) => -v);
+      };
+      const r = solve(g, 1e160, { method }) as { t: number[] };
+      expect(r.t[1]).toBe(0.01);
+      expect(r.t[r.t.length - 1]).toBe(1);
+    });
   }
 });
 

@@ -1018,6 +1018,7 @@ graph LR
 | `./interfaces.js`  | `Scalar, MathTSValue`                | Import (type-only) |
 | `./type-marker.js` | `BIGNUMBER_BRAND, defineTypeMarkers` | Import             |
 | `./bigint-gcd.js`  | `gcdBigInt`                          | Import             |
+| `./fraction.js`    | `isFraction`                         | Import             |
 
 **Exports:**
 
@@ -21556,6 +21557,7 @@ graph TD
     N36 --> N41
     N36 --> N44
     N36 --> N35
+    N36 --> N40
     N37 --> N41
     N37 --> N44
     N39 --> N38
@@ -21573,7 +21575,6 @@ graph TD
     N49 --> N46
     N49 --> N72
     N49 --> N50
-    N49 --> N48
 ```
 
 ---
@@ -21586,7 +21587,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1341   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 234646 |
+| Total Lines of Code     | 234825 |
 | Total Exports           | 7351   |
 | Total Re-exports        | 3168   |
 | Total Classes           | 62     |
