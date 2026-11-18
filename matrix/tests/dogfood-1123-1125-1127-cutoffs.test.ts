@@ -140,6 +140,24 @@ describe.each([
     [4, 2],
   ];
 
+  // Without the binary, `initialize()` falls back to the JS path and the AssemblyScript
+  // cases would pass on it. The build makes matrix/dist/wasm/mathts-as.wasm.
+  it(`the AssemblyScript module is ${useWasm ? 'loaded' : 'not loaded'}`, async () => {
+    await init();
+    const mod = (backend as unknown as { wasmModule: Record<string, unknown> | null }).wasmModule;
+    if (!useWasm) {
+      expect(mod).toBeNull();
+      return;
+    }
+    expect(
+      mod,
+      'WASMBackend.initialize() fell back to JS: run `bun run build` from the repo root'
+    ).not.toBeNull();
+    for (const name of ['matrix_lu_decompose', 'matrix_qr_decompose', 'matrix_inverse']) {
+      expect(typeof mod?.[name], `${name} exported by the AS binary`).toBe('function');
+    }
+  });
+
   it.each([1e-100, 1e-15, 1e-8, 3e200])(
     'qr of [[3,1],[4,2]]·%s: Q^T·R = A, R triangular',
     async (s) => {
@@ -211,5 +229,71 @@ describe.each([
       const r = await backend.luDecomposition(DenseMatrix.fromArray(scale(rank1, f)));
       expect(r.singular).toBe(true);
     }
+  });
+
+  // The JS path tested the pivots 0 to n-2 only: `singular: false` and an inverse of NaN.
+  it.each([
+    [
+      '[[1,2],[2,4]]',
+      [
+        [1, 2],
+        [2, 4],
+      ],
+    ],
+    ['[[0]]', [[0]]],
+    [
+      '[[2,1,3],[4,2,6],[1,5,2]] (rows 1 and 2 dependent)',
+      [
+        [2, 1, 3],
+        [4, 2, 6],
+        [1, 5, 2],
+      ],
+    ],
+  ])('a last pivot of 0 is singular: %s', async (_label, A) => {
+    await init();
+    for (const f of [1, 1e-100, 1e100]) {
+      const M = DenseMatrix.fromArray(scale(A, f));
+      expect((await backend.luDecomposition(M)).singular).toBe(true);
+      const inv = await backend.inverse(M);
+      expect(inv.singular).toBe(true);
+      expect(
+        nested(inv.inverse)
+          .flat()
+          .every((v) => v === 0)
+      ).toBe(true);
+    }
+  });
+
+  // The JS path gave `singular: false` from 2^10 and the AssemblyScript path `true`.
+  it.each([0, 4, 10, 100, 300, 500])('a rank-1 matrix·2^%i is singular', async (k) => {
+    await init();
+    const rank1 = [
+      [0.1, 0.3, 0.7],
+      [0.2, 0.6, 1.4],
+      [0.3, 0.9, 2.1],
+    ];
+    const M = DenseMatrix.fromArray(scale(rank1, 2 ** k));
+    expect((await backend.luDecomposition(M)).singular).toBe(true);
+    expect((await backend.inverse(M)).singular).toBe(true);
+  });
+
+  it('the determinant keeps a last pivot below the floor', async () => {
+    await init();
+    const det = (m: number[][]): Promise<number> =>
+      backend.determinantWasm(DenseMatrix.fromArray(m));
+    expect(
+      await det([
+        [1, 0],
+        [0, 1e-15],
+      ])
+    ).toBe(1e-15);
+    expect(
+      Math.abs(
+        await det([
+          [1, 2],
+          [2, 4],
+        ])
+      )
+    ).toBe(0);
   });
 });
