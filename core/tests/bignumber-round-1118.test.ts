@@ -111,3 +111,66 @@ describe('#1118 results round to the configured precision (oracle: Python decima
     expect(sigDigits(x)).toBeLessThanOrEqual(64);
   });
 });
+
+describe('#1118 mod is exact, and the digit count has no decimal string', () => {
+  it('mod with a dividend longer than the precision gives the exact remainder', () => {
+    BigNumber.config({ precision: 20 });
+    // Python: 987654321098765432109876 % 123456789012345. A rounded q * b gave 111116623219876.
+    expect(bn('987654321098765432109876').mod(bn('123456789012345')).toString()).toBe(
+      '111116623221036'
+    );
+    expect(bn('-987654321098765432109876').mod(bn('123456789012345')).toString()).toBe(
+      '-111116623221036'
+    );
+    expect(bn('987654321098765432109876').mod(bn('-123456789012345')).toString()).toBe(
+      '111116623221036'
+    );
+  });
+
+  it('mod keeps the usual cases: fractions, a smaller dividend, a zero remainder', () => {
+    BigNumber.config({ precision: 20 });
+    expect(bn('5.5').mod(bn('0.2')).toString()).toBe('0.1');
+    expect(bn('-7').mod(bn('3')).toString()).toBe('-1');
+    expect(bn('2').mod(bn('7')).toString()).toBe('2');
+    expect(bn('1200').mod(bn('0.25')).toString()).toBe('0');
+    expect(bn('1234.5').mod(bn('1e2')).toString()).toBe('34.5');
+    expect(bn('0.007').mod(bn('200')).toString()).toBe('0.007');
+  });
+
+  it('mod with a large exponent gap builds no large power of ten', () => {
+    BigNumber.config({ precision: 20 });
+    // Python: pow(10, 1000000, 7) == 4 and (3 * pow(10, 123456789, 97)) % 97 == 56.
+    expect(bn('1e1000000').mod(bn('7')).toString()).toBe('4');
+    expect(bn('3e123456789').mod(bn('97')).toString()).toBe('56');
+    expect(bn('7').mod(bn('1e1000000')).toString()).toBe('7');
+  });
+
+  it('rounds correctly at each power-of-ten boundary of the coefficient', () => {
+    BigNumber.config({ precision: 5 });
+    for (const digits of [5, 6, 7, 16, 17, 19, 20, 38, 39, 77, 78, 154, 155, 309, 617, 2100]) {
+      const nines = '9'.repeat(digits); // 10^digits - 1
+      const power = '1' + '0'.repeat(digits); // 10^digits
+      const expectedNines = digits <= 5 ? nines : '1' + '0'.repeat(digits);
+      expect(bn(nines).add(bn('0')).toString(), `nines ${digits}`).toBe(expectedNines);
+      expect(bn(power).add(bn('1')).toString(), `power + 1 ${digits}`).toBe(power);
+      // 12345|49...9 rounds down and 12345|50...0 rounds up, whatever the length of the tail.
+      expect(
+        bn('12345' + '4' + '9'.repeat(digits))
+          .multiply(bn('1'))
+          .toString()
+      ).toBe('12345' + '0'.repeat(digits + 1));
+      expect(
+        bn('12345' + '5' + '0'.repeat(digits - 1) + '1')
+          .multiply(bn('1'))
+          .toString()
+      ).toBe('12346' + '0'.repeat(digits + 1));
+    }
+  });
+
+  it('a precision above the power-of-ten cache rounds correctly', () => {
+    BigNumber.config({ precision: 3000 });
+    const x = bn('1.' + '3'.repeat(2999));
+    expect(sigDigits(x.multiply(x))).toBe(3000);
+    expect(x.add(bn('1e-3500')).toString()).toBe(x.toString());
+  });
+});
