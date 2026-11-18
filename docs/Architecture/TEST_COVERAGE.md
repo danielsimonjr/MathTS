@@ -15,7 +15,7 @@
 | Source Files with Tests                | 560                   |
 | Source Files without Tests             | 780                   |
 | Coverage (raw, direct-import)          | **41.8%**             |
-| Coverage (effective, active code only) | **47.6%** (402 / 844) |
+| Coverage (effective, active code only) | **47.7%** (403 / 845) |
 
 > The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
 

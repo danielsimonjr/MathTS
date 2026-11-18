@@ -3,7 +3,7 @@
   "totalFiles": 2489,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1314,
+    "build-entry": 1315,
     "test-only": 0,
     "orphan": 0,
     "test": 1083,
@@ -9095,7 +9095,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1832
+      "loc": 1845
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -9110,6 +9110,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 421
+    },
+    {
+      "file": "functions/src/typed/call-rewrite.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 372
     },
     {
       "file": "functions/src/typed/cas.ts",

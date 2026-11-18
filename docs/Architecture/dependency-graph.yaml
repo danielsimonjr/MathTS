@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-18'
-  totalFiles: 1340
+  totalFiles: 1341
   totalModules: 82
-  totalExports: 7347
+  totalExports: 7351
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -24428,6 +24428,12 @@ modules:
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
+        - file: ./call-rewrite.js
+          imports:
+            - rewriteCalls
+            - topLevelFactors
+            - isParenthesised
+            - hasTopLevelComma
         - file: ../cas/polynomial-canonical.js
           imports:
             - collapseIdenticalFactors
@@ -24806,6 +24812,22 @@ modules:
         - rightArithShift
         - rightLogShift
         - typedBitwise
+    functions/src/typed/call-rewrite.ts:
+      description: Balanced-parenthesis call rewriter shared by the string rewrites in `algebra.ts`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rewriteCalls
+        - topLevelFactors
+        - hasTopLevelComma
+        - isParenthesised
+      functions:
+        - rewriteCalls
+        - topLevelFactors
+        - hasTopLevelComma
+        - isParenthesised
     functions/src/typed/cas.ts:
       description: Symbolic CAS (Computer Algebra System) Functions
       externalDependencies: []
@@ -45807,6 +45829,7 @@ dependencyGraph:
         - functions/src/typed/algebra.ts
         - functions/src/typed/arithmetic.ts
         - functions/src/typed/bitwise.ts
+        - functions/src/typed/call-rewrite.ts
         - functions/src/typed/cas.ts
         - functions/src/typed/centrality-restarts.ts
         - functions/src/typed/combinatorics.ts
@@ -46588,7 +46611,7 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1340
+  totalTypeScriptFiles: 1341
   totalModules: 82
   totalLinesOfCode: 234263
   totalExports: 7347
