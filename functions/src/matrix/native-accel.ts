@@ -226,12 +226,16 @@ export function correctEigs(
         }
       }
     }
+    // As in mathjs, one complex eigenvalue makes every eigenvector a Complex[];
+    // a real spectrum keeps number[] vectors.
+    const anyComplex = ne.values.some((v) => Math.abs(v.im) >= EIG_IM_TOL);
     const all = ne.values.map((v, i) => ({
       value: (Math.abs(v.im) < EIG_IM_TOL ? v.re : new Complex(v.re, v.im)) as number | Complex,
-      vector: (Math.abs(v.im) < EIG_IM_TOL
-        ? ne.vectors[i]
-        : ne.vectors[i].map((re, j) => new Complex(re, ne.vectorsIm[i][j]))) as
-        number[] | Complex[],
+      vector: (anyComplex
+        ? ne.vectors[i].map(
+            (re, j) => new Complex(re, Math.abs(v.im) < EIG_IM_TOL ? 0 : ne.vectorsIm[i][j])
+          )
+        : ne.vectors[i]) as number[] | Complex[],
       i,
     }));
     const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
