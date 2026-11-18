@@ -10835,10 +10835,6 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["hasNaN", "numberVector"]
-          },
-          {
-            "file": "./utils/limits.js",
-            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -49391,7 +49387,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1340,
     "totalModules": 82,
-    "totalLinesOfCode": 234039,
+    "totalLinesOfCode": 234036,
     "totalExports": 7347,
     "totalClasses": 62,
     "totalInterfaces": 666,

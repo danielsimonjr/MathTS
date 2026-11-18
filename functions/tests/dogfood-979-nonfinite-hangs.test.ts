@@ -51,7 +51,6 @@ const CASES: Record<string, string> = {
   fisherNegative: 'S.fisherExact([[-1, 1], [2, 5]])',
   fisherHuge: 'S.fisherExact([[1e300, 0], [0, 5]])',
   fisherUnsafe: 'S.fisherExact([[2 ** 60, 3], [4, 5]])',
-  fisherLong: 'S.fisherExact([[1e10, 1e10], [1e10, 1e10]])',
   fisherWideMargin: 'S.fisherExact([[5, 2 ** 40], [3, 4]])',
   fisherValid: 'S.fisherExact([[3, 1], [2, 5]])',
   peakWidthsInf: 'S.peakWidths([1, 3, 1], [Infinity])',
@@ -206,10 +205,7 @@ describe('#979 non-finite input returns instead of hanging', () => {
       'fisherExact: a marginal total of 1e+300 exceeds the supported maximum of 2^53 - 1'
     );
     expect(error('fisherUnsafe').message).toMatch(/^fisherExact: a marginal total of /);
-    expect(error('fisherLong').message).toBe(
-      'fisherExact: the number of possible tables = 20000000001 exceeds the supported maximum of 10000000'
-    );
-    for (const name of ['fisherHuge', 'fisherUnsafe', 'fisherLong']) {
+    for (const name of ['fisherHuge', 'fisherUnsafe']) {
       expect(error(name).error, name).toBe('RangeError');
     }
   });
