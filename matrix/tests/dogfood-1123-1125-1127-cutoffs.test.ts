@@ -274,6 +274,29 @@ describe('#1125 matrixLogm: a small eigenvalue of a triangular matrix', () => {
   });
 });
 
+describe('#1125 matrixLogm quadrature constants', () => {
+  // The 16-point Gauss-Legendre nodes were wrong by up to 1e-8 and the weights summed to
+  // 1 - 1e-11, so the Schur path had an error of about 1e-11 for each matrix.
+  it('logm of [[2,1,0],[1,3,1],[0,1,4]] equals the mpmath value to 1e-14', () => {
+    const r = nested(
+      matrixLogm(
+        DenseMatrix.fromArray([
+          [2, 1, 0],
+          [1, 3, 1],
+          [0, 1, 4],
+        ])
+      )
+    );
+    // mpmath, 40 digits.
+    const ref = [
+      [0.5832842544815817, 0.4477505161685006, -0.0675775180180274],
+      [0.4477505161685006, 0.963457252632055, 0.31259548013244576],
+      [-0.0675775180180274, 0.31259548013244576, 1.3436302507825282],
+    ];
+    expect(maxDiff(r, ref)).toBeLessThan(1e-14);
+  });
+});
+
 describe('#1125 matrixLogm of a large non-symmetric matrix', () => {
   // The Schur form of a large matrix keeps residue above an absolute 1e-12 below its
   // diagonal. The absolute test sent the matrix to the Newton path: an error of 5e5 at
