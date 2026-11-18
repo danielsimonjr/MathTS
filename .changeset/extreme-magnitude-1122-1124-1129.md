@@ -8,28 +8,38 @@ Matrices with extreme entries now work in the `functions` kernels, in `lstsq` an
 
 `qr`, `sqrtm`, `inv`, `rank` and `nullspace` of `functions` scale a matrix of plain numbers by an exact power of 2 when its largest entry is outside a window, as in #1104, and scale the result back. The window is 2^-400 to 2^400 for `inv`, 2^-20 to 2^400 for `qr`, `sqrtm`, `rank` and `nullspace`. A matrix inside its window takes the old path. The scale helpers (`withPow2Scale`, `entryRange`, `ldexp` and others) now live once in `@danielsimonjr/mathts-core/internal`, and `matrix` re-exports them from its `common.ts`.
 
-A differential against the build before this change compared each changed function on 2,200 ordinary random matrices of size 1 to 6 (largest entry 1e-5 to 1e4) and on 200 matrices in each of the classes 2^-21 to 2^-19, 2^399 to 2^401, 2^-401 to 2^-399 and 1e4 to 1e12. A changed result was compared with NumPy 2.3.5 or SciPy 1.16.3. The ordinary and 1e4 to 1e12 classes are bit-equal for every function. No result is further from NumPy:
+A differential against the build before this change ran each changed function on 1,800 ordinary matrices of size 1 to 6 (largest entry 1e-5 to 1e4: real, integer, rank-deficient, symmetric positive definite and 1 × 1; 1,297 square ones for `inv` and `sqrtm`). Every result has the same bits, for `qr`, `inv`, `sqrtm`, `rank`, `nullspace` and `pinv` of `functions` and for `lstsq`, `svd`, `singularValues`, `pinv`, `cond`, `norm2` and `lowRankApprox` of `matrix`.
 
-| Function    | Class            | Bit-equal | Changed, closer | Changed, worse | Changed, same error |
-| ----------- | ---------------- | --------- | --------------- | -------------- | ------------------- |
-| `qr`        | 2^-401 to 2^-399 | 7         | 176             | 0              | 17                  |
-| `rank`      | 2^-401 to 2^-399 | 0         | 200             | 0              | 0                   |
-| `nullspace` | 2^-401 to 2^-399 | 0         | 200             | 0              | 0                   |
-| `sqrtm`     | 2^-21 to 2^-19   | 102       | 98              | 0              | 0                   |
-| `sqrtm`     | 2^399 to 2^401   | 192       | 8               | 0              | 0                   |
-| `sqrtm`     | 2^-401 to 2^-399 | 0         | 200             | 0              | 0                   |
+A second corpus has 2,730 extreme matrices: 200 in each of 11 magnitude classes from 2^-1040 to 2^1010, 300 with one entry far below the largest (the span class), 200 graded diagonals below 2^-20 and 30 special cases. Each changed result was judged against an 80-digit oracle (mpmath; NumPy 2.3.5 for `rank` and `pinv`). In the class 2^13 to 2^40 every result has the same bits.
 
-Every other function and class is bit-equal. These include `inv`, and `lstsq`, `svd`, `singularValues`, `pinv`, `cond`, `norm2` and `lowRankApprox` of `matrix`. The span class has 300 inputs per function. Its matrices (or right-hand sides of `lstsq`) have one entry below 2^-1022 times the largest entry. The `svd` family is bit-equal there too. `lstsq` has its own span measurement below.
+| Function                                          | Changed values | Closer | Same error | Further             |
+| ------------------------------------------------- | -------------- | ------ | ---------- | ------------------- |
+| `qr`                                              | 1,481          | 1,304  | 168        | 9 (largest 1.5 eps) |
+| `inv`                                             | 143            | 50     | 92         | 0                   |
+| `sqrtm`                                           | 693            | 692    | 1          | 0                   |
+| `rank`                                            | 1,280          | 1,280  | 0          | 0                   |
+| `nullspace`                                       | 1,292          | 1,286  | 1          | 5 (less than 1 eps) |
+| `pinv`                                            | 151            | 151    | 0          | 0                   |
+| `norm2`                                           | 89             | 89     | 0          | 0                   |
+| `lowRankApprox`                                   | 39             | 39     | 0          | 0                   |
+| `svd`, `singularValues`, `cond`, `functions.pinv` | 12 to 13 each  | all    | 0          | 0                   |
+
+The `svd` family changes only in the span class and the special cases, where the unscaled run is now judged (#1129). A result that changes between a value and an error:
+
+- `inv`: 7 results were a matrix of NaN and are now the error "determinant is zero" (singular matrices above 2^400). 69 errors "determinant is zero" for matrices near 1e-200 and below are now values. 42 of them have ±Infinity entries, where the true inverse is above the double range.
+- `sqrtm`: 303 values are now an error ("could not converge" for 291, "determinant is zero" for 12). Each of those values was wrong (a residual above 1e-10, or NaN). 81 errors are now values.
 
 Known limits:
 
 - `rank` and `nullspace` still change at the window edge 2^-20, because the absolute pivot test applies inside the window (#1157).
 - `sqrtm` can throw between 2^70 and 2^400, because its absolute stop test cannot be met when one unit in the last place of the root is larger than 1e-6 (#1158).
 - `qr` gives a different result for 101 random matrices with a largest entry below 2^-43. 61 of them differ only in the sign of a row of R.
+- `inv` of a matrix whose entries span more than the double range can still return all zeros, as before: `inv([[1e300, 1e-300], [0, 1e300]])` (#1162).
+- `sqrtm` of a singular matrix can return a wrong root with no error, at every scale (#1163). Such a matrix times 2^700 threw before and now returns that root, scaled.
 
 - `qr([[3e200, 1e200], [4e200, 2e200]]).R` was NaN. It is now `[[5e200, 2.2e200], [0, 4e199]]` (NumPy gives the same up to the sign of the first row).
 - `qr` of a matrix with entries below about 2^-51 returned the upper triangle of the input as R, because an absolute zero test skipped every reflection. `qr([[1.3, -0.4, 0.7], [0.2, 2.1, -1.1], [-0.9, 0.5, 1.6]] · 2^-60).R` is now 2^-60 times the R of the unscaled matrix. For a largest entry below 2^-43, a result that was a valid factorization can also change, most often in the sign of a row of R.
-- `sqrtm([[4e200, 1e200], [1e200, 3e200]])` was NaN. It is now `[[1.98158e100, 2.70832e99], [2.70832e99, 1.71075e100]]`, as in SciPy. Above 2^400, the unscaled iteration is tried first and kept when it is finite. Else the matrix is scaled to a largest entry in [1, 4). Before, `sqrtm` of a well-conditioned 2×2 matrix times 2^450 threw "could not converge"; it is now 2^225 times the root of the unscaled matrix.
+- `sqrtm([[4e200, 1e200], [1e200, 3e200]])` was NaN. It is now `[[1.98158e100, 2.70832e99], [2.70832e99, 1.71075e100]]`, as in SciPy. Above 2^400, the unscaled iteration is tried first and kept when it is finite. Else the matrix is scaled to a largest entry in [1, 4). A scaled run that is not finite throws "could not converge". Before, `sqrtm` of a well-conditioned 2×2 matrix times 2^450 threw "could not converge"; it is now 2^225 times the root of the unscaled matrix.
 - `sqrtm([[4e-20, 1e-20], [1e-20, 3e-20]])` had a diagonal of 9.5e-7, because the stop test is absolute. It is now `1.98158e-10` and `1.71075e-10`, as in SciPy.
 - `inv([[1e200, 1e200], [0, 2e200]])` was all 0. It is now `[[1e-200, -5e-201], [0, 5e-201]]`. `inv([[1e-200, 1e-200], [0, 2e-200]])` threw "determinant is zero". It is now `[[1e200, -5e199], [0, 5e199]]`, as in NumPy.
 - `rank([[1e-20, 1e-20], [0, 2e-20]])` was 0 and `nullspace` was the identity. They are now 2 and `[]`, as in NumPy. An explicit `tol` is still an absolute pivot tolerance, so `rank(A, 1e-10)` of that matrix is still 0.
