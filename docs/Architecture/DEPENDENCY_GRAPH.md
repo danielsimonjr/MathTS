@@ -3246,15 +3246,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                                                                | Type               |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------ |
-| `../utils/is.js`            | `isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
-| `../utils/factory.js`       | `factory`                                                                                              | Import             |
-| `../utils/number.js`        | `safeNumberType`                                                                                       | Import             |
-| `./simplify/util.js`        | `createUtil`                                                                                           | Import             |
-| `../utils/noop.js`          | `noBignumber, noFraction`                                                                              | Import             |
-| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                      | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`                                                                                        | Import (type-only) |
+| File                        | Imports                                                                                                           | Type               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`            | `isComplex, isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
+| `../utils/factory.js`       | `factory`                                                                                                         | Import             |
+| `../utils/number.js`        | `safeNumberType`                                                                                                  | Import             |
+| `./simplify/util.js`        | `createUtil`                                                                                                      | Import             |
+| `../utils/noop.js`          | `noBignumber, noFraction`                                                                                         | Import             |
+| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                                 | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction`                                                                                                   | Import (type-only) |
 
 **Exports:**
 
@@ -21643,7 +21643,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1343   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235354 |
+| Total Lines of Code     | 235487 |
 | Total Exports           | 7372   |
 | Total Re-exports        | 3188   |
 | Total Classes           | 62     |

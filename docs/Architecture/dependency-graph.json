@@ -8001,6 +8001,7 @@
           {
             "file": "../utils/is.js",
             "imports": [
+              "isComplex",
               "isFraction",
               "isMatrix",
               "isNode",
@@ -49598,7 +49599,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1343,
     "totalModules": 82,
-    "totalLinesOfCode": 235354,
+    "totalLinesOfCode": 235487,
     "totalExports": 7372,
     "totalClasses": 62,
     "totalInterfaces": 667,
