@@ -2,7 +2,7 @@
  * Distances between samples and discrete information measures (gap-analysis
  * 2026-11-04, Batch A).
  */
-import { numberVector } from '../typed/number-matrix.js';
+import { hasNaN, numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
 /**
@@ -22,7 +22,7 @@ export function wassersteinDistance(
   // ∫|F_u − F_v| dt over the merged support, sweeping both sorted samples
   // once (O(n log n)); the two CDFs are running weight sums.
   // SciPy gives NaN. A NaN sample point cannot be ordered, and the sweep below would not advance.
-  if (uv.some((v) => v !== v) || vv.some((v) => v !== v)) return NaN;
+  if (hasNaN(uv) || hasNaN(vv)) return NaN;
   const su = sortedWithWeights(uv, uw);
   const sv = sortedWithWeights(vv, vw);
   let iu = 0;

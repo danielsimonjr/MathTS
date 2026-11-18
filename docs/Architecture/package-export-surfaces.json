@@ -2901,6 +2901,7 @@
       "harmonicCentrality",
       "harmonicNumber",
       "hartreeEnergy",
+      "hasNaN",
       "hasNumericValue",
       "hasOwnProperty",
       "hausdorffDistance",

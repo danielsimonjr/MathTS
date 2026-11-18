@@ -46,6 +46,7 @@ import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
 import { assertLoopOrder } from '../utils/limits.js';
+import { hasNaN } from './number-matrix.js';
 
 /** Largest `n` that `binomialTest` accepts (`binomialTest(5e10 + 1e5, 1e11)` takes 7.1 s). */
 const MAX_BINOMIAL_TEST_N = 100_000_000_000;
@@ -938,7 +939,7 @@ export async function mannWhitneyTest(
   const nTotal = n1 + n2;
 
   // SciPy `nan_policy='propagate'`: NaN has no rank, and the tie scan below cannot pass it.
-  if (sample1.some((v) => v !== v) || sample2.some((v) => v !== v)) {
+  if (hasNaN(sample1) || hasNaN(sample2)) {
     const B = opts?.bootstrap ?? 0;
     if (B <= 0) return { uStatistic: NaN, pValue: NaN };
     return {
@@ -1520,6 +1521,8 @@ export function kolmogorovSmirnov2Test(
   if (n1 < 1 || n2 < 1) {
     throw new Error('kolmogorovSmirnov2Test: both samples must be non-empty');
   }
+  // NaN has no order, so the merge walk below never passes it.
+  if (hasNaN(sample1) || hasNaN(sample2)) return { statistic: NaN, pValue: NaN };
   const a = sample1.slice().sort((x, y) => x - y);
   const b = sample2.slice().sort((x, y) => x - y);
 
@@ -1859,7 +1862,7 @@ export function friedmanTest(groups: f64[][]): {
     if (g.length !== n) throw new Error('friedmanTest: all groups must be the same length');
   const rankSums = new Array<number>(k).fill(0);
   let tieCorrection = 0;
-  if (groups.some((g) => g.some((v) => v !== v))) {
+  if (groups.some(hasNaN)) {
     return { statistic: NaN, pValue: NaN, degreesOfFreedom: k - 1 };
   }
   for (let block = 0; block < n; block++) {

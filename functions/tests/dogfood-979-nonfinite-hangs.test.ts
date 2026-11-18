@@ -1,107 +1,218 @@
 /**
- * Issue #979: rankdata, spearman, spearmanr, wilcoxon, kruskalWallis, mannWhitneyTest,
- * wassersteinDistance and unwrapPhase did not return on NaN or Infinity input.
- * Each call runs in a child process with a timeout, so a regression fails fast
- * and never blocks the vitest worker. The child imports the built `dist`
- * (the `test` task depends on `build`).
+ * Issue #979: functions that did not return, or gave a wrong value, on NaN, Infinity or an
+ * invalid index. One child process runs every case, so a regression never blocks the
+ * vitest worker. In the child, each case is a thunk built in the main realm, and only the
+ * call `f()` runs in `vm.runInContext` with a timeout. The timeout interrupts a loop that
+ * does not end, so the case reports `timeout` and the other cases still run. The child
+ * imports the built `dist` (the `test` task depends on `build`).
  */
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 const DIST = pathToFileURL(resolve(__dirname, '../dist/index.js')).href;
-// A cold `import` of dist takes seconds when the full suite runs in parallel; a hang still ends the call.
-const TIMEOUT_MS = 60000;
+/** Time limit for one call in the child. */
+const CASE_TIMEOUT_MS = 5000;
+/** Time limit for the child process. A cold `import` of dist is slow under a full parallel run. */
+const CHILD_TIMEOUT_MS = 120000;
 
-/** Run `expr` (an async JS expression over `S`) in a child; NaN and Infinity print as strings. */
-function run(expr: string): unknown {
-  const code = `import(${JSON.stringify(DIST)}).then(async (S) => {
-    const v = await (${expr});
-    console.log(JSON.stringify(v, (_k, x) =>
-      typeof x === 'number' && !Number.isFinite(x) ? String(x) : x));
-  });`;
-  const r = spawnSync(process.execPath, ['-e', code], { timeout: TIMEOUT_MS, encoding: 'utf8' });
-  if (r.error) throw new Error(`call did not return within ${TIMEOUT_MS} ms: ${expr}`);
-  if (r.status !== 0) throw new Error(`child failed: ${r.stderr}`);
-  return JSON.parse(r.stdout);
+/** Each case is a JS expression over `S` (the dist module). */
+const CASES: Record<string, string> = {
+  rankdataNaN: 'S.rankdata([3, 1, NaN])',
+  rankdataInf: 'S.rankdata([Infinity, 1, Infinity, -Infinity])',
+  spearman: 'S.spearman([1, NaN, 2, 3], [1, 2, 3, 4])',
+  spearmanr: 'S.spearmanr([1, NaN, 2, 3], [1, 2, 3, 4])',
+  wilcoxon: 'S.wilcoxon([1, NaN, 3, 4], [2, 3, 1, 5])',
+  wilcoxonString: "S.wilcoxon('abc')",
+  kruskalWallis: 'S.kruskalWallis([1, NaN, 2], [3, 4, 5])',
+  mannWhitney: 'S.mannWhitneyTest([1, NaN, 3], [2, 3, 4])',
+  mannWhitneyBootstrap: 'S.mannWhitneyTest([1, NaN, 3], [2, 3, 4], { bootstrap: 3 })',
+  friedman: 'S.friedmanTest([[1, 2, 3], [2, NaN, 4], [3, 1, 2]])',
+  wassersteinA: 'S.wassersteinDistance([1, NaN], [2, 3])',
+  wassersteinB: 'S.wassersteinDistance([1, 2], [NaN, 3])',
+  kendallTau: 'S.kendallTau([1, NaN, 2, 3], [1, 2, 3, 4])',
+  kendalltau: 'S.kendalltau([1, NaN, 2, 3], [1, 2, 3, 4])',
+  kendallTauTest: 'S.kendallTauTest([1, NaN, 2, 3], [1, 2, 3, 4])',
+  unwrapInf: 'S.unwrapPhase([Infinity, 1, 2, -Infinity])',
+  unwrapInfMid: 'S.unwrapPhase([1, Infinity, 2])',
+  unwrapNaN: 'S.unwrapPhase([1, NaN, 2])',
+  unwrapSmall: 'S.unwrapPhase([0, 4])',
+  unwrapMixed: 'S.unwrapPhase([0, 5e3, -5e3, 1e4, 0])',
+  unwrapHuge: 'S.unwrapPhase([0, 1e300])',
+  unwrapLimit: 'S.unwrapPhase([0, 6.6e6])',
+  unwrapOverflow: 'S.unwrapPhase([-1e308, 1e308])',
+  ks2NaNFirst: 'S.kolmogorovSmirnov2Test([1, NaN, 2, 3], [1, 2, 3, 4])',
+  ks2NaNSecond: 'S.kolmogorovSmirnov2Test([1, 2, 3, 4], [1, NaN, 2, 3])',
+  ks2NaNOnly: 'S.kolmogorovSmirnov2Test([1, 2, 3], [NaN])',
+  ks2Inf: 'S.kolmogorovSmirnov2Test([1, Infinity, 2, -Infinity], [1, 2, 3, 4])',
+  fisherInf: 'S.fisherExact([[Infinity, 0], [0, 5]])',
+  fisherNaN: 'S.fisherExact([[NaN, 1], [2, 5]])',
+  fisherNegative: 'S.fisherExact([[-1, 1], [2, 5]])',
+  fisherValid: 'S.fisherExact([[3, 1], [2, 5]])',
+  peakWidthsInf: 'S.peakWidths([1, 3, 1], [Infinity])',
+  peakWidthsNegInf: 'S.peakWidths([1], [-Infinity])',
+  peakWidthsHigh: 'S.peakWidths([1, 3, 1], [7])',
+  peakWidthsNegative: 'S.peakWidths([1, 3, 1], [-1])',
+  peakWidthsFraction: 'S.peakWidths([1, 3, 1], [1.5])',
+  peakWidthsValid: 'S.peakWidths([1, 3, 1], [1])',
+  theilSenNaNx: 'S.theilSen([1, NaN, 2, 3], [1, 2, 3, 4])',
+  theilSenNaNy: 'S.theilSen([1, 2, 3, 4], [1, NaN, 2, 3])',
+  rankBiserialA: 'S.rankBiserial([1, NaN, 2, 3], [2, 3, 4, 5])',
+  rankBiserialB: 'S.rankBiserial([2, 3, 4, 5], [1, NaN, 2, 3])',
+};
+
+/** The outcome of one case: the value, the error class and message, or a timeout. */
+type Outcome = { value: unknown } | { error: string; message: string } | { timeout: true };
+
+const CHILD = `
+import vm from 'node:vm';
+const S = await import(${JSON.stringify(DIST)});
+const cases = ${JSON.stringify(CASES)};
+const enc = (_k, x) =>
+  ArrayBuffer.isView(x) ? Array.from(x)
+  : typeof x === 'number' && !Number.isFinite(x) ? String(x) : x;
+const out = {};
+for (const [name, expr] of Object.entries(cases)) {
+  const f = new Function('S', 'return ' + expr).bind(null, S);
+  try {
+    // Some functions (mannWhitneyTest) return a promise; their sync part runs inside the vm call.
+    const v = await vm.runInContext('f()', vm.createContext({ f }), { timeout: ${CASE_TIMEOUT_MS} });
+    out[name] = { value: JSON.parse(JSON.stringify(v, enc)) };
+  } catch (e) {
+    out[name] = e && e.code === 'ERR_SCRIPT_EXECUTION_TIMEOUT'
+      ? { timeout: true }
+      : { error: e.constructor.name, message: String(e.message) };
+  }
+}
+console.log(JSON.stringify(out, enc));
+`;
+
+let results: Record<string, Outcome> = {};
+
+/** The value that case `name` returned; fails when the case threw or timed out. */
+function value(name: string): unknown {
+  const r = results[name];
+  expect(r, name).toBeDefined();
+  expect(r, name).toHaveProperty('value');
+  return (r as { value: unknown }).value;
 }
 
-describe('#979 non-finite input returns instead of hanging', { timeout: 90000 }, () => {
-  it('rankdata propagates NaN (SciPy nan_policy=propagate)', () => {
-    expect(run('S.rankdata([3, 1, NaN])')).toEqual(['NaN', 'NaN', 'NaN']);
-  });
-  it('rankdata ranks Infinity as an ordinary value', () => {
-    expect(run('S.rankdata([Infinity, 1, Infinity, -Infinity])')).toEqual([3.5, 2, 3.5, 1]);
-  });
-  it('spearman returns NaN', () => {
-    expect(run('S.spearman([1, NaN, 2, 3], [1, 2, 3, 4])')).toBe('NaN');
-  });
-  it('spearmanr returns NaN coefficient and p-value', () => {
-    expect(run('S.spearmanr([1, NaN, 2, 3], [1, 2, 3, 4])')).toEqual({
-      coefficient: 'NaN',
-      pValue: 'NaN',
+/** The error that case `name` threw; fails when the case returned or timed out. */
+function error(name: string): { error: string; message: string } {
+  const r = results[name];
+  expect(r, name).toHaveProperty('error');
+  return r as { error: string; message: string };
+}
+
+describe('#979 non-finite input returns instead of hanging', () => {
+  beforeAll(() => {
+    const r = spawnSync(process.execPath, ['--input-type=module', '-e', CHILD], {
+      timeout: CHILD_TIMEOUT_MS,
+      encoding: 'utf8',
     });
+    if (r.error) throw new Error(`child did not end within ${CHILD_TIMEOUT_MS} ms`);
+    if (r.status !== 0) throw new Error(`child failed: ${r.stderr}`);
+    results = JSON.parse(r.stdout) as Record<string, Outcome>;
+  }, CHILD_TIMEOUT_MS + 10000);
+
+  it('rankdata propagates NaN (SciPy nan_policy=propagate)', () => {
+    expect(value('rankdataNaN')).toEqual(['NaN', 'NaN', 'NaN']);
+  });
+  it('pin: rankdata ranks Infinity as an ordinary value', () => {
+    expect(value('rankdataInf')).toEqual([3.5, 2, 3.5, 1]);
+  });
+  it('spearman and spearmanr return NaN', () => {
+    expect(value('spearman')).toBe('NaN');
+    expect(value('spearmanr')).toEqual({ coefficient: 'NaN', pValue: 'NaN' });
   });
   it('wilcoxon returns NaN statistic and p-value', () => {
-    expect(run('S.wilcoxon([1, NaN, 3, 4], [2, 3, 1, 5])')).toEqual({
-      statistic: 'NaN',
-      pValue: 'NaN',
-      zStatistic: 'NaN',
-    });
+    expect(value('wilcoxon')).toEqual({ statistic: 'NaN', pValue: 'NaN', zStatistic: 'NaN' });
   });
-  it('wilcoxon throws a TypeError on a string', () => {
-    expect(
-      run("(() => { try { S.wilcoxon('abc'); } catch (e) { return e.constructor.name; } })()")
-    ).toBe('TypeError');
+  it('pin: wilcoxon throws a TypeError on a string', () => {
+    expect(error('wilcoxonString').error).toBe('TypeError');
   });
   it('kruskalWallis returns NaN', () => {
-    expect(run('S.kruskalWallis([1, NaN, 2], [3, 4, 5])')).toEqual({
-      statistic: 'NaN',
-      pValue: 'NaN',
-      df: 1,
-    });
+    expect(value('kruskalWallis')).toEqual({ statistic: 'NaN', pValue: 'NaN', df: 1 });
   });
-  it('mannWhitneyTest returns NaN', () => {
-    expect(run('S.mannWhitneyTest([1, NaN, 3], [2, 3, 4])')).toEqual({
+  it('mannWhitneyTest returns NaN, also with bootstrap', () => {
+    expect(value('mannWhitney')).toEqual({ uStatistic: 'NaN', pValue: 'NaN' });
+    expect(value('mannWhitneyBootstrap')).toEqual({
       uStatistic: 'NaN',
-      pValue: 'NaN',
+      pValueEmpirical: 'NaN',
+      bootstrapStatistics: ['NaN', 'NaN', 'NaN'],
+      bootstrapMean: 'NaN',
+      bootstrapStd: 'NaN',
     });
   });
   it('friedmanTest returns NaN', () => {
-    const r = run('S.friedmanTest([[1, 2, 3], [2, NaN, 4], [3, 1, 2]])') as { statistic: string };
-    expect(r.statistic).toBe('NaN');
+    expect((value('friedman') as { statistic: string }).statistic).toBe('NaN');
   });
-  it('wassersteinDistance returns NaN', () => {
-    expect(run('S.wassersteinDistance([1, NaN], [2, 3])')).toBe('NaN');
+  it('wassersteinDistance returns NaN for NaN in either sample', () => {
+    expect(value('wassersteinA')).toBe('NaN');
+    expect(value('wassersteinB')).toBe('NaN');
   });
   it('kendall tau variants return NaN (SciPy nan)', () => {
-    expect(run('S.kendallTau([1, NaN, 2, 3], [1, 2, 3, 4])')).toBe('NaN');
-    expect(run('S.kendalltau([1, NaN, 2, 3], [1, 2, 3, 4])')).toEqual({
-      coefficient: 'NaN',
-      pValue: 'NaN',
-    });
-    expect(run('S.kendallTauTest([1, NaN, 2, 3], [1, 2, 3, 4])')).toEqual({
-      tau: 'NaN',
-      pValue: 'NaN',
-    });
+    expect(value('kendallTau')).toBe('NaN');
+    expect(value('kendalltau')).toEqual({ coefficient: 'NaN', pValue: 'NaN' });
+    expect(value('kendallTauTest')).toEqual({ tau: 'NaN', pValue: 'NaN' });
   });
-  it('unwrapPhase gives numpy.unwrap values on Infinity', () => {
-    expect(run('S.unwrapPhase([Infinity, 1, 2, -Infinity])')).toEqual([
-      'Infinity',
-      'NaN',
-      'NaN',
-      'NaN',
+  it('unwrapPhase gives numpy.unwrap values on Infinity and NaN', () => {
+    expect(value('unwrapInf')).toEqual(['Infinity', 'NaN', 'NaN', 'NaN']);
+    expect(value('unwrapInfMid')).toEqual([1, 'NaN', 'NaN']);
+  });
+  it('pin: unwrapPhase propagates NaN', () => {
+    expect(value('unwrapNaN')).toEqual([1, 'NaN', 'NaN']);
+  });
+  it('pin: unwrapPhase still unwraps ordinary jumps', () => {
+    expect((value('unwrapSmall') as number[])[1]).toBeCloseTo(4 - 2 * Math.PI, 12);
+  });
+  it('unwrapPhase returns on large finite jumps', () => {
+    expect(value('unwrapMixed')).toEqual([
+      0, -1.4155045149763694, 1.4155045149764476, 3.4521762771895084, 6.283185307179586,
     ]);
-    expect(run('S.unwrapPhase([1, Infinity, 2])')).toEqual([1, 'NaN', 'NaN']);
-    expect(run('S.unwrapPhase([1, NaN, 2])')).toEqual([1, 'NaN', 'NaN']);
+    expect(value('unwrapHuge')).toEqual([0, -0.7234267005270212]);
+    expect(value('unwrapLimit')).toEqual([0, -2.359923502508572]);
+    expect(value('unwrapOverflow')).toEqual([-1e308, 'NaN']);
   });
-  it('unwrapPhase returns on a huge finite jump', () => {
-    const r = run('S.unwrapPhase([0, 1e300])') as number[];
-    expect(r).toHaveLength(2);
+  it('kolmogorovSmirnov2Test returns NaN for NaN in either sample', () => {
+    const nan = { statistic: 'NaN', pValue: 'NaN' };
+    expect(value('ks2NaNFirst')).toEqual(nan);
+    expect(value('ks2NaNSecond')).toEqual(nan);
+    expect(value('ks2NaNOnly')).toEqual(nan);
   });
-  it('unwrapPhase still unwraps ordinary jumps', () => {
-    const r = run('S.unwrapPhase([0, 4])') as number[];
-    expect(r[1]).toBeCloseTo(4 - 2 * Math.PI, 12);
+  it('pin: kolmogorovSmirnov2Test orders Infinity as an ordinary value', () => {
+    expect(value('ks2Inf')).toEqual({ statistic: 0.25, pValue: 1 });
+  });
+  it('fisherExact throws a RangeError unless every entry is finite and non-negative', () => {
+    for (const name of ['fisherInf', 'fisherNaN', 'fisherNegative']) {
+      const e = error(name);
+      expect(e.error, name).toBe('RangeError');
+      expect(e.message, name).toMatch(/^fisherExact:/);
+    }
+    expect((value('fisherValid') as { pValue: number }).pValue).toBe(0.24242424242424324);
+  });
+  it('peakWidths throws a RangeError for an index that is not an integer in range', () => {
+    const cases: [string, number][] = [
+      ['peakWidthsInf', 0],
+      ['peakWidthsNegInf', 0],
+      ['peakWidthsHigh', 0],
+      ['peakWidthsNegative', 0],
+      ['peakWidthsFraction', 0],
+    ];
+    for (const [name, i] of cases) {
+      const e = error(name);
+      expect(e.error, name).toBe('RangeError');
+      expect(e.message, name).toBe(`peakWidths: peak ${i} is not a valid index for x`);
+    }
+    expect(value('peakWidthsValid')).toEqual([1]);
+  });
+  it('theilSen returns NaN slope and intercept for NaN in x or y', () => {
+    expect(value('theilSenNaNx')).toEqual({ slope: 'NaN', intercept: 'NaN' });
+    expect(value('theilSenNaNy')).toEqual({ slope: 'NaN', intercept: 'NaN' });
+  });
+  it('rankBiserial returns NaN for NaN in either sample', () => {
+    expect(value('rankBiserialA')).toBe('NaN');
+    expect(value('rankBiserialB')).toBe('NaN');
   });
 });

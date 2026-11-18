@@ -22,7 +22,7 @@ import { betaincScalar } from './wasm/special/scalars.js';
 import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
-import { numberVector } from './typed/number-matrix.js';
+import { hasNaN, numberVector } from './typed/number-matrix.js';
 import { assertAllocSize } from './utils/limits.js';
 import { readSkip } from './statistics/numeric-data.js';
 
@@ -90,7 +90,7 @@ export function rankdata(x: Vec): number[] {
   const n = a.length;
   // SciPy `nan_policy='propagate'`: a NaN has no rank, so no entry has one. NaN breaks the
   // sort comparator, and `NaN === NaN` is false, so the tie scan below would not advance.
-  if (a.some((v) => v !== v)) return new Array<number>(n).fill(NaN);
+  if (hasNaN(a)) return new Array<number>(n).fill(NaN);
   const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => a[i] - a[j]);
   const ranks = new Array<number>(n);
   for (let i = 0; i < n;) {
@@ -359,7 +359,7 @@ function _kendallTauCore(
   if (n !== y.length) throw new Error('kendallTau: inputs must have equal length');
   if (n < 2) return { tau: NaN, P: 0, Q: 0, hasTies: false, n };
   // SciPy `nan_policy='propagate'`: `Math.sign(NaN)` is NaN, and the pair count skipped it.
-  if (x.some((v) => v !== v) || y.some((v) => v !== v)) {
+  if (hasNaN(x) || hasNaN(y)) {
     return { tau: NaN, P: 0, Q: 0, hasTies: false, n };
   }
   let P = 0;
@@ -547,7 +547,7 @@ export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
   x = numberVector('kendalltau', x);
   y = numberVector('kendalltau', y);
   const { tau, Q, hasTies, n } = _kendallTauCore(x, y);
-  if (n >= 2 && (x.some((v) => v !== v) || y.some((v) => v !== v))) {
+  if (n >= 2 && (hasNaN(x) || hasNaN(y))) {
     return { coefficient: NaN, pValue: NaN };
   }
   if (!hasTies && kendallShouldUseExact(n, Q)) {
