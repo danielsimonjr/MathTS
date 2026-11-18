@@ -36,7 +36,7 @@ import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
 import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
-import { rewriteCalls, hasTopLevelAdditive } from './call-rewrite.js';
+import { rewriteCalls, topLevelFactors, isParenthesised } from './call-rewrite.js';
 import {
   collapseIdenticalFactors,
   tryPolynomialCanonicalForm,
@@ -1491,26 +1491,27 @@ export function trigToExp(expr: string): string {
 /**
  * Convert exponential expressions to trigonometric form.
  *
- * Each `exp(i*A)`, `exp(-i*A)` and `exp(A*i)` call is rewritten, where `A` is a product
- * (a sum stays as written). The angle is parenthesised when it is not a bare name or
- * number, and each result is parenthesised, so the output has the value of the input.
- * Unbalanced input stays as written.
+ * An `exp` call is rewritten when its argument is a product with a factor `i` or `-i`
+ * (`exp(i*x)`, `exp(-i*(x+1))`, `exp(2*i*x)`, `exp(x*i)`). The other factors are the
+ * angle. Any other call stays as written: a sum (`exp(i*x+1)`), an argument with an
+ * operator other than `*`, `/` and `^`, and unbalanced input. The angle is
+ * parenthesised when it is not a bare name, a number or already in parentheses, and
+ * each result is parenthesised, so the output has the value of the input.
  *
  * @param expr - Expression string
  * @returns Expression with exponentials replaced by trig
  */
 export function expToTrig(expr: string): string {
   return rewriteCalls(expr, ['exp'], (_name, raw) => {
-    const arg = expToTrig(raw).trim();
-    // Match i*A, -i*A or A*i; A must not be a sum, as the angle is the whole product.
-    const m = /^(-?)i\s*\*\s*([^]+)$/.exec(arg) ?? /^([^]+?)\s*\*\s*(-?)i$/.exec(arg);
-    if (m === null) return undefined;
-    const prefixed = /^-?i/.test(arg);
-    const neg = (prefixed ? m[1] : m[2]) === '-';
-    const angle = (prefixed ? m[2] : m[1]).trim();
-    if (angle === '' || hasTopLevelAdditive(angle)) return undefined;
-    const w = /^[A-Za-z0-9_.]+$/.test(angle) ? angle : `(${angle})`;
-    return `(cos(${w}) ${neg ? '-' : '+'} i*sin(${w}))`;
+    const factors = topLevelFactors(raw);
+    const at = factors?.findIndex((factor) => /^[+-]?\s*i$/.test(factor)) ?? -1;
+    if (factors === undefined || at < 0 || factors.length < 2) return undefined;
+    const sign = factors[at].startsWith('-') ? '-' : '+';
+    factors.splice(at, 1);
+    // Only the angle is scanned again, so nested calls cost linear time.
+    const angle = expToTrig(factors.join('*'));
+    const w = /^[A-Za-z0-9_.]+$/.test(angle) || isParenthesised(angle) ? angle : `(${angle})`;
+    return `(cos(${w}) ${sign} i*sin(${w}))`;
   });
 }
 
