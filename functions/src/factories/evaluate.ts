@@ -184,6 +184,53 @@ for (const key of EVALUATE_SCOPE_OMIT) {
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
 
+type EvaluateRunner = ReturnType<typeof createEvaluate>;
+type ExpressionScope = Parameters<typeof _compileExpression>[1];
+
+/**
+ * Evaluate with the safe or the unsafe runner of one scope pair. The module-level `evaluate`
+ * and the instance evaluator of `createInstanceEvaluator` share this body.
+ */
+function runEvaluate(
+  safeRunner: EvaluateRunner,
+  unsafeRunner: EvaluateRunner,
+  exprOrExprs: string | string[],
+  scope: Record<string, unknown> | Scope | undefined,
+  options: PhysicsEvaluateOptions | undefined
+): unknown {
+  const physics = assertPhysicsOptions(options);
+  const bound = physics === undefined ? scope : physicsScope(scope, physics);
+  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
+  const runner = options?.unsafe === true ? unsafeRunner : safeRunner;
+  if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
+  return runner(exprOrExprs, bound, inner);
+}
+
+/**
+ * Compile in the safe or the unsafe scope of one scope pair. The module-level `compileExpr`
+ * and the instance compiler of `createInstanceEvaluator` share this body.
+ */
+function compileInScope(
+  safeScope: ExpressionScope,
+  unsafeScope: ExpressionScope,
+  expr: string,
+  options: PhysicsEvaluateOptions | undefined
+) {
+  const compiled = _compileExpression(
+    parse,
+    options?.unsafe === true ? unsafeScope : safeScope,
+    expr,
+    options?.unsafe === true ? { unsafe: true } : undefined
+  );
+  const physics = assertPhysicsOptions(options);
+  if (physics === undefined) return compiled;
+  return {
+    evaluate(scope?: Record<string, unknown> | Scope): unknown {
+      return compiled.evaluate(physicsScope(scope, physics));
+    },
+  };
+}
+
 /**
  * Exact elementary charge (CODATA / 2019 SI), in coulombs.
  * Physics scopes bind `e0`, not bare `e`.
@@ -370,12 +417,7 @@ export function evaluate(
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
 ): number | number[] {
-  const physics = assertPhysicsOptions(options);
-  const bound = physics === undefined ? scope : physicsScope(scope, physics);
-  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
-  const runner = options?.unsafe === true ? _evaluateUnsafe : _evaluate;
-  if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner) as number[];
-  return runner(exprOrExprs, bound, inner) as number;
+  return runEvaluate(_evaluate, _evaluateUnsafe, exprOrExprs, scope, options) as number | number[];
 }
 
 /**
@@ -398,19 +440,7 @@ export function evaluate(
  * ```
  */
 export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
-  const compiled = _compileExpression(
-    parse,
-    options?.unsafe === true ? unsafeMathScope : mathScope,
-    expr,
-    options?.unsafe === true ? { unsafe: true } : undefined
-  );
-  const physics = assertPhysicsOptions(options);
-  if (physics === undefined) return compiled;
-  return {
-    evaluate(scope?: Record<string, unknown> | Scope): unknown {
-      return compiled.evaluate(physicsScope(scope, physics));
-    },
-  };
+  return compileInScope(mathScope, unsafeMathScope, expr, options);
 }
 
 // ---------------------------------------------------------------------------
@@ -578,28 +608,11 @@ export function createInstanceEvaluator(importedExpressionScope: Record<string, 
     scope?: Record<string, unknown> | Scope,
     options?: PhysicsEvaluateOptions
   ): unknown | unknown[] {
-    const physics = assertPhysicsOptions(options);
-    const bound = physics === undefined ? scope : physicsScope(scope, physics);
-    const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
-    const runner = options?.unsafe === true ? unsafeEvaluate : safeEvaluate;
-    if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
-    return runner(exprOrExprs, bound, inner);
+    return runEvaluate(safeEvaluate, unsafeEvaluate, exprOrExprs, scope, options);
   }
 
   function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
-    const compiled = _compileExpression(
-      parse,
-      options?.unsafe === true ? unsafeScope : safeScope,
-      expr,
-      options?.unsafe === true ? { unsafe: true } : undefined
-    );
-    const physics = assertPhysicsOptions(options);
-    if (physics === undefined) return compiled;
-    return {
-      evaluate(scope?: Record<string, unknown> | Scope): unknown {
-        return compiled.evaluate(physicsScope(scope, physics));
-      },
-    };
+    return compileInScope(safeScope, unsafeScope, expr, options);
   }
 
   return {

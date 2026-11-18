@@ -5,18 +5,11 @@
 import { chiSquaredSF } from '../distribution-functions.js';
 import { normalCDF as _normalCDF } from '../typed/distributions.js';
 import { numberVector } from '../typed/number-matrix.js';
+import { medianOf as median } from './robust-stats.js';
 
 type Vec = readonly number[] | Float64Array;
 
 const normalCDF = (z: number): number => _normalCDF(z) as number;
-
-function median(a: number[]): number {
-  const s = [...a].sort((p, q) => p - q);
-  const n = s.length;
-  if (n === 0) return NaN;
-  const mid = Math.floor(n / 2);
-  return n % 2 === 1 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}
 
 /** Sign test on the median. Ties with `median` are dropped; two-sided exact binomial p. */
 export function signTest(

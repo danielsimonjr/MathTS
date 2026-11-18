@@ -7,7 +7,19 @@ type Vec = readonly number[] | Float64Array;
 
 const meanOf = (a: number[]): number => a.reduce((s, v) => s + v, 0) / a.length;
 
-function medianOf(a: number[]): number {
+/**
+ * Median of `a` from a sorted copy. Empty gives NaN. The caller's array is not changed.
+ *
+ * @param a - The values.
+ * @returns The middle value, or the mean of the two middle values.
+ *
+ * @example
+ * ```ts
+ * medianOf([3, 1, 2]); // 2
+ * medianOf([4, 1, 3, 2]); // 2.5
+ * ```
+ */
+export function medianOf(a: number[]): number {
   const s = [...a].sort((p, q) => p - q);
   const n = s.length;
   if (n === 0) return NaN;

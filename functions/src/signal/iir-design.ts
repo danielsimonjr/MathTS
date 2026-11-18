@@ -23,6 +23,7 @@ import {
   cMul,
   cScale,
   polyFromRoots,
+  realPolyMul as polyMul,
   type AnalogProto,
   type FilterBtype,
 } from '../signal-filter-extra.js';
@@ -286,11 +287,6 @@ export function ellip(
 
 type Poly = number[]; // ascending powers of z: poly[i] is the coefficient of z^i
 
-function polyMul(p: Poly, q: Poly): Poly {
-  const res = new Array<number>(p.length + q.length - 1).fill(0);
-  for (let i = 0; i < p.length; i++) for (let j = 0; j < q.length; j++) res[i + j] += p[i] * q[j];
-  return res;
-}
 function polyAdd(p: Poly, q: Poly): Poly {
   const res = new Array<number>(Math.max(p.length, q.length)).fill(0);
   for (let i = 0; i < p.length; i++) res[i] += p[i];

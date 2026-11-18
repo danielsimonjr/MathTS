@@ -5,30 +5,13 @@
  */
 
 import { assertLoopOrder, MAX_ALLOC_ELEMENTS } from '../utils/limits.js';
+import { trialFactorize as factorize } from './modular.js';
 
 /** Largest `n` for primorial (n = 1e7 takes about 2 s). */
 const PRIMORIAL_MAX_N = 10_000_000;
 
 function assertPositiveInt(n: number, name: string): void {
   if (!Number.isSafeInteger(n) || n < 1) throw new RangeError(`${name} must be a positive integer`);
-}
-
-/** Prime factorization of a positive integer as [prime, exponent] pairs. */
-function factorize(n: number): Array<[number, number]> {
-  const out: Array<[number, number]> = [];
-  let m = n;
-  for (let d = 2; d * d <= m; d++) {
-    if (m % d === 0) {
-      let e = 0;
-      while (m % d === 0) {
-        m /= d;
-        e++;
-      }
-      out.push([d, e]);
-    }
-  }
-  if (m > 1) out.push([m, 1]);
-  return out;
 }
 
 /** Sum of the divisors of n (sigma), computed from the factorization. */
