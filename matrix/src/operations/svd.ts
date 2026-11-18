@@ -394,25 +394,35 @@ export function svd(matrix: DecompositionMatrixInput, options: SVDOptions = {}):
 export function svdOfSource(source: DecompositionSource, options: SVDOptions = {}): SVDResult {
   return svdScaled(
     source,
-    (src) => svdKernel(src, options),
+    (src) => {
+      const r = svdKernel(src, options);
+      return { value: r, S: r.S };
+    },
     (r, e) => ({ ...r, S: r.S.map((v) => ldexp(v, -e)) })
   );
+}
+
+/** A result of `call` and the singular values it was computed from. */
+interface WithS<T> {
+  value: T;
+  S: readonly number[];
 }
 
 /**
  * Run `call` on the SVD kernel with the input scaled into [2^-SQUARED, 2^FOURTH] (#1104).
  * The bidiagonal QR step forms fourth powers of the entries; its absolute deflation
- * cutoffs set no lower bound beyond the squared one. `unscale(r, e)` takes the result
- * for 2^e · A back to the result for A. The rank comes from the scaled values, so a
- * singular value that underflows when it is scaled back still counts.
+ * cutoffs set no lower bound beyond the squared one. `call` returns its result and the
+ * singular values of its kernel run. `unscale(r, e)` takes the result for 2^e · A back
+ * to the result for A. The rank comes from the scaled values, so a singular value that
+ * underflows when it is scaled back still counts.
  */
 function svdScaled<T>(
   source: DecompositionSource,
-  call: (src: DecompositionSource) => T,
+  call: (src: DecompositionSource) => WithS<T>,
   unscale: (r: T, e: number) => T
 ): T {
   const rows = source.copyRows(false);
-  return withPow2Scale(
+  return withPow2Scale<WithS<T>>(
     entryRange(rows),
     -SQUARED,
     FOURTH,
@@ -420,31 +430,26 @@ function svdScaled<T>(
       if (e === 0) return call(source);
       const scaledRows = rows.map((row) => row.slice());
       ldexpMatrix(scaledRows, e);
-      return unscale(call(decompositionSource(scaledRows)), e);
+      const r = call(decompositionSource(scaledRows));
+      return { value: unscale(r.value, e), S: r.S.map((v) => ldexp(v, -e)) };
     },
     false,
     // An entry span beyond the double range keeps the unscaled run only when its
-    // singular values are finite and the largest is nonzero (#1129). A finite derived
-    // result (a pinv of zeros) can come from NaN singular values.
-    () => singularValuesUsable(lastKernelS)
-  );
+    // singular values agree with those of the scaled run (#1129). A finite unscaled
+    // result can come from NaN or wrong singular values.
+    (u, s) => singularValuesAgree(u.S, s.S)
+  ).value;
 }
 
-/** The singular values of the latest `svdKernel` run; `svdScaled` reads them to judge an unscaled run. */
-let lastKernelS: readonly number[] = [];
-
-function singularValuesUsable(S: readonly number[]): boolean {
-  return S.length > 0 && S[0] > 0 && S.every(Number.isFinite);
+/** True when every |Su[i] - Ss[i]| is at most 1e-10 · Ss[0]. */
+function singularValuesAgree(Su: readonly number[], Ss: readonly number[]): boolean {
+  if (Su.length !== Ss.length || !Su.every(Number.isFinite)) return false;
+  const tol = 1e-10 * Ss[0];
+  return Su.every((v, i) => Math.abs(v - Ss[i]) <= tol);
 }
 
-/** The SVD kernel, without scaling. It records its singular values for `svdScaled`. */
+/** The SVD kernel, without scaling. */
 function svdKernel(source: DecompositionSource, options: SVDOptions): SVDResult {
-  const result = svdKernelRun(source, options);
-  lastKernelS = result.S;
-  return result;
-}
-
-function svdKernelRun(source: DecompositionSource, options: SVDOptions): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -611,7 +616,10 @@ export function singularValues(
 ): number[] {
   return svdScaled(
     decompositionSource(matrix),
-    (src) => svdKernel(src, { ...options }).S,
+    (src) => {
+      const S = svdKernel(src, { ...options }).S;
+      return { value: S, S };
+    },
     (S, e) => S.map((v) => ldexp(v, -e))
   );
 }
@@ -623,7 +631,10 @@ export function pinv(matrix: DecompositionMatrixInput, options?: SVDOptions): nu
   // pinv(2^e · A) = 2^-e · pinv(A).
   return svdScaled(
     decompositionSource(matrix),
-    (src) => pinvOfSvd(svdKernel(src, options ?? {}), src.rows, src.cols, options),
+    (src) => {
+      const r = svdKernel(src, options ?? {});
+      return { value: pinvOfSvd(r, src.rows, src.cols, options), S: r.S };
+    },
     (P, e) => {
       ldexpMatrix(P, e);
       return P;
@@ -680,7 +691,10 @@ export function lowRankApprox(
 ): number[][] {
   return svdScaled(
     decompositionSource(matrix),
-    (src) => lowRankOfSvd(svdKernel(src, options ?? {}), src.rows, src.cols, r),
+    (src) => {
+      const res = svdKernel(src, options ?? {});
+      return { value: lowRankOfSvd(res, src.rows, src.cols, r), S: res.S };
+    },
     (M, e) => {
       ldexpMatrix(M, -e);
       return M;
@@ -717,7 +731,8 @@ export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): nu
     decompositionSource(matrix),
     (src) => {
       const S = svdKernel(src, { ...options }).S;
-      return S.length === 0 || S[S.length - 1] === 0 ? Infinity : S[0] / S[S.length - 1];
+      const c = S.length === 0 || S[S.length - 1] === 0 ? Infinity : S[0] / S[S.length - 1];
+      return { value: c, S };
     },
     (c) => c
   );
@@ -730,7 +745,10 @@ export function cond(matrix: DecompositionMatrixInput, options?: SVDOptions): nu
 export function norm2(matrix: DecompositionMatrixInput, options?: SVDOptions): number {
   return svdScaled(
     decompositionSource(matrix),
-    (src) => svdKernel(src, { ...options }).S[0] || 0,
+    (src) => {
+      const S = svdKernel(src, { ...options }).S;
+      return { value: S[0] || 0, S };
+    },
     (s, e) => ldexp(s, -e)
   );
 }

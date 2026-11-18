@@ -82,15 +82,15 @@ export function lstsq(
   // z · sB can leave the range of a double (a subnormal sB, or a huge one); the quotient
   // sB / sA is taken first then (#1104). An ordinary pair keeps the original order.
   const inWindow = (v: number): boolean => v >= 2 ** -SQUARED && v <= 2 ** SQUARED;
-  // The right-hand side is divided by its largest entry (an ordinary b), by an exact power
-  // of 2 that brings that entry to the top of the window (an extreme b), or by 1 when that
-  // power would push a nonzero entry below 2^-1022. Division by the largest entry would
-  // flush the small entries of an extreme b to zero (#1124); a Householder step forms no
+  // The right-hand side is divided by its largest entry, unless that division would push
+  // a nonzero entry below 2^-1022 and flush its bits (#1124). Then b is divided by the
+  // exact power of 2 that brings the largest entry into the window, or by 1 when that
+  // exponent is 0 or would push a nonzero entry below 2^-1022. A Householder step forms no
   // squares of b, so the unscaled b is safe when the entries span the double range.
   let sBScale = sB;
-  if (!inWindow(sB)) {
+  if (bMin / sB < 2 ** -1022) {
     const e = pow2ScaleExponent(sB, -SQUARED, SQUARED);
-    sBScale = ldexp(bMin, e) < 2 ** -1022 ? 1 : ldexp(1, -e);
+    sBScale = e !== 0 && ldexp(bMin, e) >= 2 ** -1022 ? ldexp(1, -e) : 1;
   }
   const ratioInWindow = inWindow(sA) && inWindow(sBScale);
   for (let i = 0; i < R.length; i++) R[i] /= sA;

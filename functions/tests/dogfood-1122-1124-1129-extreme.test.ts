@@ -163,6 +163,96 @@ describe('#1122 functions kernels on extreme matrices', () => {
     expect(nullspace(A)).toEqual([]);
   });
 
+  it('sqrtm above 2^400 is 2^225 times the root at 2^0', () => {
+    // Before: scaled to the top of the window, the iteration did not converge.
+    const A = [
+      [2.4175568593124126, 0.08472754974047803],
+      [0.08472754974047803, 2.0184761582291912],
+    ];
+    const want = sqrtm(A) as number[][];
+    expect(want).toEqual([
+      [1.5545886195619647, 0.02847952318486678],
+      [0.02847952318486678, 1.4204453790935976],
+    ]);
+    const got = sqrtm(A.map((row) => row.map((v) => v * 2 ** 450))) as number[][];
+    expect(got).toEqual(want.map((row) => row.map((v) => v * 2 ** 225)));
+  });
+
+  it('sqrtm of a subnormal matrix', () => {
+    expectEachClose(
+      sqrtm([
+        [1e-310, 0],
+        [0, 4e-310],
+      ]) as number[][],
+      [
+        [1e-155, 0],
+        [0, 2e-155],
+      ],
+      1e-14
+    );
+  });
+
+  it('inv of a matrix with a subnormal entry', () => {
+    // Before: the determinant 2^-2000 underflowed to 0 and inv threw.
+    expectEachClose(
+      inv([
+        [2 ** -1000, 2 ** -1060],
+        [0, 2 ** -1000],
+      ]) as number[][],
+      [
+        [2 ** 1000, -(2 ** 940)],
+        [0, 2 ** 1000],
+      ],
+      1e-14
+    );
+  });
+
+  it('rank and nullspace of a tiny 3x3 matrix', () => {
+    const A = [
+      [1e-30, 2e-30, 0],
+      [0, 3e-30, 1e-30],
+      [1e-30, 0, 4e-30],
+    ];
+    expect(rank(A)).toBe(3);
+    expect(nullspace(A)).toEqual([]);
+  });
+
+  it('rank and nullspace of a subnormal matrix', () => {
+    const A = [
+      [5e-324, 0],
+      [0, 5e-324],
+    ];
+    expect(rank(A)).toBe(2);
+    expect(nullspace(A)).toEqual([]);
+  });
+
+  it('rank and nullspace of zero, -0, NaN and Infinity inputs take the unscaled path', () => {
+    for (const Z of [
+      [
+        [0, 0],
+        [0, 0],
+      ],
+      [
+        [-0, 0],
+        [0, -0],
+      ],
+    ]) {
+      expect(rank(Z)).toBe(0);
+      expect(nullspace(Z)).toEqual([
+        [1, 0],
+        [0, 1],
+      ]);
+    }
+    for (const v of [NaN, Infinity]) {
+      const A = [
+        [v, 1],
+        [1, 1],
+      ];
+      expect(rank(A)).toBe(2);
+      expect(nullspace(A)).toEqual([]);
+    }
+  });
+
   it('rank keeps an explicit absolute tolerance', () => {
     expect(
       rank(
@@ -206,6 +296,40 @@ describe('#1124 lstsq keeps small right-hand-side entries', () => {
       [1e300, 1e-300]
     );
   });
+  it('a right-hand side with a 1e-300 entry next to 1e100', () => {
+    expect(
+      lstsq(
+        [
+          [1, 0],
+          [0, 1],
+        ],
+        [1e100, 1e-300]
+      )
+    ).toEqual([1e100, 1e-300]);
+  });
+
+  it('a right-hand side with a subnormal entry', () => {
+    const I = [
+      [1, 0],
+      [0, 1],
+    ];
+    expect(lstsq(I, [1e10, 1e-310])).toEqual([1e10, 1e-310]);
+    expect(lstsq(I, [3, 1e-310])).toEqual([3, 1e-310]);
+  });
+
+  it('an extreme right-hand side with no small entry keeps the old bits', () => {
+    const A = [
+      [2, 1],
+      [1, 3],
+      [1, 1],
+    ];
+    expect(lstsq(A, [3e200, 7e199, 1e200])).toEqual([
+      1.6033333333333326e200, -3.199999999999999e199,
+    ]);
+    expect(lstsq(A, [3e-200, 7e-201, 1e-200])).toEqual([
+      1.6033333333333327e-200, -3.1999999999999994e-201,
+    ]);
+  });
 });
 
 describe('#1129 the svd family judges the unscaled run by its singular values', () => {
@@ -226,6 +350,19 @@ describe('#1129 the svd family judges the unscaled run by its singular values', 
 
   it('pinv of the functions package', () => {
     expectClose(pinv(A), want);
+  });
+
+  it('singular values reject an unscaled run that disagrees with the scaled run', () => {
+    // Before: the unscaled run gave [2e87, 1e86, 1e64]; its values were finite, so it was kept.
+    expectEachClose(
+      singularValues([
+        [0, 0, 0],
+        [0, 2e87, 1e86],
+        [1e64, 0, 1e-267],
+      ]),
+      [2.0024984394500785e87, 1e64, 0],
+      1e-14
+    );
   });
 
   it('singular values keep the largest', () => {
