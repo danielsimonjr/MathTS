@@ -127,7 +127,21 @@ export function acceleratedInv<T>(a: unknown, factoryInv: (m: unknown) => T): T 
   }
 }
 
+/**
+ * A computed eigenvalue of a real matrix counts as real when |im| <= EIG_IM_TOL * max|A_ij|.
+ * The tolerance is relative: the rounding noise in the imaginary part of a real eigenvalue is of
+ * order eps * ||A||, so it grows and shrinks with the matrix. A fixed absolute bound turned the
+ * pair of a small matrix into a real 0 and left the noise of a large matrix as a complex pair.
+ * 1e-10 is about 5e5 eps, and it is far below the sqrt(eps) split of a defective real pair.
+ */
 const EIG_IM_TOL = 1e-10;
+
+/** Largest absolute entry of a numeric matrix: the scale of its spectrum, free of overflow. */
+function maxAbsEntry(a: number[][]): number {
+  let m = 0;
+  for (const row of a) for (const x of row) if (Math.abs(x) > m) m = Math.abs(x);
+  return m;
+}
 
 /** True for a square `number[][]` of any size ≥ 1. */
 export function isNumericSquare(a: unknown): a is number[][] {
@@ -228,13 +242,13 @@ export function correctEigs(
     }
     // As in mathjs, one complex eigenvalue makes every eigenvector a Complex[];
     // a real spectrum keeps number[] vectors.
-    const anyComplex = ne.values.some((v) => Math.abs(v.im) >= EIG_IM_TOL);
+    const imTol = EIG_IM_TOL * maxAbsEntry(a);
+    const isReal = (im: number): boolean => Math.abs(im) <= imTol;
+    const anyComplex = ne.values.some((v) => !isReal(v.im));
     const all = ne.values.map((v, i) => ({
-      value: (Math.abs(v.im) < EIG_IM_TOL ? v.re : new Complex(v.re, v.im)) as number | Complex,
+      value: (isReal(v.im) ? v.re : new Complex(v.re, v.im)) as number | Complex,
       vector: (anyComplex
-        ? ne.vectors[i].map(
-            (re, j) => new Complex(re, Math.abs(v.im) < EIG_IM_TOL ? 0 : ne.vectorsIm[i][j])
-          )
+        ? ne.vectors[i].map((re, j) => new Complex(re, isReal(v.im) ? 0 : ne.vectorsIm[i][j]))
         : ne.vectors[i]) as number[] | Complex[],
       i,
     }));
