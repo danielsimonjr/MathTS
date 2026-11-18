@@ -228,7 +228,10 @@ export function correctEigs(
     }
     const all = ne.values.map((v, i) => ({
       value: (Math.abs(v.im) < EIG_IM_TOL ? v.re : new Complex(v.re, v.im)) as number | Complex,
-      vector: ne.vectors[i],
+      vector: (Math.abs(v.im) < EIG_IM_TOL
+        ? ne.vectors[i]
+        : ne.vectors[i].map((re, j) => new Complex(re, ne.vectorsIm[i][j]))) as
+        number[] | Complex[],
       i,
     }));
     const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);

@@ -25,7 +25,7 @@ export interface EigResult {
   /** Eigenvalues (may be complex for non-symmetric matrices) */
   values: Array<{ re: number; im: number }>;
   /**
-   * Eigenvectors as columns (each column is an eigenvector). For a real
+   * Eigenvectors as rows (`vectors[k]` is the eigenvector of `values[k]`). For a real
    * eigenvalue this is the full (real) eigenvector, unit-normalised. For a
    * complex-conjugate eigenvalue pair this holds the REAL PART of the
    * corresponding complex eigenvector — see {@link vectorsIm} for the
@@ -33,7 +33,7 @@ export interface EigResult {
    */
   vectors: number[][];
   /**
-   * Imaginary parts of the eigenvector columns (same shape as {@link vectors}).
+   * Imaginary parts of the eigenvector rows (same shape as {@link vectors}).
    * All-zero for real eigenvalues. For a complex-conjugate eigenvalue pair at
    * indices `j`/`j+1`, the full complex eigenvectors are
    * `vectors[j] + i*vectorsIm[j]` (for `values[j]`) and
