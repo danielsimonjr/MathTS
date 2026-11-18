@@ -109,55 +109,44 @@ describe('#1119 bignumber() argument handling matches mathjs 15.2.0', () => {
 });
 
 describe('#1120 solveODE RK23 and RK45 with BigNumber input', () => {
+  // The invariant: a BigNumber input takes the steps of the number path. The first-step guess is
+  // one function for both, so the step count is equal and the result agrees to double precision.
+  type Sol = { t: unknown[]; y: unknown[] };
   const f = (_t: unknown, y: unknown) => unaryMinus(y as never);
-  const last = (r: { y: unknown[] }) => Number((r.y[r.y.length - 1] as BigNumber).toString());
-  const exact = Math.exp(-1);
+  const fNum = ((_t: number, y: number) => -y) as never;
+  const last = (r: Sol) => Number(String(r.y[r.y.length - 1]));
+  const solve = (fn: unknown, tspan: unknown, y0: unknown, method: string) =>
+    solveODE(fn as never, tspan as never, y0 as never, { method } as never) as unknown as Sol;
+  // Number-path pins. Before #1120 the BigNumber path gave 2 points and 1/3 (RK23), and 4 points
+  // and 0.36788579700682765 (RK45).
+  const pins = {
+    RK23: { points: 22, y: 0.3678768529675089 },
+    RK45: { points: 6, y: 0.3678805744341225 },
+  };
   for (const method of ['RK23', 'RK45'] as const) {
-    it(`${method}: BigNumber y0 gives e^-1, not 1/3`, () => {
-      const r = solveODE(f as never, [0, 1] as never, bn(1) as never, { method } as never) as never;
-      expect(Math.abs(last(r) - exact)).toBeLessThan(1e-3);
+    it(`${method}: the number path keeps its steps and its result`, () => {
+      const r = solve(fNum, [0, 1], 1, method);
+      expect(r.t.length).toBe(pins[method].points);
+      expect(last(r)).toBe(pins[method].y);
     });
-    it(`${method}: BigNumber tspan gives e^-1`, () => {
-      const r = solveODE(
-        f as never,
-        [bn(0), bn(1)] as never,
-        1 as never,
-        { method } as never
-      ) as never;
-      expect(Math.abs(last(r) - exact)).toBeLessThan(1e-3);
+    it(`${method}: a BigNumber y0 takes the steps of the number path`, () => {
+      const r = solve(f, [0, 1], bn(1), method);
+      expect(r.t.length).toBe(pins[method].points);
+      expect(Math.abs(last(r) - pins[method].y)).toBeLessThan(1e-12);
+      expect(r.y[r.y.length - 1] instanceof BigNumber).toBe(true);
+    });
+    it(`${method}: a BigNumber tspan takes the steps of the number path`, () => {
+      const r = solve(f, [bn(0), bn(1)], 1, method);
+      expect(r.t.length).toBe(pins[method].points);
+      expect(Math.abs(last(r) - pins[method].y)).toBeLessThan(1e-12);
+    });
+    it(`${method}: a backward BigNumber span takes the steps of the number path`, () => {
+      const grow = (_t: unknown, y: unknown) => y;
+      const big = solve(grow, [bn(1), bn(0)], bn(Math.E), method);
+      const num = solve(grow, [1, 0], Math.E, method);
+      expect(big.t.length).toBe(num.t.length);
+      expect(Math.abs(last(big) - last(num))).toBeLessThan(1e-12);
+      expect(Math.abs(last(big) - 1)).toBeLessThan(1e-3);
     });
   }
-  it('RK23 takes more than two steps', () => {
-    const r = solveODE(
-      f as never,
-      [bn(0), bn(1)] as never,
-      bn(1) as never,
-      {
-        method: 'RK23',
-      } as never
-    ) as { t: unknown[] };
-    expect(r.t.length).toBeGreaterThan(3);
-  });
-  it('a backward BigNumber span works', () => {
-    const r = solveODE(
-      (_t: unknown, y: unknown) => y as never,
-      [bn(1), bn(0)] as never,
-      bn(Math.E) as never,
-      {
-        method: 'RK23',
-      } as never
-    ) as never;
-    expect(Math.abs(last(r) - 1)).toBeLessThan(1e-3);
-  });
-  it('the number path is unchanged', () => {
-    const r = solveODE(
-      ((_t: number, y: number) => -y) as never,
-      [0, 1] as never,
-      1 as never,
-      {
-        method: 'RK23',
-      } as never
-    ) as never;
-    expect(Math.abs(last(r) - exact)).toBeLessThan(1e-3);
-  });
 });
