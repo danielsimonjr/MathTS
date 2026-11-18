@@ -160,6 +160,25 @@ export const cDiv = (p: Complex, q: Complex): Complex => p.divide(q);
 /** Scale a Complex by a real number (`Complex.mul` only accepts `Scalar`, not `number`). */
 export const cScale = (p: Complex, s: number): Complex => cMul(p, new Complex(s, 0));
 
+/**
+ * Product of two real polynomials as coefficient arrays. The result has the coefficient order
+ * of the inputs.
+ *
+ * @param p - The coefficients of the first polynomial.
+ * @param q - The coefficients of the second polynomial.
+ * @returns The `p.length + q.length - 1` coefficients of the product.
+ *
+ * @example
+ * ```ts
+ * realPolyMul([1, 1], [1, -1]); // [1, 0, -1]
+ * ```
+ */
+export function realPolyMul(p: readonly number[], q: readonly number[]): number[] {
+  const res = new Array<number>(p.length + q.length - 1).fill(0);
+  for (let i = 0; i < p.length; i++) for (let j = 0; j < q.length; j++) res[i + j] += p[i] * q[j];
+  return res;
+}
+
 /** Real polynomial coefficients (highest degree first) of ∏(x − rₖ). */
 export function polyFromRoots(roots: Complex[]): number[] {
   let c: Complex[] = [new Complex(1, 0)];

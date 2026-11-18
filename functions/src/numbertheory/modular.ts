@@ -116,8 +116,18 @@ export function sqrtMod(a: number, p: number): number | null {
   return Number(r < other ? r : other);
 }
 
-/** Prime factorization of a positive safe integer as [prime, exponent] pairs. */
-function factorize(n: number): Array<[number, number]> {
+/**
+ * Prime factorization of a positive safe integer by trial division.
+ *
+ * @param n - A positive safe integer.
+ * @returns The `[prime, exponent]` pairs, in ascending order of the prime.
+ *
+ * @example
+ * ```ts
+ * trialFactorize(360); // [[2, 3], [3, 2], [5, 1]]
+ * ```
+ */
+export function trialFactorize(n: number): Array<[number, number]> {
   const out: Array<[number, number]> = [];
   let m = n;
   for (let d = 2; d * d <= m; d++) {
@@ -141,7 +151,7 @@ function factorize(n: number): Array<[number, number]> {
 export function isCarmichael(n: number): boolean {
   if (!Number.isSafeInteger(n) || n < 2) return false;
   if (isPrimeNum(n)) return false;
-  const factors = factorize(n);
+  const factors = trialFactorize(n);
   if (factors.some(([, e]) => e > 1)) return false;
   return factors.every(([p]) => (n - 1) % (p - 1) === 0);
 }

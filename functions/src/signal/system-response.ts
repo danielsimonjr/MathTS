@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { lfilter } from '../signal-filter-extra.js';
+import { lfilter, realPolyMul } from '../signal-filter-extra.js';
 import type { ComplexNumber } from './fft.js';
 import { numberVector } from '../typed/number-matrix.js';
 import { assertAllocSize } from '../utils/limits.js';
@@ -380,15 +380,10 @@ export function tf2zpk(b: Vec, a: Vec): { z: ComplexNumber[]; p: ComplexNumber[]
 export function sos2tf(sos: ReadonlyArray<readonly number[]>): { b: number[]; a: number[] } {
   let b: number[] = [1];
   let a: number[] = [1];
-  const conv = (p: number[], q: number[]): number[] => {
-    const out = new Array<number>(p.length + q.length - 1).fill(0);
-    for (let i = 0; i < p.length; i++) for (let j = 0; j < q.length; j++) out[i + j] += p[i] * q[j];
-    return out;
-  };
   for (const section of sos) {
     if (section.length !== 6) throw new RangeError('sos2tf: each section needs 6 coefficients');
-    b = conv(b, section.slice(0, 3));
-    a = conv(a, section.slice(3, 6));
+    b = realPolyMul(b, section.slice(0, 3));
+    a = realPolyMul(a, section.slice(3, 6));
   }
   return { b, a };
 }
