@@ -93,6 +93,8 @@ describe('expToTrig keeps the value of its input (#1087)', () => {
       'exp(i*x y)',
       'exp(i*x1e-3)',
       'x exp(i*y)',
+      'x[1] exp(i*y)',
+      'x[1]exp(i*y)',
       'myexp(i*x)',
       'exp(i*x',
       'exp(i*(x+1)',
@@ -150,6 +152,7 @@ describe('trigToExp output strings (#1087)', () => {
       'sin(x': 'sin(x',
       // An implicit product after a name stays as written: `x (...)` is a call of `x`.
       'x sin(y)': 'x sin(y)',
+      'x[1]sin(y)': 'x[1]sin(y)',
       'x sin(cos(y))': 'x sin(((exp(i*y) + exp(-i*y))/2))',
     };
     for (const [input, output] of Object.entries(golden)) {
@@ -158,9 +161,10 @@ describe('trigToExp output strings (#1087)', () => {
   });
 
   it('keeps the value of an implicit product', () => {
-    for (const input of ['x sin(y)', '2 sin(y)', '(x) cos(y)', 'x sin(cos(y))']) {
+    for (const input of ['x sin(y)', '2 sin(y)', '(x) cos(y)', 'x sin(cos(y))', 'v[1] sin(y)']) {
       const out = trigToExp(input);
-      for (const scope of POINTS) {
+      for (const point of POINTS) {
+        const scope = { ...point, v: [2, 3] };
         const a = parts(evaluate(input, scope));
         const b = parts(evaluate(out, scope));
         expect(Math.abs(a.re - b.re), out).toBeLessThan(1e-12);

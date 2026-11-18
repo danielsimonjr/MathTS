@@ -1471,7 +1471,9 @@ export function trigReduce(expr: string): string {
  * Each sin, cos and tan call is rewritten from the innermost argument outward. An
  * argument that is not a bare name or number gets parentheses, and each result is
  * parenthesised, so the output has the same value as the input at every operator
- * precedence. Other functions (`asin`, `sinh`) pass through unchanged.
+ * precedence. Other functions (`asin`, `sinh`) pass through unchanged. A call that is
+ * the right side of an implicit product after a name or an index (`x sin(y)`,
+ * `x[1] sin(y)`) stays as written; write the product with `*` to get the rewrite.
  *
  * @param expr - Expression string
  * @returns Expression with trig replaced by exponentials
@@ -1494,7 +1496,8 @@ export function trigToExp(expr: string): string {
  * An `exp` call is rewritten when its argument is a product with a factor `i` or `-i`
  * (`exp(i*x)`, `exp(-i*(x+1))`, `exp(2*i*x)`, `exp(x*i)`). The other factors are the
  * angle. Any other call stays as written: a sum (`exp(i*x+1)`), an argument with an
- * operator other than `*`, `/` and `^`, and unbalanced input. The angle is
+ * operator other than `*`, `/` and `^`, unbalanced input, and a call that is the
+ * right side of an implicit product after a name or an index (`x exp(i*y)`). The angle is
  * parenthesised when it is not a bare name, a number or already in parentheses, and
  * each result is parenthesised, so the output has the value of the input.
  *
