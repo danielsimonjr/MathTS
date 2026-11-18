@@ -253,7 +253,8 @@ export function correctEigs(
     // a real spectrum keeps number[] vectors.
     // A real eigenvalue of a real matrix has an im of exactly 0, except when it is repeated: the
     // copies of a repeated real eigenvalue can come out as a conjugate pair with an im of rounding
-    // size (measured: at most 1.6 * n * eps * max|A_ij|). A genuine pair, however near to real,
+    // size (mostly below 2 * n * eps * max|A_ij|; an ill-conditioned repeated eigenvalue can exceed
+    // the bound below and then stays a pair, as in NumPy). A genuine pair, however near to real,
     // has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)). The test uses the
     // eigenvalue alone, so `values` does not depend on `eigenvectors`.
     const imTol = 8 * ne.values.length * Number.EPSILON * maxAbsEntry(a);
