@@ -15,6 +15,13 @@
 export const SQUARED = 400;
 export const FOURTH = 128;
 export const ABS_CUTOFF_LO = -20;
+/**
+ * `UNIT_LO`: a kernel with an absolute 1e-14 pivot floor that cannot take a relative floor
+ * (the AssemblyScript decompositions) reads a matrix with a largest entry below 2^-3 as
+ * singular. Its window starts at 2^-3. An entry above 1 never loosens the floor, so a matrix
+ * whose entries span a wide range keeps its small pivots (#1123).
+ */
+export const UNIT_LO = -3;
 
 /**
  * The exponent `e` that moves `amax` into the window [2^lo, 2^hi]. It is 0 inside the

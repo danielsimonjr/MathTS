@@ -268,6 +268,7 @@ export {
   SQUARED,
   FOURTH,
   ABS_CUTOFF_LO,
+  UNIT_LO,
   pow2ScaleExponent,
   ldexp,
   ldexpMatrix,

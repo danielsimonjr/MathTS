@@ -94,6 +94,13 @@ function qrKernel(
 ): QRResult {
   const k = Math.min(m, n);
 
+  // A column whose residual norm is below 1e-14 is dependent on the earlier columns. For
+  // a largest entry below 1 the cutoff is relative to it, so a small matrix does not lose
+  // a column (#1125); above 1 it stays 1e-14.
+  let amax = 0;
+  for (let i = 0; i < aFlat.length; i++) if (Math.abs(aFlat[i]) > amax) amax = Math.abs(aFlat[i]);
+  const rankCutoff = 1e-14 * Math.min(1, amax);
+
   // Column-major scratch space for Q: index Qcm[i + j * m] for row i, col j.
   // We allocate width `m` for full mode (need m × m), else `k` (m × k).
   const qWidth = mode === 'full' ? m : k;
@@ -136,7 +143,7 @@ function qrKernel(
     norm = Math.sqrt(norm);
     R[j * n + j] = norm;
 
-    if (norm < 1e-14) {
+    if (norm <= rankCutoff) {
       // Rank-deficient column: choose a unit vector orthogonal to the
       // previously computed q columns.  Try canonical basis vectors and
       // re-orthogonalise.
