@@ -657,7 +657,31 @@ export class WASMBackend implements MatrixBackend {
     }
   }
 
+  /**
+   * LU decomposition on the JS path. Each of the n pivots has the floor 1e-14, as in the
+   * AssemblyScript kernels `matrix_lu_decompose` and `matrix_inverse`.
+   */
   private luDecompositionJS(a: DenseMatrix): {
+    lu: DenseMatrix;
+    perm: Int32Array;
+    singular: boolean;
+  } {
+    const r = this.luEliminateJS(a);
+    const n = a.rows;
+    // The elimination tests the pivots 0 to n-2. A last pivot of 0 gave `singular: false`
+    // and an inverse of NaN entries.
+    if (!r.singular && n > 0 && Math.abs(r.lu.get(n - 1, n - 1)) < 1e-14) {
+      return { lu: r.lu, perm: r.perm, singular: true };
+    }
+    return r;
+  }
+
+  /**
+   * Gaussian elimination with partial pivoting. It tests the pivots 0 to n-2 only, as the
+   * AssemblyScript kernel `matrix_determinant` does; `determinantJS` multiplies the last
+   * pivot in, so a last pivot of 0 gives the determinant 0.
+   */
+  private luEliminateJS(a: DenseMatrix): {
     lu: DenseMatrix;
     perm: Int32Array;
     singular: boolean;
@@ -920,7 +944,7 @@ export class WASMBackend implements MatrixBackend {
 
   private determinantJS(a: DenseMatrix): number {
     const n = a.rows;
-    const { lu, perm, singular } = this.luDecompositionJS(a);
+    const { lu, perm, singular } = this.luEliminateJS(a);
 
     if (singular) return 0.0;
 
