@@ -1960,7 +1960,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `RepeatedEigenvalue`
-- Functions: `repeatedEigenvalueReport`
+- Functions: `isRoundingSymmetric`, `repeatedEigenvalueReport`
 
 ---
 
@@ -1983,11 +1983,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports                                                           | Type   |
-| ----------------------- | ----------------------------------------------------------------- | ------ |
-| `./common.js`           | `SQUARED, entryRange, eye, isSymmetric, ldexp, pow2ScaleExponent` | Import |
-| `./eig-multiplicity.js` | `repeatedEigenvalueReport, RepeatedEigenvalue`                    | Import |
-| `./as-packed.js`        | `decompositionInputToNestedArray, DecompositionMatrixInput`       | Import |
+| File                    | Imports                                                             | Type   |
+| ----------------------- | ------------------------------------------------------------------- | ------ |
+| `./common.js`           | `SQUARED, entryRange, eye, ldexp, pow2ScaleExponent`                | Import |
+| `./eig-multiplicity.js` | `isRoundingSymmetric, repeatedEigenvalueReport, RepeatedEigenvalue` | Import |
+| `./as-packed.js`        | `decompositionInputToNestedArray, DecompositionMatrixInput`         | Import |
 
 **Exports:**
 
@@ -21668,13 +21668,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1344   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235919 |
-| Total Exports           | 7381   |
+| Total Lines of Code     | 235920 |
+| Total Exports           | 7382   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2567   |
-| Total Type Guards       | 181    |
+| Total Functions         | 2568   |
+| Total Type Guards       | 182    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |
