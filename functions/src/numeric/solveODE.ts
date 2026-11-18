@@ -147,7 +147,8 @@ function _rmsNorm(v: number[]): number {
 
 /**
  * A BigNumber (or each BigNumber of an array) rounded to the precision of its own class. BigNumber
- * `add` keeps every digit, so without this the digits of t, y and h grow on each RK step.
+ * `add` and `multiply` round to that precision (#1118), so an add result is already rounded and this
+ * step leaves it unchanged. The step stays as a guard: it costs one comparison per value.
  */
 function _roundBig<T>(v: T): T {
   if (Array.isArray(v)) return v.map(_roundBig) as T;
