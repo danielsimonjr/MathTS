@@ -36,7 +36,12 @@ import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
 import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
-import { rewriteCalls, topLevelFactors, isParenthesised } from './call-rewrite.js';
+import {
+  rewriteCalls,
+  topLevelFactors,
+  isParenthesised,
+  hasTopLevelComma,
+} from './call-rewrite.js';
 import {
   collapseIdenticalFactors,
   tryPolynomialCanonicalForm,
@@ -1474,6 +1479,8 @@ export function trigReduce(expr: string): string {
  * precedence. Other functions (`asin`, `sinh`) pass through unchanged. A call that is
  * the right side of an implicit product after a name or an index (`x sin(y)`,
  * `x[1] sin(y)`) stays as written; write the product with `*` to get the rewrite.
+ * A method call (`x.sin(y)`), a call with no argument or with two or more (`sin()`, `sin(x, y)`) and text in a string
+ * literal or a comment also stay as written.
  *
  * @param expr - Expression string
  * @returns Expression with trig replaced by exponentials
@@ -1485,8 +1492,10 @@ export function trigToExp(expr: string): string {
     cos: (w) => `((exp(i*${w}) + exp(-i*${w}))/2)`,
     tan: (w) => `((exp(i*${w}) - exp(-i*${w}))/(i*(exp(i*${w}) + exp(-i*${w}))))`,
   };
-  return rewriteCalls(expr, ['sin', 'cos', 'tan'], (name, raw) =>
-    rules[name](group(trigToExp(raw).trim()))
+  return rewriteCalls(expr, ['sin', 'cos', 'tan'], (name, raw, groupEnd) =>
+    raw.trim() === '' || hasTopLevelComma(raw, groupEnd)
+      ? undefined
+      : rules[name](group(trigToExp(raw).trim()))
   );
 }
 
@@ -1496,8 +1505,9 @@ export function trigToExp(expr: string): string {
  * An `exp` call is rewritten when its argument is a product with a factor `i` or `-i`
  * (`exp(i*x)`, `exp(-i*(x+1))`, `exp(2*i*x)`, `exp(x*i)`). The other factors are the
  * angle. Any other call stays as written: a sum (`exp(i*x+1)`), an argument with an
- * operator other than `*`, `/` and `^`, unbalanced input, and a call that is the
- * right side of an implicit product after a name or an index (`x exp(i*y)`). The angle is
+ * operator other than `*`, `/`, `^`, `!` and `'`, unbalanced input, a method call
+ * (`x.exp(i*y)`), text in a string literal or a comment, and a call that is the right
+ * side of an implicit product after a name or an index (`x exp(i*y)`). The angle is
  * parenthesised when it is not a bare name, a number or already in parentheses, and
  * each result is parenthesised, so the output has the value of the input.
  *
@@ -1505,13 +1515,13 @@ export function trigToExp(expr: string): string {
  * @returns Expression with exponentials replaced by trig
  */
 export function expToTrig(expr: string): string {
-  return rewriteCalls(expr, ['exp'], (_name, raw) => {
-    const factors = topLevelFactors(raw);
+  return rewriteCalls(expr, ['exp'], (_name, raw, groupEnd) => {
+    const factors = topLevelFactors(raw, groupEnd);
     const at = factors?.findIndex((factor) => /^[+-]?\s*i$/.test(factor)) ?? -1;
     if (factors === undefined || at < 0 || factors.length < 2) return undefined;
     const sign = factors[at].startsWith('-') ? '-' : '+';
     factors.splice(at, 1);
-    // Only the angle is scanned again, so nested calls cost linear time.
+    // Only the angle is scanned again. A call that stays as written is not scanned again.
     const angle = expToTrig(factors.join('*'));
     const w = /^[A-Za-z0-9_.]+$/.test(angle) || isParenthesised(angle) ? angle : `(${angle})`;
     return `(cos(${w}) ${sign} i*sin(${w}))`;
