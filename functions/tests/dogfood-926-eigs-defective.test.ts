@@ -66,3 +66,73 @@ describe('#926 eigs lists one eigenvector per independent direction', () => {
     expect(g.indices).toEqual([0, 1]);
   });
 });
+
+describe('#926 eigs and eig: groups, values and the vector option', () => {
+  // diag(3, [[2,1],[0,2]], 3): eigenvalue 3 is repeated and not defective, 2 is defective.
+  const D = [
+    [3, 0, 0, 0],
+    [0, 2, 1, 0],
+    [0, 0, 2, 0],
+    [0, 0, 0, 3],
+  ];
+
+  it('eig gives the indices of each group when the copies are not adjacent', () => {
+    const groups = eig(D).repeatedEigenvalues.map((g) => ({
+      value: g.value.re,
+      defective: g.defective,
+      indices: g.indices,
+    }));
+    expect(groups).toEqual([
+      { value: 3, defective: false, indices: [0, 3] },
+      { value: 2, defective: true, indices: [1, 2] },
+    ]);
+  });
+
+  it('eig gives the indices of each eigenvalue of a doubled complex pair', () => {
+    const C = [
+      [0, -1, 1, 0],
+      [1, 0, 0, 1],
+      [0, 0, 0, -1],
+      [0, 0, 1, 0],
+    ];
+    const g = eig(C).repeatedEigenvalues;
+    expect(g.map((x) => x.indices)).toEqual([
+      [0, 2],
+      [1, 3],
+    ]);
+    expect(g.every((x) => x.defective)).toBe(true);
+  });
+
+  it('keeps the vectors of the non-defective group and drops one of the defective group', () => {
+    const r = eigs(D) as R;
+    expect(r.values).toEqual([2, 2, 3, 3]);
+    expect(r.eigenvectors.map((p) => p.value)).toEqual([2, 3, 3]);
+    for (const p of r.eigenvectors) expect(residual(D, p.value, p.vector)).toBeLessThan(1e-12);
+  });
+
+  it('keeps all copies in values for a defective input', () => {
+    const r = eigs([
+      [2, 1, 0],
+      [0, 2, 0],
+      [0, 0, 3],
+    ]) as R;
+    expect(r.values).toEqual([2, 2, 3]);
+  });
+
+  it('returns only values when eigenvectors is false', () => {
+    const r = eigs(
+      [
+        [2, 1, 0],
+        [0, 2, 0],
+        [0, 0, 3],
+      ],
+      { eigenvectors: false }
+    ) as Record<string, unknown>;
+    expect(Object.keys(r)).toEqual(['values']);
+    expect(r.values).toEqual([2, 2, 3]);
+  });
+
+  // The count of [[2s,s],[0,2s]] depends on the scale s (2 vectors at s = 2^-500, 1 at
+  // s = 2^500). mathjs 15.2.0 does the same. The scale dependence is #1107.
+  it.todo('[[2s,s],[0,2s]] gives one eigenvector at every scale s (#1107)');
+});

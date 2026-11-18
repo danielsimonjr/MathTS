@@ -7282,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 244
+      "loc": 247
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -10621,7 +10621,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 69
+      "loc": 139
     },
     {
       "file": "functions/tests/dogfood-960-divide-scalar-matrix.test.ts",

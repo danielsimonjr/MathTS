@@ -135,12 +135,15 @@ export function isNumericSquare(a: unknown): a is number[][] {
 }
 
 /**
- * The `count` members of `group` whose eigenvectors are the most independent: a greedy
- * pivoted Gram-Schmidt over complex vectors that takes the largest remaining residual
- * first. The copies of a defective eigenvalue are almost parallel, so the first pick
- * decides little and the rest are dropped.
+ * Select `count` members of `group` whose eigenvectors are the most independent.
+ *
+ * The function uses a greedy pivoted Gram-Schmidt over complex vectors. Each step takes
+ * the member with the largest remaining residual and removes its direction from the
+ * other residuals. Row `i` of `re` and `im` is the eigenvector of eigenvalue `i`.
+ * The copies of a defective eigenvalue are almost parallel, so the first selection
+ * has a small effect on the result.
  */
-function independentColumns(
+function independentMembers(
   re: number[][],
   im: number[][],
   group: number[],
@@ -213,7 +216,7 @@ export function correctEigs(
     if (wantVectors) {
       for (const group of ne.repeatedEigenvalues) {
         if (group.defective) {
-          const chosen = independentColumns(
+          const chosen = independentMembers(
             ne.vectors,
             ne.vectorsIm,
             group.indices,
