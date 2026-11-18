@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as F from '../src/index.js';
+import { isComplex, isMatrix } from '@danielsimonjr/mathts-core';
+import type { MathJsInstance } from '../types/index.js';
 
 // Oracle: NumPy 2.3.5 / SciPy (values below were generated with it).
 type Bin = { re: number; im: number };
@@ -218,5 +220,128 @@ describe('typed-array input to rfft and fftn', () => {
   it('Float64Array is read like an array', () => {
     expect(A.rfft(new Float64Array([1, 2, 3, 4])).re).toEqual([10, -2, -2]);
     expect(A.fftn(new Float64Array([1, 2, 3, 4])).re[0]).toBe(10);
+  });
+});
+
+describe('review fixes (#1010, #1090)', () => {
+  const allNaN = (r: Bin[]) => {
+    for (const c of r) {
+      expect(c.re).toBeNaN();
+      expect(c.im).toBeNaN();
+    }
+  };
+  it('F1: a BigNumber NaN makes every bin NaN in both parts', () => {
+    allNaN(A.fft([A.bignumber(NaN), A.bignumber(1)]));
+    allNaN(A.fft([A.bignumber(NaN), A.bignumber(1), A.bignumber(2), A.bignumber(3)]));
+  });
+  it('F2: a one-element BigNumber or Fraction input gives a Complex bin', () => {
+    for (const r of [
+      A.fft([A.bignumber(5)])[0],
+      A.fft([[A.bignumber(5)]])[0][0],
+      A.fft([A.fraction(5)])[0],
+    ]) {
+      expect(isComplex(r)).toBe(true);
+      expect(C(r).re).toBe(5);
+      expect(C(r).im + 0).toBe(0);
+    }
+  });
+  it('F2: a numeric string boxes; a bigint and a boolean stay bare', () => {
+    const r = A.fft(['5'])[0];
+    expect(isComplex(r)).toBe(true);
+    expect(C(r).re).toBe(5);
+    expect(A.fft([5n])[0]).toBe(5n);
+    expect(A.fft([true])[0]).toBe(true);
+  });
+  it('F2: a one-element Unit input stays a Unit', () => {
+    const u = A.unit(5, 'm');
+    expect(A.fft([u])[0]).toBe(u);
+  });
+  it('F3: irfft accepts a Matrix half-spectrum', () => {
+    const r = A.irfft({ re: A.matrix([10, -2, -2]), im: A.matrix([0, 2, 0]) }, 4);
+    [1, 2, 3, 4].forEach((v, i) => expect(r[i]).toBeCloseTo(v, 12));
+  });
+  it('F4: rfft rejects a ragged array', () => {
+    expect(() =>
+      A.rfft([
+        [1, 2, 3],
+        [4, 5],
+      ])
+    ).toThrow();
+    expect(() =>
+      A.rfft([
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [[1, 2]],
+      ])
+    ).toThrow();
+  });
+  it('F5: periodogram nfft of any length, cropped when shorter (SciPy, symmetric hann)', () => {
+    const close = (got: number[], want: number[]) => {
+      expect(got).toHaveLength(want.length);
+      want.forEach((v, i) => expect(got[i]).toBeCloseTo(v, 10));
+    };
+    close(A.periodogram([1, 2, 3], { nfft: 3 }).psd, [4, 8]);
+    close(A.periodogram([1, 2, 3], { nfft: 5 }).psd, [4, 8, 8]);
+    close(A.periodogram([1, 2, 3], { nfft: 6 }).psd, [4, 8, 8, 4]);
+    close(A.periodogram([1, 2, 3, 4, 5], { nfft: 4 }).psd, [12.5, 13, 0.5]);
+    close(
+      A.periodogram([1, 2, 3, 4, 5], { nfft: 8 }).psd,
+      [24, 35.637229415144, 13.333333333333, 1.69610391819, 0]
+    );
+    for (const nfft of [0, 2.5, -4, NaN]) {
+      expect(() => A.periodogram([1, 2, 3], { nfft })).toThrow(/periodogram/);
+    }
+  });
+  it('F6: multiTaperPSD of 0 and 1 samples', () => {
+    expect(A.multiTaperPSD([])).toEqual({ psd: [], frequencies: [] });
+    expect(() => A.multiTaperPSD([5])).toThrow(
+      /multiTaperPSD: signal must have at least 2 samples \(got 1\)/
+    );
+  });
+  it('F9: periodogram and fft2d name themselves for a Matrix', () => {
+    expect(() => A.periodogram(A.matrix([1, 2, 3, 4]))).toThrow(/periodogram/);
+    expect(() =>
+      A.fft2d(
+        A.matrix([
+          [1, 2],
+          [3, 4],
+        ])
+      )
+    ).toThrow(/fft2d: expected a 2-D array/);
+    const r = A.periodogram(new Float64Array([1, 2, 3, 4])).psd;
+    [12.5, 13, 0.5].forEach((v, i) => expect(r[i]).toBeCloseTo(v, 10));
+  });
+  it('F10: length-1 values (SciPy)', () => {
+    expect(A.periodogram([5])).toEqual({ psd: [25], frequencies: [0] });
+    expect(A.dct([5])).toEqual([5]);
+    expect(A.idct([5])).toEqual([5]);
+    // scipy.signal.hilbert([5.]) = [5+0j]: the imaginary part is 0.
+    expect(nz(A.hilbertTransform([5]))).toEqual([0]);
+  });
+  it('F11: dotDivide keeps an empty inner axis (mathjs)', () => {
+    expect(A.dotDivide([[[]], [[]]], 2)).toEqual([[[]], [[]]]);
+  });
+  it('F11: conj of a Matrix is a Matrix (mathjs)', () => {
+    const r = A.conj(A.matrix([1, 2]));
+    expect(isMatrix(r)).toBe(true);
+    expect(r.valueOf()).toEqual([1, 2]);
+    expect(A.conj(A.matrix([A.complex(1, 2)])).valueOf()[0].im).toBe(-2);
+  });
+  it('F7: rfft of a Matrix or a Float64Array types as unknown, not number[][]', () => {
+    const fromMatrix: unknown = F.rfft(F.matrix([1, 2, 3, 4])).re;
+    const fromTyped: unknown = F.rfft(new Float64Array([1, 2, 3, 4])).re;
+    expect(fromMatrix).toEqual(fromTyped);
+    // @ts-expect-error a Matrix or typed array input does not claim a 2-D result
+    const notNested: number[][] = F.rfft(F.matrix([1, 2, 3, 4])).re;
+    expect(notNested).toHaveLength(3);
+    const plain: number[] = F.rfft([1, 2, 3, 4]).re;
+    expect(plain).toHaveLength(3);
+  });
+  it('F8: the declarations accept ifft(arr, n)', () => {
+    // Type-level: this compiles only when types/index.d.ts declares the n overload.
+    const ifftN = (m: MathJsInstance): number[] => m.ifft([1, 2, 3, 4], 2);
+    expect(typeof ifftN).toBe('function');
   });
 });

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `functions`: `rankdata`, `spearman`, `spearmanr`, `wilcoxon`, `kruskalWallis`, `mannWhitneyTest`, `friedmanTest`, `wassersteinDistance`, `unwrapPhase` and `kolmogorovSmirnov2Test` return on NaN or Infinity input instead of running forever. `kendallTau`, `theilSen` and `rankBiserial` return NaN for NaN input instead of a finite value. `fisherExact` and `peakWidths` throw a `RangeError` for an entry or a peak index that is not valid, where they ran forever or returned a wrong value. `fisherExact` also throws for a row or column total above 2^53 - 1, where the loop did not end (Fixes #979).
+- `functions`: `fft` of one element gives a Complex bin (also for a BigNumber or a Fraction), `ifft` takes `n`, and a NaN (number, Complex or BigNumber) makes every bin NaN in both parts at every length (Fixes #1010).
+- `functions`: `rfft`/`irfft`/`fftn` accept a Matrix and reject a ragged array, `periodogram` takes any positive integer `nfft` and crops as SciPy, `multiTaperPSD` handles 0 and 1 samples, `fft2d` keeps an empty shape, `dotDivide` keeps an empty inner axis, and `conj(matrix)` returns a Matrix (Fixes #1090).
 - `functions`: `discreteLog` returns a small answer for a modulus above 2^48, where it threw a `RangeError` (Fixes #1136).
 - `functions`: the `discreteLog` baby-step table uses typed arrays: peak memory at the 2^24 limit falls from about 1,058 MB to about 331 MB (a process that loads this function alone), and a base of small order returns at once (Fixes #1135).
 - `core`: `pairwiseSum`, `sumSquaredDeviations` and the other stable sums throw a `TypeError` naming the function for a non-array, a string or a bad `length` (Fixes #1011).
