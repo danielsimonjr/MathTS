@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   142 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
-| `@danielsimonjr/mathts-functions`      |  1146 |
+| `@danielsimonjr/mathts-functions`      |  1147 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   149 |
