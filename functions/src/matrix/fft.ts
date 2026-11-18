@@ -1,4 +1,5 @@
 import { arraySize, validate } from '../utils/array.js';
+import { isBigNumber, isFraction } from '../utils/is.js';
 import { fftExactFloat64 } from '../signal/fft-core-f64.js';
 import { complexToSplit } from './complex-to-interleaved.js';
 import { factory } from '../utils/factory.js';
@@ -35,14 +36,16 @@ type ComplexArrayND = unknown;
 
 /** A copy of every nested array level, so a result row never aliases an input row. */
 const copyNested = (x: unknown): unknown => (Array.isArray(x) ? x.map(copyNested) : x);
-/** True when a value is NaN, or a Complex with a NaN part. */
-const isNaNValue = (v: unknown): boolean =>
-  typeof v === 'number'
-    ? v !== v
-    : typeof v === 'object' &&
-      v !== null &&
-      !Array.isArray(v) &&
-      (Number.isNaN((v as { re?: number }).re) || Number.isNaN((v as { im?: number }).im));
+/**
+ * True when a value is NaN: a NaN number, or a value whose own `isNaN()` says so (a Complex
+ * with a NaN part, a NaN BigNumber).
+ */
+const isNaNValue = (v: unknown): boolean => {
+  if (typeof v === 'number') return v !== v;
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
+  const isNaNMethod = (v as { isNaN?: unknown }).isNaN;
+  return typeof isNaNMethod === 'function' && (isNaNMethod as () => boolean).call(v) === true;
+};
 
 /** True when any leaf of a nested array is NaN (in either part of a Complex). */
 function hasNaN(x: unknown): boolean {
@@ -147,7 +150,9 @@ export const createFft = /* #__PURE__ */ factory(
      *   every length (#1010).
      * - A one-element transform (every axis of length 1) returns its input value unchanged
      *   from the recursion base case, which can be a plain number. Every bin of the public
-     *   result is a Complex (#1010). A transform along any longer axis already makes every
+     *   result is a Complex (#1010). A BigNumber, a Fraction or a numeric string becomes a
+     *   Complex too, as a longer input does. Other values (a Unit, a bigint, a boolean) stay as they are: a
+     *   longer input of those either keeps no Complex meaning or throws. A transform along any longer axis already makes every
      *   bin a Complex, so only a result of one element is mapped.
      *
      * @param input  The nested input data
@@ -157,7 +162,13 @@ export const createFft = /* #__PURE__ */ factory(
     function finish(input: unknown, result: unknown, size: number[]): unknown {
       if (hasNaN(input)) return mapLeaves(result, () => complex(NaN, NaN));
       if (size.some((n) => n !== 1)) return result;
-      return mapLeaves(result, (v) => (typeof v === 'number' ? complex(v, 0) : v));
+      return mapLeaves(result, (v) =>
+        typeof v === 'number'
+          ? complex(v, 0)
+          : isBigNumber(v) || isFraction(v) || typeof v === 'string'
+            ? addScalar(v, complex(0, 0))
+            : v
+      );
     }
 
     /**
