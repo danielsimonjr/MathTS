@@ -486,7 +486,7 @@ export const createQr = /* #__PURE__ */ factory(
      * Householder step overflow. Below the window the absolute `isZero` test reads a residual
      * column norm of 1e-15 or less as zero and skips the reflection, so a column was lost
      * (#1122, #1168). Q is orthogonal, so only R is scaled back (#1122). A matrix inside the window
-     * is not scaled.
+     * is not scaled. A matrix with an entry that is not a plain number is not scaled (#1188).
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
       const data = m._data as unknown[][];
