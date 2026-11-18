@@ -11,7 +11,7 @@
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
     "core/dist/index.js": 239825,
-    "core/dist/internal.js": 240130,
+    "core/dist/internal.js": 242532,
     "core/package.json": 2024,
     "matrix/dist/index.js": 221021,
     "matrix/package.json": 2569,
