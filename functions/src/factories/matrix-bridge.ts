@@ -119,8 +119,9 @@ export class MathJSDenseMatrix {
 
   constructor(data?: number[][] | { data: number[][]; size: number[] }) {
     if (!data) {
+      // An empty dense matrix has one axis of length 0, as in mathjs.
       this._data = [];
-      this._size = [0, 0];
+      this._size = [0];
     } else if (Array.isArray(data)) {
       this._data = data;
       this._size = inferSize(data);
@@ -231,7 +232,7 @@ export class MathJSDenseMatrix {
    */
   forEach(callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => void): void {
     const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
-    walkAxes(this._data, this._size.length, [], (val, index) => cb(val, index, this));
+    eachAxes(this._data, this._size.length, [], (val, index) => cb(val, index, this));
   }
 
   /**
@@ -1222,11 +1223,34 @@ function walkAxes(
   index: number[],
   fn: (value: unknown, index: number[]) => unknown
 ): unknown[] {
-  return data.map((sub, i) =>
-    axes > 1 && Array.isArray(sub)
-      ? walkAxes(sub, axes - 1, [...index, i], fn)
-      : fn(sub, [...index, i])
-  );
+  if (axes > 1) {
+    return data.map((sub, i) =>
+      Array.isArray(sub) ? walkAxes(sub, axes - 1, [...index, i], fn) : fn(sub, [...index, i])
+    );
+  }
+  // The last axis. A literal index for 1 and 2 axes keeps the cost per value low.
+  if (index.length === 0) return data.map((value, i) => fn(value, [i]));
+  if (index.length === 1) {
+    const row = index[0];
+    return data.map((value, j) => fn(value, [row, j]));
+  }
+  return data.map((value, i) => fn(value, [...index, i]));
+}
+
+/** As `walkAxes`, but it keeps no results. */
+function eachAxes(
+  data: unknown[],
+  axes: number,
+  index: number[],
+  fn: (value: unknown, index: number[]) => void
+): void {
+  for (let i = 0; i < data.length; i++) {
+    const sub = data[i];
+    if (axes > 1 && Array.isArray(sub)) eachAxes(sub, axes - 1, [...index, i], fn);
+    else if (index.length === 0) fn(sub, [i]);
+    else if (index.length === 1) fn(sub, [index[0], i]);
+    else fn(sub, [...index, i]);
+  }
 }
 
 /** The size of a nested array, one entry per axis. */
