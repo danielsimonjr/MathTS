@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-18",
     "totalFiles": 1344,
     "totalModules": 82,
-    "totalExports": 7379
+    "totalExports": 7381
   },
   "entryPoints": [
     {
@@ -1796,6 +1796,7 @@
               "FOURTH",
               "ABS_CUTOFF_LO",
               "UNIT_LO",
+              "UNIT_FLOOR_LO",
               "pow2ScaleExponent",
               "ldexp",
               "ldexpMatrix",
@@ -1958,6 +1959,7 @@
           "FOURTH",
           "ABS_CUTOFF_LO",
           "UNIT_LO",
+          "UNIT_FLOOR_LO",
           "pow2ScaleExponent",
           "ldexp",
           "ldexpMatrix",
@@ -2093,6 +2095,7 @@
           "FOURTH",
           "ABS_CUTOFF_LO",
           "UNIT_LO",
+          "UNIT_FLOOR_LO",
           "pow2ScaleExponent",
           "ldexp",
           "ldexpMatrix",
@@ -2390,6 +2393,7 @@
           "FOURTH",
           "ABS_CUTOFF_LO",
           "UNIT_LO",
+          "UNIT_FLOOR_LO",
           "pow2ScaleExponent",
           "ldexp",
           "ldexpMatrix",
@@ -2406,7 +2410,7 @@
           "allFinite",
           "withPow2Scale"
         ],
-        "constants": ["SQUARED", "FOURTH", "ABS_CUTOFF_LO", "UNIT_LO"]
+        "constants": ["SQUARED", "FOURTH", "ABS_CUTOFF_LO", "UNIT_LO", "UNIT_FLOOR_LO"]
       },
       "core/src/shared.ts": {
         "description": "Shared utility functions used across core utility modules.",
@@ -7635,7 +7639,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["ABS_CUTOFF_LO", "SQUARED", "entryRange", "ldexp", "withPow2Scale"],
+            "imports": ["UNIT_FLOOR_LO", "SQUARED", "entryRange", "ldexpMatrix", "withPow2Scale"],
             "subpath": "internal"
           }
         ],
@@ -49676,15 +49680,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1344,
     "totalModules": 82,
-    "totalLinesOfCode": 235908,
-    "totalExports": 7379,
+    "totalLinesOfCode": 235918,
+    "totalExports": 7381,
     "totalClasses": 62,
     "totalInterfaces": 668,
     "totalFunctions": 2567,
     "totalTypeGuards": 181,
     "totalEnums": 0,
-    "totalConstants": 1690,
-    "totalReExports": 3190,
+    "totalConstants": 1691,
+    "totalReExports": 3191,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
