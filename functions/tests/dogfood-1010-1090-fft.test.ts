@@ -374,6 +374,37 @@ describe('review fixes (#1010, #1090)', () => {
         .size()
     ).toEqual([2]);
   });
+  it('fft2d takes typed-array rows and rejects 1-D, 3-D and ragged input', () => {
+    expect(nz(A.fft2d([new Float64Array([1, 2]), new Float64Array([3, 4])]))).toEqual({
+      real: [
+        [10, -2],
+        [-4, 0],
+      ],
+      imag: [
+        [0, 0],
+        [0, 0],
+      ],
+    });
+    expect(() => A.fft2d([1, 2, 3, 4])).toThrow(/fft2d: expected a 2-D array/);
+    expect(() => A.fft2d([[[1, 2]], [[3, 4]]])).toThrow(/fft2d: expected a 2-D array/);
+    expect(() => A.fft2d([[1, 2], [3]])).toThrow(/fft2d: every row must have 2 values/);
+    expect(() => A.fft2d([[1], [2, 3]])).toThrow(/fft2d: every row must have 1 values/);
+  });
+  it('periodogram rejects a nested array', () => {
+    expect(() => A.periodogram([[1, 2, 3]])).toThrow(/periodogram: signal must be a 1-D array/);
+    expect(() =>
+      A.periodogram([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toThrow(/periodogram: signal must be a 1-D array/);
+  });
+  it('multiTaperPSD with an odd nfft has floor(nfft/2)+1 bins and no NaN', () => {
+    const r = A.multiTaperPSD([1, 2, 3, 4], { nfft: 5 });
+    expect(r.frequencies).toEqual([0, 0.2, 0.4]);
+    expect(r.psd).toHaveLength(3);
+    expect(r.psd.some(Number.isNaN)).toBe(false);
+  });
   it('F7: rfft of a Matrix or a Float64Array types as unknown, not number[][]', () => {
     const fromMatrix: unknown = F.rfft(F.matrix([1, 2, 3, 4])).re;
     const fromTyped: unknown = F.rfft(new Float64Array([1, 2, 3, 4])).re;
