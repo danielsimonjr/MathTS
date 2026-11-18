@@ -5,6 +5,7 @@ import { factory } from '../utils/factory.js';
 import {
   ABS_CUTOFF_LO,
   SQUARED,
+  allFinite,
   entryRange,
   ldexp,
   withPow2Scale,
@@ -113,20 +114,35 @@ export const createSqrtm = /* #__PURE__ */ factory(
     /**
      * `_denmanBeavers` of a matrix of plain numbers, scaled by an even power of 2 when the
      * largest entry is outside [2^-20, 2^400]. The stop test `_tolerance` is absolute, so a
-     * tiny matrix stops at once, and a huge one overflows in the inverses.
-     * sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122). An ordinary matrix is not scaled.
+     * tiny matrix stops at once, and a huge one often does not converge. The scaled matrix
+     * has its largest entry in [1, 4); when that scale would push a nonzero entry below
+     * 2^-1022, the window scale of `withPow2Scale` is used. Above 2^400 the unscaled run
+     * is tried first and kept when it is finite: it stops only at a fixed point, so it is
+     * more accurate than the scaled run. sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122).
+     * An ordinary matrix is not scaled.
      */
     function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
       const data = (isMatrix(A) ? (A as Matrix).valueOf() : A) as Scalar[][];
       if (!data.every((row) => row.every((v) => typeof v === 'number'))) {
         return _denmanBeavers(A);
       }
+      const range = entryRange(data as unknown as number[][]);
       return withPow2Scale(
-        entryRange(data as unknown as number[][]),
+        range,
         ABS_CUTOFF_LO,
         SQUARED,
-        (e) => {
-          if (e === 0) return _denmanBeavers(A);
+        (windowE) => {
+          if (windowE === 0) return _denmanBeavers(A);
+          if (windowE < 0) {
+            try {
+              const unscaled = _denmanBeavers(A);
+              if (allFinite(unscaled)) return unscaled;
+            } catch {
+              // No convergence: take the scaled run.
+            }
+          }
+          const unit = -2 * Math.floor(Math.floor(Math.log2(range.amax)) / 2);
+          const e = ldexp(range.amin, unit) >= 2 ** -1022 ? unit : windowE;
           const root = _denmanBeavers(
             map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
           );

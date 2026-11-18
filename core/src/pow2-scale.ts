@@ -92,9 +92,9 @@ export function allFinite(x: unknown): boolean {
  * - A matrix with a NaN or infinite entry, or one inside the window, takes `run(0)`.
  * - `even` makes `e` even (lower by one), so a square root of 2^e is exact.
  * - When 2^e would push a nonzero entry below 2^-1022 (the entries span more than the
- *   double range), the unscaled result is kept when it is finite and `accept` agrees
- *   (`accept` defaults to true); else `run(e)`. A finite result can still be wrong
- *   (#1129), so a kernel that can tell passes its own judge.
+ *   double range), the unscaled result is kept when it is finite. A finite result can
+ *   still be wrong (#1129), so a kernel that can tell passes `accept`: both runs are
+ *   made, and the unscaled one is kept only when `accept(unscaled, scaled)` is true.
  */
 export function withPow2Scale<T>(
   range: EntryRange,
@@ -102,7 +102,7 @@ export function withPow2Scale<T>(
   hi: number,
   run: (e: number) => T,
   even = false,
-  accept: (unscaled: T) => boolean = () => true
+  accept?: (unscaled: T, scaled: T) => boolean
 ): T {
   if (!range.finite) return run(0);
   let e = pow2ScaleExponent(range.amax, lo, hi);
@@ -116,7 +116,11 @@ export function withPow2Scale<T>(
     } catch {
       ok = false;
     }
-    if (ok && allFinite(unscaled) && accept(unscaled as T)) return unscaled as T;
+    if (ok && allFinite(unscaled)) {
+      if (accept === undefined) return unscaled as T;
+      const scaled = run(e);
+      return accept(unscaled as T, scaled) ? (unscaled as T) : scaled;
+    }
   }
   return run(e);
 }
