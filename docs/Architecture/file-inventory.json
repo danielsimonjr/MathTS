@@ -14639,7 +14639,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 509
+      "loc": 532
     },
     {
       "file": "matrix/tests/dogfood-a1-svd-negative-lead.test.ts",
