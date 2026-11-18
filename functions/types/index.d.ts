@@ -2408,6 +2408,14 @@ export interface MathJsInstance extends MathJsFactory {
    */
   ifft<T extends MathCollection>(arr: T): T;
 
+  /**
+   * Calculate the 1-D inverse Fourier transform with the spectrum cropped or zero-padded to n bins
+   * @param {Array | Matrix} arr    A 1-D array or matrix
+   * @param {number} n              The number of output bins, a positive integer
+   * @return {Array | Matrix}       The inverse Fourier transformation of the array
+   */
+  ifft<T extends MathCollection>(arr: T, n: number): T;
+
   /*************************************************************************
    * Probability functions
    ************************************************************************/
