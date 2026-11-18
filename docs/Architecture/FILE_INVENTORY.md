@@ -17,7 +17,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1314 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1315 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |     1083 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
@@ -1365,6 +1365,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/algebra.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/arithmetic.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/bitwise.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/typed/call-rewrite.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/cas.ts`                                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/centrality-restarts.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/combinatorics.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |

@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 56 files
+- **functions/typed**: 57 files
 - **functions/unit**: 2 files
 - **functions/utils**: 40 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 581            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 582            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -11623,6 +11623,7 @@ graph LR
 | `../cas/render-polynomial.js`     | `renderPolynomial`                                                                                  | Import |
 | `../cas/polynomial-limits.js`     | `PolynomialDegreeError, polynomialDegreeMessage`                                                    | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
+| `./call-rewrite.js`               | `rewriteCalls, topLevelFactors, isParenthesised, hasTopLevelComma`                                  | Import |
 | `../cas/polynomial-canonical.js`  | `collapseIdenticalFactors, tryPolynomialCanonicalForm`                                              | Import |
 
 **Exports:**
@@ -11689,6 +11690,15 @@ graph LR
 **Exports:**
 
 - Constants: `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `typedBitwise`
+
+---
+
+### `functions/src/typed/call-rewrite.ts` - Balanced-parenthesis call rewriter shared by the string rewrites in `algebra.ts`.
+
+**Exports:**
+
+- Types: `GroupEnd`
+- Functions: `rewriteCalls`, `topLevelFactors`, `hasTopLevelComma`, `isParenthesised`
 
 ---
 
@@ -21203,13 +21213,13 @@ graph TD
         N350[algebra]
         N351[arithmetic]
         N352[bitwise]
-        N353[cas]
-        N354[centrality-restarts]
-        N355[combinatorics]
-        N356[complex-promotion]
-        N357[complex]
-        N358[dist-objects]
-        N359[...46 more]
+        N353[call-rewrite]
+        N354[cas]
+        N355[centrality-restarts]
+        N356[combinatorics]
+        N357[complex-promotion]
+        N358[complex]
+        N359[...47 more]
     end
 
     subgraph Functions/unit
@@ -21574,7 +21584,7 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1340   |
+| Total TypeScript Files  | 1341   |
 | Total Modules           | 82     |
 | Total Lines of Code     | 234263 |
 | Total Exports           | 7347   |
