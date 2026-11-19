@@ -56,7 +56,7 @@ interface CsSqrFunction {
 }
 
 interface CsLuFunction {
-  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition;
+  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition | null;
 }
 
 interface Dependencies {
@@ -153,6 +153,7 @@ export const createSlu = /* #__PURE__ */ factory(
      * @param {Number}       threshold       Partial pivoting threshold (1 for partial pivoting)
      *
      * @throws {RangeError} When A is not square.
+     * @throws {Error} When A is singular (no pivot found).
      * @return {Object} The lower triangular matrix, the upper triangular matrix and the permutation vectors.
      */
     return typed(name, {
@@ -204,6 +205,11 @@ export const createSlu = /* #__PURE__ */ factory(
 
         // perform lu decomposition
         const f = csLu(a, s, threshold);
+
+        // csLu returns null when a column has no usable pivot: the matrix is singular.
+        if (!f) {
+          throw new Error('Linear system cannot be solved since matrix is singular');
+        }
 
         return result(f.L, f.U, f.pinv, s.q);
       },
