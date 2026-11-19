@@ -4,6 +4,8 @@ import { factory } from '../utils/factory.js';
 // Type definitions
 interface Matrix {
   toArray(): unknown[];
+  size(): number[];
+  resize(size: number[]): Matrix;
 }
 
 interface TypedFunction<T = unknown> {
@@ -63,19 +65,41 @@ export const createKron = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Matrix': function (x: Matrix, y: Matrix): Matrix {
-        return matrix(_kron(x.toArray(), y.toArray()));
+        return _kronMatrix(x, x.size(), y, y.size());
       },
 
       'Matrix, Array': function (x: Matrix, y: unknown[]): Matrix {
-        return matrix(_kron(x.toArray(), y));
+        return _kronMatrix(x, x.size(), y, size(y));
       },
 
       'Array, Matrix': function (x: unknown[], y: Matrix): Matrix {
-        return matrix(_kron(x, y.toArray()));
+        return _kronMatrix(x, size(x), y, y.size());
       },
 
       'Array, Array': _kron,
     });
+
+    /**
+     * Kronecker product with a Matrix operand. A Matrix with a zero dimension has no
+     * entries, and toArray() drops its shape (a 0 x n matrix gives []), so the result
+     * size is the product of the operand sizes and the result is built empty (#1233).
+     */
+    function _kronMatrix(
+      x: Matrix | unknown[],
+      sx: number[],
+      y: Matrix | unknown[],
+      sy: number[]
+    ): Matrix {
+      const d = Math.max(sx.length, sy.length);
+      if (d <= 2 && (sx.includes(0) || sy.includes(0))) {
+        const px = [...Array<number>(d - sx.length).fill(1), ...sx];
+        const py = [...Array<number>(d - sy.length).fill(1), ...sy];
+        return matrix([]).resize(px.map((n, i) => n * (py[i] as number)));
+      }
+      const a = Array.isArray(x) ? x : x.toArray();
+      const b = Array.isArray(y) ? y : y.toArray();
+      return matrix(_kron(a, b));
+    }
 
     /**
      * Calculate the Kronecker product of two (1-dimensional) vectors,
