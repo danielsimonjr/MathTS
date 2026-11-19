@@ -5854,7 +5854,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 669
+      "loc": 671
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -10670,7 +10670,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 165
+      "loc": 177
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

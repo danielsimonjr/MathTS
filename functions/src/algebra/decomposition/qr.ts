@@ -645,10 +645,12 @@ export const createQr = /* #__PURE__ */ factory(
       const Rdata = ret.R._data as unknown[][];
       if ((m._data as unknown[][]).length > 0) {
         const kind = entryKind(Rdata);
+        // With no promotion rule (kind is null), the zero follows R[0][0].
+        const zero = isComplex(Rdata[0][0]) ? complex(0) : 0;
 
         for (let i = 0; i < Rdata.length; ++i) {
           for (let j = 0; j < i && j < (Rdata[0] || []).length; ++j) {
-            Rdata[i][j] = kind ? kind.zero() : 0;
+            Rdata[i][j] = kind ? kind.zero() : zero;
           }
         }
       }
