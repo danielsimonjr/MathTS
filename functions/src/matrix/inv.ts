@@ -130,15 +130,22 @@ export const createInv = /* #__PURE__ */ factory(
               } else {
                 return [divideScalar(1, (x as Scalar[])[0])];
               }
-            } else {
-              throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
             }
+            if (size[0] === 0) {
+              // the inverse of the empty matrix is the empty matrix
+              return isMatrix(x) ? (x as Matrix).clone() : [];
+            }
+            throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
 
           case 2: {
             // two dimensional array
             const rows = size[0];
             const cols = size[1];
             if (rows === cols) {
+              if (rows === 0 && isMatrix(x)) {
+                // the inverse of the 0 x 0 matrix is the 0 x 0 matrix, in the same kind
+                return (x as Matrix).clone();
+              }
               if (isMatrix(x)) {
                 const matX = x as Matrix;
                 const storage = matX.storage() as 'dense' | 'sparse';

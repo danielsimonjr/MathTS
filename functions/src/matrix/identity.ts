@@ -166,11 +166,11 @@ export const createIdentity = /* #__PURE__ */ factory(
       if (isBigNumber(rows)) rows = (rows as BigNumber).toNumber();
       if (isBigNumber(cols)) cols = (cols as BigNumber).toNumber();
 
-      if (!isInteger(rows as number) || (rows as number) < 1) {
-        throw new Error('Parameters in function identity must be positive integers');
+      if (!isInteger(rows as number) || (rows as number) < 0) {
+        throw new Error('Parameters in function identity must be non-negative integers');
       }
-      if (!isInteger(cols as number) || (cols as number) < 1) {
-        throw new Error('Parameters in function identity must be positive integers');
+      if (!isInteger(cols as number) || (cols as number) < 0) {
+        throw new Error('Parameters in function identity must be non-negative integers');
       }
 
       const one = Big ? new BigNumber(1) : 1;
