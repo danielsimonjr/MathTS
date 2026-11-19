@@ -509,6 +509,7 @@
     "functions/src/utils/string.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/matrix/det.ts",
       "functions/src/matrix/eigs.ts",
@@ -1715,6 +1716,13 @@
       "functions/src/utils/isFinite.ts",
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/parseNumber.ts"
+    ],
+    "functions/src/utils/bignumber-hypot.ts": [
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
       "functions/src/arithmetic/lcm.ts",

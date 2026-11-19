@@ -125,6 +125,13 @@ export class MathJSDenseMatrix {
     } else if (Array.isArray(data)) {
       this._data = data;
       this._size = inferSize(data);
+    } else if (
+      typeof data !== 'object' ||
+      !Array.isArray((data as { data?: unknown }).data) ||
+      !Array.isArray((data as { size?: unknown }).size)
+    ) {
+      // A scalar or a storage object without Array data and size is not matrix data.
+      throw new TypeError('Unsupported type of data (' + typeName(data) + ')');
     } else {
       this._data = data.data;
       this._size = data.size;
@@ -599,13 +606,41 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
-    if (!data) {
+    // A string is a datatype in mathjs (`sparse('number')`): it builds the empty matrix
+    if (data === undefined || data === null || typeof (data as unknown) === 'string') {
       // Empty matrix
       this._values = [];
       this._index = [];
       this._ptr = [0];
       this._size = [0, 0];
       return;
+    }
+
+    // A dense matrix is built from its nested data, as an Array is. A non-object input has no axis.
+    if (typeof data !== 'object') {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    if (data instanceof MathJSSparseMatrix) {
+      // A sparse matrix is copied: its `size` is a method, not a field
+      this._values = data._values ? [...data._values] : null;
+      this._index = [...data._index];
+      this._ptr = [...data._ptr];
+      this._size = [...data._size];
+      this._datatype = data._datatype;
+      return;
+    }
+    if (data instanceof MathJSDenseMatrix) {
+      this._values = [];
+      this._index = [];
+      this._ptr = [];
+      this._size = [];
+      this._fromDenseArray(data._data);
+      this._datatype = data._datatype;
+      return;
+    }
+    if ('_data' in data) {
+      // A plain object that copies the dense fields is not a matrix, as in mathjs
+      throw new TypeError('Unsupported type of data (Object)');
     }
 
     if (Array.isArray(data)) {
@@ -655,27 +690,48 @@ export class MathJSSparseMatrix {
    * of size [n, 1], as in mathjs.
    */
   private _fromDenseArray(input: unknown[][] | unknown[]): void {
+    // A sparse matrix has two axes. A value that is not an Array has no axis.
+    if (!Array.isArray(input)) {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    // A 1-D array is a column, so only 3 or more axes are refused.
+    const inputSize = arraySize(input);
+    if (inputSize.length > 2) {
+      throw new RangeError('Matrix must be two dimensional (size: ' + formatSize(inputSize) + ')');
+    }
     const data: unknown[][] =
       input.length > 0 && !Array.isArray(input[0])
         ? (input as unknown[]).map((v) => [v])
         : (input as unknown[][]);
     const rows = data.length;
     const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
-    this._values = [];
-    this._index = [];
-    this._ptr = [0];
-    this._size = [rows, cols];
-
+    // Fill fresh local arrays, then store them, so the loop does not read fields
+    const values: unknown[] = [];
+    const index: number[] = [];
+    const ptr: number[] = [0];
     for (let j = 0; j < cols; j++) {
       for (let i = 0; i < rows; i++) {
         const v = data[i][j];
+        // A number is the common case; only a non-number entry can be a deeper level
+        if (typeof v !== 'number' && Array.isArray(v)) {
+          // A deeper level below the first element: the input has 3 or more axes
+          throw new RangeError(
+            'Matrix must be two dimensional (size: ' +
+              formatSize([rows, cols, ...arraySize(v)]) +
+              ')'
+          );
+        }
         if (v !== 0 && v != null) {
-          this._values.push(v);
-          this._index.push(i);
+          values.push(v);
+          index.push(i);
         }
       }
-      this._ptr.push(this._values.length);
+      ptr.push(values.length);
     }
+    this._values = values;
+    this._index = index;
+    this._ptr = ptr;
+    this._size = [rows, cols];
   }
 
   // ---- Required duck-type properties for @danielsimonjr/mathts-core isMatrix check ----
@@ -1176,32 +1232,71 @@ export function createMatrixBridge() {
     data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
-    // matrix('sparse') or matrix('dense') or matrix('default')
-    if (typeof data === 'string') {
-      const isSparse = data === 'sparse';
-      return isSparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    const sparse = storageType === 'sparse';
+    if (data === undefined) return sparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (Array.isArray(data))
+      return sparse ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data as number[][]);
+    if (data instanceof MathJSSparseMatrix) return data;
+    if (data instanceof MathJSDenseMatrix)
+      return sparse ? new MathJSSparseMatrix(data._data) : data;
+    // matrix('sparse'), matrix('dense') or matrix('default'). As in mathjs, a boolean is
+    // converted to a format string, and any other format string throws. The parameter type
+    // does not list boolean, because a boolean never gives a matrix.
+    if (typeof data === 'string' || typeof (data as unknown) === 'boolean') {
+      const format = String(data);
+      if (format === 'sparse') return new MathJSSparseMatrix();
+      if (format === 'dense' || format === 'default') return new MathJSDenseMatrix();
+      throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
-    if (!data) {
-      return storageType === 'sparse' ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (!isPlainObject(data)) {
+      // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
+      throw new TypeError(
+        'Unexpected type of argument in function matrix (expected: string or Array or Matrix or boolean, actual: ' +
+          typeName(data) +
+          ', index: 0)'
+      );
     }
-    if (data instanceof MathJSSparseMatrix) {
-      return data;
+    // An internal storage object. The dense constructor checks { data, size } itself.
+    if (!sparse) return new MathJSDenseMatrix(data as never);
+    if (!isStorageObject(data)) {
+      throw new TypeError(
+        'Unsupported type of data: expected Array data and size, or CSC values, index, ptr and size'
+      );
     }
-    if (data instanceof MathJSDenseMatrix) {
-      if (storageType === 'sparse') {
-        return new MathJSSparseMatrix(data._data);
-      }
-      return data;
-    }
-    return storageType === 'sparse'
-      ? new MathJSSparseMatrix(data)
-      : new MathJSDenseMatrix(data as number[][]);
+    return new MathJSSparseMatrix(data);
   };
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** CSC and { data, size } storage objects are internal matrix data; BigNumber and Complex are not. */
+function isPlainObject(x: unknown): boolean {
+  return typeof x === 'object' && x !== null && Object.getPrototypeOf(x) === Object.prototype;
+}
+
+/**
+ * True for a storage object that the sparse constructor reads: `{ data, size }` with Array data
+ * and size, or CSC `{ values, index, ptr, size }` with Array index, ptr and size (the values may
+ * be null for a pattern matrix).
+ */
+function isStorageObject(x: object): boolean {
+  const o = x as Record<string, unknown>;
+  if (Array.isArray(o.data) && Array.isArray(o.size)) return true;
+  return (
+    Array.isArray(o.index ?? o._index) &&
+    Array.isArray(o.ptr ?? o._ptr) &&
+    Array.isArray(o.size ?? o._size)
+  );
+}
+
+/** A short type name for an error message: null, number, BigNumber, Complex, ... */
+function typeName(x: unknown): string {
+  if (x === null) return 'null';
+  if (typeof x === 'object') return (x as object).constructor?.name ?? 'Object';
+  return typeof x;
+}
 
 /**
  * A copy of nested data that has `axes` axes. The values are not copied. A level that is
@@ -1251,6 +1346,11 @@ function eachAxes(
     else if (index.length === 1) fn(sub, [index[0], i]);
     else fn(sub, [...index, i]);
   }
+}
+
+/** A size as mathjs prints it in an error: `[2, 2, 1]`. */
+function formatSize(size: number[]): string {
+  return '[' + size.join(', ') + ']';
 }
 
 /** The size of a nested array, one entry per axis. */
