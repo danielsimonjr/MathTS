@@ -88,4 +88,44 @@ describe('#1211 lup of an empty matrix', () => {
     expect((det as (a: unknown) => unknown)([[]])).toBe(1);
     expect(() => (inv as (a: unknown) => unknown)([])).toThrow(/square/);
   });
+
+  it('a non-empty 1-D input throws the two-dimensional RangeError', () => {
+    expect(() => lup([1, 2])).toThrow(RangeError);
+    expect(() => lup([1, 2])).toThrow('Matrix must be two dimensional (size: [2])');
+    expect(() => lup(matrix([1, 2]))).toThrow('Matrix must be two dimensional (size: [2])');
+  });
+
+  it('a 3-D input throws the two-dimensional RangeError', () => {
+    const a = [
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ];
+    expect(() => lup(a)).toThrow('Matrix must be two dimensional (size: [2, 2, 2])');
+    expect(() => lup(matrix(a))).toThrow(RangeError);
+  });
+
+  it('a non-empty 2-D input keeps its factorization', () => {
+    expect(
+      lup([
+        [2, 1],
+        [4, 3],
+      ])
+    ).toEqual({
+      L: [
+        [1, 0],
+        [0.5, 1],
+      ],
+      U: [
+        [4, 3],
+        [0, -0.5],
+      ],
+      p: [1, 0],
+    });
+  });
 });

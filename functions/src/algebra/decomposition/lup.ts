@@ -1,4 +1,5 @@
 import { clone } from '../../utils/object.js';
+import { format } from '../../utils/string.js';
 import { factory } from '../../utils/factory.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -292,10 +293,15 @@ export const createLup = /* #__PURE__ */ factory(
     });
 
     function _denseLUP(m: DenseMatrix): LUPResult {
+      const size = m._size;
+      // the empty 1-D matrix (size [0]) is 0 x 0; every other input must be 2-D
+      const isEmpty1D = size.length === 1 && size[0] === 0;
+      if (size.length !== 2 && !isEmpty1D) {
+        throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
+      }
       // rows & columns
-      const rows = m._size[0];
-      // a 1-D empty matrix (size [0]) has no column count: it is 0 x 0
-      const columns = m._size[1] ?? 0;
+      const rows = size[0];
+      const columns = isEmpty1D ? 0 : size[1];
       // minimum rows and columns
       let n = Math.min(rows, columns);
 
