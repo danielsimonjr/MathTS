@@ -470,8 +470,9 @@ export const createLusolve = /* #__PURE__ */ factory(
       const L = _toMatrix(l);
       const U = _toMatrix(u);
       if (isEmptyMatrix(L) || isEmptyMatrix(U)) {
-        solveEmpty(U, b);
-        return solveEmpty(L, b);
+        // L first, then U: the order of the checks of a non-empty factor object.
+        solveEmpty(L, b);
+        return solveEmpty(U, b);
       }
 
       // apply row permutations if needed (b is a DenseMatrix)
