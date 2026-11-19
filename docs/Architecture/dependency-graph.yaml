@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-19'
   totalFiles: 1347
   totalModules: 82
-  totalExports: 7388
+  totalExports: 7389
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4255,6 +4255,9 @@ modules:
         - file: ./JSBackend.js
           imports:
             - jsBackend
+        - file: ../operations/common.js
+          imports:
+            - scaleDense
         - file: ./wasm/detect.js
           imports:
             - detectWasmFeatures
@@ -5282,7 +5285,15 @@ modules:
         - file: ../types/dense/gemm-f64.js
           imports:
             - gemmF64
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ldexp
+          subpath: internal
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -5322,6 +5333,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - scaleDense
         - norm1
         - householder
         - applyHouseholderLeft
@@ -5351,6 +5363,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - scaleDense
         - norm1
         - householder
         - applyHouseholderLeft
@@ -5924,7 +5937,7 @@ modules:
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
-            - ldexp
+            - scaleDense
             - ldexpMatrix
             - entryRange
             - withPow2Scale
@@ -5952,6 +5965,7 @@ modules:
         - file: ./common.js
           imports:
             - ldexp
+            - scaleDense
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
@@ -7391,7 +7405,6 @@ modules:
             - SQUARED
             - entryRange
             - ldexp
-            - ldexpMatrix
             - withPow2Scale
           subpath: internal
       exports:
@@ -46898,11 +46911,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236931
-  totalExports: 7388
+  totalLinesOfCode: 237080
+  totalExports: 7389
   totalClasses: 62
   totalInterfaces: 668
-  totalFunctions: 2572
+  totalFunctions: 2573
   totalTypeGuards: 183
   totalEnums: 0
   totalConstants: 1693
