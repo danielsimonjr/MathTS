@@ -843,7 +843,10 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Convert to bigint (truncated)
+   * Convert to bigint (truncated toward zero).
+   *
+   * @throws Error for NaN and Infinity.
+   * @throws RangeError when the value is above the bigint size limit of the engine.
    */
   toBigInt(): bigint {
     if (this._isNaN || this._isInfinite) {
@@ -851,19 +854,31 @@ export class BigNumber implements MathTSValue {
     }
     if (this._sign === 0) return 0n;
 
-    // Arithmetic, not a zero-padded string (#1245). A bigint division truncates toward zero.
-    if (this._exponent >= 0) {
+    // Arithmetic, not a zero-padded string (#1245). A power below the cache size comes from the
+    // cache. A larger power is built for this call only, so the cache does not keep it.
+    const shift = Math.abs(this._exponent);
+    let magnitude: bigint;
+    if (shift < POW10_CACHE_SIZE) {
+      const power = pow10(shift);
+      if (this._exponent >= 0) magnitude = this._coefficient * power;
+      // A value below 1 needs no division. A bigint division truncates toward zero.
+      else if (this._coefficient < power) return 0n;
+      else magnitude = this._coefficient / power;
+    } else if (this._exponent > 0) {
       // The value is at least 10^(digits - 1), so it has at least floor((digits - 1) * log2(10)) + 1 bits.
-      const digits = this._coefficient.toString().length + this._exponent;
+      const digits = digitCount(this._coefficient) + shift;
       if (Math.floor((digits - 1) * LOG2_10_LOWER) >= V8_MAX_BIGINT_BITS) {
         throw new RangeError(
           `BigNumber is too large to convert to bigint (${digits} digits is above the bigint limit of ${V8_MAX_BIGINT_BITS} bits)`
         );
       }
-      return BigInt(this._sign) * this._coefficient * 10n ** BigInt(this._exponent);
+      magnitude = this._coefficient * 10n ** BigInt(shift);
+    } else {
+      // No power for a value below 1: the shift can be as large as the exponent range.
+      if (shift >= digitCount(this._coefficient)) return 0n;
+      magnitude = this._coefficient / 10n ** BigInt(shift);
     }
-    if (-this._exponent >= this._coefficient.toString().length) return 0n;
-    return BigInt(this._sign) * (this._coefficient / 10n ** BigInt(-this._exponent));
+    return this._sign < 0 ? -magnitude : magnitude;
   }
 
   /**

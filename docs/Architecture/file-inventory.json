@@ -996,7 +996,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2446
+      "loc": 2461
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1290,7 +1290,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 59
+      "loc": 137
     },
     {
       "file": "core/tests/dogfood-a1-stable-non-array.test.ts",
