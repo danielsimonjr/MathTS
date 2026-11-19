@@ -259,3 +259,38 @@ describe('#1204: the bounds apply to a result, not to the inner steps of a funct
     expect(BigNumber.ln2At().toString().slice(0, 12)).toBe('0.6931471805');
   });
 });
+
+describe('#1204: a function whose inner square is above the limit, with the default bounds', () => {
+  it('keeps a hypot whose squares are out of range', () => {
+    expect(bn('3e5000000000000000').hypot(bn('4e5000000000000000')).toExponential()).toBe(
+      '5e+5000000000000000'
+    );
+    expect(bn('3e-5000000000000000').hypot(bn('-4e-5000000000000000')).toExponential()).toBe(
+      '5e-5000000000000000'
+    );
+    expect(bn('3e9007000000000000').hypot(bn('4e9007000000000000')).toExponential()).toBe(
+      '5e+9007000000000000'
+    );
+    expect(bn('6e9007000000000000').hypot(bn('8e9007000000000000')).toString()).toBe('Infinity');
+    expect(bn('3e-9007000000000000').hypot(bn('4e-9007000000000000')).toExponential()).toBe(
+      '5e-9007000000000000'
+    );
+    expect(bn('0').hypot(bn('-4e5000000000000000')).toExponential()).toBe('4e+5000000000000000');
+    expect(bn('3').hypot(bn('4')).toString()).toBe('5');
+    expect(bn('0').hypot(bn('0')).toString()).toBe('0');
+    expect(bn('1').hypot(bn('1')).toString()).toBe(bn('2').sqrt().toString());
+  });
+
+  it('gives ln(2x), not NaN, for the asinh of a value whose square is out of range', () => {
+    // 5e15 * ln(10) + ln(2)
+    const expected = '1.15129254649702291132371378333671304552376289';
+    expect(bn('1e5000000000000000').asinh().toExponential().startsWith(expected)).toBe(true);
+    expect(
+      bn('-1e5000000000000000')
+        .asinh()
+        .toExponential()
+        .startsWith('-' + expected)
+    ).toBe(true);
+    expect(bn('1e5000000000000000').asinh().toExponential().endsWith('e+16')).toBe(true);
+  });
+});

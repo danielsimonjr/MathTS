@@ -1820,6 +1820,16 @@ export class BigNumber implements MathTSValue {
     const one = BigNumber.fromNumber(1);
     const magnitude = this.abs();
     const square = magnitude.multiply(magnitude);
+    if (square._isInfinite) {
+      // The square is above the widest exponent bound, so asinh(|x|) is ln(2|x|) to every digit.
+      // With |x| = c * 10^e, that is ln(2c) + e * ln(10) (#1204).
+      const coefficient = BigNumber.#construct(1, magnitude._coefficient, 0, false, false);
+      const large = coefficient
+        .multiply(BigNumber.fromNumber(2))
+        .ln()
+        .add(BigNumber.ln10At().multiply(BigNumber.fromNumber(magnitude._exponent)));
+      return this._sign === 1 ? large : large.negate();
+    }
     const result = magnitude.add(square.divide(one.add(square.add(one).sqrt()))).log1p();
     return this._sign === 1 ? result : result.negate();
   }
@@ -2115,17 +2125,32 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN || other._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite || other._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true);
 
-    // The squares run with the widest exponent bounds: a square can be out of range when the
-    // result is in range (#1204).
+    // A square can be out of range when the result is in range. The operands are divided by
+    // 10^shift first, so the larger square has an exponent near 0, and the squares run with the
+    // widest exponent bounds. The root is then multiplied by 10^shift, and `#allocate` applies the
+    // configured bounds to it (#1204).
+    const shift =
+      this._sign === 0
+        ? other._exponent
+        : other._sign === 0
+          ? this._exponent
+          : Math.max(this._exponent, other._exponent);
+    const scaled = (x: BigNumber): BigNumber =>
+      x._sign === 0
+        ? x
+        : BigNumber.#construct(x._sign, x._coefficient, x._exponent - shift, false, false);
     const saved = globalConfig;
     globalConfig = { ...saved, ...WIDEST_BOUNDS };
-    let result: BigNumber;
+    let root: BigNumber;
     try {
-      result = this.multiply(this).add(other.multiply(other)).sqrt();
+      const a = scaled(this);
+      const b = scaled(other);
+      root = a.multiply(a).add(b.multiply(b)).sqrt();
     } finally {
       globalConfig = saved;
     }
-    return result.clone();
+    if (root._sign === 0) return root;
+    return BigNumber.#allocate(root._sign, root._coefficient, root._exponent + shift);
   }
 
   // ============================================================
