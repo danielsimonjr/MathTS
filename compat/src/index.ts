@@ -506,7 +506,8 @@ export function create(
     definePrototypeAccessor(
       level,
       key,
-      isLazy(key, value) ? () => buildWrapper(key, value) : () => value
+      isLazy(key, value) ? () => buildWrapper(key, value) : () => value,
+      instance
     );
   });
 

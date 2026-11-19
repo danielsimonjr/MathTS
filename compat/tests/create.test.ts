@@ -180,3 +180,47 @@ describe('compat create(m) and import with inherited names (#1200)', () => {
     });
   }
 });
+
+describe('compat instance integrity levels (#1223)', () => {
+  // ES modules are strict: a failed assignment throws a TypeError.
+  const custom = (): string => 'custom';
+  for (const lock of ['seal', 'preventExtensions'] as const) {
+    it(`Object.${lock}: assignment of an own and an inherited name reads back`, () => {
+      const math = Object[lock](create(all)) as unknown as Record<string, unknown>;
+      expect(Object.hasOwn(math, 'add')).toBe(true);
+      expect(Object.hasOwn(math, 'besselJ0')).toBe(false);
+      math.add = custom;
+      math.besselJ0 = custom;
+      expect(math.add).toBe(custom);
+      expect(math.besselJ0).toBe(custom);
+      expect(Object.hasOwn(math, 'besselJ0')).toBe(false);
+    });
+  }
+
+  it('Object.freeze: assignment of an own and an inherited name throws', () => {
+    const math = Object.freeze(create(all)) as unknown as Record<string, unknown>;
+    const add = math.add;
+    const besselJ0 = math.besselJ0;
+    expect(() => {
+      math.add = custom;
+    }).toThrow(TypeError);
+    expect(() => {
+      math.besselJ0 = custom;
+    }).toThrow(TypeError);
+    expect(math.add).toBe(add);
+    expect(math.besselJ0).toBe(besselJ0);
+  });
+});
+
+describe('compat inherited names through a derived object (#1223)', () => {
+  it('an assignment through an object that inherits from the instance defines an own key there', () => {
+    const math = create(all) as unknown as Record<string, unknown>;
+    const derived = Object.create(math) as Record<string, unknown>;
+    const before = math.besselJ0;
+    const custom = (): string => 'custom';
+    derived.besselJ0 = custom;
+    expect(Object.hasOwn(derived, 'besselJ0')).toBe(true);
+    expect(derived.besselJ0).toBe(custom);
+    expect(math.besselJ0).toBe(before);
+  });
+});
