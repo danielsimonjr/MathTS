@@ -136,6 +136,15 @@ export const createLusolve = /* #__PURE__ */ factory(
       nested: number[][],
       b: unknown[][] | DenseMatrix | SparseMatrix
     ): number[][] {
+      if (isEmptyNested(nested)) {
+        // An empty system has the empty solution. A non-square empty input still throws.
+        const cols = nested.length === 0 ? 0 : nested[0].length;
+        if (nested.length !== cols) {
+          throw new RangeError(`lu: matrix must be square (got ${nested.length}×${cols})`);
+        }
+        rhsToNumberVector(b, 0);
+        return [];
+      }
       const eq = equilibrateDense(nested, b);
       const aRows = eq.a as number[][];
       const bVec = rhsToNumberVector(eq.b as typeof b, aRows.length);
@@ -150,6 +159,32 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
       validatePackedUpperTriangularPivots(fac.U.toFloat64Array(), aRows.length);
       return luSolve(fac, bVec).map((v) => [v]);
+    }
+
+    /** True when a nested array has no entries: no rows, or rows without columns. */
+    function isEmptyNested(rows: unknown[][]): boolean {
+      return rows.length === 0 || (Array.isArray(rows[0]) && rows[0].length === 0);
+    }
+
+    /** True when a matrix has a zero dimension. */
+    function isEmptyMatrix(m: DenseMatrix | SparseMatrix): boolean {
+      return (m as unknown as { size(): number[] }).size().some((d) => d === 0);
+    }
+
+    /**
+     * Solve an empty system. A 0 x 0 system has the empty solution (a 0 x 1 column).
+     * The shared validation throws the dimension error for a non-square matrix or a
+     * right-hand side of the wrong length.
+     */
+    function solveEmpty(
+      a: DenseMatrix | SparseMatrix,
+      b: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix {
+      const size = (a as unknown as { size(): number[] }).size();
+      // matrix([]) is a one-dimensional empty matrix: read it as the 0 x 0 matrix, as [] is.
+      const square =
+        size.length === 1 && size[0] === 0 ? new DenseMatrix({ data: [], size: [0, 0] }) : a;
+      return solveValidation(square, b, true);
     }
 
     function isLUPDecomposition(value: unknown): value is LUPDecomposition {
@@ -317,6 +352,8 @@ export const createLusolve = /* #__PURE__ */ factory(
      *
      * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
      *
+     * An empty (0 x 0) system returns the empty solution.
+     *
      * Throws when the factorization is singular or contains non-finite values, including
      * rank-deficient but consistent systems. The pivot cutoff is `1e-15` times the
      * largest absolute entry (the same floor `linsolve` uses on a unit-scale matrix).
@@ -355,6 +392,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         const b = denseRightHandSide(rhs) as typeof rhs;
         // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
         // use the dense factorization.
+        if (isEmptyMatrix(a)) return solveEmpty(a, b);
         const dense = densifyForSolver(a);
         if (dense) return _lusolveDense(matrix(dense.toArray()) as DenseMatrix, b);
         const eq = equilibrateSparse(a, b);
@@ -369,6 +407,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         threshold: number
       ): DenseMatrix {
         const b = denseRightHandSide(rhs) as typeof rhs;
+        if (isEmptyMatrix(a)) return solveEmpty(a, b);
         const eq = equilibrateSparse(a, b);
         const d = slu(eq.a, order, threshold);
         return _lusolve(d.L, d.U, d.p, d.q, eq.b as typeof b);
@@ -403,6 +442,7 @@ export const createLusolve = /* #__PURE__ */ factory(
       a: DenseMatrix,
       b: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
+      if (isEmptyMatrix(a)) return solveEmpty(a, b);
       const eq = equilibrateDense(a._data, b);
       const aMatrix = eq.a === a._data ? a : (matrix(eq.a as unknown[][]) as DenseMatrix);
       const d = lup(aMatrix);
@@ -429,6 +469,10 @@ export const createLusolve = /* #__PURE__ */ factory(
       // verify decomposition
       const L = _toMatrix(l);
       const U = _toMatrix(u);
+      if (isEmptyMatrix(L) || isEmptyMatrix(U)) {
+        solveEmpty(U, b);
+        return solveEmpty(L, b);
+      }
 
       // apply row permutations if needed (b is a DenseMatrix)
       let bMatrix: DenseMatrix;
