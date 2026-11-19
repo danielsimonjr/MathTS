@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { create, all } from '../src/index.js';
 
 /**
@@ -54,5 +54,46 @@ describe('compat import(instance) (#1222)', () => {
     expect(() => m.import({ T: ['a'] })).toThrow('Factory, Object, or Array expected');
     expect(() => m.import({ T: [1, 2] }, { silent: true })).not.toThrow();
     expect((m as unknown as Rec).T).toBeUndefined();
+  });
+
+  it('throws for an instance of another module copy (#1033 two-bundle case)', async () => {
+    vi.resetModules();
+    const copyB = (await import('../src/index.js')) as typeof import('../src/index.js');
+    expect(copyB.create).not.toBe(create);
+    expect(() => copyB.create(all).import(create(all))).toThrow(MSG);
+    expect(() => copyB.create(copyB.all).import({ inner: create({}) })).toThrow(MSG);
+    expect(() => create(all).import([copyB.create({})])).toThrow(MSG);
+  });
+
+  it('runs no user getter in the instance check', () => {
+    let reads = 0;
+    const nested = {};
+    Object.defineProperty(nested, 'x', {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return create({});
+      },
+    });
+    let mainReads = 0;
+    const control = {};
+    Object.defineProperty(control, 'x', {
+      enumerable: true,
+      get() {
+        mainReads += 1;
+        return 1;
+      },
+    });
+    try {
+      create(all).import({ control }, { silent: true });
+    } catch {
+      /* the import result is not under test */
+    }
+    try {
+      create(all).import({ nested }, { silent: true });
+    } catch {
+      /* the import result is not under test */
+    }
+    expect(reads).toBe(mainReads);
   });
 });

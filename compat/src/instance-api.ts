@@ -44,16 +44,33 @@ export interface WiredCompatInstance {
  */
 const wiredInstances = new WeakSet<object>();
 
-/** True when `value` is, or holds at any depth, a compat instance. */
+/**
+ * Registry brand for instances of another bundled copy of compat (#1033), which
+ * {@link wiredInstances} cannot see. It sits on the instance's own first prototype
+ * level, or on the instance when it has no level (`create({})`).
+ */
+const INSTANCE_BRAND = Symbol.for('mathts.compat.instance');
+
+function isInstance(value: object): boolean {
+  if (wiredInstances.has(value)) return true;
+  const proto: unknown = Object.getPrototypeOf(value);
+  const holder = proto !== null && proto !== Object.prototype ? proto : value;
+  return Object.prototype.hasOwnProperty.call(holder, INSTANCE_BRAND);
+}
+
+/**
+ * True when `value` is, or holds at any depth, a compat instance. Reads data
+ * properties only, so no user getter runs.
+ */
 function containsInstance(value: unknown, seen: Set<object>): boolean {
   if (value === null || typeof value !== 'object') return false;
-  if (wiredInstances.has(value)) return true;
+  if (isInstance(value)) return true;
   if (seen.has(value)) return false;
   seen.add(value);
-  if (Array.isArray(value)) return value.some((item) => containsInstance(item, seen));
-  if ((value as { constructor?: unknown }).constructor !== Object) return false;
+  if (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype) return false;
   for (const key of Object.keys(value)) {
-    if (containsInstance((value as Record<string, unknown>)[key], seen)) return true;
+    const desc = Object.getOwnPropertyDescriptor(value, key);
+    if (desc !== undefined && 'value' in desc && containsInstance(desc.value, seen)) return true;
   }
   return false;
 }
@@ -73,6 +90,10 @@ export function wireMathjsInstanceApi(
   currentConfig: MathJSConfig
 ): WiredCompatInstance {
   wiredInstances.add(instance);
+  const brandHolder: object = Object.getPrototypeOf(instance) ?? instance;
+  Object.defineProperty(brandHolder === Object.prototype ? instance : brandHolder, INSTANCE_BRAND, {
+    value: true,
+  });
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
     mathWithTransform: {},
