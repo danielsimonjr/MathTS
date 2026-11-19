@@ -8,7 +8,11 @@ import {
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
-import { createSolveValidation, denseRightHandSide } from './utils/solveValidation.js';
+import {
+  createSolveValidation,
+  denseRightHandSide,
+  nonSquareSolveError,
+} from './utils/solveValidation.js';
 import { csIpvec } from '../sparse/csIpvec.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { MathJSSparseMatrix } from '../../factories/matrix-bridge.js';
@@ -101,15 +105,25 @@ export const createLusolve = /* #__PURE__ */ factory(
       typeof createSolveValidation
     >[0]) as unknown as SolveValidationFunction;
 
+    /**
+     * Read a right-hand side as one column vector of length n. A right-hand side with
+     * more than one column, or with an Array entry, throws, as the shared validation does:
+     * lusolve solves one vector.
+     */
     function rhsToNumberVector(
       b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
       n: number
     ): number[] {
+      const mismatch = (): never => {
+        throw new RangeError('Dimension mismatch. Matrix columns must match vector length.');
+      };
       if (isDenseMatrix(b)) {
         const dense = b as DenseMatrix;
         if (dense._size.length === 1) {
+          if (dense._size[0] !== n) mismatch();
           return (dense._data as unknown as number[]).map((v) => v as number);
         }
+        if (dense._size.length !== 2 || dense._size[0] !== n || dense._size[1] !== 1) mismatch();
         return dense._data.map((row) => (row as number[])[0]);
       }
       if (isSparseMatrix(b)) {
@@ -117,12 +131,15 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
       if (isArray(b)) {
         const arr = b as unknown[];
-        if (arr.length !== n) {
-          throw new RangeError('Dimension mismatch. Matrix columns must match vector length.');
-        }
+        if (arr.length !== n) mismatch();
         if (arr.length > 0 && Array.isArray(arr[0])) {
+          for (const row of arr as unknown[][]) {
+            if (!Array.isArray(row) || row.length !== 1 || Array.isArray(row[0])) mismatch();
+          }
           return (arr as unknown[][]).map((row) => row[0] as number);
         }
+        // An entry of a vector is a scalar. An Array entry is a row of a ragged b.
+        if (arr.some((v) => Array.isArray(v))) mismatch();
         return arr as number[];
       }
       throw new TypeError('Invalid right-hand side for lusolve');
@@ -408,6 +425,10 @@ export const createLusolve = /* #__PURE__ */ factory(
       ): DenseMatrix {
         const b = denseRightHandSide(rhs) as typeof rhs;
         if (isEmptyMatrix(a)) return solveEmpty(a, b);
+        // A rectangular system gets the solver error (with the lstsq hint) before slu,
+        // which throws its own factorization error (with the lup hint).
+        const size = a._size;
+        if (size[0] !== size[1]) throw nonSquareSolveError(size);
         const eq = equilibrateSparse(a, b);
         const d = slu(eq.a, order, threshold);
         return _lusolve(d.L, d.U, d.p, d.q, eq.b as typeof b);

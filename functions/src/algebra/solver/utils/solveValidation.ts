@@ -24,6 +24,20 @@ interface SparseMatrixType {
   size(): number[];
 }
 
+/**
+ * The RangeError of a solver whose coefficient matrix is not square.
+ *
+ * @param size The size of the matrix, for example [2, 3].
+ * @returns The error, with a hint to use lstsq for a rectangular system.
+ */
+export function nonSquareSolveError(size: number[]): RangeError {
+  return new RangeError(
+    'Matrix must be square (size: ' +
+      format(size, {}) +
+      '); for a rectangular least-squares system use lstsq'
+  );
+}
+
 interface DenseMatrixConstructor {
   new (data: { data: unknown[][]; size: number[]; datatype?: string }): DenseMatrixType;
 }
@@ -82,11 +96,7 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
     const columns = mSize[1];
 
     if (rows !== columns) {
-      throw new RangeError(
-        'Matrix must be square (size: ' +
-          format(mSize, {}) +
-          '); for a rectangular least-squares system use lstsq'
-      );
+      throw nonSquareSolveError(mSize);
     }
 
     let data: unknown[][] = [];
