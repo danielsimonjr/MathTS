@@ -3353,6 +3353,7 @@ graph LR
 | ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
+| `../../utils/string.js`            | `format`                                                             | Import             |
 | `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
@@ -21716,7 +21717,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1348   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237444 |
+| Total Lines of Code     | 237471 |
 | Total Exports           | 7390   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
