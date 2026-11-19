@@ -82,8 +82,8 @@ describe('#1211 lup of an empty matrix', () => {
     ]);
   });
 
-  it('lusolve, det and inv of the empty inputs stay as before', () => {
-    expect(() => (lusolve as (a: unknown, b: unknown) => unknown)([], [])).toThrow(/singular/);
+  it('det and inv of the empty inputs stay as before; lusolve returns the empty solution (#1227)', () => {
+    expect((lusolve as (a: unknown, b: unknown) => unknown)([], [])).toEqual([]);
     expect((det as (a: unknown) => unknown)([])).toBe(1);
     expect((det as (a: unknown) => unknown)([[]])).toBe(1);
     expect(() => (inv as (a: unknown) => unknown)([])).toThrow(/square/);
