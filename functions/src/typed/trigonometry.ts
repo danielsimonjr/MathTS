@@ -23,6 +23,7 @@ import {
   staysRealAcosh,
   staysRealUnitInterval,
 } from './complex-promotion.js';
+import { bigHypot as scaledBigHypot } from '../utils/bignumber-hypot.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import type { PublicCos, PublicSin, PublicTan } from './public-type-exports.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
@@ -326,17 +327,18 @@ export const hypot = mathTyped('hypot', {
   },
 });
 
-/** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision. */
+/** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision (scaled, #1255). */
 function bigHypot(xs: readonly unknown[]): BigNumber {
-  let sum = BigNumber.fromNumber(0);
+  return scaledBigHypot(checkedRealList(xs));
+}
+
+function checkedRealList(xs: readonly unknown[]): (number | BigNumber)[] {
   for (const x of xs) {
     if (typeof x !== 'number' && !(x instanceof BigNumber)) {
       throw new TypeError('hypot: expects number or BigNumber values');
     }
-    const b = typeof x === 'number' ? BigNumber.fromNumber(x) : x;
-    sum = sum.add(b.multiply(b));
   }
-  return sum.sqrt();
+  return xs as (number | BigNumber)[];
 }
 
 // =============================================================================

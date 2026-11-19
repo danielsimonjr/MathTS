@@ -294,3 +294,26 @@ describe('#1204: a function whose inner square is above the limit, with the defa
     expect(bn('1e5000000000000000').asinh().toExponential().endsWith('e+16')).toBe(true);
   });
 });
+
+describe('#1255 BigNumber.hypotN', () => {
+  it('shifts the exponent exactly and rounds the root once', () => {
+    BigNumber.config({ precision: 20 });
+    try {
+      const x = new BigNumber('368908340768.57994560571');
+      const y = new BigNumber('3.0302e-19');
+      expect(BigNumber.hypotN([x, y]).toString()).toBe('368908340768.57994561');
+      expect(x.hypot(y).toString()).toBe('368908340768.57994561');
+    } finally {
+      BigNumber.resetConfig();
+    }
+  });
+  it('takes any number of values', () => {
+    const v = ['2e9000000000000000', '3e9000000000000000', '6e9000000000000000'].map(
+      (s) => new BigNumber(s)
+    );
+    expect(BigNumber.hypotN(v).toString()).toBe('7e+9000000000000000');
+    expect(BigNumber.hypotN([]).toString()).toBe('0');
+    expect(BigNumber.hypotN([new BigNumber(1), BigNumber.fromNumber(NaN)]).isNaN()).toBe(true);
+    expect(BigNumber.hypotN([BigNumber.fromNumber(-Infinity)]).toString()).toBe('Infinity');
+  });
+});

@@ -2188,30 +2188,45 @@ export class BigNumber implements MathTSValue {
    * Hypotenuse: sqrt(this^2 + other^2)
    */
   hypot(other: BigNumber): BigNumber {
-    if (this._isNaN || other._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
-    if (this._isInfinite || other._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true);
+    return BigNumber.hypotN([this, other]);
+  }
 
-    // A square can be out of range when the result is in range. The operands are divided by
-    // 10^shift first, so the larger square has an exponent near 0, and the squares run with the
-    // widest exponent bounds. The root is then multiplied by 10^shift, and `#allocate` applies the
-    // configured bounds to it (#1204).
-    const shift =
-      this._sign === 0
-        ? other._exponent
-        : other._sign === 0
-          ? this._exponent
-          : Math.max(this._exponent, other._exponent);
-    const scaled = (x: BigNumber): BigNumber =>
-      x._sign === 0
-        ? x
-        : BigNumber.#construct(x._sign, x._coefficient, x._exponent - shift, false, false);
+  /**
+   * The square root of the sum of the squares of the values, `sqrt(sum(x^2))`. An empty list gives 0.
+   * A NaN value gives NaN. Else an infinite value gives Infinity.
+   *
+   * A square can be out of range when the result is in range. Each value is divided by 10^shift
+   * first, with `shift` the largest decimal order, so the largest square has an exponent near 0.
+   * The shift changes only the exponent, so no value is rounded before it is squared. The squares
+   * and the root run with the widest exponent bounds and GUARD_DIGITS more digits, and the root is
+   * rounded once to the configured precision. The root is then multiplied by 10^shift, and `#allocate`
+   * applies the configured bounds to it (#1204, #1255).
+   */
+  static hypotN(values: readonly BigNumber[]): BigNumber {
+    if (values.some((x) => x._isNaN)) return BigNumber.#allocate(0, 0n, 0, true);
+    if (values.some((x) => x._isInfinite)) return BigNumber.#allocate(1, 0n, 0, false, true);
+    let shift = 0;
+    let found = false;
+    for (const x of values) {
+      if (x._sign === 0) continue;
+      const order = x._coefficient.toString().length + x._exponent;
+      if (!found || order > shift) shift = order;
+      found = true;
+    }
+    if (!found) return BigNumber.#allocate(0, 0n, 0);
     const saved = globalConfig;
-    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS });
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS, precision: saved.precision + GUARD_DIGITS });
     let root: BigNumber;
     try {
-      const a = scaled(this);
-      const b = scaled(other);
-      root = a.multiply(a).add(b.multiply(b)).sqrt();
+      let sum = BigNumber.#allocate(0, 0n, 0);
+      for (const x of values) {
+        if (x._sign === 0) continue;
+        const s = BigNumber.#construct(1, x._coefficient, x._exponent - shift, false, false);
+        sum = sum.add(s.multiply(s));
+      }
+      // The root has an order near 0. It is rounded under the widest bounds, and `#allocate`
+      // applies the configured bounds after the shift.
+      root = sum.sqrt().roundToPrecision(saved.precision);
     } finally {
       setGlobalConfig(saved);
     }

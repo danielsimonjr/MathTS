@@ -1717,6 +1717,13 @@
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/parseNumber.ts"
     ],
+    "functions/src/utils/bignumber-hypot.ts": [
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
       "functions/src/arithmetic/lcm.ts",
       "functions/src/arithmetic/nthRoot.ts",
