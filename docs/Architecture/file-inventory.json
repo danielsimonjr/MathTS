@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2525,
+  "totalFiles": 2526,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1112,
+    "test": 1113,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1112,
+    "tests": 1113,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1158,
+    "@danielsimonjr/mathts-functions": 1159,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5980,7 +5980,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 512
+      "loc": 525
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -10720,6 +10720,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "functions/tests/dogfood-1231-lusolve-multicolumn.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 125
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
