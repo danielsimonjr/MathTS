@@ -1588,6 +1588,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1186-eigs-relative-imag-tol.test.ts`                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1188-qr-nonnumber-cutoff.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1199-hessenberg-scale.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1202-eigs-cyclic.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1205-qr-empty.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1206-qr-entry-types.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1209-slu-empty.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |

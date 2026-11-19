@@ -7184,14 +7184,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 487
+      "loc": 493
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 883
+      "loc": 926
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",
@@ -10671,6 +10671,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 123
+    },
+    {
+      "file": "functions/tests/dogfood-1202-eigs-cyclic.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 121
     },
     {
       "file": "functions/tests/dogfood-1205-qr-empty.test.ts",
