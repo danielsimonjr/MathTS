@@ -82,11 +82,11 @@ describe('#1211 lup of an empty matrix', () => {
     ]);
   });
 
-  it('det and inv of the empty inputs stay as before; lusolve returns the empty solution (#1227)', () => {
+  it('lusolve, det and inv of the empty inputs (lusolve changed by #1227, det and inv by #1230)', () => {
     expect((lusolve as (a: unknown, b: unknown) => unknown)([], [])).toEqual([]);
     expect((det as (a: unknown) => unknown)([])).toBe(1);
-    expect((det as (a: unknown) => unknown)([[]])).toBe(1);
-    expect(() => (inv as (a: unknown) => unknown)([])).toThrow(/square/);
+    expect(() => (det as (a: unknown) => unknown)([[]])).toThrow(/square/);
+    expect((inv as (a: unknown) => unknown)([])).toEqual([]);
   });
 
   it('a non-empty 1-D input throws the two-dimensional RangeError', () => {
