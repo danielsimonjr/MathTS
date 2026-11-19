@@ -152,7 +152,12 @@ export const createLusolve = /* #__PURE__ */ factory(
     function lusolveFromNested(
       nested: number[][],
       b: unknown[][] | DenseMatrix | SparseMatrix
-    ): number[][] {
+    ): unknown[][] {
+      // The packed lu reads Float64 values. An entry that is not a number (Complex,
+      // BigNumber, Fraction, string) goes to the typed path, which keeps its type.
+      if (!isNumericRhs(b) || !isNumericRows(nested)) {
+        return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
+      }
       if (isEmptyNested(nested)) {
         // An empty system has the empty solution. A non-square empty input still throws.
         const cols = nested.length === 0 ? 0 : nested[0].length;
@@ -176,6 +181,22 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
       validatePackedUpperTriangularPivots(fac.U.toFloat64Array(), aRows.length);
       return luSolve(fac, bVec).map((v) => [v]);
+    }
+
+    /** True when no entry of the rows is a non-number. Ragged rows stay on the packed path. */
+    function isNumericRows(rows: unknown[]): boolean {
+      for (const v of rows) {
+        if (Array.isArray(v)) {
+          if (!isNumericRows(v)) return false;
+        } else if (typeof v !== 'number') return false;
+      }
+      return true;
+    }
+
+    /** True when no entry of a right-hand side is a non-number. */
+    function isNumericRhs(b: unknown[][] | DenseMatrix | SparseMatrix | unknown[]): boolean {
+      if (isDenseMatrix(b) || isSparseMatrix(b)) return isNumericRows((b as DenseMatrix).valueOf());
+      return Array.isArray(b) ? isNumericRows(b) : true;
     }
 
     /** True when a nested array has no entries: no rows, or every row without columns. */
