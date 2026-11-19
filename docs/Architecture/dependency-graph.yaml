@@ -7888,6 +7888,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/string.js
+          imports:
+            - format
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -16666,6 +16669,7 @@ modules:
             - Fraction
             - BigNumber
             - isBigNumber
+            - isComplex
             - isFraction
       exports:
         - factoryScope
@@ -44144,6 +44148,7 @@ modules:
             - sparse
             - transpose
             - bignumber
+            - complex
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -46976,7 +46981,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1349
   totalModules: 82
-  totalLinesOfCode: 237472
+  totalLinesOfCode: 237899
   totalExports: 7392
   totalClasses: 62
   totalInterfaces: 668
