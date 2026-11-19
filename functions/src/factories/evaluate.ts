@@ -573,16 +573,26 @@ function scrubImportedExpressionScope(imported: Record<string, unknown>): Record
   return out;
 }
 
-function buildScopedMathNamespace(imported: Record<string, unknown>): Record<string, unknown> {
-  return omitEvaluateInternals({ ...mathScope, ...scrubImportedExpressionScope(imported) });
+/**
+ * The safe scope of an instance: the math scope without the `hidden` names, then the
+ * imported names. An imported name in `hidden` resolves.
+ */
+function buildScopedMathNamespace(
+  imported: Record<string, unknown>,
+  hidden: ReadonlySet<string>
+): Record<string, unknown> {
+  const base: Record<string, unknown> = { ...mathScope };
+  for (const key of hidden) delete base[key];
+  return omitEvaluateInternals({ ...base, ...scrubImportedExpressionScope(imported) });
 }
 
 function buildUnsafeScopedMathNamespace(
-  imported: Record<string, unknown>
+  imported: Record<string, unknown>,
+  hidden: ReadonlySet<string>
 ): Record<string, unknown> {
-  const scoped = buildScopedMathNamespace(imported);
+  const scoped = buildScopedMathNamespace(imported, hidden);
   for (const key of EVALUATE_SCOPE_OMIT) {
-    if (Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
+    if (!hidden.has(key) && Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
       scoped[key] = fullMathScope[key];
     }
   }
@@ -593,13 +603,22 @@ function buildUnsafeScopedMathNamespace(
  * Evaluate/compile pair that closes over per-instance imports (compat `math.import`).
  * Denylisted symbols cannot be reached from safe evaluate, even if import tries to
  * override them.
+ *
+ * @param importedExpressionScope - The names that the instance imported.
+ * @param hiddenNames - Names of the math scope that the instance does not resolve
+ *   (compat hides the internal names of the functions namespace, #1216). An imported
+ *   name resolves even when it is in this list. Default: none.
  */
-export function createInstanceEvaluator(importedExpressionScope: Record<string, unknown>): {
+export function createInstanceEvaluator(
+  importedExpressionScope: Record<string, unknown>,
+  hiddenNames: Iterable<string> = []
+): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
 } {
-  const safeScope = buildScopedMathNamespace(importedExpressionScope);
-  const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope);
+  const hidden: ReadonlySet<string> = new Set(hiddenNames);
+  const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
+  const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
   const safeEvaluate = createEvaluate(parse, safeScope, configFingerprint);
   const unsafeEvaluate = createEvaluate(parse, unsafeScope, configFingerprint);
 

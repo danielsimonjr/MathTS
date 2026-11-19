@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly**: 8 files
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
-- **compat**: 7 files
+- **compat**: 8 files
 - **gpu**: 9 files
 - **plot**: 19 files
 - **plot/three**: 3 files
@@ -219,7 +219,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 16             | 0               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                               | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 7              | 0               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 8              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 9              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
@@ -1524,6 +1524,7 @@ graph LR
 | `./Backend.js`             | `MatrixBackend, BackendType`                                                                       | Import (type-only) |
 | `../types/DenseMatrix.js`  | `DenseMatrix`                                                                                      | Import             |
 | `./JSBackend.js`           | `jsBackend`                                                                                        | Import             |
+| `../operations/common.js`  | `scaleDense`                                                                                       | Import             |
 | `./wasm/detect.js`         | `detectWasmFeatures, WasmFeatures`                                                                 | Import             |
 | `./wasm/as-typed-array.js` | `AS_F64_ALIGN_SHIFT, AS_I32_ALIGN_SHIFT, AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView` | Import             |
 | `./wasm/resolve.js`        | ``                                                                                                 | Import (type-only) |
@@ -1900,17 +1901,19 @@ graph LR
 
 | Package                      | Import                                                                                                                             |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `ldexp`                                                                                                                            |
 | `@danielsimonjr/mathts-core` | `SQUARED, FOURTH, ABS_CUTOFF_LO, UNIT_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale, EntryRange` |
 
 **Internal Dependencies:**
 
-| File                         | Imports   | Type   |
-| ---------------------------- | --------- | ------ |
-| `../types/dense/gemm-f64.js` | `gemmF64` | Import |
+| File                         | Imports       | Type   |
+| ---------------------------- | ------------- | ------ |
+| `../types/dense/gemm-f64.js` | `gemmF64`     | Import |
+| `../types/DenseMatrix.js`    | `DenseMatrix` | Import |
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 - Re-exports: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `EntryRange`
 
 ---
@@ -2148,11 +2151,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                 | Type   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                           | Import |
-| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                         | Import |
-| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight, ldexp, ldexpMatrix, entryRange, withPow2Scale, SQUARED` | Import |
+| File                      | Imports                                                                                                                      | Type   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                              | Import |
+| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight, scaleDense, ldexpMatrix, entryRange, withPow2Scale, SQUARED` | Import |
 
 **Exports:**
 
@@ -2165,11 +2168,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                     | Type   |
-| ------------------------- | ----------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
-| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
-| `./common.js`             | `ldexp, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED`  | Import |
+| File                      | Imports                                                                | Type   |
+| ------------------------- | ---------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                          | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`            | Import |
+| `./common.js`             | `ldexp, scaleDense, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
@@ -3031,15 +3034,16 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexp, ldexpMatrix, withPow2Scale` |
+| Package                      | Import                                                     |
+| ---------------------------- | ---------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexp, withPow2Scale` |
 
 **Internal Dependencies:**
 
 | File                           | Imports                              | Type               |
 | ------------------------------ | ------------------------------------ | ------------------ |
 | `../../utils/factory.js`       | `factory`                            | Import             |
+| `../../utils/string.js`        | `format`                             | Import             |
 | `../../utils/isExactZero.js`   | `isExactZero`                        | Import             |
 | `../../utils/typed-impl.js`    | `findTypedImpl`                      | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                      | Import (type-only) |
@@ -20144,15 +20148,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                          | Type      |
-| ----------------------------- | ------------------------------------------------ | --------- |
-| `./shims.js`                  | `shims`                                          | Import    |
-| `./parity-names.generated.js` | `MATHJS_PARITY_NAMES`                            | Import    |
-| `./instance-layout.js`        | `createPrototypeLevels, definePrototypeAccessor` | Import    |
-| `./unary-fast-path.js`        | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
-| `./chain.js`                  | `createChain, Chain`                             | Import    |
-| `./instance-api.js`           | `wireMathjsInstanceApi, WiredCompatInstance`     | Import    |
-| `./shims.js`                  | `*`                                              | Re-export |
+| File                            | Imports                                          | Type      |
+| ------------------------------- | ------------------------------------------------ | --------- |
+| `./shims.js`                    | `shims`                                          | Import    |
+| `./parity-names.generated.js`   | `MATHJS_PARITY_NAMES`                            | Import    |
+| `./internal-names.generated.js` | `COMPAT_INTERNAL_NAMES, CompatInternalName`      | Import    |
+| `./instance-layout.js`          | `createPrototypeLevels, definePrototypeAccessor` | Import    |
+| `./unary-fast-path.js`          | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
+| `./chain.js`                    | `createChain, Chain`                             | Import    |
+| `./instance-api.js`             | `wireMathjsInstanceApi, WiredCompatInstance`     | Import    |
+| `./shims.js`                    | `*`                                              | Re-export |
 
 **Exports:**
 
@@ -20168,17 +20173,18 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                   |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`      | `mathTyped`                                                                                              |
-| `@danielsimonjr/mathts-functions` | `createInstanceEvaluator, EVALUATE_SCOPE_OMIT, reviver, replacer, runWithConfig, PhysicsEvaluateOptions` |
-| `@danielsimonjr/mathts-functions` | `importFactory, ImportOptions`                                                                           |
+| Package                           | Import                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`      | `mathTyped`                                                                                                      |
+| `@danielsimonjr/mathts-functions` | `createInstanceEvaluator, EVALUATE_SCOPE_OMIT, parser, reviver, replacer, runWithConfig, PhysicsEvaluateOptions` |
+| `@danielsimonjr/mathts-functions` | `importFactory, ImportOptions`                                                                                   |
 
 **Internal Dependencies:**
 
-| File         | Imports        | Type               |
-| ------------ | -------------- | ------------------ |
-| `./index.js` | `MathJSConfig` | Import (type-only) |
+| File                            | Imports                 | Type               |
+| ------------------------------- | ----------------------- | ------------------ |
+| `./index.js`                    | `MathJSConfig`          | Import (type-only) |
+| `./internal-names.generated.js` | `COMPAT_INTERNAL_NAMES` | Import             |
 
 **Exports:**
 
@@ -20193,6 +20199,15 @@ graph LR
 
 - Functions: `createPrototypeLevels`, `definePrototypeAccessor`
 - Constants: `PROTOTYPE_LEVEL_CAP`
+
+---
+
+### `compat/src/internal-names.generated.ts` - The internal names of the functions namespace (#1216), sorted: the `factory_*`
+
+**Exports:**
+
+- Types: `CompatInternalName`
+- Constants: `COMPAT_INTERNAL_NAMES`
 
 ---
 
@@ -20777,9 +20792,9 @@ graph LR
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
+| `matrix/src/types/DenseMatrix`                         | 6 files      | 24 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
-| `matrix/src/types/DenseMatrix`                         | 6 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
@@ -21576,41 +21591,42 @@ graph TD
         N505[index]
         N506[instance-api]
         N507[instance-layout]
-        N508[parity-names.generated]
-        N509[shims]
-        N510[unary-fast-path]
+        N508[internal-names.generated]
+        N509[parity-names.generated]
+        N510[shims]
+        N511[unary-fast-path]
     end
 
     subgraph Gpu
-        N511[BufferPool]
-        N512[GPUContext]
-        N513[ShaderManager]
-        N514[detect]
-        N515[device]
-        N516[flag]
-        N517[index]
-        N518[serialize]
-        N519[webgpu-types]
+        N512[BufferPool]
+        N513[GPUContext]
+        N514[ShaderManager]
+        N515[detect]
+        N516[device]
+        N517[flag]
+        N518[index]
+        N519[serialize]
+        N520[webgpu-types]
     end
 
     subgraph Plot
-        N520[coerce]
-        N521[contour]
-        N522[emit]
-        N523[frame]
-        N524[heatmap]
-        N525[histogram]
-        N526[index]
-        N527[marks2d]
-        N528[overlay]
-        N529[palette]
-        N530[...9 more]
+        N521[coerce]
+        N522[contour]
+        N523[emit]
+        N524[frame]
+        N525[heatmap]
+        N526[histogram]
+        N527[index]
+        N528[marks2d]
+        N529[overlay]
+        N530[palette]
+        N531[...9 more]
     end
 
     subgraph Plot/three
-        N531[points3d]
-        N532[project]
-        N533[surface]
+        N532[points3d]
+        N533[project]
+        N534[surface]
     end
 
     N4 --> N7
@@ -21698,14 +21714,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1347   |
+| Total TypeScript Files  | 1348   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237191 |
-| Total Exports           | 7388   |
+| Total Lines of Code     | 237352 |
+| Total Exports           | 7390   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2572   |
+| Total Functions         | 2573   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
