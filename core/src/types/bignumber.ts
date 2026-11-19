@@ -255,8 +255,20 @@ function checkExponentSetting(name: string, value: number, low: number, high: nu
   }
 }
 
-// Global configuration (can be modified)
+// Global configuration (can be modified). Assign it only through `setGlobalConfig`.
 let globalConfig: BigNumberConfig = { ...defaultConfig };
+
+// `#allocate` runs for every result, so it compares the exponent with these two numbers and does
+// not read the config object. An exponent from `exponentFloor` to `exponentCeiling` cannot put
+// the order of a value outside the bounds: the order is the exponent plus the digit count minus 1.
+let exponentFloor = globalConfig.minExponent;
+let exponentCeiling = globalConfig.maxExponent - MAX_COEFFICIENT_DIGITS;
+
+function setGlobalConfig(config: BigNumberConfig): void {
+  globalConfig = config;
+  exponentFloor = config.minExponent;
+  exponentCeiling = config.maxExponent - MAX_COEFFICIENT_DIGITS;
+}
 
 /**
  * The widest exponent bounds. A function runs its inner steps with these bounds, so an inner step
@@ -345,15 +357,29 @@ export class BigNumber implements MathTSValue {
     isNaN: boolean = false,
     isInfinite: boolean = false
   ): BigNumber {
+    // Only an exponent near a bound can put the order outside it, so the digit count runs only
+    // then (#1204).
+    if (exponent < exponentFloor || exponent > exponentCeiling) {
+      return BigNumber.#allocateNearBound(sign, coefficient, exponent, isNaN, isInfinite);
+    }
+    return BigNumber.#construct(sign, coefficient, exponent, isNaN, isInfinite);
+  }
+
+  /**
+   * `#allocate` for an exponent near a bound. An order above `maxExponent` gives +-Infinity, and an
+   * order below `minExponent` gives 0.
+   */
+  static #allocateNearBound(
+    sign: 1 | -1 | 0,
+    coefficient: bigint,
+    exponent: number,
+    isNaN: boolean,
+    isInfinite: boolean
+  ): BigNumber {
     if (sign !== 0 && !isNaN && !isInfinite) {
-      // The order of the value is `exponent + digits - 1`. Only an exponent near a bound can put
-      // the order outside it, so the digit count runs only then (#1204).
-      const { minExponent, maxExponent } = globalConfig;
-      if (exponent < minExponent || exponent > maxExponent - MAX_COEFFICIENT_DIGITS) {
-        const order = exponent + digitCount(coefficient) - 1;
-        if (order > maxExponent) return BigNumber.#construct(sign, 0n, 0, false, true);
-        if (order < minExponent) return BigNumber.#construct(0, 0n, 0, false, false);
-      }
+      const order = exponent + digitCount(coefficient) - 1;
+      if (order > globalConfig.maxExponent) return BigNumber.#construct(sign, 0n, 0, false, true);
+      if (order < globalConfig.minExponent) return BigNumber.#construct(0, 0n, 0, false, false);
     }
     return BigNumber.#construct(sign, coefficient, exponent, isNaN, isInfinite);
   }
@@ -560,7 +586,7 @@ export class BigNumber implements MathTSValue {
         checkExponentSetting('toExpNeg', newConfig.toExpNeg, -EXPONENT_LIMIT, 0);
       if (newConfig.toExpPos !== undefined)
         checkExponentSetting('toExpPos', newConfig.toExpPos, 0, EXPONENT_LIMIT);
-      globalConfig = { ...globalConfig, ...newConfig };
+      setGlobalConfig({ ...globalConfig, ...newConfig });
     }
     return { ...globalConfig };
   }
@@ -569,7 +595,7 @@ export class BigNumber implements MathTSValue {
    * Reset configuration to defaults
    */
   static resetConfig(): void {
-    globalConfig = { ...defaultConfig };
+    setGlobalConfig({ ...defaultConfig });
   }
 
   /**
@@ -1076,7 +1102,7 @@ export class BigNumber implements MathTSValue {
     const precision = globalConfig.precision;
     const saved = globalConfig;
     const extra = GUARD_DIGITS + String(Math.abs(exp)).length;
-    globalConfig = { ...saved, ...WIDEST_BOUNDS, precision: precision + extra };
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS, precision: precision + extra });
     let power: BigNumber;
     try {
       let result = BigNumber.fromNumber(1);
@@ -1092,7 +1118,7 @@ export class BigNumber implements MathTSValue {
       if (exp < 0) result = BigNumber.fromNumber(1).divide(result);
       power = result.roundToPrecision(precision, saved.rounding);
     } finally {
-      globalConfig = saved;
+      setGlobalConfig(saved);
     }
     return power.clone();
   }
@@ -1125,14 +1151,14 @@ export class BigNumber implements MathTSValue {
     if (guardDepth > 0) return compute();
     const precision = globalConfig.precision;
     const saved = globalConfig;
-    globalConfig = { ...saved, ...WIDEST_BOUNDS, precision: precision + GUARD_DIGITS };
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS, precision: precision + GUARD_DIGITS });
     guardDepth++;
     let result: BigNumber;
     try {
       result = compute().roundToPrecision(precision);
     } finally {
       guardDepth--;
-      globalConfig = saved;
+      setGlobalConfig(saved);
     }
     return result.clone();
   }
@@ -1341,14 +1367,14 @@ export class BigNumber implements MathTSValue {
     if (hit) return hit.clone();
     const digits = precision + CONSTANT_GUARD_DIGITS;
     const saved = globalConfig;
-    globalConfig = { ...saved, ...WIDEST_BOUNDS };
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS });
     let value: BigNumber;
     try {
       value = BigNumber.#allocate(1, series(10n ** BigInt(digits)), -digits).roundToPrecision(
         precision
       );
     } finally {
-      globalConfig = saved;
+      setGlobalConfig(saved);
     }
     BigNumber.#constantCache.set(key, value);
     return value.clone();
@@ -1913,7 +1939,7 @@ export class BigNumber implements MathTSValue {
     if (magnitude > Math.LN10) {
       const order = this._coefficient.toString().length + this._exponent;
       const saved = globalConfig;
-      globalConfig = { ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS };
+      setGlobalConfig({ ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS });
       let m: number;
       let r: BigNumber;
       try {
@@ -1921,7 +1947,7 @@ export class BigNumber implements MathTSValue {
         m = this.divide(ln10).round(0, 'halfEven').toNumber();
         r = this.subtract(ln10.multiply(BigNumber.fromNumber(m))).roundToPrecision(precision);
       } finally {
-        globalConfig = saved;
+        setGlobalConfig(saved);
       }
       const er = r.#expImpl();
       return BigNumber.#allocate(er._sign, er._coefficient, er._exponent + m);
@@ -2140,14 +2166,14 @@ export class BigNumber implements MathTSValue {
         ? x
         : BigNumber.#construct(x._sign, x._coefficient, x._exponent - shift, false, false);
     const saved = globalConfig;
-    globalConfig = { ...saved, ...WIDEST_BOUNDS };
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS });
     let root: BigNumber;
     try {
       const a = scaled(this);
       const b = scaled(other);
       root = a.multiply(a).add(b.multiply(b)).sqrt();
     } finally {
-      globalConfig = saved;
+      setGlobalConfig(saved);
     }
     if (root._sign === 0) return root;
     return BigNumber.#allocate(root._sign, root._coefficient, root._exponent + shift);
@@ -2169,7 +2195,7 @@ export class BigNumber implements MathTSValue {
     const precision = globalConfig.precision;
     const order = this._coefficient.toString().length + this._exponent;
     const saved = globalConfig;
-    globalConfig = { ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS };
+    setGlobalConfig({ ...saved, precision: precision + Math.max(0, order) + GUARD_DIGITS });
     try {
       const pi = BigNumber.piAt();
       const twoPi = pi.multiply(BigNumber.fromNumber(2));
@@ -2182,7 +2208,7 @@ export class BigNumber implements MathTSValue {
       }
       return reduced.roundToPrecision(precision);
     } finally {
-      globalConfig = saved;
+      setGlobalConfig(saved);
     }
   }
 
