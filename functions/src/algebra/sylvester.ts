@@ -6,6 +6,7 @@ interface MatrixType {
   size(): number[];
   toArray(): unknown[][];
   subset(index: unknown): MatrixType;
+  resize(size: number[]): MatrixType;
 }
 
 interface SchurResult {
@@ -17,7 +18,7 @@ interface SylvesterDependencies {
   typed: TypedFunction;
   schur: (A: MatrixType) => SchurResult;
   matrixFromColumns: (...cols: MatrixType[]) => MatrixType;
-  matrix: (arr: unknown[][]) => MatrixType;
+  matrix: (arr: unknown[] | unknown[][]) => MatrixType;
   multiply: TypedFunction;
   range: (start: number, end: number) => unknown;
   concat: TypedFunction;
@@ -127,7 +128,35 @@ export const createSylvester = /* #__PURE__ */ factory(
         return _sylvester(matrix(A), matrix(B), matrix(C)).toArray();
       },
     });
+    /** Size of a 2-D matrix; the 1-D empty matrix is the 0 x 0 matrix. */
+    function _dims(M: MatrixType): number[] {
+      const s = M.size();
+      return s.length === 1 && s[0] === 0 ? [0, 0] : s;
+    }
+
     function _sylvester(A: MatrixType, B: MatrixType, C: MatrixType): MatrixType {
+      // A is m x m and B is n x n. When m or n is 0, X is the empty m x n matrix (#1233).
+      const sa = _dims(A);
+      const sb = _dims(B);
+      if (sa.length === 2 && sb.length === 2 && sa[0] === sa[1] && sb[0] === sb[1]) {
+        if (sa[0] === 0 || sb[0] === 0) {
+          // [] is the only Array form of a matrix with 0 rows, so a 1-D empty C is 0 x n.
+          const c1 = C.size();
+          const sc = sa[0] === 0 && c1.length === 1 && c1[0] === 0 ? [0, sb[0]] : c1;
+          if (sc.length !== 2 || sc[0] !== sa[0] || sc[1] !== sb[0]) {
+            throw new RangeError(
+              'Dimension mismatch: C must be ' +
+                sa[0] +
+                ' x ' +
+                sb[0] +
+                ' (size: [' +
+                sc.join(', ') +
+                '])'
+            );
+          }
+          return matrix([]).resize([sa[0], sb[0]]);
+        }
+      }
       const n = B.size()[0];
       const m = A.size()[0];
 
