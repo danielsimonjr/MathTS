@@ -6799,7 +6799,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 466
+      "loc": 467
     },
     {
       "file": "functions/src/factories/sparse-adapter.ts",
