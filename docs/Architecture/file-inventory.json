@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2527,
+  "totalFiles": 2528,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1114,
+    "test": 1115,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1114,
+    "tests": 1115,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1160,
+    "@danielsimonjr/mathts-functions": 1161,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -7184,14 +7184,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 487
+      "loc": 485
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 883
+      "loc": 970
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",
@@ -10671,6 +10671,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 123
+    },
+    {
+      "file": "functions/tests/dogfood-1202-eigs-cyclic.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 273
     },
     {
       "file": "functions/tests/dogfood-1205-qr-empty.test.ts",
