@@ -599,13 +599,30 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
-    if (!data) {
+    if (data === undefined || data === null) {
       // Empty matrix
       this._values = [];
       this._index = [];
       this._ptr = [0];
       this._size = [0, 0];
       return;
+    }
+
+    // A dense matrix is built from its nested data, as an Array is. A non-object input has no axis.
+    if (typeof data !== 'object') {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    if (data instanceof MathJSSparseMatrix) {
+      // A sparse matrix is copied: its `size` is a method, not a field
+      this._values = data._values ? [...data._values] : null;
+      this._index = [...data._index];
+      this._ptr = [...data._ptr];
+      this._size = [...data._size];
+      this._datatype = data._datatype;
+      return;
+    }
+    if (isDenseMatrixLike(data)) {
+      data = data._data as unknown[][];
     }
 
     if (Array.isArray(data)) {
@@ -655,6 +672,11 @@ export class MathJSSparseMatrix {
    * of size [n, 1], as in mathjs.
    */
   private _fromDenseArray(input: unknown[][] | unknown[]): void {
+    // A sparse matrix has two axes. A 1-D array is a column, so only 3 or more axes are refused.
+    const inputSize = arraySize(input);
+    if (inputSize.length > 2) {
+      throw new RangeError('Matrix must be two dimensional (size: ' + formatSize(inputSize) + ')');
+    }
     const data: unknown[][] =
       input.length > 0 && !Array.isArray(input[0])
         ? (input as unknown[]).map((v) => [v])
@@ -669,6 +691,14 @@ export class MathJSSparseMatrix {
     for (let j = 0; j < cols; j++) {
       for (let i = 0; i < rows; i++) {
         const v = data[i][j];
+        if (Array.isArray(v)) {
+          // A deeper level below the first element: the input has 3 or more axes
+          throw new RangeError(
+            'Matrix must be two dimensional (size: ' +
+              formatSize([rows, cols, ...arraySize(v)]) +
+              ')'
+          );
+        }
         if (v !== 0 && v != null) {
           this._values.push(v);
           this._index.push(i);
@@ -1254,6 +1284,17 @@ function eachAxes(
 }
 
 /** The size of a nested array, one entry per axis. */
+/** True for a dense matrix object (nested `_data` and a `_size`, no CSC pointers). */
+function isDenseMatrixLike(data: object): data is { _data: unknown[]; _size: number[] } {
+  const d = data as { _data?: unknown; _size?: unknown; _ptr?: unknown };
+  return Array.isArray(d._data) && Array.isArray(d._size) && !Array.isArray(d._ptr);
+}
+
+/** A size as mathjs prints it in an error: `[2, 2, 1]`. */
+function formatSize(size: number[]): string {
+  return '[' + size.join(', ') + ']';
+}
+
 function inferSize(data: unknown[]): number[] {
   // `[[[]], [[]]]` is 2x1x0, as in mathjs.
   return arraySize(data);
