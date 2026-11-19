@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 41 files
+- **functions/utils**: 42 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 584            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 585            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3026,22 +3026,23 @@ graph LR
 
 ---
 
-### `functions/src/algebra/decomposition/qr.ts` - Householder step loop for plain number storage. Scalar work per step uses the
+### `functions/src/algebra/decomposition/qr.ts` - Tells if the column norm of a Householder step is too small to reflect. Householder only
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                           |
-| ---------------------------- | ---------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexpMatrix, withPow2Scale` |
+| Package                      | Import                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexp, ldexpMatrix, withPow2Scale` |
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type               |
-| ------------------------------ | --------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`       | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
-| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../../utils/is.js`            | `isFraction`    | Import             |
+| File                           | Imports                 | Type               |
+| ------------------------------ | ----------------------- | ------------------ |
+| `../../utils/factory.js`       | `factory`               | Import             |
+| `../../utils/isExactZero.js`   | `isExactZero`           | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
+| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
+| `../../utils/is.js`            | `isComplex, isFraction` | Import             |
 
 **Exports:**
 
@@ -7444,12 +7445,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports     | Type   |
-| --------------------- | ----------- | ------ |
-| `../utils/is.js`      | `isMatrix`  | Import |
-| `../utils/array.js`   | `arraySize` | Import |
-| `../utils/factory.js` | `factory`   | Import |
-| `../utils/string.js`  | `format`    | Import |
+| File                      | Imports       | Type   |
+| ------------------------- | ------------- | ------ |
+| `../utils/is.js`          | `isMatrix`    | Import |
+| `../utils/array.js`       | `arraySize`   | Import |
+| `../utils/factory.js`     | `factory`     | Import |
+| `../utils/isExactZero.js` | `isExactZero` | Import |
+| `../utils/string.js`      | `format`      | Import |
 
 **Exports:**
 
@@ -13069,6 +13071,14 @@ graph LR
 **Exports:**
 
 - Constants: `createIsBounded`
+
+---
+
+### `functions/src/utils/isExactZero.ts` - Tells if a scalar is exactly zero. A number uses `=== 0`. A Complex, Fraction or BigNumber
+
+**Exports:**
+
+- Functions: `isExactZero`
 
 ---
 
@@ -21320,7 +21330,7 @@ graph TD
         N369[collection]
         N370[complex]
         N371[customs]
-        N372[...31 more]
+        N372[...32 more]
     end
 
     subgraph Functions/wasm
@@ -21666,15 +21676,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1344   |
+| Total TypeScript Files  | 1345   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 235965 |
-| Total Exports           | 7382   |
+| Total Lines of Code     | 236044 |
+| Total Exports           | 7383   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2568   |
-| Total Type Guards       | 182    |
+| Total Functions         | 2569   |
+| Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |
