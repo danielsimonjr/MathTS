@@ -359,6 +359,13 @@ describe('lusolve Array A: shape checks do not depend on the entry type (#1219)'
         'Matrix decomposition: jagged nested array at row 1'
       );
     });
+    it(`${kind} A: a 1-D A throws the decomposition input error`, () => {
+      expectThrow(
+        () => lusolve([x, 1], [1, 2]),
+        TypeError,
+        'Matrix decomposition expected DenseMatrix, SparseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }, got Array'
+      );
+    });
   }
 
   it('a number A with a ragged Complex b throws the dimension error', () => {

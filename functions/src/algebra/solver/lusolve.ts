@@ -186,14 +186,10 @@ export const createLusolve = /* #__PURE__ */ factory(
       return luSolve(fac, bVec).map((v) => [v]);
     }
 
-    /** Throw the packed-path errors for a jagged or a non-square nested A. */
+    /** Throw the packed-path errors for a 1-D, a jagged or a non-square nested A. */
     function assertSquareNested(rows: unknown[][]): void {
-      const cols = Array.isArray(rows[0]) ? rows[0].length : 0;
-      for (let r = 0; r < rows.length; r++) {
-        if (!Array.isArray(rows[r]) || rows[r].length !== cols) {
-          throw new TypeError(`Matrix decomposition: jagged nested array at row ${r}`);
-        }
-      }
+      // The packed path's own shape check. It reads the row lengths only, not the entries.
+      const cols = decompositionInputToNestedArray(rows as number[][])[0]?.length ?? 0;
       if (rows.length !== cols) {
         throw new Error(`lu: matrix must be square (got ${rows.length}×${cols})`);
       }

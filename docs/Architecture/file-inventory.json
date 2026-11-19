@@ -5980,7 +5980,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 562
+      "loc": 558
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 395
+      "loc": 402
     },
     {
       "file": "functions/tests/dogfood-1226-slu-nonsquare.test.ts",
