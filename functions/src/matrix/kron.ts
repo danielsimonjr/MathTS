@@ -90,8 +90,8 @@ export const createKron = /* #__PURE__ */ factory(
       y: Matrix | unknown[],
       sy: number[]
     ): Matrix {
-      if (sx.includes(0) || sy.includes(0)) {
-        const d = Math.max(sx.length, sy.length);
+      const d = Math.max(sx.length, sy.length);
+      if (d <= 2 && (sx.includes(0) || sy.includes(0))) {
         const px = [...Array<number>(d - sx.length).fill(1), ...sx];
         const py = [...Array<number>(d - sy.length).fill(1), ...sy];
         return matrix([]).resize(px.map((n, i) => n * (py[i] as number)));

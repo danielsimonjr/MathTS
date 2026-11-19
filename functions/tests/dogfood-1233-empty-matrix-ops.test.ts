@@ -196,3 +196,90 @@ describe('#1233 kron with an empty operand', () => {
     expect(k([1, 1], [2, 3, 4])).toEqual([2, 3, 4, 2, 3, 4]);
   });
 });
+
+describe('#1233 a 0 x n or n x 0 Matrix is not square', () => {
+  const nonSquare = () => [
+    zeros(0, 3, 'dense'),
+    zeros(3, 0, 'dense'),
+    zeros(0, 3, 'sparse'),
+    zeros(3, 0, 'sparse'),
+  ];
+  it('pow throws the square error and does not return an empty matrix', () => {
+    for (const a of nonSquare()) {
+      const [r, c] = (a as Mat).size();
+      for (const y of [0, 2, -1]) {
+        expect(() => pow(a, y)).toThrow(`For A^b, A must be square (size is ${r}x${c})`);
+      }
+      expect(() => pow(a, 1.5)).toThrow(/integer/);
+    }
+  });
+  it('sqrtm throws the square error', () => {
+    for (const a of nonSquare()) expect(() => sqrtm(a)).toThrow(squareRe);
+  });
+  it('expm throws the square error, also for a sparse matrix', () => {
+    for (const a of nonSquare()) {
+      const [r, c] = (a as Mat).size();
+      expect(() => expm(a)).toThrow(`matrixExpm: matrix must be square (got ${r}×${c})`);
+    }
+    expect(() => expm(sparse([[1, 2, 3]]))).toThrow(squareRe);
+  });
+  it('expm of a non-empty sparse matrix is unchanged', () => {
+    expect(
+      expm(
+        sparse([
+          [0, 0],
+          [0, 0],
+        ])
+      )
+    ).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+  });
+  it('sylvester throws for a non-square empty A or B', () => {
+    for (const a of nonSquare()) {
+      expect(() => syl(a, dense00(), dense00())).toThrow(squareRe);
+    }
+  });
+});
+
+describe('#1233 sylvester with 0 rows and an Array C', () => {
+  const b = [
+    [1, 0],
+    [0, 1],
+  ];
+  it('C = [] is the 0 x n right-hand side', () => {
+    expect(syl([], b, [])).toEqual([]);
+    expectEmpty(syl(dense00(), matrix(b), []), 'dense', [0, 2]);
+    expectEmpty(syl(dense00(), matrix(b), matrix([])), 'dense', [0, 2]);
+  });
+  it('C = [] is not an m x 0 right-hand side', () => {
+    expect(() => syl(b, [], [])).toThrow(/Dimension mismatch: C must be 2 x 0/);
+  });
+});
+
+describe('#1233 kron with two empty operands and with three dimensions', () => {
+  it('two empty operands of each storage', () => {
+    expectEmpty(k(sparse00(), zeros(0, 3, 'sparse')), 'dense', [0, 0]);
+    expectEmpty(k(zeros(0, 3, 'sparse'), zeros(0, 3, 'dense')), 'dense', [0, 9]);
+    expectEmpty(k(zeros(3, 0, 'sparse'), zeros(3, 0, 'sparse')), 'dense', [9, 0]);
+    expectEmpty(k([], dense00()), 'dense', [0, 0]);
+    expectEmpty(k(matrix([]), matrix([])), 'dense', [0]);
+  });
+  it('a sparse operand with a zero dimension', () => {
+    expectEmpty(
+      k(
+        zeros(0, 3, 'sparse'),
+        sparse([
+          [1, 2],
+          [3, 4],
+        ])
+      ),
+      'dense',
+      [0, 6]
+    );
+  });
+  it('an operand of three dimensions keeps the earlier result', () => {
+    expectEmpty(k([[[1]]], dense00()), 'dense', [1, 1, 0]);
+  });
+});

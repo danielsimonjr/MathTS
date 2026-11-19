@@ -286,10 +286,15 @@ export const createPow = /* #__PURE__ */ factory(
      */
     function _powMatrix(x: MatrixType, y: number): MatrixType {
       // A 0 x 0 Matrix, or the 1-D empty Matrix, has a 0 x 0 power of its own kind (#1233).
+      // valueOf() of a 0 x n Matrix is [], so read the shape from size(): 0 x n is not square.
       const s = x.size();
-      if ((s.length === 1 && s[0] === 0) || (s.length === 2 && s[0] === 0 && s[1] === 0)) {
+      const empty1d = s.length === 1 && s[0] === 0;
+      if (empty1d || (s.length === 2 && s[0] === 0)) {
         if (!isInteger(y)) {
           throw new TypeError('For A^b, b must be an integer (value is ' + y + ')');
+        }
+        if (!empty1d && s[1] !== 0) {
+          throw new Error('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
         }
         return x.clone().resize([0, 0]);
       }

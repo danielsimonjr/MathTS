@@ -140,7 +140,9 @@ export const createSylvester = /* #__PURE__ */ factory(
       const sb = _dims(B);
       if (sa.length === 2 && sb.length === 2 && sa[0] === sa[1] && sb[0] === sb[1]) {
         if (sa[0] === 0 || sb[0] === 0) {
-          const sc = _dims(C);
+          // [] is the only Array form of a matrix with 0 rows, so a 1-D empty C is 0 x n.
+          const c1 = C.size();
+          const sc = sa[0] === 0 && c1.length === 1 && c1[0] === 0 ? [0, sb[0]] : c1;
           if (sc.length !== 2 || sc[0] !== sa[0] || sc[1] !== sb[0]) {
             throw new RangeError(
               'Dimension mismatch: C must be ' +
