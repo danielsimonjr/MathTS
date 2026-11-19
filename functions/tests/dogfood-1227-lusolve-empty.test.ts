@@ -140,3 +140,12 @@ describe('#1227 lusolve empty system: real lup factors and right-hand sides', ()
     }
   });
 });
+
+describe('#1227 lusolve empty system: a ragged Array is not an empty system', () => {
+  it('an Array with an empty first row and a non-empty row keeps its errors', () => {
+    const ragged = [[], [1]] as never;
+    expect(() => lusolve(ragged, [])).toThrow(/Dimension mismatch/);
+    expect(() => lusolve(ragged, [1])).toThrow(/Dimension mismatch/);
+    expect(() => lusolve(ragged, [1, 2])).toThrow(/jagged nested array at row 1/);
+  });
+});
