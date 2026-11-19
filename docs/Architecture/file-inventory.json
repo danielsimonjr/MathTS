@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2535,
+  "totalFiles": 2536,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1322,
     "test-only": 0,
     "orphan": 0,
-    "test": 1121,
+    "test": 1122,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1348,
-    "tests": 1121,
+    "tests": 1122,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1164,
+    "@danielsimonjr/mathts-functions": 1165,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5910,7 +5910,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 247
+      "loc": 253
     },
     {
       "file": "functions/src/algebra/derivative.ts",
@@ -10783,6 +10783,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 286
+    },
+    {
+      "file": "functions/tests/dogfood-1235-slu-singular.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 128
     },
     {
       "file": "functions/tests/dogfood-1251-qr-1d.test.ts",
