@@ -1180,7 +1180,7 @@ Object.defineProperty(MathJSSparseMatrix.prototype, 'type', {
  */
 export function createMatrixBridge() {
   return function matrix(
-    data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string | boolean,
+    data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
     const sparse = storageType === 'sparse';
@@ -1191,8 +1191,9 @@ export function createMatrixBridge() {
     if (data instanceof MathJSDenseMatrix)
       return sparse ? new MathJSSparseMatrix(data._data) : data;
     // matrix('sparse'), matrix('dense') or matrix('default'). As in mathjs, a boolean is
-    // converted to a format string, and any other format string throws.
-    if (typeof data === 'string' || typeof data === 'boolean') {
+    // converted to a format string, and any other format string throws. The parameter type
+    // does not list boolean, because a boolean never gives a matrix.
+    if (typeof data === 'string' || typeof (data as unknown) === 'boolean') {
       const format = String(data);
       if (format === 'sparse') return new MathJSSparseMatrix();
       if (format === 'dense' || format === 'default') return new MathJSDenseMatrix();
@@ -1201,7 +1202,7 @@ export function createMatrixBridge() {
     if (!isPlainObject(data)) {
       // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
       throw new TypeError(
-        'Unexpected type of argument in function matrix (expected: string or Array or Matrix, actual: ' +
+        'Unexpected type of argument in function matrix (expected: string or Array or Matrix or boolean, actual: ' +
           typeName(data) +
           ', index: 0)'
       );

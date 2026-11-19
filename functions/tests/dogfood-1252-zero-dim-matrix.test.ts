@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import * as math from '../src/factories/index.js';
+import * as math from '../src/index.js';
 import { MathJSDenseMatrix } from '../src/factories/matrix-bridge.js';
 
 const { matrix, bignumber, complex } = math;
@@ -21,6 +21,7 @@ describe('#1252 matrix rejects a scalar', () => {
     ['bignumber(5)', () => bignumber(5)],
     ['complex(1, 2)', () => complex(1, 2)],
     ['0', () => 0],
+    ['NaN', () => NaN],
     ['null', () => null],
   ])('matrix(%s) throws TypeError', (_n, make) => {
     expect(() => (matrix as (x: unknown) => unknown)(make())).toThrow(TypeError);
@@ -44,7 +45,7 @@ describe('#1252 matrix rejects a scalar', () => {
 describe('#1252 no decomposition or solver sees a size-less matrix', () => {
   const fns = ['qr', 'lup', 'det', 'inv', 'eigs', 'schur', 'pinv', 'trace', 'qrPivoted'];
   it.each(fns)('%s(matrix(5)) never reaches the function', (name) => {
-    if (!m[name]) return;
+    expect(typeof m[name]).toBe('function');
     let thrown: unknown;
     try {
       m[name](matrix(5 as never));
@@ -111,5 +112,34 @@ describe('#1272 matrix format strings match mathjs', () => {
   });
   it.each(['dense', 'default', 'sparse'])('matrix(%s) is still empty', (f) => {
     expect(() => mx(f)).not.toThrow();
+  });
+
+  it.each([[0], [null], [false]])('matrix(%j, "sparse") throws', (x) => {
+    expect(() => (matrix as (x: unknown, f: string) => unknown)(x, 'sparse')).toThrow(TypeError);
+  });
+
+  // These functions pass their format argument to matrix(format).
+  it.each([
+    ['zeros(2, 2, "foo")', () => m.zeros(2, 2, 'foo')],
+    ['zeros("foo")', () => m.zeros('foo')],
+    ['ones(2, "foo")', () => m.ones(2, 'foo')],
+    ['identity("foo")', () => m.identity('foo')],
+    ['identity("")', () => m.identity('')],
+    ['rotationMatrix("foo")', () => m.rotationMatrix('foo')],
+    ['matrixFromFunction([2, 2], "foo", f)', () => m.matrixFromFunction([2, 2], 'foo', () => 1)],
+  ])('%s throws Unknown matrix type', (_n, call) => {
+    expect(call).toThrow(TypeError);
+    expect(call).toThrow(/Unknown matrix type/);
+  });
+
+  it('a known format still gives a matrix of that format', () => {
+    const size = (x: unknown) => (x as { size(): number[] }).size();
+    const type = (x: unknown) => (x as { type: string }).type;
+    expect(size(m.zeros(2, 2, 'dense'))).toEqual([2, 2]);
+    expect(type(m.zeros(2, 2, 'sparse'))).toBe('SparseMatrix');
+    expect(size(m.ones(2, 'dense'))).toEqual([2]);
+    expect(size(m.identity(2, 'sparse'))).toEqual([2, 2]);
+    expect(size(m.identity('dense'))).toEqual([0]);
+    expect(type(m.matrixFromFunction([2, 2], 'sparse', () => 1))).toBe('SparseMatrix');
   });
 });
