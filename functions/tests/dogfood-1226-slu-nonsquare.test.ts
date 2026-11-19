@@ -75,6 +75,36 @@ describe('#1226 slu of a non-square sparse matrix', () => {
     );
   });
 
+  it('lusolve with order and threshold checks the shape before the threshold', () => {
+    expect(() => lusolve(sparse([[1, 2, 3]]), [1], 1, 5)).toThrow(
+      'Matrix must be square (size: [1, 3]); for a rectangular least-squares system use lstsq'
+    );
+  });
+
+  it('lusolve of a square sparse matrix still validates the order', () => {
+    expect(() =>
+      lusolve(
+        sparse([
+          [4, 3],
+          [6, 3],
+        ]),
+        [1, 2],
+        7,
+        1
+      )
+    ).toThrow(/order must be an integer/);
+  });
+
+  it('a square matrix with no stored values is not rejected by the square check', () => {
+    const zero = sparse([
+      [0, 0],
+      [0, 0],
+    ]);
+    expect(() => lusolve(zero, [1, 2], 1, 1)).toThrow(
+      'Linear system cannot be solved since matrix is singular'
+    );
+  });
+
   it('still validates order before the shape', () => {
     expect(() => slu(sparse([[1, 2, 3]]), 7, 1)).toThrow(/order must be an integer/);
   });

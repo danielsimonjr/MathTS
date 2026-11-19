@@ -10705,7 +10705,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 155
     },
     {
       "file": "functions/tests/dogfood-1227-lusolve-empty.test.ts",
