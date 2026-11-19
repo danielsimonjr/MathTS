@@ -3,7 +3,7 @@
  *
  * qr returns the complete factorization: Q is m x m and R is m x n. An empty
  * input follows the same rule (NumPy `mode='complete'`). A matrix with no rows
- * gives empty Q and R. A matrix with m rows and no columns gives the m x m
+ * gives a 0 x 0 Q and an R of the input size. A matrix with m rows and no columns gives the m x m
  * identity Q and an m x 0 R. No input throws an internal error.
  */
 
@@ -32,10 +32,13 @@ describe('#1205 qr of an empty matrix', () => {
     });
   });
 
-  it('DenseMatrix matrix([]) gives empty Q and R', () => {
-    const r = qr(matrix([])) as { Q: { valueOf(): unknown }; R: { valueOf(): unknown } };
+  it('DenseMatrix matrix([]) gives a 0 x 0 Q and an R of the input size', () => {
+    type M = { valueOf(): unknown; size(): number[] };
+    const r = qr(matrix([])) as { Q: M; R: M };
     expect(r.Q.valueOf()).toEqual([]);
     expect(r.R.valueOf()).toEqual([]);
+    expect(r.Q.size()).toEqual([0, 0]);
+    expect(r.R.size()).toEqual([0]);
   });
 
   it('DenseMatrix matrix([[]]) keeps the shapes', () => {
@@ -50,11 +53,22 @@ describe('#1205 qr of an empty matrix', () => {
     expect(r.R.size()).toEqual([3, 0]);
   });
 
-  it('DenseMatrix zeros(0, 3) gives a 0 x 3 R and no error', () => {
-    const z = zeros([0, 3], 'dense') as { size(): number[] };
-    const r = qr(z) as { Q: { size(): number[] }; R: { size(): number[] } };
-    expect(r.R.size()).toEqual(z.size());
-    expect(r.Q.size()[0] ?? 0).toBe(0);
+  it.each(['dense', 'sparse'])('%s zeros(0, 3) gives a 0 x 0 Q and a 0 x 3 R', (format) => {
+    const r = qr(zeros([0, 3], format)) as { Q: { size(): number[] }; R: { size(): number[] } };
+    expect(r.Q.size()).toEqual([0, 0]);
+    expect(r.R.size()).toEqual([0, 3]);
+  });
+
+  it.each(['dense', 'sparse'])('%s zeros(3, 0) gives a 3 x 3 Q and a 3 x 0 R', (format) => {
+    const r = qr(zeros([3, 0], format)) as { Q: { size(): number[] }; R: { size(): number[] } };
+    expect(r.Q.size()).toEqual([3, 3]);
+    expect(r.R.size()).toEqual([3, 0]);
+  });
+
+  it('DenseMatrix zeros(0, 0) gives a 0 x 0 Q and a 0 x 0 R', () => {
+    const r = qr(zeros([0, 0], 'dense')) as { Q: { size(): number[] }; R: { size(): number[] } };
+    expect(r.Q.size()).toEqual([0, 0]);
+    expect(r.R.size()).toEqual([0, 0]);
   });
 
   it('a non-empty input is unchanged', () => {

@@ -580,12 +580,12 @@ export const createQr = /* #__PURE__ */ factory(
     }
 
     function _denseQR(m: DenseMatrix): QRResult {
-      // Empty input: no Householder step runs. Q is the complete m x m identity (m = 0 gives an
-      // empty Q) and R is the input itself (m x n with m = 0 or n = 0), as NumPy mode='complete'.
+      // Empty input: no Householder step runs. Q is the complete m x m identity (m = 0 gives a
+      // 0 x 0 Q) and R is a copy of the input (m x n with m = 0 or n = 0), as NumPy mode='complete'.
       if (m._size.length === 0 || m._size.some((d) => d === 0)) {
         const rows = m._size[0] ?? 0;
         return {
-          Q: rows > 0 ? identity([rows], 'dense') : matrix([], 'dense'),
+          Q: rows > 0 ? identity([rows], 'dense') : zeros([0, 0], 'dense'),
           R: m.clone(),
         } as QRResult;
       }
@@ -606,7 +606,10 @@ export const createQr = /* #__PURE__ */ factory(
 
     // QR of a sparse matrix: there is no sparse Householder kernel, so densify, factor, and return
     // dense Q and R (both are generally dense even when the input is sparse).
+    // `valueOf` of a matrix with no rows is `[]`, which loses the column count, so an empty
+    // input is rebuilt from its size.
     function _sparseQR(m: SparseMatrix): QRResult {
+      if (m._size.some((d) => d === 0)) return _denseQR(zeros(m._size, 'dense'));
       return _denseQR(matrix(m.valueOf(), 'dense') as DenseMatrix);
     }
   }
