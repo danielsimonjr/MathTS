@@ -3043,6 +3043,7 @@ graph LR
 | File                           | Imports                              | Type               |
 | ------------------------------ | ------------------------------------ | ------------------ |
 | `../../utils/factory.js`       | `factory`                            | Import             |
+| `../../utils/string.js`        | `format`                             | Import             |
 | `../../utils/isExactZero.js`   | `isExactZero`                        | Import             |
 | `../../utils/typed-impl.js`    | `findTypedImpl`                      | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                      | Import (type-only) |
@@ -21703,7 +21704,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1347   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237072 |
+| Total Lines of Code     | 237080 |
 | Total Exports           | 7389   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
