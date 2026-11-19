@@ -96,8 +96,10 @@ describe('#1231 lusolve multi-column right-hand side', () => {
   });
 
   it('a 1-column b of BigNumber or Fraction entries solves as before', () => {
-    expect(lusolve(A, [bignumber(5), bignumber(10)])).toEqual([[1], [3]]);
-    expect(lusolve(A, [[fraction(5)], [fraction(10)]])).toEqual([[1], [3]]);
+    // The value is the same. The entries keep their type (#1219), as in mathjs.
+    const values = (x: unknown): string[] => (x as unknown[][]).map((r) => String(r[0]));
+    expect(values(lusolve(A, [bignumber(5), bignumber(10)]))).toEqual(['1', '3']);
+    expect(values(lusolve(A, [[fraction(5)], [fraction(10)]]))).toEqual(['1', '3']);
     expect(lusolve([[2]], [[4]])).toEqual([[2]]);
     expect(lusolve([[2]], [4])).toEqual([[2]]);
   });

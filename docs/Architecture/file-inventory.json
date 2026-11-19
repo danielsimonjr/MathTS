@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2528,
+  "totalFiles": 2529,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1115,
+    "test": 1116,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1115,
+    "tests": 1116,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1160,
+    "@danielsimonjr/mathts-functions": 1161,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5987,7 +5987,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 525
+      "loc": 564
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -10715,6 +10715,13 @@
       "loc": 132
     },
     {
+      "file": "functions/tests/dogfood-1219-lusolve-complex.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 402
+    },
+    {
       "file": "functions/tests/dogfood-1226-slu-nonsquare.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10740,7 +10747,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 127
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
