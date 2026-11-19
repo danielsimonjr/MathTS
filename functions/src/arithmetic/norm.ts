@@ -219,6 +219,32 @@ export const createNorm = /* #__PURE__ */ factory(
       return big && real ? (bigHypot(vals) as unknown as BigNumberType) : undefined;
     }
 
+    /**
+     * A sum of p-th powers can overflow or underflow when the p-norm is in range (#1255). Then
+     * the p-norm is m * norm(x / m, p), with m = max(abs(x)). Else `plain` is returned, so the
+     * digits of an in-range sum do not change.
+     */
+    function _scaledPNorm(
+      x: MatrixType,
+      p: number,
+      plain: number | BigNumberType
+    ): number | BigNumberType {
+      const bad =
+        plain instanceof CoreBigNumber
+          ? !plain.isFinite() || plain.isZero()
+          : typeof plain === 'number' && (!Number.isFinite(plain) || plain === 0);
+      if (!bad) return plain;
+      const m = _vectorNormPlusInfinity(x);
+      const finite = m instanceof CoreBigNumber ? m.isFinite() : Number.isFinite(m as number);
+      if (!finite || equalScalar(m, 0)) return plain;
+      const inv = pow(m, -1);
+      let n: number | BigNumberType = 0;
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        n = add(pow(multiply(abs(value), inv), p), n) as number | BigNumberType;
+      }, true);
+      return multiply(m, pow(n, 1 / p)) as number | BigNumberType;
+    }
+
     function _vectorNorm(
       x: MatrixType,
       p: number | BigNumberType | string
@@ -247,7 +273,8 @@ export const createNorm = /* #__PURE__ */ factory(
             n = add(pow(abs(value), p), n) as number | BigNumberType;
           }, true);
           // sqrt is exact for a perfect square and rounds once; pow(n, 0.5) goes through exp/ln.
-          return (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
+          const plain = (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
+          return p === 2 ? plain : _scaledPNorm(x, p, plain);
         }
         return Number.POSITIVE_INFINITY;
       }

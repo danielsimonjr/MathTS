@@ -1579,7 +1579,14 @@ function vectorNorm(arr: f64[], p: f64 = 2): f64 {
   // General p-norm: still accumulate PAIRWISE so the sum does not drift as O(n)*eps.
   const terms = new Array<f64>(arr.length);
   for (let i = 0; i < arr.length; i++) terms[i] = Math.pow(Math.abs(arr[i]), p);
-  return Math.pow(pairwiseSum(terms), 1 / p);
+  const plain = Math.pow(pairwiseSum(terms), 1 / p);
+  if (Number.isFinite(plain) && plain !== 0) return plain;
+  // A sum of p-th powers can overflow or underflow when the norm is in range (#1255). Then the
+  // norm is m * norm(x / m, p), with m = max(abs(x)).
+  const m = Math.max(...arr.map((x) => Math.abs(x)));
+  if (!Number.isFinite(m) || m === 0) return plain;
+  for (let i = 0; i < arr.length; i++) terms[i] = Math.pow(Math.abs(arr[i]) / m, p);
+  return m * Math.pow(pairwiseSum(terms), 1 / p);
 }
 
 /**

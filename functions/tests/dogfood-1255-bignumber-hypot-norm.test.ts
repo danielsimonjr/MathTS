@@ -153,7 +153,7 @@ describe('#1255 norm of BigNumber values', () => {
 });
 
 describe('#1255 digits and distance', () => {
-  it('1000 random vectors at precision 64 give the digits of the plain formula', () => {
+  it('1000 random vectors at precision 64 give the correctly rounded root', () => {
     let seed = 12345;
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     BigNumber.config({ precision: 64 });
@@ -162,15 +162,77 @@ describe('#1255 digits and distance', () => {
       const xs = Array.from({ length: n }, () =>
         b(`${rnd() < 0.5 ? '-' : ''}${(rnd() * 1000).toFixed(12)}e${Math.floor(rnd() * 80) - 40}`)
       );
+      // The reference squares and sums with 40 more digits, then rounds once to 64.
+      BigNumber.config({ precision: 104 });
       let sum = b(0);
       for (const x of xs) sum = sum.add(x.multiply(x));
-      expect(str(fn('hypot')(xs))).toBe(sum.sqrt().toString());
-      expect(str(fn('norm')(xs))).toBe(sum.sqrt().toString());
+      const ref = sum.sqrt();
+      BigNumber.config({ precision: 64 });
+      const want = ref.toSignificantDigits(64).toString();
+      expect(str(fn('hypot')(xs))).toBe(want);
+      expect(str(fn('norm')(xs))).toBe(want);
     }
   });
   it('euclidean distance of BigNumber points does not overflow', () => {
     const p = [b('0'), b('0')];
     const q = [b('3e5000000000000000'), b('4e5000000000000000')];
     expect(str(fn('distance')(p, q))).toBe('5e+5000000000000000');
+  });
+});
+
+describe('#1255 review: exact shift, p-norms and point-to-line distance', () => {
+  /** sqrt(sum(x^2)) at precision + 20 with wide bounds, rounded once to `precision`. */
+  const reference = (vals: string[], precision: number): string => {
+    BigNumber.config({ precision: precision + 20 });
+    let s = b(0);
+    for (const v of vals) s = s.add(b(v).multiply(b(v)));
+    const r = s.sqrt();
+    BigNumber.config({ precision });
+    return r.toSignificantDigits(precision).toString();
+  };
+
+  it.each(['hypot', 'factory_hypot'])(
+    '%s does not round an input with more digits than the precision',
+    (name) => {
+      const vals = ['368908340768.57994560571', '3.0302e-19'];
+      const ref = reference(vals, 20);
+      expect(ref).toBe('368908340768.57994561');
+      expect(str(fn(name)(...vals.map(b)))).toBe(ref);
+    }
+  );
+
+  it('core BigNumber.hypotN equals core hypot and the reference', () => {
+    const vals = ['368908340768.57994560571', '3.0302e-19'];
+    const ref = reference(vals, 20);
+    expect(BigNumber.hypotN(vals.map(b)).toString()).toBe(ref);
+    expect(b(vals[0]).hypot(b(vals[1])).toString()).toBe(ref);
+    expect(BigNumber.hypotN([]).toString()).toBe('0');
+  });
+
+  it('norm(v, 3) of BigNumber values does not overflow', () => {
+    BigNumber.config({ precision: 20, maxExponent: 300, minExponent: -300 });
+    const r = fn('norm')([b('1e200'), b('1e200')], 3) as BigNumber;
+    expect(r.toSignificantDigits(10).equals(b('1.25992105e200'))).toBe(true);
+  });
+
+  it('norm(v, 3) of numbers does not overflow', () => {
+    const r = fn('norm')([1e200, 1e200], 3) as number;
+    expect(r / 1e200).toBeCloseTo(Math.cbrt(2), 12);
+  });
+
+  it('point-to-line distance of BigNumber values does not give NaN', () => {
+    BigNumber.config({ precision: 20, maxExponent: 300, minExponent: -300 });
+    const r = fn('distance')(
+      { pointX: b('3e160'), pointY: b('4e160') },
+      { lineOnePtX: b(0), lineOnePtY: b(0) },
+      { lineTwoPtX: b('1e160'), lineTwoPtY: b(0) }
+    );
+    expect((r as BigNumber).equals(b('4e160'))).toBe(true);
+  });
+
+  it('point-to-line distance of numbers does not give NaN', () => {
+    expect(fn('distance')([3e160, 4e160], [0, 1e160, 0])).toBeCloseTo(4e160, -150);
+    const r3 = fn('distance')([0, 4e160, 0], [0, 0, 0, 1e160, 0, 0]) as number;
+    expect(r3 / 4e160).toBeCloseTo(1, 12);
   });
 });

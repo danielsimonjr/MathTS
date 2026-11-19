@@ -410,7 +410,35 @@ export const createDistance = /* #__PURE__ */ factory(
     ): MathNumericType {
       const num = abs(addScalar(addScalar(multiplyScalar(a, x), multiplyScalar(b, y)), c));
       const den = sqrt(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)));
-      return divideScalar(num, den);
+      const plain = divideScalar(num, den);
+      if (!_overflowed(plain, [x, y, a, b, c])) return plain;
+      // A product or a square overflowed (#1255): divide the coefficients by sqrt(a^2 + b^2) first.
+      const k = _hypot([a, b]);
+      return abs(
+        addScalar(
+          addScalar(multiplyScalar(divideScalar(a, k), x), multiplyScalar(divideScalar(b, k), y)),
+          divideScalar(c, k)
+        )
+      );
+    }
+
+    /** True when `r` is NaN or infinite and every input is finite. */
+    function _overflowed(r: MathNumericType, inputs: MathNumericType[]): boolean {
+      const finite = (v: MathNumericType): boolean | undefined =>
+        typeof v === 'number'
+          ? Number.isFinite(v)
+          : v instanceof CoreBigNumber
+            ? v.isFinite()
+            : undefined;
+      return finite(r) === false && inputs.every((v) => finite(v) === true);
+    }
+
+    /** sqrt(sum(v^2)) of finite numbers and BigNumbers, scaled so a square cannot overflow. */
+    function _hypot(vals: MathNumericType[]): MathNumericType {
+      if (vals.some((v) => v instanceof CoreBigNumber)) {
+        return bigHypot(vals as (number | CoreBigNumber)[]) as unknown as MathNumericType;
+      }
+      return Math.hypot(...(vals as number[]));
     }
 
     function _distancePointLine3D(
@@ -450,7 +478,17 @@ export const createDistance = /* #__PURE__ */ factory(
       const den = sqrt(
         addScalar(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)), multiplyScalar(c, c))
       );
-      return divideScalar(num, den);
+      const plain = divideScalar(num, den);
+      if (!_overflowed(plain, [x, y, z, x0, y0, z0, a, b, c])) return plain;
+      // A product or a square overflowed (#1255): use the unit direction (a, b, c) / |(a, b, c)|.
+      const k = _hypot([a, b, c]);
+      const [ua, ub, uc] = [divideScalar(a, k), divideScalar(b, k), divideScalar(c, k)];
+      const [dx, dy, dz] = [subtractScalar(x0, x), subtractScalar(y0, y), subtractScalar(z0, z)];
+      return _hypot([
+        subtractScalar(multiplyScalar(dy, uc), multiplyScalar(dz, ub)),
+        subtractScalar(multiplyScalar(dz, ua), multiplyScalar(dx, uc)),
+        subtractScalar(multiplyScalar(dx, ub), multiplyScalar(dy, ua)),
+      ]);
     }
 
     function _euclideanDistance(x: MathNumericType[], y: MathNumericType[]): MathNumericType {

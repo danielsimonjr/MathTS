@@ -982,7 +982,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2431
+      "loc": 2446
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1269,7 +1269,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 297
+      "loc": 320
     },
     {
       "file": "core/tests/dogfood-a1-stable-non-array.test.ts",
@@ -6379,7 +6379,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 405
+      "loc": 432
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
@@ -6869,7 +6869,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 509
+      "loc": 547
     },
     {
       "file": "functions/src/geometry/frustum.ts",
@@ -9172,7 +9172,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2942
+      "loc": 2949
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9592,7 +9592,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 49
+      "loc": 14
     },
     {
       "file": "functions/src/utils/bignumber/bitwise.ts",
@@ -10761,7 +10761,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 177
+      "loc": 239
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
