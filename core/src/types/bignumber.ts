@@ -2194,12 +2194,12 @@ export class BigNumber implements MathTSValue {
         const s = BigNumber.#construct(1, x._coefficient, x._exponent - shift, false, false);
         sum = sum.add(s.multiply(s));
       }
-      root = sum.sqrt();
+      // The root has an order near 0. It is rounded under the widest bounds, and `#allocate`
+      // applies the configured bounds after the shift.
+      root = sum.sqrt().roundToPrecision(saved.precision);
     } finally {
       setGlobalConfig(saved);
     }
-    // The root has an order near 0, so rounding it to the configured precision is in range.
-    root = root.roundToPrecision(saved.precision);
     if (root._sign === 0) return root;
     return BigNumber.#allocate(root._sign, root._coefficient, root._exponent + shift);
   }
