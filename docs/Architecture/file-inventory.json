@@ -6799,7 +6799,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1300
+      "loc": 1302
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10768,7 +10768,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 82
+      "loc": 87
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
