@@ -84,3 +84,12 @@ describe('#1263 valid inputs are unchanged', () => {
     expect((sparse(matrix([1, 2, 3])) as M).size()).toEqual([3, 1]);
   });
 });
+
+describe('#1263 a plain object with dense fields is not a dense matrix', () => {
+  it('new MathJSSparseMatrix({ _data, _size }) throws TypeError, as mathjs does', () => {
+    const fake = { _data: [[1]], _size: [1, 1] };
+    expect(call(() => new MathJSSparseMatrix(fake as never))).toThrow(
+      new TypeError('Unsupported type of data (Object)')
+    );
+  });
+});

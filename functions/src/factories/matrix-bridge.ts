@@ -621,8 +621,17 @@ export class MathJSSparseMatrix {
       this._datatype = data._datatype;
       return;
     }
-    if (isDenseMatrixLike(data)) {
-      data = data._data as unknown[][];
+    if (data instanceof MathJSDenseMatrix) {
+      this._values = [];
+      this._index = [];
+      this._ptr = [];
+      this._size = [];
+      this._fromDenseArray(data._data);
+      return;
+    }
+    if ('_data' in data) {
+      // A plain object that copies the dense fields is not a matrix, as in mathjs
+      throw new TypeError('Unsupported type of data (Object)');
     }
 
     if (Array.isArray(data)) {
@@ -683,15 +692,15 @@ export class MathJSSparseMatrix {
         : (input as unknown[][]);
     const rows = data.length;
     const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
-    this._values = [];
-    this._index = [];
-    this._ptr = [0];
-    this._size = [rows, cols];
-
+    // Fill fresh local arrays, then store them, so the loop does not read fields
+    const values: unknown[] = [];
+    const index: number[] = [];
+    const ptr: number[] = [0];
     for (let j = 0; j < cols; j++) {
       for (let i = 0; i < rows; i++) {
         const v = data[i][j];
-        if (Array.isArray(v)) {
+        // A number is the common case; only a non-number entry can be a deeper level
+        if (typeof v !== 'number' && Array.isArray(v)) {
           // A deeper level below the first element: the input has 3 or more axes
           throw new RangeError(
             'Matrix must be two dimensional (size: ' +
@@ -700,12 +709,16 @@ export class MathJSSparseMatrix {
           );
         }
         if (v !== 0 && v != null) {
-          this._values.push(v);
-          this._index.push(i);
+          values.push(v);
+          index.push(i);
         }
       }
-      this._ptr.push(this._values.length);
+      ptr.push(values.length);
     }
+    this._values = values;
+    this._index = index;
+    this._ptr = ptr;
+    this._size = [rows, cols];
   }
 
   // ---- Required duck-type properties for @danielsimonjr/mathts-core isMatrix check ----
@@ -1283,18 +1296,12 @@ function eachAxes(
   }
 }
 
-/** The size of a nested array, one entry per axis. */
-/** True for a dense matrix object (nested `_data` and a `_size`, no CSC pointers). */
-function isDenseMatrixLike(data: object): data is { _data: unknown[]; _size: number[] } {
-  const d = data as { _data?: unknown; _size?: unknown; _ptr?: unknown };
-  return Array.isArray(d._data) && Array.isArray(d._size) && !Array.isArray(d._ptr);
-}
-
 /** A size as mathjs prints it in an error: `[2, 2, 1]`. */
 function formatSize(size: number[]): string {
   return '[' + size.join(', ') + ']';
 }
 
+/** The size of a nested array, one entry per axis. */
 function inferSize(data: unknown[]): number[] {
   // `[[[]], [[]]]` is 2x1x0, as in mathjs.
   return arraySize(data);
