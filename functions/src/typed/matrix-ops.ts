@@ -1195,11 +1195,38 @@ export const matrixExpm = mathTyped('matrixExpm', {
   DenseMatrix: (A: Parameters<typeof matrixExpmPrimitive>[0]) => matrixExpmPrimitive(A),
   'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], _opts: ExpmOptions) =>
     matrixExpmPrimitive(A),
-  Array: (A: number[][]) => {
-    const D = DenseMatrix.fromArray(A);
-    return matrixExpmPrimitive(D).toArray();
+  // A sparse matrix converts to an Array, and a 0 x n matrix converts to [], so the shape
+  // is read here, before the conversion (#1233). The result is an Array.
+  SparseMatrix: (A: SparseLike) => {
+    const { rows, cols } = A;
+    if (rows !== cols) {
+      throw new Error(`matrixExpm: matrix must be square (got ${rows}×${cols})`);
+    }
+    if (typeof A.toArray === 'function') return expmArray(A.toArray());
+    return expmArray(
+      Array.from({ length: rows }, (_, i) => Array.from({ length: cols }, (_, j) => A.get(i, j)))
+    );
   },
+  Array: expmArray,
 });
+
+/** The shape and entry access that every sparse matrix kind has. */
+interface SparseLike {
+  rows: number;
+  cols: number;
+  get(i: number, j: number): number;
+  toArray?: () => number[][];
+}
+
+function expmArray(A: number[][]): number[][] {
+  // [] is the 0 x 0 matrix; its exponential is [] (#1233)
+  if (A.length === 0) return [];
+  if (A.every((row) => row.length === 0)) {
+    throw new Error(`matrixExpm: matrix must be square (got ${A.length}×0)`);
+  }
+  const D = DenseMatrix.fromArray(A);
+  return matrixExpmPrimitive(D).toArray();
+}
 
 // =============================================================================
 // 12. Matrix Logarithm (Slice 5.9)

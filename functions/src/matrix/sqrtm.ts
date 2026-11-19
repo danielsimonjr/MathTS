@@ -24,6 +24,8 @@ type MatrixData = Scalar | Scalar[] | Scalar[][];
 /** Matrix interface */
 export interface Matrix {
   size(): number[];
+  clone(): Matrix;
+  resize(size: number[]): Matrix;
   valueOf(): MatrixData;
   _data?: MatrixData;
   _size?: number[];
@@ -195,6 +197,9 @@ export const createSqrtm = /* #__PURE__ */ factory(
             // Single element Array | Matrix
             if (sizeArray[0] === 1) {
               return map(A, sqrt);
+            } else if (sizeArray[0] === 0) {
+              // the root of the 0 x 0 matrix is the 0 x 0 matrix, in the same kind (#1233)
+              return isMatrix(A) ? (A as Matrix).clone().resize([0, 0]) : [];
             } else {
               throw new RangeError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
@@ -206,6 +211,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
             const rows = sizeArray[0];
             const cols = sizeArray[1];
             if (rows === cols) {
+              if (rows === 0) return (A as Matrix).clone();
               return _sqrtmScaled(A as Scalar[][] | Matrix);
             } else {
               throw new RangeError(
