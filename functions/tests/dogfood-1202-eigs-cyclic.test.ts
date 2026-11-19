@@ -202,3 +202,71 @@ describe('eigs of a small block beside a huge entry (#1202 review)', () => {
     expectEigenpairs(M as unknown as number[][], eigenvectors);
   });
 });
+
+describe('eigs symmetric routing is relative to each pair (#1202 review)', () => {
+  type Pair = { value: unknown; vector: unknown[] };
+  const SQRT5 = bn(5).sqrt();
+
+  it('BigNumber pair within precision of its own size takes the symmetric solver', () => {
+    // 1e-13 <= 1e-12 * 2, so the pair (2, 2 + 1e-13) is symmetric and the
+    // result is that of [[1,2],[2,3]]: 2 -+ sqrt(5), to full BigNumber precision.
+    // The general solver would give 2 + sqrt(5) + 4.4e-14.
+    const A = [
+      [bn(1), bn(2)],
+      [bn(2).plus(bn('1e-13')), bn(3)],
+    ];
+    const { values } = eigs(A) as unknown as { values: BigNumber[] };
+    const top = values[1];
+    expect(top.minus(bn(2).plus(SQRT5)).abs().lt(bn('1e-30'))).toBe(true);
+  });
+
+  it('a small entry beside a zero is not symmetric: the matrix stays defective', () => {
+    // 1e-13 is below the precision 1e-12, but the pair (1e-13, 0) is compared
+    // with its own size. A symmetric reading would return two eigenvectors.
+    const A = [
+      [bn(1), bn('1e-13')],
+      [bn(0), bn(1)],
+    ];
+    const { eigenvectors } = eigs(A) as unknown as { eigenvectors: Pair[] };
+    expect(eigenvectors).toHaveLength(1);
+  });
+
+  it('Complex entry with an imaginary part within precision of its size is read as real', () => {
+    const A = [
+      [complex(1, 0), complex(2, 0)],
+      [complex(2, 1e-13), complex(3, 0)],
+    ];
+    const { values } = eigs(A) as unknown as { values: unknown[] };
+    expect(values.every((v) => typeof v === 'number')).toBe(true);
+    expectValues(
+      values,
+      [
+        { re: 2 - Math.sqrt(5), im: 0 },
+        { re: 2 + Math.sqrt(5), im: 0 },
+      ],
+      1e-9
+    );
+  });
+
+  it('an exactly symmetric BigNumber matrix with mixed magnitudes has real eigenpairs', () => {
+    const M = [
+      [1e20, 1e-5, 3],
+      [1e-5, 2, 1e10],
+      [3, 1e10, 1e-8],
+    ];
+    const { values, eigenvectors } = eigs(M.map((r) => r.map((x) => bn(x)))) as unknown as {
+      values: unknown[];
+      eigenvectors: Pair[];
+    };
+    expectValues(
+      values,
+      [
+        { re: -1e10, im: 0 },
+        { re: 1e10, im: 0 },
+        { re: 1e20, im: 0 },
+      ],
+      1e-9
+    );
+    expect(eigenvectors).toHaveLength(3);
+  });
+});

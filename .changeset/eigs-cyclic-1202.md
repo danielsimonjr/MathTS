@@ -2,13 +2,13 @@
 '@danielsimonjr/mathts-functions': patch
 ---
 
-`eigs` on a BigNumber or Complex matrix works at every scale, and on a cyclic permutation matrix (Fixes #1202).
+`eigs` on a BigNumber or Complex cyclic permutation matrix converges, and the general solver no longer reads small entries as zero (Fixes #1202).
 
 Result before this change, for the 3x3 cyclic permutation matrix times 2^e:
 
 - BigNumber and Complex, e = 0, -20, 40: threw "The eigenvalues failed to converge".
 - BigNumber and Complex, e = -40, -60: returned the eigenvalues 0, 0, 0.
-- BigNumber eigenvectors: the same four failures.
+- BigNumber and Complex eigenvectors: the same failures.
 - BigNumber `[[1, 2], [3, 4]]` times 2^-50: wrong eigenvalues.
 - number matrix: correct (unchanged).
 
@@ -24,3 +24,7 @@ Causes: the QR iteration of `complexEigs` used the corner entry as the shift, an
 - Hessenberg reduction: only a column of exact zeros skips the elimination.
 - equal eigenvalues and the 2x2 Jordan blocks: relative to the values, and to the largest entry of the block.
 - eigenvector solves: a diagonal entry is exact zero where it matches the eigenvalue, and each other row is divided by its diagonal entry.
+
+Routing change: with the default precision, or a precision given as a number, a BigNumber or Complex matrix whose pairs differed by 1e-14 to 1e-12 went to the general solver; it now goes to the symmetric solver when each pair differs by at most `precision` times its own size, as it already did for a precision given as a BigNumber. For `[[1,2],[2+1e-13,3]]` the eigenvalues move by 4.4e-14, and a Complex matrix whose imaginary parts are within `precision` of the entry sizes returns numbers, not Complex values.
+
+Not fixed: a defective matrix with small entries still returns false eigenvectors (#1242), and a symmetric BigNumber matrix with small entries still returns its diagonal (#1243, `realSymmetric.ts`).

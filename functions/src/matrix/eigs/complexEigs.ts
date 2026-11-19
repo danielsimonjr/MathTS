@@ -646,7 +646,9 @@ export function createComplexEigs({
       // The null space does not change when a row is divided by a number, so
       // give it a diagonal of exact zeros (where U_jj matches lambda, relative
       // to their size) and ones (every other row divided by its diagonal).
-      // Then the result does not depend on the scale of the matrix (#1202).
+      // Then the diagonal test does not depend on the scale of the matrix
+      // (#1202). The other entries of a matching row keep that scale, and
+      // usolveAll still reads them with an absolute tolerance (#1242).
       const Snull = T.map((row, j) =>
         close(U[j][j], lambda, prec)
           ? row.map((x, k) => (k === j ? zero : x))
