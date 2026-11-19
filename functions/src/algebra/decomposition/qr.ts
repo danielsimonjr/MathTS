@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { format } from '../../utils/string.js';
 import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -632,6 +633,11 @@ export const createQr = /* #__PURE__ */ factory(
     }
 
     function _denseQR(m: DenseMatrix): QRResult {
+      // qr factors a two dimensional matrix; the size check runs before the empty-input branch so
+      // that a size such as [1, 1, 0] is not read as a 1 x 0 matrix
+      if (m._size.length > 2) {
+        throw new RangeError('Matrix must be two dimensional (size: ' + format(m._size, {}) + ')');
+      }
       // Empty input: no Householder step runs. Q is the complete m x m identity (m = 0 gives a
       // 0 x 0 Q) and R is a copy of the input (m x n with m = 0 or n = 0), as NumPy mode='complete'.
       if (m._size.length === 0 || m._size.some((d) => d === 0)) {

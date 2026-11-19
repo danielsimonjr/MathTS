@@ -7365,6 +7365,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/string.js
+          imports:
+            - format
         - file: ../../utils/isExactZero.js
           imports:
             - isExactZero
@@ -46895,7 +46898,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236923
+  totalLinesOfCode: 236929
   totalExports: 7388
   totalClasses: 62
   totalInterfaces: 668
