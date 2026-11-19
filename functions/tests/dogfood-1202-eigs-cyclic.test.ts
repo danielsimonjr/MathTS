@@ -118,3 +118,87 @@ describe('eigs on a cyclic 3x3 permutation matrix (#1202)', () => {
     want.forEach((w, i) => expect(Math.abs(got[i] - w * s)).toBeLessThanOrEqual(REL * s));
   });
 });
+
+/** Every expected value must match a distinct computed value within relTol * max(|want|, 1). */
+function expectValues(got: unknown[], want: Ri[], relTol: number) {
+  expect(got).toHaveLength(want.length);
+  const left = got.map(toRi);
+  for (const w of want) {
+    const ds = left.map((g) => Math.hypot(g.re - w.re, g.im - w.im));
+    const best = ds.indexOf(Math.min(...ds));
+    expect(ds[best]).toBeLessThanOrEqual(relTol * Math.max(Math.hypot(w.re, w.im), 1));
+    left.splice(best, 1);
+  }
+}
+
+/** A v = lambda v for each pair, relative to max(|lambda|, 1) * max|v|. */
+function expectEigenpairs(A: number[][], pairs: { value: unknown; vector: unknown[] }[]) {
+  expect(pairs).toHaveLength(A.length);
+  for (const { value, vector } of pairs) {
+    const l = toRi(value);
+    const v = vector.map(toRi);
+    const vmax = Math.max(...v.map((x) => Math.hypot(x.re, x.im)));
+    expect(vmax).toBeGreaterThan(0);
+    for (let i = 0; i < A.length; i++) {
+      let re = -(l.re * v[i].re - l.im * v[i].im);
+      let im = -(l.re * v[i].im + l.im * v[i].re);
+      for (let j = 0; j < A.length; j++) {
+        re += A[i][j] * v[j].re;
+        im += A[i][j] * v[j].im;
+      }
+      expect(Math.hypot(re, im)).toBeLessThanOrEqual(
+        1e-8 * Math.max(Math.hypot(l.re, l.im), 1) * vmax
+      );
+    }
+  }
+}
+
+describe('eigs of a small block beside a huge entry (#1202 review)', () => {
+  // A 2x2 rotation-like block decoupled from a 1e20 entry. Tolerances relative
+  // to the whole matrix (1e-12 * 1e20 = 1e8) must not erase the coupling 1 of
+  // the block.
+  const SKEW = [
+    [1e20, 0, 0],
+    [0, 1e-5, 1],
+    [0, -1, 1e-5],
+  ];
+  const SKEW_VALUES: Ri[] = [
+    { re: 1e-5, im: 1 },
+    { re: 1e-5, im: -1 },
+    { re: 1e20, im: 0 },
+  ];
+  const ROT = [
+    [1e20, 0, 0],
+    [0, 0, 1],
+    [0, -1, 0],
+  ];
+  const ROT_VALUES: Ri[] = [
+    { re: 0, im: 1 },
+    { re: 0, im: -1 },
+    { re: 1e20, im: 0 },
+  ];
+
+  it.each([
+    ['BigNumber', 'skew', SKEW, SKEW_VALUES],
+    ['Complex', 'skew', SKEW, SKEW_VALUES],
+    ['BigNumber', 'rotation', ROT, ROT_VALUES],
+    ['Complex', 'rotation', ROT, ROT_VALUES],
+  ] as const)('%s %s block keeps its complex pair', (kind, _name, M, want) => {
+    const A = M.map((r) => r.map((x) => (kind === 'BigNumber' ? bn(x) : complex(x, 0))));
+    const { values } = eigs(A, { eigenvectors: false }) as unknown as { values: unknown[] };
+    expectValues(values, want as Ri[], 1e-9);
+  });
+
+  it.each([
+    ['BigNumber', SKEW],
+    ['Complex', SKEW],
+    ['BigNumber', ROT],
+    ['Complex', ROT],
+  ] as const)('%s block eigenvectors satisfy A v = lambda v', (kind, M) => {
+    const A = M.map((r) => r.map((x) => (kind === 'BigNumber' ? bn(x) : complex(x, 0))));
+    const { eigenvectors } = eigs(A) as unknown as {
+      eigenvectors: { value: unknown; vector: unknown[] }[];
+    };
+    expectEigenpairs(M as unknown as number[][], eigenvectors);
+  });
+});

@@ -350,14 +350,14 @@ export const createEigs = /* #__PURE__ */ factory(
 
       const N = asize[0];
 
-      // both tests below compare against prec times the largest entry, so a
-      // matrix with tiny entries is not mistaken for a real symmetric one (#1202)
-      const tol = relativeTolerance(arr, N, prec);
-
-      if (isReal(arr, N, tol)) {
+      // both tests below are relative to the entries they compare, so a small
+      // block beside a huge entry keeps its asymmetry and its imaginary parts,
+      // and a matrix with tiny entries is not read as real symmetric (#1202)
+      const precBig = bignumber(prec as number);
+      if (isReal(arr, N, precBig)) {
         coerceReal(arr, N); // modifies arr by side effect
 
-        if (isSymmetric(arr, N, tol)) {
+        if (isSymmetric(arr, N, precBig)) {
           const type = coerceTypes(mat, arr, N); // modifies arr by side effect
           return doRealSymmetric(
             arr as unknown as (number | BigNumber)[][],
@@ -373,26 +373,18 @@ export const createEigs = /* #__PURE__ */ factory(
       return doComplexEigs(arr, N, prec, type, computeVectors);
     }
 
-    /** prec times the largest entry magnitude (prec itself for a zero or non-finite matrix) */
-    function relativeTolerance(arr: Scalar[][], N: number, prec: number | BigNumber): BigNumber {
-      let scale = bignumber(0);
+    /**
+     * Check if matrix is symmetric: every pair satisfies
+     * |a_ij - a_ji| <= prec * max(|a_ij|, |a_ji|). A pair of zeros is equal.
+     */
+    function isSymmetric(arr: Scalar[][], N: number, prec: BigNumber): boolean {
       for (let i = 0; i < N; i++) {
-        for (let j = 0; j < N; j++) {
-          const a = bignumber(abs(arr[i][j]));
-          if (a.gt(scale)) scale = a;
-        }
-      }
-      return scale.isFinite() && !scale.isZero()
-        ? bignumber(prec as number).times(scale)
-        : bignumber(prec as number);
-    }
-
-    /** Check if matrix is symmetric within tolerance */
-    function isSymmetric(arr: Scalar[][], N: number, tol: BigNumber): boolean {
-      for (let i = 0; i < N; i++) {
-        for (let j = i; j < N; j++) {
-          // TODO proper comparison of bignum and frac
-          if (bignumber(abs(subtract(arr[i][j], arr[j][i]))).gt(tol)) {
+        for (let j = i + 1; j < N; j++) {
+          const diff = bignumber(abs(subtract(arr[i][j], arr[j][i])));
+          const aij = bignumber(abs(arr[i][j]));
+          const aji = bignumber(abs(arr[j][i]));
+          const size = aij.gt(aji) ? aij : aji;
+          if (diff.gt(prec.times(size))) {
             return false;
           }
         }
@@ -401,12 +393,12 @@ export const createEigs = /* #__PURE__ */ factory(
       return true;
     }
 
-    /** Check if matrix contains only real values within tolerance */
-    function isReal(arr: Scalar[][], N: number, tol: BigNumber): boolean {
+    /** Check if every entry is real: |im(a_ij)| <= prec * |a_ij| */
+    function isReal(arr: Scalar[][], N: number, prec: BigNumber): boolean {
       for (let i = 0; i < N; i++) {
         for (let j = 0; j < N; j++) {
-          // TODO proper comparison of bignum and frac
-          if (bignumber(abs(im(arr[i][j]))).gt(tol)) {
+          const imag = bignumber(abs(im(arr[i][j])));
+          if (imag.gt(prec.times(bignumber(abs(arr[i][j]))))) {
             return false;
           }
         }
