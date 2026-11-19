@@ -25,10 +25,12 @@ function expectFactorization(a: number[][], r: R) {
   expect(isPerm(q, n)).toBe(true);
   const lm = r.L.toArray();
   const um = r.U.toArray();
+  // tolerance relative to the scale of A: n entries of size max|a| meet in each sum
+  const tol = 1e-14 * n * Math.max(1, ...a.flat().map(Math.abs));
   const lu = lm.map((row) => um[0].map((_, j) => row.reduce((s, x, k) => s + x * um[k][j], 0)));
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
-      expect(Math.abs(lu[r.p[i]][j] - a[i][q[j]])).toBeLessThan(1e-12);
+      expect(Math.abs(lu[r.p[i]][j] - a[i][q[j]])).toBeLessThanOrEqual(tol);
     }
   }
 }
