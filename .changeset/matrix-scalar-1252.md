@@ -12,6 +12,6 @@ BREAKING:
 
 - `matrix(0)`, `matrix(NaN)`, `matrix(null)`, `matrix(false)`, `matrix('')` and `matrix('foo')` returned an empty dense matrix and now throw. `matrix(0, 'sparse')`, `matrix(null, 'sparse')` and `matrix(false, 'sparse')` returned an empty sparse matrix and now throw. Use `matrix()` or `matrix('sparse')` for an empty matrix.
 - The functions that pass a format to `matrix` throw `Unknown matrix type` for an unknown format string. Before, they used the dense format: `zeros(2, 2, 'foo')`, `zeros('foo')`, `ones(2, 'foo')`, `identity('foo')`, `identity('')`, `rotationMatrix('foo')`, `rotationMatrix('')` and `matrixFromFunction([2, 2], 'foo', f)`.
-- The same calls through `evaluate` and through the compat instance (`math.matrix(0)`) throw too.
+- `matrix(0)` throws through `evaluate` and through the compat instance (`math.matrix(0)`) too. The compat `zeros`, `ones` and `identity` have their own code and are unchanged.
 
 No non-breaking fix exists: any result that does not throw keeps the silent coercion of an invalid argument, and mathjs 15.2.0 throws for each of these calls. `matrix()`, `matrix([])`, `matrix('dense')`, `matrix('sparse')`, `matrix('default')`, array input, a Matrix and the internal `{ data, size }` and CSC storage objects are unchanged. A second argument that is not a known format (`matrix([[1]], 'foo')`) is still read as dense (#1284). The sparse-constructor scalar case of #1272 (`new MathJSSparseMatrix(5)`) is fixed by #1263.
