@@ -3036,13 +3036,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                 | Type               |
-| ------------------------------ | ----------------------- | ------------------ |
-| `../../utils/factory.js`       | `factory`               | Import             |
-| `../../utils/isExactZero.js`   | `isExactZero`           | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
-| `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
-| `../../utils/is.js`            | `isComplex, isFraction` | Import             |
+| File                           | Imports                              | Type               |
+| ------------------------------ | ------------------------------------ | ------------------ |
+| `../../utils/factory.js`       | `factory`                            | Import             |
+| `../../utils/isExactZero.js`   | `isExactZero`                        | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`                      | Import             |
+| `../../core/function/typed.js` | `TypedFunction`                      | Import (type-only) |
+| `../../utils/is.js`            | `isBigNumber, isComplex, isFraction` | Import             |
 
 **Exports:**
 
@@ -21678,7 +21678,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1345   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236031 |
+| Total Lines of Code     | 236082 |
 | Total Exports           | 7383   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

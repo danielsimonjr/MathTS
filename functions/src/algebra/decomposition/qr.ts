@@ -2,7 +2,7 @@ import { factory } from '../../utils/factory.js';
 import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
-import { isComplex, isFraction } from '../../utils/is.js';
+import { isBigNumber, isComplex, isFraction } from '../../utils/is.js';
 import {
   UNIT_FLOOR_LO,
   SQUARED,
@@ -356,6 +356,49 @@ export const createQr = /* #__PURE__ */ factory(
       }
     }
 
+    interface EntryKind {
+      zero: () => unknown;
+      one: () => unknown;
+      convert: (v: unknown) => unknown;
+    }
+
+    /**
+     * The entry type of a matrix (#1206). It is Complex when an entry is Complex and every other
+     * entry is a number or Complex. It is BigNumber when an entry is BigNumber and every other
+     * entry is a number or BigNumber. Else it is null (a plain number matrix, or a type with no
+     * promotion rule), and the entries stay as they are.
+     */
+    function entryKind(data: unknown[][]): EntryKind | null {
+      let cplx = false;
+      let big: { constructor: new (v: number) => unknown } | null = null;
+      let other = false;
+      for (const row of data) {
+        for (const v of row) {
+          if (isComplex(v)) cplx = true;
+          else if (isBigNumber(v))
+            big = v as unknown as { constructor: new (v: number) => unknown };
+          else if (typeof v !== 'number') other = true;
+        }
+      }
+      if (other || (cplx && big)) return null;
+      if (cplx) {
+        return {
+          zero: () => complex(0),
+          one: () => complex(1),
+          convert: (v) => (typeof v === 'number' ? complex(v) : v),
+        };
+      }
+      if (big) {
+        const Big = big.constructor;
+        return {
+          zero: () => new Big(0),
+          one: () => new Big(1),
+          convert: (v) => (typeof v === 'number' ? new Big(v) : v),
+        };
+      }
+      return null;
+    }
+
     function _denseQRimpl(m: DenseMatrix, plain: boolean): QRResult {
       // rows & columns (m x n)
       const rows = m._size[0]; // m
@@ -366,6 +409,14 @@ export const createQr = /* #__PURE__ */ factory(
 
       const R = m.clone();
       const Rdata = R._data as unknown[][];
+
+      // Q and R hold the entry type of the input, also where a skipped step writes nothing (#1206).
+      const kind = entryKind(Rdata);
+      if (kind) {
+        for (const row of Rdata) for (let c = 0; c < row.length; c++) row[c] = kind.convert(row[c]);
+        for (let r = 0; r < rows; r++)
+          for (let c = 0; c < rows; c++) Qdata[r][c] = r === c ? kind.one() : kind.zero();
+      }
 
       // vars
       let i: number, j: number, k: number;
@@ -592,11 +643,11 @@ export const createQr = /* #__PURE__ */ factory(
       const ret = _denseQRScaled(m);
       const Rdata = ret.R._data as unknown[][];
       if ((m._data as unknown[][]).length > 0) {
-        const zero = (Rdata[0][0] as { type?: string }).type === 'Complex' ? complex(0) : 0;
+        const kind = entryKind(Rdata);
 
         for (let i = 0; i < Rdata.length; ++i) {
           for (let j = 0; j < i && j < (Rdata[0] || []).length; ++j) {
-            Rdata[i][j] = zero;
+            Rdata[i][j] = kind ? kind.zero() : 0;
           }
         }
       }

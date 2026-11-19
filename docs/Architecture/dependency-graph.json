@@ -7636,7 +7636,7 @@
           },
           {
             "file": "../../utils/is.js",
-            "imports": ["isComplex", "isFraction"]
+            "imports": ["isBigNumber", "isComplex", "isFraction"]
           }
         ],
         "workspaceDependencies": [
@@ -49705,7 +49705,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1345,
     "totalModules": 82,
-    "totalLinesOfCode": 236031,
+    "totalLinesOfCode": 236082,
     "totalExports": 7383,
     "totalClasses": 62,
     "totalInterfaces": 668,
