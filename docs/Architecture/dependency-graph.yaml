@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-19'
-  totalFiles: 1345
+  totalFiles: 1347
   totalModules: 82
-  totalExports: 7383
+  totalExports: 7387
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -43830,6 +43830,13 @@ modules:
         - file: ./shims.js
           imports:
             - shims
+        - file: ./parity-names.generated.js
+          imports:
+            - MATHJS_PARITY_NAMES
+        - file: ./instance-layout.js
+          imports:
+            - createPrototypeLevels
+            - definePrototypeAccessor
         - file: ./unary-fast-path.js
           imports:
             - UNARY_NUMBER_FAST_PATH
@@ -43951,6 +43958,31 @@ modules:
         - WiredCompatInstance
       functions:
         - wireMathjsInstanceApi
+    compat/src/instance-layout.ts:
+      description: Property layout of a compat instance (#1200).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - PROTOTYPE_LEVEL_CAP
+        - createPrototypeLevels
+        - definePrototypeAccessor
+      functions:
+        - createPrototypeLevels
+        - definePrototypeAccessor
+      constants:
+        - PROTOTYPE_LEVEL_CAP
+    compat/src/parity-names.generated.ts:
+      description: The own keys of the mathjs 15.2.0 instance `create(all)`, sorted.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - MATHJS_PARITY_NAMES
+      constants:
+        - MATHJS_PARITY_NAMES
     compat/src/shims.ts:
       description: mathjs Compatibility Shims
       externalDependencies: []
@@ -46813,6 +46845,8 @@ dependencyGraph:
         - compat/src/chain.ts
         - compat/src/index.ts
         - compat/src/instance-api.ts
+        - compat/src/instance-layout.ts
+        - compat/src/parity-names.generated.ts
         - compat/src/shims.ts
         - compat/src/unary-fast-path.ts
     - name: Gpu
@@ -46853,16 +46887,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1345
+  totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236116
-  totalExports: 7383
+  totalLinesOfCode: 236700
+  totalExports: 7387
   totalClasses: 62
   totalInterfaces: 668
-  totalFunctions: 2569
+  totalFunctions: 2571
   totalTypeGuards: 183
   totalEnums: 0
-  totalConstants: 1691
+  totalConstants: 1693
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

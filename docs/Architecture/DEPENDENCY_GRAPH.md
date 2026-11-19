@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly**: 8 files
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
-- **compat**: 5 files
+- **compat**: 7 files
 - **gpu**: 9 files
 - **plot**: 19 files
 - **plot/three**: 3 files
@@ -219,7 +219,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 16             | 0               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                               | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 5              | 0               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 7              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 9              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
@@ -20143,13 +20143,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                                       | Type      |
-| ---------------------- | --------------------------------------------- | --------- |
-| `./shims.js`           | `shims`                                       | Import    |
-| `./unary-fast-path.js` | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath` | Import    |
-| `./chain.js`           | `createChain, Chain`                          | Import    |
-| `./instance-api.js`    | `wireMathjsInstanceApi, WiredCompatInstance`  | Import    |
-| `./shims.js`           | `*`                                           | Re-export |
+| File                          | Imports                                          | Type      |
+| ----------------------------- | ------------------------------------------------ | --------- |
+| `./shims.js`                  | `shims`                                          | Import    |
+| `./parity-names.generated.js` | `MATHJS_PARITY_NAMES`                            | Import    |
+| `./instance-layout.js`        | `createPrototypeLevels, definePrototypeAccessor` | Import    |
+| `./unary-fast-path.js`        | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
+| `./chain.js`                  | `createChain, Chain`                             | Import    |
+| `./instance-api.js`           | `wireMathjsInstanceApi, WiredCompatInstance`     | Import    |
+| `./shims.js`                  | `*`                                              | Re-export |
 
 **Exports:**
 
@@ -20181,6 +20183,23 @@ graph LR
 
 - Interfaces: `CompatExpressionLayers`, `WiredCompatInstance`
 - Functions: `wireMathjsInstanceApi`
+
+---
+
+### `compat/src/instance-layout.ts` - Property layout of a compat instance (#1200).
+
+**Exports:**
+
+- Functions: `createPrototypeLevels`, `definePrototypeAccessor`
+- Constants: `PROTOTYPE_LEVEL_CAP`
+
+---
+
+### `compat/src/parity-names.generated.ts` - The own keys of the mathjs 15.2.0 instance `create(all)`, sorted.
+
+**Exports:**
+
+- Constants: `MATHJS_PARITY_NAMES`
 
 ---
 
@@ -21555,40 +21574,42 @@ graph TD
         N504[chain]
         N505[index]
         N506[instance-api]
-        N507[shims]
-        N508[unary-fast-path]
+        N507[instance-layout]
+        N508[parity-names.generated]
+        N509[shims]
+        N510[unary-fast-path]
     end
 
     subgraph Gpu
-        N509[BufferPool]
-        N510[GPUContext]
-        N511[ShaderManager]
-        N512[detect]
-        N513[device]
-        N514[flag]
-        N515[index]
-        N516[serialize]
-        N517[webgpu-types]
+        N511[BufferPool]
+        N512[GPUContext]
+        N513[ShaderManager]
+        N514[detect]
+        N515[device]
+        N516[flag]
+        N517[index]
+        N518[serialize]
+        N519[webgpu-types]
     end
 
     subgraph Plot
-        N518[coerce]
-        N519[contour]
-        N520[emit]
-        N521[frame]
-        N522[heatmap]
-        N523[histogram]
-        N524[index]
-        N525[marks2d]
-        N526[overlay]
-        N527[palette]
-        N528[...9 more]
+        N520[coerce]
+        N521[contour]
+        N522[emit]
+        N523[frame]
+        N524[heatmap]
+        N525[histogram]
+        N526[index]
+        N527[marks2d]
+        N528[overlay]
+        N529[palette]
+        N530[...9 more]
     end
 
     subgraph Plot/three
-        N529[points3d]
-        N530[project]
-        N531[surface]
+        N531[points3d]
+        N532[project]
+        N533[surface]
     end
 
     N4 --> N7
@@ -21676,14 +21697,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1345   |
+| Total TypeScript Files  | 1347   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236116 |
-| Total Exports           | 7383   |
+| Total Lines of Code     | 236700 |
+| Total Exports           | 7387   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2569   |
+| Total Functions         | 2571   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -18,6 +18,8 @@
  */
 
 import { shims } from './shims.js';
+import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
+import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
@@ -299,6 +301,20 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
 }
 
 /**
+ * Copies every enumerable name of `factories`, own and inherited. A compat instance
+ * passed as `factories` keeps most names on prototype levels (#1200), which a spread
+ * of own keys misses.
+ *
+ * @param factories - The namespace to copy.
+ * @returns A plain object with every enumerable name of `factories`.
+ */
+function surfaceOf(factories: Record<string, unknown>): Record<string, unknown> {
+  const surface: Record<string, unknown> = {};
+  for (const key in factories) surface[key] = factories[key];
+  return surface;
+}
+
+/**
  * Create a MathTS instance with mathjs-compatible API
  *
  * @param factories - Factory functions to include (use `all` for the full
@@ -351,10 +367,10 @@ export function create(
     return overlayNeeded;
   };
 
-  const instance: Record<string, unknown> = {
+  const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
-    ...factories,
+    ...surfaceOf(factories),
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -460,17 +476,57 @@ export function create(
     }) as MathInstance['chain'],
   };
 
-  for (const key of Object.keys(instance)) {
-    if (key === 'config' || key === 'chain') continue;
-    const value = instance[key];
-    if (typeof value !== 'function') continue;
-    if (HOT_SCALAR_SHIM_KEYS.has(key)) continue;
-    // Lazy + memoized: the config-scoped wrapper is built on first access (a
-    // typical program touches a few dozen of the ~1,100 exports), then the
-    // accessor is replaced by a plain data property so `math.add === math.add`
-    // and later reads cost nothing. Enumerable, so `Object.keys(math)` is
-    // unchanged; assigning `math.add = ...` replaces it as before.
-    const raw = value as (...args: unknown[]) => unknown;
+  // Layout (#1200): the mathjs-parity names are own keys of the instance; every other
+  // name is on a prototype level below it (see instance-layout.ts). Both stay in V8
+  // fast mode, so `math.x` is not a dictionary lookup.
+  const parityNames = new Set(MATHJS_PARITY_NAMES);
+  const flatKeys = Object.keys(flat);
+  const inheritedKeys = flatKeys.filter((key) => !parityNames.has(key));
+  const { levels, perLevel } = createPrototypeLevels(inheritedKeys.length);
+  const instance = Object.create(levels[0] ?? Object.prototype) as Record<string, unknown>;
+
+  /** The config-scoped wrapper of a surfaced function, built on first read. */
+  const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
+    Object.prototype.hasOwnProperty.call(UNARY_NUMBER_FAST_PATH, key)
+      ? withNumberFront(
+          raw,
+          UNARY_NUMBER_FAST_PATH[key as keyof typeof UNARY_NUMBER_FAST_PATH],
+          wrapWithInstanceConfig(raw, currentConfig, usesOverlay)
+        )
+      : wrapWithInstanceConfig(raw, currentConfig, usesOverlay);
+  const isLazy = (key: string, value: unknown): value is (...args: unknown[]) => unknown =>
+    typeof value === 'function' &&
+    key !== 'config' &&
+    key !== 'chain' &&
+    !HOT_SCALAR_SHIM_KEYS.has(key);
+
+  inheritedKeys.forEach((key, index) => {
+    const value = flat[key];
+    const level = levels[Math.floor(index / perLevel)] as Record<string, unknown>;
+    definePrototypeAccessor(
+      level,
+      key,
+      isLazy(key, value) ? () => buildWrapper(key, value) : () => value,
+      instance
+    );
+  });
+
+  for (const key of flatKeys) {
+    if (!parityNames.has(key)) continue;
+    const value = flat[key];
+    if (!isLazy(key, value)) {
+      Object.defineProperty(instance, key, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+      continue;
+    }
+    // Lazy + memoized own key: the config-scoped wrapper is built on first access,
+    // then the accessor is replaced by a plain data property so `math.add === math.add`
+    // and later reads cost nothing. Assigning `math.add = ...` replaces it as before.
+    const raw = value;
     let cached: unknown;
     const replaceWith = (v: unknown): void => {
       cached = v;
@@ -492,21 +548,22 @@ export function create(
       enumerable: true,
       configurable: true,
       get() {
-        if (cached === undefined)
-          replaceWith(
-            Object.prototype.hasOwnProperty.call(UNARY_NUMBER_FAST_PATH, key)
-              ? withNumberFront(
-                  raw,
-                  UNARY_NUMBER_FAST_PATH[key as keyof typeof UNARY_NUMBER_FAST_PATH],
-                  wrapWithInstanceConfig(raw, currentConfig, usesOverlay)
-                )
-              : wrapWithInstanceConfig(raw, currentConfig, usesOverlay)
-          );
+        if (cached === undefined) replaceWith(buildWrapper(key, raw));
         return cached;
       },
-      set: replaceWith,
+      set(v: unknown) {
+        // A frozen instance is read-only, as for a data property.
+        if (Object.isFrozen(instance)) {
+          throw new TypeError(`Cannot assign to read only property '${key}' of object`);
+        }
+        replaceWith(v);
+      },
     });
   }
+
+  // The mathjs instance API below assigns its names. The parity names among them
+  // (import, evaluate, compile, ...) become own keys; compileExpr is not a mathjs name,
+  // so its assignment goes to the setter of its prototype level.
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);

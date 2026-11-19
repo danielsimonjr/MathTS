@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2519,
+  "totalFiles": 2521,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1319,
+    "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
     "test": 1108,
@@ -12,7 +12,7 @@
     "example": 7
   },
   "byArea": {
-    "src": 1345,
+    "src": 1347,
     "tests": 1108,
     "config": 30,
     "examples": 7,
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 32,
+    "@danielsimonjr/mathts-compat": 34,
     "@danielsimonjr/mathts-core": 144,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
@@ -520,7 +520,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 556
+      "loc": 613
     },
     {
       "file": "compat/src/instance-api.ts",
@@ -528,6 +528,20 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 126
+    },
+    {
+      "file": "compat/src/instance-layout.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 93
+    },
+    {
+      "file": "compat/src/parity-names.generated.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 414
     },
     {
       "file": "compat/src/shims.ts",
@@ -576,7 +590,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 109
+      "loc": 227
     },
     {
       "file": "compat/tests/cross-copy-matrix-shims-1041.test.ts",
@@ -6708,7 +6722,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 478
+      "loc": 498
     },
     {
       "file": "functions/src/core/function/typed.ts",
