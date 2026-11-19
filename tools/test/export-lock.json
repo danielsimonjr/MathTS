@@ -1505,9 +1505,6 @@
       },
       "withPow2Scale": {
         "kind": "function"
-      },
-      "withPow2ScaledKernel": {
-        "kind": "function"
       }
     }
   },

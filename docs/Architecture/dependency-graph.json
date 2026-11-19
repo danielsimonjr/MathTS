@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-19",
     "totalFiles": 1347,
     "totalModules": 82,
-    "totalExports": 7388
+    "totalExports": 7389
   },
   "entryPoints": [
     {
@@ -4413,6 +4413,10 @@
             "imports": ["jsBackend"]
           },
           {
+            "file": "../operations/common.js",
+            "imports": ["scaleDense"]
+          },
+          {
             "file": "./wasm/detect.js",
             "imports": ["detectWasmFeatures", "WasmFeatures"]
           },
@@ -5513,9 +5517,19 @@
           {
             "file": "../types/dense/gemm-f64.js",
             "imports": ["gemmF64"]
+          },
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
           }
         ],
         "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["ldexp"],
+            "subpath": "internal"
+          },
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
@@ -5559,6 +5573,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "scaleDense",
           "norm1",
           "householder",
           "applyHouseholderLeft",
@@ -5590,6 +5605,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "scaleDense",
           "norm1",
           "householder",
           "applyHouseholderLeft",
@@ -6141,7 +6157,7 @@
               "householder",
               "applyHouseholderLeft",
               "applyHouseholderRight",
-              "ldexp",
+              "scaleDense",
               "ldexpMatrix",
               "entryRange",
               "withPow2Scale",
@@ -6169,7 +6185,14 @@
           },
           {
             "file": "./common.js",
-            "imports": ["ldexp", "entryRange", "withPow2Scale", "ABS_CUTOFF_LO", "SQUARED"]
+            "imports": [
+              "ldexp",
+              "scaleDense",
+              "entryRange",
+              "withPow2Scale",
+              "ABS_CUTOFF_LO",
+              "SQUARED"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -7647,14 +7670,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": [
-              "UNIT_FLOOR_LO",
-              "SQUARED",
-              "entryRange",
-              "ldexp",
-              "ldexpMatrix",
-              "withPow2Scale"
-            ],
+            "imports": ["UNIT_FLOOR_LO", "SQUARED", "entryRange", "ldexp", "withPow2Scale"],
             "subpath": "internal"
           }
         ],
@@ -49738,11 +49754,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1347,
     "totalModules": 82,
-    "totalLinesOfCode": 236923,
-    "totalExports": 7388,
+    "totalLinesOfCode": 236902,
+    "totalExports": 7389,
     "totalClasses": 62,
     "totalInterfaces": 668,
-    "totalFunctions": 2572,
+    "totalFunctions": 2573,
     "totalTypeGuards": 183,
     "totalEnums": 0,
     "totalConstants": 1693,

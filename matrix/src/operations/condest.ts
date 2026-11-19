@@ -15,7 +15,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { decompositionInputToDenseMatrix } from './as-packed.js';
 import { lu } from './lu.js';
-import { ldexp, entryRange, withPow2ScaledKernel, SQUARED } from './common.js';
+import { ldexp, entryRange, withPow2Scale, SQUARED } from './common.js';
 
 /** Solve `A x = b` given `A`'s LU factors (`P · A = L · U`). */
 function luSolve(
@@ -143,17 +143,11 @@ export function condest(input: DenseMatrix | SparseMatrix, p: number = 1): numbe
   // The condition number does not change when A is scaled. ‖A‖₁ · ‖A⁻¹‖₁ overflows or
   // underflows outside 2^±SQUARED, so the input is scaled into that window (#1104).
   const flat = A.toFloat64Array();
-  return withPow2ScaledKernel(
-    entryRange(flat),
-    -SQUARED,
-    SQUARED,
-    { A, flat },
-    (input, e) => {
-      const scaled = input.flat.map((v) => ldexp(v, e));
-      return { A: new DenseMatrix(n, n, scaled), flat: scaled };
-    },
-    (input) => condestKernel(input.A, input.flat, n)
-  );
+  return withPow2Scale(entryRange(flat), -SQUARED, SQUARED, (e) => {
+    if (e === 0) return condestKernel(A, flat, n);
+    const scaled = flat.map((v) => ldexp(v, e));
+    return condestKernel(new DenseMatrix(n, n, scaled), scaled, n);
+  });
 }
 
 /** The 1-norm condition estimate of the n×n matrix `A` (row-major `flat`), without scaling. */

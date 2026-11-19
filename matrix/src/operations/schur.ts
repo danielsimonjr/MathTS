@@ -21,7 +21,7 @@ import {
   cloneMatrix,
   ldexpMatrix,
   entryRange,
-  withPow2ScaledKernel,
+  withPow2Scale,
   FOURTH,
   householder,
   applyHouseholderLeft,
@@ -267,22 +267,14 @@ function schurRaw(
 
   // The QR shifts form fourth powers of the entries, so the window is 2^±FOURTH (#1104).
   // T is scaled back and Q is scale-free. The caller's array is never changed.
-  return withPow2ScaledKernel(
-    entryRange(A),
-    -FOURTH,
-    FOURTH,
-    A,
-    (a, e) => {
-      const scaledA = cloneMatrix(a);
-      ldexpMatrix(scaledA, e);
-      return scaledA;
-    },
-    (a) => schurKernel(a, maxIterations, tolerance),
-    (res, e) => {
-      ldexpMatrix(res.H, -e);
-      return res;
-    }
-  );
+  return withPow2Scale(entryRange(A), -FOURTH, FOURTH, (e) => {
+    if (e === 0) return schurKernel(A, maxIterations, tolerance);
+    const scaledA = cloneMatrix(A);
+    ldexpMatrix(scaledA, e);
+    const res = schurKernel(scaledA, maxIterations, tolerance);
+    ldexpMatrix(res.H, -e);
+    return res;
+  });
 }
 
 /** The Schur kernel of `schurRaw`, for n ≥ 2, without scaling. */

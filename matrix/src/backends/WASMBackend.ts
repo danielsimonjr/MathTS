@@ -57,8 +57,9 @@ import {
   SQUARED,
   entryRange,
   ldexp,
-  withPow2ScaledKernel,
+  withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
+import { scaleDense } from '../operations/common.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
 
 /**
@@ -593,22 +594,16 @@ export class WASMBackend implements MatrixBackend {
     if (n !== a.cols) {
       throw new Error('LU decomposition requires a square matrix');
     }
-    return withPow2ScaledKernel(
-      entryRange(a.toFloat64Array()),
-      UNIT_LO,
-      SQUARED,
-      a,
-      scaleDense,
-      (s) => this.luUnscaled(s),
-      (r, e) => {
-        if (r.singular) return r;
-        // lu holds L below the diagonal and U on and above it.
-        const flat = r.lu.toFloat64Array().slice();
-        for (let i = 0; i < n; i++)
-          for (let j = i; j < n; j++) flat[i * n + j] = ldexp(flat[i * n + j], -e);
-        return { lu: new DenseMatrix(n, n, flat), perm: r.perm, singular: false };
-      }
-    );
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.luUnscaled(a);
+      const r = this.luUnscaled(scaleDense(a, e));
+      if (r.singular) return r;
+      // lu holds L below the diagonal and U on and above it.
+      const flat = r.lu.toFloat64Array().slice();
+      for (let i = 0; i < n; i++)
+        for (let j = i; j < n; j++) flat[i * n + j] = ldexp(flat[i * n + j], -e);
+      return { lu: new DenseMatrix(n, n, flat), perm: r.perm, singular: false };
+    });
   }
 
   private luUnscaled(a: DenseMatrix): {
@@ -748,15 +743,11 @@ export class WASMBackend implements MatrixBackend {
    * runs scaled by an exact power of 2. Q is scale-free; R is scaled back (#1123).
    */
   async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
-    return withPow2ScaledKernel(
-      entryRange(a.toFloat64Array()),
-      UNIT_LO,
-      SQUARED,
-      a,
-      scaleDense,
-      (s) => this.qrUnscaled(s),
-      (res, e) => ({ q: res.q, r: scaleDense(res.r, -e) })
-    );
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.qrUnscaled(a);
+      const res = this.qrUnscaled(scaleDense(a, e));
+      return { q: res.q, r: scaleDense(res.r, -e) };
+    });
   }
 
   private qrUnscaled(a: DenseMatrix): { q: DenseMatrix; r: DenseMatrix } {
@@ -860,15 +851,11 @@ export class WASMBackend implements MatrixBackend {
     if (n !== a.cols) {
       throw new Error('Matrix inverse requires a square matrix');
     }
-    return withPow2ScaledKernel(
-      entryRange(a.toFloat64Array()),
-      UNIT_LO,
-      SQUARED,
-      a,
-      scaleDense,
-      (s) => this.inverseUnscaled(s),
-      (r, e) => (r.singular ? r : { inverse: scaleDense(r.inverse, e), singular: false })
-    );
+    return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
+      if (e === 0) return this.inverseUnscaled(a);
+      const r = this.inverseUnscaled(scaleDense(a, e));
+      return r.singular ? r : { inverse: scaleDense(r.inverse, e), singular: false };
+    });
   }
 
   private inverseUnscaled(a: DenseMatrix): { inverse: DenseMatrix; singular: boolean } {
@@ -1070,13 +1057,4 @@ export const wasmBackend = new WASMBackend();
  */
 export function createWASMBackend(config?: WASMBackendConfig): WASMBackend {
   return new WASMBackend(config);
-}
-
-/** A copy of `a` with every entry multiplied by 2^e (exact). */
-function scaleDense(a: DenseMatrix, e: number): DenseMatrix {
-  return new DenseMatrix(
-    a.rows,
-    a.cols,
-    a.toFloat64Array().map((v) => ldexp(v, e))
-  );
 }

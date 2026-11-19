@@ -902,8 +902,7 @@
       "WasmManifest",
       "WasmMemoryHandle",
       "WasmModuleLoader",
-      "withPow2Scale",
-      "withPow2ScaledKernel"
+      "withPow2Scale"
     ],
     "evaluator": [
       "compile",
@@ -4718,6 +4717,7 @@
       "RQResult",
       "runShader",
       "scale",
+      "scaleDense",
       "scaledNorm",
       "schurInternal",
       "SchurOptions",
@@ -4770,7 +4770,6 @@
       "WasmLoader",
       "WasmManifest",
       "withPow2Scale",
-      "withPow2ScaledKernel",
       "zeros"
     ],
     "numbers": [

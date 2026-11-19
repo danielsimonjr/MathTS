@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    31 |
 | `@danielsimonjr/mathts-compat`         |    34 |
-| `@danielsimonjr/mathts-core`           |   145 |
+| `@danielsimonjr/mathts-core`           |   144 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
 | `@danielsimonjr/mathts-functions`      |  1161 |
@@ -257,7 +257,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/numeric/sum-squared-deviations-checked.test.ts`                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/object-pollution.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/object-properties.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
-| `core/tests/pow2-scaled-kernel.test.ts`                                           | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/public-api-smoke.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/range-integration.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/shared.test.ts`                                                       | @danielsimonjr/mathts-core           | tests    | test        |

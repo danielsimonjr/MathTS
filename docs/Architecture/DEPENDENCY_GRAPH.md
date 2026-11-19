@@ -1524,6 +1524,7 @@ graph LR
 | `./Backend.js`             | `MatrixBackend, BackendType`                                                                       | Import (type-only) |
 | `../types/DenseMatrix.js`  | `DenseMatrix`                                                                                      | Import             |
 | `./JSBackend.js`           | `jsBackend`                                                                                        | Import             |
+| `../operations/common.js`  | `scaleDense`                                                                                       | Import             |
 | `./wasm/detect.js`         | `detectWasmFeatures, WasmFeatures`                                                                 | Import             |
 | `./wasm/as-typed-array.js` | `AS_F64_ALIGN_SHIFT, AS_I32_ALIGN_SHIFT, AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView` | Import             |
 | `./wasm/resolve.js`        | ``                                                                                                 | Import (type-only) |
@@ -1900,17 +1901,19 @@ graph LR
 
 | Package                      | Import                                                                                                                             |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `ldexp`                                                                                                                            |
 | `@danielsimonjr/mathts-core` | `SQUARED, FOURTH, ABS_CUTOFF_LO, UNIT_LO, pow2ScaleExponent, ldexp, ldexpMatrix, entryRange, allFinite, withPow2Scale, EntryRange` |
 
 **Internal Dependencies:**
 
-| File                         | Imports   | Type   |
-| ---------------------------- | --------- | ------ |
-| `../types/dense/gemm-f64.js` | `gemmF64` | Import |
+| File                         | Imports       | Type   |
+| ---------------------------- | ------------- | ------ |
+| `../types/dense/gemm-f64.js` | `gemmF64`     | Import |
+| `../types/DenseMatrix.js`    | `DenseMatrix` | Import |
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 - Re-exports: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `EntryRange`
 
 ---
@@ -2148,11 +2151,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                 | Type   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                           | Import |
-| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                         | Import |
-| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight, ldexp, ldexpMatrix, entryRange, withPow2Scale, SQUARED` | Import |
+| File                      | Imports                                                                                                                      | Type   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                | Import |
+| `./as-packed.js`          | `decompositionSource, DecompositionMatrixInput`                                                                              | Import |
+| `./common.js`             | `eye, householder, applyHouseholderLeft, applyHouseholderRight, scaleDense, ldexpMatrix, entryRange, withPow2Scale, SQUARED` | Import |
 
 **Exports:**
 
@@ -2165,11 +2168,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                     | Type   |
-| ------------------------- | ----------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                               | Import |
-| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
-| `./common.js`             | `ldexp, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED`  | Import |
+| File                      | Imports                                                                | Type   |
+| ------------------------- | ---------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                          | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput`            | Import |
+| `./common.js`             | `ldexp, scaleDense, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
@@ -3031,9 +3034,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexp, ldexpMatrix, withPow2Scale` |
+| Package                      | Import                                                     |
+| ---------------------------- | ---------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `UNIT_FLOOR_LO, SQUARED, entryRange, ldexp, withPow2Scale` |
 
 **Internal Dependencies:**
 
@@ -20777,9 +20780,9 @@ graph LR
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
+| `matrix/src/types/DenseMatrix`                         | 6 files      | 24 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
-| `matrix/src/types/DenseMatrix`                         | 6 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
@@ -21700,12 +21703,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1347   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236923 |
-| Total Exports           | 7388   |
+| Total Lines of Code     | 236902 |
+| Total Exports           | 7389   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2572   |
+| Total Functions         | 2573   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

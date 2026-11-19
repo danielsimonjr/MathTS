@@ -1,4 +1,6 @@
 import { gemmF64 } from '../types/dense/gemm-f64.js';
+import { DenseMatrix } from '../types/DenseMatrix.js';
+import { ldexp } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Shared decomposition helpers (number[][] dense algebra)
@@ -275,9 +277,17 @@ export {
   entryRange,
   allFinite,
   withPow2Scale,
-  withPow2ScaledKernel,
   type EntryRange,
 } from '@danielsimonjr/mathts-core/internal';
+
+/** A copy of `a` with every entry multiplied by 2^e (exact). */
+export function scaleDense(a: DenseMatrix, e: number): DenseMatrix {
+  return new DenseMatrix(
+    a.rows,
+    a.cols,
+    a.toFloat64Array().map((v) => ldexp(v, e))
+  );
+}
 
 /** 1-norm of a matrix (max column sum of absolute values). */
 export function norm1(A: number[][]): number {

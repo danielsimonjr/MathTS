@@ -30,7 +30,7 @@ import {
   gaussJordanContinue,
   ldexpMatrix,
   entryRange,
-  withPow2ScaledKernel,
+  withPow2Scale,
   ABS_CUTOFF_LO,
   FOURTH,
 } from './common.js';
@@ -401,27 +401,14 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   // The Schur-Padé path forms fourth powers and its cutoffs are absolute, so the
   // window is [2^ABS_CUTOFF_LO, 2^FOURTH] (#1104). logm(2^e · A) = logm(A) + e·ln 2 · I,
   // so the shift is taken off the diagonal.
-  const logM = withPow2ScaledKernel(
-    entryRange(A.toFloat64Array()),
-    ABS_CUTOFF_LO,
-    FOURTH,
-    A.toArray(),
-    (Aarr, e) => {
-      const scaled = Aarr.map((row) => row.slice());
-      ldexpMatrix(scaled, e);
-      return scaled;
-    },
-    // The kernel may overwrite its argument, and a second run reads the input again.
-    (Aarr) =>
-      logmKernel(
-        Aarr.map((row) => row.slice()),
-        tol
-      ),
-    (r, e) => {
-      for (let i = 0; i < n; i++) r[i][i] -= e * Math.LN2;
-      return r;
-    }
-  );
+  const logM = withPow2Scale(entryRange(A.toFloat64Array()), ABS_CUTOFF_LO, FOURTH, (e) => {
+    const Aarr = A.toArray();
+    if (e === 0) return logmKernel(Aarr, tol);
+    ldexpMatrix(Aarr, e);
+    const r = logmKernel(Aarr, tol);
+    for (let i = 0; i < n; i++) r[i][i] -= e * Math.LN2;
+    return r;
+  });
 
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
