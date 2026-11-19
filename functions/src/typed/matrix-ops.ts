@@ -13,6 +13,13 @@
  */
 
 import {
+  SQUARED,
+  UNIT_FLOOR_LO,
+  entryRange,
+  ldexpMatrix,
+  withPow2Scale,
+} from '@danielsimonjr/mathts-core/internal';
+import {
   eig,
   svd,
   cholesky as matrixCholesky,
@@ -319,7 +326,22 @@ export interface HessenbergResult {
  * // H is upper Hessenberg, Q is orthogonal, A = Q * H * Q^T
  */
 export function hessenbergForm(A: number[][]): HessenbergResult {
-  const n = assertSquare(A, 'hessenbergForm');
+  assertSquare(A, 'hessenbergForm');
+  // The reflector tests below are absolute. Scale A by an exact power of 2 so that its
+  // largest entry is in [1, 2^400], as qr does (#1168). Q is the same for A and A*2^e,
+  // and H scales back exactly (#1199).
+  return withPow2Scale(entryRange(A), UNIT_FLOOR_LO, SQUARED, (e) => {
+    if (e === 0) return hessenbergKernel(A);
+    const scaled = cloneMatrix(A);
+    ldexpMatrix(scaled, e);
+    const ret = hessenbergKernel(scaled);
+    ldexpMatrix(ret.H, -e);
+    return ret;
+  });
+}
+
+function hessenbergKernel(A: number[][]): HessenbergResult {
+  const n = A.length;
   const H = cloneMatrix(A);
   const Q = eye(n);
 
