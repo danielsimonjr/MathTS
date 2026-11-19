@@ -335,9 +335,13 @@ export const createEigs = /* #__PURE__ */ factory(
       return result;
     }
 
-    /** number, BigNumber and Complex carry a finite test; Fraction is always finite */
+    /** finite test of a number, a BigNumber or a Complex; a Fraction is always finite */
     function isFiniteEntry(x: unknown): boolean {
       if (typeof x === 'number') return Number.isFinite(x);
+      if (isComplex(x)) {
+        const { re, im } = x as { re: number; im: number };
+        return Number.isFinite(re) && Number.isFinite(im);
+      }
       const f = (x as { isFinite?: () => boolean } | null)?.isFinite;
       return typeof f === 'function' ? f.call(x) : true;
     }

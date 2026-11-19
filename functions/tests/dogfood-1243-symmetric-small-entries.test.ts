@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type BigNumber from 'bignumber.js';
-import { eigs as eigsRaw, bignumber, matrix } from '../src/index.js';
+import { eigs as eigsRaw, bignumber, complex, matrix } from '../src/index.js';
 
 type EigResult = { values: unknown; eigenvectors?: { value: unknown; vector: unknown }[] };
 const eigs = eigsRaw as unknown as (m: unknown, o?: object) => EigResult;
@@ -196,5 +196,87 @@ describe('eigs of real symmetric matrices with small or large entries (#1243)', 
         ])
       )
     ).toThrow(/finite/);
+  });
+});
+
+describe('eigs of a real symmetric matrix: termination at the limits of the arithmetic (#1243)', () => {
+  // rank 2, integer entries: zero is a repeated eigenvalue
+  const RANK2 = [
+    [8, 6, -4, -2, -2, 6, -2, 0, -4],
+    [6, 5, -3, 0, -1, 5, -2, 1, -3],
+    [-4, -3, 2, 1, 1, -3, 1, 0, 2],
+    [-2, 0, 1, 5, 2, 0, -1, 3, 1],
+    [-2, -1, 1, 2, 1, -1, 0, 1, 1],
+    [6, 5, -3, 0, -1, 5, -2, 1, -3],
+    [-2, -2, 1, -1, 0, -2, 1, -1, 1],
+    [0, 1, 0, 3, 1, 1, -1, 2, 0],
+    [-4, -3, 2, 1, 1, -3, 1, 0, 2],
+  ];
+
+  it('a subnormal matrix terminates (the scaled tolerances underflow to 0)', () => {
+    // every entry is a multiple of 1e-322, about 20 subnormal units
+    const A = RANK2.map((r) => r.map((x) => x * 1e-322));
+    const { values } = eigs(matrix(A), { eigenvectors: false });
+    const v = (values as unknown as { toArray(): number[] }).toArray();
+    expect(v).toHaveLength(9);
+    // the two nonzero eigenvalues of RANK2 are 8.3411 and 22.6589; a
+    // subnormal entry holds about one digit
+    const big = v.map((x) => x / 1e-322).sort((a, b) => a - b);
+    expect(Math.abs(big[8] - 22.6589)).toBeLessThan(1);
+    expect(Math.abs(big[7] - 8.3411)).toBeLessThan(1);
+  });
+
+  it('a precision of 0 terminates for a number matrix with repeated eigenvalues', () => {
+    // H D H with H a Householder reflection: eigenvalues 1, 1, 1, 2, 2, 2
+    const u = [1, 2, 3, 4, 5, 6];
+    const d = [1, 1, 1, 2, 2, 2];
+    const H = (i: number, j: number) => (i === j ? 1 : 0) - (2 * u[i] * u[j]) / 91;
+    const A = u.map((_, i) =>
+      u.map((_, j) => d.reduce((s, dk, k) => s + H(i, k) * dk * H(k, j), 0))
+    );
+    for (let i = 0; i < 6; i++) for (let j = 0; j < i; j++) A[i][j] = A[j][i];
+    const { values } = eigs(matrix(A), { precision: 0, eigenvectors: false });
+    const v = (values as unknown as { toArray(): number[] }).toArray();
+    v.forEach((x, k) => expect(Math.abs(x - d[k])).toBeLessThanOrEqual(1e-13));
+  });
+
+  it('a precision of 0 terminates for a BigNumber matrix', () => {
+    const A = BASE.map((r) => r.map((x) => bn(x)));
+    const { values } = eigs(matrix(A), { precision: 0, eigenvectors: false });
+    const v = (values as unknown as { toArray(): BigNumber[] }).toArray();
+    // trace and the largest eigenvalue to 50 digits
+    expect(v[0].plus(v[1]).plus(v[2]).minus(12).abs().lte('1e-50')).toBe(true);
+    expect(
+      v[2].minus('6.83125443069820580058908911442726483293763676996782').abs().lte('1e-49')
+    ).toBe(true);
+  });
+
+  it('a rank-1 BigNumber matrix terminates and keeps its eigenvalue', () => {
+    const A = Array.from({ length: 6 }, (_, i) =>
+      Array.from({ length: 6 }, (_, j) => bn((i + 1) * (j + 1)))
+    );
+    const { values } = eigs(matrix(A), { eigenvectors: false });
+    const v = (values as unknown as { toArray(): BigNumber[] }).toArray();
+    expect(v[5].minus(91).abs().lte('1e-55')).toBe(true);
+    for (let k = 0; k < 5; k++) expect(v[k].abs().lte('1e-55')).toBe(true);
+  });
+
+  it('a Complex entry with a NaN or infinite part throws', () => {
+    for (const bad of [complex(1, NaN), complex(Infinity, 0), complex(0, -Infinity)]) {
+      expect(() =>
+        eigs(
+          matrix([
+            [bad, 1],
+            [3, 2],
+          ])
+        )
+      ).toThrow(/finite/);
+      expect(() =>
+        eigs([
+          [bad, 1],
+          [3, 2],
+        ])
+      ).toThrow(RangeError);
+    }
   });
 });

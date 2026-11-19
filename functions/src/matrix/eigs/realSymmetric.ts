@@ -106,7 +106,12 @@ export function createRealSymmetric({
         scale = Math.max(scale, Math.abs(x[i][j]));
       }
     }
-    const e0 = Math.abs(precision / N) * scale;
+    // no tolerance is below the rounding error of one rotation: one unit in
+    // the last place of the scale, and 4N subnormal units (Number.MIN_VALUE)
+    // where the products underflow. A smaller tolerance (a precision of 0, or
+    // a subnormal matrix) demands exact zeros, which the loop cannot reach.
+    const tiny = 4 * N * Number.MIN_VALUE;
+    const e0 = Math.max(Math.abs(precision / N) * scale, Number.EPSILON * scale, tiny);
     let psi: number;
     let Sij: number[][] | undefined;
     if (computeVectors) {
@@ -130,7 +135,7 @@ export function createRealSymmetric({
     // a small diagonal block beside large entries passes the test above with
     // its own off-diagonals still at its own scale: rotate each pair until
     // |a_ij| <= prec * sqrt|a_ii| * sqrt|a_jj|, floored at rounding noise (#1243)
-    const noise = 4 * N * Number.EPSILON * scale;
+    const noise = Math.max(4 * N * Number.EPSILON * scale, tiny);
     for (
       let p = getGradedPair(x, Math.abs(precision), noise);
       p;
@@ -159,7 +164,14 @@ export function createRealSymmetric({
         if (bigLt(scale, a)) scale = a;
       }
     }
-    const e0 = multiplyScalar(abs(multiplyScalar(precision, bignumber(1 / N))), scale) as BigNumber;
+    // no tolerance is below one unit of the working precision (see diag)
+    const Big = scale.constructor as unknown as { precision: number };
+    const unit = multiplyScalar(bignumber(`1e-${Big.precision}`), scale) as BigNumber;
+    const e0rel = multiplyScalar(
+      abs(multiplyScalar(precision, bignumber(1 / N))),
+      scale
+    ) as BigNumber;
+    const e0 = bigLt(e0rel, unit) ? unit : e0rel;
     let psi: BigNumber;
     let Sij: BigNumber[][] | undefined;
     if (computeVectors) {
@@ -181,8 +193,7 @@ export function createRealSymmetric({
       Vab = getAijBig(x);
     }
     // per-pair test as in diag; the noise floor uses the working precision
-    const Big = scale.constructor as unknown as { precision: number };
-    const noiseBig = multiplyScalar(bignumber(`${4 * N}e-${Big.precision}`), scale) as BigNumber;
+    const noiseBig = multiplyScalar(bignumber(4 * N), unit) as BigNumber;
     const precAbs = abs(precision) as BigNumber;
     for (
       let p = getGradedPairBig(x, precAbs, noiseBig);
