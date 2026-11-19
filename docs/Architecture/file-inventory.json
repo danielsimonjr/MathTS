@@ -10761,7 +10761,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 90
+      "loc": 101
     },
     {
       "file": "functions/tests/dogfood-1251-qr-1d.test.ts",
