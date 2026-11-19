@@ -1425,6 +1425,7 @@ The following 783 source files are not directly imported by any test file:
 | `tests/bignumber-round-1118.test.ts`                               | 2 files             |
 | `tests/bignumber-round-modes-1118.test.ts`                         | 1 files             |
 | `tests/bignumber-sqrt-range-1201.test.ts`                          | 1 files             |
+| `tests/bignumber-sqrt-round-1208.test.ts`                          | 1 files             |
 | `tests/collection-dim-validation.test.ts`                          | 2 files             |
 | `tests/collection-nested.test.ts`                                  | 3 files             |
 | `tests/collection-properties.test.ts`                              | 1 files             |

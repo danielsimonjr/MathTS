@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    31 |
 | `@danielsimonjr/mathts-compat`         |    32 |
-| `@danielsimonjr/mathts-core`           |   143 |
+| `@danielsimonjr/mathts-core`           |   144 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
 | `@danielsimonjr/mathts-functions`      |  1150 |
@@ -234,6 +234,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/bignumber-round-1118.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/bignumber-round-modes-1118.test.ts`                                   | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/bignumber-sqrt-range-1201.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/bignumber-sqrt-round-1208.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/collection-dim-validation.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/collection-nested.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/collection-properties.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
