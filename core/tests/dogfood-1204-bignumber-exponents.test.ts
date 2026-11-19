@@ -137,14 +137,19 @@ describe('#1204 item 2: minExponent and maxExponent are enforced', () => {
   it('rejects a config bound that is not an integer in range', () => {
     expect(() => BigNumber.config({ maxExponent: 1.5 })).toThrow(RangeError);
     expect(() => BigNumber.config({ maxExponent: -1 })).toThrow(RangeError);
-    expect(() => BigNumber.config({ maxExponent: 9.007e15 + 1 })).toThrow(/9007000000000000/);
-    expect(() => BigNumber.config({ toExpPos: 9.1e15 })).toThrow(RangeError);
+    expect(() => BigNumber.config({ maxExponent: 2 ** 53 - 2 ** 31 + 1 })).toThrow(
+      /9007197107257344/
+    );
+    expect(() => BigNumber.config({ toExpPos: 2 ** 53 })).toThrow(RangeError);
     expect(() => BigNumber.config({ minExponent: 1 })).toThrow(RangeError);
-    expect(() => BigNumber.config({ minExponent: -9.007e15 - 1 })).toThrow(RangeError);
-    BigNumber.config({ maxExponent: 9.007e15, minExponent: -9.007e15 });
-    BigNumber.config({ maxExponent: 1e15, minExponent: -1e15 });
-    expect(() => BigNumber.config({ minExponent: NaN })).toThrow(RangeError);
+    expect(() => BigNumber.config({ minExponent: -(2 ** 53 - 2 ** 31) - 1 })).toThrow(RangeError);
+    // The limit itself is accepted.
+    BigNumber.config({ maxExponent: 2 ** 53 - 2 ** 31, minExponent: -(2 ** 53 - 2 ** 31) });
     // A rejected call changes nothing.
+    BigNumber.config({ maxExponent: 1e15, minExponent: -1e15 });
+    expect(() => BigNumber.config({ maxExponent: 1.5 })).toThrow(RangeError);
+    expect(() => BigNumber.config({ minExponent: 1 })).toThrow(RangeError);
+    expect(() => BigNumber.config({ minExponent: NaN })).toThrow(RangeError);
     expect(BigNumber.config().maxExponent).toBe(1e15);
     expect(BigNumber.config().minExponent).toBe(-1e15);
   });
@@ -173,7 +178,7 @@ describe('#1204 item 3: exponent sums are exact', () => {
     expect(big.multiply(small).toString()).toBe('1');
   });
 
-  it('is exact at the largest allowed bound', () => {
+  it('is exact at a configured bound of 1e15', () => {
     BigNumber.config({ maxExponent: 1e15, minExponent: -1e15 });
     const x = bn('3e333333333333333');
     const cube = x.multiply(x).multiply(x);

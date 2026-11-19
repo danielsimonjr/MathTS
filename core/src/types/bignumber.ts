@@ -33,12 +33,12 @@ export interface BigNumberConfig {
   /** Rounding mode (default: 'halfUp') */
   rounding: RoundingMode;
   /**
-   * Minimum exponent (default: -9.007e15), an integer from -9.007e15 to 0. A value whose order
+   * Minimum exponent (default: -9.007e15), an integer from -(2^53 - 2^31) to 0. A value whose order
    * (`floor(log10(|x|))`) is below it becomes 0, as in decimal.js.
    */
   minExponent: number;
   /**
-   * Maximum exponent (default: 9.007e15), an integer from 0 to 9.007e15. A value whose order is above it
+   * Maximum exponent (default: 9.007e15), an integer from 0 to 2^53 - 2^31. A value whose order is above it
    * becomes +-Infinity, as in decimal.js.
    */
   maxExponent: number;
@@ -220,23 +220,28 @@ function atanhInv(n: bigint, scale: bigint): bigint {
 
 // Default configuration
 /**
- * The bound of every exponent setting, and the default of `minExponent` / `maxExponent`.
+ * The largest exponent setting that `BigNumber.config()` accepts: 2^53 - 2^31.
  *
  * Derivation: an in-range result has an exponent of at most the bound plus the digit slack. The
  * slack is the coefficient length (below `MAX_COEFFICIENT_DIGITS`, 3.4e8) plus the divide shift,
- * together below 2^31. So the bound B must satisfy B <= 2^53 - 2^31 = 9007197107257344, and every
- * in-range exponent is then an exact integer. 9.007e15 meets this with about 2e11 to spare, and it
- * stays above every exponent that `parse` accepts in practice (its cap is 2^53 - 1), so no value
- * that was finite before #1204 becomes Infinity or 0. A sum of two in-range exponents can exceed
- * 2^53 and round, but such a sum is far above the bound, so it still overflows or underflows.
+ * together below 2^31. So a bound B <= 2^53 - 2^31 keeps every in-range exponent an exact integer.
+ * A sum of two in-range exponents can exceed 2^53 and round, but such a sum is far above B, so it
+ * still overflows or underflows.
  */
-const EXPONENT_LIMIT = 9.007e15;
+const EXPONENT_LIMIT = 2 ** 53 - 2 ** 31;
+
+/**
+ * The default of `minExponent` / `maxExponent`: a round value below `EXPONENT_LIMIT` (about 2e11
+ * to spare). Every order up to 9.007e15 that was finite before #1204 stays finite. A parsed order
+ * from 9.007e15 + 1 to 2^53 - 1 (the `parse` cap) is now +-Infinity or 0.
+ */
+const DEFAULT_EXPONENT_BOUND = 9.007e15;
 
 const defaultConfig: BigNumberConfig = {
   precision: 64,
   rounding: 'halfUp',
-  minExponent: -EXPONENT_LIMIT,
-  maxExponent: EXPONENT_LIMIT,
+  minExponent: -DEFAULT_EXPONENT_BOUND,
+  maxExponent: DEFAULT_EXPONENT_BOUND,
   toExpNeg: -1e6,
   toExpPos: 1e6,
 };
