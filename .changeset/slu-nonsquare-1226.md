@@ -8,5 +8,5 @@ Prior result, for `threshold` 1:
 
 - 2x3 and 1x3 input: orders 0, 1 and 3 threw `Cannot read properties of null (reading 'L')`. Order 2 threw `Cannot set properties of undefined (setting '0')`.
 - 3x2 and 3x1 input: orders 0, 1 and 3 threw `Unexpected type of argument in function divideScalar` (actual: undefined). Order 2 threw `Cannot set properties of undefined (setting '0')`.
-- Order 2 throws the same `Cannot set properties of undefined` error for a square input. That error is unchanged for a square input.
+- Order 2 throws the same `Cannot set properties of undefined` error for a small square input (1x1, 2x2, 3x3, a full 6x6). That result is unchanged. A larger non-square input at order 2 (6x9, 9x6) threw the errors of orders 0, 1 and 3.
 - `lusolve(A, b, order, threshold)` of a 2x3 sparse `A` threw `TypeError: Cannot read properties of null (reading 'L')`.
