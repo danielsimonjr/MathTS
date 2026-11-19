@@ -606,13 +606,41 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
-    if (!data) {
+    // A string is a datatype in mathjs (`sparse('number')`): it builds the empty matrix
+    if (data === undefined || data === null || typeof (data as unknown) === 'string') {
       // Empty matrix
       this._values = [];
       this._index = [];
       this._ptr = [0];
       this._size = [0, 0];
       return;
+    }
+
+    // A dense matrix is built from its nested data, as an Array is. A non-object input has no axis.
+    if (typeof data !== 'object') {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    if (data instanceof MathJSSparseMatrix) {
+      // A sparse matrix is copied: its `size` is a method, not a field
+      this._values = data._values ? [...data._values] : null;
+      this._index = [...data._index];
+      this._ptr = [...data._ptr];
+      this._size = [...data._size];
+      this._datatype = data._datatype;
+      return;
+    }
+    if (data instanceof MathJSDenseMatrix) {
+      this._values = [];
+      this._index = [];
+      this._ptr = [];
+      this._size = [];
+      this._fromDenseArray(data._data);
+      this._datatype = data._datatype;
+      return;
+    }
+    if ('_data' in data) {
+      // A plain object that copies the dense fields is not a matrix, as in mathjs
+      throw new TypeError('Unsupported type of data (Object)');
     }
 
     if (Array.isArray(data)) {
@@ -662,27 +690,48 @@ export class MathJSSparseMatrix {
    * of size [n, 1], as in mathjs.
    */
   private _fromDenseArray(input: unknown[][] | unknown[]): void {
+    // A sparse matrix has two axes. A value that is not an Array has no axis.
+    if (!Array.isArray(input)) {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    // A 1-D array is a column, so only 3 or more axes are refused.
+    const inputSize = arraySize(input);
+    if (inputSize.length > 2) {
+      throw new RangeError('Matrix must be two dimensional (size: ' + formatSize(inputSize) + ')');
+    }
     const data: unknown[][] =
       input.length > 0 && !Array.isArray(input[0])
         ? (input as unknown[]).map((v) => [v])
         : (input as unknown[][]);
     const rows = data.length;
     const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
-    this._values = [];
-    this._index = [];
-    this._ptr = [0];
-    this._size = [rows, cols];
-
+    // Fill fresh local arrays, then store them, so the loop does not read fields
+    const values: unknown[] = [];
+    const index: number[] = [];
+    const ptr: number[] = [0];
     for (let j = 0; j < cols; j++) {
       for (let i = 0; i < rows; i++) {
         const v = data[i][j];
+        // A number is the common case; only a non-number entry can be a deeper level
+        if (typeof v !== 'number' && Array.isArray(v)) {
+          // A deeper level below the first element: the input has 3 or more axes
+          throw new RangeError(
+            'Matrix must be two dimensional (size: ' +
+              formatSize([rows, cols, ...arraySize(v)]) +
+              ')'
+          );
+        }
         if (v !== 0 && v != null) {
-          this._values.push(v);
-          this._index.push(i);
+          values.push(v);
+          index.push(i);
         }
       }
-      this._ptr.push(this._values.length);
+      ptr.push(values.length);
     }
+    this._values = values;
+    this._index = index;
+    this._ptr = ptr;
+    this._size = [rows, cols];
   }
 
   // ---- Required duck-type properties for @danielsimonjr/mathts-core isMatrix check ----
@@ -1297,6 +1346,11 @@ function eachAxes(
     else if (index.length === 1) fn(sub, [index[0], i]);
     else fn(sub, [...index, i]);
   }
+}
+
+/** A size as mathjs prints it in an error: `[2, 2, 1]`. */
+function formatSize(size: number[]): string {
+  return '[' + size.join(', ') + ']';
 }
 
 /** The size of a nested array, one entry per axis. */
