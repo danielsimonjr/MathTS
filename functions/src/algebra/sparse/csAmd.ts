@@ -523,8 +523,8 @@ export const createCsAmd = /* #__PURE__ */ factory(
         }
         // finalize AT
         tptr[m] = p2;
-        // drop the stale entries after the compaction: the transpose below counts every
-        // entry of the index array, not only those that the column pointers reach
+        // drop the stale entries after the compaction, so that the array lengths equal
+        // tptr[m]. A' * A reads only the pattern, so the values are cut, not compacted
         tindex.length = p2;
         if (at._values) at._values.length = p2;
         // recreate A from new transpose matrix

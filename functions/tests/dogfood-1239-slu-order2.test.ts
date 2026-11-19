@@ -1,9 +1,10 @@
 /**
- * Dogfood #1239 - slu with order 2 (A'*A ordering) on a small square sparse matrix.
+ * Dogfood #1239 - slu with order 2 (A'*A ordering) on a matrix with a dense row.
  *
- * csAmd drops the dense columns of A' in place. Each column with more than
- * max(16, 10 * sqrt(n)) clamped to n - 2 entries is dropped, which for a matrix
- * of up to four columns removes some or all columns. The compaction must leave
+ * csAmd drops the dense columns of A' (the dense rows of A) in place. A column is
+ * dense when it has more than min(n - 2, max(16, 10 * sqrt(n))) entries. For a
+ * matrix of up to four columns the limit removes some or all columns. For a larger
+ * matrix it removes each row that is full or almost full. The compaction must leave
  * A' consistent, so that the next transpose and the product A' * A work. slu
  * returns a valid ordering, and P A Q = L U, for every order from 0 to 3.
  */
@@ -73,13 +74,69 @@ const CASES: [string, number[][]][] = [
   ],
 ];
 
-describe('#1239 slu order 2 on small square sparse matrices', () => {
+// Shapes for the grid of sizes 1 to 5. Each matrix is nonsingular.
+const SHAPES: [string, (n: number) => number[][]][] = [
+  ['tridiagonal', tri],
+  ['identity', identity],
+  [
+    'full',
+    (n) =>
+      Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => (i === j ? 20 : 1 + ((i * 7 + j * 3) % 5)))
+      ),
+  ],
+  [
+    'dense column',
+    (n) =>
+      Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => (i === j ? 5 : j === 0 ? 1 : 0))
+      ),
+  ],
+  ['dense row', (n) => denseRow(n, 0)],
+  [
+    'antidiagonal',
+    (n) =>
+      Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => (i + j === n - 1 ? 3 : 0))
+      ),
+  ],
+];
+
+/** A diagonal matrix with one full row: csAmd drops that row at order 2. */
+function denseRow(n: number, row: number): number[][] {
+  return Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (i === j ? n + 1 : i === row ? 1 : 0))
+  );
+}
+
+describe('#1239 slu order 2 on square sparse matrices with a dense row', () => {
   it.each(CASES)('%s factorizes at order 2', (_name, a) => {
     expectFactorization(a, slu(sparse(a), 2, 0.001));
   });
 
   it.each([0, 1, 2, 3])('every case factorizes at order %i', (order) => {
     for (const [, a] of CASES) expectFactorization(a, slu(sparse(a), order, 1));
+  });
+
+  // a zero diagonal with threshold 0 gives a zero pivot at every order (#1277)
+  it.each(SHAPES)('%s of size 1 to 5 factorizes at each order and threshold', (name, make) => {
+    for (let n = 1; n <= 5; n++) {
+      const a = make(n);
+      for (const order of [0, 1, 2, 3]) {
+        for (const threshold of [0, 0.001, 1]) {
+          if (name === 'antidiagonal' && threshold === 0) continue;
+          expectFactorization(a, slu(sparse(a), order, threshold));
+        }
+      }
+    }
+  });
+
+  // the dense limit is n - 2 up to n = 18 and max(16, 10 * sqrt(n)) above: a full row is dense
+  it.each([5, 8, 18, 19, 20, 50, 200])('a matrix of size %i with a full row factorizes', (n) => {
+    for (const row of [0, n >> 1, n - 1]) {
+      const a = denseRow(n, row);
+      for (const order of [0, 1, 2, 3]) expectFactorization(a, slu(sparse(a), order, 1));
+    }
   });
 
   it('50 random sparse matrices of size 1-30 factorize at orders 0-3', () => {

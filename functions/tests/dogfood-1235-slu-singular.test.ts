@@ -58,14 +58,11 @@ const systems: Array<[string, number[][]]> = [
   ],
   ['zero 1x1', [[0]]],
 ];
-// Order 2 reaches the factorization for these inputs. For the other systems it fails earlier, in
-// csAmd (issue #1239).
-const ORDER_2_SYSTEMS = new Set(['zero 2x2', 'zero row 3x3', 'zero 1x1']);
 const cases: Array<[number, number, string, number[][]]> = [];
 for (const order of [0, 1, 2, 3]) {
   for (const threshold of [0, 0.001, 1]) {
     for (const [name, a] of systems) {
-      if (order !== 2 || ORDER_2_SYSTEMS.has(name)) cases.push([order, threshold, name, a]);
+      cases.push([order, threshold, name, a]);
     }
   }
 }

@@ -10789,21 +10789,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 128
+      "loc": 125
     },
     {
       "file": "functions/tests/dogfood-1239-slu-order2.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 160
     },
     {
       "file": "functions/tests/dogfood-1239-transpose-stale.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 38
+      "loc": 89
     },
     {
       "file": "functions/tests/dogfood-1251-qr-1d.test.ts",
