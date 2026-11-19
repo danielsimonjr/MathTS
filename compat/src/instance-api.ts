@@ -38,6 +38,26 @@ export interface WiredCompatInstance {
   expression: CompatExpressionLayers;
 }
 
+/**
+ * Instances built by {@link wireMathjsInstanceApi}. A WeakSet keeps the brand off
+ * the instance, so its property layout (and V8 fast-properties mode) is unchanged.
+ */
+const wiredInstances = new WeakSet<object>();
+
+/** True when `value` is, or holds at any depth, a compat instance. */
+function containsInstance(value: unknown, seen: Set<object>): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  if (wiredInstances.has(value)) return true;
+  if (seen.has(value)) return false;
+  seen.add(value);
+  if (Array.isArray(value)) return value.some((item) => containsInstance(item, seen));
+  if ((value as { constructor?: unknown }).constructor !== Object) return false;
+  for (const key of Object.keys(value)) {
+    if (containsInstance((value as Record<string, unknown>)[key], seen)) return true;
+  }
+  return false;
+}
+
 function scrubDenylist(scope: Record<string, unknown>): void {
   for (const key of EVALUATE_SCOPE_OMIT) {
     delete scope[key];
@@ -52,6 +72,7 @@ export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig
 ): WiredCompatInstance {
+  wiredInstances.add(instance);
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
     mathWithTransform: {},
@@ -101,6 +122,11 @@ export function wireMathjsInstanceApi(
   }
 
   function mathImport(functions: unknown, options?: ImportOptions): void {
+    if (containsInstance(functions, new Set())) {
+      throw new TypeError(
+        'import of a math instance is not supported; import its functions (an object of functions or factories) instead'
+      );
+    }
     internalImport(functions, options);
     scrubDenylist(expressionLayers.mathWithTransform);
     rebindEvaluator();

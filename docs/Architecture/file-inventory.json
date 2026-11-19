@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2529,
+  "totalFiles": 2530,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1116,
+    "test": 1117,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1116,
+    "tests": 1117,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 34,
+    "@danielsimonjr/mathts-compat": 35,
     "@danielsimonjr/mathts-core": 145,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
@@ -527,7 +527,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 126
+      "loc": 152
     },
     {
       "file": "compat/src/instance-layout.ts",
@@ -612,6 +612,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 99
+    },
+    {
+      "file": "compat/tests/dogfood-1222-import-instance.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
     },
     {
       "file": "compat/tests/dogfood-955-unit-paths.test.ts",
