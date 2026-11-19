@@ -22,7 +22,7 @@ import {
   householder,
   applyHouseholderLeft,
   applyHouseholderRight,
-  ldexp,
+  scaleDense,
   ldexpMatrix,
   entryRange,
   withPow2Scale,
@@ -83,14 +83,7 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
     if (e === 0) return qrPivotedKernel(W, m, n, tol);
     ldexpMatrix(W, e);
     const r = qrPivotedKernel(W, m, n, tol);
-    return {
-      ...r,
-      R: new DenseMatrix(
-        k,
-        n,
-        r.R.toFloat64Array().map((v) => ldexp(v, -e))
-      ),
-    };
+    return { ...r, R: scaleDense(r.R, -e) };
   });
 }
 
