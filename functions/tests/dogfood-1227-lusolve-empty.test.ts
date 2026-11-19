@@ -99,3 +99,44 @@ describe('#1227 lusolve empty system: review cases', () => {
     expect((emptyErr as Error).constructor).toBe((fullErr as Error).constructor);
   });
 });
+
+describe('#1227 lusolve empty system: real lup factors and right-hand sides', () => {
+  it('real lup factor objects of an empty system solve', async () => {
+    const { lup } = await import('../src/factories/index.js');
+    for (const a of [[], matrix([])]) {
+      const x = lusolve(lup(a as never) as never, []) as unknown as { size(): number[] };
+      expect(x.size()).toEqual([0, 1]);
+      expect(() => lusolve(lup(a as never) as never, [1])).toThrow(/Dimension mismatch/);
+    }
+  });
+
+  it('non-square lup factors throw the error of the L factor first, then of the U factor', async () => {
+    const { lup, zeros } = await import('../src/factories/index.js');
+    const tall = lup(zeros(3, 0) as never) as never; // L is 3 x 0, U is 0 x 0
+    const wide = lup(zeros(0, 3) as never) as never; // L is 0 x 0, U is 0 x 3
+    expect(() => lusolve(tall, [])).toThrow(/Matrix must be square \(size: \[3, 0\]\)/);
+    expect(() => lusolve(tall, [1, 2, 3])).toThrow(/Matrix must be square \(size: \[3, 0\]\)/);
+    expect(() => lusolve(wide, [])).toThrow(/Matrix must be square \(size: \[0, 3\]\)/);
+    expect(() => lusolve(wide, [1, 2, 3])).toThrow(/Dimension mismatch/);
+  });
+
+  it('every kind of A accepts matrix([]) as b and refuses a b of the wrong size', async () => {
+    const { lup, slu } = await import('../src/factories/index.js');
+    const solvers: ((b: unknown) => unknown)[] = [
+      (b) => lusolve(sparse([]), b as never),
+      (b) => lusolve(sparse([]), b as never, 1, 1),
+      (b) => lusolve(lup(matrix([])) as never, b as never),
+      (b) => lusolve(slu(sparse([]), 1, 1) as never, b as never),
+    ];
+    for (const solve of solvers) {
+      expect((solve(matrix([])) as { size(): number[] }).size()).toEqual([0, 1]);
+      expect(() => solve([1])).toThrow(/Dimension mismatch/);
+      expect(() => solve(new DenseMatrix({ data: [[]], size: [1, 0] }))).toThrow(
+        /Dimension mismatch/
+      );
+      expect(() => solve(new DenseMatrix({ data: [], size: [0, 2] }))).toThrow(
+        /Dimension mismatch/
+      );
+    }
+  });
+});
