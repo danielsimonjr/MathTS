@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2524
+**Total files**: 2526
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1321 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1111 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1113 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2524** |                                                                                                                |
+| **Total**     | **2526** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1347 |
-| `tests`    |  1111 |
+| `tests`    |  1113 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   144 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
-| `@danielsimonjr/mathts-functions`      |  1157 |
+| `@danielsimonjr/mathts-functions`      |  1159 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   151 |
@@ -1592,7 +1592,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1206-qr-entry-types.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1209-slu-empty.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1211-lup-empty.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1226-slu-nonsquare.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1227-lusolve-empty.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1230-empty-inv-det.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1231-lusolve-multicolumn.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-688-lusolve-singular.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-926-eigs-defective.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |

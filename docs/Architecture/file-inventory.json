@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2524,
+  "totalFiles": 2526,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1111,
+    "test": 1113,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1111,
+    "tests": 1113,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1157,
+    "@danielsimonjr/mathts-functions": 1159,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5882,7 +5882,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 233
+      "loc": 247
     },
     {
       "file": "functions/src/algebra/derivative.ts",
@@ -5980,7 +5980,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 514
+      "loc": 522
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -6015,7 +6015,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 209
+      "loc": 219
     },
     {
       "file": "functions/src/algebra/solver/validate-u-pivots.ts",
@@ -7156,7 +7156,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 288
+      "loc": 287
     },
     {
       "file": "functions/src/matrix/diag.ts",
@@ -7261,7 +7261,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 297
+      "loc": 305
     },
     {
       "file": "functions/src/matrix/kron.ts",
@@ -10701,11 +10701,25 @@
       "loc": 132
     },
     {
+      "file": "functions/tests/dogfood-1226-slu-nonsquare.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 155
+    },
+    {
       "file": "functions/tests/dogfood-1227-lusolve-empty.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 152
+    },
+    {
+      "file": "functions/tests/dogfood-1230-empty-inv-det.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 130
     },
     {
       "file": "functions/tests/dogfood-1231-lusolve-multicolumn.test.ts",

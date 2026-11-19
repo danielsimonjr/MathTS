@@ -3464,6 +3464,7 @@
       "noncentralChi2PDF",
       "noncentralFCDF",
       "noncentralTCDF",
+      "nonSquareSolveError",
       "norm",
       "norm2",
       "normalCDF",

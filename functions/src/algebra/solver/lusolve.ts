@@ -8,7 +8,11 @@ import {
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
-import { createSolveValidation, denseRightHandSide } from './utils/solveValidation.js';
+import {
+  createSolveValidation,
+  denseRightHandSide,
+  nonSquareSolveError,
+} from './utils/solveValidation.js';
 import { csIpvec } from '../sparse/csIpvec.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { MathJSSparseMatrix } from '../../factories/matrix-bridge.js';
@@ -418,6 +422,10 @@ export const createLusolve = /* #__PURE__ */ factory(
       ): DenseMatrix {
         const b = denseRightHandSide(rhs) as typeof rhs;
         if (isEmptyMatrix(a)) return solveEmpty(a, b);
+        // A rectangular system gets the solver error (with the lstsq hint) before slu,
+        // which throws its own factorization error (with the lup hint).
+        const size = a._size;
+        if (size[0] !== size[1]) throw nonSquareSolveError(size);
         const eq = equilibrateSparse(a, b);
         const d = slu(eq.a, order, threshold);
         return _lusolve(d.L, d.U, d.p, d.q, eq.b as typeof b);
