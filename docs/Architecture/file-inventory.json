@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2514,
+  "totalFiles": 2515,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1319,
     "test-only": 0,
     "orphan": 0,
-    "test": 1103,
+    "test": 1104,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1345,
-    "tests": 1103,
+    "tests": 1104,
     "config": 30,
     "examples": 7,
     "tools": 29
