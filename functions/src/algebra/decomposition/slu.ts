@@ -187,15 +187,15 @@ export const createSlu = /* #__PURE__ */ factory(
           );
         }
 
-        // The CSparse LU is square-only: a rectangular input gets the same RangeError as
-        // lusolve, det and inv, not an internal TypeError. Use lup or lstsq for a rectangular input.
+        // The CSparse LU is square-only. A rectangular input gets a RangeError, not an
+        // internal TypeError. lup factorizes a rectangular matrix.
         if (rows !== cols) {
           throw new RangeError(
             'Matrix must be square (size: [' +
               rows +
               ', ' +
               cols +
-              ']); for a rectangular least-squares system use lstsq'
+              ']); use lup for a rectangular matrix'
           );
         }
 

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-19'
   totalFiles: 1347
   totalModules: 82
-  totalExports: 7387
+  totalExports: 7388
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7876,6 +7876,7 @@ modules:
           imports:
             - createSolveValidation
             - denseRightHandSide
+            - nonSquareSolveError
         - file: ../sparse/csIpvec.js
           imports:
             - csIpvec
@@ -8002,7 +8003,7 @@ modules:
       functions:
         - createSolveNumberOps
     functions/src/algebra/solver/utils/solveValidation.ts:
-      description: Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
+      description: The RangeError of a solver whose coefficient matrix is not square.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8024,9 +8025,11 @@ modules:
           imports:
             - densifyForSolver
       exports:
+        - nonSquareSolveError
         - denseRightHandSide
         - createSolveValidation
       functions:
+        - nonSquareSolveError
         - denseRightHandSide
         - createSolveValidation
     functions/src/algebra/solver/validate-u-pivots.ts:
@@ -46892,11 +46895,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236747
-  totalExports: 7387
+  totalLinesOfCode: 236779
+  totalExports: 7388
   totalClasses: 62
   totalInterfaces: 668
-  totalFunctions: 2571
+  totalFunctions: 2572
   totalTypeGuards: 183
   totalEnums: 0
   totalConstants: 1693
