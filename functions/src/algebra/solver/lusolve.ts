@@ -161,9 +161,9 @@ export const createLusolve = /* #__PURE__ */ factory(
       return luSolve(fac, bVec).map((v) => [v]);
     }
 
-    /** True when a nested array has no entries: no rows, or rows without columns. */
+    /** True when a nested array has no entries: no rows, or every row without columns. */
     function isEmptyNested(rows: unknown[][]): boolean {
-      return rows.length === 0 || (Array.isArray(rows[0]) && rows[0].length === 0);
+      return rows.every((row) => Array.isArray(row) && row.length === 0);
     }
 
     /** True when a matrix has a zero dimension. */
