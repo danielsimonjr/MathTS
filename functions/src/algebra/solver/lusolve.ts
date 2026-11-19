@@ -153,11 +153,6 @@ export const createLusolve = /* #__PURE__ */ factory(
       nested: number[][],
       b: unknown[][] | DenseMatrix | SparseMatrix
     ): unknown[][] {
-      // The packed lu reads Float64 values. An entry that is not a number (Complex,
-      // BigNumber, Fraction, string) goes to the typed path, which keeps its type.
-      if (!isNumericRhs(b) || !isNumericRows(nested)) {
-        return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
-      }
       if (isEmptyNested(nested)) {
         // An empty system has the empty solution. A non-square empty input still throws.
         const cols = nested.length === 0 ? 0 : nested[0].length;
@@ -166,6 +161,14 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
         // The shared validation checks b as it does for a matrix A.
         return solveEmpty(new DenseMatrix({ data: [], size: [0, 0] }), b).valueOf() as number[][];
+      }
+      // The packed lu reads Float64 values. An entry that is not a number (Complex,
+      // BigNumber, Fraction, bigint, string) goes to the typed path, which keeps its type.
+      // The shape checks come first, so both paths throw the same errors.
+      if (!isNumericRhs(b) || !isNumericRows(nested)) {
+        rhsToNumberVector(b, nested.length);
+        assertSquareNested(nested);
+        return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
       }
       const eq = equilibrateDense(nested, b);
       const aRows = eq.a as number[][];
@@ -183,7 +186,20 @@ export const createLusolve = /* #__PURE__ */ factory(
       return luSolve(fac, bVec).map((v) => [v]);
     }
 
-    /** True when no entry of the rows is a non-number. Ragged rows stay on the packed path. */
+    /** Throw the packed-path errors for a jagged or a non-square nested A. */
+    function assertSquareNested(rows: unknown[][]): void {
+      const cols = Array.isArray(rows[0]) ? rows[0].length : 0;
+      for (let r = 0; r < rows.length; r++) {
+        if (!Array.isArray(rows[r]) || rows[r].length !== cols) {
+          throw new TypeError(`Matrix decomposition: jagged nested array at row ${r}`);
+        }
+      }
+      if (rows.length !== cols) {
+        throw new Error(`lu: matrix must be square (got ${rows.length}×${cols})`);
+      }
+    }
+
+    /** True when every entry of the rows, at any depth, is a number. */
     function isNumericRows(rows: unknown[]): boolean {
       for (const v of rows) {
         if (Array.isArray(v)) {

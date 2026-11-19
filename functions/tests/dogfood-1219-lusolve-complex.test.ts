@@ -299,3 +299,96 @@ describe('lusolve Complex entries (#1219)', () => {
     ).toThrow(/Dimension mismatch/);
   });
 });
+
+describe('lusolve Array A: shape checks do not depend on the entry type (#1219)', () => {
+  const MISMATCH = 'Dimension mismatch. Matrix columns must match vector length.';
+  // One Complex, one BigNumber and one number A of each shape. Every kind throws the same error.
+  const kinds: Array<[string, unknown]> = [
+    ['number', 1],
+    ['Complex', i],
+    ['BigNumber', bignumber(1)],
+  ];
+
+  function expectThrow(fn: () => unknown, type: ErrorConstructor, message: string): void {
+    let caught: unknown;
+    try {
+      fn();
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(type);
+    expect((caught as Error).constructor).toBe(type);
+    expect((caught as Error).message).toBe(message);
+  }
+
+  for (const [kind, x] of kinds) {
+    const sq = [
+      [x, 0],
+      [0, 1],
+    ];
+    it(`${kind} A: a ragged b throws the dimension error`, () => {
+      expectThrow(() => lusolve(sq, [[1], [2, 3]]), RangeError, MISMATCH);
+    });
+    it(`${kind} A: a 1 x n b throws the dimension error`, () => {
+      expectThrow(() => lusolve(sq, [[1, 2]]), RangeError, MISMATCH);
+    });
+    it(`${kind} A: an Array entry of a vector b throws the dimension error`, () => {
+      expectThrow(() => lusolve(sq, [1, [2]]), RangeError, MISMATCH);
+    });
+    it(`${kind} A: a b of the wrong length throws the dimension error`, () => {
+      expectThrow(() => lusolve(sq, [1, 2, 3]), RangeError, MISMATCH);
+    });
+    it(`${kind} A: a non-square A throws the lu square error`, () => {
+      expectThrow(
+        () =>
+          lusolve(
+            [
+              [x, 0, 0],
+              [0, 1, 0],
+            ],
+            [1, 2]
+          ),
+        Error,
+        'lu: matrix must be square (got 2×3)'
+      );
+    });
+    it(`${kind} A: a ragged A throws the jagged error`, () => {
+      expectThrow(
+        () => lusolve([[x, 0], [1]], [1, 2]),
+        TypeError,
+        'Matrix decomposition: jagged nested array at row 1'
+      );
+    });
+  }
+
+  it('a number A with a ragged Complex b throws the dimension error', () => {
+    expectThrow(
+      () =>
+        lusolve(
+          [
+            [1, 0],
+            [0, 1],
+          ],
+          [[i], [2, 3]]
+        ),
+      RangeError,
+      MISMATCH
+    );
+  });
+
+  it('a Complex b with an empty A throws the dimension error', () => {
+    expectThrow(() => lusolve([], [i]), RangeError, MISMATCH);
+  });
+
+  it('a bigint A solves on the typed path (main threw a BigInt conversion TypeError)', () => {
+    expect(
+      lusolve(
+        [
+          [2n, 0n],
+          [0n, 4n],
+        ],
+        [2n, 2n]
+      )
+    ).toEqual([[1], [0.5]]);
+  });
+});
