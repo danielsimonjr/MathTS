@@ -125,6 +125,13 @@ export class MathJSDenseMatrix {
     } else if (Array.isArray(data)) {
       this._data = data;
       this._size = inferSize(data);
+    } else if (
+      typeof data !== 'object' ||
+      !Array.isArray((data as { data?: unknown }).data) ||
+      !Array.isArray((data as { size?: unknown }).size)
+    ) {
+      // A scalar or a storage object without Array data and size is not matrix data.
+      throw new TypeError('Unsupported type of data (' + typeName(data) + ')');
     } else {
       this._data = data.data;
       this._size = data.size;
@@ -1176,32 +1183,71 @@ export function createMatrixBridge() {
     data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
-    // matrix('sparse') or matrix('dense') or matrix('default')
-    if (typeof data === 'string') {
-      const isSparse = data === 'sparse';
-      return isSparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    const sparse = storageType === 'sparse';
+    if (data === undefined) return sparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (Array.isArray(data))
+      return sparse ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data as number[][]);
+    if (data instanceof MathJSSparseMatrix) return data;
+    if (data instanceof MathJSDenseMatrix)
+      return sparse ? new MathJSSparseMatrix(data._data) : data;
+    // matrix('sparse'), matrix('dense') or matrix('default'). As in mathjs, a boolean is
+    // converted to a format string, and any other format string throws. The parameter type
+    // does not list boolean, because a boolean never gives a matrix.
+    if (typeof data === 'string' || typeof (data as unknown) === 'boolean') {
+      const format = String(data);
+      if (format === 'sparse') return new MathJSSparseMatrix();
+      if (format === 'dense' || format === 'default') return new MathJSDenseMatrix();
+      throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
-    if (!data) {
-      return storageType === 'sparse' ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (!isPlainObject(data)) {
+      // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
+      throw new TypeError(
+        'Unexpected type of argument in function matrix (expected: string or Array or Matrix or boolean, actual: ' +
+          typeName(data) +
+          ', index: 0)'
+      );
     }
-    if (data instanceof MathJSSparseMatrix) {
-      return data;
+    // An internal storage object. The dense constructor checks { data, size } itself.
+    if (!sparse) return new MathJSDenseMatrix(data as never);
+    if (!isStorageObject(data)) {
+      throw new TypeError(
+        'Unsupported type of data: expected Array data and size, or CSC values, index, ptr and size'
+      );
     }
-    if (data instanceof MathJSDenseMatrix) {
-      if (storageType === 'sparse') {
-        return new MathJSSparseMatrix(data._data);
-      }
-      return data;
-    }
-    return storageType === 'sparse'
-      ? new MathJSSparseMatrix(data)
-      : new MathJSDenseMatrix(data as number[][]);
+    return new MathJSSparseMatrix(data);
   };
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** CSC and { data, size } storage objects are internal matrix data; BigNumber and Complex are not. */
+function isPlainObject(x: unknown): boolean {
+  return typeof x === 'object' && x !== null && Object.getPrototypeOf(x) === Object.prototype;
+}
+
+/**
+ * True for a storage object that the sparse constructor reads: `{ data, size }` with Array data
+ * and size, or CSC `{ values, index, ptr, size }` with Array index, ptr and size (the values may
+ * be null for a pattern matrix).
+ */
+function isStorageObject(x: object): boolean {
+  const o = x as Record<string, unknown>;
+  if (Array.isArray(o.data) && Array.isArray(o.size)) return true;
+  return (
+    Array.isArray(o.index ?? o._index) &&
+    Array.isArray(o.ptr ?? o._ptr) &&
+    Array.isArray(o.size ?? o._size)
+  );
+}
+
+/** A short type name for an error message: null, number, BigNumber, Complex, ... */
+function typeName(x: unknown): string {
+  if (x === null) return 'null';
+  if (typeof x === 'object') return (x as object).constructor?.name ?? 'Object';
+  return typeof x;
+}
 
 /**
  * A copy of nested data that has `axes` axes. The values are not copied. A level that is

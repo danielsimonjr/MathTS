@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2542,
+  "totalFiles": 2543,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1323,
     "test-only": 0,
     "orphan": 0,
-    "test": 1127,
+    "test": 1128,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1349,
-    "tests": 1127,
+    "tests": 1128,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1170,
+    "@danielsimonjr/mathts-functions": 1171,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6827,7 +6827,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1261
+      "loc": 1307
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10832,6 +10832,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 32
+    },
+    {
+      "file": "functions/tests/dogfood-1252-zero-dim-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 146
     },
     {
       "file": "functions/tests/dogfood-1255-bignumber-hypot-norm.test.ts",
