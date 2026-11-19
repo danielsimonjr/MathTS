@@ -3621,6 +3621,7 @@
       "planckTemperature",
       "planckTime",
       "pmean",
+      "pNormSumInRange",
       "pointInPolygon",
       "pointInTriangle",
       "poissonDist",

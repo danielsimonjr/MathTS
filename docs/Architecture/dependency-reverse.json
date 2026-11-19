@@ -1720,6 +1720,7 @@
       "functions/src/arithmetic/hypot.ts",
       "functions/src/arithmetic/norm.ts",
       "functions/src/geometry/distance.ts",
+      "functions/src/typed/arithmetic.ts",
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [

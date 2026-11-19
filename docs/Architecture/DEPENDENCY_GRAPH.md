@@ -4296,11 +4296,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports         | Type               |
-| ----------------------------- | --------------- | ------------------ |
-| `../utils/bignumber-hypot.js` | `bigHypot`      | Import             |
-| `../utils/factory.js`         | `factory`       | Import             |
-| `../core/function/typed.js`   | `TypedFunction` | Import (type-only) |
+| File                          | Imports                     | Type               |
+| ----------------------------- | --------------------------- | ------------------ |
+| `../utils/bignumber-hypot.js` | `bigHypot, pNormSumInRange` | Import             |
+| `../utils/factory.js`         | `factory`                   | Import             |
+| `../core/function/typed.js`   | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -6631,13 +6631,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports           | Type               |
-| ----------------------------- | ----------------- | ------------------ |
-| `../utils/bignumber-hypot.js` | `bigHypot`        | Import             |
-| `../utils/is.js`              | `isBigNumber`     | Import             |
-| `../utils/factory.js`         | `factory`         | Import             |
-| `../types.js`                 | `MathNumericType` | Import (type-only) |
-| `../core/function/typed.js`   | `TypedFunction`   | Import (type-only) |
+| File                          | Imports                     | Type               |
+| ----------------------------- | --------------------------- | ------------------ |
+| `../utils/bignumber-hypot.js` | `bigHypot, pNormSumInRange` | Import             |
+| `../utils/is.js`              | `isBigNumber`               | Import             |
+| `../utils/factory.js`         | `factory`                   | Import             |
+| `../types.js`                 | `MathNumericType`           | Import (type-only) |
+| `../core/function/typed.js`   | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -11747,6 +11747,7 @@ graph LR
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
 | `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
+| `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
 | `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
 | `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
@@ -12966,7 +12967,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bigHypot`
+- Functions: `bigHypot`, `pNormSumInRange`
 
 ---
 
@@ -20826,9 +20827,9 @@ graph LR
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
+| `functions/src/typed/arithmetic`                       | 14 files     | 10 files   |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `functions/src/typed/arithmetic`                       | 13 files     | 10 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
@@ -21742,12 +21743,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1349   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237385 |
-| Total Exports           | 7391   |
+| Total Lines of Code     | 237472 |
+| Total Exports           | 7392   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2574   |
+| Total Functions         | 2575   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

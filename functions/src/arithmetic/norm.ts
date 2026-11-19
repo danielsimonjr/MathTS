@@ -1,5 +1,5 @@
 import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
-import { bigHypot } from '../utils/bignumber-hypot.js';
+import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { factory } from '../utils/factory.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -221,28 +221,65 @@ export const createNorm = /* #__PURE__ */ factory(
 
     /**
      * A sum of p-th powers can overflow or underflow when the p-norm is in range (#1255). Then
-     * the p-norm is m * norm(x / m, p), with m = max(abs(x)). Else `plain` is returned, so the
-     * digits of an in-range sum do not change.
+     * the p-norm is m * norm(x / m, p). The scale m is max(abs(x)) for a positive p and
+     * min(abs(x)) for a negative p, so each scaled term is at most 1. Else `plain` is returned,
+     * so the digits of an in-range sum do not change. A sum of numbers is also out of range
+     * when its terms are subnormal. A NaN, an infinite or a zero scale keeps `plain`.
      */
     function _scaledPNorm(
       x: MatrixType,
       p: number,
+      sum: number | BigNumberType,
       plain: number | BigNumberType
     ): number | BigNumberType {
-      const bad =
-        plain instanceof CoreBigNumber
-          ? !plain.isFinite() || plain.isZero()
-          : typeof plain === 'number' && (!Number.isFinite(plain) || plain === 0);
-      if (!bad) return plain;
-      const m = _vectorNormPlusInfinity(x);
-      const finite = m instanceof CoreBigNumber ? m.isFinite() : Number.isFinite(m as number);
-      if (!finite || equalScalar(m, 0)) return plain;
-      const inv = pow(m, -1);
+      const inRange =
+        sum instanceof CoreBigNumber
+          ? !(plain instanceof CoreBigNumber) || (plain.isFinite() && !plain.isZero())
+          : typeof sum !== 'number' || p === 1 || pNormSumInRange(sum);
+      if (inRange) return plain;
+      let m: number | CoreBigNumber | undefined;
+      let real = true;
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        const v = abs(value) as number | CoreBigNumber;
+        if (typeof v === 'number' ? Number.isNaN(v) : !(v instanceof CoreBigNumber) || v.isNaN()) {
+          real = false;
+        } else if (m === undefined || (p > 0 ? exactCompare(v, m) > 0 : exactCompare(v, m) < 0)) {
+          m = v;
+        }
+      });
+      const scale = m as number | CoreBigNumber | undefined;
+      if (!real || scale === undefined) return plain;
+      const usable =
+        scale instanceof CoreBigNumber
+          ? scale.isFinite() && !scale.isZero()
+          : Number.isFinite(scale) && scale !== 0;
+      if (!usable) return plain;
+      // A quotient, not a product with 1 / m: the inverse of a subnormal number is Infinity.
+      const ratio = (v: number | CoreBigNumber): number | CoreBigNumber =>
+        typeof v === 'number' && typeof scale === 'number'
+          ? v / scale
+          : toBig(v).divide(toBig(scale));
       let n: number | BigNumberType = 0;
       x.forEach(function (value: number | BigNumberType | ComplexType) {
-        n = add(pow(multiply(abs(value), inv), p), n) as number | BigNumberType;
-      }, true);
-      return multiply(m, pow(n, 1 / p)) as number | BigNumberType;
+        const term = pow(ratio(abs(value) as number | CoreBigNumber), p);
+        n = add(term, n) as number | BigNumberType;
+      });
+      return multiply(scale, pow(n, 1 / p)) as number | BigNumberType;
+    }
+
+    /** The sign of a - b with no tolerance: `larger` and `smaller` read tiny values as equal. */
+    function exactCompare(a: number | CoreBigNumber, b: number | CoreBigNumber): number {
+      if (typeof a === 'number' && typeof b === 'number') return a < b ? -1 : a > b ? 1 : 0;
+      return toBig(a).compare(toBig(b));
+    }
+
+    /** A guard on `unknown`: the compiler narrows a sum that a callback assigns to `number`. */
+    function isCoreBig(v: unknown): v is CoreBigNumber {
+      return v instanceof CoreBigNumber;
+    }
+
+    function toBig(v: number | CoreBigNumber): CoreBigNumber {
+      return typeof v === 'number' ? CoreBigNumber.fromNumber(v) : v;
     }
 
     function _vectorNorm(
@@ -260,10 +297,6 @@ export const createNorm = /* #__PURE__ */ factory(
         return _norm(x, 2);
       }
       if (typeof p === 'number' && !isNaN(p)) {
-        if (p === 2) {
-          const scaled = _scaledBigNorm(x);
-          if (scaled !== undefined) return scaled;
-        }
         // check p != 0
         if (!equalScalar(p, 0)) {
           // norm(x, p) = sum(abs(xi) ^ p) ^ 1/p
@@ -272,9 +305,15 @@ export const createNorm = /* #__PURE__ */ factory(
           x.forEach(function (value: number | BigNumberType | ComplexType) {
             n = add(pow(abs(value), p), n) as number | BigNumberType;
           }, true);
+          // A BigNumber sum means a BigNumber entry: the scaled 2-norm replaces it (#1255). The
+          // test is on the sum, so a vector of numbers pays for no second pass.
+          if (p === 2 && isCoreBig(n)) {
+            const scaled = _scaledBigNorm(x);
+            if (scaled !== undefined) return scaled;
+          }
           // sqrt is exact for a perfect square and rounds once; pow(n, 0.5) goes through exp/ln.
           const plain = (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
-          return p === 2 ? plain : _scaledPNorm(x, p, plain);
+          return p === 2 ? plain : _scaledPNorm(x, p, n, plain);
         }
         return Number.POSITIVE_INFINITY;
       }
@@ -290,12 +329,16 @@ export const createNorm = /* #__PURE__ */ factory(
      */
     function _matrixNormFrobenius(x: MatrixType): number | BigNumberType {
       // norm(x) = sqrt(sum(diag(x'x)))
-      const scaledBig = _scaledBigNorm(x);
-      if (scaledBig !== undefined) return scaledBig;
       let fro: number | BigNumberType = 0;
       x.forEach(function (value: number | BigNumberType | ComplexType) {
         fro = add(fro, multiply(value, conj(value))) as number | BigNumberType;
       });
+      // A BigNumber sum means a BigNumber entry: the scaled norm replaces it (#1255). The test
+      // is on the sum, so a matrix of numbers pays for no second pass.
+      if (isCoreBig(fro)) {
+        const scaledBig = _scaledBigNorm(x);
+        if (scaledBig !== undefined) return scaledBig;
+      }
       // A sum of squares of plain numbers overflows above about 1e154 and loses its
       // digits below about 1e-150 (#1104). Then the scaled norm of the entries is
       // returned. A NaN, infinite, complex or BigNumber entry keeps the plain sum.

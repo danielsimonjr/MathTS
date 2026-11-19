@@ -236,3 +236,67 @@ describe('#1255 review: exact shift, p-norms and point-to-line distance', () => 
     expect(r3 / 4e160).toBeCloseTo(1, 12);
   });
 });
+
+describe('#1255 final review: scale choice, subnormal sums and a degenerate line', () => {
+  const norms = ['norm', 'factory_norm'];
+  const rel = (r: unknown, want: number): number => Math.abs((r as number) / want - 1);
+
+  it.each(norms)('%s(v, 3) of tiny numbers does not underflow', (name) => {
+    expect(rel(fn(name)([1e-200, 1e-200], 3), Math.cbrt(2) * 1e-200)).toBeLessThan(1e-14);
+  });
+
+  it.each(norms)('%s(v, 3) keeps its digits when the cubes are subnormal', (name) => {
+    // 1e-321 is subnormal: the plain sum has 3 significant bits.
+    expect(rel(fn(name)([1e-107, 1e-107], 3), Math.cbrt(2) * 1e-107)).toBeLessThan(1e-14);
+  });
+
+  it.each(norms)('%s(v, 3) of the smallest numbers is not Infinity', (name) => {
+    expect(fn(name)([5e-324, 5e-324], 3)).toBe(5e-324);
+  });
+
+  it.each(norms)('%s(v, -3) scales by the smallest entry', (name) => {
+    expect(rel(fn(name)([1e-200, 1e-200], -3), 1e-200 / Math.cbrt(2))).toBeLessThan(1e-14);
+    expect(rel(fn(name)([1e200, 1e200], -3), 1e200 / Math.cbrt(2))).toBeLessThan(1e-14);
+    expect(rel(fn(name)([1e-110, 1], -3), 1e-110)).toBeLessThan(1e-14);
+    expect(fn(name)([0, 1e200], -3)).toBe(0);
+  });
+
+  it.each(norms)('%s(v, 1) of tiny numbers is the plain sum', (name) => {
+    expect(fn(name)([1e-300, 2e-300], 1)).toBe(1e-300 + 2e-300);
+  });
+
+  it.each(norms)('%s(v, 3) keeps NaN, Infinity and zero', (name) => {
+    // The factory norm returns a Complex NaN here, as it did before #1255; the typed norm a number.
+    expect(String(fn(name)([NaN, 1e200], 3))).toBe('NaN');
+    expect(fn(name)([Infinity, 1], 3)).toBe(Infinity);
+    expect(fn(name)([0, 0], 3)).toBe(0);
+  });
+
+  it('norm(v, 3) of a long vector does not exceed the call stack', () => {
+    const r = fn('norm')(new Array(200000).fill(1e200), 3);
+    expect(rel(r, Math.cbrt(200000) * 1e200)).toBeLessThan(1e-12);
+  });
+
+  it.each(norms)('%s(v, 3) of tiny BigNumber values does not underflow', (name) => {
+    BigNumber.config({ precision: 20, maxExponent: 300, minExponent: -300 });
+    const r = fn(name)([b('1e-200'), b('1e-200')], 3) as BigNumber;
+    expect(r.toSignificantDigits(9).toString()).toBe(b('1.25992105e-200').toString());
+  });
+
+  it('point-to-line distance keeps its digits when the squares are subnormal', () => {
+    // 1e-320 is subnormal: the plain result was 3.99998e-160.
+    expect(rel(fn('distance')([3e-160, 4e-160], [0, 1e-160, 0]), 4e-160)).toBeLessThan(1e-14);
+    const r3 = fn('distance')([0, 4e-160, 0], [0, 0, 0, 1e-160, 0, 0]);
+    expect(rel(r3, 4e-160)).toBeLessThan(1e-14);
+    // A point at a subnormal offset from a line with an ordinary direction.
+    expect(rel(fn('distance')([0, 4e-160, 0], [0, 0, 0, 1, 0, 0]), 4e-160)).toBeLessThan(1e-14);
+    // Ordinary input keeps the plain path.
+    expect(fn('distance')([3, 4], [0, 1, 0])).toBe(4);
+    expect(fn('distance')([0, 4, 3], [0, 0, 0, 1, 0, 0])).toBe(5);
+  });
+
+  it('the distance to a = b = 0 stays Infinity', () => {
+    expect(fn('distance')([1, 2], [0, 0, 5])).toBe(Infinity);
+    expect(str(fn('distance')([b(1), b(2)], [b(0), b(0), b(5)]))).toBe('Infinity');
+  });
+});

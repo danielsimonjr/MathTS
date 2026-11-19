@@ -6393,7 +6393,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 432
+      "loc": 475
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
@@ -6883,7 +6883,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 547
+      "loc": 565
     },
     {
       "file": "functions/src/geometry/frustum.ts",
@@ -9186,7 +9186,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2949
+      "loc": 2964
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9606,7 +9606,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 14
+      "loc": 25
     },
     {
       "file": "functions/src/utils/bignumber/bitwise.ts",
@@ -10789,7 +10789,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 239
+      "loc": 303
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

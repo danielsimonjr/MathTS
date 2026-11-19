@@ -1,4 +1,4 @@
-import { bigHypot } from '../utils/bignumber-hypot.js';
+import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
@@ -409,11 +409,14 @@ export const createDistance = /* #__PURE__ */ factory(
       c: MathNumericType
     ): MathNumericType {
       const num = abs(addScalar(addScalar(multiplyScalar(a, x), multiplyScalar(b, y)), c));
-      const den = sqrt(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)));
-      const plain = divideScalar(num, den);
-      if (!_overflowed(plain, [x, y, a, b, c])) return plain;
-      // A product or a square overflowed (#1255): divide the coefficients by sqrt(a^2 + b^2) first.
+      const den2 = addScalar(multiplyScalar(a, a), multiplyScalar(b, b));
+      const plain = divideScalar(num, sqrt(den2));
+      if (!_overflowed(plain, [x, y, a, b, c]) && !_lostDigits(den2)) return plain;
+      // A product or a square overflowed, or the squares are subnormal (#1255): divide the
+      // coefficients by sqrt(a^2 + b^2) first.
       const k = _hypot([a, b]);
+      // a = b = 0 is not a line. The plain quotient (c / 0) is kept.
+      if (_isZero(k)) return plain;
       return abs(
         addScalar(
           addScalar(multiplyScalar(divideScalar(a, k), x), multiplyScalar(divideScalar(b, k), y)),
@@ -431,6 +434,15 @@ export const createDistance = /* #__PURE__ */ factory(
             ? v.isFinite()
             : undefined;
       return finite(r) === false && inputs.every((v) => finite(v) === true);
+    }
+
+    /** True when a sum of squares of numbers is above 0 and too small to keep its digits. */
+    function _lostDigits(sumOfSquares: MathNumericType): boolean {
+      return typeof sumOfSquares === 'number' && sumOfSquares > 0 && !pNormSumInRange(sumOfSquares);
+    }
+
+    function _isZero(v: MathNumericType): boolean {
+      return v instanceof CoreBigNumber ? v.isZero() : v === 0;
     }
 
     /** sqrt(sum(v^2)) of finite numbers and BigNumbers, scaled so a square cannot overflow. */
@@ -466,22 +478,28 @@ export const createDistance = /* #__PURE__ */ factory(
           multiplyScalar(subtractScalar(y0, y), a)
         ),
       ];
-      const num = sqrt(
+      const num2 = addScalar(
         addScalar(
-          addScalar(
-            multiplyScalar(numComponents[0], numComponents[0]),
-            multiplyScalar(numComponents[1], numComponents[1])
-          ),
-          multiplyScalar(numComponents[2], numComponents[2])
-        )
+          multiplyScalar(numComponents[0], numComponents[0]),
+          multiplyScalar(numComponents[1], numComponents[1])
+        ),
+        multiplyScalar(numComponents[2], numComponents[2])
       );
-      const den = sqrt(
-        addScalar(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)), multiplyScalar(c, c))
+      const den2 = addScalar(
+        addScalar(multiplyScalar(a, a), multiplyScalar(b, b)),
+        multiplyScalar(c, c)
       );
-      const plain = divideScalar(num, den);
-      if (!_overflowed(plain, [x, y, z, x0, y0, z0, a, b, c])) return plain;
-      // A product or a square overflowed (#1255): use the unit direction (a, b, c) / |(a, b, c)|.
+      const plain = divideScalar(sqrt(num2), sqrt(den2));
+      const inRange =
+        !_overflowed(plain, [x, y, z, x0, y0, z0, a, b, c]) &&
+        !_lostDigits(num2) &&
+        !_lostDigits(den2);
+      if (inRange) return plain;
+      // A product or a square overflowed, or the squares are subnormal (#1255): use the unit
+      // direction (a, b, c) / |(a, b, c)|.
       const k = _hypot([a, b, c]);
+      // A zero direction is not a line. The plain quotient (0 / 0) is kept.
+      if (_isZero(k)) return plain;
       const [ua, ub, uc] = [divideScalar(a, k), divideScalar(b, k), divideScalar(c, k)];
       const [dx, dy, dz] = [subtractScalar(x0, x), subtractScalar(y0, y), subtractScalar(z0, z)];
       return _hypot([

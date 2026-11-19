@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-19",
     "totalFiles": 1349,
     "totalModules": 82,
-    "totalExports": 7391
+    "totalExports": 7392
   },
   "entryPoints": [
     {
@@ -9718,7 +9718,7 @@
         "internalDependencies": [
           {
             "file": "../utils/bignumber-hypot.js",
-            "imports": ["bigHypot"]
+            "imports": ["bigHypot", "pNormSumInRange"]
           },
           {
             "file": "../utils/factory.js",
@@ -17886,7 +17886,7 @@
         "internalDependencies": [
           {
             "file": "../utils/bignumber-hypot.js",
-            "imports": ["bigHypot"]
+            "imports": ["bigHypot", "pNormSumInRange"]
           },
           {
             "file": "../utils/is.js",
@@ -26458,6 +26458,10 @@
             "imports": ["atWorkPrecision"]
           },
           {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["pNormSumInRange"]
+          },
+          {
             "file": "./divide-inverse.js",
             "imports": ["divideInverse"]
           },
@@ -30320,8 +30324,8 @@
             "imports": ["BigNumber"]
           }
         ],
-        "exports": ["bigHypot"],
-        "functions": ["bigHypot"]
+        "exports": ["bigHypot", "pNormSumInRange"],
+        "functions": ["bigHypot", "pNormSumInRange"]
       },
       "functions/src/utils/clone.ts": {
         "description": "Clone an object. Will make a deep copy of the data.",
@@ -49825,11 +49829,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1349,
     "totalModules": 82,
-    "totalLinesOfCode": 237385,
-    "totalExports": 7391,
+    "totalLinesOfCode": 237472,
+    "totalExports": 7392,
     "totalClasses": 62,
     "totalInterfaces": 668,
-    "totalFunctions": 2574,
+    "totalFunctions": 2575,
     "totalTypeGuards": 183,
     "totalEnums": 0,
     "totalConstants": 1694,
