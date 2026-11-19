@@ -170,32 +170,63 @@ export const createSlu = /* #__PURE__ */ factory(
           throw new Error('Partial pivoting threshold must be a number from 0 to 1');
         }
 
+        // An empty matrix has nothing to eliminate, and the symbolic analysis cannot transpose
+        // it. Return the empty factorization that lup returns: L is m x k and U is k x n
+        // (k = min(m, n)), p is the identity on the m rows, q is the identity on the n columns
+        // (null for order 0).
+        const [rows, cols] = a._size;
+        if (rows === 0 || cols === 0) {
+          const k = Math.min(rows, cols);
+          return result(
+            emptySparse(rows, k),
+            emptySparse(k, cols),
+            identityPermutation(rows),
+            order === 0 ? null : identityPermutation(cols)
+          );
+        }
+
         // perform symbolic ordering and analysis
         const s = csSqr(order, a, false);
 
         // perform lu decomposition
         const f = csLu(a, s, threshold);
 
-        // return decomposition
-        return {
-          L: f.L,
-          U: f.U,
-          p: f.pinv,
-          q: s.q,
-          toString: function (): string {
-            return (
-              'L: ' +
-              this.L.toString() +
-              '\nU: ' +
-              this.U.toString() +
-              '\np: ' +
-              this.p.toString() +
-              (this.q ? '\nq: ' + this.q.toString() : '') +
-              '\n'
-            );
-          },
-        };
+        return result(f.L, f.U, f.pinv, s.q);
       },
     });
+
+    function emptySparse(rows: number, cols: number): SparseMatrix {
+      return new SparseMatrix({
+        values: [],
+        index: [],
+        ptr: new Array<number>(cols + 1).fill(0),
+        size: [rows, cols],
+      });
+    }
+
+    function identityPermutation(n: number): number[] {
+      return Array.from({ length: n }, (_, i) => i);
+    }
+
+    function result(L: SparseMatrix, U: SparseMatrix, p: number[], q: number[] | null): SLUResult {
+      return {
+        L,
+        U,
+        p,
+        q,
+        toString: function (): string {
+          return (
+            'L: ' +
+            this.L.toString() +
+            '\nU: ' +
+            this.U.toString() +
+            '\np: ' +
+            this.p.toString() +
+            (this.q ? '\nq: ' + this.q.toString() : '') +
+            '\n'
+          );
+        },
+      };
+    }
   }
 );
