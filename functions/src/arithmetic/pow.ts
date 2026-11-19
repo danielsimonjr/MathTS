@@ -39,6 +39,9 @@ interface UnitType {
 
 interface MatrixType {
   valueOf(): unknown[][];
+  size(): number[];
+  clone(): MatrixType;
+  resize(size: number[]): MatrixType;
 }
 
 interface PowDependencies {
@@ -235,6 +238,8 @@ export const createPow = /* #__PURE__ */ factory(
       }
       // verify that A is a 2 dimensional square matrix
       const s = size(x);
+      // An Array [] is the 0 x 0 matrix, and its power is [] (#1233).
+      if (s.length === 1 && s[0] === 0) return [];
       if (s.length !== 2) {
         throw new Error('For A^b, A must be 2 dimensional (A has ' + s.length + ' dimensions)');
       }
@@ -280,6 +285,14 @@ export const createPow = /* #__PURE__ */ factory(
      * @private
      */
     function _powMatrix(x: MatrixType, y: number): MatrixType {
+      // A 0 x 0 Matrix, or the 1-D empty Matrix, has a 0 x 0 power of its own kind (#1233).
+      const s = x.size();
+      if ((s.length === 1 && s[0] === 0) || (s.length === 2 && s[0] === 0 && s[1] === 0)) {
+        if (!isInteger(y)) {
+          throw new TypeError('For A^b, b must be an integer (value is ' + y + ')');
+        }
+        return x.clone().resize([0, 0]);
+      }
       return matrix(_powArray(x.valueOf(), y));
     }
   }

@@ -1196,6 +1196,11 @@ export const matrixExpm = mathTyped('matrixExpm', {
   'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], _opts: ExpmOptions) =>
     matrixExpmPrimitive(A),
   Array: (A: number[][]) => {
+    // [] is the 0 x 0 matrix; its exponential is [] (#1233)
+    if (A.length === 0) return [];
+    if (A.every((row) => row.length === 0)) {
+      throw new Error(`matrixExpm: matrix must be square (got ${A.length}×0)`);
+    }
     const D = DenseMatrix.fromArray(A);
     return matrixExpmPrimitive(D).toArray();
   },
