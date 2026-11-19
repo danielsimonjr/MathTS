@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly**: 8 files
 - **assembly/ops**: 17 files
 - **assembly/types**: 1 file
-- **compat**: 7 files
+- **compat**: 8 files
 - **gpu**: 9 files
 - **plot**: 19 files
 - **plot/three**: 3 files
@@ -219,7 +219,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 16             | 0               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                               | 25             | 0               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 7              | 0               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 8              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 9              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 22             | 0               |
 
@@ -20148,6 +20148,7 @@ graph LR
 | ----------------------------- | ------------------------------------------------ | --------- |
 | `./shims.js`                  | `shims`                                          | Import    |
 | `./parity-names.generated.js` | `MATHJS_PARITY_NAMES`                            | Import    |
+| `./internal-names.js`         | `isInternalName`                                 | Import    |
 | `./instance-layout.js`        | `createPrototypeLevels, definePrototypeAccessor` | Import    |
 | `./unary-fast-path.js`        | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
 | `./chain.js`                  | `createChain, Chain`                             | Import    |
@@ -20193,6 +20194,14 @@ graph LR
 
 - Functions: `createPrototypeLevels`, `definePrototypeAccessor`
 - Constants: `PROTOTYPE_LEVEL_CAP`
+
+---
+
+### `compat/src/internal-names.ts` - Internal names of the functions namespace (#1216).
+
+**Exports:**
+
+- Functions: `isInternalName`
 
 ---
 
@@ -21576,41 +21585,42 @@ graph TD
         N505[index]
         N506[instance-api]
         N507[instance-layout]
-        N508[parity-names.generated]
-        N509[shims]
-        N510[unary-fast-path]
+        N508[internal-names]
+        N509[parity-names.generated]
+        N510[shims]
+        N511[unary-fast-path]
     end
 
     subgraph Gpu
-        N511[BufferPool]
-        N512[GPUContext]
-        N513[ShaderManager]
-        N514[detect]
-        N515[device]
-        N516[flag]
-        N517[index]
-        N518[serialize]
-        N519[webgpu-types]
+        N512[BufferPool]
+        N513[GPUContext]
+        N514[ShaderManager]
+        N515[detect]
+        N516[device]
+        N517[flag]
+        N518[index]
+        N519[serialize]
+        N520[webgpu-types]
     end
 
     subgraph Plot
-        N520[coerce]
-        N521[contour]
-        N522[emit]
-        N523[frame]
-        N524[heatmap]
-        N525[histogram]
-        N526[index]
-        N527[marks2d]
-        N528[overlay]
-        N529[palette]
-        N530[...9 more]
+        N521[coerce]
+        N522[contour]
+        N523[emit]
+        N524[frame]
+        N525[heatmap]
+        N526[histogram]
+        N527[index]
+        N528[marks2d]
+        N529[overlay]
+        N530[palette]
+        N531[...9 more]
     end
 
     subgraph Plot/three
-        N531[points3d]
-        N532[project]
-        N533[surface]
+        N532[points3d]
+        N533[project]
+        N534[surface]
     end
 
     N4 --> N7
@@ -21698,15 +21708,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1347   |
+| Total TypeScript Files  | 1348   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236923 |
-| Total Exports           | 7388   |
+| Total Lines of Code     | 236964 |
+| Total Exports           | 7389   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2572   |
-| Total Type Guards       | 183    |
+| Total Functions         | 2573   |
+| Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |

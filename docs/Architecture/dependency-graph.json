@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-19",
-    "totalFiles": 1347,
+    "totalFiles": 1348,
     "totalModules": 82,
-    "totalExports": 7388
+    "totalExports": 7389
   },
   "entryPoints": [
     {
@@ -46436,6 +46436,10 @@
             "imports": ["MATHJS_PARITY_NAMES"]
           },
           {
+            "file": "./internal-names.js",
+            "imports": ["isInternalName"]
+          },
+          {
             "file": "./instance-layout.js",
             "imports": ["createPrototypeLevels", "definePrototypeAccessor"]
           },
@@ -46581,6 +46585,15 @@
         "exports": ["PROTOTYPE_LEVEL_CAP", "createPrototypeLevels", "definePrototypeAccessor"],
         "functions": ["createPrototypeLevels", "definePrototypeAccessor"],
         "constants": ["PROTOTYPE_LEVEL_CAP"]
+      },
+      "compat/src/internal-names.ts": {
+        "description": "Internal names of the functions namespace (#1216).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["isInternalName"],
+        "functions": ["isInternalName"]
       },
       "compat/src/parity-names.generated.ts": {
         "description": "The own keys of the mathjs 15.2.0 instance `create(all)`, sorted.",
@@ -49682,6 +49695,7 @@
           "compat/src/index.ts",
           "compat/src/instance-api.ts",
           "compat/src/instance-layout.ts",
+          "compat/src/internal-names.ts",
           "compat/src/parity-names.generated.ts",
           "compat/src/shims.ts",
           "compat/src/unary-fast-path.ts"
@@ -49736,14 +49750,14 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1347,
+    "totalTypeScriptFiles": 1348,
     "totalModules": 82,
-    "totalLinesOfCode": 236923,
-    "totalExports": 7388,
+    "totalLinesOfCode": 236964,
+    "totalExports": 7389,
     "totalClasses": 62,
     "totalInterfaces": 668,
-    "totalFunctions": 2572,
-    "totalTypeGuards": 183,
+    "totalFunctions": 2573,
+    "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1693,
     "totalReExports": 3191,

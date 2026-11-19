@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
 import { MATHJS_PARITY_NAMES } from '../src/parity-names.generated.js';
+import { isInternalName } from '../src/internal-names.js';
 
 /**
  * EXPANSION_PLAN W5 — `compat` exposes the full functions surface.
@@ -75,7 +76,7 @@ describe('compat create(all) lazy wrapping', () => {
     expect(a.add).not.toBe(b.add);
   });
 
-  it('for…in lists the whole surface, unchanged by accessing members', () => {
+  it('for…in lists the whole surface except the internal names (#1216), unchanged by accessing members', () => {
     const math = create(all) as unknown as Record<string, unknown>;
     const names = (): string[] => {
       const out: string[] = [];
@@ -83,7 +84,10 @@ describe('compat create(all) lazy wrapping', () => {
       return out;
     };
     const before = names();
-    for (const key of Object.keys(all)) expect(before).toContain(key);
+    const parity = new Set(MATHJS_PARITY_NAMES);
+    for (const key of Object.keys(all)) {
+      if (!isInternalName(key, parity)) expect(before).toContain(key);
+    }
     expect(before).toContain('config');
     expect(before).toContain('chain');
     for (const key of before) expect(key in math).toBe(true);

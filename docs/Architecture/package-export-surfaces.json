@@ -459,6 +459,7 @@
       "isBigNumber_",
       "isComplex_",
       "isFraction_",
+      "isInternalName",
       "isMatrix",
       "isNumber_",
       "lcm",
