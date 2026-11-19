@@ -599,7 +599,8 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
-    if (data === undefined || data === null) {
+    // A string is a datatype in mathjs (`sparse('number')`): it builds the empty matrix
+    if (data === undefined || data === null || typeof (data as unknown) === 'string') {
       // Empty matrix
       this._values = [];
       this._index = [];
@@ -627,6 +628,7 @@ export class MathJSSparseMatrix {
       this._ptr = [];
       this._size = [];
       this._fromDenseArray(data._data);
+      this._datatype = data._datatype;
       return;
     }
     if ('_data' in data) {
@@ -681,7 +683,11 @@ export class MathJSSparseMatrix {
    * of size [n, 1], as in mathjs.
    */
   private _fromDenseArray(input: unknown[][] | unknown[]): void {
-    // A sparse matrix has two axes. A 1-D array is a column, so only 3 or more axes are refused.
+    // A sparse matrix has two axes. A value that is not an Array has no axis.
+    if (!Array.isArray(input)) {
+      throw new RangeError('Matrix must be two dimensional (size: [])');
+    }
+    // A 1-D array is a column, so only 3 or more axes are refused.
     const inputSize = arraySize(input);
     if (inputSize.length > 2) {
       throw new RangeError('Matrix must be two dimensional (size: ' + formatSize(inputSize) + ')');

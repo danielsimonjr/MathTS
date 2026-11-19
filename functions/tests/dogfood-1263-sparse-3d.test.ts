@@ -93,3 +93,48 @@ describe('#1263 a plain object with dense fields is not a dense matrix', () => {
     );
   });
 });
+
+describe('#1263 inputs with no axis, a datatype string and a dense datatype', () => {
+  it('a { data } object whose data is not an Array throws RangeError', () => {
+    expect(call(() => new MathJSSparseMatrix({ data: 5 } as never))).toThrow(
+      new RangeError('Matrix must be two dimensional (size: [])')
+    );
+  });
+
+  it('a boolean, a bigint and NaN have no axis and throw RangeError', () => {
+    for (const v of [0, NaN, true, false, 5n]) {
+      expect(call(() => sparse(v))).toThrow(
+        new RangeError('Matrix must be two dimensional (size: [])')
+      );
+    }
+  });
+
+  it('a string builds the empty matrix, as on main', () => {
+    expect((sparse('number') as M).size()).toEqual([0, 0]);
+    expect((sparse('') as M).size()).toEqual([0, 0]);
+    expect((sparse('number') as M).valueOf()).toEqual([]);
+  });
+
+  it('the sparse copy of a dense matrix keeps its datatype', () => {
+    const d = matrix([
+      [1, 0],
+      [0, 2],
+    ]) as unknown as { _datatype?: string };
+    d._datatype = 'number';
+    expect((sparse(d) as unknown as { _datatype?: string })._datatype).toBe('number');
+  });
+
+  it('the copy of a sparse matrix shares no array with its source', () => {
+    const s = sparse([
+      [1, 0],
+      [0, 2],
+    ]) as unknown as MathJSSparseMatrix;
+    const c = sparse(s) as unknown as MathJSSparseMatrix;
+    expect(c).not.toBe(s);
+    expect(c._values).not.toBe(s._values);
+    expect(c._index).not.toBe(s._index);
+    expect(c._ptr).not.toBe(s._ptr);
+    expect(c._size).not.toBe(s._size);
+    expect(c.valueOf()).toEqual(s.valueOf());
+  });
+});
