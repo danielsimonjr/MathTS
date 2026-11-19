@@ -74,4 +74,49 @@ describe('hessenbergForm is scale-free (#1199)', () => {
     ]);
     expect(H[2][0]).toBe(0);
   });
+  // Entries of very different size: no column of the O(1) block may be skipped.
+  const base = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [2, 1, 4, 3],
+    [1, 3, 2, 5],
+  ];
+  const absErr = (A: number[][], scaleOf: (i: number, j: number) => number): number => {
+    const { H, Q } = hessenbergForm(A);
+    const R = mm(mm(Q, H), tr(Q));
+    let e = 0;
+    for (let i = 0; i < 4; i++)
+      for (let j = 0; j < 4; j++) e = Math.max(e, Math.abs(R[i][j] - A[i][j]) / scaleOf(i, j));
+    return e;
+  };
+
+  it.each([1e150, 1e200, 1e300, 1e308])('graded A[0][0] = %s keeps the O(1) block exact', (B) => {
+    const A = base.map((r) => r.slice());
+    A[0][0] = B;
+    expect(absErr(A, (i, j) => (i === 0 && j === 0 ? B : 1))).toBeLessThan(1e-14);
+  });
+
+  it.each([1e150, 1e300])('graded A[3][3] = %s is finite and normwise accurate', (B) => {
+    const A = base.map((r) => r.slice());
+    A[3][3] = B;
+    expect(absErr(A, () => B)).toBeLessThan(1e-14);
+  });
+
+  it.each([1e-20, 1e-100, 1e-300])(
+    'a tail of size %s next to a unit entry is reduced, not dropped',
+    (t) => {
+      const A = base.map((r, i) => r.map((x, j) => (i === 0 && j === 0 ? 1 : x * t)));
+      expect(absErr(A, (i, j) => (i === 0 && j === 0 ? 1 : t))).toBeLessThan(1e-14);
+    }
+  );
+
+  it('reduces [[1e10,1,1,1],[1e-10,1,1,1],...] to a valid form', () => {
+    const A = [
+      [1e10, 1, 1, 1],
+      [1e-10, 1, 1, 1],
+      [1e-10, 1, 1, 1],
+      [1e-10, 1, 1, 1],
+    ];
+    expect(absErr(A, () => 1e10)).toBeLessThan(1e-14);
+  });
 });
