@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 42 files
+- **functions/utils**: 43 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 585            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 586            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3353,6 +3353,7 @@ graph LR
 | ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
+| `../../utils/string.js`            | `format`                                                             | Import             |
 | `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
@@ -4110,15 +4111,22 @@ graph LR
 
 ### `functions/src/arithmetic/hypot.ts` - Calculate the hypotenuse of a list with values. The hypotenuse is defined as:
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../types.js`               | `BigNumber`     | Import (type-only) |
-| `../utils/array.js`         | `flatten`       | Import             |
-| `../utils/is.js`            | `isComplex`     | Import             |
+| File                          | Imports         | Type               |
+| ----------------------------- | --------------- | ------------------ |
+| `../utils/factory.js`         | `factory`       | Import             |
+| `../core/function/typed.js`   | `TypedFunction` | Import (type-only) |
+| `../types.js`                 | `BigNumber`     | Import (type-only) |
+| `../utils/array.js`           | `flatten`       | Import             |
+| `../utils/is.js`              | `isComplex`     | Import             |
+| `../utils/bignumber-hypot.js` | `bigHypot`      | Import             |
 
 **Exports:**
 
@@ -4282,16 +4290,18 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import  |
-| ---------------------------- | ------- |
-| `@danielsimonjr/mathts-core` | `norm2` |
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+| `@danielsimonjr/mathts-core` | `norm2`     |
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                          | Imports                     | Type               |
+| ----------------------------- | --------------------------- | ------------------ |
+| `../utils/bignumber-hypot.js` | `bigHypot, pNormSumInRange` | Import             |
+| `../utils/factory.js`         | `factory`                   | Import             |
+| `../core/function/typed.js`   | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -6617,16 +6627,18 @@ graph LR
 
 | Package                      | Import           |
 | ---------------------------- | ---------------- |
+| `@danielsimonjr/mathts-core` | `BigNumber`      |
 | `@danielsimonjr/mathts-core` | `scaledDistance` |
 
 **Internal Dependencies:**
 
-| File                        | Imports           | Type               |
-| --------------------------- | ----------------- | ------------------ |
-| `../utils/is.js`            | `isBigNumber`     | Import             |
-| `../utils/factory.js`       | `factory`         | Import             |
-| `../types.js`               | `MathNumericType` | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
+| File                          | Imports                     | Type               |
+| ----------------------------- | --------------------------- | ------------------ |
+| `../utils/bignumber-hypot.js` | `bigHypot, pNormSumInRange` | Import             |
+| `../utils/is.js`              | `isBigNumber`               | Import             |
+| `../utils/factory.js`         | `factory`                   | Import             |
+| `../types.js`                 | `MathNumericType`           | Import (type-only) |
+| `../core/function/typed.js`   | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -11736,6 +11748,7 @@ graph LR
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
 | `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
+| `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
 | `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
 | `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
@@ -12785,12 +12798,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                                                                             | Type               |
-| -------------------------- | ----------------------------------------------------------------------------------- | ------------------ |
-| `./complex-promotion.js`   | `acscReal, asecReal, staysRealAbsAtLeastOne, staysRealAcosh, staysRealUnitInterval` | Import             |
-| `./f64-kernels.js`         | `f64Unary, f64UnaryDispatched, unaryCollection`                                     | Import             |
-| `./public-type-exports.js` | `PublicCos, PublicSin, PublicTan`                                                   | Import (type-only) |
-| `./trig-angle-unit.js`     | `trigFromAngleUnit`                                                                 | Import             |
+| File                          | Imports                                                                             | Type               |
+| ----------------------------- | ----------------------------------------------------------------------------------- | ------------------ |
+| `./complex-promotion.js`      | `acscReal, asecReal, staysRealAbsAtLeastOne, staysRealAcosh, staysRealUnitInterval` | Import             |
+| `../utils/bignumber-hypot.js` | `bigHypot`                                                                          | Import             |
+| `./f64-kernels.js`            | `f64Unary, f64UnaryDispatched, unaryCollection`                                     | Import             |
+| `./public-type-exports.js`    | `PublicCos, PublicSin, PublicTan`                                                   | Import (type-only) |
+| `./trig-angle-unit.js`        | `trigFromAngleUnit`                                                                 | Import             |
 
 **Exports:**
 
@@ -12941,6 +12955,20 @@ graph LR
 
 - Interfaces: `PrecisionClass`
 - Functions: `atWorkPrecision`
+
+---
+
+### `functions/src/utils/bignumber-hypot.ts` - The square root of the sum of the squares of real values, `sqrt(sum(x^2))`, where at least one
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
+**Exports:**
+
+- Functions: `bigHypot`, `pNormSumInRange`
 
 ---
 
@@ -20800,9 +20828,9 @@ graph LR
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
+| `functions/src/typed/arithmetic`                       | 14 files     | 10 files   |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `functions/src/typed/arithmetic`                       | 13 files     | 10 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
@@ -21361,11 +21389,11 @@ graph TD
         N365[nearlyEqual]
         N366[round-decimals]
         N367[work-precision]
-        N368[clone]
-        N369[collection]
-        N370[complex]
-        N371[customs]
-        N372[...32 more]
+        N368[bignumber-hypot]
+        N369[clone]
+        N370[collection]
+        N371[complex]
+        N372[...33 more]
     end
 
     subgraph Functions/wasm
@@ -21714,14 +21742,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1348   |
+| Total TypeScript Files  | 1349   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237498 |
-| Total Exports           | 7390   |
+| Total Lines of Code     | 237999 |
+| Total Exports           | 7392   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2573   |
+| Total Functions         | 2575   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
