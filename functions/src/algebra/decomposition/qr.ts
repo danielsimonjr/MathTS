@@ -580,6 +580,15 @@ export const createQr = /* #__PURE__ */ factory(
     }
 
     function _denseQR(m: DenseMatrix): QRResult {
+      // Empty input: no Householder step runs. Q is the complete m x m identity (m = 0 gives an
+      // empty Q) and R is the input itself (m x n with m = 0 or n = 0), as NumPy mode='complete'.
+      if (m._size.length === 0 || m._size.some((d) => d === 0)) {
+        const rows = m._size[0] ?? 0;
+        return {
+          Q: rows > 0 ? identity([rows], 'dense') : matrix([], 'dense'),
+          R: m.clone(),
+        } as QRResult;
+      }
       const ret = _denseQRScaled(m);
       const Rdata = ret.R._data as unknown[][];
       if ((m._data as unknown[][]).length > 0) {
