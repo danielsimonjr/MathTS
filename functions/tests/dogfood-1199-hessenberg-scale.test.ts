@@ -46,13 +46,9 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       expect(fro(rec) / fro(A)).toBeLessThan(1e-14);
       const qtq = mm(tr(Q), Q).map((r, i) => r.map((x, j) => x - (i === j ? 1 : 0)));
       expect(fro(qtq)).toBeLessThan(1e-14);
-      // The kernel zeroes the entries below the subdiagonal in a cleanup loop, so a check
-      // of those entries cannot fail. Reconstruction (cleaned H) catches a wrong reflector.
-      // Similarity invariants: trace(H) = trace(A) and ||H||_F = ||A||_F (Q orthogonal).
-      const trH = Hu.reduce((s, r, i) => s + r[i], 0);
-      const trA = A.reduce((s, r, i) => s + r[i], 0);
-      expect(Math.abs(trH - trA) / fro(A)).toBeLessThan(TOL);
-      expect(Math.abs(fro(Hu) - fro(A)) / fro(A)).toBeLessThan(TOL);
+      // HessenbergResult promises exact zeros below the first subdiagonal. This check pins
+      // the cleanup contract: no other check fails when the cleanup loop is removed.
+      for (let i = 2; i < n; i++) for (let j = 0; j < i - 1; j++) expect(H[i][j]).toBe(0);
     });
   }
 
