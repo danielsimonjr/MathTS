@@ -45,3 +45,21 @@ describe('instance evaluator matches the module-level evaluator', () => {
     }
   });
 });
+
+describe('createInstanceEvaluator hidden names (#1216)', () => {
+  it('does not resolve a hidden name, safe or unsafe; the module scope keeps it', () => {
+    const hidden = createInstanceEvaluator({}, ['GL4_A', 'sin']);
+    expect(() => hidden.evaluate('GL4_A')).toThrow();
+    expect(() => hidden.evaluate('sin(0)')).toThrow();
+    expect(() => hidden.evaluate('sin(0)', {}, { unsafe: true })).toThrow();
+    expect(() => hidden.compile('GL4_A').evaluate()).toThrow();
+    expect(hidden.evaluate('cos(0)')).toBe(1);
+    expect(evaluate('sin(0)')).toBe(0);
+    expect(() => evaluate('GL4_A')).not.toThrow();
+  });
+
+  it('resolves an imported name that is in the hidden list', () => {
+    const imported = createInstanceEvaluator({ GL4_A: 5 }, ['GL4_A']);
+    expect(imported.evaluate('GL4_A')).toBe(5);
+  });
+});

@@ -245,6 +245,19 @@ describe('Typed Bitwise Functions', () => {
   // ---------------------------------------------------------------------------
 
   describe('BigNumber scalar', () => {
+    it('takes an integer that toString writes in exponential notation (#1204)', () => {
+      // With the defaults, toString writes an order of 1e6 or more in exponential notation.
+      BigNumber.config({ toExpPos: 21 });
+      try {
+        const x = BigNumber.parse('1e25');
+        expect(x.toString()).toBe('1e+25');
+        expect((bitAnd(x, x) as BigNumber).toFixed()).toBe('1' + '0'.repeat(25));
+        expect((bitOr(x, bn(1)) as BigNumber).toFixed()).toBe('1' + '0'.repeat(24) + '1');
+      } finally {
+        BigNumber.resetConfig();
+      }
+    });
+
     const bn = (n: number | string): BigNumber =>
       typeof n === 'number' ? BigNumber.fromNumber(n) : BigNumber.parse(n);
 

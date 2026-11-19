@@ -66,9 +66,9 @@ function bigNumberToBigInt(value: BigNumber, fnName: string): bigint {
   if (!value.isInteger()) {
     throw new Error(`Integers expected in function ${fnName}`);
   }
-  // BigNumber.toString() emits a base-10 integer for integer values;
-  // BigInt() accepts that directly.
-  return BigInt(value.toString());
+  // `toString` writes exponential notation for an order of 1e6 or more, which `BigInt()` does
+  // not accept (#1204). `toBigInt` reads the coefficient and the exponent.
+  return value.toBigInt();
 }
 
 /**
