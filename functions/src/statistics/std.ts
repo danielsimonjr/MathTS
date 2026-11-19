@@ -2,7 +2,7 @@ import { factory } from '../utils/factory.js';
 import { isBigNumber, isCollection } from '../utils/is.js';
 import { deepForEach } from '../utils/collection.js';
 import { isDegenerate } from '../utils/real-scale.js';
-import { normalizationDivisor, scaledStd } from './utils/scaledStd.js';
+import { normalizationDivisor, pickScaledStd, scaledStd } from './utils/scaledStd.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for std
@@ -122,7 +122,7 @@ export const createStd = /* #__PURE__ */ factory(
     function _scaledSlice(slice: unknown, normalization: string, plain: unknown): unknown {
       if (!isDegenerate(plain)) return plain;
       const divisor = normalizationDivisor(normalization);
-      return (divisor && scaledStd(_leaves(slice), divisor)) ?? plain;
+      return pickScaledStd(plain, divisor && scaledStd(_leaves(slice), divisor));
     }
 
     function _scaled(args: unknown[], plainResult: unknown): unknown {

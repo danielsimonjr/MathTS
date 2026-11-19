@@ -191,6 +191,13 @@ describe.each(['std', 'factory_std'])('#1257 %s', (name) => {
   it('a constant list is 0', () => {
     expect(Number(big(std([b('1e200'), b('1e200')])).toString())).toBe(0);
   });
+  it('keeps a plain 0 of in-range values (no rounding noise from the scaled path)', () => {
+    const xs = new Array(1e4).fill(0.1);
+    expect(std(xs)).toBe(0);
+    expect(std(xs, 'uncorrected')).toBe(0);
+    expect(std([xs, xs], 1)).toEqual([0, 0]);
+    expect(Number(big(std(new Array(100).fill(b('0.1')))).toString())).toBe(0);
+  });
 });
 
 describe('#1257 std with a normalization string and an options object', () => {

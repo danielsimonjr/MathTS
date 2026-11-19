@@ -1,5 +1,5 @@
-import type { BigNumber } from '@danielsimonjr/mathts-core';
-import { realScale } from '../../utils/real-scale.js';
+import { BigNumber } from '@danielsimonjr/mathts-core';
+import { realScale, squaresLeaveRange } from '../../utils/real-scale.js';
 
 type Real = number | BigNumber;
 
@@ -77,3 +77,27 @@ export function normalizationDivisor(normalization: string): ((n: number) => num
       return undefined;
   }
 }
+
+/**
+ * The result to return when the plain std is NaN, infinite or 0 and `scaled` is the scaled
+ * recomputation (`undefined` when it does not apply). A plain NaN or infinity is a square that
+ * overflowed, so the scaled result replaces it. A plain 0 is a defect only when the variance
+ * underflowed, that is when the square of the scaled result leaves the range of the type. Else
+ * the plain 0 stays: the scaled formula sums in a different order, so on values whose deviations
+ * cancel to 0 it gives rounding noise instead (#1257).
+ */
+export function pickScaledStd(plain: unknown, scaled: Real | undefined): unknown {
+  if (scaled === undefined) return plain;
+  const plainZero = plain instanceof BigNumber ? plain.isZero() : plain === 0;
+  if (!plainZero) return scaled;
+  return squareUnderflows(scaled) ? scaled : plain;
+}
+
+/** The square of `r` is 0 or below the smallest positive normal value of the type. */
+function squareUnderflows(r: Real): boolean {
+  if (r instanceof BigNumber) return r.isZero() || squaresLeaveRange(r.e, 1);
+  return r * r < MIN_NORMAL;
+}
+
+/** The smallest positive normal double, 2^-1022. */
+const MIN_NORMAL = 2 ** -1022;

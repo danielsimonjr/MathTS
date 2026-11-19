@@ -11,7 +11,12 @@ import { BigNumber } from '@danielsimonjr/mathts-core';
 export interface RealScale {
   /** `true` when the scale is a power of 10 and every value is a BigNumber. */
   readonly big: boolean;
-  /** The decimal order of the largest absolute value. */
+  /**
+   * The decimal order of the largest absolute value: the exponent of its scientific notation
+   * (`BigNumber.e`, so 0 for 1 to 9.99, 200 for 3e200). This is the order that core compares
+   * with `minExponent` and `maxExponent`. A count of the digits before the point (that order
+   * plus 1) is a different convention.
+   */
   readonly order: number;
   /** The values divided by the scale. */
   down(value: number | BigNumber): number | BigNumber;

@@ -38,7 +38,7 @@ import {
   sumSquaredDeviationsChecked,
 } from '@danielsimonjr/mathts-core';
 import { isDegenerate as isDegenerateReal } from '../utils/real-scale.js';
-import { normalizationDivisor, scaledStd } from '../statistics/utils/scaledStd.js';
+import { normalizationDivisor, pickScaledStd, scaledStd } from '../statistics/utils/scaledStd.js';
 import {
   finiteNumbers,
   normalizationFromSecondArg,
@@ -2560,7 +2560,8 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     return out;
   };
   const one = (ys: ArrayLike<unknown>): unknown => scaledStd(leavesOf(ys), divisorOf);
-  if (dim === undefined) return one(xs) ?? result;
+  // pickScaledStd keeps a plain 0 whose square did not underflow (see its comment).
+  if (dim === undefined) return pickScaledStd(result, one(xs) as ReturnType<typeof scaledStd>);
   if (!Array.isArray(result) || !Number.isInteger(dim) || dim < 0 || dim >= arrayDepth(xs)) {
     return result;
   }
@@ -2569,7 +2570,7 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     Array.isArray(plain) && Array.isArray(fixed) && plain.length === fixed.length
       ? plain.map((p, i) => merge(p, fixed[i]))
       : isBad(plain)
-        ? (fixed ?? plain)
+        ? pickScaledStd(plain, fixed as ReturnType<typeof scaledStd>)
         : plain;
   return merge(result, scaled);
 }
