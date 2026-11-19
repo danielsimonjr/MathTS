@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { format } from '../../utils/string.js';
 import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -8,7 +9,6 @@ import {
   SQUARED,
   entryRange,
   ldexp,
-  ldexpMatrix,
   withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
 
@@ -609,33 +609,31 @@ export const createQr = /* #__PURE__ */ factory(
       }
       const data = src._data as unknown[][];
       if (data.length === 0) return _denseQRimpl(src, true);
-      if (matrixAllNumbers(data)) {
-        return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
-          if (e === 0) return _denseQRimpl(src, true);
-          const scaled = src.clone();
-          ldexpMatrix(scaled._data as number[][], e);
-          const ret = _denseQRimpl(scaled, true);
-          ldexpMatrix(ret.R._data as number[][], -e);
-          return ret;
-        });
-      }
-      const parts = complexParts(data);
+      const real = matrixAllNumbers(data);
+      const parts = real ? (data as number[][]) : complexParts(data);
       if (parts === null) return _denseQRimpl(src, false);
       return withPow2Scale(entryRange(parts), UNIT_FLOOR_LO, SQUARED, (e) => {
-        if (e === 0) return _denseQRimpl(src, false);
+        if (e === 0) return _denseQRimpl(src, real);
         const scaled = src.clone();
         ldexpEntries(scaled._data as unknown[][], e);
-        const ret = _denseQRimpl(scaled, false);
+        const ret = _denseQRimpl(scaled, real);
         ldexpEntries(ret.R._data as unknown[][], -e);
         return ret;
       });
     }
 
     function _denseQR(m: DenseMatrix): QRResult {
+      // qr factors a two dimensional matrix; the size check runs before the empty-input branch so
+      // that a size such as [1, 1, 0] is not read as a 1 x 0 matrix. The empty vector (size [0])
+      // is the one non-2-D input that passes: it keeps the empty result.
+      const size = m._size;
+      if (size.length !== 2 && !(size.length === 1 && size[0] === 0)) {
+        throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
+      }
       // Empty input: no Householder step runs. Q is the complete m x m identity (m = 0 gives a
       // 0 x 0 Q) and R is a copy of the input (m x n with m = 0 or n = 0), as NumPy mode='complete'.
-      if (m._size.length === 0 || m._size.some((d) => d === 0)) {
-        const rows = m._size[0] ?? 0;
+      if (size.some((d) => d === 0)) {
+        const rows = size[0];
         return {
           Q: rows > 0 ? identity([rows], 'dense') : zeros([0, 0], 'dense'),
           R: m.clone(),
