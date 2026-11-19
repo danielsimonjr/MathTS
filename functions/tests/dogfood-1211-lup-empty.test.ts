@@ -3,9 +3,9 @@
  *
  * For an m x n input with a zero dimension, L is m x k and U is k x n
  * (k = min(m, n)), and p is the identity on the m rows. This is the shape
- * that slu (#1209) and qr (#1205) return. Array input returns nested Arrays
+ * that slu (#1209) returns. Array input returns nested Arrays
  * that keep the shape (a 1 x 0 L is [[]]), as the non-empty Array path does.
- * size() never holds undefined.
+ * size() never holds undefined or NaN.
  */
 
 import { describe, it, expect } from 'vitest';
