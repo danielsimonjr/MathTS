@@ -19,7 +19,7 @@
 
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
-import { isInternalName } from './internal-names.js';
+import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
@@ -201,22 +201,18 @@ interface MathInstanceOverrides {
   NaN: typeof shims.NaN;
 }
 
-/** The names that a compat instance does not surface (#1216); the shape of isInternalName. */
-type InternalName<K extends string> = K extends `factory_${string}`
-  ? K
-  : K extends Uppercase<K>
-    ? K
-    : never;
-
 /**
  * The compat instance: every export of the functions namespace (`create(all)` surfaces
  * them all) except the internal names (#1216) with the compat-specific members above taking precedence. No index signature.
  */
 export type MathInstance = Omit<
   typeof mathFunctions,
-  keyof MathInstanceOverrides | InternalName<Extract<keyof typeof mathFunctions, string>>
+  keyof MathInstanceOverrides | CompatInternalName
 > &
   MathInstanceOverrides;
+
+/** The internal names of the functions namespace (#1216). */
+const INTERNAL_NAMES: ReadonlySet<string> = new Set(COMPAT_INTERNAL_NAMES);
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
@@ -491,8 +487,12 @@ export function create(
   // name is on a prototype level below it (see instance-layout.ts). Both stay in V8
   // fast mode, so `math.x` is not a dictionary lookup.
   const parityNames = new Set(MATHJS_PARITY_NAMES);
-  // Internal names (#1216) are not surfaced: not own, not inherited.
-  const flatKeys = Object.keys(flat).filter((key) => !isInternalName(key, parityNames));
+  // Internal names of the functions namespace (#1216) are not surfaced: not own, not
+  // inherited. A value that the caller supplies under such a name stays (#1250).
+  const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const flatKeys = Object.keys(flat).filter(
+    (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
+  );
   const inheritedKeys = flatKeys.filter((key) => !parityNames.has(key));
   const { levels, perLevel } = createPrototypeLevels(inheritedKeys.length);
   const instance = Object.create(levels[0] ?? Object.prototype) as Record<string, unknown>;

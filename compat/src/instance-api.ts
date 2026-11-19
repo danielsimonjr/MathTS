@@ -14,6 +14,7 @@ import {
 } from '@danielsimonjr/mathts-functions';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
+import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
 type ImportableFactories = Parameters<typeof importFactory>[3];
@@ -87,14 +88,17 @@ export function wireMathjsInstanceApi(
     importedFactories
   );
 
-  let evaluator = createInstanceEvaluator(expressionLayers.mathWithTransform);
+  let evaluator = createInstanceEvaluator(
+    expressionLayers.mathWithTransform,
+    COMPAT_INTERNAL_NAMES
+  );
 
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
   function rebindEvaluator(): void {
     scrubDenylist(expressionLayers.mathWithTransform);
-    evaluator = createInstanceEvaluator(expressionLayers.mathWithTransform);
+    evaluator = createInstanceEvaluator(expressionLayers.mathWithTransform, COMPAT_INTERNAL_NAMES);
     instance.evaluate = runBound(evaluator.evaluate);
     instance.compile = runBound(evaluator.compile);
     instance.compileExpr = instance.compile;

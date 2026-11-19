@@ -140,7 +140,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/src/index.ts`                                                             | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/instance-api.ts`                                                      | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/instance-layout.ts`                                                   | @danielsimonjr/mathts-compat         | src      | build-entry |
-| `compat/src/internal-names.ts`                                                    | @danielsimonjr/mathts-compat         | src      | build-entry |
+| `compat/src/internal-names.generated.ts`                                          | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/parity-names.generated.ts`                                            | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/shims.ts`                                                             | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/unary-fast-path.ts`                                                   | @danielsimonjr/mathts-compat         | src      | build-entry |

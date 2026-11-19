@@ -46436,8 +46436,8 @@
             "imports": ["MATHJS_PARITY_NAMES"]
           },
           {
-            "file": "./internal-names.js",
-            "imports": ["isInternalName"]
+            "file": "./internal-names.generated.js",
+            "imports": ["COMPAT_INTERNAL_NAMES", "CompatInternalName"]
           },
           {
             "file": "./instance-layout.js",
@@ -46546,6 +46546,10 @@
             "file": "./index.js",
             "imports": ["MathJSConfig"],
             "typeOnly": true
+          },
+          {
+            "file": "./internal-names.generated.js",
+            "imports": ["COMPAT_INTERNAL_NAMES"]
           }
         ],
         "workspaceDependencies": [
@@ -46586,14 +46590,14 @@
         "functions": ["createPrototypeLevels", "definePrototypeAccessor"],
         "constants": ["PROTOTYPE_LEVEL_CAP"]
       },
-      "compat/src/internal-names.ts": {
-        "description": "Internal names of the functions namespace (#1216).",
+      "compat/src/internal-names.generated.ts": {
+        "description": "The internal names of the functions namespace (#1216), sorted: the `factory_*`",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["isInternalName"],
-        "functions": ["isInternalName"]
+        "exports": ["COMPAT_INTERNAL_NAMES"],
+        "constants": ["COMPAT_INTERNAL_NAMES"]
       },
       "compat/src/parity-names.generated.ts": {
         "description": "The own keys of the mathjs 15.2.0 instance `create(all)`, sorted.",
@@ -49695,7 +49699,7 @@
           "compat/src/index.ts",
           "compat/src/instance-api.ts",
           "compat/src/instance-layout.ts",
-          "compat/src/internal-names.ts",
+          "compat/src/internal-names.generated.ts",
           "compat/src/parity-names.generated.ts",
           "compat/src/shims.ts",
           "compat/src/unary-fast-path.ts"
@@ -49752,14 +49756,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1348,
     "totalModules": 82,
-    "totalLinesOfCode": 236964,
+    "totalLinesOfCode": 237053,
     "totalExports": 7389,
     "totalClasses": 62,
     "totalInterfaces": 668,
-    "totalFunctions": 2573,
-    "totalTypeGuards": 184,
+    "totalFunctions": 2572,
+    "totalTypeGuards": 183,
     "totalEnums": 0,
-    "totalConstants": 1693,
+    "totalConstants": 1694,
     "totalReExports": 3191,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,

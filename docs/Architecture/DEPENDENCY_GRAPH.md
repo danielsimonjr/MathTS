@@ -20144,16 +20144,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                          | Type      |
-| ----------------------------- | ------------------------------------------------ | --------- |
-| `./shims.js`                  | `shims`                                          | Import    |
-| `./parity-names.generated.js` | `MATHJS_PARITY_NAMES`                            | Import    |
-| `./internal-names.js`         | `isInternalName`                                 | Import    |
-| `./instance-layout.js`        | `createPrototypeLevels, definePrototypeAccessor` | Import    |
-| `./unary-fast-path.js`        | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
-| `./chain.js`                  | `createChain, Chain`                             | Import    |
-| `./instance-api.js`           | `wireMathjsInstanceApi, WiredCompatInstance`     | Import    |
-| `./shims.js`                  | `*`                                              | Re-export |
+| File                            | Imports                                          | Type      |
+| ------------------------------- | ------------------------------------------------ | --------- |
+| `./shims.js`                    | `shims`                                          | Import    |
+| `./parity-names.generated.js`   | `MATHJS_PARITY_NAMES`                            | Import    |
+| `./internal-names.generated.js` | `COMPAT_INTERNAL_NAMES, CompatInternalName`      | Import    |
+| `./instance-layout.js`          | `createPrototypeLevels, definePrototypeAccessor` | Import    |
+| `./unary-fast-path.js`          | `UNARY_NUMBER_FAST_PATH, UnaryNumberFastPath`    | Import    |
+| `./chain.js`                    | `createChain, Chain`                             | Import    |
+| `./instance-api.js`             | `wireMathjsInstanceApi, WiredCompatInstance`     | Import    |
+| `./shims.js`                    | `*`                                              | Re-export |
 
 **Exports:**
 
@@ -20177,9 +20177,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File         | Imports        | Type               |
-| ------------ | -------------- | ------------------ |
-| `./index.js` | `MathJSConfig` | Import (type-only) |
+| File                            | Imports                 | Type               |
+| ------------------------------- | ----------------------- | ------------------ |
+| `./index.js`                    | `MathJSConfig`          | Import (type-only) |
+| `./internal-names.generated.js` | `COMPAT_INTERNAL_NAMES` | Import             |
 
 **Exports:**
 
@@ -20197,11 +20198,12 @@ graph LR
 
 ---
 
-### `compat/src/internal-names.ts` - Internal names of the functions namespace (#1216).
+### `compat/src/internal-names.generated.ts` - The internal names of the functions namespace (#1216), sorted: the `factory_*`
 
 **Exports:**
 
-- Functions: `isInternalName`
+- Types: `CompatInternalName`
+- Constants: `COMPAT_INTERNAL_NAMES`
 
 ---
 
@@ -21585,7 +21587,7 @@ graph TD
         N505[index]
         N506[instance-api]
         N507[instance-layout]
-        N508[internal-names]
+        N508[internal-names.generated]
         N509[parity-names.generated]
         N510[shims]
         N511[unary-fast-path]
@@ -21710,13 +21712,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1348   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236964 |
+| Total Lines of Code     | 237053 |
 | Total Exports           | 7389   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2573   |
-| Total Type Guards       | 184    |
+| Total Functions         | 2572   |
+| Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |

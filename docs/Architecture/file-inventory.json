@@ -520,14 +520,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 625
+      "loc": 626
     },
     {
       "file": "compat/src/instance-api.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 126
+      "loc": 127
     },
     {
       "file": "compat/src/instance-layout.ts",
@@ -537,11 +537,11 @@
       "loc": 93
     },
     {
-      "file": "compat/src/internal-names.ts",
+      "file": "compat/src/internal-names.generated.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 29
+      "loc": 97
     },
     {
       "file": "compat/src/parity-names.generated.ts",
@@ -702,7 +702,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 88
+      "loc": 173
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -6792,7 +6792,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 623
+      "loc": 642
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -12091,7 +12091,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 48
+      "loc": 66
     },
     {
       "file": "functions/tests/integer-matrices.test.ts",

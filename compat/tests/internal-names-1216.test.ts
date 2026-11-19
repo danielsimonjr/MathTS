@@ -1,20 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
-import { all, create } from '../src/index.js';
-import { isInternalName } from '../src/internal-names.js';
+import { all, create, type MathInstance } from '../src/index.js';
+import { COMPAT_INTERNAL_NAMES } from '../src/internal-names.generated.js';
 import { MATHJS_PARITY_NAMES } from '../src/parity-names.generated.js';
 
-const parity = new Set(MATHJS_PARITY_NAMES);
-const isInternal = (key: string): boolean => isInternalName(key, parity);
+const INTERNAL = new Set<string>(COMPAT_INTERNAL_NAMES);
 
-/** The internal names that the functions namespace exports today. */
+/** The ALL_CAPS internal names that the functions namespace exports today. */
 const INTERNAL_CONSTANTS = [
   'ARRAY_WORKER_THRESHOLD',
   'CAS_BATCH_THRESHOLD',
   'CENTRALITY_WORKER_THRESHOLD',
   'DEFAULT_MUTATION_WEIGHTS',
   'DIST_WORKER_THRESHOLD',
-  'EARTH_RADIUS_KM',
   'EVALUATE_SCOPE_OMIT',
   'GAUSS_WORKER_THRESHOLD',
   'GL4_A',
@@ -28,28 +26,48 @@ const INTERNAL_CONSTANTS = [
   'WASM_INTERP_THRESHOLD',
 ];
 
-describe('compat instance hides the internal names of the functions namespace (#1216)', () => {
-  const internalExports = Object.keys(mathFunctions).filter(isInternal);
+/** Internal names that the expression scope of the functions package resolves. */
+const resolvesInFunctionsEvaluate = (key: string): boolean => {
+  try {
+    (mathFunctions.evaluate as (expr: string) => unknown)(key);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
-  it('the functions namespace still exports the internal names', () => {
-    expect(internalExports.filter((k) => k.startsWith('factory_')).length).toBeGreaterThan(40);
-    for (const key of INTERNAL_CONSTANTS) expect(internalExports).toContain(key);
+const forInNames = (math: Record<string, unknown>): string[] => {
+  const out: string[] = [];
+  for (const key in math) out.push(key);
+  return out;
+};
+
+describe('compat instance hides the internal names of the functions namespace (#1216)', () => {
+  it('the generated list holds the factory_* functions and the internal constants', () => {
+    expect(COMPAT_INTERNAL_NAMES.filter((k) => k.startsWith('factory_')).length).toBe(64);
+    expect(COMPAT_INTERNAL_NAMES.filter((k) => !k.startsWith('factory_'))).toEqual(
+      INTERNAL_CONSTANTS
+    );
+    const exported = new Set(Object.keys(mathFunctions));
+    for (const key of COMPAT_INTERNAL_NAMES) expect(exported.has(key)).toBe(true);
   });
 
   it('no internal name is reachable through in, for...in, own names, keys or spread', () => {
     const math = create(all) as unknown as Record<string, unknown>;
-    const forIn: string[] = [];
-    for (const key in math) forIn.push(key);
-    const reached = [...internalExports, ...INTERNAL_CONSTANTS];
-    for (const key of reached) {
+    const forIn = forInNames(math);
+    for (const key of COMPAT_INTERNAL_NAMES) {
       expect(key in math).toBe(false);
       expect(forIn).not.toContain(key);
-      expect(Object.keys(math)).not.toContain(key);
       expect(Object.keys({ ...math })).not.toContain(key);
       expect(Object.getOwnPropertyNames(math)).not.toContain(key);
       expect(math[key]).toBeUndefined();
     }
-    expect(forIn.filter(isInternal)).toEqual([]);
+  });
+
+  it('keeps EARTH_RADIUS_KM, the default radius of haversine', () => {
+    const math = create(all) as unknown as Record<string, unknown>;
+    expect(math.EARTH_RADIUS_KM).toBe(mathFunctions.EARTH_RADIUS_KM);
+    expect(forInNames(math)).toContain('EARTH_RADIUS_KM');
   });
 
   it('an internal name stays assignable as a plain own property', () => {
@@ -68,7 +86,7 @@ describe('compat instance hides the internal names of the functions namespace (#
   it('keeps every other name of the functions namespace and the parity names', () => {
     const math = create(all) as unknown as Record<string, unknown>;
     for (const key of Object.keys(mathFunctions)) {
-      if (!isInternal(key) && key !== 'default') expect(key in math).toBe(true);
+      if (!INTERNAL.has(key) && key !== 'default') expect(key in math).toBe(true);
     }
     const missing = MATHJS_PARITY_NAMES.filter((k) => !(k in math));
     expect(missing.length).toBe(KNOWN_MISSING_PARITY);
@@ -76,12 +94,79 @@ describe('compat instance hides the internal names of the functions namespace (#
 
   it('has a fixed instance key count', () => {
     const math = create(all) as unknown as Record<string, unknown>;
-    const forIn: string[] = [];
-    for (const key in math) forIn.push(key);
     expect(Object.keys(math).length).toBe(317);
-    expect(forIn.length).toBe(FOR_IN_COUNT);
+    expect(forInNames(math).length).toBe(1406 - COMPAT_INTERNAL_NAMES.length);
+  });
+});
+
+describe('create keeps the names of user factories (#1250)', () => {
+  it('keeps user names with the internal shape', () => {
+    const mine = (): number => 1;
+    const math = create({ MY_CONST: 5, R: 8.31, factory_mine: mine }) as unknown as Record<
+      string,
+      unknown
+    >;
+    expect(math.MY_CONST).toBe(5);
+    expect(math.R).toBe(8.31);
+    expect('factory_mine' in math).toBe(true);
+    expect(forInNames(math)).toEqual(expect.arrayContaining(['MY_CONST', 'R', 'factory_mine']));
+  });
+
+  it('keeps a user name added to all', () => {
+    const math = create({ ...all, X1: 7 }) as unknown as Record<string, unknown>;
+    expect(math.X1).toBe(7);
+    expect('GL4_A' in math).toBe(false);
+  });
+
+  it('keeps a user value under an internal name', () => {
+    const a = create({ ...all, GL4_A: 99 }) as unknown as Record<string, unknown>;
+    expect(a.GL4_A).toBe(99);
+    const b = create({ GL4_A: 99 }) as unknown as Record<string, unknown>;
+    expect(b.GL4_A).toBe(99);
+  });
+});
+
+describe('the expression scope of a compat instance hides the internal names (#1216)', () => {
+  const resolving = COMPAT_INTERNAL_NAMES.filter(resolvesInFunctionsEvaluate);
+
+  it('the functions package evaluate still resolves them', () => {
+    expect(resolving.length).toBeGreaterThan(60);
+  });
+
+  it('math.evaluate and math.compile do not resolve an internal name', () => {
+    const math = create(all);
+    for (const key of resolving) {
+      expect(() => math.evaluate(key)).toThrow();
+      expect(() => math.compile(key).evaluate()).toThrow();
+    }
+  });
+
+  it('math.import can define a name of the list', () => {
+    const math = create(all);
+    math.import({ GL4_A: 5 });
+    expect(math.evaluate('GL4_A')).toBe(5);
+  });
+
+  it('keeps the mathjs constants and functions', () => {
+    const math = create(all);
+    expect(math.evaluate('LN2')).toBe(Math.LN2);
+    expect(math.evaluate('sin(0)')).toBe(0);
+  });
+});
+
+describe('the MathInstance type omits the internal names (#1216)', () => {
+  it('rejects internal names and keeps EARTH_RADIUS_KM', () => {
+    const math = create(all);
+    // @ts-expect-error GL4_A is internal
+    void math.GL4_A;
+    // @ts-expect-error factory_abs is internal
+    void math.factory_abs;
+    const radius: number = math.EARTH_RADIUS_KM;
+    const ln2: number = math.LN2;
+    type Hidden = Extract<keyof MathInstance, (typeof COMPAT_INTERNAL_NAMES)[number]>;
+    const none: [Hidden] extends [never] ? true : false = true;
+    expect([radius, ln2, none]).toEqual([mathFunctions.EARTH_RADIUS_KM, Math.LN2, true]);
   });
 });
 
 const KNOWN_MISSING_PARITY = 85;
-const FOR_IN_COUNT = 1406 - 64 - 17;

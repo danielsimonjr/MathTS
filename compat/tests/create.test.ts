@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
 import { MATHJS_PARITY_NAMES } from '../src/parity-names.generated.js';
-import { isInternalName } from '../src/internal-names.js';
+import { COMPAT_INTERNAL_NAMES } from '../src/internal-names.generated.js';
 
 /**
  * EXPANSION_PLAN W5 — `compat` exposes the full functions surface.
@@ -84,9 +84,9 @@ describe('compat create(all) lazy wrapping', () => {
       return out;
     };
     const before = names();
-    const parity = new Set(MATHJS_PARITY_NAMES);
+    const internal = new Set<string>(COMPAT_INTERNAL_NAMES);
     for (const key of Object.keys(all)) {
-      if (!isInternalName(key, parity)) expect(before).toContain(key);
+      if (!internal.has(key)) expect(before).toContain(key);
     }
     expect(before).toContain('config');
     expect(before).toContain('chain');
