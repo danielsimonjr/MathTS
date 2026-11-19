@@ -5,8 +5,8 @@
  *    the value, and `toString` writes exponential notation outside `toExpNeg` / `toExpPos`.
  * 2. `minExponent` / `maxExponent` were declared and never read. A value whose order is above
  *    `maxExponent` is +-Infinity. A value whose order is below `minExponent` is 0 (decimal.js).
- * 3. An exponent sum above 2^53 was rounded. The exponents are now bounded by the config, so
- *    every sum is exact.
+ * 3. An exponent sum above 2^53 was rounded. The default bounds are +-9.007e15, below 2^53, so
+ *    every in-range exponent is exact and a larger sum overflows or underflows.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import { BigNumber } from '../src/types/bignumber.js';
@@ -83,7 +83,21 @@ describe('#1204 item 1: toString switches to exponential notation', () => {
 });
 
 describe('#1204 item 2: minExponent and maxExponent are enforced', () => {
-  it('overflows to Infinity and underflows to 0 at the default bounds', () => {
+  it('keeps the default bounds at +-9.007e15, so an order of 2e9 stays finite', () => {
+    expect(BigNumber.config().maxExponent).toBe(9.007e15);
+    expect(BigNumber.config().minExponent).toBe(-9.007e15);
+    expect(bn('1e2000000000').toString()).toBe('1e+2000000000');
+    expect(bn('-2.5e2000000000').isFinite()).toBe(true);
+    expect(bn('1e-2000000000').isZero()).toBe(false);
+    expect(bn('1e1000000000').multiply(bn('1e1000000000')).toString()).toBe('1e+2000000000');
+    expect(bn('1e9007000000000000').isFinite()).toBe(true);
+    expect(bn('1e9007000000000001').toString()).toBe('Infinity');
+    expect(bn('1e-9007000000000000').isZero()).toBe(false);
+    expect(bn('1e-9007000000000001').toString()).toBe('0');
+  });
+
+  it('overflows to Infinity and underflows to 0 at a bound of 1e9', () => {
+    BigNumber.config({ maxExponent: 1e9, minExponent: -1e9 });
     expect(bn('1e2000000000').toString()).toBe('Infinity');
     expect(bn('-1e2000000000').toString()).toBe('-Infinity');
     expect(bn('1e-2000000000').toString()).toBe('0');
@@ -104,6 +118,7 @@ describe('#1204 item 2: minExponent and maxExponent are enforced', () => {
   });
 
   it('applies the bounds to every operation that changes the exponent', () => {
+    BigNumber.config({ maxExponent: 1e9, minExponent: -1e9 });
     const big = bn('1e999999999');
     const small = bn('1e-999999999');
     expect(big.multiply(big).toString()).toBe('Infinity');
@@ -122,13 +137,16 @@ describe('#1204 item 2: minExponent and maxExponent are enforced', () => {
   it('rejects a config bound that is not an integer in range', () => {
     expect(() => BigNumber.config({ maxExponent: 1.5 })).toThrow(RangeError);
     expect(() => BigNumber.config({ maxExponent: -1 })).toThrow(RangeError);
-    expect(() => BigNumber.config({ maxExponent: 2e15 })).toThrow(RangeError);
+    expect(() => BigNumber.config({ maxExponent: 9.007e15 + 1 })).toThrow(/9007000000000000/);
+    expect(() => BigNumber.config({ toExpPos: 9.1e15 })).toThrow(RangeError);
     expect(() => BigNumber.config({ minExponent: 1 })).toThrow(RangeError);
-    expect(() => BigNumber.config({ minExponent: -2e15 })).toThrow(RangeError);
+    expect(() => BigNumber.config({ minExponent: -9.007e15 - 1 })).toThrow(RangeError);
+    BigNumber.config({ maxExponent: 9.007e15, minExponent: -9.007e15 });
+    BigNumber.config({ maxExponent: 1e15, minExponent: -1e15 });
     expect(() => BigNumber.config({ minExponent: NaN })).toThrow(RangeError);
     // A rejected call changes nothing.
-    expect(BigNumber.config().maxExponent).toBe(1e9);
-    expect(BigNumber.config().minExponent).toBe(-1e9);
+    expect(BigNumber.config().maxExponent).toBe(1e15);
+    expect(BigNumber.config().minExponent).toBe(-1e15);
   });
 
   it('keeps the RangeError for an exponent text above 2^53 - 1', () => {
@@ -139,8 +157,20 @@ describe('#1204 item 2: minExponent and maxExponent are enforced', () => {
 describe('#1204 item 3: exponent sums are exact', () => {
   it('gives Infinity, not a rounded exponent, for 3e4503599627370497 cubed', () => {
     const x = bn('3e4503599627370497');
+    expect(x.toExponential()).toBe('3e+4503599627370497');
+    expect(x.multiply(x).multiply(x).toString()).toBe('Infinity');
     expect(x.multiply(x).multiply(x).cbrt().toExponential()).toBe('Infinity');
-    expect(x.toExponential()).toBe('Infinity');
+  });
+
+  it('overflows or underflows when an exponent sum is above 2^53', () => {
+    const big = bn('1e5000000000000000');
+    const small = bn('1e-5000000000000000');
+    expect(big.multiply(big).toString()).toBe('Infinity');
+    expect(big.negate().multiply(big).toString()).toBe('-Infinity');
+    expect(small.multiply(small).toString()).toBe('0');
+    expect(big.divide(small).toString()).toBe('Infinity');
+    expect(small.divide(big).toString()).toBe('0');
+    expect(big.multiply(small).toString()).toBe('1');
   });
 
   it('is exact at the largest allowed bound', () => {
