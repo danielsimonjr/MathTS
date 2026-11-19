@@ -66,7 +66,7 @@ describe('#1247 a 3-D A is rejected', () => {
     expect(() => lusolve(matrix(a3), [1, 2])).toThrow(TWO_D);
   });
 
-  it('lusolve with a 3-D b of numbers still solves as before or throws', () => {
+  it('lusolve of a 2-D A with a 3-D b of numbers throws the dimension-mismatch error', () => {
     expect(() =>
       lusolve(
         [
@@ -107,6 +107,70 @@ describe('#1247 a 3-D A is rejected', () => {
         [1, 2]
       )
     ).toThrow('Matrix decomposition: jagged nested array at row 1');
+    expect(() =>
+      lusolve(
+        [
+          [1, 0, 0],
+          [0, 1, 0],
+          [0, 0, [1]],
+        ],
+        [1, 2, 3]
+      )
+    ).toThrow('Matrix decomposition: jagged nested array at row 2');
+  });
+
+  it('lusolve of an A with mixed depth and a deep first entry throws the two-dimensional error', () => {
+    // matrix() reads the size from the first entry of each level.
+    expect(() =>
+      lusolve(
+        [
+          [[2], 0],
+          [0, 1],
+        ],
+        [1, 2]
+      )
+    ).toThrow(TWO_D);
+  });
+
+  it('lusolve checks the dimension of A before the right-hand side and the square check', () => {
+    expect(() => lusolve(a3, [1, 2, 3])).toThrow(TWO_D);
+    expect(() => lusolve(a3, [[[1]], [[2]]])).toThrow(TWO_D);
+    expect(() =>
+      lusolve(
+        [
+          [[2], [0], [1]],
+          [[0], [1], [1]],
+        ],
+        [1, 2]
+      )
+    ).toThrow('Matrix must be two dimensional (size: [2, 3, 1])');
+    expect(() =>
+      lusolve(
+        [
+          [
+            [2, 1],
+            [0, 1],
+          ],
+          [
+            [0, 1],
+            [1, 1],
+          ],
+        ],
+        [1, 2]
+      )
+    ).toThrow('Matrix must be two dimensional (size: [2, 2, 2])');
+  });
+
+  it('lusolve of a 2-D number A still solves with every right-hand side shape', () => {
+    const a = [
+      [2, 0],
+      [0, 1],
+    ];
+    const x = [[0.5], [2]];
+    expect(lusolve(a, [1, 2])).toEqual(x);
+    expect(lusolve(a, [[1], [2]])).toEqual(x);
+    expect(lusolve(a, matrix([1, 2]))).toEqual(x);
+    expect(lusolve(a, matrix([[1], [2]]))).toEqual(x);
   });
 
   it('lup throws', () => {
