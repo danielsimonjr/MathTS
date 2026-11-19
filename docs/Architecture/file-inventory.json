@@ -5980,7 +5980,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 558
+      "loc": 564
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
