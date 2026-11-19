@@ -2,8 +2,9 @@
  * Dogfood #1206 — qr returns Q and R with one entry type.
  *
  * Every entry of Q and R has the entry type of the input: BigNumber for a BigNumber matrix,
- * Complex for a matrix with a Complex entry, number otherwise. A skipped Householder step
- * (zero column) and the zeros below the diagonal of R follow the same rule.
+ * Complex for a matrix with a Complex entry (also when other entries are BigNumber), number
+ * otherwise. A skipped Householder step (zero column) and the zeros below the diagonal of R
+ * follow the same rule.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -95,6 +96,16 @@ describe('#1206 qr entry types', () => {
     );
   });
 
+  it('mixed BigNumber/Complex matrix: all entries Complex', () => {
+    check(
+      [
+        [bn(1), cx(2, 1)],
+        [bn(3), 4],
+      ],
+      'Complex'
+    );
+  });
+
   it('sparse BigNumber input: all entries BigNumber', () => {
     check(
       [
@@ -133,6 +144,10 @@ describe('#1206 qr entry types', () => {
       [
         [cx(1, 1), cx(2, 0)],
         [3, cx(4, -1)],
+      ],
+      [
+        [bn(1), cx(2, 1)],
+        [bn(3), 4],
       ],
     ];
     for (const input of inputs) {

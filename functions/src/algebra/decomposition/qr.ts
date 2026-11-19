@@ -364,9 +364,10 @@ export const createQr = /* #__PURE__ */ factory(
 
     /**
      * The entry type of a matrix (#1206). It is Complex when an entry is Complex and every other
-     * entry is a number or Complex. It is BigNumber when an entry is BigNumber and every other
-     * entry is a number or BigNumber. Else it is null (a plain number matrix, or a type with no
-     * promotion rule), and the entries stay as they are.
+     * entry is a number, a BigNumber or a Complex; a BigNumber entry becomes a Complex (as `det`).
+     * It is BigNumber when an entry is BigNumber and every other entry is a number or BigNumber.
+     * Else it is null (a plain number matrix, or a type with no promotion rule), and the entries
+     * stay as they are.
      */
     function entryKind(data: unknown[][]): EntryKind | null {
       let cplx = false;
@@ -380,12 +381,12 @@ export const createQr = /* #__PURE__ */ factory(
           else if (typeof v !== 'number') other = true;
         }
       }
-      if (other || (cplx && big)) return null;
+      if (other) return null;
       if (cplx) {
         return {
           zero: () => complex(0),
           one: () => complex(1),
-          convert: (v) => (typeof v === 'number' ? complex(v) : v),
+          convert: (v) => (isComplex(v) ? v : complex(Number(v))),
         };
       }
       if (big) {
