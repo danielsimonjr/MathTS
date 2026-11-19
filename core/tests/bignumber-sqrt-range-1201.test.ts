@@ -121,14 +121,21 @@ describe('BigNumber root seed: edge precisions, signs and exponents (#1201)', ()
     expect(bn('-0').cbrt().isZero()).toBe(true);
   });
 
-  it('exponents near the parse limit (about 9e15) are fast and exact', () => {
-    const start = Date.now();
-    expect(bn('4e9000000000000000').sqrt().toExponential()).toBe('2e+4500000000000000');
-    expect(bn('8e-9000000000000002').sqrt().toExponential()).toBe(
-      bn('2e-4500000000000001').multiply(bn('2').sqrt()).toExponential()
-    );
-    expect(bn('27e8999999999999997').cbrt().toExponential()).toBe('3e+2999999999999999');
-    expect(bn('-8e-9000000000000000').cbrt().toExponential()).toBe('-2e-3000000000000000');
-    expect(Date.now() - start).toBeLessThan(2000);
+  it('exponents near the configured bound (1e15) are fast and exact', () => {
+    // The default bound is 1e9 (#1204): a larger exponent is Infinity or 0. Raise it to the
+    // largest value that the config accepts.
+    BigNumber.config({ maxExponent: 1e15, minExponent: -1e15 });
+    try {
+      const start = Date.now();
+      expect(bn('4e999999999999998').sqrt().toExponential()).toBe('2e+499999999999999');
+      expect(bn('8e-999999999999998').sqrt().toExponential()).toBe(
+        bn('2e-499999999999999').multiply(bn('2').sqrt()).toExponential()
+      );
+      expect(bn('27e999999999999996').cbrt().toExponential()).toBe('3e+333333333333332');
+      expect(bn('-8e-999999999999999').cbrt().toExponential()).toBe('-2e-333333333333333');
+      expect(Date.now() - start).toBeLessThan(2000);
+    } finally {
+      BigNumber.resetConfig();
+    }
   });
 });

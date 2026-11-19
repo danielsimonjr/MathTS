@@ -32,10 +32,26 @@ export interface BigNumberConfig {
   precision: number;
   /** Rounding mode (default: 'halfUp') */
   rounding: RoundingMode;
-  /** Minimum exponent (default: -1e9) */
+  /**
+   * Minimum exponent (default: -1e9), an integer from -1e15 to 0. A value whose order
+   * (`floor(log10(|x|))`) is below it becomes 0, as in decimal.js.
+   */
   minExponent: number;
-  /** Maximum exponent (default: 1e9) */
+  /**
+   * Maximum exponent (default: 1e9), an integer from 0 to 1e15. A value whose order is above it
+   * becomes +-Infinity, as in decimal.js.
+   */
   maxExponent: number;
+  /**
+   * `toString` writes exponential notation when the order is at or below this value
+   * (default: -1e6). decimal.js uses -7; this default keeps every string below 1 MB fixed-point.
+   */
+  toExpNeg: number;
+  /**
+   * `toString` writes exponential notation when the order is at or above this value
+   * (default: 1e6). decimal.js uses 21; this default keeps every string below 1 MB fixed-point.
+   */
+  toExpPos: number;
 }
 
 /**
@@ -208,7 +224,21 @@ const defaultConfig: BigNumberConfig = {
   rounding: 'halfUp',
   minExponent: -1e9,
   maxExponent: 1e9,
+  toExpNeg: -1e6,
+  toExpPos: 1e6,
 };
+
+/** The bound of every exponent setting. Two exponents in the bound add to an exact double. */
+const EXPONENT_LIMIT = 1e15;
+
+/** A coefficient has fewer digits than this: the bigint size limit of V8 is 2^30 bits. */
+const MAX_COEFFICIENT_DIGITS = 3.4e8;
+
+function checkExponentSetting(name: string, value: number, low: number, high: number): void {
+  if (!Number.isInteger(value) || value < low || value > high) {
+    throw new RangeError(`BigNumber config ${name} must be an integer from ${low} to ${high}`);
+  }
+}
 
 // Global configuration (can be modified)
 let globalConfig: BigNumberConfig = { ...defaultConfig };
@@ -292,6 +322,26 @@ export class BigNumber implements MathTSValue {
     exponent: number = 0,
     isNaN: boolean = false,
     isInfinite: boolean = false
+  ): BigNumber {
+    if (sign !== 0 && !isNaN && !isInfinite) {
+      // The order of the value is `exponent + digits - 1`. Only an exponent near a bound can put
+      // the order outside it, so the digit count runs only then (#1204).
+      const { minExponent, maxExponent } = globalConfig;
+      if (exponent < minExponent || exponent > maxExponent - MAX_COEFFICIENT_DIGITS) {
+        const order = exponent + digitCount(coefficient) - 1;
+        if (order > maxExponent) return BigNumber.#construct(sign, 0n, 0, false, true);
+        if (order < minExponent) return BigNumber.#construct(0, 0n, 0, false, false);
+      }
+    }
+    return BigNumber.#construct(sign, coefficient, exponent, isNaN, isInfinite);
+  }
+
+  static #construct(
+    sign: 1 | -1 | 0,
+    coefficient: bigint,
+    exponent: number,
+    isNaN: boolean,
+    isInfinite: boolean
   ): BigNumber {
     const Ctor = BigNumber as unknown as new (
       token: typeof INTERNAL,
@@ -480,6 +530,14 @@ export class BigNumber implements MathTSValue {
    */
   static config(newConfig?: Partial<BigNumberConfig>): BigNumberConfig {
     if (newConfig) {
+      if (newConfig.minExponent !== undefined)
+        checkExponentSetting('minExponent', newConfig.minExponent, -EXPONENT_LIMIT, 0);
+      if (newConfig.maxExponent !== undefined)
+        checkExponentSetting('maxExponent', newConfig.maxExponent, 0, EXPONENT_LIMIT);
+      if (newConfig.toExpNeg !== undefined)
+        checkExponentSetting('toExpNeg', newConfig.toExpNeg, -EXPONENT_LIMIT, 0);
+      if (newConfig.toExpPos !== undefined)
+        checkExponentSetting('toExpPos', newConfig.toExpPos, 0, EXPONENT_LIMIT);
       globalConfig = { ...globalConfig, ...newConfig };
     }
     return { ...globalConfig };
@@ -547,8 +605,8 @@ export class BigNumber implements MathTSValue {
     if (this._isInfinite) return this._sign === 1 ? Infinity : -Infinity;
     if (this._sign === 0) return 0;
 
-    const str = this.toString();
-    return parseFloat(str);
+    // The digits and the exponent, with no zeros written out: a huge exponent gives Infinity or 0.
+    return parseFloat(`${this._sign === -1 ? '-' : ''}${this._coefficient}e${this._exponent}`);
   }
 
   /**
@@ -567,6 +625,11 @@ export class BigNumber implements MathTSValue {
 
     const sign = this._sign === -1 ? '-' : '';
     const digits = this._coefficient.toString();
+
+    const order = digits.length - 1 + this._exponent;
+    if (order >= globalConfig.toExpPos || order <= globalConfig.toExpNeg) {
+      return this.toExponential();
+    }
 
     if (this._exponent >= 0) {
       // Integer or large number

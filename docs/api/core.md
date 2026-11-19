@@ -365,7 +365,7 @@ The main ones:
 | `MatrixBackend`   | Contract of a matrix compute backend: `name`, `isAvailable`, `matmul` / `transpose` / `add` / `subtract` / `scale` on `Float64Array` buffers, and `lu` / `qr` / `svd` / `eig`. |
 | `NumericType`     | Element type of a typed buffer: `'float32' \| 'float64' \| 'int32' \| 'int64' \| 'complex64' \| 'complex128'`.                                                                 |
 | `RoundingMode`    | BigNumber rounding: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'halfDown'`, `'halfEven'`, `'halfCeil'`.                                                     |
-| `BigNumberConfig` | Global BigNumber settings: `precision` (default 64), `rounding`, `minExponent`, `maxExponent`; read and set with `BigNumber.config()`.                                         |
+| `BigNumberConfig` | Global BigNumber settings: `precision` (default 64), `rounding`, `minExponent`, `maxExponent`, `toExpNeg`, `toExpPos`; read and set with `BigNumber.config()`.                 |
 
 ---
 
