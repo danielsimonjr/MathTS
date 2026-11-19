@@ -9,8 +9,13 @@ import { BigNumber } from '@danielsimonjr/mathts-core';
  * lost. `down` divides a value by the scale. `up` multiplies a result by the scale.
  */
 export interface RealScale {
-  /** `true` when the scale is a power of 10 and every value is a BigNumber. */
+  /**
+   * `true` when the scale is a power of 10: at least one value is a BigNumber. `down` and `up`
+   * then return BigNumbers.
+   */
   readonly big: boolean;
+  /** `true` when the scale is 1, so `down` and `up` change no value. */
+  readonly unit: boolean;
   /**
    * The decimal order of the largest absolute value: the exponent of its scientific notation
    * (`BigNumber.e`, so 0 for 1 to 9.99, 200 for 3e200). This is the order that core compares
@@ -45,6 +50,7 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
     const up10 = new BigNumber(`1e${order}`);
     return {
       big: true,
+      unit: order === 0,
       order,
       down: (v) => (v instanceof BigNumber ? v : BigNumber.fromNumber(v)).multiply(down10),
       up: (r) => (r instanceof BigNumber ? r : BigNumber.fromNumber(r)).multiply(up10),
@@ -58,6 +64,7 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
   const s = 2 ** k;
   return {
     big: false,
+    unit: k === 0,
     order: Math.floor(Math.log10(max)),
     down: (v) => (v as number) / s,
     up: (r) => (r as number) * s,
@@ -71,6 +78,26 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
 export function isDegenerate(r: unknown): boolean {
   if (r instanceof BigNumber) return !r.isFinite() || r.isZero();
   return typeof r === 'number' && (!Number.isFinite(r) || r === 0);
+}
+
+/**
+ * The result of `plain` for the scaled values, multiplied back by the scale. `plain` must be
+ * homogeneous of degree 1, as the standard deviation is: f(s * x) = s * f(x). The scale is exact,
+ * so `plain` does the same operations on the same digits as for values of order 1, and the
+ * result has the rounding of `plain` for those values (an exact 0 stays an exact 0).
+ *
+ * Returns `undefined` when the values have no scale (see `realScale`), when the scale is 1 (the
+ * values are scaled already) or when the result for the scaled values is not finite.
+ */
+export function rescaled(
+  values: readonly unknown[],
+  plain: (scaled: (number | BigNumber)[]) => unknown
+): number | BigNumber | undefined {
+  const scale = realScale(values);
+  if (scale === undefined || scale.unit) return undefined;
+  const r = plain(values.map((v) => scale.down(v as number | BigNumber)));
+  if (r instanceof BigNumber) return r.isFinite() ? scale.up(r) : undefined;
+  return typeof r === 'number' && Number.isFinite(r) ? scale.up(r) : undefined;
 }
 
 /**

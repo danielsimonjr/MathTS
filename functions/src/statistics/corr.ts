@@ -21,6 +21,9 @@ function isPlainNumberArray(arr: unknown[]): arr is number[] {
   return true;
 }
 
+/** The smallest positive normal double, 2^-1022. A smaller product has lost digits. */
+const MIN_NORMAL = 2 ** -1022;
+
 const name = 'corr';
 const dependencies = ['typed', 'matrix', 'sqrt', 'sum', 'subtract', 'multiply', 'divide'];
 
@@ -142,10 +145,14 @@ export const createCorr = /* #__PURE__ */ factory(
         const sxy = pairwiseDot(dX, dY);
         const sxx = pairwiseDot(dX, dX);
         const syy = pairwiseDot(dY, dY);
-        const r = sxy / Math.sqrt(sxx * syy);
-        if (Number.isFinite(r)) return r;
-        // The squares or their product left the range of a double (#1257). The correlation does
-        // not change when each deviation list is divided by an exact power of 2.
+        const product = sxx * syy;
+        const r = sxy / Math.sqrt(product);
+        // The product is a positive normal double: no square left the range.
+        if (product >= MIN_NORMAL && product <= Number.MAX_VALUE) return r;
+        // The squares or their product left the range of a double (#1257). An infinite product
+        // gives a finite r of 0, so r is not the test. The correlation does not change when each
+        // deviation list is divided by an exact power of 2. A constant list has no scale and
+        // keeps the plain NaN.
         const sx = realScale(Array.from(dX));
         const sy = realScale(Array.from(dY));
         if (sx === undefined || sy === undefined) return r;

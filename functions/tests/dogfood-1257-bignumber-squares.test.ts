@@ -198,6 +198,28 @@ describe.each(['std', 'factory_std'])('#1257 %s', (name) => {
     expect(std([xs, xs], 1)).toEqual([0, 0]);
     expect(Number(big(std(new Array(100).fill(b('0.1')))).toString())).toBe(0);
   });
+  it('keeps the 0 of equal values at a very small or very large scale', () => {
+    for (const scale of [2 ** -700, 2 ** -500, 2 ** 600, 2 ** 1000]) {
+      const xs = new Array(1e4).fill(0.1 * scale);
+      expect(std(xs)).toBe(0);
+      expect(std(xs, 'uncorrected')).toBe(0);
+      expect(std([xs, xs], 1)).toEqual([0, 0]);
+    }
+    expect(std(new Array(7).fill(1e-200))).toBe(0);
+  });
+  it('the result is the result at scale 1, multiplied by the scale', () => {
+    // The second list has two values that differ in the last bit: its std is small and not 0.
+    for (const xs of [
+      [0.3, 0.7, 1.9, 1.1, 0.2],
+      [1, 1 + 2 ** -52],
+    ]) {
+      const at1 = std(xs) as number;
+      expect(at1).toBeGreaterThan(0);
+      for (const e of [-900, -600, 600, 900]) {
+        expect(std(xs.map((x) => x * 2 ** e))).toBe(at1 * 2 ** e);
+      }
+    }
+  });
 });
 
 describe('#1257 std with a normalization string and an options object', () => {
@@ -225,6 +247,34 @@ describe('#1257 corr', () => {
       14
     );
   });
+  it('numbers: the product of the two sums of squares leaves the range', () => {
+    // Each sum of squares is in range, and their product is not. An infinite product gave a
+    // finite 0, and a subnormal product (order 1e-80) lost digits.
+    for (const o of [1e-100, 1e-80, 1e77, 1e100, 1e153]) {
+      const r = corr([1 * o, 2 * o, 4 * o], [1 * o, 3 * o, 5 * o]) as number;
+      expect(r).toBeCloseTo(0.9819805060619659, 14);
+    }
+    expect(corr([1e160, 2e160, 4e160], [1e-160, 3e-160, 5e-160])).toBeCloseTo(
+      0.9819805060619659,
+      14
+    );
+    expect(corr([1e200, 2e200, 4e200], [1, 3, 5])).toBeCloseTo(0.9819805060619659, 14);
+  });
+  it('BigNumber: the product of the two sums of squares leaves the range', () => {
+    for (const e of ['e80', 'e-80', 'e149']) {
+      const r = corr(
+        ['1', '2', '4'].map((v) => b(v + e)),
+        ['1', '3', '5'].map((v) => b(v + e))
+      );
+      expect(rel(r, exact)).toBeLessThan(1e-17);
+    }
+  });
+  it('keeps an exact 0 and the NaN of a constant list', () => {
+    expect(corr([1, 2, 3], [1, 0, 1])).toBe(0);
+    expect(corr([1, 1, 1], [1, 3, 5])).toBeNaN();
+    expect(corr([1e200, 1e200, 1e200], [1, 3, 5])).toBeNaN();
+    expect(corr([1, NaN, 4], [1, 3, 5])).toBeNaN();
+  });
 });
 
 describe('#1257 eigs of a general BigNumber matrix', () => {
@@ -244,5 +294,15 @@ describe('#1257 eigs of a general BigNumber matrix', () => {
     ]) as { values: unknown[] };
     expect(rel(r.values[0], '2e200')).toBeLessThan(1e-17);
     expect(rel(r.values[1], '5e200')).toBeLessThan(1e-17);
+  });
+  it('a complex pair that no number can hold is not returned at the wrong scale', () => {
+    // 1e600 is in the BigNumber range here, and a Complex value holds numbers. The eigenvalues
+    // of the scaled matrix are i and -i, and they are not the eigenvalues of this matrix.
+    BigNumber.config({ precision: 20, minExponent: -1000, maxExponent: 1000 });
+    const r = fn('eigs')([
+      [b(0), b('-1e600')],
+      [b('1e600'), b(0)],
+    ]) as { values: { re: number; im: number }[] };
+    for (const v of r.values) expect(Math.abs(Number(v.im ?? v))).not.toBe(1);
   });
 });

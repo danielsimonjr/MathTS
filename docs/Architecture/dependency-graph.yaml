@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-19'
-  totalFiles: 1350
+  totalFiles: 1349
   totalModules: 82
-  totalExports: 7396
+  totalExports: 7394
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -22415,11 +22415,7 @@ modules:
         - file: ../utils/real-scale.js
           imports:
             - isDegenerate
-        - file: ./utils/scaledStd.js
-          imports:
-            - normalizationDivisor
-            - pickScaledStd
-            - scaledStd
+            - rescaled
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -22492,28 +22488,6 @@ modules:
         - improveErrorMessage
       functions:
         - improveErrorMessage
-    functions/src/statistics/utils/scaledStd.ts:
-      description: The standard deviation of finite numbers and BigNumbers, computed so that no square leaves the
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/real-scale.js
-          imports:
-            - realScale
-            - squaresLeaveRange
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
-          directory: core
-          imports:
-            - BigNumber
-      exports:
-        - scaledStd
-        - normalizationDivisor
-        - pickScaledStd
-      functions:
-        - scaledStd
-        - normalizationDivisor
-        - pickScaledStd
     functions/src/statistics/variance.ts:
       description: Check if an array is a flat array of plain numbers
       externalDependencies: []
@@ -24816,11 +24790,7 @@ modules:
         - file: ../utils/real-scale.js
           imports:
             - isDegenerate
-        - file: ../statistics/utils/scaledStd.js
-          imports:
-            - normalizationDivisor
-            - pickScaledStd
-            - scaledStd
+            - rescaled
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
@@ -29351,12 +29321,14 @@ modules:
       exports:
         - realScale
         - isDegenerate
+        - rescaled
         - squaresLeaveRange
       interfaces:
         - RealScale
       functions:
         - realScale
         - isDegenerate
+        - rescaled
         - squaresLeaveRange
     functions/src/utils/samples.ts:
       description: Shared argument helper for the signal and curve-fit functions.
@@ -46128,7 +46100,6 @@ dependencyGraph:
         - functions/src/statistics/sum-indexed-guard.ts
         - functions/src/statistics/sum.ts
         - functions/src/statistics/utils/improveErrorMessage.ts
-        - functions/src/statistics/utils/scaledStd.ts
         - functions/src/statistics/variance.ts
     - name: Functions/stats
       files:
@@ -47010,13 +46981,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1350
+  totalTypeScriptFiles: 1349
   totalModules: 82
-  totalLinesOfCode: 237880
-  totalExports: 7396
+  totalLinesOfCode: 237812
+  totalExports: 7394
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2579
+  totalFunctions: 2577
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1694

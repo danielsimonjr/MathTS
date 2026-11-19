@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2539,
+  "totalFiles": 2538,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1324,
+    "build-entry": 1323,
     "test-only": 0,
     "orphan": 0,
     "test": 1123,
@@ -12,7 +12,7 @@
     "example": 7
   },
   "byArea": {
-    "src": 1350,
+    "src": 1349,
     "tests": 1123,
     "config": 30,
     "examples": 7,
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1169,
+    "@danielsimonjr/mathts-functions": 1168,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -7205,7 +7205,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 529
+      "loc": 531
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -8479,7 +8479,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 178
+      "loc": 185
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 168
+      "loc": 169
     },
     {
       "file": "functions/src/statistics/sum-indexed-guard.ts",
@@ -8599,13 +8599,6 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 50
-    },
-    {
-      "file": "functions/src/statistics/utils/scaledStd.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "src",
-      "disposition": "build-entry",
-      "loc": 104
     },
     {
       "file": "functions/src/statistics/variance.ts",
@@ -9193,7 +9186,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3029
+      "loc": 3028
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9851,7 +9844,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 112
     },
     {
       "file": "functions/src/utils/samples.ts",
@@ -10817,7 +10810,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 249
+      "loc": 309
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

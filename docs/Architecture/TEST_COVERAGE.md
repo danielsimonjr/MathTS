@@ -10,10 +10,10 @@
 
 | Metric                                 | Count                 |
 | -------------------------------------- | --------------------- |
-| Total Source Files                     | 1350                  |
+| Total Source Files                     | 1349                  |
 | Total Test Files                       | 1094                  |
 | Source Files with Tests                | 564                   |
-| Source Files without Tests             | 786                   |
+| Source Files without Tests             | 785                   |
 | Coverage (raw, direct-import)          | **41.8%**             |
 | Coverage (effective, active code only) | **47.8%** (406 / 849) |
 
@@ -23,7 +23,7 @@
 
 | Category                                       | Count | Why it is intentionally untested                           |
 | ---------------------------------------------- | ----: | ---------------------------------------------------------- |
-| **Synced mathjs categories in functions/**     |   312 | Mechanically synced from upstream mathjs by ~/.            |
+| **Synced mathjs categories in functions/**     |   311 | Mechanically synced from upstream mathjs by ~/.            |
 | **Synced expression utils + transforms**       |     4 | Synced from mathjs.                                        |
 | **AssemblyScript sources under assembly/src/** |    27 | AssemblyScript is not a vitest target.                     |
 | **Active (real gap — needs a test)**           |   443 | These are the files that should grow a direct-import test. |
@@ -32,7 +32,7 @@
 
 ## Source Files Without Test Coverage
 
-The following 786 source files are not directly imported by any test file:
+The following 785 source files are not directly imported by any test file:
 
 ### workerpool/
 
@@ -703,7 +703,6 @@ The following 786 source files are not directly imported by any test file:
 - `functions/src/statistics/std.ts` → Expected test: `tests/unit/src/std.test.ts`
 - `functions/src/statistics/sum.ts` → Expected test: `tests/unit/src/sum.test.ts`
 - `functions/src/statistics/utils/improveErrorMessage.ts` → Expected test: `tests/unit/src/improveErrorMessage.test.ts`
-- `functions/src/statistics/utils/scaledStd.ts` → Expected test: `tests/unit/src/scaledStd.test.ts`
 - `functions/src/statistics/variance.ts` → Expected test: `tests/unit/src/variance.test.ts`
 - `functions/src/string/bin.ts` → Expected test: `tests/unit/src/bin.test.ts`
 - `functions/src/string/format.ts` → Expected test: `tests/unit/src/format.test.ts`

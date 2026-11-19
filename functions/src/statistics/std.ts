@@ -1,8 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { isBigNumber, isCollection } from '../utils/is.js';
 import { deepForEach } from '../utils/collection.js';
-import { isDegenerate } from '../utils/real-scale.js';
-import { normalizationDivisor, pickScaledStd, scaledStd } from './utils/scaledStd.js';
+import { isDegenerate, rescaled } from '../utils/real-scale.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for std
@@ -115,14 +114,16 @@ export const createStd = /* #__PURE__ */ factory(
     }
 
     /**
-     * The standard deviation of the values of one slice, with the squares of the deviations
-     * scaled by exact powers so that they stay in range. The plain result stays when the scaled
-     * formula does not apply (a constant list, a value that is not finite, a Complex value).
+     * The standard deviation of the values of one slice. A degenerate plain result is computed
+     * again for the values divided by an exact scale, and multiplied back (see `rescaled`). The
+     * plain result stays when no scale applies (a value that is not finite, a Complex value).
      */
     function _scaledSlice(slice: unknown, normalization: string, plain: unknown): unknown {
       if (!isDegenerate(plain)) return plain;
-      const divisor = normalizationDivisor(normalization);
-      return pickScaledStd(plain, divisor && scaledStd(_leaves(slice), divisor));
+      const fixed = rescaled(_leaves(slice), (scaled) =>
+        sqrt((variance as (...a: unknown[]) => unknown)(scaled, normalization))
+      );
+      return fixed === undefined ? plain : fixed;
     }
 
     function _scaled(args: unknown[], plainResult: unknown): unknown {

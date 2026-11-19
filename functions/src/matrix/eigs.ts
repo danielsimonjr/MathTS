@@ -396,8 +396,8 @@ export const createEigs = /* #__PURE__ */ factory(
       );
       const result = doComplexEigs(scaled, N, prec, type, computeVectors);
       // A BigNumber eigenvalue is scaled exactly. A Complex eigenvalue holds numbers, so it is
-      // multiplied by 10^order as a number. When that factor is not a finite number, the
-      // eigenvalue is not representable and the scaled result is not returned.
+      // multiplied by 10^order as a number. When that factor is 0 or infinite, the eigenvalue is
+      // not representable as a number, and the result is that of the entries without a scale.
       const factor = Number(`1e${scale.order}`);
       const up = (v: unknown): unknown =>
         isBigNumber(v)
@@ -409,7 +409,9 @@ export const createEigs = /* #__PURE__ */ factory(
             : v;
       const values = result.values as unknown[];
       const complexValue = values.some((v) => !isBigNumber(v));
-      if (complexValue && !Number.isFinite(factor)) return result;
+      if (complexValue && (factor === 0 || !Number.isFinite(factor))) {
+        return doComplexEigs(arr, N, prec, type, computeVectors);
+      }
       result.values = values.map(up) as typeof result.values;
       for (const pair of result.eigenvectors ?? []) {
         pair.value = up(pair.value) as typeof pair.value;

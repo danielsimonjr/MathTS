@@ -37,8 +37,7 @@ import {
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
 } from '@danielsimonjr/mathts-core';
-import { isDegenerate as isDegenerateReal } from '../utils/real-scale.js';
-import { normalizationDivisor, pickScaledStd, scaledStd } from '../statistics/utils/scaledStd.js';
+import { isDegenerate as isDegenerateReal, rescaled } from '../utils/real-scale.js';
 import {
   finiteNumbers,
   normalizationFromSecondArg,
@@ -2522,8 +2521,10 @@ const exactStd = (...args: unknown[]): unknown => exactSqrt(exactVariance(...arg
 
 /**
  * A std result that is NaN, infinite or 0 can come from a variance whose sum of squares left the
- * range of the type while the std is in range (#1257). Then std is recomputed from scaled
- * deviations (see `scaledStd`). A result that is in range is returned as it is.
+ * range of the type while the std is in range (#1257). Then std is computed again for the values
+ * divided by an exact scale, and multiplied back (see `rescaled`). The second computation is
+ * `std` itself, so an exact 0 of equal values stays 0 at every scale. A result that is in range
+ * is returned as it is.
  */
 function scaledStdResult(result: unknown, args: unknown[]): unknown {
   const isBad = (x: unknown): boolean => (Array.isArray(x) ? x.some(isBad) : isDegenerateReal(x));
@@ -2538,15 +2539,12 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     else if (typeof a === 'number' || a instanceof BigNumber) dim = Number(a.valueOf());
     else if (a !== null && typeof a === 'object') opts = a as StatReduceOptions;
   }
-  const { request, skipNaN } =
+  const { skipNaN } =
     normStr !== undefined && opts !== undefined
       ? normalizationFromStringAndOptions(normStr, opts)
       : normalizationFromSecondArg(opts ?? normStr);
-  const divisorOf =
-    request.kind === 'ddof'
-      ? (n: number): number => n - request.ddof
-      : normalizationDivisor(request.norm);
-  if (divisorOf === undefined) return result;
+  // The arguments of std for one list of values: the normalization and the options, no dimension.
+  const rest = [normStr, opts].filter((a) => a !== undefined);
   const leavesOf = (ys: ArrayLike<unknown>): unknown[] => {
     const out: unknown[] = [];
     const collect = (zs: ArrayLike<unknown>): void => {
@@ -2559,9 +2557,10 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     collect(ys);
     return out;
   };
-  const one = (ys: ArrayLike<unknown>): unknown => scaledStd(leavesOf(ys), divisorOf);
-  // pickScaledStd keeps a plain 0 whose square did not underflow (see its comment).
-  if (dim === undefined) return pickScaledStd(result, one(xs) as ReturnType<typeof scaledStd>);
+  // The scale of the inner call is 1, so that call does not come back here.
+  const one = (ys: ArrayLike<unknown>): unknown =>
+    rescaled(leavesOf(ys), (scaled) => (std as (...a: unknown[]) => unknown)(scaled, ...rest));
+  if (dim === undefined) return one(xs) ?? result;
   if (!Array.isArray(result) || !Number.isInteger(dim) || dim < 0 || dim >= arrayDepth(xs)) {
     return result;
   }
@@ -2570,7 +2569,7 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     Array.isArray(plain) && Array.isArray(fixed) && plain.length === fixed.length
       ? plain.map((p, i) => merge(p, fixed[i]))
       : isBad(plain)
-        ? pickScaledStd(plain, fixed as ReturnType<typeof scaledStd>)
+        ? (fixed ?? plain)
         : plain;
   return merge(result, scaled);
 }
