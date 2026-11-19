@@ -54,7 +54,19 @@ function isComplexLike(v: unknown): v is { re: number; im: number } {
   );
 }
 
-function expectMatrixBitExact(actual: unknown[][], expected: unknown[][]): void {
+function closeTo(a: number, e: number): boolean {
+  return Object.is(a, e) || Math.abs(a - e) <= 1e-15 * Math.max(1, Math.abs(e));
+}
+
+/**
+ * `complexEntries`: the result holds the entry type of the input (#1206), so a golden plain number
+ * is a Complex cell with the same real part and a zero imaginary part.
+ */
+function expectMatrixBitExact(
+  actual: unknown[][],
+  expected: unknown[][],
+  complexEntries = false
+): void {
   expect(actual.length).toBe(expected.length);
   for (let i = 0; i < actual.length; i++) {
     expect(actual[i].length).toBe(expected[i]!.length);
@@ -62,8 +74,17 @@ function expectMatrixBitExact(actual: unknown[][], expected: unknown[][]): void 
       const a = actual[i]![j];
       const e = expected[i]![j];
       if (isComplexLike(a) && isComplexLike(e)) {
-        expect(Object.is(a.re, e.re)).toBe(true);
-        expect(Object.is(a.im, e.im)).toBe(true);
+        if (complexEntries) {
+          // A number cell is now a Complex cell, so a product takes the Complex formula (<= 4 ulp).
+          expect(closeTo(a.re, e.re)).toBe(true);
+          expect(closeTo(a.im, e.im)).toBe(true);
+        } else {
+          expect(Object.is(a.re, e.re)).toBe(true);
+          expect(Object.is(a.im, e.im)).toBe(true);
+        }
+      } else if (complexEntries && isComplexLike(a) && typeof e === 'number') {
+        expect(closeTo(a.re, e)).toBe(true);
+        expect(a.im === 0).toBe(true);
       } else if (isComplexLike(a) || isComplexLike(e)) {
         expect.unreachable('one side is a Complex cell and the other is not');
       } else {
@@ -119,8 +140,8 @@ describe('P7-1 qr number path — golden Q/R', () => {
       })
     );
     const { Q, R } = qr(A) as { Q: unknown[][]; R: unknown[][] };
-    expectMatrixBitExact(Q, g!.Q);
-    expectMatrixBitExact(R, g!.R);
+    expectMatrixBitExact(Q, g!.Q, true);
+    expectMatrixBitExact(R, g!.R, true);
   });
 
   it('DenseMatrix input gives the golden Q and R of the Array input', () => {
@@ -162,8 +183,8 @@ describe('P7-1 qr number path — resume at the first unfinished step', () => {
     expect(g).toBeDefined();
     const { run } = qrWithComplexNaNSqrt();
     const { Q, R } = run(g!.A.map((row) => row.map(toTestCell)));
-    expectMatrixBitExact(Q, g!.Q);
-    expectMatrixBitExact(R, g!.R);
+    expectMatrixBitExact(Q, g!.Q, true);
+    expectMatrixBitExact(R, g!.R, true);
   });
 
   it('coverage guard (new code only): step 3 is computed twice, so the resume branch ran', () => {
