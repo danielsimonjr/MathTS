@@ -107,7 +107,8 @@ export const createLusolve = /* #__PURE__ */ factory(
 
     /**
      * Read a right-hand side as one column vector of length n. A right-hand side with
-     * more than one column throws, as the shared validation does: lusolve solves one vector.
+     * more than one column, or with an Array entry, throws, as the shared validation does:
+     * lusolve solves one vector.
      */
     function rhsToNumberVector(
       b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
@@ -133,10 +134,12 @@ export const createLusolve = /* #__PURE__ */ factory(
         if (arr.length !== n) mismatch();
         if (arr.length > 0 && Array.isArray(arr[0])) {
           for (const row of arr as unknown[][]) {
-            if (!Array.isArray(row) || row.length !== 1) mismatch();
+            if (!Array.isArray(row) || row.length !== 1 || Array.isArray(row[0])) mismatch();
           }
           return (arr as unknown[][]).map((row) => row[0] as number);
         }
+        // An entry of a vector is a scalar. An Array entry is a row of a ragged b.
+        if (arr.some((v) => Array.isArray(v))) mismatch();
         return arr as number[];
       }
       throw new TypeError('Invalid right-hand side for lusolve');

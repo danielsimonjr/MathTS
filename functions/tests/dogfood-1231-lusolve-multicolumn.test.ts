@@ -6,7 +6,13 @@
  * drops a column.
  */
 import { describe, it, expect } from 'vitest';
-import { lusolve as lusolveFn, matrix, sparse } from '../src/factories/index.js';
+import {
+  lusolve as lusolveFn,
+  matrix,
+  sparse,
+  bignumber,
+  fraction,
+} from '../src/factories/index.js';
 type DenseCtor = new (d: { data: unknown[][]; size: number[] }) => unknown;
 const DenseMatrix = (matrix([]) as object).constructor as unknown as DenseCtor;
 
@@ -70,6 +76,30 @@ describe('#1231 lusolve multi-column right-hand side', () => {
   it('Array A with a 1xn row b throws RangeError', () => {
     throwsRange(() => lusolve(A, [[5, 10]]));
     throwsRange(() => lusolve(A, matrix([[5, 10]])));
+  });
+
+  it('Array A with a nested Array b (an entry that is an Array) throws', () => {
+    // An entry of a column vector is a scalar. An Array entry was read as a number.
+    throwsRange(() => lusolve(A, [5, [10]]));
+    throwsRange(() => lusolve(A, [[5], [[10]]]));
+    throwsRange(() => lusolve(A, [[[5]], [[10]]]));
+    throwsRange(() => lusolve(A, [[5], 10]));
+    throwsRange(() => lusolve(A, [[5], []]));
+    throwsRange(() => lusolve(A, matrix([[[5]], [[10]]])));
+    const small = [
+      [0.002, 0.001],
+      [0.001, 0.003],
+    ];
+    throwsRange(() => lusolve(small, [5, [10]]));
+    throwsRange(() => lusolve(small, [[[5]], [[10]]]));
+    throwsRange(() => lusolve(small, B2));
+  });
+
+  it('a 1-column b of BigNumber or Fraction entries solves as before', () => {
+    expect(lusolve(A, [bignumber(5), bignumber(10)])).toEqual([[1], [3]]);
+    expect(lusolve(A, [[fraction(5)], [fraction(10)]])).toEqual([[1], [3]]);
+    expect(lusolve([[2]], [[4]])).toEqual([[2]]);
+    expect(lusolve([[2]], [4])).toEqual([[2]]);
   });
 
   it('a 1-column b solves as before', () => {
