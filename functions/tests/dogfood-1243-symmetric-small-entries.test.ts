@@ -261,6 +261,45 @@ describe('eigs of a real symmetric matrix: termination at the limits of the arit
     for (let k = 0; k < 5; k++) expect(v[k].abs().lte('1e-55')).toBe(true);
   });
 
+  it('a block beside a huge diagonal entry keeps its eigenvalues', () => {
+    // the rounding floor is relative to the off-diagonal entries, not to 1e16
+    for (const huge of [1e16, 1e20]) {
+      const { values } = eigs(
+        matrix([
+          [huge, 0, 0],
+          [0, 2, 1],
+          [0, 1, 2],
+        ]),
+        { eigenvectors: false }
+      );
+      const v = (values as unknown as { toArray(): number[] }).toArray();
+      expect(Math.abs(v[0] - 1)).toBeLessThanOrEqual(1e-12);
+      expect(Math.abs(v[1] - 3)).toBeLessThanOrEqual(1e-12);
+      expect(v[2]).toBe(huge);
+    }
+    const { values } = eigs(
+      matrix([
+        [1e20, 0, 0],
+        [0, 1e-5, 1],
+        [0, 1, 1e-5],
+      ]),
+      { eigenvectors: false }
+    );
+    const w = (values as unknown as { toArray(): number[] }).toArray();
+    expect(Math.abs(w[0] + 0.99999)).toBeLessThanOrEqual(1e-12);
+    expect(Math.abs(w[1] - 1.00001)).toBeLessThanOrEqual(1e-12);
+    const B = [
+      [bn('1e70'), bn(0), bn(0)],
+      [bn(0), bn(2), bn(1)],
+      [bn(0), bn(1), bn(2)],
+    ];
+    const big = (
+      eigs(matrix(B), { eigenvectors: false }).values as unknown as { toArray(): BigNumber[] }
+    ).toArray();
+    expect(big[0].minus(1).abs().lte('1e-50')).toBe(true);
+    expect(big[1].minus(3).abs().lte('1e-50')).toBe(true);
+  });
+
   it('a Complex entry with a NaN or infinite part throws', () => {
     for (const bad of [complex(1, NaN), complex(Infinity, 0), complex(0, -Infinity)]) {
       expect(() =>

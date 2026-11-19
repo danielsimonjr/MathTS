@@ -106,12 +106,18 @@ export function createRealSymmetric({
         scale = Math.max(scale, Math.abs(x[i][j]));
       }
     }
-    // no tolerance is below the rounding error of one rotation: one unit in
-    // the last place of the scale, and 4N subnormal units (Number.MIN_VALUE)
-    // where the products underflow. A smaller tolerance (a precision of 0, or
-    // a subnormal matrix) demands exact zeros, which the loop cannot reach.
+    // initial error
+    let Vab = getAij(x);
+    // No tolerance is below the rounding error of one rotation. A rotation
+    // combines off-diagonal entries only (the diagonal sets the angle), so the
+    // error is relative to the largest off-diagonal entry, not to the scale:
+    // a block beside a huge diagonal entry keeps its own accuracy. Where the
+    // products underflow the error is 4N subnormal units (Number.MIN_VALUE).
+    // A smaller tolerance (a precision of 0, or a subnormal matrix) demands
+    // exact zeros, which the loop cannot reach.
+    const off = Vab[1];
     const tiny = 4 * N * Number.MIN_VALUE;
-    const e0 = Math.max(Math.abs(precision / N) * scale, Number.EPSILON * scale, tiny);
+    const e0 = Math.max(Math.abs(precision / N) * scale, Number.EPSILON * off, tiny);
     let psi: number;
     let Sij: number[][] | undefined;
     if (computeVectors) {
@@ -122,8 +128,6 @@ export function createRealSymmetric({
         Sij[i][i] = 1.0;
       }
     }
-    // initial error
-    let Vab = getAij(x);
     while (Math.abs(Vab[1]) > e0) {
       const i = Vab[0][0];
       const j = Vab[0][1];
@@ -135,7 +139,7 @@ export function createRealSymmetric({
     // a small diagonal block beside large entries passes the test above with
     // its own off-diagonals still at its own scale: rotate each pair until
     // |a_ij| <= prec * sqrt|a_ii| * sqrt|a_jj|, floored at rounding noise (#1243)
-    const noise = Math.max(4 * N * Number.EPSILON * scale, tiny);
+    const noise = Math.max(4 * N * Number.EPSILON * off, tiny);
     for (
       let p = getGradedPair(x, Math.abs(precision), noise);
       p;
@@ -164,9 +168,12 @@ export function createRealSymmetric({
         if (bigLt(scale, a)) scale = a;
       }
     }
-    // no tolerance is below one unit of the working precision (see diag)
+    // initial error
+    let Vab = getAijBig(x);
+    // no tolerance is below one unit of the working precision, relative to
+    // the largest off-diagonal entry (see diag)
     const Big = scale.constructor as unknown as { precision: number };
-    const unit = multiplyScalar(bignumber(`1e-${Big.precision}`), scale) as BigNumber;
+    const unit = multiplyScalar(bignumber(`1e-${Big.precision}`), Vab[1]) as BigNumber;
     const e0rel = multiplyScalar(
       abs(multiplyScalar(precision, bignumber(1 / N))),
       scale
@@ -182,8 +189,6 @@ export function createRealSymmetric({
         Sij[i][i] = bignumber(1);
       }
     }
-    // initial error
-    let Vab = getAijBig(x);
     while (bigLt(e0, abs(Vab[1]))) {
       const i = Vab[0][0];
       const j = Vab[0][1];
