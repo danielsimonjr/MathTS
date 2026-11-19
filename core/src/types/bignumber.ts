@@ -81,6 +81,15 @@ const DECIMAL_JS_ROUNDING: readonly RoundingMode[] = [
   'halfFloor',
 ];
 
+/**
+ * Largest bigint bit length that V8 builds (`1n << (2n ** 30n - 1n)` works, one bit more throws).
+ * `toBigInt` throws at once only when the result certainly has more bits than this.
+ */
+const V8_MAX_BIGINT_BITS = 2 ** 30;
+
+/** A lower bound for log2(10), so the bit-length estimate never exceeds the true bit length. */
+const LOG2_10_LOWER = 3.3219;
+
 /** Extra significant digits that a transcendental method uses before its final rounding. */
 const GUARD_DIGITS = 10;
 /** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
@@ -834,7 +843,10 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Convert to bigint (truncated)
+   * Convert to bigint (truncated toward zero).
+   *
+   * @throws Error for NaN and Infinity.
+   * @throws RangeError when the value is above the bigint size limit of the engine.
    */
   toBigInt(): bigint {
     if (this._isNaN || this._isInfinite) {
@@ -842,13 +854,31 @@ export class BigNumber implements MathTSValue {
     }
     if (this._sign === 0) return 0n;
 
-    const digits = this._coefficient.toString();
-    if (this._exponent >= 0) {
-      return BigInt(this._sign) * BigInt(digits + '0'.repeat(this._exponent));
-    } else if (-this._exponent < digits.length) {
-      return BigInt(this._sign) * BigInt(digits.slice(0, digits.length + this._exponent));
+    // Arithmetic, not a zero-padded string (#1245). A power below the cache size comes from the
+    // cache. A larger power is built for this call only, so the cache does not keep it.
+    const shift = Math.abs(this._exponent);
+    let magnitude: bigint;
+    if (shift < POW10_CACHE_SIZE) {
+      const power = pow10(shift);
+      if (this._exponent >= 0) magnitude = this._coefficient * power;
+      // A value below 1 needs no division. A bigint division truncates toward zero.
+      else if (this._coefficient < power) return 0n;
+      else magnitude = this._coefficient / power;
+    } else if (this._exponent > 0) {
+      // The value is at least 10^(digits - 1), so it has at least floor((digits - 1) * log2(10)) + 1 bits.
+      const digits = digitCount(this._coefficient) + shift;
+      if (Math.floor((digits - 1) * LOG2_10_LOWER) >= V8_MAX_BIGINT_BITS) {
+        throw new RangeError(
+          `BigNumber is too large to convert to bigint (${digits} digits is above the bigint limit of ${V8_MAX_BIGINT_BITS} bits)`
+        );
+      }
+      magnitude = this._coefficient * 10n ** BigInt(shift);
+    } else {
+      // No power for a value below 1: the shift can be as large as the exponent range.
+      if (shift >= digitCount(this._coefficient)) return 0n;
+      magnitude = this._coefficient / 10n ** BigInt(shift);
     }
-    return 0n;
+    return this._sign < 0 ? -magnitude : magnitude;
   }
 
   /**
