@@ -275,6 +275,7 @@ export {
   entryRange,
   allFinite,
   withPow2Scale,
+  withPow2ScaledKernel,
   type EntryRange,
 } from '@danielsimonjr/mathts-core/internal';
 

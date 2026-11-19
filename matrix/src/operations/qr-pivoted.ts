@@ -25,7 +25,7 @@ import {
   ldexp,
   ldexpMatrix,
   entryRange,
-  withPow2Scale,
+  withPow2ScaledKernel,
   SQUARED,
 } from './common.js';
 
@@ -77,21 +77,33 @@ export function qrPivoted(A: DecompositionMatrixInput, opts?: QRPivotedOptions):
   // The Householder steps square the entries, so the window is 2^±SQUARED (#1104).
   // R is scaled back; Q, P and the rank are scale-free.
   const A0 = source.copyRows(false);
-  return withPow2Scale(entryRange(A0), -SQUARED, SQUARED, (e) => {
-    // Working copy (row-major number[][], mirrors A's contents).
-    const W = A0.map((row) => row.slice());
-    if (e === 0) return qrPivotedKernel(W, m, n, tol);
-    ldexpMatrix(W, e);
-    const r = qrPivotedKernel(W, m, n, tol);
-    return {
+  return withPow2ScaledKernel(
+    entryRange(A0),
+    -SQUARED,
+    SQUARED,
+    A0,
+    (a, e) => {
+      const W = a.map((row) => row.slice());
+      ldexpMatrix(W, e);
+      return W;
+    },
+    // Working copy (row-major number[][], mirrors A's contents). The kernel overwrites it.
+    (a) =>
+      qrPivotedKernel(
+        a.map((row) => row.slice()),
+        m,
+        n,
+        tol
+      ),
+    (r, e) => ({
       ...r,
       R: new DenseMatrix(
         k,
         n,
         r.R.toFloat64Array().map((v) => ldexp(v, -e))
       ),
-    };
-  });
+    })
+  );
 }
 
 /** Householder QR with column pivoting on the working copy `W` (overwritten), without scaling. */

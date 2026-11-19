@@ -234,5 +234,6 @@ export {
   entryRange,
   allFinite,
   withPow2Scale,
+  withPow2ScaledKernel,
 } from './pow2-scale.js';
 export type { EntryRange } from './pow2-scale.js';

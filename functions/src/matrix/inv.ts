@@ -3,7 +3,12 @@ import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { isExactZero } from '../utils/isExactZero.js';
 import { format } from '../utils/string.js';
-import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
+import {
+  SQUARED,
+  entryRange,
+  ldexp,
+  withPow2ScaledKernel,
+} from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
@@ -185,12 +190,15 @@ export const createInv = /* #__PURE__ */ factory(
         return _inv(mat, rows, cols);
       }
       const nums = mat as unknown as number[][];
-      return withPow2Scale(entryRange(nums), -SQUARED, SQUARED, (e) => {
-        if (e === 0) return _inv(mat, rows, cols);
-        const scaled = nums.map((row) => row.map((v) => ldexp(v, e)));
-        const result = _inv(scaled as unknown as Scalar[][], rows, cols) as unknown as number[][];
-        return result.map((row) => row.map((v) => ldexp(v, e))) as unknown as Scalar[][];
-      });
+      return withPow2ScaledKernel(
+        entryRange(nums),
+        -SQUARED,
+        SQUARED,
+        nums,
+        (m, e) => m.map((row) => row.map((v) => ldexp(v, e))),
+        (m) => _inv(m as unknown as Scalar[][], rows, cols) as unknown as number[][],
+        (result, e) => result.map((row) => row.map((v) => ldexp(v, e)))
+      ) as unknown as Scalar[][];
     }
 
     /**

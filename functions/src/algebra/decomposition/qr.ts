@@ -9,7 +9,7 @@ import {
   entryRange,
   ldexp,
   ldexpMatrix,
-  withPow2Scale,
+  withPow2ScaledKernel,
 } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
@@ -610,25 +610,41 @@ export const createQr = /* #__PURE__ */ factory(
       const data = src._data as unknown[][];
       if (data.length === 0) return _denseQRimpl(src, true);
       if (matrixAllNumbers(data)) {
-        return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
-          if (e === 0) return _denseQRimpl(src, true);
-          const scaled = src.clone();
-          ldexpMatrix(scaled._data as number[][], e);
-          const ret = _denseQRimpl(scaled, true);
-          ldexpMatrix(ret.R._data as number[][], -e);
-          return ret;
-        });
+        return withPow2ScaledKernel(
+          entryRange(data as number[][]),
+          UNIT_FLOOR_LO,
+          SQUARED,
+          src,
+          (s, e) => {
+            const scaled = s.clone();
+            ldexpMatrix(scaled._data as number[][], e);
+            return scaled;
+          },
+          (s) => _denseQRimpl(s, true),
+          (ret, e) => {
+            ldexpMatrix(ret.R._data as number[][], -e);
+            return ret;
+          }
+        );
       }
       const parts = complexParts(data);
       if (parts === null) return _denseQRimpl(src, false);
-      return withPow2Scale(entryRange(parts), UNIT_FLOOR_LO, SQUARED, (e) => {
-        if (e === 0) return _denseQRimpl(src, false);
-        const scaled = src.clone();
-        ldexpEntries(scaled._data as unknown[][], e);
-        const ret = _denseQRimpl(scaled, false);
-        ldexpEntries(ret.R._data as unknown[][], -e);
-        return ret;
-      });
+      return withPow2ScaledKernel(
+        entryRange(parts),
+        UNIT_FLOOR_LO,
+        SQUARED,
+        src,
+        (s, e) => {
+          const scaled = s.clone();
+          ldexpEntries(scaled._data as unknown[][], e);
+          return scaled;
+        },
+        (s) => _denseQRimpl(s, false),
+        (ret, e) => {
+          ldexpEntries(ret.R._data as unknown[][], -e);
+          return ret;
+        }
+      );
     }
 
     function _denseQR(m: DenseMatrix): QRResult {

@@ -17,7 +17,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
-import { ldexp, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED } from './common.js';
+import { ldexp, entryRange, withPow2ScaledKernel, ABS_CUTOFF_LO, SQUARED } from './common.js';
 
 /**
  * Result of `qr`: the factors Q and R, where A = Q · R.
@@ -66,23 +66,22 @@ export function qr(A: DecompositionMatrixInput, opts?: QROptions): QRResult {
   // Gram-Schmidt squares the entries, and its rank cutoffs are absolute, so the window
   // is [2^ABS_CUTOFF_LO, 2^SQUARED] (#1104). R is scaled back; Q is scale-free.
   const aFlat = dense.toFloat64Array();
-  return withPow2Scale(entryRange(aFlat), ABS_CUTOFF_LO, SQUARED, (e) => {
-    if (e === 0) return qrKernel(aFlat, m, n, mode);
-    const r = qrKernel(
-      aFlat.map((v) => ldexp(v, e)),
-      m,
-      n,
-      mode
-    );
-    return {
+  return withPow2ScaledKernel(
+    entryRange(aFlat),
+    ABS_CUTOFF_LO,
+    SQUARED,
+    aFlat,
+    (a, e) => a.map((v) => ldexp(v, e)),
+    (a) => qrKernel(a, m, n, mode),
+    (r, e) => ({
       Q: r.Q,
       R: new DenseMatrix(
         r.R.rows,
         n,
         r.R.toFloat64Array().map((v) => ldexp(v, -e))
       ),
-    };
-  });
+    })
+  );
 }
 
 /** The Gram-Schmidt QR kernel on a row-major m×n array, without scaling. */

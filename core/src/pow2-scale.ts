@@ -144,3 +144,29 @@ export function withPow2Scale<T>(
   }
   return run(e);
 }
+
+/**
+ * Run `kernel` on `input` scaled by 2^e, and scale the result back (#1212). It wraps
+ * `withPow2Scale` for the common case: a kernel that takes one input and has no `even` or
+ * `accept` rule. The caller states only what differs:
+ * - `kernel` does not change `input`: `withPow2Scale` can run it two times.
+ * - `scale(input, e)` returns a new input equal to `input` times 2^e. It runs only when
+ *   `e` is not 0; for `e` equal to 0 the kernel gets `input` as it is.
+ * - `unscale(result, e)` undoes the scaling on the kernel result. It runs only when `e` is
+ *   not 0. Leave it out when the result does not depend on the scale (a condition number).
+ */
+export function withPow2ScaledKernel<I, R>(
+  range: EntryRange,
+  lo: number,
+  hi: number,
+  input: I,
+  scale: (input: I, e: number) => I,
+  kernel: (input: I) => R,
+  unscale?: (result: R, e: number) => R
+): R {
+  return withPow2Scale(range, lo, hi, (e) => {
+    if (e === 0) return kernel(input);
+    const result = kernel(scale(input, e));
+    return unscale === undefined ? result : unscale(result, e);
+  });
+}
