@@ -5987,7 +5987,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 568
+      "loc": 591
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -10754,7 +10754,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 136
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

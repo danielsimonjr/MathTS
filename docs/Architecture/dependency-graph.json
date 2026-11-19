@@ -8193,6 +8193,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/string.js",
+            "imports": ["format"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation", "denseRightHandSide", "nonSquareSolveError"]
           },
@@ -49738,7 +49742,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1347,
     "totalModules": 82,
-    "totalLinesOfCode": 237097,
+    "totalLinesOfCode": 237120,
     "totalExports": 7388,
     "totalClasses": 62,
     "totalInterfaces": 668,

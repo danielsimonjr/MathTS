@@ -8,6 +8,7 @@ import {
 import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
+import { format } from '../../utils/string.js';
 import {
   createSolveValidation,
   denseRightHandSide,
@@ -164,8 +165,10 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
       // The packed lu reads Float64 values. An entry that is not a number (Complex,
       // BigNumber, Fraction, bigint, string) goes to the typed path, which keeps its type.
-      // The shape checks come first, so both paths throw the same errors.
+      // The shape checks come first, so both paths throw the same errors. The A
+      // dimension check comes before the b and square checks, as in lup and qr.
       if (!isNumericRhs(b) || !isNumericRows(nested)) {
+        assertTwoDimensionalNested(nested);
         rhsToNumberVector(b, nested.length);
         assertSquareNested(nested);
         return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
@@ -184,6 +187,26 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
       validatePackedUpperTriangularPivots(fac.U.toFloat64Array(), aRows.length);
       return luSolve(fac, bVec).map((v) => [v]);
+    }
+
+    /**
+     * Throw when an entry of a row is an Array. A uniform 3-D or deeper A throws the
+     * two-dimensional error with its size. An A of mixed depth throws the jagged-array
+     * error. Only the typed path calls this: the number fast path has no Array entry.
+     */
+    function assertTwoDimensionalNested(rows: unknown[][]): void {
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
+        if (!Array.isArray(row)) continue;
+        for (let c = 0; c < row.length; c++) {
+          if (!Array.isArray(row[c])) continue;
+          const size = (matrix(rows) as unknown as { size(): number[] }).size();
+          if (size.length !== 2) {
+            throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
+          }
+          throw new TypeError(`Matrix decomposition: jagged nested array at row ${r}`);
+        }
+      }
     }
 
     /** Throw the packed-path errors for a 1-D, a jagged or a non-square nested A. */

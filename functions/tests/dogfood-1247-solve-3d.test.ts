@@ -75,7 +75,38 @@ describe('#1247 a 3-D A is rejected', () => {
         ],
         [[[1]], [[2]]]
       )
-    ).toThrow(RangeError);
+    ).toThrow('Dimension mismatch. Matrix columns must match vector length.');
+  });
+
+  it('lusolve of a 4-D A throws the two-dimensional error', () => {
+    expect(() =>
+      lusolve(
+        [
+          [[[2]], [[0]]],
+          [[[0]], [[1]]],
+        ],
+        [1, 2]
+      )
+    ).toThrow('Matrix must be two dimensional (size: [2, 2, 1, 1])');
+  });
+
+  it('lusolve of a 3-D A with empty entries throws the two-dimensional error', () => {
+    expect(() => lusolve([[[]]], [1])).toThrow('Matrix must be two dimensional (size: [1, 1, 0])');
+    expect(() => lusolve([[[]], [[]]], [1, 2])).toThrow(
+      'Matrix must be two dimensional (size: [2, 1, 0])'
+    );
+  });
+
+  it('lusolve of an A with mixed depth throws the jagged-array error', () => {
+    expect(() =>
+      lusolve(
+        [
+          [2, 0],
+          [0, [1]],
+        ],
+        [1, 2]
+      )
+    ).toThrow('Matrix decomposition: jagged nested array at row 1');
   });
 
   it('lup throws', () => {

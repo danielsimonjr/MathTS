@@ -506,6 +506,7 @@
     ],
     "functions/src/utils/string.ts": [
       "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/matrix/det.ts",
       "functions/src/matrix/eigs.ts",
