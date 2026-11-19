@@ -15,11 +15,15 @@ Changed behaviour for the inherited names:
 - `JSON.stringify(math)` writes the parity names only.
 - `delete math[name]` of an inherited name has no effect: the name stays readable with the same value, and `name in math` stays true. JavaScript gives no hook on `delete` of an inherited property without a proxy, and a proxy puts every read back on a slow path.
 - `math.import(otherInstance)` still throws, with another message: `Cannot import "Chain": already exists` (before: `Factory, Object, or Array expected`).
-- An assignment to a name of a frozen instance throws a `TypeError`. Before, it changed the frozen instance. A sealed or non-extensible instance keeps every name writable, as before.
+- `math.import(otherInstance, { silent: true, override: true })` copies only the own names of `otherInstance`, because `import` reads the own keys of an object. Before, it read all 1406 names.
+- `Object.getPrototypeOf(math)` is the first prototype level, not `Object.prototype`.
+- An assignment to a name of a frozen instance throws a `TypeError`. Before, an assignment to a lazy name such as `det` changed the frozen instance. A sealed or non-extensible instance keeps every name writable, as before.
 - An assignment of an inherited name through an object that inherits from the instance (`Object.create(math)`) defines an own property on that object and leaves the instance unchanged, as before.
 
 Replacements: `for (const name in math)` lists all 1406 names, `name in math` is true for every name, and `math[name]` reads every name. `create(math)` with an instance as input now keeps every name, own and inherited.
 
 `importFactory` of `@danielsimonjr/mathts-functions` now sees an inherited name as an existing name. A factory import of such a name without `override` gives "already exists", as for an own name.
+
+Size: the name list adds to the bundle. `compat/dist/index.js` (the unminified build) goes from 19438 to 26821 bytes, and `tools/test/bundle-budget.json` records the new size.
 
 Fixes #1200
