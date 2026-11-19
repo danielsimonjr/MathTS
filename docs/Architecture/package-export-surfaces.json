@@ -429,6 +429,7 @@
       "BIGNUMBER_PI",
       "BIGNUMBER_ZERO",
       "ceil",
+      "COMPAT_INTERNAL_NAMES",
       "complex",
       "Complex",
       "COMPLEX_ONE",

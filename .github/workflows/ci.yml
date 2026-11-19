@@ -193,10 +193,12 @@ jobs:
         run: node --expose-gc --allow-natives-syntax --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
 
       # compat create() keeps its instance and prototype levels in V8 fast mode (#1200). The
-      # parity-name check needs no build; the fast-mode test imports compat/dist and reads
+      # parity-name check needs no build, the internal-name check reads functions/dist (#1216); the fast-mode test imports compat/dist and reads
       # %HasFastProperties, so it is a direct `node` call, not a vitest file.
       - name: compat parity-names generator check
-        run: node compat/scripts/gen-parity-names.mjs --check
+        run: |
+          node compat/scripts/gen-parity-names.mjs --check
+          node compat/scripts/gen-internal-names.mjs --check
 
       - name: compat fast-instance test
         run: node --allow-natives-syntax tools/test/compat-fast-instance.test.mjs

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-19'
-  totalFiles: 1347
+  totalFiles: 1348
   totalModules: 82
-  totalExports: 7389
+  totalExports: 7390
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -43855,6 +43855,10 @@ modules:
         - file: ./parity-names.generated.js
           imports:
             - MATHJS_PARITY_NAMES
+        - file: ./internal-names.generated.js
+          imports:
+            - COMPAT_INTERNAL_NAMES
+            - CompatInternalName
         - file: ./instance-layout.js
           imports:
             - createPrototypeLevels
@@ -43954,6 +43958,9 @@ modules:
           imports:
             - MathJSConfig
           typeOnly: true
+        - file: ./internal-names.generated.js
+          imports:
+            - COMPAT_INTERNAL_NAMES
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -43964,6 +43971,7 @@ modules:
           imports:
             - createInstanceEvaluator
             - EVALUATE_SCOPE_OMIT
+            - parser
             - reviver
             - replacer
             - runWithConfig
@@ -43995,6 +44003,16 @@ modules:
         - definePrototypeAccessor
       constants:
         - PROTOTYPE_LEVEL_CAP
+    compat/src/internal-names.generated.ts:
+      description: 'The internal names of the functions namespace (#1216), sorted: the `factory_*`'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - COMPAT_INTERNAL_NAMES
+      constants:
+        - COMPAT_INTERNAL_NAMES
     compat/src/parity-names.generated.ts:
       description: The own keys of the mathjs 15.2.0 instance `create(all)`, sorted.
       externalDependencies: []
@@ -46868,6 +46886,7 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/instance-api.ts
         - compat/src/instance-layout.ts
+        - compat/src/internal-names.generated.ts
         - compat/src/parity-names.generated.ts
         - compat/src/shims.ts
         - compat/src/unary-fast-path.ts
@@ -46909,16 +46928,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1347
+  totalTypeScriptFiles: 1348
   totalModules: 82
-  totalLinesOfCode: 237121
-  totalExports: 7389
+  totalLinesOfCode: 237280
+  totalExports: 7390
   totalClasses: 62
   totalInterfaces: 668
   totalFunctions: 2573
   totalTypeGuards: 183
   totalEnums: 0
-  totalConstants: 1693
+  totalConstants: 1694
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
