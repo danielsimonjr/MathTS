@@ -96,6 +96,20 @@ describe('@danielsimonjr/mathts-compat', () => {
       expect(() => complex(1, new Complex(1, 2) as never)).toThrow(TypeError);
     });
 
+    it('converts as a map callback and rejects a third argument, as the functions complex (#1220)', () => {
+      const viaMap = [1, 2].map(complex as never) as Complex[];
+      expect(viaMap.map((c) => [c.re, c.im])).toEqual([
+        [1, 0],
+        [2, 0],
+      ]);
+      const f = complex as unknown as (...a: unknown[]) => Complex;
+      expect(() => f(1, 2, 3)).toThrow(/Too many arguments in function complex/);
+      expect(() => f(undefined, 1)).toThrow(TypeError);
+      expect(() => f(null, 1)).toThrow(TypeError);
+      expect(f(true)).toMatchObject({ re: 1, im: 0 });
+      expect(f(2n, 3n)).toMatchObject({ re: 2, im: 3 });
+    });
+
     it('should pass through Complex instances', () => {
       const original = new Complex(1, 2);
       const c = complex(original);

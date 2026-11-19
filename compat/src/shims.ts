@@ -93,19 +93,21 @@ import {
  * complex('3+4i') // Complex(3, 4)
  *
  * No argument gives COMPLEX_ZERO and a Complex is returned unchanged. Every other input goes to
- * the functions `complex`: a BigNumber, Fraction, {re, im}, {r, phi}, Array or Matrix converts,
- * and an invalid part throws a TypeError, as in mathjs.
+ * the functions `complex`: a BigNumber, Fraction, bigint, boolean, {re, im}, {r, phi}, Array or
+ * Matrix converts, and an invalid part or a third argument throws a TypeError, as in mathjs.
+ * The call shape `(value, index, collection)` converts the value, so `[1, 2].map(complex)` works.
  */
-export function complex(re?: number | string | Complex, im?: number): Complex {
-  if (re === undefined) {
+export function complex(re?: number | string | Complex, im?: number, ...rest: unknown[]): Complex {
+  if (re === undefined && im === undefined && rest.length === 0) {
     return COMPLEX_ZERO;
   }
   // The brand tests also return a value of a second copy of core unchanged (#1033).
-  if (isComplex(re) && im === undefined) {
+  if (isComplex(re) && im === undefined && rest.length === 0) {
     return re as Complex;
   }
   // Every other input uses the functions `complex`, which follows mathjs (#1220).
-  return (_complex as (...a: unknown[]) => Complex)(...(im === undefined ? [re] : [re, im]));
+  const args = im === undefined && rest.length === 0 ? [re] : [re, im, ...rest];
+  return (_complex as (...a: unknown[]) => Complex)(...args);
 }
 
 /**

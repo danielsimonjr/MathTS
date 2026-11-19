@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { eigs, complex, matrix } from '../src/index.js';
+import { eigs, complex, matrix, sparse, bignumber, fraction, unit } from '../src/index.js';
 
 type Ri = { re: number; im: number };
 const toRi = (x: unknown): Ri => {
@@ -236,6 +236,176 @@ describe('eigs keeps the imaginary part of Complex entries (#1220)', () => {
     expect([1, 2].map(complex as (x: unknown) => unknown).map(toRi)).toEqual([
       { re: 1, im: 0 },
       { re: 2, im: 0 },
+    ]);
+  });
+});
+
+// Every expected value below is the result of mathjs 15.2.0 for the same call, except where the
+// test name says that mathjs differs.
+describe('complex converts each argument type, as in mathjs (#1220)', () => {
+  const f = complex as (...a: unknown[]) => unknown;
+  const plain = (x: unknown): unknown => {
+    if (Array.isArray(x)) return x.map(plain);
+    const o = x as { re: unknown; im: unknown };
+    return [o.re, o.im];
+  };
+
+  it.each<[string, () => unknown, unknown]>([
+    ['no argument', () => f(), [0, 0]],
+    ['null', () => f(null), [0, 0]],
+    ['number', () => f(5), [5, 0]],
+    ['NaN', () => f(NaN), [NaN, 0]],
+    ['two numbers', () => f(3, 4), [3, 4]],
+    ['BigNumber', () => f(bignumber(3)), [3, 0]],
+    ['two BigNumbers', () => f(bignumber(1), bignumber(2)), [1, 2]],
+    ['number and BigNumber', () => f(1, bignumber(2)), [1, 2]],
+    ['Fraction', () => f(fraction(1, 2)), [0.5, 0]],
+    ['boolean', () => f(true), [1, 0]],
+    ['two booleans', () => f(true, false), [1, 0]],
+    ['bigint', () => f(1n), [1, 0]],
+    ['two bigints', () => f(1n, 2n), [1, 2]],
+    ['two numeric strings', () => f('2', '3'), [2, 3]],
+    ['string', () => f('3+4i'), [3, 4]],
+    ['string -i', () => f('-i'), [0, -1]],
+    ['{re, im}', () => f({ re: 1, im: 2 }), [1, 2]],
+    ['{r, phi}', () => f({ r: 2, phi: Math.PI / 2 }), [1.2246467991473532e-16, 2]],
+    ['{abs, arg}', () => f({ abs: 2, arg: Math.PI / 2 }), [1.2246467991473532e-16, 2]],
+    ['empty Array', () => f([]), []],
+    [
+      'nested Array',
+      () => f([[1, C(1, 2)], ['1+i']]),
+      [
+        [
+          [1, 0],
+          [1, 2],
+        ],
+        [[1, 1]],
+      ],
+    ],
+  ])('%s', (_name, call, want) => {
+    expect(plain(call())).toEqual(want);
+  });
+
+  it('a SparseMatrix converts its stored entries and stays a Matrix', () => {
+    const r = f(
+      sparse([
+        [1, 0],
+        [0, 2],
+      ])
+    ) as { isMatrix: boolean; toArray: () => unknown[][] };
+    expect(r.isMatrix).toBe(true);
+    expect(r.toArray().map((row) => row.map(toRi))).toEqual([
+      [
+        { re: 1, im: 0 },
+        { re: 0, im: 0 },
+      ],
+      [
+        { re: 0, im: 0 },
+        { re: 2, im: 0 },
+      ],
+    ]);
+  });
+
+  it.each<[string, () => unknown]>([
+    ['undefined', () => f(undefined)],
+    ['a function', () => f(() => 1)],
+    ['a Unit', () => f(unit('5 cm'))],
+    ['(1, undefined)', () => f(1, undefined)],
+    ['(1, null)', () => f(1, null)],
+    ['(null, 1)', () => f(null, 1)],
+    ['(Array, number)', () => f([1, 2], 3)],
+    ['(number, Array)', () => f(1, [2])],
+  ])('%s throws a TypeError', (_name, call) => {
+    expect(call).toThrow(TypeError);
+    expect(call).toThrow(/Unexpected type of argument in function complex/);
+  });
+
+  it('an object without the part names throws the mathjs error', () => {
+    expect(() => f({})).toThrow(/Expected object with properties \(re and im\)/);
+    expect(() => f({ re: 1 })).toThrow(/Expected object with properties \(re and im\)/);
+  });
+
+  it('a string part that is not a number throws the mathjs conversion error', () => {
+    expect(() => f('a', 1)).toThrow('Cannot convert "a" to a number');
+  });
+
+  it('object parts convert to numbers and a Complex part throws (mathjs keeps the part as it is)', () => {
+    expect(plain(f({ re: bignumber(1), im: bignumber(2) }))).toEqual([1, 2]);
+    expect(plain(f({ re: '1', im: '2' }))).toEqual([1, 2]);
+    expect(() => f({ re: C(1, 2), im: 0 })).toThrow(TypeError);
+  });
+
+  it('two Fractions convert (mathjs throws for this pair)', () => {
+    expect(plain(f(fraction(1, 2), fraction(1, 4)))).toEqual([0.5, 0.25]);
+  });
+});
+
+describe('eigs of Complex entries beside other types (#1220)', () => {
+  it('a full Complex 3x3 has the eigenvalues of mathjs', () => {
+    const A = [
+      [C(1, 2), C(0, 1), 3],
+      [1, C(-1, 1), C(2, 2)],
+      [2, 0, C(4, -3)],
+    ];
+    const r = run(eigs(A));
+    expectSpectrum(r.values, [
+      { re: -1.5537348448369326, im: 0.7614209826210648 },
+      { re: 1.0109728444396766, im: 1.5170779298977852 },
+      { re: 4.542762000397257, im: -2.2784989125188533 },
+    ]);
+    expectPairs(A, r);
+  });
+
+  it('a skew-Hermitian matrix has imaginary eigenvalues', () => {
+    const A = [
+      [C(0, 1), C(1, 0)],
+      [C(-1, 0), C(0, 2)],
+    ];
+    const r = run(eigs(A));
+    expectSpectrum(r.values, [
+      { re: 0, im: 0.38196601125010576 },
+      { re: 0, im: 2.618033988749895 },
+    ]);
+    expectPairs(A, r);
+  });
+
+  it('a Complex entry beside BigNumber or Fraction entries keeps its imaginary part', () => {
+    const want = [
+      { re: 2, im: 1 },
+      { re: 3, im: 0 },
+    ];
+    expectSpectrum(
+      run(
+        eigs([
+          [C(2, 1), bignumber(1)],
+          [0, bignumber(3)],
+        ])
+      ).values,
+      want
+    );
+    expectSpectrum(
+      run(
+        eigs([
+          [C(2, 1), fraction(1, 2)],
+          [0, 3],
+        ])
+      ).values,
+      want
+    );
+  });
+
+  it('a SparseMatrix with a Complex entry keeps its imaginary part', () => {
+    const r = run(
+      eigs(
+        sparse([
+          [C(0, 1), 0],
+          [0, 1],
+        ])
+      )
+    );
+    expectSpectrum((r.values as unknown as { toArray(): unknown[] }).toArray(), [
+      { re: 0, im: 1 },
+      { re: 1, im: 0 },
     ]);
   });
 });

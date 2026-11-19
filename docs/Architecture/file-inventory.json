@@ -555,7 +555,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 826
+      "loc": 828
     },
     {
       "file": "compat/src/unary-fast-path.ts",
@@ -583,7 +583,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 406
+      "loc": 420
     },
     {
       "file": "compat/tests/coverage-gaps.test.ts",
@@ -6820,7 +6820,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 467
+      "loc": 507
     },
     {
       "file": "functions/src/factories/sparse-adapter.ts",
@@ -10747,7 +10747,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 242
+      "loc": 412
     },
     {
       "file": "functions/tests/dogfood-1226-slu-nonsquare.test.ts",

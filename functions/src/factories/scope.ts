@@ -387,53 +387,93 @@ function bignumberFn(...args: unknown[]): unknown {
   return args.length === 0 ? BigNumber.fromNumber(0) : toBigNumber(args[0]);
 }
 
+/** The type name that a `complex` error message reports for an argument. */
+function complexArgType(x: unknown): string {
+  if (x === null || x === undefined) return String(x);
+  return (x as { type?: string }).type ?? typeof x;
+}
+
+/** True for a value that `complex` accepts as a real part: it converts to one number. */
+function isComplexPart(x: unknown): boolean {
+  const t = typeof x;
+  return (
+    t === 'number' ||
+    t === 'bigint' ||
+    t === 'boolean' ||
+    t === 'string' ||
+    isBigNumber(x) ||
+    isFraction(x)
+  );
+}
+
 /**
- * complex() as in mathjs: no argument gives 0; a Complex is cloned; a number, BigNumber or
- * Fraction gives a real Complex; an object {re, im} or {r, phi} and a string are parsed;
- * (re, im) builds from two real parts; an Array or a Matrix maps each entry. A Complex entry keeps
- * its imaginary part, which the earlier two-argument constructor lost by nesting the entry in re
- * (#1220). A part that is not a real scalar and a third argument throw a TypeError, as in mathjs.
+ * Converts one real part of `complex` to a number. A string that is not a number throws the
+ * mathjs conversion error. A value that is not a real scalar throws a TypeError.
+ */
+function complexPartToNumber(x: unknown, index: number): number {
+  if (typeof x === 'number') return x;
+  if (isBigNumber(x)) return x.toNumber();
+  if (isFraction(x)) return Number(x.valueOf());
+  if (typeof x === 'bigint' || typeof x === 'boolean') return Number(x);
+  if (typeof x === 'string') {
+    const n = Number(x);
+    if (Number.isNaN(n)) throw new Error(`Cannot convert "${x}" to a number`);
+    return n;
+  }
+  throw new TypeError(
+    'Unexpected type of argument in function complex (expected: number or BigNumber or ' +
+      `Fraction or bigint or boolean or string, actual: ${complexArgType(x)}, index: ${index})`
+  );
+}
+
+/**
+ * complex() as in mathjs: no argument and null give 0; a Complex is cloned; a number, BigNumber,
+ * Fraction, bigint or boolean gives a real Complex; an object {re, im}, {r, phi} or {abs, arg}
+ * and a string are parsed; (re, im) builds from two real parts; an Array or a Matrix maps each
+ * entry. A Complex entry keeps its imaginary part, which the earlier two-argument constructor
+ * lost by nesting the entry in re (#1220). A part that is not a real scalar, an argument of
+ * another type and a third argument throw a TypeError, as in mathjs. The parts of an object are
+ * converted as the parts of (re, im), so the result always holds two numbers.
  * The call shape `(value, index, collection)` converts the value, as in `bignumber`.
  */
 function complexFn(...args: unknown[]): unknown {
-  const toNum = (x: unknown): number =>
-    isBigNumber(x) ? x.toNumber() : isFraction(x) ? Number(x.valueOf()) : (x as number);
-  const isRealPart = (x: unknown): boolean =>
-    typeof x === 'number' || isBigNumber(x) || isFraction(x);
   if (isCollectionCallbackCall(args)) return complexFn(args[0]);
   if (args.length > 2) {
     throw new TypeError(
       `Too many arguments in function complex (expected: 2, actual: ${args.length})`
     );
   }
-  if (args.length === 0 || args[0] === null) return new Complex(0, 0);
+  if (args.length === 0) return new Complex(0, 0);
   const x = args[0];
   if (args.length === 2) {
-    args.forEach((part, index) => {
-      if (!isRealPart(part)) {
-        throw new TypeError(
-          'Unexpected type of argument in function complex (expected: number or BigNumber or ' +
-            `Fraction, actual: ${(part as { type?: string } | null)?.type ?? typeof part}, index: ${index})`
-        );
-      }
-    });
-    return new Complex(toNum(x), toNum(args[1]));
+    return new Complex(complexPartToNumber(x, 0), complexPartToNumber(args[1], 1));
   }
+  if (x === null) return new Complex(0, 0);
   if (isComplex(x)) return new Complex(x.re, x.im);
-  if (typeof x === 'number') return new Complex(x, 0);
-  if (isBigNumber(x) || isFraction(x)) return new Complex(toNum(x), 0);
   if (typeof x === 'string') return Complex.parse(x);
+  if (isComplexPart(x)) return new Complex(complexPartToNumber(x, 0), 0);
   if (Array.isArray(x)) return x.map((e) => complexFn(e));
   if (typeof x === 'object') {
-    const o = x as Record<string, number> & { isMatrix?: boolean; map?: (f: unknown) => unknown };
+    const o = x as Record<string, unknown> & { isMatrix?: boolean; map?: (f: unknown) => unknown };
     if (o.isMatrix === true && typeof o.map === 'function')
       return o.map((e: unknown) => complexFn(e));
-    if ('re' in o && 'im' in o) return new Complex(toNum(o.re), toNum(o.im));
+    if ('re' in o && 'im' in o)
+      return new Complex(complexPartToNumber(o.re, 0), complexPartToNumber(o.im, 0));
     const r = 'r' in o ? o.r : o.abs;
     const phi = 'phi' in o ? o.phi : o.arg;
-    if (r !== undefined && phi !== undefined) return Complex.fromPolar(toNum(r), toNum(phi));
+    if (r !== undefined && phi !== undefined)
+      return Complex.fromPolar(complexPartToNumber(r, 0), complexPartToNumber(phi, 0));
+    const proto: unknown = Object.getPrototypeOf(o);
+    if (proto === Object.prototype || proto === null) {
+      throw new Error(
+        'Expected object with properties (re and im) or (r and phi) or (abs and arg)'
+      );
+    }
   }
-  throw new Error('Expected object with properties (re and im) or (r and phi) or (abs and arg)');
+  throw new TypeError(
+    'Unexpected type of argument in function complex (expected: number or Complex or BigNumber ' +
+      `or Fraction or bigint or boolean or string or Array or Matrix or Object, actual: ${complexArgType(x)}, index: 0)`
+  );
 }
 
 export const factoryScope: Record<string, unknown> = {
