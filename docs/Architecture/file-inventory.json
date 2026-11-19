@@ -10670,7 +10670,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 123
+      "loc": 139
     },
     {
       "file": "functions/tests/dogfood-1202-eigs-cyclic.test.ts",

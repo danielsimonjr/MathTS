@@ -15,6 +15,8 @@ const rnd = (): number => {
   seed = (seed * 1103515245 + 12345) % 2147483648;
   return seed / 2147483648 - 0.5;
 };
+// About 20 n eps for n = 6 (eps = 2.2e-16) with a margin; every check is relative to the matrix norm.
+const TOL = 1e-14;
 const n = 6;
 const make = (f: (i: number, j: number) => number): number[][] =>
   Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => f(i, j)));
@@ -44,14 +46,22 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       expect(fro(rec) / fro(A)).toBeLessThan(1e-14);
       const qtq = mm(tr(Q), Q).map((r, i) => r.map((x, j) => x - (i === j ? 1 : 0)));
       expect(fro(qtq)).toBeLessThan(1e-14);
-      for (let i = 2; i < n; i++) for (let j = 0; j < i - 1; j++) expect(H[i][j]).toBe(0);
+      // The kernel zeroes the entries below the subdiagonal in a cleanup loop, so a check
+      // of those entries cannot fail. Reconstruction (cleaned H) catches a wrong reflector.
+      // Similarity invariants: trace(H) = trace(A) and ||H||_F = ||A||_F (Q orthogonal).
+      const trH = Hu.reduce((s, r, i) => s + r[i], 0);
+      const trA = A.reduce((s, r, i) => s + r[i], 0);
+      expect(Math.abs(trH - trA) / fro(A)).toBeLessThan(TOL);
+      expect(Math.abs(fro(Hu) - fro(A)) / fro(A)).toBeLessThan(TOL);
     });
   }
 
-  it.each(exps)('zero matrix stays zero with Q = I at 2^%i', (e) => {
-    const { H, Q } = hessenbergForm(zero.map((r) => r.map((x) => ld(x, e))));
-    expect(H.flat().every((x) => x === 0)).toBe(true);
-    expect(Q.map((r, i) => r.every((x, j) => x === (i === j ? 1 : 0)))).not.toContain(false);
+  it('zero matrix stays zero with Q = I at every scale', () => {
+    for (const e of exps) {
+      const { H, Q } = hessenbergForm(zero.map((r) => r.map((x) => ld(x, e))));
+      expect(H.flat().every((x) => x === 0)).toBe(true);
+      expect(Q.map((r, i) => r.every((x, j) => x === (i === j ? 1 : 0)))).not.toContain(false);
+    }
   });
 
   it('gives the same Q at every power-of-2 scale and scales H exactly', () => {
@@ -67,12 +77,20 @@ describe('hessenbergForm is scale-free (#1199)', () => {
   });
 
   it('keeps the unit-scale result of the documented example', () => {
-    const { H } = hessenbergForm([
+    const A = [
       [1, 2, 3],
       [4, 5, 6],
       [7, 8, 9],
-    ]);
-    expect(H[2][0]).toBe(0);
+    ];
+    const { H, Q } = hessenbergForm(A);
+    // The first reflector maps (4, 7) to (-sqrt(65), 0); H[0][0] is untouched.
+    expect(H[0][0]).toBe(1);
+    expect(Math.abs(Math.abs(H[1][0]) - Math.sqrt(65))).toBeLessThan(TOL * 10);
+    const rec = mm(mm(Q, H), tr(Q)).map((r, i) => r.map((x, j) => x - A[i][j]));
+    expect(fro(rec) / fro(A)).toBeLessThan(TOL);
+    expect(fro(mm(tr(Q), Q).map((r, i) => r.map((x, j) => x - (i === j ? 1 : 0))))).toBeLessThan(
+      TOL
+    );
   });
   // Entries of very different size: no column of the O(1) block may be skipped.
   const base = [
