@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
 
 /**
@@ -57,8 +57,16 @@ describe('compat import(instance) (#1222)', () => {
   });
 
   it('throws for an instance of another module copy (#1033 two-bundle case)', async () => {
-    vi.resetModules();
-    const copyB = (await import('../src/index.js')) as typeof import('../src/index.js');
+    // vi.resetModules does not exist under bun test. A copy of the built bundle in a new folder
+    // is a real second module copy under both bun test and vitest (#1033).
+    const helper = new URL('../../tools/test/second-package-copy.mjs', import.meta.url).href;
+    const { importSecondPackageCopy } = (await import(helper)) as {
+      importSecondPackageCopy(dir: string, name: string): Promise<unknown>;
+    };
+    const copyB = (await importSecondPackageCopy(
+      'compat',
+      'dogfood-1222'
+    )) as typeof import('../src/index.js');
     expect(copyB.create).not.toBe(create);
     expect(() => copyB.create(all).import(create(all))).toThrow(MSG);
     expect(() => copyB.create(copyB.all).import({ inner: create({}) })).toThrow(MSG);
