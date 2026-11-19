@@ -15,7 +15,8 @@ const rnd = (): number => {
   seed = (seed * 1103515245 + 12345) % 2147483648;
   return seed / 2147483648 - 0.5;
 };
-// About 20 n eps for n = 6 (eps = 2.2e-16) with a margin; every check is relative to the matrix norm.
+// About 45 eps (eps = 2.2e-16). Each residual is divided by the size of the entries it is
+// compared with, or the matrix has entries of order 1, so one bound serves every scale.
 const TOL = 1e-14;
 const n = 6;
 const make = (f: (i: number, j: number) => number): number[][] =>
@@ -43,9 +44,9 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       const { H, Q } = hessenbergForm(As);
       const Hu = H.map((r) => r.map((x) => ld(x, -e)));
       const rec = mm(mm(Q, Hu), tr(Q)).map((r, i) => r.map((x, j) => x - A[i][j]));
-      expect(fro(rec) / fro(A)).toBeLessThan(1e-14);
+      expect(fro(rec) / fro(A)).toBeLessThan(TOL);
       const qtq = mm(tr(Q), Q).map((r, i) => r.map((x, j) => x - (i === j ? 1 : 0)));
-      expect(fro(qtq)).toBeLessThan(1e-14);
+      expect(fro(qtq)).toBeLessThan(TOL);
       // HessenbergResult promises exact zeros below the first subdiagonal. This check pins
       // the cleanup contract: no other check fails when the cleanup loop is removed.
       for (let i = 2; i < n; i++) for (let j = 0; j < i - 1; j++) expect(H[i][j]).toBe(0);
@@ -66,8 +67,8 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       const r = hessenbergForm(random.map((row) => row.map((x) => ld(x, e))));
       for (let i = 0; i < n; i++)
         for (let j = 0; j < n; j++) {
-          expect(Math.abs(r.Q[i][j] - ref.Q[i][j])).toBeLessThan(1e-14);
-          expect(Math.abs(ld(r.H[i][j], -e) - ref.H[i][j])).toBeLessThan(1e-14);
+          expect(Math.abs(r.Q[i][j] - ref.Q[i][j])).toBeLessThan(TOL);
+          expect(Math.abs(ld(r.H[i][j], -e) - ref.H[i][j])).toBeLessThan(TOL);
         }
     }
   });
@@ -88,6 +89,28 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       TOL
     );
   });
+
+  // A column that is already zero below the subdiagonal skips its reflector only. The
+  // columns after it are still reduced.
+  it('reduces the columns after an exactly zero column', () => {
+    const A = [
+      [2, 1, 3, 4, 5],
+      [0, 3, 1, 2, 4],
+      [0, 5, 2, 1, 3],
+      [0, 4, 6, 3, 1],
+      [0, 2, 5, 7, 2],
+    ];
+    const { H, Q } = hessenbergForm(A);
+    for (let i = 0; i < 5; i++) expect(Q[i][0]).toBe(i === 0 ? 1 : 0);
+    // The second reflector maps (5, 4, 2) to (-sqrt(45), 0, 0).
+    expect(Math.abs(Math.abs(H[2][1]) - Math.sqrt(45))).toBeLessThan(TOL * 10);
+    const rec = mm(mm(Q, H), tr(Q)).map((r, i) => r.map((x, j) => x - A[i][j]));
+    expect(fro(rec) / fro(A)).toBeLessThan(TOL);
+    expect(fro(mm(tr(Q), Q).map((r, i) => r.map((x, j) => x - (i === j ? 1 : 0))))).toBeLessThan(
+      TOL
+    );
+  });
+
   // Entries of very different size: no column of the O(1) block may be skipped.
   const base = [
     [1, 2, 3, 4],
@@ -107,20 +130,20 @@ describe('hessenbergForm is scale-free (#1199)', () => {
   it.each([1e150, 1e200, 1e300, 1e308])('graded A[0][0] = %s keeps the O(1) block exact', (B) => {
     const A = base.map((r) => r.slice());
     A[0][0] = B;
-    expect(absErr(A, (i, j) => (i === 0 && j === 0 ? B : 1))).toBeLessThan(1e-14);
+    expect(absErr(A, (i, j) => (i === 0 && j === 0 ? B : 1))).toBeLessThan(TOL);
   });
 
   it.each([1e150, 1e300])('graded A[3][3] = %s is finite and normwise accurate', (B) => {
     const A = base.map((r) => r.slice());
     A[3][3] = B;
-    expect(absErr(A, () => B)).toBeLessThan(1e-14);
+    expect(absErr(A, () => B)).toBeLessThan(TOL);
   });
 
   it.each([1e-20, 1e-100, 1e-300])(
     'a tail of size %s next to a unit entry is reduced, not dropped',
     (t) => {
       const A = base.map((r, i) => r.map((x, j) => (i === 0 && j === 0 ? 1 : x * t)));
-      expect(absErr(A, (i, j) => (i === 0 && j === 0 ? 1 : t))).toBeLessThan(1e-14);
+      expect(absErr(A, (i, j) => (i === 0 && j === 0 ? 1 : t))).toBeLessThan(TOL);
     }
   );
 
@@ -131,6 +154,6 @@ describe('hessenbergForm is scale-free (#1199)', () => {
       [1e-10, 1, 1, 1],
       [1e-10, 1, 1, 1],
     ];
-    expect(absErr(A, () => 1e10)).toBeLessThan(1e-14);
+    expect(absErr(A, () => 1e10)).toBeLessThan(TOL);
   });
 });
