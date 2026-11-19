@@ -2,7 +2,7 @@
 '@danielsimonjr/mathts-functions': patch
 ---
 
-`slu` of a non-empty non-square sparse matrix throws `RangeError: Matrix must be square (size: [m, n])`, the same error as `lusolve`, for every order (Fixes #1226). The CSparse LU is square-only. Use `lup` for a rectangular matrix. The empty-matrix factorization is unchanged.
+`slu` of a non-empty non-square sparse matrix throws `RangeError: Matrix must be square (size: [m, n]); for a rectangular least-squares system use lstsq`, the same error as `lusolve` of a dense matrix, for every order (Fixes #1226). The CSparse LU is square-only. Use `lup` for a rectangular matrix. The empty-matrix factorization is unchanged.
 
 Prior result, for `threshold` 1:
 
