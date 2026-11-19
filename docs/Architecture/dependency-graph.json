@@ -17749,6 +17749,7 @@
               "Fraction",
               "BigNumber",
               "isBigNumber",
+              "isComplex",
               "isFraction"
             ]
           }
@@ -46785,7 +46786,8 @@
               "matrix",
               "sparse",
               "transpose",
-              "bignumber"
+              "bignumber",
+              "complex"
             ]
           },
           {
@@ -49851,7 +49853,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 237779,
+    "totalLinesOfCode": 237880,
     "totalExports": 7396,
     "totalClasses": 62,
     "totalInterfaces": 669,
