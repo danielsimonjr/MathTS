@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 91
+      "loc": 130
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
