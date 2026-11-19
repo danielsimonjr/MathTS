@@ -59,10 +59,6 @@ export function createRealSymmetric({
   // BigNumber comparison helpers — JavaScript's >=/</<= operators don't work
   // with Decimal.js objects because valueOf() returns strings, causing
   // lexicographic comparison instead of numeric (e.g., "1" < "5e-13").
-  function bigGte(a: Scalar, b: Scalar): boolean {
-    if (typeof a === 'number' && typeof b === 'number') return a >= b;
-    return (a as BigNumber).gte(b as BigNumber);
-  }
   function bigLt(a: Scalar, b: Scalar): boolean {
     if (typeof a === 'number' && typeof b === 'number') return a < b;
     return (a as BigNumber).lt(b as BigNumber);
@@ -102,7 +98,26 @@ export function createRealSymmetric({
   function diag(x: number[][], precision: number, computeVectors: boolean): EigenResult {
     const N = x.length;
 
-    const e0 = Math.abs(precision / N);
+    // both tolerances are relative to the matrix scale (largest entry), so
+    // eigs(c * A) = c * eigs(A) for every c (#1243)
+    let scale = 0;
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        scale = Math.max(scale, Math.abs(x[i][j]));
+      }
+    }
+    // initial error
+    let Vab = getAij(x);
+    // No tolerance is below the rounding error of one rotation. A rotation
+    // combines off-diagonal entries only (the diagonal sets the angle), so the
+    // error is relative to the largest off-diagonal entry, not to the scale:
+    // a block beside a huge diagonal entry keeps its own accuracy. Where the
+    // products underflow the error is 4N subnormal units (Number.MIN_VALUE).
+    // A smaller tolerance (a precision of 0, or a subnormal matrix) demands
+    // exact zeros, which the loop cannot reach.
+    const off = Vab[1];
+    const tiny = 4 * N * Number.MIN_VALUE;
+    const e0 = Math.max(Math.abs(precision / N) * scale, Number.EPSILON * off, tiny);
     let psi: number;
     let Sij: number[][] | undefined;
     if (computeVectors) {
@@ -113,15 +128,27 @@ export function createRealSymmetric({
         Sij[i][i] = 1.0;
       }
     }
-    // initial error
-    let Vab = getAij(x);
-    while (Math.abs(Vab[1]) >= Math.abs(e0)) {
+    while (Math.abs(Vab[1]) > e0) {
       const i = Vab[0][0];
       const j = Vab[0][1];
       psi = getTheta(x[i][i], x[j][j], x[i][j]);
       x = x1(x, psi, i, j);
       if (computeVectors) Sij = Sij1(Sij!, psi, i, j);
       Vab = getAij(x);
+    }
+    // a small diagonal block beside large entries passes the test above with
+    // its own off-diagonals still at its own scale: rotate each pair until
+    // |a_ij| <= prec * sqrt|a_ii| * sqrt|a_jj|, floored at rounding noise (#1243)
+    const noise = Math.max(4 * N * Number.EPSILON * off, tiny);
+    for (
+      let p = getGradedPair(x, Math.abs(precision), noise);
+      p;
+      p = getGradedPair(x, Math.abs(precision), noise)
+    ) {
+      const [i, j] = p;
+      psi = getTheta(x[i][i], x[j][j], x[i][j]);
+      x = x1(x, psi, i, j);
+      if (computeVectors) Sij = Sij1(Sij!, psi, i, j);
     }
     const Ei = Array(N).fill(0); // eigenvalues
     for (let i = 0; i < N; i++) {
@@ -133,7 +160,25 @@ export function createRealSymmetric({
   // diagonalization implementation for bigNumber
   function diagBig(x: BigNumber[][], precision: BigNumber, computeVectors: boolean): EigenResult {
     const N = x.length;
-    const e0 = abs(multiplyScalar(precision, bignumber(1 / N)));
+    // both tolerances are relative to the matrix scale (largest entry) (#1243)
+    let scale: BigNumber = bignumber(0);
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        const a = abs(x[i][j]) as BigNumber;
+        if (bigLt(scale, a)) scale = a;
+      }
+    }
+    // initial error
+    let Vab = getAijBig(x);
+    // no tolerance is below one unit of the working precision, relative to
+    // the largest off-diagonal entry (see diag)
+    const Big = scale.constructor as unknown as { precision: number };
+    const unit = multiplyScalar(bignumber(`1e-${Big.precision}`), Vab[1]) as BigNumber;
+    const e0rel = multiplyScalar(
+      abs(multiplyScalar(precision, bignumber(1 / N))),
+      scale
+    ) as BigNumber;
+    const e0 = bigLt(e0rel, unit) ? unit : e0rel;
     let psi: BigNumber;
     let Sij: BigNumber[][] | undefined;
     if (computeVectors) {
@@ -144,15 +189,26 @@ export function createRealSymmetric({
         Sij[i][i] = bignumber(1);
       }
     }
-    // initial error
-    let Vab = getAijBig(x);
-    while (bigGte(abs(Vab[1]), abs(e0))) {
+    while (bigLt(e0, abs(Vab[1]))) {
       const i = Vab[0][0];
       const j = Vab[0][1];
       psi = getThetaBig(x[i][i], x[j][j], x[i][j]);
       x = x1Big(x, psi, i, j);
       if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
       Vab = getAijBig(x);
+    }
+    // per-pair test as in diag; the noise floor uses the working precision
+    const noiseBig = multiplyScalar(bignumber(4 * N), unit) as BigNumber;
+    const precAbs = abs(precision) as BigNumber;
+    for (
+      let p = getGradedPairBig(x, precAbs, noiseBig);
+      p;
+      p = getGradedPairBig(x, precAbs, noiseBig)
+    ) {
+      const [i, j] = p;
+      psi = getThetaBig(x[i][i], x[j][j], x[i][j]);
+      x = x1Big(x, psi, i, j);
+      if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
     }
     const Ei: BigNumber[] = Array(N).fill(bignumber(0)); // eigenvalues
     for (let i = 0; i < N; i++) {
@@ -164,7 +220,7 @@ export function createRealSymmetric({
   // get angle
   function getTheta(aii: number, ajj: number, aij: number): number {
     const denom = ajj - aii;
-    if (Math.abs(denom) <= (config.relTol as number)) {
+    if (Math.abs(denom) <= (config.relTol as number) * Math.abs(aij)) {
       return Math.PI / 4.0;
     } else {
       return 0.5 * Math.atan((2.0 * aij) / (ajj - aii));
@@ -174,7 +230,7 @@ export function createRealSymmetric({
   // get angle for BigNumber
   function getThetaBig(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber;
-    if (bigLte(abs(denom), bignumber(config.relTol as number))) {
+    if (bigLte(abs(denom), multiplyScalar(bignumber(config.relTol as number), abs(aij)))) {
       return (bignumber(-1) as BigNumber & { acos(): BigNumber })
         .acos()
         .div(4) as unknown as BigNumber;
@@ -329,6 +385,48 @@ export function createRealSymmetric({
       }
     }
     return [maxIJ, maxMij];
+  }
+
+  // largest off-diagonal pair with |a_ij| > max(tol * sqrt|a_ii| * sqrt|a_jj|, floor),
+  // or null when every pair passes (#1243)
+  function getGradedPair(M: number[][], tol: number, floor: number): [number, number] | null {
+    const N = M.length;
+    const root = M.map((row, i) => Math.sqrt(Math.abs(row[i])));
+    let best = 0;
+    let pair: [number, number] | null = null;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const a = Math.abs(M[i][j]);
+        if (a > best && a > Math.max(tol * root[i] * root[j], floor)) {
+          best = a;
+          pair = [i, j];
+        }
+      }
+    }
+    return pair;
+  }
+
+  // BigNumber version of getGradedPair
+  function getGradedPairBig(
+    M: BigNumber[][],
+    tol: BigNumber,
+    floor: BigNumber
+  ): [number, number] | null {
+    const N = M.length;
+    const root = M.map((row, i) => (abs(row[i]) as BigNumber & { sqrt(): BigNumber }).sqrt());
+    let best: BigNumber = bignumber(0);
+    let pair: [number, number] | null = null;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const a = abs(M[i][j]) as BigNumber;
+        const t = multiplyScalar(multiplyScalar(tol, root[i]), root[j]) as BigNumber;
+        if (bigLt(best, a) && bigLt(t, a) && bigLt(floor, a)) {
+          best = a;
+          pair = [i, j];
+        }
+      }
+    }
+    return pair;
   }
 
   // sort results by absolute value

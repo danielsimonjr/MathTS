@@ -81,6 +81,15 @@ const DECIMAL_JS_ROUNDING: readonly RoundingMode[] = [
   'halfFloor',
 ];
 
+/**
+ * Largest bigint bit length that V8 builds (`1n << (2n ** 30n - 1n)` works, one bit more throws).
+ * `toBigInt` throws at once only when the result certainly has more bits than this.
+ */
+const V8_MAX_BIGINT_BITS = 2 ** 30;
+
+/** A lower bound for log2(10), so the bit-length estimate never exceeds the true bit length. */
+const LOG2_10_LOWER = 3.3219;
+
 /** Extra significant digits that a transcendental method uses before its final rounding. */
 const GUARD_DIGITS = 10;
 /** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
@@ -834,7 +843,10 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Convert to bigint (truncated)
+   * Convert to bigint (truncated toward zero).
+   *
+   * @throws Error for NaN and Infinity.
+   * @throws RangeError when the value is above the bigint size limit of the engine.
    */
   toBigInt(): bigint {
     if (this._isNaN || this._isInfinite) {
@@ -842,13 +854,31 @@ export class BigNumber implements MathTSValue {
     }
     if (this._sign === 0) return 0n;
 
-    const digits = this._coefficient.toString();
-    if (this._exponent >= 0) {
-      return BigInt(this._sign) * BigInt(digits + '0'.repeat(this._exponent));
-    } else if (-this._exponent < digits.length) {
-      return BigInt(this._sign) * BigInt(digits.slice(0, digits.length + this._exponent));
+    // Arithmetic, not a zero-padded string (#1245). A power below the cache size comes from the
+    // cache. A larger power is built for this call only, so the cache does not keep it.
+    const shift = Math.abs(this._exponent);
+    let magnitude: bigint;
+    if (shift < POW10_CACHE_SIZE) {
+      const power = pow10(shift);
+      if (this._exponent >= 0) magnitude = this._coefficient * power;
+      // A value below 1 needs no division. A bigint division truncates toward zero.
+      else if (this._coefficient < power) return 0n;
+      else magnitude = this._coefficient / power;
+    } else if (this._exponent > 0) {
+      // The value is at least 10^(digits - 1), so it has at least floor((digits - 1) * log2(10)) + 1 bits.
+      const digits = digitCount(this._coefficient) + shift;
+      if (Math.floor((digits - 1) * LOG2_10_LOWER) >= V8_MAX_BIGINT_BITS) {
+        throw new RangeError(
+          `BigNumber is too large to convert to bigint (${digits} digits is above the bigint limit of ${V8_MAX_BIGINT_BITS} bits)`
+        );
+      }
+      magnitude = this._coefficient * 10n ** BigInt(shift);
+    } else {
+      // No power for a value below 1: the shift can be as large as the exponent range.
+      if (shift >= digitCount(this._coefficient)) return 0n;
+      magnitude = this._coefficient / 10n ** BigInt(shift);
     }
-    return 0n;
+    return this._sign < 0 ? -magnitude : magnitude;
   }
 
   /**
@@ -2158,30 +2188,45 @@ export class BigNumber implements MathTSValue {
    * Hypotenuse: sqrt(this^2 + other^2)
    */
   hypot(other: BigNumber): BigNumber {
-    if (this._isNaN || other._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
-    if (this._isInfinite || other._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true);
+    return BigNumber.hypotN([this, other]);
+  }
 
-    // A square can be out of range when the result is in range. The operands are divided by
-    // 10^shift first, so the larger square has an exponent near 0, and the squares run with the
-    // widest exponent bounds. The root is then multiplied by 10^shift, and `#allocate` applies the
-    // configured bounds to it (#1204).
-    const shift =
-      this._sign === 0
-        ? other._exponent
-        : other._sign === 0
-          ? this._exponent
-          : Math.max(this._exponent, other._exponent);
-    const scaled = (x: BigNumber): BigNumber =>
-      x._sign === 0
-        ? x
-        : BigNumber.#construct(x._sign, x._coefficient, x._exponent - shift, false, false);
+  /**
+   * The square root of the sum of the squares of the values, `sqrt(sum(x^2))`. An empty list gives 0.
+   * A NaN value gives NaN. Else an infinite value gives Infinity.
+   *
+   * A square can be out of range when the result is in range. Each value is divided by 10^shift
+   * first, with `shift` the largest decimal order, so the largest square has an exponent near 0.
+   * The shift changes only the exponent, so no value is rounded before it is squared. The squares
+   * and the root run with the widest exponent bounds and GUARD_DIGITS more digits, and the root is
+   * rounded once to the configured precision. The root is then multiplied by 10^shift, and `#allocate`
+   * applies the configured bounds to it (#1204, #1255).
+   */
+  static hypotN(values: readonly BigNumber[]): BigNumber {
+    if (values.some((x) => x._isNaN)) return BigNumber.#allocate(0, 0n, 0, true);
+    if (values.some((x) => x._isInfinite)) return BigNumber.#allocate(1, 0n, 0, false, true);
+    let shift = 0;
+    let found = false;
+    for (const x of values) {
+      if (x._sign === 0) continue;
+      const order = x._coefficient.toString().length + x._exponent;
+      if (!found || order > shift) shift = order;
+      found = true;
+    }
+    if (!found) return BigNumber.#allocate(0, 0n, 0);
     const saved = globalConfig;
-    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS });
+    setGlobalConfig({ ...saved, ...WIDEST_BOUNDS, precision: saved.precision + GUARD_DIGITS });
     let root: BigNumber;
     try {
-      const a = scaled(this);
-      const b = scaled(other);
-      root = a.multiply(a).add(b.multiply(b)).sqrt();
+      let sum = BigNumber.#allocate(0, 0n, 0);
+      for (const x of values) {
+        if (x._sign === 0) continue;
+        const s = BigNumber.#construct(1, x._coefficient, x._exponent - shift, false, false);
+        sum = sum.add(s.multiply(s));
+      }
+      // The root has an order near 0. It is rounded under the widest bounds, and `#allocate`
+      // applies the configured bounds after the shift.
+      root = sum.sqrt().roundToPrecision(saved.precision);
     } finally {
       setGlobalConfig(saved);
     }
