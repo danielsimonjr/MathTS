@@ -59,10 +59,6 @@ export function createRealSymmetric({
   // BigNumber comparison helpers — JavaScript's >=/</<= operators don't work
   // with Decimal.js objects because valueOf() returns strings, causing
   // lexicographic comparison instead of numeric (e.g., "1" < "5e-13").
-  function bigGte(a: Scalar, b: Scalar): boolean {
-    if (typeof a === 'number' && typeof b === 'number') return a >= b;
-    return (a as BigNumber).gte(b as BigNumber);
-  }
   function bigLt(a: Scalar, b: Scalar): boolean {
     if (typeof a === 'number' && typeof b === 'number') return a < b;
     return (a as BigNumber).lt(b as BigNumber);
@@ -102,7 +98,15 @@ export function createRealSymmetric({
   function diag(x: number[][], precision: number, computeVectors: boolean): EigenResult {
     const N = x.length;
 
-    const e0 = Math.abs(precision / N);
+    // both tolerances are relative to the matrix scale (largest entry), so
+    // eigs(c * A) = c * eigs(A) for every c (#1243)
+    let scale = 0;
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        scale = Math.max(scale, Math.abs(x[i][j]));
+      }
+    }
+    const e0 = Math.abs(precision / N) * scale;
     let psi: number;
     let Sij: number[][] | undefined;
     if (computeVectors) {
@@ -115,10 +119,10 @@ export function createRealSymmetric({
     }
     // initial error
     let Vab = getAij(x);
-    while (Math.abs(Vab[1]) >= Math.abs(e0)) {
+    while (Math.abs(Vab[1]) > e0) {
       const i = Vab[0][0];
       const j = Vab[0][1];
-      psi = getTheta(x[i][i], x[j][j], x[i][j]);
+      psi = getTheta(x[i][i], x[j][j], x[i][j], scale);
       x = x1(x, psi, i, j);
       if (computeVectors) Sij = Sij1(Sij!, psi, i, j);
       Vab = getAij(x);
@@ -133,7 +137,15 @@ export function createRealSymmetric({
   // diagonalization implementation for bigNumber
   function diagBig(x: BigNumber[][], precision: BigNumber, computeVectors: boolean): EigenResult {
     const N = x.length;
-    const e0 = abs(multiplyScalar(precision, bignumber(1 / N)));
+    // both tolerances are relative to the matrix scale (largest entry) (#1243)
+    let scale: BigNumber = bignumber(0);
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        const a = abs(x[i][j]) as BigNumber;
+        if (bigLt(scale, a)) scale = a;
+      }
+    }
+    const e0 = multiplyScalar(abs(multiplyScalar(precision, bignumber(1 / N))), scale) as BigNumber;
     let psi: BigNumber;
     let Sij: BigNumber[][] | undefined;
     if (computeVectors) {
@@ -146,10 +158,10 @@ export function createRealSymmetric({
     }
     // initial error
     let Vab = getAijBig(x);
-    while (bigGte(abs(Vab[1]), abs(e0))) {
+    while (bigLt(e0, abs(Vab[1]))) {
       const i = Vab[0][0];
       const j = Vab[0][1];
-      psi = getThetaBig(x[i][i], x[j][j], x[i][j]);
+      psi = getThetaBig(x[i][i], x[j][j], x[i][j], scale);
       x = x1Big(x, psi, i, j);
       if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
       Vab = getAijBig(x);
@@ -162,9 +174,9 @@ export function createRealSymmetric({
   }
 
   // get angle
-  function getTheta(aii: number, ajj: number, aij: number): number {
+  function getTheta(aii: number, ajj: number, aij: number, scale: number): number {
     const denom = ajj - aii;
-    if (Math.abs(denom) <= (config.relTol as number)) {
+    if (Math.abs(denom) <= (config.relTol as number) * scale) {
       return Math.PI / 4.0;
     } else {
       return 0.5 * Math.atan((2.0 * aij) / (ajj - aii));
@@ -172,9 +184,14 @@ export function createRealSymmetric({
   }
 
   // get angle for BigNumber
-  function getThetaBig(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
+  function getThetaBig(
+    aii: BigNumber,
+    ajj: BigNumber,
+    aij: BigNumber,
+    scale: BigNumber
+  ): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber;
-    if (bigLte(abs(denom), bignumber(config.relTol as number))) {
+    if (bigLte(abs(denom), multiplyScalar(bignumber(config.relTol as number), scale))) {
       return (bignumber(-1) as BigNumber & { acos(): BigNumber })
         .acos()
         .div(4) as unknown as BigNumber;
