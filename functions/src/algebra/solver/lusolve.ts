@@ -195,7 +195,11 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
     }
 
-    /** True when every entry of the rows, at any depth, is a number. */
+    /**
+     * True when every entry of the rows is a number and the rows are at most 2-D. An entry
+     * that is an Array (a 3-D input) is not numeric here: it goes to the typed path, which
+     * throws the two-dimensional error, as for a Complex or BigNumber entry (#1247).
+     */
     function isNumericRows(rows: unknown[]): boolean {
       // Index loops, with the entries of a 2-D input read in the inner loop. A recursive
       // for-of over every row took 0.4 ms for a 128 x 128 number system; these loops take 0.01 ms.
@@ -205,7 +209,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         if (!Array.isArray(row)) return false;
         for (let c = 0; c < row.length; c++) {
           const v = row[c];
-          if (typeof v !== 'number' && !(Array.isArray(v) && isNumericRows(v))) return false;
+          if (typeof v !== 'number') return false;
         }
       }
       return true;
