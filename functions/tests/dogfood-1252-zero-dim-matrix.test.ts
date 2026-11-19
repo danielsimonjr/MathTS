@@ -20,7 +20,6 @@ describe('#1252 matrix rejects a scalar', () => {
     ['5', () => 5],
     ['bignumber(5)', () => bignumber(5)],
     ['complex(1, 2)', () => complex(1, 2)],
-    ['true', () => true],
     ['0', () => 0],
     ['null', () => null],
   ])('matrix(%s) throws TypeError', (_n, make) => {
@@ -60,5 +59,57 @@ describe('#1252 no decomposition or solver sees a size-less matrix', () => {
   it.each(['qr', 'lup'])('%s of a valid 1-D and 3-D input is still a RangeError', (name) => {
     expect(() => m[name]([1, 2])).toThrow(RangeError);
     expect(() => m[name]([[[1], [2]]])).toThrow('Matrix must be two dimensional (size: [1, 2, 1])');
+  });
+});
+
+describe('#1272 matrix rejects a malformed storage object', () => {
+  const mx = matrix as (x: unknown, f?: string) => unknown;
+  it.each([
+    ['{ size: [2] }', () => ({ size: [2] })],
+    ['{ data: 5, size: [1] }', () => ({ data: 5, size: [1] })],
+    ['{ data: [1, 2] }', () => ({ data: [1, 2] })],
+    ['a CSC object', () => ({ values: [1], index: [0], ptr: [0, 1], size: [1, 1] })],
+    ['{}', () => ({})],
+  ])('matrix(%s) throws TypeError on the dense path', (_n, make) => {
+    expect(() => mx(make())).toThrow(TypeError);
+  });
+
+  it.each([
+    ['{ size: [2] }', () => ({ size: [2] })],
+    ['{}', () => ({})],
+    ['{ data: 5, size: [1] }', () => ({ data: 5, size: [1] })],
+  ])('matrix(%s, "sparse") throws TypeError', (_n, make) => {
+    expect(() => mx(make(), 'sparse')).toThrow(TypeError);
+  });
+
+  it('the DenseMatrix constructor rejects data that is not an Array', () => {
+    expect(() => new MathJSDenseMatrix({ data: 5, size: [1] } as never)).toThrow(TypeError);
+  });
+
+  it('the valid storage objects are unchanged', () => {
+    const d = mx({ data: [[1, 2]], size: [1, 2] }) as { size(): number[] };
+    expect(d.size()).toEqual([1, 2]);
+    const s = mx({ values: [1], index: [0], ptr: [0, 1], size: [1, 1] }, 'sparse') as {
+      size(): number[];
+    };
+    expect(s.size()).toEqual([1, 1]);
+    const s2 = mx({ data: [[1, 0]], size: [1, 2] }, 'sparse') as { size(): number[] };
+    expect(s2.size()).toEqual([1, 2]);
+  });
+});
+
+describe('#1272 matrix format strings match mathjs', () => {
+  const mx = matrix as (x: unknown) => unknown;
+  it.each([
+    ['', '""'],
+    ['foo', '"foo"'],
+    [true, '"true"'],
+    [false, '"false"'],
+  ])('matrix(%j) throws Unknown matrix type', (x, q) => {
+    expect(() => mx(x)).toThrow(TypeError);
+    expect(() => mx(x)).toThrow('Unknown matrix type ' + q);
+  });
+  it.each(['dense', 'default', 'sparse'])('matrix(%s) is still empty', (f) => {
+    expect(() => mx(f)).not.toThrow();
   });
 });
