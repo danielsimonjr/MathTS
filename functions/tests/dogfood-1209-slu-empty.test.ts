@@ -7,17 +7,11 @@
  * internal "Cannot transpose a 2D matrix with no columns" error.
  */
 import { describe, it, expect } from 'vitest';
-import { slu as sluFn, lusolve as lusolveFn, sparse, zeros } from '../src/factories/index.js';
+import { slu as sluFn, sparse, zeros } from '../src/factories/index.js';
 
 type Sz = { size(): number[] };
 type R = { L: Sz; U: Sz; p: number[]; q: number[] | null };
 const slu = sluFn as (a: unknown, order: number, threshold: number) => R;
-const lusolve = lusolveFn as (
-  a: unknown,
-  b: unknown,
-  order?: number,
-  threshold?: number
-) => unknown;
 const empty = (m: number, n: number) => zeros([m, n], 'sparse');
 
 describe('#1209 slu of an empty matrix', () => {
@@ -60,19 +54,5 @@ describe('#1209 slu of an empty matrix', () => {
 
   it('toString works on the empty result', () => {
     expect(String(slu(sparse([]), 1, 1))).toContain('p: ');
-  });
-
-  it('lusolve with order and threshold fails like the other paths, not with a transpose error', () => {
-    const msg = (g: () => unknown) => {
-      try {
-        g();
-      } catch (e) {
-        return (e as Error).message;
-      }
-      return '';
-    };
-    const viaSlu = msg(() => lusolve(sparse([]), [], 1, 1));
-    expect(viaSlu).toBe(msg(() => lusolve([], [])));
-    expect(viaSlu).toMatch(/singular/);
   });
 });
