@@ -3349,7 +3349,7 @@ graph LR
 | ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
-| `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide`                          | Import             |
+| `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
 | `../../factories/matrix-bridge.js` | `MathJSSparseMatrix`                                                 | Import             |
@@ -3434,7 +3434,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/utils/solveValidation.ts` - Returns a matrix-package `SparseMatrix` right-hand side as a nested array, and any
+### `functions/src/algebra/solver/utils/solveValidation.ts` - The RangeError of a solver whose coefficient matrix is not square.
 
 **Workspace Dependencies:**
 
@@ -3452,7 +3452,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `denseRightHandSide`, `createSolveValidation`
+- Functions: `nonSquareSolveError`, `denseRightHandSide`, `createSolveValidation`
 
 ---
 
@@ -21700,12 +21700,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1347   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236754 |
-| Total Exports           | 7387   |
+| Total Lines of Code     | 236786 |
+| Total Exports           | 7388   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 668    |
-| Total Functions         | 2571   |
+| Total Functions         | 2572   |
 | Total Type Guards       | 183    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
