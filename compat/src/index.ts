@@ -19,6 +19,7 @@
 
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
+import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
@@ -202,10 +203,16 @@ interface MathInstanceOverrides {
 
 /**
  * The compat instance: every export of the functions namespace (`create(all)` surfaces
- * them all) with the compat-specific members above taking precedence. No index signature.
+ * them all) except the internal names (#1216) with the compat-specific members above taking precedence. No index signature.
  */
-export type MathInstance = Omit<typeof mathFunctions, keyof MathInstanceOverrides> &
+export type MathInstance = Omit<
+  typeof mathFunctions,
+  keyof MathInstanceOverrides | CompatInternalName
+> &
   MathInstanceOverrides;
+
+/** The internal names of the functions namespace (#1216). */
+const INTERNAL_NAMES: ReadonlySet<string> = new Set(COMPAT_INTERNAL_NAMES);
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
@@ -480,7 +487,12 @@ export function create(
   // name is on a prototype level below it (see instance-layout.ts). Both stay in V8
   // fast mode, so `math.x` is not a dictionary lookup.
   const parityNames = new Set(MATHJS_PARITY_NAMES);
-  const flatKeys = Object.keys(flat);
+  // Internal names of the functions namespace (#1216) are not surfaced: not own, not
+  // inherited. A value that the caller supplies under such a name stays (#1250).
+  const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const flatKeys = Object.keys(flat).filter(
+    (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
+  );
   const inheritedKeys = flatKeys.filter((key) => !parityNames.has(key));
   const { levels, perLevel } = createPrototypeLevels(inheritedKeys.length);
   const instance = Object.create(levels[0] ?? Object.prototype) as Record<string, unknown>;
@@ -568,7 +580,13 @@ export function create(
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);
 
-  wireMathjsInstanceApi(instance as Record<string, unknown>, currentConfig);
+  // Only the parser of the functions namespace is bound to the instance: a parser that
+  // the caller supplies stays as given (#1250).
+  wireMathjsInstanceApi(
+    instance as Record<string, unknown>,
+    currentConfig,
+    flat.parser === functionsNamespace.parser
+  );
 
   return instance as unknown as MathInstance;
 }

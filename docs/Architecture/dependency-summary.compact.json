@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-19", "f": 1347, "e": 7388, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-19", "f": 1348, "e": 7390, "re": 3191 },
   "s": {
-    "loc": 237120,
+    "loc": 237266,
     "cls": 62,
     "int": 668,
-    "fn": 2572,
+    "fn": 2573,
     "tg": 183,
     "en": 0,
-    "co": 1693,
+    "co": 1694,
     "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1854,7 +1854,7 @@
       "cls": ["Complex"]
     },
     "compat": {
-      "f": 7,
+      "f": 8,
       "exp": [
         "createChain",
         "Complex",
