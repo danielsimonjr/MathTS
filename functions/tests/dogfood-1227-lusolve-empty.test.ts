@@ -60,3 +60,42 @@ describe('#1227 lusolve of an empty system', () => {
     expect(() => lusolve(sparse([]), [])).not.toThrow(/singular/i);
   });
 });
+
+describe('#1227 lusolve empty system: review cases', () => {
+  it('real slu factor objects of sparse([]) solve for every order', async () => {
+    const { slu } = await import('../src/factories/index.js');
+    for (const order of [0, 1, 2, 3]) {
+      const x = lusolve(slu(sparse([]), order, 1) as never, []) as unknown as {
+        size(): number[];
+      };
+      expect(x.size()).toEqual([0, 1]);
+    }
+  });
+
+  it('Array A = [] validates b like a matrix A', () => {
+    for (const size of [
+      [1, 0],
+      [0, 2],
+    ]) {
+      const b = new DenseMatrix({ data: size[0] === 1 ? [[]] : [], size });
+      expect(() => lusolve([], b as never)).toThrow(/Dimension mismatch/);
+      expect(() => lusolve(matrix([]), b as never)).toThrow(/Dimension mismatch/);
+    }
+  });
+
+  it('a non-square empty Array throws the same error class as a non-empty one', () => {
+    let emptyErr: unknown;
+    let fullErr: unknown;
+    try {
+      lusolve([[]], []);
+    } catch (e) {
+      emptyErr = e;
+    }
+    try {
+      lusolve([[1, 2]], [1]);
+    } catch (e) {
+      fullErr = e;
+    }
+    expect((emptyErr as Error).constructor).toBe((fullErr as Error).constructor);
+  });
+});

@@ -140,10 +140,10 @@ export const createLusolve = /* #__PURE__ */ factory(
         // An empty system has the empty solution. A non-square empty input still throws.
         const cols = nested.length === 0 ? 0 : nested[0].length;
         if (nested.length !== cols) {
-          throw new RangeError(`lu: matrix must be square (got ${nested.length}×${cols})`);
+          throw new Error(`lu: matrix must be square (got ${nested.length}×${cols})`);
         }
-        rhsToNumberVector(b, 0);
-        return [];
+        // The shared validation checks b as it does for a matrix A.
+        return solveEmpty(new DenseMatrix({ data: [], size: [0, 0] }), b).valueOf() as number[][];
       }
       const eq = equilibrateDense(nested, b);
       const aRows = eq.a as number[][];
