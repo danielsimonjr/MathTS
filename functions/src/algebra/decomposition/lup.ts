@@ -294,7 +294,8 @@ export const createLup = /* #__PURE__ */ factory(
     function _denseLUP(m: DenseMatrix): LUPResult {
       // rows & columns
       const rows = m._size[0];
-      const columns = m._size[1];
+      // a 1-D empty matrix (size [0]) has no column count: it is 0 x 0
+      const columns = m._size[1] ?? 0;
       // minimum rows and columns
       let n = Math.min(rows, columns);
 
@@ -312,6 +313,11 @@ export const createLup = /* #__PURE__ */ factory(
       const p: number[] = [];
       for (i = 0; i < rows; i++) {
         p[i] = i;
+      }
+      // every row exists even when there are no columns: a m x 0 L is m empty rows
+      for (i = 0; i < rows; i++) {
+        ldata[i] = [];
+        if (i < columns) udata[i] = [];
       }
 
       const lupNumberOps = getLupNumberOps();
@@ -381,16 +387,6 @@ export const createLup = /* #__PURE__ */ factory(
       for (j = 0; j < columns; j++) {
         // loop rows
         for (i = 0; i < rows; i++) {
-          // initialize row in arrays
-          if (j === 0) {
-            // check row exists in upper triangular matrix
-            if (i < columns) {
-              // U
-              udata[i] = [];
-            }
-            // L
-            ldata[i] = [];
-          }
           // check we are in the upper triangular matrix
           if (i < j) {
             // check row exists in upper triangular matrix
