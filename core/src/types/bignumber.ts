@@ -81,6 +81,9 @@ const DECIMAL_JS_ROUNDING: readonly RoundingMode[] = [
   'halfFloor',
 ];
 
+/** Largest digit count `toBigInt` builds. `10n ** 1e6n` takes 0.2 s, `10n ** 1e8n` takes 39 s and V8 throws above about 3.2e8 digits. */
+const BIGINT_MAX_DIGITS = 1_000_000;
+
 /** Extra significant digits that a transcendental method uses before its final rounding. */
 const GUARD_DIGITS = 10;
 /** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
@@ -842,13 +845,18 @@ export class BigNumber implements MathTSValue {
     }
     if (this._sign === 0) return 0n;
 
-    const digits = this._coefficient.toString();
+    // Arithmetic, not a zero-padded string (#1245). A bigint division truncates toward zero.
     if (this._exponent >= 0) {
-      return BigInt(this._sign) * BigInt(digits + '0'.repeat(this._exponent));
-    } else if (-this._exponent < digits.length) {
-      return BigInt(this._sign) * BigInt(digits.slice(0, digits.length + this._exponent));
+      const order = this._coefficient.toString().length + this._exponent;
+      if (order > BIGINT_MAX_DIGITS) {
+        throw new RangeError(
+          `BigNumber is too large to convert to bigint (more than ${BIGINT_MAX_DIGITS} digits)`
+        );
+      }
+      return BigInt(this._sign) * this._coefficient * 10n ** BigInt(this._exponent);
     }
-    return 0n;
+    if (-this._exponent >= this._coefficient.toString().length) return 0n;
+    return BigInt(this._sign) * (this._coefficient / 10n ** BigInt(-this._exponent));
   }
 
   /**

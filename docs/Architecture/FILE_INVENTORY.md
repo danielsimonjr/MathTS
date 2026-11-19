@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2529
+**Total files**: 2530
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1321 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1116 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1117 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2529** |                                                                                                                |
+| **Total**     | **2530** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1347 |
-| `tests`    |  1116 |
+| `tests`    |  1117 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    31 |
 | `@danielsimonjr/mathts-compat`         |    34 |
-| `@danielsimonjr/mathts-core`           |   145 |
+| `@danielsimonjr/mathts-core`           |   146 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
 | `@danielsimonjr/mathts-functions`      |  1161 |
@@ -245,6 +245,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/constants.test.ts`                                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/dist-public-api.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/dogfood-1204-bignumber-exponents.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/dogfood-1245-tobigint-large-exponent.test.ts`                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/dogfood-a1-stable-non-array.test.ts`                                  | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/dual-rules.test.ts`                                                   | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/factory-sort.test.ts`                                                 | @danielsimonjr/mathts-core           | tests    | test        |
