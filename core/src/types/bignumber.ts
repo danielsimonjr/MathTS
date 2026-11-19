@@ -1057,8 +1057,8 @@ export class BigNumber implements MathTSValue {
    * The n-th root of a positive finite value, rounded once to the configured precision and
    * mode. The integer root of the coefficient, scaled to at least precision + 1 digits, is
    * exact. A sticky digit (1 when the root is not exact) then sets every rounding mode
-   * correctly. A Newton root at the working precision rounded twice, and gave 1 for
-   * sqrt(1 - 1e-20) (#1208). The scaling also keeps every exponent the type holds (#1201).
+   * correctly, so the result is not rounded twice (#1208). The scaling also keeps every
+   * exponent that the type holds (#1201).
    */
   #exactRoot(n: 2 | 3): BigNumber {
     const precision = globalConfig.precision;
@@ -1936,8 +1936,7 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Cube root
-   * Uses Newton-Raphson iteration.
+   * Cube root, rounded once to the configured precision and mode.
    */
   cbrt(): BigNumber {
     return this.#cbrtImpl();

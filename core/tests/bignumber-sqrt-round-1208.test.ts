@@ -67,6 +67,36 @@ describe('BigNumber.cbrt rounds the exact root once (#1208)', () => {
   });
 });
 
+describe('the sticky digit sets a directed mode (#1208)', () => {
+  it('an inexact root just above 1 rounds away from 1', () => {
+    BigNumber.config({ precision: 20, rounding: 'up' });
+    expect(bn('1.0000000000000000000000000000002').sqrt().toString()).toBe('1.0000000000000000001');
+    BigNumber.config({ precision: 20, rounding: 'ceil' });
+    expect(
+      bn('1.' + '0'.repeat(69) + '1')
+        .cbrt()
+        .toString()
+    ).toBe('1.0000000000000000001');
+  });
+
+  it('an exact root keeps its value in a directed mode', () => {
+    BigNumber.config({ precision: 3, rounding: 'up' });
+    expect(bn('0.25').sqrt().toString()).toBe('0.5');
+    BigNumber.config({ precision: 3, rounding: 'ceil' });
+    expect(bn('0.125').cbrt().toString()).toBe('0.5');
+  });
+});
+
+describe('a second rounding at precision + 1 changes the result (#1208)', () => {
+  it('rounds the exact root once, not through one extra digit', () => {
+    BigNumber.config({ precision: 1, rounding: 'halfEven' });
+    // sqrt(0.022) = 0.148..., which rounds to 0.15 and then to 0.2 when rounded twice.
+    expect(bn('0.022').sqrt().toString()).toBe('0.1');
+    // sqrt(0.063) = 0.2509..., which rounds to 0.25 and then to 0.2 when rounded twice.
+    expect(bn('0.063').sqrt().toString()).toBe('0.3');
+  });
+});
+
 describe('BigNumber.cbrt in a directed mode (#1208)', () => {
   it('rounds the exact root, not a working-precision value', () => {
     BigNumber.config({ precision: 20, rounding: 'down' });

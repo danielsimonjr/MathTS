@@ -968,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2262
+      "loc": 2261
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1199,7 +1199,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 105
     },
     {
       "file": "core/tests/collection-dim-validation.test.ts",
