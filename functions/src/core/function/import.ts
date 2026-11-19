@@ -52,6 +52,26 @@ type ImportableValue =
   ((...args: unknown[]) => unknown) | number | string | boolean | null | object | unknown[];
 
 /**
+ * Tells whether `name` is a property of `target`, own or inherited, excluding the
+ * members of `Object.prototype`. A compat instance keeps most names on prototype
+ * levels below the instance (#1200), so an own-key check misses them.
+ *
+ * @param target - The namespace.
+ * @param name - The name.
+ * @returns True when an object in the chain of `target` above `Object.prototype` has `name`.
+ */
+function hasInheritedOrOwn(target: object, name: string): boolean {
+  for (
+    let o: object | null = target;
+    o !== null && o !== Object.prototype;
+    o = Object.getPrototypeOf(o) as object | null
+  ) {
+    if (hasOwnProperty(o, name)) return true;
+  }
+  return false;
+}
+
+/**
  * Create the `import` function for a math.js instance.
  *
  * The created function adds functions, values and factories to `math`.
@@ -316,7 +336,7 @@ export function importFactory(
       : math;
 
     const existingTransform = name in math.expression.transform;
-    const existing = hasOwnProperty(namespace, name) ? namespace[name] : undefined;
+    const existing = hasInheritedOrOwn(namespace, name) ? namespace[name] : undefined;
 
     const resolver = function (): unknown {
       // collect all dependencies, handle finding both functions and classes and other special cases

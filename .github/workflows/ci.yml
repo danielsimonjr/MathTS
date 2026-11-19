@@ -192,6 +192,15 @@ jobs:
       - name: Fixed-size kernels zero-allocation test
         run: node --expose-gc --allow-natives-syntax --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
 
+      # compat create() keeps its instance and prototype levels in V8 fast mode (#1200). The
+      # parity-name check needs no build; the fast-mode test imports compat/dist and reads
+      # %HasFastProperties, so it is a direct `node` call, not a vitest file.
+      - name: compat parity-names generator check
+        run: node compat/scripts/gen-parity-names.mjs --check
+
+      - name: compat fast-instance test
+        run: node --allow-natives-syntax tools/test/compat-fast-instance.test.mjs
+
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
       # tag lands on. No other job runs the script. These tests run the real script against
