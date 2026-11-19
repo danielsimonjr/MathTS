@@ -125,6 +125,9 @@ export class MathJSDenseMatrix {
     } else if (Array.isArray(data)) {
       this._data = data;
       this._size = inferSize(data);
+    } else if (typeof data !== 'object' || !Array.isArray((data as { size?: unknown }).size)) {
+      // A scalar is not matrix data. A 0-d matrix has no size, which every consumer reads.
+      throw new TypeError('Unsupported type of data (' + typeName(data) + ')');
     } else {
       this._data = data.data;
       this._size = data.size;
@@ -1177,6 +1180,20 @@ export function createMatrixBridge() {
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
     // matrix('sparse') or matrix('dense') or matrix('default')
+    if (
+      data !== undefined &&
+      typeof data !== 'string' &&
+      !Array.isArray(data) &&
+      !isBridgeMatrix(data) &&
+      !isPlainObject(data)
+    ) {
+      // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
+      throw new TypeError(
+        'Unexpected type of argument in function matrix (expected: string or Array or Matrix, actual: ' +
+          typeName(data) +
+          ', index: 0)'
+      );
+    }
     if (typeof data === 'string') {
       const isSparse = data === 'sparse';
       return isSparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
@@ -1202,6 +1219,22 @@ export function createMatrixBridge() {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+function isBridgeMatrix(x: unknown): boolean {
+  return x instanceof MathJSDenseMatrix || x instanceof MathJSSparseMatrix;
+}
+
+/** CSC and { data, size } storage objects are internal matrix data; BigNumber and Complex are not. */
+function isPlainObject(x: unknown): boolean {
+  return typeof x === 'object' && x !== null && Object.getPrototypeOf(x) === Object.prototype;
+}
+
+/** A short type name for an error message: null, number, BigNumber, Complex, ... */
+function typeName(x: unknown): string {
+  if (x === null) return 'null';
+  if (typeof x === 'object') return (x as object).constructor?.name ?? 'Object';
+  return typeof x;
+}
 
 /**
  * A copy of nested data that has `axes` axes. The values are not copied. A level that is

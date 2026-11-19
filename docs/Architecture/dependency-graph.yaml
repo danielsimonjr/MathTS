@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-19'
+  lastUpdated: "2026-11-19"
   totalFiles: 1347
   totalModules: 82
   totalExports: 7389
@@ -357,7 +357,7 @@ modules:
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
     packages/workerpool/src/matmul-sequential.ts:
-      description: 'Sequential matrix multiplication: the one kernel for the inline branch of'
+      description: "Sequential matrix multiplication: the one kernel for the inline branch of"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -568,7 +568,7 @@ modules:
         - number
   core:
     core/src/array.ts:
-      description: 'Cold array utilities (mathjs-derived): size/validate/reshape/resize/squeeze,'
+      description: "Cold array utilities (mathjs-derived): size/validate/reshape/resize/squeeze,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -691,7 +691,7 @@ modules:
         - toExponential
         - toFixed
     core/src/collection.ts:
-      description: 'Cold array/Matrix-aware collection utilities (mathjs-derived): `deepMap`/'
+      description: "Cold array/Matrix-aware collection utilities (mathjs-derived): `deepMap`/"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -794,7 +794,7 @@ modules:
         - getSafeMethod
         - isSafeMethod
     core/src/deterministic.ts:
-      description: 'Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible.'
+      description: "Deterministic mode: a switch, global to the core module instance, that makes implicit routing reproducible."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -1558,19 +1558,19 @@ modules:
       internalDependencies:
         - file: ./is.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./number.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./object.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./factory.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./shared.js
           imports:
@@ -1909,10 +1909,10 @@ modules:
         - WasmManifest
         - EntryRange
       reExported:
-        - '* from ./is.js'
-        - '* from ./number.js'
-        - '* from ./object.js'
-        - '* from ./factory.js'
+        - "* from ./is.js"
+        - "* from ./number.js"
+        - "* from ./object.js"
+        - "* from ./factory.js"
         - hasOwnProperty
         - endsWith
         - warnOnce
@@ -2270,7 +2270,7 @@ modules:
       interfaces:
         - AbortSignalLike
     core/src/pow2-scale.ts:
-      description: 'Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122).'
+      description: "Power-of-2 scaling for numerical kernels that square their entries (#1104, #1122)."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -2411,7 +2411,7 @@ modules:
         - defaultWasmLocation
   core/error:
     core/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
+      description: "Create a range error with the message:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -3097,7 +3097,7 @@ modules:
         - BIGNUMBER_BRAND
         - DUAL_BRAND
     core/src/types/unit/Unit.ts:
-      description: '`scale_from × offset_from − scale_to × offset_to`: what converting between two'
+      description: "`scale_from × offset_from − scale_to × offset_to`: what converting between two"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -3609,7 +3609,7 @@ modules:
       constants:
         - Unit
     core/src/types/unit/unit-table.ts:
-      description: 'The built-in unit table: one row per unit, each stating its scale to SI as an'
+      description: "The built-in unit table: one row per unit, each stating its scale to SI as an"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4028,7 +4028,7 @@ modules:
           imports:
             - DenseMatrix
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPU_MIN_ELEMENTS
@@ -4075,7 +4075,7 @@ modules:
         - file: ./register-backends.js
           imports: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
@@ -4108,7 +4108,7 @@ modules:
             - planRunShaderFromTranspose
             - runShader
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUContext
@@ -4158,7 +4158,7 @@ modules:
           imports:
             - gpuOrJs
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - hasWebGPU
@@ -4190,7 +4190,7 @@ modules:
             - gemmF64
         - file: ../types/dense/reduction.js
           imports:
-            - '* as reduction'
+            - "* as reduction"
         - file: ./Backend.js
           imports:
             - MatrixBackend
@@ -4220,7 +4220,7 @@ modules:
           imports:
             - jsBackend
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -4276,7 +4276,7 @@ modules:
           imports: []
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UNIT_LO
@@ -4311,7 +4311,7 @@ modules:
           imports: []
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - WasmModuleLoader
@@ -4338,19 +4338,19 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUContext
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - ShaderManager
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - BufferPool
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUBuffer
@@ -4370,15 +4370,15 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUContext
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - BufferPool
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUBuffer
@@ -4399,7 +4399,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - ShaderManager
@@ -4449,7 +4449,7 @@ modules:
             - SyncConfig
           reExport: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - hasWebGPU
@@ -4557,13 +4557,13 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - BufferPool
             - GPUContext
             - ShaderManager
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUBuffer
@@ -4816,7 +4816,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - allocAsHeader
@@ -4902,7 +4902,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - sha384OfBuffer
@@ -4926,7 +4926,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - resolvePackagedWasm
@@ -4994,32 +4994,32 @@ modules:
       internalDependencies:
         - file: ./types/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./backends/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./operations/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./typed-operations.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./parallel-matrix.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       workspaceDependencies: []
       exports: []
       reExported:
-        - '* from ./types/index.js'
-        - '* from ./backends/index.js'
-        - '* from ./operations/index.js'
-        - '* from ./typed-operations.js'
-        - '* from ./parallel-matrix.js'
+        - "* from ./types/index.js"
+        - "* from ./backends/index.js"
+        - "* from ./operations/index.js"
+        - "* from ./typed-operations.js"
+        - "* from ./parallel-matrix.js"
     matrix/src/parallel-matrix.ts:
       description: Parallel-First Matrix Operations
       externalDependencies: []
@@ -5032,20 +5032,20 @@ modules:
           imports:
             - sqrtOfSumSquares
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - TypedFunction
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
             - ParallelResult
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SignatureFunction
@@ -5148,15 +5148,15 @@ modules:
           imports:
             - sqrtOfSumSquares
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - TypedFunction
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SignatureFunction
@@ -5289,12 +5289,12 @@ modules:
           imports:
             - DenseMatrix
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ldexp
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SQUARED
@@ -5417,7 +5417,7 @@ modules:
       constants:
         - DEFAULT_SOLVER_MAX_ELEMENTS
     matrix/src/operations/eig-multiplicity.ts:
-      description: 'Repeated-eigenvalue report for `eig`: which computed eigenvalues are copies of one'
+      description: "Repeated-eigenvalue report for `eig`: which computed eigenvalues are copies of one"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5434,7 +5434,7 @@ modules:
         - isRoundingSymmetric
         - repeatedEigenvalueReport
     matrix/src/operations/eig-wasm.ts:
-      description: '`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API'
+      description: "`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5890,7 +5890,7 @@ modules:
         - applyReflector
         - columnPivotedQr
     matrix/src/operations/qr-family.ts:
-      description: 'QR-family decompositions: LQ, RQ, QL'
+      description: "QR-family decompositions: LQ, RQ, QL"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6052,7 +6052,7 @@ modules:
         - matrixSqrtm
         - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
-      description: '`svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`).'
+      description: "`svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`)."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6134,10 +6134,10 @@ modules:
             - SliceSpec
         - file: ./dense/arithmetic.js
           imports:
-            - '* as arithmetic'
+            - "* as arithmetic"
         - file: ./dense/reduction.js
           imports:
-            - '* as reduction'
+            - "* as reduction"
         - file: ./dense/limits.js
           imports:
             - assertDenseMatrixSize
@@ -6170,11 +6170,11 @@ modules:
             - MATRIX_BRAND
             - defineMatrixBrand
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - MatrixDimensions
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - formatGeneric
@@ -6275,7 +6275,7 @@ modules:
       constants:
         - DENSE_MATRIX_MAX_ELEMENTS
     matrix/src/types/dense/reduction.ts:
-      description: '`sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that'
+      description: "`sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6287,7 +6287,7 @@ modules:
           imports:
             - contiguousDenseData
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -6425,16 +6425,16 @@ modules:
             - slice
             - SliceRange
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - rowMajorStrides
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
             - backendManager
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - arraySize
@@ -6784,11 +6784,11 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - cholesky
@@ -6827,12 +6827,12 @@ modules:
           imports:
             - reshapeByRowAxes
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
             - eigWasm
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - EigResult
@@ -6907,11 +6907,11 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - lu
@@ -6952,7 +6952,7 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - svd
@@ -6974,7 +6974,7 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -6998,12 +6998,12 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mulberry32
             - boxMuller
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -7094,11 +7094,11 @@ modules:
           imports:
             - Index
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - lu
@@ -7139,12 +7139,12 @@ modules:
           imports:
             - reshapeByRowAxes
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - svd
             - svdWasm
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - SVDResult
@@ -7168,11 +7168,11 @@ modules:
             - assertSameShape
             - ownedCopy
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - DUAL_UNARY_RULES
@@ -7190,7 +7190,7 @@ modules:
           imports:
             - DualTensor
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
@@ -7208,7 +7208,7 @@ modules:
             - Tape
             - TapedTensor
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
@@ -7292,7 +7292,7 @@ modules:
             - Tape
             - TapedTensor
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
@@ -7306,7 +7306,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
@@ -7326,7 +7326,7 @@ modules:
             - assertSameShape
             - ownedCopy
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-tensor'
+        - package: "@danielsimonjr/mathts-tensor"
           directory: tensor
           imports:
             - Tensor
@@ -7398,7 +7398,7 @@ modules:
             - isComplex
             - isFraction
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UNIT_FLOOR_LO
@@ -7424,7 +7424,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - matrixSchur
@@ -7691,7 +7691,7 @@ modules:
       internalDependencies:
         - file: ../utils/is.js
           imports:
-            - '* as is'
+            - "* as is"
         - file: ../utils/is.js
           imports:
             - isParenthesisNode
@@ -7842,7 +7842,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
@@ -7864,7 +7864,7 @@ modules:
           imports:
             - createSolveValidation
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
@@ -7911,7 +7911,7 @@ modules:
             - validatePackedUpperTriangularPivots
             - validateUpperTriangularPivots
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - decompositionInputToNestedArray
@@ -7919,7 +7919,7 @@ modules:
             - lu
             - luSolve
             - densifyForSolver
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - PackedMatrixDescriptor
@@ -7967,7 +7967,7 @@ modules:
           imports:
             - LUSOLVE_SINGULAR_MESSAGE
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
@@ -7989,7 +7989,7 @@ modules:
           imports:
             - createSolveValidation
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
@@ -8036,7 +8036,7 @@ modules:
           imports:
             - format
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
@@ -8069,7 +8069,7 @@ modules:
         - validateUpperTriangularPivots
         - validatePackedUpperTriangularPivots
     functions/src/algebra/sparse/csAmd.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8097,7 +8097,7 @@ modules:
       constants:
         - createCsAmd
     functions/src/algebra/sparse/csChol.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8124,7 +8124,7 @@ modules:
       constants:
         - createCsChol
     functions/src/algebra/sparse/csCounts.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8241,7 +8241,7 @@ modules:
       functions:
         - csLeaf
     functions/src/algebra/sparse/csLu.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8330,7 +8330,7 @@ modules:
       functions:
         - csReach
     functions/src/algebra/sparse/csSpsolve.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8352,7 +8352,7 @@ modules:
       constants:
         - createCsSpsolve
     functions/src/algebra/sparse/csSqr.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8387,7 +8387,7 @@ modules:
       constants:
         - createCsSqr
     functions/src/algebra/sparse/csSymperm.ts:
-      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
+      description: "Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8945,7 +8945,7 @@ modules:
       constants:
         - createGcd
     functions/src/arithmetic/hypot.ts:
-      description: 'Calculate the hypotenuse of a list with values. The hypotenuse is defined as:'
+      description: "Calculate the hypotenuse of a list with values. The hypotenuse is defined as:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9225,7 +9225,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -9326,7 +9326,7 @@ modules:
           imports:
             - powBigNumberWith
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -9377,7 +9377,7 @@ modules:
             - ConfigOptions
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -9386,7 +9386,7 @@ modules:
       constants:
         - createRound
     functions/src/arithmetic/sign.ts:
-      description: 'Compute the sign of a value. The sign of a value x is:'
+      description: "Compute the sign of a value. The sign of a value x is:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9444,7 +9444,7 @@ modules:
             - sqrtBigNumberWith
             - sqrtNumberWith
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -10042,7 +10042,7 @@ modules:
             - pushConfigOverlay
             - popConfigOverlay
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
@@ -10237,13 +10237,13 @@ modules:
           imports:
             - inv
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseDot
             - pairwiseSum
             - SeededRng
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarNode
@@ -10276,11 +10276,11 @@ modules:
             - ScoredCandidate
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarNode
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - scalarCanonicalKey
@@ -10318,7 +10318,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Dual
@@ -10339,7 +10339,7 @@ modules:
           imports:
             - evaluate
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createHelpClass
@@ -10411,31 +10411,31 @@ modules:
       internalDependencies:
         - file: ./typed/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./typed/cas.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./factories/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry/kernels.generated.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry/sym3.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry/mat4.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry/frustum.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./config-api.js
           imports:
@@ -11848,15 +11848,15 @@ modules:
           typeOnly: true
         - file: ./typed/public-type-exports.js
           imports:
-            - '*'
+            - "*"
           reExport: true
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - svd
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - qrPivoted
@@ -11868,12 +11868,12 @@ modules:
             - powerIteration
             - matrixPinv
             - lstsq
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - SVDResult
             - SVDOptions
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - QRPivotedResult
@@ -12627,13 +12627,13 @@ modules:
         - DtwOptions
         - DtwResult
       reExported:
-        - '* from ./typed/index.js'
-        - '* from ./typed/cas.js'
-        - '* from ./factories/index.js'
-        - '* from ./geometry/kernels.generated.js'
-        - '* from ./geometry/sym3.js'
-        - '* from ./geometry/mat4.js'
-        - '* from ./geometry/frustum.js'
+        - "* from ./typed/index.js"
+        - "* from ./typed/cas.js"
+        - "* from ./factories/index.js"
+        - "* from ./geometry/kernels.generated.js"
+        - "* from ./geometry/sym3.js"
+        - "* from ./geometry/mat4.js"
+        - "* from ./geometry/frustum.js"
         - config
         - runWithConfig
         - importFactory
@@ -13409,7 +13409,7 @@ modules:
           imports:
             - assertAllocSize
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -13470,7 +13470,7 @@ modules:
             - assertAllocSize
             - assertLoopOrder
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -13499,12 +13499,12 @@ modules:
         - leslieMatrix
         - helmertMatrix
     functions/src/linalg-svd-extra.ts:
-      description: '`orth` — orthonormal basis for the column space of a matrix.'
+      description: "`orth` — orthonormal basis for the column space of a matrix."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - svd
@@ -13526,19 +13526,19 @@ modules:
           imports:
             - NUMERIC_LITERAL
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarNode
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - scalarSymbols
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SeededRng
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - nearlyEqual
@@ -13600,7 +13600,7 @@ modules:
             - centralDifferenceGradient
             - numericJacobian
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseDot
@@ -13649,7 +13649,7 @@ modules:
           imports:
             - numberVector
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseDot
@@ -13684,11 +13684,11 @@ modules:
             - ScalarBatchTaskItem
             - ScalarBatchTaskResult
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarNode
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - WorkerPool
@@ -13746,7 +13746,7 @@ modules:
             - runScalarBatchTask
             - ScalarBatchTask
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - importModule
@@ -13762,12 +13762,12 @@ modules:
             - NUMERIC_LITERAL
             - ScalarEvalError
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - DUAL_UNARY_RULES
             - DualUnaryRule
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - LoweredScalarFn
@@ -13800,11 +13800,11 @@ modules:
           imports:
             - rationalNullspace
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarNode
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Fraction
@@ -13855,7 +13855,7 @@ modules:
             - sin
             - tan
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - ScalarBuildError
@@ -13884,7 +13884,7 @@ modules:
           imports:
             - evaluateScalar
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createScalarBuilder
@@ -13893,7 +13893,7 @@ modules:
             - LoweredScalarFn
             - ScalarGrammar
             - ScalarNode
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SeededRng
@@ -13951,14 +13951,14 @@ modules:
             - isParenthesisNode
             - isSymbolNode
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - LoweredScalarFn
             - MathNode
             - ScalarNode
             - StringOptions
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - SCALAR_FUNCTION_LOWERING
@@ -13983,7 +13983,7 @@ modules:
             - NamedScalarLoss
         - file: ./factories/index.js
           imports:
-            - '* as scalarFactories'
+            - "* as scalarFactories"
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -14014,22 +14014,22 @@ modules:
             - validateDimensionVector
             - RationalDimension
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - createSeededRng
             - pairwiseSum
             - SeededRng
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - AbortSignalLike
           subpath: internal
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - WorkerPool
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - enumerateScalars
@@ -14086,7 +14086,7 @@ modules:
             - assertAllocSize
             - assertLoopOrder
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -14264,7 +14264,7 @@ modules:
           imports:
             - polynomialRoot
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -14275,7 +14275,7 @@ modules:
         - snapRoot
         - closedFormRoots
     functions/src/cas/elementary-solve.ts:
-      description: 'Exact solution sets of one-function equations: `a*F(p*x + q) + b = 0`.'
+      description: "Exact solution sets of one-function equations: `a*F(p*x + q) + b = 0`."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14330,7 +14330,7 @@ modules:
           imports:
             - renderPolynomial
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
@@ -14416,7 +14416,7 @@ modules:
       constants:
         - RAT_ZERO
     functions/src/cas/rational-integrate.ts:
-      description: 'Layer 1 rational-function symbolic integration — Task 1: parse a'
+      description: "Layer 1 rational-function symbolic integration — Task 1: parse a"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14492,7 +14492,7 @@ modules:
         - integratePFTerm
         - integrateRationalFunction
     functions/src/cas/real-roots.ts:
-      description: 'Real-root isolation and approximation for real polynomials: Sturm sequences,'
+      description: "Real-root isolation and approximation for real polynomials: Sturm sequences,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14579,7 +14579,7 @@ modules:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
         The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose
-        union is
+        union is 
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14789,12 +14789,12 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - DEFAULT_CONFIG
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ConfigOptions
@@ -14887,7 +14887,7 @@ modules:
             - isObjectWrappingMap
         - file: ./../utils/emitter.js
           imports:
-            - '* as emitter'
+            - "* as emitter"
         - file: ./config.js
           imports:
             - DEFAULT_CONFIG
@@ -15058,12 +15058,12 @@ modules:
       classes:
         - ArgumentsError
     functions/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
+      description: "Create a range error with the message:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - DimensionError
@@ -15078,7 +15078,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - IndexError
@@ -15115,18 +15115,18 @@ modules:
             - factoryScope
         - file: ./index.js
           imports:
-            - '* as activatedFactories'
+            - "* as activatedFactories"
         - file: ../typed/expression-eval-barrel.js
           imports:
-            - '* as typedFns'
+            - "* as typedFns"
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createEvaluate
             - compileExpressionWithDeps
             - EXPRESSION_SCOPE_OMIT
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -15987,7 +15987,7 @@ modules:
           reExport: true
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createNode
@@ -16007,7 +16007,7 @@ modules:
             - createRelationalNode
             - createSymbolNode
             - createParse
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -16016,12 +16016,12 @@ modules:
             - isFraction
             - isMatrix
             - isUnit
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - createUnitClass
           subpath: internal
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createAndTransform
@@ -16597,17 +16597,17 @@ modules:
           imports:
             - assertAllocSize
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - formatGeneric
             - getArrayDataType
           subpath: internal
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -16643,7 +16643,7 @@ modules:
             - acceptsMatrix
             - adaptSparse
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -16671,11 +16671,11 @@ modules:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -16774,7 +16774,7 @@ modules:
       functions:
         - delaunay
     functions/src/geometry/distance.ts:
-      description: 'Calculates:'
+      description: "Calculates:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16793,7 +16793,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - scaledDistance
@@ -16827,7 +16827,7 @@ modules:
         - frustumIntersectsSphere
         - frustumIntersectsAabb
     functions/src/geometry/geometry-extra.ts:
-      description: 'Geometry and set extras: axis-aligned bounding box, orthogonal Procrustes'
+      description: "Geometry and set extras: axis-aligned bounding box, orthogonal Procrustes"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16842,7 +16842,7 @@ modules:
           imports:
             - rankNearest
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - matMul
@@ -16921,7 +16921,7 @@ modules:
       constants:
         - createIntersect
     functions/src/geometry/intersect3d.ts:
-      description: '3-D ray/segment intersection tests (geometry breadth follow-up): ray↔triangle'
+      description: "3-D ray/segment intersection tests (geometry breadth follow-up): ray↔triangle"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -16994,7 +16994,7 @@ modules:
         - mat3Transpose
         - mat3Inverse
     functions/src/geometry/mass-properties.ts:
-      description: 'Mass properties of solids and plane figures: volume (area in 2-D), mass,'
+      description: "Mass properties of solids and plane figures: volume (area in 2-D), mass,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -17048,7 +17048,7 @@ modules:
         - mat4Perspective
         - mat4Orthographic
     functions/src/geometry/polygon-ops.ts:
-      description: 'Polygon operations (Gap-analysis 2026-11-04 Batch E9): Sutherland-Hodgman'
+      description: "Polygon operations (Gap-analysis 2026-11-04 Batch E9): Sutherland-Hodgman"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -17188,7 +17188,7 @@ modules:
           imports:
             - implicitGpuAllowed
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - getGpuDevice
@@ -17198,7 +17198,7 @@ modules:
             - BufferPool
             - serializeGpu
             - GPUContextOptions
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUBuffer
@@ -17232,7 +17232,7 @@ modules:
           imports:
             - implicitGpuAllowed
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - getGpuDevice
@@ -17241,7 +17241,7 @@ modules:
             - BufferPool
             - serializeGpu
             - GPUContextOptions
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - GPUBuffer
@@ -17261,11 +17261,11 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - isGpuEnabled
@@ -17739,7 +17739,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseDot
@@ -18036,7 +18036,7 @@ modules:
           imports:
             - format
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - SQUARED
@@ -18111,7 +18111,7 @@ modules:
             - Matrix
             - BigNumber
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - _switch
@@ -18180,13 +18180,13 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
             - lu
             - eig
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -18457,7 +18457,7 @@ modules:
       constants:
         - createSize
     functions/src/matrix/slice-2d.ts:
-      description: 'Extract one row (`axis: 0`) or column (`axis: 1`) from a 2-D matrix.'
+      description: "Extract one row (`axis: 0`) or column (`axis: 1`) from a 2-D matrix."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18533,7 +18533,7 @@ modules:
           imports:
             - factory
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ABS_CUTOFF_LO
@@ -18603,7 +18603,7 @@ modules:
             - Index
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - getStringSubset
@@ -18613,7 +18613,7 @@ modules:
       constants:
         - createSubset
     functions/src/matrix/trace.ts:
-      description: 'Calculate the trace of a matrix: the sum of the elements on the main'
+      description: "Calculate the trace of a matrix: the sum of the elements on the main"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18779,12 +18779,12 @@ modules:
           imports:
             - studentTTwoSidedP
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseDot
             - sumSquaredDeviations
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - matMul
@@ -18818,7 +18818,7 @@ modules:
         - elasticNet
   functions/numbertheory:
     functions/src/numbertheory/arithmetic-functions.ts:
-      description: 'Arithmetic functions and integer power / root helpers: squarefree tests,'
+      description: "Arithmetic functions and integer power / root helpers: squarefree tests,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18865,7 +18865,7 @@ modules:
         - collatzSteps
         - primorial
     functions/src/numbertheory/diophantine.ts:
-      description: 'Diophantine and lattice-style integer problems: linear Diophantine equations,'
+      description: "Diophantine and lattice-style integer problems: linear Diophantine equations,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18923,7 +18923,7 @@ modules:
         - combinationsGen
         - permutationsGen
     functions/src/numbertheory/integer-matrices.ts:
-      description: 'Integer normal forms: row-style Hermite normal form, Smith normal form (with'
+      description: "Integer normal forms: row-style Hermite normal form, Smith normal form (with"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -18937,7 +18937,7 @@ modules:
         - smithNormalForm
         - lll
     functions/src/numbertheory/modular.ts:
-      description: 'Modular arithmetic: modular exponentiation, previous prime, Legendre symbol,'
+      description: "Modular arithmetic: modular exponentiation, previous prime, Legendre symbol,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -18957,7 +18957,7 @@ modules:
         - trialFactorize
         - isCarmichael
     functions/src/numbertheory/sequences.ts:
-      description: 'Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,'
+      description: "Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19010,7 +19010,7 @@ modules:
         - quad
         - quadValue
     functions/src/numeric/bfgs.ts:
-      description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
+      description: "BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19084,7 +19084,7 @@ modules:
           imports:
             - linsolve
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - matMul
@@ -19102,7 +19102,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -19131,7 +19131,7 @@ modules:
         - ridders
         - fixedPoint
     functions/src/numeric/fsolve.ts:
-      description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
+      description: "Nonlinear system solver: `fsolve` (damped Newton with a backtracking line"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19143,7 +19143,7 @@ modules:
           imports:
             - linsolve
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -19280,7 +19280,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -19308,11 +19308,11 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ComplexValue
@@ -19361,7 +19361,7 @@ modules:
       functions:
         - monteCarloIntegrate
     functions/src/numeric/nnls.ts:
-      description: 'Constrained least squares: `nnls` (Lawson–Hanson active-set non-negative'
+      description: "Constrained least squares: `nnls` (Lawson–Hanson active-set non-negative"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19379,7 +19379,7 @@ modules:
         - nnls
         - lsqBounded
     functions/src/numeric/numeric-jacobian.ts:
-      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite'
+      description: "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19446,7 +19446,7 @@ modules:
             - createFineStructure
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isUnit
@@ -19489,7 +19489,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Fraction
@@ -19571,7 +19571,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -19641,7 +19641,7 @@ modules:
           imports:
             - eigsh
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - norm2
@@ -19788,52 +19788,52 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bitwise.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./combinations.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./constants.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./logical.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./relational.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./probability.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./utils.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       workspaceDependencies: []
       exports: []
       reExported:
-        - '* from ./arithmetic.js'
-        - '* from ./bitwise.js'
-        - '* from ./combinations.js'
-        - '* from ./constants.js'
-        - '* from ./logical.js'
-        - '* from ./relational.js'
-        - '* from ./probability.js'
-        - '* from ./trigonometry.js'
-        - '* from ./utils.js'
+        - "* from ./arithmetic.js"
+        - "* from ./bitwise.js"
+        - "* from ./combinations.js"
+        - "* from ./constants.js"
+        - "* from ./logical.js"
+        - "* from ./relational.js"
+        - "* from ./probability.js"
+        - "* from ./trigonometry.js"
+        - "* from ./utils.js"
     functions/src/plain/number/logical.ts:
       description: logical module
       externalDependencies: []
@@ -20882,7 +20882,7 @@ modules:
       constants:
         - createSetCartesian
     functions/src/set/setDifference.ts:
-      description: 'Create the difference of two (multi)sets: every element of set1, that is not the element of set2.'
+      description: "Create the difference of two (multi)sets: every element of set1, that is not the element of set2."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -21377,7 +21377,7 @@ modules:
           imports:
             - assertLoopOrder
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -21652,7 +21652,7 @@ modules:
           imports:
             - ferrersP
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -21712,7 +21712,7 @@ modules:
       constants:
         - createErf
     functions/src/special/exp-integrals.ts:
-      description: 'Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).'
+      description: "Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral)."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -21762,12 +21762,12 @@ modules:
         - jacobiCN
         - jacobiDN
     functions/src/special/mathieu.ts:
-      description: 'Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the'
+      description: "Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
@@ -21782,7 +21782,7 @@ modules:
         - mathieuCe
         - mathieuSe
     functions/src/special/niche.ts:
-      description: 'Niche special functions: polylogarithm, Struve H/L, Kelvin ber/bei (order'
+      description: "Niche special functions: polylogarithm, Struve H/L, Kelvin ber/bei (order"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -21842,7 +21842,7 @@ modules:
             - assertLoopOrder
             - MAX_SPHERICAL_BESSEL_ORDER
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -21872,7 +21872,7 @@ modules:
             - assertLoopOrder
             - MAX_FERRERS_ORDER
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
@@ -21890,7 +21890,7 @@ modules:
       constants:
         - spheroidalCharacteristic
     functions/src/special/wave-functions.ts:
-      description: 'Advanced niche special functions: the Riemann–Siegel Z-function, the Lerch'
+      description: "Advanced niche special functions: the Riemann–Siegel Z-function, the Lerch"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -21981,7 +21981,7 @@ modules:
           imports:
             - typedArrayPairToNumbers
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseSum
@@ -22016,7 +22016,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - neumaierCumsum
@@ -22401,12 +22401,12 @@ modules:
       constants:
         - createStd
     functions/src/statistics/sum-indexed-guard.ts:
-      description: 'Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721).'
+      description: "Reject `sum(body, lo, hi, index)` mistaken for variadic addition (G21 / #721)."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isComplex
@@ -22442,7 +22442,7 @@ modules:
             - ConfigOptions
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseSum
@@ -22486,7 +22486,7 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - sumSquaredDeviations
@@ -22697,7 +22697,7 @@ modules:
         - mcnemar
         - cochranQ
     functions/src/stats/multivariate-sampling.ts:
-      description: 'Multivariate sampling beyond MVN: Dirichlet (`dirichletSample` /'
+      description: "Multivariate sampling beyond MVN: Dirichlet (`dirichletSample` /"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -23953,19 +23953,19 @@ modules:
       constants:
         - createIndex
     functions/src/type/matrix/types.ts:
-      description: 'Type Philosophy:'
+      description: "Type Philosophy:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - RangeForEachCallback
             - RangeFormatOptions
             - RangeJSON
             - RangeMapCallback
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - NestedArray
@@ -24487,7 +24487,7 @@ modules:
             - MathJsConfig
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UnitInstance
@@ -24823,7 +24823,7 @@ modules:
             - powReal
             - nthRootReal
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -24833,7 +24833,7 @@ modules:
             - Dual
             - DimensionMismatchError
             - extrema
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pairwiseSum
@@ -24844,19 +24844,19 @@ modules:
             - pairwiseDotChecked
             - sumSquaredDeviations
             - sumSquaredDeviationsChecked
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - pow
             - round
             - fix
             - equal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UnitInstance
             - TypedFunction
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -24865,7 +24865,7 @@ modules:
             - isDenseMatrix
             - isSparseMatrix
             - singularValues
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -25008,12 +25008,12 @@ modules:
             - runBinaryBitwiseWasm
             - runUnaryBitwiseWasm
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
             - BigNumber
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - bitAnd
@@ -25125,7 +25125,7 @@ modules:
           imports:
             - findRoot
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -25246,7 +25246,7 @@ modules:
           imports:
             - assertLoopOrder
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -25315,7 +25315,7 @@ modules:
             - ConfigOptions
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -25375,7 +25375,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -25412,12 +25412,12 @@ modules:
             - gammaSampleRng
             - normalSampleRng
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
             - mulberry32
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -25502,7 +25502,7 @@ modules:
             - numberLiteral
             - registerWorkerKernels
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -25561,7 +25561,7 @@ modules:
       functions:
         - euclidSnap
     functions/src/typed/exact-reductions.ts:
-      description: 'The factory functions that the typed functions call for input that is not plain numbers: the'
+      description: "The factory functions that the typed functions call for input that is not plain numbers: the"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -25581,103 +25581,103 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./statistics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./signal.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bitwise.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./logical.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./complex.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./set.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./special.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./fused.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./distributions.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./algebra.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./integration.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./interpolation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./numeric.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./combinatorics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./graph.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./dist-objects.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./hypothesis.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./matrix-ops.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./relational.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./string.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./probability.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./unit.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./arithmetic.js
           imports:
@@ -25762,31 +25762,31 @@ modules:
         - typedProbability
         - typedUnit
       reExported:
-        - '* from ./arithmetic.js'
-        - '* from ./trigonometry.js'
-        - '* from ./statistics.js'
-        - '* from ./signal.js'
-        - '* from ./bitwise.js'
-        - '* from ./logical.js'
-        - '* from ./complex.js'
-        - '* from ./set.js'
-        - '* from ./special.js'
-        - '* from ./fused.js'
-        - '* from ./distributions.js'
-        - '* from ./geometry.js'
-        - '* from ./algebra.js'
-        - '* from ./integration.js'
-        - '* from ./interpolation.js'
-        - '* from ./numeric.js'
-        - '* from ./combinatorics.js'
-        - '* from ./graph.js'
-        - '* from ./dist-objects.js'
-        - '* from ./hypothesis.js'
-        - '* from ./matrix-ops.js'
-        - '* from ./relational.js'
-        - '* from ./string.js'
-        - '* from ./probability.js'
-        - '* from ./unit.js'
+        - "* from ./arithmetic.js"
+        - "* from ./trigonometry.js"
+        - "* from ./statistics.js"
+        - "* from ./signal.js"
+        - "* from ./bitwise.js"
+        - "* from ./logical.js"
+        - "* from ./complex.js"
+        - "* from ./set.js"
+        - "* from ./special.js"
+        - "* from ./fused.js"
+        - "* from ./distributions.js"
+        - "* from ./geometry.js"
+        - "* from ./algebra.js"
+        - "* from ./integration.js"
+        - "* from ./interpolation.js"
+        - "* from ./numeric.js"
+        - "* from ./combinatorics.js"
+        - "* from ./graph.js"
+        - "* from ./dist-objects.js"
+        - "* from ./hypothesis.js"
+        - "* from ./matrix-ops.js"
+        - "* from ./relational.js"
+        - "* from ./string.js"
+        - "* from ./probability.js"
+        - "* from ./unit.js"
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -25816,11 +25816,11 @@ modules:
             - elementwiseUnaryDispatch
             - WasmElementwiseOp
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -25915,7 +25915,7 @@ modules:
       functions:
         - henselLift
     functions/src/typed/factorization/index.ts:
-      description: 'Public entry point of the univariate factorization engine: parse an'
+      description: "Public entry point of the univariate factorization engine: parse an"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -26040,7 +26040,7 @@ modules:
       functions:
         - factorMultivariateKronecker
     functions/src/typed/factorization/kronecker.ts:
-      description: 'Kronecker substitution: reduces a multivariate integer polynomial to a'
+      description: "Kronecker substitution: reduces a multivariate integer polynomial to a"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -26229,7 +26229,7 @@ modules:
             - argsortF64Dispatch
             - WASM_SORT_THRESHOLD
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -26307,11 +26307,11 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - gpuMatrixBackend
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -26342,7 +26342,7 @@ modules:
             - CENTRALITY_WORKER_THRESHOLD
             - runCentralityRestarts
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mulberry32
@@ -26421,11 +26421,11 @@ modules:
           imports:
             - hasNaN
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mulberry32
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -26564,107 +26564,107 @@ modules:
             - typedUnit
         - file: ./arithmetic.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./statistics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./signal.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bitwise.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./logical.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./complex.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./set.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./special.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./fused.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./distributions.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./algebra.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./integration.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./interpolation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./numeric.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./combinatorics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./graph.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./dist-objects.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./hypothesis.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./matrix-ops.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./gpu.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./relational.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./string.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./probability.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./unit.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./arithmetic.js
           imports:
@@ -26750,7 +26750,7 @@ modules:
             - typedUnit
           reExport: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
+        - package: "@danielsimonjr/mathts-gpu"
           directory: gpu
           imports:
             - enableGpu
@@ -26793,32 +26793,32 @@ modules:
         - typedUnit
         - typedFunctions
       reExported:
-        - '* from ./arithmetic.js'
-        - '* from ./trigonometry.js'
-        - '* from ./statistics.js'
-        - '* from ./signal.js'
-        - '* from ./bitwise.js'
-        - '* from ./logical.js'
-        - '* from ./complex.js'
-        - '* from ./set.js'
-        - '* from ./special.js'
-        - '* from ./fused.js'
-        - '* from ./distributions.js'
-        - '* from ./geometry.js'
-        - '* from ./algebra.js'
-        - '* from ./integration.js'
-        - '* from ./interpolation.js'
-        - '* from ./numeric.js'
-        - '* from ./combinatorics.js'
-        - '* from ./graph.js'
-        - '* from ./dist-objects.js'
-        - '* from ./hypothesis.js'
-        - '* from ./matrix-ops.js'
-        - '* from ./gpu.js'
-        - '* from ./relational.js'
-        - '* from ./string.js'
-        - '* from ./probability.js'
-        - '* from ./unit.js'
+        - "* from ./arithmetic.js"
+        - "* from ./trigonometry.js"
+        - "* from ./statistics.js"
+        - "* from ./signal.js"
+        - "* from ./bitwise.js"
+        - "* from ./logical.js"
+        - "* from ./complex.js"
+        - "* from ./set.js"
+        - "* from ./special.js"
+        - "* from ./fused.js"
+        - "* from ./distributions.js"
+        - "* from ./geometry.js"
+        - "* from ./algebra.js"
+        - "* from ./integration.js"
+        - "* from ./interpolation.js"
+        - "* from ./numeric.js"
+        - "* from ./combinatorics.js"
+        - "* from ./graph.js"
+        - "* from ./dist-objects.js"
+        - "* from ./hypothesis.js"
+        - "* from ./matrix-ops.js"
+        - "* from ./gpu.js"
+        - "* from ./relational.js"
+        - "* from ./string.js"
+        - "* from ./probability.js"
+        - "* from ./unit.js"
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -26866,11 +26866,11 @@ modules:
           imports:
             - assertLoopOrder
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
@@ -26953,19 +26953,19 @@ modules:
         - chebyshevFit
         - legendreFit
     functions/src/typed/invalid-scalar-guards.ts:
-      description: 'Guards for typed `add` / `multiply`: reject operands that must not be coerced'
+      description: "Guards for typed `add` / `multiply`: reject operands that must not be coerced"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isBigNumber
             - isComplex
             - isDual
             - isFraction
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - isNativeMatrix
@@ -26988,7 +26988,7 @@ modules:
           imports:
             - mapEachLeaf
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -27023,7 +27023,7 @@ modules:
           imports:
             - MathJSDenseMatrix
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
@@ -27046,7 +27046,7 @@ modules:
             - isDenseMatrix
             - matMul
             - transposeNestedArray
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -27189,12 +27189,12 @@ modules:
             - GaussLegendre4Solution
           reExport: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - densifyForSolver
             - SparseMatrix
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ABS_CUTOFF_LO
@@ -27343,7 +27343,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -27420,11 +27420,11 @@ modules:
           imports:
             - multinomialExact
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - IMatrix
@@ -27458,7 +27458,7 @@ modules:
       internalDependencies:
         - file: ../../types/public-overloads.generated.js
           imports:
-            - '*'
+            - "*"
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -27477,7 +27477,7 @@ modules:
           imports:
             - nearlyEqual
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -27514,7 +27514,7 @@ modules:
           imports:
             - flatten
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -27580,11 +27580,11 @@ modules:
           imports:
             - dwtPeriodization
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -27761,7 +27761,7 @@ modules:
             - ellipticEIncompleteScalar
             - ellipticPiIncompleteScalar
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -27862,12 +27862,12 @@ modules:
           imports:
             - assertAllocSize
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
             - neumaierCumsum
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -27949,13 +27949,13 @@ modules:
             - assertFormatPrecision
             - fillPrintTemplate
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
             - BigNumber
             - isBigNumber
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - formatBigNumber
@@ -27983,12 +27983,12 @@ modules:
           imports:
             - DimensionError
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
             - isComplex
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UnitInstance
@@ -28023,14 +28023,14 @@ modules:
           imports:
             - trigFromAngleUnit
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
             - Complex
             - BigNumber
             - Dual
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - UnitInstance
@@ -28082,7 +28082,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - registerNativeTypes
@@ -28096,11 +28096,11 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Unit
@@ -28172,7 +28172,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - arraySize
@@ -28206,7 +28206,7 @@ modules:
             - deepForEachArray
             - cloneArray
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - NestedArray
@@ -28338,7 +28338,7 @@ modules:
           imports:
             - nearlyEqual
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - BigNumber
@@ -28387,7 +28387,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - containsCollections
@@ -28468,7 +28468,7 @@ modules:
           imports:
             - pickShallow
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - LegacyFactory
@@ -28735,7 +28735,7 @@ modules:
       constants:
         - createIsNaN
     functions/src/utils/isNegative.ts:
-      description: 'Test whether a value is negative: smaller than zero.'
+      description: "Test whether a value is negative: smaller than zero."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -28792,7 +28792,7 @@ modules:
       constants:
         - createIsNumeric
     functions/src/utils/isPositive.ts:
-      description: 'Test whether a value is positive: larger than zero.'
+      description: "Test whether a value is positive: larger than zero."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -28875,7 +28875,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DENSE_MATRIX_MAX_ELEMENTS
@@ -28912,7 +28912,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ObjectWrappingMap
@@ -29029,7 +29029,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - acosh
@@ -29059,7 +29059,7 @@ modules:
             - toFixed
             - toPrecision
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - FormatOptions
@@ -29130,7 +29130,7 @@ modules:
         - NumberTypeConfig
         - SplitValue
     functions/src/utils/numeric.ts:
-      description: 'Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.'
+      description: "Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -29155,7 +29155,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - canDefineProperty
@@ -29317,7 +29317,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - formatGeneric
@@ -29342,7 +29342,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - _switch
@@ -29397,7 +29397,7 @@ modules:
             - defaultWasmLocation
             - resolveBrowserWasm
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - WasmModuleLoader
@@ -29451,7 +29451,7 @@ modules:
       constants:
         - WASM_BITWISE_THRESHOLD
     functions/src/wasm/bridges/common.ts:
-      description: 'Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,'
+      description: "Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -29463,7 +29463,7 @@ modules:
           imports:
             - wasmPolicyAllows
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - allocAsHeader
@@ -29529,7 +29529,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - sha384OfBuffer
@@ -29589,7 +29589,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
@@ -29663,7 +29663,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - resolvePackagedWasm
@@ -30085,7 +30085,7 @@ modules:
             - MathNode
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -30109,39 +30109,39 @@ modules:
       internalDependencies:
         - file: ./types.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./keywords.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./operators.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./parse.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./Parser.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./Help.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./compiler/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./evaluator/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./transform/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./function/parser.js
           imports:
@@ -30347,15 +30347,15 @@ modules:
         - EnumerationStop
         - ScalarGrammar
       reExported:
-        - '* from ./types.js'
-        - '* from ./keywords.js'
-        - '* from ./operators.js'
-        - '* from ./parse.js'
-        - '* from ./Parser.js'
-        - '* from ./Help.js'
-        - '* from ./compiler/index.js'
-        - '* from ./evaluator/index.js'
-        - '* from ./transform/index.js'
+        - "* from ./types.js"
+        - "* from ./keywords.js"
+        - "* from ./operators.js"
+        - "* from ./parse.js"
+        - "* from ./Parser.js"
+        - "* from ./Help.js"
+        - "* from ./compiler/index.js"
+        - "* from ./evaluator/index.js"
+        - "* from ./transform/index.js"
         - createParser
         - embeddedDocs
         - defaultMathScope
@@ -30526,7 +30526,7 @@ modules:
             - DefaultDependencies
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -30636,7 +30636,7 @@ modules:
           imports:
             - hasOwnProperty
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - AbortSignalLike
@@ -30649,7 +30649,7 @@ modules:
       functions:
         - scalarGrammarAccepts
     expression/src/scalar-structure.ts:
-      description: 'Structural utilities over {@link ScalarNode}: traversal, metrics, and'
+      description: "Structural utilities over {@link ScalarNode}: traversal, metrics, and"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -35524,262 +35524,262 @@ modules:
       internalDependencies:
         - file: ./speedOfLight.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./gravitationConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./reducedPlanckConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./magneticConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./electricConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./vacuumImpedance.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./coulomb.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./coulombConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./elementaryCharge.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bohrMagneton.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./conductanceQuantum.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./inverseConductanceQuantum.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./magneticFluxQuantum.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./nuclearMagneton.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./klitzing.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bohrRadius.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./classicalElectronRadius.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./electronMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./fermiCoupling.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./fineStructure.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./hartreeEnergy.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./protonMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./deuteronMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./neutronMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./quantumOfCirculation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./rydberg.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./thomsonCrossSection.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./weakMixingAngle.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./efimovFactor.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./atomicMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./avogadro.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./boltzmann.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./faraday.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./firstRadiation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./loschmidt.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./gasConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./molarPlanckConstant.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./molarVolume.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./sackurTetrode.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./secondRadiation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./stefanBoltzmann.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./wienDisplacement.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./molarMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./molarMassC12.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./gravity.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckLength.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckMass.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckTime.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckCharge.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./planckTemperature.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       workspaceDependencies: []
       exports: []
       reExported:
-        - '* from ./speedOfLight.js'
-        - '* from ./gravitationConstant.js'
-        - '* from ./planckConstant.js'
-        - '* from ./reducedPlanckConstant.js'
-        - '* from ./magneticConstant.js'
-        - '* from ./electricConstant.js'
-        - '* from ./vacuumImpedance.js'
-        - '* from ./coulomb.js'
-        - '* from ./coulombConstant.js'
-        - '* from ./elementaryCharge.js'
-        - '* from ./bohrMagneton.js'
-        - '* from ./conductanceQuantum.js'
-        - '* from ./inverseConductanceQuantum.js'
-        - '* from ./magneticFluxQuantum.js'
-        - '* from ./nuclearMagneton.js'
-        - '* from ./klitzing.js'
-        - '* from ./bohrRadius.js'
-        - '* from ./classicalElectronRadius.js'
-        - '* from ./electronMass.js'
-        - '* from ./fermiCoupling.js'
-        - '* from ./fineStructure.js'
-        - '* from ./hartreeEnergy.js'
-        - '* from ./protonMass.js'
-        - '* from ./deuteronMass.js'
-        - '* from ./neutronMass.js'
-        - '* from ./quantumOfCirculation.js'
-        - '* from ./rydberg.js'
-        - '* from ./thomsonCrossSection.js'
-        - '* from ./weakMixingAngle.js'
-        - '* from ./efimovFactor.js'
-        - '* from ./atomicMass.js'
-        - '* from ./avogadro.js'
-        - '* from ./boltzmann.js'
-        - '* from ./faraday.js'
-        - '* from ./firstRadiation.js'
-        - '* from ./loschmidt.js'
-        - '* from ./gasConstant.js'
-        - '* from ./molarPlanckConstant.js'
-        - '* from ./molarVolume.js'
-        - '* from ./sackurTetrode.js'
-        - '* from ./secondRadiation.js'
-        - '* from ./stefanBoltzmann.js'
-        - '* from ./wienDisplacement.js'
-        - '* from ./molarMass.js'
-        - '* from ./molarMassC12.js'
-        - '* from ./gravity.js'
-        - '* from ./planckLength.js'
-        - '* from ./planckMass.js'
-        - '* from ./planckTime.js'
-        - '* from ./planckCharge.js'
-        - '* from ./planckTemperature.js'
+        - "* from ./speedOfLight.js"
+        - "* from ./gravitationConstant.js"
+        - "* from ./planckConstant.js"
+        - "* from ./reducedPlanckConstant.js"
+        - "* from ./magneticConstant.js"
+        - "* from ./electricConstant.js"
+        - "* from ./vacuumImpedance.js"
+        - "* from ./coulomb.js"
+        - "* from ./coulombConstant.js"
+        - "* from ./elementaryCharge.js"
+        - "* from ./bohrMagneton.js"
+        - "* from ./conductanceQuantum.js"
+        - "* from ./inverseConductanceQuantum.js"
+        - "* from ./magneticFluxQuantum.js"
+        - "* from ./nuclearMagneton.js"
+        - "* from ./klitzing.js"
+        - "* from ./bohrRadius.js"
+        - "* from ./classicalElectronRadius.js"
+        - "* from ./electronMass.js"
+        - "* from ./fermiCoupling.js"
+        - "* from ./fineStructure.js"
+        - "* from ./hartreeEnergy.js"
+        - "* from ./protonMass.js"
+        - "* from ./deuteronMass.js"
+        - "* from ./neutronMass.js"
+        - "* from ./quantumOfCirculation.js"
+        - "* from ./rydberg.js"
+        - "* from ./thomsonCrossSection.js"
+        - "* from ./weakMixingAngle.js"
+        - "* from ./efimovFactor.js"
+        - "* from ./atomicMass.js"
+        - "* from ./avogadro.js"
+        - "* from ./boltzmann.js"
+        - "* from ./faraday.js"
+        - "* from ./firstRadiation.js"
+        - "* from ./loschmidt.js"
+        - "* from ./gasConstant.js"
+        - "* from ./molarPlanckConstant.js"
+        - "* from ./molarVolume.js"
+        - "* from ./sackurTetrode.js"
+        - "* from ./secondRadiation.js"
+        - "* from ./stefanBoltzmann.js"
+        - "* from ./wienDisplacement.js"
+        - "* from ./molarMass.js"
+        - "* from ./molarMassC12.js"
+        - "* from ./gravity.js"
+        - "* from ./planckLength.js"
+        - "* from ./planckMass.js"
+        - "* from ./planckTime.js"
+        - "* from ./planckCharge.js"
+        - "* from ./planckTemperature.js"
     expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts:
       description: inverseConductanceQuantum module
       externalDependencies: []
@@ -36072,12 +36072,12 @@ modules:
         - wienDisplacementDocs
   expression/error:
     expression/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
+      description: "Create a range error with the message:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - DimensionError
@@ -36092,7 +36092,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - IndexError
@@ -36202,7 +36202,7 @@ modules:
           imports:
             - createParserClass
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -36840,7 +36840,7 @@ modules:
             - DefaultDependencies
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
@@ -37590,7 +37590,7 @@ modules:
       functions:
         - lastDimToZeroBase
     expression/src/transform/utils/prepareTransformArgs.ts:
-      description: 'Shared tail of filter/forEach transforms: evaluate the collection argument and'
+      description: "Shared tail of filter/forEach transforms: evaluate the collection argument and"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -37611,7 +37611,7 @@ modules:
         - prepareTransformArrayAndCallback
         - applyArrayCallbackTransform
     expression/src/transform/utils/shortCircuitBinary.ts:
-      description: 'Evaluate a lazy binary operator transform: compile/evaluate the left arg'
+      description: "Evaluate a lazy binary operator transform: compile/evaluate the left arg"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -37665,7 +37665,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - arraySize
@@ -37700,7 +37700,7 @@ modules:
             - deepForEachArray
             - cloneArray
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - NestedArray
@@ -37805,7 +37805,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - containsCollections
@@ -37871,7 +37871,7 @@ modules:
           imports:
             - pickShallow
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - LegacyFactory
@@ -38061,7 +38061,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - ObjectWrappingMap
@@ -38119,7 +38119,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - acosh
@@ -38148,7 +38148,7 @@ modules:
             - toFixed
             - toPrecision
           subpath: internal
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - FormatOptions
@@ -38222,7 +38222,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - canDefineProperty
@@ -38328,7 +38328,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - endsWith
@@ -38357,7 +38357,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - parse
@@ -38447,7 +38447,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Unit
@@ -38505,7 +38505,7 @@ modules:
             - unitPrefixExactScale
             - getUnitPrefix
             - REFUSED_UNIT_SPELLINGS
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Dimensions
@@ -38666,7 +38666,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -38694,7 +38694,7 @@ modules:
             - BIGNUMBER_E
             - BIGNUMBER_LN2
             - BIGNUMBER_LN10
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - IComplex
@@ -38771,7 +38771,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - createNode
@@ -38831,7 +38831,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - compile
@@ -38840,7 +38840,7 @@ modules:
             - compileExpressionWithDeps
             - evaluate
             - parse
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - CompiledExpression
@@ -38870,7 +38870,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - eig
@@ -38904,7 +38904,7 @@ modules:
             - matrixLogm
             - matrixSqrtm
             - matrixSchur
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - EigResult
@@ -39032,7 +39032,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - add
@@ -39182,7 +39182,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - sin
@@ -39254,7 +39254,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - mean
@@ -39287,7 +39287,7 @@ modules:
             - nanmedian
             - nanvariance
             - nanstd
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - parallelStatSum
@@ -39314,7 +39314,7 @@ modules:
             - minSelect
             - maxSelect
             - typedStatistics
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - normalDist
@@ -39367,7 +39367,7 @@ modules:
             - logisticPDF
             - logisticCDF
             - logisticQuantile
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - studentTTest
@@ -39391,7 +39391,7 @@ modules:
             - studentizedRangeCDF
             - studentizedRangeQuantile
             - tukeyHSD
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - combinations
@@ -39412,7 +39412,7 @@ modules:
             - pickRandom
             - seedProbabilityRng
             - typedProbability
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - linearRegression
@@ -39432,7 +39432,7 @@ modules:
             - spectralClustering
             - beta
             - digamma
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - linregress
@@ -39444,7 +39444,7 @@ modules:
             - trimmedMean
             - describe
             - histogram
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - andersonDarlingTest
@@ -39452,7 +39452,7 @@ modules:
             - friedmanTest
             - anova2
             - multipleComparison
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - paretoDist
@@ -39462,7 +39462,7 @@ modules:
             - gumbelDist
             - invGaussDist
             - multivariateNormal
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - meanCI
@@ -39471,29 +39471,29 @@ modules:
             - permutationTest
             - mahalanobis
             - hotellingT2
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - Distribution
             - SampleNOptions
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - LinRegressResult
             - CorrelationTestResult
             - DescribeResult
             - HistogramResult
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - NormalityTestResult
             - Anova2Effect
             - Anova2Result
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - MultivariateDistribution
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - ConfidenceInterval
@@ -39911,7 +39911,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - parallelFFT
@@ -40043,7 +40043,7 @@ modules:
             - rightArithShift
             - rightLogShift
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isDeterministic
@@ -40053,7 +40053,7 @@ modules:
             - scaledDistance
             - sumSquaredDeviations
             - extrema
-        - package: '@danielsimonjr/mathts-workerpool'
+        - package: "@danielsimonjr/mathts-workerpool"
           directory: packages/workerpool
           imports:
             - MathWorkerPool
@@ -40111,12 +40111,12 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - importModule
           subpath: internal
-        - package: '@danielsimonjr/mathts-workerpool'
+        - package: "@danielsimonjr/mathts-workerpool"
           directory: packages/workerpool
           imports:
             - TransferableLike
@@ -40258,12 +40258,12 @@ modules:
           reExport: true
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-workerpool'
+        - package: "@danielsimonjr/mathts-workerpool"
           directory: packages/workerpool
           imports:
             - matmulSequential
             - resolveDefaultWorkerScript
-        - package: '@danielsimonjr/mathts-workerpool'
+        - package: "@danielsimonjr/mathts-workerpool"
           directory: packages/workerpool
           imports:
             - PoolOptions
@@ -41059,7 +41059,7 @@ modules:
           imports:
             - parseYamlSafe
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - parse
@@ -41194,7 +41194,7 @@ modules:
           imports:
             - parseYamlSafe
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - evaluate
@@ -41211,11 +41211,11 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isFraction
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - formatGeneric
@@ -41284,7 +41284,7 @@ modules:
             - renderChart
             - ChartSpec
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
+        - package: "@danielsimonjr/mathts-expression"
           directory: expression
           imports:
             - mathMLDocument
@@ -41526,10 +41526,10 @@ modules:
           imports:
             - SUPPORTED_CELL_TYPES
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
-            - '* as mathFunctions'
+            - "* as mathFunctions"
       exports:
         - listFunctions
         - capabilitiesInfo
@@ -41626,7 +41626,7 @@ modules:
             - RenderDoc
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-plot'
+        - package: "@danielsimonjr/mathts-plot"
           directory: plot
           imports:
             - latexToPdf
@@ -41674,7 +41674,7 @@ modules:
       functions:
         - handleRequest
     workbook/src/run-worker.ts:
-      description: '`worker_threads` entry point for `runWorkbookWithTimeout` (see'
+      description: "`worker_threads` entry point for `runWorkbookWithTimeout` (see"
       externalDependencies: []
       nodeDependencies:
         - module: worker_threads
@@ -41733,7 +41733,7 @@ modules:
             - writeFileAtomic
         - file: ./edit.js
           imports:
-            - '* as edit'
+            - "* as edit"
       workspaceDependencies: []
       exports:
         - Session
@@ -41754,12 +41754,12 @@ modules:
       functions:
         - mathMLToSVG
     workbook/src/svg.ts:
-      description: 'Adapter: workbook ChartSpec → @danielsimonjr/mathts-plot per-type functions.'
+      description: "Adapter: workbook ChartSpec → @danielsimonjr/mathts-plot per-type functions."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-plot'
+        - package: "@danielsimonjr/mathts-plot"
           directory: plot
           imports:
             - line
@@ -41889,7 +41889,7 @@ modules:
         - assertNoPollution
   assembly/algebra:
     assembly/src/algebra/decomposition.ts:
-      description: 'Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.'
+      description: "Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -43123,7 +43123,7 @@ modules:
         - divided_difference_f64
   assembly/ops:
     assembly/src/ops/approx.ts:
-      description: 'Rational approximation — AssemblyScript fallback: partial-fraction'
+      description: "Rational approximation — AssemblyScript fallback: partial-fraction"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -43474,7 +43474,7 @@ modules:
         - rfft
         - powerSpectrum
     assembly/src/ops/linalg.ts:
-      description: 'Extra linear-algebra kernels — AssemblyScript fallback: reduced row'
+      description: "Extra linear-algebra kernels — AssemblyScript fallback: reduced row"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -43616,7 +43616,7 @@ modules:
         - integerDigits
         - chineseRemainder
     assembly/src/ops/optimization.ts:
-      description: 'Optimization kernels — AssemblyScript fallback: linear programming'
+      description: "Optimization kernels — AssemblyScript fallback: linear programming"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -43873,14 +43873,14 @@ modules:
             - WiredCompatInstance
         - file: ./shims.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
-            - '* as mathFunctions'
-        - package: '@danielsimonjr/mathts-core'
+            - "* as mathFunctions"
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -43895,12 +43895,12 @@ modules:
             - BIGNUMBER_ONE
             - BIGNUMBER_PI
             - BIGNUMBER_E
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
             - SparseMatrix
-        - package: '@danielsimonjr/mathts-parallel'
+        - package: "@danielsimonjr/mathts-parallel"
           directory: parallel
           imports:
             - computePool
@@ -43923,7 +43923,7 @@ modules:
         - all
         - create
       reExported:
-        - '* from ./shims.js'
+        - "* from ./shims.js"
         - Complex
         - Fraction
         - BigNumber
@@ -43946,7 +43946,7 @@ modules:
       constants:
         - all
     compat/src/instance-api.ts:
-      description: 'mathjs instance methods on `create(all)`: import, typed, compile, and'
+      description: "mathjs instance methods on `create(all)`: import, typed, compile, and"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -43955,11 +43955,11 @@ modules:
             - MathJSConfig
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - mathTyped
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - createInstanceEvaluator
@@ -43968,7 +43968,7 @@ modules:
             - replacer
             - runWithConfig
             - PhysicsEvaluateOptions
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - importFactory
@@ -44015,7 +44015,7 @@ modules:
             - UNARY_NUMBER_FAST_PATH
             - UnaryNumberFastPath
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - Complex
@@ -44033,11 +44033,11 @@ modules:
             - LOG10E
             - SQRT2
             - SQRT1_2
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - TypedFunction
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - PublicAbs
@@ -44049,7 +44049,7 @@ modules:
             - PublicSin
             - PublicSqrt
             - PublicTan
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - add
@@ -44081,7 +44081,7 @@ modules:
             - sparse
             - transpose
             - bignumber
-        - package: '@danielsimonjr/mathts-matrix'
+        - package: "@danielsimonjr/mathts-matrix"
           directory: matrix
           imports:
             - DenseMatrix
@@ -44701,7 +44701,7 @@ modules:
             - Data
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-core'
+        - package: "@danielsimonjr/mathts-core"
           directory: core
           imports:
             - isMatrix
@@ -44866,7 +44866,7 @@ modules:
             - PlotOptions
           typeOnly: true
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - histogram
@@ -45044,7 +45044,7 @@ modules:
       functions:
         - viridis
     plot/src/plot.ts:
-      description: 'Generic entry point. Data forms:'
+      description: "Generic entry point. Data forms:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -45069,7 +45069,7 @@ modules:
           imports:
             - update
       workspaceDependencies:
-        - package: '@danielsimonjr/mathts-functions'
+        - package: "@danielsimonjr/mathts-functions"
           directory: functions
           imports:
             - parse
@@ -45110,7 +45110,7 @@ modules:
       functions:
         - renderLayer
     plot/src/render-file.ts:
-      description: 'Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling'
+      description: "Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling"
       externalDependencies: []
       nodeDependencies:
         - module: child_process
@@ -45226,7 +45226,7 @@ modules:
       constants:
         - THEMES
     plot/src/tikz.ts:
-      description: 'A named color or an xcolor mix such as `red!50!black`: letters, digits, `!` and `.` only.'
+      description: "A named color or an xcolor mix such as `red!50!black`: letters, digits, `!` and `.` only."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -46911,7 +46911,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 237080
+  totalLinesOfCode: 237113
   totalExports: 7389
   totalClasses: 62
   totalInterfaces: 668
