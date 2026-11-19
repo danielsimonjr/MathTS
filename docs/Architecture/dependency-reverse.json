@@ -504,6 +504,23 @@
       "functions/src/utils/customs.ts",
       "functions/src/utils/factory.ts"
     ],
+    "functions/src/utils/string.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/solver/utils/solveValidation.ts",
+      "functions/src/matrix/det.ts",
+      "functions/src/matrix/eigs.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/matrix/pinv.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/sqrtm.ts",
+      "functions/src/matrix/trace.ts",
+      "functions/src/matrix/transpose.ts",
+      "functions/src/relational/compareText.ts",
+      "functions/src/string/format.ts",
+      "functions/src/type/chain/Chain.ts",
+      "functions/src/typed/string.ts",
+      "functions/src/utils/print.ts"
+    ],
     "functions/src/utils/factory.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
@@ -1294,22 +1311,6 @@
       "functions/src/type/matrix/utils/broadcast.ts",
       "functions/src/typed/set.ts",
       "functions/src/utils/optimizeCallback.ts"
-    ],
-    "functions/src/utils/string.ts": [
-      "functions/src/algebra/solver/utils/solveValidation.ts",
-      "functions/src/matrix/det.ts",
-      "functions/src/matrix/eigs.ts",
-      "functions/src/matrix/inv.ts",
-      "functions/src/matrix/pinv.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/sqrtm.ts",
-      "functions/src/matrix/trace.ts",
-      "functions/src/matrix/transpose.ts",
-      "functions/src/relational/compareText.ts",
-      "functions/src/string/format.ts",
-      "functions/src/type/chain/Chain.ts",
-      "functions/src/typed/string.ts",
-      "functions/src/utils/print.ts"
     ],
     "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
     "functions/src/algebra/sparse/csFlip.ts": [

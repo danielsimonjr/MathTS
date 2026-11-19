@@ -1,4 +1,5 @@
 import { clone } from '../../utils/object.js';
+import { format } from '../../utils/string.js';
 import { factory } from '../../utils/factory.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -292,9 +293,15 @@ export const createLup = /* #__PURE__ */ factory(
     });
 
     function _denseLUP(m: DenseMatrix): LUPResult {
+      const size = m._size;
+      // the empty 1-D matrix (size [0]) is 0 x 0; every other input must be 2-D
+      const isEmpty1D = size.length === 1 && size[0] === 0;
+      if (size.length !== 2 && !isEmpty1D) {
+        throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
+      }
       // rows & columns
-      const rows = m._size[0];
-      const columns = m._size[1];
+      const rows = size[0];
+      const columns = isEmpty1D ? 0 : size[1];
       // minimum rows and columns
       let n = Math.min(rows, columns);
 
@@ -312,6 +319,11 @@ export const createLup = /* #__PURE__ */ factory(
       const p: number[] = [];
       for (i = 0; i < rows; i++) {
         p[i] = i;
+      }
+      // every row exists even when there are no columns: a m x 0 L is m empty rows
+      for (i = 0; i < rows; i++) {
+        ldata[i] = [];
+        if (i < columns) udata[i] = [];
       }
 
       const lupNumberOps = getLupNumberOps();
@@ -381,16 +393,6 @@ export const createLup = /* #__PURE__ */ factory(
       for (j = 0; j < columns; j++) {
         // loop rows
         for (i = 0; i < rows; i++) {
-          // initialize row in arrays
-          if (j === 0) {
-            // check row exists in upper triangular matrix
-            if (i < columns) {
-              // U
-              udata[i] = [];
-            }
-            // L
-            ldata[i] = [];
-          }
           // check we are in the upper triangular matrix
           if (i < j) {
             // check row exists in upper triangular matrix
