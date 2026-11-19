@@ -56,7 +56,7 @@ interface CsSqrFunction {
 }
 
 interface CsLuFunction {
-  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition;
+  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition | null;
 }
 
 interface Dependencies {

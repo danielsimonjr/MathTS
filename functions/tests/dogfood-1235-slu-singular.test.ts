@@ -40,31 +40,54 @@ const systems: Array<[string, number[][]]> = [
       [0, 0, 1],
     ],
   ],
+  [
+    'zero column 3x3',
+    [
+      [1, 0, 2],
+      [3, 0, 4],
+      [5, 0, 6],
+    ],
+  ],
+  [
+    'two equal rows 3x3',
+    [
+      [1, 1, 0],
+      [1, 1, 0],
+      [0, 0, 1],
+    ],
+  ],
+  ['zero 1x1', [[0]]],
 ];
+// Order 2 reaches the factorization for these inputs. For the other systems it fails earlier, in
+// csAmd (issue #1239).
+const ORDER_2_SYSTEMS = new Set(['zero 2x2', 'zero row 3x3', 'zero 1x1']);
+const cases: Array<[number, number, string, number[][]]> = [];
+for (const order of [0, 1, 2, 3]) {
+  for (const threshold of [0, 0.001, 1]) {
+    for (const [name, a] of systems) {
+      if (order !== 2 || ORDER_2_SYSTEMS.has(name)) cases.push([order, threshold, name, a]);
+    }
+  }
+}
 
 describe('dogfood #1235 slu of a singular sparse matrix', () => {
-  // Order 2 on these inputs fails in csAmd (issue #1239), not in the factorization.
-  for (const order of [0, 1, 3]) {
-    for (const threshold of [0.001, 1]) {
-      for (const [name, a] of systems) {
-        it(`slu throws an Error for ${name}, order ${order}, threshold ${threshold}`, () => {
-          let caught: unknown;
-          try {
-            slu(sparse(a), order, threshold);
-          } catch (e) {
-            caught = e;
-          }
-          expect(caught).toBeInstanceOf(Error);
-          expect(caught).not.toBeInstanceOf(TypeError);
-          expect((caught as Error).message).toMatch(SINGULAR);
-        });
-        it(`lusolve throws the singular Error for ${name}, order ${order}, threshold ${threshold}`, () => {
-          const b = a.map((_, i) => [i + 1]);
-          expect(() => lusolve(sparse(a), b, order, threshold)).toThrow(SINGULAR);
-          expect(() => lusolve(sparse(a), b, order, threshold)).not.toThrow(TypeError);
-        });
+  for (const [order, threshold, name, a] of cases) {
+    it(`slu throws an Error for ${name}, order ${order}, threshold ${threshold}`, () => {
+      let caught: unknown;
+      try {
+        slu(sparse(a), order, threshold);
+      } catch (e) {
+        caught = e;
       }
-    }
+      expect(caught).toBeInstanceOf(Error);
+      expect(caught).not.toBeInstanceOf(TypeError);
+      expect((caught as Error).message).toMatch(SINGULAR);
+    });
+    it(`lusolve throws the singular Error for ${name}, order ${order}, threshold ${threshold}`, () => {
+      const b = a.map((_, i) => [i + 1]);
+      expect(() => lusolve(sparse(a), b, order, threshold)).toThrow(SINGULAR);
+      expect(() => lusolve(sparse(a), b, order, threshold)).not.toThrow(TypeError);
+    });
   }
 
   it('lusolve of the dense singular matrix throws the same message', () => {
