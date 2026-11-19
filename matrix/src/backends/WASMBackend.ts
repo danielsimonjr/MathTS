@@ -59,6 +59,7 @@ import {
   ldexp,
   withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
+import { scaleDense } from '../operations/common.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
 
 /**
@@ -1056,13 +1057,4 @@ export const wasmBackend = new WASMBackend();
  */
 export function createWASMBackend(config?: WASMBackendConfig): WASMBackend {
   return new WASMBackend(config);
-}
-
-/** A copy of `a` with every entry multiplied by 2^e (exact). */
-function scaleDense(a: DenseMatrix, e: number): DenseMatrix {
-  return new DenseMatrix(
-    a.rows,
-    a.cols,
-    a.toFloat64Array().map((v) => ldexp(v, e))
-  );
 }

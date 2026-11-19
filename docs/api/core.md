@@ -357,15 +357,15 @@ Tree helpers: `clone`, `extend`, `mapObject` and `deepFlatten` skip an own `__pr
 Type-only exports do not appear in the generated index below (it lists runtime values).
 The main ones:
 
-| Type              | Description                                                                                                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `IComplex`        | Interface of `Complex`: `re`, `im`, plus `conjugate()`, `arg()`, `sqrt()`, `exp()`, `log()`.                                                                                   |
-| `IFraction`       | Interface of `Fraction`: bigint `numerator` / `denominator`, `simplify()`, `toNumber()`.                                                                                       |
-| `IBigNumber`      | Interface of `BigNumber`: arithmetic taking `IBigNumber \| number \| string`, `negate`, `abs`, `pow`, `sqrt`, `isNaN()` and other predicates.                                  |
-| `MatrixBackend`   | Contract of a matrix compute backend: `name`, `isAvailable`, `matmul` / `transpose` / `add` / `subtract` / `scale` on `Float64Array` buffers, and `lu` / `qr` / `svd` / `eig`. |
-| `NumericType`     | Element type of a typed buffer: `'float32' \| 'float64' \| 'int32' \| 'int64' \| 'complex64' \| 'complex128'`.                                                                 |
-| `RoundingMode`    | BigNumber rounding: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'halfDown'`, `'halfEven'`, `'halfCeil'`.                                                     |
-| `BigNumberConfig` | Global BigNumber settings: `precision` (default 64), `rounding`, `minExponent`, `maxExponent`; read and set with `BigNumber.config()`.                                         |
+| Type              | Description                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IComplex`        | Interface of `Complex`: `re`, `im`, plus `conjugate()`, `arg()`, `sqrt()`, `exp()`, `log()`.                                                                                          |
+| `IFraction`       | Interface of `Fraction`: bigint `numerator` / `denominator`, `simplify()`, `toNumber()`.                                                                                              |
+| `IBigNumber`      | Interface of `BigNumber`: arithmetic taking `IBigNumber \| number \| string`, `negate`, `abs`, `pow`, `sqrt`, `isNaN()` and other predicates.                                         |
+| `MatrixBackend`   | Contract of a matrix compute backend: `name`, `isAvailable`, `matmul` / `transpose` / `add` / `subtract` / `scale` on `Float64Array` buffers, and `lu` / `qr` / `svd` / `eig`.        |
+| `NumericType`     | Element type of a typed buffer: `'float32' \| 'float64' \| 'int32' \| 'int64' \| 'complex64' \| 'complex128'`.                                                                        |
+| `RoundingMode`    | BigNumber rounding: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'halfDown'`, `'halfEven'`, `'halfCeil'`.                                                            |
+| `BigNumberConfig` | Global BigNumber settings: `precision` (default 64), `rounding`, `minExponent` / `maxExponent` (default ±9.007e15), `toExpNeg` / `toExpPos` (default ±1e6); see `BigNumber.config()`. |
 
 ---
 
