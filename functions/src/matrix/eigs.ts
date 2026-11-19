@@ -85,7 +85,6 @@ interface Dependencies {
   typed: TypedFunction;
   matrix: MatrixConstructor;
   addScalar: TypedFunction<Scalar>;
-  equal: TypedFunction<boolean>;
   subtract: TypedFunction<Scalar>;
   abs: TypedFunction<number | BigNumber>;
   atan: TypedFunction<Scalar>;
@@ -97,7 +96,6 @@ interface Dependencies {
   bignumber: TypedFunction<BigNumber>;
   multiply: TypedFunction<Scalar | Scalar[][] | Matrix>;
   add: TypedFunction<Scalar>;
-  larger: TypedFunction<boolean>;
   column: TypedFunction<Scalar[]>;
   flatten: TypedFunction<Scalar[]>;
   number: TypedFunction<number>;
@@ -111,7 +109,6 @@ interface Dependencies {
   usolveAll: TypedFunction<Scalar[][]>;
   im: TypedFunction<number | BigNumber>;
   re: TypedFunction<number | BigNumber>;
-  smaller: TypedFunction<boolean>;
   matrixFromColumns: TypedFunction<Scalar[][]>;
   dot: TypedFunction<Scalar>;
 }
@@ -124,7 +121,6 @@ const dependencies = [
   'typed',
   'matrix',
   'addScalar',
-  'equal',
   'subtract',
   'abs',
   'atan',
@@ -136,7 +132,6 @@ const dependencies = [
   'bignumber',
   'multiply',
   'add',
-  'larger',
   'column',
   'flatten',
   'number',
@@ -150,7 +145,6 @@ const dependencies = [
   'usolveAll',
   'im',
   're',
-  'smaller',
   'matrixFromColumns',
   'dot',
 ];
@@ -164,7 +158,6 @@ export const createEigs = /* #__PURE__ */ factory(
     matrix,
     addScalar,
     subtract,
-    equal,
     abs,
     atan,
     cos,
@@ -175,7 +168,6 @@ export const createEigs = /* #__PURE__ */ factory(
     bignumber,
     multiply,
     add,
-    larger,
     column: _column,
     flatten,
     number,
@@ -189,7 +181,6 @@ export const createEigs = /* #__PURE__ */ factory(
     usolveAll,
     im,
     re,
-    smaller,
     matrixFromColumns,
     dot,
   }: Dependencies) => {
@@ -225,10 +216,7 @@ export const createEigs = /* #__PURE__ */ factory(
       inv,
       usolve,
       usolveAll,
-      equal,
       complex,
-      larger,
-      smaller,
       matrixFromColumns,
       dot,
     } as unknown as Parameters<typeof createComplexEigs>[0]);
@@ -362,10 +350,14 @@ export const createEigs = /* #__PURE__ */ factory(
 
       const N = asize[0];
 
-      if (isReal(arr, N, prec)) {
+      // both tests below are relative to the entries they compare, so a small
+      // block beside a huge entry keeps its asymmetry and its imaginary parts,
+      // and a matrix with tiny entries is not read as real symmetric (#1202)
+      const precBig = bignumber(prec as number);
+      if (isReal(arr, N, precBig)) {
         coerceReal(arr, N); // modifies arr by side effect
 
-        if (isSymmetric(arr, N, prec)) {
+        if (isSymmetric(arr, N, precBig)) {
           const type = coerceTypes(mat, arr, N); // modifies arr by side effect
           return doRealSymmetric(
             arr as unknown as (number | BigNumber)[][],
@@ -381,12 +373,18 @@ export const createEigs = /* #__PURE__ */ factory(
       return doComplexEigs(arr, N, prec, type, computeVectors);
     }
 
-    /** Check if matrix is symmetric within precision */
-    function isSymmetric(arr: Scalar[][], N: number, prec: number | BigNumber): boolean {
+    /**
+     * Check if matrix is symmetric: every pair satisfies
+     * |a_ij - a_ji| <= prec * max(|a_ij|, |a_ji|). A pair of zeros is equal.
+     */
+    function isSymmetric(arr: Scalar[][], N: number, prec: BigNumber): boolean {
       for (let i = 0; i < N; i++) {
-        for (let j = i; j < N; j++) {
-          // TODO proper comparison of bignum and frac
-          if (larger(bignumber(abs(subtract(arr[i][j], arr[j][i]))), prec)) {
+        for (let j = i + 1; j < N; j++) {
+          const diff = bignumber(abs(subtract(arr[i][j], arr[j][i])));
+          const aij = bignumber(abs(arr[i][j]));
+          const aji = bignumber(abs(arr[j][i]));
+          const size = aij.gt(aji) ? aij : aji;
+          if (diff.gt(prec.times(size))) {
             return false;
           }
         }
@@ -395,12 +393,12 @@ export const createEigs = /* #__PURE__ */ factory(
       return true;
     }
 
-    /** Check if matrix contains only real values within precision */
-    function isReal(arr: Scalar[][], N: number, prec: number | BigNumber): boolean {
+    /** Check if every entry is real: |im(a_ij)| <= prec * |a_ij| */
+    function isReal(arr: Scalar[][], N: number, prec: BigNumber): boolean {
       for (let i = 0; i < N; i++) {
         for (let j = 0; j < N; j++) {
-          // TODO proper comparison of bignum and frac
-          if (larger(bignumber(abs(im(arr[i][j]))), prec)) {
+          const imag = bignumber(abs(im(arr[i][j])));
+          if (imag.gt(prec.times(bignumber(abs(arr[i][j]))))) {
             return false;
           }
         }

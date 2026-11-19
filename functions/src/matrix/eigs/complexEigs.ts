@@ -48,10 +48,7 @@ interface Dependencies {
   qr: (x: Scalar[][]) => QRResult;
   usolve: (A: Scalar[][], b: Scalar[]) => Scalar[];
   usolveAll: (A: Scalar[][], b: Scalar[]) => Scalar[][];
-  equal: (a: Scalar, b: Scalar) => boolean;
   complex: (re: number | Scalar, im?: number) => Complex;
-  larger: (a: Scalar, b: Scalar) => boolean;
-  smaller: (a: Scalar, b: Scalar) => boolean;
   matrixFromColumns: (...cols: Scalar[][]) => Scalar[][];
   dot: (a: Scalar[], b: Scalar[]) => Scalar;
 }
@@ -80,13 +77,70 @@ export function createComplexEigs({
   qr,
   usolve,
   usolveAll,
-  equal,
   complex,
-  larger,
-  smaller,
   matrixFromColumns: _matrixFromColumns,
   dot,
 }: Dependencies) {
+  /** Real magnitudes (from abs) are numbers or BigNumbers; compare them exactly. */
+  function toBig(x: Scalar): BigNumber {
+    return (typeof x === 'number' ? bignumber(x) : x) as BigNumber;
+  }
+  function lt(a: Scalar, b: Scalar): boolean {
+    return typeof a === 'number' && typeof b === 'number' ? a < b : toBig(a).lt(toBig(b));
+  }
+  function le(a: Scalar, b: Scalar): boolean {
+    return typeof a === 'number' && typeof b === 'number' ? a <= b : toBig(a).lte(toBig(b));
+  }
+  function gt(a: Scalar, b: Scalar): boolean {
+    return lt(b, a);
+  }
+  function isExactZero(x: Scalar): boolean {
+    return typeof x === 'number' ? x === 0 : toBig(x).isZero();
+  }
+
+  /** |a - b| <= prec * max(|a|, |b|); two zeros are close */
+  function close(a: Scalar, b: Scalar, prec: Scalar): boolean {
+    const aa = abs(a) as Scalar;
+    const ab = abs(b) as Scalar;
+    return le(abs(subtract(a, b) as Scalar), multiplyScalar(prec, lt(aa, ab) ? ab : aa));
+  }
+
+  /**
+   * Is the subdiagonal entry H[k][k-1] of the active n x n window negligible?
+   * The LAPACK dlahqr test: compare it with prec times the two diagonal
+   * entries beside it, or, when both are zero, the neighbouring subdiagonal
+   * entries. A tolerance relative to the whole matrix would erase the coupling
+   * of a small block beside a huge entry (#1202).
+   */
+  function negligible(H: Scalar[][], n: number, k: number, prec: Scalar): boolean {
+    const h = abs(H[k][k - 1]) as Scalar;
+    if (isExactZero(h)) return true;
+    let tst = addScalar(abs(H[k - 1][k - 1]) as Scalar, abs(H[k][k]) as Scalar);
+    if (isExactZero(tst)) {
+      if (k >= 2) tst = addScalar(tst, abs(H[k - 1][k - 2]) as Scalar);
+      if (k + 1 < n) tst = addScalar(tst, abs(H[k + 1][k]) as Scalar);
+    }
+    return le(h, multiplyScalar(prec, tst));
+  }
+
+  /**
+   * The matrix scale: its largest entry magnitude. Every tolerance below is
+   * `prec` times this scale, so the result does not depend on the units of the
+   * matrix. A zero or non-finite scale falls back to 1.
+   */
+  function matrixScale(arr: Scalar[][], N: number, type: DataType): Scalar {
+    const big = type === 'BigNumber';
+    let scale: Scalar = big ? bignumber(0) : 0;
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        const a = abs(arr[i][j]) as Scalar;
+        if (lt(scale, a)) scale = a;
+      }
+    }
+    const finite = typeof scale === 'number' ? Number.isFinite(scale) : toBig(scale).isFinite();
+    return finite && !isExactZero(scale) ? scale : big ? bignumber(1) : 1;
+  }
+
   /**
    * Compute eigenvalues and optionally eigenvectors of a general matrix
    * @param arr the matrix to find eigenvalues of
@@ -105,6 +159,12 @@ export function createComplexEigs({
   ): ComplexEigsResult {
     // TODO check if any row/col are zero except the diagonal
 
+    // Every test below is relative to the entries it compares (#1202), so the
+    // result does not depend on the units of the matrix, and a small block
+    // beside a huge entry keeps its own eigenvalues.
+    const rel: Scalar = type === 'BigNumber' ? bignumber(prec as number) : (prec as number);
+    const scale = matrixScale(arr, N, type);
+
     // make sure corresponding rows and columns have similar magnitude
     // important because of numerical stability
     // MODIFIES arr by side effect!
@@ -122,11 +182,11 @@ export function createComplexEigs({
     // to Hessenberg form (upper triangular plus one subdiagonal row)
     // updates the transformation matrix R with new row operations
     // MODIFIES arr by side effect!
-    reduceToHessenberg(arr, N, prec, type, findVectors, R);
+    reduceToHessenberg(arr, N, type, findVectors, R);
     // still true that original A = R^-1 arr R)
 
     // find eigenvalues
-    const { values, C } = iterateUntilTriangular(arr, N, prec, type, findVectors);
+    const { values, C } = iterateUntilTriangular(arr, N, rel, type, findVectors);
 
     // values is the list of eigenvalues, C is the column
     // transformation matrix that transforms arr, the hessenberg
@@ -135,7 +195,7 @@ export function createComplexEigs({
     // and original A is unchanged.)
 
     if (findVectors) {
-      const eigenvectors = findEigenvectors(arr, N, C!, R, values, prec, type);
+      const eigenvectors = findEigenvectors(arr, N, C!, R, values, rel, scale, type);
       return { values, eigenvectors };
     }
 
@@ -194,7 +254,7 @@ export function createComplexEigs({
           rowNorm = addScalar(rowNorm, abs(arr[i][j]) as Scalar);
         }
 
-        if (!equal(colNorm, 0) && !equal(rowNorm, 0)) {
+        if (!isExactZero(colNorm) && !isExactZero(rowNorm)) {
           // find integer power closest to balancing the matrix
           // (we want to scale only by integer powers of radix,
           // so that we don't lose any precision due to round-off)
@@ -205,18 +265,18 @@ export function createComplexEigs({
           const rowDivRadix = divideScalar(rowNorm, radix);
           const rowMulRadix = multiplyScalar(rowNorm, radix);
 
-          while (smaller(c, rowDivRadix)) {
+          while (lt(c, rowDivRadix)) {
             c = multiplyScalar(c, radixSq);
             f = multiplyScalar(f, radix);
           }
-          while (larger(c, rowMulRadix)) {
+          while (gt(c, rowMulRadix)) {
             c = divideScalar(c, radixSq);
             f = divideScalar(f, radix);
           }
 
           // check whether balancing is needed
           // condition = (c + rowNorm) / f < 0.95 * (colNorm + rowNorm)
-          const condition = smaller(
+          const condition = lt(
             divideScalar(addScalar(c, rowNorm), f),
             multiplyScalar(addScalar(colNorm, rowNorm), 0.95)
           );
@@ -256,7 +316,6 @@ export function createComplexEigs({
    * Reduce matrix to Hessenberg form using similarity transformations
    * @param arr the matrix to reduce (modified in place)
    * @param N size of the matrix
-   * @param prec precision threshold
    * @param type data type
    * @param findVectors whether to track transformations
    * @param R the row transformation matrix that will be modified
@@ -264,7 +323,6 @@ export function createComplexEigs({
   function reduceToHessenberg(
     arr: Scalar[][],
     N: number,
-    prec: number | BigNumber,
     type: DataType,
     findVectors: boolean,
     R: Scalar[][] | null
@@ -274,10 +332,6 @@ export function createComplexEigs({
 
     const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0;
 
-    if (big) {
-      prec = bignumber(prec as number);
-    }
-
     for (let i = 0; i < N - 2; i++) {
       // Find the largest subdiag element in the i-th col
 
@@ -286,14 +340,16 @@ export function createComplexEigs({
 
       for (let j = i + 1; j < N; j++) {
         const el = arr[j][i];
-        if (smaller(abs(max), abs(el))) {
+        if (lt(abs(max), abs(el))) {
           max = el;
           maxIndex = j;
         }
       }
 
-      // This col is pivoted, no need to do anything
-      if (smaller(abs(max), prec)) {
+      // This col is pivoted, no need to do anything. Only an exact zero skips:
+      // the pivot is the largest entry, so the multipliers stay at most 1, and
+      // a small nonzero entry beside a huge one is not dropped (#1202)
+      if (isExactZero(abs(max) as Scalar)) {
         continue;
       }
 
@@ -354,7 +410,7 @@ export function createComplexEigs({
   function iterateUntilTriangular(
     A: Scalar[][],
     N: number,
-    prec: number | BigNumber,
+    prec: Scalar,
     type: DataType,
     findVectors: boolean
   ): TriangularResult {
@@ -362,10 +418,6 @@ export function createComplexEigs({
     const cplx = type === 'Complex';
 
     const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
-
-    if (big) {
-      prec = bignumber(prec as number);
-    }
 
     // The Francis Algorithm
     // The core idea of this algorithm is that doing successive
@@ -404,12 +456,21 @@ export function createComplexEigs({
 
       // Perform the factorization
 
-      const k = arr[n - 1][n - 1]; // TODO this is apparently a somewhat
+      let k = arr[n - 1][n - 1]; // TODO this is apparently a somewhat
       // old-fashioned choice; ideally set close to an eigenvalue, or
       // perhaps better yet switch to the implicit QR version that is sometimes
       // specifically called the "Francis algorithm" that is alluded to
       // in the following TODO. (Or perhaps we switch to an independently
       // optimized third-party package for the linear algebra operations...)
+
+      // The shift above is zero for a cyclic permutation matrix, which then
+      // never moves (QR of a unitary matrix returns the matrix). Every tenth
+      // step without convergence use an exceptional shift (EISPACK hqr, NR):
+      // the corner plus 3/4 of the sum of the two trailing subdiagonal entries.
+      if (n >= 3 && lastConvergenceBefore % 10 === 0) {
+        const w = addScalar(abs(arr[n - 1][n - 2]) as Scalar, abs(arr[n - 2][n - 3]) as Scalar);
+        k = addScalar(k, multiplyScalar(w, 0.75));
+      }
 
       for (let i = 0; i < n; i++) {
         arr[i][i] = subtract(arr[i][i], k) as Scalar;
@@ -429,7 +490,7 @@ export function createComplexEigs({
       }
 
       // The rightmost diagonal element converged to an eigenvalue
-      if (n === 1 || smaller(abs(arr[n - 1][n - 2]), prec)) {
+      if (n === 1 || negligible(arr, n, n - 1, prec)) {
         lastConvergenceBefore = 0;
         lambdas.push(arr[n - 1][n - 1]);
 
@@ -452,7 +513,7 @@ export function createComplexEigs({
         }
 
         // The rightmost diagonal 2x2 block converged
-      } else if (n === 2 || smaller(abs(arr[n - 2][n - 3]), prec)) {
+      } else if (n === 2 || negligible(arr, n, n - 2, prec)) {
         lastConvergenceBefore = 0;
         const ll = eigenvalues2x2(
           arr[n - 2][n - 2],
@@ -535,7 +596,8 @@ export function createComplexEigs({
     C: Scalar[][],
     R: Scalar[][] | null,
     values: Scalar[],
-    prec: number | BigNumber,
+    prec: Scalar,
+    scale: Scalar,
     type: DataType
   ): EigenvectorResult[] {
     const Cinv = inv(C);
@@ -553,7 +615,7 @@ export function createComplexEigs({
     const multiplicities: number[] = [];
 
     for (const lambda of values) {
-      const i = indexOf(uniqueValues, lambda, equal);
+      const i = indexOf(uniqueValues, lambda, (a, b) => close(a, b, prec));
 
       if (i === -1) {
         uniqueValues.push(lambda);
@@ -574,12 +636,29 @@ export function createComplexEigs({
 
     for (let i = 0; i < len; i++) {
       const lambda = uniqueValues[i];
-      const S = subtract(
+      // the characteristic matrix
+      const T = subtract(
         U as unknown as Scalar[],
         multiply(lambda, E) as unknown as Scalar[]
-      ) as unknown as Scalar[][]; // the characteristic matrix
+      ) as unknown as Scalar[][];
 
-      let solutions = usolveAll(S, b);
+      // usolveAll reads a diagonal entry as zero with an absolute tolerance.
+      // The null space does not change when a row is divided by a number, so
+      // give it a diagonal of exact zeros (where U_jj matches lambda, relative
+      // to their size) and ones (every other row divided by its diagonal).
+      // Then the diagonal test does not depend on the scale of the matrix
+      // (#1202). The other entries of a matching row keep that scale, and
+      // usolveAll still reads them with an absolute tolerance (#1242).
+      const Snull = T.map((row, j) =>
+        close(U[j][j], lambda, prec)
+          ? row.map((x, k) => (k === j ? zero : x))
+          : row.map((x) => divideScalar(x, row[j]))
+      );
+
+      // inverse iteration compares with prec, so it works on the scale-1 matrix
+      const S = T.map((row) => row.map((x) => divideScalar(x, scale)));
+
+      let solutions = usolveAll(Snull, b);
       solutions.shift(); // ignore the null vector
 
       // looks like we missed something, try inverse iteration
@@ -634,7 +713,7 @@ export function createComplexEigs({
     d: Scalar,
     l1: Scalar,
     l2: Scalar,
-    prec: number | BigNumber,
+    prec: Scalar,
     type: DataType
   ): [[Scalar, Scalar], [Scalar, Scalar]] {
     const big = type === 'BigNumber';
@@ -643,9 +722,17 @@ export function createComplexEigs({
     const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0;
     const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
+    // tolerance relative to the largest entry of this block (#1202)
+    let blockScale = abs(a) as Scalar;
+    for (const x of [b, c, d]) {
+      const ax = abs(x) as Scalar;
+      if (lt(blockScale, ax)) blockScale = ax;
+    }
+    prec = multiplyScalar(prec, blockScale);
+
     // matrix is already upper triangular
     // return an identity matrix
-    if (smaller(abs(c), prec)) {
+    if (le(abs(c), prec)) {
       return [
         [one, zero],
         [zero, one],
@@ -654,7 +741,7 @@ export function createComplexEigs({
 
     // matrix is diagonalizable
     // return its eigenvectors as columns
-    if (larger(abs(subtract(l1, l2) as Scalar), prec)) {
+    if (gt(abs(subtract(l1, l2) as Scalar), prec)) {
       return [
         [subtract(l1, d) as Scalar, subtract(l2, d) as Scalar],
         [c, c],
@@ -669,7 +756,7 @@ export function createComplexEigs({
     // col(N,2) = 0  implies  S = ( col(N,1), e_1 )
     // col(N,2) != 0 implies  S = ( col(N,2), e_2 )
 
-    if (smaller(abs(b), prec) && smaller(abs(nd), prec)) {
+    if (le(abs(b), prec) && le(abs(nd), prec)) {
       return [
         [na, one],
         [c, zero],
@@ -761,7 +848,7 @@ export function createComplexEigs({
     A: Scalar[][],
     N: number,
     orthog: Scalar[][],
-    prec: number | BigNumber,
+    prec: Scalar,
     type: DataType
   ): Scalar[] | null {
     const largeNum: Scalar = type === 'BigNumber' ? bignumber(1000) : 1000;
@@ -781,7 +868,7 @@ export function createComplexEigs({
         // was defective. But still make the full number of tries...
         continue;
       }
-      if (larger(norm(b), largeNum)) {
+      if (gt(norm(b), largeNum)) {
         break;
       }
     }
@@ -794,7 +881,7 @@ export function createComplexEigs({
     while (true) {
       const c = usolve(A, b);
 
-      if (smaller(norm(orthogonalComplement(b, [c])), prec)) {
+      if (lt(norm(orthogonalComplement(b, [c])), prec)) {
         break;
       }
       if (++i >= 10) {
