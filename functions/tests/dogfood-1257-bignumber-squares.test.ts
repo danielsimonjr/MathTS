@@ -207,6 +207,13 @@ describe.each(['std', 'factory_std'])('#1257 %s', (name) => {
     }
     expect(std(new Array(7).fill(1e-200))).toBe(0);
   });
+  it('values just below a power of 2 and the largest doubles', () => {
+    // Math.log2 rounds these up, so the exponent of the scale needs a correction.
+    for (const x of [(2 - 2 ** -52) * 2 ** 1000, (1 - 2 ** -53) * 2 ** -1000, Number.MAX_VALUE]) {
+      expect(std([x, x, x])).toBe(0);
+      expect(std([x, x / 2])).toBe((std([1, 0.5]) as number) * x);
+    }
+  });
   it('the result is the result at scale 1, multiplied by the scale', () => {
     // The second list has two values that differ in the last bit: its std is small and not 0.
     for (const xs of [

@@ -2557,7 +2557,8 @@ function scaledStdResult(result: unknown, args: unknown[]): unknown {
     collect(ys);
     return out;
   };
-  // The scale of the inner call is 1, so that call does not come back here.
+  // The largest scaled value is in [1, 2), so the scale of the inner call is 1 and that call
+  // does not come back here.
   const one = (ys: ArrayLike<unknown>): unknown =>
     rescaled(leavesOf(ys), (scaled) => (std as (...a: unknown[]) => unknown)(scaled, ...rest));
   if (dim === undefined) return one(xs) ?? result;

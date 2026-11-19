@@ -59,7 +59,11 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
   let max = 0;
   for (const v of values as number[]) if (Math.abs(v) > max) max = Math.abs(v);
   if (max === 0) return undefined;
-  const k = Math.floor(Math.log2(max));
+  // Math.log2 can round up to the next integer (for a value just below a power of 2, and to 1024
+  // for the largest doubles), so k is corrected: 2^k <= max < 2^(k+1), and max / 2^k is in [1, 2).
+  let k = Math.floor(Math.log2(max));
+  if (2 ** k > max) k--;
+  else if (2 ** (k + 1) <= max) k++;
   // 2^k is exact. For k below -1022 it is a subnormal, which is still a power of 2.
   const s = 2 ** k;
   return {
