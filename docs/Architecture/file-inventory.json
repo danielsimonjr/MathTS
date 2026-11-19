@@ -6050,7 +6050,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 667
+      "loc": 668
     },
     {
       "file": "functions/src/algebra/sparse/csChol.ts",

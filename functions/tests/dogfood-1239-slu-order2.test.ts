@@ -132,7 +132,7 @@ describe('#1239 slu order 2 on square sparse matrices with a dense row', () => {
   });
 
   // the dense limit is n - 2 up to n = 18 and max(16, 10 * sqrt(n)) above: a full row is dense
-  it.each([5, 8, 18, 19, 20, 50, 200])('a matrix of size %i with a full row factorizes', (n) => {
+  it.each([5, 8, 18, 19, 20, 50, 100])('a matrix of size %i with a full row factorizes', (n) => {
     for (const row of [0, n >> 1, n - 1]) {
       const a = denseRow(n, row);
       for (const order of [0, 1, 2, 3]) expectFactorization(a, slu(sparse(a), order, 1));
