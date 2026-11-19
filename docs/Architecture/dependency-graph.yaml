@@ -7339,6 +7339,9 @@ modules:
         - file: ../../utils/object.js
           imports:
             - clone
+        - file: ../../utils/string.js
+          imports:
+            - format
         - file: ../../utils/factory.js
           imports:
             - factory
@@ -46889,7 +46892,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236669
+  totalLinesOfCode: 236671
   totalExports: 7387
   totalClasses: 62
   totalInterfaces: 668
