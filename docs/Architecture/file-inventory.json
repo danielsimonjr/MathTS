@@ -7191,7 +7191,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 485
+      "loc": 501
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -7205,7 +7205,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 389
+      "loc": 454
     },
     {
       "file": "functions/src/matrix/fft.ts",
@@ -10754,7 +10754,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 91
+      "loc": 201
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

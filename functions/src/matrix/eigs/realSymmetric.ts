@@ -122,10 +122,24 @@ export function createRealSymmetric({
     while (Math.abs(Vab[1]) > e0) {
       const i = Vab[0][0];
       const j = Vab[0][1];
-      psi = getTheta(x[i][i], x[j][j], x[i][j], scale);
+      psi = getTheta(x[i][i], x[j][j], x[i][j]);
       x = x1(x, psi, i, j);
       if (computeVectors) Sij = Sij1(Sij!, psi, i, j);
       Vab = getAij(x);
+    }
+    // a small diagonal block beside large entries passes the test above with
+    // its own off-diagonals still at its own scale: rotate each pair until
+    // |a_ij| <= prec * sqrt|a_ii| * sqrt|a_jj|, floored at rounding noise (#1243)
+    const noise = 4 * N * Number.EPSILON * scale;
+    for (
+      let p = getGradedPair(x, Math.abs(precision), noise);
+      p;
+      p = getGradedPair(x, Math.abs(precision), noise)
+    ) {
+      const [i, j] = p;
+      psi = getTheta(x[i][i], x[j][j], x[i][j]);
+      x = x1(x, psi, i, j);
+      if (computeVectors) Sij = Sij1(Sij!, psi, i, j);
     }
     const Ei = Array(N).fill(0); // eigenvalues
     for (let i = 0; i < N; i++) {
@@ -161,10 +175,24 @@ export function createRealSymmetric({
     while (bigLt(e0, abs(Vab[1]))) {
       const i = Vab[0][0];
       const j = Vab[0][1];
-      psi = getThetaBig(x[i][i], x[j][j], x[i][j], scale);
+      psi = getThetaBig(x[i][i], x[j][j], x[i][j]);
       x = x1Big(x, psi, i, j);
       if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
       Vab = getAijBig(x);
+    }
+    // per-pair test as in diag; the noise floor uses the working precision
+    const Big = scale.constructor as unknown as { precision: number };
+    const noiseBig = multiplyScalar(bignumber(`${4 * N}e-${Big.precision}`), scale) as BigNumber;
+    const precAbs = abs(precision) as BigNumber;
+    for (
+      let p = getGradedPairBig(x, precAbs, noiseBig);
+      p;
+      p = getGradedPairBig(x, precAbs, noiseBig)
+    ) {
+      const [i, j] = p;
+      psi = getThetaBig(x[i][i], x[j][j], x[i][j]);
+      x = x1Big(x, psi, i, j);
+      if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
     }
     const Ei: BigNumber[] = Array(N).fill(bignumber(0)); // eigenvalues
     for (let i = 0; i < N; i++) {
@@ -174,9 +202,9 @@ export function createRealSymmetric({
   }
 
   // get angle
-  function getTheta(aii: number, ajj: number, aij: number, scale: number): number {
+  function getTheta(aii: number, ajj: number, aij: number): number {
     const denom = ajj - aii;
-    if (Math.abs(denom) <= (config.relTol as number) * scale) {
+    if (Math.abs(denom) <= (config.relTol as number) * Math.abs(aij)) {
       return Math.PI / 4.0;
     } else {
       return 0.5 * Math.atan((2.0 * aij) / (ajj - aii));
@@ -184,14 +212,9 @@ export function createRealSymmetric({
   }
 
   // get angle for BigNumber
-  function getThetaBig(
-    aii: BigNumber,
-    ajj: BigNumber,
-    aij: BigNumber,
-    scale: BigNumber
-  ): BigNumber {
+  function getThetaBig(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber;
-    if (bigLte(abs(denom), multiplyScalar(bignumber(config.relTol as number), scale))) {
+    if (bigLte(abs(denom), multiplyScalar(bignumber(config.relTol as number), abs(aij)))) {
       return (bignumber(-1) as BigNumber & { acos(): BigNumber })
         .acos()
         .div(4) as unknown as BigNumber;
@@ -346,6 +369,48 @@ export function createRealSymmetric({
       }
     }
     return [maxIJ, maxMij];
+  }
+
+  // largest off-diagonal pair with |a_ij| > max(tol * sqrt|a_ii| * sqrt|a_jj|, floor),
+  // or null when every pair passes (#1243)
+  function getGradedPair(M: number[][], tol: number, floor: number): [number, number] | null {
+    const N = M.length;
+    const root = M.map((row, i) => Math.sqrt(Math.abs(row[i])));
+    let best = 0;
+    let pair: [number, number] | null = null;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const a = Math.abs(M[i][j]);
+        if (a > best && a > Math.max(tol * root[i] * root[j], floor)) {
+          best = a;
+          pair = [i, j];
+        }
+      }
+    }
+    return pair;
+  }
+
+  // BigNumber version of getGradedPair
+  function getGradedPairBig(
+    M: BigNumber[][],
+    tol: BigNumber,
+    floor: BigNumber
+  ): [number, number] | null {
+    const N = M.length;
+    const root = M.map((row, i) => (abs(row[i]) as BigNumber & { sqrt(): BigNumber }).sqrt());
+    let best: BigNumber = bignumber(0);
+    let pair: [number, number] | null = null;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const a = abs(M[i][j]) as BigNumber;
+        const t = multiplyScalar(multiplyScalar(tol, root[i]), root[j]) as BigNumber;
+        if (bigLt(best, a) && bigLt(t, a) && bigLt(floor, a)) {
+          best = a;
+          pair = [i, j];
+        }
+      }
+    }
+    return pair;
   }
 
   // sort results by absolute value

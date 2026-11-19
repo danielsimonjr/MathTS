@@ -87,4 +87,114 @@ describe('eigs of real symmetric matrices with small or large entries (#1243)', 
     );
     expect((values as unknown as { toArray(): number[] }).toArray()).toEqual([c, 3 * c]);
   });
+
+  it('a uniformly tiny matrix rotates (positive control)', () => {
+    const { values } = eigs(
+      matrix([
+        [2e-14, 1e-14],
+        [1e-14, 2e-14],
+      ]),
+      { eigenvectors: false }
+    );
+    const v = (values as unknown as { toArray(): number[] }).toArray();
+    expect(Math.abs(v[0] - 1e-14)).toBeLessThanOrEqual(1e-8 * 1e-14);
+    expect(Math.abs(v[1] - 3e-14)).toBeLessThanOrEqual(1e-8 * 3e-14);
+  });
+
+  // a small block beside a unit entry: exact small eigenvalues 0.9e-12, 1.1e-12
+  const GRADED = [
+    [1, 0, 0],
+    [0, 1e-12, 1e-13],
+    [0, 1e-13, 1e-12],
+  ];
+  const GRADED_WANT = [0.9e-12, 1.1e-12, 1];
+
+  it('a graded number matrix keeps the small eigenvalues to relative 1e-8', () => {
+    const { values, eigenvectors } = eigs(matrix(GRADED));
+    const v = (values as unknown as { toArray(): number[] }).toArray();
+    v.forEach((x, k) =>
+      expect(Math.abs(x - GRADED_WANT[k])).toBeLessThanOrEqual(1e-8 * GRADED_WANT[k])
+    );
+    for (const { value, vector } of eigenvectors!) {
+      const u = vecArr(vector).map(num);
+      const lam = num(value);
+      if (lam > 0.5) continue;
+      // residual of the small block, relative to its own scale (1e-12)
+      for (let i = 0; i < 3; i++) {
+        const av = GRADED[i].reduce((s, a, j) => s + a * u[j], 0);
+        expect(Math.abs(av - lam * u[i])).toBeLessThanOrEqual(1e-8 * 1e-12);
+      }
+    }
+  });
+
+  it('a graded BigNumber matrix keeps the small eigenvalues to relative 1e-8', () => {
+    const A = GRADED.map((r) => r.map((x) => bn(x)));
+    const { values } = eigs(matrix(A), { eigenvectors: false });
+    const v = (values as unknown as { toArray(): BigNumber[] }).toArray();
+    v.forEach((x, k) => {
+      const want = bn(GRADED_WANT[k]);
+      expect(x.minus(want).abs().lte(want.times('1e-8'))).toBe(true);
+    });
+  });
+
+  it('a graded block with unequal diagonals converges', () => {
+    // small block [[1e-12, 1e-13], [1e-13, 1.5e-12]]
+    const { values } = eigs(
+      matrix([
+        [1, 0, 0],
+        [0, 1e-12, 1e-13],
+        [0, 1e-13, 1.5e-12],
+      ]),
+      { eigenvectors: false }
+    );
+    const v = (values as unknown as { toArray(): number[] }).toArray();
+    const m = 1.25e-12;
+    const d = Math.sqrt(0.25e-12 ** 2 + 1e-13 ** 2);
+    expect(Math.abs(v[0] - (m - d))).toBeLessThanOrEqual(1e-8 * (m - d));
+    expect(Math.abs(v[1] - (m + d))).toBeLessThanOrEqual(1e-8 * (m + d));
+  });
+
+  it('singular and zero-diagonal matrices terminate', () => {
+    const cases = [
+      [
+        [1, 1],
+        [1, 1],
+      ],
+      [
+        [0, 1],
+        [1, 0],
+      ],
+      Array.from({ length: 6 }, (_, i) => Array.from({ length: 6 }, (_, j) => (i + 1) * (j + 1))),
+    ];
+    for (const A of cases) expect(() => eigs(matrix(A))).not.toThrow();
+  });
+
+  it('NaN or Infinity entries throw instead of returning garbage', () => {
+    for (const bad of [NaN, Infinity, -Infinity]) {
+      expect(() =>
+        eigs(
+          matrix([
+            [1, bad],
+            [bad, 2],
+          ])
+        )
+      ).toThrow(/finite/);
+      expect(() =>
+        eigs(
+          matrix([
+            [1, bad],
+            [3, 2],
+          ])
+        )
+      ).toThrow(/finite/);
+    }
+    expect(() =>
+      eigs(
+        matrix([
+          [bn(1), bn('Infinity')],
+          [bn('Infinity'), bn(2)],
+        ])
+      )
+    ).toThrow(/finite/);
+  });
 });
