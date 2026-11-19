@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-18",
-  "totalFiles": 2512,
+  "generated": "2026-11-19",
+  "totalFiles": 2514,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1318,
+    "build-entry": 1319,
     "test-only": 0,
     "orphan": 0,
-    "test": 1102,
+    "test": 1103,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1344,
-    "tests": 1102,
+    "src": 1345,
+    "tests": 1103,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1148,
+    "@danielsimonjr/mathts-functions": 1150,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5847,7 +5847,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 527
+      "loc": 605
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -7240,7 +7240,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 310
+      "loc": 297
     },
     {
       "file": "functions/src/matrix/kron.ts",
@@ -9651,6 +9651,13 @@
       "loc": 66
     },
     {
+      "file": "functions/src/utils/isExactZero.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 14
+    },
+    {
       "file": "functions/src/utils/isFinite.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -10629,6 +10636,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 187
+    },
+    {
+      "file": "functions/tests/dogfood-1188-qr-nonnumber-cutoff.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

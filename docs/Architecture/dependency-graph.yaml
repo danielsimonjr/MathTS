@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-18'
-  totalFiles: 1344
+  lastUpdated: '2026-11-19'
+  totalFiles: 1345
   totalModules: 82
-  totalExports: 7382
+  totalExports: 7383
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7355,13 +7355,16 @@ modules:
       constants:
         - createLup
     functions/src/algebra/decomposition/qr.ts:
-      description: Householder step loop for plain number storage. Scalar work per step uses the
+      description: Tells if the column norm of a Householder step is too small to reflect. Householder only
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isExactZero
         - file: ../../utils/typed-impl.js
           imports:
             - findTypedImpl
@@ -7371,6 +7374,7 @@ modules:
           typeOnly: true
         - file: ../../utils/is.js
           imports:
+            - isComplex
             - isFraction
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
@@ -7379,6 +7383,7 @@ modules:
             - UNIT_FLOOR_LO
             - SQUARED
             - entryRange
+            - ldexp
             - ldexpMatrix
             - withPow2Scale
           subpath: internal
@@ -18001,6 +18006,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/isExactZero.js
+          imports:
+            - isExactZero
         - file: ../utils/string.js
           imports:
             - format
@@ -28628,6 +28636,16 @@ modules:
         - createIsBounded
       constants:
         - createIsBounded
+    functions/src/utils/isExactZero.ts:
+      description: Tells if a scalar is exactly zero. A number uses `=== 0`. A Complex, Fraction or BigNumber
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - isExactZero
+      functions:
+        - isExactZero
     functions/src/utils/isFinite.ts:
       description: Test whether a value is finite.
       externalDependencies: []
@@ -46124,6 +46142,7 @@ dependencyGraph:
         - functions/src/utils/hasNumericValue.ts
         - functions/src/utils/is.ts
         - functions/src/utils/isBounded.ts
+        - functions/src/utils/isExactZero.ts
         - functions/src/utils/isFinite.ts
         - functions/src/utils/isInteger.ts
         - functions/src/utils/isNaN.ts
@@ -46833,14 +46852,14 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1344
+  totalTypeScriptFiles: 1345
   totalModules: 82
-  totalLinesOfCode: 235965
-  totalExports: 7382
+  totalLinesOfCode: 236044
+  totalExports: 7383
   totalClasses: 62
   totalInterfaces: 668
-  totalFunctions: 2568
-  totalTypeGuards: 182
+  totalFunctions: 2569
+  totalTypeGuards: 183
   totalEnums: 0
   totalConstants: 1691
   totalReExports: 3191
