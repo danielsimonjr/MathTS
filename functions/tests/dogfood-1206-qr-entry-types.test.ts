@@ -127,6 +127,18 @@ describe('#1206 qr entry types', () => {
     );
   });
 
+  it('Complex matrix with an entry of another type: the zeros below the diagonal stay Complex', () => {
+    // No promotion rule applies to a string entry, so the entries stay as they are. The zeros
+    // below the diagonal of R follow R[0][0], as before #1206.
+    const r = qr([
+      [cx(0, 0), '2', cx(1, 0)],
+      [cx(0, 0), cx(0, 0), '3'],
+      [cx(0, 0), cx(0, 0), cx(0, 0)],
+    ]) as { R: unknown[][] };
+    for (let i = 1; i < 3; i++)
+      for (let j = 0; j < i; j++) expect(kindOf(r.R[i][j])).toBe('Complex');
+  });
+
   it('Q * R reconstructs a BigNumber and a Complex input', () => {
     const mul = multiplyScalar as (a: unknown, b: unknown) => unknown;
     const add = addScalar as (a: unknown, b: unknown) => unknown;
