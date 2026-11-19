@@ -130,6 +130,18 @@ function digitCount(coefficient: bigint, min = 1): number {
   return digits;
 }
 
+/** `floor(value^(1/n))` of a positive bigint, by Newton steps that fall onto the root. */
+function integerRoot(value: bigint, n: 2 | 3): bigint {
+  const exponent = BigInt(n);
+  const bits = value.toString(2).length;
+  let x = 1n << BigInt(Math.ceil(bits / n));
+  for (;;) {
+    const y = ((exponent - 1n) * x + value / x ** (exponent - 1n)) / exponent;
+    if (y >= x) return x;
+    x = y;
+  }
+}
+
 /** At or above this coefficient, `normalize` tests the low bit before it divides by ten. */
 const BIT_TEST_LIMIT = 10n ** 40n;
 
@@ -1038,20 +1050,28 @@ export class BigNumber implements MathTSValue {
    * Square root
    */
   sqrt(): BigNumber {
-    return this.#guarded(() => this.#sqrtImpl());
+    return this.#sqrtImpl();
   }
 
   /**
-   * A double-precision start for a Newton root of a positive finite value. The value is split as
-   * m * 10^(n*k) with m in [0.1, 10^(n-1)), so the double root of m is finite and the root of the
-   * value is that seed times 10^k, for every exponent the type holds (#1201).
+   * The n-th root of a positive finite value, rounded once to the configured precision and
+   * mode. The integer root of the coefficient, scaled to at least precision + 1 digits, is
+   * exact. A sticky digit (1 when the root is not exact) then sets every rounding mode
+   * correctly. A Newton root at the working precision rounded twice, and gave 1 for
+   * sqrt(1 - 1e-20) (#1208). The scaling also keeps every exponent the type holds (#1201).
    */
-  #rootSeed(n: number, root: (x: number) => number): BigNumber {
-    const order = digitCount(this._coefficient) + this._exponent;
-    const k = Math.floor(order / n);
-    const mantissa = BigNumber.#allocate(1, this._coefficient, this._exponent - n * k);
-    const seed = BigNumber.fromNumber(root(mantissa.valueOf()));
-    return BigNumber.#allocate(seed._sign, seed._coefficient, seed._exponent + k);
+  #exactRoot(n: 2 | 3): BigNumber {
+    const precision = globalConfig.precision;
+    const need = n * (precision + 1);
+    let shift = Math.max(0, need - digitCount(this._coefficient));
+    while ((this._exponent - shift) % n !== 0) shift++;
+    const scaled = this._coefficient * pow10(shift);
+    const root = integerRoot(scaled, n);
+    const sticky = root ** BigInt(n) === scaled ? 0n : 1n;
+    const exponent = (this._exponent - shift) / n - 1;
+    return BigNumber.#allocate(this._sign, root * 10n + sticky, exponent).roundToPrecision(
+      precision
+    );
   }
 
   #sqrtImpl(): BigNumber {
@@ -1059,25 +1079,7 @@ export class BigNumber implements MathTSValue {
     if (this._sign === -1) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._sign === 0) return this;
     if (this._isInfinite) return this;
-
-    // Newton-Raphson iteration
-    const precision = globalConfig.precision;
-    let guess = this.#rootSeed(2, Math.sqrt);
-
-    for (let i = 0; i < 100; i++) {
-      const newGuess = guess.add(this.divide(guess)).divide(BigNumber.fromNumber(2));
-      if (
-        guess
-          .subtract(newGuess)
-          .abs()
-          .compareTo(guess.multiply(BigNumber.parse('1e-' + (precision + 5)))) <= 0
-      ) {
-        return newGuess.roundToPrecision(precision);
-      }
-      guess = newGuess;
-    }
-
-    return guess.roundToPrecision(precision);
+    return this.#exactRoot(2);
   }
 
   // ============================================================
@@ -1938,42 +1940,14 @@ export class BigNumber implements MathTSValue {
    * Uses Newton-Raphson iteration.
    */
   cbrt(): BigNumber {
-    return this.#guarded(() => this.#cbrtImpl());
+    return this.#cbrtImpl();
   }
 
   #cbrtImpl(): BigNumber {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) return this;
-
-    // Handle negative numbers: cbrt(-x) = -cbrt(x)
-    if (this._sign === -1) {
-      return this.negate().cbrt().negate();
-    }
-
-    const precision = globalConfig.precision;
-    const three = BigNumber.fromNumber(3);
-    let guess = this.#rootSeed(3, Math.cbrt);
-
-    // Newton's method: x_{n+1} = (2*x_n + a / x_n^2) / 3
-    for (let i = 0; i < 100; i++) {
-      const guessSquared = guess.multiply(guess);
-      const newGuess = guess
-        .multiply(BigNumber.fromNumber(2))
-        .add(this.divide(guessSquared))
-        .divide(three);
-      if (
-        guess
-          .subtract(newGuess)
-          .abs()
-          .compareTo(guess.abs().multiply(BigNumber.parse('1e-' + (precision + 5)))) <= 0
-      ) {
-        return newGuess.roundToPrecision(precision);
-      }
-      guess = newGuess;
-    }
-
-    return guess.roundToPrecision(precision);
+    return this.#exactRoot(3);
   }
 
   /**
