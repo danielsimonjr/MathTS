@@ -523,6 +523,10 @@ export const createCsAmd = /* #__PURE__ */ factory(
         }
         // finalize AT
         tptr[m] = p2;
+        // drop the stale entries after the compaction: the transpose below counts every
+        // entry of the index array, not only those that the column pointers reach
+        tindex.length = p2;
+        if (at._values) at._values.length = p2;
         // recreate A from new transpose matrix
         a = transpose(at) as SparseMatrixData;
         // use A' * A

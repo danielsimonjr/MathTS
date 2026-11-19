@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2531,
+  "totalFiles": 2532,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1118,
+    "test": 1119,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1118,
+    "tests": 1119,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1163,
+    "@danielsimonjr/mathts-functions": 1164,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 663
+      "loc": 667
     },
     {
       "file": "functions/src/algebra/sparse/csChol.ts",
@@ -10755,6 +10755,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 127
+    },
+    {
+      "file": "functions/tests/dogfood-1239-slu-order2.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 90
     },
     {
       "file": "functions/tests/dogfood-1251-qr-1d.test.ts",
