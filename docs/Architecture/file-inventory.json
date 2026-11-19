@@ -1269,7 +1269,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 292
+      "loc": 297
     },
     {
       "file": "core/tests/dogfood-a1-stable-non-array.test.ts",
