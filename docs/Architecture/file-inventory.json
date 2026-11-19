@@ -702,7 +702,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 185
+      "loc": 193
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",

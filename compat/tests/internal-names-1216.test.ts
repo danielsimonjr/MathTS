@@ -118,6 +118,14 @@ describe('create keeps the names of user factories (#1250)', () => {
     expect('GL4_A' in math).toBe(false);
   });
 
+  it('keeps a parser that the caller supplies', () => {
+    const mine = (): { evaluate: () => string } => ({ evaluate: () => 'mine' });
+    const math = create({ ...all, parser: mine }) as unknown as {
+      parser: () => { evaluate: (expr: string) => unknown };
+    };
+    expect(math.parser().evaluate('1 + 1')).toBe('mine');
+  });
+
   it('keeps a user value under an internal name', () => {
     const a = create({ ...all, GL4_A: 99 }) as unknown as Record<string, unknown>;
     expect(a.GL4_A).toBe(99);
