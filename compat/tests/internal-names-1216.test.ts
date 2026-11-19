@@ -147,6 +147,18 @@ describe('the expression scope of a compat instance hides the internal names (#1
     expect(math.evaluate('GL4_A')).toBe(5);
   });
 
+  it('math.parser() evaluates in the scope of its instance', () => {
+    const math = create(all);
+    const parser = math.parser();
+    for (const key of resolving) expect(() => parser.evaluate(key)).toThrow();
+    expect(() => math.parser({ unsafe: true }).evaluate('GL4_A')).toThrow();
+    parser.set('x', 3);
+    expect(parser.evaluate('x^2 + LN2')).toBe(9 + Math.LN2);
+    math.import({ triple1216: (value: number) => 3 * value });
+    expect(parser.evaluate('triple1216(x)')).toBe(9);
+    expect(math.parser().evaluate('triple1216(2)')).toBe(6);
+  });
+
   it('keeps the mathjs constants and functions', () => {
     const math = create(all);
     expect(math.evaluate('LN2')).toBe(Math.LN2);

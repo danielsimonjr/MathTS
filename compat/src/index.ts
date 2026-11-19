@@ -580,7 +580,13 @@ export function create(
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);
 
-  wireMathjsInstanceApi(instance as Record<string, unknown>, currentConfig);
+  // Only the parser of the functions namespace is bound to the instance: a parser that
+  // the caller supplies stays as given (#1250).
+  wireMathjsInstanceApi(
+    instance as Record<string, unknown>,
+    currentConfig,
+    flat.parser === functionsNamespace.parser
+  );
 
   return instance as unknown as MathInstance;
 }

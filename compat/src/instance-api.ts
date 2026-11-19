@@ -7,6 +7,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import {
   createInstanceEvaluator,
   EVALUATE_SCOPE_OMIT,
+  parser as functionsParser,
   reviver,
   replacer,
   runWithConfig,
@@ -48,10 +49,16 @@ function scrubDenylist(scope: Record<string, unknown>): void {
 /**
  * Attach mathjs `import` / `typed` / `compile`, rebind evaluate to merged import
  * scope, and keep sandbox denylist intact.
+ *
+ * @param instance - The compat instance.
+ * @param currentConfig - The live config object of the instance.
+ * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
+ *   with the instance evaluator. Default: `false`.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
-  currentConfig: MathJSConfig
+  currentConfig: MathJSConfig,
+  bindParser = false
 ): WiredCompatInstance {
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
@@ -108,6 +115,20 @@ export function wireMathjsInstanceApi(
     internalImport(functions, options);
     scrubDenylist(expressionLayers.mathWithTransform);
     rebindEvaluator();
+  }
+
+  // The parser of the functions package evaluates in the module scope. The instance
+  // parser keeps its retained scope and evaluates with the current instance evaluator,
+  // so it resolves imported names, uses the instance config and hides the internal
+  // names (#1216).
+  if (bindParser) {
+    const instanceParser: typeof functionsParser = (options) => {
+      const made = functionsParser(options);
+      made.evaluate = (expr: string): unknown =>
+        (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
+      return made;
+    };
+    instance.parser = instanceParser;
   }
 
   instance.import = mathImport;
