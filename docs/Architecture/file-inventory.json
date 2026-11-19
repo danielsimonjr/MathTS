@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2515,
+  "totalFiles": 2516,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1319,
     "test-only": 0,
     "orphan": 0,
-    "test": 1104,
+    "test": 1105,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1345,
-    "tests": 1104,
+    "tests": 1105,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 32,
-    "@danielsimonjr/mathts-core": 143,
+    "@danielsimonjr/mathts-core": 144,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
@@ -968,7 +968,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2288
+      "loc": 2261
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1193,6 +1193,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 135
+    },
+    {
+      "file": "core/tests/bignumber-sqrt-round-1208.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
     },
     {
       "file": "core/tests/collection-dim-validation.test.ts",
