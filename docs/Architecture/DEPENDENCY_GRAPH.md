@@ -148,14 +148,14 @@ The codebase is organized into the following modules:
 - **functions/set**: 11 files
 - **functions/signal**: 17 files
 - **functions/special**: 14 files
-- **functions/statistics**: 19 files
+- **functions/statistics**: 20 files
 - **functions/stats**: 15 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 42 files
+- **functions/utils**: 43 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 585            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 587            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3048,6 +3048,7 @@ graph LR
 | `../../utils/typed-impl.js`    | `findTypedImpl`                      | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                      | Import (type-only) |
 | `../../utils/is.js`            | `isBigNumber, isComplex, isFraction` | Import             |
+| `../../utils/real-scale.js`    | `realScale, squaresLeaveRange`       | Import             |
 
 **Exports:**
 
@@ -4288,10 +4289,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports                   | Type               |
+| --------------------------- | ------------------------- | ------------------ |
+| `../utils/factory.js`       | `factory`                 | Import             |
+| `../core/function/typed.js` | `TypedFunction`           | Import (type-only) |
+| `../utils/real-scale.js`    | `realScale, isDegenerate` | Import             |
 
 **Exports:**
 
@@ -7288,6 +7290,7 @@ graph LR
 | `../utils/string.js`      | `format`                                               | Import |
 | `./eigs/complexEigs.js`   | `createComplexEigs`                                    | Import |
 | `./eigs/realSymmetric.js` | `createRealSymmetric`                                  | Import |
+| `../utils/real-scale.js`  | `realScale, squaresLeaveRange`                         | Import |
 | `../utils/is.js`          | `typeOf, isNumber, isBigNumber, isComplex, isFraction` | Import |
 
 **Exports:**
@@ -9964,15 +9967,16 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                     |
-| ---------------------------- | -------------------------- |
-| `@danielsimonjr/mathts-core` | `pairwiseSum, pairwiseDot` |
+| Package                      | Import                                |
+| ---------------------------- | ------------------------------------- |
+| `@danielsimonjr/mathts-core` | `BigNumber, pairwiseSum, pairwiseDot` |
 
 **Internal Dependencies:**
 
 | File                        | Imports                   | Type               |
 | --------------------------- | ------------------------- | ------------------ |
 | `../utils/factory.js`       | `factory`                 | Import             |
+| `../utils/real-scale.js`    | `realScale`               | Import             |
 | `../core/function/typed.js` | `TypedFunction`           | Import (type-only) |
 | `./numeric-data.js`         | `typedArrayPairToNumbers` | Import             |
 
@@ -10226,11 +10230,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../utils/is.js`            | `isCollection`  | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports                           | Type               |
+| --------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`       | `factory`                         | Import             |
+| `../utils/is.js`            | `isBigNumber, isCollection`       | Import             |
+| `../utils/collection.js`    | `deepForEach`                     | Import             |
+| `../utils/real-scale.js`    | `isDegenerate`                    | Import             |
+| `./utils/scaledStd.js`      | `normalizationDivisor, scaledStd` | Import             |
+| `../core/function/typed.js` | `TypedFunction`                   | Import (type-only) |
 
 **Exports:**
 
@@ -10288,6 +10295,26 @@ graph LR
 **Exports:**
 
 - Functions: `improveErrorMessage`
+
+---
+
+### `functions/src/statistics/utils/scaledStd.ts` - The standard deviation of finite numbers and BigNumbers, computed so that no square leaves the
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
+**Internal Dependencies:**
+
+| File                        | Imports     | Type   |
+| --------------------------- | ----------- | ------ |
+| `../../utils/real-scale.js` | `realScale` | Import |
+
+**Exports:**
+
+- Functions: `scaledStd`, `normalizationDivisor`
 
 ---
 
@@ -11732,6 +11759,8 @@ graph LR
 | `../factories/scope.js`                | `factoryScope`                                                                                                                                                                                                                                | Import             |
 | `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
 | `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection`                                                                                                                                                                                  | Import             |
+| `../utils/real-scale.js`               | `isDegenerate`                                                                                                                                                                                                                                | Import             |
+| `../statistics/utils/scaledStd.js`     | `normalizationDivisor, scaledStd`                                                                                                                                                                                                             | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
@@ -13389,6 +13418,21 @@ graph LR
 **Exports:**
 
 - Functions: `product`
+
+---
+
+### `functions/src/utils/real-scale.ts` - An exact scale for a list of real values, so that the squares of the scaled values cannot
+
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `BigNumber` |
+
+**Exports:**
+
+- Interfaces: `RealScale`
+- Functions: `realScale`, `isDegenerate`, `squaresLeaveRange`
 
 ---
 
@@ -20786,7 +20830,7 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/utils/collection`                       | 0 files      | 43 files   |
+| `functions/src/utils/collection`                       | 0 files      | 44 files   |
 | `functions/src/utils/limits`                           | 0 files      | 42 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
@@ -20799,10 +20843,10 @@ graph LR
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
+| `functions/src/typed/arithmetic`                       | 15 files     | 10 files   |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `functions/src/typed/arithmetic`                       | 13 files     | 10 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
@@ -21282,7 +21326,7 @@ graph TD
         N307[min]
         N308[mode]
         N309[nan-reductions]
-        N310[...9 more]
+        N310[...10 more]
     end
 
     subgraph Functions/stats
@@ -21365,7 +21409,7 @@ graph TD
         N369[collection]
         N370[complex]
         N371[customs]
-        N372[...32 more]
+        N372[...33 more]
     end
 
     subgraph Functions/wasm
@@ -21714,15 +21758,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1348   |
+| Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237239 |
-| Total Exports           | 7390   |
+| Total Lines of Code     | 237645 |
+| Total Exports           | 7395   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 668    |
-| Total Functions         | 2573   |
-| Total Type Guards       | 183    |
+| Total Interfaces        | 669    |
+| Total Functions         | 2578   |
+| Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |

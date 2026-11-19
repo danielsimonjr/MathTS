@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
-import { pairwiseSum, pairwiseDot } from '@danielsimonjr/mathts-core';
+import { BigNumber, pairwiseSum, pairwiseDot } from '@danielsimonjr/mathts-core';
+import { realScale } from '../utils/real-scale.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { typedArrayPairToNumbers } from './numeric-data.js';
 
@@ -106,6 +107,20 @@ export const createCorr = /* #__PURE__ */ factory(
         return correlation(A, B);
       }
     }
+    function fromDeviations(dX: unknown[], dY: unknown[]): unknown {
+      const sxy = sum(dX.map((dx: unknown, i: number) => multiply(dx, dY[i])));
+      const sxx = sum(dX.map((dx: unknown) => multiply(dx, dx)));
+      const syy = sum(dY.map((dy: unknown) => multiply(dy, dy)));
+      return divide(sxy, sqrt(multiply(sxx, syy)));
+    }
+
+    /** `false` for a number or BigNumber that is NaN or infinite, else `true` or `undefined`. */
+    function isFiniteReal(r: unknown): boolean | undefined {
+      if (typeof r === 'number') return Number.isFinite(r);
+      if (r instanceof BigNumber) return r.isFinite();
+      return undefined;
+    }
+
     function correlation(A: unknown[], B: unknown[]): unknown {
       const n = A.length;
 
@@ -127,7 +142,18 @@ export const createCorr = /* #__PURE__ */ factory(
         const sxy = pairwiseDot(dX, dY);
         const sxx = pairwiseDot(dX, dX);
         const syy = pairwiseDot(dY, dY);
-        return sxy / Math.sqrt(sxx * syy);
+        const r = sxy / Math.sqrt(sxx * syy);
+        if (Number.isFinite(r)) return r;
+        // The squares or their product left the range of a double (#1257). The correlation does
+        // not change when each deviation list is divided by an exact power of 2.
+        const sx = realScale(Array.from(dX));
+        const sy = realScale(Array.from(dY));
+        if (sx === undefined || sy === undefined) return r;
+        for (let i = 0; i < n; i++) {
+          dX[i] = sx.down(dX[i]) as number;
+          dY[i] = sy.down(dY[i]) as number;
+        }
+        return pairwiseDot(dX, dY) / Math.sqrt(pairwiseDot(dX, dX) * pairwiseDot(dY, dY));
       }
 
       // Generic fallback (BigNumber/Complex/Fraction): the same stable two-pass via typed operators.
@@ -135,10 +161,17 @@ export const createCorr = /* #__PURE__ */ factory(
       const meanY = divide(sum(B), n);
       const dX = A.map((x: unknown) => subtract(x, meanX));
       const dY = B.map((y: unknown) => subtract(y, meanY));
-      const sxy = sum(dX.map((dx: unknown, i: number) => multiply(dx, dY[i])));
-      const sxx = sum(dX.map((dx: unknown) => multiply(dx, dx)));
-      const syy = sum(dY.map((dy: unknown) => multiply(dy, dy)));
-      return divide(sxy, sqrt(multiply(sxx, syy)));
+      const plain = fromDeviations(dX, dY);
+      if (isFiniteReal(plain) !== false) return plain;
+      // A square left the range of the type (#1257). The correlation does not change when each
+      // deviation list is divided by an exact scale.
+      const sx = realScale(dX);
+      const sy = realScale(dY);
+      if (sx === undefined || sy === undefined) return plain;
+      return fromDeviations(
+        dX.map((v: unknown) => sx.down(v as number)),
+        dY.map((v: unknown) => sy.down(v as number))
+      );
     }
   }
 );

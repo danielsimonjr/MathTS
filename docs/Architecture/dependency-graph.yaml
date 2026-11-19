@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-19'
-  totalFiles: 1348
+  totalFiles: 1350
   totalModules: 82
-  totalExports: 7390
+  totalExports: 7395
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7397,6 +7397,10 @@ modules:
             - isBigNumber
             - isComplex
             - isFraction
+        - file: ../../utils/real-scale.js
+          imports:
+            - realScale
+            - squaresLeaveRange
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -9224,6 +9228,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../utils/real-scale.js
+          imports:
+            - realScale
+            - isDegenerate
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -17805,6 +17813,10 @@ modules:
         - file: ./eigs/realSymmetric.js
           imports:
             - createRealSymmetric
+        - file: ../utils/real-scale.js
+          imports:
+            - realScale
+            - squaresLeaveRange
         - file: ../utils/is.js
           imports:
             - typeOf
@@ -21973,6 +21985,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/real-scale.js
+          imports:
+            - realScale
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -21984,6 +21999,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - BigNumber
             - pairwiseSum
             - pairwiseDot
       exports:
@@ -22390,7 +22406,18 @@ modules:
             - factory
         - file: ../utils/is.js
           imports:
+            - isBigNumber
             - isCollection
+        - file: ../utils/collection.js
+          imports:
+            - deepForEach
+        - file: ../utils/real-scale.js
+          imports:
+            - isDegenerate
+        - file: ./utils/scaledStd.js
+          imports:
+            - normalizationDivisor
+            - scaledStd
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -22463,6 +22490,25 @@ modules:
         - improveErrorMessage
       functions:
         - improveErrorMessage
+    functions/src/statistics/utils/scaledStd.ts:
+      description: The standard deviation of finite numbers and BigNumbers, computed so that no square leaves the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/real-scale.js
+          imports:
+            - realScale
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+      exports:
+        - scaledStd
+        - normalizationDivisor
+      functions:
+        - scaledStd
+        - normalizationDivisor
     functions/src/statistics/variance.ts:
       description: Check if an array is a flat array of plain numbers
       externalDependencies: []
@@ -24762,6 +24808,13 @@ modules:
             - f64UnaryDispatched
             - mapEachLeaf
             - unaryCollection
+        - file: ../utils/real-scale.js
+          imports:
+            - isDegenerate
+        - file: ../statistics/utils/scaledStd.js
+          imports:
+            - normalizationDivisor
+            - scaledStd
         - file: ../statistics/numeric-data.js
           imports:
             - finiteNumbers
@@ -29279,6 +29332,26 @@ modules:
         - product
       functions:
         - product
+    functions/src/utils/real-scale.ts:
+      description: An exact scale for a list of real values, so that the squares of the scaled values cannot
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+      exports:
+        - realScale
+        - isDegenerate
+        - squaresLeaveRange
+      interfaces:
+        - RealScale
+      functions:
+        - realScale
+        - isDegenerate
+        - squaresLeaveRange
     functions/src/utils/samples.ts:
       description: Shared argument helper for the signal and curve-fit functions.
       externalDependencies: []
@@ -46048,6 +46121,7 @@ dependencyGraph:
         - functions/src/statistics/sum-indexed-guard.ts
         - functions/src/statistics/sum.ts
         - functions/src/statistics/utils/improveErrorMessage.ts
+        - functions/src/statistics/utils/scaledStd.ts
         - functions/src/statistics/variance.ts
     - name: Functions/stats
       files:
@@ -46236,6 +46310,7 @@ dependencyGraph:
         - functions/src/utils/parseNumber.ts
         - functions/src/utils/print.ts
         - functions/src/utils/product.ts
+        - functions/src/utils/real-scale.ts
         - functions/src/utils/samples.ts
         - functions/src/utils/sort-numbers.ts
         - functions/src/utils/string.ts
@@ -46928,14 +47003,14 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1348
+  totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 237239
-  totalExports: 7390
+  totalLinesOfCode: 237645
+  totalExports: 7395
   totalClasses: 62
-  totalInterfaces: 668
-  totalFunctions: 2573
-  totalTypeGuards: 183
+  totalInterfaces: 669
+  totalFunctions: 2578
+  totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1694
   totalReExports: 3191

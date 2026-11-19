@@ -1,10 +1,10 @@
 {
   "generated": "2026-11-19",
-  "total": 214,
+  "total": 213,
   "parallelizedCount": 22,
   "effectiveCount": 16,
   "disabledCount": 6,
-  "nonParallelCount": 192,
+  "nonParallelCount": 191,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
@@ -339,7 +339,6 @@
     "smallerEq",
     "sqrt",
     "square",
-    "std",
     "studentTPDF",
     "subfactorial",
     "subtract",
@@ -734,7 +733,7 @@
     "arithmetic.ts": {
       "effective": 0,
       "disabled": 0,
-      "none": 41
+      "none": 40
     },
     "bitwise.ts": {
       "effective": 0,

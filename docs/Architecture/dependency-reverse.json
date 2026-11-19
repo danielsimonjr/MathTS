@@ -1075,6 +1075,15 @@
       "functions/src/utils/print.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/real-scale.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/matrix/eigs.ts",
+      "functions/src/statistics/corr.ts",
+      "functions/src/statistics/std.ts",
+      "functions/src/statistics/utils/scaledStd.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
       "functions/src/algebra/derivative.ts",
@@ -1391,6 +1400,7 @@
       "functions/src/statistics/median.ts",
       "functions/src/statistics/min.ts",
       "functions/src/statistics/prod.ts",
+      "functions/src/statistics/std.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts",
       "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
@@ -2818,6 +2828,10 @@
     ],
     "functions/src/statistics/quantile-numpy-methods.ts": [
       "functions/src/statistics/quantileSeq.ts"
+    ],
+    "functions/src/statistics/utils/scaledStd.ts": [
+      "functions/src/statistics/std.ts",
+      "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/statistics/sum-indexed-guard.ts": ["functions/src/statistics/sum.ts"],
     "functions/src/probability/util/gammaSample.ts": [

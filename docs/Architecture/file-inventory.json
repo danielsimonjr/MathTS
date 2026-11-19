@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2533,
+  "totalFiles": 2536,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1322,
+    "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1119,
+    "test": 1120,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1348,
-    "tests": 1119,
+    "src": 1350,
+    "tests": 1120,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1163,
+    "@danielsimonjr/mathts-functions": 1166,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5889,7 +5889,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 669
+      "loc": 688
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -6393,7 +6393,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 382
+      "loc": 400
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
@@ -7205,7 +7205,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 485
+      "loc": 529
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -8479,7 +8479,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 145
+      "loc": 178
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 122
+      "loc": 168
     },
     {
       "file": "functions/src/statistics/sum-indexed-guard.ts",
@@ -8599,6 +8599,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 50
+    },
+    {
+      "file": "functions/src/statistics/utils/scaledStd.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 80
     },
     {
       "file": "functions/src/statistics/variance.ts",
@@ -9186,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2942
+      "loc": 3028
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9838,6 +9845,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 20
+    },
+    {
+      "file": "functions/src/utils/real-scale.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 80
     },
     {
       "file": "functions/src/utils/samples.ts",
@@ -10776,6 +10790,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 32
+    },
+    {
+      "file": "functions/tests/dogfood-1257-bignumber-squares.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 242
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",

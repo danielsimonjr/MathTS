@@ -4,6 +4,7 @@ import { isExactZero } from '../../utils/isExactZero.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isBigNumber, isComplex, isFraction } from '../../utils/is.js';
+import { realScale, squaresLeaveRange } from '../../utils/real-scale.js';
 import {
   UNIT_FLOOR_LO,
   SQUARED,
@@ -400,6 +401,19 @@ export const createQr = /* #__PURE__ */ factory(
       return null;
     }
 
+    /**
+     * The scale of the entries k..rows-1 of column k when they are all numbers or BigNumbers, at
+     * least one is a BigNumber and their squares can leave the configured exponent bounds, else
+     * `undefined`. A column whose squares stay in range keeps the unscaled norm, so its result
+     * does not change.
+     */
+    function bigColumnScale(Rdata: unknown[][], k: number, rows: number) {
+      const column: unknown[] = [];
+      for (let i = k; i < rows; i++) column.push(Rdata[i][k]);
+      const scale = realScale(column);
+      return scale && scale.big && squaresLeaveRange(scale.order, rows - k) ? scale : undefined;
+    }
+
     function _denseQRimpl(m: DenseMatrix, plain: boolean): QRResult {
       // rows & columns (m x n)
       const rows = m._size[0]; // m
@@ -468,12 +482,17 @@ export const createQr = /* #__PURE__ */ factory(
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;
+        // The squares of a BigNumber column can leave the exponent bounds when its norm is in
+        // range (#1257). Then the column is divided by an exact power of 10 first.
+        const colScale = plain ? undefined : bigColumnScale(Rdata, k, rows);
 
         for (i = k; i < rows; i++) {
-          alphaSquared = addScalar(alphaSquared, multiplyScalar(Rdata[i][k], conj(Rdata[i][k])));
+          const x = colScale ? colScale.down(Rdata[i][k] as number) : Rdata[i][k];
+          alphaSquared = addScalar(alphaSquared, multiplyScalar(x, conj(x)));
         }
 
-        const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
+        const root = sqrt(alphaSquared);
+        const alpha = multiplyScalar(sgn, colScale ? colScale.up(root as number) : root);
 
         if (!negligibleNorm(alpha, alphaSquared, plain)) {
           // first element in vector u
