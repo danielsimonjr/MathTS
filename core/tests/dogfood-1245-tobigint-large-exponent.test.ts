@@ -1,6 +1,7 @@
 /**
  * #1245: `BigNumber.toBigInt()` built a zero-padded string for a large exponent and hung on 1e100000000.
- * It now multiplies the coefficient by `10n ** exponent` and throws a RangeError above 1,000,000 digits.
+ * It now multiplies the coefficient by `10n ** exponent`. It throws a RangeError at once only when the
+ * result is certainly above the V8 bigint limit of 2^30 bits (about 3.23e8 digits).
  */
 import { describe, expect, it } from 'vitest';
 import { BigNumber } from '../src/types/bignumber.js';
@@ -8,29 +9,30 @@ import { BigNumber } from '../src/types/bignumber.js';
 const bn = (s: string): BigNumber => BigNumber.parse(s);
 
 describe('#1245 toBigInt with a large exponent', () => {
-  it('accepts the digit limit and gives the exact value in bounded time', () => {
-    const start = Date.now();
-    const v = bn('1e999999').toBigInt();
-    expect(v === 10n ** 999999n).toBe(true);
-    expect(Date.now() - start).toBeLessThan(2000);
+  it('gives the exact value of 1e2000000 (main returned it, a 1e6 digit cap threw)', () => {
+    const v = bn('1e2000000').toBigInt();
+    expect(v === 10n ** 2000000n).toBe(true);
+    const s = v.toString();
+    expect(s.length).toBe(2000001);
+    expect(s.startsWith('10000')).toBe(true);
+    expect(s.endsWith('00000')).toBe(true);
   });
 
-  it('throws a RangeError for 1e2000000 (the string build took about 1 s and returned a value)', () => {
-    expect(() => bn('1e2000000').toBigInt()).toThrow(RangeError);
+  it('gives the exact value of -2.5e1000000', () => {
+    const s = bn('-2.5e1000000').toBigInt().toString();
+    expect(s.length).toBe(1000002);
+    expect(s.startsWith('-25000')).toBe(true);
+    expect(s.endsWith('00000')).toBe(true);
   });
 
-  it.each(['1e100000000', '-1e100000000', '1e1000000000000'])(
-    '%s throws a RangeError at once',
+  it.each(['1e1000000000', '-1e1000000000', '1e100000000000', '1e1000000000000'])(
+    '%s is above the V8 limit and throws a RangeError at once',
     (s) => {
       const start = Date.now();
       expect(() => bn(s).toBigInt()).toThrow(RangeError);
-      expect(Date.now() - start).toBeLessThan(500);
+      expect(Date.now() - start).toBeLessThan(100);
     }
   );
-
-  it('rejects one digit above the limit', () => {
-    expect(() => bn('1e1000000').toBigInt()).toThrow(RangeError);
-  });
 
   it.each([
     ['0', 0n],

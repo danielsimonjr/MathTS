@@ -81,8 +81,14 @@ const DECIMAL_JS_ROUNDING: readonly RoundingMode[] = [
   'halfFloor',
 ];
 
-/** Largest digit count `toBigInt` builds. `10n ** 1e6n` takes 0.2 s, `10n ** 1e8n` takes 39 s and V8 throws above about 3.2e8 digits. */
-const BIGINT_MAX_DIGITS = 1_000_000;
+/**
+ * Largest bigint bit length that V8 builds (`1n << (2n ** 30n - 1n)` works, one bit more throws).
+ * `toBigInt` throws at once only when the result certainly has more bits than this.
+ */
+const V8_MAX_BIGINT_BITS = 2 ** 30;
+
+/** A lower bound for log2(10), so the bit-length estimate never exceeds the true bit length. */
+const LOG2_10_LOWER = 3.3219;
 
 /** Extra significant digits that a transcendental method uses before its final rounding. */
 const GUARD_DIGITS = 10;
@@ -847,10 +853,11 @@ export class BigNumber implements MathTSValue {
 
     // Arithmetic, not a zero-padded string (#1245). A bigint division truncates toward zero.
     if (this._exponent >= 0) {
-      const order = this._coefficient.toString().length + this._exponent;
-      if (order > BIGINT_MAX_DIGITS) {
+      // The value is at least 10^(digits - 1), so it has at least floor((digits - 1) * log2(10)) + 1 bits.
+      const digits = this._coefficient.toString().length + this._exponent;
+      if (Math.floor((digits - 1) * LOG2_10_LOWER) >= V8_MAX_BIGINT_BITS) {
         throw new RangeError(
-          `BigNumber is too large to convert to bigint (more than ${BIGINT_MAX_DIGITS} digits)`
+          `BigNumber is too large to convert to bigint (${digits} digits is above the bigint limit of ${V8_MAX_BIGINT_BITS} bits)`
         );
       }
       return BigInt(this._sign) * this._coefficient * 10n ** BigInt(this._exponent);
