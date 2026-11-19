@@ -37,19 +37,27 @@ export function createPrototypeLevels(count: number): {
 
 /**
  * Defines a permanent accessor for `key` on a prototype level. The getter builds
- * the value on the first read and caches it. The setter stores a new value. It
- * throws when the receiver is not extensible (a frozen or sealed instance).
- * The accessor stays an accessor: redefining a prototype property as a data
- * property puts the prototype in dictionary mode.
+ * the value on the first read and caches it. The setter stores a new value in the
+ * accessor's closure, so an assignment adds no own key to the instance. The
+ * accessor stays an accessor: redefining a prototype property as a data property
+ * puts the prototype in dictionary mode.
+ *
+ * Integrity levels behave as for an own data property of `owner` (#1223): an
+ * assignment through a sealed or non-extensible `owner` works, and an assignment
+ * through a frozen `owner` throws a `TypeError`. An assignment through another
+ * receiver (an object that inherits from `owner`) defines an own data property on
+ * that receiver, as an inherited writable data property does.
  *
  * @param level - The prototype level.
  * @param key - The name.
  * @param build - Makes the value on the first read.
+ * @param owner - The instance that the level belongs to.
  */
 export function definePrototypeAccessor(
   level: Record<string, unknown>,
   key: string,
-  build: () => unknown
+  build: () => unknown,
+  owner: object
 ): void {
   let built = false;
   let stored: unknown;
@@ -64,9 +72,17 @@ export function definePrototypeAccessor(
       return stored;
     },
     set(this: object, value: unknown) {
-      // An inherited data property of a non-extensible object is read-only, so an
-      // inherited name of a frozen or sealed instance is read-only too.
-      if (!Object.isExtensible(this)) {
+      if (this !== owner) {
+        // Throws a TypeError when the receiver is not extensible.
+        Object.defineProperty(this, key, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+        return;
+      }
+      if (Object.isFrozen(owner)) {
         throw new TypeError(`Cannot assign to read only property '${key}' of object`);
       }
       stored = value;

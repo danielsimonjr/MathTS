@@ -35,7 +35,9 @@ function objectsOf(math) {
 
 function assertFast(math, phase) {
   const objects = objectsOf(math);
-  assert.ok(objects.length >= 2, 'expected prototype levels below the instance');
+  // One level per CAP inherited names; with no inherited name the instance stands alone.
+  const inherited = allNames(math).length - Object.keys(math).length;
+  assert.equal(objects.length, 1 + Math.ceil(inherited / CAP), `${phase}: level count`);
   objects.forEach((o, i) => {
     const size = Object.getOwnPropertyNames(o).length;
     assert.ok(size <= CAP, `${phase}: object ${i} has ${size} names, cap ${CAP}`);
@@ -88,4 +90,13 @@ test('inherited names behave as names of the instance', () => {
   assert.throws(() => {
     frozen.det = replacement;
   }, TypeError);
+  // #1223: a sealed or non-extensible instance keeps its names writable.
+  for (const lock of [Object.seal, Object.preventExtensions]) {
+    const locked = lock(create(all));
+    locked.integrate = replacement;
+    locked.det = replacement;
+    assert.equal(locked.integrate, replacement);
+    assert.equal(locked.det, replacement);
+    assertFast(locked, `after ${lock.name}`);
+  }
 });
