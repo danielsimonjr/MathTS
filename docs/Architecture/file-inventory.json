@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2528,
+  "totalFiles": 2529,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1321,
     "test-only": 0,
     "orphan": 0,
-    "test": 1115,
+    "test": 1116,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1347,
-    "tests": 1115,
+    "tests": 1116,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 34,
-    "@danielsimonjr/mathts-core": 144,
+    "@danielsimonjr/mathts-core": 145,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
@@ -982,7 +982,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2261
+      "loc": 2431
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1263,6 +1263,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "core/tests/dogfood-1204-bignumber-exponents.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 297
     },
     {
       "file": "core/tests/dogfood-a1-stable-non-array.test.ts",
@@ -13477,7 +13484,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 367
+      "loc": 380
     },
     {
       "file": "functions/tests/typed-bridge.test.ts",
