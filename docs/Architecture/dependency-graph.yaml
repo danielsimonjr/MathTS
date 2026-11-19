@@ -16635,6 +16635,7 @@ modules:
             - Fraction
             - BigNumber
             - isBigNumber
+            - isComplex
             - isFraction
       exports:
         - factoryScope
@@ -46895,7 +46896,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236923
+  totalLinesOfCode: 236953
   totalExports: 7388
   totalClasses: 62
   totalInterfaces: 668

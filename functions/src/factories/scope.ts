@@ -11,6 +11,7 @@ import {
   Fraction,
   BigNumber,
   isBigNumber,
+  isComplex,
   isFraction,
 } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
@@ -386,6 +387,35 @@ function bignumberFn(...args: unknown[]): unknown {
   return args.length === 0 ? BigNumber.fromNumber(0) : toBigNumber(args[0]);
 }
 
+/**
+ * complex() as in mathjs: no argument gives 0; a Complex is cloned; a number, BigNumber or
+ * Fraction gives a real Complex; an object {re, im} or {r, phi} and a string are parsed;
+ * (re, im) builds from two parts; an Array maps each entry. A Complex entry keeps its imaginary
+ * part, which the earlier two-argument constructor lost by nesting the entry in re (#1220).
+ */
+function complexFn(...args: unknown[]): unknown {
+  const toNum = (x: unknown): number =>
+    isBigNumber(x) ? x.toNumber() : isFraction(x) ? Number(x.valueOf()) : (x as number);
+  if (args.length === 0 || args[0] === null) return new Complex(0, 0);
+  const x = args[0];
+  if (args.length >= 2 && !isCollectionCallbackCall(args)) {
+    return new Complex(toNum(x), toNum(args[1]));
+  }
+  if (isComplex(x)) return new Complex(x.re, x.im);
+  if (typeof x === 'number') return new Complex(x, 0);
+  if (isBigNumber(x) || isFraction(x)) return new Complex(toNum(x), 0);
+  if (typeof x === 'string') return Complex.parse(x);
+  if (Array.isArray(x)) return x.map((e) => complexFn(e));
+  if (typeof x === 'object') {
+    const o = x as Record<string, number>;
+    if ('re' in o && 'im' in o) return new Complex(toNum(o.re), toNum(o.im));
+    const r = 'r' in o ? o.r : o.abs;
+    const phi = 'phi' in o ? o.phi : o.arg;
+    if (r !== undefined && phi !== undefined) return Complex.fromPolar(toNum(r), toNum(phi));
+  }
+  throw new Error('Expected object with properties (re and im) or (r and phi) or (abs and arg)');
+}
+
 export const factoryScope: Record<string, unknown> = {
   typed: factoryTyped,
   config: configView,
@@ -403,7 +433,7 @@ export const factoryScope: Record<string, unknown> = {
   matrix: createMatrixBridge(),
 
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
-  complex: (re: number, im: number) => new Complex(re, im),
+  complex: complexFn,
   bignumber: bignumberFn,
   fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
   number: Number,
