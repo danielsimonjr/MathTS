@@ -3334,7 +3334,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
+### `functions/src/algebra/solver/lusolve.ts` - Read a right-hand side as one column vector of length n. A right-hand side with
 
 **Workspace Dependencies:**
 
@@ -21700,7 +21700,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1347   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 236747 |
+| Total Lines of Code     | 236757 |
 | Total Exports           | 7387   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

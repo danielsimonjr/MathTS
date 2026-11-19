@@ -7859,7 +7859,7 @@ modules:
       constants:
         - createLsolveAll
     functions/src/algebra/solver/lusolve.ts:
-      description: Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
+      description: Read a right-hand side as one column vector of length n. A right-hand side with
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -46892,7 +46892,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1347
   totalModules: 82
-  totalLinesOfCode: 236747
+  totalLinesOfCode: 236757
   totalExports: 7387
   totalClasses: 62
   totalInterfaces: 668
