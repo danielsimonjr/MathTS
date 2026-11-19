@@ -67,6 +67,7 @@ import {
   sparse as _factorySparse,
   transpose as _transpose,
   bignumber as _bignumber,
+  complex as _complex,
 } from '@danielsimonjr/mathts-functions';
 
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
@@ -90,19 +91,21 @@ import {
  * complex(3, 4)  // Complex(3, 4)
  * complex(5)     // Complex(5, 0)
  * complex('3+4i') // Complex(3, 4)
+ *
+ * No argument gives COMPLEX_ZERO and a Complex is returned unchanged. Every other input goes to
+ * the functions `complex`: a BigNumber, Fraction, {re, im}, {r, phi}, Array or Matrix converts,
+ * and an invalid part throws a TypeError, as in mathjs.
  */
 export function complex(re?: number | string | Complex, im?: number): Complex {
   if (re === undefined) {
     return COMPLEX_ZERO;
   }
   // The brand tests also return a value of a second copy of core unchanged (#1033).
-  if (isComplex(re)) {
+  if (isComplex(re) && im === undefined) {
     return re as Complex;
   }
-  if (typeof re === 'string') {
-    return Complex.parse(re);
-  }
-  return new Complex(re, im ?? 0);
+  // Every other input uses the functions `complex`, which follows mathjs (#1220).
+  return (_complex as (...a: unknown[]) => Complex)(...(im === undefined ? [re] : [re, im]));
 }
 
 /**

@@ -109,7 +109,7 @@ describe('eigs keeps the imaginary part of Complex entries (#1220)', () => {
     expectPairs(A, r);
   });
 
-  it('Hermitian [[2,1-i],[1+i,3]] has real eigenvalues 1 and 4', () => {
+  it('Hermitian [[2,1-i],[1+i,3]] has eigenvalues within 1e-8 of 1 and 4', () => {
     const A = [
       [C(2, 0), C(1, -1)],
       [C(1, 1), C(3, 0)],
@@ -206,5 +206,36 @@ describe('eigs keeps the imaginary part of Complex entries (#1220)', () => {
     expect(d).not.toBe(c);
     expect((complex as (x: unknown) => unknown)({ re: 3, im: 4 })).toMatchObject({ re: 3, im: 4 });
     expect((complex as (x: unknown) => unknown)('2+i')).toMatchObject({ re: 2, im: 1 });
+  });
+
+  it('complex(Matrix) maps each entry and returns a Matrix, as in mathjs', () => {
+    const r = (complex as (x: unknown) => unknown)(matrix([1, 2])) as {
+      isMatrix: boolean;
+      toArray: () => unknown[];
+    };
+    expect(r.isMatrix).toBe(true);
+    expect(r.toArray().map(toRi)).toEqual([
+      { re: 1, im: 0 },
+      { re: 2, im: 0 },
+    ]);
+  });
+
+  it('a Complex part of the two-argument form throws a TypeError, as in mathjs', () => {
+    const f = complex as (...a: unknown[]) => unknown;
+    expect(() => f(C(1, 2), 5)).toThrow(TypeError);
+    expect(() => f(1, C(1, 2))).toThrow(/Unexpected type of argument in function complex/);
+  });
+
+  it('a third argument throws a TypeError, as in mathjs', () => {
+    expect(() => (complex as (...a: unknown[]) => unknown)(1, 2, 3)).toThrow(
+      /Too many arguments in function complex/
+    );
+  });
+
+  it('the collection-callback shape converts the value', () => {
+    expect([1, 2].map(complex as (x: unknown) => unknown).map(toRi)).toEqual([
+      { re: 1, im: 0 },
+      { re: 2, im: 0 },
+    ]);
   });
 });

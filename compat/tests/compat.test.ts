@@ -89,6 +89,13 @@ describe('@danielsimonjr/mathts-compat', () => {
       expect(c.im).toBe(0);
     });
 
+    it('converts a BigNumber pair and rejects a Complex part, as in mathjs (#1220)', () => {
+      const c = complex(bignumber(1) as never, bignumber(2) as never);
+      expect([c.re, c.im]).toEqual([1, 2]);
+      expect(() => complex(new Complex(1, 2), 5)).toThrow(TypeError);
+      expect(() => complex(1, new Complex(1, 2) as never)).toThrow(TypeError);
+    });
+
     it('should pass through Complex instances', () => {
       const original = new Complex(1, 2);
       const c = complex(original);

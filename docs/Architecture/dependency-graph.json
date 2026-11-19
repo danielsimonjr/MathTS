@@ -46676,7 +46676,8 @@
               "matrix",
               "sparse",
               "transpose",
-              "bignumber"
+              "bignumber",
+              "complex"
             ]
           },
           {
@@ -49739,7 +49740,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1347,
     "totalModules": 82,
-    "totalLinesOfCode": 236953,
+    "totalLinesOfCode": 236975,
     "totalExports": 7388,
     "totalClasses": 62,
     "totalInterfaces": 668,

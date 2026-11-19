@@ -390,15 +390,33 @@ function bignumberFn(...args: unknown[]): unknown {
 /**
  * complex() as in mathjs: no argument gives 0; a Complex is cloned; a number, BigNumber or
  * Fraction gives a real Complex; an object {re, im} or {r, phi} and a string are parsed;
- * (re, im) builds from two parts; an Array maps each entry. A Complex entry keeps its imaginary
- * part, which the earlier two-argument constructor lost by nesting the entry in re (#1220).
+ * (re, im) builds from two real parts; an Array or a Matrix maps each entry. A Complex entry keeps
+ * its imaginary part, which the earlier two-argument constructor lost by nesting the entry in re
+ * (#1220). A part that is not a real scalar and a third argument throw a TypeError, as in mathjs.
+ * The call shape `(value, index, collection)` converts the value, as in `bignumber`.
  */
 function complexFn(...args: unknown[]): unknown {
   const toNum = (x: unknown): number =>
     isBigNumber(x) ? x.toNumber() : isFraction(x) ? Number(x.valueOf()) : (x as number);
+  const isRealPart = (x: unknown): boolean =>
+    typeof x === 'number' || isBigNumber(x) || isFraction(x);
+  if (isCollectionCallbackCall(args)) return complexFn(args[0]);
+  if (args.length > 2) {
+    throw new TypeError(
+      `Too many arguments in function complex (expected: 2, actual: ${args.length})`
+    );
+  }
   if (args.length === 0 || args[0] === null) return new Complex(0, 0);
   const x = args[0];
-  if (args.length >= 2 && !isCollectionCallbackCall(args)) {
+  if (args.length === 2) {
+    args.forEach((part, index) => {
+      if (!isRealPart(part)) {
+        throw new TypeError(
+          'Unexpected type of argument in function complex (expected: number or BigNumber or ' +
+            `Fraction, actual: ${(part as { type?: string } | null)?.type ?? typeof part}, index: ${index})`
+        );
+      }
+    });
     return new Complex(toNum(x), toNum(args[1]));
   }
   if (isComplex(x)) return new Complex(x.re, x.im);
@@ -407,7 +425,9 @@ function complexFn(...args: unknown[]): unknown {
   if (typeof x === 'string') return Complex.parse(x);
   if (Array.isArray(x)) return x.map((e) => complexFn(e));
   if (typeof x === 'object') {
-    const o = x as Record<string, number>;
+    const o = x as Record<string, number> & { isMatrix?: boolean; map?: (f: unknown) => unknown };
+    if (o.isMatrix === true && typeof o.map === 'function')
+      return o.map((e: unknown) => complexFn(e));
     if ('re' in o && 'im' in o) return new Complex(toNum(o.re), toNum(o.im));
     const r = 'r' in o ? o.r : o.abs;
     const phi = 'phi' in o ? o.phi : o.arg;
