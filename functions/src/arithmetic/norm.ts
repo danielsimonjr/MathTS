@@ -1,3 +1,5 @@
+import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
+import { bigHypot } from '../utils/bignumber-hypot.js';
 import { factory } from '../utils/factory.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -202,6 +204,21 @@ export const createNorm = /* #__PURE__ */ factory(
      * @returns {number | BigNumberType} Returns the norm
      * @private
      */
+    /** The scaled 2-norm of the real entries when one is a BigNumber and none is complex (#1255). */
+    function _scaledBigNorm(x: MatrixType): BigNumberType | undefined {
+      const vals: (number | CoreBigNumber)[] = [];
+      let big = false;
+      let real = true;
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        if (value instanceof CoreBigNumber) {
+          big = true;
+          vals.push(value);
+        } else if (typeof value === 'number') vals.push(value);
+        else real = false;
+      });
+      return big && real ? (bigHypot(vals) as unknown as BigNumberType) : undefined;
+    }
+
     function _vectorNorm(
       x: MatrixType,
       p: number | BigNumberType | string
@@ -217,6 +234,10 @@ export const createNorm = /* #__PURE__ */ factory(
         return _norm(x, 2);
       }
       if (typeof p === 'number' && !isNaN(p)) {
+        if (p === 2) {
+          const scaled = _scaledBigNorm(x);
+          if (scaled !== undefined) return scaled;
+        }
         // check p != 0
         if (!equalScalar(p, 0)) {
           // norm(x, p) = sum(abs(xi) ^ p) ^ 1/p
@@ -242,6 +263,8 @@ export const createNorm = /* #__PURE__ */ factory(
      */
     function _matrixNormFrobenius(x: MatrixType): number | BigNumberType {
       // norm(x) = sqrt(sum(diag(x'x)))
+      const scaledBig = _scaledBigNorm(x);
+      if (scaledBig !== undefined) return scaledBig;
       let fro: number | BigNumberType = 0;
       x.forEach(function (value: number | BigNumberType | ComplexType) {
         fro = add(fro, multiply(value, conj(value))) as number | BigNumberType;

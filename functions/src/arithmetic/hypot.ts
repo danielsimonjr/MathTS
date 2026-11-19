@@ -3,6 +3,8 @@ import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../types.js';
 import { flatten } from '../utils/array.js';
 import { isComplex } from '../utils/is.js';
+import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
+import { bigHypot } from '../utils/bignumber-hypot.js';
 
 // Type definitions for dependency injection
 interface Matrix {
@@ -95,6 +97,13 @@ export const createHypot = /* #__PURE__ */ factory(
     function _hypot(args: NumericValue[]): NumericValue {
       // code based on `hypot` from es6-shim:
       // https://github.com/paulmillr/es6-shim/blob/master/es6-shim.js#L1619-L1633
+      // A BigNumber list is scaled by a power of ten, so a square cannot overflow (#1255).
+      if (
+        args.some((a) => a instanceof CoreBigNumber) &&
+        args.every((a) => typeof a === 'number' || a instanceof CoreBigNumber)
+      ) {
+        return bigHypot(args as (number | CoreBigNumber)[]) as unknown as NumericValue;
+      }
       let result: NumericValue = 0;
       let largest: NumericValue = 0;
 

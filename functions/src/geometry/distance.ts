@@ -1,3 +1,5 @@
+import { bigHypot } from '../utils/bignumber-hypot.js';
+import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { scaledDistance } from '@danielsimonjr/mathts-core';
@@ -467,6 +469,15 @@ export const createDistance = /* #__PURE__ */ factory(
       }
       if (allNumbers) return scaledDistance(x as number[], y as number[]);
 
+      const diffs: MathNumericType[] = [];
+      for (let i = 0; i < vectorSize; i++) diffs.push(subtractScalar(x[i], y[i]));
+      // A BigNumber difference is scaled by a power of ten, so a square cannot overflow (#1255).
+      if (
+        diffs.some((d) => d instanceof CoreBigNumber) &&
+        diffs.every((d) => typeof d === 'number' || d instanceof CoreBigNumber)
+      ) {
+        return bigHypot(diffs as (number | CoreBigNumber)[]) as unknown as MathNumericType;
+      }
       let result: MathNumericType = 0;
       for (let i = 0; i < vectorSize; i++) {
         const diff = subtractScalar(x[i], y[i]);
