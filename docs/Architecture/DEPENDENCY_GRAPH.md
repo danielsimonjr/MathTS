@@ -3353,6 +3353,7 @@ graph LR
 | ---------------------------------- | -------------------------------------------------------------------- | ------------------ |
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
+| `../../utils/string.js`            | `format`                                                             | Import             |
 | `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
@@ -6511,9 +6512,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                             |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, isBigNumber, isFraction` |
+| Package                      | Import                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, isBigNumber, isComplex, isFraction` |
 
 **Internal Dependencies:**
 
@@ -20223,13 +20224,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                       |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                                      |
-| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                                              |
-| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                                        |
-| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse, transpose, bignumber` |
-| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                                          |
+| Package                           | Import                                                                                                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                                               |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                                                       |
+| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                                                 |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse, transpose, bignumber, complex` |
+| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                                                   |
 
 **Internal Dependencies:**
 
@@ -21716,7 +21717,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1348   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237379 |
+| Total Lines of Code     | 237666 |
 | Total Exports           | 7390   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

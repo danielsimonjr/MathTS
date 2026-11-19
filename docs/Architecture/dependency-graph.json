@@ -8213,6 +8213,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/string.js",
+            "imports": ["format"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation", "denseRightHandSide", "nonSquareSolveError"]
           },
@@ -17741,6 +17745,7 @@
               "Fraction",
               "BigNumber",
               "isBigNumber",
+              "isComplex",
               "isFraction"
             ]
           }
@@ -46713,7 +46718,8 @@
               "matrix",
               "sparse",
               "transpose",
-              "bignumber"
+              "bignumber",
+              "complex"
             ]
           },
           {
@@ -49777,7 +49783,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1348,
     "totalModules": 82,
-    "totalLinesOfCode": 237379,
+    "totalLinesOfCode": 237666,
     "totalExports": 7390,
     "totalClasses": 62,
     "totalInterfaces": 668,
