@@ -13484,7 +13484,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 374
+      "loc": 380
     },
     {
       "file": "functions/tests/typed-bridge.test.ts",
