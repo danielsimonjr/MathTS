@@ -25,6 +25,7 @@ interface Matrix {
   datatype(): string | undefined;
   size(): number[];
   clone(): Matrix;
+  resize(size: number[]): Matrix;
   toArray(): MatrixData;
   valueOf(): MatrixData;
   _data?: MatrixData;
@@ -132,8 +133,8 @@ export const createInv = /* #__PURE__ */ factory(
               }
             }
             if (size[0] === 0) {
-              // the inverse of the empty matrix is the empty matrix
-              return isMatrix(x) ? (x as Matrix).clone() : [];
+              // the inverse of the empty matrix is the 0 x 0 matrix, as lup gives (#1229)
+              return isMatrix(x) ? (x as Matrix).clone().resize([0, 0]) : [];
             }
             throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
 

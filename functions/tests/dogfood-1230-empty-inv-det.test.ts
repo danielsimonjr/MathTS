@@ -11,10 +11,12 @@ const dense00 = () => identity(0, 'dense');
 const squareRe = /Matrix must be square/;
 
 describe('#1230 identity of size 0', () => {
-  it('identity(0) is a 0 x 0 array', () => {
-    expect((identity(0) as Mat).size()).toEqual([0, 0]);
+  it('identity(0) is a 0 x 0 DenseMatrix', () => {
+    const r = identity(0) as Mat;
+    expect(r.storage()).toBe('dense');
+    expect(r.size()).toEqual([0, 0]);
   });
-  it('identity(0, 0) and identity([0, 0]) are 0 x 0 arrays', () => {
+  it('identity(0, 0) is a 0 x 0 DenseMatrix and identity([0, 0]) is []', () => {
     expect((identity(0, 0) as Mat).size()).toEqual([0, 0]);
     expect(identity([0, 0])).toEqual([]);
   });
@@ -42,20 +44,20 @@ describe('#1230 inv of a 0 x 0 input', () => {
   it('inv([]) is []', () => {
     expect(inv([])).toEqual([]);
   });
-  it('inv(matrix([])) is an empty Matrix of the same kind', () => {
+  it('inv(matrix([])) is a 0 x 0 Matrix of the same storage', () => {
     const r = inv(matrix([])) as Mat;
     expect(r.storage()).toBe('dense');
-    expect(r.size()).toEqual([0]);
+    expect(r.size()).toEqual([0, 0]);
   });
   it('inv of a 0 x 0 DenseMatrix is a 0 x 0 DenseMatrix', () => {
     const r = inv(dense00()) as Mat;
     expect(r.storage()).toBe('dense');
     expect(r.size()).toEqual([0, 0]);
   });
-  it('inv(sparse([])) is a SparseMatrix', () => {
+  it('inv(sparse([])) is a 0 x 0 SparseMatrix', () => {
     const r = inv(sparse([])) as Mat;
     expect(r.storage()).toBe('sparse');
-    expect(r.size()[0]).toBe(0);
+    expect(r.size()).toEqual([0, 0]);
   });
   it('inv of a non-square empty input throws the square error', () => {
     expect(() => inv([[]])).toThrow(squareRe);
