@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2532,
+  "totalFiles": 2534,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1321,
+    "build-entry": 1322,
     "test-only": 0,
     "orphan": 0,
-    "test": 1119,
+    "test": 1120,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1347,
-    "tests": 1119,
+    "src": 1348,
+    "tests": 1120,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 34,
+    "@danielsimonjr/mathts-compat": 36,
     "@danielsimonjr/mathts-core": 145,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
@@ -520,14 +520,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 613
+      "loc": 631
     },
     {
       "file": "compat/src/instance-api.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 126
+      "loc": 151
     },
     {
       "file": "compat/src/instance-layout.ts",
@@ -535,6 +535,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 93
+    },
+    {
+      "file": "compat/src/internal-names.generated.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 97
     },
     {
       "file": "compat/src/parity-names.generated.ts",
@@ -590,7 +597,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 227
+      "loc": 231
     },
     {
       "file": "compat/tests/cross-copy-matrix-shims-1041.test.ts",
@@ -689,6 +696,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 30
+    },
+    {
+      "file": "compat/tests/internal-names-1216.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 193
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -6785,7 +6799,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 623
+      "loc": 642
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -6799,7 +6813,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1294
+      "loc": 1306
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10768,7 +10782,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 65
+      "loc": 116
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
@@ -12105,7 +12119,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 48
+      "loc": 66
     },
     {
       "file": "functions/tests/integer-matrices.test.ts",
