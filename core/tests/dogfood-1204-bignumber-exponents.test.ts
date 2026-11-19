@@ -198,3 +198,64 @@ describe('#1204 item 3: exponent sums are exact', () => {
     expect(x.multiply(x).multiply(x).cbrt().toExponential()).toBe('3e+300000000');
   });
 });
+
+describe('#1204: the bounds apply to a result, not to the inner steps of a function', () => {
+  const functions: [string, (x: BigNumber) => BigNumber, string][] = [
+    ['exp', (x) => x.exp(), '10'],
+    ['exp', (x) => x.exp(), '-10'],
+    ['expm1', (x) => x.expm1(), '0.5'],
+    ['ln', (x) => x.ln(), '2'],
+    ['log10', (x) => x.log10(), '2'],
+    ['log1p', (x) => x.log1p(), '0.5'],
+    ['sin', (x) => x.sin(), '1'],
+    ['cos', (x) => x.cos(), '1'],
+    ['tan', (x) => x.tan(), '1'],
+    ['asin', (x) => x.asin(), '0.5'],
+    ['acos', (x) => x.acos(), '0.5'],
+    ['atan', (x) => x.atan(), '0.5'],
+    ['sinh', (x) => x.sinh(), '1'],
+    ['tanh', (x) => x.tanh(), '0.5'],
+    ['pow 0.5', (x) => x.pow(bn('0.5')), '2'],
+    ['sqrt', (x) => x.sqrt(), '2'],
+    ['cbrt', (x) => x.cbrt(), '2'],
+  ];
+
+  it.each(functions)('%s gives the same digits with bounds of +-5 (case %#)', (_name, f, arg) => {
+    const expected = f(bn(arg)).toString();
+    BigNumber.config({ maxExponent: 5, minExponent: -5 });
+    expect(f(bn(arg)).toString()).toBe(expected);
+  });
+
+  it('still applies the bounds to the result of a function', () => {
+    const inRange = bn('1000').pow(bn('1.5')).toString();
+    expect(inRange.slice(0, 20)).toBe('31622.77660168379331');
+    BigNumber.config({ maxExponent: 5, minExponent: -5 });
+    expect(bn('14').exp().toString()).toBe('Infinity'); // 1.2e6
+    expect(bn('-14').exp().toString()).toBe('0'); // 8.3e-7
+    expect(bn('0.000001').sin().toString()).toBe('0');
+    expect(bn('1000').pow(2).toString()).toBe('Infinity');
+    expect(bn('1000').pow(bn('1.5')).toString()).toBe(inRange);
+  });
+
+  it('keeps an integer power that is in range when the bounds are not symmetric', () => {
+    BigNumber.config({ maxExponent: 5, minExponent: -100 });
+    // The inner product 1000^3 is above maxExponent; the result 1e-9 is in range.
+    expect(bn('1000').pow(-3).toString()).toBe('0.000000001');
+    expect(bn('1000').pow(3).toString()).toBe('Infinity');
+  });
+
+  it('keeps a hypot that is in range when a square is not', () => {
+    BigNumber.config({ maxExponent: 100, minExponent: -100 });
+    expect(bn('3e-60').hypot(bn('4e-60')).toExponential()).toBe('5e-60');
+    expect(bn('3e60').hypot(bn('4e60')).toExponential()).toBe('5e+60');
+    expect(bn('3e100').hypot(bn('4e100')).toExponential()).toBe('5e+100');
+    expect(bn('6e100').hypot(bn('8e100')).toString()).toBe('Infinity');
+  });
+
+  it('does not keep a constant that a bound changed', () => {
+    BigNumber.config({ minExponent: 0, precision: 61 });
+    expect(BigNumber.ln2At().toString()).toBe('0'); // order -1 is below minExponent 0
+    BigNumber.config({ minExponent: -5 });
+    expect(BigNumber.ln2At().toString().slice(0, 12)).toBe('0.6931471805');
+  });
+});

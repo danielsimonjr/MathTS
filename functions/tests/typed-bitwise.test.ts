@@ -245,6 +245,13 @@ describe('Typed Bitwise Functions', () => {
   // ---------------------------------------------------------------------------
 
   describe('BigNumber scalar', () => {
+    it('takes an integer of 1000001 digits, which toString writes as 1e+1000000 (#1204)', () => {
+      const x = BigNumber.parse('1e1000000');
+      expect(x.toString()).toBe('1e+1000000');
+      expect((bitAnd(x, x) as BigNumber).equals(x)).toBe(true);
+      expect((bitOr(x, bn(1)) as BigNumber).toBigInt() === 10n ** 1000000n + 1n).toBe(true);
+    });
+
     const bn = (n: number | string): BigNumber =>
       typeof n === 'number' ? BigNumber.fromNumber(n) : BigNumber.parse(n);
 

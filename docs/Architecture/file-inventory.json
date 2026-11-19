@@ -982,7 +982,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2339
+      "loc": 2370
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1269,7 +1269,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 201
+      "loc": 262
     },
     {
       "file": "core/tests/dogfood-a1-stable-non-array.test.ts",
@@ -13484,7 +13484,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 367
+      "loc": 374
     },
     {
       "file": "functions/tests/typed-bridge.test.ts",

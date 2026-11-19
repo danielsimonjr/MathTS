@@ -259,6 +259,13 @@ function checkExponentSetting(name: string, value: number, low: number, high: nu
 let globalConfig: BigNumberConfig = { ...defaultConfig };
 
 /**
+ * The widest exponent bounds. A function runs its inner steps with these bounds, so an inner step
+ * does not overflow or underflow at a configured bound. The function then applies the configured
+ * bounds to its result (#1204).
+ */
+const WIDEST_BOUNDS = { minExponent: -EXPONENT_LIMIT, maxExponent: EXPONENT_LIMIT } as const;
+
+/**
  * Distinguishes internal `(sign, coefficient, exponent)` construction from a
  * user call. A second numeric argument (`new BigNumber(1, 2)`) must not be
  * treated as a coefficient — decimal.js uses that slot as a radix, and this
@@ -1069,7 +1076,8 @@ export class BigNumber implements MathTSValue {
     const precision = globalConfig.precision;
     const saved = globalConfig;
     const extra = GUARD_DIGITS + String(Math.abs(exp)).length;
-    globalConfig = { ...saved, precision: precision + extra };
+    globalConfig = { ...saved, ...WIDEST_BOUNDS, precision: precision + extra };
+    let power: BigNumber;
     try {
       let result = BigNumber.fromNumber(1);
       let base: BigNumber = this.clone();
@@ -1082,10 +1090,11 @@ export class BigNumber implements MathTSValue {
         if (e > 0) base = base.multiply(base);
       }
       if (exp < 0) result = BigNumber.fromNumber(1).divide(result);
-      return result.roundToPrecision(precision, saved.rounding);
+      power = result.roundToPrecision(precision, saved.rounding);
     } finally {
       globalConfig = saved;
     }
+    return power.clone();
   }
 
   /** `this ** y` for a non-integer or infinite `y`: `exp(y * ln(this))` with guard digits. */
@@ -1108,20 +1117,24 @@ export class BigNumber implements MathTSValue {
   /**
    * Runs `compute` with GUARD_DIGITS more significant digits, then rounds its result to the
    * configured precision, so the rounding error of each inner step stays below the last digit
-   * (#1043). A nested call (atan2 calls atan) runs at the precision already raised.
+   * (#1043). A nested call (atan2 calls atan) runs at the precision already raised. The inner
+   * steps run with the widest exponent bounds, and `clone` applies the configured bounds to the
+   * result (#1204).
    */
   #guarded(compute: () => BigNumber): BigNumber {
     if (guardDepth > 0) return compute();
     const precision = globalConfig.precision;
     const saved = globalConfig;
-    globalConfig = { ...saved, precision: precision + GUARD_DIGITS };
+    globalConfig = { ...saved, ...WIDEST_BOUNDS, precision: precision + GUARD_DIGITS };
     guardDepth++;
+    let result: BigNumber;
     try {
-      return compute().roundToPrecision(precision);
+      result = compute().roundToPrecision(precision);
     } finally {
       guardDepth--;
       globalConfig = saved;
     }
+    return result.clone();
   }
 
   /**
@@ -1323,14 +1336,22 @@ export class BigNumber implements MathTSValue {
   /** A constant from a fixed-point series: `series(scale)` gives the value times `scale`. */
   static #constant(name: string, precision: number, series: (scale: bigint) => bigint): BigNumber {
     const key = `${name}:${precision}`;
+    // The cache holds the value with no bound applied; `clone` applies the configured bounds.
     const hit = BigNumber.#constantCache.get(key);
-    if (hit) return hit;
+    if (hit) return hit.clone();
     const digits = precision + CONSTANT_GUARD_DIGITS;
-    const value = BigNumber.#allocate(1, series(10n ** BigInt(digits)), -digits).roundToPrecision(
-      precision
-    );
+    const saved = globalConfig;
+    globalConfig = { ...saved, ...WIDEST_BOUNDS };
+    let value: BigNumber;
+    try {
+      value = BigNumber.#allocate(1, series(10n ** BigInt(digits)), -digits).roundToPrecision(
+        precision
+      );
+    } finally {
+      globalConfig = saved;
+    }
     BigNumber.#constantCache.set(key, value);
-    return value;
+    return value.clone();
   }
 
   /** π to `precision` digits (Machin: 16·atan(1/5) − 4·atan(1/239)). */
@@ -2094,7 +2115,17 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN || other._isNaN) return BigNumber.#allocate(0, 0n, 0, true);
     if (this._isInfinite || other._isInfinite) return BigNumber.#allocate(1, 0n, 0, false, true);
 
-    return this.multiply(this).add(other.multiply(other)).sqrt();
+    // The squares run with the widest exponent bounds: a square can be out of range when the
+    // result is in range (#1204).
+    const saved = globalConfig;
+    globalConfig = { ...saved, ...WIDEST_BOUNDS };
+    let result: BigNumber;
+    try {
+      result = this.multiply(this).add(other.multiply(other)).sqrt();
+    } finally {
+      globalConfig = saved;
+    }
+    return result.clone();
   }
 
   // ============================================================
