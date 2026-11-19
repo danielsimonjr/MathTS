@@ -332,19 +332,21 @@ export function hessenbergForm(A: number[][]): HessenbergResult {
 
     // Compute Householder vector
     const len = x.length;
+    // Build the vector from x / max|x|. The reflector does not change, the squares
+    // cannot overflow or underflow, and no absolute threshold skips a small column
+    // (#1199). Only an exact zero column skips. A NaN or an infinity propagates.
+    let m = 0;
+    for (let i = 0; i < len; i++) m = Math.max(m, Math.abs(x[i]));
+    if (m === 0) continue;
+    const v = x.map((t) => t / m);
     let normX = 0;
-    for (let i = 0; i < len; i++) normX += x[i] * x[i];
+    for (let i = 0; i < len; i++) normX += v[i] * v[i];
     normX = Math.sqrt(normX);
+    v[0] += (v[0] >= 0 ? 1 : -1) * normX;
 
-    if (normX < 1e-15) continue;
-
-    const sign = x[0] >= 0 ? 1 : -1;
-    const v = x.slice();
-    v[0] += sign * normX;
-
+    // normV >= 1 because |v[0]| >= normX >= 1.
     let normV = 0;
     for (let i = 0; i < len; i++) normV += v[i] * v[i];
-    if (normV < 1e-30) continue;
     const beta = 2.0 / normV;
 
     // Apply P*H (left multiplication): H[k+1:n, k:n] -= beta * v * (v^T * H[k+1:n, k:n])
