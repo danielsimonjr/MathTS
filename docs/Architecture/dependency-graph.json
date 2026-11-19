@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-19",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7395
+    "totalExports": 7396
   },
   "entryPoints": [
     {
@@ -23774,7 +23774,7 @@
           },
           {
             "file": "./utils/scaledStd.js",
-            "imports": ["normalizationDivisor", "scaledStd"]
+            "imports": ["normalizationDivisor", "pickScaledStd", "scaledStd"]
           },
           {
             "file": "../core/function/typed.js",
@@ -23864,7 +23864,7 @@
         "internalDependencies": [
           {
             "file": "../../utils/real-scale.js",
-            "imports": ["realScale"]
+            "imports": ["realScale", "squaresLeaveRange"]
           }
         ],
         "workspaceDependencies": [
@@ -23874,8 +23874,8 @@
             "imports": ["BigNumber"]
           }
         ],
-        "exports": ["scaledStd", "normalizationDivisor"],
-        "functions": ["scaledStd", "normalizationDivisor"]
+        "exports": ["scaledStd", "normalizationDivisor", "pickScaledStd"],
+        "functions": ["scaledStd", "normalizationDivisor", "pickScaledStd"]
       },
       "functions/src/statistics/variance.ts": {
         "description": "Check if an array is a flat array of plain numbers",
@@ -26459,7 +26459,7 @@
           },
           {
             "file": "../statistics/utils/scaledStd.js",
-            "imports": ["normalizationDivisor", "scaledStd"]
+            "imports": ["normalizationDivisor", "pickScaledStd", "scaledStd"]
           },
           {
             "file": "../statistics/numeric-data.js",
@@ -49851,11 +49851,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 237645,
-    "totalExports": 7395,
+    "totalLinesOfCode": 237779,
+    "totalExports": 7396,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2578,
+    "totalFunctions": 2579,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1694,

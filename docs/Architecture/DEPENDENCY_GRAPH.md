@@ -10230,14 +10230,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                           | Type               |
-| --------------------------- | --------------------------------- | ------------------ |
-| `../utils/factory.js`       | `factory`                         | Import             |
-| `../utils/is.js`            | `isBigNumber, isCollection`       | Import             |
-| `../utils/collection.js`    | `deepForEach`                     | Import             |
-| `../utils/real-scale.js`    | `isDegenerate`                    | Import             |
-| `./utils/scaledStd.js`      | `normalizationDivisor, scaledStd` | Import             |
-| `../core/function/typed.js` | `TypedFunction`                   | Import (type-only) |
+| File                        | Imports                                          | Type               |
+| --------------------------- | ------------------------------------------------ | ------------------ |
+| `../utils/factory.js`       | `factory`                                        | Import             |
+| `../utils/is.js`            | `isBigNumber, isCollection`                      | Import             |
+| `../utils/collection.js`    | `deepForEach`                                    | Import             |
+| `../utils/real-scale.js`    | `isDegenerate`                                   | Import             |
+| `./utils/scaledStd.js`      | `normalizationDivisor, pickScaledStd, scaledStd` | Import             |
+| `../core/function/typed.js` | `TypedFunction`                                  | Import (type-only) |
 
 **Exports:**
 
@@ -10308,13 +10308,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports     | Type   |
-| --------------------------- | ----------- | ------ |
-| `../../utils/real-scale.js` | `realScale` | Import |
+| File                        | Imports                        | Type   |
+| --------------------------- | ------------------------------ | ------ |
+| `../../utils/real-scale.js` | `realScale, squaresLeaveRange` | Import |
 
 **Exports:**
 
-- Functions: `scaledStd`, `normalizationDivisor`
+- Functions: `scaledStd`, `normalizationDivisor`, `pickScaledStd`
 
 ---
 
@@ -11760,7 +11760,7 @@ graph LR
 | `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
 | `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection`                                                                                                                                                                                  | Import             |
 | `../utils/real-scale.js`               | `isDegenerate`                                                                                                                                                                                                                                | Import             |
-| `../statistics/utils/scaledStd.js`     | `normalizationDivisor, scaledStd`                                                                                                                                                                                                             | Import             |
+| `../statistics/utils/scaledStd.js`     | `normalizationDivisor, pickScaledStd, scaledStd`                                                                                                                                                                                              | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
@@ -21760,12 +21760,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 237645 |
-| Total Exports           | 7395   |
+| Total Lines of Code     | 237779 |
+| Total Exports           | 7396   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2578   |
+| Total Functions         | 2579   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -3611,6 +3611,7 @@
       "pi",
       "pick",
       "pickRandom",
+      "pickScaledStd",
       "pickShallow",
       "piecewise",
       "pinv",
