@@ -17,7 +17,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
-import { ldexp, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED } from './common.js';
+import { ldexp, scaleDense, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED } from './common.js';
 
 /**
  * Result of `qr`: the factors Q and R, where A = Q · R.
@@ -74,14 +74,7 @@ export function qr(A: DecompositionMatrixInput, opts?: QROptions): QRResult {
       n,
       mode
     );
-    return {
-      Q: r.Q,
-      R: new DenseMatrix(
-        r.R.rows,
-        n,
-        r.R.toFloat64Array().map((v) => ldexp(v, -e))
-      ),
-    };
+    return { Q: r.Q, R: scaleDense(r.R, -e) };
   });
 }
 

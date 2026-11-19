@@ -8,7 +8,6 @@ import {
   SQUARED,
   entryRange,
   ldexp,
-  ldexpMatrix,
   withPow2Scale,
 } from '@danielsimonjr/mathts-core/internal';
 
@@ -609,23 +608,14 @@ export const createQr = /* #__PURE__ */ factory(
       }
       const data = src._data as unknown[][];
       if (data.length === 0) return _denseQRimpl(src, true);
-      if (matrixAllNumbers(data)) {
-        return withPow2Scale(entryRange(data as number[][]), UNIT_FLOOR_LO, SQUARED, (e) => {
-          if (e === 0) return _denseQRimpl(src, true);
-          const scaled = src.clone();
-          ldexpMatrix(scaled._data as number[][], e);
-          const ret = _denseQRimpl(scaled, true);
-          ldexpMatrix(ret.R._data as number[][], -e);
-          return ret;
-        });
-      }
-      const parts = complexParts(data);
+      const real = matrixAllNumbers(data);
+      const parts = real ? (data as number[][]) : complexParts(data);
       if (parts === null) return _denseQRimpl(src, false);
       return withPow2Scale(entryRange(parts), UNIT_FLOOR_LO, SQUARED, (e) => {
-        if (e === 0) return _denseQRimpl(src, false);
+        if (e === 0) return _denseQRimpl(src, real);
         const scaled = src.clone();
         ldexpEntries(scaled._data as unknown[][], e);
-        const ret = _denseQRimpl(scaled, false);
+        const ret = _denseQRimpl(scaled, real);
         ldexpEntries(ret.R._data as unknown[][], -e);
         return ret;
       });
