@@ -141,7 +141,8 @@ export const createSlu = /* #__PURE__ */ factory(
      *
      *    lup, lsolve, usolve, lusolve
      *
-     * @param {SparseMatrix} A              A two dimensional sparse matrix for which to get the LU decomposition.
+     * @param {SparseMatrix} A              A square two dimensional sparse matrix for which to get the LU decomposition.
+     *                                       A non-square matrix throws a RangeError; use lup for a rectangular matrix.
      * @param {Number}       order          The Symbolic Ordering and Analysis order:
      *                                       0 - Natural ordering, no permutation vector q is returned
      *                                       1 - Matrix must be square, symbolic ordering and analisis is performed on M = A + A'
@@ -151,6 +152,7 @@ export const createSlu = /* #__PURE__ */ factory(
      *                                           A dense row is a row with more than 10*sqr(columns) entries.
      * @param {Number}       threshold       Partial pivoting threshold (1 for partial pivoting)
      *
+     * @throws {RangeError} When A is not square.
      * @return {Object} The lower triangular matrix, the upper triangular matrix and the permutation vectors.
      */
     return typed(name, {
@@ -183,6 +185,12 @@ export const createSlu = /* #__PURE__ */ factory(
             identityPermutation(rows),
             order === 0 ? null : identityPermutation(cols)
           );
+        }
+
+        // The CSparse LU is square-only: a rectangular input gets the same RangeError as
+        // lusolve, det and inv, not an internal TypeError. Use lup for a rectangular input.
+        if (rows !== cols) {
+          throw new RangeError('Matrix must be square (size: [' + rows + ', ' + cols + '])');
         }
 
         // perform symbolic ordering and analysis
