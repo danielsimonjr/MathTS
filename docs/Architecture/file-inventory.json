@@ -625,7 +625,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 100
+      "loc": 168
     },
     {
       "file": "compat/tests/dogfood-955-unit-paths.test.ts",

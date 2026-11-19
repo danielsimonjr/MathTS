@@ -32,10 +32,10 @@ describe('compat import(instance) (#1222)', () => {
 
   it('leaves the target unchanged after the throw', () => {
     const m2 = create({});
+    const before = Object.keys(m2);
     expect(() => m2.import(create(all))).toThrow(MSG);
-    const before = Object.keys(m2).length;
-    expect(() => m2.import(create(all))).toThrow(MSG);
-    expect(Object.keys(m2).length).toBe(before);
+    expect(() => m2.import({ inner: create(all) }, { override: true })).toThrow(MSG);
+    expect(Object.keys(m2)).toEqual(before);
   });
 
   it('still imports a plain object, an array and a function', () => {
@@ -94,6 +94,74 @@ describe('compat import(instance) (#1222)', () => {
     } catch {
       /* the import result is not under test */
     }
+    expect(mainReads).toBe(1);
     expect(reads).toBe(mainReads);
+  });
+
+  it('keeps the brand out of the enumerable surface', () => {
+    const brand = Symbol.for('mathts.compat.instance');
+    for (const m of [create(all), create({})]) {
+      const names: PropertyKey[] = [];
+      for (const key in m) names.push(key);
+      expect(names).not.toContain(brand);
+      expect(Reflect.ownKeys({ ...m })).not.toContain(brand);
+      expect(Object.getOwnPropertySymbols(Object.assign({}, m))).toEqual([]);
+      const holder = Object.getOwnPropertySymbols(m).includes(brand) ? m : Object.getPrototypeOf(m);
+      expect(Object.getOwnPropertyDescriptor(holder, brand)).toEqual({
+        value: true,
+        writable: false,
+        enumerable: false,
+        configurable: false,
+      });
+    }
+    expect(Object.getOwnPropertySymbols(create(all))).toEqual([]);
+    expect(Object.getOwnPropertySymbols(Object.prototype)).not.toContain(brand);
+    expect(
+      JSON.stringify(create({}), (_k, v: unknown) => (typeof v === 'function' ? undefined : v))
+    ).not.toContain('mathts.compat.instance');
+  });
+
+  it('does not take a parser, a chain, a frozen or a cyclic object for an instance', () => {
+    const m = create(all);
+    const notInstance = (fn: () => void): void => {
+      try {
+        fn();
+      } catch (error) {
+        expect((error as Error).message).not.toMatch(MSG);
+      }
+    };
+    notInstance(() => m.import(m.parser()));
+    notInstance(() => m.import({ p: m.parser() }, { silent: true }));
+    notInstance(() => m.import(m.chain(1)));
+    notInstance(() => m.import({ c: m.chain(1) }, { silent: true }));
+    m.import(Object.freeze({ frozen1222: (x: number) => x + 1 }));
+    expect((m as unknown as Record<string, (x: number) => number>).frozen1222(1)).toBe(2);
+    expect(() => m.import(Object.freeze(create({})))).toThrow(MSG);
+    // The check stops at an object that it has seen; the importer of mathjs does not.
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    notInstance(() => m.import(cyclic, { silent: true }));
+    expect(() => m.import({ cyclic, inst: create({}) })).toThrow(MSG);
+  });
+
+  it('runs no get trap of a Proxy in the check, and a revoked Proxy throws a TypeError', () => {
+    const traps: string[] = [];
+    const handler = new Proxy(
+      {},
+      {
+        get(_target, trap) {
+          traps.push(String(trap));
+          return undefined;
+        },
+      }
+    );
+    const proxied = new Proxy({ inst: create({}) }, handler);
+    expect(() => create(all).import(proxied)).toThrow(MSG);
+    expect(traps).not.toContain('get');
+    expect(() => create(all).import(new Proxy(create(all), {}))).toThrow(MSG);
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(() => create(all).import(proxy)).toThrow(TypeError);
+    expect(() => create(all).import([proxy], { silent: true })).toThrow(TypeError);
   });
 });
