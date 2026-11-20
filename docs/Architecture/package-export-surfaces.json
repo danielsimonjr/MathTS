@@ -3351,6 +3351,7 @@
       "max",
       "MAX_ALLOC_ELEMENTS",
       "MAX_BESSEL_J_SWEEP",
+      "MAX_CHEBYSHEV_ORDER",
       "MAX_EXPN_ORDER",
       "MAX_FERRERS_ORDER",
       "MAX_GEGENBAUER_ORDER",

@@ -6,7 +6,8 @@
  * (or throwing) inside the default test timeout.
  */
 import { describe, it, expect } from 'vitest';
-import { besselJ, besselY, chebyshevT } from '../src/typed/special.js';
+import { besselJ, besselY, chebyshevT, laguerreL, legendreP } from '../src/typed/special.js';
+import { MAX_CHEBYSHEV_ORDER } from '../src/utils/limits.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
 import { besselYnJS } from '../src/wasm/special/wasm-bridge.js';
 import {
@@ -198,5 +199,56 @@ describe('#1132 besselJ and besselY: one work bound per array call', () => {
   it('a total below the maximum passes: besselJ(2, 1e6 elements) runs', () => {
     const r = besselJ(2, fill(1_000_000, 0.5)) as Float64Array;
     expect(r.length).toBe(1_000_000);
+  });
+});
+
+describe('#1290 chebyshevT, legendreP and laguerreL: one work bound per array call', () => {
+  const fill = (len: number, v: number) => new Float64Array(len).fill(v);
+
+  it('chebyshevT(2e9, 4 elements at 0.5) throws a RangeError about the per-call bound', () => {
+    expect(() => chebyshevT(2e9, fill(4, 0.5))).toThrow(RangeError);
+    expect(() => chebyshevT(2e9, fill(4, 0.5))).toThrow(/per call/);
+  });
+  it('legendreP(1.3e9, 2 elements at 0.5) throws a RangeError about the per-call bound', () => {
+    expect(() => legendreP(1.3e9, fill(2, 0.5))).toThrow(
+      /legendreP: order 1300000000 over 2 elements/
+    );
+  });
+  it('laguerreL(6e8, 2 elements at 0.5) throws a RangeError about the per-call bound', () => {
+    expect(() => laguerreL(6e8, fill(2, 0.5))).toThrow(
+      /laguerreL: order 600000000 over 2 elements/
+    );
+  });
+  it('chebyshevT(3e9, 1000 elements at 1.5) is Infinity for every element (overflow exit)', () => {
+    const r = chebyshevT(3e9, fill(1000, 1.5)) as Float64Array;
+    expect(r.every((v) => v === Infinity)).toBe(true);
+  });
+  it('chebyshevT(3e9, [1.5, -1.5]) is Infinity for both (an even order)', () => {
+    const r = chebyshevT(3e9, new Float64Array([1.5, -1.5])) as Float64Array;
+    expect(Array.from(r)).toEqual([Infinity, Infinity]);
+  });
+  it('legendreP(2e9, 4 elements at 1.5) ends at the first overflow and does not throw', () => {
+    const r = legendreP(2e9, fill(4, 1.5)) as Float64Array;
+    expect(r.length).toBe(4);
+    expect(r.every((v) => !Number.isFinite(v))).toBe(true);
+  });
+  it('legendreP(1e6, [0.3, 0.4]) equals the two scalars', () => {
+    const r = legendreP(1e6, new Float64Array([0.3, 0.4])) as Float64Array;
+    expect(Array.from(r)).toEqual([legendreP(1e6, 0.3), legendreP(1e6, 0.4)]);
+  });
+  it('chebyshevT(1000, 1000 elements at 0.5) is -0.5 for every element (1e6 steps, no scan)', () => {
+    const r = chebyshevT(1000, fill(1000, 0.5)) as Float64Array;
+    expect(r.every((v) => Math.abs(v + 0.5) < 1e-12)).toBe(true);
+  });
+  it('a NaN element counts no steps: chebyshevT(3e9, 4 NaN elements) is NaN', () => {
+    const r = chebyshevT(3e9, fill(4, NaN)) as Float64Array;
+    expect(r.every((v) => Number.isNaN(v))).toBe(true);
+  });
+  it('an order above the scalar limit keeps the message of the scalar', () => {
+    expect(() => chebyshevT(5e9, fill(2, 0.5))).toThrow(/chebyshevT: n = 5000000000 exceeds/);
+    expect(() => laguerreL(2e9, fill(2, 0.5))).toThrow(/laguerreL: n = 2000000000 exceeds/);
+  });
+  it('the chebyshevT worker kernel carries the limit of utils/limits.ts', () => {
+    expect(workerKernel('chebyshevT', 5)).toContain(String(MAX_CHEBYSHEV_ORDER));
   });
 });

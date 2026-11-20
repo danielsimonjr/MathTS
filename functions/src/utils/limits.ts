@@ -47,6 +47,12 @@ export const MAX_EXPN_ORDER = 1_200_000_000;
 export const MAX_LAGUERRE_ORDER = 1_000_000_000;
 
 /**
+ * Maximum degree for `chebyshevT` (n = 3.5e9 took 17.5 s). The scalar is serialized
+ * into worker kernels, so `chebyshevTScalar` repeats this value as a literal.
+ */
+export const MAX_CHEBYSHEV_ORDER = 4_000_000_000;
+
+/**
  * Maximum `n` and `max(n, |x|)` for the spherical Bessel functions. The old build ran
  * `sphericalBesselY(1.5e9, 2e9)` in 15.9 s at 31% load, so 1.8e9 is near its 20 s point.
  */

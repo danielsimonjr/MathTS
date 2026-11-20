@@ -12784,6 +12784,7 @@ graph LR
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Import |
 | `./f64-kernels.js`                   | `f64Unary`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Import |
 | `./parallel-map.js`                  | `kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import |
+| `../utils/limits.js`                 | `MAX_CHEBYSHEV_ORDER, MAX_LAGUERRE_ORDER, MAX_RECURRENCE_ORDER, assertArrayWork`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import |
 | `./worker-kernels.js`                | `numberLiteral, registerWorkerKernels`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import |
 | `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, factorial, upperGammaQ, incompleteBetaFraction, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, erfcScalar, betaScalar, gammaincScalar, gammaincpScalar, betaincScalar, besselIScalar, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                     | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, assertBesselArrayWork, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
@@ -13359,7 +13360,7 @@ graph LR
 **Exports:**
 
 - Functions: `assertAllocSize`, `assertArrayWork`, `assertLoopOrder`
-- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`
 
 ---
 
@@ -20925,7 +20926,7 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
-| `functions/src/utils/limits`                           | 0 files      | 43 files   |
+| `functions/src/utils/limits`                           | 0 files      | 44 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21854,8 +21855,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 241796 |
-| Total Exports           | 7428   |
+| Total Lines of Code     | 241863 |
+| Total Exports           | 7429   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 63     |
 | Total Interfaces        | 675    |

@@ -1850,6 +1850,7 @@
       "functions/src/typed/integration.ts",
       "functions/src/typed/probability.ts",
       "functions/src/typed/signal.ts",
+      "functions/src/typed/special.ts",
       "functions/src/typed/statistics.ts",
       "functions/src/utils/print.ts",
       "functions/src/wasm/special/wasm-bridge.ts"

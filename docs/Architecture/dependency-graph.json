@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1353,
     "totalModules": 82,
-    "totalExports": 7428
+    "totalExports": 7429
   },
   "entryPoints": [
     {
@@ -29899,6 +29899,15 @@
             "imports": ["kernelSource"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": [
+              "MAX_CHEBYSHEV_ORDER",
+              "MAX_LAGUERRE_ORDER",
+              "MAX_RECURRENCE_ORDER",
+              "assertArrayWork"
+            ]
+          },
+          {
             "file": "./worker-kernels.js",
             "imports": ["numberLiteral", "registerWorkerKernels"]
           },
@@ -31222,6 +31231,7 @@
           "MAX_FERRERS_ORDER",
           "MAX_EXPN_ORDER",
           "MAX_LAGUERRE_ORDER",
+          "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
           "MAX_BESSEL_J_SWEEP",
           "assertAllocSize",
@@ -31238,6 +31248,7 @@
           "MAX_FERRERS_ORDER",
           "MAX_EXPN_ORDER",
           "MAX_LAGUERRE_ORDER",
+          "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
           "MAX_BESSEL_J_SWEEP"
         ]
@@ -50172,14 +50183,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1353,
     "totalModules": 82,
-    "totalLinesOfCode": 241796,
-    "totalExports": 7428,
+    "totalLinesOfCode": 241863,
+    "totalExports": 7429,
     "totalClasses": 63,
     "totalInterfaces": 675,
     "totalFunctions": 2611,
     "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1697,
+    "totalConstants": 1698,
     "totalReExports": 3194,
     "totalTypeOnlyImports": 686,
     "runtimeCircularDeps": 2,
