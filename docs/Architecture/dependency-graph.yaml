@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7397
+  totalExports: 7399
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15512,6 +15512,7 @@ modules:
             - acceleratedDet
             - acceleratedInv
             - correctEigs
+            - correctEigsOfMatrix
         - file: ../matrix/reshape.js
           imports:
             - createReshape
@@ -17824,7 +17825,7 @@ modules:
       functions:
         - createRealSymmetric
     functions/src/matrix/eigs.ts:
-      description: Compute eigenvalues and optionally eigenvectors of a square matrix.
+      description: 'Add the property `vectors` to an eigs result: it throws, because the name was replaced by'
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -17860,6 +17861,9 @@ modules:
       workspaceDependencies: []
       exports:
         - createEigs
+        - defineRemovedVectorsGetter
+      functions:
+        - defineRemovedVectorsGetter
       constants:
         - createEigs
     functions/src/matrix/fft.ts:
@@ -18223,7 +18227,10 @@ modules:
       description: Native-accelerated fast paths for matrix factory functions.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./eigs.js
+          imports:
+            - defineRemovedVectorsGetter
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -18242,12 +18249,14 @@ modules:
         - acceleratedInv
         - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       functions:
         - isLargeNumericSquare
         - acceleratedDet
         - acceleratedInv
         - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       constants:
         - NATIVE_MATRIX_THRESHOLD
     functions/src/matrix/ones.ts:
@@ -47041,11 +47050,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238615
-  totalExports: 7397
+  totalLinesOfCode: 238693
+  totalExports: 7399
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2579
+  totalFunctions: 2581
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695

@@ -2622,7 +2622,10 @@
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
-    "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
+    "functions/src/matrix/eigs.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/matrix/native-accel.ts"
+    ],
     "functions/src/algebra/solver/lusolve.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/corr.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/mad.ts": ["functions/src/factories/index.ts"],

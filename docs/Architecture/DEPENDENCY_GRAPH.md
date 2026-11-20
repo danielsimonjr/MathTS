@@ -6336,7 +6336,7 @@ graph LR
 | `../matrix/count.js`                     | `createCount`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../matrix/trace.js`                     | `createTrace`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../matrix/det.js`                       | `createDet`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
-| `../matrix/native-accel.js`              | `acceleratedDet, acceleratedInv, correctEigs`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
+| `../matrix/native-accel.js`              | `acceleratedDet, acceleratedInv, correctEigs, correctEigsOfMatrix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import                |
 | `../matrix/reshape.js`                   | `createReshape`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../algebra/sparse/csAmd.js`             | `createCsAmd`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../algebra/sparse/csCounts.js`          | `createCsCounts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import                |
@@ -7287,7 +7287,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs.ts` - Compute eigenvalues and optionally eigenvectors of a square matrix.
+### `functions/src/matrix/eigs.ts` - Add the property `vectors` to an eigs result: it throws, because the name was replaced by
 
 **External Dependencies:**
 
@@ -7309,6 +7309,7 @@ graph LR
 
 **Exports:**
 
+- Functions: `defineRemovedVectorsGetter`
 - Constants: `createEigs`
 
 ---
@@ -7590,9 +7591,15 @@ graph LR
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, eig` |
 | `@danielsimonjr/mathts-core`   | `Complex`              |
 
+**Internal Dependencies:**
+
+| File        | Imports                      | Type   |
+| ----------- | ---------------------------- | ------ |
+| `./eigs.js` | `defineRemovedVectorsGetter` | Import |
+
 **Exports:**
 
-- Functions: `isLargeNumericSquare`, `acceleratedDet`, `acceleratedInv`, `isNumericSquare`, `correctEigs`
+- Functions: `isLargeNumericSquare`, `acceleratedDet`, `acceleratedInv`, `isNumericSquare`, `correctEigs`, `correctEigsOfMatrix`
 - Constants: `NATIVE_MATRIX_THRESHOLD`
 
 ---
@@ -21769,12 +21776,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238615 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238693 |
+| Total Exports           | 7399   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Functions         | 2581   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7397, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7399, "re": 3191 },
   "s": {
-    "loc": 238615,
+    "loc": 238693,
     "cls": 62,
     "int": 669,
-    "fn": 2579,
+    "fn": 2581,
     "tg": 184,
     "en": 0,
     "co": 1695,
@@ -779,12 +779,12 @@
         "createComplexEigs",
         "createRealSymmetric",
         "createEigs",
+        "defineRemovedVectorsGetter",
         "createFft",
         "createFilter",
         "createFlatten",
         "createForEach",
-        "sparseMatrixFromVectors",
-        "vectorLength"
+        "sparseMatrixFromVectors"
       ],
       "int": [
         "Matrix",

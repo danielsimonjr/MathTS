@@ -18,6 +18,7 @@
  */
 import { DenseMatrix, lu, eig } from '@danielsimonjr/mathts-matrix';
 import { Complex } from '@danielsimonjr/mathts-core';
+import { defineRemovedVectorsGetter } from './eigs.js';
 
 /** Below this dimension the factory path is already sub-millisecond; native
  *  conversion overhead isn't worth it and the well-tested factory path runs. */
@@ -244,27 +245,37 @@ function independentMembers(
   return chosen;
 }
 
+/** The result of the native eigs: the values, and one pair per independent eigenvector. */
+interface NativeEigs {
+  values: Array<number | Complex>;
+  eigenvectors?: Array<{ value: number | Complex; vector: Array<number | Complex> }>;
+}
+
+/** The options of the public `eigs` that the native path reads. */
+type EigsOptions = { eigenvectors?: boolean; matricize?: boolean };
+
+const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
+const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
+
 /**
- * Correct eigendecomposition for the public `eigs`.
- *
- * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
- * non-symmetric matrix — even trivial upper-triangular ones, whose eigenvalues
- * are just the diagonal (e.g. [[2,1,0],[0,3,1],[0,0,4]] → [1.27, 3, 4.73]). The
- * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
- * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
- * numeric square matrices through it and emit the factory's `{ values,
- * eigenvectors }` shape. Non-(numeric square) inputs and any native error
- * other than a RangeError fall back to the factory; a RangeError from the native
- * solver propagates (a non-finite entry, a non-finite eigenvalue, no convergence).
+ * The order of the values of the factory `eigs`: the absolute value ascending, then the real part
+ * descending, then the imaginary part descending. A Matrix result keeps it (#1179).
  */
-export function correctEigs(
-  a: unknown,
-  options: { eigenvectors?: boolean } | undefined,
-  factoryEigs: (m: unknown, o?: unknown) => unknown
-): unknown {
-  const toFactory = (): unknown =>
-    options === undefined ? factoryEigs(a) : factoryEigs(a, options);
-  if (!isNumericSquare(a)) return toFactory();
+function compareFactoryOrder(p: number | Complex, q: number | Complex): number {
+  return (
+    Math.hypot(reOf(p), imOf(p)) - Math.hypot(reOf(q), imOf(q)) ||
+    reOf(q) - reOf(p) ||
+    imOf(q) - imOf(p)
+  );
+}
+
+/**
+ * Eigendecomposition of a numeric square matrix by the native orthes/hqr2 solver, in the shape of
+ * the factory `eigs`. Returns `undefined` for any native error other than a RangeError (the caller
+ * falls back to the factory); a RangeError from the native solver propagates (a non-finite entry, a
+ * non-finite eigenvalue, no convergence).
+ */
+function nativeEigs(a: number[][], options: EigsOptions | undefined): NativeEigs | undefined {
   const wantVectors = options?.eigenvectors !== false;
   try {
     const ne = eig(a, { computeVectors: wantVectors });
@@ -303,8 +314,6 @@ export function correctEigs(
       vector: wantVectors ? vectorOf(v, i) : [],
       i,
     }));
-    const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
-    const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
     all.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
     const values = all.map((p) => p.value);
     const pairs = all.filter((p) => keep.has(p.i));
@@ -313,6 +322,57 @@ export function correctEigs(
       : { values };
   } catch (e) {
     if (e instanceof RangeError) throw e;
-    return toFactory();
+    return undefined;
   }
+}
+
+/**
+ * Correct eigendecomposition for the public `eigs`.
+ *
+ * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
+ * non-symmetric matrix — even trivial upper-triangular ones, whose eigenvalues
+ * are just the diagonal (e.g. [[2,1,0],[0,3,1],[0,0,4]] → [1.27, 3, 4.73]). The
+ * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
+ * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
+ * numeric square matrices through it and emit the factory's `{ values,
+ * eigenvectors }` shape. Non-(numeric square) inputs and any native error
+ * other than a RangeError fall back to the factory; a RangeError from the native
+ * solver propagates (a non-finite entry, a non-finite eigenvalue, no convergence).
+ */
+export function correctEigs(
+  a: unknown,
+  options: EigsOptions | undefined,
+  factoryEigs: (m: unknown, o?: unknown) => unknown
+): unknown {
+  const native = isNumericSquare(a) ? nativeEigs(a, options) : undefined;
+  if (native !== undefined) return native;
+  return options === undefined ? factoryEigs(a) : factoryEigs(a, options);
+}
+
+/**
+ * The same for a Matrix (#1179). A Matrix of numbers takes the native solver, and the result is a
+ * Matrix of values and a Matrix for each vector, as the factory returns for a Matrix. The values
+ * keep the order of the factory (`compareFactoryOrder`), so a Matrix result does not change its
+ * order. `toMatrix` builds a Matrix from an array. The option `matricize: false` returns arrays.
+ */
+export function correctEigsOfMatrix(
+  m: { toArray(): unknown },
+  options: EigsOptions | undefined,
+  factoryEigs: (m: unknown, o?: unknown) => unknown,
+  toMatrix: (data: unknown[]) => unknown
+): unknown {
+  const arr = m.toArray();
+  const native = isNumericSquare(arr) ? nativeEigs(arr, options) : undefined;
+  if (native === undefined) return options === undefined ? factoryEigs(m) : factoryEigs(m, options);
+  const wrap = options?.matricize !== false ? toMatrix : (data: unknown[]) => data;
+  const wrapped: Record<string, unknown> = {
+    values: wrap([...native.values].sort(compareFactoryOrder)),
+  };
+  if (native.eigenvectors !== undefined) {
+    wrapped.eigenvectors = [...native.eigenvectors]
+      .sort((p, q) => compareFactoryOrder(p.value, q.value))
+      .map(({ value, vector }) => ({ value, vector: wrap(vector) }));
+    defineRemovedVectorsGetter(wrapped);
+  }
+  return wrapped;
 }

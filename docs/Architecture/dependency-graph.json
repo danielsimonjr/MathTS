@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7397
+    "totalExports": 7399
   },
   "entryPoints": [
     {
@@ -16447,7 +16447,7 @@
           },
           {
             "file": "../matrix/native-accel.js",
-            "imports": ["acceleratedDet", "acceleratedInv", "correctEigs"]
+            "imports": ["acceleratedDet", "acceleratedInv", "correctEigs", "correctEigsOfMatrix"]
           },
           {
             "file": "../matrix/reshape.js",
@@ -19019,7 +19019,7 @@
         "functions": ["createRealSymmetric"]
       },
       "functions/src/matrix/eigs.ts": {
-        "description": "Compute eigenvalues and optionally eigenvectors of a square matrix.",
+        "description": "Add the property `vectors` to an eigs result: it throws, because the name was replaced by",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -19058,7 +19058,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEigs"],
+        "exports": ["createEigs", "defineRemovedVectorsGetter"],
+        "functions": ["defineRemovedVectorsGetter"],
         "constants": ["createEigs"]
       },
       "functions/src/matrix/fft.ts": {
@@ -19461,7 +19462,12 @@
         "description": "Native-accelerated fast paths for matrix factory functions.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./eigs.js",
+            "imports": ["defineRemovedVectorsGetter"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -19480,14 +19486,16 @@
           "acceleratedDet",
           "acceleratedInv",
           "isNumericSquare",
-          "correctEigs"
+          "correctEigs",
+          "correctEigsOfMatrix"
         ],
         "functions": [
           "isLargeNumericSquare",
           "acceleratedDet",
           "acceleratedInv",
           "isNumericSquare",
-          "correctEigs"
+          "correctEigs",
+          "correctEigsOfMatrix"
         ],
         "constants": ["NATIVE_MATRIX_THRESHOLD"]
       },
@@ -49889,11 +49897,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238615,
-    "totalExports": 7397,
+    "totalLinesOfCode": 238693,
+    "totalExports": 7399,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2579,
+    "totalFunctions": 2581,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,

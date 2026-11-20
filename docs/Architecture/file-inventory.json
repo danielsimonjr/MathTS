@@ -6827,7 +6827,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1935
+      "loc": 1945
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -7226,7 +7226,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 547
+      "loc": 555
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -7352,7 +7352,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 319
+      "loc": 379
     },
     {
       "file": "functions/src/matrix/ones.ts",

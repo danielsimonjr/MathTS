@@ -115,6 +115,20 @@ interface Dependencies {
 
 const name = 'eigs';
 
+/**
+ * Add the property `vectors` to an eigs result: it throws, because the name was replaced by
+ * `eigenvectors`. The property is not enumerable, so the eigenvectors can still be converted to
+ * a string.
+ */
+export function defineRemovedVectorsGetter(result: object): void {
+  Object.defineProperty(result, 'vectors', {
+    enumerable: false,
+    get: () => {
+      throw new Error('eigs(M).vectors replaced with eigs(M).eigenvectors');
+    },
+  });
+}
+
 // The absolute state of math.js's dependency system:
 const dependencies = [
   'config',
@@ -321,13 +335,7 @@ export const createEigs = /* #__PURE__ */ factory(
         }
       }
       if (computeVectors) {
-        Object.defineProperty(result, 'vectors', {
-          enumerable: false, // to make sure that the eigenvectors can still be
-          // converted to string.
-          get: () => {
-            throw new Error('eigs(M).vectors replaced with eigs(M).eigenvectors');
-          },
-        });
+        defineRemovedVectorsGetter(result);
       }
       return result;
     }
