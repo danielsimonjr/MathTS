@@ -1749,6 +1749,23 @@ export function zTransform(expr: string, n: string, z: string): string {
 // =============================================================================
 
 /**
+ * The center of an expansion as a finite real number: a BigNumber or a Fraction is its value,
+ * and a Complex with a zero imaginary part is its real part.
+ *
+ * @throws TypeError for a Complex off the real line or a value that is not a finite number
+ */
+function realCenter(fnName: string, x0: unknown): f64 {
+  let v: unknown = x0;
+  if (v instanceof Complex) {
+    if (v.im !== 0) throw new TypeError(`${fnName}: the center must be real, got ${v.toString()}`);
+    v = v.re;
+  }
+  const n = Number(v);
+  if (!Number.isFinite(n)) throw new TypeError(`${fnName}: the center must be a finite number`);
+  return n;
+}
+
+/**
  * Compute the Taylor series expansion of an expression around a point.
  *
  * The coefficients come from three tiers (see {@link taylorCoefficients}). First, power-series
@@ -1764,12 +1781,14 @@ export function zTransform(expr: string, n: string, z: string): string {
  * @param x0 - Center of expansion (default 0, i.e., Maclaurin series)
  * @param n - Order of expansion (default 5)
  * @returns Taylor polynomial as an expression string
+ * @throws TypeError when `x0` is not a finite real number (a BigNumber or Fraction is accepted)
  *
  * @example
  * taylor('sin(x)', 'x', 0, 5)  // => 'x - 0.1666666667*x^3 + 0.008333333333*x^5'
  * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4'
  */
 export function taylor(expr: string, varName: string, x0: f64 = 0, n: number = 5): string {
+  x0 = realCenter('taylor', x0);
   const coeffs = taylorCoefficients(expr, varName, x0, n);
 
   const terms = coeffs.map((c, k) => buildTerm(c, varName, x0, k)).filter(Boolean);
@@ -1884,6 +1903,7 @@ export function series(expr: string, varName: string, x0: f64 = 0, n: number = 5
  * seriesCoefficient('sin(x)', 'x', 0, 1) // => 1
  */
 export function seriesCoefficient(expr: string, varName: string, x0: f64, k: number): f64 {
+  x0 = realCenter('seriesCoefficient', x0);
   return taylorCoefficients(expr, varName, x0, k)[k];
 }
 
