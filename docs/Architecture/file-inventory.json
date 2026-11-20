@@ -12966,7 +12966,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 91
     },
     {
       "file": "functions/tests/pow-bignumber-kernel.test.ts",
@@ -13141,7 +13141,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 137
+      "loc": 138
     },
     {
       "file": "functions/tests/rationalize-zero-polynomial-1177.test.ts",

@@ -44,6 +44,12 @@ describe('#1176 the polynomial reader has a term limit', () => {
     expect(() => expand('(pi+e+sqrt(2)+log(2)+x)^60')).toThrow(/more than 10000 terms/);
   });
 
+  it('refuses the eight-generator power of the issue at once', () => {
+    expect(() => expand('(pi+e+sqrt(2)+log(2)+sin(1)+cos(1)+x+y)^40')).toThrow(
+      /more than 10000 terms/
+    );
+  });
+
   it('throws the class that the package exports, as it does for the degree error', () => {
     // A caller can only test `instanceof` against a class that the package exports.
     const published = api as Record<string, unknown>;
