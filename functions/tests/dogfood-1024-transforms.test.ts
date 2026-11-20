@@ -2,12 +2,19 @@
  * #1024: `symbolicIntegral`, `laplace` and `inverseLaplace` returned a marker
  * (`integral(...)`, `L{...}(s)`, `L^-1{...}(t)`) for common inputs.
  *
- * Each reported input now has a closed form. An input outside the supported forms
- * keeps its marker (the documented, unchanged contract).
+ * Each reported input now has a closed form. An input outside the supported forms keeps the
+ * `integral(...)` marker in `symbolicIntegral` (it parses as a call), and `laplace` and
+ * `inverseLaplace` throw a `NoClosedFormError`.
  */
 
 import { describe, it, expect } from 'vitest';
-import { symbolicIntegral, laplace, inverseLaplace, evaluate } from '../src/index.js';
+import {
+  symbolicIntegral,
+  laplace,
+  inverseLaplace,
+  evaluate,
+  NoClosedFormError,
+} from '../src/index.js';
 
 const MARKER = /^(integral\(|L\{|L\^-1\{)/;
 
@@ -104,8 +111,8 @@ describe('#1024 laplace: linearity, shift theorem, t^n*exp', () => {
     expect(laplace('exp(-t)', 't', 's')).toBe('1/(s + 1)');
   });
 
-  it('keeps the marker for t*sin(t) (outside the supported forms)', () => {
-    expect(laplace('t*sin(t)', 't', 's')).toBe('L{t*sin(t)}(s)');
+  it('throws NoClosedFormError for t*sin(t) (outside the supported forms)', () => {
+    expect(() => laplace('t*sin(t)', 't', 's')).toThrow(NoClosedFormError);
   });
 });
 
@@ -168,9 +175,9 @@ describe('#1024 inverseLaplace: rational functions', () => {
     expect(inverseLaplace('1/(s + 1)', 's', 't')).toBe('exp(-1*t)');
   });
 
-  it('keeps the marker when the degree of the numerator is not below the denominator', () => {
-    expect(inverseLaplace('5', 's', 't')).toBe('L^-1{5}(t)');
-    expect(inverseLaplace('s^2/(s+1)', 's', 't')).toMatch(MARKER);
+  it('throws NoClosedFormError when the degree of the numerator is not below the denominator', () => {
+    expect(() => inverseLaplace('5', 's', 't')).toThrow(NoClosedFormError);
+    expect(() => inverseLaplace('s^2/(s+1)', 's', 't')).toThrow(NoClosedFormError);
   });
 });
 

@@ -3476,6 +3476,7 @@
       "NnlsOptions",
       "NnlsResult",
       "noBignumber",
+      "NoClosedFormError",
       "nodeOperations",
       "nodeToScalar",
       "noFraction",

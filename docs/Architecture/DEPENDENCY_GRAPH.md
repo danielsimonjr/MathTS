@@ -127,7 +127,7 @@ The codebase is organized into the following modules:
 - **functions/arithmetic**: 40 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 15 files
+- **functions/cas**: 16 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 592            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 593            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5821,6 +5821,14 @@ graph LR
 **Exports:**
 
 - Functions: `detZ`, `resultantZ`, `rothsteinResultant`, `hermiteReduce`, `residueIntegral`, `rothsteinTrager`, `integrateLayer3`
+
+---
+
+### `functions/src/cas/no-closed-form.ts` - The error of a CAS transform that has no rule for its input.
+
+**Exports:**
+
+- Classes: `NoClosedFormError`
 
 ---
 
@@ -11931,6 +11939,7 @@ graph LR
 | `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
 | `./numeric.js`                   | `findRoot`                                                                                                                                        | Import |
+| `../cas/no-closed-form.js`       | `NoClosedFormError`                                                                                                                               | Import |
 
 **Exports:**
 
@@ -20970,10 +20979,10 @@ graph LR
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `functions/src/typed/cas`                              | 20 files     | 1 file     |
 | `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
-| `functions/src/typed/cas`                              | 19 files     | 1 file     |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `functions/src/typed/algebra`                          | 12 files     | 7 files    |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
@@ -21226,11 +21235,11 @@ graph TD
         N149[exact-identity]
         N150[exact-roots]
         N151[layer3]
-        N152[polynomial-canonical]
-        N153[polynomial-limits]
-        N154[rat]
-        N155[rational-integrate]
-        N156[...5 more]
+        N152[no-closed-form]
+        N153[polynomial-canonical]
+        N154[polynomial-limits]
+        N155[rat]
+        N156[...6 more]
     end
 
     subgraph Functions/combinatorics
@@ -21879,12 +21888,12 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1355   |
+| Total TypeScript Files  | 1356   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 243016 |
-| Total Exports           | 7436   |
+| Total Lines of Code     | 243119 |
+| Total Exports           | 7438   |
 | Total Re-exports        | 3194   |
-| Total Classes           | 63     |
+| Total Classes           | 64     |
 | Total Interfaces        | 676    |
 | Total Functions         | 2614   |
 | Total Type Guards       | 185    |

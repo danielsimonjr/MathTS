@@ -2952,6 +2952,7 @@
     "functions/src/cas/closed-form-roots.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/taylor-jet.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/exact-roots.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/no-closed-form.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",
       "functions/src/typed/graph.ts"

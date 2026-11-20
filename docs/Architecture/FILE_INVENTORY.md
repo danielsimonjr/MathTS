@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2610
+**Total files**: 2613
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1329 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1330 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1189 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1191 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2610** |                                                                                                                |
+| **Total**     | **2613** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    30 |
 | `examples` |     7 |
-| `src`      |  1355 |
-| `tests`    |  1189 |
+| `src`      |  1356 |
+| `tests`    |  1191 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   146 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   575 |
-| `@danielsimonjr/mathts-functions`      |  1228 |
+| `@danielsimonjr/mathts-functions`      |  1231 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   159 |
@@ -1012,6 +1012,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/cas/exact-identity.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/exact-roots.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/layer3.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/cas/no-closed-form.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/polynomial-canonical.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/polynomial-limits.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/rat.ts`                                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1588,11 +1589,13 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/docs-sync.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1004-describe-nan.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1010-1090-fft.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1022-limit-sampling-rulings.test.ts`                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1022-limit-zero-and-divergence.test.ts`                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1022-limit.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1023-taylor-exact.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1023-taylor-jet.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1024-close-poles.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1024-no-closed-form.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1024-transforms.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1087-exptotrig.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1098-nan-policy.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |

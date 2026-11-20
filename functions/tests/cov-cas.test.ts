@@ -23,6 +23,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { NoClosedFormError } from '../src/cas/no-closed-form.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { parse, evaluate } from '../src/factories/evaluate.js';
 import { derivative } from '../src/factories/index.js';
@@ -158,8 +159,8 @@ describe('laplace transform table', () => {
     expect(laplace('exp(-t)', 't', 's')).toBe('1/(s + 1)');
   });
 
-  it('unrecognised form returns L{} notation', () => {
-    expect(laplace('t*sin(t)', 't', 's')).toBe('L{t*sin(t)}(s)');
+  it('unrecognised form throws NoClosedFormError', () => {
+    expect(() => laplace('t*sin(t)', 't', 's')).toThrow(NoClosedFormError);
   });
 });
 
@@ -182,8 +183,8 @@ describe('inverseLaplace transform table', () => {
     expect(inverseLaplace('3/(s^2 + 4)', 's', 't')).toBe('1.5*sin(2*t)');
   });
 
-  it('unrecognised form returns L^-1{} notation', () => {
-    expect(inverseLaplace('1/(s^4+1)', 's', 't')).toBe('L^-1{1/(s^4+1)}(t)');
+  it('unrecognised form throws NoClosedFormError', () => {
+    expect(() => inverseLaplace('1/(s^4+1)', 's', 't')).toThrow(NoClosedFormError);
   });
 });
 

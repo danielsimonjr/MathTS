@@ -71,6 +71,7 @@ import {
 import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
+import { NoClosedFormError } from '../cas/no-closed-form.js';
 
 /**
  * The errors that a CAS function throws for a polynomial of a degree above 1000
@@ -78,6 +79,9 @@ import { findRoot } from './numeric.js';
  * `RangeError`.
  */
 export { PolynomialDegreeError, PolynomialSizeError };
+
+/** The error that `laplace` and `inverseLaplace` throw for an input outside their rules. */
+export { NoClosedFormError };
 
 // =============================================================================
 // Type Aliases
@@ -532,6 +536,25 @@ const LIMIT_ZERO_RATIO = 1e-14;
  * step before diverge (a convergent sequence has steps that shrink by much more per sample).
  */
 const LIMIT_DIVERGENT_STEP_RATIO = 0.9;
+/**
+ * In the sampling path of `limit`, samples whose size falls by at least this factor at every step
+ * (the steps of the distance are factors of 100) go to 0: `x*log(x)` falls by about 67 per step,
+ * `sqrt(x)*log(x)` by about 7. A sequence that falls by a factor of 2 at each of three steps
+ * cannot converge to a value other than 0.
+ */
+const LIMIT_VANISHING_STEP_FACTOR = 2;
+/**
+ * In the sampling path of `limit`, a divergent one-sign sequence moves by at least this fraction
+ * of its last value at each step: `log(x)` moves by 4.6 at -23, but `x^0.001` (converging to 1)
+ * moves by 0.0045 at 0.98.
+ */
+const LIMIT_DIVERGENT_STEP_SIZE = 0.1;
+/**
+ * In the sampling path of `limit`, samples that change sign at least twice, while the two nearest
+ * the point are at least this fraction of the largest sample, oscillate: the limit does not
+ * exist (`sin(1/x)` at 0).
+ */
+const LIMIT_OSCILLATION_SIZE_RATIO = 1e-3;
 /** The distance from the point at which `quotientLimit` reads the sign of a pole. */
 const LIMIT_POLE_OFFSET = 1e-8;
 /** The distances from the point at which a finite L'Hopital result is checked against a sample. */
@@ -665,8 +688,10 @@ function quotientLimit(
  * L'Hopital's rule with symbolic derivatives (see {@link quotientLimit}): up to 8 steps, with a
  * check of a finite result against a sample, and `+-Infinity` for a pole. Every other
  * expression (and the inf/inf form) is sampled at distances 1e-4 to 1e-10 from the point: the
- * sample sequence gives `+-Infinity` when its values grow without bound, otherwise the value at
- * which two successive samples differ least. A limit at +-Infinity is sampled at 1e2 to 1e8.
+ * sample sequence gives `+-Infinity` when its values grow without bound, 0 when they fall in size
+ * by 2 times or more at each step (`x*log(x)` at 0+), `NaN` when they change sign twice or more
+ * without falling in size (`sin(1/x)` at 0+), otherwise the value at which two successive samples
+ * differ least. A limit at +-Infinity is sampled at 1e2 to 1e8.
  *
  * @param expr - Expression string
  * @param varName - Variable approaching the limit
@@ -734,6 +759,29 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
     if (valid.length === 0) return NaN;
     if (valid.length === 1) return valid[0];
     const last = valid[valid.length - 1];
+    // Values that fall in size by a factor of 2 or more at every step go to 0: the nearest
+    // sample is only the size of the function at 1e-10 (x*log(x) gives -2.3e-9 there).
+    if (
+      valid.length >= 3 &&
+      valid.every(
+        (v, i) =>
+          v !== 0 &&
+          (i === 0 || LIMIT_VANISHING_STEP_FACTOR * Math.abs(v) <= Math.abs(valid[i - 1]))
+      )
+    ) {
+      return 0;
+    }
+    // Values that change sign twice or more and do not fall in size oscillate: no limit.
+    const largest = Math.max(...valid.map(Math.abs));
+    let signChanges = 0;
+    for (let i = 1; i < valid.length; i++) if (valid[i] * valid[i - 1] < 0) signChanges++;
+    if (
+      signChanges >= 2 &&
+      Math.max(Math.abs(last), Math.abs(valid[valid.length - 2])) >=
+        LIMIT_OSCILLATION_SIZE_RATIO * largest
+    ) {
+      return NaN;
+    }
     // Values that grow at every step, by 100 times in all and at least 2 times in the last
     // step, diverge: the limit is infinite, and the last sample is only its size at 1e-10.
     if (
@@ -752,7 +800,8 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
       const notShrinking = d.every(
         (s, i) => i === 0 || Math.abs(s) >= LIMIT_DIVERGENT_STEP_RATIO * Math.abs(d[i - 1])
       );
-      if (oneSign && notShrinking) return d[0] > 0 ? Infinity : -Infinity;
+      const large = Math.abs(d[d.length - 1]) >= LIMIT_DIVERGENT_STEP_SIZE * Math.abs(last);
+      if (oneSign && notShrinking && large) return d[0] > 0 ? Infinity : -Infinity;
     }
     // Converged values: take the sample that differs least from the one before it. The last
     // sample is not safe, because a difference of two close values (1 - cos(h)) rounds to 0.
@@ -1246,12 +1295,13 @@ function laplaceOfTerms(trimmed: string, t: string, s: string): string | null {
  * a fixed text. Any other sum of terms `c * t^n * exp(alpha*t)`, `c * exp(alpha*t) * sin(b*t)` and
  * `c * exp(alpha*t) * cos(b*t)` has its transform by linearity and the shift theorem (`n` an integer
  * of 0 or more; `n` must be 0 for `sin` and `cos`). Any other input, such as `t*sin(t)` or
- * `1/t`, returns the unevaluated marker `L{expr}(s)`.
+ * `1/t`, throws a {@link NoClosedFormError}.
  *
  * @param expr - Time-domain expression string
  * @param t - Time variable name
  * @param s - Frequency variable name
- * @returns Laplace transform as an expression string, or the marker `L{expr}(s)`
+ * @returns Laplace transform as an expression string
+ * @throws NoClosedFormError When the input is outside these forms
  *
  * @example
  * laplace('1', 't', 's')           // => '1/s'
@@ -1274,7 +1324,9 @@ export function laplace(expr: string, t: string, s: string): string {
     return `${trimmed}/${s}`;
   }
 
-  return laplaceOfTerms(trimmed, t, s) ?? `L{${trimmed}}(${s})`;
+  const text = laplaceOfTerms(trimmed, t, s);
+  if (text === null) throw new NoClosedFormError(`laplace: no closed form for ${trimmed}`);
+  return text;
 }
 
 /**
@@ -1446,6 +1498,36 @@ function isPolynomialQuotient(node: AstNode, s: string): boolean {
 /** Two real poles closer than this fraction of max(1, |pole|) are too close to separate. */
 const INVERSE_LAPLACE_ROOT_SEPARATION = 1e-6;
 
+/**
+ * The distinct real roots of the polynomial `coefficients` (constant first), or null when the
+ * Sturm sequence fails or two roots are closer than {@link INVERSE_LAPLACE_ROOT_SEPARATION}.
+ */
+function separatedRealRoots(coefficients: f64[]): f64[] | null {
+  let distinct: f64[];
+  try {
+    distinct = sturmRoots(coefficients);
+  } catch {
+    return null;
+  }
+  const sorted = [...distinct].sort((a, b) => a - b);
+  for (let i = 1; i < sorted.length; i++) {
+    const size = Math.max(Math.abs(sorted[i]), Math.abs(sorted[i - 1]), 1);
+    if (sorted[i] - sorted[i - 1] <= INVERSE_LAPLACE_ROOT_SEPARATION * size) return null;
+  }
+  return distinct;
+}
+
+/**
+ * True when `node` is a quotient of two polynomials in `s` whose denominator has two real poles
+ * too close to separate. The sampled table of {@link inverseLaplaceTransform} cannot see such a
+ * pair: at its sample points `1/(s^2-1e-14)` equals `1/s^2` to 15 digits.
+ */
+function hasInseparablePoles(node: AstNode, s: string): boolean {
+  if (!isPolynomialQuotient(node, s)) return false;
+  const denominator = densePolynomialIn(unwrapParens(node).args![1], s);
+  return denominator !== null && denominator.length > 2 && separatedRealRoots(denominator) === null;
+}
+
 function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: number): string | null {
   const root = unwrapParens(node);
   if (operatorName(root) !== 'divide' || root.args?.length !== 2) return null;
@@ -1465,17 +1547,8 @@ function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: numbe
   // closer than INVERSE_LAPLACE_ROOT_SEPARATION (relative to their size) are past the accuracy of
   // the multiplicity test, so the transform keeps its marker: merging them read the two poles
   // +-1e-7 of 1/(s^2-1e-14) as one.
-  let distinct: f64[];
-  try {
-    distinct = sturmRoots(denominator);
-  } catch {
-    return null;
-  }
-  const sorted = [...distinct].sort((a, b) => a - b);
-  for (let i = 1; i < sorted.length; i++) {
-    const size = Math.max(Math.abs(sorted[i]), Math.abs(sorted[i - 1]), 1);
-    if (sorted[i] - sorted[i - 1] <= INVERSE_LAPLACE_ROOT_SEPARATION * size) return null;
-  }
+  const distinct = separatedRealRoots(denominator);
+  if (distinct === null) return null;
   let probe: f64[] = [...D];
   const real: Array<{ r: f64; m: number }> = [];
   for (const found of distinct) {
@@ -1619,13 +1692,14 @@ function inverseLaplaceSum(
  * fractions: `D` may have any real roots, repeated ones included, and one simple pair of complex
  * roots (`1/(s+1)^2` gives `t*exp(-1*t)`, `1/(s^2 + 2*s + 5)` gives `0.5*exp(-1*t)*sin(2*t)`). A
  * repeated complex pair (`1/(s^2+1)^2`) is outside this step. (3) The lookup table of
- * {@link inverseLaplaceTransform} gives the other forms it knows. Any other input returns the
- * unevaluated marker `L^-1{expr}(t)`.
+ * {@link inverseLaplaceTransform} gives the other forms it knows. Any other input throws a
+ * {@link NoClosedFormError}.
  *
  * @param expr - Frequency-domain expression string
  * @param s - Frequency variable name
  * @param t - Time variable name
- * @returns Inverse Laplace transform as an expression string, or the marker `L^-1{expr}(t)`
+ * @returns Inverse Laplace transform as an expression string
+ * @throws NoClosedFormError When no step gives a closed form
  *
  * @example
  * inverseLaplace('1/s', 's', 't')         // => '1'
@@ -1646,16 +1720,21 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
     if (inverseLaplaceSum(tree, s, t, 1, texts)) return joinTerms(texts);
     // A quotient of two polynomials in `s` belongs to the exact reader. When it refuses (poles
     // too close to separate), the sampled table must not answer: it reads 1/(s^2-1e-14) as 1/s^2.
-    if (isPolynomialQuotient(tree, s)) return `L^-1{${trimmed}}(${t})`;
+    if (isPolynomialQuotient(tree, s)) throw noInverse(trimmed);
   }
 
   try {
     return inverseLaplaceTransform(trimmed, s, t);
   } catch {
-    // Not in the lookup table either: return the marker.
+    // Not in the lookup table either.
   }
 
-  return `L^-1{${trimmed}}(${t})`;
+  throw noInverse(trimmed);
+}
+
+/** The error of `inverseLaplace` for an input that no step inverts. */
+function noInverse(expr: string): NoClosedFormError {
+  return new NoClosedFormError(`inverseLaplace: no closed form for ${expr}`);
 }
 
 /**
@@ -3464,7 +3543,8 @@ function iltMatchPattern(node: MathNode, sVar: string, pattern: string): boolean
     const v1 = iltEvalAt(node, sVar, p);
     const v2 = iltEvalAt(checkNode, sVar, p);
     if (v1 === null || v2 === null) return false;
-    if (Math.abs(v1 - v2) > 1e-9) return false;
+    // Relative to the values: an absolute 1e-9 read 1/(s - 1e-9) as 1/s.
+    if (Math.abs(v1 - v2) > 1e-12 * Math.max(Math.abs(v1), Math.abs(v2))) return false;
   }
   return true;
 }
@@ -3767,6 +3847,14 @@ export function inverseLaplaceTransform(
     node = parse(expr);
   } else {
     node = expr;
+  }
+  const tree = parseTree(node.toString());
+  if (tree !== null && hasInseparablePoles(tree, sVar)) {
+    throw new Error(
+      'inverseLaplaceTransform: the poles of "' +
+        node.toString() +
+        '" are too close to separate; the lookup table cannot match it.'
+    );
   }
   return _inverseLaplaceNode(node, sVar, tVar);
 }

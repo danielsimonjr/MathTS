@@ -1,8 +1,8 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1355, "e": 7436, "re": 3194 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1356, "e": 7438, "re": 3194 },
   "s": {
-    "loc": 243016,
-    "cls": 63,
+    "loc": 243119,
+    "cls": 64,
     "int": 676,
     "fn": 2614,
     "tg": 185,
@@ -588,7 +588,7 @@
       ]
     },
     "functions/cas": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "antiderivativeReciprocal",
         "snapRoot",
@@ -609,9 +609,9 @@
         "residueIntegral",
         "rothsteinTrager",
         "integrateLayer3",
-        "collapseIdenticalFactors"
+        "NoClosedFormError"
       ],
-      "cls": ["PolynomialDegreeError", "PolynomialSizeError"],
+      "cls": ["NoClosedFormError", "PolynomialDegreeError", "PolynomialSizeError"],
       "int": [
         "ElementaryDecline",
         "ElementarySolution",

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1355
+  totalFiles: 1356
   totalModules: 82
-  totalExports: 7436
+  totalExports: 7438
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14521,6 +14521,16 @@ modules:
         - residueIntegral
         - rothsteinTrager
         - integrateLayer3
+    functions/src/cas/no-closed-form.ts:
+      description: The error of a CAS transform that has no rule for its input.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - NoClosedFormError
+      classes:
+        - NoClosedFormError
     functions/src/cas/polynomial-canonical.ts:
       description: Canonical polynomial forms for CAS simplify / factor (G21).
       externalDependencies: []
@@ -25453,6 +25463,9 @@ modules:
         - file: ./numeric.js
           imports:
             - findRoot
+        - file: ../cas/no-closed-form.js
+          imports:
+            - NoClosedFormError
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -25461,6 +25474,7 @@ modules:
       exports:
         - PolynomialDegreeError
         - PolynomialSizeError
+        - NoClosedFormError
         - CAS_BATCH_THRESHOLD
         - integrate
         - limit
@@ -46164,6 +46178,7 @@ dependencyGraph:
         - functions/src/cas/exact-identity.ts
         - functions/src/cas/exact-roots.ts
         - functions/src/cas/layer3.ts
+        - functions/src/cas/no-closed-form.ts
         - functions/src/cas/polynomial-canonical.ts
         - functions/src/cas/polynomial-limits.ts
         - functions/src/cas/rat.ts
@@ -47346,11 +47361,11 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1355
+  totalTypeScriptFiles: 1356
   totalModules: 82
-  totalLinesOfCode: 243016
-  totalExports: 7436
-  totalClasses: 63
+  totalLinesOfCode: 243119
+  totalExports: 7438
+  totalClasses: 64
   totalInterfaces: 676
   totalFunctions: 2614
   totalTypeGuards: 185
