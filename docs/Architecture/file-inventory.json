@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2635,
+  "totalFiles": 2637,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1330,
+    "build-entry": 1331,
     "test-only": 0,
     "orphan": 0,
-    "test": 1213,
+    "test": 1214,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1356,
-    "tests": 1213,
+    "src": 1357,
+    "tests": 1214,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1244,
+    "@danielsimonjr/mathts-functions": 1246,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -247,7 +247,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 896
+      "loc": 898
     },
     {
       "file": "assembly/src/tridiag.ts",
@@ -6785,7 +6785,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 83
+      "loc": 106
     },
     {
       "file": "functions/src/combinatorics/composition.ts",
@@ -7765,7 +7765,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 296
+      "loc": 356
     },
     {
       "file": "functions/src/numeric/gauss-nodes.ts",
@@ -7920,6 +7920,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 124
+    },
+    {
+      "file": "functions/src/numeric/tridiagonal-eigen.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 275
     },
     {
       "file": "functions/src/optimization-extra.ts",
@@ -8500,7 +8507,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 196
+      "loc": 259
     },
     {
       "file": "functions/src/special/erf-extra.ts",
@@ -8542,7 +8549,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 232
+      "loc": 357
     },
     {
       "file": "functions/src/special/niche.ts",
@@ -8563,7 +8570,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 207
+      "loc": 350
     },
     {
       "file": "functions/src/special/spheroidal.ts",
@@ -8577,7 +8584,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 559
+      "loc": 670
     },
     {
       "file": "functions/src/special/zeta-extra.ts",
@@ -9592,7 +9599,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 514
+      "loc": 533
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -9627,7 +9634,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1561
+      "loc": 1631
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -9893,7 +9900,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 101
+      "loc": 153
     },
     {
       "file": "functions/src/utils/map.ts",
@@ -10096,14 +10103,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 968
+      "loc": 1023
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 817
+      "loc": 881
     },
     {
       "file": "functions/src/wasm/WasmLoader.ts",
@@ -10894,7 +10901,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 390
+      "loc": 406
     },
     {
       "file": "functions/tests/dogfood-1114-discretelog-gcd.test.ts",
@@ -11398,7 +11405,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 340
+      "loc": 342
     },
     {
       "file": "functions/tests/dogfood-989c-eigs-non-finite.test.ts",
@@ -11441,6 +11448,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 126
+    },
+    {
+      "file": "functions/tests/dogfood-batch-i-special.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 762
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

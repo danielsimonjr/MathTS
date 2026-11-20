@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1356,
+    "totalFiles": 1357,
     "totalModules": 82,
-    "totalExports": 7438
+    "totalExports": 7446
   },
   "entryPoints": [
     {
@@ -15624,7 +15624,7 @@
         "constants": ["createBellNumbers"]
       },
       "functions/src/combinatorics/catalan.ts": {
-        "description": "The Catalan Numbers enumerate combinatorial structures of many different types.",
+        "description": "The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20728,6 +20728,10 @@
           {
             "file": "../utils/limits.js",
             "imports": ["assertAllocSize", "assertLoopOrder"]
+          },
+          {
+            "file": "./tridiagonal-eigen.js",
+            "imports": ["symTridiagEigenvalues"]
           }
         ],
         "workspaceDependencies": [],
@@ -21128,6 +21132,15 @@
         "exports": ["svds"],
         "interfaces": ["SvdsOptions", "SvdsResult"],
         "functions": ["svds"]
+      },
+      "functions/src/numeric/tridiagonal-eigen.ts": {
+        "description": "Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["symTridiagEigenvalues", "symTridiagEigenvalue", "symTridiagEigenvector"],
+        "functions": ["symTridiagEigenvalues", "symTridiagEigenvalue", "symTridiagEigenvector"]
       }
     },
     "functions/plain": {
@@ -23257,6 +23270,10 @@
           {
             "file": "./spheroidal.js",
             "imports": ["ferrersP"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["MAX_FERRERS_ORDER", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -23350,14 +23367,17 @@
         "description": "Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [
+        "internalDependencies": [
           {
-            "package": "@danielsimonjr/mathts-matrix",
-            "directory": "matrix",
-            "imports": ["eig"]
+            "file": "../numeric/tridiagonal-eigen.js",
+            "imports": ["symTridiagEigenvalue", "symTridiagEigenvector"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["MAX_MATHIEU_HARMONICS"]
           }
         ],
+        "workspaceDependencies": [],
         "exports": ["mathieuA", "mathieuB", "mathieuCe", "mathieuSe"],
         "functions": ["mathieuA", "mathieuB", "mathieuCe", "mathieuSe"]
       },
@@ -23472,6 +23492,10 @@
           {
             "file": "./hypergeometric.js",
             "imports": ["hyp1f1"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["MAX_SIEGEL_Z_T", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -29976,6 +30000,15 @@
             "imports": ["kernelSource"]
           },
           {
+            "file": "../utils/limits.js",
+            "imports": [
+              "MAX_CHEBYSHEV_ORDER",
+              "MAX_LAGUERRE_ORDER",
+              "MAX_RECURRENCE_ORDER",
+              "assertArrayWork"
+            ]
+          },
+          {
             "file": "./worker-kernels.js",
             "imports": ["numberLiteral", "registerWorkerKernels"]
           },
@@ -30028,6 +30061,7 @@
               "besselY0Dispatch",
               "besselY1Dispatch",
               "besselYDispatch",
+              "assertBesselArrayWork",
               "airyAiDispatch",
               "airyBiDispatch",
               "ellipticKDispatch",
@@ -31298,12 +31332,16 @@
           "MAX_FERRERS_ORDER",
           "MAX_EXPN_ORDER",
           "MAX_LAGUERRE_ORDER",
+          "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
           "MAX_BESSEL_J_SWEEP",
+          "MAX_SIEGEL_Z_T",
+          "MAX_MATHIEU_HARMONICS",
           "assertAllocSize",
+          "assertArrayWork",
           "assertLoopOrder"
         ],
-        "functions": ["assertAllocSize", "assertLoopOrder"],
+        "functions": ["assertAllocSize", "assertArrayWork", "assertLoopOrder"],
         "constants": [
           "MAX_ALLOC_ELEMENTS",
           "MAX_LOOP_ORDER",
@@ -31313,8 +31351,11 @@
           "MAX_FERRERS_ORDER",
           "MAX_EXPN_ORDER",
           "MAX_LAGUERRE_ORDER",
+          "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
-          "MAX_BESSEL_J_SWEEP"
+          "MAX_BESSEL_J_SWEEP",
+          "MAX_SIEGEL_Z_T",
+          "MAX_MATHIEU_HARMONICS"
         ]
       },
       "functions/src/utils/map.ts": {
@@ -32339,7 +32380,7 @@
           },
           {
             "file": "../../utils/limits.js",
-            "imports": ["MAX_BESSEL_J_SWEEP"]
+            "imports": ["MAX_BESSEL_J_SWEEP", "MAX_RECURRENCE_ORDER", "assertArrayWork"]
           }
         ],
         "workspaceDependencies": [],
@@ -32362,6 +32403,7 @@
           "besselYnJS",
           "airyAiJS",
           "airyBiJS",
+          "assertBesselArrayWork",
           "besselJDispatch",
           "besselYDispatch",
           "lgammaJS",
@@ -32402,6 +32444,7 @@
           "besselYnJS",
           "airyAiJS",
           "airyBiJS",
+          "assertBesselArrayWork",
           "besselJDispatch",
           "besselYDispatch",
           "lgammaJS",
@@ -49142,7 +49185,8 @@
           "functions/src/numeric/solveODE.ts",
           "functions/src/numeric/solveParabolicPDE.ts",
           "functions/src/numeric/structured-solvers.ts",
-          "functions/src/numeric/svds.ts"
+          "functions/src/numeric/svds.ts",
+          "functions/src/numeric/tridiagonal-eigen.ts"
         ]
       },
       {
@@ -50246,16 +50290,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1356,
+    "totalTypeScriptFiles": 1357,
     "totalModules": 82,
-    "totalLinesOfCode": 243959,
-    "totalExports": 7438,
+    "totalLinesOfCode": 245021,
+    "totalExports": 7446,
     "totalClasses": 64,
     "totalInterfaces": 676,
-    "totalFunctions": 2618,
+    "totalFunctions": 2623,
     "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1698,
+    "totalConstants": 1701,
     "totalReExports": 3194,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,

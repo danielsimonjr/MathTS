@@ -1837,10 +1837,13 @@
       "functions/src/signal/system-response.ts",
       "functions/src/signal/waveforms.ts",
       "functions/src/signal/windows-extra.ts",
+      "functions/src/special/angular-momentum.ts",
       "functions/src/special/exp-integrals.ts",
+      "functions/src/special/mathieu.ts",
       "functions/src/special/polygamma-orthopoly.ts",
       "functions/src/special/spherical-bessel.ts",
       "functions/src/special/spheroidal.ts",
+      "functions/src/special/wave-functions.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/stats/mvn.ts",
@@ -1850,6 +1853,7 @@
       "functions/src/typed/integration.ts",
       "functions/src/typed/probability.ts",
       "functions/src/typed/signal.ts",
+      "functions/src/typed/special.ts",
       "functions/src/typed/statistics.ts",
       "functions/src/utils/print.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
@@ -2763,6 +2767,10 @@
       "functions/src/typed/cas.ts",
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/numeric/tridiagonal-eigen.ts": [
+      "functions/src/numeric/gauss-nodes-extra.ts",
+      "functions/src/special/mathieu.ts"
     ],
     "functions/src/probability/util/seededRNG.ts": [
       "functions/src/numeric/global-optimizers.ts",

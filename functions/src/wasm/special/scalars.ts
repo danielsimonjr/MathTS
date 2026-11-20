@@ -297,10 +297,14 @@ export function besselGammaAux(xmu: f64): [f64, f64, f64, f64] {
  * J_ν(x) and Y_ν(x) for real order ν >= 0 and x > 0 (Temme 1976 / Steed, as in
  * Numerical Recipes `bessjy`): CF1 (Lentz) for J'_ν/J_ν, then either Temme's
  * series (x < 2) or Steed's CF2 (x >= 2) at the reduced order μ ∈ [−1/2, 1/2],
- * and stable recurrences back to ν. Returns [J_ν, Y_ν]. Accurate to ~1e-15
+ * and stable recurrences back to ν. Returns [J_ν, yScale · Y_ν]. Accurate to ~1e-15
  * for all x > 0, with no loss near integer orders.
+ *
+ * `yScale` multiplies Y at the reduced order, before the upward recurrence (which is linear).
+ * A caller that needs `c · Y_ν` with a small `c` passes `c`: the product can be a double
+ * where Y_ν alone is outside the double range.
  */
-export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
+export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
   const EPS = 1e-16;
   const FPMIN = 1e-300;
   const MAXIT = 100000;
@@ -331,7 +335,7 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
   }
   let rjl = isign * FPMIN;
   let rjpl = h * rjl;
-  const rjl1 = rjl;
+  let rjl1 = rjl;
   const rjp1 = rjpl;
   let fact = xnu * xi;
   for (let l = nl; l >= 1; l--) {
@@ -339,6 +343,16 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
     fact -= xi;
     rjpl = fact * rjtemp - rjl;
     rjl = rjtemp;
+    // The downward recurrence grows by about 2 nu / x per step, so from the seed 1e-300 it
+    // leaves the double range for nu / x above about 150, and the ratio f = rjpl / rjl was NaN
+    // (besselY(400.3, 3), besselJ(300.5, 1)). Only the ratio and the quotient rjl1 / rjl are used:
+    // scale all three. After a scale of 1e-250 the seed rjl1 is 0, which is the true J_nu
+    // (a growth of 1e550 or more puts J_nu below the smallest double).
+    if (Math.abs(rjl) > 1e250) {
+      rjl *= 1e-250;
+      rjpl *= 1e-250;
+      rjl1 *= 1e-250;
+    }
   }
   if (rjl === 0) rjl = EPS;
   const f = rjpl / rjl;
@@ -426,10 +440,19 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
   const scale = rjmu / rjl;
   const rj = rjl1 * scale;
   void rjp1;
+  rymu *= yScale;
+  ry1 *= yScale;
   for (let i = 1; i <= nl; i++) {
     const rytemp = (xmu + i) * xi2 * ry1 - rymu;
     rymu = ry1;
     ry1 = rytemp;
+    // Y_{mu+i+1} left the double range (or is NaN). Every later order is farther out, so the
+    // target order is that value, and the next step would give -Infinity - -Infinity = NaN.
+    // At the last step the target is rymu, which is finite.
+    if (!Number.isFinite(ry1)) {
+      if (i < nl) rymu = ry1;
+      break;
+    }
   }
   return [rj, rymu];
 }
@@ -466,11 +489,31 @@ export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
 export function besselJRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
   if (x === 0) return nu > 0 ? 0 : nu < 0 ? Infinity : 1;
+  // A tiny x overflows the continued fraction of besselJYTemme (it divides by x), so use the
+  // power series J_nu(x) = (x/2)^nu / Gamma(nu + 1) * sum_k (-x^2/4)^k / (k! (nu + 1)_k).
+  // The terms fall by x^2/4 per step, so the sum ends after a few terms. A power that
+  // underflows is the correct result: the value is then below the smallest double.
+  if (nu > 0 && x < 1e-5) {
+    const q = (-x * x) / 4;
+    let term = 1;
+    let sum = 1;
+    for (let k = 1; k < 20; k++) {
+      term *= q / (k * (nu + k));
+      sum += term;
+      if (Math.abs(term) < 1e-17 * Math.abs(sum)) break;
+    }
+    return (Math.pow(x / 2, nu) / Math.exp(_lgamma(nu + 1))) * sum;
+  }
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
-  const jy = besselJYTemme(an, x);
-  if (nu >= 0) return jy[0];
-  return Math.cos(an * Math.PI) * jy[0] - Math.sin(an * Math.PI) * jy[1];
+  if (nu >= 0) return besselJYTemme(an, x)[0];
+  // J_{-nu} = cos(nu pi) J_nu - sin(nu pi) Y_nu, with nu reduced to [0, 2) before the product
+  // with pi (see besselYRealOrder). The factor -sin(nu pi) goes into the Y recurrence, so the
+  // product is right also where Y_nu alone is outside the double range.
+  const f = an - 2 * Math.floor(an / 2);
+  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
+  const jy = besselJYTemme(an, x, -Math.sin(f * Math.PI));
+  return c * jy[0] + jy[1];
 }
 
 /** Y_ν(x) for non-integer real order ν and x > 0 (see besselJRealOrder). */
@@ -479,9 +522,18 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (x === 0) return -Infinity;
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
-  const jy = besselJYTemme(an, x);
-  if (nu >= 0) return jy[1];
-  return Math.sin(an * Math.PI) * jy[0] + Math.cos(an * Math.PI) * jy[1];
+  if (nu >= 0) return besselJYTemme(an, x)[1];
+  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. Reduce nu to [0, 2) before the product with pi:
+  // the product loses log2(nu) bits, and at a half-integer cos(nu pi) is exactly 0, not 1e-14,
+  // which times the huge Y_nu (besselY(-100.5, 1) = 6e-190, not -2e172) gave a wrong value. The
+  // function repeats the reduction inline because the worker kernels serialize it alone.
+  const f = an - 2 * Math.floor(an / 2);
+  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
+  const s = Math.sin(f * Math.PI);
+  // The factor c goes into the Y recurrence: c Y_nu can be a double where Y_nu alone is not
+  // (besselY(-151.5001, 1) = -2.8e305 with Y_nu = -9e308), and at a half-integer the term is 0.
+  const jy = besselJYTemme(an, x, c);
+  return s * jy[0] + jy[1];
 }
 
 /** Bessel function of the first kind, general integer order n: J_n(x). */
@@ -584,7 +636,10 @@ export function besselYScalar(n: f64, x: f64): f64 {
   let yCurr: f64 = besselY1Scalar(x);
   for (let k = 1; k < ni; k++) {
     const yNext = ((2 * k) / x) * yCurr - yPrev;
-    if (Number.isNaN(yNext)) return NaN;
+    // Y_n(x) < 0 and falls without a bound as n grows while x < n, so a result outside the
+    // double range is -Infinity. The next step would be -Infinity - -Infinity = NaN. A NaN
+    // returns as NaN.
+    if (!Number.isFinite(yNext)) return yNext;
     yPrev = yCurr;
     yCurr = yNext;
   }

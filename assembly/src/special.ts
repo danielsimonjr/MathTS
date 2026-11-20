@@ -333,7 +333,9 @@ function _besselYn(n: i32, x: f64): f64 {
   let yCurr: f64 = _besselY1(x);
   for (let k: i32 = 1; k < ni; k++) {
     const yNext: f64 = (2.0 * <f64>k / x) * yCurr - yPrev;
-    if (isNaN(yNext)) return NaN;
+    // Same rule as besselYScalar: a result outside the double range is -Infinity (times the
+    // sign of a negative odd order), and a NaN returns as NaN.
+    if (!isFinite(yNext)) return sign * yNext;
     yPrev = yCurr;
     yCurr = yNext;
   }

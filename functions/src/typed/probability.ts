@@ -72,16 +72,35 @@ function makeRng(seed: string | number | null): RngFn {
 /** Largest even index n with a finite B_n as a double. */
 const BERNOULLI_MAX_FINITE_INDEX = 258;
 
+/**
+ * Smallest even index that uses the zeta product. The cotangent recursion below loses range
+ * from n = 198 (its cached coefficients underflow and the prefactors overflow, so the product
+ * is an infinity), and B_n of every index up to 258 is a finite double (#1102).
+ */
+const BERNOULLI_ZETA_FROM_INDEX = 190;
+
 /** Cache entry: [cotangent coefficient a_n, prefactor, B_{2n}] */
 type BernoulliEntry = [number, number, number];
 
 const _bernoulliCache: (BernoulliEntry | undefined)[] = [undefined];
 
 /**
+ * B_n for an even n from 190 to 258: `B_n = (-1)^(n/2+1) · 2 · n! ζ(n) / (2π)^n`. The partial
+ * products of `k / 2π` stay below the final value, so nothing overflows. ζ(n) = 1 + 2^-n + ...
+ * is 1 in double precision from n = 54, so the sum is not needed.
+ */
+function bernoulliFromZeta(n: number): number {
+  let product = 2;
+  for (let k = 1; k <= n; k++) product *= k / (2 * Math.PI);
+  return (n / 2) % 2 === 1 ? product : -product;
+}
+
+/**
  * Return the n-th Bernoulli number for non-negative integer n.
  *
  * B_0 = 1, B_1 = -1/2, B_{2k+1} = 0 for k ≥ 1.
- * Uses the cotangent-coefficient recursion (O(n²) time, O(n) space).
+ * Uses the cotangent-coefficient recursion below n = 190 (O(n²) time, O(n) space) and the
+ * zeta product `|B_n| = 2 n! ζ(n) / (2π)^n` from n = 190 up to the last finite value n = 258.
  *
  * @param n - Non-negative integer index
  * @returns B_n as a JS number
@@ -94,9 +113,9 @@ function bernoulliNumber(n: number): number {
   if (n === 1) return -0.5;
   if (n % 2 === 1) return 0;
   // |B_n| is above the largest double from n = 260 (B_258 = 1.3e306 is the last finite
-  // value). The sign of B_2m is (-1)^(m+1). The recursion below already returns an
-  // infinity from n = 198 (#1102); this return keeps the sign for every larger even n.
+  // value). The sign of B_2m is (-1)^(m+1), which the infinity keeps.
   if (n > BERNOULLI_MAX_FINITE_INDEX) return (n / 2) % 2 === 0 ? -Infinity : Infinity;
+  if (n >= BERNOULLI_ZETA_FROM_INDEX) return bernoulliFromZeta(n);
 
   // Seed cache with B_2 = 1/6
   if (_bernoulliCache.length === 1) {

@@ -18,6 +18,29 @@ interface CatalanDependencies {
   isInteger: (x: NumericValue) => boolean;
 }
 
+/**
+ * The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the
+ * last finite value).
+ */
+const CATALAN_OVERFLOW_INDEX = 520;
+
+/**
+ * C_n for a number `n`: the product `C_{k+1} = C_k (4k + 2) / (k + 2)`. While the product is a
+ * safe integer, the division is exact, so C_n is the exact integer up to C_30. After that the
+ * factor is below 4, so nothing overflows before n = 520, and the relative error stays below
+ * 1e-15 (the binomial `C(2n, n)` of the factory is `Infinity` from 2n = 282, which lost every
+ * value from n = 141, #1102).
+ */
+function catalanNumber(n: number): number {
+  if (n >= CATALAN_OVERFLOW_INDEX) return Infinity;
+  let c = 1;
+  for (let k = 0; k < n; k++) {
+    const product = c * (4 * k + 2);
+    c = product <= Number.MAX_SAFE_INTEGER ? product / (k + 2) : c * ((4 * k + 2) / (k + 2));
+  }
+  return c;
+}
+
 const name = 'catalan';
 const dependencies = [
   'typed',
@@ -70,7 +93,7 @@ export const createCatalan = /* #__PURE__ */ factory(
 
         const compute = (): NumericValue =>
           divideScalar(combinations(multiplyScalar(n, 2), n), addScalar(n, 1));
-        if (typeof n === 'number') return compute();
+        if (typeof n === 'number') return catalanNumber(n);
         // The binomial coefficient is n + 1 times the result. With the digits of n + 1 more, a
         // result that fits the precision has an exact binomial coefficient and an exact quotient
         // (#1118). A longer result rounds one time.

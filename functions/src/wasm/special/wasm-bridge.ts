@@ -56,7 +56,7 @@ import {
   ellipticECompleteScalar,
 } from './scalars.js';
 import { wasmPolicyAllows } from '../policy.js';
-import { MAX_BESSEL_J_SWEEP } from '../../utils/limits.js';
+import { MAX_BESSEL_J_SWEEP, MAX_RECURRENCE_ORDER, assertArrayWork } from '../../utils/limits.js';
 
 /**
  * Element-count threshold above which we attempt the WASM Bessel kernels.
@@ -180,13 +180,77 @@ const AS_MAX_ORDER = 2147483647;
  */
 function besselJKernelTakes(order: number): boolean {
   if (!Number.isInteger(order)) return false;
-  const ni = Math.abs(order);
-  return ni + 2 * Math.max(10, Math.ceil(Math.sqrt(40 * ni))) <= MAX_BESSEL_J_SWEEP;
+  return besselJSweepStart(Math.abs(order)) <= MAX_BESSEL_J_SWEEP;
 }
 
 /** Whether the AS `bessel_yn_f64` kernel gives the JS result for `order` (an i32 integer). */
 function besselYKernelTakes(order: number): boolean {
   return Number.isInteger(order) && Math.abs(order) <= AS_MAX_ORDER;
+}
+
+// ---------------------------------------------------------------------------
+// Work bound of one array call (#1132)
+// ---------------------------------------------------------------------------
+
+/** The order above which `besselJScalar` and `besselYScalar` throw a RangeError by themselves. */
+const SCALAR_ORDER_LIMIT = 2_500_000_000;
+
+/** One downward-sweep step costs this many upward steps (the ratio of the two limits). */
+const SWEEP_WEIGHT = MAX_RECURRENCE_ORDER / MAX_BESSEL_J_SWEEP;
+
+/** The start order of the downward sweep of `besselJScalar` for the integer order `ni`. */
+function besselJSweepStart(ni: number): number {
+  return ni + 2 * Math.max(10, Math.ceil(Math.sqrt(40 * ni)));
+}
+
+/**
+ * Recurrence steps that `besselJScalar(ni, x)` or `besselYScalar(ni, x)` runs for an integer
+ * order `ni` in `[2, 2.5e9]`, in units of one upward step. A call that ends at once (a NaN or
+ * infinite x, a zero result, a non-positive x for Y) and a call that throws by itself count 0.
+ */
+function besselElementSteps(kind: 'besselJ' | 'besselY', ni: number, x: number): number {
+  if (!Number.isFinite(x)) return 0;
+  const ax = Math.abs(x);
+  if (kind === 'besselY') {
+    if (x <= 0) return 0;
+    // Past k = 2x every step multiplies Y_k by more than 3, so the value overflows within
+    // about 2000 more steps, and the scalar ends there.
+    return Math.min(ni, 2 * Math.ceil(ax) + 2000);
+  }
+  // The zero bound of besselJScalar: ln|J_n(x)| <= n (1 + ln(|x| / 2) - ln n).
+  if (ax < 1e-15) return 0;
+  if (ax <= ni && ni * (1 + Math.log(ax / 2) - Math.log(ni)) < -745.2) return 0;
+  if (ax > ni) return ni;
+  const start = besselJSweepStart(ni);
+  return start > MAX_BESSEL_J_SWEEP ? 0 : start * SWEEP_WEIGHT;
+}
+
+/**
+ * Throw a RangeError when one array call of `besselJ` or `besselY` needs more recurrence steps
+ * than `MAX_RECURRENCE_ORDER`, the budget of one call (about 20 s). The scalar limits bound one
+ * element, so an array of 1024 elements at order 2.4e9 ran for hours. Only an integer order of
+ * at least 2 runs a recurrence. An element whose own call throws keeps its own message.
+ *
+ * @param kind - `'besselJ'` or `'besselY'`
+ * @param n - Order
+ * @param xs - Arguments
+ * @throws RangeError if the total work is above the maximum
+ */
+export function assertBesselArrayWork(
+  kind: 'besselJ' | 'besselY',
+  n: number,
+  xs: Float64Array
+): void {
+  const ni = Math.abs(n);
+  if (!Number.isInteger(n) || ni < 2 || ni > SCALAR_ORDER_LIMIT) return;
+  // Most calls pass here: the largest possible total is within the budget.
+  const perElement = kind === 'besselY' ? ni : Math.max(ni, besselJSweepStart(ni) * SWEEP_WEIGHT);
+  if (perElement * xs.length <= MAX_RECURRENCE_ORDER) return;
+  let steps = 0;
+  for (let i = 0; i < xs.length; i++) {
+    steps += besselElementSteps(kind, ni, xs[i]);
+  }
+  assertArrayWork(kind, n, xs.length, Math.ceil(steps), MAX_RECURRENCE_ORDER);
 }
 
 /** Order-`n` (`n ≥ 2`) variant of an AS managed `<name>(order, xs)` kernel. */

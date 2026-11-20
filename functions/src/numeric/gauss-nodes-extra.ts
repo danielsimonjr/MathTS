@@ -1,20 +1,29 @@
 /**
  * Gauss quadrature nodes and weights for classical weight functions.
  *
- * - Hermite (weight `e^{−x²}` on ℝ), Laguerre (weight `x^α e^{−x}` on `[0, ∞)`),
- *   Jacobi (weight `(1−x)^α (1+x)^β` on `[−1, 1]`): the nodes are the roots of
- *   the degree-n orthogonal polynomial, found by a sign-change scan with
- *   bisection; the weights come from the Christoffel formula
- *   `w_i = 1 / Σ_{k<n} p_k(x_i)²` with orthonormal `p_k`.
+ * - Hermite (weight `e^{−x²}` on ℝ) and Laguerre (weight `x^α e^{−x}` on `[0, ∞)`):
+ *   the Golub–Welsch method. The nodes are the eigenvalues of the symmetric tridiagonal
+ *   Jacobi matrix of the weight (O(n²), `tridiagonal-eigen.ts`), refined by Newton steps
+ *   on the orthonormal polynomial `p_n`; the weights come from the Christoffel formula
+ *   `w_i = 1 / Σ_{k<n} p_k(x_i)²` with orthonormal `p_k`, rescaled so that the sum does
+ *   not overflow.
+ * - Jacobi (weight `(1−x)^α (1+x)^β` on `[−1, 1]`): the nodes are the roots of the
+ *   degree-n orthogonal polynomial, found by a sign-change scan with bisection; the
+ *   weights come from the same Christoffel formula.
  * - Chebyshev T and U: closed-form nodes and weights.
  *
  * @packageDocumentation
  */
 
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
+import { symTridiagEigenvalues } from './tridiagonal-eigen.js';
 
-/** Largest `n` for the root-scan rules. Above about 450 the scan throws, so the limit costs no result. */
-const MAX_SCAN_DEGREE = 500;
+/**
+ * Largest `n` for the Golub–Welsch rules (`rootsHermite`, `rootsLaguerre`). The cost is O(n²):
+ * n = 5000 took 6.2 s (Hermite) and 7.1 s (Laguerre), and n = 9000 took 13.4 s and 29.1 s at
+ * about 40% machine load, so 7000 is below the 20 s point.
+ */
+const MAX_GAUSS_RULE_DEGREE = 7000;
 
 /** Largest `n` for `rootsJacobi` (n = 1200 took 14.0 s). */
 const MAX_JACOBI_NODES = 1300;
@@ -105,24 +114,6 @@ function scanRoots(p: (x: number) => number, lo: number, hi: number, n: number):
   return roots;
 }
 
-/** Physicists' Hermite H_k(x) by the three-term recurrence. */
-function hermiteValues(n: number, x: number): number[] {
-  const vals = [1, 2 * x];
-  for (let k = 1; k < n; k++) {
-    vals.push(2 * x * vals[k] - 2 * k * vals[k - 1]);
-  }
-  return vals;
-}
-
-/** Generalized Laguerre L_k^{(α)}(x) for k = 0..n. */
-function laguerreValues(n: number, alpha: number, x: number): number[] {
-  const vals = [1, 1 + alpha - x];
-  for (let k = 1; k < n; k++) {
-    vals.push(((2 * k + 1 + alpha - x) * vals[k] - (k + alpha) * vals[k - 1]) / (k + 1));
-  }
-  return vals;
-}
-
 /** Jacobi P_k^{(α,β)}(x) for k = 0..n. */
 function jacobiValues(n: number, alpha: number, beta: number, x: number): number[] {
   const vals = [1, alpha + 1 + ((alpha + beta + 2) * (x - 1)) / 2];
@@ -138,52 +129,121 @@ function jacobiValues(n: number, alpha: number, beta: number, x: number): number
 }
 
 /**
+ * Golub–Welsch rule for a weight whose orthonormal polynomials `p_k` satisfy
+ * `x p_k = b_{k+1} p_{k+1} + a_k p_k + b_k p_{k−1}` with `p_0 = p0`.
+ *
+ * The nodes are the eigenvalues of the symmetric tridiagonal Jacobi matrix (diagonal `a_k`,
+ * off-diagonal `b_k`). The eigenvalues are accurate to about `ε · max|node|` in absolute terms,
+ * so two Newton steps on `p_n` restore the relative accuracy of the small nodes. The weights are
+ * `w_i = μ_0 / Σ_{k<n} p_k(x_i)²`, here `1 / Σ p_k²` because `p0² = μ_0`. The recurrences
+ * rescale by `1e-150` when a value passes `1e150`, so a weight below `1e-300` ends as 0 or as a
+ * subnormal number instead of an overflow.
+ */
+function golubWelschRule(
+  n: number,
+  a: (k: number) => number,
+  b: (k: number) => number,
+  p0: number
+): GaussRule {
+  const diag = new Float64Array(n);
+  const off = new Float64Array(n - 1);
+  for (let k = 0; k < n; k++) diag[k] = a(k);
+  for (let k = 1; k < n; k++) off[k - 1] = b(k);
+  const nodes = symTridiagEigenvalues(diag, off);
+
+  /** `p_n(x)`, `p_n'(x)`, `Σ_{k<n} p_k(x)²` and the number of rescales, all in the scaled units. */
+  const evaluate = (x: number) => {
+    let previous = 0;
+    let current = p0;
+    let dPrevious = 0;
+    let dCurrent = 0;
+    let sum = p0 * p0;
+    let rescales = 0;
+    for (let k = 0; k < n; k++) {
+      const bk = k === 0 ? 0 : b(k);
+      const bNext = b(k + 1);
+      const next = ((x - a(k)) * current - bk * previous) / bNext;
+      const dNext = ((x - a(k)) * dCurrent + current - bk * dPrevious) / bNext;
+      previous = current;
+      current = next;
+      dPrevious = dCurrent;
+      dCurrent = dNext;
+      if (k + 1 < n) sum += current * current;
+      if (Math.abs(current) > 1e150) {
+        current *= 1e-150;
+        previous *= 1e-150;
+        dCurrent *= 1e-150;
+        dPrevious *= 1e-150;
+        sum *= 1e-300;
+        rescales++;
+      }
+    }
+    return { value: current, slope: dCurrent, sum, rescales };
+  };
+
+  const weights = new Array<number>(n);
+  for (let i = 0; i < n; i++) {
+    let x = nodes[i];
+    for (let step = 0; step < 2; step++) {
+      const v = evaluate(x);
+      const dx = v.value / v.slope;
+      if (Number.isFinite(dx)) x -= dx;
+    }
+    nodes[i] = x;
+    const { sum, rescales } = evaluate(x);
+    // Each rescale divides the sum by 1e300, so 1 / sum is too large by that factor.
+    weights[i] = rescales === 0 ? 1 / sum : rescales === 1 ? (1 / sum) * 1e-300 : 0;
+  }
+  return { nodes, weights };
+}
+
+/**
  * Hermite Gauss rule: nodes are the roots of H_n; weights satisfy
- * `Σ w_i f(x_i) ≈ ∫ e^{−x²} f(x) dx`.
+ * `Σ w_i f(x_i) ≈ ∫ e^{−x²} f(x) dx`. Golub–Welsch (`a_k = 0`, `b_k = √(k/2)`,
+ * `p_0 = π^{−1/4}`), so the cost is O(n²) and `n` up to `MAX_GAUSS_RULE_DEGREE` works.
+ * The nodes are symmetric: `x_i = −x_{n−1−i}` and the middle node of an odd `n` is 0.
  *
  * @example
  * rootsHermite(2).nodes // [-0.7071067811865476, 0.7071067811865476]
  */
 export function rootsHermite(n: number): GaussRule {
-  checkDegree(n, 'rootsHermite', MAX_SCAN_DEGREE);
-  const bound = Math.sqrt(2 * n + 1) + 1;
-  const nodes = scanRoots((x) => hermiteValues(n, x)[n], -bound, bound, n);
-  const weights = nodes.map((x) => {
-    const vals = hermiteValues(n - 1, x);
-    let s = 0;
-    for (let k = 0; k < n; k++) {
-      s += (vals[k] * vals[k]) / (Math.pow(2, k) * gammaFn(k + 1) * Math.sqrt(Math.PI));
-    }
-    return 1 / s;
-  });
-  return { nodes, weights };
+  checkDegree(n, 'rootsHermite', MAX_GAUSS_RULE_DEGREE);
+  const rule = golubWelschRule(
+    n,
+    () => 0,
+    (k) => Math.sqrt(k / 2),
+    Math.pow(Math.PI, -0.25)
+  );
+  for (let i = 0; i < n >> 1; i++) {
+    const j = n - 1 - i;
+    const x = (rule.nodes[j] - rule.nodes[i]) / 2;
+    const w = (rule.weights[i] + rule.weights[j]) / 2;
+    rule.nodes[i] = -x;
+    rule.nodes[j] = x;
+    rule.weights[i] = w;
+    rule.weights[j] = w;
+  }
+  if (n % 2 === 1) rule.nodes[n >> 1] = 0;
+  return rule;
 }
 
 /**
  * Generalized Laguerre Gauss rule for weight `x^α e^{−x}` on `[0, ∞)`
- * (`α = 0` by default). Weights: `w_i = 1 / Σ_{k<n} k! (L_k^α(x_i))² / Γ(k+α+1)`.
+ * (`α = 0` by default). Golub–Welsch (`a_k = 2k+α+1`, `b_k = √(k(k+α))`,
+ * `p_0 = 1/√Γ(α+1)`), so the cost is O(n²) and `n` up to `MAX_GAUSS_RULE_DEGREE` works.
  *
  * @example
  * rootsLaguerre(2).nodes // [0.5857864376269049, 3.414213562373095]
  */
 export function rootsLaguerre(n: number, alpha = 0): GaussRule {
-  checkDegree(n, 'rootsLaguerre', MAX_SCAN_DEGREE);
+  checkDegree(n, 'rootsLaguerre', MAX_GAUSS_RULE_DEGREE);
   checkExponent(alpha, 'rootsLaguerre');
-  const upper = 4 * n + 2 * alpha + 4;
-  const nodes = scanRoots((x) => laguerreValues(n, alpha, x)[n], 0, upper, n);
-  const hk: number[] = [];
-  let fact = 1;
-  for (let k = 0; k < n; k++) {
-    hk.push(fact / gammaFn(k + alpha + 1));
-    fact *= k + 1;
-  }
-  const weights = nodes.map((x) => {
-    const vals = laguerreValues(n - 1, alpha, x);
-    let s = 0;
-    for (let k = 0; k < n; k++) s += hk[k] * vals[k] * vals[k];
-    return 1 / s;
-  });
-  return { nodes, weights };
+  return golubWelschRule(
+    n,
+    (k) => 2 * k + alpha + 1,
+    (k) => Math.sqrt(k * (k + alpha)),
+    1 / Math.sqrt(gammaFn(alpha + 1))
+  );
 }
 
 /**
