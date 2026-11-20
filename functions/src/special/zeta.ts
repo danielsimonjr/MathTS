@@ -39,6 +39,8 @@ interface ExactBigNumber {
 const BORWEIN_DIGITS_PER_TERM = Math.log10(3 + Math.sqrt(8));
 /** Guard digits of the Borwein series of a BigNumber: once in the term count, twice in the work precision. */
 const BORWEIN_GUARD_DIGITS = 10;
+/** The Euler-Mascheroni constant: zeta(s) = 1 / (s - 1) + EULER_GAMMA + O(s - 1) next to the pole. */
+const EULER_GAMMA = 0.5772156649015329;
 
 type NumericValue = number | BigNumberType | ComplexType;
 
@@ -167,25 +169,21 @@ export const createZeta = /* #__PURE__ */ factory(
         // its first term, so the series does not cancel: a few guard digits are enough.
         const precision = BigNumber!.precision;
         const digits = Math.ceil((precision + BORWEIN_GUARD_DIGITS) / BORWEIN_DIGITS_PER_TERM);
-        if (negative) {
-          // gamma of a non-integer BigNumber is not defined, so only the guard of zetaNumeric
-          // (a value within relTol of 0) gives a result here.
-          return atWorkPrecision(BigNumber!, precision + 2 * BORWEIN_GUARD_DIGITS, () =>
-            zetaNumeric(
-              s,
-              createValue,
-              () => digits,
-              () => BigNumber!.piAt(),
-              borweinD
-            )
-          );
-        }
+        if (negative) return reflectedZeta(s, x, precision, digits);
         // A BigNumber is exact: 0 and 1 are the only special values. zetaNumeric compares with
         // config.relTol and config.absTol (1e-12), so it gave NaN for 1 + 1e-25 and -0.5 for 1e-40.
         if (x.isZero()) return createValue(-0.5);
         if (x.equals(1)) return createValue(NaN);
         // 1 - 2^(1 - s) loses one digit for each digit of |s - 1| below 1.
         const closeToOne = Math.max(0, -x.sub(1).abs().e);
+        // At this distance EULER_GAMMA is at or below the last digit of 1 / (s - 1), and the next
+        // term of the Laurent series is closeToOne digits below it. The Borwein series would need
+        // closeToOne extra digits: 3000 digits gave no result in 170 s.
+        if (closeToOne >= precision) {
+          return atWorkPrecision(BigNumber!, precision + BORWEIN_GUARD_DIGITS, () =>
+            createValue(1).div(s.minus(1)).plus(createValue(EULER_GAMMA))
+          );
+        }
         return atWorkPrecision(
           BigNumber!,
           precision + 2 * BORWEIN_GUARD_DIGITS + closeToOne,
@@ -202,6 +200,51 @@ export const createZeta = /* #__PURE__ */ factory(
       },
       Complex: zetaComplex,
     });
+
+    /**
+     * zeta(s) of a negative BigNumber s that is not an even integer, by the reflection formula
+     * of `zeta`. The work precision holds three losses: 1 - 2^s of zeta(1 - s) next to the pole
+     * (one digit for each digit of |s| below 1), sin(pi s / 2) next to a trivial zero (one digit
+     * for each digit of the distance to the nearest even integer below |s|), and the integer
+     * digits of s in the arguments of sin and pow. An infinite factor (gamma(1 - s) above the
+     * exponent range) gives NaN; the value is then infinite with the sign of sin(pi s / 2),
+     * because the other factors are positive.
+     * @param {BigNumber} s   the argument
+     * @param {ExactBigNumber} x   s with the exact methods
+     * @param {number} precision   the precision of the result
+     * @param {number} digits   the number of Borwein terms
+     * @returns {BigNumber} zeta(s) to the precision
+     */
+    function reflectedZeta(
+      s: BigNumberType,
+      x: ExactBigNumber,
+      precision: number,
+      digits: number
+    ): BigNumberType {
+      const integerDigits = Math.max(0, x.e + 1);
+      const guess = precision + 2 * BORWEIN_GUARD_DIGITS + integerDigits;
+      // s / 2 minus its nearest integer: the distance to the nearest even integer, halved.
+      const evenDistance = atWorkPrecision(BigNumber!, guess + 5, () => {
+        const half = s.div(2);
+        return half.minus(half.round()).abs();
+      });
+      const poleDigits = Math.max(0, -x.e);
+      const zeroDigits = evenDistance.isZero() ? 0 : Math.max(0, x.e - evenDistance.e) + 1;
+      const workPrecision = guess + poleDigits + zeroDigits;
+      return atWorkPrecision(BigNumber!, workPrecision, () => {
+        const value = zeta(
+          s,
+          (v: number): BigNumberType => new BigNumber!(v),
+          () => digits,
+          (v: BigNumberType) => v as unknown as number,
+          () => BigNumber!.piAt(),
+          borweinD
+        ) as BigNumberType;
+        if (!value.isNaN()) return value;
+        const sine = BigNumber!.piAt().mul(s).div(2).sin();
+        return new BigNumber!(sine.isNegative() ? -Infinity : Infinity);
+      });
+    }
 
     /**
      * Compute the Riemann zeta function of a real number or BigNumber `s`.

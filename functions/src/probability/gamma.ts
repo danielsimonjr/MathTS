@@ -26,6 +26,10 @@ interface BigNumberType {
   isNegative(): boolean;
   isZero(): boolean;
   isFinite(): boolean;
+  isNaN(): boolean;
+  abs(): BigNumberType;
+  round(): BigNumberType;
+  sin(): BigNumberType;
   sub(n: number | BigNumberType): BigNumberType;
   mul(n: number | BigNumberType): BigNumberType;
   add(n: number | BigNumberType): BigNumberType;
@@ -159,6 +163,7 @@ export const createGamma = /* #__PURE__ */ factory(
       number: gammaNumber,
       Complex: gammaComplex,
       BigNumber: function (n: BigNumberType): BigNumberType {
+        if (n.isNaN()) return n;
         if (n.isInteger()) {
           return n.isNegative() || n.isZero()
             ? BigNumber.fromNumber(Infinity)
@@ -169,7 +174,7 @@ export const createGamma = /* #__PURE__ */ factory(
           return BigNumber.fromNumber(n.isNegative() ? NaN : Infinity);
         }
 
-        throw new Error('Integer BigNumber expected');
+        return n.isNegative() ? reflectedGamma(n) : shiftedGamma(n);
       },
     });
 
@@ -186,20 +191,78 @@ export const createGamma = /* #__PURE__ */ factory(
     }
 
     /**
+     * The number of integer digits of ln(Gamma(m + 1)) for an m above 1. ln(Gamma(m + 1)) is
+     * below m ln(m) + 1, so the count is at most the digits of m ln(m) plus one.
+     * @param {number} m   a number above 1
+     * @returns {number} an upper bound of the integer digits
+     */
+    function lnGammaIntegerDigits(m: number): number {
+      return Math.max(1, Math.ceil(Math.log10(m * Math.max(1, Math.log(m))))) + 1;
+    }
+
+    /**
+     * Gamma(x) of a positive BigNumber x that is not an integer. The Stirling series needs an
+     * argument above the precision, so Gamma(x) = Gamma(x + N + 1) / (x (x + 1) ... (x + N)),
+     * with N = max(0, ceil(precision + STIRLING_GUARD_DIGITS - x)). The work precision holds the
+     * integer digits of ln(Gamma(x + N + 1)) and the rounding error of the N + 1 factors.
+     * @param {BigNumber} x   a finite non-integer above 0
+     * @returns {BigNumber} Gamma(x) to the precision
+     */
+    function shiftedGamma(x: BigNumberType): BigNumberType {
+      const precision = BigNumber.precision;
+      const xNum = x.toNumber();
+      const shift = Math.max(0, Math.ceil(precision + STIRLING_GUARD_DIGITS - xNum));
+      const m = xNum + shift;
+      const workPrecision =
+        precision + STIRLING_GUARD_DIGITS + lnGammaIntegerDigits(m) + 2 * String(shift + 1).length;
+      return atWorkPrecision(BigNumber, workPrecision, () => {
+        let divisor = x;
+        for (let k = 1; k <= shift; k++) divisor = divisor.mul(x.add(k));
+        const shifted = x.add(shift);
+        const numerator = stirlingFactorial(shifted, m);
+        // The shifted argument is at least precision + STIRLING_GUARD_DIGITS, so the series
+        // converges; a non-convergence is a defect, not a fallback case.
+        if (!numerator) throw new Error('gamma: the Stirling series did not converge');
+        return numerator.div(divisor);
+      });
+    }
+
+    /**
+     * Gamma(x) of a negative BigNumber x that is not an integer, by the reflection formula
+     * Gamma(x) = pi / (sin(pi x) Gamma(1 - x)). sin(pi x) loses the integer digits of x and one
+     * digit for each digit of the distance from x to the nearest integer below 1.
+     * @param {BigNumber} x   a finite non-integer below 0
+     * @returns {BigNumber} Gamma(x) to the precision
+     */
+    function reflectedGamma(x: BigNumberType): BigNumberType {
+      const precision = BigNumber.precision;
+      const integerDigits = Math.max(0, x.e + 1);
+      const guess = precision + STIRLING_GUARD_DIGITS + integerDigits;
+      const distanceExponent = atWorkPrecision(BigNumber, guess + 5, () =>
+        x.sub(x.round()).abs()
+      ).e;
+      const extra = integerDigits + Math.max(0, -distanceExponent);
+      return atWorkPrecision(BigNumber, precision + STIRLING_GUARD_DIGITS + extra, () => {
+        const pi = BigNumber.piAt();
+        const sine = pi.mul(x).sin();
+        return pi.div(sine.mul(shiftedGamma(BigNumber.fromNumber(1).sub(x))));
+      });
+    }
+
+    /**
      * n! from the Stirling series: ln(n!) = n ln(n) - n + ln(2 pi n) / 2 + sum(B(2k) / (2k (2k - 1)
      * n^(2k - 1))), then exp. The sum stops when a term is below the precision. It returns
      * `undefined` when the terms do not shrink that far, and the caller then multiplies. The work
      * precision keeps the integer digits of ln(n!) too, so the absolute error of ln(n!) is below
      * the last digit of the result.
-     * @param {BigNumber} n   an integer above 8
+     * The formula is ln(Gamma(n + 1)), so n can also be a real number that is not an integer.
+     * @param {BigNumber} n   a number above 8
      * @param {number} nNum   n as a number
-     * @returns {BigNumber | undefined} the factorial of n to the precision, or undefined
+     * @returns {BigNumber | undefined} Gamma(n + 1) to the precision, or undefined
      */
     function stirlingFactorial(n: BigNumberType, nNum: number): BigNumberType | undefined {
       const precision = BigNumber.precision;
-      const integerDigits = Math.floor(Math.log10(nNum)) + 1;
-      // ln(n!) is below 46 n, so it has at most integerDigits + 2 integer digits.
-      const workPrecision = precision + STIRLING_GUARD_DIGITS + integerDigits + 2;
+      const workPrecision = precision + STIRLING_GUARD_DIGITS + lnGammaIntegerDigits(nNum);
       const termLimit = Math.ceil(workPrecision / 2) + 5;
       const tangent = tangentNumbers(termLimit);
       let converged = false;
