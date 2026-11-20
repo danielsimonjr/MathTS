@@ -73,24 +73,28 @@ check('windowFunction(3, hann)', arrEq(readArr(exports.windowFunction(3, 2)), [0
   exports.__unpin(x);
 }
 
-// welch_psd_f64 zero-pads each frame to the next power of two; bins 0..floor(frame/2) are
-// returned. Only an even frame ends on the Nyquist bin: the last bin of an odd frame lies below
-// Nyquist and is doubled like the bins before it (#1145). Oracle: numpy 2.3.5, two frames of
-// x = [1,5,2,8,3,9,4,7,6,10] zero-padded to 8, rect window, |fft|^2 / (2 * 5), bins 1..2 doubled.
+// welch_psd_f64 works on a frame whose length is a power of two (its FFT has exactly that many
+// points); bin k is at k / frame and the last bin of an even frame is the Nyquist bin. Any other
+// frame length returns an empty array (the JS bridge then takes its exact-length path), because the
+// kernel would put bin k at k / nextPow2(frame) (#1145). Oracle: numpy 2.3.5, two frames of
+// x = [1,5,2,8,3,9,4,7,6,10], rect window, |fft|^2 / (2 * 4), bin 1 doubled.
 {
   const x = makeArray([1, 5, 2, 8, 3, 9, 4, 7, 6, 10]);
-  const odd = readArr(exports.welch_psd_f64(x, 5, 0, 3));
-  check(
-    'welch_psd_f64 doubles the last bin of an odd frame',
-    odd.length === 3 && arrEq(odd, [165.7, 69.21564209736039, 32.19999999999999]),
-    JSON.stringify(odd)
-  );
-  // An even frame keeps its Nyquist bin single: frame 4, two frames (the first 8 samples).
   const even = readArr(exports.welch_psd_f64(x, 4, 0, 3));
   check(
-    'welch_psd_f64 leaves the Nyquist bin of an even frame single',
+    'welch_psd_f64 leaves the Nyquist bin of a power-of-two frame single',
     even.length === 3 && arrEq(even, [98.125, 3.750000000000001, 22.625]),
     JSON.stringify(even)
+  );
+  for (const frame of [3, 5, 6, 7, 10]) {
+    check(
+      `welch_psd_f64 returns empty for the frame length ${frame}, which is not a power of two`,
+      readArr(exports.welch_psd_f64(x, frame, 0, 3)).length === 0
+    );
+  }
+  check(
+    'bartlett_psd_f64 returns empty for a frame length that is not a power of two',
+    readArr(exports.bartlett_psd_f64(x, 6)).length === 0
   );
   exports.__unpin(x);
 }

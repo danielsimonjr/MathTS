@@ -233,7 +233,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 365
+      "loc": 369
     },
     {
       "file": "assembly/src/sort.ts",
