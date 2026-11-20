@@ -211,3 +211,19 @@ describe('#1155 an empty or a large selection', () => {
     expect(r.size).toEqual([n]);
   });
 });
+
+describe('#1155 subset assignment does not change the replacement of the caller', () => {
+  // mathjs 15.2.0 `_set` unsqueezes the caller's replacement Array in place (a mutation of an
+  // input, not a documented contract). MathTS gives the same result and leaves the Array as it is.
+  it('a 1-D replacement for a [2, 1] selection keeps its shape', () => {
+    const rep = [5, 6];
+    const m = mat(ts, d2()).subset(ts.index([0, 1], 0), rep) as M;
+    expect(m.toArray()).toEqual([
+      [5, 2],
+      [6, 4],
+    ]);
+    expect(rep).toEqual([5, 6]);
+  });
+  it('the result equals mathjs', () =>
+    expectSame((l) => mat(l, d2()).subset(l.index([0, 1], 0), [5, 6])));
+});

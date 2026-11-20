@@ -449,7 +449,10 @@ export class MathJSDenseMatrix {
         while (selection[k] === 1 && repSize[k] === 1) k++;
         let outer = 0;
         for (; selection[k] === 1; k++) outer++;
-        rep = unsqueeze(rep as unknown[], selection.length, outer, repSize);
+        // `unsqueeze` changes its Array in place: give it a copy, so the Array of the caller
+        // keeps its shape (mathjs changes the caller's Array here).
+        const own = rep === replacement ? copyAxes(rep, repSize.length) : rep;
+        rep = unsqueeze(own as unknown[], selection.length, outer, repSize);
         repSize = arraySize(rep as unknown[]);
       }
       if (!sameSize(repSize)) throw new DimensionError(selection, repSize, '>');
