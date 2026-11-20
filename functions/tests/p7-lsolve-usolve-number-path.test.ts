@@ -221,12 +221,25 @@ describe('P7-11 BigNumber / Fraction / Complex fallback', () => {
 });
 
 describe('P7-11 near-singular, IEEE, and matrix RHS', () => {
-  it('a diagonal inside absTol throws the same singular error as the generic loop', () => {
+  // #1169 (C1 F1): a triangular matrix is singular only when a diagonal entry is exactly 0.
+  // The old pin threw on diag(1e-16, 1e-16), whose determinant is 1e-32, not 0; exact forward
+  // substitution gives x0 = 1e-16 / 1e-16 = 1 and x1 = (2 - 1) / 1e-16 = 1e16.
+  it('a diagonal inside absTol solves bit-exact against the generic loop', () => {
     const L = [
       [1e-16, 0],
       [1, 1e-16],
     ];
     const b = [1e-16, 2];
+    expectMatrixBitExact(asRows(lsolve(L, b)), asRows(lsolveGeneric(L, b)));
+    expect(asRows(lsolve(L, b))).toEqual([[1], [1e16]]);
+  });
+
+  it('an exactly zero diagonal throws the same singular error as the generic loop', () => {
+    const L = [
+      [0, 0],
+      [1, 1],
+    ];
+    const b = [1, 2];
     expect(() => lsolve(L, b)).toThrow('Linear system cannot be solved since matrix is singular');
     expect(() => lsolveGeneric(L, b)).toThrow(
       'Linear system cannot be solved since matrix is singular'

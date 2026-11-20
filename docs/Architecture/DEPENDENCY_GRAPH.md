@@ -3012,17 +3012,18 @@ graph LR
 
 ## Functions/algebra Dependencies
 
-### `functions/src/algebra/decomposition/lup.ts` - Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a
+### `functions/src/algebra/decomposition/lup.ts` - Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type               |
-| ------------------------------ | --------------- | ------------------ |
-| `../../utils/object.js`        | `clone`         | Import             |
-| `../../utils/string.js`        | `format`        | Import             |
-| `../../utils/factory.js`       | `factory`       | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
-| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                           | Imports                                | Type               |
+| ------------------------------ | -------------------------------------- | ------------------ |
+| `../../utils/object.js`        | `clone`                                | Import             |
+| `../../utils/string.js`        | `format`                               | Import             |
+| `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
+| `../../utils/typed-impl.js`    | `createNumberFieldOps, NumberFieldOps` | Import             |
+| `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
 
 **Exports:**
 
@@ -3040,16 +3041,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                              | Type               |
-| -------------------------------- | ------------------------------------ | ------------------ |
-| `../../utils/factory.js`         | `factory`                            | Import             |
-| `../../utils/string.js`          | `format`                             | Import             |
-| `../../utils/isExactZero.js`     | `isExactZero`                        | Import             |
-| `../../utils/typed-impl.js`      | `findTypedImpl`                      | Import             |
-| `../../core/function/typed.js`   | `TypedFunction`                      | Import (type-only) |
-| `../../utils/is.js`              | `isBigNumber, isComplex, isFraction` | Import             |
-| `../../utils/real-scale.js`      | `realScale, squaresLeaveRange`       | Import             |
-| `../../utils/bignumber-hypot.js` | `P_NORM_SUM_MIN`                     | Import             |
+| File                             | Imports                                | Type               |
+| -------------------------------- | -------------------------------------- | ------------------ |
+| `../../utils/factory.js`         | `factory`                              | Import             |
+| `../../utils/string.js`          | `format`                               | Import             |
+| `../../utils/isExactZero.js`     | `isExactZero`                          | Import             |
+| `../../utils/typed-impl.js`      | `createNumberFieldOps, NumberFieldOps` | Import             |
+| `../../core/function/typed.js`   | `TypedFunction`                        | Import (type-only) |
+| `../../utils/is.js`              | `isBigNumber, isComplex, isFraction`   | Import             |
+| `../../utils/real-scale.js`      | `realScale, squaresLeaveRange`         | Import             |
+| `../../utils/bignumber-hypot.js` | `P_NORM_SUM_MIN`                       | Import             |
 
 **Exports:**
 
@@ -3308,6 +3309,7 @@ graph LR
 | File                           | Imports                                | Type               |
 | ------------------------------ | -------------------------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
 | `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
@@ -3332,6 +3334,7 @@ graph LR
 | ---------------------------- | ----------------------- | ------ |
 | `../../utils/factory.js`     | `factory`               | Import |
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
+| `../../utils/isExactZero.js` | `isZeroEntry`           | Import |
 
 **Exports:**
 
@@ -3369,12 +3372,12 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/pivot-tolerance.ts` - Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Safety factor on `n * eps` in {@link pivotTolerance}.
 
 **Exports:**
 
-- Functions: `isBadLuFactorPivot`
-- Constants: `LU_PIVOT_TOL`, `LUSOLVE_SINGULAR_MESSAGE`
+- Functions: `pivotTolerance`, `isBadLuFactorPivot`
+- Constants: `PIVOT_EPS_FACTOR`, `LUSOLVE_SINGULAR_MESSAGE`
 
 ---
 
@@ -3391,6 +3394,7 @@ graph LR
 | File                           | Imports                                | Type               |
 | ------------------------------ | -------------------------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
 | `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
@@ -3416,6 +3420,7 @@ graph LR
 | ---------------------------- | ----------------------- | ------ |
 | `../../utils/factory.js`     | `factory`               | Import |
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
+| `../../utils/isExactZero.js` | `isZeroEntry`           | Import |
 
 **Exports:**
 
@@ -11306,10 +11311,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                                                                       | Type               |
-| ------------------------ | ----------------------------------------------------------------------------- | ------------------ |
-| `../../utils/factory.js` | `factory`                                                                     | Import             |
-| `./types.js`             | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
+| File                         | Imports                                                                       | Type               |
+| ---------------------------- | ----------------------------------------------------------------------------- | ------------------ |
+| `../../utils/factory.js`     | `factory`                                                                     | Import             |
+| `../../utils/isExactZero.js` | `isZeroEntry`                                                                 | Import             |
+| `./types.js`                 | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -12523,23 +12529,24 @@ graph LR
 
 | Package                        | Import                                                         |
 | ------------------------------ | -------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix` | `densifyForSolver, SparseMatrix`                               |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver, singularValues, SparseMatrix`               |
 | `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, pow2ScaleExponent` |
 
 **Internal Dependencies:**
 
-| File                               | Imports                                                                                                                            | Type      |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
-| `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
-| `../numeric/ode-step-limit.js`     | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
-| `../numeric/adaptive-quad.js`      | `quadValue`                                                                                                                        | Import    |
-| `../optimization-extra.js`         | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
-| `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
-| `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
-| `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
-| `../numeric/solveDDE.js`           | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
-| `../numeric/gauss-legendre4.js`    | `gaussLegendre4, GL4_A, GL4_B, GL4_C, GL4ConvergenceError, GaussLegendre4Options, GaussLegendre4Solution`                          | Re-export |
+| File                                   | Imports                                                                                                                            | Type      |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../algebra/solver/pivot-tolerance.js` | `pivotTolerance`                                                                                                                   | Import    |
+| `../numeric/numeric-jacobian.js`       | `numericJacobian`                                                                                                                  | Import    |
+| `../numeric/solveODE.js`               | `rosenbrockSolve`                                                                                                                  | Import    |
+| `../numeric/ode-step-limit.js`         | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
+| `../numeric/adaptive-quad.js`          | `quadValue`                                                                                                                        | Import    |
+| `../optimization-extra.js`             | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
+| `../numeric/rational-nullspace.js`     | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
+| `../numeric/solveParabolicPDE.js`      | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
+| `../numeric/solveDAE.js`               | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
+| `../numeric/solveDDE.js`               | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
+| `../numeric/gauss-legendre4.js`        | `gaussLegendre4, GL4_A, GL4_B, GL4_C, GL4ConvergenceError, GaussLegendre4Options, GaussLegendre4Solution`                          | Re-export |
 
 **Exports:**
 
@@ -13124,7 +13131,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isExactZero`
+- Functions: `isExactZero`, `isZeroEntry`
 
 ---
 
@@ -13525,7 +13532,9 @@ graph LR
 
 **Exports:**
 
-- Functions: `findTypedImpl`
+- Interfaces: `NumberFieldScalars`
+- Types: `NumberFieldOps`
+- Functions: `findTypedImpl`, `createNumberFieldOps`
 
 ---
 
@@ -20861,9 +20870,9 @@ graph LR
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
-| `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
@@ -21772,13 +21781,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238835 |
-| Total Exports           | 7406   |
+| Total Lines of Code     | 239183 |
+| Total Exports           | 7409   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 672    |
-| Total Functions         | 2591   |
-| Total Type Guards       | 184    |
+| Total Interfaces        | 673    |
+| Total Functions         | 2594   |
+| Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |
