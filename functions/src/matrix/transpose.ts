@@ -193,8 +193,8 @@ export const createTranspose = /* #__PURE__ */ factory(
       }
       // vars
       let p: number, l: number, j: number;
-      // loop values in matrix
-      for (p = 0, l = index.length; p < l; p++) {
+      // loop the values that the column pointers reach (ignore stale tail entries)
+      for (p = 0, l = ptr[columns]; p < l; p++) {
         // number of values in row
         w[index[p]]++;
       }

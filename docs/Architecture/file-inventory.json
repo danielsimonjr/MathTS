@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-19",
-  "totalFiles": 2544,
+  "totalFiles": 2546,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1323,
     "test-only": 0,
     "orphan": 0,
-    "test": 1129,
+    "test": 1131,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1349,
-    "tests": 1129,
+    "tests": 1131,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1172,
+    "@danielsimonjr/mathts-functions": 1174,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6064,7 +6064,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 663
+      "loc": 668
     },
     {
       "file": "functions/src/algebra/sparse/csChol.ts",
@@ -10810,7 +10810,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 128
+      "loc": 125
+    },
+    {
+      "file": "functions/tests/dogfood-1239-slu-order2.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 160
+    },
+    {
+      "file": "functions/tests/dogfood-1239-transpose-stale.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
     },
     {
       "file": "functions/tests/dogfood-1243-symmetric-small-entries.test.ts",
