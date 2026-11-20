@@ -135,6 +135,41 @@ function maxAbsEntry(a: number[][]): number {
 }
 
 /**
+ * The test that an eigenvalue of `a` is real: its imaginary part is rounding noise, `|im| <=
+ * 8 n eps scale`. The scale is local (#1240). A scale of the whole matrix, its largest entry,
+ * reads `1e-5 +- i` beside an entry of 1e20 as real, because the noise of the huge entry is far
+ * above 1. Every eigenvalue lies in the Gershgorin disc of some row, `|l - a_ii| <= R_i` with R_i
+ * the sum of the other entries of the row. The scale of an eigenvalue is the largest entry of the
+ * rows whose disc holds it. The discs have a slack of the noise of the largest entry, `8 n eps
+ * max|a|`, so a value that rounding moved from its disc still finds its rows. When no row holds
+ * the value, the scale is the largest entry of the matrix. The test uses the eigenvalue alone, so
+ * `values` does not depend on `eigenvectors`.
+ */
+function makeIsReal(a: number[][]): (v: { re: number; im: number }) => boolean {
+  const n = a.length;
+  const noise = 8 * n * Number.EPSILON;
+  const global = maxAbsEntry(a);
+  const slack = noise * global;
+  const rows = a.map((row, i) => {
+    let radius = 0;
+    let top = 0;
+    for (let j = 0; j < n; j++) {
+      const x = Math.abs(row[j]);
+      if (j !== i) radius += x;
+      if (x > top) top = x;
+    }
+    return { centre: row[i], radius: radius + slack, top };
+  });
+  return (v) => {
+    let scale = 0;
+    for (const { centre, radius, top } of rows) {
+      if (top > scale && Math.hypot(v.re - centre, v.im) <= radius) scale = top;
+    }
+    return Math.abs(v.im) <= noise * (scale > 0 ? scale : global);
+  };
+}
+
+/**
  * The real part of eigenvector `i`, or, for a pair that rounds to a repeated real eigenvalue, a
  * real eigenvector of that eigenvalue. The two members of a pair share the real part
  * `vectors[i]`, so the member with im < 0 takes the imaginary part `vectorsIm[i]` instead, scaled
@@ -143,10 +178,10 @@ function maxAbsEntry(a: number[][]): number {
 function realVector(
   ne: { values: Array<{ re: number; im: number }>; vectors: number[][]; vectorsIm: number[][] },
   i: number,
-  isReal: (im: number) => boolean
+  isReal: (v: { re: number; im: number }) => boolean
 ): number[] {
   const im = ne.values[i].im;
-  if (im >= 0 || !isReal(im)) return ne.vectors[i];
+  if (im >= 0 || !isReal(ne.values[i])) return ne.vectors[i];
   const v = ne.vectorsIm[i];
   const norm = Math.hypot(...v) || 1;
   return v.map((x) => x / norm);
@@ -253,20 +288,18 @@ export function correctEigs(
     // a real spectrum keeps number[] vectors.
     // A real eigenvalue of a real matrix has an im of exactly 0, except when it is repeated: the
     // copies of a repeated real eigenvalue can come out as a conjugate pair with an im of rounding
-    // size (mostly below 2 * n * eps * max|A_ij|; an ill-conditioned repeated eigenvalue can exceed
-    // the bound below and then stays a pair, as in NumPy). A genuine pair, however near to real,
-    // has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)). The test uses the
-    // eigenvalue alone, so `values` does not depend on `eigenvectors`.
-    const imTol = 8 * ne.values.length * Number.EPSILON * maxAbsEntry(a);
-    const isReal = (im: number): boolean => Math.abs(im) <= imTol;
-    const anyComplex = ne.values.some((v) => !isReal(v.im));
-    const vectorOf = (v: { im: number }, i: number): number[] | Complex[] => {
+    // size (mostly below 2 * n * eps * the local scale; an ill-conditioned repeated eigenvalue can
+    // exceed the bound of `makeIsReal` and then stays a pair, as in NumPy). A genuine pair, however
+    // near to real, has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)).
+    const isReal = makeIsReal(a);
+    const anyComplex = ne.values.some((v) => !isReal(v));
+    const vectorOf = (v: { re: number; im: number }, i: number): number[] | Complex[] => {
       const re = realVector(ne, i, isReal);
       if (!anyComplex) return re;
-      return re.map((x, j) => new Complex(x, isReal(v.im) ? 0 : ne.vectorsIm[i][j]));
+      return re.map((x, j) => new Complex(x, isReal(v) ? 0 : ne.vectorsIm[i][j]));
     };
     const all = ne.values.map((v, i) => ({
-      value: (isReal(v.im) ? v.re : new Complex(v.re, v.im)) as number | Complex,
+      value: (isReal(v) ? v.re : new Complex(v.re, v.im)) as number | Complex,
       vector: wantVectors ? vectorOf(v, i) : [],
       i,
     }));

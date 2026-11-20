@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2555,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1139,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1139,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,15 +23,15 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 37,
+    "@danielsimonjr/mathts-compat": 38,
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1181,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 151,
+    "@danielsimonjr/mathts-matrix": 152,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -675,6 +675,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 241
+    },
+    {
+      "file": "compat/tests/eigs-matrix-input-1179.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 64
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -7345,7 +7352,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 319
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -10701,6 +10708,13 @@
       "loc": 87
     },
     {
+      "file": "functions/tests/dogfood-1179-eigs-matrix-input.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 242
+    },
+    {
       "file": "functions/tests/dogfood-1186-eigs-relative-imag-tol.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10820,6 +10834,13 @@
       "loc": 125
     },
     {
+      "file": "functions/tests/dogfood-1238-eigs-double-shift.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 200
+    },
+    {
       "file": "functions/tests/dogfood-1239-slu-order2.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10832,6 +10853,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 89
+    },
+    {
+      "file": "functions/tests/dogfood-1240-eigs-huge-entry-pair.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
+      "file": "functions/tests/dogfood-1242-eigs-defective-small.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 187
     },
     {
       "file": "functions/tests/dogfood-1243-symmetric-small-entries.test.ts",
@@ -10881,6 +10916,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 141
+    },
+    {
+      "file": "functions/tests/dogfood-1285-norm-corr-eigs.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 234
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
@@ -14534,7 +14576,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 763
+      "loc": 769
     },
     {
       "file": "matrix/src/operations/expm.ts",
@@ -15004,6 +15046,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 69
+    },
+    {
+      "file": "matrix/tests/eig-zero-diagonal-deflation.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 75
     },
     {
       "file": "matrix/tests/gap-linalg-extension-oracle.test.ts",

@@ -227,8 +227,14 @@ function eigGeneral(
     let l = nIdx;
     while (l > low) {
       s = Math.abs(H[(l - 1) * nn + (l - 1)]) + Math.abs(H[l * nn + l]);
-      if (s === 0.0) s = norm;
-      // <= so an exactly zero sub-diagonal deflates even when s (and norm) is 0.
+      // Both diagonal entries are zero: the scale is that of the neighbouring subdiagonal
+      // entries (the LAPACK dlahqr rule). The norm of the whole matrix would erase the coupling
+      // of a small block beside a huge entry (#1240).
+      if (s === 0.0) {
+        if (l >= 2) s += Math.abs(H[(l - 1) * nn + (l - 2)]);
+        if (l + 1 <= nIdx) s += Math.abs(H[(l + 1) * nn + l]);
+      }
+      // <= so an exactly zero sub-diagonal deflates even when s is 0.
       if (Math.abs(H[l * nn + (l - 1)]) <= eps * s) break;
       l--;
     }
