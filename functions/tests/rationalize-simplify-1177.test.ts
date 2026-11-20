@@ -135,3 +135,17 @@ describe('#1177: a division by a constant that is no power of 2', () => {
     expect(rat('5*x/3+1')).toBe('1.6666666666666665 * x + 1');
   });
 });
+
+describe('#1177: the factored canonical form belongs to the default rule set only', () => {
+  // simplify applies the factored form only when the caller passes no rules or simplify.rules
+  // itself. A copy of the default rules is a custom rule set and gives the mathjs 15.2.0 text.
+  const rules = (simplify as unknown as { rules: unknown[] }).rules;
+  const withRules = simplify as unknown as (input: string, rules: unknown[]) => unknown;
+  it('a copy of the default rules gives the mathjs text', () => {
+    expect(String(withRules('(x+1)^2-1', rules.slice()))).toBe('(x + 1) ^ 2 - 1');
+  });
+  it('the default rules give the factored form', () => {
+    expect(String(withRules('(x+1)^2-1', rules))).not.toBe('(x + 1) ^ 2 - 1');
+    expect(simp('(x+1)^2-1')).toBe(String(withRules('(x+1)^2-1', rules)));
+  });
+});
