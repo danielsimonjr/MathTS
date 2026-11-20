@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7399
+  totalExports: 7400
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7357,6 +7357,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ../../utils/typed-impl.js
           imports:
             - createNumberFieldOps
@@ -7837,6 +7840,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -7964,6 +7970,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -23974,6 +23983,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./types.js
           imports:
             - FibonacciHeapNode
@@ -28756,8 +28768,10 @@ modules:
       workspaceDependencies: []
       exports:
         - isExactZero
+        - isZeroEntry
       functions:
         - isExactZero
+        - isZeroEntry
     functions/src/utils/isFinite.ts:
       description: Test whether a value is finite.
       externalDependencies: []
@@ -47048,12 +47062,12 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238576
-  totalExports: 7399
+  totalLinesOfCode: 238725
+  totalExports: 7400
   totalClasses: 62
   totalInterfaces: 670
-  totalFunctions: 2581
-  totalTypeGuards: 184
+  totalFunctions: 2582
+  totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1695
   totalReExports: 3191

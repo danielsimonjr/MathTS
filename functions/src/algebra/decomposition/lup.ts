@@ -1,6 +1,7 @@
 import { clone } from '../../utils/object.js';
 import { format } from '../../utils/string.js';
 import { factory } from '../../utils/factory.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 import { createNumberFieldOps, type NumberFieldOps } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
@@ -156,10 +157,6 @@ export const createLup = /* #__PURE__ */ factory(
      */
     const absLarger = (x: unknown, y: unknown): boolean =>
       typeof x === 'number' && typeof y === 'number' ? x > y : Boolean(larger(x, y));
-
-    /** True when a sparse entry is zero. A number is zero only when it equals 0. */
-    const isZeroEntry = (v: unknown): boolean =>
-      typeof v === 'number' ? v === 0 : Boolean(equalScalar(v, 0));
 
     function matrixAllNumbers(data: unknown[][]): boolean {
       for (let r = 0; r < data.length; r++) {
@@ -559,7 +556,7 @@ export const createLup = /* #__PURE__ */ factory(
             // update value
             v = divideScalar(v, vjj);
             // check value is non zero
-            if (!isZeroEntry(v)) {
+            if (!isZeroEntry(v, equalScalar)) {
               // update lower triangular matrix
               lvalues.push(v);
               lindex.push(x);

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7399
+    "totalExports": 7400
   },
   "entryPoints": [
     {
@@ -7626,6 +7626,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
+          },
+          {
             "file": "../../utils/typed-impl.js",
             "imports": ["createNumberFieldOps", "NumberFieldOps"]
           },
@@ -8159,6 +8163,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
           },
@@ -8294,6 +8302,10 @@
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           },
           {
             "file": "./utils/solveValidation.js",
@@ -25508,6 +25520,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
+          },
+          {
             "file": "./types.js",
             "imports": [
               "FibonacciHeapNode",
@@ -30706,8 +30722,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["isExactZero"],
-        "functions": ["isExactZero"]
+        "exports": ["isExactZero", "isZeroEntry"],
+        "functions": ["isExactZero", "isZeroEntry"]
       },
       "functions/src/utils/isFinite.ts": {
         "description": "Test whether a value is finite.",
@@ -49895,12 +49911,12 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238576,
-    "totalExports": 7399,
+    "totalLinesOfCode": 238725,
+    "totalExports": 7400,
     "totalClasses": 62,
     "totalInterfaces": 670,
-    "totalFunctions": 2581,
-    "totalTypeGuards": 184,
+    "totalFunctions": 2582,
+    "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1695,
     "totalReExports": 3191,

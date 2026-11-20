@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 import type {
   FibonacciHeapNode,
   FibonacciHeapInterface,
@@ -34,14 +35,6 @@ export const createSpaClass = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ addScalar, equalScalar, FibonacciHeap }: SpaDependencies) => {
-    /**
-     * True when an entry is zero. A number is zero only when it equals 0: the tolerance
-     * of `equalScalar` is absolute, so it would drop every value of a matrix near 1e-100 (#1169).
-     * Other value types keep the `equalScalar` rule.
-     */
-    const isZeroEntry = (v: SpaValue): boolean =>
-      typeof v === 'number' ? v === 0 : equalScalar(v, 0);
-
     /**
      * An ordered Sparse Accumulator is a representation for a sparse vector that includes a dense array
      * of the vector elements and an ordered list of non-zero elements.
@@ -120,7 +113,7 @@ export const createSpaClass = /* #__PURE__ */ factory(
           // check it is in range
           if (node.key >= from) {
             // check value is not zero
-            if (!isZeroEntry(node.value)) {
+            if (!isZeroEntry(node.value, equalScalar)) {
               // invoke callback
               callback(node.key, node.value, this);
             }

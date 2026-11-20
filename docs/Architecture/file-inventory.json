@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2555,
+  "totalFiles": 2558,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1139,
+    "test": 1142,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1139,
+    "tests": 1142,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1183,
+    "@danielsimonjr/mathts-functions": 1186,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5896,7 +5896,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 596
+      "loc": 593
     },
     {
       "file": "functions/src/algebra/decomposition/qr.ts",
@@ -6001,7 +6001,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 349
+      "loc": 369
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
@@ -6029,7 +6029,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 348
+      "loc": 351
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -6141,7 +6141,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 238
+      "loc": 243
     },
     {
       "file": "functions/src/algebra/sparse/csMark.ts",
@@ -9025,7 +9025,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 179
+      "loc": 172
     },
     {
       "file": "functions/src/type/matrix/types.ts",
@@ -9466,7 +9466,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2510
+      "loc": 2627
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9718,7 +9718,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 14
+      "loc": 28
     },
     {
       "file": "functions/src/utils/isFinite.ts",
@@ -10708,6 +10708,13 @@
       "loc": 160
     },
     {
+      "file": "functions/tests/dogfood-1157-rank-qr-certificate.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 111
+    },
+    {
       "file": "functions/tests/dogfood-1162-inv-wide-range.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10727,6 +10734,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 170
+    },
+    {
+      "file": "functions/tests/dogfood-1169-slu-pivot-scale-invariant.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 53
     },
     {
       "file": "functions/tests/dogfood-1186-eigs-relative-imag-tol.test.ts",
@@ -10923,6 +10937,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 118
+    },
+    {
+      "file": "functions/tests/dogfood-1287-lusolve-tiny-right-side.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 78
     },
     {
       "file": "functions/tests/dogfood-1287-pivot-test-rank-deficient.test.ts",

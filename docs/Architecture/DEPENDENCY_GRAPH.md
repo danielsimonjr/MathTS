@@ -3021,6 +3021,7 @@ graph LR
 | `../../utils/object.js`        | `clone`                                | Import             |
 | `../../utils/string.js`        | `format`                               | Import             |
 | `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
 | `../../utils/typed-impl.js`    | `createNumberFieldOps, NumberFieldOps` | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
 
@@ -3308,6 +3309,7 @@ graph LR
 | File                           | Imports                                | Type               |
 | ------------------------------ | -------------------------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
 | `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
@@ -3391,6 +3393,7 @@ graph LR
 | File                           | Imports                                | Type               |
 | ------------------------------ | -------------------------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/isExactZero.js`   | `isZeroEntry`                          | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation`                | Import             |
 | `./utils/solveNumberOps.js`    | `createSolveNumberOps, SolveNumberOps` | Import             |
 | `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
@@ -11302,10 +11305,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                                                                       | Type               |
-| ------------------------ | ----------------------------------------------------------------------------- | ------------------ |
-| `../../utils/factory.js` | `factory`                                                                     | Import             |
-| `./types.js`             | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
+| File                         | Imports                                                                       | Type               |
+| ---------------------------- | ----------------------------------------------------------------------------- | ------------------ |
+| `../../utils/factory.js`     | `factory`                                                                     | Import             |
+| `../../utils/isExactZero.js` | `isZeroEntry`                                                                 | Import             |
+| `./types.js`                 | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -13121,7 +13125,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `isExactZero`
+- Functions: `isExactZero`, `isZeroEntry`
 
 ---
 
@@ -21771,13 +21775,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238576 |
-| Total Exports           | 7399   |
+| Total Lines of Code     | 238725 |
+| Total Exports           | 7400   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 670    |
-| Total Functions         | 2581   |
-| Total Type Guards       | 184    |
+| Total Functions         | 2582   |
+| Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |

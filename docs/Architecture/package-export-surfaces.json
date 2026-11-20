@@ -3115,6 +3115,7 @@
       "isVarianceNorm",
       "isWasmLoaded",
       "isZero",
+      "isZeroEntry",
       "isZeroNumber",
       "jackknife",
       "jacobian",

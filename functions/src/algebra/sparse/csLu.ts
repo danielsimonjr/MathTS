@@ -168,8 +168,10 @@ export const createCsLu = /* #__PURE__ */ factory(
           if (pinv[i] < 0) {
             // absolute value of x[i]
             const xabs = abs(x[i]);
-            // check absoulte value is greater than pivot value
-            if (larger(xabs, a)) {
+            // check absoulte value is greater than pivot value. Two numbers compare with `>`:
+            // the tolerance of `larger` is absolute, so it ties every entry of a matrix near
+            // 1e-100 and the first candidate wins (#1169).
+            if (typeof xabs === 'number' ? xabs > a : larger(xabs, a)) {
               // largest pivot candidate so far
               a = xabs as number;
               ipiv = i;
@@ -189,7 +191,10 @@ export const createCsLu = /* #__PURE__ */ factory(
         if (pinv[col] < 0) {
           const diagAbs = abs(x[col]);
           const diagNonZero = typeof diagAbs === 'number' ? diagAbs > 0 : larger(diagAbs, 0);
-          if (diagNonZero && largerEq(diagAbs, multiply(a, tol))) {
+          // Same rule for the threshold: `largerEq` ties the diagonal to any pivot near 1e-100.
+          const diagPreferred =
+            typeof diagAbs === 'number' ? diagAbs >= a * tol : largerEq(diagAbs, multiply(a, tol));
+          if (diagNonZero && diagPreferred) {
             ipiv = col;
           }
         }

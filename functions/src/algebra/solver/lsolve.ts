@@ -1,5 +1,6 @@
 import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { createSolveNumberOps, type SolveNumberOps } from './utils/solveNumberOps.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -180,10 +181,19 @@ export const createLsolve = /* #__PURE__ */ factory(
       for (let j = 0; j < columns; j++) {
         const bj = (bdata[j][0] as number) || 0;
         let xj: number;
-        if (!ops.equalScalar(bj, 0)) {
+        // Only an exact zero skips the row: a right side that is small, but not zero, is
+        // solved (#1287). The tolerance of `equalScalar` is absolute, so it read every right
+        // side near 1e-15 and below as zero.
+        if (bj !== 0) {
           const vjj = mdata[j][j];
           if (ops.equalScalar(vjj, 0)) {
-            throw new Error('Linear system cannot be solved since matrix is singular');
+            // A zero diagonal entry is a degenerate row for a right side that is zero within
+            // the tolerance (a rounding residue). Any other right side has no solution.
+            if (!ops.equalScalar(bj, 0)) {
+              throw new Error('Linear system cannot be solved since matrix is singular');
+            }
+            x[j] = [0];
+            continue;
           }
           const quot = ops.div(bj, vjj);
           if (typeof quot !== 'number') {
@@ -242,12 +252,17 @@ export const createLsolve = /* #__PURE__ */ factory(
         const bj = bdata[j][0] || 0;
         let xj: unknown;
 
-        if (!equalScalar(bj, 0)) {
+        if (!isZeroEntry(bj, equalScalar)) {
           // non-degenerate row, find solution
 
           const vjj = mdata[j][j];
 
           if (equalScalar(vjj, 0)) {
+            if (equalScalar(bj, 0)) {
+              // rounding residue on a zero diagonal: a degenerate row
+              x[j] = [0];
+              continue;
+            }
             throw new Error('Linear system cannot be solved since matrix is singular');
           }
 
@@ -294,7 +309,7 @@ export const createLsolve = /* #__PURE__ */ factory(
       for (let j = 0; j < columns; j++) {
         const bj = bdata[j][0] || 0;
 
-        if (!equalScalar(bj, 0)) {
+        if (!isZeroEntry(bj, equalScalar)) {
           // non-degenerate row, find solution
 
           let vjj: unknown = 0;
@@ -322,6 +337,11 @@ export const createLsolve = /* #__PURE__ */ factory(
 
           // at this point we must have a value in vjj
           if (equalScalar(vjj, 0)) {
+            if (equalScalar(bj, 0)) {
+              // rounding residue on a zero diagonal: a degenerate row
+              x[j] = [0];
+              continue;
+            }
             throw new Error('Linear system cannot be solved since matrix is singular');
           }
 
