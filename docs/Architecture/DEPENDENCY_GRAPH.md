@@ -127,7 +127,7 @@ The codebase is organized into the following modules:
 - **functions/arithmetic**: 40 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 13 files
+- **functions/cas**: 16 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 590            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 593            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5786,6 +5786,21 @@ graph LR
 
 ---
 
+### `functions/src/cas/exact-roots.ts` - Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.
+
+**Internal Dependencies:**
+
+| File       | Imports                                                       | Type   |
+| ---------- | ------------------------------------------------------------- | ------ |
+| `./rat.js` | `Rat, ratNormalize, ratAdd, ratSub, ratMul, ratDiv, RAT_ZERO` | Import |
+
+**Exports:**
+
+- Interfaces: `ExactQuadratic`
+- Functions: `decimalTextToRat`, `coefficientRat`, `ratText`, `exactLinearRoot`, `exactLinearText`, `exactQuadraticRoots`, `powerRuleText`
+
+---
+
 ### `functions/src/cas/layer3.ts` - Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
 
 **Workspace Dependencies:**
@@ -5807,6 +5822,14 @@ graph LR
 **Exports:**
 
 - Functions: `detZ`, `resultantZ`, `rothsteinResultant`, `hermiteReduce`, `residueIntegral`, `rothsteinTrager`, `integrateLayer3`
+
+---
+
+### `functions/src/cas/no-closed-form.ts` - The error of a CAS transform that has no rule for its input.
+
+**Exports:**
+
+- Classes: `NoClosedFormError`
 
 ---
 
@@ -5922,6 +5945,21 @@ graph LR
 - Interfaces: `AstNode`
 - Functions: `parseTree`, `containsSymbol`, `operatorName`, `callName`, `constantValue`, `polynomialCoefficients`
 - Constants: `COEFFICIENT_NOISE_RATIO`
+
+---
+
+### `functions/src/cas/taylor-jet.ts` - Taylor coefficients by truncated power-series ("jet") arithmetic on the syntax tree.
+
+**Internal Dependencies:**
+
+| File               | Imports                                                          | Type   |
+| ------------------ | ---------------------------------------------------------------- | ------ |
+| `./syntax-tree.js` | `AstNode, operatorName, callName, containsSymbol, constantValue` | Import |
+
+**Exports:**
+
+- Functions: `jetCoefficients`, `jetValueIsZero`
+- Constants: `JET_NOISE_RATIO`
 
 ---
 
@@ -11883,25 +11921,28 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                                                                           | Type   |
-| -------------------------------- | --------------------------------------------------------------------------------- | ------ |
-| `../factories/evaluate.js`       | `parse, evaluate, compileExpr`                                                    | Import |
-| `./euclid.js`                    | `euclidSnap`                                                                      | Import |
-| `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString`                                    | Import |
-| `./algebra.js`                   | `expand, factor, polyder, polynomialGCD, polynomialQuotient`                      | Import |
-| `../factories/index.js`          | `derivative`                                                                      | Import |
-| `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                        | Import |
-| `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                      | Import |
-| `../cas/elementary-solve.js`     | `solveElementary`                                                                 | Import |
-| `../cas/polynomial-limits.js`    | `PolynomialSizeError`                                                             | Import |
-| `../cas/syntax-tree.js`          | `MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, parseTree, polynomialCoefficients` | Import |
-| `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                       | Import |
-| `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                              | Import |
-| `../plain/number/arithmetic.js`  | `gcdNumber`                                                                       | Import |
-| `../cas/real-roots.js`           | `realRoots`                                                                       | Import |
-| `../numeric/adaptive-quad.js`    | `quadValue`                                                                       | Import |
-| `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                    | Import |
-| `./numeric.js`                   | `findRoot`                                                                        | Import |
+| File                             | Imports                                                                                                                                           | Type   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../factories/evaluate.js`       | `parse, evaluate, compileExpr`                                                                                                                    | Import |
+| `./euclid.js`                    | `euclidSnap`                                                                                                                                      | Import |
+| `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString`                                                                                                    | Import |
+| `./algebra.js`                   | `expand, factor, polyder, polynomialGCD, polynomialQuotient`                                                                                      | Import |
+| `../factories/index.js`          | `derivative, simplify`                                                                                                                            | Import |
+| `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                                                                                        | Import |
+| `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                                                                                      | Import |
+| `../cas/elementary-solve.js`     | `solveElementary`                                                                                                                                 | Import |
+| `../cas/polynomial-limits.js`    | `PolynomialSizeError`                                                                                                                             | Import |
+| `../cas/syntax-tree.js`          | `AstNode, MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, callName, constantValue, containsSymbol, operatorName, parseTree, polynomialCoefficients` | Import |
+| `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                                                                                       | Import |
+| `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                                                              | Import |
+| `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                                                                       | Import |
+| `../cas/real-roots.js`           | `realRoots`                                                                                                                                       | Import |
+| `../cas/taylor-jet.js`           | `jetCoefficients, jetValueIsZero`                                                                                                                 | Import |
+| `../cas/exact-roots.js`          | `exactLinearRoot, exactLinearText, exactQuadraticRoots, powerRuleText`                                                                            | Import |
+| `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
+| `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
+| `./numeric.js`                   | `findRoot`                                                                                                                                        | Import |
+| `../cas/no-closed-form.js`       | `NoClosedFormError`                                                                                                                               | Import |
 
 **Exports:**
 
@@ -20943,6 +20984,7 @@ graph LR
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `functions/src/typed/cas`                              | 20 files     | 1 file     |
 | `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -20950,7 +20992,6 @@ graph LR
 | `functions/src/typed/algebra`                          | 12 files     | 7 files    |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
-| `core/src/index`                                       | 18 files     | 0 files    |
 
 ---
 
@@ -21197,13 +21238,13 @@ graph TD
         N147[closed-form-roots]
         N148[elementary-solve]
         N149[exact-identity]
-        N150[layer3]
-        N151[polynomial-canonical]
-        N152[polynomial-limits]
-        N153[rat]
-        N154[rational-integrate]
-        N155[real-roots]
-        N156[...3 more]
+        N150[exact-roots]
+        N151[layer3]
+        N152[no-closed-form]
+        N153[polynomial-canonical]
+        N154[polynomial-limits]
+        N155[rat]
+        N156[...6 more]
     end
 
     subgraph Functions/combinatorics
@@ -21852,14 +21893,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1353   |
+| Total TypeScript Files  | 1356   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 241563 |
-| Total Exports           | 7426   |
+| Total Lines of Code     | 243486 |
+| Total Exports           | 7438   |
 | Total Re-exports        | 3194   |
-| Total Classes           | 63     |
-| Total Interfaces        | 675    |
-| Total Functions         | 2609   |
+| Total Classes           | 64     |
+| Total Interfaces        | 676    |
+| Total Functions         | 2618   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1353
+  totalFiles: 1356
   totalModules: 82
-  totalExports: 7426
+  totalExports: 7438
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14436,6 +14436,39 @@ modules:
         - isExactPolynomialIdentity
       functions:
         - isExactPolynomialIdentity
+    functions/src/cas/exact-roots.ts:
+      description: Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./rat.js
+          imports:
+            - Rat
+            - ratNormalize
+            - ratAdd
+            - ratSub
+            - ratMul
+            - ratDiv
+            - RAT_ZERO
+      workspaceDependencies: []
+      exports:
+        - decimalTextToRat
+        - coefficientRat
+        - ratText
+        - exactLinearRoot
+        - exactLinearText
+        - exactQuadraticRoots
+        - powerRuleText
+      interfaces:
+        - ExactQuadratic
+      functions:
+        - decimalTextToRat
+        - coefficientRat
+        - ratText
+        - exactLinearRoot
+        - exactLinearText
+        - exactQuadraticRoots
+        - powerRuleText
     functions/src/cas/layer3.ts:
       description: Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
       externalDependencies: []
@@ -14491,6 +14524,16 @@ modules:
         - residueIntegral
         - rothsteinTrager
         - integrateLayer3
+    functions/src/cas/no-closed-form.ts:
+      description: The error of a CAS transform that has no rule for its input.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - NoClosedFormError
+      classes:
+        - NoClosedFormError
     functions/src/cas/polynomial-canonical.ts:
       description: Canonical polynomial forms for CAS simplify / factor (G21).
       externalDependencies: []
@@ -14722,6 +14765,28 @@ modules:
         - polynomialCoefficients
       constants:
         - COEFFICIENT_NOISE_RATIO
+    functions/src/cas/taylor-jet.ts:
+      description: Taylor coefficients by truncated power-series ("jet") arithmetic on the syntax tree.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./syntax-tree.js
+          imports:
+            - AstNode
+            - operatorName
+            - callName
+            - containsSymbol
+            - constantValue
+      workspaceDependencies: []
+      exports:
+        - JET_NOISE_RATIO
+        - jetCoefficients
+        - jetValueIsZero
+      functions:
+        - jetCoefficients
+        - jetValueIsZero
+      constants:
+        - JET_NOISE_RATIO
   functions/combinatorics:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
@@ -25358,6 +25423,7 @@ modules:
         - file: ../factories/index.js
           imports:
             - derivative
+            - simplify
         - file: ../cas/antiderivative.js
           imports:
             - antiderivativeReciprocal
@@ -25372,8 +25438,13 @@ modules:
             - PolynomialSizeError
         - file: ../cas/syntax-tree.js
           imports:
+            - AstNode
             - MAX_POLYNOMIAL_DEGREE
             - PolynomialDegreeError
+            - callName
+            - constantValue
+            - containsSymbol
+            - operatorName
             - parseTree
             - polynomialCoefficients
         - file: ../cas/closed-form-roots.js
@@ -25390,6 +25461,16 @@ modules:
         - file: ../cas/real-roots.js
           imports:
             - realRoots
+        - file: ../cas/taylor-jet.js
+          imports:
+            - jetCoefficients
+            - jetValueIsZero
+        - file: ../cas/exact-roots.js
+          imports:
+            - exactLinearRoot
+            - exactLinearText
+            - exactQuadraticRoots
+            - powerRuleText
         - file: ../numeric/adaptive-quad.js
           imports:
             - quadValue
@@ -25400,6 +25481,9 @@ modules:
         - file: ./numeric.js
           imports:
             - findRoot
+        - file: ../cas/no-closed-form.js
+          imports:
+            - NoClosedFormError
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -25408,6 +25492,7 @@ modules:
       exports:
         - PolynomialDegreeError
         - PolynomialSizeError
+        - NoClosedFormError
         - CAS_BATCH_THRESHOLD
         - integrate
         - limit
@@ -46121,7 +46206,9 @@ dependencyGraph:
         - functions/src/cas/closed-form-roots.ts
         - functions/src/cas/elementary-solve.ts
         - functions/src/cas/exact-identity.ts
+        - functions/src/cas/exact-roots.ts
         - functions/src/cas/layer3.ts
+        - functions/src/cas/no-closed-form.ts
         - functions/src/cas/polynomial-canonical.ts
         - functions/src/cas/polynomial-limits.ts
         - functions/src/cas/rat.ts
@@ -46130,6 +46217,7 @@ dependencyGraph:
         - functions/src/cas/render-coeff-times.ts
         - functions/src/cas/render-polynomial.ts
         - functions/src/cas/syntax-tree.ts
+        - functions/src/cas/taylor-jet.ts
     - name: Functions/combinatorics
       files:
         - functions/src/combinatorics/bellNumbers.ts
@@ -47303,16 +47391,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1353
+  totalTypeScriptFiles: 1356
   totalModules: 82
-  totalLinesOfCode: 241563
-  totalExports: 7426
-  totalClasses: 63
-  totalInterfaces: 675
-  totalFunctions: 2609
+  totalLinesOfCode: 243486
+  totalExports: 7438
+  totalClasses: 64
+  totalInterfaces: 676
+  totalFunctions: 2618
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1697
+  totalConstants: 1698
   totalReExports: 3194
   totalTypeOnlyImports: 686
   runtimeCircularDeps: 2

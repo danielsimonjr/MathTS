@@ -318,12 +318,12 @@ describe('#884 solve returns a finite solution set; solveExact returns the perio
 
   describe('exact text carries no rounded digit', () => {
     const declined: Array<[string, RegExp]> = [
-      // asin(0.4714045207910317) would pretend to be exact
-      ['sin(x)=sqrt(2)/3', /the value 0\.47140452079103\d* that sin must take has no exact text/],
+      // asin(0.5403023058681398) would pretend to be exact
+      ['sin(x)=cos(1)', /the value 0\.54030\d* that sin must take has no exact text/],
       ['cos(sqrt(2)*x)=0', /the coefficient 1\.4142135623730951 of x inside cos/],
-      ['exp(x)=pi', /the value 3\.14159\d* that exp must take has no exact text/],
-      ['log(x)=sqrt(2)', /the value 1\.41421\d* that log must take has no exact text/],
-      ['abs(x)=sqrt(2)', /the value 1\.41421\d* that abs must take has no exact text/],
+      ['exp(x)=sin(1)', /the value 0\.84147\d* that exp must take has no exact text/],
+      ['log(x)=cos(1)', /the value 0\.54030\d* that log must take has no exact text/],
+      ['abs(x)=cos(1)', /the value 0\.54030\d* that abs must take has no exact text/],
       ['sqrt(x)=pi', /the value 3\.14159\d* that sqrt must take has no exact text/],
       ['sin(x+1/sqrt(7))=0', /the offset 0\.3779644730092272 inside sin/],
     ];
@@ -335,8 +335,21 @@ describe('#884 solve returns a finite solution set; solveExact returns the perio
       }
     });
 
+    it('a value built from integers, pi and sqrt(...) keeps its text (#966)', () => {
+      expect(exact('sin(x)=sqrt(2)/3').roots).toEqual(['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)']);
+      expect([...solveWith('exp(x)=pi', 'x')]).toEqual(['log(pi)']);
+      expect(exact('log(x)=sqrt(2)').roots).toEqual(['exp(sqrt(2))']);
+      expect(exact('abs(x)=sqrt(2)').roots).toEqual(['-sqrt(2)', 'sqrt(2)']);
+      // The text is the sum, product or quotient as it was written, folded into one value.
+      expect(exact('3*sin(x)=sqrt(2)').roots).toEqual(['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)']);
+      expect(exact('sin(x)=1-sqrt(2)/3').roots).toEqual([
+        'asin(1 - sqrt(2)/3)',
+        'pi - asin(1 - sqrt(2)/3)',
+      ]);
+    });
+
     it('the message states what an exact constant is', () => {
-      expect(() => solveExact('sin(x)=sqrt(2)/3', 'x')).toThrow(
+      expect(() => solveExact('sin(x)=cos(1)', 'x')).toThrow(
         /integer, a fraction with a denominator up to 100000, or a decimal of at most 12 digits/
       );
     });
@@ -418,7 +431,9 @@ describe('#884 solve returns a finite solution set; solveExact returns the perio
 
     it('solveExact says that the form is not supported, and points to solve', () => {
       expect(() => solveExact('sin(x)=x', 'x')).toThrow(/not of the form a\*F\(p\*x \+ q\) = b/);
-      expect(() => solveExact('x^2-2', 'x')).toThrow(/Use solve for a polynomial/);
+      expect(() => solveExact('x^3-2', 'x')).toThrow(
+        /Use solve for a polynomial of a higher degree/
+      );
       expect(() => solveExact(42, 'x')).toThrow(TypeError);
     });
 
@@ -497,9 +512,9 @@ describe('#884 solve returns a finite solution set; solveExact returns the perio
 
     it('a radical root keeps its exact text, and a decimal never appears in it', () => {
       expect(solveWith('x^2-2', 'x')).toEqual(['-sqrt(2)', 'sqrt(2)']);
-      for (const equation of ['2*x^2-3*x+1/3', 'x^2/3-1/9']) {
-        for (const root of solveWith(equation, 'x')) expect(typeof root).toBe('number');
-      }
+      // A coefficient that the computer rounded (1/3) is read as the fraction it stands for.
+      expect(solveWith('2*x^2-3*x+1/3', 'x')).toEqual(['3/4 - sqrt(57)/12', '3/4 + sqrt(57)/12']);
+      expect(solveWith('x^2/3-1/9', 'x')).toEqual(['-sqrt(3)/3', 'sqrt(3)/3']);
     });
 
     it('a polynomial in another variable gets the same radical text', () => {

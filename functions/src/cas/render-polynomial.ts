@@ -110,7 +110,8 @@ const MAX_COEFFICIENT_DENOMINATOR = 10_000;
 
 /** The fraction `n/d` (`d` at most {@link MAX_COEFFICIENT_DENOMINATOR}) that equals `c`, or null. */
 function coefficientFraction(c: number): [n: number, d: number] | null {
-  const tolerance = FRACTION_NOISE * Math.max(1, Math.abs(c));
+  // The tolerance is relative to `c`. A fixed floor would match `0/1` to every coefficient below it.
+  const tolerance = FRACTION_NOISE * Math.abs(c);
   let h1 = 1;
   let h0 = 0;
   let k1 = 0;
@@ -133,32 +134,22 @@ function coefficientFraction(c: number): [n: number, d: number] | null {
   return null;
 }
 
-/** True when `1/d` has a finite decimal expansion: `d` has no prime factor besides 2 and 5. */
-function hasFiniteDecimal(d: number): boolean {
-  let rest = d;
-  while (rest % 2 === 0) rest /= 2;
-  while (rest % 5 === 0) rest /= 5;
-  return rest === 1;
-}
-
 /**
  * Write the coefficients of one polynomial as text, without a rounded digit.
  *
  * A coefficient that is an integer up to rounding noise (a relative error of 1e-12) is written as
  * that integer. Only an exact zero is zero: a small coefficient such as `1e-13` stays. A
- * coefficient that equals a fraction `n/d` with a denominator up to 10000 and an infinite decimal
- * expansion (`1/3`, not `1/2`) is written as that fraction, so `x/3` is `1/3*x` and not
- * `0.333333333333*x`. If any coefficient of the polynomial needs a fraction, every fractional
- * coefficient of it is written as a fraction (`1/3*x + 1/2`). A polynomial whose fractional
- * coefficients all have a finite decimal (`0.5*x + 0.25`) keeps the decimals. Any other
- * coefficient is written with 12 digits.
+ * coefficient that equals a fraction `n/d` with a denominator up to 10000 is written as that
+ * fraction, whatever the other coefficients are: `x/3` is `1/3*x` and not `0.333333333333*x`,
+ * and `0.5*x + 0.25` is `1/2*x + 1/4`. Any other coefficient is written with 12 digits.
  *
  * @param values - The numeric coefficients of one polynomial.
  * @returns The text of each coefficient, in the order of `values`.
  *
  * @example
  * coefficientTexts([1 / 3, 0.5, 2]); // ['1/3', '1/2', '2']
- * coefficientTexts([0.5, 0.25, 2]); // ['0.5', '0.25', '2']
+ * coefficientTexts([0.5, 0.25, 2]); // ['1/2', '1/4', '2']
+ * coefficientTexts([0.123456, 2]); // ['0.123456', '2'] (no fraction with a denominator up to 10000)
  */
 export function coefficientTexts(values: readonly number[]): string[] {
   const whole = (c: number): number | null => {
@@ -171,12 +162,11 @@ export function coefficientTexts(values: readonly number[]): string[] {
   const fractions = values.map((c) =>
     Number.isFinite(c) && whole(c) === null ? coefficientFraction(c) : null
   );
-  const useFractions = fractions.some((f) => f !== null && !hasFiniteDecimal(f[1]));
   return values.map((c, i) => {
     const r = whole(c);
     if (r !== null) return String(r + 0);
     const fraction = fractions[i];
-    if (useFractions && fraction !== null) return `${fraction[0]}/${fraction[1]}`;
+    if (fraction !== null) return `${fraction[0]}/${fraction[1]}`;
     return String(Number(c.toPrecision(12)));
   });
 }
