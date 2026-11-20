@@ -550,6 +550,7 @@ import {
   solve,
   solveExact,
   laplace,
+  inverseLaplace,
 } from '@danielsimonjr/mathts-functions';
 
 // Symbolic integration
@@ -558,14 +559,15 @@ integrate('5*x^3', 'x'); // '5*x^4/4'
 integrate('sin(x)', 'x', 0, 3.14159); // ~2.0
 
 // Limits
-limit('sin(x)/x', 'x', 0); // '1'
-limit('(1 + 1/n)^n', 'n', Infinity); // 'E'
+limit('sin(x)/x', 'x', 0); // 1
+limit('(1 + 1/n)^n', 'n', Infinity); // ~2.71828
 
 // Partial derivatives
 partialDerivative('x^2*y + y^3', 'y'); // '2*y^2 + x^2'
 
 // Taylor series
-taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
+taylor('exp(x)', 'x', 0, 4); // '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4'
+taylor('1/(1-x)', 'x', 0, 6); // '1 + x + x^2 + x^3 + x^4 + x^5 + x^6'
 
 // Solve equations
 solve('x^2 - 5*x + 6', 'x'); // [2, 3]
@@ -576,7 +578,8 @@ solve('exp(x) = 2', 'x'); // ['log(2)']
 solve('cos(x) - x', 'x', { numeric: true, range: [0, 1] }); // [0.7390851332151607]
 
 // Laplace transform
-laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
+laplace('t*exp(-2*t)', 't', 's'); // '1/(s + 2)^2'
+inverseLaplace('1/(s^2 + 2*s + 5)', 's', 't'); // '0.5*exp(-1*t)*sin(2*t)'
 ```
 
 ### How `solve` answers
