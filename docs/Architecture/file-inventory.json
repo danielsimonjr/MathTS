@@ -8584,7 +8584,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 529
+      "loc": 531
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -10691,7 +10691,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 431
+      "loc": 469
     },
     {
       "file": "functions/tests/dogfood-1135-1136-discretelog.test.ts",

@@ -395,6 +395,44 @@ describe('quantileSeq finds one probability by selection, not by a full sort (#1
     expect(mismatches).toEqual([]);
   });
 
+  it('gives the single-probability results for a long list and for N (one sort for 24 or more)', () => {
+    let seed = 987;
+    const rand = (): number => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    const data = Array.from({ length: 500 }, () =>
+      rand() < 0.3 ? -0 : Math.floor(rand() * 40) - 10
+    );
+    data.splice(7, 0, NaN, NaN);
+    const finite = data.filter((v) => !Number.isNaN(v));
+    const probs = Array.from({ length: 30 }, (_, i) => (i + 1) / 31);
+    for (const method of METHODS) {
+      for (const skipNaN of [false, true]) {
+        const many = q(data, probs, { method, skipNaN }) as number[];
+        expect(many.length).toBe(30);
+        probs.forEach((p, i) => {
+          const one = q(skipNaN ? finite : data, p, { method, skipNaN }) as number;
+          // Equal values, whatever the sign of a zero.
+          expect(
+            Number.isNaN(one) ? Number.isNaN(many[i]) : many[i] === one,
+            `${method} ${skipNaN} p=${p}`
+          ).toBe(true);
+        });
+      }
+    }
+    // The N form: N = 30 gives the probabilities 1/31 ... 30/31, and the same values.
+    const viaN = q(finite, 30, { method: 'hazen' }) as number[];
+    const viaList = q(finite, probs, { method: 'hazen' }) as number[];
+    const plain = (xs: number[]): number[] => xs.map((v) => v + 0); // -0 + 0 is 0
+    expect(plain(viaN)).toEqual(plain(viaList));
+    // A sorted input keeps its order and gives the same values.
+    const sortedFinite = finite.slice().sort((a, b) => a - b);
+    expect(plain(q(sortedFinite, probs, { method: 'hazen', sorted: true }) as number[])).toEqual(
+      plain(viaList)
+    );
+  });
+
   it('skips NaN and keeps the NaN policy on the selection path', () => {
     expect(q([3, NaN, 1, 2], 0.5)).toBeNaN();
     expect(q([3, NaN, 1, 2], 0.5, { skipNaN: true })).toBe(2);

@@ -65,12 +65,14 @@ function isNaNValue(v: unknown): boolean {
 /**
  * From this many probabilities on, an unsorted number sample is sorted once, with the native
  * typed-array sort, and every probability reads its values from the sorted copy. Below it, each
- * probability takes its two order statistics by selection (O(n) each, no sort). Measured on
- * 1e6 numbers (Node 26): a selection costs about 20 ms per probability and one native sort about
- * 550 ms, so the break-even is near 28 probabilities (near 13 at n = 1e3, where the sort has
- * fewer levels). 16 is within a factor of 2 of the best choice at both sizes.
+ * probability takes its two order statistics by selection (O(n) each, no sort). Measured with
+ * the minimum of 7 to 15 runs on a loaded machine (Node 26): one sort costs about 0.22 ms for
+ * 1e3 values, 3 ms for 1e4, 36 ms for 1e5 and 460 ms for 1e6, and one selection costs about
+ * 0.014, 0.2, 1.4 and 18 ms. The break-even is near 15 probabilities for 1e3 and 1e4 values and
+ * near 26 for 1e5 and 1e6 values; 24 is within a factor of about 1.5 of the best choice at each
+ * of these sizes.
  */
-const SORT_FROM_PROBS = 16;
+const SORT_FROM_PROBS = 24;
 
 /** The values of `values` as numbers: the buffer, the count that it holds and whether NaN was met. */
 interface NumberScan {
