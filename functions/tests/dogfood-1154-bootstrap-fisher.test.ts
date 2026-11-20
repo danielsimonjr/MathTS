@@ -336,7 +336,7 @@ describe('fisherExact keeps its accuracy for large counts and for very small p-v
 });
 
 describe('the resampling tests bound bootstrap * sample size (#1154)', () => {
-  // Without the bound each call below runs for 20 s or more before it returns.
+  // Without the bound each call below runs for about 5 to 23 s before it returns.
   const sample = Array.from({ length: 1000 }, (_, i) => Math.sin(i) * 3 + i / 500);
 
   it('kolmogorovSmirnovTest rejects bootstrap * sample size above 20,000,000', async () => {
@@ -347,18 +347,18 @@ describe('the resampling tests bound bootstrap * sample size (#1154)', () => {
     );
   });
 
-  it('shapiroWilkTest rejects bootstrap * sample size above 50,000,000', async () => {
-    await expect(shapiroWilkTest(sample, { bootstrap: 50001, bootstrapSeed: 1 })).rejects.toThrow(
-      /^shapiroWilkTest: bootstrap \* sample size = 50001000 exceeds the supported maximum of 50000000$/
+  it('shapiroWilkTest rejects bootstrap * sample size above 100,000,000', async () => {
+    await expect(shapiroWilkTest(sample, { bootstrap: 100001, bootstrapSeed: 1 })).rejects.toThrow(
+      /^shapiroWilkTest: bootstrap \* sample size = 100001000 exceeds the supported maximum of 100000000$/
     );
   });
 
-  it('mannWhitneyTest rejects bootstrap * pooled size above 200,000,000', async () => {
+  it('mannWhitneyTest rejects bootstrap * pooled size above 300,000,000', async () => {
     const other = sample.map((v) => v + 0.25);
     await expect(
-      mannWhitneyTest(sample, other, { bootstrap: 100001, bootstrapSeed: 1 })
+      mannWhitneyTest(sample, other, { bootstrap: 150001, bootstrapSeed: 1 })
     ).rejects.toThrow(
-      /^mannWhitneyTest: bootstrap \* pooled size = 200002000 exceeds the supported maximum of 200000000$/
+      /^mannWhitneyTest: bootstrap \* pooled size = 300002000 exceeds the supported maximum of 300000000$/
     );
   });
 
@@ -376,6 +376,7 @@ describe('chiSquareTest with a NaN statistic gives NaN bootstrap fields (#1154)'
   it('[NaN, 5] against [3, 3] gives NaN for pValueEmpirical, bootstrapMean and bootstrapStd', async () => {
     const r = (await chiSquareTest([NaN, 5], [3, 3], { bootstrap: 3, bootstrapSeed: 1 })) as {
       statistic: number;
+      bootstrapStatistics: Float64Array;
       pValueEmpirical: number;
       bootstrapMean: number;
       bootstrapStd: number;
@@ -384,6 +385,9 @@ describe('chiSquareTest with a NaN statistic gives NaN bootstrap fields (#1154)'
     expect(r.pValueEmpirical).toBeNaN();
     expect(r.bootstrapMean).toBeNaN();
     expect(r.bootstrapStd).toBeNaN();
+    // The same shape as mannWhitneyTest for a NaN sample: B statistics, each NaN.
+    expect(r.bootstrapStatistics).toHaveLength(3);
+    expect(Array.from(r.bootstrapStatistics).every(Number.isNaN)).toBe(true);
   });
 });
 

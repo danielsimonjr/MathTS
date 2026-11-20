@@ -226,14 +226,15 @@ const HYPOTHESIS_THRESHOLD = 4096;
 const CHI_BOOTSTRAP_MAX_DRAWS = 20 * MAX_LOOP_ORDER;
 
 /**
- * Maximum bootstrap count times sample size for the resampling tests (#1154). Each limit is the
- * work that returns in about 20 s at the rate measured on the build machine under load:
- * `kolmogorovSmirnovTest` 1.06-1.15 us per value per resample (the CDF call), `shapiroWilkTest`
- * 117-218 ns, `mannWhitneyTest` 38-68 ns per pooled value per permutation.
+ * Maximum bootstrap count times sample size for the resampling tests (#1154), set near 20 s of
+ * work as for `chiSquareTest`. Rates measured with bun on the build machine under load:
+ * `kolmogorovSmirnovTest` 0.9-1.15 us per value per resample (the CDF call), so 2e7 takes
+ * 18-23 s; `shapiroWilkTest` 63-218 ns, so 1e8 takes 6-22 s; `mannWhitneyTest` 16-68 ns per
+ * pooled value per permutation, so 3e8 takes 5-20 s. The range is the load of the machine.
  */
 const KS_BOOTSTRAP_MAX_WORK = 2 * MAX_LOOP_ORDER;
-const SW_BOOTSTRAP_MAX_WORK = 5 * MAX_LOOP_ORDER;
-const MW_BOOTSTRAP_MAX_WORK = 20 * MAX_LOOP_ORDER;
+const SW_BOOTSTRAP_MAX_WORK = 10 * MAX_LOOP_ORDER;
+const MW_BOOTSTRAP_MAX_WORK = 30 * MAX_LOOP_ORDER;
 
 /**
  * Draw `n` indices with replacement from an ascending `sorted` array and return
@@ -580,7 +581,7 @@ export async function chiSquareTest(
     return {
       statistic: baseStatistic,
       pValueEmpirical: NaN,
-      bootstrapStatistics: new Float64Array(0),
+      bootstrapStatistics: new Float64Array(B).fill(NaN),
       bootstrapMean: NaN,
       bootstrapStd: NaN,
     } satisfies ChiSquareBootstrapResult;
