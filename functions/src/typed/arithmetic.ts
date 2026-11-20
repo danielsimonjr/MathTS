@@ -78,7 +78,7 @@ import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { sparseProduct } from './sparse-product.js';
-import { collectionRelationalRows } from './collection-relational.js';
+import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -384,7 +384,9 @@ function matrixProduct(a: unknown, b: unknown): unknown[][] {
   const nb = toNested(b) as unknown[][];
   // The numeric backend holds numbers only. A Complex, Fraction or BigNumber entry takes the
   // generic product, which uses the scalar add and multiply (#1040).
-  if (!isNumberMatrix(na) || !isNumberMatrix(nb)) {
+  // A product with an empty axis (`[2, 1] x [1, 0]` is `[[], []]`) takes the generic product:
+  // `DenseMatrix` holds no empty axis.
+  if (!isNumberMatrix(na) || !isNumberMatrix(nb) || hasEmptyAxis(na) || hasEmptyAxis(nb)) {
     assertRectangular(na);
     assertRectangular(nb);
     return genericMatrixProduct(na, nb);
@@ -392,6 +394,11 @@ function matrixProduct(a: unknown, b: unknown): unknown[][] {
   const A = DenseMatrix.fromArray(na as number[][]);
   const B = DenseMatrix.fromArray(nb as number[][]);
   return backendManager.multiply(A, B).toArray();
+}
+
+/** True when a 2-D array has no rows or no columns. */
+function hasEmptyAxis(m: unknown[][]): boolean {
+  return m.length === 0 || m[0].length === 0;
 }
 
 /** The product of two 2-D arrays with any scalar entries, by the scalar add and multiply. */
@@ -459,7 +466,8 @@ function dotProduct(
  * @param rankA - Number of axes of `a`.
  * @param rankB - Number of axes of `b`.
  * @returns A scalar, or the Array of the product.
- * @throws RangeError when the lengths do not match; Error for an empty vector pair or a 3-D operand.
+ * @throws RangeError when the lengths do not match; Error for an empty vector pair or a 3-D operand;
+ *   TypeError for a matrix with no columns times an empty vector.
  */
 function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number): unknown {
   if (rankA !== 1 && rankA !== 2) {
@@ -502,10 +510,10 @@ function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number)
       `Dimension mismatch in multiplication. Matrix columns (${inner}) must match Vector length (${b.length})`
     );
   }
+  // An `[r, 0]` matrix times an empty vector has no entry to multiply; mathjs throws a TypeError.
+  if (inner === 0) throw new TypeError('Cannot multiply a matrix with an empty vector');
   const out = new Array<unknown>(a.length);
-  for (let i = 0; i < a.length; i++) {
-    out[i] = inner === 0 ? 0 : dotProduct(a[i] as unknown[], b, inner);
-  }
+  for (let i = 0; i < a.length; i++) out[i] = dotProduct(a[i] as unknown[], b, inner);
   return out;
 }
 
@@ -640,7 +648,9 @@ function collectionSize(collection: unknown): number[] {
  */
 function divideScalarByCollection(scalar: unknown, collection: unknown): unknown {
   const size = collectionSize(collection);
-  if (size.length !== 2 || size[0] !== size[1]) {
+  // A vector of length 1 is a 1 x 1 matrix for this rule, as in mathjs: `divide(4, [-2])` is `[-2]`.
+  const oneEntryVector = size.length === 1 && size[0] === 1;
+  if (!oneEntryVector && (size.length !== 2 || size[0] !== size[1])) {
     throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
   }
   const inverse = divideInverse()(collection);
@@ -1973,8 +1983,7 @@ export const equal = mathTyped('equal', {
   'Complex, Complex': (a: Complex, b: Complex): boolean => coreEqual(a, b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => coreEqual(a, b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => coreEqual(a, b),
-  'Unit, Unit': (a: Unit, b: Unit): boolean =>
-    unitSameDimension(a, b) && asUnit(a).value === asUnit(b).value,
+  'Unit, Unit': (a: Unit, b: Unit): boolean => unitsEqual(a, b),
   // An Array or a matrix against any operand: the element-wise comparison of mathjs (#975).
   ...collectionRelationalRows('equal'),
 });

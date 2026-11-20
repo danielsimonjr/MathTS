@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2650,
+  "totalFiles": 2651,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1332,
     "test-only": 0,
     "orphan": 0,
-    "test": 1226,
+    "test": 1227,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1358,
-    "tests": 1226,
+    "tests": 1227,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1254,
+    "@danielsimonjr/mathts-functions": 1255,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -583,7 +583,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 70
+      "loc": 95
     },
     {
       "file": "compat/tests/bignumber-collections-1112.test.ts",
@@ -9326,7 +9326,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3265
+      "loc": 3274
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9361,7 +9361,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 73
+      "loc": 93
     },
     {
       "file": "functions/src/typed/combinatorics.ts",
@@ -9634,7 +9634,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 488
+      "loc": 484
     },
     {
       "file": "functions/src/typed/set.ts",
@@ -13018,6 +13018,13 @@
       "loc": 151
     },
     {
+      "file": "functions/tests/multiply-divide-edges-1007.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 44
+    },
+    {
       "file": "functions/tests/multiply-scalar-collection.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -13890,7 +13897,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 448
+      "loc": 467
     },
     {
       "file": "functions/tests/sparse-transpose-diag.test.ts",
@@ -14541,7 +14548,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 34
+      "loc": 50
     },
     {
       "file": "functions/tests/unit-characterization.test.ts",

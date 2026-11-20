@@ -296,13 +296,86 @@ describe('issue #949: public comparison functions take a collection of every cla
   // `equal`, `compare`, `larger`, `smaller`, `largerEq` and `smallerEq` of the public package
   // take an Array, a DenseMatrix and a public SparseMatrix alike (#975, #1307): each collection
   // row calls the function of the factory scope, which `factory_<name>` also exports.
+  // The values of mathjs 15.2.0 for `f(SQ, SQ)` and `f(SQ, 1)`, SQ = [[1, 0], [0, 2]].
+  const T = true;
+  const F = false;
+  const expected: Record<string, [unknown, unknown]> = {
+    equal: [
+      [
+        [T, T],
+        [T, T],
+      ],
+      [
+        [T, F],
+        [F, F],
+      ],
+    ],
+    compare: [
+      [
+        [0, 0],
+        [0, 0],
+      ],
+      [
+        [0, -1],
+        [-1, 1],
+      ],
+    ],
+    larger: [
+      [
+        [F, F],
+        [F, F],
+      ],
+      [
+        [F, F],
+        [F, T],
+      ],
+    ],
+    smaller: [
+      [
+        [F, F],
+        [F, F],
+      ],
+      [
+        [F, T],
+        [T, F],
+      ],
+    ],
+    largerEq: [
+      [
+        [T, T],
+        [T, T],
+      ],
+      [
+        [T, F],
+        [F, T],
+      ],
+    ],
+    smallerEq: [
+      [
+        [T, T],
+        [T, T],
+      ],
+      [
+        [T, T],
+        [T, F],
+      ],
+    ],
+  };
   for (const name of ['equal', 'compare', 'larger', 'smaller', 'largerEq', 'smallerEq']) {
     it(`${name} takes a collection of every class`, () => {
       const f = exportsOf[name]!;
-      for (const arg of [toSparse(SQ), DenseMatrix.fromArray(SQ), SQ]) {
-        expect(() => f(arg, arg)).not.toThrow();
-        expect(() => f(arg, 1)).not.toThrow();
+      const [same, withScalar] = expected[name]!;
+      for (const arg of [DenseMatrix.fromArray(SQ), SQ]) {
+        expect(nested(f(arg, arg))).toEqual(same);
+        expect(nested(f(arg, 1))).toEqual(withScalar);
       }
+      // A public SparseMatrix stores numbers, so a sparse-by-sparse result holds 1 and 0 for
+      // true and false (mathjs: booleans for equal, 0 for larger). The sparse-by-scalar
+      // result is dense, as in mathjs.
+      const asNumbers = (x: unknown): unknown =>
+        Array.isArray(x) ? x.map(asNumbers) : typeof x === 'boolean' ? Number(x) : x;
+      expect(nested(f(toSparse(SQ), toSparse(SQ)))).toEqual(asNumbers(same));
+      expect(nested(f(toSparse(SQ), 1))).toEqual(withScalar);
     });
     it(`factory_${name} takes a public SparseMatrix`, () => {
       const f = exportsOf[`factory_${name}`]!;

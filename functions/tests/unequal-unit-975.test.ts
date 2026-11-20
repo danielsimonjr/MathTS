@@ -31,3 +31,19 @@ describe('#975 unequal of Units', () => {
     expect(unequal(unit('1 m'), unit('100 cm'))).toBe(false);
   });
 });
+
+describe('#975 equal and unequal of Units use the tolerance of the number rows', () => {
+  const sum = (): unknown => (math.add as unknown as Fn)(unit('0.1 m'), unit('0.2 m'));
+  it('equal(0.3 m, 0.1 m + 0.2 m) is true (mathjs: true)', () => {
+    expect(equal(unit('0.3 m'), sum())).toBe(true);
+    expect(equal([unit('0.3 m')], [sum()])).toEqual([true]);
+  });
+  it('unequal(0.3 m, 0.1 m + 0.2 m) is false (mathjs: false)', () => {
+    expect(unequal(unit('0.3 m'), sum())).toBe(false);
+    expect(unequal([unit('0.3 m')], [sum()])).toEqual([false]);
+  });
+  it('a dimension mismatch stays unequal', () => {
+    expect(equal(unit('1 m'), unit('1 s'))).toBe(false);
+    expect(unequal(unit('1 m'), unit('1 s'))).toBe(true);
+  });
+});

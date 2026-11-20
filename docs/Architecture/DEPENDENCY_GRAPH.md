@@ -11869,7 +11869,7 @@ graph LR
 | `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
 | `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
 | `./sparse-product.js`                  | `sparseProduct`                                                                                                                                                                                                                               | Import             |
-| `./collection-relational.js`           | `collectionRelationalRows`                                                                                                                                                                                                                    | Import             |
+| `./collection-relational.js`           | `collectionRelationalRows, unitsEqual`                                                                                                                                                                                                        | Import             |
 | `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
 | `./public-type-exports.js`             | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                                                                                  | Import (type-only) |
@@ -11973,10 +11973,16 @@ graph LR
 
 ### `functions/src/typed/collection-relational.ts` - The collection rows of the comparison functions (#975, #1307).
 
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `equal` |
+
 **Exports:**
 
 - Types: `RelationalFn`
-- Functions: `registerCollectionRelational`, `collectionRelational`, `collectionRelationalRows`
+- Functions: `unitsEqual`, `registerCollectionRelational`, `collectionRelational`, `collectionRelationalRows`
 
 ---
 
@@ -12761,11 +12767,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                    | Type   |
-| ------------------------------- | -------------------------- | ------ |
-| `../relational/natural-sort.js` | `naturalSort`              | Import |
-| `../utils/number.js`            | `nearlyEqual`              | Import |
-| `./collection-relational.js`    | `collectionRelationalRows` | Import |
+| File                            | Imports                                | Type   |
+| ------------------------------- | -------------------------------------- | ------ |
+| `../relational/natural-sort.js` | `naturalSort`                          | Import |
+| `../utils/number.js`            | `nearlyEqual`                          | Import |
+| `./collection-relational.js`    | `collectionRelationalRows, unitsEqual` | Import |
 
 **Exports:**
 
@@ -21931,12 +21937,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1358   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 244711 |
-| Total Exports           | 7444   |
+| Total Lines of Code     | 244736 |
+| Total Exports           | 7445   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
 | Total Interfaces        | 676    |
-| Total Functions         | 2624   |
+| Total Functions         | 2625   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1358,
     "totalModules": 82,
-    "totalExports": 7444
+    "totalExports": 7445
   },
   "entryPoints": [
     {
@@ -26801,7 +26801,7 @@
           },
           {
             "file": "./collection-relational.js",
-            "imports": ["collectionRelationalRows"]
+            "imports": ["collectionRelationalRows", "unitsEqual"]
           },
           {
             "file": "./exact-reductions.js",
@@ -27319,13 +27319,21 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["equal"]
+          }
+        ],
         "exports": [
+          "unitsEqual",
           "registerCollectionRelational",
           "collectionRelational",
           "collectionRelationalRows"
         ],
         "functions": [
+          "unitsEqual",
           "registerCollectionRelational",
           "collectionRelational",
           "collectionRelationalRows"
@@ -29762,7 +29770,7 @@
           },
           {
             "file": "./collection-relational.js",
-            "imports": ["collectionRelationalRows"]
+            "imports": ["collectionRelationalRows", "unitsEqual"]
           }
         ],
         "workspaceDependencies": [
@@ -50313,11 +50321,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1358,
     "totalModules": 82,
-    "totalLinesOfCode": 244711,
-    "totalExports": 7444,
+    "totalLinesOfCode": 244736,
+    "totalExports": 7445,
     "totalClasses": 64,
     "totalInterfaces": 676,
-    "totalFunctions": 2624,
+    "totalFunctions": 2625,
     "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1698,

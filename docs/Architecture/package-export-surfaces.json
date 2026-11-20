@@ -4273,6 +4273,7 @@
       "unit",
       "UnitDimensionOptions",
       "unitImpulse",
+      "unitsEqual",
       "unitToRationalDimension",
       "unkey",
       "unsqueeze",

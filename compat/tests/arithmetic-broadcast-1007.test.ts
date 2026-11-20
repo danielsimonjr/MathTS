@@ -67,3 +67,28 @@ describe('compat arithmetic with operands of different sizes (#1007, #1302)', ()
     expect(math.multiply([[1, 2, 3]], [[1], [2], [3]])).toEqual([[14]]);
   });
 });
+
+describe('compat 1-D matrix results have the mathjs shape (#1007)', () => {
+  const plain = (x: unknown): unknown =>
+    typeof (x as { toArray?: unknown })?.toArray === 'function'
+      ? (x as { toArray(): unknown }).toArray()
+      : x;
+  it('subtract(matrix([3, 4]), 1) is [2, 3], not [[2, 3]]', () => {
+    expect(plain(math.subtract(math.matrix([3, 4]), 1))).toEqual([2, 3]);
+  });
+  it('a 1-D matrix times a column is [-9], not [[-9]]', () => {
+    expect(plain(math.multiply(math.matrix([1, 3, 4]), math.matrix([[-1], [0], [-2]])))).toEqual([
+      -9,
+    ]);
+  });
+  it('the product of two 1-D matrices is the scalar product -16', () => {
+    expect(math.multiply(math.matrix([-3, 4, 4]), math.matrix([0, -4, 0]))).toBe(-16);
+  });
+  it('evaluate takes a 1-D operand with a 2-D operand', () => {
+    expect(plain(math.evaluate('[1,2] + [[1,2],[3,4]]'))).toEqual([
+      [2, 4],
+      [4, 6],
+    ]);
+    expect(plain(math.evaluate('[[1,2],[3,4]] * [1,1]'))).toEqual([3, 7]);
+  });
+});

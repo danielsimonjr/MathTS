@@ -13,6 +13,26 @@
  * module is internal: it is not re-exported.
  */
 
+import { equal as coreEqual } from '@danielsimonjr/mathts-core';
+
+/**
+ * True when two Units measure one quantity: one dimension, and values that are equal under the
+ * tolerance of the number rows of `equal` (mathjs: `0.3 m` equals `0.1 m + 0.2 m`). The scalar
+ * rows of `equal` and `unequal` both use it, so the two always agree (#975).
+ *
+ * @param a - Left Unit.
+ * @param b - Right Unit.
+ * @returns Whether the Units are equal.
+ */
+export function unitsEqual(a: unknown, b: unknown): boolean {
+  const x = a as { equalBase(o: unknown): boolean; value: unknown };
+  const y = b as { value: unknown };
+  if (!x.equalBase(b)) return false;
+  return typeof x.value === 'number' && typeof y.value === 'number'
+    ? coreEqual(x.value, y.value)
+    : x.value === y.value;
+}
+
 /** A comparison of two operands. */
 export type RelationalFn = (a: unknown, b: unknown) => unknown;
 

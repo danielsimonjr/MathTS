@@ -33,7 +33,7 @@ import {
   isFraction,
 } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
-import { collectionRelationalRows } from './collection-relational.js';
+import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
 
 // =============================================================================
 // Internal helpers
@@ -200,11 +200,7 @@ export const unequal = mathTyped('unequal', {
   // units are: `1 m` and `100 cm` are equal, as `equal` says. The structural fallback of
   // `equalScalar` compares the display unit too, so it called them unequal while the collection
   // rows below (the factory function) called them equal.
-  'Unit, Unit': (x: Unit, y: Unit): boolean => {
-    const a = x as unknown as { equalBase(o: unknown): boolean; value: number };
-    const b = y as unknown as { value: number };
-    return !(a.equalBase(y) && a.value === b.value);
-  },
+  'Unit, Unit': (x: Unit, y: Unit): boolean => !unitsEqual(x, y),
   'any, any': (x: unknown, y: unknown): boolean => {
     if (x === null) return y !== null;
     if (y === null) return x !== null;
