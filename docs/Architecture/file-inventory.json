@@ -8500,7 +8500,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 232
+      "loc": 319
     },
     {
       "file": "functions/src/special/niche.ts",
@@ -11286,7 +11286,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 471
+      "loc": 530
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

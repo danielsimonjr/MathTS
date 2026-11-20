@@ -13,6 +13,12 @@
  * matrix and reuse the maintained symmetric eigensolver in
  * `@danielsimonjr/mathts-matrix` (`eig`).
  *
+ * The characteristic values `a_n(q)` and `b_n(q)` need more harmonics at a large `q` and at a
+ * high order (a mode spreads over about `(10 + 2√(2n+1))·|q|^{1/4}` harmonics), so they use a
+ * matrix sized to `n` and `q` (`harmonicsNeeded`) and one eigenvalue by Sturm bisection
+ * (`numeric/tridiagonal-eigen.ts`). From `|q| ≥ max(1e5, 10 s⁴)` they use the asymptotic
+ * series DLMF 28.8.1, whose cost does not grow with `q`.
+ *
  * Normalization / sign — the standard DLMF / Abramowitz & Stegun convention
  * (identical to `mpmath`/`scipy`): `(1/π)∫₀^{2π} ce_n(x,q)² dx = 1` (so
  * `ce_0(x,0) = 1/√2`, `ce_n(x,0) = cos nx`, `se_n(x,0) = sin nx` for `n ≥ 1`),
@@ -27,16 +33,23 @@
  */
 
 import { eig } from '@danielsimonjr/mathts-matrix';
+import { symTridiagEigenvalue } from '../numeric/tridiagonal-eigen.js';
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
 
 /**
- * Truncation order of the Fourier expansion / size of the tridiagonal matrix.
+ * Truncation order of the Fourier expansion / size of the tridiagonal matrix of `ce` and `se`.
  * The coefficients decay super-exponentially, so 50 terms are machine-precision
  * accurate for the pinned range (n ≤ 6, q ≤ 10) with wide margin.
  */
 const N = 50;
+
+/** Highest order of `mathieuA` and `mathieuCe` (each parity class holds 50 modes). */
+const MAX_MATHIEU_A_ORDER = 99;
+
+/** Highest order of `mathieuB` and `mathieuSe`. */
+const MAX_MATHIEU_B_ORDER = 100;
 
 /** The four parity classes of periodic Mathieu solution. */
 type MathieuClass =
@@ -55,47 +68,61 @@ interface MathieuMode {
   harmonics: Int32Array;
 }
 
+/** Harmonic multiple weighting coefficient `k` for a parity class. */
+function harmonicAt(cls: MathieuClass, k: number): number {
+  switch (cls) {
+    case 'even-cos':
+      return 2 * k;
+    case 'odd-cos':
+    case 'odd-sin':
+      return 2 * k + 1;
+    case 'even-sin':
+      return 2 * k + 2;
+  }
+}
+
 /** Harmonic multiple `h[k]` weighting coefficient `k` for a parity class. */
 function harmonicsFor(cls: MathieuClass): Int32Array {
   const h = new Int32Array(N);
-  for (let k = 0; k < N; k++) {
-    switch (cls) {
-      case 'even-cos':
-        h[k] = 2 * k;
-        break;
-      case 'odd-cos':
-      case 'odd-sin':
-        h[k] = 2 * k + 1;
-        break;
-      case 'even-sin':
-        h[k] = 2 * k + 2;
-        break;
-    }
-  }
+  for (let k = 0; k < N; k++) h[k] = harmonicAt(cls, k);
   return h;
 }
 
 /**
- * Build the symmetric tridiagonal matrix (DLMF §28.4 recurrences) for a parity
- * class as a dense `number[][]` for the eigensolver. Diagonal = harmonic²;
- * off-diagonal = coupling `q`, with the class-specific first-entry corrections:
- * `even-cos` scales the (0,1) coupling by `√2` (the `A_0` folding), and the two
- * odd classes shift the first diagonal by `±q`.
+ * The symmetric tridiagonal matrix (DLMF §28.4 recurrences) of a parity class for `size`
+ * harmonics. Diagonal = harmonic²; off-diagonal = coupling `q`, with the class-specific
+ * first-entry corrections: `even-cos` scales the (0,1) coupling by `√2` (the `A_0` folding),
+ * and the two odd classes shift the first diagonal by `±q`.
  */
-function buildMatrix(cls: MathieuClass, q: f64): number[][] {
-  const A: number[][] = Array.from({ length: N }, () => new Array<number>(N).fill(0));
-  const h = harmonicsFor(cls);
-  for (let k = 0; k < N; k++) A[k][k] = h[k] * h[k];
-
+function classTridiagonal(
+  cls: MathieuClass,
+  q: f64,
+  size: number
+): { diag: Float64Array; off: Float64Array } {
+  const diag = new Float64Array(size);
+  const off = new Float64Array(size - 1);
+  for (let k = 0; k < size; k++) {
+    const h = harmonicAt(cls, k);
+    diag[k] = h * h;
+  }
   // First-diagonal corrections for the odd-harmonic classes.
-  if (cls === 'odd-cos') A[0][0] = 1 + q;
-  else if (cls === 'odd-sin') A[0][0] = 1 - q;
-
-  for (let k = 0; k < N - 1; k++) {
+  if (cls === 'odd-cos') diag[0] = 1 + q;
+  else if (cls === 'odd-sin') diag[0] = 1 - q;
+  for (let k = 0; k < size - 1; k++) {
     // even-cos couples A_0↔A_2 with q·√2 (symmetrized A_0 folding).
-    const off = cls === 'even-cos' && k === 0 ? q * Math.SQRT2 : q;
-    A[k][k + 1] = off;
-    A[k + 1][k] = off;
+    off[k] = cls === 'even-cos' && k === 0 ? q * Math.SQRT2 : q;
+  }
+  return { diag, off };
+}
+
+/** The matrix of `classTridiagonal` for `N` harmonics as a dense `number[][]` for the eigensolver. */
+function buildMatrix(cls: MathieuClass, q: f64): number[][] {
+  const { diag, off } = classTridiagonal(cls, q, N);
+  const A: number[][] = Array.from({ length: N }, () => new Array<number>(N).fill(0));
+  for (let k = 0; k < N; k++) A[k][k] = diag[k];
+  for (let k = 0; k < N - 1; k++) {
+    A[k][k + 1] = off[k];
+    A[k + 1][k] = off[k];
   }
   return A;
 }
@@ -151,6 +178,70 @@ function solveClass(cls: MathieuClass, q: f64): MathieuMode[] {
   return modes;
 }
 
+/**
+ * Number of harmonics that a matrix needs for the characteristic value of order `n` at `q`.
+ * The mode `n` spreads over about `(10 + 2√(2n+1))·|q|^{1/4}` harmonics around its own
+ * (`n/2`-th), and 30 more harmonics make the truncation error negligible.
+ */
+function harmonicsNeeded(n: number, q: f64): number {
+  return (
+    Math.ceil(n / 2) + Math.ceil((10 + 2 * Math.sqrt(2 * n + 1)) * Math.pow(Math.abs(q), 0.25)) + 30
+  );
+}
+
+/**
+ * The asymptotic series of DLMF 28.8.1 for `q = h²` large (`s = 2m + 1` for `a_m` and for
+ * `b_{m+1}`): `−2q + 2s√q − (s²+1)/8 − (s³+3s)/(2⁷√q) − …`, eight terms.
+ */
+function asymptoticCharacteristic(s: number, q: f64): f64 {
+  const root = Math.sqrt(q);
+  const s2 = s * s;
+  const s3 = s2 * s;
+  const s4 = s2 * s2;
+  const s5 = s4 * s;
+  const s6 = s4 * s2;
+  const s7 = s6 * s;
+  return (
+    -2 * q +
+    2 * s * root -
+    (s2 + 1) / 8 -
+    (s3 + 3 * s) / (128 * root) -
+    (5 * s4 + 34 * s2 + 9) / (4096 * q) -
+    (33 * s5 + 410 * s3 + 405 * s) / (131072 * q * root) -
+    (63 * s6 + 1260 * s4 + 2943 * s2 + 486) / (1048576 * q * q) -
+    (527 * s7 + 15617 * s5 + 69001 * s3 + 41607 * s) / (33554432 * q * q * root)
+  );
+}
+
+/**
+ * The characteristic value `a_n(q)` (`kind` `'a'`) or `b_n(q)` (`kind` `'b'`).
+ *
+ * A non-NaN `q` and an order within the limits give a result: 0 at `q = 0` is `n²` exactly,
+ * `−Infinity` for an infinite `q`, the asymptotic series for `|q| ≥ max(1e5, 10 s⁴)` (`s = 2n+1`;
+ * a negative `q` maps by DLMF 28.2.21: `a_{2m}(−q) = a_{2m}(q)`, `a_{2m+1}(−q) = b_{2m+1}(q)`,
+ * `b_{2m+1}(−q) = a_{2m+1}(q)`, `b_{2m+2}(−q) = b_{2m+2}(q)`), and otherwise the `m`-th
+ * eigenvalue of the sized matrix of the parity class.
+ */
+function characteristicValue(kind: 'a' | 'b', n: number, q: f64): f64 {
+  if (Number.isNaN(q)) return NaN;
+  if (q === 0) return n * n;
+  const absQ = Math.abs(q);
+  if (absQ === Infinity) return -Infinity;
+  const s = 2 * n + 1;
+  if (absQ >= Math.max(1e5, 10 * s ** 4)) {
+    // For a negative q and an odd order, a and b swap.
+    const useA = (kind === 'a') !== (q < 0 && n % 2 === 1);
+    return asymptoticCharacteristic(useA ? 2 * n + 1 : 2 * n - 1, absQ);
+  }
+  const even = n % 2 === 0;
+  const cls: MathieuClass =
+    kind === 'a' ? (even ? 'even-cos' : 'odd-cos') : even ? 'even-sin' : 'odd-sin';
+  const m = Math.floor((n - (kind === 'b' ? (even ? 2 : 1) : 0)) / 2);
+  const size = Math.max(harmonicsNeeded(n, q), m + 40);
+  const { diag, off } = classTridiagonal(cls, q, size);
+  return symTridiagEigenvalue(diag, off, m);
+}
+
 /** Validate an order argument is a nonnegative integer. */
 function checkOrder(n: number, min: number, max: number, name: string): void {
   if (!Number.isInteger(n) || n < min) {
@@ -170,10 +261,8 @@ function checkOrder(n: number, min: number, max: number, name: string): void {
  * @param q - Mathieu parameter.
  */
 export function mathieuA(n: number, q: f64): f64 {
-  checkOrder(n, 0, 2 * N - 1, 'mathieuA');
-  const cls: MathieuClass = n % 2 === 0 ? 'even-cos' : 'odd-cos';
-  const m = Math.floor(n / 2);
-  return solveClass(cls, q)[m].a;
+  checkOrder(n, 0, MAX_MATHIEU_A_ORDER, 'mathieuA');
+  return characteristicValue('a', n, q);
 }
 
 /**
@@ -184,10 +273,8 @@ export function mathieuA(n: number, q: f64): f64 {
  * @param q - Mathieu parameter.
  */
 export function mathieuB(n: number, q: f64): f64 {
-  checkOrder(n, 1, 2 * N, 'mathieuB');
-  const cls: MathieuClass = n % 2 === 0 ? 'even-sin' : 'odd-sin';
-  const m = Math.floor((n - (n % 2 === 0 ? 2 : 1)) / 2);
-  return solveClass(cls, q)[m].a;
+  checkOrder(n, 1, MAX_MATHIEU_B_ORDER, 'mathieuB');
+  return characteristicValue('b', n, q);
 }
 
 /** Sum a mode's Fourier series with the given trig basis. */
@@ -208,7 +295,7 @@ function evalSeries(mode: MathieuMode, x: f64, basis: (t: number) => number): f6
  * @param x - Argument in radians.
  */
 export function mathieuCe(n: number, q: f64, x: f64): f64 {
-  checkOrder(n, 0, 2 * N - 1, 'mathieuCe');
+  checkOrder(n, 0, MAX_MATHIEU_A_ORDER, 'mathieuCe');
   const cls: MathieuClass = n % 2 === 0 ? 'even-cos' : 'odd-cos';
   const m = Math.floor(n / 2);
   return evalSeries(solveClass(cls, q)[m], x, Math.cos);
@@ -224,7 +311,7 @@ export function mathieuCe(n: number, q: f64, x: f64): f64 {
  * @param x - Argument in radians.
  */
 export function mathieuSe(n: number, q: f64, x: f64): f64 {
-  checkOrder(n, 1, 2 * N, 'mathieuSe');
+  checkOrder(n, 1, MAX_MATHIEU_B_ORDER, 'mathieuSe');
   const cls: MathieuClass = n % 2 === 0 ? 'even-sin' : 'odd-sin';
   const m = Math.floor((n - (n % 2 === 0 ? 2 : 1)) / 2);
   return evalSeries(solveClass(cls, q)[m], x, Math.sin);

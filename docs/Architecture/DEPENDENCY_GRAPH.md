@@ -9922,6 +9922,12 @@ graph LR
 | ------------------------------ | ------ |
 | `@danielsimonjr/mathts-matrix` | `eig`  |
 
+**Internal Dependencies:**
+
+| File                              | Imports                | Type   |
+| --------------------------------- | ---------------------- | ------ |
+| `../numeric/tridiagonal-eigen.js` | `symTridiagEigenvalue` | Import |
+
 **Exports:**
 
 - Functions: `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`
@@ -21866,7 +21872,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1354   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 242310 |
+| Total Lines of Code     | 242397 |
 | Total Exports           | 7432   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 63     |

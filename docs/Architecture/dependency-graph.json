@@ -23312,7 +23312,12 @@
         "description": "Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../numeric/tridiagonal-eigen.js",
+            "imports": ["symTridiagEigenvalue"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -50207,7 +50212,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1354,
     "totalModules": 82,
-    "totalLinesOfCode": 242310,
+    "totalLinesOfCode": 242397,
     "totalExports": 7432,
     "totalClasses": 63,
     "totalInterfaces": 675,

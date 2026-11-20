@@ -314,8 +314,8 @@ describe('Mathieu order and discrete logarithm (#989)', () => {
     expect(() => mathieuCe(100, 0, 1)).toThrow('order n must be at most 99, got 100');
     expect(() => mathieuSe(101, 0, 1)).toThrow('order n must be at most 100, got 101');
   });
-  it('mathieuA(99, 1) matches SciPy', () => {
-    expect(Math.abs(mathieuA(99, 1) / 9801.002551012194 - 1)).toBeLessThan(1e-12);
+  it('mathieuA(99, 1) matches SciPy mathieu_a (the 50-harmonic matrix gave 9801.0025510, #1105)', () => {
+    expect(Math.abs(mathieuA(99, 1) / 9801.00005102041 - 1)).toBeLessThan(1e-12);
   });
   it('discreteLog refuses a modulus that needs more than 2^24 baby steps (hang before the fix)', () => {
     const q = 2 ** 53 - 111; // a prime, and the order of g = 3 is above 2^24

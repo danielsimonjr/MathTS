@@ -11,6 +11,7 @@ import { MAX_CHEBYSHEV_ORDER } from '../src/utils/limits.js';
 import { bernoulli, catalan, zeros } from '../src/index.js';
 import { siegelZ } from '../src/special/wave-functions.js';
 import { sphericalHarmonic } from '../src/special/angular-momentum.js';
+import { mathieuA, mathieuB } from '../src/special/mathieu.js';
 import { rootsHermite, rootsLaguerre } from '../src/numeric/gauss-nodes-extra.js';
 import { symTridiagEigenvalue, symTridiagEigenvalues } from '../src/numeric/tridiagonal-eigen.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
@@ -466,5 +467,63 @@ describe('tridiagonal-eigen: symTridiagEigenvalues and symTridiagEigenvalue', ()
     expect(() => symTridiagEigenvalues([], [])).toThrow(RangeError);
     expect(() => symTridiagEigenvalue([1, 2], [1], 2)).toThrow(RangeError);
     expect(() => symTridiagEigenvalue([1, NaN], [1], 0)).toThrow(RangeError);
+  });
+});
+
+describe('#1105 mathieuA and mathieuB at large q', () => {
+  it('mathieuA(n, q) for q = 1e6 and 1e8 matches the tridiagonal eigenvalue (SciPy)', () => {
+    expect(rel(mathieuA(3, 1e6), -1986006.2528470953)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(3, 1e8), -199860006.2502844)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(0, 1e6), -1998000.2500312617)).toBeLessThan(1e-13);
+  });
+  it('mathieuA(99, q) at large q needs thousands of harmonics and matches SciPy', () => {
+    expect(rel(mathieuA(99, 1e8), -196024956.42641017)).toBeLessThan(1e-12);
+    expect(rel(mathieuA(99, 1e9), -1987419087.1115198)).toBeLessThan(1e-12);
+  });
+  it('mathieuA(3, 1e10) / 1e10 and mathieuA(3, 1e100) follow the asymptotic series', () => {
+    expect(rel(mathieuA(3, 1e10) / 1e10, -1.9998600006250027)).toBeLessThan(1e-14);
+    expect(mathieuA(3, 1e100)).toBe(-2e100);
+  });
+  it('mathieuB(n, 1e6) matches SciPy', () => {
+    expect(rel(mathieuB(3, 1e6), -1990003.251094726)).toBeLessThan(1e-13);
+    expect(rel(mathieuB(4, 1e6), -1986006.2528470969)).toBeLessThan(1e-13);
+  });
+  it('a negative q follows DLMF 28.2.21: a_3(-q) = b_3(q)', () => {
+    expect(mathieuA(3, -1e6)).toBe(mathieuB(3, 1e6));
+    expect(rel(mathieuA(3, -5), mathieuB(3, 5))).toBeLessThan(1e-12);
+    expect(rel(mathieuB(3, -5), mathieuA(3, 5))).toBeLessThan(1e-12);
+    expect(rel(mathieuA(4, -5), mathieuA(4, 5))).toBeLessThan(1e-12);
+  });
+  it('the two methods agree at the change of method (|q| = 1e5)', () => {
+    expect(rel(mathieuA(0, 99999), -199365.7977291912)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(0, 1e5), -199367.79456690454)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(7, 99999), -190539.54958944966)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(7, 1e5), -190541.50215473777)).toBeLessThan(1e-13);
+    expect(rel(mathieuB(1, 1e5), -199367.79456690466)).toBeLessThan(1e-13);
+  });
+  it('mathieuA(99, q) agrees with SciPy on both sides of the change of method (10 s^4 = 1.5682e10)', () => {
+    expect(rel(mathieuA(99, 1.568e10), -31310167467.659313)).toBeLessThan(1e-13);
+    expect(rel(mathieuA(99, 1.5685e10), -31320159522.265316)).toBeLessThan(1e-13);
+  });
+  it('mathieuA and mathieuB match SciPy at small q and high order', () => {
+    expect(rel(mathieuA(99, 1), 9801.00005102041)).toBeLessThan(1e-12);
+    expect(rel(mathieuA(3, 1e4), -18606.278776913656)).toBeLessThan(1e-12);
+    expect(rel(mathieuA(99, 100), 9801.510220693339)).toBeLessThan(1e-12);
+    expect(rel(mathieuA(99, 1000), 9852.188092449915)).toBeLessThan(1e-12);
+    expect(rel(mathieuA(10, 1000), -729.6779750629651)).toBeLessThan(1e-12);
+    expect(rel(mathieuB(100, 1000), 10050.162809813028)).toBeLessThan(1e-12);
+    expect(rel(mathieuB(100, 1), 10000.000050005017)).toBeLessThan(1e-12);
+  });
+  it('q = 0 gives n squared exactly, and a non-finite q follows the limit', () => {
+    expect(mathieuA(0, 0)).toBe(0);
+    expect(mathieuA(5, 0)).toBe(25);
+    expect(mathieuB(4, 0)).toBe(16);
+    expect(mathieuA(3, Infinity)).toBe(-Infinity);
+    expect(mathieuB(3, -Infinity)).toBe(-Infinity);
+    expect(mathieuA(3, NaN)).toBeNaN();
+  });
+  it('the order limits keep their messages', () => {
+    expect(() => mathieuA(100, 1)).toThrow('order n must be at most 99, got 100');
+    expect(() => mathieuB(101, 1)).toThrow('order n must be at most 100, got 101');
   });
 });
