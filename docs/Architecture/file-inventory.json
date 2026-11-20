@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2549,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1133,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1133,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1176,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 151,
+    "@danielsimonjr/mathts-matrix": 152,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -14695,7 +14695,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 713
+      "loc": 735
     },
     {
       "file": "matrix/src/types/index.ts",
@@ -14913,6 +14913,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 678
+    },
+    {
+      "file": "matrix/tests/dogfood-1013-one-d-input.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 67
     },
     {
       "file": "matrix/tests/dogfood-1104-schur-scale.test.ts",
