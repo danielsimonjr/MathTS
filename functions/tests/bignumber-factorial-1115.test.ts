@@ -83,7 +83,22 @@ describe('#1115: factorial of a large BigNumber', () => {
 
   it('factorial of a BigNumber above the exponent range is Infinity', { timeout: 10000 }, () => {
     BigNumber.config({ precision: 64 });
-    expect((factorial('1e20') as BigNumber).isFinite()).toBe(false);
+    for (const n of ['1e15', '1e20', '1e300', '1e400', '1e5000000000000000']) {
+      expect(String(factorial(n))).toBe('Infinity');
+    }
+  });
+
+  it('gamma of a large BigNumber is the factorial of its predecessor', { timeout: 10000 }, () => {
+    BigNumber.config({ precision: 64 });
+    const gamma = (n: string): unknown => fn('gamma')(bn(n));
+    eq(gamma('10001'), FACTORIAL_10000);
+    eq(gamma('20001'), FACTORIAL_20000);
+    // mpmath: gamma(1e9) = 999999999!
+    eq(
+      gamma('1e9'),
+      '9.904626579222993737280821105065704321717221390029311927710558538e+8565705513'
+    );
+    expect(String(gamma('1e400'))).toBe('Infinity');
   });
 
   it('factorial of a small BigNumber is exact', () => {

@@ -229,6 +229,10 @@ export const createGamma = /* #__PURE__ */ factory(
         return BigNumber.fromNumber([1, 1, 2, 6, 24, 120, 720, 5040][nNum]);
       }
 
+      // An n above the range of a number has an n! far above every exponent bound. The loop below
+      // would not end, and the Stirling table would have no size.
+      if (!Number.isFinite(nNum)) return BigNumber.fromNumber(Infinity);
+
       // Above the Stirling limit the product of nNum terms is too slow (n = 1e9 never returned,
       // #1115), and the exact product has far more digits than the precision anyway.
       if (nNum > Math.max(STIRLING_MIN, STIRLING_PER_DIGIT * BigNumber.precision)) {

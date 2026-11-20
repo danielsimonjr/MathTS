@@ -79,7 +79,22 @@ describe('#1166 item 4: exp, expm1, sinh, cosh and tanh at |x| = 1e10', () => {
 
   it('a bound that the user sets still applies to the result', () => {
     BigNumber.config({ precision: 64, maxExponent: 1000 });
-    expect(bn('1e10').sinh().isFinite()).toBe(false);
+    expect(String(bn('1e10').sinh())).toBe('Infinity');
+    expect(String(bn('-1e10').sinh())).toBe('-Infinity');
     expect(String(bn('-1e10').expm1())).toBe('-1');
+  });
+
+  it('sinh, cosh, tanh and expm1 of an argument beyond the exponent range', () => {
+    BigNumber.config({ precision: 64 });
+    for (const x of ['1e17', '2.1e16', '1e30', '1e5000000000000000']) {
+      expect(String(bn(x).sinh())).toBe('Infinity');
+      expect(String(bn(`-${x}`).sinh())).toBe('-Infinity');
+      expect(String(bn(x).cosh())).toBe('Infinity');
+      expect(String(bn(`-${x}`).cosh())).toBe('Infinity');
+      expect(String(bn(x).tanh())).toBe('1');
+      expect(String(bn(`-${x}`).tanh())).toBe('-1');
+      expect(String(bn(x).expm1())).toBe('Infinity');
+      expect(String(bn(`-${x}`).expm1())).toBe('-1');
+    }
   });
 });

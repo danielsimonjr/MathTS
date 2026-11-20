@@ -1877,6 +1877,8 @@ export class BigNumber implements MathTSValue {
     // x keeps its digits: exp(x) - exp(-x) cancels them (#1166). A large |x| gives e / (e + 1) = 1.
     const one = BigNumber.fromNumber(1);
     const e = this.abs().expm1();
+    // Beyond the exponent range expm1 is Infinity, and Infinity / Infinity below is NaN.
+    if (!e.isFinite()) return this._sign === 1 ? e : e.negate();
     const magnitude = e.add(e.divide(e.add(one))).divide(BigNumber.fromNumber(2));
     return this._sign === 1 ? magnitude : magnitude.negate();
   }
