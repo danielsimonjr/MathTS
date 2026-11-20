@@ -1270,35 +1270,54 @@ Object.defineProperty(MathJSSparseMatrix.prototype, 'type', {
 // ---------------------------------------------------------------------------
 
 /**
+ * The storage format of a `matrix(data, format)` call: `'sparse'`, `'dense'` (for `'dense'` and
+ * `'default'`) or `undefined` (no format). As in mathjs, a boolean is converted to a string and
+ * any string except the three formats throws.
+ * @throws TypeError for an unknown format, or for a format that is not a string or a boolean
+ */
+function matrixFormat(format: unknown): 'sparse' | 'dense' | undefined {
+  if (format === undefined) return undefined;
+  if (typeof format !== 'string' && typeof format !== 'boolean') {
+    throw new TypeError(
+      'Unexpected type of argument in function matrix (expected: string or boolean, actual: ' +
+        typeName(format) +
+        ', index: 1)'
+    );
+  }
+  const name = String(format);
+  if (name === 'sparse') return 'sparse';
+  if (name === 'dense' || name === 'default') return 'dense';
+  throw new TypeError('Unknown matrix type ' + JSON.stringify(name) + '.');
+}
+
+/**
  * Creates the `matrix` factory function that mathjs factories call as:
  *   matrix()           — empty dense matrix
  *   matrix(data)       — dense matrix from nested array
  *   matrix('sparse')   — empty sparse matrix (format-only arg)
  *   matrix('default')  — empty dense matrix (format-only arg)
  *   matrix(data, 'sparse') — sparse matrix from data
+ *   matrix(sparse, 'dense') — dense matrix with the entries of a sparse matrix
+ * The format is 'dense', 'default' or 'sparse'; any other value throws (see `matrixFormat`).
+ * A matrix that already has the format is returned as it is.
  */
 export function createMatrixBridge() {
   return function matrix(
     data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
-    const sparse = storageType === 'sparse';
-    if (data === undefined) return sparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
-    if (Array.isArray(data))
-      return sparse ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data as number[][]);
-    if (data instanceof MathJSSparseMatrix) return data;
-    if (data instanceof MathJSDenseMatrix)
-      return sparse ? new MathJSSparseMatrix(data._data) : data;
-    // matrix('sparse'), matrix('dense') or matrix('default'). As in mathjs, a boolean is
-    // converted to a format string, and any other format string throws. The parameter type
-    // does not list boolean, because a boolean never gives a matrix.
+    // matrix('sparse'), matrix('dense') or matrix('default'): the format alone. As in mathjs, a
+    // boolean is converted to a format string, and any other format string throws. The second
+    // argument of this form is a datatype, which is not checked. The parameter type does not
+    // list boolean, because a boolean never gives a matrix.
     if (typeof data === 'string' || typeof (data as unknown) === 'boolean') {
       const format = String(data);
       if (format === 'sparse') return new MathJSSparseMatrix();
       if (format === 'dense' || format === 'default') return new MathJSDenseMatrix();
       throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
-    if (!isPlainObject(data)) {
+    const isMatrix = data instanceof MathJSSparseMatrix || data instanceof MathJSDenseMatrix;
+    if (data !== undefined && !Array.isArray(data) && !isMatrix && !isPlainObject(data)) {
       // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
       throw new TypeError(
         'Unexpected type of argument in function matrix (expected: string or Array or Matrix or boolean, actual: ' +
@@ -1306,6 +1325,18 @@ export function createMatrixBridge() {
           ', index: 0)'
       );
     }
+    const format = matrixFormat(storageType);
+    const sparse = format === 'sparse';
+    if (data === undefined) return sparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (Array.isArray(data))
+      return sparse ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data as number[][]);
+    if (data instanceof MathJSSparseMatrix) {
+      return format === 'dense'
+        ? new MathJSDenseMatrix({ data: data.toArray() as number[][], size: data.size() })
+        : data;
+    }
+    if (data instanceof MathJSDenseMatrix)
+      return sparse ? new MathJSSparseMatrix(data._data) : data;
     // An internal storage object. The dense constructor checks { data, size } itself.
     if (!sparse) return new MathJSDenseMatrix(data as never);
     if (!isStorageObject(data)) {

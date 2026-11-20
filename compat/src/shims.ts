@@ -207,6 +207,7 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * @example
  * matrix([[1,2],[3,4]])
  * matrix([[1,2],[3,4]], 'sparse')
+ * matrix(sparseMatrix, 'dense')
  */
 export function matrix(
   data?: number[][] | DenseMatrix | SparseMatrix,
@@ -216,8 +217,15 @@ export function matrix(
     return _factoryMatrix() as CompatMatrixValue;
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
+    // A native matrix of the format that is asked for, or of no format, is returned as it is.
+    if (format === undefined) return data;
+    // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
+    _factoryMatrix(undefined, format);
     if (format === 'sparse' && isDenseMatrix(data)) {
       return _factorySparse(data.toArray()) as CompatMatrixValue;
+    }
+    if (format !== 'sparse' && isSparseMatrix(data)) {
+      return DenseMatrix.fromArray(data.toArray());
     }
     return data;
   }

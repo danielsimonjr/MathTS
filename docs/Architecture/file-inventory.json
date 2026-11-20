@@ -555,7 +555,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 840
+      "loc": 848
     },
     {
       "file": "compat/src/unary-fast-path.ts",
@@ -646,7 +646,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 166
+      "loc": 169
     },
     {
       "file": "compat/tests/dogfood-955-unit-paths.test.ts",
@@ -6848,7 +6848,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1411
+      "loc": 1442
     },
     {
       "file": "functions/src/factories/scope.ts",
