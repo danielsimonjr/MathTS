@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1353
   totalModules: 82
-  totalExports: 7426
+  totalExports: 7428
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -28026,6 +28026,7 @@ modules:
             - besselY0Dispatch
             - besselY1Dispatch
             - besselYDispatch
+            - assertBesselArrayWork
             - airyAiDispatch
             - airyBiDispatch
             - ellipticKDispatch
@@ -29222,9 +29223,11 @@ modules:
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
         - assertAllocSize
+        - assertArrayWork
         - assertLoopOrder
       functions:
         - assertAllocSize
+        - assertArrayWork
         - assertLoopOrder
       constants:
         - MAX_ALLOC_ELEMENTS
@@ -30234,6 +30237,8 @@ modules:
         - file: ../../utils/limits.js
           imports:
             - MAX_BESSEL_J_SWEEP
+            - MAX_RECURRENCE_ORDER
+            - assertArrayWork
       workspaceDependencies: []
       exports:
         - WASM_SPECIAL_THRESHOLD
@@ -30254,6 +30259,7 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
+        - assertBesselArrayWork
         - besselJDispatch
         - besselYDispatch
         - lgammaJS
@@ -30293,6 +30299,7 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
+        - assertBesselArrayWork
         - besselJDispatch
         - besselYDispatch
         - lgammaJS
@@ -47305,11 +47312,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1353
   totalModules: 82
-  totalLinesOfCode: 241698
-  totalExports: 7426
+  totalLinesOfCode: 241796
+  totalExports: 7428
   totalClasses: 63
   totalInterfaces: 675
-  totalFunctions: 2609
+  totalFunctions: 2611
   totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1697

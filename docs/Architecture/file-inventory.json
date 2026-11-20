@@ -9578,7 +9578,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1568
+      "loc": 1571
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -9844,7 +9844,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 101
+      "loc": 132
     },
     {
       "file": "functions/src/utils/map.ts",
@@ -10054,7 +10054,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 817
+      "loc": 881
     },
     {
       "file": "functions/src/wasm/WasmLoader.ts",
@@ -11279,7 +11279,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 157
+      "loc": 203
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

@@ -67,6 +67,7 @@ import {
   besselY0Dispatch,
   besselY1Dispatch,
   besselYDispatch,
+  assertBesselArrayWork,
   airyAiDispatch,
   airyBiDispatch,
   ellipticKDispatch,
@@ -835,6 +836,7 @@ export const besselY1 = mathTyped('besselY1', {
 export const besselJ = mathTyped('besselJ', {
   'number, number': besselJScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselArrayWork('besselJ', n, x);
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return besselJDispatch(n, x);
     }
@@ -855,6 +857,7 @@ export const besselJ = mathTyped('besselJ', {
 export const besselY = mathTyped('besselY', {
   'number, number': besselYScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselArrayWork('besselY', n, x);
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return besselYDispatch(n, x);
     }

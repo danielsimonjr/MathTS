@@ -8,6 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { besselJ, besselY, chebyshevT } from '../src/typed/special.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
+import { besselYnJS } from '../src/wasm/special/wasm-bridge.js';
 import {
   sphericalBesselJ,
   sphericalBesselI,
@@ -152,5 +153,50 @@ describe('#1116 Bessel and Chebyshev results that were NaN', () => {
         -Infinity,
       ]);
     });
+  });
+});
+
+describe('#1132 besselJ and besselY: one work bound per array call', () => {
+  const fill = (len: number, v: number) => new Float64Array(len).fill(v);
+
+  it('besselY(2.4e9, 1024 elements at 5e9) throws a RangeError before any recurrence runs', () => {
+    expect(() => besselY(2.4e9, fill(1024, 5e9))).toThrow(RangeError);
+  });
+  it('besselJ(2.4e9, 1024 elements at 5e9) throws a RangeError before any recurrence runs', () => {
+    expect(() => besselJ(2.4e9, fill(1024, 5e9))).toThrow(RangeError);
+  });
+  it('besselJ and besselY with 2 elements (below the array threshold) throw too', () => {
+    expect(() => besselJ(2.4e9, fill(2, 5e9))).toThrow(RangeError);
+    expect(() => besselY(2.4e9, fill(2, 5e9))).toThrow(RangeError);
+  });
+  it('the message names the order, the element count and the per-call maximum', () => {
+    expect(() => besselJ(2.4e9, fill(1024, 5e9))).toThrow(
+      /besselJ: order 2400000000 over 1024 elements needs about \d+ recurrence steps, above the supported maximum of 2500000000 per call/
+    );
+  });
+  it('a downward sweep over many elements throws (x just below n)', () => {
+    expect(() => besselJ(5e8, fill(8, 5e8 - 1))).toThrow(/per call/);
+  });
+  it('an element with its own limit error keeps its own message', () => {
+    expect(() => besselJ(3e9, fill(4, 5e9))).toThrow(/besselJ: n = 3000000000 exceeds/);
+    expect(() => besselY(3e9, fill(2048, 5))).toThrow(/besselY: n = 3000000000 exceeds/);
+  });
+  it('besselJ(2.4e9, 2048 elements at 1000) is 0 for every element (zero bound, no steps)', () => {
+    const r = besselJ(2.4e9, fill(2048, 1000)) as Float64Array;
+    expect(r.length).toBe(2048);
+    expect(r.every((v) => v === 0)).toBe(true);
+  });
+  it('besselY(2e9, 2048 elements at 1) equals the scalar rule (overflow exit, about 200 steps)', () => {
+    const r = besselY(2e9, fill(2048, 1)) as Float64Array;
+    const want = besselYnJS(2e9, fill(2048, 1));
+    expect(r.every((v, i) => Object.is(v, want[i]))).toBe(true);
+  });
+  it('besselJ(5, [1, 2, 3]) equals the scalars', () => {
+    const r = besselJ(5, new Float64Array([1, 2, 3])) as Float64Array;
+    expect(Array.from(r)).toEqual([besselJ(5, 1), besselJ(5, 2), besselJ(5, 3)]);
+  });
+  it('a total below the maximum passes: besselJ(2, 1e6 elements) runs', () => {
+    const r = besselJ(2, fill(1_000_000, 0.5)) as Float64Array;
+    expect(r.length).toBe(1_000_000);
   });
 });

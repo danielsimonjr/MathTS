@@ -18,6 +18,9 @@ export const MAX_LOOP_ORDER = 10_000_000;
  *
  * The limit is the order where the slowest of these recurrences ran for about 20 s before
  * the limit existed (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s).
+ * It also bounds the total of one array call: `besselJ(n, xs)` and `legendreP(n, xs)` run
+ * one recurrence per element, so an array whose elements need more than this many steps in
+ * all throws a RangeError (`assertArrayWork`).
  */
 export const MAX_RECURRENCE_ORDER = 2_500_000_000;
 
@@ -80,6 +83,34 @@ export function assertAllocSize(fn: string, dims: readonly number[]): void {
     }
     if (d === 0) return;
     room = Math.floor(room / d);
+  }
+}
+
+/**
+ * Throw a RangeError when one array call needs more recurrence steps than `max`.
+ *
+ * A scalar limit bounds one element. An array call runs one recurrence per element, so a
+ * long array at a large order ran for hours (`besselY(2.4e9, 1024 elements)`). The caller
+ * computes `steps`, the total of the steps of all elements in units of one upward step.
+ *
+ * @param fn - Function name for the message
+ * @param n - Order, for the message
+ * @param count - Number of elements, for the message
+ * @param steps - Total recurrence steps of the call
+ * @param max - Largest total that one call accepts
+ * @throws RangeError if steps is greater than max
+ */
+export function assertArrayWork(
+  fn: string,
+  n: number,
+  count: number,
+  steps: number,
+  max: number
+): void {
+  if (steps > max) {
+    throw new RangeError(
+      `${fn}: order ${n} over ${count} elements needs about ${steps} recurrence steps, above the supported maximum of ${max} per call`
+    );
   }
 }
 

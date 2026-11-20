@@ -1694,6 +1694,8 @@
       "asReadReturnedF64",
       "asReadReturnedI32",
       "assertAllocSize",
+      "assertArrayWork",
+      "assertBesselArrayWork",
       "assertDependencies",
       "assertFormatPrecision",
       "assertLoopOrder",
