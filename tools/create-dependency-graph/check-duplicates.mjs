@@ -19,7 +19,7 @@
 // (well under a second). Run WITHOUT `--no-regen` manually or from CI when you
 // want a self-contained, always-fresh check.
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 const ROOT_DIR = process.cwd();
@@ -68,6 +68,15 @@ function main() {
     }
   }
 
+  // `bun run docs:deps` writes the report and no commit holds it, so a new checkout has none.
+  const reportPath = join(ROOT_DIR, 'docs/Architecture/duplicate-symbols.json');
+  if (!existsSync(reportPath)) {
+    console.error(
+      `check:duplicates: ${reportPath} not found: run \`bun run docs:deps\` first ` +
+        '(after `bun run build`). That command writes the file, and no commit holds it.'
+    );
+    process.exit(1);
+  }
   const report = readJson('docs/Architecture/duplicate-symbols.json');
   const baseline = readJson('docs/Architecture/duplicate-baseline.json');
 
