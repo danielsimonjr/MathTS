@@ -21,13 +21,11 @@ export class PolynomialDegreeError extends RangeError {
 }
 
 /**
- * The most terms that a power of a multivariate polynomial may have. The bound is the number of
- * terms that the power can hold, `binomial(n + t - 1, t - 1)` for `n` and `t` the exponent and the
- * number of terms of the base, so `(x+y+z+w)^900` (about 1.2e8 terms) is refused before any
- * product runs, and `(x+y)^1000` (1001 terms) is not.
- *
- * Temporary: the batch H1 branch defines `MAX_POLYNOMIAL_TERMS` and `PolynomialSizeError` in
- * `typed/polynomial-ideal.ts`. When it merges, this copy is deleted.
+ * The most terms that a power of a multivariate polynomial may have. The check uses the number of
+ * terms that the power can hold: the smaller of `binomial(n + t - 1, t - 1)` (`n` the exponent and
+ * `t` the number of terms of the base) and the number of exponent vectors in the box that the
+ * power fills. So `(x+y+z+w)^900` (about 1.2e8 terms) is refused before any product runs, and
+ * `(x+y)^1000` (1001 terms) and `(x^3+x^2+x+1)^100` (301 terms) are not.
  */
 export const MAX_POLYNOMIAL_TERMS = 100_000;
 
