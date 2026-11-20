@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2576,
+  "totalFiles": 2585,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1160,
+    "test": 1169,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1160,
+    "tests": 1169,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,15 +23,15 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 37,
+    "@danielsimonjr/mathts-compat": 38,
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1198,
+    "@danielsimonjr/mathts-functions": 1204,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 157,
+    "@danielsimonjr/mathts-matrix": 159,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -675,6 +675,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 241
+    },
+    {
+      "file": "compat/tests/eigs-matrix-input-1179.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 91
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -6407,7 +6414,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 505
+      "loc": 539
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
@@ -6820,7 +6827,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1935
+      "loc": 1945
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -7219,14 +7226,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 551
+      "loc": 570
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 970
+      "loc": 1162
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",
@@ -7345,7 +7352,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 416
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -8493,7 +8500,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 185
+      "loc": 207
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -9200,7 +9207,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3051
+      "loc": 3061
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10299,7 +10306,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 311
+      "loc": 292
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
@@ -10806,6 +10813,13 @@
       "loc": 53
     },
     {
+      "file": "functions/tests/dogfood-1179-eigs-matrix-input.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 242
+    },
+    {
       "file": "functions/tests/dogfood-1186-eigs-relative-imag-tol.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10925,6 +10939,13 @@
       "loc": 125
     },
     {
+      "file": "functions/tests/dogfood-1238-eigs-double-shift.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 200
+    },
+    {
       "file": "functions/tests/dogfood-1239-slu-order2.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10937,6 +10958,27 @@
       "area": "tests",
       "disposition": "test",
       "loc": 89
+    },
+    {
+      "file": "functions/tests/dogfood-1240-eigs-balance.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 230
+    },
+    {
+      "file": "functions/tests/dogfood-1240-eigs-huge-entry-pair.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
+      "file": "functions/tests/dogfood-1242-eigs-defective-small.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 264
     },
     {
       "file": "functions/tests/dogfood-1243-symmetric-small-entries.test.ts",
@@ -10993,6 +11035,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 74
+    },
+    {
+      "file": "functions/tests/dogfood-1285-norm-corr-eigs.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 234
     },
     {
       "file": "functions/tests/dogfood-1287-lusolve-row-relative-pivot.test.ts",
@@ -14688,7 +14737,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 763
+      "loc": 896
     },
     {
       "file": "matrix/src/operations/expm.ts",
@@ -14709,7 +14758,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 88
+      "loc": 90
     },
     {
       "file": "matrix/src/operations/logm.ts",
@@ -15167,6 +15216,13 @@
       "loc": 72
     },
     {
+      "file": "matrix/tests/eig-balance-1240.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 164
+    },
+    {
       "file": "matrix/tests/eig-complex-eigenvectors-oracle.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -15200,6 +15256,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 69
+    },
+    {
+      "file": "matrix/tests/eig-zero-diagonal-deflation.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 75
     },
     {
       "file": "matrix/tests/gap-linalg-extension-oracle.test.ts",

@@ -387,6 +387,10 @@ export const createNorm = /* #__PURE__ */ factory(
       if (sizeX[0] !== sizeX[1]) {
         throw new RangeError('Invalid matrix dimensions');
       }
+      // A NaN or an infinite entry has no eigenvalues to find (eigs throws a RangeError, #1243),
+      // and the norm is NaN or Infinity (#1285).
+      const nonFinite = _nonFiniteNorm(x.toArray());
+      if (nonFinite !== undefined) return nonFinite as number | BigNumberType;
       // A*.A squares each entry, so it can overflow or underflow when the norm is in range
       // (#1257). An overflow gives eigs a non-finite entry, and eigs throws a RangeError for
       // it (#1243). The norm is s * norm(x / s) for an exact scale s, so retry with the scaled
@@ -413,6 +417,36 @@ export const createNorm = /* #__PURE__ */ factory(
         })
       );
       return scale.up(_matrixNormTwoOf(scaled) as number) as number | BigNumberType;
+    }
+
+    /**
+     * The 2-norm of a matrix that has a non-finite entry: NaN when an entry is NaN, else Infinity
+     * when an entry is infinite, as mathjs gives for an infinite entry. A BigNumber when an entry
+     * is a BigNumber, else a number. `undefined` when every entry is finite.
+     */
+    function _nonFiniteNorm(rows: unknown[]): number | CoreBigNumber | undefined {
+      let anyBig = false;
+      let anyNaN = false;
+      let anyInfinite = false;
+      for (const v of rows.flat(Infinity)) {
+        let re: number;
+        let im = 0;
+        if (v instanceof CoreBigNumber) {
+          anyBig = true;
+          re = v.isNaN() ? NaN : v.isFinite() ? 0 : Infinity;
+        } else if (typeof v === 'number') {
+          re = v;
+        } else if (typeof v === 'object' && v !== null && 're' in v && 'im' in v) {
+          ({ re, im } = v as { re: number; im: number });
+        } else {
+          continue;
+        }
+        if (Number.isNaN(re) || Number.isNaN(im)) anyNaN = true;
+        else if (!Number.isFinite(re) || !Number.isFinite(im)) anyInfinite = true;
+      }
+      if (!anyNaN && !anyInfinite) return undefined;
+      const result = anyNaN ? NaN : Infinity;
+      return anyBig ? CoreBigNumber.fromNumber(result) : result;
     }
 
     function _matrixNormTwoOf(x: MatrixType): number | BigNumberType {

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7414
+  totalExports: 7418
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5483,13 +5483,16 @@ modules:
             - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
       interfaces:
         - EigResult
         - EigOptions
+        - EigBalance
       functions:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
@@ -5541,6 +5544,8 @@ modules:
             - eig
             - eigvals
             - powerIteration
+            - balanceForEig
+            - EigBalance
             - EigResult
             - EigOptions
             - RepeatedEigenvalue
@@ -5657,6 +5662,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -5718,6 +5725,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -15547,6 +15556,7 @@ modules:
             - acceleratedDet
             - acceleratedInv
             - correctEigs
+            - correctEigsOfMatrix
         - file: ../matrix/reshape.js
           imports:
             - createReshape
@@ -17821,7 +17831,7 @@ modules:
       constants:
         - createDot
     functions/src/matrix/eigs/complexEigs.ts:
-      description: Create the `complexEigs` function, which computes the eigenvalues and the optional
+      description: A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -17834,6 +17844,9 @@ modules:
         - file: ../../utils/object.js
           imports:
             - clone
+        - file: ../../utils/real-scale.js
+          imports:
+            - realScale
       workspaceDependencies: []
       exports:
         - createComplexEigs
@@ -17856,7 +17869,7 @@ modules:
       functions:
         - createRealSymmetric
     functions/src/matrix/eigs.ts:
-      description: Compute eigenvalues and optionally eigenvectors of a square matrix.
+      description: A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -17892,6 +17905,9 @@ modules:
       workspaceDependencies: []
       exports:
         - createEigs
+        - defineRemovedVectorsGetter
+      functions:
+        - defineRemovedVectorsGetter
       constants:
         - createEigs
     functions/src/matrix/fft.ts:
@@ -18255,7 +18271,13 @@ modules:
       description: Native-accelerated fast paths for matrix factory functions.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./eigs.js
+          imports:
+            - defineRemovedVectorsGetter
+        - file: ../utils/is.js
+          imports:
+            - isFraction
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -18263,6 +18285,7 @@ modules:
             - DenseMatrix
             - lu
             - eig
+            - balanceForEig
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -18272,14 +18295,14 @@ modules:
         - isLargeNumericSquare
         - acceleratedDet
         - acceleratedInv
-        - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       functions:
         - isLargeNumericSquare
         - acceleratedDet
         - acceleratedInv
-        - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       constants:
         - NATIVE_MATRIX_THRESHOLD
     functions/src/matrix/ones.ts:
@@ -47149,15 +47172,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 239862
-  totalExports: 7414
+  totalLinesOfCode: 240414
+  totalExports: 7418
   totalClasses: 62
-  totalInterfaces: 673
-  totalFunctions: 2599
-  totalTypeGuards: 185
+  totalInterfaces: 674
+  totalFunctions: 2601
+  totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1696
-  totalReExports: 3191
+  totalReExports: 3193
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

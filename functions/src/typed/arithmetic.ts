@@ -1641,6 +1641,16 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     return max;
   }
   if (p === 2) {
+    // A NaN entry gives NaN, and an infinite entry gives Infinity, as in mathjs. The singular
+    // value iteration cannot read a non-finite entry (#1285).
+    let infinite = false;
+    for (const row of data) {
+      for (const x of row) {
+        if (Number.isNaN(x)) return NaN;
+        if (!Number.isFinite(x)) infinite = true;
+      }
+    }
+    if (infinite) return Infinity;
     // spectral norm = largest singular value
     const sv = singularValues(data);
     return sv.length > 0 ? Math.max(...sv) : 0;

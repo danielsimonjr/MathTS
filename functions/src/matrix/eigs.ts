@@ -107,7 +107,6 @@ interface Dependencies {
   reshape: TypedFunction<Scalar[]>;
   qr: TypedFunction<{ Q: Scalar[][]; R: Scalar[][] }>;
   usolve: TypedFunction<Scalar[]>;
-  usolveAll: TypedFunction<Scalar[][]>;
   im: TypedFunction<number | BigNumber>;
   re: TypedFunction<number | BigNumber>;
   matrixFromColumns: TypedFunction<Scalar[][]>;
@@ -115,6 +114,28 @@ interface Dependencies {
 }
 
 const name = 'eigs';
+
+/**
+ * A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an
+ * entry. An entry of decimal order e has a square of order 2e, and a number holds orders up to
+ * 308. A BigNumber matrix with an entry of order above 150 (or below -150) is scaled before the
+ * solve, even when the squares are inside the BigNumber range (#1285).
+ */
+const NUMBER_SQUARE_ORDER_LIMIT = 300;
+
+/**
+ * Add the property `vectors` to an eigs result: it throws, because the name was replaced by
+ * `eigenvectors`. The property is not enumerable, so the eigenvectors can still be converted to
+ * a string.
+ */
+export function defineRemovedVectorsGetter(result: object): void {
+  Object.defineProperty(result, 'vectors', {
+    enumerable: false,
+    get: () => {
+      throw new Error('eigs(M).vectors replaced with eigs(M).eigenvectors');
+    },
+  });
+}
 
 // The absolute state of math.js's dependency system:
 const dependencies = [
@@ -143,7 +164,6 @@ const dependencies = [
   'reshape',
   'qr',
   'usolve',
-  'usolveAll',
   'im',
   're',
   'matrixFromColumns',
@@ -179,7 +199,6 @@ export const createEigs = /* #__PURE__ */ factory(
     reshape,
     qr,
     usolve,
-    usolveAll,
     im,
     re,
     matrixFromColumns,
@@ -216,7 +235,6 @@ export const createEigs = /* #__PURE__ */ factory(
       qr,
       inv,
       usolve,
-      usolveAll,
       complex,
       matrixFromColumns,
       dot,
@@ -325,13 +343,7 @@ export const createEigs = /* #__PURE__ */ factory(
         }
       }
       if (computeVectors) {
-        Object.defineProperty(result, 'vectors', {
-          enumerable: false, // to make sure that the eigenvectors can still be
-          // converted to string.
-          get: () => {
-            throw new Error('eigs(M).vectors replaced with eigs(M).eigenvectors');
-          },
-        });
+        defineRemovedVectorsGetter(result);
       }
       return result;
     }
@@ -397,8 +409,9 @@ export const createEigs = /* #__PURE__ */ factory(
     /**
      * The general solver squares and multiplies entries, so a BigNumber matrix with entries near
      * the exponent bounds gives NaN (#1257). When the squares of the largest entry can leave the
-     * bounds, the entries are divided by an exact power of 10 and each eigenvalue is multiplied
-     * back. The eigenvectors do not change. A Complex eigenvalue is multiplied back as a number.
+     * bounds, or the number range of a complex eigenvalue (#1285), the entries are divided by an
+     * exact power of 10 and each eigenvalue is multiplied back. The eigenvectors do not change.
+     * A Complex eigenvalue is multiplied back as a number.
      */
     function doScaledComplexEigs(
       arr: Scalar[][],
@@ -408,7 +421,13 @@ export const createEigs = /* #__PURE__ */ factory(
       computeVectors: boolean
     ): EigenResult {
       const scale = type === 'BigNumber' ? realScale(arr.flat()) : undefined;
-      if (scale === undefined || !scale.big || !squaresLeaveRange(scale.order, N)) {
+      if (
+        scale === undefined ||
+        !scale.big ||
+        !(
+          squaresLeaveRange(scale.order, N) || 2 * Math.abs(scale.order) > NUMBER_SQUARE_ORDER_LIMIT
+        )
+      ) {
         return doComplexEigs(arr, N, prec, type, computeVectors);
       }
       const scaled = arr.map((row) =>

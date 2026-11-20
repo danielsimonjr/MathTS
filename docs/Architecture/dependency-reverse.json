@@ -1054,6 +1054,7 @@
       "functions/src/matrix/ifft.ts",
       "functions/src/matrix/inv.ts",
       "functions/src/matrix/mapSlices.ts",
+      "functions/src/matrix/native-accel.ts",
       "functions/src/matrix/partitionSelect.ts",
       "functions/src/matrix/pinv.ts",
       "functions/src/matrix/resize.ts",
@@ -1087,6 +1088,7 @@
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/arithmetic/norm.ts",
       "functions/src/matrix/eigs.ts",
+      "functions/src/matrix/eigs/complexEigs.ts",
       "functions/src/statistics/corr.ts",
       "functions/src/statistics/std.ts",
       "functions/src/typed/arithmetic.ts"
@@ -2631,7 +2633,10 @@
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
-    "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
+    "functions/src/matrix/eigs.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/matrix/native-accel.ts"
+    ],
     "functions/src/algebra/solver/lusolve.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/corr.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/mad.ts": ["functions/src/factories/index.ts"],
