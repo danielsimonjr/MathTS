@@ -595,6 +595,24 @@ export function runtimeExportNames(source) {
 }
 
 /**
+ * Says what is wrong with the functions-surface file, or null when nothing is wrong.
+ * `bun run docs:deps` writes `package-export-surfaces.json` and no commit holds it. A `--check`
+ * run is a gate: without the file it could not reconcile the shipped exports with their source,
+ * so it must fail and not skip. A rewrite run skips the reconciliation (the Site workflow runs
+ * the generator after a build and without docs:deps).
+ * @param {string} surfacesPath Absolute path of package-export-surfaces.json.
+ * @param {boolean} check True for `--check`, false for a rewrite.
+ * @returns {string | null} The failure text, or null.
+ */
+export function missingSurfaceFileMessage(surfacesPath, check) {
+  if (!check || existsSync(surfacesPath)) return null;
+  return (
+    `functions surface reconciliation: ${surfacesPath} not found. Run \`bun run docs:deps\` first ` +
+    '(after `bun run build`). That command writes the file, and no commit holds it.'
+  );
+}
+
+/**
  * Refuse missing dist, stale `src/` mtimes, or barrel value exports absent from dist.
  * @param {string} pkgDir absolute package directory
  * @param {{ load?: boolean, mod?: Record<string, unknown> }} [options]
@@ -760,9 +778,16 @@ async function runMain() {
   // --- Cross-validate the shipped functions surface against the dep-graph's
   // independent static-source inventory. A name in the runtime `dist` with no source
   // origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
-  // accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
-  // absent the reconciliation is skipped (not failed) so this check stays self-contained.
+  // accidental export). `bun run docs:deps` writes the surfaces file and no commit holds it.
+  // With `--check` a missing file fails (a gate that skips checks nothing); a rewrite skips the
+  // reconciliation, because the Site workflow runs the generator without docs:deps.
   const SURFACES = resolve(REPO, 'docs', 'Architecture', 'package-export-surfaces.json');
+  const check = process.argv.includes('--check');
+  const surfaceProblem = missingSurfaceFileMessage(SURFACES, check);
+  if (surfaceProblem) {
+    console.error(surfaceProblem);
+    process.exit(1);
+  }
   let reconcile = { skipped: true, orphans: [] };
   if (functionsSurface && existsSync(SURFACES)) {
     const { surfaces } = JSON.parse(readFileSync(SURFACES, 'utf8'));
@@ -780,7 +805,6 @@ async function runMain() {
         `refresh: ${reconcile.orphans.join(', ')}`
       : `functions surface reconciles: all ${functionsSurface?.length ?? 0} shipped exports have a source origin.`;
 
-  const check = process.argv.includes('--check');
   const stale = jobs.filter((j) => norm(j.next) !== norm(j.prev));
 
   if (check) {

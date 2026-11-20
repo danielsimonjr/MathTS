@@ -83,6 +83,18 @@ jobs:
       - name: Format check
         run: bun run format:check
 
+      # The dependency-graph reports in docs/Architecture are generated and not committed
+      # (.gitignore names them), so a clean checkout has none of them. This step writes them and
+      # holds two gates that read them: the file census (`docs:deps` fails when a tracked .ts is
+      # missing from it) and the duplicate-symbol gate (a new TRUE_DUPLICATE beyond
+      # docs/Architecture/duplicate-baseline.json fails). The steps below read the reports:
+      # `docs:functions:check` reads package-export-surfaces.json and `check:browser-safety`
+      # reads dependency-graph.json. It needs the wasm that `bun run build` wrote.
+      - name: Dependency graph and file census
+        run: |
+          bun run docs:deps
+          bun run check:duplicates:fast
+
       - name: Docs export-index drift check
         run: bun run docs:functions:check
 
