@@ -137,7 +137,7 @@ bitwise family (`bitAnd`, `bitOr`, `bitXor`, shifts) are set to `'never'`, so st
 always takes the synchronous branch for them today. Those ComputePool methods pass
 the op string into `shouldParallelize(n, op)` — a nameless `shouldParallelize(n)`
 would ignore the map and use the global 50,000. The generated
-[`parallel-pairing.md`](./parallel-pairing.md) is the authoritative, always-current
+`parallel-pairing.md` (not committed; `bun run docs:deps` writes it) is the authoritative, always-current
 map of which functions are effectively parallelized vs threshold-disabled, and each
 op's threshold.
 

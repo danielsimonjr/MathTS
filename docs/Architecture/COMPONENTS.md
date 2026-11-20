@@ -3,7 +3,7 @@
 A TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker acceleration, organized as a Turborepo
 monorepo of 24 ESM-only packages. This document is the component-level map: what each package is for, its
 key exported types, and how the packages depend on one another. For the always-current dependency data see
-the generated [`DEPENDENCY_GRAPH.md`](./DEPENDENCY_GRAPH.md); for the higher-level narrative see
+the generated `DEPENDENCY_GRAPH.md` (`bun run docs:deps` writes it; the repository does not commit it); for the higher-level narrative see
 [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## Table of Contents
@@ -416,7 +416,7 @@ no duplicated implementation. They let consumers install a focused domain.
 ## Component Dependencies
 
 Per-package edges (source of truth: each `package.json`; generated form:
-[`DEPENDENCY_GRAPH.md`](./DEPENDENCY_GRAPH.md)). No circular dependencies (0 cycles).
+`DEPENDENCY_GRAPH.md`, not committed). No circular dependencies (0 cycles).
 
 ```
 typed-function

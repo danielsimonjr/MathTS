@@ -1100,7 +1100,7 @@ only, never classes (AS231 constraint). Per project memory this is the productio
 
 The built binary export counts (functions, totals, category breakdown, and
 AssemblyScript source-file count) are in the generated
-[`wasm-pairing.md`](./wasm-pairing.md#wasm-binary-exports) report — not
+`wasm-pairing.md` report (`bun run docs:deps` writes it; the repository does not commit it) — not
 hand-maintained here:
 
 | Category (by export-name prefix) | Function exports | Examples                                                                                                                                                                                                                              |
