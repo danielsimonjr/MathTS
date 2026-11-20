@@ -1,5 +1,94 @@
 # @danielsimonjr/mathts-statistics
 
+## 0.5.1
+
+### Patch Changes
+
+- 5b09394: `describe` gives NaN in every field except `nobs` when the input holds a NaN. Before, a NaN gave wrong values in some fields only. `nobs` is the input length. The new option `{ skipNaN: true }` (or `{ skipna: true }`) drops the NaN values first and gives `describe` of the values that remain (`Infinity` is kept). `nobs` counts them. Options that are not a plain object, and unknown options, throw `TypeError` (#1004).
+- 4cb2099: `quantileSeq`, `ptp`, `iqr` and `histogram` follow the NaN policy of `mean`, `median` and `describe` (Fixes #1098). NaN propagates by default. `{ skipNaN: true }` or `{ skipna: true }` omits NaN and keeps `±Infinity`. `quantileSeq` takes the option in its options object, also with an array of probabilities and with BigNumber data or probabilities. `ptp(x, opts)`, `iqr(x, opts)` and `histogram(x, bins, opts)` take it as the last argument. A last argument that is not an object is ignored, so `rows.map(ptp)` works as before.
+  
+  `quantileSeq` interpolates as NumPy `_lerp` does, so `quantileSeq([-Infinity, Infinity, 2, 3], 0.25)` is `-Infinity` and not `NaN`, and `describe` gives the same `q25`. A result can change by a few units in the last place, up to 8 measured, and the new value is the NumPy value (`quantileSeq([3, -1, 5, 7, 2], 0.25, 'median_unbiased')` was 1, is 1.0000000000000002, as NumPy). `histogram` with an infinite value throws `Error`; it returned NaN edges before. `histogram` has no range option, so NaN or an infinite value always makes the range not finite (the `numpy.histogram` error for an automatic range).
+  
+  BREAKING:
+  
+  - `quantileSeq` and `iqr` with NaN return `NaN` (`quantileSeq([1, NaN, 2, 3], 0.75)` was 2.25). This includes `sorted: true` (`quantileSeq([1, 2, 3, NaN], 0.5, true)` was 2.5) and Matrix data.
+  - `ptp` with NaN is `NaN` at any position (`ptp([1, NaN, 2, 3])` was 2; `ptp([1, NaN, Infinity])` was `Infinity`).
+  - `histogram` with NaN throws `Error`. Before, it dropped the NaN, or returned zero counts and NaN edges when the NaN came first. Pass `{ skipNaN: true }` to count the other values.
+- Updated dependencies [a0945d9]
+- Updated dependencies [f97d51c]
+- Updated dependencies [354d57b]
+- Updated dependencies [c0222fa]
+- Updated dependencies [5b09394]
+- Updated dependencies [6b4e603]
+- Updated dependencies [c5ea0d7]
+- Updated dependencies [f1a4b33]
+- Updated dependencies [b1977e7]
+- Updated dependencies [e233385]
+- Updated dependencies [03b5d7a]
+- Updated dependencies [1dec729]
+- Updated dependencies [d297c16]
+- Updated dependencies [ab37729]
+- Updated dependencies [52f96d8]
+- Updated dependencies [fbc5277]
+- Updated dependencies [f88c4bc]
+- Updated dependencies [4c361f5]
+- Updated dependencies [3f8840c]
+- Updated dependencies [4304ad1]
+- Updated dependencies [e6c3657]
+- Updated dependencies [f0d9581]
+- Updated dependencies [d9f3a33]
+- Updated dependencies [cb23b66]
+- Updated dependencies [0c85f33]
+- Updated dependencies [01765bf]
+- Updated dependencies [90a75f9]
+- Updated dependencies [00c530e]
+- Updated dependencies [0c85f33]
+- Updated dependencies [9f8cbaf]
+- Updated dependencies [5b284e3]
+- Updated dependencies [d8b3c68]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [b473e94]
+- Updated dependencies [1629b29]
+- Updated dependencies [64c9721]
+- Updated dependencies [680d90a]
+- Updated dependencies [0e2cfea]
+- Updated dependencies [67b7cbb]
+- Updated dependencies [2771df1]
+- Updated dependencies [7975f0b]
+- Updated dependencies [b2a29c7]
+- Updated dependencies [d0a18ca]
+- Updated dependencies [00d8732]
+- Updated dependencies [a41228f]
+- Updated dependencies [852f6e2]
+- Updated dependencies [4312c30]
+- Updated dependencies [e08d7df]
+- Updated dependencies [9a720bf]
+- Updated dependencies [56e8b0f]
+- Updated dependencies [1906ed4]
+- Updated dependencies [ba3a7bb]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [3e089aa]
+- Updated dependencies [d21f9cc]
+- Updated dependencies [3eadf13]
+- Updated dependencies [8e50670]
+- Updated dependencies [4467c8a]
+- Updated dependencies [5ba5401]
+- Updated dependencies [dd3cb3b]
+- Updated dependencies [aa18779]
+- Updated dependencies [a593d34]
+- Updated dependencies [b799410]
+- Updated dependencies [d05f7f4]
+- Updated dependencies [4cb2099]
+- Updated dependencies [64e1e93]
+- Updated dependencies [404e8a4]
+- Updated dependencies [073ec8b]
+- Updated dependencies [2165c36]
+- Updated dependencies [bf0c777]
+- Updated dependencies [29cc252]
+- Updated dependencies [0c767ba]
+- Updated dependencies [d2b506e]
+  - @danielsimonjr/mathts-functions@0.87.0
+
 ## 0.5.0
 
 ### Minor Changes

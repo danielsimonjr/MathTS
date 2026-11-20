@@ -1,5 +1,42 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.3.1
+
+### Patch Changes
+
+- 5ba5401: `eigs` lists one eigenvector for each independent direction of an eigenvalue (Fixes #926).
+  
+  - For `[[2,1,0],[0,2,0],[0,0,3]]`, `eigs` gave two parallel vectors for the eigenvalue 2. It now gives one, as its documentation says: an eigenvalue appears in `eigenvectors` as often as its geometric multiplicity. `values` still lists 2, 2, 3. `eigenvectors` is shorter than `values` for every defective input. A repeated eigenvalue that is not defective keeps all its vectors, and an input without a repeated eigenvalue keeps the same bits.
+  - `eig` keeps one row of `vectors` for each eigenvalue, so its shape does not change. Each `repeatedEigenvalues` entry has a new field `indices`: the positions of its copies in `values`. The rows of a defective eigenvalue repeat a direction; the entry tells which rows.
+- Updated dependencies [6b4e603]
+- Updated dependencies [c5ea0d7]
+- Updated dependencies [fe2cf32]
+- Updated dependencies [b1977e7]
+- Updated dependencies [db4818f]
+- Updated dependencies [d297c16]
+- Updated dependencies [fbc5277]
+- Updated dependencies [4304ad1]
+- Updated dependencies [1f8ff61]
+- Updated dependencies [24e06d4]
+- Updated dependencies [f7a4aa7]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [b473e94]
+- Updated dependencies [1629b29]
+- Updated dependencies [2771df1]
+- Updated dependencies [d0a18ca]
+- Updated dependencies [852f6e2]
+- Updated dependencies [9a720bf]
+- Updated dependencies [1906ed4]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [5ba5401]
+- Updated dependencies [aa18779]
+- Updated dependencies [3929108]
+- Updated dependencies [404e8a4]
+- Updated dependencies [6bc82a2]
+- Updated dependencies [db3f34f]
+  - @danielsimonjr/mathts-matrix@0.12.0
+  - @danielsimonjr/mathts-core@0.29.0
+
 ## 0.3.0
 
 ### Minor Changes

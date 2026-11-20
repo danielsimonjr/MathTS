@@ -1,5 +1,142 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.12.0
+
+### Minor Changes
+
+- d0a18ca: A matrix of a second copy of the matrix package works in every public function (#1041). New export: isNativeMatrix.
+- 5ba5401: `eigs` lists one eigenvector for each independent direction of an eigenvalue (Fixes #926).
+  
+  - For `[[2,1,0],[0,2,0],[0,0,3]]`, `eigs` gave two parallel vectors for the eigenvalue 2. It now gives one, as its documentation says: an eigenvalue appears in `eigenvectors` as often as its geometric multiplicity. `values` still lists 2, 2, 3. `eigenvectors` is shorter than `values` for every defective input. A repeated eigenvalue that is not defective keeps all its vectors, and an input without a repeated eigenvalue keeps the same bits.
+  - `eig` keeps one row of `vectors` for each eigenvalue, so its shape does not change. Each `repeatedEigenvalues` entry has a new field `indices`: the positions of its copies in `values`. The rows of a defective eigenvalue repeat a direction; the entry tells which rows.
+
+### Patch Changes
+
+- 6b4e603: A matrix with a very large or very small largest entry is now scaled by an exact power of 2 in `schur`, `qr`, `lq`, `rq`, `ql`, `qrPivoted`, `svd`, `singularValues`, `norm2`, `cond`, `pinv`, `lowRankApprox`, `sqrtm`, `logm` and `condest`, and the result is scaled back (Fixes #1104). `schur([[1, 1e160], [1e160, 1]])` returned NaN; its diagonal is now 1e160 and -1e160 to 15 digits, as in SciPy.
+  
+  Each routine has a window for the largest entry: 2^±128 for `schur`; 2^-400 to 2^128 for the `svd` family; 2^-20 to 2^128 for `logm`; 2^-20 to 2^400 for `qr`, `lq`, `rq`, `ql` and `sqrtm`; 2^±400 for `qrPivoted` and `condest`. A matrix inside its window takes the same path as before, with bit-identical results. One exception: `sqrtm` of a non-symmetric matrix with a largest entry above 2^256 now gets a scaled Schur step, so its result changes. A larger matrix is scaled to the top of the window. A smaller matrix is scaled to [1, 2).
+  
+  `logm` of a matrix with a largest entry above 2^128 can change from the 12th digit. Inside the window the absolute cutoffs still apply: `sqrtm` treats a matrix as symmetric when its entries differ by at most 1e-8. In a scaled `svd`, a singular value below about 2^-660 of the largest one can become 0: `svd(diag(1e200, 1, 1e-200))` returns `[1e200, 1, 0]`. When the scale would lose a nonzero entry and the unscaled result is finite, the unscaled result is kept. `logm` of a matrix with complex eigenvalues and a largest entry below 2^-20 now throws, as it already did for the same matrix at unit scale; before, it returned a value.
+  
+  `normFro`, `DenseMatrix.norm`, `SparseMatrix.norm` and `norm(A, 'fro')` of `[[1e200, 1e200]]` return `1.414e200` instead of `Infinity`, and the norm of a matrix of 1e-200 entries is no longer 0. `lstsq` no longer overflows or underflows when the scale of `b` is subnormal or very large.
+- c5ea0d7: `eig` and `eigvals` scale the matrix by a power of 2 before the QR iteration, so a matrix with entries above about 1e154 or below about 1e-146 gives correct eigenvalues. Before, `eig([[1,1e154,0],[1e154,4,1e154],[0,1e154,9]])` and `mathieuA(3, 1e200)` never returned, a nonsymmetric matrix at that scale gave NaN, and a tiny matrix gave wrong values. A non-finite eigenvalue throws a RangeError ("eig: an eigenvalue is not finite"), and the QR iteration throws a RangeError ("eig: QR iteration did not converge") after `maxIterations` iterations for one eigenvalue (default 1000; the option was ignored before). `eigs` throws the RangeError of the native solver for a non-finite entry, where it returned NaN or never returned. Trade: the scaling brings the largest entry into range, so a value far below it can go to zero: `eigvals([[1e300,0],[0,1e-300]])` gives `[1e300, 0]`, not `[1e300, 1e-300]` (#989).
+- db4818f: Fixes #1107: `eig` and `eigvals` at subnormal scale, and the `maxIterations` option.
+  
+  - The `isSymmetric` field of the `eig` result is now relative: `|a_ij - a_ji| / max|a| <= 1e-10`. The old test was absolute (`1e-10`), so the answer changed with the scale of the matrix. `eig([[1e-200,1e-200],[0,1e-200]])` reported `isSymmetric: true`, two independent eigenvectors in `repeatedEigenvalues` and `defective: false`. It now reports `isSymmetric: false`, one independent eigenvector and `defective: true`, as at scale 1. The flag changes for some matrices of ordinary scale: `max|a| = 1e6` with an asymmetry of `1e-6` is now symmetric, and `max|a| = 1e-6` with an asymmetry of `1e-11` is now not symmetric. The flag selects only the `repeatedEigenvalues` grouping; the values and vectors do not use it.
+  - `repeatedEigenvalues` factors the matrix at the scale of the solver. Its `value` is scaled back to the scale of the input.
+  - The Householder reduction applies each reflector to the eigenvector matrix as the reflector is formed, before its entries are scaled back. `eig([[1,4e-323,0],[4e-323,4,4e-323],[0,4e-323,9]])` gave `Infinity` and `NaN` in `vectors`, and a 4x4 matrix with entries of `1e-312` gave eigenvector errors near `1e-13`. Both now give unit vectors with errors near `1e-16`. Eigenvectors of other matrices can change in the last bits.
+  - `eig` and `eigvals` throw a `RangeError` when `maxIterations` is not a positive integer or `Infinity` (`NaN`, `null`, `0`, a negative number, a fraction, a string). `NaN` switched the iteration limit off and `null` threw an unrelated error. `Infinity` still means no limit. An omitted `maxIterations` still means 1000.
+- d297c16: Internal refactor, no change in behaviour (Refs #1212). The matrix `qr` and `qrPivoted` scale R back with the shared `scaleDense` helper in `operations/common.ts`, which the WASM backend also uses. The functions `qr` runs its number path and its Complex path through one scaled call.
+- 1f8ff61: `eig(A).isSymmetric` is true only when every `|a_ij - a_ji|` is at most `8 * n * eps * ||A||_F`, so it is exact up to the rounding of the input and does not depend on the scale of `A`. The test was `|a_ij - a_ji| / max|a| <= 1e-10`, so `[[1, 1e-12], [0, 1]]` and any other matrix whose asymmetry was above `8 * n * eps * ||A||_F` but at most 1e-10 relative to `max|a|` reported `true`; they report `false` now. The flag does not choose a solver or change the eigenvalues, vectors or `repeatedEigenvalues`: the result is bit-equal to the former one apart from the flag (Fixes #1191).
+- 24e06d4: `eig` and `eigvals` of a zero matrix (3x3 and larger) no longer throw `RangeError: eig: QR iteration did not converge`, and the eigenvectors of the 2x2 zero matrix are no longer NaN. The Hessenberg deflation test now accepts an exactly zero sub-diagonal when the norm is zero. A sub-diagonal entry exactly equal to `eps * s` now also deflates. For such an input the eigenvalues can differ in the last bits and in order, and the eigenvectors of a repeated eigenvalue can be a different valid set. For `[[1,0,0],[2^-51,1,0],[0,3,2]]` the eigenvalues change from `[0.9999999999999998, 2, 1]` to `[1, 1, 2]`; the residual stays at rounding level. Fixes #1192.
+- f7a4aa7: Kernels of the matrix package no longer compare data to an absolute constant that depends on the unit of the matrix (Fixes #1123, #1125, #1127).
+  
+  Root causes and results (SciPy and NumPy 2.3.5 are the oracle):
+  
+  - `WASMBackend.qrDecomposition`, `luDecomposition` and `inverse` (JS and AssemblyScript paths) skipped a column or a pivot below an absolute 1e-14 and squared entries above 1e154. The three methods now run on a copy scaled by an exact power of 2 when the largest entry is outside [2^-3, 2^400]. `[[3e-100,1e-100],[4e-100,2e-100]]` gave `Q = I, R = A` and `singular: true`; it now gives `|R| = [[5, 2.2], [0, 0.4]]e-100`, a regular LU and `inverse = [[1e100, -5e99], [-2e100, 1.5e100]]`. `[[3e200,1e200],[4e200,2e200]]` gave `Q·R ≠ A`; it now gives `Qᵀ·R = A` to 1e-16. The window constant is `UNIT_LO` in `core/src/pow2-scale.ts`; the scaling uses the shared `withPow2Scale`.
+  - The JS path of `WASMBackend.luDecomposition` and `inverse` did not test the last pivot. `[[1,2],[2,4]]` gave `singular: false` and an inverse of NaN entries. The JS path now reports `singular: true` and a zero inverse when the last pivot is below 1e-14, as the AssemblyScript path does. `[[1,0],[0,1e-15]]` is now singular on both paths (it was regular on the JS path). The absolute 1e-14 pivot floor inside the scaling window is #1172.
+  - `matrixSqrtm` compared with an absolute 1e-8 (symmetry, negative eigenvalue of a symmetric matrix), 1e-7 (negative or complex eigenvalue of a non-symmetric matrix) and 1e-13 (Newton step). Below a largest entry of 1 each cutoff is now relative to that entry. The eigenvalue tolerance is also never below 1e-13 of the largest entry, so it grows above a largest entry of 1e5 (symmetric) and 1e6 (non-symmetric): the rounding noise of a zero eigenvalue is no longer read as a negative eigenvalue. The 2×2 block root test and the Newton residual test are the tests of the previous release. `matrixSqrtm([[4,1],[1.02,3]]·2^-22)` gave a symmetric matrix with off-diagonal 1.3359e-4; it now gives 1.3227e-4 and 1.3492e-4 (SciPy). `matrixSqrtm(zeros(2))` gave `5.684e-14·I`; it now gives zeros (SciPy).
+  - `matrixSqrtm` of a non-symmetric matrix was wrong from about 2^40 (#1127). The Schur form keeps Hessenberg residue below its quasi-diagonal of up to 1e-12 of the neighbouring diagonal, and the absolute test `|T[i+1][i]| < 1e-12` read residue of a large matrix as a 2×2 block. The test is now relative to the neighbouring diagonal. For G·2^52 the error of the root, scaled back, was 0.0122; it is now 0 (equal to `sqrtm(G)`), and G·2^300 gave NaN and now gives the root.
+  - `matrixLogm` rejected an eigenvalue at or below an absolute 1e-14. The Schur path now accepts a positive eigenvalue at or below 1e-14 only when it is 1e8 times above the backward error `max|A - Q·T·Qᵀ|` of the Schur form, so its logarithm has a relative error of at most 1e-8. `matrixLogm(diag(1, 1e-20))` threw `non-positive eigenvalue`; it now gives `diag(0, -46.0517)` (SciPy). `matrixLogm([[1e-20,1],[0,1]])` threw; it now gives `[[-46.05, 46.05], [0, 0]]` (SciPy). The Schur block test and the root denominator test are relative the same way.
+  - `matrixLogm` used 16-point Gauss-Legendre constants with nodes wrong by up to 1e-8 and weights that summed to 1 - 1e-11, so each Schur-path logarithm had an error of about 1e-11. The constants are now correct to the last bit. `matrixLogm([[2,1,0],[1,3,1],[0,1,4]])` was 3.1e-12 from mpmath; it is now 1.6e-15.
+  - For a large matrix whose Schur form keeps residue above an absolute 1e-12 (the previous release took the Newton path), `matrixLogm` runs both paths and keeps the Newton result only when it agrees with the Schur result to 1e-8. The Newton path is more accurate there when it converges, and wrong by up to 1e11 when it does not.
+  - `qr` treated a column of residual norm below an absolute 1e-14 as dependent. The cutoff is now relative to the largest entry when that entry is below 1. A 3-column matrix of pivots 1.6e-15 and 1.3e-15 at 2^-19 kept its column in the NumPy values.
+  
+  Known limit: `matrixLogm` of a singular matrix of large entries returns a finite matrix instead of throwing (#1174). This is also the behaviour of the previous release.
+  
+  Value and throw changes:
+  
+  - `WASMBackend.luDecomposition` and `inverse`, JS path: 217 of 1,500 ordinary matrices change from `singular: false` to `singular: true` with a zero inverse. Each of the 217 has a reciprocal condition number below 1e-13 (largest 8.7e-15). Of 320 scaled matrices, 26 change to singular (reciprocal condition number below 1.2e-15) and 13 change from singular to regular.
+  - `WASMBackend.luDecomposition` and `inverse`, AssemblyScript path: 17 of 320 scaled matrices change from singular to regular. No ordinary matrix changes.
+  - `matrixSqrtm`, largest entry below 1: 10 non-symmetric matrices with a small negative eigenvalue (8 of 1,500 ordinary, 2 of 320 scaled) now throw `negative eigenvalue`. The previous release returned a real matrix with an error of 4e-4 to 4e-3; SciPy gives a complex root.
+  - `matrixSqrtm`, largest entry above 1e5: 5 of 320 scaled symmetric matrices that threw `negative eigenvalue` now return the real root. The error against the SciPy root is 4e-9 to 1.1e-8.
+  - `matrixLogm([[1e-20,1],[0,1]])` and `matrixLogm(diag(1, 1e-20))` return a value instead of throwing.
+  
+  Differential against the previous release (1,500 ordinary matrices of size 1 to 6, entries up to 1e6; 320 of them scaled by 2^-60 to 2^600). Equal means the same doubles.
+  
+  | function                                   | ordinary                                                             | scaled                                                                            |
+  | ------------------------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+  | `matrixSqrtm`                              | 1,488 equal; 8 value to throw; 4 symmetric closer (5e-13 to 1.2e-15) | 306 equal; 5 throw to value; 2 value to throw; 7 last-bit or closer               |
+  | `matrixLogm`                               | 749 equal; 741 closer; 10 further, at most 2.1 times                 | 145 equal; 169 closer (1 was wrong by 2.6e10); 6 further, at most 2.1 times       |
+  | `qr`                                       | 1,499 equal; 1 changed, equal error (largest entry below 1, graded)  | 320 equal                                                                         |
+  | `WASMBackend` `qr` (AS and JS)             | 1,499 equal; the same 1 changed, equal error                         | 287 equal; 29 closer; 4 equal error                                               |
+  | `WASMBackend` `luDecomposition`, `inverse` | AS 1,500 equal; JS 1,283 equal, 217 regular to singular              | AS 303 equal, 17 singular to regular; JS 281 equal, 26 to singular, 13 to regular |
+- b473e94: `eigs` returns the eigenvector of a complex eigenvalue as `Complex` entries, so that `A v = lambda v` holds. Before, the vector held only the real part and was wrong (Fixes #978). When one eigenvalue is complex, every eigenvector holds `Complex` entries, as in mathjs; the vector of a real eigenvalue then has zero imaginary parts. A real spectrum keeps `number[]` vectors. The doc comment of `eig` now says that `vectors[k]` is a row, not a column.
+  
+  Value change: `eigs(A).eigenvectors[k].vector` is `Complex[]` for every `k` when any eigenvalue is a `Complex`.
+- 2771df1: Matrices with extreme entries now work in the `functions` kernels, in `lstsq` and in the `svd` family (Fixes #1122, #1124, #1129).
+  
+  `qr`, `sqrtm`, `inv`, `rank` and `nullspace` of `functions` scale a matrix of plain numbers by an exact power of 2 when its largest entry is outside a window, as in #1104, and scale the result back. The window is 2^-400 to 2^400 for `inv`, 2^-20 to 2^400 for `qr`, `sqrtm`, `rank` and `nullspace`. A matrix inside its window takes the old path. The scale helpers (`withPow2Scale`, `entryRange`, `ldexp` and others) now live once in `@danielsimonjr/mathts-core/internal`, and `matrix` re-exports them from its `common.ts`. `eig` of `matrix` now uses the same helper in place of its own copy of the rule. Its results have the same bits on 5,716 matrices from 2^-1040 to 2^1010.
+  
+  A differential against the build before this change ran each changed function on 1,800 ordinary matrices of size 1 to 6 (largest entry 1e-5 to 1e4: real, integer, rank-deficient, symmetric positive definite and 1 × 1; 1,297 square ones for `inv` and `sqrtm`). Every result has the same bits, for `qr`, `inv`, `sqrtm`, `rank`, `nullspace` and `pinv` of `functions` and for `lstsq`, `svd`, `singularValues`, `pinv`, `cond`, `norm2` and `lowRankApprox` of `matrix`.
+  
+  A second corpus has 2,730 extreme matrices: 200 in each of 11 magnitude classes from 2^-1040 to 2^1010, 300 with one entry far below the largest (the span class), 200 graded diagonals from 1e-34 to 1e-4 and 30 special cases. Each changed result was judged against an 80-digit oracle (mpmath; NumPy 2.3.5 for `rank` and `pinv`). In the class 2^13 to 2^40 every result has the same bits.
+  
+  | Function                                          | Changed values | Closer | Same error | Further             |
+  | ------------------------------------------------- | -------------- | ------ | ---------- | ------------------- |
+  | `qr`                                              | 1,481          | 1,304  | 168        | 9 (largest 1.5 eps) |
+  | `inv`                                             | 143            | 50     | 5          | 0                   |
+  | `sqrtm`                                           | 693            | 692    | 1          | 0                   |
+  | `rank`                                            | 1,280          | 1,280  | 0          | 0                   |
+  | `nullspace`                                       | 1,292          | 1,286  | 1          | 5 (less than 1 eps) |
+  | `pinv`                                            | 151            | 151    | 0          | 0                   |
+  | `norm2`                                           | 89             | 89     | 0          | 0                   |
+  | `lowRankApprox`                                   | 39             | 39     | 0          | 0                   |
+  | `svd`, `singularValues`, `cond`, `functions.pinv` | 12 to 13 each  | all    | 0          | 0                   |
+  
+  Of the changed `inv` values, 87 more had a non-finite entry before and have one now, for matrices below 2^-1022: each ±Infinity entry is now where the true inverse is above the double range, and no entry is NaN. One more has an infinite input. The `svd` family changes only in the span class and the special cases, where the unscaled run is now judged (#1129). A result that changes between a value and an error:
+  
+  - `inv`: 7 results were a matrix of NaN and are now the error "determinant is zero" (singular matrices above 2^400). 69 errors "determinant is zero" for matrices near 1e-200 and below are now values. 42 of them have ±Infinity entries, where the true inverse is above the double range.
+  - `sqrtm`: 303 values are now an error ("could not converge" for 291, "determinant is zero" for 12). Each of those values was wrong (a residual above 1e-10, or NaN). 81 errors are now values.
+  
+  Known limits:
+  
+  - `rank` and `nullspace` still change at the window edge 2^-20, because the absolute pivot test applies inside the window (#1157).
+  - `sqrtm` can throw between 2^70 and 2^400, because its absolute stop test cannot be met when one unit in the last place of the root is larger than 1e-6 (#1158).
+  - `qr` gives a different result for 101 random matrices with a largest entry below 2^-43. 61 of them differ only in the sign of a row of R.
+  - `inv` of a matrix whose entries span more than the double range can still return all zeros, as before: `inv([[1e300, 1e-300], [0, 1e300]])` (#1162).
+  - `sqrtm` of a singular matrix can return a wrong root with no error, at every scale (#1163). Such a matrix times 2^700 threw before and now returns that root, scaled.
+  
+  - `qr([[3e200, 1e200], [4e200, 2e200]]).R` was NaN. It is now `[[5e200, 2.2e200], [0, 4e199]]` (NumPy gives the same up to the sign of the first row).
+  - `qr` of a matrix with entries below about 2^-51 returned the upper triangle of the input as R, because an absolute zero test skipped every reflection. `qr([[1.3, -0.4, 0.7], [0.2, 2.1, -1.1], [-0.9, 0.5, 1.6]] · 2^-60).R` is now 2^-60 times the R of the unscaled matrix. For a largest entry below 2^-43, a result that was a valid factorization can also change, most often in the sign of a row of R.
+  - `sqrtm([[4e200, 1e200], [1e200, 3e200]])` was NaN. It is now `[[1.98158e100, 2.70832e99], [2.70832e99, 1.71075e100]]`, as in SciPy. Above 2^400, the unscaled iteration is tried first and kept when it is finite. Else the matrix is scaled to a largest entry in [1, 4). A scaled run that is not finite throws "could not converge". Before, `sqrtm` of a well-conditioned 2×2 matrix times 2^450 threw "could not converge"; it is now 2^225 times the root of the unscaled matrix.
+  - `sqrtm([[4e-20, 1e-20], [1e-20, 3e-20]])` had a diagonal of 9.5e-7, because the stop test is absolute. It is now `1.98158e-10` and `1.71075e-10`, as in SciPy.
+  - `inv([[1e200, 1e200], [0, 2e200]])` was all 0. It is now `[[1e-200, -5e-201], [0, 5e-201]]`. `inv([[1e-200, 1e-200], [0, 2e-200]])` threw "determinant is zero". It is now `[[1e200, -5e199], [0, 5e199]]`, as in NumPy.
+  - `rank([[1e-20, 1e-20], [0, 2e-20]])` was 0 and `nullspace` was the identity. They are now 2 and `[]`, as in NumPy. An explicit `tol` is still an absolute pivot tolerance, so `rank(A, 1e-10)` of that matrix is still 0.
+  
+  `lstsq` divided every entry of `b` by the largest one, so the small entries of an extreme `b` became 0 or lost bits. The solution is linear in `b`. When that division would push a nonzero entry below 2^-1022, `b` is now split into the entries that keep their bits and the entries that do not. Each part is solved at its own scale, and the two solutions are added. Any other `b` gives the same bits as before, except a `b` whose largest entry is below 2^-1022 times the largest entry of `A` (see below). `lstsq(I, [[1e200, 1e-200], [0, 1e-200]])` was `[[1e200, 0], [0, 0]]`. It is now `[[1e200, 1e-200], [0, 1e-200]]`, as in NumPy. `lstsq(I, [1e100, 1e-300])` was `[1e100, 0]`, and `lstsq(I, [3, 1e-310])` was `[3, 9.9999999999995e-311]`. They are now `[1e100, 1e-300]` and `[3, 1e-310]`. A subnormal `b` also keeps its bits when the largest entry of `A` is above 1: `lstsq([[9, -2], [0, 1]], [0, 1e-323])` was `[0, 0]` and is now `[0, 1e-323]`. On 400 right-hand sides of that kind with no wide span, 277 results are bit-equal, 123 change, and none is further from the exact solution.
+  
+  A differential on 900 such right-hand sides (dense, identity, diagonal, triangular, block-diagonal, tall, wide and rank-deficient `A`, vector and matrix `b`) compared the result with the build before this change and with the exact rational solution. 587 results are bit-equal. An entry changes only where a small entry of `b` reaches it. Of the 306 changed results that have full rank, none is further from the exact solution relative to the largest entry of its column, and 25 are closer. Relative to each entry, 288 are closer and 1 is further, by 1.5 eps. The 7 changed rank-deficient results are closer to NumPy.
+  
+  The `svd` family can keep an unscaled kernel run for a matrix whose entries span more than the double range. That run is now kept only when its singular values are finite and each one is within 1e-10 times the largest singular value of the scaled run. Before, a finite run was kept. `pinv([[1e200, 0, 0], [0, 1, 0], [0, 0, 1e-200]])` of `matrix` returned all zeros. It is now `diag(1e-200, 0, 0)`, as in NumPy. `singularValues([[0, 0, 0], [0, 2e87, 1e86], [1e64, 0, 1e-267]])` was `[2e87, 1e86, 1e64]`. It is now `[2.0024984394500785e87, 1e64, 0]`, as in NumPy.
+- 852f6e2: Four small numeric defects.
+  
+  - A number as the data argument of a stable reduction in core (`pairwiseSum`, `pairwiseDot`, `sumSquaredDeviations`, their `Checked` variants, `neumaierSum`, `neumaierCumsum`, `norm2`, `scaledDistance`, `extrema`) now throws a `TypeError` that names the function. A string, and an object whose `length` is not a non-negative integer, throw the same error. Before, `pairwiseSum(0)` and `sumSquaredDeviations(0)` threw `RangeError: Maximum call stack size exceeded`, and `norm2(5)` gave `0` (#1011).
+  - `numberVector` rejects a value that is not an array, typed array, array-like or iterable object. The statistics, signal and linear-algebra functions that take a number vector read a number as `[]`. Before, `zscore(5)` was `[]`, `skewness(5)` was `NaN`, `trapz(5)` was `0` and `signTest(5)` was `{ statistic: 0, pValue: 1 }`. Now each throws a `TypeError` that names the function, for example `zscore: expects an array of numbers, got a number` (#1083).
+  - The SVD gave wrong singular values for a matrix whose leading column entry is negative with zeros below it, because the Householder helper returned the non-orthogonal `beta = -2` for that column. Before, `norm([[-3,0],[0,1]], 2)` was `9`, and the singular values were `[9, 1]`. Now the norm is `3` and the singular values are `[3, 1]` (NumPy and mathjs). `pinv`, `lowRankApprox` and `svd` rebuild such a matrix correctly. The default `norm` of a matrix was already the spectral norm (`p = 2`), as in mathjs. A new test pins that default, and the fix above corrects its value for such a matrix: `norm([[-3,0],[0,1]])` was `9` and is `3`. `norm([[1,0],[0,2]])` is `2` (#1082, #995).
+  - In `parallel`, `parallelMean`, `parallelVariance` and `parallelStd` on the sequential path pass the data to `pairwiseSum` before they read its length. A number now throws the `TypeError` of core. Before, `parallelMean(1)` gave `0` (#1011).
+- 6bc82a2: `eig(A).repeatedEigenvalues` counts a defective eigenvalue as defective when its coupling is below `sqrt(eps) * ||A||_F` (Fixes #1180). The rank tolerance of a cluster was fixed at `sqrt(eps) * ||A||_F`. It is now 4 times the measured cluster radius, between `8 * n * eps * ||A||_F` and the old `sqrt(eps) * ||A||_F`. A singular value above that tolerance counts as a coupling only when it is at least 16 times the largest one below it. Without that second test, rounding noise in a matrix such as `S * (2I) * S^-1` with a graded `S` was reported as a coupling. Value change: `[[1,1e-9],[0,1]]` and `[[1,1e-12],[0,1]]` report 1 independent eigenvector (were 2), and `[[1,1e-9,0],[0,1,0],[0,0,1]]` reports 2 of 3 (was 3). The report no longer reads the `isSymmetric` flag. It treats the matrix as symmetric when every `|a_ij - a_ji|` is at most `8 * n * eps * ||A||_F` (the flag has a looser tolerance, see #1191). A coupling below `8 * n * eps * ||A||_F` (about 6e-15 for a 2 x 2 matrix with unit entries) still counts as zero.
+- Updated dependencies [fe2cf32]
+- Updated dependencies [b1977e7]
+- Updated dependencies [98a54f8]
+- Updated dependencies [fbc5277]
+- Updated dependencies [4304ad1]
+- Updated dependencies [98a54f8]
+- Updated dependencies [f7a4aa7]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [1629b29]
+- Updated dependencies [2771df1]
+- Updated dependencies [852f6e2]
+- Updated dependencies [9a720bf]
+- Updated dependencies [1906ed4]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [aa18779]
+- Updated dependencies [3929108]
+- Updated dependencies [404e8a4]
+- Updated dependencies [db3f34f]
+  - @danielsimonjr/mathts-core@0.29.0
+  - @danielsimonjr/mathts-parallel@0.12.0
+
 ## 0.11.0
 
 ### Minor Changes
