@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1353
   totalModules: 82
-  totalExports: 7416
+  totalExports: 7417
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -21369,6 +21369,10 @@ modules:
         - rfft
         - irfft
         - fftshift
+        - fftshift
+        - fftshift
+        - ifftshift
+        - ifftshift
         - ifftshift
         - fftfreq
         - rfftfreq
@@ -21581,6 +21585,9 @@ modules:
         - file: ../typed/signal.js
           imports:
             - windowFunction
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
         - file: ../signal-filter-extra.js
           imports:
             - butter
@@ -27791,6 +27798,7 @@ modules:
             - goertzelDispatch
             - welchPSDDispatch
             - welchPSDJS
+            - windowTypeCode
             - WASM_SIGNAL_THRESHOLD
         - file: ../signal/wavelet-filters.js
           imports:
@@ -29984,6 +29992,7 @@ modules:
       workspaceDependencies: []
       exports:
         - WASM_SIGNAL_THRESHOLD
+        - windowTypeCode
         - applyWindowJS
         - goertzelJS
         - welchPSDJS
@@ -29995,6 +30004,7 @@ modules:
         - goertzelDispatch
         - chirpZTransformDispatch
       functions:
+        - windowTypeCode
         - applyWindowJS
         - goertzelJS
         - welchPSDJS
@@ -47221,11 +47231,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1353
   totalModules: 82
-  totalLinesOfCode: 240086
-  totalExports: 7416
+  totalLinesOfCode: 240249
+  totalExports: 7417
   totalClasses: 63
   totalInterfaces: 674
-  totalFunctions: 2593
+  totalFunctions: 2598
   totalTypeGuards: 186
   totalEnums: 0
   totalConstants: 1697

@@ -49,6 +49,10 @@ import {
 } from '../src/typed/signal.js';
 import { overrideWasmPolicy } from '../src/wasm/policy.js';
 
+// Other files that run in the same process (bun test) read the shared pool: restore its
+// configuration (a later file calls initialize() to start it again).
+const savedPoolConfig = computePool.getConfig();
+
 // These tests prove the AS kernels themselves (they run, and they match JS), so they let
 // every bridge reach its kernel. In production the measured dispatch policy
 // (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
@@ -123,7 +127,7 @@ describe('signal — parallel paths via lowered threshold', () => {
     computePool.updateConfig({ thresholdElements: 1, chunkSize: 8 });
   });
   afterAll(async () => {
-    computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
+    computePool.updateConfig(savedPoolConfig);
     await computePool.terminate();
   });
 
