@@ -230,3 +230,19 @@ describe('#1171 matrixLogm of a real matrix with complex eigenvalues', () => {
     expect(diff / maxAbs(want)).toBeLessThan(1e-12);
   });
 });
+
+describe('matrixLogm of a matrix with an infinite eigenvalue', () => {
+  it('names the non-finite entry, as main did (not a non-positive eigenvalue)', () => {
+    for (const A of [
+      [
+        [Infinity, 0],
+        [0, 1],
+      ],
+      [
+        [2, 0],
+        [0, -Infinity],
+      ],
+    ])
+      expect(() => matrixLogm(DenseMatrix.fromArray(A))).toThrow(/non-finite/);
+  });
+});

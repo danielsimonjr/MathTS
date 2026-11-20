@@ -208,6 +208,45 @@ function confirmedBySecondForm(
 }
 
 /**
+ * The modulus of the complex-conjugate pair of the 2×2 block of T at rows `r`, `r + 1`. The
+ * determinant is above 0 in exact arithmetic (the block has a negative discriminant); if
+ * rounding makes it negative the result is NaN, and every test of it is written so that NaN
+ * fails closed.
+ */
+function blockModulus(T: number[][], r: number): number {
+  return Math.sqrt(T[r][r] * T[r + 1][r + 1] - T[r][r + 1] * T[r + 1][r]);
+}
+
+/**
+ * True when the complex pair of modulus `m` of the first Schur form is confirmed by the
+ * second: the nearest 2×2 block of T2 has a modulus within 1e-3 of `m` in relative size. The
+ * rounding noise of a cluster of zero eigenvalues can form a 2×2 block of modulus
+ * 1e-16 · max|A|, which changes between two forms like the noise of one zero eigenvalue (#1174).
+ */
+function blockConfirmedBySecondForm(
+  m: number,
+  second: { T2: number[][]; mask2: boolean[] | null }
+): boolean {
+  const { T2, mask2 } = second;
+  if (mask2 === null) return false;
+  let gap = Infinity;
+  let m2 = NaN;
+  // The mask marks both rows of a block and blocks do not overlap, so a marked row that
+  // follows the end of the block before it is the first row of a block. Two blocks can be
+  // adjacent: the walk steps over both rows of each block.
+  for (let r = 0; r + 1 < T2.length; r++) {
+    if (!mask2[r]) continue;
+    const g = Math.abs(blockModulus(T2, r) - m);
+    if (g < gap) {
+      gap = g;
+      m2 = blockModulus(T2, r);
+    }
+    r++;
+  }
+  return m2 > 0 && Math.abs(m - m2) <= 1e-3 * m;
+}
+
+/**
  * Schur-Padé logm: Higham (2008) Algorithm 11.10.
  *
  * 1. Schur decompose A = Q · T · Q^T.
@@ -246,9 +285,28 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
   let backwardError = -1;
   let dmax = 0;
   for (let i = 0; i < n; i++) dmax = Math.max(dmax, Math.abs(T[i][i]));
+  // An infinite eigenvalue is neither positive nor non-positive: leave it to the Newton path,
+  // whose `eig` names the non-finite entry (NaN keeps its NaN result).
+  if (dmax === Infinity) return null;
   let second: { T2: number[][]; mask2: boolean[] | null } | null = null;
   for (let i = 0; i < n; i++) {
-    if (inBlock[i]) continue;
+    if (inBlock[i]) {
+      // A 2×2 block holds a complex pair of modulus m. It is checked like a 1×1 entry of
+      // that size: noise of a zero eigenvalue cluster forms such a block (#1174).
+      const m = blockModulus(T, i);
+      if (!(m > 1e-14)) {
+        if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+        if (!(m > 0 && m >= 1e8 * backwardError))
+          throw nonPositiveEigenvalue(m, ', a complex pair that is not above the floor 1e-14');
+      }
+      if (!(m > 1e-8 * dmax)) {
+        second ??= secondSchurForm(A);
+        if (!blockConfirmedBySecondForm(m, second))
+          throw nonPositiveEigenvalue(m, ', a complex pair not confirmed by a second Schur form');
+      }
+      i++;
+      continue;
+    }
     const d = T[i][i];
     if (d <= 1e-14) {
       if (d <= 0) throw nonPositiveEigenvalue(d);
