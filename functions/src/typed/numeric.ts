@@ -1546,9 +1546,11 @@ function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
 }
 
 /**
- * Rank of a matrix of finite entries and the cutoff that gave it: the number of singular
- * values above `max(S) * max(m, n) * eps` (NumPy `matrix_rank`). The cutoff is relative to
- * the matrix, so it is the same for a matrix and for any multiple of it (#1157).
+ * Rank of a matrix of finite entries by the singular values, and the cutoff that gave it: the
+ * number of singular values above `max(S) * max(m, n) * eps` (NumPy `matrix_rank`). The cutoff
+ * is relative to the matrix, so it is the same for a matrix and for any multiple of it (#1157).
+ * The SVD costs about 15 times the elimination of the same matrix, so {@link rankAndCutoff}
+ * calls it only when the cheaper QR decision is not certain.
  */
 function svdRankOf(M: number[][]): { rank: i32; cut: f64 } {
   const s = matrixSingularValues(M);
@@ -1558,6 +1560,119 @@ function svdRankOf(M: number[][]): { rank: i32; cut: f64 } {
   let r = 0;
   for (let i = 0; i < s.length; i++) if (s[i] > cut) r++;
   return { rank: r, cut };
+}
+
+/** Distance of the QR decision from the singular-value cutoff that it must keep (a factor). */
+const QRCP_MARGIN = 2;
+
+/**
+ * The rank that {@link svdRankOf} gives, from a Householder QR with column pivoting, or `null`
+ * when the QR cannot certify it. Rank `r` is certified by two bounds on the singular values `s`
+ * of `M` (`R11` is the leading `r x r` block of the triangular factor, `R22` the rest):
+ *
+ * - `s[r+1] <= ||R22||F` : a trailing block with `||R22||F <= cut / MARGIN` leaves no more than
+ *   `r` singular values above the cutoff. The cutoff is at least `max(m, n) * eps * rho`, with
+ *   `rho` the largest column norm, because `s[1] >= rho`.
+ * - `s[r] >= 1 / ||inv(R11)||F` : `R11` is a submatrix of `M` after the column permutation, so its
+ *   smallest singular value bounds `s[r]` from below. The cutoff is at most
+ *   `max(m, n) * eps * ||M||F`, because `s[1] <= ||M||F`. Both bounds keep the factor MARGIN
+ *   for the rounding error of the QR.
+ *
+ * A matrix with a singular value near the cutoff fails a bound and goes to the SVD.
+ * `cut` is the upper bound of the cutoff, for the pivot test of `nullspace`.
+ */
+function qrcpRankOf(M: number[][]): { rank: i32; cut: f64 } | null {
+  const m = M.length;
+  const n = M[0].length;
+  const p = Math.min(m, n);
+  const a = new Float64Array(m * n); // column-major
+  const colNorm2 = new Float64Array(n); // squared norm of the part of a column not yet reduced
+  let total = 0;
+  let maxColNorm2 = 0;
+  for (let j = 0; j < n; j++) {
+    let sum = 0;
+    for (let i = 0; i < m; i++) {
+      const v = M[i][j];
+      a[i + j * m] = v;
+      sum += v * v;
+    }
+    colNorm2[j] = sum;
+    total += sum;
+    if (sum > maxColNorm2) maxColNorm2 = sum;
+  }
+  const scale = Math.max(m, n) * Number.EPSILON;
+  const cutLower = (scale * Math.sqrt(maxColNorm2)) / QRCP_MARGIN;
+  const cutUpper = scale * Math.sqrt(total);
+  const tailLimit = cutLower * cutLower;
+
+  let r = p;
+  for (let k = 0; k < p; k++) {
+    let tail = 0;
+    for (let j = k; j < n; j++) tail += colNorm2[j];
+    if (tail <= tailLimit) {
+      r = k;
+      break;
+    }
+    let pivot = k;
+    for (let j = k + 1; j < n; j++) if (colNorm2[j] > colNorm2[pivot]) pivot = j;
+    if (pivot !== k) {
+      const ok = k * m;
+      const op = pivot * m;
+      for (let i = 0; i < m; i++) {
+        const t = a[ok + i];
+        a[ok + i] = a[op + i];
+        a[op + i] = t;
+      }
+      const t = colNorm2[k];
+      colNorm2[k] = colNorm2[pivot];
+      colNorm2[pivot] = t;
+    }
+    // Householder reflector of a[k.., k]; the reduced column keeps its R entry on top.
+    const ok = k * m;
+    let norm2 = 0;
+    for (let i = k; i < m; i++) norm2 += a[ok + i] * a[ok + i];
+    const alpha = a[ok + k] > 0 ? -Math.sqrt(norm2) : Math.sqrt(norm2);
+    a[ok + k] -= alpha;
+    let vv = 0;
+    for (let i = k; i < m; i++) vv += a[ok + i] * a[ok + i];
+    for (let j = k + 1; j < n; j++) {
+      const oj = j * m;
+      let dot = 0;
+      for (let i = k; i < m; i++) dot += a[ok + i] * a[oj + i];
+      const f = (2 * dot) / vv;
+      a[oj + k] -= f * a[ok + k];
+      let sum = 0;
+      for (let i = k + 1; i < m; i++) {
+        const v = a[oj + i] - f * a[ok + i];
+        a[oj + i] = v;
+        sum += v * v;
+      }
+      colNorm2[j] = sum;
+    }
+    a[ok + k] = alpha;
+  }
+  if (r === 0) return { rank: 0, cut: cutUpper };
+
+  // Lower bound of s[r]: 1 / ||inv(R11)||F, with R11 = a[0..r, 0..r] upper triangular.
+  const x = new Float64Array(r);
+  let inverse2 = 0;
+  for (let j = 0; j < r; j++) {
+    x[j] = 1 / a[j + j * m];
+    inverse2 += x[j] * x[j];
+    for (let i = j - 1; i >= 0; i--) {
+      let sum = 0;
+      for (let l = i + 1; l <= j; l++) sum += a[i + l * m] * x[l];
+      x[i] = -sum / a[i + i * m];
+      inverse2 += x[i] * x[i];
+    }
+  }
+  if (!(1 / Math.sqrt(inverse2) > QRCP_MARGIN * cutUpper)) return null;
+  return { rank: r, cut: cutUpper };
+}
+
+/** Rank and cutoff of a matrix of finite entries: the QR decision when certain, else the SVD. */
+function rankAndCutoff(M: number[][]): { rank: i32; cut: f64 } {
+  return qrcpRankOf(M) ?? svdRankOf(M);
 }
 
 /**
@@ -1575,7 +1690,9 @@ export function rank(A: number[][], tol?: f64): i32 {
   if (m === 0) return 0;
   const n = A[0].length;
   if (n === 0) return 0;
-  if (tol === undefined && entryRange(A).finite) return svdRankOf(A).rank;
+  if (tol === undefined && entryRange(A).finite) {
+    return rankAndCutoff(scaledCopyForAbsoluteCutoff(A)).rank;
+  }
 
   // Use Gaussian elimination to count pivots
   const M = tol === undefined ? scaledCopyForAbsoluteCutoff(A) : A.map((row) => row.slice());
@@ -1670,7 +1787,7 @@ export function nullspace(A: number[][]): number[][] {
   let M = scaled.map((row) => row.slice());
   let pivotCols: i32[];
   if (n > 0 && entryRange(A).finite) {
-    const { rank: r, cut } = svdRankOf(scaled);
+    const { rank: r, cut } = rankAndCutoff(scaled);
     pivotCols = rrefPivots(M, (v) => v > cut, r, 0);
     if (pivotCols.length < r) {
       // Rounding left a pivot below the cutoff: take the largest nonzero pivots instead.

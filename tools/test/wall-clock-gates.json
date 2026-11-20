@@ -35,6 +35,13 @@
       "needs": ["functions/dist/index.js", "matrix/dist/index.js"]
     },
     {
+      "name": "rank-vs-svd",
+      "script": "functions/tests/helpers/rank-perf-gate.mjs",
+      "limit": 0.25,
+      "selfTestScale": 12,
+      "needs": ["functions/dist/index.js", "matrix/dist/index.js"]
+    },
+    {
       "name": "sin-f64",
       "script": "functions/tests/helpers/sin-f64-perf-gate.mjs",
       "limit": 1.2,
