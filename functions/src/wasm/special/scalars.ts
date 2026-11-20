@@ -297,10 +297,14 @@ export function besselGammaAux(xmu: f64): [f64, f64, f64, f64] {
  * J_ν(x) and Y_ν(x) for real order ν >= 0 and x > 0 (Temme 1976 / Steed, as in
  * Numerical Recipes `bessjy`): CF1 (Lentz) for J'_ν/J_ν, then either Temme's
  * series (x < 2) or Steed's CF2 (x >= 2) at the reduced order μ ∈ [−1/2, 1/2],
- * and stable recurrences back to ν. Returns [J_ν, Y_ν]. Accurate to ~1e-15
+ * and stable recurrences back to ν. Returns [J_ν, yScale · Y_ν]. Accurate to ~1e-15
  * for all x > 0, with no loss near integer orders.
+ *
+ * `yScale` multiplies Y at the reduced order, before the upward recurrence (which is linear).
+ * A caller that needs `c · Y_ν` with a small `c` passes `c`: the product can be a double
+ * where Y_ν alone is outside the double range.
  */
-export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
+export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
   const EPS = 1e-16;
   const FPMIN = 1e-300;
   const MAXIT = 100000;
@@ -331,7 +335,7 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
   }
   let rjl = isign * FPMIN;
   let rjpl = h * rjl;
-  const rjl1 = rjl;
+  let rjl1 = rjl;
   const rjp1 = rjpl;
   let fact = xnu * xi;
   for (let l = nl; l >= 1; l--) {
@@ -339,6 +343,16 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
     fact -= xi;
     rjpl = fact * rjtemp - rjl;
     rjl = rjtemp;
+    // The downward recurrence grows by about 2 nu / x per step, so from the seed 1e-300 it
+    // leaves the double range for nu / x above about 150, and the ratio f = rjpl / rjl was NaN
+    // (besselY(400.3, 3), besselJ(300.5, 1)). Only the ratio and the quotient rjl1 / rjl are used:
+    // scale all three. After a scale of 1e-250 the seed rjl1 is 0, which is the true J_nu
+    // (a growth of 1e550 or more puts J_nu below the smallest double).
+    if (Math.abs(rjl) > 1e250) {
+      rjl *= 1e-250;
+      rjpl *= 1e-250;
+      rjl1 *= 1e-250;
+    }
   }
   if (rjl === 0) rjl = EPS;
   const f = rjpl / rjl;
@@ -426,6 +440,8 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
   const scale = rjmu / rjl;
   const rj = rjl1 * scale;
   void rjp1;
+  rymu *= yScale;
+  ry1 *= yScale;
   for (let i = 1; i <= nl; i++) {
     const rytemp = (xmu + i) * xi2 * ry1 - rymu;
     rymu = ry1;
@@ -490,9 +506,14 @@ export function besselJRealOrder(nu: f64, x: f64): f64 {
   }
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
-  const jy = besselJYTemme(an, x);
-  if (nu >= 0) return jy[0];
-  return Math.cos(an * Math.PI) * jy[0] - Math.sin(an * Math.PI) * jy[1];
+  if (nu >= 0) return besselJYTemme(an, x)[0];
+  // J_{-nu} = cos(nu pi) J_nu - sin(nu pi) Y_nu, with nu reduced to [0, 2) before the product
+  // with pi (see besselYRealOrder). The factor -sin(nu pi) goes into the Y recurrence, so the
+  // product is right also where Y_nu alone is outside the double range.
+  const f = an - 2 * Math.floor(an / 2);
+  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
+  const jy = besselJYTemme(an, x, -Math.sin(f * Math.PI));
+  return c * jy[0] + jy[1];
 }
 
 /** Y_ν(x) for non-integer real order ν and x > 0 (see besselJRealOrder). */
@@ -501,12 +522,18 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (x === 0) return -Infinity;
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
-  const jy = besselJYTemme(an, x);
-  if (nu >= 0) return jy[1];
-  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. An overflowed Y_nu has an unknown size, and
-  // cos(nu pi) can be small, so the sum has no known value.
-  if (!Number.isFinite(jy[1])) return NaN;
-  return Math.sin(an * Math.PI) * jy[0] + Math.cos(an * Math.PI) * jy[1];
+  if (nu >= 0) return besselJYTemme(an, x)[1];
+  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. Reduce nu to [0, 2) before the product with pi:
+  // the product loses log2(nu) bits, and at a half-integer cos(nu pi) is exactly 0, not 1e-14,
+  // which times the huge Y_nu (besselY(-100.5, 1) = 6e-190, not -2e172) gave a wrong value. The
+  // function repeats the reduction inline because the worker kernels serialize it alone.
+  const f = an - 2 * Math.floor(an / 2);
+  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
+  const s = Math.sin(f * Math.PI);
+  // The factor c goes into the Y recurrence: c Y_nu can be a double where Y_nu alone is not
+  // (besselY(-151.5001, 1) = -2.8e305 with Y_nu = -9e308), and at a half-integer the term is 0.
+  const jy = besselJYTemme(an, x, c);
+  return s * jy[0] + jy[1];
 }
 
 /** Bessel function of the first kind, general integer order n: J_n(x). */

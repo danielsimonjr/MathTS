@@ -8500,7 +8500,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 304
+      "loc": 357
     },
     {
       "file": "functions/src/special/niche.ts",
@@ -8521,7 +8521,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 350
     },
     {
       "file": "functions/src/special/spheroidal.ts",
@@ -10054,7 +10054,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 996
+      "loc": 1023
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -11286,7 +11286,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 682
+      "loc": 762
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

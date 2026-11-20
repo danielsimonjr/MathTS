@@ -46,12 +46,17 @@ const LN_MIN_DOUBLE = -745.2;
 /**
  * Miller's downward recurrence `f_{k-1} = a_k f_k + sign · f_{k+1}` with `a_k = (2k+1)/x`.
  *
- * Returns `r = f_n / f_0` up to a power of ten: the sweep multiplies its live values by 1e-150
- * whenever they grow past 1e150, and `shifts` counts the rescales that came after `f_n` was
- * captured. `f_n` itself is not rescaled, so it cannot underflow early, and the exact ratio is
- * `r · 1e-150^shifts`. The caller multiplies it by the exact `f_0`.
+ * Returns `r = f_n / f_0` and `r1 = f_n / f_1` up to a power of ten: the sweep multiplies its
+ * live values by 1e-150 whenever they grow past 1e150, and `shifts` counts the rescales that came
+ * after `f_n` was captured. `f_n` itself is not rescaled, so it cannot underflow early, and the
+ * exact ratios are `r · 1e-150^shifts` and `r1 · 1e-150^shifts`. The caller multiplies one of
+ * them by the exact `f_0` or `f_1`.
  */
-function millerDownward(n: number, x: number, sign: 1 | -1): { r: number; shifts: number } {
+function millerDownward(
+  n: number,
+  x: number,
+  sign: 1 | -1
+): { r: number; r1: number; shifts: number } {
   const big = Math.max(n, Math.abs(x));
   assertLoopOrder('sphericalBessel', 'max(n, |x|)', big, MAX_SPHERICAL_BESSEL_ORDER);
   const start = Math.ceil(big) + 30 + Math.ceil(Math.sqrt(40 * (big + 1)));
@@ -72,7 +77,7 @@ function millerDownward(n: number, x: number, sign: 1 | -1): { r: number; shifts
     fk1 = fk;
     fk = prev;
   }
-  return { r: fn / fk, shifts };
+  return { r: fn / fk, r1: fn / fk1, shifts };
 }
 
 /**
@@ -122,11 +127,16 @@ function sphBesselJ(n: number, x: number): number {
     }
     return j;
   }
-  const { r, shifts } = millerDownward(n, x, -1);
-  // j_n = r · 1e-150^shifts · j_0 with |j_0| <= 1, so an underflow of the factor is the result.
-  let ratio = r;
+  const { r, r1, shifts } = millerDownward(n, x, -1);
+  // j_n = r · 1e-150^shifts · j_0 = r1 · 1e-150^shifts · j_1. Near a zero of sin x the exact j_0
+  // is a rounding error and the computed f_0 is all cancellation, so the larger of j_0 and j_1
+  // sets the scale (they have no common zero). Both are at most 1 in size, so an underflow of
+  // the factor is the result.
+  const j1 = Math.sin(x) / (x * x) - Math.cos(x) / x;
+  const useFirst = Math.abs(j1) > Math.abs(j0);
+  let ratio = useFirst ? r1 : r;
   for (let s = 0; s < shifts && ratio !== 0; s += 1) ratio *= SHIFT;
-  return ratio * j0;
+  return ratio * (useFirst ? j1 : j0);
 }
 
 /**
@@ -160,9 +170,14 @@ function sphBesselY(n: number, x: number): number {
  * true place.
  */
 function sphBesselI(n: number, x: number): number {
-  if (n === 0) return Math.sinh(x) / x;
-  if (x === 0) return 0;
+  if (x === 0) return n === 0 ? 1 : 0;
   if (x < 0) return (n % 2 === 0 ? 1 : -1) * sphBesselI(n, -x);
+  if (n === 0) {
+    // sinh(x) is Infinity from x = 710.5, where i_0(x) = sinh(x) / x is still a double (up to x = 716.2).
+    if (x === Infinity) return Infinity;
+    const first = Math.sinh(x) / x;
+    return Number.isFinite(first) ? first : Math.exp(lnSphBesselI0(x));
+  }
   if (x < 1) return smallXSeries(n, x, 1);
   const { r, shifts } = millerDownward(n, x, 1);
   let ratio = r;
@@ -195,6 +210,17 @@ function sphBesselKNegative(n: number, x: number): number {
 }
 
 /**
+ * An upper bound of `Σ_{1<=j<n} ln(1 + (2j+1)/x)`, the growth of ln k̃ from order 1 to order n.
+ * The closed form of the integral carries one unit of margin for its rounding error.
+ */
+function lnGrowthBound(n: number, x: number): number {
+  const plain = (n * n - 1) / x;
+  if (x > 1e12) return plain;
+  const f = (t: number): number => ((x + 1 + 2 * t) / 2) * (Math.log1p((1 + 2 * t) / x) - 1);
+  return Math.min(plain, f(n) - f(1) + 1);
+}
+
+/**
  * k_n(x): upward recurrence (stable for K) on the scaled values `k̃_n = e^x k_n`, which start
  * at `k̃_0 = (π/2)/x` and do not underflow for a large x. The sweep rescales by 1e-290 when
  * `k̃` passes 1e290 and counts the rescales. For x > 0 every term is positive, so the first
@@ -208,10 +234,14 @@ function sphBesselK(n: number, x: number): number {
   const s0 = Math.PI / 2 / x;
   let km = s0;
   let k = n === 0 ? s0 : s0 * (1 + 1 / x);
-  // k̃_{j+1} = k̃_{j-1} + a_j k̃_j <= (1 + a_j) k̃_j because k̃ grows with j, and ln(1 + a) <= a,
-  // so ln k̃_n <= ln k̃_1 + Σ_{j<n} (2j+1)/x = ln k̃_1 + (n² − 1)/x. A bound below the smallest
-  // double ends the sweep at once with the correctly rounded 0.
-  if (n >= 2 && Math.log(k) + (n * n - 1) / x - x < LN_MIN_DOUBLE) return 0;
+  // k̃_{j+1} = k̃_{j-1} + a_j k̃_j <= (1 + a_j) k̃_j because k̃ grows with j, so
+  // ln k̃_n <= ln k̃_1 + Σ_{1<=j<n} ln(1 + a_j) with a_j = (2j+1)/x. The sum is at most the
+  // integral from 1 to n (the terms grow), which has the closed form F(n) − F(1) with
+  // F(t) = ((x + 1 + 2t)/2) (ln(1 + (2t+1)/x) − 1), and at most Σ a_j = (n² − 1)/x (ln(1+a) <= a;
+  // the closed form loses its digits for x above 1e12, where that bound is tight). A bound below
+  // the smallest double ends the sweep at once with the correctly rounded 0, also for n near x,
+  // where the plain bound is 0 and the sweep took 19 s (`sphericalBesselK(1.8e9, 1.8e9)`).
+  if (n >= 2 && Math.log(k) + lnGrowthBound(n, x) - x < LN_MIN_DOUBLE) return 0;
   let scales = 0;
   for (let j = 1; j < n; j += 1) {
     const next = km + ((2 * j + 1) / x) * k;

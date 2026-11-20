@@ -20,9 +20,10 @@
  * DLMF 28.8.1, whose cost does not grow with `q`.
  *
  * Normalization / sign — the standard DLMF / Abramowitz & Stegun convention
- * (identical to `mpmath`/`scipy`): `(1/π)∫₀^{2π} ce_n(x,q)² dx = 1` (so
+ * (identical to `scipy`): `(1/π)∫₀^{2π} ce_n(x,q)² dx = 1` (so
  * `ce_0(x,0) = 1/√2`, `ce_n(x,0) = cos nx`, `se_n(x,0) = sin nx` for `n ≥ 1`),
- * with the global sign fixed so the dominant Fourier coefficient is positive.
+ * and the sign of DLMF 28.2(vi): the sign at `q = 0`, carried to every real `q` by continuity.
+ * That sign is `ce_n(0, q) > 0` and `se_n'(0, q) > 0` for every `q` (see `anchorSign`).
  * Oracle-pinned against `scipy.special` (the installed `mpmath` 1.3.0 lacks the
  * Mathieu family) in `functions/tests/gap-special-mathieu-oracle.test.ts`.
  *
@@ -170,17 +171,22 @@ function characteristicValue(kind: 'a' | 'b', n: number, q: f64): f64 {
 /** Entries of the mode cache. The cache keeps the last modes, because a plot calls `ce` once per `x`. */
 const MODE_CACHE_SIZE = 32;
 
-/** The largest mode that the cache keeps (800 KB), so the cache holds at most 26 MB. */
-const MODE_CACHE_MAX_COEFFS = 100_000;
+/**
+ * The most coefficients that the cache holds in all (25.6 MB). A mode of any size below the cap
+ * `MAX_MATHIEU_HARMONICS` fits, so a plot that calls `ce` or `se` once per `x` at a huge `q`
+ * does one solve (1 s at the cap) and not one per point.
+ */
+const MODE_CACHE_MAX_TOTAL = 3_200_000;
 
-/** Modes by `cls:q:m`, oldest first. */
+/** Modes by `cls:q:m`, oldest first, and the number of coefficients that they hold. */
 const modeCache = new Map<string, MathieuMode>();
+let modeCacheTotal = 0;
 
 /**
  * The `m`-th mode (from 0, ascending eigenvalue) of a parity class, for the order `n`: the
  * eigenvector of the sized matrix, with the `A_0` folding undone, normalised to
- * `(1/π)∫₀^{2π} f² = 1` (the constant term of the cosine class counts twice) and signed so that
- * the coefficient `m` is positive.
+ * `(1/π)∫₀^{2π} f² = 1` (the constant term of the cosine class counts twice) and signed by
+ * continuity from `q = 0` (see `anchorSign`).
  *
  * @throws RangeError if the matrix needs more than `MAX_MATHIEU_HARMONICS` harmonics
  */
@@ -211,16 +217,63 @@ function solveMode(fn: string, cls: MathieuClass, n: number, m: number, q: f64):
     const w = cls === 'even-cos' && k === 0 ? 2 : 1;
     norm2 += w * coeffs[k] * coeffs[k];
   }
-  const scale = (coeffs[m] < 0 ? -1 : 1) / Math.sqrt(norm2);
+  const scale = anchorSign(cls, coeffs, m) / Math.sqrt(norm2);
   for (let k = 0; k < size; k++) coeffs[k] *= scale;
 
   const mode: MathieuMode = { cls, coeffs };
-  if (size <= MODE_CACHE_MAX_COEFFS) {
-    if (modeCache.size >= MODE_CACHE_SIZE)
-      modeCache.delete(modeCache.keys().next().value as string);
-    modeCache.set(key, mode);
+  while (modeCache.size >= MODE_CACHE_SIZE || modeCacheTotal + size > MODE_CACHE_MAX_TOTAL) {
+    const oldest = modeCache.keys().next().value as string;
+    modeCacheTotal -= (modeCache.get(oldest) as MathieuMode).coeffs.length;
+    modeCache.delete(oldest);
   }
+  modeCache.set(key, mode);
+  modeCacheTotal += size;
   return mode;
+}
+
+/**
+ * The sign factor that gives a mode the sign of DLMF 28.2(vi): the sign at `q = 0`, continued
+ * to the actual `q`.
+ *
+ * Each parity class has one boundary condition at `x = 0` and one at `x = π/2`, so one linear
+ * functional `Σ w_k c_k` of the coefficients is `y(x₀)` or `y'(x₀)` at each point. A solution
+ * cannot have `y = y' = 0` at a point, so that functional never vanishes while `q` moves, and
+ * its sign at the actual `q` is its sign at `q = 0`, where the mode is the unit coefficient `m`.
+ * The sign is therefore `sign(w_m)`. The rule "coefficient `m` is positive" is not that sign: the
+ * coefficient `m` changes sign near `q = 30` for `ce_2` (SciPy and DLMF agree with the rule above).
+ *
+ * A mode with a large `q` is exponentially small at `x = 0` or at `x = π/2`, and its sum there is
+ * all cancellation. So the function uses the point where the sum is the larger part of the sum of
+ * the absolute terms.
+ *
+ * @returns `1` or `-1`, the factor for `coeffs`
+ */
+function anchorSign(cls: MathieuClass, coeffs: Float64Array, m: number): number {
+  const sine = cls === 'odd-sin' || cls === 'even-sin';
+  let best = 0;
+  let sign = 1;
+  for (let anchor = 0; anchor < 2; anchor++) {
+    let sum = 0;
+    let magnitude = 0;
+    let expected = 1;
+    for (let k = 0; k < coeffs.length; k++) {
+      const h = harmonicAt(cls, k);
+      const alt = k % 2 === 0 ? 1 : -1;
+      let w: number;
+      if (anchor === 0) w = sine ? h : 1;
+      else if (cls === 'even-cos' || cls === 'odd-sin') w = alt;
+      else w = -h * alt;
+      sum += w * coeffs[k];
+      magnitude += Math.abs(w * coeffs[k]);
+      if (k === m) expected = w < 0 ? -1 : 1;
+    }
+    const ratio = magnitude > 0 ? Math.abs(sum) / magnitude : 0;
+    if (ratio > best) {
+      best = ratio;
+      sign = (sum < 0 ? -1 : 1) * expected;
+    }
+  }
+  return sign;
 }
 
 /** Validate an order argument is a nonnegative integer. */

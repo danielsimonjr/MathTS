@@ -137,6 +137,16 @@ describe('#1116 Bessel and Chebyshev results that were NaN', () => {
     it('sphericalBesselK(1e8, Infinity) is 0 at once', () => {
       expect(sphericalBesselK(1e8, Infinity)).toBe(0);
     });
+    it('sphericalBesselK(n, x) with n near x is 0 at once (the sweep took 19 s at n = x = 1.8e9)', () => {
+      // True value exp(-0.53 x): far below the smallest double. The default test timeout is 5 s.
+      expect(sphericalBesselK(1.8e9, 1.8e9)).toBe(0);
+      expect(sphericalBesselK(1.7e9, 1.8e9)).toBe(0);
+    });
+    it('the upper bound lets a value near the underflow edge pass (mpmath)', () => {
+      // k_347(800) = 1.3414e-318 and k_346(800) = 8.8052e-319 are subnormal doubles.
+      expect(rel(sphericalBesselK(347, 800), 1.3414e-318)).toBeLessThan(1e-4);
+      expect(rel(sphericalBesselK(346, 800), 8.8052e-319)).toBeLessThan(1e-4);
+    });
   });
 
   describe('chebyshevT for |x| > 1 after the overflow', () => {
@@ -616,19 +626,42 @@ describe('#1289 besselY: an overflow is -Infinity, not NaN', () => {
     expect(rel(besselY(150.5, 1) as number, -2.999691509002089e306)).toBeLessThan(1e-13);
     expect(rel(besselY(260, 20) as number, -6.900884357849415e253)).toBeLessThan(1e-13);
   });
-  it('a non-finite x still gives NaN, and a negative real order that overflows stays NaN', () => {
+  it('a real order at x >= 2 and at a huge order is -Infinity, not NaN (mpmath: -1e796, -7e2388, ...)', () => {
+    // The downward recurrence of besselJYTemme overflowed for nu / x above about 150.
+    for (const [nu, x] of [
+      [400.3, 2],
+      [400.3, 3],
+      [1000.3, 3],
+      [1000.3, 50],
+      [3000.3, 90],
+    ]) {
+      expect(besselY(nu, x), `besselY(${nu}, ${x})`).toBe(-Infinity);
+    }
+    expect(besselJ(300.5, 1)).toBe(0);
+    expect(besselJ(1000.3, 3)).toBe(0);
+  });
+  it('a negative real order: the sign of the overflow, and the exact zero of cos at a half-integer', () => {
+    expect(besselY(-400.3, 1)).toBe(-Infinity);
+    expect(besselY(-400.7, 1)).toBe(Infinity);
+    expect(besselY(-400.5, 1)).toBe(0);
+    // These were -1.8e172 and -2.0e9: cos(100.5 pi) is 1e-14 in a double, times a huge Y_nu.
+    expect(rel(besselY(-100.5, 1) as number, 5.94003332445e-190)).toBeLessThan(1e-9);
+    expect(rel(besselY(-20.5, 1) as number, 6.01429082926e-26)).toBeLessThan(1e-9);
+    expect(rel(besselY(-60.5, 2) as number, 1.51700688916e-83)).toBeLessThan(1e-9);
+  });
+  it('a non-finite x still gives NaN', () => {
     expect(besselY(1e8, Infinity)).toBeNaN();
     expect(besselY(5, NaN)).toBeNaN();
     expect(besselY(400, 0)).toBeNaN();
     expect(besselY(400, -1)).toBeNaN();
-    expect(besselY(-400.5, 1)).toBeNaN();
   });
 });
 
 describe('#1289 mathieuCe and mathieuSe at large q and high order', () => {
   const abs = (a: number, b: number) => Math.abs(a - b);
   it('mathieuSe(100, 1e3, 0.4) uses the harmonics that order 100 needs (SciPy tridiagonal)', () => {
-    expect(abs(mathieuSe(100, 1e3, 0.4), 1.0101290320424767)).toBeLessThan(1e-10);
+    // The sign is the one of DLMF 28.2(vi), by continuity from q = 0: se'(0, q) > 0.
+    expect(abs(mathieuSe(100, 1e3, 0.4), -1.0101290320424767)).toBeLessThan(1e-10);
   });
   it('mathieuCe(0, 1e6, 1.5) has the right sign and size', () => {
     expect(abs(mathieuCe(0, 1e6, 1.5), 0.042019879164098224)).toBeLessThan(1e-10);
@@ -637,14 +670,34 @@ describe('#1289 mathieuCe and mathieuSe at large q and high order', () => {
     expect(abs(mathieuCe(99, 1e8, 1.5), -2.1859582726046796)).toBeLessThan(1e-10);
   });
   it('mathieuSe(4, 1e4, 1.2) matches to 1e-10 relative', () => {
-    expect(rel(mathieuSe(4, 1e4, 1.2), -7.261328317028637e-4)).toBeLessThan(1e-10);
+    expect(rel(mathieuSe(4, 1e4, 1.2), 7.261328317028637e-4)).toBeLessThan(1e-10);
   });
   it('mathieuCe(40, 100, 0.7) keeps its value (control, SciPy mathieu_cem)', () => {
     expect(abs(mathieuCe(40, 100, 0.7), -0.06035583475937689)).toBeLessThan(1e-10);
   });
   it('a negative q uses the same method', () => {
     expect(abs(mathieuCe(6, -300, 0.3), 1.2418375986375678)).toBeLessThan(1e-10);
-    expect(abs(mathieuSe(7, -50, 2.2), 0.9711091395212201)).toBeLessThan(1e-10);
+    expect(abs(mathieuSe(7, -50, 2.2), -0.9711091395212201)).toBeLessThan(1e-10);
+  });
+  it('the sign follows DLMF 28.2(vi) (continuity from q = 0): SciPy mathieu_cem and mathieu_sem', () => {
+    // The coefficient m of the Fourier series is negative for these (n, q), so a rule that
+    // makes it positive returns the opposite sign.
+    expect(abs(mathieuCe(3, 25, 0.3), 0.16589139160737623)).toBeLessThan(1e-10);
+    expect(abs(mathieuCe(4, 50, 0.3), 0.0585451251669315)).toBeLessThan(1e-10);
+    expect(abs(mathieuCe(2, 100, 0.3), 1.0955372765749082e-4)).toBeLessThan(1e-10);
+    expect(abs(mathieuSe(7, 50, 0.3), 0.36871769546048205)).toBeLessThan(1e-10);
+    expect(abs(mathieuSe(4, 100, 0.3), 5.487317992177143e-4)).toBeLessThan(1e-10);
+  });
+  it('ce_n(0, q) and the slope of se_n at 0 are positive for every q (DLMF 28.2(vi))', () => {
+    // Only |q| <= 30 here: at a large q the mode is exponentially small at x = 0, below rounding,
+    // and the sign is read at pi/2 (see anchorSign).
+    for (const q of [1, 10, 30, -10, -30]) {
+      for (const n of [2, 3, 4, 5, 8, 11]) {
+        expect(mathieuCe(n, q, 0)).toBeGreaterThanOrEqual(0);
+        const h = 1e-9;
+        expect(mathieuSe(n, q, h)).toBeGreaterThan(0);
+      }
+    }
   });
   it('q = 0 gives the plain trigonometric functions', () => {
     expect(abs(mathieuCe(5, 0, 0.7), Math.cos(3.5))).toBeLessThan(1e-14);
@@ -677,5 +730,32 @@ describe('#1289 mathieuCe and mathieuSe at large q and high order', () => {
     const first = mathieuCe(3, 7.5, 0.4);
     for (let i = 1; i <= 40; i++) mathieuCe(3, 7.5 + i, 0.4);
     expect(mathieuCe(3, 7.5, 0.4)).toBe(first);
+  });
+});
+
+describe('code review F1, F3b, F4, F5: values that the review found wrong', () => {
+  it('F1: sphericalBesselI at x = 0 is 1 for n = 0 and 0 for n > 0', () => {
+    expect(sphericalBesselI(0, 0)).toBe(1);
+    expect(sphericalBesselI(3, 0)).toBe(0);
+  });
+
+  it('F3b: a negative real order near an overflow keeps the finite cos or sin term', () => {
+    expect(rel(besselY(-151.5001, 1) as number, -2.8381551290433205e305)).toBeLessThan(1e-9);
+    expect(rel(besselY(-151.4999, 1) as number, 2.8349155690017926e305)).toBeLessThan(1e-9);
+    expect(rel(besselY(-152.5, 1) as number, 7.62980592e-315)).toBeLessThan(1e-8);
+    expect(rel(besselJ(-152.0001, 1) as number, 4.9362468597371876e306)).toBeLessThan(1e-9);
+    expect(rel(besselY(-151.25, 1) as number, 1.5318366649966553e308)).toBeLessThan(1e-9);
+    expect(besselY(-152.49, 1)).toBe(-Infinity);
+  });
+
+  it('F4: sphericalBesselJ at x = k pi does not normalise by the rounding error of j_0', () => {
+    expect(rel(sphericalBesselJ(10, Math.PI), 5.485546590142097e-6)).toBeLessThan(1e-10);
+    expect(rel(sphericalBesselJ(10, 2 * Math.PI), 0.0028626898900201633)).toBeLessThan(1e-10);
+  });
+
+  it('F5: sphericalBesselI(0, x) is finite while the value is a double', () => {
+    expect(rel(sphericalBesselI(0, 712), 1.1592073491493218e306)).toBeLessThan(1e-13);
+    expect(rel(sphericalBesselI(0, -712), 1.1592073491493218e306)).toBeLessThan(1e-13);
+    expect(sphericalBesselI(0, Infinity)).toBe(Infinity);
   });
 });
