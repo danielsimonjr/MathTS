@@ -51,3 +51,16 @@ describe('#1153 peakWidths matches scipy.signal.peak_widths', () => {
     );
   });
 });
+
+describe('#1153 findPeaks prominence stops at a NaN sample, as scipy.signal.find_peaks', () => {
+  // The rewrite of the prominence walk made a NaN sample end the walk (a comparison with NaN is
+  // false), as in SciPy 1.16.3. The old walk ran through it. Oracle: find_peaks(x, prominence=p).
+  it.each([
+    [[0, NaN, 3, 4, 0], 3, []],
+    [[0, NaN, 3, 4, 0], 1, [3]],
+    [[0, NaN, 3, 4, 0], 1.0001, []],
+    [[5, 1, 3, NaN, 4, 5, 0, 2], 2, []],
+  ] as [number[], number, number[]][])('findPeaks(%j, prominence %d) is %j', (x, p, want) => {
+    expect(F.findPeaks(x, { prominence: p })).toEqual(want);
+  });
+});

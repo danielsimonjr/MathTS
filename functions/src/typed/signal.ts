@@ -1082,6 +1082,12 @@ export function periodogram(
   let winPower: f64 = 0;
   for (let i: i32 = 0; i < n; i++) winPower += win[i] * win[i];
   winPower /= n;
+  // A Hann window of length 2 is [0, 0]: no power, so the periodogram would be 0 / 0 (NaN).
+  if (!(winPower > 0)) {
+    throw new RangeError(
+      `periodogram: the '${winType}' window of length ${n} is all zeros; use another window or more samples`
+    );
+  }
 
   const real = new Float64Array(nfft);
   const imag = new Float64Array(nfft);
@@ -1586,7 +1592,7 @@ export function bartlettPSD(
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
  * @returns `{ psd: number[], frequencies: number[] }`; empty for an empty signal
- * @throws RangeError if the signal has exactly one sample
+ * @throws RangeError if the signal has exactly one sample, or if `nfft` or `K` is not a positive integer
  */
 export function multiTaperPSD(
   signal: number[] | Float64Array,
@@ -1600,6 +1606,12 @@ export function multiTaperPSD(
   }
   const nfft: i32 = opts?.nfft ?? (Math.pow(2, Math.ceil(Math.log2(n))) as i32);
   const K: i32 = opts?.K ?? 5;
+  if (!(Number.isInteger(nfft) && nfft >= 1)) {
+    throw new RangeError(`multiTaperPSD: nfft must be a positive integer (got ${nfft})`);
+  }
+  if (!(Number.isInteger(K) && K >= 1)) {
+    throw new RangeError(`multiTaperPSD: K must be a positive integer (got ${K})`);
+  }
 
   // Approximate Slepian tapers via discrete cosine windows.
   // Taper k: w_k[n] = sin((k+1) * pi * n / (N+1)) — a sine-family taper.

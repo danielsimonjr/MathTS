@@ -80,6 +80,48 @@ describe('#1145 fftshift and ifftshift accept a Matrix', () => {
   });
 });
 
+describe('#1145 fftshift and ifftshift of a 2-D input shift every axis (numpy 2.3.5)', () => {
+  const grid = (rows: number, cols: number): number[][] =>
+    Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => r * cols + c));
+  const rows: [string, number[][], number[][], number[][]][] = [
+    [
+      '3 x 4',
+      grid(3, 4),
+      [
+        [10, 11, 8, 9],
+        [2, 3, 0, 1],
+        [6, 7, 4, 5],
+      ],
+      [
+        [6, 7, 4, 5],
+        [10, 11, 8, 9],
+        [2, 3, 0, 1],
+      ],
+    ],
+    [
+      '3 x 3',
+      grid(3, 3),
+      [
+        [8, 6, 7],
+        [2, 0, 1],
+        [5, 3, 4],
+      ],
+      [
+        [4, 5, 3],
+        [7, 8, 6],
+        [1, 2, 0],
+      ],
+    ],
+  ];
+  it.each(rows)('%s array and Matrix', (_name, x, shifted, unshifted) => {
+    expect(F.fftshift(x as never)).toEqual(shifted);
+    expect(F.ifftshift(x as never)).toEqual(unshifted);
+    expect(F.fftshift(F.matrix(x) as never)).toEqual(shifted);
+    expect(F.ifftshift(F.matrix(x) as never)).toEqual(unshifted);
+    expect(F.ifftshift(F.fftshift(x as never) as never)).toEqual(x);
+  });
+});
+
 describe('#1145 welchPSD with a Hann window of length 2', () => {
   it.each(['hann', 'hanning'])('throws a RangeError for the "%s" window', (window) => {
     expect(() => F.welchPSD([5, 6], { window })).toThrow(RangeError);
@@ -106,6 +148,26 @@ describe('#1145 welchPSD with a Hann window of length 2', () => {
   });
   it('pin: an empty signal still returns an empty PSD', () => {
     expect(F.welchPSD([]).psd).toEqual([]);
+  });
+});
+
+describe('#1145 a Hann window of length 2 in periodogram, csd and coherence', () => {
+  it('periodogram([5, 6]) throws a RangeError instead of returning NaN', () => {
+    expect(() => F.periodogram([5, 6])).toThrow(RangeError);
+    expect(() => F.periodogram([5, 6])).toThrow(/^periodogram: the 'hann' window of length 2/);
+    expect(() => F.periodogram([5, 6], { nfft: 8 })).toThrow(/^periodogram: the 'hann' window/);
+  });
+  it('csd and coherence with nperseg 2 throw a RangeError instead of returning NaN', () => {
+    expect(() => F.csd([5, 6], [5, 6])).toThrow(/^csd\/coherence: the 'hann' window of length 2/);
+    expect(() => F.coherence([5, 6], [5, 6])).toThrow(RangeError);
+    expect(() => F.csd([5, 6, 7, 8], [5, 6, 7, 8], { nperseg: 2 })).toThrow(RangeError);
+  });
+  it('pin: other windows of length 2 and a Hann window of length 3 stay finite', () => {
+    expect(F.periodogram([5, 6], { window: 'hamming' }).psd.every(Number.isFinite)).toBe(true);
+    expect(F.periodogram([5, 6, 7]).psd).toEqual([36, 72, 36]);
+    expect(F.csd([5, 6, 7, 8], [5, 6, 7, 8], { nperseg: 3 }).power.every(Number.isFinite)).toBe(
+      true
+    );
   });
 });
 
@@ -146,6 +208,25 @@ describe('#1145 multiTaperPSD of a length that is not a power of two', () => {
   });
   it('pin: a power-of-two length with the default nfft is unchanged', () => {
     expect(F.multiTaperPSD([1, 2, 3, 4]).psd).toEqual([3.75, 7.5, 3.75]);
+  });
+});
+
+describe('#1145 multiTaperPSD rejects an nfft or a K that is not a positive integer', () => {
+  // Before the check: nfft 2.5 and K 0 returned NaN bins, nfft 0 returned a NaN frequency, nfft -3
+  // threw 'length cannot be negative', and nfft 7.5 returned a PSD of zeros.
+  const x = [1, 2, 3, 4, 5];
+  it.each([0, -3, 2.5, 7.5, NaN, Infinity])('nfft %d throws a RangeError', (nfft) => {
+    expect(() => F.multiTaperPSD(x, { nfft })).toThrow(RangeError);
+    expect(() => F.multiTaperPSD(x, { nfft })).toThrow(
+      /^multiTaperPSD: nfft must be a positive integer/
+    );
+  });
+  it.each([0, -1, 1.5, NaN])('K %d throws a RangeError', (K) => {
+    expect(() => F.multiTaperPSD(x, { K })).toThrow(/^multiTaperPSD: K must be a positive integer/);
+  });
+  it('pin: an odd nfft and K = 1 stay valid', () => {
+    expect(F.multiTaperPSD([1, 2, 3, 4], { nfft: 5 }).psd.every(Number.isFinite)).toBe(true);
+    expect(F.multiTaperPSD(x, { K: 1 }).psd.every(Number.isFinite)).toBe(true);
   });
 });
 
@@ -224,6 +305,16 @@ describe('#1145 welchPSD and bartlettPSD with an odd frame length', () => {
       F.welchPSD(x, { frameLength: 4, overlap: 2, window: 'rect' }).psd,
       [124.875, 3.750000000000001, 23.375]
     );
+  });
+});
+
+describe('#1145 resample of an empty signal (listed "not probed yet" in the issue)', () => {
+  // SciPy raises ValueError for an empty input; the package returns [] for every empty signal
+  // (welchPSD([]), multiTaperPSD([]) and spectrogram([]) do the same). Pinned as a decision.
+  it('resample([], num) and resample([], newRate, oldRate) return []', () => {
+    expect(F.resample([], 4)).toEqual([]);
+    expect(F.resample([], 1)).toEqual([]);
+    expect(F.resample([], 2, 1)).toEqual([]);
   });
 });
 

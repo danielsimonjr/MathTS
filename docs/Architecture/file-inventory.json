@@ -8297,7 +8297,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 202
+      "loc": 214
     },
     {
       "file": "functions/src/signal/fft.ts",
@@ -8346,7 +8346,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 458
+      "loc": 464
     },
     {
       "file": "functions/src/signal/system-response.ts",
@@ -9515,7 +9515,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1748
+      "loc": 1760
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10698,7 +10698,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 238
+      "loc": 329
     },
     {
       "file": "functions/tests/dogfood-1147-unwrap-numpy.test.ts",
@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 54
+      "loc": 67
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",

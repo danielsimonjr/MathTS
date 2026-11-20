@@ -117,18 +117,30 @@ export function irfft(spec: { re: unknown; im: unknown }, n: number): number[] {
 }
 
 /**
+ * Roll the first axis, then every sub-array: with no `axes` argument `numpy.fft.fftshift` shifts
+ * every axis of an N-D input, and a nested array or a 2-D Matrix is one.
+ */
+function shiftEveryAxis(x: unknown[], roll: (a: unknown[]) => unknown[]): unknown[] {
+  const rolled = roll(x);
+  return rolled.some(Array.isArray)
+    ? rolled.map((row) => (Array.isArray(row) ? shiftEveryAxis(row, roll) : row))
+    : rolled;
+}
+
+/**
  * Shift the zero-frequency component to the center of the spectrum (roll by `floor(n/2)`).
  *
  * Thin public surface over the package's single roll algorithm (`fftshift<T>` in `./fft.ts`) —
  * same behavior, delegated to keep one implementation. A Matrix or a typed array is unwrapped,
- * as in {@link rfft}; the result is always a plain array.
+ * as in {@link rfft}; the result is always a plain array. A nested array or a 2-D Matrix is
+ * shifted along every axis, as NumPy does without `axes`.
  *
  * @throws TypeError if `x` is not an array, a typed array or a Matrix
  */
 export function fftshift(x: number[]): number[];
 export function fftshift(x: unknown): unknown[];
 export function fftshift(x: unknown): unknown[] {
-  return fftshiftGeneric(unwrapInput('fftshift', x));
+  return shiftEveryAxis(unwrapInput('fftshift', x), fftshiftGeneric);
 }
 
 /**
@@ -142,7 +154,7 @@ export function fftshift(x: unknown): unknown[] {
 export function ifftshift(x: number[]): number[];
 export function ifftshift(x: unknown): unknown[];
 export function ifftshift(x: unknown): unknown[] {
-  return ifftshiftGeneric(unwrapInput('ifftshift', x));
+  return shiftEveryAxis(unwrapInput('ifftshift', x), ifftshiftGeneric);
 }
 
 /**

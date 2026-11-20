@@ -208,6 +208,12 @@ function segmentSpectra(
   if (step <= 0) throw new Error('csd/coherence: noverlap must be less than nperseg');
   const win = windowFunction(nperseg, winType);
   const winSum2 = win.reduce((s, w) => s + w * w, 0);
+  // A Hann window of length 2 is [0, 0]: no power, so the scale 1 / winSum2 would be Infinity (NaN).
+  if (!(winSum2 > 0)) {
+    throw new RangeError(
+      `csd/coherence: the '${winType}' window of length ${nperseg} is all zeros; use another window or a longer nperseg`
+    );
+  }
 
   const segments: ComplexNumber[][] = [];
   for (let start = 0; start + nperseg <= sig.length; start += step) {
