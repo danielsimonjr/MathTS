@@ -6414,7 +6414,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 505
+      "loc": 539
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",
@@ -7226,7 +7226,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 555
+      "loc": 570
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -8500,7 +8500,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 185
+      "loc": 207
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -9207,7 +9207,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3051
+      "loc": 3061
     },
     {
       "file": "functions/src/typed/bitwise.ts",

@@ -24,6 +24,26 @@ function isPlainNumberArray(arr: unknown[]): arr is number[] {
 /** The smallest positive normal double, 2^-1022. A smaller product has lost digits. */
 const MIN_NORMAL = 2 ** -1022;
 
+/**
+ * A value above this magnitude can make the sum of the list leave the double range (two values
+ * near Number.MAX_VALUE do). 2^500 is far below Number.MAX_VALUE (just under 2^1024) and far
+ * above the values that need no scale, so a list of ordinary values is never scaled.
+ */
+const MEAN_SCALE_LIMIT = 2 ** 500;
+
+/**
+ * The values divided by an exact power of 2 when one of them is above MEAN_SCALE_LIMIT in
+ * magnitude, else the values. The correlation does not change when a list is multiplied by a
+ * positive constant, and a list of values near Number.MAX_VALUE has a mean that overflows (#1285).
+ */
+function scaledForMean(values: number[]): number[] {
+  let top = 0;
+  for (const v of values) if (Math.abs(v) > top) top = Math.abs(v);
+  if (!(top > MEAN_SCALE_LIMIT)) return values;
+  const scale = realScale(values);
+  return scale === undefined ? values : values.map((v) => scale.down(v) as number);
+}
+
 const name = 'corr';
 const dependencies = ['typed', 'matrix', 'sqrt', 'sum', 'subtract', 'multiply', 'divide'];
 
@@ -134,13 +154,15 @@ export const createCorr = /* #__PURE__ */ factory(
       // Centering by the mean first removes the cancellation entirely. (The old WASM kernel used
       // the same one-pass formula and is retired for correlation.)
       if (isPlainNumberArray(A) && isPlainNumberArray(B)) {
-        const meanX = pairwiseSum(A) / n;
-        const meanY = pairwiseSum(B) / n;
+        const x = scaledForMean(A);
+        const y = scaledForMean(B);
+        const meanX = pairwiseSum(x) / n;
+        const meanY = pairwiseSum(y) / n;
         const dX = new Float64Array(n);
         const dY = new Float64Array(n);
         for (let i = 0; i < n; i++) {
-          dX[i] = A[i] - meanX;
-          dY[i] = B[i] - meanY;
+          dX[i] = x[i] - meanX;
+          dY[i] = y[i] - meanY;
         }
         const sxy = pairwiseDot(dX, dY);
         const sxx = pairwiseDot(dX, dX);

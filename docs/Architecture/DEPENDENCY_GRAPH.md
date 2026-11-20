@@ -7287,7 +7287,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs.ts` - Add the property `vectors` to an eigs result: it throws, because the name was replaced by
+### `functions/src/matrix/eigs.ts` - A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an
 
 **External Dependencies:**
 
@@ -21776,7 +21776,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238693 |
+| Total Lines of Code     | 238774 |
 | Total Exports           | 7399   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

@@ -19019,7 +19019,7 @@
         "functions": ["createRealSymmetric"]
       },
       "functions/src/matrix/eigs.ts": {
-        "description": "Add the property `vectors` to an eigs result: it throws, because the name was replaced by",
+        "description": "A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -49897,7 +49897,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238693,
+    "totalLinesOfCode": 238774,
     "totalExports": 7399,
     "totalClasses": 62,
     "totalInterfaces": 669,
