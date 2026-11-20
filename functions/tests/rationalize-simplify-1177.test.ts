@@ -122,3 +122,15 @@ describe('#1177 item 4: an explicit bignumber() keeps its digits', () => {
     );
   });
 });
+
+describe('#1177: a division by a constant that is no power of 2', () => {
+  // The exact reader multiplies by the float reciprocal, as the mathjs rules do, but it adds the
+  // terms in another order. mathjs 15.2.0 gives 2.333333333333333 * x; the MathTS digits are the
+  // correctly rounded 7/3. 5*x/3+1 and the x^3 coefficient (1.6666666666666665) equal mathjs.
+  it('(x+1)^3*(x+2)/3 keeps the documented text', () => {
+    expect(rat('(x+1)^3*(x+2)/3')).toBe(
+      '0.3333333333333333 * x ^ 4 + 1.6666666666666665 * x ^ 3 + 3 * x ^ 2 + 2.3333333333333335 * x + 0.6666666666666666'
+    );
+    expect(rat('5*x/3+1')).toBe('1.6666666666666665 * x + 1');
+  });
+});

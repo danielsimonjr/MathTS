@@ -6344,7 +6344,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 37
+      "loc": 31
     },
     {
       "file": "functions/src/arithmetic/gcd.ts",
