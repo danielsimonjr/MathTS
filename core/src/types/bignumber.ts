@@ -2519,10 +2519,10 @@ export class BigNumber implements MathTSValue {
       return this.normalize(sign, coefficient, exponent);
     }
     // The rounding step strips the trailing zeros, so the exact value needs no normalize first.
-    return BigNumber.#allocate(sign, coefficient, exponent).roundExcessDigits(
-      precision,
-      globalConfig.rounding
-    );
+    // A value above maxExponent is already infinite: rounding it would read the zero coefficient
+    // of Infinity and give 0 (an operand with more digits than the precision reached this).
+    const exact = BigNumber.#allocate(sign, coefficient, exponent);
+    return exact.isFinite() ? exact.roundExcessDigits(precision, globalConfig.rounding) : exact;
   }
 
   private normalize(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {

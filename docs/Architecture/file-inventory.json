@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2553,
+  "totalFiles": 2554,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1137,
+    "test": 1138,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1137,
+    "tests": 1138,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 37,
-    "@danielsimonjr/mathts-core": 149,
+    "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
@@ -1214,6 +1214,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 43
+    },
+    {
+      "file": "core/tests/bignumber-overflow-rounding.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "core/tests/bignumber-pow-large-exponent.test.ts",
@@ -7954,14 +7961,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 70
+      "loc": 85
     },
     {
       "file": "functions/src/probability/gamma.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 255
+      "loc": 267
     },
     {
       "file": "functions/src/probability/kldivergence.ts",
@@ -8507,7 +8514,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 330
+      "loc": 412
     },
     {
       "file": "functions/src/statistics/corr.ts",
