@@ -73,6 +73,28 @@ check('windowFunction(3, hann)', arrEq(readArr(exports.windowFunction(3, 2)), [0
   exports.__unpin(x);
 }
 
+// welch_psd_f64 zero-pads each frame to the next power of two; bins 0..floor(frame/2) are
+// returned. Only an even frame ends on the Nyquist bin: the last bin of an odd frame lies below
+// Nyquist and is doubled like the bins before it (#1145). Oracle: numpy 2.3.5, two frames of
+// x = [1,5,2,8,3,9,4,7,6,10] zero-padded to 8, rect window, |fft|^2 / (2 * 5), bins 1..2 doubled.
+{
+  const x = makeArray([1, 5, 2, 8, 3, 9, 4, 7, 6, 10]);
+  const odd = readArr(exports.welch_psd_f64(x, 5, 0, 3));
+  check(
+    'welch_psd_f64 doubles the last bin of an odd frame',
+    odd.length === 3 && arrEq(odd, [165.7, 69.21564209736039, 32.19999999999999]),
+    JSON.stringify(odd)
+  );
+  // An even frame keeps its Nyquist bin single: frame 4, two frames (the first 8 samples).
+  const even = readArr(exports.welch_psd_f64(x, 4, 0, 3));
+  check(
+    'welch_psd_f64 leaves the Nyquist bin of an even frame single',
+    even.length === 3 && arrEq(even, [98.125, 3.750000000000001, 22.625]),
+    JSON.stringify(even)
+  );
+  exports.__unpin(x);
+}
+
 console.log('\n===============================');
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

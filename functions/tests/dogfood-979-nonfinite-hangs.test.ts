@@ -176,11 +176,12 @@ describe('#979 non-finite input returns instead of hanging', () => {
     expect((value('unwrapSmall') as number[])[1]).toBeCloseTo(4 - 2 * Math.PI, 12);
   });
   it('unwrapPhase returns on large finite jumps', () => {
+    // numpy 2.3.5 numpy.unwrap: the wrapped step comes from the raw difference (#1147).
     expect(value('unwrapMixed')).toEqual([
-      0, -1.4155045149763694, 1.4155045149764476, 3.4521762771895084, 6.283185307179586,
+      0, -1.4155045149500438, 1.4155045149518628, 3.4521762772783404, 6.283185307180247,
     ]);
-    expect(value('unwrapHuge')).toEqual([0, -0.7234267005270212]);
-    expect(value('unwrapLimit')).toEqual([0, -2.359923502508572]);
+    expect(value('unwrapHuge')).toEqual([0, 0]);
+    expect(value('unwrapLimit')).toEqual([0, -2.35992350243032]);
     expect(value('unwrapOverflow')).toEqual([-1e308, 'NaN']);
   });
   it('kolmogorovSmirnov2Test returns NaN for NaN in either sample', () => {

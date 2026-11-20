@@ -119,21 +119,30 @@ export function irfft(spec: { re: unknown; im: unknown }, n: number): number[] {
 /**
  * Shift the zero-frequency component to the center of the spectrum (roll by `floor(n/2)`).
  *
- * Thin `number[]` public surface over the package's single roll algorithm
- * (`fftshift<T>` in `./fft.ts`) — same behavior, delegated to keep one
- * implementation.
+ * Thin public surface over the package's single roll algorithm (`fftshift<T>` in `./fft.ts`) —
+ * same behavior, delegated to keep one implementation. A Matrix or a typed array is unwrapped,
+ * as in {@link rfft}; the result is always a plain array.
+ *
+ * @throws TypeError if `x` is not an array, a typed array or a Matrix
  */
-export function fftshift(x: number[]): number[] {
-  return fftshiftGeneric(x);
+export function fftshift(x: number[]): number[];
+export function fftshift(x: unknown): unknown[];
+export function fftshift(x: unknown): unknown[] {
+  return fftshiftGeneric(unwrapInput('fftshift', x));
 }
 
 /**
  * Inverse of {@link fftshift} (roll by `ceil(n/2)`).
  *
- * Thin `number[]` public surface over `ifftshift<T>` in `./fft.ts`.
+ * Thin public surface over `ifftshift<T>` in `./fft.ts`. A Matrix or a typed array is
+ * unwrapped; the result is always a plain array.
+ *
+ * @throws TypeError if `x` is not an array, a typed array or a Matrix
  */
-export function ifftshift(x: number[]): number[] {
-  return ifftshiftGeneric(x);
+export function ifftshift(x: number[]): number[];
+export function ifftshift(x: unknown): unknown[];
+export function ifftshift(x: unknown): unknown[] {
+  return ifftshiftGeneric(unwrapInput('ifftshift', x));
 }
 
 /**

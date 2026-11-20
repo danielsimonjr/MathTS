@@ -198,8 +198,10 @@ export function welch_psd_f64(
   for (let k: i32 = 0; k < psdLen; k++) {
     psd[k] /= norm;
   }
-  // Double one-sided bins (except DC and Nyquist)
-  for (let k: i32 = 1; k < psdLen - 1; k++) {
+  // Double the one-sided bins. DC is never doubled. The last bin is the Nyquist bin, and so is
+  // left single, only for an even frame; for an odd frame it lies below Nyquist and is doubled.
+  const doubleEnd: i32 = frameLength % 2 == 0 ? psdLen - 1 : psdLen;
+  for (let k: i32 = 1; k < doubleEnd; k++) {
     psd[k] *= 2.0;
   }
 
