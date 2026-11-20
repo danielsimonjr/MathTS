@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2551,
+  "totalFiles": 2553,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1135,
+    "test": 1137,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1135,
+    "tests": 1137,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
-    "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1179,
+    "@danielsimonjr/mathts-expression": 575,
+    "@danielsimonjr/mathts-functions": 1180,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -4839,7 +4839,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 954
+      "loc": 964
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
@@ -5561,6 +5561,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 257
+    },
+    {
+      "file": "expression/tests/operator-tex-command-space-1014.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
     },
     {
       "file": "expression/tests/OperatorNode-compile.test.ts",
@@ -6638,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 154
+      "loc": 189
     },
     {
       "file": "functions/src/cas/render-coeff-times.ts",
@@ -9193,7 +9200,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1980
+      "loc": 2024
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -10257,7 +10264,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 178
+      "loc": 180
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
@@ -12987,7 +12994,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 73
+      "loc": 105
     },
     {
       "file": "functions/tests/reductions-exact-public-types-1049.test.ts",
@@ -13226,6 +13233,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "functions/tests/small-cas-defects-1014.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
     },
     {
       "file": "functions/tests/solve-ode-tspan-all-methods.test.ts",

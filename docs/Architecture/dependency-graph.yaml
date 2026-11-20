@@ -24716,6 +24716,9 @@ modules:
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
+        - file: ../factories/scope.js
+          imports:
+            - factoryScope
         - file: ./call-rewrite.js
           imports:
             - rewriteCalls
@@ -36766,7 +36769,7 @@ modules:
       constants:
         - createObjectNode
     expression/src/node/OperatorNode.ts:
-      description: Returns true if the expression starts with a constant, under
+      description: Join the LaTeX of an operator and of its operand. A command (`\neg`, `\cdot`, `\wedge`)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -47048,7 +47051,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238473
+  totalLinesOfCode: 238562
   totalExports: 7400
   totalClasses: 63
   totalInterfaces: 669

@@ -41,6 +41,7 @@ import {
   polynomialSizeMessage,
 } from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
+import { factoryScope } from '../factories/scope.js';
 import {
   rewriteCalls,
   topLevelFactors,
@@ -393,11 +394,10 @@ function gcdSmall(x: number, y: number): number {
 }
 
 /**
- * Scale a coefficient array by the lcm of its coefficients' denominators so that every entry is a
- * safe integer. Returns `null` unless every coefficient is a rational with a small denominator
- * and the common denominator stays within {@link MAX_RATIONAL_DENOMINATOR}.
+ * The lcm of the denominators of the coefficients, or `null` when a coefficient is not a rational
+ * with a small denominator or the lcm passes {@link MAX_RATIONAL_DENOMINATOR}.
  */
-function scaleToSafeIntegers(coeffs: number[]): number[] | null {
+function commonDenominator(coeffs: number[]): number | null {
   let L = 1;
   for (const c of coeffs) {
     const q = rationalDenominator(c);
@@ -405,6 +405,17 @@ function scaleToSafeIntegers(coeffs: number[]): number[] | null {
     L = (L / gcdSmall(L, q)) * q;
     if (L > MAX_RATIONAL_DENOMINATOR) return null;
   }
+  return L;
+}
+
+/**
+ * Scale a coefficient array by the lcm of its coefficients' denominators so that every entry is a
+ * safe integer. Returns `null` unless every coefficient is a rational with a small denominator
+ * and the common denominator stays within {@link MAX_RATIONAL_DENOMINATOR}.
+ */
+function scaleToSafeIntegers(coeffs: number[]): number[] | null {
+  const L = commonDenominator(coeffs);
+  if (L === null) return null;
   // The convergent test above is relative, so a large non-integer (|c| ≳ 1e12) can pass as
   // "integer"; require the scaled values to sit on integers in absolute terms too, otherwise
   // rounding would silently change a coefficient.
@@ -1188,6 +1199,18 @@ export function factor(expr: string): string {
     try {
       const v = univariateVars[0];
       const dense = polyToDense(polyFromExpression(expr, [v]));
+      if (degree(dense) >= 1 && !dense.every(isNearInt)) {
+        // Rational coefficients (`x^2/2 - 1/2`): factor the integer polynomial that the common
+        // denominator L gives (`x^2 - 1`) and divide the factored text by L. The polynomial is
+        // irreducible over the rationals exactly when the integer polynomial is.
+        const L = commonDenominator(dense);
+        const scaled = scaleToSafeIntegers(dense);
+        if (L !== null && L > 1 && scaled !== null) {
+          const scaledText = cleanUnivariatePoly(scaled, v);
+          const factored = factor(scaledText);
+          return factored === scaledText ? expr : `${factored}/${L}`;
+        }
+      }
       if (degree(dense) >= 2 && dense.every(isNearInt)) {
         const intDense = dense.map((c) => Math.round(c));
         const { roots, remainder } = findRationalLinearFactors(intDense);
@@ -1234,6 +1257,9 @@ export function factor(expr: string): string {
 
   for (const term of terms) {
     const numMatch = term.match(/^(-?\d+)\s*\*?\s*(.*)$/);
+    // A rest that starts with "/", "^", "." or a digit means the match cut a number literal
+    // (`2^3*x`, `2.5*y`, `2/3`): the leading integer is not the coefficient of the term.
+    if (numMatch && /^[/^.\d]/.test(numMatch[2])) return expr;
     if (numMatch) {
       coeffs.push(parseInt(numMatch[1], 10));
       varParts.push(numMatch[2] || '1');
@@ -1249,15 +1275,19 @@ export function factor(expr: string): string {
 
   if (g <= 1) return expr;
 
-  const inner = coeffs
-    .map((c, i) => {
-      const reduced = c / g;
-      if (varParts[i] === '1') return String(reduced);
-      if (reduced === 1) return varParts[i];
-      if (reduced === -1) return '-' + varParts[i];
-      return reduced + '*' + varParts[i];
-    })
-    .join(' + ');
+  const parts = coeffs.map((c, i) => {
+    const reduced = c / g;
+    if (varParts[i] === '1') return String(reduced);
+    if (reduced === 1) return varParts[i];
+    if (reduced === -1) return '-' + varParts[i];
+    return reduced + '*' + varParts[i];
+  });
+  // A negative term after the first reads " - t", not " + -t".
+  const inner = parts.reduce(
+    (text, part, i) =>
+      i === 0 ? part : part.startsWith('-') ? `${text} - ${part.slice(1)}` : `${text} + ${part}`,
+    ''
+  );
 
   return g + '*(' + inner + ')';
 }
@@ -1865,7 +1895,20 @@ export function eliminate(system: string[], variable: string): string[] {
  * @returns Derivative expression string
  */
 export function symbolicPartialDerivative(expr: string, variable: string): string {
-  return derivativeOfAdditiveTerms(expr, variable);
+  const termwise = derivativeOfAdditiveTerms(expr, variable);
+  // The term reader cannot read a term such as `x^2*y` (a power of the variable and another
+  // symbol): it leaves a `d/dx(...)` placeholder in the text. The expression derivative reads
+  // the whole tree, so use it for that input. It is read at call time from the factory scope,
+  // which `factories/index.ts` fills: a static import of that module closes an import cycle.
+  if (!termwise.includes(`d/d${variable}(`)) return termwise;
+  const treeDerivative = factoryScope.derivative as
+    ((expression: string, variable: string) => { toString(): string }) | undefined;
+  if (treeDerivative === undefined) return termwise;
+  try {
+    return treeDerivative(expr, variable).toString();
+  } catch {
+    return termwise;
+  }
 }
 
 /**

@@ -11720,6 +11720,7 @@ graph LR
 | `../cas/render-polynomial.js`     | `renderPolynomial`                                                                                  | Import |
 | `../cas/polynomial-limits.js`     | `PolynomialDegreeError, PolynomialSizeError, polynomialDegreeMessage, polynomialSizeMessage`        | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
+| `../factories/scope.js`           | `factoryScope`                                                                                      | Import |
 | `./call-rewrite.js`               | `rewriteCalls, topLevelFactors, isParenthesised, hasTopLevelComma`                                  | Import |
 | `../cas/polynomial-canonical.js`  | `collapseIdenticalFactors, tryPolynomialCanonicalForm`                                              | Import |
 
@@ -18007,7 +18008,7 @@ graph LR
 
 ---
 
-### `expression/src/node/OperatorNode.ts` - Returns true if the expression starts with a constant, under
+### `expression/src/node/OperatorNode.ts` - Join the LaTeX of an operator and of its operand. A command (`\neg`, `\cdot`, `\wedge`)
 
 **Internal Dependencies:**
 
@@ -20861,10 +20862,10 @@ graph LR
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/typed/algebra`                          | 12 files     | 7 files    |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
-| `tensor/src/named-index`                               | 0 files      | 18 files   |
 
 ---
 
@@ -21768,7 +21769,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238473 |
+| Total Lines of Code     | 238562 |
 | Total Exports           | 7400   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |

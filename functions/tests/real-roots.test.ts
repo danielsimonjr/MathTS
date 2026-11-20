@@ -70,3 +70,35 @@ describe('real roots: coefficient order and robustness', () => {
     expect(Math.abs(r[0] + 1e6) / 1e6).toBeLessThan(1e-9);
   });
 });
+
+describe('real roots: accuracy of a simple root (#1014 item 4)', () => {
+  it('[1,-3,2] = 2x^2 - 3x + 1 has the roots 0.5 and 1 to the last bit', () => {
+    // The bisection stops at a relative bracket width of 1e-10, so it returned
+    // [0.49999999999272404, 1.0000000000218279]; Newton steps inside the bracket polish them.
+    expect(realRoots([1, -3, 2])).toEqual([0.5, 1]);
+  });
+  it('[-6,11,-6,1] has the roots 1, 2 and 3 to the last bit', () => {
+    expect(realRoots([-6, 11, -6, 1])).toEqual([1, 2, 3]);
+  });
+  it('[-2,0,1] has the roots +-sqrt(2) to the last bit', () => {
+    const r = realRoots([-2, 0, 1]);
+    expect(r.length).toBe(2);
+    expect(Math.abs(r[0] + Math.SQRT2)).toBeLessThanOrEqual(2 * Number.EPSILON * Math.SQRT2);
+    expect(Math.abs(r[1] - Math.SQRT2)).toBeLessThanOrEqual(2 * Number.EPSILON * Math.SQRT2);
+  });
+  it('a double root is one root, and ascending order and distinct roots hold', () => {
+    const r = realRoots([1, -2, 1]);
+    expect(r.length).toBe(1);
+    // A double root is flat: its accuracy stays about sqrt(eps), as the bisection gave.
+    expect(Math.abs(r[0] - 1)).toBeLessThan(1e-7);
+    const many = realRoots([-6, 11, -6, 1]);
+    expect([...many].sort((a, b) => a - b)).toEqual(many);
+    expect(new Set(many).size).toBe(many.length);
+  });
+  it('a looser tol still gives the polished roots', () => {
+    const r = realRoots([1, -3, 2], 1e-3);
+    expect(r.length).toBe(2);
+    expect(Math.abs(r[0] - 0.5)).toBeLessThanOrEqual(2 * Number.EPSILON);
+    expect(Math.abs(r[1] - 1)).toBeLessThanOrEqual(2 * Number.EPSILON);
+  });
+});

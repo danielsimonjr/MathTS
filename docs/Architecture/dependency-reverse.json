@@ -1918,6 +1918,7 @@
       "functions/src/config-api.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/factories/index.ts",
+      "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/matrix-ops.ts"
