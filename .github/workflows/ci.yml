@@ -111,10 +111,11 @@ jobs:
       - name: Neutral browser bundles
         run: node tools/test/browser-bundle-neutral.mjs
 
+      # The README block of function counts states the count of the released version. The version
+      # PR updates it (`version-packages` runs the sync), so a pull request does not edit it and no
+      # two pull requests conflict on it.
       - name: README function stats
-        run: |
-          node --test tools/test/sync-readme-functions-stats.test.mjs
-          node tools/sync-readme-functions-stats.mjs --check
+        run: node --test tools/test/sync-readme-functions-stats.test.mjs
 
       # The generators, and the Site workflow: its deploy steps run in bash against a local
       # bare gh-pages repository and stub npm and curl programs.
