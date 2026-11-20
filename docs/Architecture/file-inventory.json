@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2551,
+  "totalFiles": 2552,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1135,
+    "test": 1136,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1135,
+    "tests": 1136,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1177,
+    "@danielsimonjr/mathts-functions": 1178,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -7954,7 +7954,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 174
+      "loc": 251
     },
     {
       "file": "functions/src/probability/kldivergence.ts",
@@ -10111,6 +10111,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 61
+    },
+    {
+      "file": "functions/tests/bignumber-factorial-1115.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 97
     },
     {
       "file": "functions/tests/bignumber-factory-1043.test.ts",

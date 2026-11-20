@@ -21396,7 +21396,7 @@
         "constants": ["createFactorial"]
       },
       "functions/src/probability/gamma.ts": {
-        "description": "Compute the gamma function of a value using Lanczos approximation for",
+        "description": "The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -49884,7 +49884,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238512,
+    "totalLinesOfCode": 238589,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,

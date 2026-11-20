@@ -28,12 +28,41 @@ interface BigNumberType {
   isFinite(): boolean;
   sub(n: number | BigNumberType): BigNumberType;
   mul(n: number | BigNumberType): BigNumberType;
+  add(n: number | BigNumberType): BigNumberType;
+  div(n: number | BigNumberType): BigNumberType;
+  ln(): BigNumberType;
+  exp(): BigNumberType;
+  /** The decimal exponent of the leading digit. */
+  readonly e: number;
   toNumber(): number;
   toSignificantDigits(digits: number): BigNumberType;
 }
 
 interface BigNumberConstructor extends PrecisionClass {
   fromNumber(n: number): BigNumberType;
+  fromBigInt(n: bigint): BigNumberType;
+  piAt(): BigNumberType;
+}
+
+/** The extra digits that the Stirling series keeps below the last digit of the result. */
+const STIRLING_GUARD_DIGITS = 10;
+/** n! of a BigNumber above this has the Stirling series. Below it the exact product is cheaper. */
+const STIRLING_MIN = 10000;
+/** The Stirling series also needs n above this number times the precision (its terms must shrink). */
+const STIRLING_PER_DIGIT = 100;
+
+/**
+ * The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of
+ * Brent and Harvey. The Bernoulli numbers follow: B(2k) = (-1)^(k-1) * 2k * T(k) / (4^k (4^k - 1)).
+ */
+function tangentNumbers(count: number): bigint[] {
+  const t: bigint[] = new Array<bigint>(count + 1).fill(0n);
+  t[1] = 1n;
+  for (let k = 2; k <= count; k++) t[k] = BigInt(k - 1) * t[k - 1];
+  for (let k = 2; k <= count; k++) {
+    for (let j = k; j <= count; j++) t[j] = BigInt(j - k) * t[j - 1] + BigInt(j - k + 2) * t[j];
+  }
+  return t;
 }
 
 interface GammaDependencies {
@@ -145,6 +174,47 @@ export const createGamma = /* #__PURE__ */ factory(
     });
 
     /**
+     * n! from the Stirling series: ln(n!) = n ln(n) - n + ln(2 pi n) / 2 + sum(B(2k) / (2k (2k - 1)
+     * n^(2k - 1))), then exp. The sum stops when a term is below the precision. It returns
+     * `undefined` when the terms do not shrink that far, and the caller then multiplies. The work
+     * precision keeps the integer digits of ln(n!) too, so the absolute error of ln(n!) is below
+     * the last digit of the result.
+     * @param {BigNumber} n   an integer above 8
+     * @param {number} nNum   n as a number
+     * @returns {BigNumber | undefined} the factorial of n to the precision, or undefined
+     */
+    function stirlingFactorial(n: BigNumberType, nNum: number): BigNumberType | undefined {
+      const precision = BigNumber.precision;
+      const integerDigits = Math.floor(Math.log10(nNum)) + 1;
+      // ln(n!) is below 46 n, so it has at most integerDigits + 2 integer digits.
+      const workPrecision = precision + STIRLING_GUARD_DIGITS + integerDigits + 2;
+      const termLimit = Math.ceil(workPrecision / 2) + 5;
+      const tangent = tangentNumbers(termLimit);
+      let converged = false;
+      const result = atWorkPrecision(BigNumber, workPrecision, () => {
+        let lnFactorial = n.mul(n.ln()).sub(n).add(BigNumber.piAt().mul(2).mul(n).ln().div(2));
+        const inverse = BigNumber.fromNumber(1).div(n);
+        const inverseSquare = inverse.mul(inverse);
+        let power = inverse; // n^-(2k - 1)
+        for (let k = 1; k <= termLimit; k++) {
+          const scale = 4n ** BigInt(k);
+          const divisor = scale * (scale - 1n) * BigInt(2 * k - 1);
+          const term = BigNumber.fromBigInt(tangent[k])
+            .div(BigNumber.fromBigInt(divisor))
+            .mul(power);
+          lnFactorial = k % 2 === 1 ? lnFactorial.add(term) : lnFactorial.sub(term);
+          if (term.e < -(precision + STIRLING_GUARD_DIGITS)) {
+            converged = true;
+            break;
+          }
+          power = power.mul(inverseSquare);
+        }
+        return lnFactorial.exp();
+      });
+      return converged ? result : undefined;
+    }
+
+    /**
      * Calculate factorial for a BigNumber.
      * BigNumber multiply rounds to the precision (#1118), so the product runs with guard digits
      * and the result rounds one time. Each partial product is not larger than the result. Thus a
@@ -157,6 +227,13 @@ export const createGamma = /* #__PURE__ */ factory(
       const nNum = n.toNumber();
       if (nNum < 8) {
         return BigNumber.fromNumber([1, 1, 2, 6, 24, 120, 720, 5040][nNum]);
+      }
+
+      // Above the Stirling limit the product of nNum terms is too slow (n = 1e9 never returned,
+      // #1115), and the exact product has far more digits than the precision anyway.
+      if (nNum > Math.max(STIRLING_MIN, STIRLING_PER_DIGIT * BigNumber.precision)) {
+        const approximate = stirlingFactorial(n, nNum);
+        if (approximate) return approximate;
       }
 
       // The guard digits hold the factor of one step and the rounding error of the nNum steps.

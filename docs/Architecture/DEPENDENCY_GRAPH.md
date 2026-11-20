@@ -8833,7 +8833,7 @@ graph LR
 
 ---
 
-### `functions/src/probability/gamma.ts` - Compute the gamma function of a value using Lanczos approximation for
+### `functions/src/probability/gamma.ts` - The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of
 
 **Internal Dependencies:**
 
@@ -21768,7 +21768,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238512 |
+| Total Lines of Code     | 238589 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
