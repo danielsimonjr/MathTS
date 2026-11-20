@@ -65,6 +65,8 @@ import {
   ceil as _ceil,
   matrix as _factoryMatrix,
   sparse as _factorySparse,
+  zeros as _factoryZeros,
+  ones as _factoryOnes,
   transpose as _transpose,
   bignumber as _bignumber,
   complex as _complex,
@@ -205,23 +207,29 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * @example
  * matrix([[1,2],[3,4]])
  * matrix([[1,2],[3,4]], 'sparse')
+ * matrix(sparseMatrix, 'dense')
  */
 export function matrix(
   data?: number[][] | DenseMatrix | SparseMatrix,
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
-  if (data === undefined && format === undefined) {
+  if (arguments.length === 0) {
     return _factoryMatrix() as CompatMatrixValue;
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
+    // A native matrix of the format that is asked for, or of no format, is returned as it is.
+    if (format === undefined) return data;
+    // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
+    _factoryMatrix([], format);
     if (format === 'sparse' && isDenseMatrix(data)) {
       return _factorySparse(data.toArray()) as CompatMatrixValue;
     }
+    if (format !== 'sparse' && isSparseMatrix(data)) {
+      return DenseMatrix.fromArray(data.toArray());
+    }
     return data;
   }
-  if (data === undefined) {
-    return _factoryMatrix(undefined, format) as CompatMatrixValue;
-  }
+  // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
   return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
 }
 
@@ -627,30 +635,40 @@ export function identity(n: number): DenseMatrix {
 /**
  * Zeros (mathjs-compatible).
  *
- * Single-arg `zeros(n)` is a length-`n` **vector** matching mathjs
- * (`math.zeros(3).toArray()` === `[0,0,0]`, size `[3]`); two-arg `zeros(r,c)` is
- * an `r×c` DenseMatrix. (matrix's DenseMatrix is strictly 2-D, so the vector case
- * returns a `number[]`.)
+ * Two forms keep the compat contract: `zeros(n)` is a length-`n` `number[]` (the size is
+ * `[n]`, as `math.zeros(3).toArray()` is `[0,0,0]` in mathjs) and `zeros(r, c)` is a native
+ * `r×c` DenseMatrix. Every other form goes to the functions `zeros`, which returns the mathjs
+ * shape: an Array size (`zeros([2, 3, 2])`, an Array), three or more sizes
+ * (`zeros(2, 3, 2)`, a matrix of size `[2, 3, 2]`) and a trailing format (`zeros(2, 2, 'sparse')`).
  */
-export function zeros(rows: number, cols?: number): DenseMatrix | number[] {
-  if (cols === undefined) {
-    return new Array<number>(rows).fill(0);
-  }
-  return DenseMatrix.zeros(rows, cols);
+export function zeros(rows: number, cols?: number): DenseMatrix | number[];
+export function zeros(...args: unknown[]): CompatMatrixValue | unknown[];
+export function zeros(...args: unknown[]): unknown {
+  return filled(args, 0, _factoryZeros as (...a: unknown[]) => unknown);
 }
 
 /**
  * Ones (mathjs-compatible).
  *
- * Single-arg `ones(n)` is a length-`n` **vector** matching mathjs
- * (`math.ones(3).toArray()` === `[1,1,1]`); two-arg `ones(r,c)` is an `r×c`
- * DenseMatrix.
+ * The forms are those of {@link zeros}: `ones(n)` is a `number[]`, `ones(r, c)` a native
+ * `r×c` DenseMatrix, and every other form goes to the functions `ones`.
  */
-export function ones(rows: number, cols?: number): DenseMatrix | number[] {
-  if (cols === undefined) {
-    return new Array<number>(rows).fill(1);
+export function ones(rows: number, cols?: number): DenseMatrix | number[];
+export function ones(...args: unknown[]): CompatMatrixValue | unknown[];
+export function ones(...args: unknown[]): unknown {
+  return filled(args, 1, _factoryOnes as (...a: unknown[]) => unknown);
+}
+
+/** The shared body of `zeros` and `ones`: the two compat forms, else the functions factory. */
+function filled(args: unknown[], value: 0 | 1, factory: (...a: unknown[]) => unknown): unknown {
+  const [rows, cols] = args;
+  if (typeof rows === 'number' && args.length <= 2) {
+    if (cols === undefined) return new Array<number>(rows).fill(value);
+    if (typeof cols === 'number') {
+      return value === 0 ? DenseMatrix.zeros(rows, cols) : DenseMatrix.ones(rows, cols);
+    }
   }
-  return DenseMatrix.ones(rows, cols);
+  return factory(...args);
 }
 
 /**

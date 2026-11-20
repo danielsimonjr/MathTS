@@ -7939,6 +7939,9 @@ modules:
         - file: ../../utils/string.js
           imports:
             - format
+        - file: ../../utils/array.js
+          imports:
+            - arraySize
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -16811,6 +16814,16 @@ modules:
         - file: ../utils/array.js
           imports:
             - arraySize
+            - validate
+            - validateIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - unsqueeze
+            - broadcastTo
+        - file: ../error/DimensionError.js
+          imports:
+            - DimensionError
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
@@ -18832,6 +18845,8 @@ modules:
             - clone
         - file: ../utils/array.js
           imports:
+            - arraySize
+            - broadcastSizes
             - isEmptyIndex
             - validateIndexSourceSize
         - file: ../utils/customs.js
@@ -25092,6 +25107,9 @@ modules:
           imports:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
@@ -27368,6 +27386,9 @@ modules:
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -27768,6 +27789,9 @@ modules:
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
         - file: ../probability/multinomial-exact.js
           imports:
             - multinomialExact
@@ -44521,6 +44545,8 @@ modules:
             - ceil
             - matrix
             - sparse
+            - zeros
+            - ones
             - transpose
             - bignumber
             - complex
@@ -44614,6 +44640,10 @@ modules:
         - det
         - identity
         - zeros
+        - zeros
+        - zeros
+        - ones
+        - ones
         - ones
         - size
         - isComplex_
@@ -47363,11 +47393,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1356
   totalModules: 82
-  totalLinesOfCode: 243119
+  totalLinesOfCode: 243486
   totalExports: 7438
   totalClasses: 64
   totalInterfaces: 676
-  totalFunctions: 2614
+  totalFunctions: 2618
   totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1698

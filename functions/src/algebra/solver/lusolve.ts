@@ -9,6 +9,7 @@ import type { PackedMatrixDescriptor } from '@danielsimonjr/mathts-matrix';
 import { isArray, isDenseMatrix, isMatrix, isSparseMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
 import { format } from '../../utils/string.js';
+import { arraySize } from '../../utils/array.js';
 import {
   createSolveValidation,
   denseRightHandSide,
@@ -204,7 +205,8 @@ export const createLusolve = /* #__PURE__ */ factory(
         if (!Array.isArray(row)) continue;
         for (let c = 0; c < row.length; c++) {
           if (!Array.isArray(row[c])) continue;
-          const size = (matrix(rows) as unknown as { size(): number[] }).size();
+          // The size of the first entry of each level: a jagged input is not validated here.
+          const size = arraySize(rows);
           if (size.length !== 2) {
             throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
           }

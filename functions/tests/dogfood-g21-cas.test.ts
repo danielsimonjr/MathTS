@@ -33,12 +33,10 @@ describe('G21 dogfood CAS (#716 #717 #718 #719 #690 #721 #832)', () => {
     expect(String(simplify('2*sin(x)^2 + 2'))).toBe('2 * (sin(x) ^ 2 + 1)');
     expect(String(fullSimplify('2*sin(x)^2 + 2'))).toBe('2*sin(x)^2 + 2');
     expect(String(casSimplify('2*sin(x)^2 + 2'))).toBe('2 + 2*sin(x)^2');
-    // Above the canonical-form coefficient cap. factor()'s divisor walk is O(|c|);
-    // running it here would not return within the timeout.
-    const huge = 'x^2 + 2000000000';
-    const started = Date.now();
-    const out = String(simplify(huge));
-    expect(Date.now() - started).toBeLessThan(500);
+    // Above the canonical-form coefficient cap. factor()'s divisor walk is O(|c|), so a
+    // missing cap makes this test time out. The time bound is the wall-clock gate
+    // "simplify-coefficient-cap" (tools/test/wall-clock-gates.json).
+    const out = String(simplify('x^2 + 2000000000'));
     expect(out).toMatch(/x/);
     expect(out).not.toMatch(/\^2\s*\*/);
   });

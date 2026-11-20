@@ -21,10 +21,10 @@ type Signatures = Record<string, SignatureFunction>;
 // =============================================================================
 
 /**
- * Create a matrix from various input types
+ * Create a matrix from various input types. A 1-D array gives a 1 x n row matrix.
  */
 export const matrix: TypedFunction = mathTyped('matrix', {
-  Array: (arr: number[][]) => DenseMatrix.fromArray(arr),
+  Array: (arr: number[][] | number[]) => DenseMatrix.fromArray(arr),
 
   'number, number': (rows: number, cols: number) => DenseMatrix.zeros(rows, cols),
 
