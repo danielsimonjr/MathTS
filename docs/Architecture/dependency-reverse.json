@@ -788,6 +788,16 @@
       "functions/src/utils/parseNumber.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/isExactZero.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lsolveAll.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/usolveAll.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/type/matrix/Spa.ts"
+    ],
     "functions/src/utils/typed-impl.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
@@ -1009,10 +1019,6 @@
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
     ],
-    "functions/src/utils/isExactZero.ts": [
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/matrix/inv.ts"
-    ],
     "functions/src/utils/is.ts": [
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/algebra/derivative.ts",
@@ -1048,6 +1054,7 @@
       "functions/src/matrix/ifft.ts",
       "functions/src/matrix/inv.ts",
       "functions/src/matrix/mapSlices.ts",
+      "functions/src/matrix/native-accel.ts",
       "functions/src/matrix/partitionSelect.ts",
       "functions/src/matrix/pinv.ts",
       "functions/src/matrix/resize.ts",
@@ -1063,6 +1070,7 @@
       "functions/src/relational/compareNatural.ts",
       "functions/src/scalar-node-bridge.ts",
       "functions/src/signal/fft-helpers.ts",
+      "functions/src/statistics/numeric-data.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/statistics/std.ts",
       "functions/src/statistics/utils/improveErrorMessage.ts",
@@ -1080,6 +1088,7 @@
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/arithmetic/norm.ts",
       "functions/src/matrix/eigs.ts",
+      "functions/src/matrix/eigs/complexEigs.ts",
       "functions/src/statistics/corr.ts",
       "functions/src/statistics/std.ts",
       "functions/src/typed/arithmetic.ts"
@@ -1160,7 +1169,8 @@
       "functions/src/algebra/simplifyConstant.ts",
       "functions/src/algebra/simplifyCore.ts",
       "functions/src/algebra/substitute.ts",
-      "functions/src/algebra/symbolicEqual.ts"
+      "functions/src/algebra/symbolicEqual.ts",
+      "functions/src/cas/exact-identity.ts"
     ],
     "functions/src/core/config.ts": [
       "functions/src/algebra/derivative.ts",
@@ -1230,6 +1240,16 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/typed/polynomial-ideal.ts": [
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
+    ],
     "functions/src/utils/map.ts": [
       "functions/src/algebra/resolve.ts",
       "functions/src/algebra/simplify.ts",
@@ -1276,7 +1296,8 @@
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/validate-u-pivots.ts"
+      "functions/src/algebra/solver/validate-u-pivots.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/algebra/solver/validate-u-pivots.ts": [
       "functions/src/algebra/solver/lusolve.ts"
@@ -1377,6 +1398,7 @@
       "functions/src/factories/index.ts"
     ],
     "functions/src/algebra/sparse/csCumsum.ts": ["functions/src/algebra/sparse/csSymperm.ts"],
+    "functions/src/cas/exact-identity.ts": ["functions/src/algebra/symbolicEqual.ts"],
     "functions/src/utils/collection.ts": [
       "functions/src/arithmetic/abs.ts",
       "functions/src/arithmetic/ceil.ts",
@@ -1677,6 +1699,26 @@
       "functions/src/arithmetic/dotMultiply.ts",
       "functions/src/trigonometry/atan2.ts"
     ],
+    "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/arithmetic/fraction-gcd.ts",
+      "functions/src/cas/exact-identity.ts",
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rat.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/factorization/finite-field.ts",
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
+      "functions/src/typed/factorization/square-free.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/arithmetic/fraction-gcd.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/lcm.ts"
+    ],
     "functions/src/arithmetic/mod.ts": [
       "functions/src/arithmetic/gcd.ts",
       "functions/src/factories/index.ts"
@@ -1769,6 +1811,7 @@
       "functions/src/combinatorics/stirlingS2.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/matrix-bridge.ts",
+      "functions/src/hypothesis-extra.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/linalg-special-matrices.ts",
       "functions/src/matrix/diag.ts",
@@ -1882,15 +1925,6 @@
       "functions/src/typed/factorization/multi-poly.ts",
       "functions/src/typed/polynomial-ideal.ts"
     ],
-    "functions/src/typed/polynomial-ideal.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/cas/polynomial-canonical.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/multi-poly.ts"
-    ],
     "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
     "functions/src/factories/index.ts": [
       "functions/src/cas/closed-form-roots.ts",
@@ -1918,6 +1952,7 @@
       "functions/src/config-api.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/factories/index.ts",
+      "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/matrix-ops.ts"
@@ -2002,7 +2037,8 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/integration.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/numeric-data.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2342,25 +2378,24 @@
       "functions/src/cas/taylor-jet.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/typed/factorization/multi-poly.ts": [
+      "functions/src/cas/exact-identity.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts"
+    ],
+    "functions/src/cas/polynomial-limits.ts": [
+      "functions/src/cas/exact-identity.ts",
+      "functions/src/cas/syntax-tree.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/polynomial-ideal.ts"
+    ],
     "functions/src/cas/rat.ts": [
       "functions/src/cas/exact-roots.ts",
       "functions/src/cas/layer3.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/cas/render-coeff-times.ts"
-    ],
-    "functions/src/typed/factorization/integer-poly.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rat.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/factorization/finite-field.ts",
-      "functions/src/typed/factorization/hensel.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts",
-      "functions/src/typed/factorization/multi-poly.ts",
-      "functions/src/typed/factorization/square-free.ts",
-      "functions/src/typed/factorization/zassenhaus.ts"
     ],
     "functions/src/typed/factorization/zassenhaus.ts": [
       "functions/src/cas/layer3.ts",
@@ -2373,11 +2408,6 @@
       "functions/src/cas/rational-integrate.ts"
     ],
     "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
-    "functions/src/cas/polynomial-limits.ts": [
-      "functions/src/cas/syntax-tree.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/polynomial-ideal.ts"
-    ],
     "functions/src/error/ArgumentsError.ts": [
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts"
@@ -2404,6 +2434,10 @@
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
     "functions/src/typed/expression-eval-barrel.ts": ["functions/src/factories/evaluate.ts"],
+    "functions/src/utils/json-replacer.ts": [
+      "functions/src/factories/evaluate.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/typed/divide-inverse.ts": [
       "functions/src/factories/index.ts",
       "functions/src/typed/arithmetic.ts"
@@ -2623,7 +2657,10 @@
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
-    "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
+    "functions/src/matrix/eigs.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/matrix/native-accel.ts"
+    ],
     "functions/src/algebra/solver/lusolve.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/corr.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/mad.ts": ["functions/src/factories/index.ts"],
@@ -2806,6 +2843,12 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/utils/samples.ts": [
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/interpolation.ts",
+      "functions/src/typed/signal.ts"
+    ],
     "functions/src/signal/wavelet-filters.ts": [
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/signal.ts"
@@ -2834,6 +2877,7 @@
     ],
     "functions/src/utils/median-numbers.ts": [
       "functions/src/statistics/median.ts",
+      "functions/src/statistics/quantile-numpy-methods.ts",
       "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/quantile-numpy-methods.ts": [
@@ -2843,6 +2887,11 @@
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/typed/dist-objects.ts"
+    ],
+    "functions/src/typed/hypothesis.ts": [
+      "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
@@ -2885,11 +2934,6 @@
       "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
-    ],
-    "functions/src/utils/samples.ts": [
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/interpolation.ts",
-      "functions/src/typed/signal.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/call-rewrite.ts": ["functions/src/typed/algebra.ts"],
@@ -2964,10 +3008,6 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
-    "functions/src/typed/hypothesis.ts": [
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
-    ],
     "functions/src/typed/relational.ts": [
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
@@ -2984,11 +3024,6 @@
     "functions/src/typed/factorization/finite-field.ts": [
       "functions/src/typed/factorization/hensel.ts",
       "functions/src/typed/factorization/zassenhaus.ts"
-    ],
-    "functions/src/typed/factorization/multi-poly.ts": [
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts"
     ],
     "functions/src/typed/factorization/kronecker-factor.ts": [
       "functions/src/typed/factorization/index.ts"

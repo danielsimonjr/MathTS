@@ -1,4 +1,5 @@
 import { isConstantNode } from '../utils/is.js';
+import { isExactPolynomialIdentity } from '../cas/exact-identity.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode } from '../utils/node.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -34,8 +35,12 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
     /**
      * Attempts to determine if two expressions are symbolically equal, i.e.
      * one is the result of valid algebraic manipulations on the other.
-     * Currently, this simply checks if the difference of the two expressions
-     * simplifies down to 0. So there are two important caveats:
+     * Two expressions are equal when they are the same polynomial over their
+     * variables and function calls, with exact rational coefficients (so
+     * `(x+1)^2` equals `x^2+2*x+1`, and `sqrt(2)/3+1/3` equals `(sqrt(2)+1)/3`),
+     * or when the difference of the two expressions simplifies down to 0.
+     * The exact test runs only when no options are given. So there are two
+     * important caveats:
      * 1. whether two expressions are symbolically equal depends on the
      *     manipulations allowed. Therefore, this function takes an optional
      *     third argument, which are the options that control the behavior
@@ -70,6 +75,9 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
      *     is found.
      */
     function _symbolicEqual(e1: MathNode, e2: MathNode, options: SimplifyOptions = {}): boolean {
+      // With options, the caller picks the rules (a context can make a product non-commutative),
+      // and an exact comparison with the default ring rules would override them.
+      if (Object.keys(options).length === 0 && isExactPolynomialIdentity(e1, e2)) return true;
       const diff = new OperatorNode('-', 'subtract', [e1, e2]);
       // An empty scope with the DEFAULT rules (`simplify`'s `Node, Map, Object` form). An empty
       // rule ARRAY, which this once passed, applies no rule at all, so every pair compared false.

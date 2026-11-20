@@ -9,6 +9,8 @@ export {
   eig,
   eigvals,
   powerIteration,
+  balanceForEig,
+  type EigBalance,
   type EigResult,
   type EigOptions,
   type RepeatedEigenvalue,

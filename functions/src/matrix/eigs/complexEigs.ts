@@ -1,4 +1,5 @@
 import { clone } from '../../utils/object.js';
+import { realScale } from '../../utils/real-scale.js';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
 
@@ -47,7 +48,6 @@ interface Dependencies {
   inv: (x: Scalar[][]) => Scalar[][];
   qr: (x: Scalar[][]) => QRResult;
   usolve: (A: Scalar[][], b: Scalar[]) => Scalar[];
-  usolveAll: (A: Scalar[][], b: Scalar[]) => Scalar[][];
   complex: (re: number | Scalar, im?: number) => Complex;
   matrixFromColumns: (...cols: Scalar[][]) => Scalar[][];
   dot: (a: Scalar[], b: Scalar[]) => Scalar;
@@ -55,6 +55,19 @@ interface Dependencies {
 
 /** Supported data types for eigenvalue computation */
 type DataType = 'number' | 'BigNumber' | 'Complex';
+
+/**
+ * A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
+ * relative to the row (`nullSpaceUpper`). The two limits meet here. A coupling of 1e-13 is a
+ * coupling (a test of #1202), so the limit lies below 1e-13. The rounding of a dense matrix with a
+ * repeated eigenvalue reaches 4e-14 of the row for BigNumber entries and 2e-13 for Complex entries
+ * (seeded matrices of order 3 to 5 at the scales 1, 2^40 and 2^-60). The limit is one twentieth
+ * of the default precision 1e-12, 5e-14, and it is a trade. Of 20 seeded dense BigNumber matrices
+ * `P D P^-1` per scale with a double eigenvalue, 20, 20 and 19 keep every eigenvector at the
+ * scales 1, 2^40 and 2^-60. A count can change between runs (inverse iteration starts from a
+ * random vector). A lost eigenvector is a missing one, never a false one.
+ */
+const COUPLING_FRACTION_OF_PREC = 0.05;
 
 /**
  * Create the `complexEigs` function, which computes the eigenvalues and the optional
@@ -76,7 +89,6 @@ export function createComplexEigs({
   inv,
   qr,
   usolve,
-  usolveAll,
   complex,
   matrixFromColumns: _matrixFromColumns,
   dot,
@@ -403,6 +415,73 @@ export function createComplexEigs({
   }
 
   /**
+   * The Wilkinson shift: the eigenvalue of the trailing 2x2 block of the active window that is
+   * nearer to its corner entry.
+   */
+  function wilkinsonShift(arr: Scalar[][], n: number): Scalar {
+    const d = arr[n - 1][n - 1];
+    const [l1, l2] = eigenvalues2x2(arr[n - 2][n - 2], arr[n - 2][n - 1], arr[n - 1][n - 2], d);
+    return lt(abs(subtract(l1, d) as Scalar) as Scalar, abs(subtract(l2, d) as Scalar) as Scalar)
+      ? l1
+      : l2;
+  }
+
+  /**
+   * One real double-shift QR step (Francis) on the n x n window `arr` of real entries, for a
+   * trailing 2x2 block with a complex conjugate pair. The two shifts are the eigenvalues of that
+   * block, so the step uses the real matrix M = arr^2 - s arr + t I, with s the trace and t the
+   * determinant of the block. The step is A' = Q^T A Q with Q from the QR decomposition of M. It
+   * returns `null` when the block has two real eigenvalues, and the caller takes the corner shift.
+   *
+   * The entries below the first subdiagonal of A' are zero in exact arithmetic; the rounding
+   * left there is set to an exact zero, so A' stays an upper Hessenberg matrix.
+   *
+   * A square of an entry of type number can leave the double range. M is therefore formed from
+   * `arr / c`, with `c` a power of 2: the scale is exact, and the QR decomposition of M / c^2
+   * gives the same Q. A BigNumber has the range, and `doScaledComplexEigs` scales its entries.
+   */
+  function doubleShiftStep(
+    arr: Scalar[][],
+    n: number,
+    big: boolean
+  ): { arr: Scalar[][]; Q: Scalar[][] } | null {
+    let down = (x: Scalar): Scalar => x;
+    if (!big) {
+      const scale = realScale(arr.flat());
+      if (scale === undefined) return null;
+      down = (x) => scale.down(x as number) as Scalar;
+    }
+    const zero: Scalar = big ? bignumber(0) : 0;
+
+    const a = down(arr[n - 2][n - 2]);
+    const b = down(arr[n - 2][n - 1]);
+    const c = down(arr[n - 1][n - 2]);
+    const d = down(arr[n - 1][n - 1]);
+    const half = multiplyScalar(subtract(a, d) as Scalar, 0.5);
+    const disc = addScalar(multiplyScalar(half, half), multiplyScalar(b, c));
+    if (!lt(disc, zero)) return null;
+
+    const s = addScalar(a, d);
+    const t = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar;
+    const scaled = arr.map((row) => row.map(down));
+    const squared = multiply(scaled, scaled) as Scalar[][];
+    const M = squared.map((row, i) =>
+      row.map((x, j) => {
+        const v = subtract(x, multiplyScalar(s, scaled[i][j])) as Scalar;
+        return i === j ? addScalar(v, t) : v;
+      })
+    );
+
+    const { Q }: QRResult = qr(M);
+    const QT = Q.map((_, j) => Q.map((row) => row[j]));
+    const next = multiply(QT, multiply(arr, Q) as Scalar[][]) as Scalar[][];
+    for (let i = 2; i < n; i++) {
+      for (let j = 0; j < i - 1; j++) next[i][j] = zero;
+    }
+    return { arr: next, Q };
+  }
+
+  /**
    * Iterate QR algorithm until matrix is block-upper-triangular
    * @see Press, Williams: Numerical recipes in Fortran 77
    * @see https://en.wikipedia.org/wiki/QR_algorithm
@@ -456,37 +535,49 @@ export function createComplexEigs({
 
       // Perform the factorization
 
-      let k = arr[n - 1][n - 1]; // TODO this is apparently a somewhat
-      // old-fashioned choice; ideally set close to an eigenvalue, or
-      // perhaps better yet switch to the implicit QR version that is sometimes
-      // specifically called the "Francis algorithm" that is alluded to
-      // in the following TODO. (Or perhaps we switch to an independently
-      // optimized third-party package for the linear algebra operations...)
+      // A real shift cannot separate a complex conjugate pair, so the corner shift alone does not
+      // deflate a matrix with one in 100 steps (#1238). A real matrix whose trailing 2x2 block has
+      // a complex pair takes a real double-shift step instead (Francis). A Complex matrix takes
+      // the eigenvalue of the trailing block nearer to the corner (Wilkinson). A step that the
+      // exceptional shift below owns keeps it, so a cyclic matrix still moves (#1202).
+      const exceptional = n >= 3 && lastConvergenceBefore % 10 === 0;
 
-      // The shift above is zero for a cyclic permutation matrix, which then
-      // never moves (QR of a unitary matrix returns the matrix). Every tenth
-      // step without convergence use an exceptional shift (EISPACK hqr, NR):
-      // the corner plus 3/4 of the sum of the two trailing subdiagonal entries.
-      if (n >= 3 && lastConvergenceBefore % 10 === 0) {
-        const w = addScalar(abs(arr[n - 1][n - 2]) as Scalar, abs(arr[n - 2][n - 3]) as Scalar);
-        k = addScalar(k, multiplyScalar(w, 0.75));
-      }
+      const doubleStep = !cplx && n >= 3 && !exceptional ? doubleShiftStep(arr, n, big) : null;
+      if (doubleStep !== null) {
+        arr = doubleStep.arr;
+        if (findVectors) {
+          Qpartial = multiply(Qpartial!, doubleStep.Q) as Scalar[][];
+        }
+      } else {
+        let k = arr[n - 1][n - 1];
 
-      for (let i = 0; i < n; i++) {
-        arr[i][i] = subtract(arr[i][i], k) as Scalar;
-      }
+        if (exceptional) {
+          // The corner is zero for a cyclic permutation matrix, which then
+          // never moves (QR of a unitary matrix returns the matrix). Every tenth
+          // step without convergence use an exceptional shift (EISPACK hqr, NR):
+          // the corner plus 3/4 of the sum of the two trailing subdiagonal entries.
+          const w = addScalar(abs(arr[n - 1][n - 2]) as Scalar, abs(arr[n - 2][n - 3]) as Scalar);
+          k = addScalar(k, multiplyScalar(w, 0.75));
+        } else if (cplx && n >= 3) {
+          k = wilkinsonShift(arr, n);
+        }
 
-      // TODO do an implicit QR transformation
-      const { Q, R }: QRResult = qr(arr);
-      arr = multiply(R, Q) as Scalar[][];
+        for (let i = 0; i < n; i++) {
+          arr[i][i] = subtract(arr[i][i], k) as Scalar;
+        }
 
-      for (let i = 0; i < n; i++) {
-        arr[i][i] = addScalar(arr[i][i], k);
-      }
+        // TODO do an implicit QR transformation
+        const { Q, R }: QRResult = qr(arr);
+        arr = multiply(R, Q) as Scalar[][];
 
-      // keep track of transformations
-      if (findVectors) {
-        Qpartial = multiply(Qpartial!, Q) as Scalar[][];
+        for (let i = 0; i < n; i++) {
+          arr[i][i] = addScalar(arr[i][i], k);
+        }
+
+        // keep track of transformations
+        if (findVectors) {
+          Qpartial = multiply(Qpartial!, Q) as Scalar[][];
+        }
       }
 
       // The rightmost diagonal element converged to an eigenvalue
@@ -631,7 +722,6 @@ export function createComplexEigs({
 
     const vectors: EigenvectorResult[] = [];
     const len = uniqueValues.length;
-    const b: Scalar[] = Array(N).fill(zero);
     const E = diag(Array(N).fill(one));
 
     for (let i = 0; i < len; i++) {
@@ -642,13 +732,12 @@ export function createComplexEigs({
         multiply(lambda, E) as unknown as Scalar[]
       ) as unknown as Scalar[][];
 
-      // usolveAll reads a diagonal entry as zero with an absolute tolerance.
       // The null space does not change when a row is divided by a number, so
       // give it a diagonal of exact zeros (where U_jj matches lambda, relative
       // to their size) and ones (every other row divided by its diagonal).
       // Then the diagonal test does not depend on the scale of the matrix
       // (#1202). The other entries of a matching row keep that scale, and
-      // usolveAll still reads them with an absolute tolerance (#1242).
+      // `nullSpaceUpper` reads them relative to the row (#1242).
       const Snull = T.map((row, j) =>
         close(U[j][j], lambda, prec)
           ? row.map((x, k) => (k === j ? zero : x))
@@ -658,8 +747,7 @@ export function createComplexEigs({
       // inverse iteration compares with prec, so it works on the scale-1 matrix
       const S = T.map((row) => row.map((x) => divideScalar(x, scale)));
 
-      let solutions = usolveAll(Snull, b);
-      solutions.shift(); // ignore the null vector
+      let solutions = nullSpaceUpper(Snull, U, prec, zero, one);
 
       // looks like we missed something, try inverse iteration
       // But if that fails, just presume that the original matrix truly
@@ -672,22 +760,126 @@ export function createComplexEigs({
         solutions.push(approxVec);
       }
 
-      // Transform back into original array coordinates
+      // Transform back into original array coordinates. The product needs a column.
       const correction = multiply(inv(R!), C) as Scalar[][];
-      solutions = solutions.map(
-        (v) => multiply(correction, v as unknown as Scalar[][]) as unknown as Scalar[]
+      solutions = solutions.map((v) =>
+        flatten(
+          multiply(
+            correction,
+            v.map((x) => [x])
+          ) as Scalar[][]
+        )
       );
 
-      vectors.push(...solutions.map((v) => ({ value: lambda, vector: flatten(v) })));
+      vectors.push(...solutions.map((v) => ({ value: lambda, vector: v })));
     }
 
     return vectors;
   }
 
   /**
+   * A basis of the null space of an upper triangular matrix `T`, by backward substitution with
+   * a zero right-hand side: one vector for each zero diagonal entry whose row is consistent. A
+   * diagonal entry is zero only when it is an exact zero (`findEigenvectors` gives the rows that
+   * match lambda an exact zero and every other row a one).
+   *
+   * The row of a zero diagonal entry is consistent for a solution x when the residual of the row,
+   * `|x_i|` after the substitution, is rounding noise: it is at most `COUPLING_FRACTION_OF_PREC *
+   * prec` times the largest entry of that row of `U` times the largest component of x solved so
+   * far. The test is relative, so a coupling of 1e-18 in a matrix of that scale is a coupling
+   * (#1242), and the rounding of a dense row (about 1e-15 of the row) is not. A consistent row
+   * sets x_i to an exact zero, so the rounding does not enter the vector. An inconsistent row
+   * drops the vector.
+   * @returns the vectors as plain arrays; the null vector is not among them
+   */
+  function nullSpaceUpper(
+    T: Scalar[][],
+    U: Scalar[][],
+    prec: Scalar,
+    zero: Scalar,
+    one: Scalar
+  ): Scalar[][] {
+    const N = T.length;
+    const tolerance = multiplyScalar(prec, COUPLING_FRACTION_OF_PREC);
+    const rowTop = U.map((row) => {
+      let top = abs(row[0]) as Scalar;
+      for (const x of row) {
+        const ax = abs(x) as Scalar;
+        if (lt(top, ax)) top = ax;
+      }
+      return top;
+    });
+
+    // B[0] is the null vector; each later vector adds a free variable
+    const B: Scalar[][] = [Array(N).fill(zero)];
+
+    for (let i = N - 1; i >= 0; i--) {
+      let L = B.length;
+
+      for (let k = 0; k < L; k++) {
+        const b = B[k];
+
+        if (!isExactZero(abs(T[i][i]) as Scalar)) {
+          b[i] = divideScalar(b[i], T[i][i]);
+          for (let j = i - 1; j >= 0; j--) {
+            b[j] = subtract(b[j], multiplyScalar(b[i], T[j][i])) as Scalar;
+          }
+          continue;
+        }
+
+        // zero diagonal entry: the row needs a residual of rounding size
+        let solved = abs(zero) as Scalar;
+        for (let m = i + 1; m < N; m++) {
+          const am = abs(b[m]) as Scalar;
+          if (lt(solved, am)) solved = am;
+        }
+        const limit = multiplyScalar(tolerance, multiplyScalar(rowTop[i], solved));
+        if (!le(abs(b[i]) as Scalar, limit)) {
+          // this vector has no solution, but other vectors may have one
+          B.splice(k, 1);
+          k -= 1;
+          L -= 1;
+          continue;
+        }
+        b[i] = zero;
+
+        if (k === 0) {
+          // a free variable: a new vector with x_i = 1
+          const bNew = [...b];
+          bNew[i] = one;
+          for (let j = i - 1; j >= 0; j--) {
+            bNew[j] = subtract(bNew[j], T[j][i]) as Scalar;
+          }
+          B.push(bNew);
+        }
+      }
+    }
+
+    return B.slice(1);
+  }
+
+  /**
    * Compute the eigenvalues of a 2x2 matrix
    */
   function eigenvalues2x2(a: Scalar, b: Scalar, c: Scalar, d: Scalar): [Scalar, Scalar] {
+    // The squares below leave the double range for entries of type number or Complex above about
+    // 1e154 or below about 1e-154, and the eigenvalues are then NaN or 0. The eigenvalues of
+    // a block scaled by an exact power of 2 are the eigenvalues of the block, scaled the same way.
+    const mags = [a, b, c, d].map((x) => abs(x));
+    if (mags.every((m) => typeof m === 'number')) {
+      const top = Math.max(...(mags as number[]));
+      if (top > 0 && Number.isFinite(top) && (top > 2 ** 500 || top < 2 ** -500)) {
+        const factor = 2 ** Math.floor(Math.log2(top));
+        const [l1, l2] = eigenvalues2x2(
+          divideScalar(a, factor),
+          divideScalar(b, factor),
+          divideScalar(c, factor),
+          divideScalar(d, factor)
+        );
+        return [multiplyScalar(l1, factor), multiplyScalar(l2, factor)];
+      }
+    }
+
     // lambda_+- = 1/2 trA +- 1/2 sqrt( tr^2 A - 4 detA )
     const trA = addScalar(a, d);
     const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar;

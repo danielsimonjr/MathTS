@@ -1,7 +1,8 @@
 import { clone } from '../../utils/object.js';
 import { format } from '../../utils/string.js';
 import { factory } from '../../utils/factory.js';
-import { findTypedImpl } from '../../utils/typed-impl.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
+import { createNumberFieldOps, type NumberFieldOps } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -140,47 +141,22 @@ export const createLup = /* #__PURE__ */ factory(
     SparseMatrix,
     Spa,
   }: Dependencies) => {
-    type NumberBin = (a: number, b: number) => number;
-    type NumberUnary = (a: number) => number;
-    type NumberLarger = (a: number, b: number) => boolean;
-    type NumberEqual = (a: number, b: number) => boolean;
-    type LupNumberOps = {
-      add: NumberBin;
-      mul: NumberBin;
-      sub: NumberBin;
-      div: NumberBin;
-      abs: NumberUnary;
-      larger: NumberLarger;
-      equalScalar: NumberEqual;
-    };
+    type LupNumberOps = NumberFieldOps<'abs'>;
 
-    let cachedLupOps: LupNumberOps | null | undefined;
+    const getLupNumberOps = createNumberFieldOps(
+      typed,
+      { addScalar, multiplyScalar, subtractScalar, divideScalar },
+      'abs',
+      abs
+    );
 
-    function getLupNumberOps(): LupNumberOps | null {
-      if (cachedLupOps === undefined) {
-        const nn = ['number', 'number'];
-        const add = findTypedImpl<[number, number], number>(typed, addScalar, nn);
-        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
-        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
-        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
-        const absNum = findTypedImpl<[number], number>(typed, abs, ['number']);
-        const largerNum = findTypedImpl<[number, number], boolean>(typed, larger, nn);
-        const equalNum = findTypedImpl<[number, number], boolean>(typed, equalScalar, nn);
-        cachedLupOps =
-          add && mul && sub && div && absNum && largerNum && equalNum
-            ? {
-                add,
-                mul,
-                sub,
-                div,
-                abs: absNum,
-                larger: largerNum,
-                equalScalar: equalNum,
-              }
-            : null;
-      }
-      return cachedLupOps;
-    }
+    /**
+     * Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of
+     * `larger` is absolute, so it ties every entry of a matrix near 1e-100 (#1169). Other
+     * value types keep the `larger` rule.
+     */
+    const absLarger = (x: unknown, y: unknown): boolean =>
+      typeof x === 'number' && typeof y === 'number' ? x > y : Boolean(larger(x, y));
 
     function matrixAllNumbers(data: unknown[][]): boolean {
       for (let r = 0; r < data.length; r++) {
@@ -220,7 +196,9 @@ export const createLup = /* #__PURE__ */ factory(
         for (i = j; i < rows; i++) {
           const v = data[i][j];
           const absv = ops.abs(v);
-          if (ops.larger(absv, pabsv)) {
+          // Plain comparison: the tolerance of `larger` is absolute, and it ties every
+          // entry of a matrix near 1e-100 to zero (#1169).
+          if (absv > pabsv) {
             pi = i;
             pabsv = absv;
             vjj = v;
@@ -235,7 +213,7 @@ export const createLup = /* #__PURE__ */ factory(
         if (j < rows) {
           for (i = j + 1; i < rows; i++) {
             const vij = data[i][j];
-            if (!ops.equalScalar(vij, 0)) {
+            if (vij !== 0) {
               data[i][j] = ops.div(data[i][j], vjj);
             }
           }
@@ -547,7 +525,7 @@ export const createLup = /* #__PURE__ */ factory(
           // absolute value
           const absv = abs(v);
           // value is greater than pivote value
-          if (larger(absv, pabsv)) {
+          if (absLarger(absv, pabsv)) {
             // store row
             pi = x;
             // update max value
@@ -578,7 +556,7 @@ export const createLup = /* #__PURE__ */ factory(
             // update value
             v = divideScalar(v, vjj);
             // check value is non zero
-            if (!equalScalar(v, 0)) {
+            if (!isZeroEntry(v, equalScalar)) {
               // update lower triangular matrix
               lvalues.push(v);
               lindex.push(x);

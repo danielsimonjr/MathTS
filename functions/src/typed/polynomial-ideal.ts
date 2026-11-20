@@ -68,17 +68,28 @@ function cmpPowers(a: number[], b: number[]): number {
  * that made it (see {@link COEFFICIENT_NOISE_RATIO}), sort lex-descending.
  */
 export function normalize(p: Poly): Poly {
-  const byKey = new Map<string, { coeff: number; powers: number[]; magnitude: number }>();
-  for (const t of p) {
-    const key = t.powers.join(',');
-    const existing = byKey.get(key);
-    if (existing) {
-      existing.coeff += t.coeff;
-      existing.magnitude += magnitudeOf(t);
-    } else {
-      byKey.set(key, { coeff: t.coeff, powers: [...t.powers], magnitude: magnitudeOf(t) });
-    }
+  const byKey: TermMap = new Map();
+  for (const t of p) accumulateTerm(byKey, t);
+  return finishTerms(byKey);
+}
+
+/** The terms of a polynomial being built, keyed by their exponent vector. */
+type TermMap = Map<string, { coeff: number; powers: number[]; magnitude: number }>;
+
+/** Add `t` to the term with the same exponents, or start that term. */
+function accumulateTerm(byKey: TermMap, t: Term): void {
+  const key = t.powers.join(',');
+  const existing = byKey.get(key);
+  if (existing) {
+    existing.coeff += t.coeff;
+    existing.magnitude += magnitudeOf(t);
+  } else {
+    byKey.set(key, { coeff: t.coeff, powers: [...t.powers], magnitude: magnitudeOf(t) });
   }
+}
+
+/** Drop the zero and noise coefficients of `byKey` and sort the rest lex-descending. */
+function finishTerms(byKey: TermMap): Poly {
   const out: Poly = [];
   for (const { coeff, powers, magnitude } of byKey.values()) {
     if (coeff !== 0 && Math.abs(coeff) > COEFFICIENT_NOISE_RATIO * magnitude) {
@@ -113,19 +124,27 @@ export function polySub(a: Poly, b: Poly): Poly {
 /**
  * Return the product of two multivariate polynomials, with like terms combined.
  * The result drops near-zero terms and is sorted in descending lex order.
+ *
+ * The product is combined as it is made, and the call throws a {@link PolynomialSizeError} as
+ * soon as it holds more than `MAX_POLYNOMIAL_TERMS` distinct terms. The count is of distinct
+ * terms, not of products: a dense univariate product has many products and few terms.
  */
 export function polyMul(a: Poly, b: Poly): Poly {
-  const out: Poly = [];
+  const byKey: TermMap = new Map();
   for (const ta of a) {
     for (const tb of b) {
       const powers = new Array(ta.powers.length);
       for (let i = 0; i < ta.powers.length; i++) {
         powers[i] = ta.powers[i] + tb.powers[i];
       }
-      out.push(makeTerm(ta.coeff * tb.coeff, powers, magnitudeOf(ta) * magnitudeOf(tb)));
+      accumulateTerm(
+        byKey,
+        makeTerm(ta.coeff * tb.coeff, powers, magnitudeOf(ta) * magnitudeOf(tb))
+      );
+      if (byKey.size > MAX_POLYNOMIAL_TERMS) throw new PolynomialSizeError();
     }
   }
-  return normalize(out);
+  return finishTerms(byKey);
 }
 
 function polyPow(a: Poly, n: number, nVars: number): Poly {
@@ -144,40 +163,8 @@ function polyPow(a: Poly, n: number, nVars: number): Poly {
     return n === 0 ? result : constPolynomial(constant ** n, nVars);
   }
   if (n * degree > MAX_POLYNOMIAL_DEGREE) throw new PolynomialDegreeError();
-  // A total degree inside the limit does not bound the terms of `a^n`: `(x+y+z+w)^900` has degree
-  // 900 and about 1.2e8 terms.
-  if (powerTermBound(a, n, nVars) > MAX_POLYNOMIAL_TERMS) throw new PolynomialSizeError();
   for (let i = 0; i < n; i++) result = polyMul(result, a);
   return result;
-}
-
-/**
- * The most terms of the power `n` of the polynomial `a`: the smaller of two bounds, or `Infinity`
- * once a bound is above {@link MAX_POLYNOMIAL_TERMS} (each loop stops there). The first is
- * `binomial(n + t - 1, t - 1)` for `t` terms in `a`. The second counts the exponent vectors that
- * the power can hold, `product(n * maxPower_v + 1)` over the variables `v`: it is the tighter
- * bound for a base with few distinct exponents, such as `x^3 + x^2 + x + 1`.
- */
-function powerTermBound(a: Poly, n: number, nVars: number): number {
-  const t = a.length;
-  if (t <= 1 || n <= 1) return t;
-  // binomial(n + t - 1, k) for k = min(t - 1, n): the smaller index keeps the loop short.
-  const k = Math.min(t - 1, n);
-  let binomial = 1;
-  for (let i = 1; i <= k; i++) {
-    binomial = (binomial * (n + t - 1 - k + i)) / i;
-    if (binomial > MAX_POLYNOMIAL_TERMS) {
-      binomial = Infinity;
-      break;
-    }
-  }
-  let box = 1;
-  for (let v = 0; v < nVars && box <= MAX_POLYNOMIAL_TERMS; v++) {
-    let top = 0;
-    for (const term of a) top = Math.max(top, term.powers[v]);
-    box *= n * top + 1;
-  }
-  return Math.min(binomial, box > MAX_POLYNOMIAL_TERMS ? Infinity : box);
 }
 
 /** The constant polynomial `value`: no terms when `value` is zero. */

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1352, "e": 7410, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1355, "e": 7436, "re": 3194 },
   "s": {
-    "loc": 240275,
+    "loc": 243016,
     "cls": 63,
-    "int": 670,
-    "fn": 2589,
-    "tg": 184,
+    "int": 676,
+    "fn": 2614,
+    "tg": 185,
     "en": 0,
-    "co": 1697,
-    "toi": 685
+    "co": 1698,
+    "toi": 686
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -352,9 +352,9 @@
         "RepeatedEigenvalue",
         "EigResult",
         "EigOptions",
+        "EigBalance",
         "ExpmOptions",
-        "LogmOptions",
-        "LUResult"
+        "LogmOptions"
       ]
     },
     "matrix/types": {
@@ -506,7 +506,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 39,
+      "f": 40,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -525,11 +525,11 @@
         "createFix",
         "createFloorNumber",
         "createFloor",
-        "createGcd",
-        "createHypot",
-        "createInvmod"
+        "fractionGcd",
+        "fractionLcm",
+        "createGcd"
       ],
-      "int": ["MathNode"]
+      "int": ["FractionParts", "MathNode"]
     },
     "functions/bitwise": {
       "f": 8,
@@ -588,12 +588,13 @@
       ]
     },
     "functions/cas": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "antiderivativeReciprocal",
         "snapRoot",
         "closedFormRoots",
         "solveElementary",
+        "isExactPolynomialIdentity",
         "decimalTextToRat",
         "coefficientRat",
         "ratText",
@@ -608,8 +609,7 @@
         "residueIntegral",
         "rothsteinTrager",
         "integrateLayer3",
-        "collapseIdenticalFactors",
-        "tryPolynomialCanonicalForm"
+        "collapseIdenticalFactors"
       ],
       "cls": ["PolynomialDegreeError", "PolynomialSizeError"],
       "int": [
@@ -655,13 +655,13 @@
     "functions/factories": {
       "f": 5,
       "exp": [
+        "replacer",
         "EVALUATE_SCOPE_OMIT",
         "parse",
         "physicsScope",
         "evaluate",
         "compileExpr",
         "parser",
-        "replacer",
         "reviver",
         "createInstanceEvaluator",
         "scalarToNode",
@@ -780,12 +780,12 @@
         "createComplexEigs",
         "createRealSymmetric",
         "createEigs",
+        "defineRemovedVectorsGetter",
         "createFft",
         "createFilter",
         "createFlatten",
         "createForEach",
-        "sparseMatrixFromVectors",
-        "vectorLength"
+        "sparseMatrixFromVectors"
       ],
       "int": [
         "Matrix",
@@ -1057,6 +1057,7 @@
         "createMin",
         "createMode",
         "nanmedian",
+        "exactOrder",
         "isFloatTyped",
         "copyToNumberArray",
         "flattenForStatistics",
@@ -1065,10 +1066,9 @@
         "readSkip",
         "parseStatOptions",
         "normalizationFromSecondArg",
-        "normalizationFromStringAndOptions",
-        "numberGrid"
+        "normalizationFromStringAndOptions"
       ],
-      "int": ["QuantileSeqOptions"]
+      "int": ["QuantileArith", "QuantilePlan", "QuantileSeqOptions", "ParsedQuantileOptions"]
     },
     "functions/stats": {
       "f": 15,
@@ -1214,7 +1214,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 44,
+      "f": 45,
       "exp": [
         "arraySize",
         "validate",
@@ -1959,12 +1959,12 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 250, "o": 15 },
+    { "p": "factories/index.ts", "i": 251, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },

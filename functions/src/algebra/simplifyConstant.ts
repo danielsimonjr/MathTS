@@ -1,4 +1,6 @@
+import FractionJS from 'fraction.js';
 import {
+  isBigNumber,
   isComplex,
   isFraction,
   isMatrix,
@@ -239,6 +241,20 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         args = args.map(_removeFractions);
         result = _toNumber(mathWithTransform[fnname].apply(null, args), options);
       }
+      // A Fraction that meets a function with no Fraction signature takes the core conversion to
+      // BigNumber, so factorial(5) or atan2(1,1) would give a 64-digit BigNumber. mathjs throws at
+      // that conversion and retries with numbers: do the same when no argument is a BigNumber and the
+      // function is not the BigNumber constructor itself (bignumber(1/3) keeps its 64 digits).
+      if (
+        fnname !== 'bignumber' &&
+        isBigNumber(result) &&
+        !args.some((arg) => _someEntry(arg, isBigNumber))
+      ) {
+        result = _toNumber(
+          mathWithTransform[fnname].apply(null, args.map(_removeFractions)),
+          options
+        );
+      }
       return _realPart(result);
     }
 
@@ -271,6 +287,12 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       Matrix: function (m: { valueOf(): unknown[] }): ArrayNode {
         return new ArrayNode(m.valueOf().map((e: unknown) => _toNode(e)));
       },
+      // A function such as size returns a plain Array. Without this signature the typed conversion
+      // Array -> Matrix wraps it in an object whose valueOf() is not an array, and the Matrix branch
+      // above throws.
+      Array: function (items: unknown[]): ArrayNode {
+        return new ArrayNode(items.map((e: unknown) => _toNode(e)));
+      },
     }) as unknown as (value: unknown) => MathNode;
 
     function _ensureNode(thing: unknown): MathNode {
@@ -280,12 +302,24 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       return _toNode(thing);
     }
 
+    // The Fraction of a number, or null when the number has no exact fraction. mathjs asks
+    // fraction.js, so this asks it too: a MathTS Fraction reproduces more doubles than fraction.js
+    // does (66079.39738442015 is 6977852205/105598 there), and each of those would print as a
+    // ratio of large numbers, where mathjs keeps the decimal. fraction.js gives the numerator
+    // and the denominator; a MathTS Fraction is built from that text.
+    function _fractionOfNumber(n: number): FractionLike | null {
+      const exact = new FractionJS(n);
+      if (exact.valueOf() !== n || fraction === undefined) return null;
+      return fraction(`${exact.s < 0n ? '-' : ''}${exact.n}/${exact.d}`);
+    }
+
     // convert a number to a fraction only if it can be expressed exactly,
     // and when both numerator and denominator are small enough
     function _exactFraction(n: unknown, options: Options): unknown {
       const exactFractions = options && options.exactFractions !== false;
       if (exactFractions && isBounded(n) && fraction) {
-        const f = fraction(n);
+        const f = typeof n === 'number' ? _fractionOfNumber(n) : fraction(n);
+        if (f === null) return n;
         const fractionsLimit =
           options && typeof options.fractionsLimit === 'number' ? options.fractionsLimit : Infinity; // no limit by default
 
@@ -611,8 +645,9 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           if (foldItems.some(isNode)) {
             return new ArrayNode(foldItems.map(_ensureNode));
           }
-          /* All literals -- return a Matrix so we can operate on it */
-          return matrix(foldItems);
+          /* All literals -- return a Matrix so we can operate on it. The rows of a 2-D literal are
+             Matrices already: unwrap them, or the matrix has the size [rows], not [rows, columns]. */
+          return matrix(foldItems.map((item) => (isMatrix(item) ? item.valueOf() : item)));
         }
         case 'IndexNode': {
           return new IndexNode(

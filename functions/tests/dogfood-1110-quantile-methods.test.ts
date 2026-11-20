@@ -151,9 +151,9 @@ describe('quantileSeq NumPy methods at low and high probability (#1110)', () => 
     expect(q([1, 2, 3, 4], 0.875, 'closest_observation')).toBe(4);
   });
 
-  it('gives NaN when the clipped boundary element is infinite, as NumPy', () => {
-    expect(q([-Infinity, 1, 2], 0, 'hazen')).toBeNaN();
-    expect(q([-Infinity, 1], 0.25, 'weibull')).toBeNaN();
+  it('keeps an infinite clipped boundary element (#1131)', () => {
+    expect(q([-Infinity, 1, 2], 0, 'hazen')).toBe(-Infinity);
+    expect(q([-Infinity, 1], 0.25, 'weibull')).toBe(-Infinity);
   });
 
   it('keeps skipNaN, Matrix and BigNumber data working', () => {

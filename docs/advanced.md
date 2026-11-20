@@ -606,6 +606,8 @@ no finite list holds the solutions. It never scans for roots unless you ask it t
 - A polynomial of a degree above 1000 throws a `RangeError` (`PolynomialDegreeError`) that names
   the limit. The numeric scan has no such limit. The degree counts after the zero coefficients
   cancel: `(x - x)^1000000000` is the constant 0.
+- A polynomial with more than 10000 terms throws a `RangeError` (`PolynomialSizeError`) that names
+  the limit. The package exports the two error classes, so a caller can test `instanceof`.
 - An identity (`x^2 - x^2`, `(x - x)^1000000000`, `sin(x) - sin(x)`, `0*x`, `x = x`) throws an
   `Error`: every value of the variable is a solution, and no finite list holds them. An equation with no real root (`1 = 2`, `x^4 + 1`) gives
   `[]`. So `[]` always means that the equation has no root, and never that it is an identity.

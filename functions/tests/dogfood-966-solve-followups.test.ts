@@ -206,8 +206,12 @@ describe('#966 item 9: solveExact of a polynomial of degree 1 or 2', () => {
 
 describe('#966 item 7: a power is refused by its term count, not only by its total degree', () => {
   it('expand((x+y+z+w)^900) throws at once', () => {
-    expect(() => expand('(x+y+z+w)^900')).toThrow(/more than 100000 terms/);
+    expect(() => expand('(x+y+z+w)^900')).toThrow(/more than 10000 terms/);
     expect(() => expand('(x+y+z+w)^900')).toThrow(RangeError);
+  });
+
+  it('a product of two large powers throws at once (P9)', () => {
+    expect(() => expand('(x+y+z+w)^30*(x+y+z+w)^30')).toThrow(/more than 10000 terms/);
   });
 
   it('the error names expand', () => {

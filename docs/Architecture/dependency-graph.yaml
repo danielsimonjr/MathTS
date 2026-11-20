@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1352
+  totalFiles: 1355
   totalModules: 82
-  totalExports: 7410
+  totalExports: 7436
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5333,6 +5333,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - relativeDifference
         - scaleDense
         - norm1
         - householder
@@ -5363,6 +5364,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - relativeDifference
         - scaleDense
         - norm1
         - householder
@@ -5481,13 +5483,16 @@ modules:
             - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
       interfaces:
         - EigResult
         - EigOptions
+        - EigBalance
       functions:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
@@ -5539,6 +5544,8 @@ modules:
             - eig
             - eigvals
             - powerIteration
+            - balanceForEig
+            - EigBalance
             - EigResult
             - EigOptions
             - RepeatedEigenvalue
@@ -5655,6 +5662,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -5716,6 +5725,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -5785,6 +5796,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -5796,6 +5808,7 @@ modules:
             - matInv
             - gaussJordanContinue
             - ldexpMatrix
+            - relativeDifference
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
@@ -5803,13 +5816,18 @@ modules:
         - file: ./sqrtm.js
           imports:
             - matrixSqrtNewtonInternal
+            - sqrtmQuasiTriangular
       workspaceDependencies: []
       exports:
+        - logPade
         - matrixLogm
+        - assertFiniteLogm
       interfaces:
         - LogmOptions
       functions:
+        - logPade
         - matrixLogm
+        - assertFiniteLogm
     matrix/src/operations/lstsq.ts:
       description: Linear least squares by column-pivoted Householder QR and a complete
       externalDependencies: []
@@ -6007,12 +6025,14 @@ modules:
             - givensRotation
       workspaceDependencies: []
       exports:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
       interfaces:
         - SchurResult
         - SchurOptions
       functions:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
     matrix/src/operations/sqrtm.ts:
@@ -6029,6 +6049,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -6038,17 +6059,20 @@ modules:
             - gaussJordanSolve
             - ldexpMatrix
             - normInf
+            - relativeDifference
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
             - SQUARED
       workspaceDependencies: []
       exports:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
       interfaces:
         - SqrtmOptions
       functions:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
@@ -7344,9 +7368,7 @@ modules:
         - assertSameTape
   functions/algebra:
     functions/src/algebra/decomposition/lup.ts:
-      description: >-
-        Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`)
-        and a
+      description: 'Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7359,9 +7381,13 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7387,7 +7413,8 @@ modules:
             - isExactZero
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7562,7 +7589,7 @@ modules:
       constants:
         - createPolynomialRoot
     functions/src/algebra/rationalize.ts:
-      description: Transform a rationalizable expression in a rational fraction.
+      description: The rule engine distributes a product of sums term by term, and its cost grows with the term
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7575,6 +7602,10 @@ modules:
         - file: ../typed/algebra.js
           imports:
             - expand
+        - file: ../typed/polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - polyToDenseCoefficients
         - file: ../utils/node.js
           imports:
             - MathNode
@@ -7748,11 +7779,15 @@ modules:
         - createSimplify
     functions/src/algebra/simplifyConstant.ts:
       description: simplifyConstant() takes a mathjs expression (either a Node representing
-      externalDependencies: []
+      externalDependencies:
+        - package: fraction.js
+          imports:
+            - FractionJS
       nodeDependencies: []
       internalDependencies:
         - file: ../utils/is.js
           imports:
+            - isBigNumber
             - isComplex
             - isFraction
             - isMatrix
@@ -7837,6 +7872,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -7870,6 +7908,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -7938,19 +7979,21 @@ modules:
       constants:
         - createLusolve
     functions/src/algebra/solver/pivot-tolerance.ts:
-      description: Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+      description: Safety factor on `n * eps` in {@link pivotTolerance}.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
+        - pivotTolerance
         - isBadLuFactorPivot
       functions:
+        - pivotTolerance
         - isBadLuFactorPivot
       constants:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
     functions/src/algebra/solver/usolve.ts:
       description: >-
@@ -7962,6 +8005,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -7998,6 +8044,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -8490,6 +8539,9 @@ modules:
         - file: ../utils/is.js
           imports:
             - isConstantNode
+        - file: ../cas/exact-identity.js
+          imports:
+            - isExactPolynomialIdentity
         - file: ../utils/factory.js
           imports:
             - factory
@@ -8911,6 +8963,23 @@ modules:
       constants:
         - createFloorNumber
         - createFloor
+    functions/src/arithmetic/fraction-gcd.ts:
+      description: 'The gcd of two fractions, as fraction.js defines it: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d).'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - bigintGcd
+      workspaceDependencies: []
+      exports:
+        - fractionGcd
+        - fractionLcm
+      interfaces:
+        - FractionParts
+      functions:
+        - fractionGcd
+        - fractionLcm
     functions/src/arithmetic/gcd.ts:
       description: Calculate the greatest common divisor for two or more values or arrays.
       externalDependencies: []
@@ -8922,6 +8991,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./fraction-gcd.js
+          imports:
+            - fractionGcd
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -9017,6 +9089,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./fraction-gcd.js
+          imports:
+            - fractionLcm
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -10407,6 +10482,9 @@ modules:
           imports:
             - hasNaN
             - numberVector
+        - file: ./utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - fTest
@@ -14324,6 +14402,37 @@ modules:
         - ElementarySolution
       functions:
         - solveElementary
+    functions/src/cas/exact-identity.ts:
+      description: Decide that two expressions are the same polynomial, exactly.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/factorization/multi-poly.js
+          imports:
+            - addMP
+            - fromTerms
+            - integerContentMP
+            - isZero
+            - mulMP
+            - negMP
+            - totalDegree
+            - MultiPoly
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - bigintGcd
+        - file: ../utils/node.js
+          imports:
+            - MathNode
+          typeOnly: true
+        - file: ./polynomial-limits.js
+          imports:
+            - MAX_POLYNOMIAL_DEGREE
+            - MAX_POLYNOMIAL_TERMS
+      workspaceDependencies: []
+      exports:
+        - isExactPolynomialIdentity
+      functions:
+        - isExactPolynomialIdentity
     functions/src/cas/exact-roots.ts:
       description: Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.
       externalDependencies: []
@@ -14442,16 +14551,16 @@ modules:
       exports:
         - MAX_POLYNOMIAL_DEGREE
         - MAX_POLYNOMIAL_TERMS
-        - polynomialSizeMessage
         - polynomialDegreeMessage
+        - polynomialSizeMessage
         - PolynomialDegreeError
         - PolynomialSizeError
       classes:
         - PolynomialDegreeError
         - PolynomialSizeError
       functions:
-        - polynomialSizeMessage
         - polynomialDegreeMessage
+        - polynomialSizeMessage
       constants:
         - MAX_POLYNOMIAL_DEGREE
         - MAX_POLYNOMIAL_TERMS
@@ -15209,6 +15318,10 @@ modules:
         - file: ../typed/expression-eval-barrel.js
           imports:
             - '* as typedFns'
+        - file: ../utils/json-replacer.js
+          imports:
+            - replacer
+          reExport: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
@@ -15233,15 +15346,17 @@ modules:
             - Unit
             - UnitInstance
       exports:
+        - replacer
         - EVALUATE_SCOPE_OMIT
         - parse
         - physicsScope
         - evaluate
         - compileExpr
         - parser
-        - replacer
         - reviver
         - createInstanceEvaluator
+      reExported:
+        - replacer
       interfaces:
         - PhysicsEvaluateOptions
         - PhysicsScopeOptions
@@ -15252,7 +15367,6 @@ modules:
         - evaluate
         - compileExpr
         - parser
-        - replacer
         - reviver
         - createInstanceEvaluator
       constants:
@@ -15266,6 +15380,9 @@ modules:
         - file: ./scope.js
           imports:
             - factoryScope
+        - file: ../utils/json-replacer.js
+          imports:
+            - replacer
         - file: ../typed/arithmetic.js
           imports:
             - add
@@ -15573,6 +15690,7 @@ modules:
             - acceleratedDet
             - acceleratedInv
             - correctEigs
+            - correctEigsOfMatrix
         - file: ../matrix/reshape.js
           imports:
             - createReshape
@@ -17847,7 +17965,7 @@ modules:
       constants:
         - createDot
     functions/src/matrix/eigs/complexEigs.ts:
-      description: Create the `complexEigs` function, which computes the eigenvalues and the optional
+      description: A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -17860,6 +17978,9 @@ modules:
         - file: ../../utils/object.js
           imports:
             - clone
+        - file: ../../utils/real-scale.js
+          imports:
+            - realScale
       workspaceDependencies: []
       exports:
         - createComplexEigs
@@ -17882,7 +18003,7 @@ modules:
       functions:
         - createRealSymmetric
     functions/src/matrix/eigs.ts:
-      description: Compute eigenvalues and optionally eigenvectors of a square matrix.
+      description: A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -17918,6 +18039,9 @@ modules:
       workspaceDependencies: []
       exports:
         - createEigs
+        - defineRemovedVectorsGetter
+      functions:
+        - defineRemovedVectorsGetter
       constants:
         - createEigs
     functions/src/matrix/fft.ts:
@@ -18281,7 +18405,13 @@ modules:
       description: Native-accelerated fast paths for matrix factory functions.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./eigs.js
+          imports:
+            - defineRemovedVectorsGetter
+        - file: ../utils/is.js
+          imports:
+            - isFraction
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -18289,6 +18419,7 @@ modules:
             - DenseMatrix
             - lu
             - eig
+            - balanceForEig
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -18298,14 +18429,14 @@ modules:
         - isLargeNumericSquare
         - acceleratedDet
         - acceleratedInv
-        - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       functions:
         - isLargeNumericSquare
         - acceleratedDet
         - acceleratedInv
-        - isNumericSquare
         - correctEigs
+        - correctEigsOfMatrix
       constants:
         - NATIVE_MATRIX_THRESHOLD
     functions/src/matrix/ones.ts:
@@ -18326,7 +18457,7 @@ modules:
       constants:
         - createOnes
     functions/src/matrix/partitionSelect.ts:
-      description: Partition-based selection of an array or 1D matrix.
+      description: 'Three-way quickselect: each pass splits the range into values less than, equal to and'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18636,6 +18767,11 @@ modules:
           imports:
             - factory
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - matrixSqrtm
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -18645,6 +18781,7 @@ modules:
             - entryRange
             - ldexp
             - withPow2Scale
+            - EntryRange
           subpath: internal
       exports:
         - createSqrtm
@@ -21331,6 +21468,10 @@ modules:
         - rfft
         - irfft
         - fftshift
+        - fftshift
+        - fftshift
+        - ifftshift
+        - ifftshift
         - ifftshift
         - fftfreq
         - rfftfreq
@@ -21543,6 +21684,9 @@ modules:
         - file: ../typed/signal.js
           imports:
             - windowFunction
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
         - file: ../signal-filter-extra.js
           imports:
             - butter
@@ -22275,6 +22419,7 @@ modules:
         - file: ./numeric-data.js
           imports:
             - flattenForStatistics
+            - exactOrder
             - finiteNumbers
             - isFloatTyped
             - numberGrid
@@ -22367,8 +22512,13 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isNumber
       workspaceDependencies: []
       exports:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22384,6 +22534,7 @@ modules:
         - isConstantArrayLike
         - typedArrayPairToNumbers
       functions:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22437,19 +22588,37 @@ modules:
         - file: ./numeric-data.js
           imports:
             - readSkip
+        - file: ../utils/median-numbers.js
+          imports:
+            - minFrom
+            - quickSelectInPlace
       workspaceDependencies: []
       exports:
+        - NUMBER_ARITH
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
       interfaces:
+        - QuantileArith
+        - QuantilePlan
         - QuantileSeqOptions
+        - ParsedQuantileOptions
       functions:
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
+      constants:
+        - NUMBER_ARITH
     functions/src/statistics/quantileSeq.ts:
-      description: Compute the prob order quantile of a matrix or a list with values.
+      description: From this many probabilities on, an unsorted number sample is sorted once, with the native
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22472,15 +22641,22 @@ modules:
           typeOnly: true
         - file: ./numeric-data.js
           imports:
+            - exactOrder
             - isFloatTyped
-            - copyToNumberArray
             - FloatTyped
         - file: ./quantile-numpy-methods.js
           imports:
-            - assertNumpyQuantileMethod
-            - quantileOfSorted
+            - NUMBER_ARITH
+            - blendNumber
+            - orderStatistics
             - parseQuantileThirdArg
+            - quantileOfSorted
+            - quantileOfUnsorted
+            - quantilePlan
             - NumpyQuantileMethod
+            - ParsedQuantileOptions
+            - QuantileArith
+            - QuantilePlan
             - QuantileSeqOptions
       workspaceDependencies: []
       exports:
@@ -22880,8 +23056,12 @@ modules:
         - file: ../typed/distributions.js
           imports:
             - normalCDF
+        - file: ../typed/hypothesis.js
+          imports:
+            - binomialTest
         - file: ../typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
         - file: ./robust-stats.js
           imports:
@@ -24033,6 +24213,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./types.js
           imports:
             - FibonacciHeapNode
@@ -24767,9 +24950,13 @@ modules:
             - PolynomialDegreeError
             - PolynomialSizeError
             - polynomialDegreeMessage
+            - polynomialSizeMessage
         - file: ./string-derivative.js
           imports:
             - derivativeOfAdditiveTerms
+        - file: ../factories/scope.js
+          imports:
+            - factoryScope
         - file: ./call-rewrite.js
           imports:
             - rewriteCalls
@@ -25218,6 +25405,9 @@ modules:
         - file: ../cas/elementary-solve.js
           imports:
             - solveElementary
+        - file: ../cas/polynomial-limits.js
+          imports:
+            - PolynomialSizeError
         - file: ../cas/syntax-tree.js
           imports:
             - AstNode
@@ -25270,6 +25460,7 @@ modules:
             - Complex
       exports:
         - PolynomialDegreeError
+        - PolynomialSizeError
         - CAS_BATCH_THRESHOLD
         - integrate
         - limit
@@ -26555,7 +26746,9 @@ modules:
             - multipleTest
         - file: ../utils/limits.js
           imports:
+            - assertAllocSize
             - assertLoopOrder
+            - MAX_LOOP_ORDER
         - file: ./number-matrix.js
           imports:
             - hasNaN
@@ -27266,6 +27459,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../algebra/solver/pivot-tolerance.js
+          imports:
+            - pivotTolerance
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -27332,6 +27528,7 @@ modules:
           directory: matrix
           imports:
             - densifyForSolver
+            - singularValues
             - SparseMatrix
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -27716,6 +27913,7 @@ modules:
             - goertzelDispatch
             - welchPSDDispatch
             - welchPSDJS
+            - windowTypeCode
             - WASM_SIGNAL_THRESHOLD
         - file: ../signal/wavelet-filters.js
           imports:
@@ -27999,9 +28197,14 @@ modules:
         - file: ../utils/median-numbers.js
           imports:
             - medianInPlace
+            - minFrom
+            - quickSelectInPlace
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
+        - file: ./number-matrix.js
+          imports:
+            - hasNaN
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -28830,8 +29033,10 @@ modules:
       workspaceDependencies: []
       exports:
         - isExactZero
+        - isZeroEntry
       functions:
         - isExactZero
+        - isZeroEntry
     functions/src/utils/isFinite.ts:
       description: Test whether a value is finite.
       externalDependencies: []
@@ -29032,6 +29237,16 @@ modules:
         - createIsZero
       constants:
         - createIsZero
+    functions/src/utils/json-replacer.ts:
+      description: '`JSON.stringify` replacer that preserves non-finite numbers and bigint values, with the tags'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - replacer
+      functions:
+        - replacer
     functions/src/utils/limits.ts:
       description: Shared size limits that guard allocation and loop length (DoS guard).
       externalDependencies: []
@@ -29109,9 +29324,13 @@ modules:
       exports:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
       functions:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
       externalDependencies: []
@@ -29568,8 +29787,12 @@ modules:
       workspaceDependencies: []
       exports:
         - findTypedImpl
+        - createNumberFieldOps
+      interfaces:
+        - NumberFieldScalars
       functions:
         - findTypedImpl
+        - createNumberFieldOps
   functions/wasm:
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
@@ -29884,6 +30107,7 @@ modules:
       workspaceDependencies: []
       exports:
         - WASM_SIGNAL_THRESHOLD
+        - windowTypeCode
         - applyWindowJS
         - goertzelJS
         - welchPSDJS
@@ -29895,6 +30119,7 @@ modules:
         - goertzelDispatch
         - chirpZTransformDispatch
       functions:
+        - windowTypeCode
         - applyWindowJS
         - goertzelJS
         - welchPSDJS
@@ -36836,7 +37061,7 @@ modules:
       constants:
         - createObjectNode
     expression/src/node/OperatorNode.ts:
-      description: Returns true if the expression starts with a constant, under
+      description: Join the LaTeX of an operator and of its operand. A command (`\neg`, `\cdot`, `\wedge`)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -45857,6 +46082,7 @@ dependencyGraph:
         - functions/src/arithmetic/expm1.ts
         - functions/src/arithmetic/fix.ts
         - functions/src/arithmetic/floor.ts
+        - functions/src/arithmetic/fraction-gcd.ts
         - functions/src/arithmetic/gcd.ts
         - functions/src/arithmetic/hypot.ts
         - functions/src/arithmetic/invmod.ts
@@ -45935,6 +46161,7 @@ dependencyGraph:
         - functions/src/cas/antiderivative.ts
         - functions/src/cas/closed-form-roots.ts
         - functions/src/cas/elementary-solve.ts
+        - functions/src/cas/exact-identity.ts
         - functions/src/cas/exact-roots.ts
         - functions/src/cas/layer3.ts
         - functions/src/cas/polynomial-canonical.ts
@@ -46413,6 +46640,7 @@ dependencyGraph:
         - functions/src/utils/isPositive.ts
         - functions/src/utils/isPrime.ts
         - functions/src/utils/isZero.ts
+        - functions/src/utils/json-replacer.ts
         - functions/src/utils/limits.ts
         - functions/src/utils/map.ts
         - functions/src/utils/median-numbers.ts
@@ -47118,18 +47346,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1352
+  totalTypeScriptFiles: 1355
   totalModules: 82
-  totalLinesOfCode: 240275
-  totalExports: 7410
+  totalLinesOfCode: 243016
+  totalExports: 7436
   totalClasses: 63
-  totalInterfaces: 670
-  totalFunctions: 2589
-  totalTypeGuards: 184
+  totalInterfaces: 676
+  totalFunctions: 2614
+  totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1697
-  totalReExports: 3191
-  totalTypeOnlyImports: 685
+  totalConstants: 1698
+  totalReExports: 3194
+  totalTypeOnlyImports: 686
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0

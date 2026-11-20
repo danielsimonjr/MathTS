@@ -45,6 +45,7 @@ import {
 import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { solveElementary } from '../cas/elementary-solve.js';
+import { PolynomialSizeError } from '../cas/polynomial-limits.js';
 import {
   type AstNode,
   MAX_POLYNOMIAL_DEGREE,
@@ -71,8 +72,12 @@ import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
 
-/** The error that a CAS function throws for a polynomial of a degree above 1000. */
-export { PolynomialDegreeError };
+/**
+ * The errors that a CAS function throws for a polynomial of a degree above 1000
+ * (`PolynomialDegreeError`) or with more than 10000 terms (`PolynomialSizeError`). Both are a
+ * `RangeError`.
+ */
+export { PolynomialDegreeError, PolynomialSizeError };
 
 // =============================================================================
 // Type Aliases

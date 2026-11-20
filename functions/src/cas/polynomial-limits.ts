@@ -20,16 +20,20 @@ export class PolynomialDegreeError extends RangeError {
   }
 }
 
-/**
- * The most terms that a power of a multivariate polynomial may have. The check uses the number of
- * terms that the power can hold: the smaller of `binomial(n + t - 1, t - 1)` (`n` the exponent and
- * `t` the number of terms of the base) and the number of exponent vectors in the box that the
- * power fills. So `(x+y+z+w)^900` (about 1.2e8 terms) is refused before any product runs, and
- * `(x+y)^1000` (1001 terms) and `(x^3+x^2+x+1)^100` (301 terms) are not.
- */
-export const MAX_POLYNOMIAL_TERMS = 100_000;
+/** The text of the error: it names the limit, so a caller can say why the input was refused. */
+export function polynomialDegreeMessage(): string {
+  return `the polynomial has a degree above ${MAX_POLYNOMIAL_DEGREE}, the highest degree that the CAS builds`;
+}
 
-/** Thrown when a power of a polynomial would have more than {@link MAX_POLYNOMIAL_TERMS} terms. */
+/**
+ * The largest number of terms of a polynomial that the CAS builds. The terms of a product are
+ * counted as they are combined, so a power such as `(a+b+c+d+x)^60`, whose expansion has more than
+ * 10000 terms, is refused as soon as its partial product passes the limit, and does not run for
+ * minutes. A univariate polynomial of the highest degree has 1001 terms, far below the limit.
+ */
+export const MAX_POLYNOMIAL_TERMS = 10_000;
+
+/** Thrown when a polynomial would have more than {@link MAX_POLYNOMIAL_TERMS} terms. */
 export class PolynomialSizeError extends RangeError {
   constructor(message = polynomialSizeMessage()) {
     super(message);
@@ -37,12 +41,7 @@ export class PolynomialSizeError extends RangeError {
   }
 }
 
-/** The text of the size error: it names the limit. */
-export function polynomialSizeMessage(): string {
-  return `the polynomial would have more than ${MAX_POLYNOMIAL_TERMS} terms, the most that the CAS builds`;
-}
-
 /** The text of the error: it names the limit, so a caller can say why the input was refused. */
-export function polynomialDegreeMessage(): string {
-  return `the polynomial has a degree above ${MAX_POLYNOMIAL_DEGREE}, the highest degree that the CAS builds`;
+export function polynomialSizeMessage(): string {
+  return `the polynomial has more than ${MAX_POLYNOMIAL_TERMS} terms, the most that the CAS builds`;
 }

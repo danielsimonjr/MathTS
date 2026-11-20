@@ -18,7 +18,7 @@ artefacts) and `@danielsimonjr/mathts-typed-function` (fork consumed via npm ali
 
 <!-- BEGIN GENERATED FUNCTIONS STATS (tools/sync-readme-functions-stats.mjs) -->
 
-The function layer (`@danielsimonjr/mathts-functions` 0.87.0) exposes **1,383 exports** in
+The function layer (`@danielsimonjr/mathts-functions` 0.87.0) exposes **1,384 exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
 <!-- END GENERATED FUNCTIONS STATS -->
@@ -228,6 +228,15 @@ the remaining element-wise ops by up to 1.6×.
 > stay in JS where V8 JITs them faster than WASM plus the marshalling cost.
 > Results on developer hardware will differ from CI.
 
+**FFT.** Use `parallelFFT` for a real `Float64Array` on a latency path. For a `Float64Array` it returns
+a Promise, and for a `number[]` it returns the result at once. The result is
+`{ real, imag, originalLength }`, zero-padded to n rounded up to a power of two. It is not a `Complex[]`. Use `fft`
+for a spectrum of exactly n bins when n is not a power of two, or when you need a `Complex[]`. At
+2^16 and 2^20 samples `parallelFFT` took 0.89 to 1.06 and 1.02 to 1.03 times the time of `fft.js`
+4.0.4, and `fft` took 1.13 to 1.15 and 1.56 to 1.61 times. `fft.js` with a plan and arrays that it
+reuses was faster than every entry point. The table, the host and the method are in
+[`docs/performance.md`](./docs/performance.md#fft-pick-the-entry-point).
+
 Per-operation thresholds of the `computePool.*` calls (from `npm run bench:parallel`,
 default values in `parallel/src/ComputePool.ts`). The typed `Float64Array` functions
 are synchronous and do not read them:
@@ -260,7 +269,7 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 | `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels)                                                      |
 | `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                                                                       |
 | `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                                                                                    |
-| `@danielsimonjr/mathts-functions`      | 1,383 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
+| `@danielsimonjr/mathts-functions`      | 1,384 exports in 27 categories; typed dispatch + `evaluate()` — see `docs/reference/functions.md` / [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/) |
 | `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                                                                        |
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (15 node classes + `Node` base)                                                                                  |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                                                                      |
@@ -444,7 +453,7 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 | [`docs/migration-guide.md`](./docs/migration-guide.md)                                 | Migrating from mathjs v15                                                 |
 | [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)                 | ScalarNode toolkit, Pareto selection, and search                          |
 | [`TODO.md`](./TODO.md)                                                                 | Open items and deferred decisions                                         |
-| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,383 exports) with Accel column    |
+| [`docs/reference/functions.md`](./docs/reference/functions.md)                         | Full typed-function export reference (1,384 exports) with Accel column    |
 | [`docs/README.md`](./docs/README.md)                                                   | Index of every document in `docs/`                                        |
 | [`docs/getting-started.md`](./docs/getting-started.md)                                 | Install, first computations, function categories                          |
 | [danielsimonjr.com/MathTS](https://danielsimonjr.com/MathTS/)                          | Searchable **functions** reference (`bun run docs:site`)                  |
