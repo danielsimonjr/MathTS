@@ -7065,7 +7065,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 545
+      "loc": 550
     },
     {
       "file": "functions/src/index.ts",
@@ -8689,7 +8689,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 148
+      "loc": 163
     },
     {
       "file": "functions/src/stats/power-analysis.ts",
@@ -9403,7 +9403,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2185
+      "loc": 2214
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -10698,21 +10698,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 207
+      "loc": 231
     },
     {
       "file": "functions/tests/dogfood-1148-mw-wilcoxon-scipy.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 158
+      "loc": 190
     },
     {
       "file": "functions/tests/dogfood-1154-bootstrap-fisher.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 337
+      "loc": 404
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
@@ -11216,7 +11216,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 52
+      "loc": 43
     },
     {
       "file": "functions/tests/exact-reductions-unregistered.test.ts",

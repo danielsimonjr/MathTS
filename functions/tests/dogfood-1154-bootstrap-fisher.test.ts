@@ -334,3 +334,76 @@ describe('fisherExact keeps its accuracy for large counts and for very small p-v
     expect(() => p(1, 1, 1e308, 1e308)).toThrow(/^fisherExact: the sum of the table entries/);
   });
 });
+
+describe('the resampling tests bound bootstrap * sample size (#1154)', () => {
+  // Without the bound each call below runs for 20 s or more before it returns.
+  const sample = Array.from({ length: 1000 }, (_, i) => Math.sin(i) * 3 + i / 500);
+
+  it('kolmogorovSmirnovTest rejects bootstrap * sample size above 20,000,000', async () => {
+    await expect(
+      kolmogorovSmirnovTest(sample, undefined, { bootstrap: 20001, bootstrapSeed: 1 })
+    ).rejects.toThrow(
+      /^kolmogorovSmirnovTest: bootstrap \* sample size = 20001000 exceeds the supported maximum of 20000000$/
+    );
+  });
+
+  it('shapiroWilkTest rejects bootstrap * sample size above 50,000,000', async () => {
+    await expect(shapiroWilkTest(sample, { bootstrap: 50001, bootstrapSeed: 1 })).rejects.toThrow(
+      /^shapiroWilkTest: bootstrap \* sample size = 50001000 exceeds the supported maximum of 50000000$/
+    );
+  });
+
+  it('mannWhitneyTest rejects bootstrap * pooled size above 200,000,000', async () => {
+    const other = sample.map((v) => v + 0.25);
+    await expect(
+      mannWhitneyTest(sample, other, { bootstrap: 100001, bootstrapSeed: 1 })
+    ).rejects.toThrow(
+      /^mannWhitneyTest: bootstrap \* pooled size = 200002000 exceeds the supported maximum of 200000000$/
+    );
+  });
+
+  it('each test still runs a bootstrap of 100 on 1,000 values', async () => {
+    const ks = await kolmogorovSmirnovTest(sample, undefined, { bootstrap: 100, bootstrapSeed: 1 });
+    const sw = await shapiroWilkTest(sample, { bootstrap: 100, bootstrapSeed: 1 });
+    const mw = await mannWhitneyTest(sample, sample, { bootstrap: 100, bootstrapSeed: 1 });
+    for (const r of [ks, sw, mw]) {
+      expect((r as { bootstrapStatistics: Float64Array }).bootstrapStatistics).toHaveLength(100);
+    }
+  });
+});
+
+describe('chiSquareTest with a NaN statistic gives NaN bootstrap fields (#1154)', () => {
+  it('[NaN, 5] against [3, 3] gives NaN for pValueEmpirical, bootstrapMean and bootstrapStd', async () => {
+    const r = (await chiSquareTest([NaN, 5], [3, 3], { bootstrap: 3, bootstrapSeed: 1 })) as {
+      statistic: number;
+      pValueEmpirical: number;
+      bootstrapMean: number;
+      bootstrapStd: number;
+    };
+    expect(r.statistic).toBeNaN();
+    expect(r.pValueEmpirical).toBeNaN();
+    expect(r.bootstrapMean).toBeNaN();
+    expect(r.bootstrapStd).toBeNaN();
+  });
+});
+
+describe('fisherExact moves a rounded mode estimate to the true mode (#1154)', () => {
+  // Oracle: exact rational sums (Python fractions, SciPy's 1 + 1e-14 rule). In both tables the
+  // float quotient floor((c1 + 1)(r1 + 1) / (N + 2)) is one away from the exact mode, and the
+  // estimate is the observed table, so without the correction the result is 1.
+  it('[[4116953074265712, 2], [2134782147411396, 0]]: the estimate is one below the mode', () => {
+    const p = fisherExact([
+      [4116953074265712, 2],
+      [2134782147411396, 0],
+    ]).pValue;
+    expect(Math.abs(p - 0.5502633066380852)).toBeLessThanOrEqual(1e-15);
+  });
+
+  it('[[1679133894013118, 1652517130518410], [1, 2]]: the estimate is one above the mode', () => {
+    const p = fisherExact([
+      [1679133894013118, 1652517130518410],
+      [1, 2],
+    ]).pValue;
+    expect(Math.abs(p - 0.6220282277239815)).toBeLessThanOrEqual(1e-15);
+  });
+});

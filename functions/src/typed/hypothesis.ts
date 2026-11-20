@@ -226,6 +226,16 @@ const HYPOTHESIS_THRESHOLD = 4096;
 const CHI_BOOTSTRAP_MAX_DRAWS = 20 * MAX_LOOP_ORDER;
 
 /**
+ * Maximum bootstrap count times sample size for the resampling tests (#1154). Each limit is the
+ * work that returns in about 20 s at the rate measured on the build machine under load:
+ * `kolmogorovSmirnovTest` 1.06-1.15 us per value per resample (the CDF call), `shapiroWilkTest`
+ * 117-218 ns, `mannWhitneyTest` 38-68 ns per pooled value per permutation.
+ */
+const KS_BOOTSTRAP_MAX_WORK = 2 * MAX_LOOP_ORDER;
+const SW_BOOTSTRAP_MAX_WORK = 5 * MAX_LOOP_ORDER;
+const MW_BOOTSTRAP_MAX_WORK = 20 * MAX_LOOP_ORDER;
+
+/**
  * Draw `n` indices with replacement from an ascending `sorted` array and return
  * the resample in ascending order, without sorting: tally the draws in a counts
  * array (the same rng stream as drawing values directly), then emit each value
@@ -565,6 +575,16 @@ export async function chiSquareTest(
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   if (B === 0) return baseResult;
+  // A NaN statistic compares false with every resample, so the draws would give a p-value of 0.
+  if (Number.isNaN(baseStatistic)) {
+    return {
+      statistic: baseStatistic,
+      pValueEmpirical: NaN,
+      bootstrapStatistics: new Float64Array(0),
+      bootstrapMean: NaN,
+      bootstrapStd: NaN,
+    } satisfies ChiSquareBootstrapResult;
+  }
 
   // Build cumulative expected probability distribution for multinomial sampling.
   let totalExpected = 0;
@@ -826,6 +846,9 @@ export async function kolmogorovSmirnovTest(
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   if (B === 0) return baseResult;
 
+  // Each resample draws and scores `n` values, so the work is B * n (#1154).
+  assertLoopOrder('kolmogorovSmirnovTest', 'bootstrap * sample size', B * n, KS_BOOTSTRAP_MAX_WORK);
+
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
   const cdf = cdfFn || _normalCDF;
 
@@ -1043,6 +1066,9 @@ export async function mannWhitneyTest(
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   if (B === 0) return baseResult;
 
+  // Each permutation shuffles the pooled ranks, so the work is B * (n1 + n2) (#1154).
+  assertLoopOrder('mannWhitneyTest', 'bootstrap * pooled size', B * nTotal, MW_BOOTSTRAP_MAX_WORK);
+
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 
   /**
@@ -1236,6 +1262,9 @@ export async function shapiroWilkTest(
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   if (B === 0) return baseResult;
+
+  // Each resample draws `n` values and sums three passes over them, so the work is B * n (#1154).
+  assertLoopOrder('shapiroWilkTest', 'bootstrap * sample size', B * n, SW_BOOTSTRAP_MAX_WORK);
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 
