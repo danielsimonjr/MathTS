@@ -1,3 +1,5 @@
+import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
+import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { scaledDistance } from '@danielsimonjr/mathts-core';
@@ -407,8 +409,48 @@ export const createDistance = /* #__PURE__ */ factory(
       c: MathNumericType
     ): MathNumericType {
       const num = abs(addScalar(addScalar(multiplyScalar(a, x), multiplyScalar(b, y)), c));
-      const den = sqrt(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)));
-      return divideScalar(num, den);
+      const den2 = addScalar(multiplyScalar(a, a), multiplyScalar(b, b));
+      const plain = divideScalar(num, sqrt(den2));
+      if (!_overflowed(plain, [x, y, a, b, c]) && !_lostDigits(den2)) return plain;
+      // A product or a square overflowed, or the squares are subnormal (#1255): divide the
+      // coefficients by sqrt(a^2 + b^2) first.
+      const k = _hypot([a, b]);
+      // a = b = 0 is not a line. The plain quotient (c / 0) is kept.
+      if (_isZero(k)) return plain;
+      return abs(
+        addScalar(
+          addScalar(multiplyScalar(divideScalar(a, k), x), multiplyScalar(divideScalar(b, k), y)),
+          divideScalar(c, k)
+        )
+      );
+    }
+
+    /** True when `r` is NaN or infinite and every input is finite. */
+    function _overflowed(r: MathNumericType, inputs: MathNumericType[]): boolean {
+      const finite = (v: MathNumericType): boolean | undefined =>
+        typeof v === 'number'
+          ? Number.isFinite(v)
+          : v instanceof CoreBigNumber
+            ? v.isFinite()
+            : undefined;
+      return finite(r) === false && inputs.every((v) => finite(v) === true);
+    }
+
+    /** True when a sum of squares of numbers is above 0 and too small to keep its digits. */
+    function _lostDigits(sumOfSquares: MathNumericType): boolean {
+      return typeof sumOfSquares === 'number' && sumOfSquares > 0 && !pNormSumInRange(sumOfSquares);
+    }
+
+    function _isZero(v: MathNumericType): boolean {
+      return v instanceof CoreBigNumber ? v.isZero() : v === 0;
+    }
+
+    /** sqrt(sum(v^2)) of finite numbers and BigNumbers, scaled so a square cannot overflow. */
+    function _hypot(vals: MathNumericType[]): MathNumericType {
+      if (vals.some((v) => v instanceof CoreBigNumber)) {
+        return bigHypot(vals as (number | CoreBigNumber)[]) as unknown as MathNumericType;
+      }
+      return Math.hypot(...(vals as number[]));
     }
 
     function _distancePointLine3D(
@@ -436,19 +478,35 @@ export const createDistance = /* #__PURE__ */ factory(
           multiplyScalar(subtractScalar(y0, y), a)
         ),
       ];
-      const num = sqrt(
+      const num2 = addScalar(
         addScalar(
-          addScalar(
-            multiplyScalar(numComponents[0], numComponents[0]),
-            multiplyScalar(numComponents[1], numComponents[1])
-          ),
-          multiplyScalar(numComponents[2], numComponents[2])
-        )
+          multiplyScalar(numComponents[0], numComponents[0]),
+          multiplyScalar(numComponents[1], numComponents[1])
+        ),
+        multiplyScalar(numComponents[2], numComponents[2])
       );
-      const den = sqrt(
-        addScalar(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)), multiplyScalar(c, c))
+      const den2 = addScalar(
+        addScalar(multiplyScalar(a, a), multiplyScalar(b, b)),
+        multiplyScalar(c, c)
       );
-      return divideScalar(num, den);
+      const plain = divideScalar(sqrt(num2), sqrt(den2));
+      const inRange =
+        !_overflowed(plain, [x, y, z, x0, y0, z0, a, b, c]) &&
+        !_lostDigits(num2) &&
+        !_lostDigits(den2);
+      if (inRange) return plain;
+      // A product or a square overflowed, or the squares are subnormal (#1255): use the unit
+      // direction (a, b, c) / |(a, b, c)|.
+      const k = _hypot([a, b, c]);
+      // A zero direction is not a line. The plain quotient (0 / 0) is kept.
+      if (_isZero(k)) return plain;
+      const [ua, ub, uc] = [divideScalar(a, k), divideScalar(b, k), divideScalar(c, k)];
+      const [dx, dy, dz] = [subtractScalar(x0, x), subtractScalar(y0, y), subtractScalar(z0, z)];
+      return _hypot([
+        subtractScalar(multiplyScalar(dy, uc), multiplyScalar(dz, ub)),
+        subtractScalar(multiplyScalar(dz, ua), multiplyScalar(dx, uc)),
+        subtractScalar(multiplyScalar(dx, ub), multiplyScalar(dy, ua)),
+      ]);
     }
 
     function _euclideanDistance(x: MathNumericType[], y: MathNumericType[]): MathNumericType {
@@ -467,6 +525,15 @@ export const createDistance = /* #__PURE__ */ factory(
       }
       if (allNumbers) return scaledDistance(x as number[], y as number[]);
 
+      const diffs: MathNumericType[] = [];
+      for (let i = 0; i < vectorSize; i++) diffs.push(subtractScalar(x[i], y[i]));
+      // A BigNumber difference is scaled by a power of ten, so a square cannot overflow (#1255).
+      if (
+        diffs.some((d) => d instanceof CoreBigNumber) &&
+        diffs.every((d) => typeof d === 'number' || d instanceof CoreBigNumber)
+      ) {
+        return bigHypot(diffs as (number | CoreBigNumber)[]) as unknown as MathNumericType;
+      }
       let result: MathNumericType = 0;
       for (let i = 0; i < vectorSize; i++) {
         const diff = subtractScalar(x[i], y[i]);

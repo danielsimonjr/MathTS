@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-19",
-    "totalFiles": 1349,
+    "lastUpdated": "2026-11-20",
+    "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7394
+    "totalExports": 7396
   },
   "entryPoints": [
     {
@@ -8217,6 +8217,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/string.js",
+            "imports": ["format"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation", "denseRightHandSide", "nonSquareSolveError"]
           },
@@ -9411,9 +9415,19 @@
           {
             "file": "../utils/is.js",
             "imports": ["isComplex"]
+          },
+          {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["bigHypot"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          }
+        ],
         "exports": ["createHypot"],
         "constants": ["createHypot"]
       },
@@ -9711,6 +9725,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["bigHypot", "pNormSumInRange"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -9725,6 +9743,11 @@
           }
         ],
         "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          },
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
@@ -17875,6 +17898,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["bigHypot", "pNormSumInRange"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["isBigNumber"]
           },
@@ -17894,6 +17921,11 @@
           }
         ],
         "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          },
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
@@ -26459,6 +26491,10 @@
             "imports": ["atWorkPrecision"]
           },
           {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["pNormSumInRange"]
+          },
+          {
             "file": "./divide-inverse.js",
             "imports": ["divideInverse"]
           },
@@ -29942,6 +29978,10 @@
             ]
           },
           {
+            "file": "../utils/bignumber-hypot.js",
+            "imports": ["bigHypot"]
+          },
+          {
             "file": "./f64-kernels.js",
             "imports": ["f64Unary", "f64UnaryDispatched", "unaryCollection"]
           },
@@ -30304,6 +30344,21 @@
         "exports": ["atWorkPrecision"],
         "interfaces": ["PrecisionClass"],
         "functions": ["atWorkPrecision"]
+      },
+      "functions/src/utils/bignumber-hypot.ts": {
+        "description": "The square root of the sum of the squares of real values, `sqrt(sum(x^2))`, where at least one",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          }
+        ],
+        "exports": ["bigHypot", "pNormSumInRange"],
+        "functions": ["bigHypot", "pNormSumInRange"]
       },
       "functions/src/utils/clone.ts": {
         "description": "Clone an object. Will make a deep copy of the data.",
@@ -49033,6 +49088,7 @@
           "functions/src/utils/bignumber/nearlyEqual.ts",
           "functions/src/utils/bignumber/round-decimals.ts",
           "functions/src/utils/bignumber/work-precision.ts",
+          "functions/src/utils/bignumber-hypot.ts",
           "functions/src/utils/clone.ts",
           "functions/src/utils/collection.ts",
           "functions/src/utils/complex.ts",
@@ -49822,13 +49878,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1349,
+    "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 237817,
-    "totalExports": 7394,
+    "totalLinesOfCode": 238377,
+    "totalExports": 7396,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2577,
+    "totalFunctions": 2579,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1694,

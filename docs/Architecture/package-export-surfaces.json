@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-19",
+  "generated": "2026-11-20",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -1787,6 +1787,7 @@
       "BfgsResult",
       "bfs",
       "bicgstab",
+      "bigHypot",
       "bigint",
       "bigintGcd",
       "bignumber",
@@ -3621,6 +3622,7 @@
       "planckTemperature",
       "planckTime",
       "pmean",
+      "pNormSumInRange",
       "pointInPolygon",
       "pointInTriangle",
       "poissonDist",

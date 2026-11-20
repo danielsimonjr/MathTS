@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-19'
-  totalFiles: 1349
+  lastUpdated: '2026-11-20'
+  totalFiles: 1350
   totalModules: 82
-  totalExports: 7394
+  totalExports: 7396
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7892,6 +7892,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/string.js
+          imports:
+            - format
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -8970,7 +8973,14 @@ modules:
         - file: ../utils/is.js
           imports:
             - isComplex
-      workspaceDependencies: []
+        - file: ../utils/bignumber-hypot.js
+          imports:
+            - bigHypot
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
       exports:
         - createHypot
       constants:
@@ -9221,6 +9231,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../utils/bignumber-hypot.js
+          imports:
+            - bigHypot
+            - pNormSumInRange
         - file: ../utils/factory.js
           imports:
             - factory
@@ -9233,6 +9247,10 @@ modules:
             - realScale
             - isDegenerate
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -16787,6 +16805,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../utils/bignumber-hypot.js
+          imports:
+            - bigHypot
+            - pNormSumInRange
         - file: ../utils/is.js
           imports:
             - isBigNumber
@@ -16802,6 +16824,10 @@ modules:
             - TypedFunction
           typeOnly: true
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -24810,6 +24836,9 @@ modules:
         - file: ../utils/bignumber/work-precision.js
           imports:
             - atWorkPrecision
+        - file: ../utils/bignumber-hypot.js
+          imports:
+            - pNormSumInRange
         - file: ./divide-inverse.js
           imports:
             - divideInverse
@@ -28037,6 +28066,9 @@ modules:
             - staysRealAbsAtLeastOne
             - staysRealAcosh
             - staysRealUnitInterval
+        - file: ../utils/bignumber-hypot.js
+          imports:
+            - bigHypot
         - file: ./f64-kernels.js
           imports:
             - f64Unary
@@ -28390,6 +28422,22 @@ modules:
         - PrecisionClass
       functions:
         - atWorkPrecision
+    functions/src/utils/bignumber-hypot.ts:
+      description: The square root of the sum of the squares of real values, `sqrt(sum(x^2))`, where at least one
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - BigNumber
+      exports:
+        - bigHypot
+        - pNormSumInRange
+      functions:
+        - bigHypot
+        - pNormSumInRange
     functions/src/utils/clone.ts:
       description: Clone an object. Will make a deep copy of the data.
       externalDependencies: []
@@ -46258,6 +46306,7 @@ dependencyGraph:
         - functions/src/utils/bignumber/nearlyEqual.ts
         - functions/src/utils/bignumber/round-decimals.ts
         - functions/src/utils/bignumber/work-precision.ts
+        - functions/src/utils/bignumber-hypot.ts
         - functions/src/utils/clone.ts
         - functions/src/utils/collection.ts
         - functions/src/utils/complex.ts
@@ -46981,13 +47030,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1349
+  totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 237817
-  totalExports: 7394
+  totalLinesOfCode: 238377
+  totalExports: 7396
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2577
+  totalFunctions: 2579
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1694

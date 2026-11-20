@@ -336,6 +336,17 @@ export const createEigs = /* #__PURE__ */ factory(
       return result;
     }
 
+    /** finite test of a number, a BigNumber or a Complex; a Fraction is always finite */
+    function isFiniteEntry(x: unknown): boolean {
+      if (typeof x === 'number') return Number.isFinite(x);
+      if (isComplex(x)) {
+        const { re, im } = x as { re: number; im: number };
+        return Number.isFinite(re) && Number.isFinite(im);
+      }
+      const f = (x as { isFinite?: () => boolean } | null)?.isFinite;
+      return typeof f === 'function' ? f.call(x) : true;
+    }
+
     function computeValuesAndVectors(
       mat: Matrix,
       prec: number | BigNumber,
@@ -350,6 +361,15 @@ export const createEigs = /* #__PURE__ */ factory(
       }
 
       const N = asize[0];
+
+      // NaN or Infinity entries make every rotation and test meaningless
+      for (const row of arr) {
+        for (const x of row) {
+          if (!isFiniteEntry(x)) {
+            throw new RangeError(`eigs: matrix entries must be finite (got ${String(x)})`);
+          }
+        }
+      }
 
       // both tests below are relative to the entries they compare, so a small
       // block beside a huge entry keeps its asymmetry and its imaginary parts,

@@ -73,6 +73,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
+import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { exactReductions } from './exact-reductions.js';
 import {
@@ -1580,7 +1581,28 @@ function vectorNorm(arr: f64[], p: f64 = 2): f64 {
   // General p-norm: still accumulate PAIRWISE so the sum does not drift as O(n)*eps.
   const terms = new Array<f64>(arr.length);
   for (let i = 0; i < arr.length; i++) terms[i] = Math.pow(Math.abs(arr[i]), p);
-  return Math.pow(pairwiseSum(terms), 1 / p);
+  const sum = pairwiseSum(terms);
+  const plain = Math.pow(sum, 1 / p);
+  return p === 1 || pNormSumInRange(sum) ? plain : scaledPNorm(arr, p, terms, plain);
+}
+
+/**
+ * The p-norm of `arr` when the plain sum of p-th powers is out of range. It is a function of its
+ * own so that `vectorNorm`, the path of every in-range call, stays small.
+ */
+function scaledPNorm(arr: f64[], p: f64, terms: f64[], plain: f64): f64 {
+  // A sum of p-th powers can overflow or underflow when the norm is in range (#1255). Then the
+  // norm is m * norm(x / m, p). The scale m is max(abs(x)) for a positive p and min(abs(x)) for a
+  // negative p, so each scaled term is at most 1. A NaN, an infinite or a zero scale keeps `plain`.
+  let m = p > 0 ? 0 : Infinity;
+  for (let i = 0; i < arr.length; i++) {
+    const a = Math.abs(arr[i]);
+    if (Number.isNaN(a)) return plain;
+    if (p > 0 ? a > m : a < m) m = a;
+  }
+  if (!Number.isFinite(m) || m === 0) return plain;
+  for (let i = 0; i < arr.length; i++) terms[i] = Math.pow(Math.abs(arr[i]) / m, p);
+  return m * Math.pow(pairwiseSum(terms), 1 / p);
 }
 
 /**
