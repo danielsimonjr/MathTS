@@ -81,6 +81,12 @@
       "script": "functions/tests/helpers/bignumber-sum-perf-gate.mjs",
       "limit": 1.5,
       "needs": ["core/dist/index.js"]
+    },
+    {
+      "name": "simplify-coefficient-cap",
+      "script": "functions/tests/helpers/simplify-coefficient-cap-perf-gate.mjs",
+      "limit": 3,
+      "needs": ["functions/dist/index.js"]
     }
   ]
 }

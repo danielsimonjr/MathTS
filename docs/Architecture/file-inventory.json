@@ -11223,7 +11223,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 115
     },
     {
       "file": "functions/tests/dogfood-g22-expression-sandbox.test.ts",
