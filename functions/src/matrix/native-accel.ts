@@ -16,8 +16,10 @@
  * singular matrix — is handled correctly (a singular matrix has det 0), verified
  * against numpy.
  */
-import { DenseMatrix, lu, eig } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, lu, eig, balanceForEig } from '@danielsimonjr/mathts-matrix';
 import { Complex } from '@danielsimonjr/mathts-core';
+import { defineRemovedVectorsGetter } from './eigs.js';
+import { isFraction } from '../utils/is.js';
 
 /** Below this dimension the factory path is already sub-millisecond; native
  *  conversion overhead isn't worth it and the well-tested factory path runs. */
@@ -135,6 +137,47 @@ function maxAbsEntry(a: number[][]): number {
 }
 
 /**
+ * The test that an eigenvalue of `a` is real: its imaginary part is rounding noise, `|im| <=
+ * 8 n eps scale`. The scale is local (#1240). A scale of the whole matrix, its largest entry,
+ * reads `1e-5 +- i` beside an entry of 1e20 as real, because the noise of the huge entry is far
+ * above 1. The test reads the matrix that the solver reads: the active block of the balanced
+ * matrix (`balanceForEig`). An isolated eigenvalue has an im of exactly 0. Every eigenvalue of the
+ * block lies in the Gershgorin disc of some row of the block, `|l - b_ii| <= R_i` with R_i the sum
+ * of the other entries of the row. The scale of an eigenvalue is the largest entry of the rows
+ * whose disc holds it. The discs have a slack of the noise of the largest block entry, `8 n eps
+ * max|b|`, so a value that rounding moved from its disc still finds its rows. When no row holds
+ * the value, the scale is the largest block entry. The test uses the eigenvalue alone, so
+ * `values` does not depend on `eigenvectors`.
+ */
+function makeIsReal(a: number[][]): (v: { re: number; im: number }) => boolean {
+  const noise = 8 * a.length * Number.EPSILON;
+  const { perm, low, high, scale } = balanceForEig(a);
+  const block = perm.slice(low, high + 1);
+  const d = scale.slice(low, high + 1);
+  const b = block.map((pi, i) => block.map((pj, j) => a[pi][pj] * (d[j] / d[i])));
+  const global = maxAbsEntry(b);
+  const slack = noise * global;
+  const rows = b.map((row, i) => {
+    let radius = 0;
+    let top = 0;
+    row.forEach((y, j) => {
+      const x = Math.abs(y);
+      if (j !== i) radius += x;
+      if (x > top) top = x;
+    });
+    return { centre: row[i], radius: radius + slack, top };
+  });
+  return (v) => {
+    if (v.im === 0) return true;
+    let local = 0;
+    for (const { centre, radius, top } of rows) {
+      if (top > local && Math.hypot(v.re - centre, v.im) <= radius) local = top;
+    }
+    return Math.abs(v.im) <= noise * (local > 0 ? local : global);
+  };
+}
+
+/**
  * The real part of eigenvector `i`, or, for a pair that rounds to a repeated real eigenvalue, a
  * real eigenvector of that eigenvalue. The two members of a pair share the real part
  * `vectors[i]`, so the member with im < 0 takes the imaginary part `vectorsIm[i]` instead, scaled
@@ -143,18 +186,13 @@ function maxAbsEntry(a: number[][]): number {
 function realVector(
   ne: { values: Array<{ re: number; im: number }>; vectors: number[][]; vectorsIm: number[][] },
   i: number,
-  isReal: (im: number) => boolean
+  isReal: (v: { re: number; im: number }) => boolean
 ): number[] {
   const im = ne.values[i].im;
-  if (im >= 0 || !isReal(im)) return ne.vectors[i];
+  if (im >= 0 || !isReal(ne.values[i])) return ne.vectors[i];
   const v = ne.vectorsIm[i];
   const norm = Math.hypot(...v) || 1;
   return v.map((x) => x / norm);
-}
-
-/** True for a square `number[][]` of any size ≥ 1. */
-export function isNumericSquare(a: unknown): a is number[][] {
-  return isNumericSquareAtLeast(a, 1);
 }
 
 /**
@@ -209,27 +247,37 @@ function independentMembers(
   return chosen;
 }
 
+/** The result of the native eigs: the values, and one pair per independent eigenvector. */
+interface NativeEigs {
+  values: Array<number | Complex>;
+  eigenvectors?: Array<{ value: number | Complex; vector: Array<number | Complex> }>;
+}
+
+/** The options of the public `eigs` that the native path reads. */
+type EigsOptions = { eigenvectors?: boolean; matricize?: boolean };
+
+const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
+const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
+
 /**
- * Correct eigendecomposition for the public `eigs`.
- *
- * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
- * non-symmetric matrix — even trivial upper-triangular ones, whose eigenvalues
- * are just the diagonal (e.g. [[2,1,0],[0,3,1],[0,0,4]] → [1.27, 3, 4.73]). The
- * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
- * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
- * numeric square matrices through it and emit the factory's `{ values,
- * eigenvectors }` shape. Non-(numeric square) inputs and any native error
- * other than a RangeError fall back to the factory; a RangeError from the native
- * solver propagates (a non-finite entry, a non-finite eigenvalue, no convergence).
+ * The order of the values of the factory `eigs`: the absolute value ascending, then the real part
+ * descending, then the imaginary part descending. A Matrix result keeps it (#1179).
  */
-export function correctEigs(
-  a: unknown,
-  options: { eigenvectors?: boolean } | undefined,
-  factoryEigs: (m: unknown, o?: unknown) => unknown
-): unknown {
-  const toFactory = (): unknown =>
-    options === undefined ? factoryEigs(a) : factoryEigs(a, options);
-  if (!isNumericSquare(a)) return toFactory();
+function compareFactoryOrder(p: number | Complex, q: number | Complex): number {
+  return (
+    Math.hypot(reOf(p), imOf(p)) - Math.hypot(reOf(q), imOf(q)) ||
+    reOf(q) - reOf(p) ||
+    imOf(q) - imOf(p)
+  );
+}
+
+/**
+ * Eigendecomposition of a numeric square matrix by the native orthes/hqr2 solver, in the shape of
+ * the factory `eigs`. Returns `undefined` for any native error other than a RangeError (the caller
+ * falls back to the factory); a RangeError from the native solver propagates (a non-finite entry, a
+ * non-finite eigenvalue, no convergence).
+ */
+function nativeEigs(a: number[][], options: EigsOptions | undefined): NativeEigs | undefined {
   const wantVectors = options?.eigenvectors !== false;
   try {
     const ne = eig(a, { computeVectors: wantVectors });
@@ -253,25 +301,21 @@ export function correctEigs(
     // a real spectrum keeps number[] vectors.
     // A real eigenvalue of a real matrix has an im of exactly 0, except when it is repeated: the
     // copies of a repeated real eigenvalue can come out as a conjugate pair with an im of rounding
-    // size (mostly below 2 * n * eps * max|A_ij|; an ill-conditioned repeated eigenvalue can exceed
-    // the bound below and then stays a pair, as in NumPy). A genuine pair, however near to real,
-    // has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)). The test uses the
-    // eigenvalue alone, so `values` does not depend on `eigenvectors`.
-    const imTol = 8 * ne.values.length * Number.EPSILON * maxAbsEntry(a);
-    const isReal = (im: number): boolean => Math.abs(im) <= imTol;
-    const anyComplex = ne.values.some((v) => !isReal(v.im));
-    const vectorOf = (v: { im: number }, i: number): number[] | Complex[] => {
+    // size (mostly below 2 * n * eps * the local scale; an ill-conditioned repeated eigenvalue can
+    // exceed the bound of `makeIsReal` and then stays a pair, as in NumPy). A genuine pair, however
+    // near to real, has a larger im (the 2x2 block of a split Jordan block: about sqrt(eps)).
+    const isReal = makeIsReal(a);
+    const anyComplex = ne.values.some((v) => !isReal(v));
+    const vectorOf = (v: { re: number; im: number }, i: number): number[] | Complex[] => {
       const re = realVector(ne, i, isReal);
       if (!anyComplex) return re;
-      return re.map((x, j) => new Complex(x, isReal(v.im) ? 0 : ne.vectorsIm[i][j]));
+      return re.map((x, j) => new Complex(x, isReal(v) ? 0 : ne.vectorsIm[i][j]));
     };
     const all = ne.values.map((v, i) => ({
-      value: (isReal(v.im) ? v.re : new Complex(v.re, v.im)) as number | Complex,
+      value: (isReal(v) ? v.re : new Complex(v.re, v.im)) as number | Complex,
       vector: wantVectors ? vectorOf(v, i) : [],
       i,
     }));
-    const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
-    const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
     all.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
     const values = all.map((p) => p.value);
     const pairs = all.filter((p) => keep.has(p.i));
@@ -280,6 +324,92 @@ export function correctEigs(
       : { values };
   } catch (e) {
     if (e instanceof RangeError) throw e;
-    return toFactory();
+    return undefined;
   }
+}
+
+/**
+ * The matrix as `number[][]` when the factory `eigs` would solve it in its `number` type: a square
+ * array whose entries are numbers or Fractions (`coerceTypes` converts a Fraction to a number).
+ * Otherwise `undefined`. A Fraction among the entries then takes the native solver too, whose
+ * eigenvectors are accurate to rounding; the factory gave a residual of 2.3e-6 (#1179).
+ */
+function asNumberSquare(a: unknown): number[][] | undefined {
+  if (!Array.isArray(a) || a.length < 1) return undefined;
+  const n = a.length;
+  const out: number[][] = [];
+  for (const row of a) {
+    if (!Array.isArray(row) || row.length !== n) return undefined;
+    const r = new Array<number>(n);
+    for (let j = 0; j < n; j++) {
+      const x: unknown = row[j];
+      if (typeof x === 'number') r[j] = x;
+      else if (isFraction(x)) r[j] = Number(x);
+      else return undefined;
+    }
+    out.push(r);
+  }
+  return out;
+}
+
+/**
+ * Correct eigendecomposition for the public `eigs`.
+ *
+ * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
+ * non-symmetric matrix — even trivial upper-triangular ones, whose eigenvalues
+ * are just the diagonal (e.g. [[2,1,0],[0,3,1],[0,0,4]] → [1.27, 3, 4.73]). The
+ * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
+ * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
+ * numeric square matrices through it and emit the factory's `{ values,
+ * eigenvectors }` shape. Non-(numeric square) inputs and any native error
+ * other than a RangeError fall back to the factory; a RangeError from the native
+ * solver propagates (a non-finite entry, a non-finite eigenvalue, no convergence).
+ */
+export function correctEigs(
+  a: unknown,
+  options: EigsOptions | undefined,
+  factoryEigs: (m: unknown, o?: unknown) => unknown
+): unknown {
+  const nums = asNumberSquare(a);
+  const native = nums === undefined ? undefined : nativeEigs(nums, options);
+  if (native === undefined) return options === undefined ? factoryEigs(a) : factoryEigs(a, options);
+  // An Array with a Fraction entry went to the factory before #1179: it keeps the factory order,
+  // as mathjs 15.2.0 does. A number Array keeps the real-part order of the native solver.
+  const hasFraction = (a as unknown[][]).some((row) => row.some((x) => isFraction(x)));
+  return hasFraction ? inFactoryOrder(native, (data) => data) : native;
+}
+
+/**
+ * The native result in the order of the factory (`compareFactoryOrder`), each list built by `wrap`.
+ */
+function inFactoryOrder(native: NativeEigs, wrap: (data: unknown[]) => unknown): unknown {
+  const wrapped: Record<string, unknown> = {
+    values: wrap([...native.values].sort(compareFactoryOrder)),
+  };
+  if (native.eigenvectors !== undefined) {
+    wrapped.eigenvectors = [...native.eigenvectors]
+      .sort((p, q) => compareFactoryOrder(p.value, q.value))
+      .map(({ value, vector }) => ({ value, vector: wrap(vector) }));
+    defineRemovedVectorsGetter(wrapped);
+  }
+  return wrapped;
+}
+
+/**
+ * The same for a Matrix (#1179). A Matrix of numbers takes the native solver, and the result is a
+ * Matrix of values and a Matrix for each vector, as the factory returns for a Matrix. The values
+ * keep the order of the factory (`compareFactoryOrder`), so a Matrix result does not change its
+ * order. `toMatrix` builds a Matrix from an array. The option `matricize: false` returns arrays.
+ */
+export function correctEigsOfMatrix(
+  m: { toArray(): unknown },
+  options: EigsOptions | undefined,
+  factoryEigs: (m: unknown, o?: unknown) => unknown,
+  toMatrix: (data: unknown[]) => unknown
+): unknown {
+  const arr = m.toArray();
+  const nums = asNumberSquare(arr);
+  const native = nums === undefined ? undefined : nativeEigs(nums, options);
+  if (native === undefined) return options === undefined ? factoryEigs(m) : factoryEigs(m, options);
+  return inFactoryOrder(native, options?.matricize !== false ? toMatrix : (data) => data);
 }
