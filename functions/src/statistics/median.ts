@@ -7,6 +7,7 @@ import { arrayHasNaN } from '../utils/sort-numbers.js';
 import { medianInPlace, medianNumbers } from '../utils/median-numbers.js';
 import {
   flattenForStatistics,
+  exactOrder,
   finiteNumbers,
   isFloatTyped,
   numberGrid,
@@ -155,15 +156,17 @@ export const createMedian = /* #__PURE__ */ factory(
           return medianNumbers(flat as number[]);
         }
 
+        // An exact order, so the result does not depend on the input order (#1292).
+        const order = exactOrder(compare as (a: unknown, b: unknown) => unknown);
         if (num % 2 === 0) {
           // even: return the average of the two middle values
           const mid = num / 2 - 1;
-          const right = partitionSelect(flat, mid + 1);
+          const right = partitionSelect(flat, mid + 1, order);
 
           // array now partitioned at mid + 1, take max of left part
           let left = flat[mid];
           for (let i = 0; i < mid; ++i) {
-            if ((compare as (a: unknown, b: unknown) => number)(flat[i], left) > 0) {
+            if (order(flat[i], left) > 0) {
               left = flat[i];
             }
           }
@@ -171,7 +174,7 @@ export const createMedian = /* #__PURE__ */ factory(
           return middle2(left, right);
         } else {
           // odd: return the middle value
-          const m = partitionSelect(flat, (num - 1) / 2);
+          const m = partitionSelect(flat, (num - 1) / 2, order);
 
           return middle(m);
         }

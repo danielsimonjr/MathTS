@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 import type {
   FibonacciHeapNode,
   FibonacciHeapInterface,
@@ -112,7 +113,7 @@ export const createSpaClass = /* #__PURE__ */ factory(
           // check it is in range
           if (node.key >= from) {
             // check value is not zero
-            if (!equalScalar(node.value, 0)) {
+            if (!isZeroEntry(node.value, equalScalar)) {
               // invoke callback
               callback(node.key, node.value, this);
             }

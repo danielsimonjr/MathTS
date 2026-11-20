@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7397
+    "totalExports": 7408
   },
   "entryPoints": [
     {
@@ -7609,7 +7609,7 @@
     },
     "functions/algebra": {
       "functions/src/algebra/decomposition/lup.ts": {
-        "description": "Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a",
+        "description": "Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -7626,8 +7626,12 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
+          },
+          {
             "file": "../../utils/typed-impl.js",
-            "imports": ["findTypedImpl"]
+            "imports": ["createNumberFieldOps", "NumberFieldOps"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -7658,7 +7662,7 @@
           },
           {
             "file": "../../utils/typed-impl.js",
-            "imports": ["findTypedImpl"]
+            "imports": ["createNumberFieldOps", "NumberFieldOps"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -8159,6 +8163,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
           },
@@ -8194,6 +8202,10 @@
           {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           }
         ],
         "workspaceDependencies": [
@@ -8276,14 +8288,19 @@
         "constants": ["createLusolve"]
       },
       "functions/src/algebra/solver/pivot-tolerance.ts": {
-        "description": "Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix",
+        "description": "Safety factor on `n * eps` in {@link pivotTolerance}.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE", "isBadLuFactorPivot"],
-        "functions": ["isBadLuFactorPivot"],
-        "constants": ["LU_PIVOT_TOL", "LUSOLVE_SINGULAR_MESSAGE"]
+        "exports": [
+          "PIVOT_EPS_FACTOR",
+          "LUSOLVE_SINGULAR_MESSAGE",
+          "pivotTolerance",
+          "isBadLuFactorPivot"
+        ],
+        "functions": ["pivotTolerance", "isBadLuFactorPivot"],
+        "constants": ["PIVOT_EPS_FACTOR", "LUSOLVE_SINGULAR_MESSAGE"]
       },
       "functions/src/algebra/solver/usolve.ts": {
         "description": "Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro",
@@ -8293,6 +8310,10 @@
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           },
           {
             "file": "./utils/solveValidation.js",
@@ -8334,6 +8355,10 @@
           {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           }
         ],
         "workspaceDependencies": [
@@ -19523,7 +19548,7 @@
         "constants": ["createOnes"]
       },
       "functions/src/matrix/partitionSelect.ts": {
-        "description": "Partition-based selection of an array or 1D matrix.",
+        "description": "Three-way quickselect: each pass splits the range into values less than, equal to and",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23571,6 +23596,7 @@
             "file": "./numeric-data.js",
             "imports": [
               "flattenForStatistics",
+              "exactOrder",
               "finiteNumbers",
               "isFloatTyped",
               "numberGrid",
@@ -23673,10 +23699,15 @@
           {
             "file": "../utils/array.js",
             "imports": ["flatten"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isBigNumber", "isNumber"]
           }
         ],
         "workspaceDependencies": [],
         "exports": [
+          "exactOrder",
           "isFloatTyped",
           "copyToNumberArray",
           "flattenForStatistics",
@@ -23693,6 +23724,7 @@
           "typedArrayPairToNumbers"
         ],
         "functions": [
+          "exactOrder",
           "isFloatTyped",
           "copyToNumberArray",
           "flattenForStatistics",
@@ -23753,15 +23785,42 @@
           {
             "file": "./numeric-data.js",
             "imports": ["readSkip"]
+          },
+          {
+            "file": "../utils/median-numbers.js",
+            "imports": ["minFrom", "quickSelectInPlace"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["assertNumpyQuantileMethod", "quantileOfSorted", "parseQuantileThirdArg"],
-        "interfaces": ["QuantileSeqOptions"],
-        "functions": ["assertNumpyQuantileMethod", "quantileOfSorted", "parseQuantileThirdArg"]
+        "exports": [
+          "NUMBER_ARITH",
+          "assertNumpyQuantileMethod",
+          "quantilePlan",
+          "blendNumber",
+          "orderStatistics",
+          "quantileOfSorted",
+          "quantileOfUnsorted",
+          "parseQuantileThirdArg"
+        ],
+        "interfaces": [
+          "QuantileArith",
+          "QuantilePlan",
+          "QuantileSeqOptions",
+          "ParsedQuantileOptions"
+        ],
+        "functions": [
+          "assertNumpyQuantileMethod",
+          "quantilePlan",
+          "blendNumber",
+          "orderStatistics",
+          "quantileOfSorted",
+          "quantileOfUnsorted",
+          "parseQuantileThirdArg"
+        ],
+        "constants": ["NUMBER_ARITH"]
       },
       "functions/src/statistics/quantileSeq.ts": {
-        "description": "Compute the prob order quantile of a matrix or a list with values.",
+        "description": "From this many probabilities on, an unsorted number sample is sorted once, with the native",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23788,15 +23847,22 @@
           },
           {
             "file": "./numeric-data.js",
-            "imports": ["isFloatTyped", "copyToNumberArray", "FloatTyped"]
+            "imports": ["exactOrder", "isFloatTyped", "FloatTyped"]
           },
           {
             "file": "./quantile-numpy-methods.js",
             "imports": [
-              "assertNumpyQuantileMethod",
-              "quantileOfSorted",
+              "NUMBER_ARITH",
+              "blendNumber",
+              "orderStatistics",
               "parseQuantileThirdArg",
+              "quantileOfSorted",
+              "quantileOfUnsorted",
+              "quantilePlan",
               "NumpyQuantileMethod",
+              "ParsedQuantileOptions",
+              "QuantileArith",
+              "QuantilePlan",
               "QuantileSeqOptions"
             ]
           }
@@ -25518,6 +25584,10 @@
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           },
           {
             "file": "./types.js",
@@ -29046,6 +29116,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../algebra/solver/pivot-tolerance.js",
+            "imports": ["pivotTolerance"]
+          },
+          {
             "file": "../numeric/numeric-jacobian.js",
             "imports": ["numericJacobian"]
           },
@@ -29118,7 +29192,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["densifyForSolver", "SparseMatrix"]
+            "imports": ["densifyForSolver", "singularValues", "SparseMatrix"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -29853,7 +29927,7 @@
           },
           {
             "file": "../utils/median-numbers.js",
-            "imports": ["medianInPlace"]
+            "imports": ["medianInPlace", "minFrom", "quickSelectInPlace"]
           },
           {
             "file": "../utils/limits.js",
@@ -30726,8 +30800,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["isExactZero"],
-        "functions": ["isExactZero"]
+        "exports": ["isExactZero", "isZeroEntry"],
+        "functions": ["isExactZero", "isZeroEntry"]
       },
       "functions/src/utils/isFinite.ts": {
         "description": "Test whether a value is finite.",
@@ -31042,8 +31116,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["medianNumbers", "medianInPlace"],
-        "functions": ["medianNumbers", "medianInPlace"]
+        "exports": ["medianNumbers", "medianInPlace", "minFrom", "quickSelectInPlace"],
+        "functions": ["medianNumbers", "medianInPlace", "minFrom", "quickSelectInPlace"]
       },
       "functions/src/utils/node.ts": {
         "description": "Type definitions for Math.js AST nodes",
@@ -31517,8 +31591,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["findTypedImpl"],
-        "functions": ["findTypedImpl"]
+        "exports": ["findTypedImpl", "createNumberFieldOps"],
+        "interfaces": ["NumberFieldScalars"],
+        "functions": ["findTypedImpl", "createNumberFieldOps"]
       }
     },
     "functions/wasm": {
@@ -49920,14 +49995,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238753,
-    "totalExports": 7397,
+    "totalLinesOfCode": 239386,
+    "totalExports": 7408,
     "totalClasses": 62,
-    "totalInterfaces": 669,
-    "totalFunctions": 2583,
-    "totalTypeGuards": 184,
+    "totalInterfaces": 673,
+    "totalFunctions": 2593,
+    "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1695,
+    "totalConstants": 1696,
     "totalReExports": 3191,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,

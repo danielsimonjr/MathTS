@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7397
+  totalExports: 7408
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7344,9 +7344,7 @@ modules:
         - assertSameTape
   functions/algebra:
     functions/src/algebra/decomposition/lup.ts:
-      description: >-
-        Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`)
-        and a
+      description: 'Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7359,9 +7357,13 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7387,7 +7389,8 @@ modules:
             - isExactZero
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7837,6 +7840,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -7870,6 +7876,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -7941,19 +7950,21 @@ modules:
       constants:
         - createLusolve
     functions/src/algebra/solver/pivot-tolerance.ts:
-      description: Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+      description: Safety factor on `n * eps` in {@link pivotTolerance}.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
+        - pivotTolerance
         - isBadLuFactorPivot
       functions:
+        - pivotTolerance
         - isBadLuFactorPivot
       constants:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
     functions/src/algebra/solver/usolve.ts:
       description: >-
@@ -7965,6 +7976,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -8001,6 +8015,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -18278,7 +18295,7 @@ modules:
       constants:
         - createOnes
     functions/src/matrix/partitionSelect.ts:
-      description: Partition-based selection of an array or 1D matrix.
+      description: 'Three-way quickselect: each pass splits the range into values less than, equal to and'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22229,6 +22246,7 @@ modules:
         - file: ./numeric-data.js
           imports:
             - flattenForStatistics
+            - exactOrder
             - finiteNumbers
             - isFloatTyped
             - numberGrid
@@ -22321,8 +22339,13 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isNumber
       workspaceDependencies: []
       exports:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22338,6 +22361,7 @@ modules:
         - isConstantArrayLike
         - typedArrayPairToNumbers
       functions:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22391,19 +22415,37 @@ modules:
         - file: ./numeric-data.js
           imports:
             - readSkip
+        - file: ../utils/median-numbers.js
+          imports:
+            - minFrom
+            - quickSelectInPlace
       workspaceDependencies: []
       exports:
+        - NUMBER_ARITH
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
       interfaces:
+        - QuantileArith
+        - QuantilePlan
         - QuantileSeqOptions
+        - ParsedQuantileOptions
       functions:
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
+      constants:
+        - NUMBER_ARITH
     functions/src/statistics/quantileSeq.ts:
-      description: Compute the prob order quantile of a matrix or a list with values.
+      description: From this many probabilities on, an unsorted number sample is sorted once, with the native
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22426,15 +22468,22 @@ modules:
           typeOnly: true
         - file: ./numeric-data.js
           imports:
+            - exactOrder
             - isFloatTyped
-            - copyToNumberArray
             - FloatTyped
         - file: ./quantile-numpy-methods.js
           imports:
-            - assertNumpyQuantileMethod
-            - quantileOfSorted
+            - NUMBER_ARITH
+            - blendNumber
+            - orderStatistics
             - parseQuantileThirdArg
+            - quantileOfSorted
+            - quantileOfUnsorted
+            - quantilePlan
             - NumpyQuantileMethod
+            - ParsedQuantileOptions
+            - QuantileArith
+            - QuantilePlan
             - QuantileSeqOptions
       workspaceDependencies: []
       exports:
@@ -23987,6 +24036,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
         - file: ./types.js
           imports:
             - FibonacciHeapNode
@@ -27209,6 +27261,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../algebra/solver/pivot-tolerance.js
+          imports:
+            - pivotTolerance
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -27275,6 +27330,7 @@ modules:
           directory: matrix
           imports:
             - densifyForSolver
+            - singularValues
             - SparseMatrix
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -27943,6 +27999,8 @@ modules:
         - file: ../utils/median-numbers.js
           imports:
             - medianInPlace
+            - minFrom
+            - quickSelectInPlace
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
@@ -28774,8 +28832,10 @@ modules:
       workspaceDependencies: []
       exports:
         - isExactZero
+        - isZeroEntry
       functions:
         - isExactZero
+        - isZeroEntry
     functions/src/utils/isFinite.ts:
       description: Test whether a value is finite.
       externalDependencies: []
@@ -29053,9 +29113,13 @@ modules:
       exports:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
       functions:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
       externalDependencies: []
@@ -29512,8 +29576,12 @@ modules:
       workspaceDependencies: []
       exports:
         - findTypedImpl
+        - createNumberFieldOps
+      interfaces:
+        - NumberFieldScalars
       functions:
         - findTypedImpl
+        - createNumberFieldOps
   functions/wasm:
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
@@ -47068,14 +47136,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238753
-  totalExports: 7397
+  totalLinesOfCode: 239386
+  totalExports: 7408
   totalClasses: 62
-  totalInterfaces: 669
-  totalFunctions: 2583
-  totalTypeGuards: 184
+  totalInterfaces: 673
+  totalFunctions: 2593
+  totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1695
+  totalConstants: 1696
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

@@ -186,7 +186,11 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
         throw err;
       }
-      validatePackedUpperTriangularPivots(fac.U.toFloat64Array(), aRows.length);
+      validatePackedUpperTriangularPivots(
+        fac.U.toFloat64Array(),
+        aRows.length,
+        fac.L.toFloat64Array()
+      );
       return luSolve(fac, bVec).map((v) => [v]);
     }
 
@@ -440,10 +444,10 @@ export const createLusolve = /* #__PURE__ */ factory(
      * An empty (0 x 0) system returns the empty solution.
      *
      * Throws when the factorization is singular or contains non-finite values, including
-     * rank-deficient but consistent systems. The pivot cutoff is `1e-15` times the
-     * largest absolute entry (the same floor `linsolve` uses on a unit-scale matrix).
-     * Numeric systems whose entries are all smaller than 1 are equilibrated first so
-     * that cutoff stays relative to the matrix.
+     * rank-deficient but consistent systems. The pivot cutoff is `8 * n * eps` times the largest
+     * term that the elimination subtracted from the pivot, so a small pivot that no term
+     * cancelled is valid (the diagonal matrix `diag(1e10, 1e-7)` is regular). Numeric systems whose entries are all
+     * smaller than 1 are equilibrated first.
      */
     return typed(name, {
       'Array, Array | Matrix': function (
@@ -574,7 +578,7 @@ export const createLusolve = /* #__PURE__ */ factory(
       }
 
       const lifted = liftTinyFactor(U, bMatrix);
-      validateUpperTriangularPivots(lifted.U);
+      validateUpperTriangularPivots(lifted.U, L);
 
       // use forward substitution to resolve L * y = b
       const y = lsolve(L, lifted.b);

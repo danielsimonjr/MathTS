@@ -1,5 +1,6 @@
 import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { createSolveNumberOps, type SolveNumberOps } from './utils/solveNumberOps.js';
 import type { TypedFunction } from '../../core/function/typed.js';
@@ -185,7 +186,9 @@ export const createUsolve = /* #__PURE__ */ factory(
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
         let xj: number;
-        if (!ops.equalScalar(bj, 0)) {
+        // A right side that is only small is not zero (#1287): the tolerance of `equalScalar`
+        // is absolute and would read every value of a matrix near 1e-100 as zero.
+        if (bj !== 0) {
           const quot = ops.div(bj, vjj);
           if (typeof quot !== 'number') {
             return j;
@@ -251,7 +254,7 @@ export const createUsolve = /* #__PURE__ */ factory(
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
-        if (!equalScalar(bj, 0)) {
+        if (!isZeroEntry(bj, equalScalar)) {
           xj = divideScalar(bj, vjj);
 
           // loop rows
@@ -324,7 +327,7 @@ export const createUsolve = /* #__PURE__ */ factory(
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
-        if (!equalScalar(bj, 0)) {
+        if (!isZeroEntry(bj, equalScalar)) {
           const xj = divideScalar(bj, vjj);
 
           for (let k = 0, lastIndex = jIndices.length; k < lastIndex; k++) {
