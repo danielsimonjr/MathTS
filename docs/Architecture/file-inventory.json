@@ -9515,7 +9515,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1736
+      "loc": 1748
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10705,7 +10705,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 63
+      "loc": 89
     },
     {
       "file": "functions/tests/dogfood-1153-peak-widths.test.ts",

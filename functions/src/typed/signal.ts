@@ -582,21 +582,33 @@ function floatMod(a: f64, b: f64): f64 {
  *
  * @param phase - Array of phase values in radians
  * @returns Unwrapped phase array
+ * @throws TypeError if `phase` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function unwrapPhase(phase: number[]): number[] {
-  const n: i32 = phase.length;
+  // An array is read in place: a Float64Array copy of it costs more than the loop. Any other
+  // value goes through toSamples, which converts a typed array and rejects the rest by name.
+  const samples: ArrayLike<number> = Array.isArray(phase)
+    ? phase
+    : toSamples('unwrapPhase', phase, 'phase');
+  const n: i32 = samples.length;
   if (n === 0) return [];
   const period: f64 = 2 * Math.PI;
   const result: number[] = new Array<number>(n);
-  result[0] = phase[0];
+  let previous: f64 = samples[0];
+  result[0] = previous;
   let cumulative: f64 = 0;
   for (let i: i32 = 1; i < n; i++) {
-    const diff: f64 = phase[i] - phase[i - 1];
-    let wrapped: f64 = floatMod(diff + Math.PI, period) - Math.PI;
-    if (wrapped === -Math.PI && diff > 0) wrapped = Math.PI;
-    // A step below pi keeps its value; the correction is then exactly zero.
-    cumulative += Math.abs(diff) < Math.PI ? 0 : wrapped - diff;
-    result[i] = phase[i] + cumulative;
+    const current: f64 = samples[i];
+    const diff: f64 = current - previous;
+    previous = current;
+    // A step below pi keeps its value: its correction is exactly zero, so the remainder (a slow
+    // fmod) runs only for a step of pi or more, or a NaN step, whose correction is NaN.
+    if (!(Math.abs(diff) < Math.PI)) {
+      let wrapped: f64 = floatMod(diff + Math.PI, period) - Math.PI;
+      if (wrapped === -Math.PI && diff > 0) wrapped = Math.PI;
+      cumulative += wrapped - diff;
+    }
+    result[i] = current + cumulative;
   }
   return result;
 }

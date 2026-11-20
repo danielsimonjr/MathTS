@@ -35,6 +35,22 @@ describe('#1147 unwrapPhase equals numpy.unwrap', () => {
       [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.4999999999999996, 3.9999999999999996, 4.5, 5, 5.5],
     ],
     ['one step of 4', [0, 4], [0, -2.2831853071795862]],
+    // Steps one ulp below, at and one ulp above pi: the edge between "no correction" and "wrap".
+    [
+      'steps one ulp below pi',
+      [0, 3.1415926535897927, 6.283185307179585, 0],
+      [0, 3.1415926535897927, 6.283185307179585, 6.283185307179586],
+    ],
+    [
+      'steps one ulp above pi',
+      [0, 3.1415926535897936, 6.283185307179587, 0],
+      [0, 3.141592653589793, 6.283185307179586, 6.283185307179585],
+    ],
+    [
+      'steps of exactly pi',
+      [0, Math.PI, 2 * Math.PI, 3 * Math.PI, 0],
+      [0, 3.141592653589793, 6.283185307179586, 9.42477796076938, 6.283185307179586],
+    ],
     ['Infinity first', [Infinity, 1, 2, -Infinity], [Infinity, NaN, NaN, NaN]],
     ['Infinity in the middle', [1, Infinity, 2], [1, NaN, NaN]],
     ['NaN in the middle', [1, NaN, 2], [1, NaN, NaN]],
@@ -58,5 +74,15 @@ describe('#1147 unwrapPhase equals numpy.unwrap', () => {
 
   it('returns an empty array for an empty input', () => {
     expect(F.unwrapPhase([])).toEqual([]);
+  });
+
+  it('rejects a Matrix by name, as dct and hilbertTransform do (#1145), and does not return [undefined]', () => {
+    const m = F.matrix([0, 4, 8]) as never;
+    expect(() => F.unwrapPhase(m)).toThrow(TypeError);
+    expect(() => F.unwrapPhase(m)).toThrow(/^unwrapPhase: phase must be an array or a typed array/);
+  });
+
+  it('accepts a typed array and gives the values of the array', () => {
+    expect(F.unwrapPhase(new Float64Array([0, 4, 8]) as never)).toEqual(F.unwrapPhase([0, 4, 8]));
   });
 });
