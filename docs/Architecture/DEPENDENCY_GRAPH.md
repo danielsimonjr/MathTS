@@ -9959,12 +9959,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../core/config.js`         | `ConfigOptions` | Import (type-only) |
-| `../types.js`               | `BigNumber`     | Import (type-only) |
+| File                                   | Imports                           | Type               |
+| -------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                  | `factory`                         | Import             |
+| `../core/function/typed.js`            | `TypedFunction`                   | Import (type-only) |
+| `../types.js`                          | `BigNumber`                       | Import (type-only) |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -20832,7 +20832,7 @@ graph LR
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
-| `functions/src/core/config`                            | 0 files      | 57 files   |
+| `functions/src/core/config`                            | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -21768,7 +21768,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238456 |
+| Total Lines of Code     | 238512 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
@@ -21776,7 +21776,7 @@ graph TD
 | Total Functions         | 2579   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
-| Type-only Imports       | 685    |
+| Type-only Imports       | 684    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

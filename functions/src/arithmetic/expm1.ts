@@ -13,7 +13,7 @@ interface ComplexConstructor {
 }
 
 interface BigNumberType {
-  exp(): { minus(n: number): BigNumberType };
+  expm1(): BigNumberType;
 }
 
 interface Expm1Dependencies {
@@ -70,7 +70,7 @@ export const createExpm1 = /* #__PURE__ */ factory(
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.exp().minus(1);
+        return x.expm1();
       },
     });
   }

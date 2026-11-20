@@ -23296,14 +23296,13 @@
             "typeOnly": true
           },
           {
-            "file": "../core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
-          },
-          {
             "file": "../types.js",
             "imports": ["BigNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -49885,7 +49884,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238456,
+    "totalLinesOfCode": 238512,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,
@@ -49894,7 +49893,7 @@
     "totalEnums": 0,
     "totalConstants": 1695,
     "totalReExports": 3191,
-    "totalTypeOnlyImports": 685,
+    "totalTypeOnlyImports": 684,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

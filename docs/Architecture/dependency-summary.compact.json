@@ -1,14 +1,14 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7397, "re": 3191 },
   "s": {
-    "loc": 238456,
+    "loc": 238512,
     "cls": 62,
     "int": 669,
     "fn": 2579,
     "tg": 184,
     "en": 0,
     "co": 1695,
-    "toi": 685
+    "toi": 684
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -1964,7 +1964,7 @@
     { "p": "function/typed.ts", "i": 3, "o": 206 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
-    { "p": "core/config.ts", "i": 0, "o": 57 },
+    { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },

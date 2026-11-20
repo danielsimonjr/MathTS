@@ -1862,7 +1862,7 @@ export class BigNumber implements MathTSValue {
   // ============================================================
 
   /**
-   * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2
+   * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2, computed through expm1 to keep a small x
    */
   sinh(): BigNumber {
     return this.#guarded(() => this.#sinhImpl());
@@ -1873,9 +1873,12 @@ export class BigNumber implements MathTSValue {
     if (this._isInfinite) return this;
     if (this._sign === 0) return this;
 
-    const ex = this.exp();
-    const enx = this.negate().exp();
-    return ex.subtract(enx).divide(BigNumber.fromNumber(2));
+    // sinh(|x|) = (e + e / (e + 1)) / 2 with e = expm1(|x|). Both terms are positive, so a small
+    // x keeps its digits: exp(x) - exp(-x) cancels them (#1166). A large |x| gives e / (e + 1) = 1.
+    const one = BigNumber.fromNumber(1);
+    const e = this.abs().expm1();
+    const magnitude = e.add(e.divide(e.add(one))).divide(BigNumber.fromNumber(2));
+    return this._sign === 1 ? magnitude : magnitude.negate();
   }
 
   /**
