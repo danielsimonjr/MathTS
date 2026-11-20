@@ -12,6 +12,7 @@ import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
 import { hasNaN, numberVector } from './typed/number-matrix.js';
+import { assertLoopOrder } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
@@ -241,10 +242,78 @@ export interface FisherExactResult {
   pValue: number;
 }
 
-/** log C(n, k) via lgamma — stable for the hypergeometric enumeration below. */
-function logChoose(n: number, k: number): number {
-  if (k < 0 || k > n) return -Infinity;
-  return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
+/**
+ * Rescale factor of the `fisherExact` walk and its reciprocal. They are powers of two, so a
+ * rescale is exact.
+ */
+const FISHER_SHIFT = 2 ** 400;
+const FISHER_TINY = 2 ** -400;
+
+/**
+ * Maximum number of steps of the `fisherExact` walk (measured: about 50 ns for each step at
+ * full machine load, so the maximum takes about 20 s).
+ */
+const FISHER_MAX_STEPS = 400_000_000;
+
+/** A table counts when its probability is at most the observed one times this (SciPy: 1e-14). */
+const FISHER_TOLERANCE = 1 + 1e-14;
+
+/**
+ * P(k + step) / P(k) for the 2×2 table with `k` in the first cell, row total `r1`, column
+ * total `c1` and `e = r2 - c1` (the last cell is `e + k`). `step` is 1 or -1. The ratio is a
+ * quotient of integers, so it needs no log-gamma.
+ */
+function fisherRatio(r1: number, c1: number, e: number, k: number, step: number): number {
+  return step === 1
+    ? ((r1 - k) * (c1 - k)) / ((k + 1) * (e + k + 1))
+    : (k * (e + k)) / ((r1 - k + 1) * (c1 - k + 1));
+}
+
+/**
+ * Walk from the mode table to `end` in the direction `step` and add to `sums`: `sums[0]` is the
+ * sum of all tables in units of the mode table, and `sums[1]` is the sum of the tables that
+ * count, in units of the observed table. A probability is `term * 2^(-400 * scale)` in units of
+ * the mode table, with `term` in [2^-400, 1], and the observed one is
+ * `observed * 2^(-400 * observedScale)`. This is a module function with number parameters,
+ * because a closure that writes to variables of `fisherExact` ran many times slower in V8.
+ */
+function fisherWalk(
+  r1: number,
+  c1: number,
+  e: number,
+  mode: number,
+  end: number,
+  step: number,
+  observed: number,
+  observedScale: number,
+  sums: Float64Array
+): void {
+  const perObserved = 1 / observed;
+  let total = 0;
+  let counted = sums[1];
+  let term = 1;
+  let scale = 0;
+  for (let k = mode; k !== end; k += step) {
+    term *= fisherRatio(r1, c1, e, k, step);
+    if (term < FISHER_TINY) {
+      term *= FISHER_SHIFT;
+      if (++scale > observedScale + 1) break; // below 2^-400 of the observed probability
+    }
+    if (scale === 0) total += term;
+    if (scale < observedScale - 1) continue; // above 2^400 times the observed probability
+    const units =
+      scale === observedScale
+        ? term * perObserved
+        : scale > observedScale
+          ? term * FISHER_TINY * perObserved
+          : term * FISHER_SHIFT * perObserved;
+    if (units <= FISHER_TOLERANCE) {
+      counted += units;
+      if (units <= 1e-17 * counted) break; // the terms fall away from the mode
+    }
+  }
+  sums[0] += total;
+  sums[1] = counted;
 }
 
 /**
@@ -253,16 +322,25 @@ function logChoose(n: number, k: number): number {
  * observed table's), matching `scipy.stats.fisher_exact`. `oddsRatio` is the sample
  * ratio `ad/bc` (SciPy reports the conditional-MLE estimate; the p-value matches).
  *
- * The probabilities rise to the mode of the hypergeometric distribution and fall after it.
- * So the tables that count are two tails, one below the mode and one above it, and the
- * function finds where each tail starts by a binary search and sums each tail away from the
- * mode until the terms are negligible. The cost depends on the width of the tail mass and not
- * on the size of the counts; a table with every probability at most the observed one (the
- * observed table is at the mode) returns 1 at once.
+ * The probability of the table with `k` in the first cell rises to the mode of the
+ * hypergeometric distribution and falls after it, and the ratio of two neighbours is a
+ * quotient of integers. So the function walks away from the mode in both directions and keeps
+ * each probability as a running product relative to the mode table. It needs no log-gamma,
+ * whose rounding error grows with the counts (about 1e-5 at counts of 1e9). A product that
+ * falls below 2^-400 is multiplied by 2^400 and the number of rescales is kept, so a
+ * probability far below the smallest double keeps its full precision, and the only rounding
+ * to a subnormal is in the result. The cost grows with the standard deviation of the
+ * distribution and with the distance of the observed table from the mode, not with the size of
+ * the counts.
+ *
+ * As in SciPy, a table counts when its probability is at most the observed one times
+ * `1 + 1e-14`. The result is 0 only when the p-value is below half of the smallest double.
  *
  * @throws A `RangeError` when an entry is not a non-negative integer (SciPy casts a float to
- *   an integer without a message, but a count has no meaning for 3.7), or when the smaller
- *   of the first row total and the first column total is above 2^53 - 1.
+ *   an integer without a message, but a count has no meaning for 3.7), when the smaller
+ *   of the first row total and the first column total is above 2^53 - 1, when the sum of
+ *   the entries is not finite, or when the walk needs more than 400,000,000 steps (counts above
+ *   about 1e14 in each cell).
  */
 export function fisherExact(
   table: readonly [readonly number[], readonly number[]]
@@ -277,9 +355,8 @@ export function fisherExact(
   const r1 = a + b;
   const r2 = c + d;
   const c1 = a + c;
-  const N = a + b + c + d;
-  const logHyper = (k: number): number =>
-    logChoose(r1, k) + logChoose(r2, c1 - k) - logChoose(N, c1);
+  const c2 = b + d;
+  const N = r1 + r2;
   const lo = Math.max(0, c1 - r2);
   const hi = Math.min(r1, c1);
   // `k++` does not change a `k` above 2^53, so a loop over `k` would not end.
@@ -288,47 +365,56 @@ export function fisherExact(
       `fisherExact: a marginal total of ${hi} exceeds the supported maximum of 2^53 - 1`
     );
   }
+  // An infinite sum gives a NaN mode, and the walk from a NaN mode would not end.
+  if (!Number.isFinite(N)) {
+    throw new RangeError('fisherExact: the sum of the table entries must be finite');
+  }
   const oddsRatio = b * c === 0 ? Infinity : (a * d) / (b * c);
-  // A table counts when its log probability is at most this limit (SciPy: a relative 1e-7).
-  const limit = logHyper(a) + 1e-7;
-  const mode = Math.min(hi, Math.max(lo, Math.floor(((c1 + 1) * (r1 + 1)) / (N + 2))));
-  if (logHyper(mode) <= limit) return { oddsRatio, pValue: 1 };
+  // Serfling: the observed table has a probability of at most exp(-2 t^2 / (n (1 - (n - 1) / N))),
+  // where t is its distance from the mean and n is a marginal total. At most 2^53 tables count,
+  // each with at most that probability, so when the exponent is below -800 the p-value is below
+  // 2^53 exp(-800), which is less than half of the smallest double: the correct result is 0.
+  const spread = Math.min(...[r1, r2, c1, c2].map((n) => n * (1 - (n - 1) / N)));
+  const distance = Math.abs(a - r1 * (c1 / N));
+  if (spread > 0 && 2 * distance * distance > 800 * spread) return { oddsRatio, pValue: 0 };
+  const e = r2 - c1;
+  // The mode is floor((c1 + 1)(r1 + 1) / (N + 2)). Rounding can move the quotient across an
+  // integer, so the two loops move the estimate to the table that no neighbour exceeds.
+  let mode = Math.min(hi, Math.max(lo, Math.floor((c1 + 1) * ((r1 + 1) / (N + 2)))));
+  while (mode < hi && fisherRatio(r1, c1, e, mode, 1) > 1) mode++;
+  while (mode > lo && fisherRatio(r1, c1, e, mode, -1) > 1) mode--;
+  // The walk goes three times from the mode to the observed table, and it sums the body of the
+  // distribution, about 8.5 standard deviations on each side of the mode.
+  const deviation = Math.sqrt((r1 / N) * (r2 / N) * c1 * (c2 / Math.max(N - 1, 1)));
+  assertLoopOrder(
+    'fisherExact',
+    'the number of steps for this table (3 * distance from the mode + 17 * standard deviation)',
+    Math.round(3 * Math.abs(a - mode) + 17 * deviation),
+    FISHER_MAX_STEPS
+  );
 
-  /** Sum the probabilities from `from` away from the mode (`step` is -1 or 1) to the end. */
-  const tailSum = (from: number, step: 1 | -1): number => {
-    let sum = 0;
-    for (let k = from; k >= lo && k <= hi; k += step) {
-      const term = Math.exp(logHyper(k));
-      sum += term;
-      if (term <= 1e-17 * sum) break; // the terms fall away from the mode
+  // The probability of the observed table is observed * 2^(-400 * observedScale) in units of
+  // the mode table.
+  let observed = 1;
+  let observedScale = 0;
+  const toObserved = a > mode ? 1 : -1;
+  for (let k = mode; k !== a; k += toObserved) {
+    observed *= fisherRatio(r1, c1, e, k, toObserved);
+    if (observed < FISHER_TINY) {
+      observed *= FISHER_SHIFT;
+      // Below 2^-1200 of the mode probability, 2^53 tables sum to less than 2^-1075: the result is 0.
+      if (++observedScale > 2) return { oddsRatio, pValue: 0 };
     }
-    return sum;
-  };
+  }
+  // Every table has at most the probability of the mode table, so every table counts.
+  if (observedScale === 0 && observed * FISHER_TOLERANCE >= 1) return { oddsRatio, pValue: 1 };
 
-  let p = 0;
-  if (logHyper(lo) <= limit) {
-    // The largest k in [lo, mode - 1] that counts: the lower tail is lo..k.
-    let l = lo;
-    let r = mode - 1;
-    while (l < r) {
-      const mid = l + Math.ceil((r - l) / 2);
-      if (logHyper(mid) <= limit) l = mid;
-      else r = mid - 1;
-    }
-    p += tailSum(l, -1);
-  }
-  if (logHyper(hi) <= limit) {
-    // The smallest k in [mode + 1, hi] that counts: the upper tail is k..hi.
-    let l = mode + 1;
-    let r = hi;
-    while (l < r) {
-      const mid = l + Math.floor((r - l) / 2);
-      if (logHyper(mid) <= limit) r = mid;
-      else l = mid + 1;
-    }
-    p += tailSum(l, 1);
-  }
-  return { oddsRatio, pValue: Math.min(1, p) };
+  const sums = new Float64Array([1, 0]); // the mode table is in the sum of all tables
+  fisherWalk(r1, c1, e, mode, hi, 1, observed, observedScale, sums);
+  fisherWalk(r1, c1, e, mode, lo, -1, observed, observedScale, sums);
+  // One rounding to a subnormal at most: the product before the power of two is above 2^-460.
+  const pValue = observed * (sums[1] / sums[0]) * 2 ** (-400 * observedScale);
+  return { oddsRatio, pValue: Math.min(1, pValue) };
 }
 
 // --- Studentized range distribution + Tukey's HSD (Wave D / remaining) ----------

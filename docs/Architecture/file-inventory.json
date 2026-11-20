@@ -7065,7 +7065,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 459
+      "loc": 545
     },
     {
       "file": "functions/src/index.ts",
@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 220
+      "loc": 304
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
@@ -10936,7 +10936,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 240
+      "loc": 243
     },
     {
       "file": "functions/tests/dogfood-986-987-symbolic-constants.test.ts",

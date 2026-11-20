@@ -1769,6 +1769,7 @@
       "functions/src/combinatorics/stirlingS2.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/matrix-bridge.ts",
+      "functions/src/hypothesis-extra.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/linalg-special-matrices.ts",
       "functions/src/matrix/diag.ts",

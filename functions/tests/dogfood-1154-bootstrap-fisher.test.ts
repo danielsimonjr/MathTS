@@ -217,3 +217,87 @@ describe('fisherExact matches scipy.stats.fisher_exact and sums only the tail ta
     ).toBe(Infinity);
   });
 });
+
+describe('fisherExact keeps its accuracy for large counts and for very small p-values (#1146, #1154)', () => {
+  const rel = (a: number, b: number): number => Math.abs(a - b) / Math.abs(b);
+  const p = (a: number, b: number, c: number, d: number): number =>
+    fisherExact([
+      [a, b],
+      [c, d],
+    ]).pValue;
+
+  // Oracle for the large tables: log P(k) from a 50-digit log-gamma (mpmath), the two tail
+  // limits by bisection on it, and each tail sum anchored on it every 50,000 tables. A sum of
+  // double log-gamma terms gave 0.1138667 for the first table (relative error 1.3e-5) and 1 for
+  // the third. SciPy 1.16.3 gives 0.11386527324621518 for the first (1.2e-9 from the oracle)
+  // and overflows int64 above 1e10.
+  it.each([
+    [1e9, 1e9 + 1e5, 1e9, 1e9, 0.11386527461183898],
+    [1e11, 1e11 + 1e5, 1e11, 1e11, 0.8743695685267159],
+    [1e12, 1e12 + 1e5, 1e12, 1e12, 0.9601231857091571],
+    [49996000000, 5e10, 50004000000, 50000012345, 2.3761754421477215e-71],
+    [1e6, 3e15, 2090000, 6e15, 2.101995431353479e-288],
+  ])('[[%d, %d], [%d, %d]] gives %d', (a, b, c, d, want) => {
+    expect(rel(p(a, b, c, d), want)).toBeLessThan(1e-10);
+  });
+
+  // A table counts when its probability is at most the observed one times 1 + 1e-14 (SciPy).
+  // The table with 999984 in the first cell is 4.1e-9 more probable than the observed one, so
+  // it does not count; with a tolerance of 1e-7 it counted and the result was 0.98803.
+  // SciPy 1.16.3: 0.9872343474111872. Oracle: 0.9872343472827956.
+  it('[[999968, 1e6], [1e6, 1e6]] does not count a table that is 4e-9 more probable', () => {
+    expect(rel(p(999968, 1e6, 1e6, 1e6), 0.9872343472827956)).toBeLessThan(1e-10);
+  });
+
+  // Oracle: exact integers (math.comb) and a correctly rounded division. A p-value that a
+  // double can hold is not 0: the smallest double is 5e-324.
+  it.each([
+    [504, 0, 0, 504, 2.901965752735433e-302],
+    [483, 29, 23, 479, 1.2977061270013185e-217],
+  ])('[[%d, %d], [%d, %d]] gives %d', (a, b, c, d, want) => {
+    expect(rel(p(a, b, c, d), want)).toBeLessThan(1e-13);
+  });
+
+  it.each([
+    [738, 88, 41, 838, 2.750325e-318],
+    [516, 0, 0, 516, 1.75016689427636e-309],
+    [556, 5, 7, 596, 8e-322],
+    [540, 0, 0, 540, 5e-324],
+  ])('[[%d, %d], [%d, %d]] gives the subnormal %d', (a, b, c, d, want) => {
+    // 1e-323 is two units in the last place of a subnormal.
+    expect(Math.abs(p(a, b, c, d) - want)).toBeLessThanOrEqual(1e-323);
+    expect(p(a, b, c, d)).toBeGreaterThan(0);
+  });
+
+  // The same oracle as for the large tables: 38 standard deviations from the mode.
+  it('a large table far in the tail keeps a subnormal p-value', () => {
+    const got = p(999400000, 1000600000, 1000600000, 999400000);
+    expect(Math.abs(got - 4.27497448e-315)).toBeLessThanOrEqual(1e-323);
+    expect(
+      rel(p(999415000, 1000585000, 1000585000, 999415000), 1.2052327404521215e-299)
+    ).toBeLessThan(1e-10);
+  });
+
+  // 2 / C(1088, 544) is below half of the smallest double, so 0 is the correctly rounded result.
+  it('gives 0 only below the smallest double', () => {
+    expect(p(544, 0, 0, 544)).toBe(0);
+    expect(p(10, 1e6, 1e6, 10)).toBe(0);
+  });
+
+  // The old loop did not end for these. The bound on the tail probability gives 0 at once.
+  it('a table far in the tail of a huge table gives 0 at once', () => {
+    expect(p(0, 1e15, 1e15, 0)).toBe(0);
+    expect(p(7, 1e15, 1e15, 7)).toBe(0);
+  });
+
+  it('throws a RangeError when the walk would need more than 400,000,000 steps', () => {
+    const far = (): number => p(4e15 - 5e8, 4e15 + 5e8, 4e15 + 5e8, 4e15 - 5e8);
+    expect(far).toThrow(RangeError);
+    expect(far).toThrow(/^fisherExact: the number of steps for this table/);
+  });
+
+  it('throws a RangeError when the sum of the entries is not finite', () => {
+    expect(() => p(1, 1, 1e308, 1e308)).toThrow(RangeError);
+    expect(() => p(1, 1, 1e308, 1e308)).toThrow(/^fisherExact: the sum of the table entries/);
+  });
+});
