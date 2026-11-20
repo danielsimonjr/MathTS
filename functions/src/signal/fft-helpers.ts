@@ -121,9 +121,16 @@ export function irfft(spec: { re: unknown; im: unknown }, n: number): number[] {
  * every axis of an N-D input, and a nested array or a 2-D Matrix is one.
  */
 function shiftEveryAxis(x: unknown[], roll: (a: unknown[]) => unknown[]): unknown[] {
+  // NumPy has no ragged array. `arraySize` reads the first row only, so `validate` rejects one.
+  validate(x, arraySize(x));
+  return shiftAxes(x, roll);
+}
+
+/** The recursion of {@link shiftEveryAxis}, after the shape check. */
+function shiftAxes(x: unknown[], roll: (a: unknown[]) => unknown[]): unknown[] {
   const rolled = roll(x);
   return rolled.some(Array.isArray)
-    ? rolled.map((row) => (Array.isArray(row) ? shiftEveryAxis(row, roll) : row))
+    ? rolled.map((row) => (Array.isArray(row) ? shiftAxes(row, roll) : row))
     : rolled;
 }
 
@@ -136,6 +143,7 @@ function shiftEveryAxis(x: unknown[], roll: (a: unknown[]) => unknown[]): unknow
  * shifted along every axis, as NumPy does without `axes`.
  *
  * @throws TypeError if `x` is not an array, a typed array or a Matrix
+ * @throws DimensionError (a RangeError) if `x` is a ragged nested array, as {@link rfft} does
  */
 export function fftshift(x: number[]): number[];
 export function fftshift(x: unknown): unknown[];
@@ -150,6 +158,7 @@ export function fftshift(x: unknown): unknown[] {
  * unwrapped; the result is always a plain array.
  *
  * @throws TypeError if `x` is not an array, a typed array or a Matrix
+ * @throws DimensionError (a RangeError) if `x` is a ragged nested array, as {@link rfft} does
  */
 export function ifftshift(x: number[]): number[];
 export function ifftshift(x: unknown): unknown[];

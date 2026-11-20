@@ -340,3 +340,41 @@ describe('#1145 spectrogram with a Hann window of length 2', () => {
     expect(r.magnitude[0][0]).toBeCloseTo(11, 12);
   });
 });
+
+describe('fftshift and ifftshift reject a ragged nested array (NumPy has no ragged array)', () => {
+  // Before the check: fftshift([[1, 2], [3]]) returned [[3], [2, 1]] and fftshift([1, [2, 3]])
+  // returned [[3, 2], 1]. rfft rejects the same inputs with a DimensionError.
+  it.each([[[[1, 2], [3]]], [[1, [2, 3]]], [[[[1, 2]], [[3]]]]])('%j throws a RangeError', (x) => {
+    expect(() => F.fftshift(x)).toThrow(RangeError);
+    expect(() => F.ifftshift(x)).toThrow(RangeError);
+  });
+  it('pin: a rectangular nested array is shifted along every axis (numpy.fft.fftshift)', () => {
+    expect(
+      F.fftshift([
+        [1, 2, 3],
+        [4, 5, 6],
+      ])
+    ).toEqual([
+      [6, 4, 5],
+      [3, 1, 2],
+    ]);
+    expect(F.fftshift([])).toEqual([]);
+  });
+});
+
+describe('multiTaperPSD with nfft smaller than the signal', () => {
+  // Oracle: NumPy 2.3.5. The tapered signal is cut into floor(n / nfft) frames of nfft samples
+  // with no overlap; the PSD is the mean of their one-sided periodograms.
+  const x = Array.from({ length: 16 }, (_, i) => Math.sin(i) + 0.1 * i);
+  it('nfft 4 (four frames)', () => {
+    closeTo(
+      F.multiTaperPSD(x, { nfft: 4, K: 1 }).psd,
+      [1.3570182776384323, 0.939712883207431, 0.097663925902124]
+    );
+  });
+  it('nfft 5 (three frames, a tail of one sample dropped)', () => {
+    const r = F.multiTaperPSD(x, { nfft: 5, K: 1 });
+    closeTo(r.psd, [1.7743000955864978, 1.2866338881599588, 0.07955434772572756]);
+    expect(r.frequencies).toEqual([0, 0.2, 0.4]);
+  });
+});

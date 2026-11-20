@@ -87,6 +87,29 @@ describe('findPeaks and medfilt reject a Matrix by name', () => {
   });
   it('the array forms are unchanged', () => {
     expect(F.findPeaks([0, 1, 5, 1, 0])).toEqual([2]);
-    expect(F.medfilt([0, 1, 5, 1, 0])).toEqual([1, 1, 1, 1, 1]);
+    // scipy.signal.medfilt pads with zeros (SciPy 1.16.3).
+    expect(F.medfilt([0, 1, 5, 1, 0])).toEqual([0, 1, 1, 1, 0]);
+  });
+});
+
+describe('medfilt equals scipy.signal.medfilt (zero padding)', () => {
+  // Oracle: SciPy 1.16.3. Before the fix the edge windows were cut short, not padded with zeros:
+  // [0, 1, 5, 1, 0] gave [1, 1, 1, 1, 1].
+  const rows: [number[], number, number[]][] = [
+    [[0, 1, 5, 1, 0], 3, [0, 1, 1, 1, 0]],
+    [[3, -1, 4, -1, 5, -9, 2], 5, [0, 0, 3, -1, 2, 0, 0]],
+    [[-5, -4, -3], 7, [0, 0, 0]],
+    [[2, 8, 1], 3, [2, 2, 1]],
+    [[1, 2], 9, [0, 0]],
+    [[-1, -2, -3, -4], 3, [-1, -2, -3, -3]],
+  ];
+  it.each(rows)('medfilt(%j, %d)', (x, n, want) => {
+    expect(F.medfilt(x, n)).toEqual(want);
+  });
+  it('a Float64Array gives the same result', () => {
+    expect(F.medfilt(new Float64Array([0, 1, 5, 1, 0]) as never)).toEqual([0, 1, 1, 1, 0]);
+  });
+  it.each([0, -3, 2.5, NaN])('n = %d throws a RangeError', (n) => {
+    expect(() => F.medfilt([1, 2, 3], n)).toThrow(/^medfilt: n must be a positive integer/);
   });
 });

@@ -1333,28 +1333,41 @@ export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
 // =============================================================================
 
 /**
- * Apply a median filter to a signal.
+ * Apply a median filter to a signal, as `scipy.signal.medfilt` does.
+ *
+ * The signal is padded with zeros at both ends, so every window holds `n` values. A window
+ * longer than the signal is allowed; its padded values are zeros.
  *
  * @param x - Input signal
- * @param n - Window size (default 3, must be odd)
+ * @param n - Window size (default 3). An even size is increased by one.
  * @returns Filtered signal
  * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
+ * @throws RangeError if `n` is not a positive integer
  */
 export function medfilt(x: number[], n: i32 = 3): number[] {
   if (!Array.isArray(x)) x = Array.from(toSamples('medfilt', x, 'x'));
+  if (!(Number.isInteger(n) && n >= 1)) {
+    throw new RangeError(`medfilt: n must be a positive integer (got ${n})`);
+  }
   if (n % 2 === 0) n += 1;
-  const half: i32 = Math.min(Math.floor(n / 2), x.length);
-  const result: number[] = new Array(x.length);
+  const half: i32 = Math.floor(n / 2);
+  const len: i32 = x.length;
+  const result: number[] = new Array(len);
 
-  for (let i: i32 = 0; i < x.length; i++) {
-    const window: number[] = [];
-    for (let j: i32 = i - half; j <= i + half; j++) {
-      if (j >= 0 && j < x.length) {
-        window.push(x[j]);
-      }
-    }
+  for (let i: i32 = 0; i < len; i++) {
+    // The in-range values of the window. The other n - window.length values are zero padding,
+    // which is counted and never stored, so a huge n allocates nothing more.
+    const lo: i32 = Math.max(0, i - half);
+    const hi: i32 = Math.min(len - 1, i + half);
+    const window: number[] = x.slice(lo, hi + 1);
     window.sort((a, b) => a - b);
-    result[i] = window[Math.floor(window.length / 2)];
+    const zeros: i32 = n - window.length;
+    // The sorted window with the zeros in place: the negative values, the zeros, the rest.
+    let negatives: i32 = 0;
+    while (negatives < window.length && window[negatives] < 0) negatives++;
+    if (half < negatives) result[i] = window[half];
+    else if (half < negatives + zeros) result[i] = 0;
+    else result[i] = window[half - zeros];
   }
 
   return result;
@@ -1605,6 +1618,11 @@ export function bartlettPSD(
  * When `nfft` is larger than the signal, each taper is zero-padded to `nfft`, so bin `i` is at
  * the frequency `i / nfft` and the PSD is the periodogram `|X|^2 / n` of the `n` samples.
  *
+ * When `nfft` is smaller than the signal, each tapered signal is cut into `floor(n / nfft)`
+ * frames of `nfft` samples with no overlap, and a tail shorter than `nfft` is dropped. The
+ * per-taper PSD is then the mean of the periodograms of these frames (Welch's method with a
+ * rectangular window), and bin `i` is at the frequency `i / nfft`.
+ *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
  * @returns `{ psd: number[], frequencies: number[] }`; empty for an empty signal
@@ -1645,7 +1663,7 @@ export function multiTaperPSD(
       tapered[j] = samples[j] * w;
     }
 
-    // Per-taper PSD via Welch (single frame of nfft samples, no overlap)
+    // Per-taper PSD via Welch: frames of nfft samples, no overlap (one frame when nfft >= n)
     const taperPsd =
       n >= WASM_SIGNAL_THRESHOLD
         ? welchPSDDispatch(tapered, nfft, 0, 'rect')

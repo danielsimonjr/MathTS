@@ -8297,7 +8297,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 214
+      "loc": 223
     },
     {
       "file": "functions/src/signal/fft.ts",
@@ -9515,7 +9515,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1776
+      "loc": 1794
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10698,7 +10698,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 343
+      "loc": 380
     },
     {
       "file": "functions/tests/dogfood-1147-unwrap-numpy.test.ts",
@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 93
+      "loc": 116
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
@@ -10985,7 +10985,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 331
+      "loc": 332
     },
     {
       "file": "functions/tests/dogfood-998-nintegrate-divergent.test.ts",
