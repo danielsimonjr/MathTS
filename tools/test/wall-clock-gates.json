@@ -29,9 +29,28 @@
       "needs": ["functions/dist/index.js"]
     },
     {
+      "name": "quantile-vs-median",
+      "script": "functions/tests/helpers/quantile-median-perf-gate.mjs",
+      "limit": 2,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "quantile-rotated-vs-random",
+      "script": "functions/tests/helpers/quantile-structured-perf-gate.mjs",
+      "limit": 3,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
       "name": "lusolve",
       "script": "functions/tests/helpers/lusolve-perf-gate.mjs",
       "limit": 1.2,
+      "needs": ["functions/dist/index.js", "matrix/dist/index.js"]
+    },
+    {
+      "name": "rank-vs-svd",
+      "script": "functions/tests/helpers/rank-perf-gate.mjs",
+      "limit": 0.25,
+      "selfTestScale": 12,
       "needs": ["functions/dist/index.js", "matrix/dist/index.js"]
     },
     {
