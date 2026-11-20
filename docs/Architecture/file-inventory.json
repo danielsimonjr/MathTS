@@ -8577,7 +8577,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 207
+      "loc": 227
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -10453,7 +10453,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 144
+      "loc": 145
     },
     {
       "file": "functions/tests/constrained.test.ts",

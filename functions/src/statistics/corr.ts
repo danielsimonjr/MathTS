@@ -130,11 +130,31 @@ export const createCorr = /* #__PURE__ */ factory(
         return correlation(A, B);
       }
     }
-    function fromDeviations(dX: unknown[], dY: unknown[]): unknown {
+    /**
+     * The correlation of two deviation lists, and the product of their sums of squares.
+     * @param {Array} dX   the deviations of the first list
+     * @param {Array} dY   the deviations of the second list
+     * @returns {{ r: unknown, product: unknown }} the correlation and the product
+     */
+    function fromDeviations(dX: unknown[], dY: unknown[]): { r: unknown; product: unknown } {
       const sxy = sum(dX.map((dx: unknown, i: number) => multiply(dx, dY[i])));
       const sxx = sum(dX.map((dx: unknown) => multiply(dx, dx)));
       const syy = sum(dY.map((dy: unknown) => multiply(dy, dy)));
-      return divide(sxy, sqrt(multiply(sxx, syy)));
+      const product = multiply(sxx, syy);
+      return { r: divide(sxy, sqrt(product)), product };
+    }
+
+    /**
+     * `true` when the product of the sums of squares is finite and not 0, or when its type has
+     * no range (Complex, Fraction). An infinite product gives a finite r of 0, so r is not the test.
+     * @param {unknown} product   the product of the two sums of squares
+     * @returns {boolean} whether the product is in the range of its type
+     */
+    function productInRange(product: unknown): boolean {
+      const finite = isFiniteReal(product);
+      if (finite === undefined) return true;
+      if (!finite) return false;
+      return typeof product === 'number' ? product !== 0 : !(product as BigNumber).isZero();
     }
 
     /** `false` for a number or BigNumber that is NaN or infinite, else `true` or `undefined`. */
@@ -191,16 +211,16 @@ export const createCorr = /* #__PURE__ */ factory(
       const dX = A.map((x: unknown) => subtract(x, meanX));
       const dY = B.map((y: unknown) => subtract(y, meanY));
       const plain = fromDeviations(dX, dY);
-      if (isFiniteReal(plain) !== false) return plain;
+      if (productInRange(plain.product)) return plain.r;
       // A square left the range of the type (#1257). The correlation does not change when each
       // deviation list is divided by an exact scale.
       const sx = realScale(dX);
       const sy = realScale(dY);
-      if (sx === undefined || sy === undefined) return plain;
+      if (sx === undefined || sy === undefined) return plain.r;
       return fromDeviations(
         dX.map((v: unknown) => sx.down(v as number)),
         dY.map((v: unknown) => sy.down(v as number))
-      );
+      ).r;
     }
   }
 );
