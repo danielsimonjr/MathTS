@@ -94,8 +94,9 @@ export function cumprod(x: Vec): number[] {
 /**
  * Prefix extreme. `replace(value, extreme)` is true when `value` should
  * become the running extreme. `cummax` uses `>` and seed `-Infinity`;
- * `cummin` uses `<` and seed `Infinity`. A NaN never replaces the extreme,
- * because those relational operators are already false for NaN.
+ * `cummin` uses `<` and seed `Infinity`. A NaN becomes the extreme and stays it, as in NumPy
+ * (`maximum.accumulate`): the relational operators are false for NaN, so no later value
+ * replaces a NaN extreme.
  */
 function cumulativeExtreme(
   name: string,
@@ -107,7 +108,7 @@ function cumulativeExtreme(
   const out = new Array<number>(a.length);
   let extreme = seed;
   for (let i = 0; i < a.length; i++) {
-    if (replace(a[i], extreme)) extreme = a[i];
+    if (a[i] !== a[i] || replace(a[i], extreme)) extreme = a[i];
     out[i] = extreme;
   }
   return out;

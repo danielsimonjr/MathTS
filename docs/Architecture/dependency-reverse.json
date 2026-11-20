@@ -1777,6 +1777,7 @@
       "functions/src/combinatorics/stirlingS2.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/matrix-bridge.ts",
+      "functions/src/hypothesis-extra.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/linalg-special-matrices.ts",
       "functions/src/matrix/diag.ts",
@@ -2010,7 +2011,8 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/integration.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/numeric-data.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2857,6 +2859,11 @@
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/typed/dist-objects.ts"
     ],
+    "functions/src/typed/hypothesis.ts": [
+      "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
       "functions/src/typed/string.ts"
@@ -2967,10 +2974,6 @@
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/graph.ts": [
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/hypothesis.ts": [
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
