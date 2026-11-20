@@ -13,6 +13,10 @@ npm install @danielsimonjr/mathts-functions
 ## What it provides
 
 - Hundreds of typed functions (`add`, `sin`, `svd`-aware ops, `parallelFFT`, …).
+  For a real `Float64Array` on a latency path, use `parallelFFT`: it is faster than `fft`, which builds a
+  `Complex` object for each bin. It returns `{ real, imag, originalLength }`, zero-padded to n rounded up
+  to a power of two. Use `fft` for a spectrum of exactly n bins when n is not a power of two. The measured table
+  is in [the performance guide](https://github.com/danielsimonjr/mathts/blob/main/docs/performance.md#fft-pick-the-entry-point).
 - A wired `parse` / `evaluate` against the full activated math scope. `evaluate` resolves any function name, so its scope holds the whole function table. The `@danielsimonjr/mathts-functions/evaluate` subpath is not a size saving: a minified esbuild bundle is about 1.19 MB for the subpath and for the main barrel (under 1 percent apart), and an import of `evaluate`, `parse` and `compileExpr` together adds under 1 KB. For a small browser bundle that needs only basic expressions, use `evaluate` from `@danielsimonjr/mathts-expression` (about 256 KB minified). Its default scope is smaller and lacks functions such as `det`, `mean` and `gamma`; pass them in the scope when you need them. The `mathts-compat` package bundles the full table, so a `create(all)` bundle is about 1.7 MB minified. `tools/test/bundle-budget.json` records these sizes, and `check-bundle-budget.mjs` fails when one moves by more than its tolerance.
   In the default scope, `G`, `c` and `hbar` read as units (gauss, speed of light, hectobar), so
   `5 G to T` works. To read them as the CODATA constants, call

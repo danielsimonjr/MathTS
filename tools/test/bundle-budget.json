@@ -209,7 +209,7 @@
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1848399
+      "bytes": 1868622
     }
   ]
 }
