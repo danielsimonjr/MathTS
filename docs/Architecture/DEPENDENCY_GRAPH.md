@@ -2070,7 +2070,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `LogmOptions`
-- Functions: `matrixLogm`
+- Functions: `logPade`, `matrixLogm`
 
 ---
 
@@ -21781,12 +21781,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239330 |
-| Total Exports           | 7411   |
+| Total Lines of Code     | 239331 |
+| Total Exports           | 7412   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 673    |
-| Total Functions         | 2592   |
+| Total Functions         | 2593   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

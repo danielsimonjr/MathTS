@@ -4623,6 +4623,7 @@
       "loadWasmManifest",
       "log",
       "LogmOptions",
+      "logPade",
       "lowRankApprox",
       "lq",
       "LQResult",

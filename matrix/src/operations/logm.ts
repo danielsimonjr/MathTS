@@ -75,23 +75,24 @@ const GL16_WEIGHTS = [
 ];
 /* eslint-enable no-loss-of-precision */
 
-/** Solve (M) * x = b where M is n×n and b is n×1 (returns x). */
-function solveCol(M: number[][], b: number[]): number[] {
-  const n = M.length;
-  const Aug = M.map((row, i) => [...row, b[i]]);
-  gaussJordanContinue(Aug, n, 1e-30);
-  return Aug.map((row) => row[n]);
-}
-
 /**
  * Evaluate log(I + X) via 16-point Gauss-Legendre quadrature:
  *   log(I + X) = X * integral_0^1 (I + t*X)^{-1} dt
  *
- * Each quadrature point requires solving an n×n linear system per column.
+ * Each quadrature point requires one n×n linear system with n right-hand sides.
  * Requires ||X|| < 1 for accuracy (inverse-scaling ensures this).
  * 16-point GL gives ~32nd-order accuracy for smooth integrands.
+ *
+ * @param X - The n×n matrix, with a norm below 1.
+ * @param eliminate - The elimination of an augmented matrix. The default is
+ *   `gaussJordanContinue`; a test passes a counting copy, to pin one elimination per node.
+ * @returns log(I + X).
+ * @internal
  */
-function logPade(X: number[][]): number[][] {
+export function logPade(
+  X: number[][],
+  eliminate: typeof gaussJordanContinue = gaussJordanContinue
+): number[][] {
   const n = X.length;
   const result: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   const I = eye(n);
@@ -105,13 +106,13 @@ function logPade(X: number[][]): number[][] {
       Array.from({ length: n }, (_, j) => I[i][j] + t * X[i][j])
     );
 
-    // Solve M * col_j(Y) = col_j(X) for each column j
+    // Solve M * Y = X for all columns in one elimination of the augmented matrix [M | X]:
+    // O(n³) per node, where one elimination per column cost O(n⁴). The pivots depend on M
+    // only, so every column of Y is the value that a solve of that column alone gives.
     // Then result += w * Y
-    for (let j = 0; j < n; j++) {
-      const xCol = X.map((row) => row[j]);
-      const yCol = solveCol(M, xCol);
-      for (let i = 0; i < n; i++) result[i][j] += w * yCol[i];
-    }
+    const aug = M.map((row, i) => [...row, ...X[i]]);
+    eliminate(aug, n, 1e-30);
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) result[i][j] += w * aug[i][n + j];
   }
 
   return result;

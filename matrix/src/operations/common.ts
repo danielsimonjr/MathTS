@@ -137,7 +137,7 @@ export function gaussJordanSolve(a: number[][], rhs: number[][]): number[][] | n
 /**
  * In-place Gauss–Jordan elimination on an augmented matrix. Partial pivoting;
  * columns whose pivot satisfies `|pivot| < pivotTol` are skipped (no row scale);
- * zero elimination factors are skipped. Used by `matSolve` and `solveCol` with
+ * zero elimination factors are skipped. Used by `matSolve` and `logPade` with
  * different tolerances and RHS widths.
  *
  * @internal
