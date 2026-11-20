@@ -12,6 +12,9 @@ type Vec = readonly number[] | Float64Array;
 
 const normalCDF = (z: number): number => _normalCDF(z) as number;
 
+/** Largest n for which `signTest` sums the binomial coefficients directly (C(1000, 500) < 2^1000). */
+const SIGN_TEST_EXACT_MAX_N = 1000;
+
 /**
  * Sign test on the median. Ties with `median` are dropped; two-sided exact binomial p.
  * A NaN in `x`, or a NaN `medianValue`, gives a NaN statistic and p-value (`nPos` and `nNeg`
@@ -29,8 +32,20 @@ export function signTest(
   }
   const n = nPos + nNeg;
   if (n === 0) return { statistic: 0, pValue: 1, nPos, nNeg };
-  // The binomial coefficients of the old sum overflowed for n above 1,029 (p-value NaN) and
-  // each of the k + 1 terms cost O(k). `binomialTest` sums the pmf in log space around n / 2.
+  if (n <= SIGN_TEST_EXACT_MAX_N) {
+    // The tail is symmetric, so p = 2 P(X <= min(k, n - k)). Each C(n, j) comes from the one
+    // before it in one multiply and one divide: the sum is exact while C(n, j) * n < 2^53.
+    const m = Math.min(nPos, nNeg);
+    let c = 1;
+    let tail = 1;
+    for (let j = 0; j < m; j++) {
+      c = (c * (n - j)) / (j + 1);
+      tail += c;
+    }
+    return { statistic: nPos, pValue: Math.min(1, (2 * tail) / 2 ** n), nPos, nNeg };
+  }
+  // Above 1,000 values `binomialTest` sums the pmf in log space around n / 2 (the coefficients
+  // overflow near n = 1,029).
   return { statistic: nPos, pValue: binomialTest(nPos, n, 0.5).pValue, nPos, nNeg };
 }
 

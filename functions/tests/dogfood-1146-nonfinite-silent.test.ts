@@ -204,3 +204,27 @@ describe('fisherExact returns at once for large counts (#1146)', () => {
     expect(r.pValue).toBe(1);
   });
 });
+
+describe('signTest sums the exact binomial tail for up to 1,000 values (#1146 review)', () => {
+  // Oracle: exact fractions, min(1, 2 * sum_{j <= min(k, n - k)} C(n, j) / 2^n) (Python math.comb).
+  const signs = (n: number, k: number) => [...Array(k).fill(1), ...Array(n - k).fill(-1)];
+
+  it('[Infinity, -Infinity, 1, 2] gives exactly 0.625', () => {
+    expect(signTest([Infinity, -Infinity, 1, 2]).pValue).toBe(0.625);
+  });
+
+  it.each([
+    [30, 9, 0.04277394525706768],
+    [7, 0, 0.015625],
+    [1000, 500, 1],
+  ])('n = %i, k = %i gives %s exactly', (n, k, p) => {
+    expect(signTest(signs(n, k)).pValue).toBe(p);
+  });
+
+  it.each([
+    [1000, 470, 0.06202319509836318],
+    [999, 400, 3.2845331249519864e-10],
+  ])('n = %i, k = %i is within 1e-13 of %s', (n, k, p) => {
+    expect(Math.abs(signTest(signs(n, k)).pValue / p - 1)).toBeLessThan(1e-13);
+  });
+});

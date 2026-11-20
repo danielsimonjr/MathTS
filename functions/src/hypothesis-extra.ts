@@ -213,7 +213,12 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   const nAll = diffs.length;
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
-  if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');
+  if (n === 0) {
+    // SciPy 1.16.3 (method 'auto'): the permutation path for 2 to 13 differences gives p = 1,
+    // and the normal approximation for more gives 0 / 0. A single difference has no permutation.
+    if (nAll < 2) throw new Error('wilcoxon: all differences are zero (test undefined)');
+    return { statistic: 0, pValue: nAll <= 13 ? 1 : NaN, zStatistic: NaN };
+  }
   const absD = d.map(Math.abs);
   const ranks = rankdata(absD);
   let wPlus = 0;

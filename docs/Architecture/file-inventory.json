@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 404
+      "loc": 410
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",

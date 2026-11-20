@@ -155,3 +155,35 @@ describe('wilcoxon matches scipy.stats.wilcoxon defaults (#1148)', () => {
     expect(Number.isFinite(r.zStatistic)).toBe(true);
   });
 });
+
+describe('wilcoxon with every difference zero matches SciPy 1.16.3 (#1148 review)', () => {
+  // scipy.stats.wilcoxon(x, x) with the defaults: statistic 0.0; p 1.0 for 2 to 13 values
+  // (permutation path), p nan for more (normal approximation, 0 / 0). One value raises.
+  const ones = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
+
+  it.each([
+    [2, 1],
+    [3, 1],
+    [13, 1],
+    [14, NaN],
+    [50, NaN],
+    [51, NaN],
+    [60, NaN],
+  ])('%i equal pairs give statistic 0 and p %s', (n, p) => {
+    const r = wilcoxon(ones(n), ones(n));
+    expect(r.statistic).toBe(0);
+    if (Number.isNaN(p)) expect(r.pValue).toBeNaN();
+    else expect(r.pValue).toBe(p);
+    expect(r.zStatistic).toBeNaN();
+  });
+
+  it('the one-sample form [0, 0, 0] gives statistic 0 and p 1', () => {
+    const r = wilcoxon([0, 0, 0]);
+    expect(r.statistic).toBe(0);
+    expect(r.pValue).toBe(1);
+  });
+
+  it('a single zero difference still throws, as SciPy raises', () => {
+    expect(() => wilcoxon([1], [1])).toThrow(/all differences are zero/);
+  });
+});
