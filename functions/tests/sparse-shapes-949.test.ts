@@ -292,16 +292,16 @@ describe('issue #949: one SparseMatrix contract for the factory functions', () =
   });
 });
 
-describe('issue #949: public comparison functions are scalar-only', () => {
+describe('issue #949: public comparison functions take a collection of every class', () => {
   // `equal`, `compare`, `larger`, `smaller`, `largerEq` and `smallerEq` of the public package
-  // hold scalar signatures only. They reject every collection, so a public SparseMatrix is
-  // refused the same as an Array or a DenseMatrix. `factory_<name>` takes the collections.
+  // take an Array, a DenseMatrix and a public SparseMatrix alike (#975, #1307): each collection
+  // row calls the function of the factory scope, which `factory_<name>` also exports.
   for (const name of ['equal', 'compare', 'larger', 'smaller', 'largerEq', 'smallerEq']) {
-    it(`${name} rejects a collection of every class with a TypeError`, () => {
+    it(`${name} takes a collection of every class`, () => {
       const f = exportsOf[name]!;
       for (const arg of [toSparse(SQ), DenseMatrix.fromArray(SQ), SQ]) {
-        expect(() => f(arg, arg)).toThrow(TypeError);
-        expect(() => f(arg, 1)).toThrow(TypeError);
+        expect(() => f(arg, arg)).not.toThrow();
+        expect(() => f(arg, 1)).not.toThrow();
       }
     });
     it(`factory_${name} takes a public SparseMatrix`, () => {

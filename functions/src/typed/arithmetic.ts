@@ -24,6 +24,7 @@ import {
   Dual,
   DimensionMismatchError,
   extrema,
+  isComplex,
 } from '@danielsimonjr/mathts-core';
 import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection } from './f64-kernels.js';
@@ -69,13 +70,15 @@ import {
   singularValues,
 } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
-import { arraySize } from '../utils/array.js';
+import { arraySize, broadcastTo } from '../utils/array.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
+import { sparseProduct } from './sparse-product.js';
+import { collectionRelationalRows } from './collection-relational.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -204,7 +207,61 @@ function arrayAllNumbersPair(a: unknown[], b: unknown[]): boolean {
   return true;
 }
 
+/**
+ * True when two Arrays have the same length and the same depth along their first-element
+ * chain. Such a pair needs no broadcast: the walk of {@link elementwiseWalk} applies as it is.
+ * The check allocates nothing, because `add([1, 2, 3], [4, 5, 6])` is a hot call.
+ */
+function sameLeadingShape(a: unknown[], b: unknown[]): boolean {
+  let x: unknown = a;
+  let y: unknown = b;
+  while (Array.isArray(x) && Array.isArray(y)) {
+    if (x.length !== y.length) return false;
+    x = x[0];
+    y = y[0];
+  }
+  return !Array.isArray(x) && !Array.isArray(y);
+}
+
+/**
+ * Stretch two Arrays of different shapes to their common shape. The axes are right-aligned
+ * (NumPy and mathjs rule): a pair of axis sizes is valid when the sizes are equal or when one
+ * of them is 1 and the other is at least 1. A size-1 axis does not stretch to a size-0 axis.
+ *
+ * @param a - Left operand.
+ * @param b - Right operand.
+ * @returns The two operands at the common shape.
+ * @throws RangeError when an axis pair cannot broadcast, with the text of the same-length check.
+ */
+function broadcastPair(a: unknown[], b: unknown[]): [unknown[], unknown[]] {
+  const sizeA = arraySize(a);
+  const sizeB = arraySize(b);
+  const rank = Math.max(sizeA.length, sizeB.length);
+  const common = new Array<number>(rank);
+  for (let k = 1; k <= rank; k++) {
+    const da = sizeA[sizeA.length - k] ?? 1;
+    const db = sizeB[sizeB.length - k] ?? 1;
+    if (da !== db && !((da === 1 && db >= 1) || (db === 1 && da >= 1))) {
+      throw new RangeError(`Dimension mismatch (${da} != ${db}) in element-wise operation`);
+    }
+    common[rank - k] = Math.max(da, db);
+  }
+  return [broadcastTo(a, common) as unknown[], broadcastTo(b, common) as unknown[]];
+}
+
+/**
+ * Element-wise operation on two operands, one of them an Array at least. Two Arrays of
+ * different shapes broadcast first (once per call); then {@link elementwiseWalk} runs.
+ */
 function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknown): unknown {
+  if (Array.isArray(a) && Array.isArray(b) && !sameLeadingShape(a, b)) {
+    [a, b] = broadcastPair(a, b);
+  }
+  return elementwiseWalk(tf, fallback, a, b);
+}
+
+/** The element-wise walk. Both operands have the same shape, or one is a scalar. */
+function elementwiseWalk(tf: object, fallback: ScalarOp, a: unknown, b: unknown): unknown {
   const f = getNumberBin(tf, fallback);
   const aArr = Array.isArray(a);
   const bArr = Array.isArray(b);
@@ -220,7 +277,7 @@ function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknow
     if (a.length > 0 && (Array.isArray(a[0]) || Array.isArray(b[0]))) {
       const out = new Array(a.length);
       for (let i = 0; i < a.length; i++) {
-        out[i] = elementwiseNumber(tf, fallback, a[i], b[i]);
+        out[i] = elementwiseWalk(tf, fallback, a[i], b[i]);
       }
       return out;
     }
@@ -237,7 +294,7 @@ function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknow
       return elementwise(fallback, a, b);
     }
     if (a.length > 0 && Array.isArray(a[0])) {
-      return a.map((x) => elementwiseNumber(tf, fallback, x, b));
+      return a.map((x) => elementwiseWalk(tf, fallback, x, b));
     }
     if (arrayAllNumbersFlat(a)) {
       const out = new Array(a.length);
@@ -251,7 +308,7 @@ function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknow
       return elementwise(fallback, a, b);
     }
     if (b.length > 0 && Array.isArray(b[0])) {
-      return b.map((y) => elementwiseNumber(tf, fallback, a, y));
+      return b.map((y) => elementwiseWalk(tf, fallback, a, y));
     }
     if (arrayAllNumbersFlat(b)) {
       const out = new Array(b.length);
@@ -356,6 +413,121 @@ function genericMatrixProduct(a: unknown[][], b: unknown[][]): unknown[][] {
     out.push(row);
   }
   return out;
+}
+
+/** The number of axes of an Array, read along its first elements: `[]` has 1, `[[1]]` has 2. */
+function arrayRank(a: unknown): number {
+  let rank = 0;
+  let x: unknown = a;
+  while (Array.isArray(x)) {
+    rank++;
+    x = x[0];
+  }
+  return rank;
+}
+
+/**
+ * The sum of the products of the first `n` entries of two sequences. With `conjugateLeft`, a
+ * Complex entry of `x` is conjugated first (the scalar product of two vectors, as `dot` of mathjs).
+ */
+function dotProduct(
+  x: ArrayLike<unknown>,
+  y: ArrayLike<unknown>,
+  n: number,
+  conjugateLeft = false
+): unknown {
+  const left = (k: number): unknown =>
+    conjugateLeft && isComplex(x[k]) ? (x[k] as Complex).conjugate() : x[k];
+  let acc: unknown = mulOp(left(0), y[0]);
+  for (let k = 1; k < n; k++) {
+    const p = mulOp(left(k), y[k]);
+    acc = typeof acc === 'number' && typeof p === 'number' ? acc + p : addOp(acc, p);
+  }
+  return acc;
+}
+
+/**
+ * The product of two Arrays where an operand has one axis, with the rules and the error texts
+ * of mathjs (#1007): `[n] x [n]` is the scalar product (it conjugates the Complex entries of
+ * the left vector, as mathjs does through `dot`), `[r, n] x [n]` is a vector of length `r`,
+ * `[n] x [n, c]` is a vector of length `c` (both without a conjugate). An operand with 3 or more
+ * axes throws.
+ * A 2-D by 2-D call does not come here (see {@link matrixProduct}).
+ *
+ * @param a - Left operand.
+ * @param b - Right operand.
+ * @param rankA - Number of axes of `a`.
+ * @param rankB - Number of axes of `b`.
+ * @returns A scalar, or the Array of the product.
+ * @throws RangeError when the lengths do not match; Error for an empty vector pair or a 3-D operand.
+ */
+function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number): unknown {
+  if (rankA !== 1 && rankA !== 2) {
+    throw new Error(
+      `Can only multiply a 1 or 2 dimensional matrix (Matrix A has ${rankA} dimensions)`
+    );
+  }
+  if (rankB !== 1 && rankB !== 2) {
+    throw new Error(
+      `Can only multiply a 1 or 2 dimensional matrix (Matrix B has ${rankB} dimensions)`
+    );
+  }
+  if (rankA === 1 && rankB === 1) {
+    if (a.length !== b.length) {
+      throw new RangeError(
+        'Dimension mismatch in multiplication. Vectors must have the same length'
+      );
+    }
+    if (a.length === 0) throw new Error('Cannot multiply two empty vectors');
+    return dotProduct(a, b, a.length, true);
+  }
+  if (rankA === 1) {
+    if (a.length !== b.length) {
+      throw new RangeError(
+        `Dimension mismatch in multiplication. Vector length (${a.length}) must match Matrix rows (${b.length})`
+      );
+    }
+    const cols = (b[0] as unknown[]).length;
+    const out = new Array<unknown>(cols);
+    const column = new Array<unknown>(b.length);
+    for (let j = 0; j < cols; j++) {
+      for (let k = 0; k < b.length; k++) column[k] = (b[k] as unknown[])[j];
+      out[j] = a.length === 0 ? 0 : dotProduct(a, column, a.length);
+    }
+    return out;
+  }
+  const inner = (a[0] as unknown[]).length;
+  if (inner !== b.length) {
+    throw new RangeError(
+      `Dimension mismatch in multiplication. Matrix columns (${inner}) must match Vector length (${b.length})`
+    );
+  }
+  const out = new Array<unknown>(a.length);
+  for (let i = 0; i < a.length; i++) {
+    out[i] = inner === 0 ? 0 : dotProduct(a[i] as unknown[], b, inner);
+  }
+  return out;
+}
+
+/**
+ * The product of two matrix operands where one of them is not 2-D (a factory matrix of size
+ * `[n]`): the result of {@link vectorProduct} on their nested data, a scalar or an Array.
+ */
+function matrixVectorProduct(a: unknown, b: unknown): unknown {
+  const na = toNested(a) as unknown[];
+  const nb = toNested(b) as unknown[];
+  return vectorProduct(na, nb, arrayRank(na), arrayRank(nb));
+}
+
+/** A vector product as a dense matrix of size `[n]`; a scalar stays a scalar. */
+function denseVectorProduct(a: unknown, b: unknown): unknown {
+  const out = matrixVectorProduct(a, b);
+  return Array.isArray(out) ? trustedDense(out as number[][]) : out;
+}
+
+/** True when a matrix operand has other than two axes (a factory matrix of size `[n]`). */
+function isNotTwoDimensional(m: unknown): boolean {
+  return collectionSize(m).length !== 2;
 }
 
 /** A matrix operand → its dense nested array; a scalar passes through unchanged. */
@@ -770,14 +942,12 @@ export const multiply = withBinaryScalarGuards(
 
     // Matrix × matrix (2-D arrays) routed through the native DenseMatrix +
     // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
-    // Previously `multiply(2DArray, 2DArray)` threw; this is additive. Non-2-D
-    // Array operands throw a clear message pointing at the right primitive.
-    'Array, Array': (a: unknown[], b: unknown[]): unknown[][] => {
-      if (!Array.isArray(a[0]) || !Array.isArray(b[0])) {
-        throw new TypeError(
-          'multiply(Array, Array) requires two 2-D matrices; use dot() for vector dot products'
-        );
-      }
+    // A 1-D operand takes the vector product of mathjs (#1007): vector x vector is the scalar
+    // product, matrix x vector and vector x matrix are vectors.
+    'Array, Array': (a: unknown[], b: unknown[]): unknown => {
+      const rankA = arrayRank(a);
+      const rankB = arrayRank(b);
+      if (rankA !== 2 || rankB !== 2) return vectorProduct(a, b, rankA, rankB);
       return matrixProduct(a, b);
     },
 
@@ -786,20 +956,28 @@ export const multiply = withBinaryScalarGuards(
     // reaching it via the Matrix~>Array conversion would strip the matrix type
     // (breaking callers like `sylvester` that call `.toArray()` on the product).
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
+      if (isNotTwoDimensional(a) || isNotTwoDimensional(b)) return denseVectorProduct(a, b);
       return trustedDense(matrixProduct(a, b) as number[][]);
     },
 
     // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
-    // operands and a dense matrix for a sparse and a dense operand.
-    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => {
-      const product = matrixProduct(a, b);
-      if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(product);
-      return new MathJSSparseMatrix(product);
+    // operands and a dense matrix for a sparse and a dense operand. The sparse product reads
+    // the stored entries only (#1271); it never builds a dense matrix. A sparse matrix has
+    // two axes, so a vector case comes from the dense operand only.
+    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+      sparseProduct(a, b, addOp, mulOp),
+    // A sparse matrix times a 1-D dense matrix is a sparse column of size [r, 1] (mathjs).
+    'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
+      if (!isNotTwoDimensional(b)) return trustedDense(matrixProduct(a, b) as number[][]);
+      const column = (matrixVectorProduct(a, b) as unknown[]).map((x) => [x]);
+      return isSparseMatrix(a) ? publicSparseOrDense(column) : new MathJSSparseMatrix(column);
     },
-    'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-      trustedDense(matrixProduct(a, b) as number[][]),
+    // A 1-D dense matrix times a sparse matrix is a dense vector of size [c]. mathjs throws
+    // here; the product is defined, so MathTS returns it.
     'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      trustedDense(matrixProduct(a, b) as number[][]),
+      isNotTwoDimensional(a)
+        ? denseVectorProduct(a, b)
+        : trustedDense(matrixProduct(a, b) as number[][]),
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
@@ -914,6 +1092,15 @@ export const divide = mathTyped('divide', {
     { collectionFirst: divideKernels, scalarFirst: scalarOverCollection },
     ALL_SCALAR_TYPES
   ),
+
+  // A collection divided by a collection is `a * inv(b)` (mathjs `divide`, #975). The errors
+  // of `inv` pass unchanged: a non-square `b` throws RangeError "Matrix must be square", a
+  // singular `b` throws Error "Cannot calculate inverse, determinant is zero". The result type
+  // follows `multiply`.
+  'Array | DenseMatrix | SparseMatrix, Array | DenseMatrix | SparseMatrix': (
+    a: unknown,
+    b: unknown
+  ): unknown => (multiply as unknown as ScalarOp)(a, divideInverse()(b)),
 });
 divideForNumberPath.fn = divide;
 
@@ -1787,6 +1974,8 @@ export const equal = mathTyped('equal', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => coreEqual(a, b),
   'Unit, Unit': (a: Unit, b: Unit): boolean =>
     unitSameDimension(a, b) && asUnit(a).value === asUnit(b).value,
+  // An Array or a matrix against any operand: the element-wise comparison of mathjs (#975).
+  ...collectionRelationalRows('equal'),
 });
 
 /**
@@ -1798,6 +1987,7 @@ export const smaller = mathTyped('smaller', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) < 0,
+  ...collectionRelationalRows('smaller'),
 });
 
 /**
@@ -1809,6 +1999,7 @@ export const larger = mathTyped('larger', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,
+  ...collectionRelationalRows('larger'),
 });
 
 /**
@@ -1820,6 +2011,7 @@ export const smallerEq = mathTyped('smallerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) <= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) <= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) <= 0,
+  ...collectionRelationalRows('smallerEq'),
 });
 
 /**
@@ -1831,6 +2023,7 @@ export const largerEq = mathTyped('largerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) >= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) >= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) >= 0,
+  ...collectionRelationalRows('largerEq'),
 });
 
 /**
@@ -1843,6 +2036,7 @@ export const compare = mathTyped('compare', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),
   'Unit, Unit': (a: Unit, b: Unit): i32 => unitCmp(a, b),
+  ...collectionRelationalRows('compare'),
 });
 
 // =============================================================================

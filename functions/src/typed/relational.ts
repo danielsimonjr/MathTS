@@ -32,6 +32,7 @@ import {
   isFraction,
 } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
+import { collectionRelationalRows } from './collection-relational.js';
 
 // =============================================================================
 // Internal helpers
@@ -201,6 +202,9 @@ export const unequal = mathTyped('unequal', {
     if (y === undefined) return x !== undefined;
     return !equalScalar(x, y);
   },
+  // An Array or a matrix against any operand: the element-wise result of mathjs (#975). A
+  // collection is never null, so a null operand keeps the rule above: unequal.
+  ...collectionRelationalRows('unequal', true),
 });
 
 // =============================================================================
