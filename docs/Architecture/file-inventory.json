@@ -14737,7 +14737,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 610
+      "loc": 623
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -15052,7 +15052,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 90
+      "loc": 112
     },
     {
       "file": "matrix/tests/dogfood-1171-schur-deflation.test.ts",

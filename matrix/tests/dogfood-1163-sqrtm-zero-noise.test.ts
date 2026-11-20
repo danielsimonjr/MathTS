@@ -87,3 +87,25 @@ describe('#1163 matrixSqrtm reads Schur rounding noise of a zero eigenvalue as z
     ).toBeLessThan(1e-14);
   });
 });
+
+describe('#1170 matrixSqrtm of a symmetric singular matrix of rank below n-1', () => {
+  it('8 random PSD matrices of size 10 and rank 3 square back to their matrix', () => {
+    // The eigenvectors of `eig` for the repeated zero eigenvalue are not orthogonal, and
+    // Gram-Schmidt on them altered the other eigenvectors: main and the first fix of #1170
+    // returned roots that missed the matrix by 1e-8 (SciPy: 1e-15).
+    let seed = 987;
+    const rnd = (): number => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647 - 0.5;
+    };
+    for (let t = 0; t < 8; t++) {
+      const G: Rows = Array.from({ length: 10 }, () => Array.from({ length: 3 }, rnd));
+      const A = mul(
+        G,
+        G[0].map((_, j) => G.map((r) => r[j]))
+      );
+      const X = matrixSqrtm(DenseMatrix.fromArray(A)).toArray() as Rows;
+      expect(relativeResidual(X, A)).toBeLessThan(1e-11);
+    }
+  });
+});

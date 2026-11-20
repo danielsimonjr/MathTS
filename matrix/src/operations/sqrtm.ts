@@ -133,7 +133,20 @@ function sqrtmSymmetric(A: number[][]): number[][] {
   for (let i = 0; i < n; i++) Dsqrt[i][i] = Math.sqrt(Math.max(values[i].re, 0));
 
   // sqrtm(A) = Q * D^{1/2} * Q^T
-  return matMul(matMul(Q, Dsqrt), Qt);
+  const Yeig = matMul(matMul(Q, Dsqrt), Qt);
+  const eigMiss = relativeDifference(matMul(Yeig, Yeig), Asym);
+  if (eigMiss <= 1e-12) return Yeig;
+
+  // The eigenvectors of a repeated eigenvalue (the zero eigenvalues of a singular matrix) are
+  // not orthogonal, and Gram-Schmidt on them alters the other eigenvectors: a PSD matrix of
+  // rank 3 and size 10 missed its root by 1e-8 (#1170). The real Schur form of a symmetric
+  // matrix is diagonal up to rounding and its orthogonal factor is exact: A = Q T Qᵀ, so
+  // sqrtm(A) = Q · diag(sqrt(max(T_ii, 0))) · Qᵀ. The better of the two roots is kept.
+  const { H: T, Q: Qs } = schurInternal(Asym);
+  const Ds = eye(n);
+  for (let i = 0; i < n; i++) Ds[i][i] = Math.sqrt(Math.max(T[i][i], 0));
+  const Yschur = matMul(matMul(Qs, Ds), transpose(Qs));
+  return relativeDifference(matMul(Yschur, Yschur), Asym) < eigMiss ? Yschur : Yeig;
 }
 
 // ---------------------------------------------------------------------------
