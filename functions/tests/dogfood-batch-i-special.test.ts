@@ -199,6 +199,7 @@ describe('#1132 besselJ and besselY: one work bound per array call', () => {
     const r = besselY(2e9, fill(2048, 1)) as Float64Array;
     const want = besselYnJS(2e9, fill(2048, 1));
     expect(r.every((v, i) => Object.is(v, want[i]))).toBe(true);
+    expect(r.every((v) => v === -Infinity)).toBe(true);
   });
   it('besselJ(5, [1, 2, 3]) equals the scalars', () => {
     const r = besselJ(5, new Float64Array([1, 2, 3])) as Float64Array;
@@ -525,5 +526,50 @@ describe('#1105 mathieuA and mathieuB at large q', () => {
   it('the order limits keep their messages', () => {
     expect(() => mathieuA(100, 1)).toThrow('order n must be at most 99, got 100');
     expect(() => mathieuB(101, 1)).toThrow('order n must be at most 100, got 101');
+  });
+});
+
+describe('#1289 besselY: an overflow is -Infinity, not NaN', () => {
+  it('besselY(n, x) is -Infinity where the upward recurrence leaves the double range', () => {
+    // Y_n(1) is below -1.797e308 from n = 152. The recurrence reached NaN at n = 154.
+    for (const [n, x] of [
+      [152, 1],
+      [154, 1],
+      [200, 1],
+      [400, 1],
+      [300, 5],
+      [1000, 100],
+      [3, 1e-310],
+    ]) {
+      expect(besselY(n, x), `besselY(${n}, ${x})`).toBe(-Infinity);
+    }
+  });
+  it('besselY(400.5, 1) is -Infinity (real order)', () => {
+    expect(besselY(400.5, 1)).toBe(-Infinity);
+    expect(besselY(152.5, 1)).toBe(-Infinity);
+  });
+  it('a negative odd integer order flips the sign: besselY(-401, 1) is +Infinity', () => {
+    expect(besselY(-401, 1)).toBe(Infinity);
+    expect(besselY(-400, 1)).toBe(-Infinity);
+  });
+  it('besselY(400, [1, 2]) is [-Infinity, -Infinity]', () => {
+    const r = besselY(400, new Float64Array([1, 2])) as Float64Array;
+    expect(Array.from(r)).toEqual([-Infinity, -Infinity]);
+  });
+  it('a huge order ends at once: besselY(1e9, 1) is -Infinity', () => {
+    expect(besselY(1e9, 1)).toBe(-Infinity);
+  });
+  it('the values below the overflow keep their digits (mpmath)', () => {
+    expect(rel(besselY(150, 1) as number, -1.733326253073777e305)).toBeLessThan(1e-13);
+    expect(rel(besselY(151, 1) as number, -5.199920593251399e307)).toBeLessThan(1e-13);
+    expect(rel(besselY(150.5, 1) as number, -2.999691509002089e306)).toBeLessThan(1e-13);
+    expect(rel(besselY(260, 20) as number, -6.900884357849415e253)).toBeLessThan(1e-13);
+  });
+  it('a non-finite x still gives NaN, and a negative real order that overflows stays NaN', () => {
+    expect(besselY(1e8, Infinity)).toBeNaN();
+    expect(besselY(5, NaN)).toBeNaN();
+    expect(besselY(400, 0)).toBeNaN();
+    expect(besselY(400, -1)).toBeNaN();
+    expect(besselY(-400.5, 1)).toBeNaN();
   });
 });

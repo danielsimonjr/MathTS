@@ -430,6 +430,13 @@ export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
     const rytemp = (xmu + i) * xi2 * ry1 - rymu;
     rymu = ry1;
     ry1 = rytemp;
+    // Y_{mu+i+1} left the double range (or is NaN). Every later order is farther out, so the
+    // target order is that value, and the next step would give -Infinity - -Infinity = NaN.
+    // At the last step the target is rymu, which is finite.
+    if (!Number.isFinite(ry1)) {
+      if (i < nl) rymu = ry1;
+      break;
+    }
   }
   return [rj, rymu];
 }
@@ -496,6 +503,9 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
   const jy = besselJYTemme(an, x);
   if (nu >= 0) return jy[1];
+  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. An overflowed Y_nu has an unknown size, and
+  // cos(nu pi) can be small, so the sum has no known value.
+  if (!Number.isFinite(jy[1])) return NaN;
   return Math.sin(an * Math.PI) * jy[0] + Math.cos(an * Math.PI) * jy[1];
 }
 
@@ -599,7 +609,10 @@ export function besselYScalar(n: f64, x: f64): f64 {
   let yCurr: f64 = besselY1Scalar(x);
   for (let k = 1; k < ni; k++) {
     const yNext = ((2 * k) / x) * yCurr - yPrev;
-    if (Number.isNaN(yNext)) return NaN;
+    // Y_n(x) < 0 and falls without a bound as n grows while x < n, so a result outside the
+    // double range is -Infinity. The next step would be -Infinity - -Infinity = NaN. A NaN
+    // returns as NaN.
+    if (!Number.isFinite(yNext)) return yNext;
     yPrev = yCurr;
     yCurr = yNext;
   }

@@ -247,7 +247,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 896
+      "loc": 898
     },
     {
       "file": "assembly/src/tridiag.ts",
@@ -10054,7 +10054,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 983
+      "loc": 996
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -10747,7 +10747,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 390
+      "loc": 406
     },
     {
       "file": "functions/tests/dogfood-1114-discretelog-gcd.test.ts",
@@ -11286,7 +11286,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 530
+      "loc": 576
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

@@ -174,7 +174,7 @@ function callKernel(
       const r = ${onArray}
         ? m[${JSON.stringify(fn)}](${n}, new Float64Array([${x}]))[0]
         : m[${JSON.stringify(fn)}](${n}, ${x});
-      console.log(JSON.stringify({ ok: true, value: Number.isNaN(r) ? 'NaN' : r, ms: Date.now() - t }));
+      console.log(JSON.stringify({ ok: true, value: Number.isNaN(r) ? 'NaN' : r === Infinity ? 'Inf' : r === -Infinity ? '-Inf' : r, ms: Date.now() - t }));
     } catch (e) {
       console.log(JSON.stringify({ ok: false, message: String(e && e.message), ms: Date.now() - t }));
     }`;
@@ -187,6 +187,8 @@ function callKernel(
   if (r.error || r.status === null) return { timedOut: true, ms: Date.now() - t };
   const out = JSON.parse(r.stdout.trim().split('\n').pop()!);
   if (out.value === 'NaN') out.value = NaN;
+  if (out.value === 'Inf') out.value = Infinity;
+  if (out.value === '-Inf') out.value = -Infinity;
   return { timedOut: false, ...out };
 }
 
@@ -294,15 +296,29 @@ function jnBatch(cases: [number, number[]][], timeoutMs = 30_000): number[][] | 
 describeIfBindings('#1113 kernel: early exits and signs match the JS scalar', () => {
   it('bessel_yn_f64 and bessel_jn_f64 stop at the first NaN', () => {
     // Before the fix each call ran the whole recurrence: about 2 s for an order of 1e8.
-    for (const r of [
-      yn(2_147_483_647, 1),
-      jn(1_000_000_000, Infinity),
-      yn(100_000_000, Infinity),
-    ]) {
+    for (const r of [jn(1_000_000_000, Infinity), yn(100_000_000, Infinity)]) {
       expect(r.timedOut).toBe(false);
       expect(r.ok).toBe(true);
       expect(r.value).toBeNaN();
       expect(r.ms).toBeLessThan(500);
+    }
+  }, 60_000);
+
+  it('bessel_yn_f64 stops at the first overflow and returns the infinity of the JS scalar (#1289)', () => {
+    // Y_n(1) is below -1.797e308 from n = 152. The kernel returned NaN from n = 154.
+    for (const [n, want] of [
+      [152, -Infinity],
+      [154, -Infinity],
+      [400, -Infinity],
+      [2_147_483_647, -Infinity],
+      [-401, Infinity],
+      [-400, -Infinity],
+    ] as [number, number][]) {
+      const r = yn(n, 1);
+      expect(r.timedOut, `yn(${n}, 1)`).toBe(false);
+      expect(r.ok, `yn(${n}, 1)`).toBe(true);
+      expect(r.value, `yn(${n}, 1)`).toBe(want);
+      expect(r.ms, `yn(${n}, 1)`).toBeLessThan(500);
     }
   }, 60_000);
 
