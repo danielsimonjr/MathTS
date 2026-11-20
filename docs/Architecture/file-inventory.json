@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2554,
+  "totalFiles": 2556,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1138,
+    "test": 1140,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1138,
+    "tests": 1140,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1178,
+    "@danielsimonjr/mathts-functions": 1180,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -10162,11 +10162,25 @@
       "loc": 81
     },
     {
+      "file": "functions/tests/bignumber-zeta-exact-1166.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 56
+    },
+    {
       "file": "functions/tests/bignumber-zeta-expm1-1166.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 95
+    },
+    {
+      "file": "functions/tests/bignumber-zeta-noninteger-1166.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 47
     },
     {
       "file": "functions/tests/bin-hex-oct-bignumber.test.ts",

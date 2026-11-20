@@ -20,6 +20,21 @@ interface BigNumberConstructor extends PrecisionClass {
   piAt(): BigNumberType;
 }
 
+/** The BigNumber methods that the exact checks of `zeta` use. */
+interface ExactBigNumber {
+  isNaN(): boolean;
+  isFinite(): boolean;
+  isZero(): boolean;
+  isNegative(): boolean;
+  isInteger(): boolean;
+  equals(n: number): boolean;
+  sub(n: number): ExactBigNumber;
+  abs(): ExactBigNumber;
+  mod(n: number): ExactBigNumber;
+  /** The decimal exponent of the leading digit. */
+  readonly e: number;
+}
+
 /** log10(3 + sqrt(8)): the Borwein series gains this many digits per term. */
 const BORWEIN_DIGITS_PER_TERM = Math.log10(3 + Math.sqrt(8));
 /** Guard digits of the Borwein series of a BigNumber: once in the term count, twice in the work precision. */
@@ -138,20 +153,51 @@ export const createZeta = /* #__PURE__ */ factory(
     return typed(name, {
       number: zetaNumber,
       BigNumber: (s: BigNumberType): BigNumberType => {
+        const x = s as unknown as ExactBigNumber;
+        const createValue = (value: number): BigNumberType => new BigNumber!(value);
+        if (x.isNaN()) return createValue(NaN);
+        if (!x.isFinite()) return createValue(x.isNegative() ? NaN : 1);
+        const negative = x.isNegative() && !x.isZero();
+        // A negative even integer is a trivial zero. The reflection formula gives a sin(pi * s / 2)
+        // of the size of the work precision there, times a factor of up to (1 - s)!: not 0.
+        if (negative && x.isInteger() && x.mod(2).isZero()) return createValue(0);
         // The error of n Borwein terms is about (3 + sqrt(8))^-n, so n follows the precision of
         // the BigNumber and not config.relTol: 12 digits of relTol gave 8 correct digits (#1166).
         // The terms d(k, n) are sums of positive numbers and the alternating sum is of the size of
         // its first term, so the series does not cancel: a few guard digits are enough.
         const precision = BigNumber!.precision;
         const digits = Math.ceil((precision + BORWEIN_GUARD_DIGITS) / BORWEIN_DIGITS_PER_TERM);
-        return atWorkPrecision(BigNumber!, precision + 2 * BORWEIN_GUARD_DIGITS, () =>
-          zetaNumeric(
-            s,
-            (value: number) => new BigNumber!(value),
-            () => digits,
-            () => BigNumber!.piAt(),
-            borweinD
-          )
+        if (negative) {
+          // gamma of a non-integer BigNumber is not defined, so only the guard of zetaNumeric
+          // (a value within relTol of 0) gives a result here.
+          return atWorkPrecision(BigNumber!, precision + 2 * BORWEIN_GUARD_DIGITS, () =>
+            zetaNumeric(
+              s,
+              createValue,
+              () => digits,
+              () => BigNumber!.piAt(),
+              borweinD
+            )
+          );
+        }
+        // A BigNumber is exact: 0 and 1 are the only special values. zetaNumeric compares with
+        // config.relTol and config.absTol (1e-12), so it gave NaN for 1 + 1e-25 and -0.5 for 1e-40.
+        if (x.isZero()) return createValue(-0.5);
+        if (x.equals(1)) return createValue(NaN);
+        // 1 - 2^(1 - s) loses one digit for each digit of |s - 1| below 1.
+        const closeToOne = Math.max(0, -x.sub(1).abs().e);
+        return atWorkPrecision(
+          BigNumber!,
+          precision + 2 * BORWEIN_GUARD_DIGITS + closeToOne,
+          () =>
+            zeta(
+              s,
+              createValue,
+              () => digits,
+              (value: BigNumberType) => value as unknown as number,
+              () => BigNumber!.piAt(),
+              borweinD
+            ) as BigNumberType
         );
       },
       Complex: zetaComplex,
@@ -247,7 +293,13 @@ export const createZeta = /* #__PURE__ */ factory(
       // accurate) times an accurate prefactor. Re(s) ≥ 0 keeps the verified-accurate direct path
       // (critical strip included).
       if (getRe(s) >= 0) {
-        return f(s, createValue(n), createValue, dTable?.(n, createValue));
+        return f(
+          s,
+          createValue(n),
+          createValue,
+          dTable?.(n, createValue),
+          dTable ? integerPowers(s, n, createValue) : undefined
+        );
       } else {
         // Function Equation for reflection to x < 1
         const piValue = getPi();
@@ -291,14 +343,44 @@ export const createZeta = /* #__PURE__ */ factory(
       s: NumericValue,
       n: NumericValue,
       createValue: (value: number) => NumericValue,
-      dAt: DFn = (k) => d(k, n)
+      dAt: DFn = (k) => d(k, n),
+      powAt: DFn = (k) => pow(k, s)
     ): NumericValue {
       const c = divide(1, multiply(dAt(createValue(0)), subtract(1, pow(2, subtract(1, s)))));
       let S = createValue(0);
       for (let k = createValue(1); smallerEq(k, n); k = add(k, 1)) {
-        S = add(S, divide(multiply((-1) ** ((k as number) - 1), dAt(k)), pow(k, s)));
+        S = add(S, divide(multiply((-1) ** ((k as number) - 1), dAt(k)), powAt(k)));
       }
       return multiply(c, S);
+    }
+
+    /**
+     * The values k^s for k = 1 to n. The power is completely multiplicative, so only a prime k
+     * needs a `pow` (an exp and a ln at the work precision when s is not an integer): a composite
+     * k is the product of its smallest prime factor and the quotient. A table of n = 275 terms
+     * (precision 200) then needs 58 powers and not 275.
+     * @param {number | BigNumber} s
+     * @param {number} n   the number of terms
+     * @param {(number) => number | BigNumber} createValue
+     * @returns {(k: number | BigNumber) => number | BigNumber}   k^s for an integer k from 1 to n
+     */
+    function integerPowers(
+      s: NumericValue,
+      n: number,
+      createValue: (value: number) => NumericValue
+    ): DFn {
+      const smallestFactor = new Array<number>(n + 1).fill(0);
+      const table: NumericValue[] = new Array<NumericValue>(n + 1);
+      table[1] = createValue(1);
+      for (let k = 2; k <= n; k++) {
+        if (smallestFactor[k] === 0) {
+          for (let m = k; m <= n; m += k) if (smallestFactor[m] === 0) smallestFactor[m] = k;
+          table[k] = pow(createValue(k), s);
+        } else {
+          table[k] = multiply(table[smallestFactor[k]], table[k / smallestFactor[k]]);
+        }
+      }
+      return (k: NumericValue): NumericValue => table[Number(k)];
     }
 
     /**
