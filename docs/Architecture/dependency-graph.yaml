@@ -25157,8 +25157,10 @@ modules:
             - solveElementary
         - file: ../cas/syntax-tree.js
           imports:
+            - AstNode
             - MAX_POLYNOMIAL_DEGREE
             - PolynomialDegreeError
+            - operatorName
             - parseTree
             - polynomialCoefficients
         - file: ../cas/closed-form-roots.js
@@ -47038,7 +47040,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238444
+  totalLinesOfCode: 238591
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669

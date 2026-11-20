@@ -43,8 +43,10 @@ import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { solveElementary } from '../cas/elementary-solve.js';
 import {
+  type AstNode,
   MAX_POLYNOMIAL_DEGREE,
   PolynomialDegreeError,
+  operatorName,
   parseTree,
   polynomialCoefficients,
 } from '../cas/syntax-tree.js';
@@ -455,22 +457,137 @@ export function integrate(
   return `integral(${trimmed}, ${varName})`;
 }
 
+/** `quotientLimit` takes at most this many L'Hopital steps. */
+const LIMIT_RULE_MAX_STEPS = 8;
+/** `quotientLimit` stops when the text of the numerator or the denominator is longer than this. */
+const LIMIT_RULE_TEXT_LIMIT = 200;
+/** A value of the numerator or the denominator at or below this is zero (an absolute bound). */
+const LIMIT_ZERO = 1e-14;
+/** The distance from the point at which `quotientLimit` reads the sign of a pole. */
+const LIMIT_POLE_OFFSET = 1e-8;
+/** The distances from the point at which a finite L'Hopital result is checked against a sample. */
+const LIMIT_CHECK_OFFSETS = [1e-2, 1e-3, 1e-4];
+/** A finite L'Hopital result must agree with a sample within this fraction of `max(1, |result|)`. */
+const LIMIT_CHECK_TOLERANCE = 5e-2;
+
+/** The node inside any number of parentheses. */
+function unwrapParens(node: AstNode): AstNode {
+  return node.type === 'ParenthesisNode' && node.content ? unwrapParens(node.content) : node;
+}
+
+/** The sign of `v` as -1, 0 or 1; NaN gives 0. */
+function signOf(v: f64): number {
+  return v > 0 ? 1 : v < 0 ? -1 : 0;
+}
+
 /**
- * Compute symbolic limits using numerical approach and L'Hopital's rule.
+ * The limit of a quotient `N/D` at `value` by L'Hopital's rule, or `undefined` when the rule
+ * does not apply and the caller must sample.
  *
- * Handles standard limits, 0/0 indeterminate forms via L'Hopital,
- * and one-sided limits.
+ * Each step evaluates `N` and `D` at `value`. A pair of zeros (0/0) is replaced by the pair of
+ * the symbolic derivatives, up to {@link LIMIT_RULE_MAX_STEPS} times. A finite quotient is the
+ * limit. A zero denominator with a non-zero numerator (c/0) is a pole: the sign of the current
+ * pair just beside `value` gives +Infinity or -Infinity for each side, and `NaN` when the two
+ * sides disagree. The rule reads the limit of `N'/D'` as `N'(a)/D'(a)`, which holds only when
+ * both derivatives are continuous at `a`; so a finite result must agree with a sample of the
+ * original expression on each requested side that has a finite sample (otherwise the result is
+ * discarded). The inf/inf form has no step here: a non-finite `N` or `D` gives `undefined`.
+ */
+function quotientLimit(
+  expr: string,
+  varName: string,
+  value: f64,
+  dir: 'left' | 'right' | undefined
+): f64 | undefined {
+  const parsed = parseTree(expr);
+  if (parsed === null) return undefined;
+  const root = unwrapParens(parsed);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return undefined;
+  let num = root.args[0].toString();
+  let den = root.args[1].toString();
+
+  const real = (text: string, x: f64): f64 | undefined => {
+    try {
+      const v: unknown = evalAt(text, varName, x);
+      return typeof v === 'number' ? v : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const sides = dir === 'right' ? [1] : dir === 'left' ? [-1] : [1, -1];
+  /** The sign of the current quotient just beside `value`, on side `d` (0 when it has none). */
+  const sideSign = (d: number): number => {
+    const a = real(num, value + d * LIMIT_POLE_OFFSET);
+    const b = real(den, value + d * LIMIT_POLE_OFFSET);
+    return a === undefined || b === undefined ? 0 : signOf(a) * signOf(b);
+  };
+  /** The result `L` when each requested side with a finite sample has a sample close to it. */
+  const checked = (L: f64): f64 | undefined => {
+    let sidesChecked = 0;
+    for (const d of sides) {
+      let finite = 0;
+      let agrees = false;
+      for (const h of LIMIT_CHECK_OFFSETS) {
+        const sample = real(expr, value + d * h);
+        if (sample === undefined || !Number.isFinite(sample)) continue;
+        finite++;
+        if (Math.abs(sample - L) <= LIMIT_CHECK_TOLERANCE * Math.max(1, Math.abs(L))) agrees = true;
+      }
+      if (finite === 0) continue;
+      if (!agrees) return undefined;
+      sidesChecked++;
+    }
+    return sidesChecked > 0 ? L : undefined;
+  };
+
+  for (let step = 0; step <= LIMIT_RULE_MAX_STEPS; step++) {
+    const nv = real(num, value);
+    const dv = real(den, value);
+    if (nv === undefined || dv === undefined || !Number.isFinite(nv) || !Number.isFinite(dv)) {
+      return undefined;
+    }
+    if (Math.abs(dv) > LIMIT_ZERO) return checked(nv / dv);
+    if (Math.abs(nv) > LIMIT_ZERO) {
+      // c/0: a pole. The sign of each side comes from the current pair, not from the original
+      // expression, which may round to 0 beside `value` (1 - cos(x) at 1e-8).
+      const signs = sides.map(sideSign);
+      if (signs.some((s) => s === 0)) return undefined;
+      return signs.every((s) => s === signs[0]) ? signs[0] * Infinity : NaN;
+    }
+    // 0/0: take the derivative of both parts.
+    if (step === LIMIT_RULE_MAX_STEPS) return undefined;
+    if (num.length > LIMIT_RULE_TEXT_LIMIT || den.length > LIMIT_RULE_TEXT_LIMIT) return undefined;
+    try {
+      num = _casDerivativeOne(num, varName);
+      den = _casDerivativeOne(den, varName);
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Compute a limit of an expression at a finite point or at infinity.
+ *
+ * Direct evaluation comes first. A quotient `N/D` that is 0/0 or c/0 at the point then takes
+ * L'Hopital's rule with symbolic derivatives (see {@link quotientLimit}): up to 8 steps, with a
+ * check of a finite result against a sample, and `+-Infinity` for a pole. Every other
+ * expression (and the inf/inf form) is sampled at distances 1e-4 to 1e-10 from the point: the
+ * sample sequence gives `+-Infinity` when its values grow without bound, otherwise the value at
+ * which two successive samples differ least. A limit at +-Infinity is sampled at 1e2 to 1e8.
  *
  * @param expr - Expression string
  * @param varName - Variable approaching the limit
  * @param value - Value being approached (can be Infinity or -Infinity)
- * @param dir - Direction: 'left', 'right', or undefined for both
- * @returns The limit value
+ * @param dir - Direction: 'left', 'right', or undefined for both. Two sides that disagree give NaN.
+ * @returns The limit value: a number, `Infinity`, `-Infinity`, or `NaN` when it does not exist
  *
  * @example
- * limit('sin(x)/x', 'x', 0)        // => 1
- * limit('1/x', 'x', 0, 'right')    // => Infinity
- * limit('(x^2-1)/(x-1)', 'x', 1)   // => 2
+ * limit('sin(x)/x', 'x', 0)               // => 1
+ * limit('(1-cos(x))/x^2', 'x', 0)         // => 0.5
+ * limit('1/x', 'x', 0, 'right')           // => Infinity
+ * limit('(x^2-1)/(x-1)', 'x', 1)          // => 2
  */
 export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 'right'): f64 {
   const eps = 1e-10;
@@ -505,6 +622,10 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
     // Fall through to numerical approach
   }
 
+  // L'Hopital's rule for a 0/0 or c/0 quotient
+  const byRule = quotientLimit(expr, varName, value, dir);
+  if (byRule !== undefined) return byRule;
+
   // Numerical approach from the specified direction
   const approach = (direction: number): f64 => {
     const vals: f64[] = [];
@@ -517,7 +638,30 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
     }
     const valid = vals.filter((v) => isFinite(v) && !isNaN(v));
     if (valid.length === 0) return NaN;
-    return valid[valid.length - 1];
+    if (valid.length === 1) return valid[0];
+    const last = valid[valid.length - 1];
+    // Values that grow at every step, by 100 times in all and at least 2 times in the last
+    // step, diverge: the limit is infinite, and the last sample is only its size at 1e-10.
+    if (
+      valid.length >= 3 &&
+      valid.every((v, i) => i === 0 || Math.abs(v) > Math.abs(valid[i - 1])) &&
+      Math.abs(last) >= 100 * Math.abs(valid[0]) &&
+      Math.abs(last) >= 2 * Math.abs(valid[valid.length - 2])
+    ) {
+      return last > 0 ? Infinity : -Infinity;
+    }
+    // Converged values: take the sample that differs least from the one before it. The last
+    // sample is not safe, because a difference of two close values (1 - cos(h)) rounds to 0.
+    let best = valid.length - 1;
+    let bestDiff = Math.abs(valid[best] - valid[best - 1]);
+    for (let i = valid.length - 2; i >= 1; i--) {
+      const diff = Math.abs(valid[i] - valid[i - 1]);
+      if (diff < bestDiff) {
+        best = i;
+        bestDiff = diff;
+      }
+    }
+    return valid[best];
   };
 
   if (dir === 'right') return approach(1);
@@ -530,6 +674,9 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
   if (isNaN(fromRight) && isNaN(fromLeft)) return NaN;
   if (isNaN(fromRight)) return fromLeft;
   if (isNaN(fromLeft)) return fromRight;
+
+  // Two infinities of one sign agree (their difference is NaN)
+  if (fromRight === fromLeft) return fromRight;
 
   // Check if limits agree
   if (Math.abs(fromRight - fromLeft) < Math.max(1e-6, eps * Math.abs(fromRight))) {
