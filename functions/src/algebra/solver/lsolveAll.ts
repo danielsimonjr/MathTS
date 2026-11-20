@@ -128,6 +128,8 @@ export const createLsolveAll = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix[] {
+        // A matrix-package SparseMatrix (CSR) has no _index/_ptr/size(): densify it and
+        // run the dense forward substitution, which gives the same result as lsolveAll(dense).
         const dense = densifyForSolver(m);
         if (dense) return _denseForwardSubstitution(matrix(dense.toArray()) as DenseMatrix, b);
         return _sparseForwardSubstitution(m, b);

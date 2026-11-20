@@ -336,8 +336,10 @@ class TapedTensor {
   contract(other: TapedTensor): TapedTensor;
 
   /**
-   * Reverse-mode AD over matmul (a generalisation of contract on rank-2 inputs;
-   * also accepts rank-N inputs as batched matmul, similar to NumPy's @).
+   * Reverse-mode AD over matmul (a generalisation of contract on rank-2 inputs).
+   * It follows the NumPy `@` rules, as `Tensor.matmul` does: a rank-1 operand gets an
+   * added axis that the result drops, and the batch axes are right-aligned and broadcast.
+   * The adjoint of a broadcast operand is summed over the axes that it repeated.
    *
    * Adjoints (classical):
    *   dA = dY · Bᵀ
@@ -351,7 +353,7 @@ class TapedTensor {
 
 - `contract`: 2-tensor product (3×4 ⊗ 4×5 → 3×5) gradients match numerical AD via small perturbations.
 - `contract`: 3-tensor chain reverse-mode = analytical adjoint to 1e-9.
-- `matmul`: 2-D classic, 3-D batched matmul, gradient correctness vs the closed-form `dA = dY · Bᵀ`, `dB = Aᵀ · dY`.
+- `matmul`: 2-D classic, 3-D batched matmul, gradient correctness vs the closed-form `dA = dY · Bᵀ`, `dB = Aᵀ · dY`. Rank-1 operands and broadcast batch axes: value equals `Tensor.matmul`, gradients match a finite difference.
 - Both ops compose cleanly with the existing `add` / `mul` / `scale` (a chain `(A · B) + C` returns correct gradients across all leaves).
 - Error: contracting two `TapedTensor`s without overlapping axisLabels throws.
 

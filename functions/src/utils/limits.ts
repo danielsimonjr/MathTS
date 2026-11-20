@@ -18,6 +18,9 @@ export const MAX_LOOP_ORDER = 10_000_000;
  *
  * The limit is the order where the slowest of these recurrences ran for about 20 s before
  * the limit existed (`besselJ(2.5e9, 5e9)` took 18.3 s, `legendreP(2.5e9, 0.5)` 29.0 s).
+ * It also bounds the total of one array call: `besselJ(n, xs)` and `legendreP(n, xs)` run
+ * one recurrence per element, so an array whose elements need more than this many steps in
+ * all throws a RangeError (`assertArrayWork`).
  */
 export const MAX_RECURRENCE_ORDER = 2_500_000_000;
 
@@ -44,6 +47,12 @@ export const MAX_EXPN_ORDER = 1_200_000_000;
 export const MAX_LAGUERRE_ORDER = 1_000_000_000;
 
 /**
+ * Maximum degree for `chebyshevT` (n = 3.5e9 took 17.5 s). The scalar is serialized
+ * into worker kernels, so `chebyshevTScalar` repeats this value as a literal.
+ */
+export const MAX_CHEBYSHEV_ORDER = 4_000_000_000;
+
+/**
  * Maximum `n` and `max(n, |x|)` for the spherical Bessel functions. The old build ran
  * `sphericalBesselY(1.5e9, 2e9)` in 15.9 s at 31% load, so 1.8e9 is near its 20 s point.
  */
@@ -56,6 +65,21 @@ export const MAX_SPHERICAL_BESSEL_ORDER = 1_800_000_000;
  * serialized into worker kernels, so `besselJScalar` repeats this value as a literal.
  */
 export const MAX_BESSEL_J_SWEEP = 1_200_000_000;
+
+/**
+ * Maximum `|t|` for `siegelZ` above 40. The Euler–Maclaurin sum has about `|t| / 2` terms of
+ * one sine, one cosine, one logarithm and one square root each. The call `siegelZ(1e8)` took
+ * 26 s at 41% machine load and `siegelZ(2e7)` 4.2 s, so 8e7 is near the 20 s point.
+ */
+export const MAX_SIEGEL_Z_T = 80_000_000;
+
+/**
+ * Maximum number of harmonics (the size of the tridiagonal matrix) of one `mathieuCe` or
+ * `mathieuSe` call. The matrix, its LU factors and the coefficients are about nine arrays of
+ * this length, so 1e6 harmonics hold about 70 MB. The size grows with `(10 + 2 sqrt(2n + 1)) |q|^(1/4)`,
+ * so the limit covers `|q|` up to about 1.8e19 at `n = 3` and about 5e17 at `n = 99`.
+ */
+export const MAX_MATHIEU_HARMONICS = 1_000_000;
 
 /**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
@@ -80,6 +104,34 @@ export function assertAllocSize(fn: string, dims: readonly number[]): void {
     }
     if (d === 0) return;
     room = Math.floor(room / d);
+  }
+}
+
+/**
+ * Throw a RangeError when one array call needs more recurrence steps than `max`.
+ *
+ * A scalar limit bounds one element. An array call runs one recurrence per element, so a
+ * long array at a large order ran for hours (`besselY(2.4e9, 1024 elements)`). The caller
+ * computes `steps`, the total of the steps of all elements in units of one upward step.
+ *
+ * @param fn - Function name for the message
+ * @param n - Order, for the message
+ * @param count - Number of elements, for the message
+ * @param steps - Total recurrence steps of the call
+ * @param max - Largest total that one call accepts
+ * @throws RangeError if steps is greater than max
+ */
+export function assertArrayWork(
+  fn: string,
+  n: number,
+  count: number,
+  steps: number,
+  max: number
+): void {
+  if (steps > max) {
+    throw new RangeError(
+      `${fn}: order ${n} over ${count} elements needs about ${steps} recurrence steps, above the supported maximum of ${max} per call`
+    );
   }
 }
 

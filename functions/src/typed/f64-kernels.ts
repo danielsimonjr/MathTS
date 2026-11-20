@@ -117,13 +117,37 @@ function unaryOnArray(value: unknown[], apply: Apply, spec: UnaryRealSpec): unkn
   return out;
 }
 
+/** True when every leaf of a nested Array is a number inside the real domain of the function. */
+function leavesStayReal(value: unknown, domain: UnaryRealSpec['inRealDomain']): boolean {
+  if (Array.isArray(value)) return value.every((el) => leavesStayReal(el, domain));
+  return typeof value === 'number' && (domain === undefined || domain(value));
+}
+
 /**
- * Element-wise unary on a Matrix. A numeric result is `matrix.map`, so the
- * container class is unchanged. A leaf that leaves the real domain cannot live
- * in the Float64Array storage, so that case returns a nested array of the same
- * shape whose entries are the typed scalar results.
+ * Element-wise unary on a Matrix. A numeric result is `matrix.map`, so the container class is
+ * unchanged. A leaf that leaves the real domain gives a result that the class may not store:
+ *
+ * - A factory matrix (`MathJSDenseMatrix`, `MathJSSparseMatrix`) stores any value and has
+ *   `create(data)`. It keeps its class, with the typed scalar results as entries. It may have
+ *   one axis or three, and `rows x cols` reads two axes only (a matrix of size `[n]` has `cols`
+ *   0), so a factory matrix that is not 2-D is read through `toArray()`.
+ * - A matrix of the matrix package stores `Float64Array` data, and has no `create`. Its result
+ *   is a nested array of the same shape, whose entries are the typed scalar results (the
+ *   published overloads of `sqrt` and the other unary functions declare that type).
  */
 function unaryOnMatrix(matrix: NumericMatrix, apply: Apply, spec: UnaryRealSpec): unknown {
+  const factory = matrix as unknown as {
+    create?: (data: unknown[]) => unknown;
+    size?: () => number[];
+    toArray(): unknown[];
+  };
+  const create = typeof factory.create === 'function' ? factory.create : undefined;
+  if (create !== undefined && typeof factory.size === 'function' && factory.size().length !== 2) {
+    const nested = factory.toArray();
+    if (leavesStayReal(nested, spec.inRealDomain)) return matrix.map(spec.real);
+    return create.call(matrix, unaryOnArray(nested, apply, spec));
+  }
+
   const { rows, cols } = matrix;
   let numeric = true;
   for (let i = 0; i < rows && numeric; i++) {
@@ -143,7 +167,7 @@ function unaryOnMatrix(matrix: NumericMatrix, apply: Apply, spec: UnaryRealSpec)
     for (let j = 0; j < cols; j++) row[j] = apply(matrix.get(i, j));
     out[i] = row;
   }
-  return out;
+  return create !== undefined ? create.call(matrix, out) : out;
 }
 
 /**

@@ -22,6 +22,12 @@ import { gammaG, gammaP } from '../plain/number/index.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { f64Unary } from './f64-kernels.js';
 import { kernelSource } from './parallel-map.js';
+import {
+  MAX_CHEBYSHEV_ORDER,
+  MAX_LAGUERRE_ORDER,
+  MAX_RECURRENCE_ORDER,
+  assertArrayWork,
+} from '../utils/limits.js';
 import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
 import {
   _lgamma,
@@ -67,6 +73,7 @@ import {
   besselY0Dispatch,
   besselY1Dispatch,
   besselYDispatch,
+  assertBesselArrayWork,
   airyAiDispatch,
   airyBiDispatch,
   ellipticKDispatch,
@@ -298,7 +305,12 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
     curr = x;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - prev;
-    if (Number.isNaN(next)) return NaN;
+    if (!Number.isFinite(next)) {
+      if (Number.isNaN(next)) return NaN;
+      // For |x| > 1, |T_k(x)| grows with k and T_k(x) has the sign (-1)^k when x < -1, so the
+      // first overflow decides the result. A further step would compute Infinity - Infinity.
+      return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+    }
     prev = curr;
     curr = next;
   }
@@ -830,6 +842,7 @@ export const besselY1 = mathTyped('besselY1', {
 export const besselJ = mathTyped('besselJ', {
   'number, number': besselJScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselArrayWork('besselJ', n, x);
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return besselJDispatch(n, x);
     }
@@ -850,6 +863,7 @@ export const besselJ = mathTyped('besselJ', {
 export const besselY = mathTyped('besselY', {
   'number, number': besselYScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselArrayWork('besselY', n, x);
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return besselYDispatch(n, x);
     }
@@ -951,6 +965,54 @@ export const ellipticE = mathTyped('ellipticE', {
 // Orthogonal Polynomials
 // =============================================================================
 
+/** The per-call budget of each polynomial family: the order limit of its scalar (#1290). */
+const POLYNOMIAL_CALL_BUDGET = {
+  chebyshevT: MAX_CHEBYSHEV_ORDER,
+  laguerreL: MAX_LAGUERRE_ORDER,
+  legendreP: MAX_RECURRENCE_ORDER,
+} as const;
+
+/**
+ * Recurrence steps that `chebyshevTScalar` and `legendrePScalar` run for the degree `ni` at `x`.
+ * For `|x| > 1` both stop at the first overflow: `|T_k(x)| >= (|x| + sqrt(x^2 - 1))^k / 2` and
+ * `P_k(x) >= |x|^k` (the mean of `(x + sqrt(x^2 - 1) cos t)^k`, by Jensen), so the value
+ * is above the largest double after about `709.8 / ln|x|` steps. A NaN `x` ends at the first step.
+ */
+function overflowSteps(kind: 'chebyshevT' | 'legendreP', ni: number, x: number): number {
+  if (Number.isNaN(x)) return 0;
+  const ax = Math.abs(x);
+  if (ax <= 1) return ni;
+  const rate = kind === 'chebyshevT' ? Math.acosh(ax) : Math.log(ax);
+  return Math.min(ni, Math.ceil(709.8 / rate) + 3);
+}
+
+/**
+ * Throw a RangeError when one array call of `chebyshevT`, `legendreP` or `laguerreL` needs more
+ * recurrence steps than the order limit of its scalar. The scalar limit bounds one element, so
+ * an array of 1000 elements at the largest degree ran for hours. A degree that the scalar
+ * rejects keeps the message of the scalar. `laguerreL` counts the full degree for every element.
+ *
+ * @param kind - Polynomial family
+ * @param n - Degree
+ * @param xs - Arguments
+ * @throws RangeError if the total work is above the budget of the family
+ */
+function assertPolynomialArrayWork(
+  kind: keyof typeof POLYNOMIAL_CALL_BUDGET,
+  n: number,
+  xs: Float64Array
+): void {
+  if (!Number.isFinite(n)) return;
+  const ni = Math.round(n);
+  const max = POLYNOMIAL_CALL_BUDGET[kind];
+  if (ni < 2 || ni > max || ni * xs.length <= max) return;
+  let steps = 0;
+  for (let i = 0; i < xs.length; i++) {
+    steps += kind === 'laguerreL' ? (Number.isNaN(xs[i]) ? 0 : ni) : overflowSteps(kind, ni, xs[i]);
+  }
+  assertArrayWork(kind, n, xs.length, Math.ceil(steps), max);
+}
+
 /**
  * Chebyshev polynomial of the first kind T_n(x).
  *
@@ -960,8 +1022,10 @@ export const ellipticE = mathTyped('ellipticE', {
  */
 export const chebyshevT = mathTyped('chebyshevT', {
   'number, number': chebyshevTScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => chebyshevTScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertPolynomialArrayWork('chebyshevT', n, x);
+    return f64Unary(x, (v) => chebyshevTScalar(n, v));
+  },
 });
 
 /**
@@ -986,8 +1050,10 @@ export const hermiteH = mathTyped('hermiteH', {
  */
 export const laguerreL = mathTyped('laguerreL', {
   'number, number': laguerreLScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => laguerreLScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertPolynomialArrayWork('laguerreL', n, x);
+    return f64Unary(x, (v) => laguerreLScalar(n, v));
+  },
 });
 
 /**
@@ -999,8 +1065,10 @@ export const laguerreL = mathTyped('laguerreL', {
  */
 export const legendreP = mathTyped('legendreP', {
   'number, number': legendrePScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => legendrePScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertPolynomialArrayWork('legendreP', n, x);
+    return f64Unary(x, (v) => legendrePScalar(n, v));
+  },
 });
 
 // =============================================================================
@@ -1414,6 +1482,7 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          _lgamma,
           besselJRealOrder,
           besselJScalar,
         ],
@@ -1438,6 +1507,7 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          _lgamma,
           besselJRealOrder,
           besselYRealOrder,
           besselYScalar,

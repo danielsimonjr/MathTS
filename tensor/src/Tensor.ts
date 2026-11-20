@@ -1086,55 +1086,88 @@ export class Tensor {
     return new Tensor(outShape, out);
   }
 
-  /** Batched matrix multiply; `matMul` is an alias (#753). */
+  /**
+   * Matrix product with the NumPy `matmul` rules (`matMul` is an alias, #753).
+   *
+   * - Two rank-2 operands give the matrix product.
+   * - A rank-1 left operand gets a leading axis, a rank-1 right operand gets a trailing axis,
+   *   and each added axis is removed from the result (`[k] @ [k]` is a rank-0 tensor).
+   * - The leading (batch) axes are right-aligned and broadcast with {@link Tensor.broadcastShape}:
+   *   an axis of size 1, or a missing axis, repeats against the other operand (#992).
+   *
+   * @param operand - The right operand.
+   * @returns The product, of shape `[...broadcast batch, m, n]` less the added axes.
+   * @throws Error when an operand has rank 0, the inner dimensions differ or the batch axes
+   *   cannot broadcast.
+   */
   matmul(operand: Tensor): Tensor {
     const other = asTensorOperand('matmul', operand);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
-    if (rankA < 2 || rankB < 2) {
+    if (rankA < 1 || rankB < 1) {
       throw new Error(
-        `Tensor.matmul: both operands must have rank ≥ 2 (got ${rankA} and ${rankB})`
+        `Tensor.matmul: both operands must have rank ≥ 1 (got ${rankA} and ${rankB})`
       );
     }
-    if (rankA !== rankB) {
-      throw new Error(
-        `Tensor.matmul: batch rank mismatch; operands must have the same rank (${rankA} vs ${rankB})`
-      );
-    }
-    const batchRank = rankA - 2;
-    for (let b = 0; b < batchRank; b++) {
-      if (this.shape[b] !== other.shape[b]) {
-        throw new Error(
-          `Tensor.matmul: batch dimension ${b} mismatch (${this.shape[b]} vs ${other.shape[b]})`
-        );
-      }
-    }
-    const m = this.shape[rankA - 2]!;
-    const k = this.shape[rankA - 1]!;
-    const k2 = other.shape[rankB - 2]!;
-    const n = other.shape[rankB - 1]!;
+    const aShape = rankA === 1 ? [1, this.shape[0]!] : [...this.shape];
+    const bShape = rankB === 1 ? [other.shape[0]!, 1] : [...other.shape];
+    const m = aShape[aShape.length - 2]!;
+    const k = aShape[aShape.length - 1]!;
+    const k2 = bShape[bShape.length - 2]!;
+    const n = bShape[bShape.length - 1]!;
     if (k !== k2) {
       throw new Error(`Tensor.matmul: inner dimension mismatch ${k} != ${k2}`);
     }
 
+    const batchA = aShape.slice(0, -2);
+    const batchB = bShape.slice(0, -2);
+    const batchShape = Tensor.broadcastShape(batchA, batchB);
+    const batchRank = batchShape.length;
+    const batchSize = Tensor.sizeOf(batchShape);
+    // Stride of each batch axis in whole slabs. A size-1 or a missing axis has stride 0, so it
+    // reads slab 0 at every coordinate.
+    const slabStrides = (own: number[]): number[] => {
+      const rowMajor = Tensor.rowMajorStrides(own);
+      return batchShape.map((_, axis) => {
+        const at = axis - (batchRank - own.length);
+        return at >= 0 && own[at] !== 1 ? rowMajor[at]! : 0;
+      });
+    };
+    const aStrides = slabStrides(batchA);
+    const bStrides = slabStrides(batchB);
+
     const aData = this.contiguous().data;
-    const bData = other.data;
-    let batchSize = 1;
-    for (let b = 0; b < batchRank; b++) batchSize *= this.shape[b]!;
+    const bData = other.contiguous().data;
     const yData = new Float64Array(batchSize * m * n);
     const mk = m * k;
     const kn = k * n;
     const mn = m * n;
+    const coords = new Array<number>(batchRank).fill(0);
     for (let batch = 0; batch < batchSize; batch++) {
-      const aSlab =
-        batchSize === 1 ? aData : new Float64Array(aData.subarray(batch * mk, batch * mk + mk));
-      const bSlab =
-        batchSize === 1 ? bData : new Float64Array(bData.subarray(batch * kn, batch * kn + kn));
-      const c = backendManager.multiply(new DenseMatrix(m, k, aSlab), new DenseMatrix(k, n, bSlab));
+      let aSlab = 0;
+      let bSlab = 0;
+      for (let axis = 0; axis < batchRank; axis++) {
+        aSlab += coords[axis]! * aStrides[axis]!;
+        bSlab += coords[axis]! * bStrides[axis]!;
+      }
+      const aSlabData =
+        batchSize === 1 ? aData : new Float64Array(aData.subarray(aSlab * mk, aSlab * mk + mk));
+      const bSlabData =
+        batchSize === 1 ? bData : new Float64Array(bData.subarray(bSlab * kn, bSlab * kn + kn));
+      const c = backendManager.multiply(
+        new DenseMatrix(m, k, aSlabData),
+        new DenseMatrix(k, n, bSlabData)
+      );
       yData.set(c.toFloat64Array(), batch * mn);
+      for (let axis = batchRank - 1; axis >= 0; axis--) {
+        if (++coords[axis]! < batchShape[axis]!) break;
+        coords[axis] = 0;
+      }
     }
-    const batchShape = this.shape.slice(0, batchRank);
-    return new Tensor([...batchShape, m, n], yData);
+    const outShape = [...batchShape];
+    if (rankA > 1) outShape.push(m);
+    if (rankB > 1) outShape.push(n);
+    return new Tensor(outShape, yData);
   }
 
   matMul(other: Tensor): Tensor {

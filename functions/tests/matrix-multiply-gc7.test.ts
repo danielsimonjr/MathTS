@@ -73,7 +73,12 @@ describe('GC7: multiply(2D, 2D) via accelerated backend', () => {
       for (let j = 0; j < n; j++) expect(got[i][j]).toBeCloseTo(ref[i][j], 9);
   });
 
-  it('rejects non-2D Array operands with a clear message', () => {
-    expect(() => multiply([1, 2, 3], [4, 5, 6])).toThrow(/2-D matrices|dot/);
+  it('multiplies two 1-D Arrays as a dot product (#1007)', () => {
+    expect(multiply([1, 2, 3], [4, 5, 6])).toBe(32);
+  });
+
+  it('rejects an operand of three dimensions with a clear message', () => {
+    expect(() => multiply([[[1]]], [[1]])).toThrow(/1 or 2 dimensional matrix \(Matrix A has 3/);
+    expect(() => multiply([[1]], [[[1]]])).toThrow(/1 or 2 dimensional matrix \(Matrix B has 3/);
   });
 });

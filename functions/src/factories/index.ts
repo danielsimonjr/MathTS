@@ -12,6 +12,7 @@ import { factoryScope } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
+import { registerCollectionRelational } from '../typed/collection-relational.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
 import type {
   PublicDet,
@@ -566,6 +567,8 @@ export const inv = ((m: unknown) =>
 // `divide(scalar, square matrix)` multiplies by this `inv` (#960). Registered here because the
 // typed arithmetic module cannot import the factory layer.
 registerDivideInverse(inv as unknown as (m: unknown) => unknown);
+// The typed comparison functions take collections through the factory ports (#975, #1307).
+registerCollectionRelational(factoryScope);
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);

@@ -27,11 +27,13 @@ import {
   Complex,
   BigNumber,
   Fraction,
+  Unit,
   isBigNumber,
   isComplex,
   isFraction,
 } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
+import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
 
 // =============================================================================
 // Internal helpers
@@ -194,6 +196,11 @@ export const equalScalar = mathTyped('equalScalar', {
  * ```
  */
 export const unequal = mathTyped('unequal', {
+  // Two Units are equal when they measure one quantity in one dimension, whatever their display
+  // units are: `1 m` and `100 cm` are equal, as `equal` says. The structural fallback of
+  // `equalScalar` compares the display unit too, so it called them unequal while the collection
+  // rows below (the factory function) called them equal.
+  'Unit, Unit': (x: Unit, y: Unit): boolean => !unitsEqual(x, y),
   'any, any': (x: unknown, y: unknown): boolean => {
     if (x === null) return y !== null;
     if (y === null) return x !== null;
@@ -201,6 +208,9 @@ export const unequal = mathTyped('unequal', {
     if (y === undefined) return x !== undefined;
     return !equalScalar(x, y);
   },
+  // An Array or a matrix against any operand: the element-wise result of mathjs (#975). A
+  // collection is never null, so a null operand keeps the rule above: unequal.
+  ...collectionRelationalRows('unequal', true),
 });
 
 // =============================================================================
