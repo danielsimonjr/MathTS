@@ -3,7 +3,7 @@ import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
-import { isFloatTyped, type FloatTyped } from './numeric-data.js';
+import { exactOrder, isFloatTyped, type FloatTyped } from './numeric-data.js';
 import {
   NUMBER_ARITH,
   blendNumber,
@@ -524,6 +524,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         flat = flat.filter((v) => !isNaNValue(v));
         if (flat.length === 0) return probs.map(() => firstNaN);
       }
+      // An exact order, so the result does not depend on the input order (#1292).
+      const order = exactOrder(compare);
       return probs.map((p) => {
         if (isNaNProb(p)) return p;
         const plan = planFor(mode, flat.length, p);
@@ -534,14 +536,14 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
           left = flat[leftIdx];
           right = flat[rightIdx];
         } else if (leftIdx === rightIdx) {
-          left = right = partitionSelect(flat, leftIdx);
+          left = right = partitionSelect(flat, leftIdx, order);
         } else {
-          right = partitionSelect(flat, rightIdx);
+          right = partitionSelect(flat, rightIdx, order);
 
           // max of partition is kth largest
           left = flat[leftIdx];
           for (let i = 0; i < leftIdx; ++i) {
-            if (compare(flat[i], left) > 0) {
+            if (order(flat[i], left) > 0) {
               left = flat[i];
             }
           }

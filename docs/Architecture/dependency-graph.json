@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7404
+    "totalExports": 7405
   },
   "entryPoints": [
     {
@@ -19506,7 +19506,7 @@
         "constants": ["createOnes"]
       },
       "functions/src/matrix/partitionSelect.ts": {
-        "description": "Partition-based selection of an array or 1D matrix.",
+        "description": "Three-way quickselect: each pass splits the range into values less than, equal to and",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23554,6 +23554,7 @@
             "file": "./numeric-data.js",
             "imports": [
               "flattenForStatistics",
+              "exactOrder",
               "finiteNumbers",
               "isFloatTyped",
               "numberGrid",
@@ -23656,10 +23657,15 @@
           {
             "file": "../utils/array.js",
             "imports": ["flatten"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isBigNumber", "isNumber"]
           }
         ],
         "workspaceDependencies": [],
         "exports": [
+          "exactOrder",
           "isFloatTyped",
           "copyToNumberArray",
           "flattenForStatistics",
@@ -23676,6 +23682,7 @@
           "typedArrayPairToNumbers"
         ],
         "functions": [
+          "exactOrder",
           "isFloatTyped",
           "copyToNumberArray",
           "flattenForStatistics",
@@ -23798,7 +23805,7 @@
           },
           {
             "file": "./numeric-data.js",
-            "imports": ["isFloatTyped", "FloatTyped"]
+            "imports": ["exactOrder", "isFloatTyped", "FloatTyped"]
           },
           {
             "file": "./quantile-numpy-methods.js",
@@ -49919,11 +49926,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238679,
-    "totalExports": 7404,
+    "totalLinesOfCode": 238674,
+    "totalExports": 7405,
     "totalClasses": 62,
     "totalInterfaces": 672,
-    "totalFunctions": 2585,
+    "totalFunctions": 2586,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1696,

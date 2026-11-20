@@ -1063,6 +1063,7 @@
       "functions/src/relational/compareNatural.ts",
       "functions/src/scalar-node-bridge.ts",
       "functions/src/signal/fft-helpers.ts",
+      "functions/src/statistics/numeric-data.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/statistics/std.ts",
       "functions/src/statistics/utils/improveErrorMessage.ts",

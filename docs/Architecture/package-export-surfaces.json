@@ -2613,6 +2613,7 @@
       "eventDetection",
       "ewma",
       "exactDivide",
+      "exactOrder",
       "exactReductions",
       "exp",
       "expand",
