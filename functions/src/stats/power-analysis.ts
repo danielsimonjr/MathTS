@@ -90,6 +90,8 @@ export function tTestPower(
     }
     for (let it = 0; it < 200; it++) {
       const mid = (lo + hi) / 2;
+      // lo and hi are adjacent doubles after about 70 steps; more steps change nothing.
+      if (mid === lo || mid === hi) break;
       if (powerAt(effectSize, mid, alpha, alt) < targetPower) lo = mid;
       else hi = mid;
     }
