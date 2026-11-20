@@ -358,8 +358,11 @@ export class MathJSDenseMatrix {
 
   /**
    * Write a scalar or a sub-matrix at the selected indices; returns this.
-   * The replacement is a scalar or an Array / matrix that broadcasts to the shape of the
-   * selection (the trailing axes match, or have length 1), as in the mathjs `_set`.
+   * The replacement is one value, or an Array / matrix that gets the size of the selection by
+   * the rule of the mathjs `_set`: it broadcasts to the selection, or it has fewer axes and
+   * gets axes of length 1. One selected entry takes one value only.
+   * @throws TypeError when the index selects one entry and the replacement is an Array or matrix
+   * @throws DimensionError when the replacement does not get the size of the selection
    */
   private _setSubset(
     index: MatrixIndexLike,
@@ -381,17 +384,22 @@ export class MathJSDenseMatrix {
       );
     }
     const selection = dims.map((d) => d.sel.length);
+    const sameSize = (size: number[]): boolean =>
+      size.length === selection.length && size.every((n, k) => n === selection[k]);
     if (Array.isArray(rep)) {
       // The rule of the mathjs `_set`. Step 1: broadcast the replacement to the selection (a
       // failure is not an error yet). Step 2: when the replacement has fewer axes, add axes of
       // length 1: one outer axis for each leading axis of length 1 that only the selection has,
       // and the others as inner axes. Step 3: compare the sizes.
-      try {
-        rep = broadcastTo(rep, selection);
-      } catch {
-        // The size check below reports the mismatch.
-      }
       let repSize = arraySize(rep as unknown[]);
+      if (!sameSize(repSize)) {
+        try {
+          rep = broadcastTo(rep, selection);
+          repSize = arraySize(rep as unknown[]);
+        } catch {
+          // The size check below reports the mismatch.
+        }
+      }
       if (repSize.length < selection.length) {
         let k = 0;
         while (selection[k] === 1 && repSize[k] === 1) k++;
@@ -400,24 +408,21 @@ export class MathJSDenseMatrix {
         rep = unsqueeze(rep as unknown[], selection.length, outer, repSize);
         repSize = arraySize(rep as unknown[]);
       }
-      if (repSize.length !== selection.length || repSize.some((n, k) => n !== selection[k])) {
-        throw new DimensionError(selection, repSize, '>');
-      }
+      if (!sameSize(repSize)) throw new DimensionError(selection, repSize, '>');
     }
-    const total = selection.reduce((p, n) => p * n, 1);
-    const pos = new Array<number>(selection.length).fill(0);
-    const at = new Array<number>(selection.length);
-    for (let count = 0; count < total; count++) {
-      let value = rep;
-      if (Array.isArray(rep))
-        for (let k = 0; k < pos.length; k++) value = (value as unknown[])[pos[k]];
-      for (let d = 0; d < pos.length; d++) at[d] = dims[d].sel[pos[d]];
-      this.set(at, value as number);
-      for (let d = pos.length - 1; d >= 0; d--) {
-        if (++pos[d] < selection[d]) break;
-        pos[d] = 0;
+    // Write one axis at a time. An Array replacement has the size of the selection here; any
+    // other replacement is one value for every selected entry.
+    const nested = Array.isArray(rep);
+    const last = dims.length - 1;
+    const write = (target: unknown[], source: unknown, depth: number): void => {
+      const { sel } = dims[depth];
+      for (let i = 0; i < sel.length; i++) {
+        const value = nested ? (source as unknown[])[i] : source;
+        if (depth === last) target[sel[i]] = value;
+        else write(target[sel[i]] as unknown[], value, depth + 1);
       }
-    }
+    };
+    write(this._data, rep, 0);
     return this;
   }
 

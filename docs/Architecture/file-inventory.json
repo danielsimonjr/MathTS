@@ -6855,7 +6855,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1475
+      "loc": 1480
     },
     {
       "file": "functions/src/factories/scope.ts",
