@@ -9535,7 +9535,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `rfft`, `rfft`, `rfft`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `fftn`, `fftn`, `fftn`
+- Functions: `rfft`, `rfft`, `rfft`, `rfft`, `irfft`, `fftshift`, `fftshift`, `fftshift`, `ifftshift`, `ifftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `fftn`, `fftn`, `fftn`
 
 ---
 
@@ -12675,16 +12675,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                                                                                                                    | Type               |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `../utils/limits.js`            | `assertAllocSize`                                                                                                                          | Import             |
-| `../utils/samples.js`           | `toSamples`                                                                                                                                | Import             |
-| `./public-type-exports.js`      | `PublicParallelFFT`                                                                                                                        | Import (type-only) |
-| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import             |
-| `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import             |
-| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import             |
-| `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import             |
-| `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                         | Import             |
+| File                            | Imports                                                                                                                                                    | Type               |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/limits.js`            | `assertAllocSize`                                                                                                                                          | Import             |
+| `../utils/samples.js`           | `toSamples`                                                                                                                                                | Import             |
+| `./public-type-exports.js`      | `PublicParallelFFT`                                                                                                                                        | Import (type-only) |
+| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                                          | Import             |
+| `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                                           | Import             |
+| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                                             | Import             |
+| `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, windowTypeCode, WASM_SIGNAL_THRESHOLD` | Import             |
+| `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                                         | Import             |
 
 **Exports:**
 
@@ -13701,7 +13701,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
+- Functions: `windowTypeCode`, `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
 - Constants: `WASM_SIGNAL_THRESHOLD`
 
 ---
@@ -21768,12 +21768,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238390 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238456 |
+| Total Exports           | 7398   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Functions         | 2584   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7397
+    "totalExports": 7398
   },
   "entryPoints": [
     {
@@ -22625,6 +22625,10 @@
           "rfft",
           "irfft",
           "fftshift",
+          "fftshift",
+          "fftshift",
+          "ifftshift",
+          "ifftshift",
           "ifftshift",
           "fftfreq",
           "rfftfreq",
@@ -29516,6 +29520,7 @@
               "goertzelDispatch",
               "welchPSDDispatch",
               "welchPSDJS",
+              "windowTypeCode",
               "WASM_SIGNAL_THRESHOLD"
             ]
           },
@@ -31797,6 +31802,7 @@
         "workspaceDependencies": [],
         "exports": [
           "WASM_SIGNAL_THRESHOLD",
+          "windowTypeCode",
           "applyWindowJS",
           "goertzelJS",
           "welchPSDJS",
@@ -31809,6 +31815,7 @@
           "chirpZTransformDispatch"
         ],
         "functions": [
+          "windowTypeCode",
           "applyWindowJS",
           "goertzelJS",
           "welchPSDJS",
@@ -49885,11 +49892,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238390,
-    "totalExports": 7397,
+    "totalLinesOfCode": 238456,
+    "totalExports": 7398,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2579,
+    "totalFunctions": 2584,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,
