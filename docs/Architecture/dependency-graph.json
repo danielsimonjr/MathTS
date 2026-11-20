@@ -11083,6 +11083,10 @@
           {
             "file": "./typed/number-matrix.js",
             "imports": ["hasNaN", "numberVector"]
+          },
+          {
+            "file": "./utils/limits.js",
+            "imports": ["assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -24272,8 +24276,12 @@
             "imports": ["normalCDF"]
           },
           {
+            "file": "../typed/hypothesis.js",
+            "imports": ["binomialTest"]
+          },
+          {
             "file": "../typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           },
           {
             "file": "./robust-stats.js",
@@ -28315,7 +28323,7 @@
           },
           {
             "file": "../utils/limits.js",
-            "imports": ["assertLoopOrder"]
+            "imports": ["assertAllocSize", "assertLoopOrder", "MAX_LOOP_ORDER"]
           },
           {
             "file": "./number-matrix.js",
@@ -29923,6 +29931,10 @@
           {
             "file": "../utils/limits.js",
             "imports": ["assertAllocSize"]
+          },
+          {
+            "file": "./number-matrix.js",
+            "imports": ["hasNaN"]
           }
         ],
         "workspaceDependencies": [
@@ -49980,7 +49992,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 239566,
+    "totalLinesOfCode": 239849,
     "totalExports": 7412,
     "totalClasses": 62,
     "totalInterfaces": 674,
