@@ -71,6 +71,12 @@ export const createDotDivide = /* #__PURE__ */ factory(
      *    math.dotDivide(a, b)   // returns [[3, 2.5], [1.2, 0.5]]
      *    math.divide(a, b)      // returns [[1.75, 0.75], [-1.75, 2.25]]
      *
+     * A sparse numerator over a dense denominator visits the stored entries of the sparse
+     * matrix only. An entry that the sparse matrix does not store stays 0, also where the
+     * denominator is 0, so `dotDivide(sparse([[0, 0], [0, 0]]), [[0, 1], [1, 1]])` is a sparse
+     * zero matrix and not NaN at (0, 0). mathjs gives the same result. The call with an Array
+     * numerator gives NaN there.
+     *
      * See also:
      *
      *    divide, multiply, dotMultiply

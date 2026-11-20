@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 57 files
+- **functions/typed**: 59 files
 - **functions/unit**: 2 files
 - **functions/utils**: 45 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 594            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 596            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -6329,6 +6329,7 @@ graph LR
 | `../utils/json-replacer.js`              | `replacer`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import                |
 | `../typed/arithmetic.js`                 | `add, multiply`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../typed/divide-inverse.js`             | `registerDivideInverse`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Import                |
+| `../typed/collection-relational.js`      | `registerCollectionRelational`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
 | `../typed/exact-reductions.js`           | `registerExactReductions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import                |
 | `../typed/public-type-exports.js`        | `PublicDet, PublicMad, PublicMedian, PublicMode`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import (type-only)    |
 | `../arithmetic/abs.js`                   | `createAbs`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
@@ -11856,7 +11857,7 @@ graph LR
 
 | Package                          | Import                                                                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError, extrema`                                                          |
+| `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError, extrema, isComplex`                                               |
 | `@danielsimonjr/mathts-core`     | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, pairwiseDotChecked, sumSquaredDeviations, sumSquaredDeviationsChecked` |
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                                                                                  |
 | `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                                                                                             |
@@ -11874,11 +11875,13 @@ graph LR
 | `../utils/real-scale.js`               | `isDegenerate, rescaled`                                                                                                                                                                                                                      | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
-| `../utils/array.js`                    | `arraySize`                                                                                                                                                                                                                                   | Import             |
+| `../utils/array.js`                    | `arraySize, broadcastTo`                                                                                                                                                                                                                      | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
 | `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
 | `./divide-inverse.js`                  | `divideInverse`                                                                                                                                                                                                                               | Import             |
+| `./sparse-product.js`                  | `sparseProduct`                                                                                                                                                                                                                               | Import             |
+| `./collection-relational.js`           | `collectionRelationalRows, unitsEqual`                                                                                                                                                                                                        | Import             |
 | `./exact-reductions.js`                | `exactReductions`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber/round-decimals.js` | `ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals`                                                                                                                                                                                          | Import             |
 | `./public-type-exports.js`             | `PublicAbs, PublicAdd, PublicExp, PublicLog, PublicLog10, PublicMean, PublicSqrt, PublicStd, PublicVariance`                                                                                                                                  | Import (type-only) |
@@ -11977,6 +11980,21 @@ graph LR
 
 - Functions: `runCentralityRestarts`
 - Constants: `CENTRALITY_WORKER_THRESHOLD`
+
+---
+
+### `functions/src/typed/collection-relational.ts` - The collection rows of the comparison functions (#975, #1307).
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `equal` |
+
+**Exports:**
+
+- Types: `RelationalFn`
+- Functions: `unitsEqual`, `registerCollectionRelational`, `collectionRelational`, `collectionRelationalRows`
 
 ---
 
@@ -12755,16 +12773,17 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction, isBigNumber, isComplex, isFraction` |
+| Package                      | Import                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction, Unit, isBigNumber, isComplex, isFraction` |
 
 **Internal Dependencies:**
 
-| File                            | Imports       | Type   |
-| ------------------------------- | ------------- | ------ |
-| `../relational/natural-sort.js` | `naturalSort` | Import |
-| `../utils/number.js`            | `nearlyEqual` | Import |
+| File                            | Imports                                | Type   |
+| ------------------------------- | -------------------------------------- | ------ |
+| `../relational/natural-sort.js` | `naturalSort`                          | Import |
+| `../utils/number.js`            | `nearlyEqual`                          | Import |
+| `./collection-relational.js`    | `collectionRelationalRows, unitsEqual` | Import |
 
 **Exports:**
 
@@ -12818,6 +12837,29 @@ graph LR
 
 - Functions: `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fft2d`, `fourier`, `invFourier`, `hilbertTransform`, `spectrogram`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample`, `medfilt`, `windowFunction`, `convolve`, `correlate`, `welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`, `initializeSignal`, `terminateSignal`
 - Constants: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `typedSignal`
+
+---
+
+### `functions/src/typed/sparse-product.ts` - Sparse x sparse matrix product that reads the stored entries only (#1271).
+
+**Workspace Dependencies:**
+
+| Package                        | Import                         |
+| ------------------------------ | ------------------------------ |
+| `@danielsimonjr/mathts-matrix` | `SparseMatrix, isSparseMatrix` |
+
+**Internal Dependencies:**
+
+| File                             | Imports                                 | Type   |
+| -------------------------------- | --------------------------------------- | ------ |
+| `../factories/matrix-bridge.js`  | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
+| `../factories/sparse-adapter.js` | `csrToCsc, cscToPublic`                 | Import |
+| `../utils/array.js`              | `arraySize`                             | Import |
+
+**Exports:**
+
+- Types: `SparseScalarOp`, `SparseProduct`
+- Functions: `assertInnerDimensions`, `cscProduct`, `sparseProduct`
 
 ---
 
@@ -20966,14 +21008,14 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/factories/index`                        | 249 files    | 15 files   |
+| `functions/src/factories/index`                        | 250 files    | 15 files   |
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
-| `functions/src/utils/array`                            | 0 files      | 53 files   |
+| `functions/src/utils/array`                            | 0 files      | 54 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
@@ -20988,9 +21030,9 @@ graph LR
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
+| `functions/src/typed/arithmetic`                       | 18 files     | 10 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
-| `functions/src/typed/arithmetic`                       | 16 files     | 10 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `functions/src/typed/number-matrix`                    | 0 files      | 24 files   |
@@ -21535,10 +21577,10 @@ graph TD
         N353[call-rewrite]
         N354[cas]
         N355[centrality-restarts]
-        N356[combinatorics]
-        N357[complex-promotion]
-        N358[complex]
-        N359[...47 more]
+        N356[collection-relational]
+        N357[combinatorics]
+        N358[complex-promotion]
+        N359[...49 more]
     end
 
     subgraph Functions/unit
@@ -21906,14 +21948,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1357   |
+| Total TypeScript Files  | 1359   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245021 |
-| Total Exports           | 7446   |
+| Total Lines of Code     | 245798 |
+| Total Exports           | 7453   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
 | Total Interfaces        | 676    |
-| Total Functions         | 2623   |
+| Total Functions         | 2630   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

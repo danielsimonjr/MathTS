@@ -87,6 +87,12 @@
       "script": "functions/tests/helpers/simplify-coefficient-cap-perf-gate.mjs",
       "limit": 3,
       "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "sparse-product-1271",
+      "script": "functions/tests/helpers/sparse-product-1271-perf-gate.mjs",
+      "limit": 3,
+      "needs": ["functions/dist/index.js"]
     }
   ]
 }

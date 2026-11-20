@@ -36,7 +36,10 @@ interface Dependencies {
   addScalar: (a: Scalar, b: Scalar) => Scalar;
   subtract: (a: Scalar | Scalar[], b: Scalar | Scalar[]) => Scalar | Scalar[];
   flatten: <T>(arr: T[][] | T[]) => T[];
-  multiply: (a: Scalar | Scalar[][], b: Scalar | Scalar[][]) => Scalar | Scalar[][];
+  multiply: (
+    a: Scalar | Scalar[] | Scalar[][],
+    b: Scalar | Scalar[] | Scalar[][]
+  ) => Scalar | Scalar[] | Scalar[][];
   multiplyScalar: (a: Scalar, b: Scalar) => Scalar;
   divideScalar: (a: Scalar, b: Scalar) => Scalar;
   sqrt: (x: Scalar) => Scalar;
@@ -760,16 +763,11 @@ export function createComplexEigs({
         solutions.push(approxVec);
       }
 
-      // Transform back into original array coordinates. The product needs a column.
+      // Transform back into original array coordinates. A vector of the null space is flat,
+      // and a vector of the inverse iteration is a column (`usolve` returns a column), so the
+      // product is a matrix times a vector or a matrix times a column; `flatten` makes both flat.
       const correction = multiply(inv(R!), C) as Scalar[][];
-      solutions = solutions.map((v) =>
-        flatten(
-          multiply(
-            correction,
-            v.map((x) => [x])
-          ) as Scalar[][]
-        )
-      );
+      solutions = solutions.map((v) => flatten(multiply(correction, v) as Scalar[] | Scalar[][]));
 
       vectors.push(...solutions.map((v) => ({ value: lambda, vector: v })));
     }
