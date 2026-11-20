@@ -29,6 +29,12 @@
       "needs": ["functions/dist/index.js"]
     },
     {
+      "name": "quantile-vs-median",
+      "script": "functions/tests/helpers/quantile-median-perf-gate.mjs",
+      "limit": 2,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
       "name": "lusolve",
       "script": "functions/tests/helpers/lusolve-perf-gate.mjs",
       "limit": 1.2,
