@@ -810,6 +810,7 @@ export class TapedTensor {
         `TapedTensor.matmul: both operands must have rank ≥ 1 (got ${rankA} and ${rankB})`
       );
     }
+    if (rankA >= 3 && rankB === 2) return this._matmulSharedRight(other);
     if (rankA < 2 || rankB < 2 || !_sameBatchAxes(this.shape, other.shape)) {
       return this._matmulBroadcast(other);
     }
@@ -854,6 +855,47 @@ export class TapedTensor {
     );
 
     return new TapedTensor(yShape, new Float64Array(yData), this.tape, id);
+  }
+
+  /**
+   * `matmul` of a batched left operand `[...batch, m, k]` and a right operand `[k, n]` that every
+   * batch entry shares (the weight of a layer). The batch axes and `m` fold into one row axis, so
+   * the product is one matrix product `[rows, k] @ [k, n]`, the adjoint of the shared operand
+   * sums over the batch inside that product, and no operand is expanded to the batch.
+   */
+  private _matmulSharedRight(other: TapedTensor): TapedTensor {
+    const rankA = this.shape.length;
+    const k = this.shape[rankA - 1];
+    const n = other.shape[1];
+    if (k !== other.shape[0]) {
+      throw new Error(`TapedTensor.matmul: inner dimension mismatch (${k} vs ${other.shape[0]})`);
+    }
+    let rows = 1;
+    for (let axis = 0; axis < rankA - 1; axis++) rows *= this.shape[axis];
+    const aFlat = [rows, k];
+    const yFlat = [rows, n];
+    const aPrimal = new Float64Array(this.primal);
+    const bPrimal = new Float64Array(other.primal);
+    const yData = _batchedMatmul(aPrimal, bPrimal, aFlat, other.shape);
+
+    const aGradSlot = this.inputSlot();
+    const bGradSlot = this.tape.getInputGrad(other.id)!;
+    const { id } = this.tape.record(
+      [this.id, other.id],
+      yData.length,
+      (outputGrad: Float64Array) => {
+        const dA = _batchedMatmulGradA(outputGrad, bPrimal, yFlat, other.shape);
+        for (let i = 0; i < dA.length; i++) aGradSlot[i] += dA[i];
+        const dB = _batchedMatmulGradB(aPrimal, outputGrad, aFlat, yFlat);
+        for (let i = 0; i < dB.length; i++) bGradSlot[i] += dB[i];
+      }
+    );
+    return new TapedTensor(
+      [...this.shape.slice(0, rankA - 1), n],
+      new Float64Array(yData),
+      this.tape,
+      id
+    );
   }
 
   /**
