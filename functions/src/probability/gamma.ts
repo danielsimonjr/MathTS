@@ -162,7 +162,7 @@ export const createGamma = /* #__PURE__ */ factory(
         if (n.isInteger()) {
           return n.isNegative() || n.isZero()
             ? BigNumber.fromNumber(Infinity)
-            : bigFactorial(n.sub(1));
+            : bigFactorial(exactPredecessor(n));
         }
 
         if (!n.isFinite()) {
@@ -172,6 +172,18 @@ export const createGamma = /* #__PURE__ */ factory(
         throw new Error('Integer BigNumber expected');
       },
     });
+
+    /**
+     * n - 1 for an integer n above zero, with no rounding. `sub` rounds to the precision, so an n
+     * with more digits than the precision gave a wrong factorial: at precision 5, gamma(100002)
+     * computed 100000! and not 100001!. An n above 2^53 has an n! that is out of range anyway.
+     * @param {BigNumber} n
+     * @returns {BigNumber} n - 1
+     */
+    function exactPredecessor(n: BigNumberType): BigNumberType {
+      const value = n.toNumber();
+      return Number.isSafeInteger(value) ? BigNumber.fromNumber(value - 1) : n.sub(1);
+    }
 
     /**
      * n! from the Stirling series: ln(n!) = n ln(n) - n + ln(2 pi n) / 2 + sum(B(2k) / (2k (2k - 1)
