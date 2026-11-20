@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1354
   totalModules: 82
-  totalExports: 7432
+  totalExports: 7434
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -19856,7 +19856,7 @@ modules:
       functions:
         - svds
     functions/src/numeric/tridiagonal-eigen.ts:
-      description: Eigenvalues of a real symmetric tridiagonal matrix.
+      description: Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19864,9 +19864,11 @@ modules:
       exports:
         - symTridiagEigenvalues
         - symTridiagEigenvalue
+        - symTridiagEigenvector
       functions:
         - symTridiagEigenvalues
         - symTridiagEigenvalue
+        - symTridiagEigenvector
   functions/plain:
     functions/src/plain/number/arithmetic.ts:
       description: Calculate gcd for numbers
@@ -21995,11 +21997,11 @@ modules:
         - file: ../numeric/tridiagonal-eigen.js
           imports:
             - symTridiagEigenvalue
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
-          directory: matrix
+            - symTridiagEigenvector
+        - file: ../utils/limits.js
           imports:
-            - eig
+            - MAX_MATHIEU_HARMONICS
+      workspaceDependencies: []
       exports:
         - mathieuA
         - mathieuB
@@ -29256,6 +29258,7 @@ modules:
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
         - MAX_SIEGEL_Z_T
+        - MAX_MATHIEU_HARMONICS
         - assertAllocSize
         - assertArrayWork
         - assertLoopOrder
@@ -29276,6 +29279,7 @@ modules:
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
         - MAX_SIEGEL_Z_T
+        - MAX_MATHIEU_HARMONICS
     functions/src/utils/map.ts:
       description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
@@ -47349,14 +47353,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1354
   totalModules: 82
-  totalLinesOfCode: 242412
-  totalExports: 7432
+  totalLinesOfCode: 242504
+  totalExports: 7434
   totalClasses: 63
   totalInterfaces: 675
-  totalFunctions: 2613
+  totalFunctions: 2614
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1699
+  totalConstants: 1700
   totalReExports: 3194
   totalTypeOnlyImports: 686
   runtimeCircularDeps: 2

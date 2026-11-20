@@ -11,9 +11,13 @@ import { MAX_CHEBYSHEV_ORDER } from '../src/utils/limits.js';
 import { bernoulli, catalan, zeros } from '../src/index.js';
 import { siegelZ } from '../src/special/wave-functions.js';
 import { sphericalHarmonic } from '../src/special/angular-momentum.js';
-import { mathieuA, mathieuB } from '../src/special/mathieu.js';
+import { mathieuA, mathieuB, mathieuCe, mathieuSe } from '../src/special/mathieu.js';
 import { rootsHermite, rootsLaguerre } from '../src/numeric/gauss-nodes-extra.js';
-import { symTridiagEigenvalue, symTridiagEigenvalues } from '../src/numeric/tridiagonal-eigen.js';
+import {
+  symTridiagEigenvalue,
+  symTridiagEigenvalues,
+  symTridiagEigenvector,
+} from '../src/numeric/tridiagonal-eigen.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
 import { besselYnJS } from '../src/wasm/special/wasm-bridge.js';
 import {
@@ -434,7 +438,7 @@ describe('#1102 range losses: 3-D zeros (fixed by batch D, pinned here)', () => 
   });
 });
 
-describe('tridiagonal-eigen: symTridiagEigenvalues and symTridiagEigenvalue', () => {
+describe('tridiagonal-eigen: symTridiagEigenvalues, symTridiagEigenvalue and symTridiagEigenvector', () => {
   it('the 1D Laplacian has the eigenvalues 2 - 2 cos(k pi / (n + 1))', () => {
     const n = 40;
     const values = symTridiagEigenvalues(new Array(n).fill(2), new Array(n - 1).fill(-1));
@@ -468,6 +472,53 @@ describe('tridiagonal-eigen: symTridiagEigenvalues and symTridiagEigenvalue', ()
     expect(() => symTridiagEigenvalues([], [])).toThrow(RangeError);
     expect(() => symTridiagEigenvalue([1, 2], [1], 2)).toThrow(RangeError);
     expect(() => symTridiagEigenvalue([1, NaN], [1], 0)).toThrow(RangeError);
+    expect(() => symTridiagEigenvector([1, 2], [], 1)).toThrow(RangeError);
+    expect(() => symTridiagEigenvector([1, NaN], [1], 1)).toThrow(RangeError);
+    expect(() => symTridiagEigenvector([1, 2], [1], NaN)).toThrow(RangeError);
+  });
+  it('the eigenvector of the 1D Laplacian is a sine, for the first, a middle and the last eigenvalue', () => {
+    const n = 31;
+    const d = new Array(n).fill(2);
+    const e = new Array(n - 1).fill(-1);
+    for (const k of [1, 12, 31]) {
+      const lambda = 2 - 2 * Math.cos((k * Math.PI) / (n + 1));
+      const v = symTridiagEigenvector(d, e, symTridiagEigenvalue(d, e, k - 1));
+      let dot = 0;
+      let norm = 0;
+      for (let i = 0; i < n; i++) {
+        const s = Math.sin(((i + 1) * k * Math.PI) / (n + 1));
+        dot += v[i] * s;
+        norm += s * s;
+      }
+      expect(Math.abs(Math.abs(dot) / Math.sqrt(norm) - 1)).toBeLessThan(1e-13);
+      expect(Math.abs(symTridiagEigenvalue(d, e, k - 1) - lambda)).toBeLessThan(1e-14);
+    }
+  });
+  it('the eigenvector has a small residual for a matrix with entries of very different size', () => {
+    const d = [3, -1, 4, 1, -5, 9, 2, -6, 5, 3, 1e6, -1e6];
+    const e = [1, 2, -1, 0.5, 3, -2, 1, 1, 0.25, 7, 1e3];
+    for (let k = 0; k < d.length; k++) {
+      const lambda = symTridiagEigenvalue(d, e, k);
+      const v = symTridiagEigenvector(d, e, lambda);
+      let norm = 0;
+      let residual = 0;
+      for (let i = 0; i < d.length; i++) {
+        let tv = d[i] * v[i];
+        if (i > 0) tv += e[i - 1] * v[i - 1];
+        if (i < d.length - 1) tv += e[i] * v[i + 1];
+        residual = Math.max(residual, Math.abs(tv - lambda * v[i]));
+        norm += v[i] * v[i];
+      }
+      expect(Math.abs(norm - 1), `k = ${k}`).toBeLessThan(1e-14);
+      expect(residual, `k = ${k}`).toBeLessThan(1e-9);
+    }
+  });
+  it('a diagonal matrix gives a unit vector, and a 1 x 1 matrix gives [1]', () => {
+    const v = symTridiagEigenvector([3, 1, 2], [0, 0], 2);
+    expect(Math.abs(v[2])).toBe(1);
+    expect(v[0]).toBeCloseTo(0, 12);
+    expect(v[1]).toBeCloseTo(0, 12);
+    expect(Array.from(symTridiagEigenvector([7], [], 7))).toEqual([1]);
   });
 });
 
@@ -571,5 +622,54 @@ describe('#1289 besselY: an overflow is -Infinity, not NaN', () => {
     expect(besselY(400, 0)).toBeNaN();
     expect(besselY(400, -1)).toBeNaN();
     expect(besselY(-400.5, 1)).toBeNaN();
+  });
+});
+
+describe('#1289 mathieuCe and mathieuSe at large q and high order', () => {
+  const abs = (a: number, b: number) => Math.abs(a - b);
+  it('mathieuSe(100, 1e3, 0.4) uses the harmonics that order 100 needs (SciPy tridiagonal)', () => {
+    expect(abs(mathieuSe(100, 1e3, 0.4), 1.0101290320424767)).toBeLessThan(1e-10);
+  });
+  it('mathieuCe(0, 1e6, 1.5) has the right sign and size', () => {
+    expect(abs(mathieuCe(0, 1e6, 1.5), 0.042019879164098224)).toBeLessThan(1e-10);
+  });
+  it('mathieuCe(99, 1e8, 1.5) sums thousands of harmonics', () => {
+    expect(abs(mathieuCe(99, 1e8, 1.5), -2.1859582726046796)).toBeLessThan(1e-10);
+  });
+  it('mathieuSe(4, 1e4, 1.2) matches to 1e-10 relative', () => {
+    expect(rel(mathieuSe(4, 1e4, 1.2), -7.261328317028637e-4)).toBeLessThan(1e-10);
+  });
+  it('mathieuCe(40, 100, 0.7) keeps its value (control, SciPy mathieu_cem)', () => {
+    expect(abs(mathieuCe(40, 100, 0.7), -0.06035583475937689)).toBeLessThan(1e-10);
+  });
+  it('a negative q uses the same method', () => {
+    expect(abs(mathieuCe(6, -300, 0.3), 1.2418375986375678)).toBeLessThan(1e-10);
+    expect(abs(mathieuSe(7, -50, 2.2), 0.9711091395212201)).toBeLessThan(1e-10);
+  });
+  it('q = 0 gives the plain trigonometric functions', () => {
+    expect(abs(mathieuCe(5, 0, 0.7), Math.cos(3.5))).toBeLessThan(1e-14);
+    expect(abs(mathieuSe(4, 0, 0.3), Math.sin(1.2))).toBeLessThan(1e-14);
+    expect(abs(mathieuCe(0, 0, 0.9), Math.SQRT1_2)).toBeLessThan(1e-14);
+  });
+  it('ce_5(x, 1e4) has the norm 1: (1 / pi) times the integral of ce^2 over 0..2 pi', () => {
+    const points = 4096;
+    let sum = 0;
+    for (let i = 0; i < points; i++) sum += mathieuCe(5, 1e4, (2 * Math.PI * i) / points) ** 2;
+    expect(abs((sum * 2) / points, 1)).toBeLessThan(1e-9);
+  });
+  it('a q that needs more than MAX_MATHIEU_HARMONICS harmonics throws a RangeError', () => {
+    expect(() => mathieuCe(3, 1e30, 0)).toThrow(RangeError);
+    expect(() => mathieuSe(3, 1e30, 0)).toThrow(/harmonics/);
+    expect(() => mathieuCe(3, Infinity, 0)).toThrow(RangeError);
+    expect(() => mathieuSe(3, -Infinity, 0)).toThrow(RangeError);
+  });
+  it('a NaN q gives NaN', () => {
+    expect(mathieuCe(3, NaN, 0.5)).toBeNaN();
+    expect(mathieuSe(3, NaN, 0.5)).toBeNaN();
+  });
+  it('a call after 40 other q values gives the same result (the cache is bounded)', () => {
+    const first = mathieuCe(3, 7.5, 0.4);
+    for (let i = 1; i <= 40; i++) mathieuCe(3, 7.5 + i, 0.4);
+    expect(mathieuCe(3, 7.5, 0.4)).toBe(first);
   });
 });

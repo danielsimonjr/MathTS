@@ -8672,11 +8672,11 @@ graph LR
 
 ---
 
-### `functions/src/numeric/tridiagonal-eigen.ts` - Eigenvalues of a real symmetric tridiagonal matrix.
+### `functions/src/numeric/tridiagonal-eigen.ts` - Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.
 
 **Exports:**
 
-- Functions: `symTridiagEigenvalues`, `symTridiagEigenvalue`
+- Functions: `symTridiagEigenvalues`, `symTridiagEigenvalue`, `symTridiagEigenvector`
 
 ---
 
@@ -9916,17 +9916,12 @@ graph LR
 
 ### `functions/src/special/mathieu.ts` - Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the
 
-**Workspace Dependencies:**
-
-| Package                        | Import |
-| ------------------------------ | ------ |
-| `@danielsimonjr/mathts-matrix` | `eig`  |
-
 **Internal Dependencies:**
 
-| File                              | Imports                | Type   |
-| --------------------------------- | ---------------------- | ------ |
-| `../numeric/tridiagonal-eigen.js` | `symTridiagEigenvalue` | Import |
+| File                              | Imports                                       | Type   |
+| --------------------------------- | --------------------------------------------- | ------ |
+| `../numeric/tridiagonal-eigen.js` | `symTridiagEigenvalue, symTridiagEigenvector` | Import |
+| `../utils/limits.js`              | `MAX_MATHIEU_HARMONICS`                       | Import |
 
 **Exports:**
 
@@ -13377,7 +13372,7 @@ graph LR
 **Exports:**
 
 - Functions: `assertAllocSize`, `assertArrayWork`, `assertLoopOrder`
-- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`, `MAX_SIEGEL_Z_T`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`, `MAX_SIEGEL_Z_T`, `MAX_MATHIEU_HARMONICS`
 
 ---
 
@@ -20941,8 +20936,8 @@ graph LR
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
+| `functions/src/utils/limits`                           | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/utils/limits`                           | 0 files      | 46 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
@@ -21872,12 +21867,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1354   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 242412 |
-| Total Exports           | 7432   |
+| Total Lines of Code     | 242504 |
+| Total Exports           | 7434   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 63     |
 | Total Interfaces        | 675    |
-| Total Functions         | 2613   |
+| Total Functions         | 2614   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

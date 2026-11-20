@@ -1,5 +1,5 @@
 /**
- * Eigenvalues of a real symmetric tridiagonal matrix.
+ * Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.
  *
  * Internal module (not exported from the package). It serves the Gauss rules of
  * `gauss-nodes-extra.ts` (Golub–Welsch) and the Mathieu functions of `mathieu.ts`:
@@ -8,6 +8,8 @@
  *   shifts (O(n²), ascending order).
  * - {@link symTridiagEigenvalue}: one eigenvalue by Sturm-sequence bisection (O(n) per step), to
  *   an absolute error of a few units in the last place of the norm of the matrix.
+ * - {@link symTridiagEigenvector}: the unit eigenvector of one eigenvalue, by inverse iteration
+ *   with a tridiagonal LU factorisation that pivots rows (O(n) per step).
  *
  * The matrix has the diagonal `diag` (length n) and the sub- and super-diagonal `off`
  * (length n − 1, `off[i]` couples `i` and `i + 1`).
@@ -161,4 +163,112 @@ export function symTridiagEigenvalue(
     if (hi - lo <= 2 * Number.EPSILON * Math.max(Math.abs(lo), Math.abs(hi))) break;
   }
   return lo + (hi - lo) / 2;
+}
+
+/** Inverse-iteration steps of {@link symTridiagEigenvector} (each one gains a factor 1e16 / gap). */
+const INVERSE_ITERATIONS = 3;
+
+/**
+ * The unit eigenvector of the symmetric tridiagonal matrix `(diag, off)` for the eigenvalue
+ * `lambda`, by inverse iteration: it solves `(T − λI) x = b` three times, each time scaling `x`
+ * to a largest entry of 1. The LU factorisation of `T − λI` swaps rows (as LAPACK `dgttrf`
+ * does) and replaces a pivot of size below `eps · norm` by that size, so the solve never divides
+ * by zero. The start vector is a fixed pseudo-random sequence: a start vector of ones can be
+ * orthogonal to the target. The sign of the result is not defined.
+ *
+ * The eigenvalue must be separated from the others by more than a few units in the last place
+ * of the norm of the matrix, and `lambda` must be within that distance of it.
+ *
+ * @param diag - Diagonal, length n ≥ 1
+ * @param off - Sub-diagonal (equal to the super-diagonal), length n − 1
+ * @param lambda - The eigenvalue, for example from {@link symTridiagEigenvalue}
+ * @returns The eigenvector with 2-norm 1
+ * @throws RangeError if the lengths do not fit or an entry is not finite
+ */
+export function symTridiagEigenvector(
+  diag: ArrayLike<number>,
+  off: ArrayLike<number>,
+  lambda: number
+): Float64Array {
+  checkShape(diag, off, 'symTridiagEigenvector');
+  const n = diag.length;
+  const x = new Float64Array(n);
+  if (n === 1) {
+    x[0] = 1;
+    return x;
+  }
+  const d = new Float64Array(n);
+  const du = new Float64Array(n - 1);
+  const dl = new Float64Array(n - 1);
+  const du2 = new Float64Array(n - 2);
+  const swapped = new Uint8Array(n - 1);
+  let norm = 0;
+  for (let i = 0; i < n; i++) {
+    d[i] = diag[i] - lambda;
+    norm = Math.max(norm, Math.abs(diag[i]) + (i > 0 ? Math.abs(off[i - 1]) : 0));
+    if (i < n - 1) {
+      du[i] = off[i];
+      dl[i] = off[i];
+    }
+  }
+  if (!Number.isFinite(norm) || !Number.isFinite(lambda)) {
+    throw new RangeError('symTridiagEigenvector: every entry and lambda must be finite');
+  }
+  const pivmin = Number.EPSILON * Math.max(norm, Math.abs(lambda), Number.MIN_VALUE * 1e10);
+  // LU with row swaps (LAPACK dgttrf). The multipliers go to dl, the second super-diagonal to du2.
+  for (let i = 0; i < n - 1; i++) {
+    if (Math.abs(d[i]) >= Math.abs(dl[i])) {
+      // A zero pivot has a zero dl[i] too, so there is nothing to eliminate.
+      if (d[i] !== 0) {
+        const fact = dl[i] / d[i];
+        dl[i] = fact;
+        d[i + 1] -= fact * du[i];
+      }
+    } else {
+      const fact = d[i] / dl[i];
+      d[i] = dl[i];
+      dl[i] = fact;
+      const temp = du[i];
+      du[i] = d[i + 1];
+      d[i + 1] = temp - fact * d[i + 1];
+      if (i < n - 2) {
+        du2[i] = du[i + 1];
+        du[i + 1] = -fact * du[i + 1];
+      }
+      swapped[i] = 1;
+    }
+  }
+  for (let i = 0; i < n; i++) if (Math.abs(d[i]) < pivmin) d[i] = pivmin;
+
+  // Start vector: a linear congruential sequence in (-1, 1), the same on every call.
+  let seed = 123456789;
+  for (let i = 0; i < n; i++) {
+    seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+    x[i] = (seed / 4294967296) * 2 - 1 || 0.5;
+  }
+  for (let iter = 0; iter < INVERSE_ITERATIONS; iter++) {
+    for (let i = 0; i < n - 1; i++) {
+      if (swapped[i]) {
+        const temp = x[i];
+        x[i] = x[i + 1];
+        x[i + 1] = temp - dl[i] * x[i];
+      } else {
+        x[i + 1] -= dl[i] * x[i];
+      }
+    }
+    x[n - 1] /= d[n - 1];
+    x[n - 2] = (x[n - 2] - du[n - 2] * x[n - 1]) / d[n - 2];
+    for (let i = n - 3; i >= 0; i--) x[i] = (x[i] - du[i] * x[i + 1] - du2[i] * x[i + 2]) / d[i];
+    let big = 0;
+    for (let i = 0; i < n; i++) big = Math.max(big, Math.abs(x[i]));
+    if (!Number.isFinite(big) || big === 0) {
+      throw new Error('symTridiagEigenvector: inverse iteration did not converge');
+    }
+    for (let i = 0; i < n; i++) x[i] /= big;
+  }
+  let sum = 0;
+  for (let i = 0; i < n; i++) sum += x[i] * x[i];
+  const scale = 1 / Math.sqrt(sum);
+  for (let i = 0; i < n; i++) x[i] *= scale;
+  return x;
 }

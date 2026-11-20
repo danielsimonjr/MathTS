@@ -1839,6 +1839,7 @@
       "functions/src/signal/windows-extra.ts",
       "functions/src/special/angular-momentum.ts",
       "functions/src/special/exp-integrals.ts",
+      "functions/src/special/mathieu.ts",
       "functions/src/special/polygamma-orthopoly.ts",
       "functions/src/special/spherical-bessel.ts",
       "functions/src/special/spheroidal.ts",

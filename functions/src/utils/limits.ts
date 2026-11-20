@@ -74,6 +74,14 @@ export const MAX_BESSEL_J_SWEEP = 1_200_000_000;
 export const MAX_SIEGEL_Z_T = 80_000_000;
 
 /**
+ * Maximum number of harmonics (the size of the tridiagonal matrix) of one `mathieuCe` or
+ * `mathieuSe` call. The matrix, its LU factors and the coefficients are about nine arrays of
+ * this length, so 1e6 harmonics hold about 70 MB. The size grows with `|q|^(1/4)`, so the limit
+ * covers `|q|` up to about 1e19.
+ */
+export const MAX_MATHIEU_HARMONICS = 1_000_000;
+
+/**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
  *
  * The test divides step by step, so the product cannot overflow. A NaN or negative
