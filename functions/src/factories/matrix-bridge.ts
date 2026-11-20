@@ -13,7 +13,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
-import { arraySize } from '../utils/array.js';
+import { arraySize, validate } from '../utils/array.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
@@ -123,8 +123,11 @@ export class MathJSDenseMatrix {
       this._data = [];
       this._size = [0];
     } else if (Array.isArray(data)) {
+      // Untrusted nested data: every row must match the size of the first one (mathjs `validate`).
+      // A producer that knows the size passes `{ data, size }`, which is not validated.
       this._data = data;
       this._size = inferSize(data);
+      validate(data, this._size);
     } else if (
       typeof data !== 'object' ||
       !Array.isArray((data as { data?: unknown }).data) ||
@@ -205,8 +208,7 @@ export class MathJSDenseMatrix {
     size: number[];
     datatype?: string;
   }): MathJSDenseMatrix {
-    const m = new MathJSDenseMatrix(opts.data);
-    m._size = opts.size;
+    const m = new MathJSDenseMatrix({ data: opts.data, size: opts.size });
     m._datatype = opts.datatype;
     return m;
   }
@@ -318,12 +320,16 @@ export class MathJSDenseMatrix {
     }
     if (dims.length === 1) {
       const picked = dims[0].map((i) => (this._data as unknown as number[])[i]);
-      const m = new MathJSDenseMatrix(picked as unknown as number[][]);
-      m._size = [dims[0].length];
-      return m;
+      return new MathJSDenseMatrix({
+        data: picked as unknown as number[][],
+        size: [dims[0].length],
+      });
     }
     const [rowSel, colSel] = dims;
-    return new MathJSDenseMatrix(rowSel.map((i) => colSel.map((j) => this._data[i][j])));
+    return new MathJSDenseMatrix({
+      data: rowSel.map((i) => colSel.map((j) => this._data[i][j])),
+      size: [rowSel.length, colSel.length],
+    });
   }
 
   /** Write a scalar or a sub-matrix at the selected indices; returns this. */
@@ -356,9 +362,10 @@ export class MathJSDenseMatrix {
    * Deep clone.
    */
   clone(): MathJSDenseMatrix {
-    const copy = copyAxes(this._data, this._size.length);
-    const m = new MathJSDenseMatrix(copy as unknown as number[][]);
-    m._size = [...this._size];
+    const m = new MathJSDenseMatrix({
+      data: copyAxes(this._data, this._size.length) as number[][],
+      size: [...this._size],
+    });
     m._datatype = this._datatype;
     return m;
   }
@@ -486,7 +493,7 @@ export class MathJSDenseMatrix {
 
   /** Create from native DenseMatrix. */
   static fromNative(dm: DenseMatrix): MathJSDenseMatrix {
-    return new MathJSDenseMatrix(dm.toArray());
+    return new MathJSDenseMatrix({ data: dm.toArray(), size: [dm.rows, dm.cols] });
   }
 
   /**

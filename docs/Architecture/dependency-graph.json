@@ -17715,7 +17715,7 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["arraySize"]
+            "imports": ["arraySize", "validate"]
           },
           {
             "file": "../utils/limits.js",
@@ -26487,6 +26487,10 @@
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
           {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
+          },
+          {
             "file": "./invalid-scalar-guards.js",
             "imports": ["withBinaryScalarGuards"]
           },
@@ -28906,6 +28910,10 @@
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
           }
         ],
         "workspaceDependencies": [
@@ -29324,6 +29332,10 @@
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
           },
           {
             "file": "../probability/multinomial-exact.js",
@@ -49885,7 +49897,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238412,
+    "totalLinesOfCode": 238437,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,

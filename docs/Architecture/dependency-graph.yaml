@@ -16622,6 +16622,7 @@ modules:
         - file: ../utils/array.js
           imports:
             - arraySize
+            - validate
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
@@ -24833,6 +24834,9 @@ modules:
           imports:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
@@ -27083,6 +27087,9 @@ modules:
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -27477,6 +27484,9 @@ modules:
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+        - file: ../utils/array.js
+          imports:
+            - arraySize
         - file: ../probability/multinomial-exact.js
           imports:
             - multinomialExact
@@ -47038,7 +47048,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238412
+  totalLinesOfCode: 238437
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669

@@ -1329,6 +1329,9 @@
       "functions/src/statistics/numeric-data.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/type/matrix/utils/broadcast.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/probability.ts",
       "functions/src/typed/set.ts",
       "functions/src/utils/optimizeCallback.ts"
     ],

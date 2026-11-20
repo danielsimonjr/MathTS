@@ -6507,11 +6507,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports           | Type   |
-| -------------------- | ----------------- | ------ |
-| `../utils/is.js`     | `typeOf`          | Import |
-| `../utils/array.js`  | `arraySize`       | Import |
-| `../utils/limits.js` | `assertAllocSize` | Import |
+| File                 | Imports               | Type   |
+| -------------------- | --------------------- | ------ |
+| `../utils/is.js`     | `typeOf`              | Import |
+| `../utils/array.js`  | `arraySize, validate` | Import |
+| `../utils/limits.js` | `assertAllocSize`     | Import |
 
 **Exports:**
 
@@ -11754,6 +11754,7 @@ graph LR
 | `../utils/real-scale.js`               | `isDegenerate, rescaled`                                                                                                                                                                                                                      | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
+| `../utils/array.js`                    | `arraySize`                                                                                                                                                                                                                                   | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
 | `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
@@ -12488,6 +12489,7 @@ graph LR
 | `../factories/scope.js`         | `factoryScope`      | Import |
 | `./number-matrix.js`            | `isNumberMatrix`    | Import |
 | `../factories/matrix-bridge.js` | `MathJSDenseMatrix` | Import |
+| `../utils/array.js`             | `arraySize`         | Import |
 
 **Exports:**
 
@@ -12600,6 +12602,7 @@ graph LR
 | `../utils/limits.js`                  | `assertAllocSize, assertLoopOrder` | Import |
 | `../plain/number/probability.js`      | `gammaNumber`                      | Import |
 | `../factories/matrix-bridge.js`       | `MathJSDenseMatrix`                | Import |
+| `../utils/array.js`                   | `arraySize`                        | Import |
 | `../probability/multinomial-exact.js` | `multinomialExact`                 | Import |
 
 **Exports:**
@@ -20833,9 +20836,9 @@ graph LR
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
+| `functions/src/utils/array`                            | 0 files      | 52 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
-| `functions/src/utils/array`                            | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
@@ -20850,8 +20853,8 @@ graph LR
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
+| `functions/src/typed/arithmetic`                       | 16 files     | 10 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
-| `functions/src/typed/arithmetic`                       | 15 files     | 10 files   |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
@@ -21768,7 +21771,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238412 |
+| Total Lines of Code     | 238437 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

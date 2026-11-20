@@ -69,6 +69,7 @@ import {
   singularValues,
 } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
+import { arraySize } from '../utils/array.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
@@ -285,16 +286,24 @@ function elementwiseMatrixNumber(
     (scalarKeepsSparse === 'left' && sparseA) ||
     (scalarKeepsSparse === true &&
       ((sparseA && !isCollection(b)) || (sparseB && !isCollection(a))));
-  if (!sparseOut) return new MathJSDenseMatrix(data as number[][]);
+  if (!sparseOut) return trustedDense(data as number[][]);
   if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(data);
   return new MathJSSparseMatrix(data);
+}
+
+/**
+ * A bridge matrix of nested data that an operation built itself. The size comes from the first
+ * element of each axis, and the data is not validated (the `{ data, size }` form).
+ */
+function trustedDense(data: number[][]): MathJSDenseMatrix {
+  return new MathJSDenseMatrix({ data, size: arraySize(data) });
 }
 
 /** The public `SparseMatrix` of nested numbers; a nested array with another entry type as a dense matrix. */
 function publicSparseOrDense(data: unknown[][]): SparseMatrix | MathJSDenseMatrix {
   for (const row of data) {
     for (const v of row) {
-      if (typeof v !== 'number') return new MathJSDenseMatrix(data as number[][]);
+      if (typeof v !== 'number') return trustedDense(data as number[][]);
     }
   }
   return SparseMatrix.fromDense(DenseMatrix.fromArray(data as number[][]));
@@ -777,7 +786,7 @@ export const multiply = withBinaryScalarGuards(
     // reaching it via the Matrix~>Array conversion would strip the matrix type
     // (breaking callers like `sylvester` that call `.toArray()` on the product).
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      return new MathJSDenseMatrix(matrixProduct(a, b) as number[][]);
+      return trustedDense(matrixProduct(a, b) as number[][]);
     },
 
     // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
@@ -788,9 +797,9 @@ export const multiply = withBinaryScalarGuards(
       return new MathJSSparseMatrix(product);
     },
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-      new MathJSDenseMatrix(matrixProduct(a, b) as number[][]),
+      trustedDense(matrixProduct(a, b) as number[][]),
     'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      new MathJSDenseMatrix(matrixProduct(a, b) as number[][]),
+      trustedDense(matrixProduct(a, b) as number[][]),
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2549,
+  "totalFiles": 2553,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1133,
+    "test": 1137,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1133,
+    "tests": 1137,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 37,
+    "@danielsimonjr/mathts-compat": 38,
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1179,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 152,
@@ -619,6 +619,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 99
+    },
+    {
+      "file": "compat/tests/dogfood-1092-1273-compat-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
     },
     {
       "file": "compat/tests/dogfood-1222-import-instance.test.ts",
@@ -6827,7 +6834,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1361
+      "loc": 1373
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -9200,7 +9207,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3051
+      "loc": 3060
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9445,7 +9452,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1293
+      "loc": 1294
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -9487,7 +9494,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 511
+      "loc": 514
     },
     {
       "file": "functions/src/typed/public-type-exports.ts",
@@ -10624,6 +10631,13 @@
       "loc": 414
     },
     {
+      "file": "functions/tests/dogfood-1092-1273-ragged-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 170
+    },
+    {
       "file": "functions/tests/dogfood-1098-nan-policy.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10881,6 +10895,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 141
+    },
+    {
+      "file": "functions/tests/dogfood-1273-ragged-sparse.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 95
+    },
+    {
+      "file": "functions/tests/dogfood-1279-1155-nd-shape.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 437
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
