@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1351,
+    "totalFiles": 1352,
     "totalModules": 82,
-    "totalExports": 7407
+    "totalExports": 7410
   },
   "entryPoints": [
     {
@@ -15448,6 +15448,21 @@
           "polynomialCoefficients"
         ],
         "constants": ["COEFFICIENT_NOISE_RATIO"]
+      },
+      "functions/src/cas/taylor-jet.ts": {
+        "description": "Taylor coefficients by truncated power-series (\"jet\") arithmetic on the syntax tree.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./syntax-tree.js",
+            "imports": ["AstNode", "operatorName", "callName", "containsSymbol", "constantValue"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["JET_NOISE_RATIO", "jetCoefficients", "jetValueIsZero"],
+        "functions": ["jetCoefficients", "jetValueIsZero"],
+        "constants": ["JET_NOISE_RATIO"]
       }
     },
     "functions/combinatorics": {
@@ -26899,6 +26914,10 @@
           {
             "file": "../cas/real-roots.js",
             "imports": ["realRoots"]
+          },
+          {
+            "file": "../cas/taylor-jet.js",
+            "imports": ["jetCoefficients", "jetValueIsZero"]
           },
           {
             "file": "../cas/exact-roots.js",
@@ -48623,7 +48642,8 @@
           "functions/src/cas/real-roots.ts",
           "functions/src/cas/render-coeff-times.ts",
           "functions/src/cas/render-polynomial.ts",
-          "functions/src/cas/syntax-tree.ts"
+          "functions/src/cas/syntax-tree.ts",
+          "functions/src/cas/taylor-jet.ts"
         ]
       },
       {
@@ -49941,16 +49961,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1351,
+    "totalTypeScriptFiles": 1352,
     "totalModules": 82,
-    "totalLinesOfCode": 239707,
-    "totalExports": 7407,
+    "totalLinesOfCode": 240246,
+    "totalExports": 7410,
     "totalClasses": 63,
     "totalInterfaces": 670,
-    "totalFunctions": 2587,
+    "totalFunctions": 2589,
     "totalTypeGuards": 184,
     "totalEnums": 0,
-    "totalConstants": 1696,
+    "totalConstants": 1697,
     "totalReExports": 3191,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,

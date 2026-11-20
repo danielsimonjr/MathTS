@@ -60,6 +60,7 @@ import { closedFormRoots, snapRoot } from '../cas/closed-form-roots.js';
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
 import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
+import { jetCoefficients, jetValueIsZero } from '../cas/taylor-jet.js';
 import {
   exactLinearRoot,
   exactLinearText,
@@ -225,52 +226,69 @@ function numericalDerivative(
   return (deriv1 - deriv2) / (2 * h);
 }
 
+/** The contour sum starts with at least this many points. */
+const CONTOUR_MIN_POINTS = 64;
+/** The contour sum doubles its points up to this many. */
+const CONTOUR_MAX_POINTS = 4096;
+/** Two successive contour sums agree when they differ by at most this fraction of max|f|. */
+const CONTOUR_TOLERANCE = 1e-13;
+/** The contour radii, tried in order while the sum does not converge. */
+const CONTOUR_RADII = [0.5, 0.25, 0.125];
+
 /**
- * Exact Taylor coefficients a_0..a_n of expr around x0 via the Cauchy
- * integral on the circle |z - x0| = r, discretized at N roots of unity:
+ * Taylor coefficients a_0..a_n of expr around x0 via the Cauchy integral on the circle
+ * |z - x0| = r, discretized at N roots of unity:
  *
  *   a_k = (1 / (N * r^k)) * sum_{j=0}^{N-1} Re[ f(z_j) * e^{-2*pi*i*j*k/N} ]
  *   where z_j = x0 + r * e^{2*pi*i*j/N}
  *
- * Reuses the expression evaluator's complex-number support (sin/cos/exp/
- * log/sqrt/pow all have complex overloads) instead of finite-difference
- * derivatives, whose error explodes with order. a[k] IS the Taylor
- * coefficient f^(k)(x0)/k! already — do not divide by k! again.
- *
- * r=0.5 is fixed: it keeps the contour clear of the nearest singularity for
- * the entire/analytic functions this module targets (sin, cos, exp,
- * polynomials). The sum aliases when a singularity lies within 2r of x0: a_k then
- * also receives a_(k+N) * r^N + ..., so this is only the fallback of
- * {@link taylorCoefficients} for the orders that the symbolic pass does not give.
+ * The sum aliases: a_k also receives a_(k+N) * r^N + .... So N doubles (from
+ * {@link CONTOUR_MIN_POINTS}) until two successive sums agree to {@link CONTOUR_TOLERANCE}
+ * times max|f| on the contour. At {@link CONTOUR_MAX_POINTS} the radius halves (a
+ * singularity is near the contour). A coefficient below its rounding size,
+ * CONTOUR_TOLERANCE * max|f| / r^k, is 0. The last tier of {@link taylorCoefficients}.
  */
 function contourTaylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
-  const N = Math.max(1 << Math.ceil(Math.log2(2 * (n + 1))), 16); // >= 2(n+1), power of two
-  const r = 0.5; // contour radius
-  const fRe = new Array<f64>(N);
-  const fIm = new Array<f64>(N);
-  for (let j = 0; j < N; j++) {
-    const ang = (2 * Math.PI * j) / N;
-    const z = new Complex(x0 + r * Math.cos(ang), r * Math.sin(ang));
-    const val = evaluate(expr, { [varName]: z }) as Complex | f64;
-    if (typeof val === 'number') {
-      fRe[j] = val;
-      fIm[j] = 0;
-    } else {
-      fRe[j] = val.re;
-      fIm[j] = val.im;
-    }
-  }
-  const a: f64[] = new Array(n + 1);
-  for (let k = 0; k <= n; k++) {
-    let sRe = 0;
+  const compiled = compileExpr(expr);
+  const sum = (N: number, r: f64): { a: f64[]; fmax: f64 } => {
+    const fRe = new Array<f64>(N);
+    const fIm = new Array<f64>(N);
+    let fmax = 0;
     for (let j = 0; j < N; j++) {
-      const ang = (-2 * Math.PI * j * k) / N;
-      // Re[ (fRe + i fIm) * (cos ang + i sin ang) ]
-      sRe += fRe[j] * Math.cos(ang) - fIm[j] * Math.sin(ang);
+      const ang = (2 * Math.PI * j) / N;
+      const z = new Complex(x0 + r * Math.cos(ang), r * Math.sin(ang));
+      const val = compiled.evaluate({ [varName]: z }) as Complex | f64;
+      fRe[j] = typeof val === 'number' ? val : val.re;
+      fIm[j] = typeof val === 'number' ? 0 : val.im;
+      fmax = Math.max(fmax, Math.hypot(fRe[j], fIm[j]));
     }
-    a[k] = sRe / (N * Math.pow(r, k));
+    const a: f64[] = new Array(n + 1);
+    for (let k = 0; k <= n; k++) {
+      let sRe = 0;
+      for (let j = 0; j < N; j++) {
+        const ang = (-2 * Math.PI * ((j * k) % N)) / N;
+        sRe += fRe[j] * Math.cos(ang) - fIm[j] * Math.sin(ang);
+      }
+      a[k] = sRe / (N * Math.pow(r, k));
+    }
+    return { a, fmax };
+  };
+  const clean = (a: f64[], fmax: f64, r: f64): f64[] =>
+    a.map((c, k) => (Math.abs(c) <= (CONTOUR_TOLERANCE * fmax) / Math.pow(r, k) ? 0 : c));
+  const start = Math.max(CONTOUR_MIN_POINTS, 1 << Math.ceil(Math.log2(4 * (n + 1))));
+  let last: { a: f64[]; fmax: f64; r: f64 } | null = null;
+  for (const r of CONTOUR_RADII) {
+    let prev = sum(start, r);
+    for (let N = 2 * start; N <= Math.max(CONTOUR_MAX_POINTS, 2 * start); N *= 2) {
+      const next = sum(N, r);
+      const bound = CONTOUR_TOLERANCE * Math.max(next.fmax, Number.MIN_VALUE);
+      const agree = next.a.every((c, k) => Math.abs(c - prev.a[k]) * Math.pow(r, k) <= bound);
+      prev = next;
+      if (agree) return clean(next.a, next.fmax, r);
+    }
+    last = { ...prev, r };
   }
-  return a; // a[k] is already the Taylor coefficient f^(k)(x0)/k!
+  return clean(last!.a, last!.fmax, last!.r);
 }
 
 /** The symbolic Taylor pass stops when the text of the current derivative is longer than this. */
@@ -312,10 +330,15 @@ function symbolicTaylorCoefficients(expr: string, varName: string, x0: f64, n: n
 
 /**
  * Taylor coefficients a_0..a_n of expr around x0. a[k] IS the coefficient f^(k)(x0)/k!.
- * The orders that {@link symbolicTaylorCoefficients} gives are exact; the contour sum
- * ({@link contourTaylorCoefficients}) fills the orders above them.
+ * Three tiers, in order: jet arithmetic on the syntax tree ({@link jetCoefficients}, exact
+ * to rounding, for + - * / ^ and the elementary functions); the symbolic derivatives
+ * ({@link symbolicTaylorCoefficients}) for the orders that they give; the contour sum
+ * ({@link contourTaylorCoefficients}) for the orders above them.
  */
 function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const tree = parseTree(expr);
+  const jets = tree === null ? null : jetCoefficients(tree, varName, x0, n);
+  if (jets !== null) return jets;
   const exact = symbolicTaylorCoefficients(expr, varName, x0, n);
   if (exact.length === n + 1) return exact;
   const contour = contourTaylorCoefficients(expr, varName, x0, n);
@@ -337,8 +360,14 @@ function factorial(n: number): f64 {
  */
 function formatCoeff(c: f64): string {
   if (Math.abs(c) < 1e-12) return '0';
-  // A value within 1e-10 of a non-zero integer is that integer. A value near 0 keeps its digits
-  // (`1.147e-11` is not `0`): `buildTerm` already drops what is below 1e-12.
+  return formatCoeffDigits(c);
+}
+
+/**
+ * The text of a non-zero coefficient, with no floor near 0: a value within 1e-10 of a non-zero
+ * integer is that integer, and a small value keeps its digits (`7.647163732e-13`).
+ */
+function formatCoeffDigits(c: f64): string {
   const nearest = Math.round(c);
   if (nearest !== 0 && Math.abs(c - nearest) < 1e-10) return String(nearest);
   // Show up to 10 significant digits. Only the mantissa loses its trailing zeros: the exponent
@@ -352,8 +381,9 @@ function formatCoeff(c: f64): string {
  * Build a polynomial term string.
  */
 function buildTerm(c: f64, varName: string, x0: f64, power: number): string {
-  if (Math.abs(c) < 1e-12) return '';
-  const cs = formatCoeff(c);
+  // Each tier of `taylorCoefficients` gives exactly 0 for a coefficient that is rounding noise.
+  if (c === 0) return '';
+  const cs = formatCoeffDigits(c);
   if (power === 0) return cs;
 
   const xPart = x0 === 0 ? varName : `(${varName} - ${formatCoeff(x0)})`;
@@ -486,8 +516,17 @@ export function integrate(
 const LIMIT_RULE_MAX_STEPS = 8;
 /** `quotientLimit` stops when the text of the numerator or the denominator is longer than this. */
 const LIMIT_RULE_TEXT_LIMIT = 200;
-/** A value of the numerator or the denominator at or below this is zero (an absolute bound). */
-const LIMIT_ZERO = 1e-14;
+/**
+ * A value of the numerator or the denominator is zero when it is at most this fraction of the
+ * magnitude of its own evaluation (rounding noise, `sin(pi)`), or, for an expression with no
+ * jet rule, of the values just beside the point.
+ */
+const LIMIT_ZERO_RATIO = 1e-14;
+/**
+ * In the sampling path of `limit`, steps of one sign where each is at least this fraction of the
+ * step before diverge (a convergent sequence has steps that shrink by much more per sample).
+ */
+const LIMIT_DIVERGENT_STEP_RATIO = 0.9;
 /** The distance from the point at which `quotientLimit` reads the sign of a pole. */
 const LIMIT_POLE_OFFSET = 1e-8;
 /** The distances from the point at which a finite L'Hopital result is checked against a sample. */
@@ -540,11 +579,14 @@ function quotientLimit(
     }
   };
   const sides = dir === 'right' ? [1] : dir === 'left' ? [-1] : [1, -1];
-  /** The sign of the current quotient just beside `value`, on side `d` (0 when it has none). */
-  const sideSign = (d: number): number => {
-    const a = real(num, value + d * LIMIT_POLE_OFFSET);
+  /**
+   * The sign of the current quotient just beside `value`, on side `d` (0 when it has none), for
+   * a pole: the numerator is not zero at `value`, so its sign there holds beside it too (a sample
+   * of it at an offset can have the other sign: `x^3 - 1e-30` at 1e-8).
+   */
+  const sideSign = (d: number, nv: f64): number => {
     const b = real(den, value + d * LIMIT_POLE_OFFSET);
-    return a === undefined || b === undefined ? 0 : signOf(a) * signOf(b);
+    return b === undefined ? 0 : signOf(nv) * signOf(b);
   };
   /** The result `L` when each requested side with a finite sample has a sample close to it. */
   const checked = (L: f64): f64 | undefined => {
@@ -565,17 +607,36 @@ function quotientLimit(
     return sidesChecked > 0 ? L : undefined;
   };
 
+  /**
+   * True when `v`, the value of `text` at `value`, is zero. The test is relative: a small
+   * constant (`1e-15/x`) is not zero, and the rounding noise of `sin(pi)` is.
+   */
+  const isZero = (text: string, v: f64): boolean => {
+    if (v === 0) return true;
+    const tree = parseTree(text);
+    const byJet = tree === null ? null : jetValueIsZero(tree, varName, value, LIMIT_ZERO_RATIO);
+    if (byJet !== null) return byJet;
+    let beside = 0;
+    for (const h of LIMIT_CHECK_OFFSETS) {
+      for (const d of [1, -1]) {
+        const w = real(text, value + d * h);
+        if (w !== undefined && Number.isFinite(w)) beside = Math.max(beside, Math.abs(w));
+      }
+    }
+    return Math.abs(v) <= LIMIT_ZERO_RATIO * beside;
+  };
+
   for (let step = 0; step <= LIMIT_RULE_MAX_STEPS; step++) {
     const nv = real(num, value);
     const dv = real(den, value);
     if (nv === undefined || dv === undefined || !Number.isFinite(nv) || !Number.isFinite(dv)) {
       return undefined;
     }
-    if (Math.abs(dv) > LIMIT_ZERO) return checked(nv / dv);
-    if (Math.abs(nv) > LIMIT_ZERO) {
+    if (!isZero(den, dv)) return checked(nv / dv);
+    if (!isZero(num, nv)) {
       // c/0: a pole. The sign of each side comes from the current pair, not from the original
       // expression, which may round to 0 beside `value` (1 - cos(x) at 1e-8).
-      const signs = sides.map(sideSign);
+      const signs = sides.map((d) => sideSign(d, nv));
       if (signs.some((s) => s === 0)) return undefined;
       return signs.every((s) => s === signs[0]) ? signs[0] * Infinity : NaN;
     }
@@ -661,6 +722,9 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
         vals.push(NaN);
       }
     }
+    // The two samples nearest the point overflow to one infinity (exp(1/x)): the limit is it.
+    const [nearA, nearB] = vals.slice(-2);
+    if (nearA === nearB && (nearA === Infinity || nearA === -Infinity)) return nearA;
     const valid = vals.filter((v) => isFinite(v) && !isNaN(v));
     if (valid.length === 0) return NaN;
     if (valid.length === 1) return valid[0];
@@ -674,6 +738,16 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
       Math.abs(last) >= 2 * Math.abs(valid[valid.length - 2])
     ) {
       return last > 0 ? Infinity : -Infinity;
+    }
+    // Values that move by one sign at every step, with steps that do not shrink, diverge
+    // (log(x) moves by -4.6 for each factor of 100). A convergent sequence has shrinking steps.
+    if (valid.length >= 3) {
+      const d = valid.slice(1).map((v, i) => v - valid[i]);
+      const oneSign = d.every((s) => s > 0) || d.every((s) => s < 0);
+      const notShrinking = d.every(
+        (s, i) => i === 0 || Math.abs(s) >= LIMIT_DIVERGENT_STEP_RATIO * Math.abs(d[i - 1])
+      );
+      if (oneSign && notShrinking) return d[0] > 0 ? Infinity : -Infinity;
     }
     // Converged values: take the sample that differs least from the one before it. The last
     // sample is not safe, because a difference of two close values (1 - cos(h)) rounds to 0.
@@ -722,12 +796,18 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
  * @param varName - Variable to differentiate with respect to
  * @param scope - Variable values at which to evaluate
  * @returns Numerical value of the partial derivative
+ * @throws TypeError when `scope` is not an object
  *
  * @example
  * partialDerivative('x^2 + y^2', 'x', { x: 3, y: 4 }) // => 6
  * partialDerivative('sin(x*y)', 'x', { x: 0, y: 1 })   // => 1
  */
 export function partialDerivative(expr: string, varName: string, scope: Record<string, f64>): f64 {
+  if (typeof scope !== 'object' || scope === null) {
+    throw new TypeError(
+      'partialDerivative(expr, varName, scope): scope must be an object that gives a value to each variable'
+    );
+  }
   const x0 = scope[varName];
   if (x0 === undefined) {
     throw new Error(`Variable '${varName}' not found in scope`);
@@ -1351,6 +1431,16 @@ interface PoleTerm {
  * `2 e^(a t) (Re R cos(b t) - Im R sin(b t))`. The partial fractions are checked against `N/D`
  * at three points, so a multiplicity that the root finder got wrong gives null, never a wrong text.
  */
+/** True when `node` is `N/D` with `N` and `D` polynomials in `s` (finite real coefficients). */
+function isPolynomialQuotient(node: AstNode, s: string): boolean {
+  const root = unwrapParens(node);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return false;
+  return densePolynomialIn(root.args[0], s) !== null && densePolynomialIn(root.args[1], s) !== null;
+}
+
+/** Two real poles closer than this fraction of max(1, |pole|) are too close to separate. */
+const INVERSE_LAPLACE_ROOT_SEPARATION = 1e-6;
+
 function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: number): string | null {
   const root = unwrapParens(node);
   if (operatorName(root) !== 'divide' || root.args?.length !== 2) return null;
@@ -1366,16 +1456,20 @@ function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: numbe
   const D = denominator.map((c) => c / lead);
   const N = numerator.map((c) => (sign * c) / lead);
 
-  // The real roots: distinct (merged within 1e-6), each with its multiplicity.
-  let found: f64[];
+  // The real roots that the Sturm sequence separates, each with its multiplicity. Two of them
+  // closer than INVERSE_LAPLACE_ROOT_SEPARATION (relative to their size) are past the accuracy of
+  // the multiplicity test, so the transform keeps its marker: merging them read the two poles
+  // +-1e-7 of 1/(s^2-1e-14) as one.
+  let distinct: f64[];
   try {
-    found = sturmRoots(denominator);
+    distinct = sturmRoots(denominator);
   } catch {
     return null;
   }
-  const distinct: f64[] = [];
-  for (const r of found) {
-    if (!distinct.some((v) => Math.abs(v - r) <= 1e-6 * Math.max(1, Math.abs(r)))) distinct.push(r);
+  const sorted = [...distinct].sort((a, b) => a - b);
+  for (let i = 1; i < sorted.length; i++) {
+    const size = Math.max(Math.abs(sorted[i]), Math.abs(sorted[i - 1]), 1);
+    if (sorted[i] - sorted[i - 1] <= INVERSE_LAPLACE_ROOT_SEPARATION * size) return null;
   }
   let probe: f64[] = [...D];
   const real: Array<{ r: f64; m: number }> = [];
@@ -1545,6 +1639,9 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
   if (tree !== null) {
     const texts: string[] = [];
     if (inverseLaplaceSum(tree, s, t, 1, texts)) return joinTerms(texts);
+    // A quotient of two polynomials in `s` belongs to the exact reader. When it refuses (poles
+    // too close to separate), the sampled table must not answer: it reads 1/(s^2-1e-14) as 1/s^2.
+    if (isPolynomialQuotient(tree, s)) return `L^-1{${trimmed}}(${t})`;
   }
 
   try {
@@ -1654,12 +1751,13 @@ export function zTransform(expr: string, n: string, z: string): string {
 /**
  * Compute the Taylor series expansion of an expression around a point.
  *
- * Coefficients come from symbolic derivatives evaluated at x0 (f^(k)(x0) / k!), so
- * `1/(1-x)` has the coefficients 1, 1, 1, ... exactly. The Cauchy integral on a complex
- * contour around x0 fills the orders that the symbolic pass does not give: it stops
- * at order 24 or when the text of a derivative is longer than 200 characters (see
- * {@link taylorCoefficients}). The contour sum is less exact there when a singularity
- * lies within 1 of x0.
+ * The coefficients come from three tiers (see {@link taylorCoefficients}). First, power-series
+ * arithmetic on the syntax tree handles + - * / ^ and exp, log, sqrt, sin, cos, tan, sinh,
+ * cosh, tanh, asin, acos and atan, so `1/(1-x)` has the coefficients 1, 1, 1, ... at any
+ * order. Next, symbolic derivatives evaluated at x0 (f^(k)(x0) / k!) give the coefficients of
+ * other functions up to order 24. Last, the Cauchy integral on a complex contour around x0
+ * fills the remaining orders; it doubles its points until the sum converges. A coefficient
+ * that is rounding noise is left out; a small true coefficient (1/15!) stays.
  *
  * @param expr - Expression string
  * @param varName - Variable name
@@ -1890,8 +1988,8 @@ function refineBracket(f: (x: f64) => f64, a: f64, b: f64): f64 {
  * `x^2 - 1e-20`. It never looks outside `range`. A grid point where `f` is exactly zero is a
  * root. A grid point that is a local minimum of `|f|` with no sign change on either side may sit
  * beside a root that touches zero, such as the double root of `(x - 1)^2`. The root is the point
- * where the slope of `f` changes sign inside the two intervals beside that grid point (slope by a
- * central difference, refined with Brent's method), and it counts when `|f|` there is below
+ * where the slope of `f` changes sign inside the two intervals beside that grid point (slope from
+ * the symbolic derivative, or a 5-point stencil, refined with Brent's method), and it counts when `|f|` there is below
  * {@link SCAN_TOUCH_LIMIT}. The scan does not detect a pair of roots that are closer than one grid
  * step (no sign change). A sign change at a pole (`tan(x)` at `pi/2`) is not a root: the refined
  * point is kept only when `|f|` there is not above the larger `|f|` at the bracket ends.
@@ -1925,13 +2023,37 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
     xs[i] = i === 0 ? lo : i === intervals ? hi : lo + (width * i) / intervals;
     fs[i] = sample(xs[i]);
   }
-  // The half-width of the central difference for the slope of `f`: far below the grid step.
+  // The step of the difference for the slope of `f`: far below the grid step.
   const slopeWidth = (width / intervals) * 1e-3;
-  /** The slope of `f` at `x` by a central difference that stays inside the range. */
+  /**
+   * The slope of `f` at `x`: the symbolic derivative when it can be built, so the zero of the
+   * slope (a touching root) is exact to rounding. Otherwise the 5-point stencil
+   * (f(x-2h) - 8f(x-h) + 8f(x+h) - f(x+2h))/(12h), with an O(h^4) error; the 3-point difference
+   * had an O(h^2) error that moved the touching root of `(x^2-1)^2` by 1.8e-11. Near an end of
+   * the range, the stencil moves inside it.
+   */
+  let derivative: ((x: f64) => f64) | null | undefined;
   const slopeAt = (x: f64): f64 => {
-    const a = Math.max(lo, x - slopeWidth);
-    const b = Math.min(hi, x + slopeWidth);
-    return (sample(b) - sample(a)) / (b - a);
+    if (derivative === undefined) {
+      try {
+        derivative = compileAt(_casDerivativeOne(expr, varName), varName);
+      } catch {
+        derivative = null;
+      }
+    }
+    if (derivative !== null) {
+      try {
+        const v: unknown = derivative(x);
+        if (typeof v === 'number' && Number.isFinite(v)) return v;
+      } catch {
+        // the stencil below
+      }
+    }
+    const c = Math.min(hi - 2 * slopeWidth, Math.max(lo + 2 * slopeWidth, x));
+    const h = slopeWidth;
+    return (
+      (sample(c - 2 * h) - 8 * sample(c - h) + 8 * sample(c + h) - sample(c + 2 * h)) / (12 * h)
+    );
   };
   /**
    * The root that touches zero beside grid point `i` (a local minimum of `|f|` with no sign

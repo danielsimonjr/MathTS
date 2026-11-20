@@ -21,8 +21,6 @@ const MAX_RADICAND = Number.MAX_SAFE_INTEGER;
 const MAX_TYPED_DIGITS = 15;
 /** The largest denominator of a fraction that stands for a rounded coefficient (`1/3`, `7/12`). */
 const MAX_COEFFICIENT_DENOMINATOR = 10_000;
-/** A fraction stands for a rounded coefficient when they agree to this fraction of the coefficient. */
-const COEFFICIENT_FRACTION_TOLERANCE = 1e-15;
 
 /** A decimal text such as `0.5`, `-12`, `1e-20` or `2.5e3` as a rational, or null when it is none. */
 export function decimalTextToRat(text: string): Rat | null {
@@ -44,7 +42,11 @@ function significantDigits(text: string): number {
   return mantissa.replace(/^0+/, '').replace(/0+$/, '').length;
 }
 
-/** The small fraction `n/d` (`d` up to the limit) that agrees with `x` to rounding size, or null. */
+/**
+ * The small fraction `n/d` (`d` up to the limit) whose correctly rounded value is `x`, or null.
+ * The match is exact: `0.3333333333333333` is `1/3`, and `0.30000000000000004` (one ulp above
+ * the double of 3/10) is no fraction.
+ */
 function smallFraction(x: number): Rat | null {
   let h1 = 1n;
   let h0 = 0n;
@@ -56,10 +58,7 @@ function smallFraction(x: number): Rat | null {
     const h2 = BigInt(a) * h1 + h0;
     const k2 = BigInt(a) * k1 + k0;
     if (k2 > BigInt(MAX_COEFFICIENT_DENOMINATOR)) return null;
-    if (
-      Math.abs(Math.abs(x) - Number(h2) / Number(k2)) <=
-      COEFFICIENT_FRACTION_TOLERANCE * Math.abs(x)
-    ) {
+    if (Number(h2) / Number(k2) === Math.abs(x)) {
       return ratNormalize(x < 0 ? -h2 : h2, k2);
     }
     [h0, h1, k0, k1] = [h1, h2, k1, k2];

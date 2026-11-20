@@ -2339,6 +2339,7 @@
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/cas/syntax-tree.ts": [
       "functions/src/cas/elementary-solve.ts",
+      "functions/src/cas/taylor-jet.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/cas/rat.ts": [
@@ -2905,6 +2906,7 @@
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/closed-form-roots.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/taylor-jet.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/exact-roots.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",

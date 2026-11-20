@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2553,
+  "totalFiles": 2559,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1325,
+    "build-entry": 1326,
     "test-only": 0,
     "orphan": 0,
-    "test": 1136,
+    "test": 1141,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1351,
-    "tests": 1136,
+    "src": 1352,
+    "tests": 1141,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1181,
+    "@danielsimonjr/mathts-functions": 1187,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6603,7 +6603,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 225
+      "loc": 224
     },
     {
       "file": "functions/src/cas/layer3.ts",
@@ -6667,6 +6667,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 238
+    },
+    {
+      "file": "functions/src/cas/taylor-jet.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 420
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -9228,7 +9235,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3985
+      "loc": 4105
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -10596,6 +10603,13 @@
       "loc": 364
     },
     {
+      "file": "functions/tests/docs-partial-derivative-example.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 18
+    },
+    {
       "file": "functions/tests/docs-reference-completeness.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10624,6 +10638,13 @@
       "loc": 456
     },
     {
+      "file": "functions/tests/dogfood-1022-limit-zero-and-divergence.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
+    },
+    {
       "file": "functions/tests/dogfood-1022-limit.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10636,6 +10657,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 86
+    },
+    {
+      "file": "functions/tests/dogfood-1023-taylor-jet.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 56
+    },
+    {
+      "file": "functions/tests/dogfood-1024-close-poles.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 24
     },
     {
       "file": "functions/tests/dogfood-1024-transforms.test.ts",
@@ -10937,6 +10972,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 278
+    },
+    {
+      "file": "functions/tests/dogfood-966-touching-root-and-fraction.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 47
     },
     {
       "file": "functions/tests/dogfood-978-eigs-complex-vectors.test.ts",

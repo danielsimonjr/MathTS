@@ -127,7 +127,7 @@ The codebase is organized into the following modules:
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 13 files
+- **functions/cas**: 14 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 588            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 589            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5888,6 +5888,21 @@ graph LR
 - Interfaces: `AstNode`
 - Functions: `parseTree`, `containsSymbol`, `operatorName`, `callName`, `constantValue`, `polynomialCoefficients`
 - Constants: `COEFFICIENT_NOISE_RATIO`
+
+---
+
+### `functions/src/cas/taylor-jet.ts` - Taylor coefficients by truncated power-series ("jet") arithmetic on the syntax tree.
+
+**Internal Dependencies:**
+
+| File               | Imports                                                          | Type   |
+| ------------------ | ---------------------------------------------------------------- | ------ |
+| `./syntax-tree.js` | `AstNode, operatorName, callName, containsSymbol, constantValue` | Import |
+
+**Exports:**
+
+- Functions: `jetCoefficients`, `jetValueIsZero`
+- Constants: `JET_NOISE_RATIO`
 
 ---
 
@@ -11842,6 +11857,7 @@ graph LR
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                                                              | Import |
 | `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                                                                       | Import |
 | `../cas/real-roots.js`           | `realRoots`                                                                                                                                       | Import |
+| `../cas/taylor-jet.js`           | `jetCoefficients, jetValueIsZero`                                                                                                                 | Import |
 | `../cas/exact-roots.js`          | `exactLinearRoot, exactLinearText, exactQuadraticRoots, powerRuleText`                                                                            | Import |
 | `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
@@ -20877,10 +20893,10 @@ graph LR
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/typed/cas`                              | 18 files     | 1 file     |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
-| `tensor/src/named-index`                               | 0 files      | 18 files   |
 
 ---
 
@@ -21133,7 +21149,7 @@ graph TD
         N153[rat]
         N154[rational-integrate]
         N155[real-roots]
-        N156[...3 more]
+        N156[...4 more]
     end
 
     subgraph Functions/combinatorics
@@ -21782,14 +21798,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1351   |
+| Total TypeScript Files  | 1352   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239707 |
-| Total Exports           | 7407   |
+| Total Lines of Code     | 240246 |
+| Total Exports           | 7410   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |
 | Total Interfaces        | 670    |
-| Total Functions         | 2587   |
+| Total Functions         | 2589   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

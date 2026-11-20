@@ -562,8 +562,8 @@ integrate('sin(x)', 'x', 0, 3.14159); // ~2.0
 limit('sin(x)/x', 'x', 0); // 1
 limit('(1 + 1/n)^n', 'n', Infinity); // ~2.71828
 
-// Partial derivatives
-partialDerivative('x^2*y + y^3', 'y'); // '2*y^2 + x^2'
+// Partial derivatives (numeric, at the point in the scope)
+partialDerivative('x^2*y + y^3', 'y', { x: 2, y: 3 }); // 31 (x^2 + 3*y^2 at x = 2, y = 3)
 
 // Taylor series
 taylor('exp(x)', 'x', 0, 4); // '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4'
