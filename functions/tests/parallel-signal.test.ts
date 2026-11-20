@@ -16,6 +16,10 @@ import {
   parallelAutoCorr,
 } from '../src/index.js';
 
+// Other files that run in the same process (bun test) read the shared pool: restore its
+// configuration (a later file calls initialize() to start it again).
+const savedPoolConfig = computePool.getConfig();
+
 // The typed-function calls return `unknown`; these are the documented result shapes.
 interface Spectrum {
   real: Float64Array;
@@ -31,6 +35,7 @@ describe('Parallel Signal Processing Functions', () => {
   });
 
   afterAll(async () => {
+    computePool.updateConfig(savedPoolConfig);
     await computePool.terminate();
   });
 

@@ -2819,6 +2819,12 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/utils/samples.ts": [
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/interpolation.ts",
+      "functions/src/typed/signal.ts"
+    ],
     "functions/src/signal/wavelet-filters.ts": [
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/signal.ts"
@@ -2904,11 +2910,6 @@
       "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"
-    ],
-    "functions/src/utils/samples.ts": [
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/interpolation.ts",
-      "functions/src/typed/signal.ts"
     ],
     "functions/src/typed/string-derivative.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/typed/call-rewrite.ts": ["functions/src/typed/algebra.ts"],

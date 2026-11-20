@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2575,
+  "totalFiles": 2578,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1159,
+    "test": 1162,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1159,
+    "tests": 1162,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1200,
+    "@danielsimonjr/mathts-functions": 1203,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 153,
@@ -233,7 +233,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 363
+      "loc": 369
     },
     {
       "file": "assembly/src/sort.ts",
@@ -8304,14 +8304,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 193
+      "loc": 223
     },
     {
       "file": "functions/src/signal/fft.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 382
+      "loc": 384
     },
     {
       "file": "functions/src/signal/fir-smoothing.ts",
@@ -8353,7 +8353,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 446
+      "loc": 469
     },
     {
       "file": "functions/src/signal/system-response.ts",
@@ -9522,7 +9522,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1701
+      "loc": 1794
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -9977,7 +9977,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 512
+      "loc": 518
     },
     {
       "file": "functions/src/wasm/sort/wasm-bridge.ts",
@@ -10432,7 +10432,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 309
+      "loc": 313
     },
     {
       "file": "functions/tests/cov-special.test.ts",
@@ -10715,6 +10715,13 @@
       "loc": 174
     },
     {
+      "file": "functions/tests/dogfood-1145-signal-degenerate.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 381
+    },
+    {
       "file": "functions/tests/dogfood-1146-nonfinite-silent.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10722,11 +10729,25 @@
       "loc": 231
     },
     {
+      "file": "functions/tests/dogfood-1147-unwrap-numpy.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
       "file": "functions/tests/dogfood-1148-mw-wilcoxon-scipy.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 190
+    },
+    {
+      "file": "functions/tests/dogfood-1153-peak-widths.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 116
     },
     {
       "file": "functions/tests/dogfood-1154-bootstrap-fisher.test.ts",
@@ -11076,7 +11097,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 243
+      "loc": 244
     },
     {
       "file": "functions/tests/dogfood-986-987-symbolic-constants.test.ts",
@@ -11125,7 +11146,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 331
+      "loc": 332
     },
     {
       "file": "functions/tests/dogfood-998-nintegrate-divergent.test.ts",
@@ -12882,7 +12903,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 496
+      "loc": 501
     },
     {
       "file": "functions/tests/parallel-stat-prod.test.ts",
@@ -13344,7 +13365,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 367
+      "loc": 371
     },
     {
       "file": "functions/tests/signal/conv.test.ts",
@@ -13365,7 +13386,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 66
+      "loc": 68
     },
     {
       "file": "functions/tests/simplify-exact-fractions.test.ts",
@@ -14030,7 +14051,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 258
+      "loc": 263
     },
     {
       "file": "functions/tests/typed-sync-special-wasm-tier.test.ts",
@@ -14177,7 +14198,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 116
+      "loc": 118
     },
     {
       "file": "functions/tests/wasm-policy.test.ts",

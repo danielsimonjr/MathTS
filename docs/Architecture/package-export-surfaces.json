@@ -4331,6 +4331,7 @@
       "wilsonInterval",
       "windowFunction",
       "WindowOptions",
+      "windowTypeCode",
       "wishartSample",
       "withAsF64",
       "withAsI32",

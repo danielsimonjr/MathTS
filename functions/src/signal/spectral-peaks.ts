@@ -13,6 +13,7 @@
 import { fft, type ComplexNumber } from './fft.js';
 import { fftExactFloat64 } from './fft-core-f64.js';
 import { windowFunction } from '../typed/signal.js';
+import { toSamples } from '../utils/samples.js';
 import { butter, filtfilt } from '../signal-filter-extra.js';
 
 // =============================================================================
@@ -29,34 +30,48 @@ export interface FindPeaksOptions {
   prominence?: number;
 }
 
+/** Prominence of one peak and the sample indices of the two bases it was measured from. */
+interface PeakBases {
+  prominence: number;
+  leftBase: number;
+  rightBase: number;
+}
+
 /**
  * Topographic prominence of the peak at index `i`: how much the peak stands out from
  * the surrounding baseline, found by extending outward from the peak in each direction
- * until either a taller sample or the array boundary is reached, tracking the minimum
- * sample seen along the way, then taking the *higher* of the two direction minima as
- * the peak's base. Matches `scipy.signal.peak_prominences`'s single-peak case.
+ * while the samples do not rise above the peak, tracking the minimum sample seen along the
+ * way, then taking the *higher* of the two direction minima as the peak's base. The base
+ * index of a direction is the closest sample that holds that direction's minimum. Matches
+ * `scipy.signal.peak_prominences`'s single-peak case, including the base indices.
  */
-function peakProminence(x: readonly number[], i: number): number {
-  const n = x.length;
+function prominenceAndBases(x: readonly number[], i: number): PeakBases {
   const peakHeight = x[i];
 
   let leftMin = peakHeight;
-  let j = i;
-  while (j > 0) {
-    j--;
-    if (x[j] > peakHeight) break;
-    if (x[j] < leftMin) leftMin = x[j];
+  let leftBase = i;
+  for (let j = i; j >= 0 && x[j] <= peakHeight; j--) {
+    if (x[j] < leftMin) {
+      leftMin = x[j];
+      leftBase = j;
+    }
   }
 
   let rightMin = peakHeight;
-  let k = i;
-  while (k < n - 1) {
-    k++;
-    if (x[k] > peakHeight) break;
-    if (x[k] < rightMin) rightMin = x[k];
+  let rightBase = i;
+  for (let k = i; k < x.length && x[k] <= peakHeight; k++) {
+    if (x[k] < rightMin) {
+      rightMin = x[k];
+      rightBase = k;
+    }
   }
 
-  return peakHeight - Math.max(leftMin, rightMin);
+  return { prominence: peakHeight - Math.max(leftMin, rightMin), leftBase, rightBase };
+}
+
+/** Topographic prominence of the peak at index `i` (see {@link prominenceAndBases}). */
+function peakProminence(x: readonly number[], i: number): number {
+  return prominenceAndBases(x, i).prominence;
 }
 
 /**
@@ -95,8 +110,11 @@ function filterByDistance(x: readonly number[], peaks: number[], distance: numbe
  * @param x - Input signal
  * @param opts - `{ height?, distance?, prominence? }`
  * @returns Ascending indices of the surviving peaks
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function findPeaks(x: readonly number[], opts?: FindPeaksOptions): number[] {
+  // An array is read in place; any other value goes through toSamples, which rejects a Matrix.
+  if (!Array.isArray(x)) x = toSamples('findPeaks', x, 'x') as unknown as readonly number[];
   let peaks: number[] = [];
   for (let i = 1; i < x.length - 1; i++) {
     if (x[i - 1] < x[i] && x[i] > x[i + 1]) peaks.push(i);
@@ -118,53 +136,52 @@ export function findPeaks(x: readonly number[], opts?: FindPeaksOptions): number
 }
 
 /**
- * Linear-interpolated crossing point of `refHeight`, walking from `start` in direction
- * `dir` (-1 left, +1 right) while `x` stays above `refHeight`. Returns the fractional
- * index of the crossing (or the boundary index if `refHeight` is never crossed).
- */
-function interpolateCrossing(
-  x: readonly number[],
-  start: number,
-  dir: -1 | 1,
-  refHeight: number
-): number {
-  const n = x.length;
-  let j = start;
-  while (j + dir >= 0 && j + dir < n && x[j + dir] > refHeight) j += dir;
-  const j2 = j + dir;
-  if (j2 < 0 || j2 >= n) return j;
-  const v1 = x[j];
-  const v2 = x[j2];
-  if (v1 === v2) return j;
-  const frac = (v1 - refHeight) / (v1 - v2);
-  return j + dir * frac;
-}
-
-/**
  * Width (in samples) of each peak at `relHeight` down from the peak toward its
  * topographic base (see {@link peakProminence}), with linearly-interpolated crossing
  * points — `scipy.signal.peak_widths`.
+ *
+ * The walk to each side starts at the peak and stops at the first sample that is not above
+ * the reference height, or at the base of the peak (the sample that holds the minimum of that
+ * side), whichever comes first. A `relHeight` above 1 therefore never reaches below the bases.
+ * A sample that is lower than one of its neighbours is not a peak: its prominence is 0, and so
+ * is its width.
  *
  * @param x - Input signal
  * @param peaks - Peak indices (e.g. from {@link findPeaks})
  * @param relHeight - Fraction of the prominence to descend (default 0.5, i.e. FWHM-style)
  * @returns Width per peak, same order as `peaks`
+ * @throws RangeError if `relHeight` is negative or NaN (SciPy raises for a negative value and
+ *   returns 0 for NaN; a NaN has no meaning as a fraction, so this function rejects it), or
+ *   if a peak is not an integer index of `x`
  */
 export function peakWidths(
   x: readonly number[],
   peaks: readonly number[],
   relHeight = 0.5
 ): number[] {
-  return peaks.map((i, k) => {
+  if (!(relHeight >= 0)) {
+    throw new RangeError(`peakWidths: relHeight must be a number >= 0 (got ${relHeight})`);
+  }
+  // Array.from: a typed array's own map would store each fractional width back as an integer.
+  return Array.from(peaks, (p, k) => {
     // A NaN, infinite, fractional or out-of-range index made the crossing walk run forever
     // or read outside x.
-    if (!(Number.isInteger(i) && i >= 0 && i < x.length)) {
+    if (!(Number.isInteger(p) && p >= 0 && p < x.length)) {
       throw new RangeError(`peakWidths: peak ${k} is not a valid index for x`);
     }
-    const prom = peakProminence(x, i);
-    const refHeight = x[i] - relHeight * prom;
-    const left = interpolateCrossing(x, i, -1, refHeight);
-    const right = interpolateCrossing(x, i, 1, refHeight);
+    const { prominence, leftBase, rightBase } = prominenceAndBases(x, p);
+    const height = x[p] - relHeight * prominence;
+
+    let i = p;
+    while (leftBase < i && height < x[i]) i--;
+    let left = i;
+    if (x[i] < height) left += (height - x[i]) / (x[i + 1] - x[i]);
+
+    i = p;
+    while (i < rightBase && height < x[i]) i++;
+    let right = i;
+    if (x[i] < height) right -= (height - x[i]) / (x[i - 1] - x[i]);
+
     return right - left;
   });
 }
@@ -196,6 +213,12 @@ function segmentSpectra(
   if (step <= 0) throw new Error('csd/coherence: noverlap must be less than nperseg');
   const win = windowFunction(nperseg, winType);
   const winSum2 = win.reduce((s, w) => s + w * w, 0);
+  // A Hann window of length 2 is [0, 0]: no power, so the scale 1 / winSum2 would be Infinity (NaN).
+  if (!(winSum2 > 0)) {
+    throw new RangeError(
+      `csd/coherence: the '${winType}' window of length ${nperseg} is all zeros; use another window or a longer nperseg`
+    );
+  }
 
   const segments: ComplexNumber[][] = [];
   for (let start = 0; start + nperseg <= sig.length; start += step) {

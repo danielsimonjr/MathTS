@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7412
+    "totalExports": 7413
   },
   "entryPoints": [
     {
@@ -22674,6 +22674,10 @@
           "rfft",
           "irfft",
           "fftshift",
+          "fftshift",
+          "fftshift",
+          "ifftshift",
+          "ifftshift",
           "ifftshift",
           "fftfreq",
           "rfftfreq",
@@ -22886,6 +22890,10 @@
           {
             "file": "../typed/signal.js",
             "imports": ["windowFunction"]
+          },
+          {
+            "file": "../utils/samples.js",
+            "imports": ["toSamples"]
           },
           {
             "file": "../signal-filter-extra.js",
@@ -29618,6 +29626,7 @@
               "goertzelDispatch",
               "welchPSDDispatch",
               "welchPSDJS",
+              "windowTypeCode",
               "WASM_SIGNAL_THRESHOLD"
             ]
           },
@@ -31904,6 +31913,7 @@
         "workspaceDependencies": [],
         "exports": [
           "WASM_SIGNAL_THRESHOLD",
+          "windowTypeCode",
           "applyWindowJS",
           "goertzelJS",
           "welchPSDJS",
@@ -31916,6 +31926,7 @@
           "chirpZTransformDispatch"
         ],
         "functions": [
+          "windowTypeCode",
           "applyWindowJS",
           "goertzelJS",
           "welchPSDJS",
@@ -49992,11 +50003,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 239858,
-    "totalExports": 7412,
+    "totalLinesOfCode": 240018,
+    "totalExports": 7413,
     "totalClasses": 62,
     "totalInterfaces": 674,
-    "totalFunctions": 2591,
+    "totalFunctions": 2596,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1696,

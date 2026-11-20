@@ -134,10 +134,11 @@ export function apply_window_f64(samples: Float64Array, windowType: i32): i32 {
  * Welch's overlapped-segment-averaging PSD.
  *
  * @param samples - Input signal
- * @param frameLength - Length of each frame (should be a power of 2)
+ * @param frameLength - Length of each frame (must be a power of 2)
  * @param overlap - Number of overlapping samples between consecutive frames
  * @param windowType - Window function (0=Hann, 1=Hamming, 2=Blackman, 3=Rect)
- * @returns Float64Array of length frameLength/2 + 1, or empty on error
+ * @returns Float64Array of length frameLength/2 + 1, or empty on error (including a frame length
+ *   that is not a power of 2)
  */
 export function welch_psd_f64(
   samples: Float64Array,
@@ -149,6 +150,10 @@ export function welch_psd_f64(
   if (n < frameLength || frameLength < 2 || overlap >= frameLength) {
     return new Float64Array(0);
   }
+  // The kernel zero-pads each frame to the next power of two, so bin k sits at k / nextPow2(frame).
+  // That is the spectrum of the frame only for a power-of-two frame; any other frame would get its
+  // bins on the wrong grid, so it returns empty (the caller then takes its exact-length path).
+  if ((frameLength & (frameLength - 1)) != 0) return new Float64Array(0);
 
   const psdLen: i32 = frameLength / 2 + 1;
   const psd = new Float64Array(psdLen);
@@ -198,7 +203,8 @@ export function welch_psd_f64(
   for (let k: i32 = 0; k < psdLen; k++) {
     psd[k] /= norm;
   }
-  // Double one-sided bins (except DC and Nyquist)
+  // Double the one-sided bins except DC and Nyquist. The frame is a power of two (checked above),
+  // so it is even and its last bin is the Nyquist bin.
   for (let k: i32 = 1; k < psdLen - 1; k++) {
     psd[k] *= 2.0;
   }
