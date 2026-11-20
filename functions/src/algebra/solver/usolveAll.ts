@@ -1,6 +1,7 @@
 import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
+import { isZeroEntry } from '../../utils/isExactZero.js';
 
 // Type definitions
 type ScalarValue = number | bigint | { re: number; im: number } | unknown;
@@ -173,7 +174,7 @@ export const createUsolveAll = /* #__PURE__ */ factory(
         for (let k = 0; k < L; k++) {
           const b = B[k];
 
-          if (!equalScalar(M[i][i], 0)) {
+          if (!isZeroEntry(M[i][i], equalScalar)) {
             // non-singular row
 
             b[i] = divideScalar(b[i], M[i][i]);
@@ -264,7 +265,7 @@ export const createUsolveAll = /* #__PURE__ */ factory(
             }
           }
 
-          if (!equalScalar(Mii, 0)) {
+          if (!isZeroEntry(Mii, equalScalar)) {
             // non-singular row
 
             b[i] = divideScalar(b[i], Mii);

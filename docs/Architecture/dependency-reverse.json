@@ -792,7 +792,9 @@
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lsolveAll.ts",
       "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/usolveAll.ts",
       "functions/src/matrix/inv.ts",
       "functions/src/type/matrix/Spa.ts"
     ],

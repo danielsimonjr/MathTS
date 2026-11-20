@@ -8202,6 +8202,10 @@
           {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           }
         ],
         "workspaceDependencies": [
@@ -8347,6 +8351,10 @@
           {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
+          },
+          {
+            "file": "../../utils/isExactZero.js",
+            "imports": ["isZeroEntry"]
           }
         ],
         "workspaceDependencies": [
@@ -49911,7 +49919,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238725,
+    "totalLinesOfCode": 238736,
     "totalExports": 7400,
     "totalClasses": 62,
     "totalInterfaces": 670,

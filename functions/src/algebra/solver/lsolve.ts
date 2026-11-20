@@ -186,8 +186,9 @@ export const createLsolve = /* #__PURE__ */ factory(
         // side near 1e-15 and below as zero.
         if (bj !== 0) {
           const vjj = mdata[j][j];
-          if (ops.equalScalar(vjj, 0)) {
-            // A zero diagonal entry is a degenerate row for a right side that is zero within
+          if (vjj === 0) {
+            // Only an exactly zero diagonal entry is singular (#1169): the tolerance of `equalScalar`
+            // is absolute. A zero diagonal entry is a degenerate row for a right side that is zero within
             // the tolerance (a rounding residue). Any other right side has no solution.
             if (!ops.equalScalar(bj, 0)) {
               throw new Error('Linear system cannot be solved since matrix is singular');
@@ -257,7 +258,7 @@ export const createLsolve = /* #__PURE__ */ factory(
 
           const vjj = mdata[j][j];
 
-          if (equalScalar(vjj, 0)) {
+          if (isZeroEntry(vjj, equalScalar)) {
             if (equalScalar(bj, 0)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
@@ -336,7 +337,7 @@ export const createLsolve = /* #__PURE__ */ factory(
           }
 
           // at this point we must have a value in vjj
-          if (equalScalar(vjj, 0)) {
+          if (isZeroEntry(vjj, equalScalar)) {
             if (equalScalar(bj, 0)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];

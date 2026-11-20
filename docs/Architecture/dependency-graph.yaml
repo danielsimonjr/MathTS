@@ -7876,6 +7876,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -8009,6 +8012,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/isExactZero.js
+          imports:
+            - isZeroEntry
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -47062,7 +47068,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238725
+  totalLinesOfCode: 238736
   totalExports: 7400
   totalClasses: 62
   totalInterfaces: 670
