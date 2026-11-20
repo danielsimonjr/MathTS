@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2559,
+  "totalFiles": 2560,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1143,
+    "test": 1144,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1143,
+    "tests": 1144,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1182,
+    "@danielsimonjr/mathts-functions": 1183,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 152,
@@ -6855,7 +6855,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1480
+      "loc": 1645
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10729,6 +10729,13 @@
       "loc": 174
     },
     {
+      "file": "functions/tests/dogfood-1155-matrix-methods-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 210
+    },
+    {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10929,7 +10936,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 543
+      "loc": 544
     },
     {
       "file": "functions/tests/dogfood-1279-sparse-resize.test.ts",
@@ -10943,7 +10950,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 143
+      "loc": 150
     },
     {
       "file": "functions/tests/dogfood-1284-matrix-undefined.test.ts",
@@ -11307,7 +11314,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 585
+      "loc": 587
     },
     {
       "file": "functions/tests/factories-tier2.test.ts",

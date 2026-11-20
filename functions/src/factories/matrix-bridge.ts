@@ -142,10 +142,11 @@ export class MathJSDenseMatrix {
       this._size = [0];
     } else if (Array.isArray(data)) {
       // Untrusted nested data: every row must match the size of the first one (mathjs `validate`).
-      // A producer that knows the size passes `{ data, size }`, which is not validated.
-      this._data = data;
+      // A producer that knows the size passes `{ data, size }`, which is not validated or copied.
+      // As in mathjs, the matrix holds a copy, so a write to the matrix does not change `data`.
       this._size = inferSize(data);
       validate(data, this._size);
+      this._data = copyAxes(data, this._size.length) as number[][];
     } else if (
       typeof data !== 'object' ||
       !Array.isArray((data as { data?: unknown }).data) ||
@@ -274,6 +275,16 @@ export class MathJSDenseMatrix {
    * fall back to Array conversion (core calls `matrix.get(i, j)`).
    */
   get(indexOrRow: number[] | number, col?: number): number {
+    // As the mathjs `get`: one index per axis, each an integer inside its axis.
+    const index = Array.isArray(indexOrRow)
+      ? indexOrRow
+      : col === undefined
+        ? [indexOrRow]
+        : [indexOrRow, col];
+    if (index.length !== this._size.length) {
+      throw new DimensionError(index.length, this._size.length);
+    }
+    for (let k = 0; k < index.length; k++) validateIndex(index[k], this._size[k]);
     if (Array.isArray(indexOrRow) && this._size.length > 2) {
       // One index per axis.
       let level: unknown = this._data;
@@ -289,9 +300,28 @@ export class MathJSDenseMatrix {
   }
 
   /**
-   * Set element at [row, col]. Mutates in place and returns this.
+   * Set the entry at `index` (one index per axis) in place and return this, as the mathjs
+   * `DenseMatrix.set`. An index at or after the end of its axis grows the matrix; each new entry
+   * gets `defaultValue` (0 when it is not given).
+   * @throws DimensionError when `index` has fewer entries than the matrix has axes
+   * @throws TypeError or IndexError when an index is not a non-negative integer
    */
-  set(index: number[], value: number, _defaultValue?: number): MathJSDenseMatrix {
+  set(index: number[], value: number, defaultValue?: number): MathJSDenseMatrix {
+    if (!Array.isArray(index)) throw new TypeError('Array expected');
+    if (index.length < this._size.length) {
+      throw new DimensionError(index.length, this._size.length, '<');
+    }
+    let grow = index.length > this._size.length;
+    for (let k = 0; k < index.length; k++) {
+      validateIndex(index[k]);
+      if (index[k] >= this._size[k]) grow = true;
+    }
+    if (grow) {
+      this._fit(
+        index.map((i) => i + 1),
+        defaultValue
+      );
+    }
     if (this._size.length === 1) {
       (this._data as unknown as number[])[index[0]] = value;
     } else if (this._size.length === 2) {
@@ -326,7 +356,7 @@ export class MathJSDenseMatrix {
     const dims = matrixIndexSelectors(index);
     return replacement === undefined
       ? this._getSubset(index, dims)
-      : this._setSubset(index, dims, replacement);
+      : this._setSubset(index, dims, replacement, defaultValue);
   }
 
   /**
@@ -337,8 +367,20 @@ export class MathJSDenseMatrix {
     if (dims.length !== this._size.length) {
       throw new DimensionError(dims.length, this._size.length);
     }
+    // As the mathjs `_get`: check the smallest and then the largest index of each axis, so an
+    // error names the same index as mathjs.
     for (let d = 0; d < dims.length; d++) {
-      for (const i of dims[d].sel) validateIndex(i, this._size[d]);
+      const { sel } = dims[d];
+      if (sel.length === 0) continue;
+      let min = sel[0];
+      let max = sel[0];
+      for (const i of sel) {
+        validateIndex(i);
+        if (i < min) min = i;
+        if (i > max) max = i;
+      }
+      validateIndex(min, this._size[d]);
+      validateIndex(max, this._size[d]);
     }
     if (index.isScalar()) return this.get(dims.map((d) => d.sel[0]));
     const last = dims.length - 1;
@@ -367,10 +409,11 @@ export class MathJSDenseMatrix {
   private _setSubset(
     index: MatrixIndexLike,
     dims: IndexSelector[],
-    replacement: unknown
+    replacement: unknown,
+    defaultValue?: number
   ): MathJSDenseMatrix {
-    if (dims.length !== this._size.length) {
-      throw new DimensionError(dims.length, this._size.length);
+    if (dims.length < this._size.length) {
+      throw new DimensionError(dims.length, this._size.length, '<');
     }
     let rep: unknown = (replacement as { toArray?: () => unknown } | null)?.toArray
       ? (replacement as { toArray(): unknown }).toArray()
@@ -380,7 +423,8 @@ export class MathJSDenseMatrix {
       if (Array.isArray(rep)) throw new TypeError('Scalar expected');
       return this.set(
         dims.map((d) => d.sel[0]),
-        rep as number
+        rep as number,
+        defaultValue
       );
     }
     const selection = dims.map((d) => d.sel.length);
@@ -410,6 +454,16 @@ export class MathJSDenseMatrix {
       }
       if (!sameSize(repSize)) throw new DimensionError(selection, repSize, '>');
     }
+    // Grow the matrix when a selected index is at or after the end of its axis (mathjs `_fit`).
+    const fit = dims.map(({ sel }) => {
+      let max = -1;
+      for (const i of sel) {
+        validateIndex(i);
+        if (i > max) max = i;
+      }
+      return max + 1;
+    });
+    this._fit(fit, defaultValue);
     // Write one axis at a time. An Array replacement has the size of the selection here; any
     // other replacement is one value for every selected entry.
     const nested = Array.isArray(rep);
@@ -424,6 +478,27 @@ export class MathJSDenseMatrix {
     };
     write(this._data, rep, 0);
     return this;
+  }
+
+  /**
+   * Grow the matrix in place to at least `size` (mathjs `_fit`): add axes, and lengthen each axis
+   * that is shorter than `size`. A new entry gets `defaultValue` (0 when it is not given).
+   * Nothing changes when the matrix is large enough.
+   */
+  private _fit(size: number[], defaultValue?: number): void {
+    const newSize = [...this._size];
+    let changed = false;
+    while (newSize.length < size.length) {
+      newSize.push(0);
+      changed = true;
+    }
+    for (let k = 0; k < size.length; k++) {
+      if (size[k] > newSize[k]) {
+        newSize[k] = size[k];
+        changed = true;
+      }
+    }
+    if (changed) this.resize(newSize, defaultValue);
   }
 
   /**
@@ -442,9 +517,27 @@ export class MathJSDenseMatrix {
    * Resize the matrix to the given size, keeping every axis (mathjs `DenseMatrix.resize`).
    * A new entry gets `defaultValue` (0 when it is not given). With `copy` the matrix is not
    * changed and the result is a new matrix; without `copy` the matrix is changed and returned
-   * (mathjs factory code does `m.resize(size)` and continues using `m`).
+   * (mathjs factory code does `m.resize(size)` and continues using `m`). The size is an Array or
+   * a matrix. An empty size gives the first entry of the matrix (not a matrix), as in mathjs.
    */
-  resize(newSize: number[], defaultValue?: number, copy?: boolean): MathJSDenseMatrix {
+  resize(sizeArg: [], defaultValue?: number, copy?: boolean): number;
+  resize(
+    sizeArg: number[] | { valueOf(): unknown },
+    defaultValue?: number,
+    copy?: boolean
+  ): MathJSDenseMatrix;
+  resize(
+    sizeArg: number[] | { valueOf(): unknown },
+    defaultValue?: number,
+    copy?: boolean
+  ): MathJSDenseMatrix | number {
+    const newSize = sizeList(sizeArg);
+    if (newSize.length === 0) {
+      // An empty size gives the first entry, as in mathjs.
+      let v: unknown = this._data;
+      while (Array.isArray(v)) v = v[0];
+      return v as number;
+    }
     assertAllocSize('resize', newSize);
     // Resize a copy of the nested data: the arrays of this matrix, and the arrays that the
     // caller passed to `matrix(data)`, are never changed in place.
@@ -465,17 +558,17 @@ export class MathJSDenseMatrix {
 
   /**
    * Reshape the matrix to the given size, which can hold one -1 for a length that follows from
-   * the others (mathjs `DenseMatrix.reshape`). Returns a new matrix; this matrix is not changed.
+   * the others (mathjs `DenseMatrix.reshape`). Without `copy` this matrix is changed and
+   * returned; with `copy` the result is a new matrix and this matrix is not changed.
    * @throws DimensionError when the new size has another number of entries
    */
-  reshape(newSize: number[], _copy?: boolean): MathJSDenseMatrix {
+  reshape(newSize: number[], copy?: boolean): MathJSDenseMatrix {
     const count = this._size.reduce((p, n) => p * n, 1);
     const size = processSizesWildcard(newSize, count);
-    const m = new MathJSDenseMatrix({
-      data: reshapeArray(this._data as number[][], newSize) as number[][],
-      size,
-    });
-    m._datatype = this._datatype;
+    const data = reshapeArray(this._data as number[][], newSize) as number[][];
+    const m = copy ? this.clone() : this;
+    m._data = data;
+    m._size = size;
     return m;
   }
 
@@ -573,6 +666,8 @@ export class MathJSDenseMatrix {
     defaultValue: number = 0
   ): MathJSDenseMatrix {
     const [rows, cols] = size;
+    // A matrix of diagonal values gives its entries, as in mathjs.
+    if (isBridgeMatrix(value)) value = value.valueOf() as unknown as number[];
     const data: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(defaultValue));
     // Determine diagonal length
     const kRow = k < 0 ? -k : 0;
@@ -1078,10 +1173,15 @@ export class MathJSSparseMatrix {
    * Resize the matrix to two dimensions (mathjs `SparseMatrix.resize`). A new entry gets
    * `defaultValue` (0 when it is not given or falsy, which stores nothing). With `copy` the
    * matrix is not changed and the result is a new matrix; without `copy` the matrix is changed
-   * and returned.
+   * and returned. The size is an Array or a matrix.
    * @throws Error when the size does not have two dimensions
    */
-  resize(newSize: number[], defaultValue?: unknown, copy?: boolean): MathJSSparseMatrix {
+  resize(
+    sizeArg: number[] | { valueOf(): unknown },
+    defaultValue?: unknown,
+    copy?: boolean
+  ): MathJSSparseMatrix {
+    const newSize = sizeList(sizeArg);
     if (newSize.length !== 2) throw new Error('Only two dimensions matrix are supported');
     if (newSize.some((n) => !Number.isInteger(n) || n < 0)) {
       throw new TypeError(
@@ -1138,6 +1238,53 @@ export class MathJSSparseMatrix {
     return this;
   }
 
+  /**
+   * Reshape the matrix to two dimensions in row-major order (mathjs `SparseMatrix.reshape`). The
+   * size can hold one -1 for a length that follows from the other. Without `copy` this matrix is
+   * changed and returned; with `copy` the result is a new matrix.
+   * @throws TypeError when the size is not an Array of positive integers or -1
+   * @throws Error when the size does not have two dimensions or has another number of entries
+   */
+  reshape(sizes: number[], copy?: boolean): MathJSSparseMatrix {
+    if (!Array.isArray(sizes)) throw new TypeError('Array expected');
+    if (sizes.length !== 2) {
+      throw new Error('Sparse matrices can only be reshaped in two dimensions');
+    }
+    for (const n of sizes) {
+      if (typeof n !== 'number' || !Number.isInteger(n) || n <= -2 || n === 0) {
+        throw new TypeError(
+          'Invalid size, must contain positive integers or -1 (size: ' + formatSize(sizes) + ')'
+        );
+      }
+    }
+    const count = this._size[0] * this._size[1];
+    const [rows, cols] = processSizesWildcard(sizes, count);
+    if (rows * cols !== count) {
+      throw new Error('Reshaping sparse matrix will result in the wrong number of elements');
+    }
+    const m = copy ? this.clone() : this;
+    if (rows === this._size[0] && cols === this._size[1]) return m;
+    // Move each stored entry to its row-major position in the new size, then store the entries
+    // column by column, each column in row order.
+    const oldCols = this._size[1];
+    const entries: Array<[number, number, unknown]> = [];
+    for (let j = 0; j < oldCols; j++) {
+      for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
+        const flat = this._index[k] * oldCols + j;
+        entries.push([Math.floor(flat / cols), flat % cols, this._values ? this._values[k] : 1]);
+      }
+    }
+    entries.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    const ptr: number[] = new Array(cols + 1).fill(0);
+    for (const e of entries) ptr[e[1] + 1]++;
+    for (let j = 0; j < cols; j++) ptr[j + 1] += ptr[j];
+    m._index = entries.map((e) => e[0]);
+    m._values = this._values ? entries.map((e) => e[2]) : null;
+    m._ptr = ptr;
+    m._size = [rows, cols];
+    return m;
+  }
+
   toJSON(): {
     mathjs: string;
     values: unknown[] | null;
@@ -1170,6 +1317,8 @@ export class MathJSSparseMatrix {
     _datatype?: string
   ): MathJSSparseMatrix {
     const [rows, cols] = size;
+    // A matrix of diagonal values gives its entries, as in mathjs.
+    if (isBridgeMatrix(value)) value = value.valueOf();
     const kRow = k < 0 ? -k : 0;
     const kCol = k > 0 ? k : 0;
     const diagLen = Math.min(rows - kRow, cols - kCol);
@@ -1328,7 +1477,7 @@ function matrixFormat(format: unknown): 'sparse' | 'dense' | undefined {
  *   matrix(data, 'sparse') — sparse matrix from data
  *   matrix(sparse, 'dense') — dense matrix with the entries of a sparse matrix
  * The format is 'dense', 'default' or 'sparse'; any other value throws (see `matrixFormat`).
- * A matrix that already has the format is returned as it is. An explicit `undefined` data
+ * A matrix argument is copied, as in mathjs: the result never shares data with it. An explicit `undefined` data
  * argument throws a TypeError, as in mathjs; a call with no argument is an empty matrix.
  */
 export function createMatrixBridge() {
@@ -1366,10 +1515,10 @@ export function createMatrixBridge() {
     if (data instanceof MathJSSparseMatrix) {
       return format === 'dense'
         ? new MathJSDenseMatrix({ data: data.toArray() as number[][], size: data.size() })
-        : data;
+        : data.clone();
     }
     if (data instanceof MathJSDenseMatrix)
-      return sparse ? new MathJSSparseMatrix(data._data) : data;
+      return sparse ? new MathJSSparseMatrix(data._data) : data.clone();
     // A storage object from a caller: the constructor trusts { data, size } (internal producers
     // pass it), so check here that the data has the size, as mathjs does.
     if (!sparse) {
@@ -1423,7 +1572,7 @@ function typeName(x: unknown): string {
  */
 function copyAxes(data: unknown, axes: number): unknown {
   if (!Array.isArray(data)) return data;
-  return axes <= 1 ? [...data] : data.map((sub) => copyAxes(sub, axes - 1));
+  return axes <= 1 ? data.slice() : data.map((sub) => copyAxes(sub, axes - 1));
 }
 
 /**
@@ -1465,6 +1614,22 @@ function eachAxes(
     else if (index.length === 1) fn(sub, [index[0], i]);
     else fn(sub, [...index, i]);
   }
+}
+
+/** True for a dense or sparse bridge matrix. */
+function isBridgeMatrix(x: unknown): x is MathJSDenseMatrix | MathJSSparseMatrix {
+  return x instanceof MathJSDenseMatrix || x instanceof MathJSSparseMatrix;
+}
+
+/**
+ * A size argument as a list of numbers, as the mathjs `resize` methods read it: an Array, or a
+ * matrix of lengths (a one-column matrix gives one length per row).
+ * @throws TypeError when the size is not an Array or a matrix
+ */
+function sizeList(size: unknown): number[] {
+  const list = isBridgeMatrix(size) ? (size.valueOf() as unknown[]) : size;
+  if (!Array.isArray(list)) throw new TypeError('Array or Matrix expected');
+  return list.map((v) => (Array.isArray(v) && v.length === 1 ? v[0] : v)) as number[];
 }
 
 /** A size as mathjs prints it in an error: `[2, 2, 1]`. */

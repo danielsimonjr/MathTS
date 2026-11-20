@@ -246,12 +246,13 @@ describe('#1155 reshape reads every axis', () => {
     expect(thrown(() => mjReshape(mjMatrix(D2), [3]))!.message).toBe(e!.message);
   });
 
-  it('the method form reshapes, and the input is unchanged', () => {
+  it('the function keeps its input; the method changes its matrix, as in mathjs', () => {
     const d2 = matrix(D2);
-    expect(dataOf(d2.reshape([4]))).toEqual([1, 2, 3, 4]);
     reshape(d2, [4, 1]);
     expect(d2.size()).toEqual([2, 2]);
     expect(d2.toArray()).toEqual(D2);
+    expect(d2.reshape([4])).toBe(d2);
+    expect(dataOf(d2)).toEqual([1, 2, 3, 4]);
   });
 });
 

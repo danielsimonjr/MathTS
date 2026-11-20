@@ -117,13 +117,20 @@ describe('#1284 matrix(sparseMatrix, "dense") converts to dense', () => {
     expect(s.toArray()).toEqual(DENSE_2);
   });
 
-  it('a matrix of the format that is asked for, and one with no format, is returned as it is', () => {
+  it('a matrix of the format that is asked for, and one with no format, is copied (mathjs)', () => {
     const d = matrix([[1]]) as Mat;
     const s = sparse();
-    expect(matrix(d, 'dense')).toBe(d);
-    expect(matrix(d)).toBe(d);
-    expect(matrix(s, 'sparse')).toBe(s);
-    expect(matrix(s)).toBe(s);
+    for (const [m, f] of [
+      [d, 'dense'],
+      [d, undefined],
+      [s, 'sparse'],
+      [s, undefined],
+    ] as const) {
+      const c = (f === undefined ? matrix(m) : matrix(m, f)) as Mat;
+      expect(c).not.toBe(m);
+      expect(c.storage()).toBe(m.storage());
+      expect(c.toArray()).toEqual(m.toArray());
+    }
   });
 });
 
