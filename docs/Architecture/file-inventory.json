@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2549,
+  "totalFiles": 2550,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1133,
+    "test": 1134,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1133,
+    "tests": 1134,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1176,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 152,
+    "@danielsimonjr/mathts-matrix": 153,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -14562,7 +14562,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 476
+      "loc": 541
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
@@ -14940,7 +14940,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 195
+      "loc": 233
+    },
+    {
+      "file": "matrix/tests/dogfood-1174-logm-singular-large.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 80
     },
     {
       "file": "matrix/tests/dogfood-1191-eig-issymmetric.test.ts",
@@ -15136,7 +15143,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 312
+      "loc": 314
     },
     {
       "file": "matrix/tests/operations/lu-qr-oracle.test.ts",

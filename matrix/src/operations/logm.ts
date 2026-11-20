@@ -155,6 +155,57 @@ function complexBlockMask(T: number[][]): boolean[] | null {
   return mask;
 }
 
+/** The error for a 1×1 block of the Schur form that is not told from a non-positive value. */
+function nonPositiveEigenvalue(d: number, detail = ''): Error {
+  return new Error(
+    'matrixLogm: non-positive eigenvalue detected — principal logarithm is undefined ' +
+      '(eigenvalue ≈ ' +
+      d +
+      detail +
+      ')'
+  );
+}
+
+/**
+ * The Schur form of `D·A·D⁻¹` with `D = diag(2^(i mod 2))`: an exact similarity copy of A (a
+ * power-of-2 scale is exact in floating point), whose rounding noise differs from that of the
+ * Schur form of A. A full grading `2^i` loses accuracy for large n, and a reversal leaves a
+ * symmetric matrix unchanged, so the alternating scale is used.
+ */
+function secondSchurForm(A: number[][]): { T2: number[][]; mask2: boolean[] | null } {
+  const A2 = A.map((row, r) => row.map((v, c) => v * 2 ** ((r % 2) - (c % 2))));
+  const T2 = schurInternal(A2).H;
+  return { T2, mask2: complexBlockMask(T2) };
+}
+
+/**
+ * True when the eigenvalue `d` of the first Schur form is confirmed by the second: the
+ * nearest 1×1 entry `d2` of T2 is positive and within 1e-3 of `d` in relative size. The
+ * rounding noise of a zero eigenvalue is of the size of 1e-16 · max|A| and changes sign and
+ * size between the two forms, so a singular matrix at a large scale does not pass. Over
+ * 2,000 random matrices of the sweep, the largest relative gap of an accurate eigenvalue
+ * was 9.6e-5, and the smallest gap of a singular matrix 7.3e-2: the limit 1e-3 is 10 times
+ * above the first and 73 times below the second (#1174).
+ */
+function confirmedBySecondForm(
+  d: number,
+  second: { T2: number[][]; mask2: boolean[] | null }
+): boolean {
+  const { T2, mask2 } = second;
+  if (mask2 === null) return false;
+  let d2 = NaN;
+  let gap = Infinity;
+  for (let r = 0; r < T2.length; r++) {
+    if (mask2[r]) continue;
+    const g = Math.abs(T2[r][r] - d);
+    if (g < gap) {
+      gap = g;
+      d2 = T2[r][r];
+    }
+  }
+  return d2 > 0 && Math.abs(d - d2) <= 1e-3 * d;
+}
+
 /**
  * Schur-Padé logm: Higham (2008) Algorithm 11.10.
  *
@@ -168,7 +219,9 @@ function complexBlockMask(T: number[][]): boolean[] | null {
  * logarithm). A 2×2 block with a complex-conjugate pair is handled in real arithmetic by the
  * quasi-triangular square root; its principal logarithm is real (#1171).
  *
- * Returns null if the matrix cannot be handled by the Schur path.
+ * Returns null if the matrix cannot be handled by the Schur path. Throws when a 1×1 block is
+ * not told from a non-positive eigenvalue: the Newton path would read the same matrix with its
+ * own rounding noise and could return a finite matrix for a matrix with no logarithm (#1174).
  */
 function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boolean } | null {
   const { H: T, Q } = schurInternal(A);
@@ -181,19 +234,31 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
   for (let i = 1; i < T.length; i++)
     if (negligibleSubdiagonal(T, i) && Math.abs(T[i][i - 1]) > 1e-12) residue = true;
 
-  // Check that all diagonal entries are strictly positive
+  // Check that all 1×1 diagonal entries are strictly positive
   // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
   // backward error of the Schur form, so its logarithm has a relative error of at most
   // 1e-8 (#1125). The rounding noise of a zero eigenvalue is of the size of that error.
+  // An eigenvalue at most 1e-8 of the largest diagonal entry is also confirmed on a second
+  // Schur form (#1174): the noise of a zero eigenvalue is 1e-16 · max|A|, above 1e-14 from a
+  // scale of 2^10 up, so the absolute test alone passes it.
   const n = T.length;
   let backwardError = -1;
+  let dmax = 0;
+  for (let i = 0; i < n; i++) dmax = Math.max(dmax, Math.abs(T[i][i]));
+  let second: { T2: number[][]; mask2: boolean[] | null } | null = null;
   for (let i = 0; i < n; i++) {
     if (inBlock[i]) continue;
     const d = T[i][i];
     if (d <= 1e-14) {
-      if (d <= 0) return null;
+      if (d <= 0) throw nonPositiveEigenvalue(d);
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
-      if (d < 1e8 * backwardError) return null;
+      if (d < 1e8 * backwardError)
+        throw nonPositiveEigenvalue(d, ', which is not above the floor 1e-14');
+    }
+    if (d <= 1e-8 * dmax) {
+      second ??= secondSchurForm(A);
+      if (!confirmedBySecondForm(d, second))
+        throw nonPositiveEigenvalue(d, ', not confirmed by a second Schur form');
     }
   }
 
