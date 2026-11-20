@@ -35,6 +35,12 @@
       "needs": ["functions/dist/index.js"]
     },
     {
+      "name": "quantile-rotated-vs-random",
+      "script": "functions/tests/helpers/quantile-structured-perf-gate.mjs",
+      "limit": 3,
+      "needs": ["functions/dist/index.js"]
+    },
+    {
       "name": "lusolve",
       "script": "functions/tests/helpers/lusolve-perf-gate.mjs",
       "limit": 1.2,
