@@ -1084,6 +1084,14 @@
       "functions/src/statistics/std.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/utils/bignumber-hypot.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
       "functions/src/algebra/derivative.ts",
@@ -1725,13 +1733,6 @@
       "functions/src/utils/isFinite.ts",
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/parseNumber.ts"
-    ],
-    "functions/src/utils/bignumber-hypot.ts": [
-      "functions/src/arithmetic/hypot.ts",
-      "functions/src/arithmetic/norm.ts",
-      "functions/src/geometry/distance.ts",
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
       "functions/src/arithmetic/lcm.ts",

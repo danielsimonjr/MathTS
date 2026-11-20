@@ -5903,7 +5903,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 688
+      "loc": 689
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -6407,7 +6407,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 493
+      "loc": 505
     },
     {
       "file": "functions/src/arithmetic/nthRoot.ts",

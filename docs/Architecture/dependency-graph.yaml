@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7396
+  totalExports: 7397
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7401,6 +7401,9 @@ modules:
           imports:
             - realScale
             - squaresLeaveRange
+        - file: ../../utils/bignumber-hypot.js
+          imports:
+            - P_NORM_SUM_MIN
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -28433,11 +28436,14 @@ modules:
           imports:
             - BigNumber
       exports:
+        - P_NORM_SUM_MIN
         - bigHypot
         - pNormSumInRange
       functions:
         - bigHypot
         - pNormSumInRange
+      constants:
+        - P_NORM_SUM_MIN
     functions/src/utils/clone.ts:
       description: Clone an object. Will make a deep copy of the data.
       externalDependencies: []
@@ -47032,14 +47038,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238377
-  totalExports: 7396
+  totalLinesOfCode: 238390
+  totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669
   totalFunctions: 2579
   totalTypeGuards: 184
   totalEnums: 0
-  totalConstants: 1694
+  totalConstants: 1695
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

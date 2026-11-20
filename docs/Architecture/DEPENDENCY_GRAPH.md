@@ -3040,15 +3040,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                              | Type               |
-| ------------------------------ | ------------------------------------ | ------------------ |
-| `../../utils/factory.js`       | `factory`                            | Import             |
-| `../../utils/string.js`        | `format`                             | Import             |
-| `../../utils/isExactZero.js`   | `isExactZero`                        | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl`                      | Import             |
-| `../../core/function/typed.js` | `TypedFunction`                      | Import (type-only) |
-| `../../utils/is.js`            | `isBigNumber, isComplex, isFraction` | Import             |
-| `../../utils/real-scale.js`    | `realScale, squaresLeaveRange`       | Import             |
+| File                             | Imports                              | Type               |
+| -------------------------------- | ------------------------------------ | ------------------ |
+| `../../utils/factory.js`         | `factory`                            | Import             |
+| `../../utils/string.js`          | `format`                             | Import             |
+| `../../utils/isExactZero.js`     | `isExactZero`                        | Import             |
+| `../../utils/typed-impl.js`      | `findTypedImpl`                      | Import             |
+| `../../core/function/typed.js`   | `TypedFunction`                      | Import (type-only) |
+| `../../utils/is.js`              | `isBigNumber, isComplex, isFraction` | Import             |
+| `../../utils/real-scale.js`      | `realScale, squaresLeaveRange`       | Import             |
+| `../../utils/bignumber-hypot.js` | `P_NORM_SUM_MIN`                     | Import             |
 
 **Exports:**
 
@@ -12976,6 +12977,7 @@ graph LR
 **Exports:**
 
 - Functions: `bigHypot`, `pNormSumInRange`
+- Constants: `P_NORM_SUM_MIN`
 
 ---
 
@@ -21766,8 +21768,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238377 |
-| Total Exports           | 7396   |
+| Total Lines of Code     | 238390 |
+| Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
