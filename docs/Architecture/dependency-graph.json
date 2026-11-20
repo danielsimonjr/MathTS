@@ -7853,7 +7853,7 @@
         "constants": ["createPolynomialRoot"]
       },
       "functions/src/algebra/rationalize.ts": {
-        "description": "Transform a rationalizable expression in a rational fraction.",
+        "description": "The rule engine distributes a product of sums term by term, and its cost grows with the term",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -7868,6 +7868,10 @@
           {
             "file": "../typed/algebra.js",
             "imports": ["expand"]
+          },
+          {
+            "file": "../typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression", "polyToDenseCoefficients"]
           },
           {
             "file": "../utils/node.js",
@@ -8068,6 +8072,7 @@
           {
             "file": "../utils/is.js",
             "imports": [
+              "isBigNumber",
               "isComplex",
               "isFraction",
               "isMatrix",
@@ -49911,7 +49916,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238574,
+    "totalLinesOfCode": 238689,
     "totalExports": 7400,
     "totalClasses": 63,
     "totalInterfaces": 669,

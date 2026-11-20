@@ -1230,6 +1230,16 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/typed/polynomial-ideal.ts": [
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
+    ],
     "functions/src/utils/map.ts": [
       "functions/src/algebra/resolve.ts",
       "functions/src/algebra/simplify.ts",
@@ -1881,15 +1891,6 @@
       "functions/src/typed/cas.ts",
       "functions/src/typed/factorization/multi-poly.ts",
       "functions/src/typed/polynomial-ideal.ts"
-    ],
-    "functions/src/typed/polynomial-ideal.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/cas/polynomial-canonical.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/multi-poly.ts"
     ],
     "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
     "functions/src/factories/index.ts": [

@@ -1,5 +1,6 @@
 import FractionJS from 'fraction.js';
 import {
+  isBigNumber,
   isComplex,
   isFraction,
   isMatrix,
@@ -240,6 +241,15 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         args = args.map(_removeFractions);
         result = _toNumber(mathWithTransform[fnname].apply(null, args), options);
       }
+      // A Fraction that meets a function with no Fraction signature takes the core conversion to
+      // BigNumber, so factorial(5) or atan2(1,1) would give a 64-digit BigNumber. mathjs throws at
+      // that conversion and retries with numbers: do the same when no argument is a BigNumber.
+      if (isBigNumber(result) && !args.some((arg) => _someEntry(arg, isBigNumber))) {
+        result = _toNumber(
+          mathWithTransform[fnname].apply(null, args.map(_removeFractions)),
+          options
+        );
+      }
       return _realPart(result);
     }
 
@@ -271,6 +281,12 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       },
       Matrix: function (m: { valueOf(): unknown[] }): ArrayNode {
         return new ArrayNode(m.valueOf().map((e: unknown) => _toNode(e)));
+      },
+      // A function such as size returns a plain Array. Without this signature the typed conversion
+      // Array -> Matrix wraps it in an object whose valueOf() is not an array, and the Matrix branch
+      // above throws.
+      Array: function (items: unknown[]): ArrayNode {
+        return new ArrayNode(items.map((e: unknown) => _toNode(e)));
       },
     }) as unknown as (value: unknown) => MathNode;
 
@@ -624,8 +640,9 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           if (foldItems.some(isNode)) {
             return new ArrayNode(foldItems.map(_ensureNode));
           }
-          /* All literals -- return a Matrix so we can operate on it */
-          return matrix(foldItems);
+          /* All literals -- return a Matrix so we can operate on it. The rows of a 2-D literal are
+             Matrices already: unwrap them, or the matrix has the size [rows], not [rows, columns]. */
+          return matrix(foldItems.map((item) => (isMatrix(item) ? item.valueOf() : item)));
         }
         case 'IndexNode': {
           return new IndexNode(

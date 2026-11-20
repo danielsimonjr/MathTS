@@ -3161,18 +3161,19 @@ graph LR
 
 ---
 
-### `functions/src/algebra/rationalize.ts` - Transform a rationalizable expression in a rational fraction.
+### `functions/src/algebra/rationalize.ts` - The rule engine distributes a product of sums term by term, and its cost grows with the term
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                             | Type               |
-| --------------------------- | ------------------------------------------------------------------- | ------------------ |
-| `../utils/number.js`        | `isInteger`                                                         | Import             |
-| `../utils/factory.js`       | `factory`                                                           | Import             |
-| `../typed/algebra.js`       | `expand`                                                            | Import             |
-| `../utils/node.js`          | `MathNode, ConstantNode, SymbolNode, OperatorNode, ParenthesisNode` | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`                                                     | Import (type-only) |
-| `../core/config.js`         | `ConfigOptions`                                                     | Import (type-only) |
+| File                           | Imports                                                             | Type               |
+| ------------------------------ | ------------------------------------------------------------------- | ------------------ |
+| `../utils/number.js`           | `isInteger`                                                         | Import             |
+| `../utils/factory.js`          | `factory`                                                           | Import             |
+| `../typed/algebra.js`          | `expand`                                                            | Import             |
+| `../typed/polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients`                       | Import             |
+| `../utils/node.js`             | `MathNode, ConstantNode, SymbolNode, OperatorNode, ParenthesisNode` | Import (type-only) |
+| `../core/function/typed.js`    | `TypedFunction`                                                     | Import (type-only) |
+| `../core/config.js`            | `ConfigOptions`                                                     | Import (type-only) |
 
 **Exports:**
 
@@ -3266,15 +3267,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                                                                           | Type               |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`            | `isComplex, isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
-| `../utils/factory.js`       | `factory`                                                                                                         | Import             |
-| `../utils/number.js`        | `safeNumberType`                                                                                                  | Import             |
-| `./simplify/util.js`        | `createUtil`                                                                                                      | Import             |
-| `../utils/noop.js`          | `noBignumber, noFraction`                                                                                         | Import             |
-| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                                 | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`                                                                                                   | Import (type-only) |
+| File                        | Imports                                                                                                                        | Type               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `../utils/is.js`            | `isBigNumber, isComplex, isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
+| `../utils/factory.js`       | `factory`                                                                                                                      | Import             |
+| `../utils/number.js`        | `safeNumberType`                                                                                                               | Import             |
+| `./simplify/util.js`        | `createUtil`                                                                                                                   | Import             |
+| `../utils/noop.js`          | `noBignumber, noFraction`                                                                                                      | Import             |
+| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                                              | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction`                                                                                                                | Import (type-only) |
 
 **Exports:**
 
@@ -21775,7 +21776,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238574 |
+| Total Lines of Code     | 238689 |
 | Total Exports           | 7400   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |

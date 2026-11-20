@@ -616,8 +616,11 @@ export function differences(arr: number[], n: number = 1): number[] {
 export function variables(expr: string): string[] {
   const vars = new Set<string>();
   const regex = /[a-zA-Z_]\w*/g;
+  // Blank the number literals first, so the exponent of `1e3` or `2.5E-3` is not read as the
+  // name `e3` or `E`. A digit inside a name (`x2e3`) stays: the lookbehind skips it.
+  const text = expr.replace(/(?<![A-Za-z_\d.])(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g, ' ');
   let match: RegExpExecArray | null;
-  while ((match = regex.exec(expr)) !== null) {
+  while ((match = regex.exec(text)) !== null) {
     if (!MATH_KEYWORDS.has(match[0])) {
       vars.add(match[0]);
     }
