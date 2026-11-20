@@ -583,7 +583,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 40
+      "loc": 70
     },
     {
       "file": "compat/tests/bignumber-collections-1112.test.ts",

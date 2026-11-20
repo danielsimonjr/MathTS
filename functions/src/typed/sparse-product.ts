@@ -70,6 +70,44 @@ function sortRows(rows: Int32Array, count: number): void {
 }
 
 /**
+ * The distinct rows that a CSC operand stores, in ascending order, and for each stored entry the
+ * position of its row in that list. A product of a tall matrix (many rows, few entries) works in
+ * this compact row space, so its workspace has one slot per stored row, not per row of the matrix.
+ * The order of the compact ids is the order of the rows, so sorting ids sorts rows.
+ */
+function compactRows(
+  index: ArrayLike<number>,
+  count: number
+): { ids: Int32Array; rows: Int32Array } {
+  const sorted = new Int32Array(count);
+  for (let q = 0; q < count; q++) sorted[q] = index[q];
+  sorted.sort();
+  let distinct = 0;
+  for (let q = 0; q < count; q++) {
+    if (q === 0 || sorted[q] !== sorted[q - 1]) sorted[distinct++] = sorted[q];
+  }
+  const rows = sorted.slice(0, distinct);
+  const ids = new Int32Array(count);
+  for (let q = 0; q < count; q++) {
+    let lo = 0;
+    let hi = distinct - 1;
+    const row = index[q];
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (rows[mid] < row) lo = mid + 1;
+      else hi = mid;
+    }
+    ids[q] = lo;
+  }
+  return { ids, rows };
+}
+
+/** A matrix with more rows than this multiple of its stored entries and columns is tall. */
+const TALL_ROW_FACTOR = 4;
+/** A matrix below this row count never takes the compact row space. */
+const TALL_ROW_FLOOR = 1 << 16;
+
+/**
  * The product of two CSC matrices, as mathjs stores it: every structural product entry is
  * kept, also a sum that cancels to zero (csAmd and the CSparse factories read the pattern).
  * The row indices of each column are sorted. A matrix with no stored values (`_values` null)
@@ -80,6 +118,9 @@ function sortRows(rows: Int32Array, count: number): void {
  *
  * Cost: O(rows + cols + flops + nnz(C) log m), where m is the largest column count of the
  * result. Memory: O(rows + nnz(C)). A column workspace of `rows` entries is allocated once.
+ * A tall left operand (`rows` above 4 x (stored entries + columns) and above 65536) works in the
+ * compact row space of its stored rows instead: O(nnz(a) log nnz(a)) more time, and a workspace
+ * of one slot per stored row, so 5e7 rows with 3 entries need no 200 MB.
  *
  * @param a - Left operand (`rows x inner`).
  * @param b - Right operand (`inner x cols`).
@@ -107,10 +148,15 @@ export function cscProduct(
   const pattern = aValues === null || bValues === null;
   const numeric = !pattern && allNumbers(aValues, aPtr[inner]) && allNumbers(bValues, bPtr[cols]);
 
-  const mark = new Int32Array(rows).fill(-1);
-  const columnRows = new Int32Array(rows);
-  const accNumber = numeric ? new Float64Array(rows) : null;
-  const accAny: unknown[] | null = numeric || pattern ? null : new Array<unknown>(rows);
+  const storedA = aPtr[inner];
+  const tall = rows > TALL_ROW_FLOOR && rows > TALL_ROW_FACTOR * (storedA + cols);
+  const compact = tall ? compactRows(aIndex, storedA) : null;
+  const aRow = compact !== null ? compact.ids : aIndex;
+  const slots = compact !== null ? compact.rows.length : rows;
+  const mark = new Int32Array(slots).fill(-1);
+  const columnRows = new Int32Array(slots);
+  const accNumber = numeric ? new Float64Array(slots) : null;
+  const accAny: unknown[] | null = numeric || pattern ? null : new Array<unknown>(slots);
   const index: number[] = [];
   const values: unknown[] | null = pattern ? null : [];
   const ptr = new Array<number>(cols + 1);
@@ -121,7 +167,7 @@ export function cscProduct(
     for (let p = bPtr[j]; p < bPtr[j + 1]; p++) {
       const k = bIndex[p];
       for (let q = aPtr[k]; q < aPtr[k + 1]; q++) {
-        const r = aIndex[q];
+        const r = aRow[q];
         const fresh = mark[r] !== j;
         if (fresh) {
           mark[r] = j;
@@ -139,7 +185,7 @@ export function cscProduct(
     sortRows(columnRows, count);
     for (let c = 0; c < count; c++) {
       const r = columnRows[c];
-      index.push(r);
+      index.push(compact !== null ? compact.rows[r] : r);
       if (values !== null) values.push(accNumber !== null ? accNumber[r] : accAny![r]);
     }
     ptr[j + 1] = index.length;
