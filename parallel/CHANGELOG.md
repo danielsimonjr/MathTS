@@ -1,5 +1,40 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.12.0
+
+### Minor Changes
+
+- 98a54f8: `ComputePool.workerCount` is 0 after `terminate()`, in agreement with `stats().totalWorkers`, and returns the configured `maxWorkers` again after `initialize()` (Refs #1016). Before: it returned `maxWorkers` (2 or 12) after `terminate()` while `stats().totalWorkers` was 0. Before the first worker starts, `workerCount` stays the configured `maxWorkers`, because block and distribution fan-out size their chunks from it. No other `ComputePool` state survives `terminate()`: `isReady()` is false and compute methods throw. The new getter `ComputePool.liveWorkerCount` gives the number of workers that run now (`stats().totalWorkers`): 0 on a fresh pool, at least 1 after `initialize()`, and 0 after `terminate()`.
+
+### Patch Changes
+
+- 98a54f8: `parallelEvery` and `parallelForEach` no longer throw `predicate is not defined` / `fn is not defined` on the worker path (Refs #1027). Before: both wrapped the callback in a closure, and the worker received only the closure source with a free variable, so any input at or above the parallel threshold threw. After: the `toString()` of the wrapper gives self-contained source that embeds the source of the callback, so the worker path runs. The wrapper stays a closure, so the sequential path still accepts closures and bound or native functions. `parallelEvery(Array.from({length: 200000}, (_, i) => i), x => x >= 0)` now returns `true`.
+- 1629b29: `min` and `max` of a Float64Array propagate NaN on every sequential and parallel path, as the Array path and mathjs do (#1048). This change adds the core primitive `extrema`.
+- 852f6e2: Four small numeric defects.
+  
+  - A number as the data argument of a stable reduction in core (`pairwiseSum`, `pairwiseDot`, `sumSquaredDeviations`, their `Checked` variants, `neumaierSum`, `neumaierCumsum`, `norm2`, `scaledDistance`, `extrema`) now throws a `TypeError` that names the function. A string, and an object whose `length` is not a non-negative integer, throw the same error. Before, `pairwiseSum(0)` and `sumSquaredDeviations(0)` threw `RangeError: Maximum call stack size exceeded`, and `norm2(5)` gave `0` (#1011).
+  - `numberVector` rejects a value that is not an array, typed array, array-like or iterable object. The statistics, signal and linear-algebra functions that take a number vector read a number as `[]`. Before, `zscore(5)` was `[]`, `skewness(5)` was `NaN`, `trapz(5)` was `0` and `signTest(5)` was `{ statistic: 0, pValue: 1 }`. Now each throws a `TypeError` that names the function, for example `zscore: expects an array of numbers, got a number` (#1083).
+  - The SVD gave wrong singular values for a matrix whose leading column entry is negative with zeros below it, because the Householder helper returned the non-orthogonal `beta = -2` for that column. Before, `norm([[-3,0],[0,1]], 2)` was `9`, and the singular values were `[9, 1]`. Now the norm is `3` and the singular values are `[3, 1]` (NumPy and mathjs). `pinv`, `lowRankApprox` and `svd` rebuild such a matrix correctly. The default `norm` of a matrix was already the spectral norm (`p = 2`), as in mathjs. A new test pins that default, and the fix above corrects its value for such a matrix: `norm([[-3,0],[0,1]])` was `9` and is `3`. `norm([[1,0],[0,2]])` is `2` (#1082, #995).
+  - In `parallel`, `parallelMean`, `parallelVariance` and `parallelStd` on the sequential path pass the data to `pairwiseSum` before they read its length. A number now throws the `TypeError` of core. Before, `parallelMean(1)` gave `0` (#1011).
+- Updated dependencies [fe2cf32]
+- Updated dependencies [b1977e7]
+- Updated dependencies [fbc5277]
+- Updated dependencies [4304ad1]
+- Updated dependencies [f7a4aa7]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [1629b29]
+- Updated dependencies [2771df1]
+- Updated dependencies [852f6e2]
+- Updated dependencies [9a720bf]
+- Updated dependencies [1906ed4]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [aa18779]
+- Updated dependencies [3929108]
+- Updated dependencies [404e8a4]
+- Updated dependencies [db3f34f]
+  - @danielsimonjr/mathts-core@0.29.0
+  - @danielsimonjr/mathts-workerpool@0.5.1
+
 ## 0.11.0
 
 ### Minor Changes

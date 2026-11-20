@@ -1,5 +1,152 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.0
+
+### Minor Changes
+
+- 5b284e3: A compat instance from `create(all)` no longer exposes the internal names of the functions namespace (#1216). The 80 names are the 64 `factory_*` functions and 16 ALL_CAPS tuning constants (`ARRAY_WORKER_THRESHOLD`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `DEFAULT_MUTATION_WEIGHTS`, `DIST_WORKER_THRESHOLD`, `EVALUATE_SCOPE_OMIT`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `MASS_PROPERTY_SHAPES`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `WASM_INTERP_THRESHOLD`). They are gone from `in`, `for...in`, property reads, the `MathInstance` type, `math.chain`, and `math.evaluate` / `math.compile` / `math.parser()`. They stay exported from `@danielsimonjr/mathts-functions`. The list is `compat/src/internal-names.generated.ts`, written by `compat/scripts/gen-internal-names.mjs`; its `--check` in CI fails when the functions namespace adds an internal name that the list does not hold.
+  
+  Measured on `create(all)`:
+  
+  |                                            | 0.6.0 (published) | main before this change | this change |
+  | ------------------------------------------ | ----------------- | ----------------------- | ----------- |
+  | `for...in` names                           | 1406              | 1406                    | 1326        |
+  | `Object.keys` names                        | 1406              | 317                     | 317         |
+  | the 80 names reachable through `in`        | 80                | 80                      | 0           |
+  | the 80 names that `math.evaluate` resolves | 72                | 72                      | 0           |
+  | the 80 names that `math.parser()` resolves | 72                | 72                      | 0           |
+  
+  `EARTH_RADIUS_KM` stays: it is the default radius of `haversine`, a physical constant. The mathjs constants `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2` and `SQRT1_2` stay. A factory object that you pass to `create` keeps all its names: only a name whose value is the value of the functions namespace is hidden, so `create({ MY_CONST: 5, R: 8.31 })`, `create({ ...all, X1: 7 })` and `create({ ...all, GL4_A: 99 })` keep `MY_CONST`, `R`, `X1` and `GL4_A` as in 0.6.0 (#1250). `math.import({ GL4_A: 5 })` now makes `GL4_A` resolve to 5 in `math.evaluate`; in 0.6.0 it threw `Cannot import "GL4_A": already exists`. The expression scope does not read instance properties, as in 0.6.0: `create({ ...all, GL4_A: 99 }).evaluate('GL4_A')` gave the internal table and now throws `Undefined symbol`.
+  
+  `math.parser()` of a `create(all)` instance now evaluates with the evaluator of its instance. In 0.6.0 it used the module scope of the functions package, so it resolved the internal names, did not resolve a name from `math.import`, and ignored the instance config (after `math.config({ number: 'BigNumber' })`, `math.parser().evaluate('1/3')` returned a number and now returns a BigNumber). A `parser` that you pass to `create` in your own factory object is not changed.
+  
+  This change is breaking because 0.6.0 exposes all of these names. No non-breaking path is worth it: the names are tuning constants and internal factories, not mathjs API.
+- ba3a7bb: Breaking: the `create(all)` instance holds only the mathjs-parity names as own keys. `compat/src/parity-names.generated.ts` lists the 402 own keys of the mathjs 15.2.0 instance `create(all)`. The compat surface has 317 of them, and these 317 are the own keys (measured: `Object.keys(create(all)).length` is 317). The other 85 names of the list, for example `Unit`, `Complex` and `PI`, are not compat names before or after this change. The other 1089 names are inherited from prototype levels below the instance. Every name stays readable, assignable and enumerable.
+  
+  Why: V8 keeps an object in fast mode only up to 1020 own properties. The instance had 1406, so every `math.x` read was a dictionary lookup. A read of `math.add` cost 18.0 ns per call on Node 26 and 17.7 ns on Node 22, against 9.5 and 10.6 ns for a detached `add`. Now the instance and each prototype level (at most 900 names) stay fast after creation, after every name is read, after `import` and after `config`. Measured with 2e7 reads of one own name and one name on each level, 3 runs: a read costs 2.4 to 7.2 ns on Node 26 and 4.2 to 10.1 ns on Node 22, against 14.8 to 27.4 ns and 13.4 to 19.0 ns before. The `compat-add` wall-clock gate median went from 1.48 to 1.70 down to 0.49 to 0.57 (3 runs each, Node 26). `tools/test/compat-fast-instance.test.mjs` pins this with `%HasFastProperties`.
+  
+  Changed behaviour for the inherited names:
+  
+  - `Object.keys(math)`, `Object.entries(math)`, `Object.values(math)` and `Object.getOwnPropertyNames(math)` give the 317 parity names only.
+  - A spread `{ ...math }` and `Object.assign({}, math)` copy the parity names only.
+  - `Object.hasOwn(math, name)` and `math.hasOwnProperty(name)` are false for an inherited name.
+  - `JSON.stringify(math)` writes the parity names only.
+  - `delete math[name]` of an inherited name has no effect: the name stays readable with the same value, and `name in math` stays true. JavaScript gives no hook on `delete` of an inherited property without a proxy, and a proxy puts every read back on a slow path.
+  - `math.import(otherInstance)` still throws, with another message: `Cannot import "Chain": already exists` (before: `Factory, Object, or Array expected`).
+  - `math.import(otherInstance, { silent: true, override: true })` copies only the own names of `otherInstance`, because `import` reads the own keys of an object. Before, it read all 1406 names.
+  - `Object.getPrototypeOf(math)` is the first prototype level, not `Object.prototype`.
+  - An assignment to a name of a frozen instance throws a `TypeError`. Before, an assignment to a lazy name such as `det` changed the frozen instance. A sealed or non-extensible instance keeps every name writable, as before.
+  - An assignment of an inherited name through an object that inherits from the instance (`Object.create(math)`) defines an own property on that object and leaves the instance unchanged, as before.
+  
+  Replacements: `for (const name in math)` lists all 1406 names, `name in math` is true for every name, and `math[name]` reads every name. `create(math)` with an instance as input now keeps every name, own and inherited.
+  
+  `importFactory` of `@danielsimonjr/mathts-functions` now sees an inherited name as an existing name. A factory import of such a name without `override` gives "already exists", as for an own name.
+  
+  Size: the name list adds to the bundle. `compat/dist/index.js` (the unminified build) goes from 19438 to 26821 bytes, and `tools/test/bundle-budget.json` records the new size.
+  
+  Fixes #1200
+
+### Patch Changes
+
+- b1977e7: Brand-based type tests accept a value of a second copy of core (#1033). The typed `sum` keeps Complex, BigNumber and Fraction values exact, sums nested arrays and matrices in the pairwise kernel, and sums along a dimension (#1039). The typed `min` and `max`, and `mean`, `variance` and `std`, keep exact types; complex variance uses the conjugate. A 1-D sparse matrix is a column vector. The typed `dot` keeps exact types and conjugates its first argument. A 1-D Matrix keeps its shape when it converts to an Array. New core exports: `pairwiseSumChecked`, `sumSquaredDeviationsChecked` and `pairwiseDotChecked`.
+- 8edf4e2: `bignumber` converts an Array or a Matrix element by element, as mathjs does. Before, `bignumber([1, 2])` gave -Infinity, and null, a boolean, a bigint and a Fraction gave ±Infinity. A scalar call keeps the `BigNumber` return type. `bignumber()` still returns 0.
+- 680d90a: `eigs` of a matrix with Complex entries keeps the imaginary part of each entry (#1220). The factory scope `complex(x)` built `new Complex(x, undefined)`, so a Complex argument became a Complex that held the entry in `re`, and `abs` read it as its modulus. `complex()` now follows mathjs: no argument or `null` gives 0, it clones a Complex, and it accepts a number, BigNumber, Fraction, bigint, boolean, string, `{re, im}`, `{r, phi}`, `{abs, arg}` and an Array. Before: `eigs([[complex(2,1)]])` gave 2.236 (now 2+i); `eigs([[complex(0,1),0],[0,1]])` gave 1, 1 (now i, 1); `diag(2+i, 5+i)` gave 2.236, 5.099 (now 2+i, 5+i); `[[2+i,1],[0,3]]` gave 2.236, 3 (now 2+i, 3); `[[2,1-i],[1+i,3]]` gave 0.9999999999999991, 4.000000000000001 (now 1.0000000000000002, 4, within 1e-8 of 1 and 4, as mathjs 15.2.0). The public `complex(complexValue)`, `complex({re, im})` and `complex('2+i')` returned a Complex that held the argument in `re`; they now return the Complex. `complex(Matrix)` maps each entry and returns a Matrix. A part of `(re, im)` that is not a number, BigNumber, Fraction, bigint, boolean or numeric string throws a TypeError, as do a single argument of another type (`complex(undefined)`) and a third argument, as in mathjs. `complex(1, undefined)` returned 1 and now throws. The parts of an object convert to numbers. The call shape `(value, index, collection)` converts the value, so `[1, 2].map(complex)` gives 1 and 2. The compat `complex` shim uses the functions `complex` for every input except no argument and a single Complex, which it still returns unchanged; `complex(z, 5)` returned `z` and now throws a TypeError, and a third argument throws.
+- d0a18ca: A matrix of a second copy of the matrix package works in every public function (#1041). New export: isNativeMatrix.
+- 0ebdaa3: `math.import(otherInstance)` on a compat instance throws one `TypeError` ("import of a math instance is not supported; import its functions (an object of functions or factories) instead"), also when the instance sits inside an array or object, when it comes from another bundled copy of compat (a `Symbol.for('mathts.compat.instance')` brand on the instance's own prototype level marks it), and with `override` or `silent` (Refs #1222). mathjs 15.2.0 throws for every such call too, with messages that depend on the instance content. Before, on main: `create({}).import(create(all))` threw `Signature "Array" is defined twice`; `create(all).import(inst, {override:true})` threw `Factory, Object, or Array expected`; `{silent:true}` threw `Signature "Array" is defined twice`; `create(all).import(create(all))` threw `Cannot import "Chain": already exists`. `import({ T: [1, 2, 3] })` keeps the mathjs message `Factory, Object, or Array expected` (same in mathjs 15.2.0; with `silent` it is skipped). The check reads data properties only, so a getter in the imported object runs once, as before. Plain objects, arrays and factories import as before.
+- 852f6e2: Four small numeric defects.
+  
+  - A number as the data argument of a stable reduction in core (`pairwiseSum`, `pairwiseDot`, `sumSquaredDeviations`, their `Checked` variants, `neumaierSum`, `neumaierCumsum`, `norm2`, `scaledDistance`, `extrema`) now throws a `TypeError` that names the function. A string, and an object whose `length` is not a non-negative integer, throw the same error. Before, `pairwiseSum(0)` and `sumSquaredDeviations(0)` threw `RangeError: Maximum call stack size exceeded`, and `norm2(5)` gave `0` (#1011).
+  - `numberVector` rejects a value that is not an array, typed array, array-like or iterable object. The statistics, signal and linear-algebra functions that take a number vector read a number as `[]`. Before, `zscore(5)` was `[]`, `skewness(5)` was `NaN`, `trapz(5)` was `0` and `signTest(5)` was `{ statistic: 0, pValue: 1 }`. Now each throws a `TypeError` that names the function, for example `zscore: expects an array of numbers, got a number` (#1083).
+  - The SVD gave wrong singular values for a matrix whose leading column entry is negative with zeros below it, because the Householder helper returned the non-orthogonal `beta = -2` for that column. Before, `norm([[-3,0],[0,1]], 2)` was `9`, and the singular values were `[9, 1]`. Now the norm is `3` and the singular values are `[3, 1]` (NumPy and mathjs). `pinv`, `lowRankApprox` and `svd` rebuild such a matrix correctly. The default `norm` of a matrix was already the spectral norm (`p = 2`), as in mathjs. A new test pins that default, and the fix above corrects its value for such a matrix: `norm([[-3,0],[0,1]])` was `9` and is `3`. `norm([[1,0],[0,2]])` is `2` (#1082, #995).
+  - In `parallel`, `parallelMean`, `parallelVariance` and `parallelStd` on the sequential path pass the data to `pairwiseSum` before they read its length. A number now throws the `TypeError` of core. Before, `parallelMean(1)` gave `0` (#1011).
+- Updated dependencies [a0945d9]
+- Updated dependencies [f97d51c]
+- Updated dependencies [354d57b]
+- Updated dependencies [c0222fa]
+- Updated dependencies [5b09394]
+- Updated dependencies [6b4e603]
+- Updated dependencies [c5ea0d7]
+- Updated dependencies [fe2cf32]
+- Updated dependencies [f1a4b33]
+- Updated dependencies [b1977e7]
+- Updated dependencies [98a54f8]
+- Updated dependencies [e233385]
+- Updated dependencies [db4818f]
+- Updated dependencies [03b5d7a]
+- Updated dependencies [1dec729]
+- Updated dependencies [d297c16]
+- Updated dependencies [ab37729]
+- Updated dependencies [52f96d8]
+- Updated dependencies [fbc5277]
+- Updated dependencies [f88c4bc]
+- Updated dependencies [4c361f5]
+- Updated dependencies [3f8840c]
+- Updated dependencies [4304ad1]
+- Updated dependencies [e6c3657]
+- Updated dependencies [f0d9581]
+- Updated dependencies [d9f3a33]
+- Updated dependencies [cb23b66]
+- Updated dependencies [0c85f33]
+- Updated dependencies [01765bf]
+- Updated dependencies [90a75f9]
+- Updated dependencies [00c530e]
+- Updated dependencies [0c85f33]
+- Updated dependencies [98a54f8]
+- Updated dependencies [1f8ff61]
+- Updated dependencies [9f8cbaf]
+- Updated dependencies [5b284e3]
+- Updated dependencies [d8b3c68]
+- Updated dependencies [24e06d4]
+- Updated dependencies [f7a4aa7]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [b473e94]
+- Updated dependencies [1629b29]
+- Updated dependencies [64c9721]
+- Updated dependencies [680d90a]
+- Updated dependencies [0e2cfea]
+- Updated dependencies [67b7cbb]
+- Updated dependencies [2771df1]
+- Updated dependencies [7975f0b]
+- Updated dependencies [b2a29c7]
+- Updated dependencies [d0a18ca]
+- Updated dependencies [00d8732]
+- Updated dependencies [a41228f]
+- Updated dependencies [852f6e2]
+- Updated dependencies [4312c30]
+- Updated dependencies [e08d7df]
+- Updated dependencies [9a720bf]
+- Updated dependencies [56e8b0f]
+- Updated dependencies [1906ed4]
+- Updated dependencies [ba3a7bb]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [3e089aa]
+- Updated dependencies [d21f9cc]
+- Updated dependencies [3eadf13]
+- Updated dependencies [8e50670]
+- Updated dependencies [4467c8a]
+- Updated dependencies [5ba5401]
+- Updated dependencies [dd3cb3b]
+- Updated dependencies [aa18779]
+- Updated dependencies [a593d34]
+- Updated dependencies [3929108]
+- Updated dependencies [b799410]
+- Updated dependencies [d05f7f4]
+- Updated dependencies [4cb2099]
+- Updated dependencies [64e1e93]
+- Updated dependencies [404e8a4]
+- Updated dependencies [073ec8b]
+- Updated dependencies [2165c36]
+- Updated dependencies [bf0c777]
+- Updated dependencies [29cc252]
+- Updated dependencies [0c767ba]
+- Updated dependencies [6bc82a2]
+- Updated dependencies [db3f34f]
+- Updated dependencies [d2b506e]
+  - @danielsimonjr/mathts-functions@0.87.0
+  - @danielsimonjr/mathts-matrix@0.12.0
+  - @danielsimonjr/mathts-core@0.29.0
+  - @danielsimonjr/mathts-parallel@0.12.0
+
 ## 0.6.0
 
 ### Minor Changes

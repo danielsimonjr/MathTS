@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.5.1
+
+### Patch Changes
+
+- 1629b29: `min` and `max` of a Float64Array propagate NaN on every sequential and parallel path, as the Array path and mathjs do (#1048). This change adds the core primitive `extrema`.
+
 ## 0.5.0
 
 ### Minor Changes

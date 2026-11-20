@@ -1,5 +1,29 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.6.1
+
+### Patch Changes
+
+- 1249122: Document that `TapedTensor.binaryCrossEntropy` takes logits, not probabilities, returns one loss per element, and exists only as a method (Refs #1017). Before: the JSDoc said only "with logits" and `docs/api/autograd.md` omitted the method. After: both state the formula, the shapes, the gradient (`sigmoid(x) - t`) and the `[0.8, 0.3]` worked example. No behaviour change.
+- Updated dependencies [fe2cf32]
+- Updated dependencies [b1977e7]
+- Updated dependencies [fbc5277]
+- Updated dependencies [4304ad1]
+- Updated dependencies [f7a4aa7]
+- Updated dependencies [c4ddb8c]
+- Updated dependencies [1629b29]
+- Updated dependencies [2771df1]
+- Updated dependencies [852f6e2]
+- Updated dependencies [9a720bf]
+- Updated dependencies [1906ed4]
+- Updated dependencies [a5a8eff]
+- Updated dependencies [aa18779]
+- Updated dependencies [3929108]
+- Updated dependencies [404e8a4]
+- Updated dependencies [db3f34f]
+  - @danielsimonjr/mathts-core@0.29.0
+  - @danielsimonjr/mathts-tensor@0.5.1
+
 ## 0.6.0
 
 ### Minor Changes
