@@ -1264,24 +1264,8 @@
       "functions/src/algebra/solver/lsolve.ts",
       "functions/src/algebra/solver/usolve.ts"
     ],
-    "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
-    "functions/src/factories/matrix-bridge.ts": [
-      "functions/src/algebra/solver/lusolve.ts",
-      "functions/src/factories/scope.ts",
-      "functions/src/factories/sparse-adapter.ts",
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/matrix-ops.ts",
-      "functions/src/typed/probability.ts"
-    ],
-    "functions/src/algebra/solver/pivot-tolerance.ts": [
-      "functions/src/algebra/solver/lusolve.ts",
-      "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/validate-u-pivots.ts"
-    ],
-    "functions/src/algebra/solver/validate-u-pivots.ts": [
-      "functions/src/algebra/solver/lusolve.ts"
-    ],
     "functions/src/utils/array.ts": [
+      "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/arithmetic/hypot.ts",
       "functions/src/arithmetic/pow.ts",
@@ -1334,6 +1318,23 @@
       "functions/src/typed/probability.ts",
       "functions/src/typed/set.ts",
       "functions/src/utils/optimizeCallback.ts"
+    ],
+    "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
+    "functions/src/factories/matrix-bridge.ts": [
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/factories/scope.ts",
+      "functions/src/factories/sparse-adapter.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/probability.ts"
+    ],
+    "functions/src/algebra/solver/pivot-tolerance.ts": [
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/validate-u-pivots.ts"
+    ],
+    "functions/src/algebra/solver/validate-u-pivots.ts": [
+      "functions/src/algebra/solver/lusolve.ts"
     ],
     "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
     "functions/src/algebra/sparse/csFlip.ts": [
@@ -2385,6 +2386,7 @@
     ],
     "functions/src/error/DimensionError.ts": [
       "functions/src/core/create.ts",
+      "functions/src/factories/matrix-bridge.ts",
       "functions/src/logical/nullish.ts",
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/resize.ts",

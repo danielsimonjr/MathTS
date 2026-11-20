@@ -3356,6 +3356,7 @@ graph LR
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
 | `../../utils/string.js`            | `format`                                                             | Import             |
+| `../../utils/array.js`             | `arraySize`                                                          | Import             |
 | `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
@@ -6507,11 +6508,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports               | Type   |
-| -------------------- | --------------------- | ------ |
-| `../utils/is.js`     | `typeOf`              | Import |
-| `../utils/array.js`  | `arraySize, validate` | Import |
-| `../utils/limits.js` | `assertAllocSize`     | Import |
+| File                         | Imports                                                                     | Type   |
+| ---------------------------- | --------------------------------------------------------------------------- | ------ |
+| `../utils/is.js`             | `typeOf`                                                                    | Import |
+| `../utils/array.js`          | `arraySize, validate, validateIndex, resize, reshape, processSizesWildcard` | Import |
+| `../error/DimensionError.js` | `DimensionError`                                                            | Import |
+| `../utils/limits.js`         | `assertAllocSize`                                                           | Import |
 
 **Exports:**
 
@@ -20836,7 +20838,7 @@ graph LR
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
-| `functions/src/utils/array`                            | 0 files      | 52 files   |
+| `functions/src/utils/array`                            | 0 files      | 53 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
@@ -21771,7 +21773,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238437 |
+| Total Lines of Code     | 238464 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

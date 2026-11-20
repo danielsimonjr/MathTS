@@ -13,7 +13,15 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
-import { arraySize, validate } from '../utils/array.js';
+import {
+  arraySize,
+  validate,
+  validateIndex,
+  resize as resizeArray,
+  reshape as reshapeArray,
+  processSizesWildcard,
+} from '../utils/array.js';
+import { DimensionError } from '../error/DimensionError.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
@@ -32,22 +40,30 @@ interface MatrixIndexLike {
   dimension(dim: number): unknown;
 }
 
+/** The indices that one dimension of a mathjs `Index` selects. */
+interface IndexSelector {
+  /** The selected indices, in order. */
+  sel: number[];
+  /** True when the Index gave this dimension as a number: the result has no axis for it. */
+  scalar: boolean;
+}
+
 /**
  * Resolve a mathjs `Index` object to the list of selected indices per dimension.
- * Each dimension selector is a scalar number → `[n]`, or a Range /
+ * Each dimension selector is a scalar number → `[n]` (marked `scalar`), or a Range /
  * ImmutableDenseMatrix (has `.toArray()`) → its index list.
  */
-function matrixIndexSelectors(index: MatrixIndexLike): number[][] {
+function matrixIndexSelectors(index: MatrixIndexLike): IndexSelector[] {
   const nDims = index.size().length;
-  const out: number[][] = [];
+  const out: IndexSelector[] = [];
   for (let d = 0; d < nDims; d++) {
     const sel = index.dimension(d);
     if (typeof sel === 'number') {
-      out.push([sel]);
+      out.push({ sel: [sel], scalar: true });
     } else if (sel && typeof (sel as { toArray?: () => number[] }).toArray === 'function') {
-      out.push((sel as { toArray(): number[] }).toArray());
+      out.push({ sel: (sel as { toArray(): number[] }).toArray(), scalar: false });
     } else {
-      out.push([Number(sel)]);
+      out.push({ sel: [Number(sel)], scalar: true });
     }
   }
   return out;
@@ -311,48 +327,76 @@ export class MathJSDenseMatrix {
       : this._setSubset(index, dims, replacement);
   }
 
-  /** Read a scalar (Index.isScalar) or a sub-matrix from selected indices. */
-  private _getSubset(index: MatrixIndexLike, dims: number[][]): number | MathJSDenseMatrix {
-    if (index.isScalar()) {
-      return dims.length === 1
-        ? (this._data[dims[0][0]] as unknown as number)
-        : this._data[dims[0][0]][dims[1][0]];
+  /**
+   * Read a scalar (Index.isScalar) or a sub-matrix from selected indices, one selector per axis.
+   * A dimension that the Index gives as a number adds no axis to the result, as in mathjs.
+   */
+  private _getSubset(index: MatrixIndexLike, dims: IndexSelector[]): number | MathJSDenseMatrix {
+    if (dims.length !== this._size.length) {
+      throw new DimensionError(dims.length, this._size.length);
     }
-    if (dims.length === 1) {
-      const picked = dims[0].map((i) => (this._data as unknown as number[])[i]);
-      return new MathJSDenseMatrix({
-        data: picked as unknown as number[][],
-        size: [dims[0].length],
-      });
+    for (let d = 0; d < dims.length; d++) {
+      for (const i of dims[d].sel) validateIndex(i, this._size[d]);
     }
-    const [rowSel, colSel] = dims;
-    return new MathJSDenseMatrix({
-      data: rowSel.map((i) => colSel.map((j) => this._data[i][j])),
-      size: [rowSel.length, colSel.length],
+    if (index.isScalar()) return this.get(dims.map((d) => d.sel[0]));
+    const last = dims.length - 1;
+    const read = (data: unknown, depth: number): unknown => {
+      const { sel, scalar } = dims[depth];
+      const pick = (i: number): unknown =>
+        depth === last ? (data as unknown[])[i] : read((data as unknown[])[i], depth + 1);
+      return scalar ? pick(sel[0]) : sel.map(pick);
+    };
+    const result = new MathJSDenseMatrix({
+      data: read(this._data, 0) as number[][],
+      size: dims.filter((d) => !d.scalar).map((d) => d.sel.length),
     });
+    result._datatype = this._datatype;
+    return result;
   }
 
-  /** Write a scalar or a sub-matrix at the selected indices; returns this. */
+  /**
+   * Write a scalar or a sub-matrix at the selected indices; returns this.
+   * The replacement is a scalar or an Array / matrix that broadcasts to the shape of the
+   * selection (the trailing axes match, or have length 1), as in the mathjs `_set`.
+   */
   private _setSubset(
     index: MatrixIndexLike,
-    dims: number[][],
+    dims: IndexSelector[],
     replacement: unknown
   ): MathJSDenseMatrix {
-    if (index.isScalar()) {
-      if (dims.length === 1)
-        (this._data as unknown as number[])[dims[0][0]] = replacement as number;
-      else this._data[dims[0][0]][dims[1][0]] = replacement as number;
-      return this;
+    if (dims.length !== this._size.length) {
+      throw new DimensionError(dims.length, this._size.length);
     }
-    const rep = (replacement as { toArray?: () => unknown }).toArray
-      ? (replacement as { toArray(): unknown[] }).toArray()
-      : (replacement as unknown[]);
-    const [rowSel, colSel] = dims.length === 2 ? dims : [dims[0], [0]];
-    for (let ri = 0; ri < rowSel.length; ri++) {
-      for (let ci = 0; ci < colSel.length; ci++) {
-        const row = rep[ri];
-        const v = Array.isArray(row) ? row[ci] : row;
-        this._data[rowSel[ri]][colSel[ci]] = v as number;
+    if (index.isScalar()) {
+      return this.set(
+        dims.map((d) => d.sel[0]),
+        replacement as number
+      );
+    }
+    const rep = (replacement as { toArray?: () => unknown } | null)?.toArray
+      ? (replacement as { toArray(): unknown }).toArray()
+      : replacement;
+    const selection = dims.map((d) => d.sel.length);
+    const repSize = arraySize(rep as unknown[]);
+    const offset = selection.length - repSize.length;
+    if (offset < 0 || repSize.some((n, k) => n !== selection[k + offset] && n !== 1)) {
+      throw new DimensionError(selection, repSize, '>');
+    }
+    const total = selection.reduce((p, n) => p * n, 1);
+    const pos = new Array<number>(selection.length).fill(0);
+    for (let count = 0; count < total; count++) {
+      let value = rep;
+      for (let k = 0; k < repSize.length; k++) {
+        value = (value as unknown[])[repSize[k] === 1 ? 0 : pos[k + offset]];
+      }
+      this.set(
+        pos.map((p, d) => dims[d].sel[p]),
+        value as number
+      );
+      // The next position, in row-major order.
+      for (let d = pos.length - 1; d >= 0; d--) {
+        if (++pos[d] < selection[d]) break;
+        pos[d] = 0;
       }
     }
     return this;
@@ -371,63 +415,44 @@ export class MathJSDenseMatrix {
   }
 
   /**
-   * Resize the matrix to the given size. Mutates in place and returns this.
-   * (mathjs factory code does `m.resize(size)` and continues using `m`)
+   * Resize the matrix to the given size, keeping every axis (mathjs `DenseMatrix.resize`).
+   * A new entry gets `defaultValue` (0 when it is not given). With `copy` the matrix is not
+   * changed and the result is a new matrix; without `copy` the matrix is changed and returned
+   * (mathjs factory code does `m.resize(size)` and continues using `m`).
    */
-  resize(newSize: number[], defaultValue?: number): MathJSDenseMatrix {
-    const fill = defaultValue ?? 0;
+  resize(newSize: number[], defaultValue?: number, copy?: boolean): MathJSDenseMatrix {
     assertAllocSize('resize', newSize);
-
-    if (newSize.length === 1) {
-      // 1D resize
-      const len = newSize[0];
-      const flat: number[] = [];
-      const oldData = this._data as unknown as number[];
-      for (let i = 0; i < len; i++) {
-        flat.push(i < (this._size[0] ?? 0) ? (oldData[i] ?? fill) : fill);
-      }
-      this._data = flat as unknown as number[][];
-      this._size = [len];
-      return this;
-    }
-
-    // 2D resize
-    const [rows, cols] = newSize;
-    const data: number[][] = [];
-    const oldRows = this._size[0] ?? 0;
-    const oldCols = this._size[1] ?? 0;
-    for (let i = 0; i < rows; i++) {
-      const row: number[] = [];
-      for (let j = 0; j < cols; j++) {
-        row.push(i < oldRows && j < oldCols && this._data[i] ? (this._data[i][j] ?? fill) : fill);
-      }
-      data.push(row);
+    // Resize a copy of the nested data: the arrays of this matrix, and the arrays that the
+    // caller passed to `matrix(data)`, are never changed in place.
+    const data = resizeArray(
+      copyAxes(this._data, this._size.length) as number[][],
+      newSize,
+      defaultValue ?? 0
+    ) as number[][];
+    if (copy) {
+      const m = new MathJSDenseMatrix({ data, size: [...newSize] });
+      m._datatype = this._datatype;
+      return m;
     }
     this._data = data;
-    this._size = [rows, cols];
+    this._size = [...newSize];
     return this;
   }
 
   /**
-   * Reshape the matrix.
+   * Reshape the matrix to the given size, which can hold one -1 for a length that follows from
+   * the others (mathjs `DenseMatrix.reshape`). Returns a new matrix; this matrix is not changed.
+   * @throws DimensionError when the new size has another number of entries
    */
-  reshape(newSize: number[]): MathJSDenseMatrix {
-    const flat: number[] = [];
-    for (const row of this._data) {
-      for (const val of row) {
-        flat.push(val);
-      }
-    }
-    const [rows, cols] = newSize;
-    const data: number[][] = [];
-    for (let i = 0; i < rows; i++) {
-      const row: number[] = [];
-      for (let j = 0; j < cols; j++) {
-        row.push(flat[i * cols + j] ?? 0);
-      }
-      data.push(row);
-    }
-    return new MathJSDenseMatrix({ data, size: [rows, cols] });
+  reshape(newSize: number[], _copy?: boolean): MathJSDenseMatrix {
+    const count = this._size.reduce((p, n) => p * n, 1);
+    const size = processSizesWildcard(newSize, count);
+    const m = new MathJSDenseMatrix({
+      data: reshapeArray(this._data as number[][], newSize) as number[][],
+      size,
+    });
+    m._datatype = this._datatype;
+    return m;
   }
 
   /**

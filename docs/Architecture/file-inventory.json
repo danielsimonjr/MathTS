@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2555,
+  "totalFiles": 2556,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1139,
+    "test": 1140,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1139,
+    "tests": 1140,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,7 +23,7 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 39,
+    "@danielsimonjr/mathts-compat": 40,
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
@@ -640,6 +640,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 103
+    },
+    {
+      "file": "compat/tests/dogfood-1288-zeros-nd.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 166
     },
     {
       "file": "compat/tests/dogfood-955-unit-paths.test.ts",
@@ -6029,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 591
+      "loc": 593
     },
     {
       "file": "functions/src/algebra/solver/pivot-tolerance.ts",
@@ -6841,7 +6848,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1373
+      "loc": 1398
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10908,7 +10915,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 95
+      "loc": 98
     },
     {
       "file": "functions/tests/dogfood-1279-1155-nd-shape.test.ts",

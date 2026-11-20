@@ -8225,6 +8225,10 @@
             "imports": ["format"]
           },
           {
+            "file": "../../utils/array.js",
+            "imports": ["arraySize"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation", "denseRightHandSide", "nonSquareSolveError"]
           },
@@ -17715,7 +17719,18 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["arraySize", "validate"]
+            "imports": [
+              "arraySize",
+              "validate",
+              "validateIndex",
+              "resize",
+              "reshape",
+              "processSizesWildcard"
+            ]
+          },
+          {
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
           },
           {
             "file": "../utils/limits.js",
@@ -49897,7 +49912,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238437,
+    "totalLinesOfCode": 238464,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,

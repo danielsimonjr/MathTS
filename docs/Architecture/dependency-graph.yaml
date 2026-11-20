@@ -7898,6 +7898,9 @@ modules:
         - file: ../../utils/string.js
           imports:
             - format
+        - file: ../../utils/array.js
+          imports:
+            - arraySize
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
@@ -16623,6 +16626,13 @@ modules:
           imports:
             - arraySize
             - validate
+            - validateIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+        - file: ../error/DimensionError.js
+          imports:
+            - DimensionError
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
@@ -47048,7 +47058,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238437
+  totalLinesOfCode: 238464
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669
