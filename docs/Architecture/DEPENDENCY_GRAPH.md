@@ -1994,8 +1994,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `EigResult`, `EigOptions`
-- Functions: `eig`, `eigvals`, `powerIteration`
+- Interfaces: `EigResult`, `EigOptions`, `EigBalance`
+- Functions: `balanceForEig`, `eig`, `eigvals`, `powerIteration`
 
 ---
 
@@ -2029,7 +2029,7 @@ graph LR
 
 | File              | Imports                                                                                                                                        | Type      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `./eig.js`        | `eig, eigvals, powerIteration, EigResult, EigOptions, RepeatedEigenvalue`                                                                      | Re-export |
+| `./eig.js`        | `eig, eigvals, powerIteration, balanceForEig, EigBalance, EigResult, EigOptions, RepeatedEigenvalue`                                           | Re-export |
 | `./svd.js`        | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions`                                                        | Re-export |
 | `./eig-wasm.js`   | `eigWasm, eigvalsWasm, spectralRadiusWasm`                                                                                                     | Re-export |
 | `./svd-wasm.js`   | `svdWasm`                                                                                                                                      | Re-export |
@@ -2051,7 +2051,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `RepeatedEigenvalue`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lstsq`, `densifyForSolver`, `DEFAULT_SOLVER_MAX_ELEMENTS`, `DensifyOptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `isPackedMatrixDescriptor`, `DecompositionMatrixInput`, `PackedMatrixDescriptor`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `balanceForEig`, `EigBalance`, `EigResult`, `EigOptions`, `RepeatedEigenvalue`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lstsq`, `densifyForSolver`, `DEFAULT_SOLVER_MAX_ELEMENTS`, `DensifyOptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `isPackedMatrixDescriptor`, `DecompositionMatrixInput`, `PackedMatrixDescriptor`
 
 ---
 
@@ -6387,7 +6387,7 @@ graph LR
 | `../matrix/count.js`                     | `createCount`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../matrix/trace.js`                     | `createTrace`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../matrix/det.js`                       | `createDet`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
-| `../matrix/native-accel.js`              | `acceleratedDet, acceleratedInv, correctEigs`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
+| `../matrix/native-accel.js`              | `acceleratedDet, acceleratedInv, correctEigs, correctEigsOfMatrix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import                |
 | `../matrix/reshape.js`                   | `createReshape`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../algebra/sparse/csAmd.js`             | `createCsAmd`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../algebra/sparse/csCounts.js`          | `createCsCounts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import                |
@@ -7296,7 +7296,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs/complexEigs.ts` - Create the `complexEigs` function, which computes the eigenvalues and the optional
+### `functions/src/matrix/eigs/complexEigs.ts` - A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
 
 **External Dependencies:**
 
@@ -7307,9 +7307,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports | Type   |
-| ----------------------- | ------- | ------ |
-| `../../utils/object.js` | `clone` | Import |
+| File                        | Imports     | Type   |
+| --------------------------- | ----------- | ------ |
+| `../../utils/object.js`     | `clone`     | Import |
+| `../../utils/real-scale.js` | `realScale` | Import |
 
 **Exports:**
 
@@ -7337,7 +7338,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs.ts` - Compute eigenvalues and optionally eigenvectors of a square matrix.
+### `functions/src/matrix/eigs.ts` - A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an
 
 **External Dependencies:**
 
@@ -7359,6 +7360,7 @@ graph LR
 
 **Exports:**
 
+- Functions: `defineRemovedVectorsGetter`
 - Constants: `createEigs`
 
 ---
@@ -7635,14 +7637,21 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                 |
-| ------------------------------ | ---------------------- |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, eig` |
-| `@danielsimonjr/mathts-core`   | `Complex`              |
+| Package                        | Import                                |
+| ------------------------------ | ------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, eig, balanceForEig` |
+| `@danielsimonjr/mathts-core`   | `Complex`                             |
+
+**Internal Dependencies:**
+
+| File             | Imports                      | Type   |
+| ---------------- | ---------------------------- | ------ |
+| `./eigs.js`      | `defineRemovedVectorsGetter` | Import |
+| `../utils/is.js` | `isFraction`                 | Import |
 
 **Exports:**
 
-- Functions: `isLargeNumericSquare`, `acceleratedDet`, `acceleratedInv`, `isNumericSquare`, `correctEigs`
+- Functions: `isLargeNumericSquare`, `acceleratedDet`, `acceleratedInv`, `correctEigs`, `correctEigsOfMatrix`
 - Constants: `NATIVE_MATRIX_THRESHOLD`
 
 ---
@@ -20903,7 +20912,7 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
-| `functions/src/utils/is`                               | 0 files      | 62 files   |
+| `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
@@ -21840,13 +21849,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 240645 |
-| Total Exports           | 7422   |
-| Total Re-exports        | 3192   |
+| Total Lines of Code     | 241197 |
+| Total Exports           | 7426   |
+| Total Re-exports        | 3194   |
 | Total Classes           | 63     |
-| Total Interfaces        | 674    |
-| Total Functions         | 2603   |
-| Total Type Guards       | 186    |
+| Total Interfaces        | 675    |
+| Total Functions         | 2605   |
+| Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |
 | Runtime Circular Deps   | 2      |

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1353,
     "totalModules": 82,
-    "totalExports": 7422
+    "totalExports": 7426
   },
   "entryPoints": [
     {
@@ -5714,9 +5714,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["eig", "eigvals", "powerIteration"],
-        "interfaces": ["EigResult", "EigOptions"],
-        "functions": ["eig", "eigvals", "powerIteration"]
+        "exports": ["balanceForEig", "eig", "eigvals", "powerIteration"],
+        "interfaces": ["EigResult", "EigOptions", "EigBalance"],
+        "functions": ["balanceForEig", "eig", "eigvals", "powerIteration"]
       },
       "matrix/src/operations/expm.ts": {
         "description": "Matrix Exponential — Scaling-and-Squaring with Padé-13 Approximant",
@@ -5765,6 +5765,8 @@
               "eig",
               "eigvals",
               "powerIteration",
+              "balanceForEig",
+              "EigBalance",
               "EigResult",
               "EigOptions",
               "RepeatedEigenvalue"
@@ -5883,6 +5885,8 @@
           "eig",
           "eigvals",
           "powerIteration",
+          "balanceForEig",
+          "EigBalance",
           "EigResult",
           "EigOptions",
           "RepeatedEigenvalue",
@@ -5945,6 +5949,8 @@
           "eig",
           "eigvals",
           "powerIteration",
+          "balanceForEig",
+          "EigBalance",
           "EigResult",
           "EigOptions",
           "RepeatedEigenvalue",
@@ -16569,7 +16575,7 @@
           },
           {
             "file": "../matrix/native-accel.js",
-            "imports": ["acceleratedDet", "acceleratedInv", "correctEigs"]
+            "imports": ["acceleratedDet", "acceleratedInv", "correctEigs", "correctEigsOfMatrix"]
           },
           {
             "file": "../matrix/reshape.js",
@@ -19095,7 +19101,7 @@
         "constants": ["createDot"]
       },
       "functions/src/matrix/eigs/complexEigs.ts": {
-        "description": "Create the `complexEigs` function, which computes the eigenvalues and the optional",
+        "description": "A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -19111,6 +19117,10 @@
           {
             "file": "../../utils/object.js",
             "imports": ["clone"]
+          },
+          {
+            "file": "../../utils/real-scale.js",
+            "imports": ["realScale"]
           }
         ],
         "workspaceDependencies": [],
@@ -19137,7 +19147,7 @@
         "functions": ["createRealSymmetric"]
       },
       "functions/src/matrix/eigs.ts": {
-        "description": "Compute eigenvalues and optionally eigenvectors of a square matrix.",
+        "description": "A complex eigenvalue is held in numbers, and the discriminant of a 2x2 block is the square of an",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -19176,7 +19186,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEigs"],
+        "exports": ["createEigs", "defineRemovedVectorsGetter"],
+        "functions": ["defineRemovedVectorsGetter"],
         "constants": ["createEigs"]
       },
       "functions/src/matrix/fft.ts": {
@@ -19579,12 +19590,21 @@
         "description": "Native-accelerated fast paths for matrix factory functions.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./eigs.js",
+            "imports": ["defineRemovedVectorsGetter"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isFraction"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "lu", "eig"]
+            "imports": ["DenseMatrix", "lu", "eig", "balanceForEig"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -19597,15 +19617,15 @@
           "isLargeNumericSquare",
           "acceleratedDet",
           "acceleratedInv",
-          "isNumericSquare",
-          "correctEigs"
+          "correctEigs",
+          "correctEigsOfMatrix"
         ],
         "functions": [
           "isLargeNumericSquare",
           "acceleratedDet",
           "acceleratedInv",
-          "isNumericSquare",
-          "correctEigs"
+          "correctEigs",
+          "correctEigsOfMatrix"
         ],
         "constants": ["NATIVE_MATRIX_THRESHOLD"]
       },
@@ -50113,15 +50133,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1353,
     "totalModules": 82,
-    "totalLinesOfCode": 240645,
-    "totalExports": 7422,
+    "totalLinesOfCode": 241197,
+    "totalExports": 7426,
     "totalClasses": 63,
-    "totalInterfaces": 674,
-    "totalFunctions": 2603,
-    "totalTypeGuards": 186,
+    "totalInterfaces": 675,
+    "totalFunctions": 2605,
+    "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1697,
-    "totalReExports": 3192,
+    "totalReExports": 3194,
     "totalTypeOnlyImports": 686,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2589
+**Total files**: 2598
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1327 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1170 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1179 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2589** |                                                                                                                |
+| **Total**     | **2598** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1353 |
-| `tests`    |  1170 |
+| `tests`    |  1179 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -44,14 +44,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
 | `@danielsimonjr/mathts-autograd`       |    31 |
-| `@danielsimonjr/mathts-compat`         |    37 |
+| `@danielsimonjr/mathts-compat`         |    38 |
 | `@danielsimonjr/mathts-core`           |   146 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   575 |
-| `@danielsimonjr/mathts-functions`      |  1210 |
+| `@danielsimonjr/mathts-functions`      |  1216 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
-| `@danielsimonjr/mathts-matrix`         |   157 |
+| `@danielsimonjr/mathts-matrix`         |   159 |
 | `@danielsimonjr/mathts-numbers`        |     4 |
 | `@danielsimonjr/mathts-parallel`       |    56 |
 | `@danielsimonjr/mathts-parser`         |     5 |
@@ -160,6 +160,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/tests/dogfood-g26.test.ts`                                                | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-g32b.test.ts`                                               | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/dogfood-mathjs-parity.test.ts`                                      | @danielsimonjr/mathts-compat         | tests    | test        |
+| `compat/tests/eigs-matrix-input-1179.test.ts`                                     | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/gap-config-behavior.test.ts`                                        | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/instance-config-isolation.test.ts`                                  | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/instance-typed-surface.test.ts`                                     | @danielsimonjr/mathts-compat         | tests    | test        |
@@ -1611,6 +1612,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1169-lsolve-tiny-diagonal.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1169-lup-linsolve-relative-pivot.test.ts`                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1169-slu-pivot-scale-invariant.test.ts`                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1179-eigs-matrix-input.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1186-eigs-relative-imag-tol.test.ts`                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1188-qr-nonnumber-cutoff.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1199-hessenberg-scale.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1628,8 +1630,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1231-lusolve-multicolumn.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1233-empty-matrix-ops.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1235-slu-singular.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1238-eigs-double-shift.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1239-slu-order2.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1239-transpose-stale.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1240-eigs-balance.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1240-eigs-huge-entry-pair.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1242-eigs-defective-small.test.ts`                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1243-symmetric-small-entries.test.ts`                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1247-solve-3d.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1251-qr-1d.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1638,6 +1644,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1257-bignumber-squares.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1263-sparse-3d.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1277-slu-zero-threshold.test.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1285-norm-corr-eigs.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1287-lusolve-row-relative-pivot.test.ts`                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1287-lusolve-tiny-right-side.test.ts`                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1287-pivot-test-rank-deficient.test.ts`                  | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2243,11 +2250,13 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/dogfood-g26.test.ts`                                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-logm-finite-guard.test.ts`                                  | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/dogfood-logm-pade-one-solve.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/eig-balance-1240.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-complex-eigenvectors-oracle.test.ts`                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-iteration-limit-989c.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-jordan-blocks.test.ts`                                          | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-nonfinite.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/eig-repeated-robust.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/eig-zero-diagonal-deflation.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gap-linalg-extension-oracle.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gemm-f64.test.ts`                                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/gpu/gpu-backend-scale-readback.test.ts`                             | @danielsimonjr/mathts-matrix         | tests    | test        |

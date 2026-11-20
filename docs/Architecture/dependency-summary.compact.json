@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1353, "e": 7422, "re": 3192 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1353, "e": 7426, "re": 3194 },
   "s": {
-    "loc": 240645,
+    "loc": 241197,
     "cls": 63,
-    "int": 674,
-    "fn": 2603,
-    "tg": 186,
+    "int": 675,
+    "fn": 2605,
+    "tg": 185,
     "en": 0,
     "co": 1697,
     "toi": 686
@@ -352,9 +352,9 @@
         "RepeatedEigenvalue",
         "EigResult",
         "EigOptions",
+        "EigBalance",
         "ExpmOptions",
-        "LogmOptions",
-        "LUResult"
+        "LogmOptions"
       ]
     },
     "matrix/types": {
@@ -779,12 +779,12 @@
         "createComplexEigs",
         "createRealSymmetric",
         "createEigs",
+        "defineRemovedVectorsGetter",
         "createFft",
         "createFilter",
         "createFlatten",
         "createForEach",
-        "sparseMatrixFromVectors",
-        "vectorLength"
+        "sparseMatrixFromVectors"
       ],
       "int": [
         "Matrix",
@@ -1963,7 +1963,7 @@
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 62 },
+    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
