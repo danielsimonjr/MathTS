@@ -184,9 +184,14 @@ export const createCsLu = /* #__PURE__ */ factory(
         if (ipiv === -1 || a <= 0) {
           return null;
         }
-        // update actual pivot column, give preference to diagonal value
-        if (pinv[col] < 0 && largerEq(abs(x[col]), multiply(a, tol))) {
-          ipiv = col;
+        // update actual pivot column, give preference to diagonal value. A zero diagonal
+        // value is never preferred: with tol = 0 the threshold test alone reads 0 >= 0 (#1277).
+        if (pinv[col] < 0) {
+          const diagAbs = abs(x[col]);
+          const diagNonZero = typeof diagAbs === 'number' ? diagAbs > 0 : larger(diagAbs, 0);
+          if (diagNonZero && largerEq(diagAbs, multiply(a, tol))) {
+            ipiv = col;
+          }
         }
         // the chosen pivot
         const pivot = x[ipiv];
