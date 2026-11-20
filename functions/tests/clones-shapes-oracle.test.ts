@@ -16,11 +16,7 @@ import {
 import { factoryScope } from '../src/factories/scope.js';
 import { createIndexClass } from '../src/type/matrix/MatrixIndex.js';
 import { matrixFromVectorList } from '../src/matrix/from-vectors.js';
-import {
-  isLargeNumericSquare,
-  isNumericSquare,
-  NATIVE_MATRIX_THRESHOLD,
-} from '../src/matrix/native-accel.js';
+import { isLargeNumericSquare, NATIVE_MATRIX_THRESHOLD } from '../src/matrix/native-accel.js';
 
 type SparseMatrix = {
   storage(): string;
@@ -242,7 +238,7 @@ describe('M13 — Index dimension walk (size / min / max)', () => {
   });
 });
 
-describe('M17 — numeric-square predicates (minSide 1 vs 8)', () => {
+describe('M17 — numeric-square predicate (minSide 8)', () => {
   const mk = (n: number): number[][] =>
     Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
 
@@ -251,60 +247,45 @@ describe('M17 — numeric-square predicates (minSide 1 vs 8)', () => {
   });
 
   it('side 0 and empty are not numeric square', () => {
-    expect(isNumericSquare([])).toBe(false);
     expect(isLargeNumericSquare([])).toBe(false);
-    expect(isNumericSquare(mk(0))).toBe(false);
     expect(isLargeNumericSquare(mk(0))).toBe(false);
   });
 
-  it('1×1 is numeric square but not large', () => {
-    expect(isNumericSquare([[5]])).toBe(true);
+  it('1×1 is not large', () => {
     expect(isLargeNumericSquare([[5]])).toBe(false);
   });
 
-  it('7×7 is numeric square but not large; 8×8 is both', () => {
-    expect(isNumericSquare(mk(7))).toBe(true);
+  it('7×7 is not large; 8×8 is large', () => {
     expect(isLargeNumericSquare(mk(7))).toBe(false);
-    expect(isNumericSquare(mk(8))).toBe(true);
     expect(isLargeNumericSquare(mk(8))).toBe(true);
   });
 
-  it('Complex entry fails both predicates', () => {
+  it('Complex entry is not numeric', () => {
     const withComplex = [
       [new Complex(1, 0), 0],
       [0, 1],
     ] as unknown as number[][];
-    expect(isNumericSquare(withComplex)).toBe(false);
     expect(isLargeNumericSquare(withComplex)).toBe(false);
   });
 
   it('ragged and non-array inputs are rejected', () => {
-    expect(isNumericSquare([[1, 2], [3]])).toBe(false);
     expect(isLargeNumericSquare(null)).toBe(false);
-    expect(isNumericSquare('not')).toBe(false);
   });
 
   it('numeric means typeof === "number": NaN and Infinity pass, BigNumber/Complex fail', () => {
-    expect(isNumericSquare([[NaN]])).toBe(true);
-    expect(isNumericSquare([[Infinity]])).toBe(true);
-    expect(isNumericSquare([[-0]])).toBe(true);
-    expect(isNumericSquare([[bignumber(1)]])).toBe(false);
+    for (const x of [NaN, Infinity, -0]) {
+      const eight = mk(8);
+      eight[0][0] = x;
+      expect(isLargeNumericSquare(eight)).toBe(true);
+    }
     expect(isLargeNumericSquare([[bignumber(1)]])).toBe(false);
     const eightWithBn = mk(8);
     (eightWithBn as unknown[][])[0][0] = bignumber(1);
-    expect(isNumericSquare(eightWithBn)).toBe(false);
     expect(isLargeNumericSquare(eightWithBn)).toBe(false);
   });
 
-  it('non-square rectangular arrays fail both predicates, including large-enough sides', () => {
-    expect(
-      isNumericSquare([
-        [1, 2, 3],
-        [4, 5, 6],
-      ])
-    ).toBe(false);
+  it('non-square rectangular arrays are not numeric square, at a large-enough side too', () => {
     const eightBySeven = Array.from({ length: 8 }, () => Array.from({ length: 7 }, () => 1));
-    expect(isNumericSquare(eightBySeven)).toBe(false);
     expect(isLargeNumericSquare(eightBySeven)).toBe(false);
   });
 });

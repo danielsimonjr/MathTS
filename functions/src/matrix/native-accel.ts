@@ -195,11 +195,6 @@ function realVector(
   return v.map((x) => x / norm);
 }
 
-/** True for a square `number[][]` of any size ≥ 1. */
-export function isNumericSquare(a: unknown): a is number[][] {
-  return isNumericSquareAtLeast(a, 1);
-}
-
 /**
  * Select `count` members of `group` whose eigenvectors are the most independent.
  *
