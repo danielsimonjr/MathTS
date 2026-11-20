@@ -1913,7 +1913,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `relativeDifference`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 - Re-exports: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `EntryRange`
 
 ---
@@ -2059,18 +2059,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                                        | Type   |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                  | Import |
-| `./eig.js`                | `eig`                                                                                                                                          | Import |
-| `./schur.js`              | `schurInternal`                                                                                                                                | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                                                                                     | Import |
+| File                      | Imports                                                                                                                                                            | Type   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                                      | Import |
+| `./eig.js`                | `eig`                                                                                                                                                              | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                                             | Import |
+| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal, sqrtmQuasiTriangular`                                                                                                                   | Import |
 
 **Exports:**
 
 - Interfaces: `LogmOptions`
-- Functions: `matrixLogm`
+- Functions: `logPade`, `matrixLogm`, `assertFiniteLogm`
 
 ---
 
@@ -2195,7 +2195,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `SchurResult`, `SchurOptions`
-- Functions: `matrixSchur`, `schurInternal`
+- Functions: `negligibleSubdiagonal`, `matrixSchur`, `schurInternal`
 
 ---
 
@@ -2203,17 +2203,17 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                     | Type   |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                               | Import |
-| `./eig.js`                | `eig`                                                                                                                       | Import |
-| `./schur.js`              | `schurInternal`                                                                                                             | Import |
-| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
+| File                      | Imports                                                                                                                                         | Type   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                   | Import |
+| `./eig.js`                | `eig`                                                                                                                                           | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                          | Import |
+| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
 - Interfaces: `SqrtmOptions`
-- Functions: `matrixSqrtm`, `matrixSqrtNewtonInternal`
+- Functions: `sqrtmQuasiTriangular`, `matrixSqrtm`, `matrixSqrtNewtonInternal`
 
 ---
 
@@ -7878,9 +7878,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `ABS_CUTOFF_LO, SQUARED, allFinite, entryRange, ldexp, withPow2Scale` |
+| Package                        | Import                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, matrixSqrtm`                                                        |
+| `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, allFinite, entryRange, ldexp, withPow2Scale, EntryRange` |
 
 **Internal Dependencies:**
 
@@ -21839,12 +21840,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 240249 |
-| Total Exports           | 7417   |
+| Total Lines of Code     | 240645 |
+| Total Exports           | 7422   |
 | Total Re-exports        | 3192   |
 | Total Classes           | 63     |
 | Total Interfaces        | 674    |
-| Total Functions         | 2598   |
+| Total Functions         | 2603   |
 | Total Type Guards       | 186    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

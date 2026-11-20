@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1353
   totalModules: 82
-  totalExports: 7417
+  totalExports: 7422
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5333,6 +5333,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - relativeDifference
         - scaleDense
         - norm1
         - householder
@@ -5363,6 +5364,7 @@ modules:
         - matSub
         - matScale
         - normInf
+        - relativeDifference
         - scaleDense
         - norm1
         - householder
@@ -5785,6 +5787,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -5796,6 +5799,7 @@ modules:
             - matInv
             - gaussJordanContinue
             - ldexpMatrix
+            - relativeDifference
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
@@ -5803,13 +5807,18 @@ modules:
         - file: ./sqrtm.js
           imports:
             - matrixSqrtNewtonInternal
+            - sqrtmQuasiTriangular
       workspaceDependencies: []
       exports:
+        - logPade
         - matrixLogm
+        - assertFiniteLogm
       interfaces:
         - LogmOptions
       functions:
+        - logPade
         - matrixLogm
+        - assertFiniteLogm
     matrix/src/operations/lstsq.ts:
       description: Linear least squares by column-pivoted Householder QR and a complete
       externalDependencies: []
@@ -6007,12 +6016,14 @@ modules:
             - givensRotation
       workspaceDependencies: []
       exports:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
       interfaces:
         - SchurResult
         - SchurOptions
       functions:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
     matrix/src/operations/sqrtm.ts:
@@ -6029,6 +6040,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -6038,17 +6050,20 @@ modules:
             - gaussJordanSolve
             - ldexpMatrix
             - normInf
+            - relativeDifference
             - entryRange
             - withPow2Scale
             - ABS_CUTOFF_LO
             - SQUARED
       workspaceDependencies: []
       exports:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
       interfaces:
         - SqrtmOptions
       functions:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
@@ -18674,6 +18689,11 @@ modules:
           imports:
             - factory
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - matrixSqrtm
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -18683,6 +18703,7 @@ modules:
             - entryRange
             - ldexp
             - withPow2Scale
+            - EntryRange
           subpath: internal
       exports:
         - createSqrtm
@@ -47231,11 +47252,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1353
   totalModules: 82
-  totalLinesOfCode: 240249
-  totalExports: 7417
+  totalLinesOfCode: 240645
+  totalExports: 7422
   totalClasses: 63
   totalInterfaces: 674
-  totalFunctions: 2598
+  totalFunctions: 2603
   totalTypeGuards: 186
   totalEnums: 0
   totalConstants: 1697

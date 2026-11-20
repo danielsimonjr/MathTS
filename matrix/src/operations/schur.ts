@@ -277,6 +277,45 @@ function schurRaw(
   });
 }
 
+/** The smallest normal double: LAPACK `SAFMIN`. */
+const SAFMIN = 2.2250738585072014e-308;
+
+/**
+ * True when the subdiagonal entry `H[i][i-1]` (i ≥ 1) is negligible, so that the block
+ * boundary between rows `i-1` and `i` is a block boundary of the quasi-triangular form.
+ *
+ * The test is the one of LAPACK `dlahqr` (Ahues and Tisseur, LAWN 122): the entry is compared
+ * with the diagonal as before, then with the product of the four entries of the 2×2 window,
+ * so a large superdiagonal entry keeps a tiny subdiagonal entry (#1171). `[[10, -1e14],
+ * [1e-12, 10]]` has eigenvalues 10 ± 10i; its subdiagonal entry is 1e-13 of the diagonal, but
+ * the block is far from triangular.
+ *
+ * Both comparisons are written as `!(x > y)`, so a NaN (a non-finite entry) takes the result of
+ * the old test (#1104).
+ *
+ * Shared by the deflation of `schurKernel` and by the readers of the Schur form
+ * (`sqrtm`, `logm`), which must find the blocks that Schur left standing.
+ *
+ * @internal
+ */
+export function negligibleSubdiagonal(H: number[][], i: number, tolerance = 1e-12): boolean {
+  const h = Math.abs(H[i][i - 1]);
+  if (h === 0) return true;
+  const diagSum = Math.abs(H[i - 1][i - 1]) + Math.abs(H[i][i]);
+  if (diagSum === 0) return h <= SAFMIN;
+  if (!(h <= tolerance * diagSum)) return false;
+
+  const upper = Math.abs(H[i - 1][i]);
+  const ab = Math.max(h, upper);
+  const ba = Math.min(h, upper);
+  const diagAbs = Math.abs(H[i][i]);
+  const diagDiff = Math.abs(H[i - 1][i - 1] - H[i][i]);
+  const aa = Math.max(diagAbs, diagDiff);
+  const bb = Math.min(diagAbs, diagDiff);
+  const s = aa + ab;
+  return !(ba * (ab / s) > Math.max(SAFMIN, tolerance * (bb * (aa / s))));
+}
+
 /** The Schur kernel of `schurRaw`, for n ≥ 2, without scaling. */
 function schurKernel(
   A: number[][],
@@ -300,8 +339,7 @@ function schurKernel(
     // Deflation: zero out negligible subdiagonal entries
     let start = end;
     while (start > 0) {
-      const scale = Math.abs(H[start - 1][start - 1]) + Math.abs(H[start][start]);
-      if (Math.abs(H[start][start - 1]) <= tolerance * scale) {
+      if (negligibleSubdiagonal(H, start, tolerance)) {
         H[start][start - 1] = 0;
         break;
       }
