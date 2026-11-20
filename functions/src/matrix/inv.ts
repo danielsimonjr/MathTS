@@ -185,12 +185,37 @@ export const createInv = /* #__PURE__ */ factory(
         return _inv(mat, rows, cols);
       }
       const nums = mat as unknown as number[][];
-      return withPow2Scale(entryRange(nums), -SQUARED, SQUARED, (e) => {
-        if (e === 0) return _inv(mat, rows, cols);
-        const scaled = nums.map((row) => row.map((v) => ldexp(v, e)));
-        const result = _inv(scaled as unknown as Scalar[][], rows, cols) as unknown as number[][];
-        return result.map((row) => row.map((v) => ldexp(v, e))) as unknown as Scalar[][];
-      });
+      // When the entries span more than the double range, the scale flushes the small ones
+      // to zero, and the scaled matrix can read as singular, while the unscaled run can
+      // overflow to a finite zero matrix (#1162). The scaled run returns null on an error
+      // and the unscaled result is kept in that case only.
+      let scaledError: unknown;
+      const result = withPow2Scale<Scalar[][] | null>(
+        entryRange(nums),
+        -SQUARED,
+        SQUARED,
+        (e) => {
+          if (e === 0) return _inv(mat, rows, cols);
+          try {
+            const scaled = nums.map((row) => row.map((v) => ldexp(v, e)));
+            const inverse = _inv(
+              scaled as unknown as Scalar[][],
+              rows,
+              cols
+            ) as unknown as number[][];
+            return inverse.map((row) => row.map((v) => ldexp(v, e))) as unknown as Scalar[][];
+          } catch (err) {
+            scaledError = err;
+            return null;
+          }
+        },
+        false,
+        (_unscaled, scaled) =>
+          scaled === null || !scaled.every((row) => row.every((v) => Number.isFinite(v)))
+      );
+      // A null result means no unscaled result was accepted: the scaled error is the error.
+      if (result === null) throw scaledError;
+      return result;
     }
 
     /**

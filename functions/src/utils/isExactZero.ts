@@ -11,3 +11,17 @@ export function isExactZero(x: unknown): boolean {
   const zero = (x as { isZero?: () => boolean } | null)?.isZero;
   return typeof zero === 'function' ? zero.call(x) : x === 0;
 }
+
+/**
+ * Tells if a stored entry is zero: a number only when it equals 0, any other type by the
+ * tolerance of `equalScalar`. The tolerance of `equalScalar` is absolute, so it reads every
+ * value of a matrix near 1e-100 as zero (#1169, #1287). A BigNumber, Fraction or Complex keeps
+ * the tolerance rule.
+ *
+ * @param x - The entry.
+ * @param equalScalar - The `equalScalar` function of the factory.
+ * @returns `true` when the entry is zero.
+ */
+export function isZeroEntry(x: unknown, equalScalar: (a: unknown, b: unknown) => unknown): boolean {
+  return typeof x === 'number' ? x === 0 : Boolean(equalScalar(x, 0));
+}

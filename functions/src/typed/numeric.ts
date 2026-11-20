@@ -11,7 +11,11 @@
  * @packageDocumentation
  */
 
-import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  densifyForSolver,
+  singularValues as matrixSingularValues,
+  type SparseMatrix,
+} from '@danielsimonjr/mathts-matrix';
 import {
   ABS_CUTOFF_LO,
   SQUARED,
@@ -19,6 +23,7 @@ import {
   ldexp,
   pow2ScaleExponent,
 } from '@danielsimonjr/mathts-core/internal';
+import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -208,14 +213,23 @@ export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
   if (n === 0) throw new Error('linsolve: empty matrix');
   if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');
   if (b.length !== n) throw new Error('linsolve: dimension mismatch');
-  return solvePivoted(dense, b, 1e-15);
+  return solvePivoted(dense, b, pivotTolerance(n));
 }
 
-/** Gaussian elimination with partial pivoting; throws when a pivot is below `pivotTol`. */
+/**
+ * Gaussian elimination with partial pivoting. It throws when the pivot is zero, or is
+ * below `pivotTol` times the largest term that the elimination subtracted from the pivot
+ * entry. The rounding error of the pivot is about eps times that term, so a smaller pivot
+ * holds no digits (a rank-deficient matrix leaves such a pivot). A pivot that no term
+ * cancelled is valid at any size, so the test does not change when a row or a column of
+ * `A` is multiplied by a constant. `lusolve` applies the same rule to its factors
+ * (`isBadLuFactorPivot`).
+ */
 function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
   const n = A.length;
 
-  // Augmented matrix
+  // Augmented matrix. After step `col`, the entries of a row below the diagonal hold its
+  // multipliers (the factor L), which the pivot test reads.
   const M = A.map((row, i) => [...row, b[i]]);
 
   // Forward elimination with partial pivoting
@@ -228,12 +242,23 @@ function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
         maxRow = row;
       }
     }
-    if (maxVal < pivotTol) throw new Error('linsolve: singular matrix');
+    // Largest term subtracted from the pivot entry: the multiplier of step k times the
+    // entry of pivot row k in this column.
+    let cancelScale = 0;
+    const pivotRow = M[maxRow];
+    for (let k = 0; k < col; k++) {
+      const term = Math.abs(pivotRow[k] * M[k][col]);
+      if (term > cancelScale) cancelScale = term;
+    }
+    if (maxVal === 0 || maxVal < pivotTol * cancelScale) {
+      throw new Error('linsolve: singular matrix');
+    }
     if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
 
     for (let row = col + 1; row < n; row++) {
       const factor = M[row][col] / M[col][col];
-      for (let j = col; j <= n; j++) {
+      M[row][col] = factor;
+      for (let j = col + 1; j <= n; j++) {
         M[row][j] -= factor * M[col][j];
       }
     }
@@ -346,7 +371,8 @@ export function globalMinimize(
 
 /**
  * Pivot limit for the column-equilibrated normal equations of {@link leastSquares}.
- * The diagonal of the scaled AᵀA is 1, so the limit is relative to the column scale.
+ * The diagonal of the scaled AᵀA is 1, and a pivot is compared with the largest term that
+ * cancelled in it, so the limit is relative to the column scale.
  */
 const LEAST_SQUARES_PIVOT_TOL = 1e-13;
 
@@ -409,16 +435,18 @@ export function leastSquares(A: number[][], b: number[]): number[] {
  * @param f - Function to integrate
  * @param a - Lower bound
  * @param b - Upper bound
- * @param opts - Options (tol, maxDepth for max subdivisions)
+ * @param opts - Options (tol, maxDepth for max subdivisions, maxPanels for the most
+ *   Gauss-Kronrod panels in total; default 100000)
  * @returns Approximate integral
  * @throws RangeError when the result is not finite or the integral does not converge
- *   (a divergent integrand, a NaN integrand, or a `maxDepth` that leaves unresolved error)
+ *   (a divergent integrand, a NaN integrand, or a `maxDepth` or `maxPanels` that leaves
+ *   unresolved error)
  */
 export function nintegrate(
   f: (x: f64) => f64,
   a: f64,
   b: f64,
-  opts?: { tol?: f64; maxDepth?: i32 }
+  opts?: { tol?: f64; maxDepth?: i32; maxPanels?: i32 }
 ): f64 {
   return quadValue('nintegrate', f, a, b, opts);
 }
@@ -1506,9 +1534,10 @@ export function eventDetection(
 
 /**
  * A copy of `A` scaled by an exact power of 2 so that its largest entry is inside
- * [2^-20, 2^400]. The pivot tests of `rank` and `nullspace` compare to an absolute
- * cutoff, so a matrix of tiny entries reads as zero (#1122). A matrix inside the window,
- * or one with a NaN or infinite entry, is copied unchanged.
+ * [2^-20, 2^400]. The pivot tests of `rank` (with an explicit tolerance) and of the
+ * `nullspace` elimination compare to an absolute cutoff, so a matrix of tiny entries
+ * reads as zero (#1122). A matrix inside the window, or one with a NaN or infinite
+ * entry, is copied unchanged.
  */
 function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
   const range = entryRange(A);
@@ -1517,17 +1546,153 @@ function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
 }
 
 /**
- * Numerical rank of a matrix using SVD-like approach.
+ * Rank of a matrix of finite entries by the singular values, and the cutoff that gave it: the
+ * number of singular values above `max(S) * max(m, n) * eps` (NumPy `matrix_rank`). The cutoff
+ * is relative to the matrix, so it is the same for a matrix and for any multiple of it (#1157).
+ * The SVD costs about 15 times the elimination of the same matrix, so {@link rankAndCutoff}
+ * calls it only when the cheaper QR decision is not certain.
+ */
+function svdRankOf(M: number[][]): { rank: i32; cut: f64 } {
+  const s = matrixSingularValues(M);
+  let largest = 0;
+  for (let i = 0; i < s.length; i++) if (s[i] > largest) largest = s[i];
+  const cut = largest * Math.max(M.length, M[0].length) * Number.EPSILON;
+  let r = 0;
+  for (let i = 0; i < s.length; i++) if (s[i] > cut) r++;
+  return { rank: r, cut };
+}
+
+/** Distance of the QR decision from the singular-value cutoff that it must keep (a factor). */
+const QRCP_MARGIN = 2;
+
+/**
+ * The rank that {@link svdRankOf} gives, from a Householder QR with column pivoting, or `null`
+ * when the QR cannot certify it. Rank `r` is certified by two bounds on the singular values `s`
+ * of `M` (`R11` is the leading `r x r` block of the triangular factor, `R22` the rest):
+ *
+ * - `s[r+1] <= ||R22||F` : a trailing block with `||R22||F <= cut / MARGIN` leaves no more than
+ *   `r` singular values above the cutoff. The cutoff is at least `max(m, n) * eps * rho`, with
+ *   `rho` the largest column norm, because `s[1] >= rho`.
+ * - `s[r] >= 1 / ||inv(R11)||F` : `R11` is a submatrix of `M` after the column permutation, so its
+ *   smallest singular value bounds `s[r]` from below. The cutoff is at most
+ *   `max(m, n) * eps * ||M||F`, because `s[1] <= ||M||F`. Both bounds keep the factor MARGIN
+ *   for the rounding error of the QR.
+ *
+ * A matrix with a singular value near the cutoff fails a bound and goes to the SVD.
+ * `cut` is the upper bound of the cutoff, for the pivot test of `nullspace`.
+ */
+function qrcpRankOf(M: number[][]): { rank: i32; cut: f64 } | null {
+  const m = M.length;
+  const n = M[0].length;
+  const p = Math.min(m, n);
+  const a = new Float64Array(m * n); // column-major
+  const colNorm2 = new Float64Array(n); // squared norm of the part of a column not yet reduced
+  let total = 0;
+  let maxColNorm2 = 0;
+  for (let j = 0; j < n; j++) {
+    let sum = 0;
+    for (let i = 0; i < m; i++) {
+      const v = M[i][j];
+      a[i + j * m] = v;
+      sum += v * v;
+    }
+    colNorm2[j] = sum;
+    total += sum;
+    if (sum > maxColNorm2) maxColNorm2 = sum;
+  }
+  const scale = Math.max(m, n) * Number.EPSILON;
+  const cutLower = (scale * Math.sqrt(maxColNorm2)) / QRCP_MARGIN;
+  const cutUpper = scale * Math.sqrt(total);
+  const tailLimit = cutLower * cutLower;
+
+  let r = p;
+  for (let k = 0; k < p; k++) {
+    let tail = 0;
+    for (let j = k; j < n; j++) tail += colNorm2[j];
+    if (tail <= tailLimit) {
+      r = k;
+      break;
+    }
+    let pivot = k;
+    for (let j = k + 1; j < n; j++) if (colNorm2[j] > colNorm2[pivot]) pivot = j;
+    if (pivot !== k) {
+      const ok = k * m;
+      const op = pivot * m;
+      for (let i = 0; i < m; i++) {
+        const t = a[ok + i];
+        a[ok + i] = a[op + i];
+        a[op + i] = t;
+      }
+      const t = colNorm2[k];
+      colNorm2[k] = colNorm2[pivot];
+      colNorm2[pivot] = t;
+    }
+    // Householder reflector of a[k.., k]; the reduced column keeps its R entry on top.
+    const ok = k * m;
+    let norm2 = 0;
+    for (let i = k; i < m; i++) norm2 += a[ok + i] * a[ok + i];
+    const alpha = a[ok + k] > 0 ? -Math.sqrt(norm2) : Math.sqrt(norm2);
+    a[ok + k] -= alpha;
+    let vv = 0;
+    for (let i = k; i < m; i++) vv += a[ok + i] * a[ok + i];
+    for (let j = k + 1; j < n; j++) {
+      const oj = j * m;
+      let dot = 0;
+      for (let i = k; i < m; i++) dot += a[ok + i] * a[oj + i];
+      const f = (2 * dot) / vv;
+      a[oj + k] -= f * a[ok + k];
+      let sum = 0;
+      for (let i = k + 1; i < m; i++) {
+        const v = a[oj + i] - f * a[ok + i];
+        a[oj + i] = v;
+        sum += v * v;
+      }
+      colNorm2[j] = sum;
+    }
+    a[ok + k] = alpha;
+  }
+  if (r === 0) return { rank: 0, cut: cutUpper };
+
+  // Lower bound of s[r]: 1 / ||inv(R11)||F, with R11 = a[0..r, 0..r] upper triangular.
+  const x = new Float64Array(r);
+  let inverse2 = 0;
+  for (let j = 0; j < r; j++) {
+    x[j] = 1 / a[j + j * m];
+    inverse2 += x[j] * x[j];
+    for (let i = j - 1; i >= 0; i--) {
+      let sum = 0;
+      for (let l = i + 1; l <= j; l++) sum += a[i + l * m] * x[l];
+      x[i] = -sum / a[i + i * m];
+      inverse2 += x[i] * x[i];
+    }
+  }
+  if (!(1 / Math.sqrt(inverse2) > QRCP_MARGIN * cutUpper)) return null;
+  return { rank: r, cut: cutUpper };
+}
+
+/** Rank and cutoff of a matrix of finite entries: the QR decision when certain, else the SVD. */
+function rankAndCutoff(M: number[][]): { rank: i32; cut: f64 } {
+  return qrcpRankOf(M) ?? svdRankOf(M);
+}
+
+/**
+ * Numerical rank of a matrix.
  *
  * @param A - Matrix (m x n)
- * @param tol - Absolute pivot tolerance. Without it, the matrix is first scaled by a power
- *   of 2 into [2^-20, 2^400] and the tolerance is 1e-10.
+ * @param tol - Explicit absolute tolerance on the pivots of a Gaussian elimination. Without
+ *   it, the rank is the number of singular values above `max(S) * max(m, n) * eps`, as NumPy
+ *   `matrix_rank` counts. A matrix with a NaN or infinite entry has no singular values, so
+ *   it is eliminated after a power-of-2 scale into [2^-20, 2^400] with the tolerance 1e-10.
  * @returns Numerical rank
  */
 export function rank(A: number[][], tol?: f64): i32 {
   const m = A.length;
   if (m === 0) return 0;
   const n = A[0].length;
+  if (n === 0) return 0;
+  if (tol === undefined && entryRange(A).finite) {
+    return rankAndCutoff(scaledCopyForAbsoluteCutoff(A)).rank;
+  }
 
   // Use Gaussian elimination to count pivots
   const M = tol === undefined ? scaledCopyForAbsoluteCutoff(A) : A.map((row) => row.slice());
@@ -1557,18 +1722,19 @@ export function rank(A: number[][], tol?: f64): i32 {
 }
 
 /**
- * Null space basis of a matrix.
- *
- * @param A - Matrix (m x n)
- * @returns Array of basis vectors spanning the null space
+ * Reduced row echelon form of `M`, in place. A column is a pivot column when its largest
+ * entry below the current row satisfies `accept`, and at most `limit` columns are. An
+ * entry of a pivot column is eliminated only when its absolute value is above `elimTol`.
+ * Returns the pivot columns.
  */
-export function nullspace(A: number[][]): number[][] {
-  const m = A.length;
-  if (m === 0) return [];
-  const n = A[0].length;
-
-  // RREF
-  const M = scaledCopyForAbsoluteCutoff(A);
+function rrefPivots(
+  M: number[][],
+  accept: (maxVal: f64) => boolean,
+  limit: i32,
+  elimTol: f64
+): i32[] {
+  const m = M.length;
+  const n = M[0].length;
   const pivotCols: i32[] = [];
   let r = 0;
 
@@ -1581,14 +1747,14 @@ export function nullspace(A: number[][]): number[][] {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-10) continue;
+    if (pivotCols.length >= limit || !accept(maxVal)) continue;
     if (maxRow !== r) [M[r], M[maxRow]] = [M[maxRow], M[r]];
 
     const pivot = M[r][col];
     for (let j = 0; j < n; j++) M[r][j] /= pivot;
 
     for (let row = 0; row < m; row++) {
-      if (row !== r && Math.abs(M[row][col]) > 1e-15) {
+      if (row !== r && Math.abs(M[row][col]) > elimTol) {
         const factor = M[row][col];
         for (let j = 0; j < n; j++) M[row][j] -= factor * M[r][j];
       }
@@ -1596,6 +1762,40 @@ export function nullspace(A: number[][]): number[][] {
 
     pivotCols.push(col);
     r++;
+  }
+
+  return pivotCols;
+}
+
+/**
+ * Null space basis of a matrix.
+ *
+ * For a matrix of finite entries, the number of basis vectors is `n - rank(A)`, with the
+ * rank of {@link rank}: the elimination takes at most that many pivots, and a pivot must
+ * be above the singular-value cutoff of the matrix. A matrix with a NaN or infinite entry
+ * is eliminated with the absolute pivot tolerance 1e-10.
+ *
+ * @param A - Matrix (m x n)
+ * @returns Array of basis vectors spanning the null space
+ */
+export function nullspace(A: number[][]): number[][] {
+  const m = A.length;
+  if (m === 0) return [];
+  const n = A[0].length;
+
+  const scaled = scaledCopyForAbsoluteCutoff(A);
+  let M = scaled.map((row) => row.slice());
+  let pivotCols: i32[];
+  if (n > 0 && entryRange(A).finite) {
+    const { rank: r, cut } = rankAndCutoff(scaled);
+    pivotCols = rrefPivots(M, (v) => v > cut, r, 0);
+    if (pivotCols.length < r) {
+      // Rounding left a pivot below the cutoff: take the largest nonzero pivots instead.
+      M = scaled.map((row) => row.slice());
+      pivotCols = rrefPivots(M, (v) => v > 0, r, 0);
+    }
+  } else {
+    pivotCols = rrefPivots(M, (v) => !(v < 1e-10), n, 1e-15);
   }
 
   // Free variables

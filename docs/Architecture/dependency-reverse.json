@@ -788,6 +788,16 @@
       "functions/src/utils/parseNumber.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/isExactZero.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lsolveAll.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/usolveAll.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/type/matrix/Spa.ts"
+    ],
     "functions/src/utils/typed-impl.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
@@ -1008,10 +1018,6 @@
       "functions/src/utils/isZero.ts",
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
-    ],
-    "functions/src/utils/isExactZero.ts": [
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/matrix/inv.ts"
     ],
     "functions/src/utils/is.ts": [
       "functions/src/algebra/decomposition/qr.ts",
@@ -1277,7 +1283,8 @@
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/validate-u-pivots.ts"
+      "functions/src/algebra/solver/validate-u-pivots.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/algebra/solver/validate-u-pivots.ts": [
       "functions/src/algebra/solver/lusolve.ts"
