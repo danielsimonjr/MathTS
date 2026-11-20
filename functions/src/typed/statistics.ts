@@ -17,6 +17,7 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
 import { assertAllocSize } from '../utils/limits.js';
+import { hasNaN } from './number-matrix.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -777,11 +778,13 @@ export function quickSelect(arr: number[], k: i32): f64 {
  * Find the median of an array in O(n) average time using quickselect.
  *
  * @param arr - Input array (not modified)
- * @returns The median value
+ * @returns The median value, or NaN for an empty array or an array that holds a NaN
+ *   (quickselect has no order for NaN; `median` and `numpy.median` also give NaN)
  */
 export function medianSelect(arr: number[]): f64 {
   const n: i32 = arr.length;
   if (n === 0) return NaN;
+  if (hasNaN(arr)) return NaN;
   if (n === 1) return arr[0];
 
   const mid: i32 = Math.floor(n / 2);
