@@ -209,12 +209,21 @@ describe('eigs of a matrix of Fractions takes the native solver (#1179)', () => 
     expect(worstResidual(TRIAGE3, r)).toBeLessThan(1e-13);
   });
 
-  it('gives the same values as the number matrix', () => {
+  it('gives the values of the number matrix in the factory order, as mathjs 15.2.0 does', () => {
+    // |lambda| ascending: mathjs 15.2.0 gives 3.0496, -5.4560, 5.4664 for this Fraction Array.
+    const byRe = (p: { re: number }, q: { re: number }): number => p.re - q.re;
     const want = toArray(run(TRIAGE3).values).map(toRi);
-    const got = toArray(run(fractions).values).map(toRi);
-    got.forEach((v, k) => {
-      expect(v.re).toBeCloseTo(want[k].re, 12);
-      expect(v.im).toBeCloseTo(want[k].im, 12);
-    });
+    for (const input of [fractions, mixed]) {
+      const got = toArray(run(input).values).map(toRi);
+      expect(got.map((v) => Math.round(v.re * 1e4) / 1e4)).toEqual([3.0496, -5.456, 5.4664]);
+      [...got].sort(byRe).forEach((v, k) => {
+        expect(v.re).toBeCloseTo([...want].sort(byRe)[k].re, 12);
+        expect(v.im).toBeCloseTo([...want].sort(byRe)[k].im, 12);
+      });
+    }
+    const r = run(fractions);
+    expect(r.eigenvectors.map((e) => toRi(e.value).re)).toEqual(
+      toArray(r.values).map((v) => toRi(v).re)
+    );
   });
 });

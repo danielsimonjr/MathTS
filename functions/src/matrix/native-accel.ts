@@ -372,8 +372,27 @@ export function correctEigs(
 ): unknown {
   const nums = asNumberSquare(a);
   const native = nums === undefined ? undefined : nativeEigs(nums, options);
-  if (native !== undefined) return native;
-  return options === undefined ? factoryEigs(a) : factoryEigs(a, options);
+  if (native === undefined) return options === undefined ? factoryEigs(a) : factoryEigs(a, options);
+  // An Array with a Fraction entry went to the factory before #1179: it keeps the factory order,
+  // as mathjs 15.2.0 does. A number Array keeps the real-part order of the native solver.
+  const hasFraction = (a as unknown[][]).some((row) => row.some((x) => isFraction(x)));
+  return hasFraction ? inFactoryOrder(native, (data) => data) : native;
+}
+
+/**
+ * The native result in the order of the factory (`compareFactoryOrder`), each list built by `wrap`.
+ */
+function inFactoryOrder(native: NativeEigs, wrap: (data: unknown[]) => unknown): unknown {
+  const wrapped: Record<string, unknown> = {
+    values: wrap([...native.values].sort(compareFactoryOrder)),
+  };
+  if (native.eigenvectors !== undefined) {
+    wrapped.eigenvectors = [...native.eigenvectors]
+      .sort((p, q) => compareFactoryOrder(p.value, q.value))
+      .map(({ value, vector }) => ({ value, vector: wrap(vector) }));
+    defineRemovedVectorsGetter(wrapped);
+  }
+  return wrapped;
 }
 
 /**
@@ -392,15 +411,5 @@ export function correctEigsOfMatrix(
   const nums = asNumberSquare(arr);
   const native = nums === undefined ? undefined : nativeEigs(nums, options);
   if (native === undefined) return options === undefined ? factoryEigs(m) : factoryEigs(m, options);
-  const wrap = options?.matricize !== false ? toMatrix : (data: unknown[]) => data;
-  const wrapped: Record<string, unknown> = {
-    values: wrap([...native.values].sort(compareFactoryOrder)),
-  };
-  if (native.eigenvectors !== undefined) {
-    wrapped.eigenvectors = [...native.eigenvectors]
-      .sort((p, q) => compareFactoryOrder(p.value, q.value))
-      .map(({ value, vector }) => ({ value, vector: wrap(vector) }));
-    defineRemovedVectorsGetter(wrapped);
-  }
-  return wrapped;
+  return inFactoryOrder(native, options?.matricize !== false ? toMatrix : (data) => data);
 }
