@@ -211,12 +211,27 @@ export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
   return solvePivoted(dense, b, 1e-15);
 }
 
-/** Gaussian elimination with partial pivoting; throws when a pivot is below `pivotTol`. */
+/**
+ * Gaussian elimination with partial pivoting. It throws when the pivot is zero or is
+ * below `pivotTol` times the largest entry of the pivot row of `A` (before elimination),
+ * so a matrix that is only small (or only large) is not judged singular.
+ */
 function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
   const n = A.length;
 
   // Augmented matrix
   const M = A.map((row, i) => [...row, b[i]]);
+
+  // Largest entry of each row of A. It moves with its row when the rows swap.
+  const rowScale: number[] = new Array(n);
+  for (let i = 0; i < n; i++) {
+    let s = 0;
+    for (let j = 0; j < n; j++) {
+      const a = Math.abs(A[i][j]);
+      if (a > s) s = a;
+    }
+    rowScale[i] = s;
+  }
 
   // Forward elimination with partial pivoting
   for (let col = 0; col < n; col++) {
@@ -228,8 +243,13 @@ function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
         maxRow = row;
       }
     }
-    if (maxVal < pivotTol) throw new Error('linsolve: singular matrix');
-    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
+    if (maxVal === 0 || maxVal < pivotTol * rowScale[maxRow]) {
+      throw new Error('linsolve: singular matrix');
+    }
+    if (maxRow !== col) {
+      [M[col], M[maxRow]] = [M[maxRow], M[col]];
+      [rowScale[col], rowScale[maxRow]] = [rowScale[maxRow], rowScale[col]];
+    }
 
     for (let row = col + 1; row < n; row++) {
       const factor = M[row][col] / M[col][col];

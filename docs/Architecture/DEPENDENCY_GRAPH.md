@@ -3012,17 +3012,17 @@ graph LR
 
 ## Functions/algebra Dependencies
 
-### `functions/src/algebra/decomposition/lup.ts` - Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a
+### `functions/src/algebra/decomposition/lup.ts` - Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of
 
 **Internal Dependencies:**
 
-| File                           | Imports         | Type               |
-| ------------------------------ | --------------- | ------------------ |
-| `../../utils/object.js`        | `clone`         | Import             |
-| `../../utils/string.js`        | `format`        | Import             |
-| `../../utils/factory.js`       | `factory`       | Import             |
-| `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
-| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                           | Imports                                | Type               |
+| ------------------------------ | -------------------------------------- | ------------------ |
+| `../../utils/object.js`        | `clone`                                | Import             |
+| `../../utils/string.js`        | `format`                               | Import             |
+| `../../utils/factory.js`       | `factory`                              | Import             |
+| `../../utils/typed-impl.js`    | `createNumberFieldOps, NumberFieldOps` | Import             |
+| `../../core/function/typed.js` | `TypedFunction`                        | Import (type-only) |
 
 **Exports:**
 
@@ -3040,16 +3040,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                              | Type               |
-| -------------------------------- | ------------------------------------ | ------------------ |
-| `../../utils/factory.js`         | `factory`                            | Import             |
-| `../../utils/string.js`          | `format`                             | Import             |
-| `../../utils/isExactZero.js`     | `isExactZero`                        | Import             |
-| `../../utils/typed-impl.js`      | `findTypedImpl`                      | Import             |
-| `../../core/function/typed.js`   | `TypedFunction`                      | Import (type-only) |
-| `../../utils/is.js`              | `isBigNumber, isComplex, isFraction` | Import             |
-| `../../utils/real-scale.js`      | `realScale, squaresLeaveRange`       | Import             |
-| `../../utils/bignumber-hypot.js` | `P_NORM_SUM_MIN`                     | Import             |
+| File                             | Imports                                | Type               |
+| -------------------------------- | -------------------------------------- | ------------------ |
+| `../../utils/factory.js`         | `factory`                              | Import             |
+| `../../utils/string.js`          | `format`                               | Import             |
+| `../../utils/isExactZero.js`     | `isExactZero`                          | Import             |
+| `../../utils/typed-impl.js`      | `createNumberFieldOps, NumberFieldOps` | Import             |
+| `../../core/function/typed.js`   | `TypedFunction`                        | Import (type-only) |
+| `../../utils/is.js`              | `isBigNumber, isComplex, isFraction`   | Import             |
+| `../../utils/real-scale.js`      | `realScale, squaresLeaveRange`         | Import             |
+| `../../utils/bignumber-hypot.js` | `P_NORM_SUM_MIN`                       | Import             |
 
 **Exports:**
 
@@ -3369,7 +3369,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/pivot-tolerance.ts` - Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Pivot floor relative to the scale of the pivot row — the same factor `linsolve` uses
 
 **Exports:**
 
@@ -12519,7 +12519,7 @@ graph LR
 
 | Package                        | Import                                                         |
 | ------------------------------ | -------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix` | `densifyForSolver, SparseMatrix`                               |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver, singularValues, SparseMatrix`               |
 | `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, pow2ScaleExponent` |
 
 **Internal Dependencies:**
@@ -13521,7 +13521,9 @@ graph LR
 
 **Exports:**
 
-- Functions: `findTypedImpl`
+- Interfaces: `NumberFieldScalars`
+- Types: `NumberFieldOps`
+- Functions: `findTypedImpl`, `createNumberFieldOps`
 
 ---
 
@@ -21768,12 +21770,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238390 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238566 |
+| Total Exports           | 7398   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Interfaces        | 670    |
+| Total Functions         | 2580   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -1,5 +1,5 @@
 /**
- * UPT N5: leastSquares equilibrates columns; linsolve keeps its absolute pivot limit.
+ * UPT N5: leastSquares equilibrates columns; linsolve keeps a pivot limit of 1e-15 of the pivot row.
  */
 import { describe, it, expect } from 'vitest';
 import { leastSquares, linsolve } from '../src/index.js';
@@ -71,16 +71,28 @@ describe('UPT N5 leastSquares', () => {
 });
 
 describe('UPT N5 linsolve public limit', () => {
-  it('still throws on a pivot below the absolute 1e-15 limit', () => {
+  it('still throws on a pivot below 1e-15 of its row', () => {
     expect(() =>
       linsolve(
         [
-          [1e-16, 0],
+          [1e-16, 1],
           [0, 1],
         ],
         [1, 1]
       )
     ).toThrow(/singular/);
+  });
+
+  it('solves a pivot that is small only against other rows (#1169)', () => {
+    const x = linsolve(
+      [
+        [1e-16, 0],
+        [0, 1],
+      ],
+      [1, 1]
+    );
+    expect(x[0] / 1e16).toBeCloseTo(1, 14);
+    expect(x[1]).toBe(1);
   });
 });
 

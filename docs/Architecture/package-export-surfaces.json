@@ -2249,6 +2249,7 @@
       "createNthRoots",
       "createNuclearMagneton",
       "createNullish",
+      "createNumberFieldOps",
       "createNumeric",
       "createOct",
       "createOnes",

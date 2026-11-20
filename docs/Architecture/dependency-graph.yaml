@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7397
+  totalExports: 7398
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7344,9 +7344,7 @@ modules:
         - assertSameTape
   functions/algebra:
     functions/src/algebra/decomposition/lup.ts:
-      description: >-
-        Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`)
-        and a
+      description: 'Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7361,7 +7359,8 @@ modules:
             - factory
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7387,7 +7386,8 @@ modules:
             - isExactZero
         - file: ../../utils/typed-impl.js
           imports:
-            - findTypedImpl
+            - createNumberFieldOps
+            - NumberFieldOps
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -7938,7 +7938,7 @@ modules:
       constants:
         - createLusolve
     functions/src/algebra/solver/pivot-tolerance.ts:
-      description: Unit-scale pivot floor — the same absolute cutoff `linsolve` uses on an O(1) matrix
+      description: Pivot floor relative to the scale of the pivot row — the same factor `linsolve` uses
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -27254,6 +27254,7 @@ modules:
           directory: matrix
           imports:
             - densifyForSolver
+            - singularValues
             - SparseMatrix
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -29488,8 +29489,12 @@ modules:
       workspaceDependencies: []
       exports:
         - findTypedImpl
+        - createNumberFieldOps
+      interfaces:
+        - NumberFieldScalars
       functions:
         - findTypedImpl
+        - createNumberFieldOps
   functions/wasm:
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
@@ -47038,11 +47043,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238390
-  totalExports: 7397
+  totalLinesOfCode: 238566
+  totalExports: 7398
   totalClasses: 62
-  totalInterfaces: 669
-  totalFunctions: 2579
+  totalInterfaces: 670
+  totalFunctions: 2580
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695
