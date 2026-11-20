@@ -128,7 +128,9 @@ describe('clone oracle — string derivative (symbolicPartialDerivative / casDer
   });
 
   it('parentheses, nested functions, unary minus, products, x vs y, whitespace', () => {
-    expect(symbolicPartialDerivative('(x + 1)', 'x')).toBe('d/dx((x) + 0');
+    // The term reader leaves the broken placeholder 'd/dx((x) + 0' for this input (#1014 item 2);
+    // symbolicPartialDerivative now returns the expression derivative, as mathjs does (1).
+    expect(symbolicPartialDerivative('(x + 1)', 'x')).toBe('1');
     expect(String(casDerivative('(x + 1)', 'x'))).toBe(String(derivative('(x + 1)', 'x')));
     expect(String(casDerivative('sin(cos(x))', 'x'))).toBe(String(derivative('sin(cos(x))', 'x')));
   });

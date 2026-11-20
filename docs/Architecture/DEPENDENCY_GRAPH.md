@@ -124,10 +124,10 @@ The codebase is organized into the following modules:
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
 - **functions/algebra**: 49 files
-- **functions/arithmetic**: 39 files
+- **functions/arithmetic**: 40 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 12 files
+- **functions/cas**: 13 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 44 files
+- **functions/utils**: 45 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 587            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 590            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3162,18 +3162,19 @@ graph LR
 
 ---
 
-### `functions/src/algebra/rationalize.ts` - Transform a rationalizable expression in a rational fraction.
+### `functions/src/algebra/rationalize.ts` - The rule engine distributes a product of sums term by term, and its cost grows with the term
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                             | Type               |
-| --------------------------- | ------------------------------------------------------------------- | ------------------ |
-| `../utils/number.js`        | `isInteger`                                                         | Import             |
-| `../utils/factory.js`       | `factory`                                                           | Import             |
-| `../typed/algebra.js`       | `expand`                                                            | Import             |
-| `../utils/node.js`          | `MathNode, ConstantNode, SymbolNode, OperatorNode, ParenthesisNode` | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`                                                     | Import (type-only) |
-| `../core/config.js`         | `ConfigOptions`                                                     | Import (type-only) |
+| File                           | Imports                                                             | Type               |
+| ------------------------------ | ------------------------------------------------------------------- | ------------------ |
+| `../utils/number.js`           | `isInteger`                                                         | Import             |
+| `../utils/factory.js`          | `factory`                                                           | Import             |
+| `../typed/algebra.js`          | `expand`                                                            | Import             |
+| `../typed/polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients`                       | Import             |
+| `../utils/node.js`             | `MathNode, ConstantNode, SymbolNode, OperatorNode, ParenthesisNode` | Import (type-only) |
+| `../core/function/typed.js`    | `TypedFunction`                                                     | Import (type-only) |
+| `../core/config.js`            | `ConfigOptions`                                                     | Import (type-only) |
 
 **Exports:**
 
@@ -3259,17 +3260,23 @@ graph LR
 
 ### `functions/src/algebra/simplifyConstant.ts` - simplifyConstant() takes a mathjs expression (either a Node representing
 
+**External Dependencies:**
+
+| Package       | Import       |
+| ------------- | ------------ |
+| `fraction.js` | `FractionJS` |
+
 **Internal Dependencies:**
 
-| File                        | Imports                                                                                                           | Type               |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`            | `isComplex, isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
-| `../utils/factory.js`       | `factory`                                                                                                         | Import             |
-| `../utils/number.js`        | `safeNumberType`                                                                                                  | Import             |
-| `./simplify/util.js`        | `createUtil`                                                                                                      | Import             |
-| `../utils/noop.js`          | `noBignumber, noFraction`                                                                                         | Import             |
-| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                                 | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`                                                                                                   | Import (type-only) |
+| File                        | Imports                                                                                                                        | Type               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `../utils/is.js`            | `isBigNumber, isComplex, isFraction, isMatrix, isNode, isArrayNode, isConstantNode, isIndexNode, isObjectNode, isOperatorNode` | Import             |
+| `../utils/factory.js`       | `factory`                                                                                                                      | Import             |
+| `../utils/number.js`        | `safeNumberType`                                                                                                               | Import             |
+| `./simplify/util.js`        | `createUtil`                                                                                                                   | Import             |
+| `../utils/noop.js`          | `noBignumber, noFraction`                                                                                                      | Import             |
+| `../utils/node.js`          | `MathNode, ConstantNode, ArrayNode, OperatorNode`                                                                              | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction`                                                                                                                | Import (type-only) |
 
 **Exports:**
 
@@ -3806,12 +3813,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports          | Type               |
-| --------------------------- | ---------------- | ------------------ |
-| `../utils/is.js`            | `isConstantNode` | Import             |
-| `../utils/factory.js`       | `factory`        | Import             |
-| `../utils/node.js`          | `MathNode`       | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`  | Import (type-only) |
+| File                        | Imports                     | Type               |
+| --------------------------- | --------------------------- | ------------------ |
+| `../utils/is.js`            | `isConstantNode`            | Import             |
+| `../cas/exact-identity.js`  | `isExactPolynomialIdentity` | Import             |
+| `../utils/factory.js`       | `factory`                   | Import             |
+| `../utils/node.js`          | `MathNode`                  | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -4093,6 +4101,21 @@ graph LR
 
 ---
 
+### `functions/src/arithmetic/fraction-gcd.ts` - The gcd of two fractions, as fraction.js defines it: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d).
+
+**Internal Dependencies:**
+
+| File                                     | Imports     | Type   |
+| ---------------------------------------- | ----------- | ------ |
+| `../typed/factorization/integer-poly.js` | `bigintGcd` | Import |
+
+**Exports:**
+
+- Interfaces: `FractionParts`
+- Functions: `fractionGcd`, `fractionLcm`
+
+---
+
 ### `functions/src/arithmetic/gcd.ts` - Calculate the greatest common divisor for two or more values or arrays.
 
 **Internal Dependencies:**
@@ -4101,6 +4124,7 @@ graph LR
 | ---------------------------------------------- | ---------------------------- | ------------------ |
 | `../utils/number.js`                           | `isInteger`                  | Import             |
 | `../utils/factory.js`                          | `factory`                    | Import             |
+| `./fraction-gcd.js`                            | `fractionGcd`                | Import             |
 | `../core/function/typed.js`                    | `TypedFunction`              | Import (type-only) |
 | `../type/matrix/types.js`                      | `AlgorithmFunction`          | Import (type-only) |
 | `../core/config.js`                            | `ConfigOptions`              | Import (type-only) |
@@ -4164,6 +4188,7 @@ graph LR
 | File                                           | Imports                           | Type               |
 | ---------------------------------------------- | --------------------------------- | ------------------ |
 | `../utils/factory.js`                          | `factory`                         | Import             |
+| `./fraction-gcd.js`                            | `fractionLcm`                     | Import             |
 | `../core/function/typed.js`                    | `TypedFunction`                   | Import (type-only) |
 | `../type/matrix/types.js`                      | `AlgorithmFunction`               | Import (type-only) |
 | `../type/matrix/utils/matAlgo02xDS0.js`        | `createMatAlgo02xDS0`             | Import             |
@@ -5743,6 +5768,23 @@ graph LR
 
 ---
 
+### `functions/src/cas/exact-identity.ts` - Decide that two expressions are the same polynomial, exactly.
+
+**Internal Dependencies:**
+
+| File                                     | Imports                                                                            | Type               |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- | ------------------ |
+| `../typed/factorization/multi-poly.js`   | `addMP, fromTerms, integerContentMP, isZero, mulMP, negMP, totalDegree, MultiPoly` | Import             |
+| `../typed/factorization/integer-poly.js` | `bigintGcd`                                                                        | Import             |
+| `../utils/node.js`                       | `MathNode`                                                                         | Import (type-only) |
+| `./polynomial-limits.js`                 | `MAX_POLYNOMIAL_DEGREE, MAX_POLYNOMIAL_TERMS`                                      | Import             |
+
+**Exports:**
+
+- Functions: `isExactPolynomialIdentity`
+
+---
+
 ### `functions/src/cas/layer3.ts` - Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
 
 **Workspace Dependencies:**
@@ -5786,9 +5828,9 @@ graph LR
 
 **Exports:**
 
-- Classes: `PolynomialDegreeError`
-- Functions: `polynomialDegreeMessage`
-- Constants: `MAX_POLYNOMIAL_DEGREE`
+- Classes: `PolynomialDegreeError`, `PolynomialSizeError`
+- Functions: `polynomialDegreeMessage`, `polynomialSizeMessage`
+- Constants: `MAX_POLYNOMIAL_DEGREE`, `MAX_POLYNOMIAL_TERMS`
 
 ---
 
@@ -6212,18 +6254,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                   | Type   |
-| ------------------------------------ | ------------------------- | ------ |
-| `./scope.js`                         | `factoryScope`            | Import |
-| `./index.js`                         | `* as activatedFactories` | Import |
-| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import |
+| File                                 | Imports                   | Type      |
+| ------------------------------------ | ------------------------- | --------- |
+| `./scope.js`                         | `factoryScope`            | Import    |
+| `./index.js`                         | `* as activatedFactories` | Import    |
+| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import    |
+| `../utils/json-replacer.js`          | `replacer`                | Re-export |
 
 **Exports:**
 
 - Interfaces: `PhysicsEvaluateOptions`, `PhysicsScopeOptions`
 - Types: `PhysicsCharge`
-- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `replacer`, `reviver`, `createInstanceEvaluator`
+- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `reviver`, `createInstanceEvaluator`
 - Constants: `EVALUATE_SCOPE_OMIT`, `parse`
+- Re-exports: `replacer`
 
 ---
 
@@ -6243,6 +6287,7 @@ graph LR
 | File                                     | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Type                  |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | `./scope.js`                             | `factoryScope`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
+| `../utils/json-replacer.js`              | `replacer`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import                |
 | `../typed/arithmetic.js`                 | `add, multiply`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../typed/divide-inverse.js`             | `registerDivideInverse`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Import                |
 | `../typed/exact-reductions.js`           | `registerExactReductions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import                |
@@ -11740,8 +11785,9 @@ graph LR
 | `./euclid.js`                     | `euclidSnap`                                                                                        | Import |
 | `../utils/samples.js`             | `toSamples`                                                                                         | Import |
 | `../cas/render-polynomial.js`     | `renderPolynomial`                                                                                  | Import |
-| `../cas/polynomial-limits.js`     | `PolynomialDegreeError, polynomialDegreeMessage`                                                    | Import |
+| `../cas/polynomial-limits.js`     | `PolynomialDegreeError, PolynomialSizeError, polynomialDegreeMessage, polynomialSizeMessage`        | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
+| `../factories/scope.js`           | `factoryScope`                                                                                      | Import |
 | `./call-rewrite.js`               | `rewriteCalls, topLevelFactors, isParenthesised, hasTopLevelComma`                                  | Import |
 | `../cas/polynomial-canonical.js`  | `collapseIdenticalFactors, tryPolynomialCanonicalForm`                                              | Import |
 
@@ -11844,6 +11890,7 @@ graph LR
 | `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                        | Import |
 | `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                      | Import |
 | `../cas/elementary-solve.js`     | `solveElementary`                                                                 | Import |
+| `../cas/polynomial-limits.js`    | `PolynomialSizeError`                                                             | Import |
 | `../cas/syntax-tree.js`          | `MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, parseTree, polynomialCoefficients` | Import |
 | `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                       | Import |
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                              | Import |
@@ -12586,10 +12633,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                        | Type   |
-| ----------------------------- | ---------------------------------------------- | ------ |
-| `../cas/render-polynomial.js` | `coefficientTexts, renderPolynomial`           | Import |
-| `../cas/polynomial-limits.js` | `MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError` | Import |
+| File                          | Imports                                                                                   | Type   |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| `../cas/render-polynomial.js` | `coefficientTexts, renderPolynomial`                                                      | Import |
+| `../cas/polynomial-limits.js` | `MAX_POLYNOMIAL_DEGREE, MAX_POLYNOMIAL_TERMS, PolynomialDegreeError, PolynomialSizeError` | Import |
 
 **Exports:**
 
@@ -13285,6 +13332,14 @@ graph LR
 **Exports:**
 
 - Constants: `createIsZero`
+
+---
+
+### `functions/src/utils/json-replacer.ts` - `JSON.stringify` replacer that preserves non-finite numbers and bigint values, with the tags
+
+**Exports:**
+
+- Functions: `replacer`
 
 ---
 
@@ -18033,7 +18088,7 @@ graph LR
 
 ---
 
-### `expression/src/node/OperatorNode.ts` - Returns true if the expression starts with a constant, under
+### `expression/src/node/OperatorNode.ts` - Join the LaTeX of an operator and of its operand. A command (`\neg`, `\cdot`, `\wedge`)
 
 **Internal Dependencies:**
 
@@ -20852,7 +20907,7 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/factories/index`                        | 248 files    | 15 files   |
+| `functions/src/factories/index`                        | 249 files    | 15 files   |
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
@@ -20887,10 +20942,10 @@ graph LR
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/typed/algebra`                          | 12 files     | 7 files    |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
 | `core/src/index`                                       | 18 files     | 0 files    |
-| `tensor/src/named-index`                               | 0 files      | 18 files   |
 
 ---
 
@@ -21104,7 +21159,7 @@ graph TD
         N123[dotDivide]
         N124[dotMultiply]
         N125[dotPow]
-        N126[...29 more]
+        N126[...30 more]
     end
 
     subgraph Functions/bitwise
@@ -21136,14 +21191,14 @@ graph TD
         N146[antiderivative]
         N147[closed-form-roots]
         N148[elementary-solve]
-        N149[layer3]
-        N150[polynomial-canonical]
-        N151[polynomial-limits]
-        N152[rat]
-        N153[rational-integrate]
-        N154[real-roots]
-        N155[render-coeff-times]
-        N156[...2 more]
+        N149[exact-identity]
+        N150[layer3]
+        N151[polynomial-canonical]
+        N152[polynomial-limits]
+        N153[rat]
+        N154[rational-integrate]
+        N155[real-roots]
+        N156[...3 more]
     end
 
     subgraph Functions/combinatorics
@@ -21443,7 +21498,7 @@ graph TD
         N369[clone]
         N370[collection]
         N371[complex]
-        N372[...34 more]
+        N372[...35 more]
     end
 
     subgraph Functions/wasm
@@ -21792,17 +21847,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1350   |
+| Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 240414 |
-| Total Exports           | 7418   |
-| Total Re-exports        | 3193   |
-| Total Classes           | 62     |
-| Total Interfaces        | 674    |
-| Total Functions         | 2601   |
-| Total Type Guards       | 184    |
+| Total Lines of Code     | 241197 |
+| Total Exports           | 7426   |
+| Total Re-exports        | 3194   |
+| Total Classes           | 63     |
+| Total Interfaces        | 675    |
+| Total Functions         | 2605   |
+| Total Type Guards       | 185    |
 | Total Enums             | 0      |
-| Type-only Imports       | 685    |
+| Type-only Imports       | 686    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

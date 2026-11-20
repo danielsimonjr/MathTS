@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': patch
+---
+
+`simplify` keeps a decimal that has no small exact fraction, as mathjs does (Fixes #1175). Before the change, `simplify('66079.39738442015')` printed `6.977852205e+9 / 1.05598e+5`, `simplify('22026.465794806718*3')` and `simplify('exp(10)*3')` printed the same, and `simplify('59760.92063816244 + x')` printed `x + 1.7556623026e+10 / 2.93781e+5`. The test of `_exactFraction` accepted a number when a MathTS Fraction reproduces it, and a MathTS Fraction reproduces more doubles than the `fraction.js` class that mathjs asks. The test now asks `fraction.js` (a dependency of the package already), so each of these prints `66079.39738442015` and `x + 59760.92063816244`. The reverse case changes too: `simplify('1e-7')` printed `1e-7`, and now prints `1 / 1e+7`, as mathjs does, because `fraction.js` has an exact fraction for it. A number with a small exact fraction does not change: `0.1+0.2` is `3 / 10`, `123.456` is `15432 / 125` and `0.3333333333333333` is `1 / 3`. For 2000 values of `exp(12*u)` (u from a fixed generator), 307 results differed from mathjs before the change, and none differs after it. (Refs #1175)

@@ -1169,7 +1169,8 @@
       "functions/src/algebra/simplifyConstant.ts",
       "functions/src/algebra/simplifyCore.ts",
       "functions/src/algebra/substitute.ts",
-      "functions/src/algebra/symbolicEqual.ts"
+      "functions/src/algebra/symbolicEqual.ts",
+      "functions/src/cas/exact-identity.ts"
     ],
     "functions/src/core/config.ts": [
       "functions/src/algebra/derivative.ts",
@@ -1238,6 +1239,16 @@
       "functions/src/typed/cas.ts",
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/polynomial-ideal.ts": [
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/polynomial-canonical.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
     ],
     "functions/src/utils/map.ts": [
       "functions/src/algebra/resolve.ts",
@@ -1387,6 +1398,7 @@
       "functions/src/factories/index.ts"
     ],
     "functions/src/algebra/sparse/csCumsum.ts": ["functions/src/algebra/sparse/csSymperm.ts"],
+    "functions/src/cas/exact-identity.ts": ["functions/src/algebra/symbolicEqual.ts"],
     "functions/src/utils/collection.ts": [
       "functions/src/arithmetic/abs.ts",
       "functions/src/arithmetic/ceil.ts",
@@ -1687,6 +1699,26 @@
       "functions/src/arithmetic/dotMultiply.ts",
       "functions/src/trigonometry/atan2.ts"
     ],
+    "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/arithmetic/fraction-gcd.ts",
+      "functions/src/cas/exact-identity.ts",
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rat.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/factorization/finite-field.ts",
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
+      "functions/src/typed/factorization/square-free.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/arithmetic/fraction-gcd.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/lcm.ts"
+    ],
     "functions/src/arithmetic/mod.ts": [
       "functions/src/arithmetic/gcd.ts",
       "functions/src/factories/index.ts"
@@ -1893,15 +1925,6 @@
       "functions/src/typed/factorization/multi-poly.ts",
       "functions/src/typed/polynomial-ideal.ts"
     ],
-    "functions/src/typed/polynomial-ideal.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/cas/polynomial-canonical.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/multi-poly.ts"
-    ],
     "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
     "functions/src/factories/index.ts": [
       "functions/src/cas/closed-form-roots.ts",
@@ -1929,6 +1952,7 @@
       "functions/src/config-api.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/factories/index.ts",
+      "functions/src/typed/algebra.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/matrix-ops.ts"
@@ -2353,19 +2377,18 @@
       "functions/src/cas/elementary-solve.ts",
       "functions/src/typed/cas.ts"
     ],
-    "functions/src/typed/factorization/integer-poly.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rat.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/factorization/finite-field.ts",
-      "functions/src/typed/factorization/hensel.ts",
+    "functions/src/typed/factorization/multi-poly.ts": [
+      "functions/src/cas/exact-identity.ts",
       "functions/src/typed/factorization/index.ts",
       "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts",
-      "functions/src/typed/factorization/multi-poly.ts",
-      "functions/src/typed/factorization/square-free.ts",
-      "functions/src/typed/factorization/zassenhaus.ts"
+      "functions/src/typed/factorization/kronecker.ts"
+    ],
+    "functions/src/cas/polynomial-limits.ts": [
+      "functions/src/cas/exact-identity.ts",
+      "functions/src/cas/syntax-tree.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/polynomial-ideal.ts"
     ],
     "functions/src/typed/factorization/zassenhaus.ts": [
       "functions/src/cas/layer3.ts",
@@ -2383,11 +2406,6 @@
       "functions/src/cas/rational-integrate.ts"
     ],
     "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
-    "functions/src/cas/polynomial-limits.ts": [
-      "functions/src/cas/syntax-tree.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/polynomial-ideal.ts"
-    ],
     "functions/src/error/ArgumentsError.ts": [
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts"
@@ -2414,6 +2432,10 @@
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
     "functions/src/typed/expression-eval-barrel.ts": ["functions/src/factories/evaluate.ts"],
+    "functions/src/utils/json-replacer.ts": [
+      "functions/src/factories/evaluate.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/typed/divide-inverse.ts": [
       "functions/src/factories/index.ts",
       "functions/src/typed/arithmetic.ts"
@@ -2998,11 +3020,6 @@
     "functions/src/typed/factorization/finite-field.ts": [
       "functions/src/typed/factorization/hensel.ts",
       "functions/src/typed/factorization/zassenhaus.ts"
-    ],
-    "functions/src/typed/factorization/multi-poly.ts": [
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts"
     ],
     "functions/src/typed/factorization/kronecker-factor.ts": [
       "functions/src/typed/factorization/index.ts"

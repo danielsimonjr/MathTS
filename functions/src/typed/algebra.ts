@@ -34,8 +34,14 @@ import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
 import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
-import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
+import {
+  PolynomialDegreeError,
+  PolynomialSizeError,
+  polynomialDegreeMessage,
+  polynomialSizeMessage,
+} from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
+import { factoryScope } from '../factories/scope.js';
 import {
   rewriteCalls,
   topLevelFactors,
@@ -388,11 +394,10 @@ function gcdSmall(x: number, y: number): number {
 }
 
 /**
- * Scale a coefficient array by the lcm of its coefficients' denominators so that every entry is a
- * safe integer. Returns `null` unless every coefficient is a rational with a small denominator
- * and the common denominator stays within {@link MAX_RATIONAL_DENOMINATOR}.
+ * The lcm of the denominators of the coefficients, or `null` when a coefficient is not a rational
+ * with a small denominator or the lcm passes {@link MAX_RATIONAL_DENOMINATOR}.
  */
-function scaleToSafeIntegers(coeffs: number[]): number[] | null {
+function commonDenominator(coeffs: number[]): number | null {
   let L = 1;
   for (const c of coeffs) {
     const q = rationalDenominator(c);
@@ -400,6 +405,17 @@ function scaleToSafeIntegers(coeffs: number[]): number[] | null {
     L = (L / gcdSmall(L, q)) * q;
     if (L > MAX_RATIONAL_DENOMINATOR) return null;
   }
+  return L;
+}
+
+/**
+ * Scale a coefficient array by the lcm of its coefficients' denominators so that every entry is a
+ * safe integer. Returns `null` unless every coefficient is a rational with a small denominator
+ * and the common denominator stays within {@link MAX_RATIONAL_DENOMINATOR}.
+ */
+function scaleToSafeIntegers(coeffs: number[]): number[] | null {
+  const L = commonDenominator(coeffs);
+  if (L === null) return null;
   // The convergent test above is relative, so a large non-integer (|c| ≳ 1e12) can pass as
   // "integer"; require the scaled values to sit on integers in absolute terms too, otherwise
   // rounding would silently change a coefficient.
@@ -600,8 +616,11 @@ export function differences(arr: number[], n: number = 1): number[] {
 export function variables(expr: string): string[] {
   const vars = new Set<string>();
   const regex = /[a-zA-Z_]\w*/g;
+  // Blank the number literals first, so the exponent of `1e3` or `2.5E-3` is not read as the
+  // name `e3` or `E`. A digit inside a name (`x2e3`) stays: the lookbehind skips it.
+  const text = expr.replace(/(?<![A-Za-z_\d.])(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g, ' ');
   let match: RegExpExecArray | null;
-  while ((match = regex.exec(expr)) !== null) {
+  while ((match = regex.exec(text)) !== null) {
     if (!MATH_KEYWORDS.has(match[0])) {
       vars.add(match[0]);
     }
@@ -911,6 +930,10 @@ function abstractConstantCalls(expr: string): {
  * `expand('(pi+x)^2')` → `'pi^2 + 2*pi*x + x^2'`.
  * Each constant adds to the size of the result as a variable does.
  *
+ * A polynomial above the degree limit (1000) or with more than 10000 terms has no fallback: the
+ * call throws a `RangeError` (`PolynomialDegreeError` or `PolynomialSizeError`) at once.
+ * `expand('(a+b+c+d+x)^20')` has 10626 terms and throws; `expand('(a+b+c+d+x)^19')` has 8855.
+ *
  * Everything else (a function call that contains a variable, such as `sin(x)`, non-integer
  * exponents, division by a variable or by a constant call) falls back to the original
  * regex-based distributor below, which does NOT collect like terms.
@@ -938,6 +961,8 @@ export function expand(expr: string): string {
           const out = idealPolyToString(polyFromExpression(text, names), names);
           return out.replace(placeholder, (name) => atoms.get(name) ?? name);
         } catch (error) {
+          // Any other error (also a PolynomialSizeError: this is the exact reading of the input,
+          // so a polynomial with too many terms has no other reading) goes to the outer catch.
           if (!(error instanceof PolynomialDegreeError)) throw error;
           // Above the degree limit with the constants as factors: read the text without them
           // below, so the degree error is thrown only for a polynomial in the variables.
@@ -949,6 +974,9 @@ export function expand(expr: string): string {
       if (error instanceof PolynomialDegreeError) {
         throw new PolynomialDegreeError(`expand: ${polynomialDegreeMessage()}`);
       }
+      if (error instanceof PolynomialSizeError) {
+        throw new PolynomialSizeError(`expand: ${polynomialSizeMessage()}`);
+      }
       // Not a pure polynomial in these variables (function call, non-integer
       // exponent, division by a non-constant, ...) — fall back below.
     }
@@ -957,16 +985,29 @@ export function expand(expr: string): string {
   let result = expr;
 
   // A group is a bare "(...)": the "(" of a function call such as sin(x) opens an argument list.
-  // Handle (expr)^2 => (expr)*(expr)
-  result = result.replace(/(?<![\w.^])\(([^()]+)\)\^2/g, '($1)*($1)');
+  // Handle (expr)^2 => (expr)*(expr), but only when the square stays one factor of a product.
+  // After a "/" the rewrite changes the value (1/(s)^2 is 1/(s*s), not (1/s)*s). Before a further
+  // "^" (right-associative power) or inside a longer exponent (^23, ^2.5) it changes the value too.
+  result = result.replace(
+    /(?<![\w.^])\(([^()]+)\)\^2/g,
+    (whole: string, inner: string, offset: number, text: string) => {
+      const before = text.slice(0, offset).trimEnd();
+      const after = text.slice(offset + whole.length);
+      if (before.endsWith('/') || /^\s*\^/.test(after) || /^[\w.(]/.test(after)) return whole;
+      return `(${inner})*(${inner})`;
+    }
+  );
 
   // Split a factor into its additive terms, treating binary subtraction as a
   // signed term: "x - 2" → ["x", "-2"] (NOT ["x - 2"]). Without this the minus
   // dangled and `x*(x-2)` distributed to "x*x - 2" instead of "x*x + x*-2".
+  // A minus after an operator is a sign, not a subtraction: the sum of an earlier product holds
+  // terms such as "1*-4", and a cut there leaves "1*" and "-4" (the text "1**5"). The sign of an
+  // exponent ("2e-3", "2.5E+2") is part of the number literal: a cut there leaves "2e" and "-3".
   const splitTerms = (factor: string): string[] =>
     factor
-      .replace(/\s*-\s*/g, ' + -')
-      .split(/\s*\+\s*/)
+      .replace(/(?<=[\w.)])\s*(?<!(?<![\w.])[\d.]+[eE])-\s*/g, ' + -')
+      .split(/\s*(?<!(?<![\w.])[\d.]+[eE])\+\s*/)
       .map((t) => t.trim())
       .filter((t) => t !== '');
 
@@ -975,6 +1016,14 @@ export function expand(expr: string): string {
   let match: RegExpExecArray | null;
 
   while ((match = mulPattern.exec(result)) !== null) {
+    const before = result.slice(0, match.index).trimEnd();
+    const after = result.slice(match.index + match[0].length).trimStart();
+    // A product after "/" or "^", or before a power, is not a free factor: splicing a sum there
+    // changes the value. Leave that product as it is and look for the next one.
+    if (before.endsWith('/') || before.endsWith('^') || after.startsWith('^')) {
+      mulPattern.lastIndex = match.index + 1;
+      continue;
+    }
     const leftTerms = splitTerms(match[1]);
     const rightTerms = splitTerms(match[2]);
     const products: string[] = [];
@@ -983,9 +1032,12 @@ export function expand(expr: string): string {
         products.push(l.trim() + '*' + r.trim());
       }
     }
+    // The sum is one factor of its neighbours: "2*(a+b)*(c+d)", "x-(a+b)*(c+d)" and
+    // "(a+b)*(c+d)/2" need the parentheses, or the sign, the divisor or the factor binds to one term.
+    const sum = products.join(' + ');
     result =
       result.slice(0, match.index) +
-      products.join(' + ') +
+      (before === '' && after === '' ? sum : `(${sum})`) +
       result.slice(match.index + match[0].length);
     mulPattern.lastIndex = 0;
   }
@@ -1153,6 +1205,18 @@ export function factor(expr: string): string {
     try {
       const v = univariateVars[0];
       const dense = polyToDense(polyFromExpression(expr, [v]));
+      if (degree(dense) >= 1 && !dense.every(isNearInt)) {
+        // Rational coefficients (`x^2/2 - 1/2`): factor the integer polynomial that the common
+        // denominator L gives (`x^2 - 1`) and divide the factored text by L. The polynomial is
+        // irreducible over the rationals exactly when the integer polynomial is.
+        const L = commonDenominator(dense);
+        const scaled = scaleToSafeIntegers(dense);
+        if (L !== null && L > 1 && scaled !== null) {
+          const scaledText = cleanUnivariatePoly(scaled, v);
+          const factored = factor(scaledText);
+          return factored === scaledText ? expr : `${factored}/${L}`;
+        }
+      }
       if (degree(dense) >= 2 && dense.every(isNearInt)) {
         const intDense = dense.map((c) => Math.round(c));
         const { roots, remainder } = findRationalLinearFactors(intDense);
@@ -1199,6 +1263,9 @@ export function factor(expr: string): string {
 
   for (const term of terms) {
     const numMatch = term.match(/^(-?\d+)\s*\*?\s*(.*)$/);
+    // A rest that starts with "/", "^", "." or a digit means the match cut a number literal
+    // (`2^3*x`, `2.5*y`, `2/3`): the leading integer is not the coefficient of the term.
+    if (numMatch && /^[/^.\d]/.test(numMatch[2])) return expr;
     if (numMatch) {
       coeffs.push(parseInt(numMatch[1], 10));
       varParts.push(numMatch[2] || '1');
@@ -1214,15 +1281,19 @@ export function factor(expr: string): string {
 
   if (g <= 1) return expr;
 
-  const inner = coeffs
-    .map((c, i) => {
-      const reduced = c / g;
-      if (varParts[i] === '1') return String(reduced);
-      if (reduced === 1) return varParts[i];
-      if (reduced === -1) return '-' + varParts[i];
-      return reduced + '*' + varParts[i];
-    })
-    .join(' + ');
+  const parts = coeffs.map((c, i) => {
+    const reduced = c / g;
+    if (varParts[i] === '1') return String(reduced);
+    if (reduced === 1) return varParts[i];
+    if (reduced === -1) return '-' + varParts[i];
+    return reduced + '*' + varParts[i];
+  });
+  // A negative term after the first reads " - t", not " + -t".
+  const inner = parts.reduce(
+    (text, part, i) =>
+      i === 0 ? part : part.startsWith('-') ? `${text} - ${part.slice(1)}` : `${text} + ${part}`,
+    ''
+  );
 
   return g + '*(' + inner + ')';
 }
@@ -1830,7 +1901,20 @@ export function eliminate(system: string[], variable: string): string[] {
  * @returns Derivative expression string
  */
 export function symbolicPartialDerivative(expr: string, variable: string): string {
-  return derivativeOfAdditiveTerms(expr, variable);
+  const termwise = derivativeOfAdditiveTerms(expr, variable);
+  // The term reader cannot read a term such as `x^2*y` (a power of the variable and another
+  // symbol): it leaves a `d/dx(...)` placeholder in the text. The expression derivative reads
+  // the whole tree, so use it for that input. It is read at call time from the factory scope,
+  // which `factories/index.ts` fills: a static import of that module closes an import cycle.
+  if (!termwise.includes(`d/d${variable}(`)) return termwise;
+  const treeDerivative = factoryScope.derivative as
+    ((expression: string, variable: string) => { toString(): string }) | undefined;
+  if (treeDerivative === undefined) return termwise;
+  try {
+    return treeDerivative(expr, variable).toString();
+  } catch {
+    return termwise;
+  }
 }
 
 /**

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1350,
+    "totalFiles": 1353,
     "totalModules": 82,
-    "totalExports": 7418
+    "totalExports": 7426
   },
   "entryPoints": [
     {
@@ -7867,7 +7867,7 @@
         "constants": ["createPolynomialRoot"]
       },
       "functions/src/algebra/rationalize.ts": {
-        "description": "Transform a rationalizable expression in a rational fraction.",
+        "description": "The rule engine distributes a product of sums term by term, and its cost grows with the term",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -7882,6 +7882,10 @@
           {
             "file": "../typed/algebra.js",
             "imports": ["expand"]
+          },
+          {
+            "file": "../typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression", "polyToDenseCoefficients"]
           },
           {
             "file": "../utils/node.js",
@@ -8071,12 +8075,18 @@
       },
       "functions/src/algebra/simplifyConstant.ts": {
         "description": "simplifyConstant() takes a mathjs expression (either a Node representing",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "fraction.js",
+            "imports": ["FractionJS"]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "../utils/is.js",
             "imports": [
+              "isBigNumber",
               "isComplex",
               "isFraction",
               "isMatrix",
@@ -8882,6 +8892,10 @@
             "imports": ["isConstantNode"]
           },
           {
+            "file": "../cas/exact-identity.js",
+            "imports": ["isExactPolynomialIdentity"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -9375,6 +9389,21 @@
         "exports": ["createFloorNumber", "createFloor"],
         "constants": ["createFloorNumber", "createFloor"]
       },
+      "functions/src/arithmetic/fraction-gcd.ts": {
+        "description": "The gcd of two fractions, as fraction.js defines it: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/factorization/integer-poly.js",
+            "imports": ["bigintGcd"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["fractionGcd", "fractionLcm"],
+        "interfaces": ["FractionParts"],
+        "functions": ["fractionGcd", "fractionLcm"]
+      },
       "functions/src/arithmetic/gcd.ts": {
         "description": "Calculate the greatest common divisor for two or more values or arrays.",
         "externalDependencies": [],
@@ -9387,6 +9416,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./fraction-gcd.js",
+            "imports": ["fractionGcd"]
           },
           {
             "file": "../core/function/typed.js",
@@ -9502,6 +9535,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./fraction-gcd.js",
+            "imports": ["fractionLcm"]
           },
           {
             "file": "../core/function/typed.js",
@@ -15168,6 +15205,42 @@
         "interfaces": ["ElementaryDecline", "ElementarySolution"],
         "functions": ["solveElementary"]
       },
+      "functions/src/cas/exact-identity.ts": {
+        "description": "Decide that two expressions are the same polynomial, exactly.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/factorization/multi-poly.js",
+            "imports": [
+              "addMP",
+              "fromTerms",
+              "integerContentMP",
+              "isZero",
+              "mulMP",
+              "negMP",
+              "totalDegree",
+              "MultiPoly"
+            ]
+          },
+          {
+            "file": "../typed/factorization/integer-poly.js",
+            "imports": ["bigintGcd"]
+          },
+          {
+            "file": "../utils/node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          },
+          {
+            "file": "./polynomial-limits.js",
+            "imports": ["MAX_POLYNOMIAL_DEGREE", "MAX_POLYNOMIAL_TERMS"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["isExactPolynomialIdentity"],
+        "functions": ["isExactPolynomialIdentity"]
+      },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
         "externalDependencies": [],
@@ -15254,10 +15327,17 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["MAX_POLYNOMIAL_DEGREE", "polynomialDegreeMessage", "PolynomialDegreeError"],
-        "classes": ["PolynomialDegreeError"],
-        "functions": ["polynomialDegreeMessage"],
-        "constants": ["MAX_POLYNOMIAL_DEGREE"]
+        "exports": [
+          "MAX_POLYNOMIAL_DEGREE",
+          "MAX_POLYNOMIAL_TERMS",
+          "polynomialDegreeMessage",
+          "polynomialSizeMessage",
+          "PolynomialDegreeError",
+          "PolynomialSizeError"
+        ],
+        "classes": ["PolynomialDegreeError", "PolynomialSizeError"],
+        "functions": ["polynomialDegreeMessage", "polynomialSizeMessage"],
+        "constants": ["MAX_POLYNOMIAL_DEGREE", "MAX_POLYNOMIAL_TERMS"]
       },
       "functions/src/cas/rat.ts": {
         "description": "Exact rational arithmetic (lowest-terms, positive denominator).",
@@ -16025,6 +16105,11 @@
           {
             "file": "../typed/expression-eval-barrel.js",
             "imports": ["* as typedFns"]
+          },
+          {
+            "file": "../utils/json-replacer.js",
+            "imports": ["replacer"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [
@@ -16054,16 +16139,17 @@
           }
         ],
         "exports": [
+          "replacer",
           "EVALUATE_SCOPE_OMIT",
           "parse",
           "physicsScope",
           "evaluate",
           "compileExpr",
           "parser",
-          "replacer",
           "reviver",
           "createInstanceEvaluator"
         ],
+        "reExported": ["replacer"],
         "interfaces": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"],
         "functions": [
           "physicsScope",
@@ -16072,7 +16158,6 @@
           "evaluate",
           "compileExpr",
           "parser",
-          "replacer",
           "reviver",
           "createInstanceEvaluator"
         ],
@@ -16086,6 +16171,10 @@
           {
             "file": "./scope.js",
             "imports": ["factoryScope"]
+          },
+          {
+            "file": "../utils/json-replacer.js",
+            "imports": ["replacer"]
           },
           {
             "file": "../typed/arithmetic.js",
@@ -26468,11 +26557,20 @@
           },
           {
             "file": "../cas/polynomial-limits.js",
-            "imports": ["PolynomialDegreeError", "polynomialDegreeMessage"]
+            "imports": [
+              "PolynomialDegreeError",
+              "PolynomialSizeError",
+              "polynomialDegreeMessage",
+              "polynomialSizeMessage"
+            ]
           },
           {
             "file": "./string-derivative.js",
             "imports": ["derivativeOfAdditiveTerms"]
+          },
+          {
+            "file": "../factories/scope.js",
+            "imports": ["factoryScope"]
           },
           {
             "file": "./call-rewrite.js",
@@ -26949,6 +27047,10 @@
             "imports": ["solveElementary"]
           },
           {
+            "file": "../cas/polynomial-limits.js",
+            "imports": ["PolynomialSizeError"]
+          },
+          {
             "file": "../cas/syntax-tree.js",
             "imports": [
               "MAX_POLYNOMIAL_DEGREE",
@@ -26995,6 +27097,7 @@
         ],
         "exports": [
           "PolynomialDegreeError",
+          "PolynomialSizeError",
           "CAS_BATCH_THRESHOLD",
           "integrate",
           "limit",
@@ -29387,7 +29490,12 @@
           },
           {
             "file": "../cas/polynomial-limits.js",
-            "imports": ["MAX_POLYNOMIAL_DEGREE", "PolynomialDegreeError"]
+            "imports": [
+              "MAX_POLYNOMIAL_DEGREE",
+              "MAX_POLYNOMIAL_TERMS",
+              "PolynomialDegreeError",
+              "PolynomialSizeError"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -31053,6 +31161,15 @@
         "workspaceDependencies": [],
         "exports": ["createIsZero"],
         "constants": ["createIsZero"]
+      },
+      "functions/src/utils/json-replacer.ts": {
+        "description": "`JSON.stringify` replacer that preserves non-finite numbers and bigint values, with the tags",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["replacer"],
+        "functions": ["replacer"]
       },
       "functions/src/utils/limits.ts": {
         "description": "Shared size limits that guard allocation and loop length (DoS guard).",
@@ -39078,7 +39195,7 @@
         "constants": ["createObjectNode"]
       },
       "expression/src/node/OperatorNode.ts": {
-        "description": "Returns true if the expression starts with a constant, under",
+        "description": "Join the LaTeX of an operator and of its operand. A command (`\\neg`, `\\cdot`, `\\wedge`)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -48598,6 +48715,7 @@
           "functions/src/arithmetic/expm1.ts",
           "functions/src/arithmetic/fix.ts",
           "functions/src/arithmetic/floor.ts",
+          "functions/src/arithmetic/fraction-gcd.ts",
           "functions/src/arithmetic/gcd.ts",
           "functions/src/arithmetic/hypot.ts",
           "functions/src/arithmetic/invmod.ts",
@@ -48685,6 +48803,7 @@
           "functions/src/cas/antiderivative.ts",
           "functions/src/cas/closed-form-roots.ts",
           "functions/src/cas/elementary-solve.ts",
+          "functions/src/cas/exact-identity.ts",
           "functions/src/cas/layer3.ts",
           "functions/src/cas/polynomial-canonical.ts",
           "functions/src/cas/polynomial-limits.ts",
@@ -49240,6 +49359,7 @@
           "functions/src/utils/isPositive.ts",
           "functions/src/utils/isPrime.ts",
           "functions/src/utils/isZero.ts",
+          "functions/src/utils/json-replacer.ts",
           "functions/src/utils/limits.ts",
           "functions/src/utils/map.ts",
           "functions/src/utils/median-numbers.ts",
@@ -50011,18 +50131,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1350,
+    "totalTypeScriptFiles": 1353,
     "totalModules": 82,
-    "totalLinesOfCode": 240414,
-    "totalExports": 7418,
-    "totalClasses": 62,
-    "totalInterfaces": 674,
-    "totalFunctions": 2601,
-    "totalTypeGuards": 184,
+    "totalLinesOfCode": 241197,
+    "totalExports": 7426,
+    "totalClasses": 63,
+    "totalInterfaces": 675,
+    "totalFunctions": 2605,
+    "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1696,
-    "totalReExports": 3193,
-    "totalTypeOnlyImports": 685,
+    "totalConstants": 1697,
+    "totalReExports": 3194,
+    "totalTypeOnlyImports": 686,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

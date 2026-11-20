@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import { fractionLcm } from './fraction-gcd.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
@@ -20,10 +21,6 @@ interface BigNumberType {
   mod(other: BigNumberType): BigNumberType;
   div(other: BigNumberType): BigNumberType;
   abs(): BigNumberType;
-}
-
-interface FractionType {
-  lcm(other: FractionType): FractionType;
 }
 
 interface LcmDependencies {
@@ -95,7 +92,7 @@ export const createLcm = /* #__PURE__ */ factory(
       {
         'number, number': lcmNumber,
         'BigNumber, BigNumber': _lcmBigNumber,
-        'Fraction, Fraction': (x: FractionType, y: FractionType): FractionType => x.lcm(y),
+        'Fraction, Fraction': fractionLcm,
       },
       matrixAlgorithmSuite({
         SS: matAlgo06xS0S0 as unknown as AlgorithmFunction,

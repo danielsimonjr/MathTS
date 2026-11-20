@@ -126,14 +126,49 @@ export function isolateRealRoots(
 }
 
 /**
+ * Polish the root `x` of `p` inside the bracket `[lo, hi]` with Newton steps. A step is taken
+ * only when it stays inside the bracket and does not increase `|p|`, so the result is never worse
+ * than `x`, and a multiple root (where `p'` is about 0, and the step is noise) keeps its value.
+ */
+function newtonPolish(
+  p: readonly number[],
+  dp: readonly number[],
+  x: number,
+  lo: number,
+  hi: number
+): number {
+  let fx = polyval(p as number[], x);
+  for (let it = 0; it < 60 && fx !== 0; it++) {
+    const slope = polyval(dp as number[], x);
+    if (slope === 0) break;
+    const next = x - fx / slope;
+    if (!(next >= lo && next <= hi) || next === x) break;
+    const fNext = polyval(p as number[], next);
+    if (Math.abs(fNext) > Math.abs(fx)) break;
+    x = next;
+    fx = fNext;
+  }
+  return x;
+}
+
+/**
  * Real roots of the polynomial, sorted ascending, each distinct root once.
+ *
+ * `coeffs` are ascending: `coeffs[i]` multiplies x^i, so `[1, -3, 2]` is `2x^2 - 3x + 1`
+ * (roots 1/2 and 1). The zero polynomial throws a `RangeError`.
+ *
  * Isolates with `isolateRealRoots`, then refines each interval by bisection on
- * Sturm counts until its width is at most `tol`. Bisection on counts (rather
- * than sign changes) also handles even-multiplicity roots, where the sign does
- * not change.
+ * Sturm counts until its width is at most `tol` (default 1e-10, relative to
+ * `max(1, |x|)`). Bisection on counts (rather than sign changes) also handles
+ * even-multiplicity roots, where the sign does not change. Then each root is polished by Newton
+ * steps inside its bracket, so a simple root is accurate to about the rounding error of the
+ * polynomial value (`realRoots([1, -3, 2])` is `[0.5, 1]`, not `[0.49999999999..., 1.00000000002...]`).
+ * A multiple root is flat, so it keeps the accuracy of the bisection (about sqrt of the machine
+ * epsilon).
  */
 export function realRoots(coeffs: readonly number[], tol = 1e-10): number[] {
   const p = assertNonZero(coeffs);
+  const dp = derivative(p);
   const seq = sturmSequence(p);
   const count = (a: number, b: number): number =>
     signChanges(seq.map((q) => polyval(q, a))) - signChanges(seq.map((q) => polyval(q, b)));
@@ -148,6 +183,6 @@ export function realRoots(coeffs: readonly number[], tol = 1e-10): number[] {
       if (count(lo, m) === 1) hi = m;
       else lo = m;
     }
-    return (lo + hi) / 2;
+    return newtonPolish(p, dp, (lo + hi) / 2, lo, hi);
   });
 }

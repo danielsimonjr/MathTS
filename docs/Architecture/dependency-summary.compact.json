@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7418, "re": 3193 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1353, "e": 7426, "re": 3194 },
   "s": {
-    "loc": 240414,
-    "cls": 62,
-    "int": 674,
-    "fn": 2601,
-    "tg": 184,
+    "loc": 241197,
+    "cls": 63,
+    "int": 675,
+    "fn": 2605,
+    "tg": 185,
     "en": 0,
-    "co": 1696,
-    "toi": 685
+    "co": 1697,
+    "toi": 686
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -506,7 +506,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 39,
+      "f": 40,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -525,11 +525,11 @@
         "createFix",
         "createFloorNumber",
         "createFloor",
-        "createGcd",
-        "createHypot",
-        "createInvmod"
+        "fractionGcd",
+        "fractionLcm",
+        "createGcd"
       ],
-      "int": ["MathNode"]
+      "int": ["FractionParts", "MathNode"]
     },
     "functions/bitwise": {
       "f": 8,
@@ -588,12 +588,13 @@
       ]
     },
     "functions/cas": {
-      "f": 12,
+      "f": 13,
       "exp": [
         "antiderivativeReciprocal",
         "snapRoot",
         "closedFormRoots",
         "solveElementary",
+        "isExactPolynomialIdentity",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -604,14 +605,13 @@
         "collapseIdenticalFactors",
         "tryPolynomialCanonicalForm",
         "MAX_POLYNOMIAL_DEGREE",
+        "MAX_POLYNOMIAL_TERMS",
         "polynomialDegreeMessage",
+        "polynomialSizeMessage",
         "PolynomialDegreeError",
-        "RAT_ZERO",
-        "ratNormalize",
-        "ratAdd",
-        "ratSub"
+        "PolynomialSizeError"
       ],
-      "cls": ["PolynomialDegreeError"],
+      "cls": ["PolynomialDegreeError", "PolynomialSizeError"],
       "int": [
         "ElementaryDecline",
         "ElementarySolution",
@@ -654,13 +654,13 @@
     "functions/factories": {
       "f": 5,
       "exp": [
+        "replacer",
         "EVALUATE_SCOPE_OMIT",
         "parse",
         "physicsScope",
         "evaluate",
         "compileExpr",
         "parser",
-        "replacer",
         "reviver",
         "createInstanceEvaluator",
         "scalarToNode",
@@ -1213,7 +1213,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 44,
+      "f": 45,
       "exp": [
         "arraySize",
         "validate",
@@ -1958,7 +1958,7 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 250, "o": 15 },
+    { "p": "factories/index.ts", "i": 251, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
