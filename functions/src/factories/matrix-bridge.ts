@@ -694,7 +694,8 @@ export class MathJSSparseMatrix {
 
   /**
    * Convert a dense 2D array to CSC format. A 1-D array becomes a column vector
-   * of size [n, 1], as in mathjs.
+   * of size [n, 1], as in mathjs. A ragged array has as many columns as its longest
+   * row, and a short row is read as zero after its last entry.
    */
   private _fromDenseArray(input: unknown[][] | unknown[]): void {
     // A sparse matrix has two axes. A value that is not an Array has no axis.
@@ -706,19 +707,23 @@ export class MathJSSparseMatrix {
     if (inputSize.length > 2) {
       throw new RangeError('Matrix must be two dimensional (size: ' + formatSize(inputSize) + ')');
     }
-    const data: unknown[][] =
-      input.length > 0 && !Array.isArray(input[0])
-        ? (input as unknown[]).map((v) => [v])
-        : (input as unknown[][]);
-    const rows = data.length;
-    const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
+    // As in mathjs, the column count is the length of the longest row, a value that is not an
+    // Array is a row of one entry, and a short row is read as zero after its last entry.
+    const rows = input.length;
+    let cols = 0;
+    for (let i = 0; i < rows; i++) {
+      const row = input[i];
+      const length = Array.isArray(row) ? row.length : 1;
+      if (length > cols) cols = length;
+    }
     // Fill fresh local arrays, then store them, so the loop does not read fields
     const values: unknown[] = [];
     const index: number[] = [];
     const ptr: number[] = [0];
     for (let j = 0; j < cols; j++) {
       for (let i = 0; i < rows; i++) {
-        const v = data[i][j];
+        const row = input[i];
+        const v = Array.isArray(row) ? row[j] : j === 0 ? row : undefined;
         // A number is the common case; only a non-number entry can be a deeper level
         if (typeof v !== 'number' && Array.isArray(v)) {
           // A deeper level below the first element: the input has 3 or more axes

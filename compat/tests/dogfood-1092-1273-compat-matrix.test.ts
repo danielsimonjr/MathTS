@@ -56,3 +56,22 @@ describe('compat matrix() rejects a ragged nested array (#1092, #1273)', () => {
     expect(e!.message).toBe(thrown(() => mj.matrix([[1], [2, 3]]))!.message);
   });
 });
+
+describe('compat sparse() of a ragged nested array (#1273)', () => {
+  it.each([
+    [[[1], [2, 3]]],
+    [[[1, 2], [3]]],
+    [[[1, 2], [3, 4, 5], [6]]],
+    [[[], [1]]],
+    [[[1], 2]],
+    [[1, [2]]],
+  ])('sparse(%j) and matrix(%j, "sparse") have the mathjs size and entries', (input) => {
+    const expected = mj.sparse(input) as { size(): number[]; toArray(): unknown };
+    const viaSparse = math.sparse(input) as { size(): number[]; toArray(): unknown };
+    expect(viaSparse.size()).toEqual(expected.size());
+    expect(viaSparse.toArray()).toEqual(expected.toArray());
+    const viaMatrix = math.matrix(input, 'sparse') as { size(): number[]; toArray(): unknown };
+    expect(viaMatrix.size()).toEqual(expected.size());
+    expect(viaMatrix.toArray()).toEqual(expected.toArray());
+  });
+});
