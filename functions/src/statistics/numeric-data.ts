@@ -6,6 +6,25 @@
  * otherwise returns the list of modes.
  */
 import { flatten } from '../utils/array.js';
+import { isBigNumber, isNumber } from '../utils/is.js';
+
+type Exact = { cmp(other: unknown): number };
+
+/**
+ * An exact order for order statistics. Numbers and BigNumbers compare exactly; every other
+ * type (Fraction, Unit) uses `compare`. `compare` treats values within the config `relTol` as
+ * equal, so a selection with it gives a result that depends on the input order (#1292).
+ */
+export function exactOrder(
+  compare: (a: unknown, b: unknown) => unknown
+): (a: unknown, b: unknown) => number {
+  return (a, b) => {
+    if (isBigNumber(a) && (isBigNumber(b) || isNumber(b))) return (a as unknown as Exact).cmp(b);
+    if (isNumber(a) && isBigNumber(b)) return -(b as unknown as Exact).cmp(a);
+    if (isNumber(a) && isNumber(b)) return a < b ? -1 : a > b ? 1 : 0;
+    return Number(compare(a, b));
+  };
+}
 
 /** A `Float32Array` or `Float64Array` numeric column. */
 export type FloatTyped = Float32Array | Float64Array;

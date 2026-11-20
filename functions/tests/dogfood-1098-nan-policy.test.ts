@@ -38,13 +38,14 @@ describe('quantileSeq NaN and Infinity policy (#1098)', () => {
     expect(() => q([1, 2], 0.5, { skipNaN: true, skipna: false })).toThrow(TypeError);
   });
 
-  it('matches NumPy with infinite values', () => {
+  it('matches NumPy with infinite values, and keeps an infinite end (#1131)', () => {
     expect(q([-Infinity, Infinity, 2, 3], 0.25)).toBe(-Infinity);
     expect(q([-Infinity, Infinity, 2, 3], 0.5)).toBe(2.5);
     expect(q([-Infinity, Infinity, 2, 3], 0.75)).toBe(Infinity);
-    expect(q([1, Infinity], 0)).toBeNaN();
-    expect(q([Infinity, Infinity, 2, 3], 0.75)).toBeNaN();
-    expect(q([-Infinity, -Infinity], 0.5)).toBeNaN();
+    // NumPy gives NaN for these three (inf - inf); #1131 returns the end itself.
+    expect(q([1, Infinity], 0)).toBe(1);
+    expect(q([Infinity, Infinity, 2, 3], 0.75)).toBe(Infinity);
+    expect(q([-Infinity, -Infinity], 0.5)).toBe(-Infinity);
   });
 
   it('keeps finite results', () => {
