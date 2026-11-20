@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parse, symbolicEqual } from '../src/index.js';
 import { isExactPolynomialIdentity } from '../src/cas/exact-identity.js';
+import type { MathNode } from '../src/utils/node.js';
 
 // #1178 (and #1014 item 3): symbolicEqual decided only by `simplify(e1 - e2)` being the constant 0.
 // An irrational constant beside a fraction folds to a decimal, so an exact zero left a rounding
@@ -55,7 +56,8 @@ describe('#1178 symbolicEqual keeps its other answers', () => {
 });
 
 describe('#1178 isExactPolynomialIdentity decides only what it proves', () => {
-  const same = (a: string, b: string): boolean => isExactPolynomialIdentity(parse(a), parse(b));
+  const node = (text: string): MathNode => parse(text) as unknown as MathNode;
+  const same = (a: string, b: string): boolean => isExactPolynomialIdentity(node(a), node(b));
 
   it('is true for a proven identity', () => {
     expect(same('(x+1)^2', 'x^2+2*x+1')).toBe(true);

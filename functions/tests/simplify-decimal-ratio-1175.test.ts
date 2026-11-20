@@ -7,7 +7,7 @@ import { simplify } from '../src/index.js';
 // does not reproduce the number. The expected texts are the mathjs 15.2.0 results.
 
 function text(input: string): string {
-  return simplify(input).toString();
+  return String(simplify(input));
 }
 
 describe('#1175 simplify keeps a decimal that has no small exact fraction', () => {

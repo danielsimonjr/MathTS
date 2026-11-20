@@ -12994,7 +12994,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 119
+      "loc": 117
     },
     {
       "file": "functions/tests/real-roots.test.ts",
@@ -13519,7 +13519,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 115
+      "loc": 117
     },
     {
       "file": "functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts",
