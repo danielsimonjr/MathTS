@@ -6610,7 +6610,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 397
+      "loc": 425
     },
     {
       "file": "functions/src/cas/layer3.ts",
@@ -13659,7 +13659,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 129
     },
     {
       "file": "functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts",

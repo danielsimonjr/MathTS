@@ -105,6 +105,18 @@ describe('#1178 isExactPolynomialIdentity decides only what it proves', () => {
     expect(same('(a+b+c+d+x)^60', '(a+b+c+d+x)^60')).toBe(false);
   });
 
+  it('is false for a coefficient above the bit limit, and keeps a smaller one', () => {
+    // The work budget counts pairs of terms, not the size of a coefficient. (x+1e300)^300 stays
+    // under the term and pair limits, but its coefficients reach 100000 bits and the comparison took
+    // 12 s; the cost follows the size of the numbers, so the size has its own limit (4096 bits).
+    expect(same('(x+1e300)^3', '(x+1e300)^3')).toBe(true); // 2990 bits
+    expect(same('(x+1e300)^5', '(x+1e300)^5')).toBe(false); // 4983 bits
+    expect(same('(10^1000)^1', '(10^1000)^1')).toBe(true);
+    expect(same('(10^1000)^3', '(10^1000)^3')).toBe(false);
+    // The caller still gets the answer of simplify when the exact test has no answer.
+    expect(symbolicEqual('(x+1e300)^5', '(x+1e300)^5')).toBe(true);
+  });
+
   it('does not throw on an input that no polynomial reads', () => {
     expect(same('x=1', 'x=1')).toBe(false);
     expect(same('f(x)=x', 'f(x)=x')).toBe(false);

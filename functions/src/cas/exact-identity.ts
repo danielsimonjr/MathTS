@@ -73,6 +73,18 @@ const NON_NUMBER_SYMBOLS = new Set(['NaN', 'Infinity', 'undefined', 'null']);
  */
 const MAX_TERM_PAIRS = 10 * MAX_POLYNOMIAL_TERMS;
 
+/**
+ * The most bits that a coefficient or a denominator holds. The work budget counts pairs of terms,
+ * and the cost of a pair follows the size of its numbers: `(x+1e300)^300` stays under every count
+ * limit, but its coefficients reach 100000 bits and the comparison took 12 s (main: 0.1 s). Every
+ * double fits in a quarter of this (the exact decimal of the largest one holds 1077 bits). The
+ * comparison is undecided past it, and `simplify` then decides as before.
+ */
+const MAX_COEFFICIENT_BITS = 4096;
+
+/** The first magnitude that is past {@link MAX_COEFFICIENT_BITS}. */
+const COEFFICIENT_LIMIT = 1n << BigInt(MAX_COEFFICIENT_BITS);
+
 /** The number of term pairs that a comparison has multiplied. */
 interface Work {
   pairs: number;
@@ -288,9 +300,22 @@ function reduce(value: Value): Value {
   return { p: { vars: value.p.vars.slice(), terms }, den: value.den / factor };
 }
 
+/** True when a coefficient or the denominator of `value` holds more than the bit limit. */
+function isOversized(value: Value): boolean {
+  if (value.den >= COEFFICIENT_LIMIT) return true;
+  for (const coefficient of value.p.terms.values()) {
+    if (coefficient >= COEFFICIENT_LIMIT || coefficient <= -COEFFICIENT_LIMIT) return true;
+  }
+  return false;
+}
+
 /** `value` when it is within the size limits, else the input is undecided. */
 function bounded(value: Value): Value {
-  if (value.p.terms.size > MAX_POLYNOMIAL_TERMS || totalDegree(value.p) > MAX_POLYNOMIAL_DEGREE) {
+  if (
+    value.p.terms.size > MAX_POLYNOMIAL_TERMS ||
+    totalDegree(value.p) > MAX_POLYNOMIAL_DEGREE ||
+    isOversized(value)
+  ) {
     return undecided();
   }
   return value;
@@ -306,6 +331,8 @@ function multiplyValues(left: Value, right: Value, work: Work): Value {
   const pairs = left.p.terms.size * right.p.terms.size;
   work.pairs += pairs;
   if (pairs > MAX_POLYNOMIAL_TERMS || work.pairs > MAX_TERM_PAIRS) return undecided();
+  // Each operand is within the bit limit (every value passes `bounded`), so one product holds at
+  // most twice the limit: its cost is bounded, and `bounded` refuses the result when it is too large.
   return bounded(reduce({ p: mulMP(left.p, right.p), den: left.den * right.den }));
 }
 
@@ -337,7 +364,8 @@ function powerOf(base: Value, exponent: number, work: Work): Value {
 function evaluate(ir: Ir, vars: string[], work: Work): Value {
   switch (ir.kind) {
     case 'const':
-      return { p: constant(vars, ir.num), den: ir.den };
+      // A bigint literal has no size limit of its own.
+      return bounded({ p: constant(vars, ir.num), den: ir.den });
     case 'unknown': {
       const index = vars.indexOf(ir.name);
       if (index < 0) return undecided();
