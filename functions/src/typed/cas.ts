@@ -46,6 +46,9 @@ import {
   type AstNode,
   MAX_POLYNOMIAL_DEGREE,
   PolynomialDegreeError,
+  callName,
+  constantValue,
+  containsSymbol,
   operatorName,
   parseTree,
   polynomialCoefficients,
@@ -972,22 +975,184 @@ function firstTransformHit(
   return undefined;
 }
 
+/** One term `c * t^n * exp(alpha*t) * [sin|cos](b*t)` of a time-domain sum. */
+interface LaplaceTerm {
+  c: f64;
+  n: number;
+  alpha: f64;
+  trig: { fn: 'sin' | 'cos'; b: f64 } | null;
+}
+
+/** The highest power of `t` that {@link laplace} reads in one term (its factorial stays finite). */
+const LAPLACE_MAX_POWER = 170;
+
+/** `u = a*t + q`: the slope and the offset of the text `u` as a linear function of `t`, or null. */
+function linearIn(u: string, t: string): { a: f64; q: f64 } | null {
+  try {
+    const q = evalAt(u, t, 0);
+    const a = evalAt(u, t, 1) - q;
+    const scale = Math.max(1, Math.abs(a), Math.abs(q));
+    for (const x of [2, 5]) {
+      if (!(Math.abs(evalAt(u, t, x) - q - x * a) <= 1e-9 * scale)) return null;
+    }
+    return Number.isFinite(a) && Number.isFinite(q) ? { a, q } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Multiply `term` by the factor in `node`; false when the factor is outside the supported forms. */
+function readLaplaceFactor(node: AstNode, t: string, term: LaplaceTerm): boolean {
+  if (!containsSymbol(node, t)) {
+    const v = constantValue(node);
+    if (v === null) return false;
+    term.c *= v;
+    return true;
+  }
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && readLaplaceFactor(node.content, t, term);
+  }
+  if (node.type === 'SymbolNode') {
+    term.n += 1; // the node holds `t`, and no other symbol (see the test above)
+    return true;
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'multiply' && args.length === 2) {
+    return readLaplaceFactor(args[0], t, term) && readLaplaceFactor(args[1], t, term);
+  }
+  if (op === 'divide' && args.length === 2 && !containsSymbol(args[1], t)) {
+    const divisor = constantValue(args[1]);
+    if (divisor === null || divisor === 0) return false;
+    term.c /= divisor;
+    return readLaplaceFactor(args[0], t, term);
+  }
+  if ((op === 'unaryMinus' || op === 'unaryPlus') && args.length === 1) {
+    if (op === 'unaryMinus') term.c = -term.c;
+    return readLaplaceFactor(args[0], t, term);
+  }
+  if (op === 'pow' && args.length === 2 && !containsSymbol(args[1], t)) {
+    const base = unwrapParens(args[0]);
+    const e = constantValue(args[1]);
+    if (base.type !== 'SymbolNode' || base.name !== t || e === null) return false;
+    if (!Number.isInteger(e) || e < 0) return false;
+    term.n += e;
+    return true;
+  }
+  const name = callName(node);
+  if (name !== null && node.args?.length === 1) {
+    const lin = linearIn(node.args[0].toString(), t);
+    if (lin === null) return false;
+    if (name === 'exp') {
+      term.alpha += lin.a;
+      term.c *= Math.exp(lin.q);
+      return true;
+    }
+    if ((name === 'sin' || name === 'cos') && term.trig === null && lin.q === 0 && lin.a !== 0) {
+      if (name === 'sin' && lin.a < 0) term.c = -term.c;
+      term.trig = { fn: name, b: Math.abs(lin.a) };
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Split `node` over `+` and `-` into terms (with the sign) and read each; false on any miss. */
+function readLaplaceTerms(node: AstNode, t: string, sign: number, out: LaplaceTerm[]): boolean {
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && readLaplaceTerms(node.content, t, sign, out);
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'add' && args.length === 2) {
+    return readLaplaceTerms(args[0], t, sign, out) && readLaplaceTerms(args[1], t, sign, out);
+  }
+  if (op === 'subtract' && args.length === 2) {
+    return readLaplaceTerms(args[0], t, sign, out) && readLaplaceTerms(args[1], t, -sign, out);
+  }
+  if (op === 'unaryMinus' && args.length === 1) {
+    return readLaplaceTerms(args[0], t, -sign, out);
+  }
+  const term: LaplaceTerm = { c: sign, n: 0, alpha: 0, trig: null };
+  if (!readLaplaceFactor(node, t, term) || term.n > LAPLACE_MAX_POWER) return false;
+  out.push(term);
+  return true;
+}
+
+/**
+ * The text of the Laplace transform of one term, or `''` for a zero term, or null when the term
+ * has no rule. With `a = alpha`: `c*n!/(s - a)^(n+1)`, `c*b/((s - a)^2 + b^2)` for `sin(b*t)` and
+ * `c*(s - a)/((s - a)^2 + b^2)` for `cos(b*t)`; a power of `t` with a `sin` or `cos` has no rule.
+ */
+function laplaceTermText(term: LaplaceTerm, s: string): string | null {
+  const shift =
+    term.alpha === 0
+      ? s
+      : term.alpha < 0
+        ? `(${s} + ${formatPrecise(-term.alpha)})`
+        : `(${s} - ${formatPrecise(term.alpha)})`;
+  if (term.trig === null) {
+    const coeff = formatPrecise(term.c * factorial(term.n));
+    if (coeff === '0') return '';
+    return `${coeff}/${term.n === 0 ? shift : `${shift}^${term.n + 1}`}`;
+  }
+  if (term.n !== 0) return null;
+  const { fn, b } = term.trig;
+  const den = `(${term.alpha === 0 ? `${s}^2` : `${shift}^2`} + ${formatPrecise(b * b)})`;
+  if (fn === 'sin') {
+    const coeff = formatPrecise(term.c * b);
+    return coeff === '0' ? '' : `${coeff}/${den}`;
+  }
+  const coeff = formatPrecise(term.c);
+  if (coeff === '0') return '';
+  return `${coeff === '1' ? '' : coeff === '-1' ? '-' : `${coeff}*`}${shift}/${den}`;
+}
+
+/** Join the texts of the terms of a sum: skip the empty ones, and write `+ -` as `-`. */
+function joinTerms(texts: string[]): string {
+  const kept = texts.filter((text) => text !== '');
+  return kept.length === 0 ? '0' : kept.join(' + ').replace(/\+ -/g, '- ');
+}
+
+/**
+ * The Laplace transform of a sum of terms `c * t^n * exp(alpha*t) * [sin|cos](b*t)`, by linearity,
+ * the shift theorem and `L{t^n} = n!/s^(n+1)`. Null when any term is outside these forms.
+ */
+function laplaceOfTerms(trimmed: string, t: string, s: string): string | null {
+  const tree = parseTree(trimmed);
+  if (tree === null) return null;
+  const terms: LaplaceTerm[] = [];
+  if (!readLaplaceTerms(tree, t, 1, terms)) return null;
+  const texts: string[] = [];
+  for (const term of terms) {
+    const text = laplaceTermText(term, s);
+    if (text === null) return null;
+    texts.push(text);
+  }
+  return joinTerms(texts);
+}
+
 /**
  * Compute the Laplace transform of an expression.
  *
- * Uses a table-based approach for common functions: constants, polynomials,
- * exponentials, sin, cos.
+ * A table gives the common single forms (constants, `t^n`, `exp(a*t)`, `sin(a*t)`, `cos(a*t)`) in
+ * a fixed text. Any other sum of terms `c * t^n * exp(alpha*t)`, `c * exp(alpha*t) * sin(b*t)` and
+ * `c * exp(alpha*t) * cos(b*t)` has its transform by linearity and the shift theorem (`n` an integer
+ * of 0 or more; `n` must be 0 for `sin` and `cos`). Any other input, such as `t*sin(t)` or
+ * `1/t`, returns the unevaluated marker `L{expr}(s)`.
  *
  * @param expr - Time-domain expression string
  * @param t - Time variable name
  * @param s - Frequency variable name
- * @returns Laplace transform as an expression string
+ * @returns Laplace transform as an expression string, or the marker `L{expr}(s)`
  *
  * @example
  * laplace('1', 't', 's')           // => '1/s'
  * laplace('t^2', 't', 's')         // => '2/s^3'
  * laplace('sin(t)', 't', 's')      // => '1/(s^2 + 1)'
  * laplace('exp(-t)', 't', 's')     // => '1/(s + 1)'
+ * laplace('t*exp(-t)', 't', 's')   // => '1/(s + 1)^2'
+ * laplace('exp(-2*t)*sin(3*t)', 't', 's') // => '3/((s + 2)^2 + 9)'
  */
 export function laplace(expr: string, t: string, s: string): string {
   const trimmed = expr.trim();
@@ -1002,7 +1167,7 @@ export function laplace(expr: string, t: string, s: string): string {
     return `${trimmed}/${s}`;
   }
 
-  return `L{${trimmed}}(${s})`;
+  return laplaceOfTerms(trimmed, t, s) ?? `L{${trimmed}}(${s})`;
 }
 
 /**
@@ -1067,19 +1232,284 @@ const inverseLaplaceTable: InverseLaplaceEntry[] = [
   },
 ];
 
+/** The highest degree of the denominator that {@link inverseLaplace} inverts as a rational function. */
+const INVERSE_LAPLACE_MAX_DEGREE = 4;
+
+/**
+ * A number as text with 15 significant digits (an integer without a decimal point), `'0'` for a
+ * value that is rounding noise. {@link formatCoeff} keeps 10 digits, which is too few for a pole or
+ * a frequency inside `exp(...)` and `cos(...)`: an error of 1e-10 in the argument shows at once.
+ */
+function formatPrecise(c: f64): string {
+  if (Math.abs(c) < 1e-12) return '0';
+  if (Math.abs(c - Math.round(c)) <= 1e-13 * Math.max(1, Math.abs(c))) return String(Math.round(c));
+  return String(Number(c.toPrecision(15)));
+}
+
+/** Divide the dense ascending polynomial `p` by `(s - r)`: the quotient and the remainder `p(r)`. */
+function divideByRoot(p: readonly f64[], r: f64): { quotient: f64[]; remainder: f64 } {
+  const quotient: f64[] = new Array(Math.max(p.length - 1, 0));
+  let carry = 0;
+  for (let i = p.length - 1; i >= 1; i--) {
+    carry = p[i] + carry * r;
+    quotient[i - 1] = carry;
+  }
+  return { quotient, remainder: p[0] + carry * r };
+}
+
+/** The first `count` Taylor coefficients `p^(j)(r)/j!` of the dense ascending polynomial `p`. */
+function taylorAt(p: readonly f64[], r: f64, count: number): f64[] {
+  const out: f64[] = [];
+  let rest: f64[] = [...p];
+  for (let j = 0; j < count; j++) {
+    if (rest.length === 0) {
+      out.push(0);
+      continue;
+    }
+    const { quotient, remainder } = divideByRoot(rest, r);
+    out.push(remainder);
+    rest = quotient;
+  }
+  return out;
+}
+
+/** `sum |p_i| |r|^i`: the size of the terms that Horner's rule adds for `p(r)`. */
+function termMagnitude(p: readonly f64[], r: f64): f64 {
+  let total = 0;
+  for (let i = p.length - 1; i >= 0; i--) total = total * Math.abs(r) + Math.abs(p[i]);
+  return total;
+}
+
+/** The value of the dense ascending polynomial `p` at the complex point `re + im*i`. */
+function complexHorner(p: readonly f64[], re: f64, im: f64): [f64, f64] {
+  let vr = 0;
+  let vi = 0;
+  for (let i = p.length - 1; i >= 0; i--) {
+    const nextRe = vr * re - vi * im + p[i];
+    vi = vr * im + vi * re;
+    vr = nextRe;
+  }
+  return [vr, vi];
+}
+
+/** The dense ascending coefficients of `node` as a polynomial in `s`, or null. */
+function densePolynomialIn(node: AstNode, s: string): f64[] | null {
+  try {
+    return readPolynomial(node.toString(), s);
+  } catch {
+    return null;
+  }
+}
+
+/** A coefficient times a product of factors, as text; `''` when the coefficient is noise. */
+function productText(c: f64, factors: string[]): string {
+  const coeff = formatPrecise(c);
+  if (coeff === '0') return '';
+  if (factors.length === 0) return coeff;
+  const product = factors.join('*');
+  return coeff === '1' ? product : coeff === '-1' ? `-${product}` : `${coeff}*${product}`;
+}
+
+/** One term `coef/(s - pole)^k` of a partial fraction. */
+interface PoleTerm {
+  pole: f64;
+  k: number;
+  coef: f64;
+}
+
+/**
+ * The inverse Laplace transform of `sign * N(s)/D(s)`, for polynomials `N` and `D` in `s` with
+ * `deg N < deg D <= 4`, as the text of a function of `t`; null when the fraction is outside that
+ * form (see {@link inverseLaplace}).
+ *
+ * `D` splits into its real roots with their multiplicities and at most one conjugate pair of simple
+ * complex roots. A real root `r` of multiplicity `m` gives `sum_k A_k t^(k-1)/(k-1)! e^(r t)`,
+ * where `A_k` is the `(m - k)`-th Taylor coefficient at `r` of `N/Q` and `Q = D/(s - r)^m` (dense
+ * polynomial arithmetic, no sampling). A simple pair `a +- b*i` with residue `R` at `a + b*i` gives
+ * `2 e^(a t) (Re R cos(b t) - Im R sin(b t))`. The partial fractions are checked against `N/D`
+ * at three points, so a multiplicity that the root finder got wrong gives null, never a wrong text.
+ */
+function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: number): string | null {
+  const root = unwrapParens(node);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return null;
+  const numerator = densePolynomialIn(root.args[0], s);
+  const denominator = densePolynomialIn(root.args[1], s);
+  if (numerator === null || denominator === null) return null;
+  const degree = denominator.length - 1;
+  if (degree < 1 || degree > INVERSE_LAPLACE_MAX_DEGREE || numerator.length - 1 >= degree) {
+    return null;
+  }
+  if (numerator.every((c) => c === 0)) return '0';
+  const lead = denominator[degree];
+  const D = denominator.map((c) => c / lead);
+  const N = numerator.map((c) => (sign * c) / lead);
+
+  // The real roots: distinct (merged within 1e-6), each with its multiplicity.
+  let found: f64[];
+  try {
+    found = sturmRoots(denominator);
+  } catch {
+    return null;
+  }
+  const distinct: f64[] = [];
+  for (const r of found) {
+    if (!distinct.some((v) => Math.abs(v - r) <= 1e-6 * Math.max(1, Math.abs(r)))) distinct.push(r);
+  }
+  let probe: f64[] = [...D];
+  const real: Array<{ r: f64; m: number }> = [];
+  for (const found of distinct) {
+    let m = 0;
+    for (;;) {
+      const { quotient, remainder } = divideByRoot(probe, found);
+      if (probe.length < 2 || !(Math.abs(remainder) <= 1e-9 * termMagnitude(probe, found))) break;
+      probe = quotient;
+      m++;
+    }
+    if (m === 0) return null;
+    // A root of multiplicity m is only good to about eps^(1/m) in D, but it is a simple root of the
+    // (m-1)-th derivative of D: polish it there.
+    let flat: f64[] = D;
+    for (let i = 1; i < m; i++) flat = flat.slice(1).map((c, j) => c * (j + 1));
+    real.push({ r: m === 1 ? found : polishRoot(flat, found), m });
+  }
+  let rest: f64[] = [...D];
+  for (const { r, m } of real) {
+    for (let i = 0; i < m; i++) rest = divideByRoot(rest, r).quotient;
+  }
+  // What is left after the real roots: a constant, or one quadratic with a negative discriminant.
+  let pair: { re: f64; im: f64 } | null = null;
+  if (rest.length === 3) {
+    const discriminant = rest[1] * rest[1] - 4 * rest[2] * rest[0];
+    if (!(discriminant < -1e-12 * (rest[1] * rest[1] + Math.abs(4 * rest[2] * rest[0]))))
+      return null;
+    pair = { re: -rest[1] / (2 * rest[2]), im: Math.sqrt(-discriminant) / (2 * rest[2]) };
+  } else if (rest.length !== 1) {
+    return null;
+  }
+
+  // Partial fractions.
+  const terms: PoleTerm[] = [];
+  for (const { r, m } of real) {
+    let Q: f64[] = [...D];
+    for (let i = 0; i < m; i++) Q = divideByRoot(Q, r).quotient;
+    const nT = taylorAt(N, r, m);
+    const qT = taylorAt(Q, r, m);
+    if (!(Math.abs(qT[0]) > 1e-12 * termMagnitude(Q, r))) return null;
+    const g: f64[] = [];
+    for (let j = 0; j < m; j++) {
+      let acc = nT[j];
+      for (let i = 1; i <= j; i++) acc -= qT[i] * g[j - i];
+      g.push(acc / qT[0]);
+    }
+    for (let k = 1; k <= m; k++) terms.push({ pole: r, k, coef: g[m - k] });
+  }
+  let residue: [f64, f64] | null = null;
+  if (pair !== null) {
+    const slope = D.slice(1).map((c, i) => c * (i + 1));
+    const [nr, ni] = complexHorner(N, pair.re, pair.im);
+    const [dr, di] = complexHorner(slope, pair.re, pair.im);
+    const norm = dr * dr + di * di;
+    if (!(norm > 0)) return null;
+    residue = [(nr * dr + ni * di) / norm, (ni * dr - nr * di) / norm];
+  }
+
+  // Check: the partial fractions must equal N/D at three real points to the right of every pole.
+  const rightmost = Math.max(pair?.re ?? -Infinity, ...real.map((p) => p.r));
+  for (const offset of [1.5, 2.5, 4.1]) {
+    const x = rightmost + offset;
+    const want = polynomialValue(N, x) / polynomialValue(D, x);
+    let got = 0;
+    let size = Math.abs(want);
+    for (const { pole, k, coef } of terms) {
+      const term = coef / (x - pole) ** k;
+      got += term;
+      size += Math.abs(term);
+    }
+    if (pair !== null && residue !== null) {
+      const dx = x - pair.re;
+      const term = (2 * (residue[0] * dx - residue[1] * pair.im)) / (dx * dx + pair.im * pair.im);
+      got += term;
+      size += Math.abs(term);
+    }
+    if (!(Math.abs(got - want) <= 1e-8 * size)) return null;
+  }
+
+  // The time-domain text.
+  const texts: string[] = [];
+  for (const { pole, k, coef } of terms) {
+    const factors: string[] = [];
+    if (k === 2) factors.push(t);
+    else if (k > 2) factors.push(`${t}^${k - 1}`);
+    if (pole !== 0) factors.push(`exp(${formatPrecise(pole)}*${t})`);
+    texts.push(productText(coef / factorial(k - 1), factors));
+  }
+  if (pair !== null && residue !== null) {
+    const grow = pair.re === 0 ? [] : [`exp(${formatPrecise(pair.re)}*${t})`];
+    const angle = formatPrecise(pair.im);
+    texts.push(productText(2 * residue[0], [...grow, `cos(${angle}*${t})`]));
+    texts.push(productText(-2 * residue[1], [...grow, `sin(${angle}*${t})`]));
+  }
+  return joinTerms(texts);
+}
+
+/** The value of the dense ascending polynomial `p` at `x`. */
+function polynomialValue(p: readonly f64[], x: f64): f64 {
+  let v = 0;
+  for (let i = p.length - 1; i >= 0; i--) v = v * x + p[i];
+  return v;
+}
+
+/** Split `node` over `+` and `-`, and invert each fraction; false when one is outside the form. */
+function inverseLaplaceSum(
+  node: AstNode,
+  s: string,
+  t: string,
+  sign: number,
+  out: string[]
+): boolean {
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && inverseLaplaceSum(node.content, s, t, sign, out);
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'add' && args.length === 2) {
+    return (
+      inverseLaplaceSum(args[0], s, t, sign, out) && inverseLaplaceSum(args[1], s, t, sign, out)
+    );
+  }
+  if (op === 'subtract' && args.length === 2) {
+    return (
+      inverseLaplaceSum(args[0], s, t, sign, out) && inverseLaplaceSum(args[1], s, t, -sign, out)
+    );
+  }
+  if (op === 'unaryMinus' && args.length === 1) return inverseLaplaceSum(args[0], s, t, -sign, out);
+  const text = inverseLaplaceRational(node, s, t, sign);
+  if (text === null) return false;
+  out.push(text);
+  return true;
+}
+
 /**
  * Compute the inverse Laplace transform of an expression.
  *
- * Uses table lookup and partial fraction patterns.
+ * Three steps, in this order. (1) A table gives the common fractions in a fixed text (`1/s`,
+ * `1/(s + a)`, `1/(s - a)`, `s/(s^2 + a)`, ...), written with the spacing shown. (2) A sum of
+ * fractions `N(s)/D(s)` with polynomials `N` and `D` of `deg N < deg D <= 4` is inverted by partial
+ * fractions: `D` may have any real roots, repeated ones included, and one simple pair of complex
+ * roots (`1/(s+1)^2` gives `t*exp(-1*t)`, `1/(s^2 + 2*s + 5)` gives `0.5*exp(-1*t)*sin(2*t)`). A
+ * repeated complex pair (`1/(s^2+1)^2`) is outside this step. (3) The lookup table of
+ * {@link inverseLaplaceTransform} gives the other forms it knows. Any other input returns the
+ * unevaluated marker `L^-1{expr}(t)`.
  *
  * @param expr - Frequency-domain expression string
  * @param s - Frequency variable name
  * @param t - Time variable name
- * @returns Inverse Laplace transform as an expression string
+ * @returns Inverse Laplace transform as an expression string, or the marker `L^-1{expr}(t)`
  *
  * @example
  * inverseLaplace('1/s', 's', 't')         // => '1'
  * inverseLaplace('1/(s + 1)', 's', 't')   // => 'exp(-1*t)'
+ * inverseLaplace('1/(s+1)^2', 's', 't')   // => 't*exp(-1*t)'
  */
 export function inverseLaplace(expr: string, s: string, t: string): string {
   const trimmed = expr.trim();
@@ -1087,6 +1517,18 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
   const hit = firstTransformHit(trimmed, s, inverseLaplaceTable, s, t);
   if (hit !== undefined) {
     return hit;
+  }
+
+  const tree = parseTree(trimmed);
+  if (tree !== null) {
+    const texts: string[] = [];
+    if (inverseLaplaceSum(tree, s, t, 1, texts)) return joinTerms(texts);
+  }
+
+  try {
+    return inverseLaplaceTransform(trimmed, s, t);
+  } catch {
+    // Not in the lookup table either: return the marker.
   }
 
   return `L^-1{${trimmed}}(${t})`;

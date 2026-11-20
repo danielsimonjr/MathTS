@@ -25160,6 +25160,9 @@ modules:
             - AstNode
             - MAX_POLYNOMIAL_DEGREE
             - PolynomialDegreeError
+            - callName
+            - constantValue
+            - containsSymbol
             - operatorName
             - parseTree
             - polynomialCoefficients
@@ -47040,7 +47043,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238591
+  totalLinesOfCode: 239106
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669

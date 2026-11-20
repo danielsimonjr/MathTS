@@ -183,7 +183,7 @@ describe('inverseLaplace transform table', () => {
   });
 
   it('unrecognised form returns L^-1{} notation', () => {
-    expect(inverseLaplace('1/(s^3+1)', 's', 't')).toBe('L^-1{1/(s^3+1)}(t)');
+    expect(inverseLaplace('1/(s^4+1)', 's', 't')).toBe('L^-1{1/(s^4+1)}(t)');
   });
 });
 

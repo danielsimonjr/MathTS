@@ -11812,24 +11812,24 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                                                                                                  | Type   |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- | ------ |
-| `../factories/evaluate.js`       | `parse, evaluate, compileExpr`                                                                           | Import |
-| `./euclid.js`                    | `euclidSnap`                                                                                             | Import |
-| `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString`                                                           | Import |
-| `./algebra.js`                   | `expand, factor, polyder, polynomialGCD, polynomialQuotient`                                             | Import |
-| `../factories/index.js`          | `derivative`                                                                                             | Import |
-| `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                                               | Import |
-| `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                                             | Import |
-| `../cas/elementary-solve.js`     | `solveElementary`                                                                                        | Import |
-| `../cas/syntax-tree.js`          | `AstNode, MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, operatorName, parseTree, polynomialCoefficients` | Import |
-| `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                                              | Import |
-| `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                     | Import |
-| `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                              | Import |
-| `../cas/real-roots.js`           | `realRoots`                                                                                              | Import |
-| `../numeric/adaptive-quad.js`    | `quadValue`                                                                                              | Import |
-| `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                           | Import |
-| `./numeric.js`                   | `findRoot`                                                                                               | Import |
+| File                             | Imports                                                                                                                                           | Type   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../factories/evaluate.js`       | `parse, evaluate, compileExpr`                                                                                                                    | Import |
+| `./euclid.js`                    | `euclidSnap`                                                                                                                                      | Import |
+| `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString`                                                                                                    | Import |
+| `./algebra.js`                   | `expand, factor, polyder, polynomialGCD, polynomialQuotient`                                                                                      | Import |
+| `../factories/index.js`          | `derivative`                                                                                                                                      | Import |
+| `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                                                                                        | Import |
+| `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                                                                                      | Import |
+| `../cas/elementary-solve.js`     | `solveElementary`                                                                                                                                 | Import |
+| `../cas/syntax-tree.js`          | `AstNode, MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, callName, constantValue, containsSymbol, operatorName, parseTree, polynomialCoefficients` | Import |
+| `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                                                                                       | Import |
+| `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                                                              | Import |
+| `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                                                                       | Import |
+| `../cas/real-roots.js`           | `realRoots`                                                                                                                                       | Import |
+| `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
+| `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
+| `./numeric.js`                   | `findRoot`                                                                                                                                        | Import |
 
 **Exports:**
 
@@ -21768,7 +21768,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238591 |
+| Total Lines of Code     | 239106 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

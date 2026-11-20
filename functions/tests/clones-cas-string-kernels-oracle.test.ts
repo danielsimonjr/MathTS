@@ -154,7 +154,7 @@ describe('clone oracle — Laplace table walk (laplace / inverseLaplace)', () =>
 
   it('unknown expression returns placeholder, not throw', () => {
     expect(laplace('t*sin(t)', 't', 's')).toBe('L{t*sin(t)}(s)');
-    expect(inverseLaplace('1/(s^3+1)', 's', 't')).toBe('L^-1{1/(s^3+1)}(t)');
+    expect(inverseLaplace('1/(s^4+1)', 's', 't')).toBe('L^-1{1/(s^4+1)}(t)');
   });
 
   it('whitespace is trimmed', () => {
