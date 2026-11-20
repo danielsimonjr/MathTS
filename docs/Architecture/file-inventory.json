@@ -10691,7 +10691,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 521
+      "loc": 530
     },
     {
       "file": "functions/tests/dogfood-1135-1136-discretelog.test.ts",

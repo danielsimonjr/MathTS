@@ -331,6 +331,15 @@ describe('quantileSeq has one rule for infinite ends and an overflowing differen
     }
   });
 
+  it('gives NaN between the neighbours -Infinity and Infinity, and the ends at 0 and 1', () => {
+    // -Infinity * (1 - gamma) + Infinity * gamma has no value, as the median of the two.
+    expect(q([-Infinity, Infinity], 0)).toBe(-Infinity);
+    expect(q([-Infinity, Infinity], 1)).toBe(Infinity);
+    expect(q([-Infinity, Infinity], 0.5)).toBeNaN();
+    expect(q([-Infinity, Infinity], 0.25)).toBeNaN();
+    expect(Number(q([-Infinity, Infinity].map(B), 0.5))).toBeNaN();
+  });
+
   it('gives the same results for BigNumber data', () => {
     expect(Number(q([1, Infinity].map(B), 0))).toBe(1);
     expect(Number(q([1, Infinity].map(B), 0.5))).toBe(Infinity);
