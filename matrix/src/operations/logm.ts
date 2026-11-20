@@ -6,8 +6,10 @@
  *   (Algorithm 11.10).
  *
  * Algorithm (general Schur-based path, Slice 6.1):
- *   1. Schur decompose: A = Q · T · Q^T.
- *   2. Repeatedly take matrix square roots of T (Björck recurrence on upper-
+ *   1. Schur decompose: A = Q · T · Q^T. T is quasi-upper-triangular: a complex-
+ *      conjugate eigenvalue pair is a 2×2 block, balanced by a power-of-2 diagonal
+ *      similarity so that its two off-diagonal entries have about the same size.
+ *   2. Repeatedly take matrix square roots of T (Björck recurrence on quasi-upper-
  *      triangular matrices) until ||T^{1/2^k} - I||_1 < 0.25.
  *   3. Evaluate log(I + X) via 16-point Gauss-Legendre quadrature.
  *   4. Scale back by 2^k; rotate by Q: logm(A) = Q · (2^k · log(T^{1/2^k})) · Q^T.
@@ -18,7 +20,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
-import { schurInternal } from './schur.js';
+import { schurInternal, negligibleSubdiagonal } from './schur.js';
 import {
   eye,
   matMul,
@@ -34,7 +36,7 @@ import {
   ABS_CUTOFF_LO,
   FOURTH,
 } from './common.js';
-import { matrixSqrtNewtonInternal } from './sqrtm.js';
+import { matrixSqrtNewtonInternal, sqrtmQuasiTriangular } from './sqrtm.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -124,57 +126,33 @@ function schurBackwardError(A: number[][], T: number[][], Q: number[][]): number
 }
 
 // ---------------------------------------------------------------------------
-// Upper-triangular square root (Björck recurrence) for Schur-based logm
+// Block structure of the quasi-triangular Schur form
 // ---------------------------------------------------------------------------
 
 /**
- * Compute the upper-triangular square root U of an upper-triangular matrix T
- * (T assumed to be a 1×1 or all-real-diagonal block — i.e., T is strictly
- * upper triangular with positive diagonal entries).
+ * Marks the rows of each 2×2 diagonal block of a quasi-upper-triangular Schur form T: a
+ * subdiagonal entry that the Schur deflation test (`negligibleSubdiagonal`) keeps is the
+ * entry of a block, so the reader finds the blocks that Schur left standing (#1171).
  *
- * Diagonal: U_ii = sqrt(T_ii).
- * Super-diagonal: U_ij = (T_ij - sum_{k=i+1}^{j-1} U_ik * U_kj) / (U_ii + U_jj).
- *
- * Used by the inverse-scaling phase in logmSchur to take repeated square roots
- * of an upper-triangular Schur factor. Only applicable when all diagonal
- * entries are strictly positive (no 2×2 complex-eigenvalue blocks).
- *
- * Ref: Björck & Hammarling (1983); Higham (2008) §6.2 eq. (6.4)–(6.5).
+ * Returns null when two blocks overlap, or when a block has no complex-conjugate eigenvalue
+ * pair (`((a-d)/2)² + bc >= 0`): such a matrix goes to the eigenvalue path. A complex pair
+ * is never on the closed negative real axis, so its principal logarithm is real.
  */
-function sqrtUpperTriangular(T: number[][]): number[][] | null {
+function complexBlockMask(T: number[][]): boolean[] | null {
   const n = T.length;
-  const U: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-
-  for (let i = 0; i < n; i++) {
-    if (T[i][i] < 0) return null;
-    U[i][i] = Math.sqrt(T[i][i]);
-  }
-
-  for (let j = 1; j < n; j++) {
-    for (let i = j - 1; i >= 0; i--) {
-      let sum = 0;
-      for (let k = i + 1; k < j; k++) sum += U[i][k] * U[k][j];
-      const denom = U[i][i] + U[j][j];
-      U[i][j] = denom === 0 ? 0 : (T[i][j] - sum) / denom;
-    }
-  }
-
-  return U;
-}
-
-/**
- * Check whether a quasi-upper-triangular Schur form T has any 2×2 blocks
- * (i.e. any complex-conjugate eigenvalue pair). Returns true if all diagonal
- * blocks are 1×1 (all real eigenvalues).
- */
-function isStrictlyUpperTriangular(T: number[][]): boolean {
-  const n = T.length;
+  const mask = new Array<boolean>(n).fill(false);
   for (let i = 1; i < n; i++) {
-    // Compared with the neighbouring diagonal, like the Schur deflation test (#1125).
-    if (Math.abs(T[i][i - 1]) > 1e-12 * (Math.abs(T[i][i]) + Math.abs(T[i - 1][i - 1])))
-      return false;
+    if (negligibleSubdiagonal(T, i)) continue;
+    if (mask[i - 1]) return null;
+    const a = T[i - 1][i - 1];
+    const b = T[i - 1][i];
+    const c = T[i][i - 1];
+    const d = T[i][i];
+    if (!(((a - d) / 2) ** 2 + b * c < 0)) return null;
+    mask[i - 1] = true;
+    mask[i] = true;
   }
-  return true;
+  return mask;
 }
 
 /**
@@ -186,22 +164,22 @@ function isStrictlyUpperTriangular(T: number[][]): boolean {
  * 4. Scale back: logm(T) = 2^k · log(T^{1/2^k}).
  * 5. Rotate: logm(A) = Q · logm(T) · Q^T.
  *
- * Restricted to matrices whose Schur form T has all-positive diagonal (i.e.
- * no 2×2 blocks — complex eigenvalues — and no negative 1×1 blocks). If T
- * has complex-conjugate 2×2 blocks, falls through to the eig-based path.
+ * The 1×1 blocks of T must be positive (a non-positive real eigenvalue has no principal
+ * logarithm). A 2×2 block with a complex-conjugate pair is handled in real arithmetic by the
+ * quasi-triangular square root; its principal logarithm is real (#1171).
  *
- * Returns null if the matrix cannot be handled by the Schur-triangular path.
+ * Returns null if the matrix cannot be handled by the Schur path.
  */
 function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boolean } | null {
   const { H: T, Q } = schurInternal(A);
 
-  // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
-  // require a more involved 2×2 block log (deferred; eig path throws instead).
-  if (!isStrictlyUpperTriangular(T)) return null;
-  // A subdiagonal entry above an absolute 1e-12 that passed the relative test is residue
+  const inBlock = complexBlockMask(T);
+  if (inBlock === null) return null;
+  // A subdiagonal entry above an absolute 1e-12 that is not the entry of a block is residue
   // of the Schur form of a large matrix.
   let residue = false;
-  for (let i = 1; i < T.length; i++) if (Math.abs(T[i][i - 1]) > 1e-12) residue = true;
+  for (let i = 1; i < T.length; i++)
+    if (negligibleSubdiagonal(T, i) && Math.abs(T[i][i - 1]) > 1e-12) residue = true;
 
   // Check that all diagonal entries are strictly positive
   // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
@@ -210,6 +188,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
   const n = T.length;
   let backwardError = -1;
   for (let i = 0; i < n; i++) {
+    if (inBlock[i]) continue;
     const d = T[i][i];
     if (d <= 1e-14) {
       if (d <= 0) return null;
@@ -218,8 +197,20 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     }
   }
 
-  // Inverse-scaling phase: repeatedly take upper-triangular sqrt of T
-  let M = T;
+  // Balance each 2×2 block by an exact power-of-2 diagonal similarity D, so that its two
+  // off-diagonal entries have about the same size: log(T) = D⁻¹ · log(D·T·D⁻¹) · D. A
+  // non-normal block loses the accuracy of its diagonal in the square-root phase otherwise.
+  const dexp = new Array<number>(n).fill(0);
+  for (let i = 1; i < n; i++) {
+    const secondRowOfBlock = !negligibleSubdiagonal(T, i);
+    dexp[i] =
+      dexp[i - 1] +
+      (secondRowOfBlock ? Math.round(0.5 * Math.log2(Math.abs(T[i - 1][i] / T[i][i - 1]))) : 0);
+  }
+  const Tb = T.map((row, r) => row.map((v, c) => v * 2 ** (dexp[r] - dexp[c])));
+
+  // Inverse-scaling phase: repeatedly take the quasi-upper-triangular sqrt of T
+  let M = Tb;
   let numSqrt = 0;
   const maxSqrt = 64;
 
@@ -227,7 +218,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
     if (norm1(MminI) < tol) break;
 
-    const sqrtM = sqrtUpperTriangular(M);
+    const sqrtM = sqrtmQuasiTriangular(M);
     if (sqrtM === null || !isFinite(normInf(sqrtM))) break;
 
     M = sqrtM;
@@ -245,6 +236,9 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     const scale = Math.pow(2, numSqrt);
     logT = logT.map((row) => row.map((v) => v * scale));
   }
+
+  // Undo the balance
+  logT = logT.map((row, r) => row.map((v, c) => v * 2 ** (dexp[c] - dexp[r])));
 
   // Rotate: logm(A) = Q * logm(T) * Q^T
   const Qt = transpose(Q);
@@ -371,16 +365,18 @@ export interface LogmOptions {
  * Falls back to eigendecomposition if the square-root sequence diverges
  * (i.e., if the matrix has no non-positive eigenvalues and is diagonalisable).
  *
- * Limitations (deferred to Slice 5.9b):
- *   - Matrices with non-positive real eigenvalues: principal log is undefined.
- *   - Matrices with complex eigenvalues: throws.
- *   - Non-diagonalisable (defective) matrices: eig-fallback also throws.
- *   - Full Schur-based inverse-scaling-and-squaring for general non-normal
- *     matrices.
+ * A real matrix with a complex-conjugate eigenvalue pair and no eigenvalue on the closed
+ * negative real axis has a real principal logarithm. The Schur path computes it in real
+ * arithmetic from the 2×2 blocks of the real Schur form (#1171).
  *
- * @param A - Square DenseMatrix with positive real eigenvalues.
+ * Limitations:
+ *   - Matrices with non-positive real eigenvalues: principal log is undefined.
+ *   - The Newton fallback (taken when the Schur path cannot start) throws for complex
+ *     eigenvalues.
+ *
+ * @param A - Square DenseMatrix with no eigenvalue on the closed negative real axis.
  * @returns logm(A) as a DenseMatrix.
- * @throws Error for matrices with non-positive or complex eigenvalues.
+ * @throws Error for matrices with non-positive real eigenvalues.
  *
  * @example
  * // logm(I) = 0
@@ -418,8 +414,9 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
 /** The logarithm of an n×n array (n ≥ 1), without scaling. */
 function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
-  // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
-  // Falls through (returns null) for complex-eigenvalue Schur blocks.
+  // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices and
+  // complex-conjugate pairs (2×2 blocks). Falls through (returns null) for a Schur form
+  // that is not a block-triangular form of that kind.
   const schur = logmSchur(Aarr, tol);
   if (schur !== null) {
     if (!schur.residue) return schur.logm;

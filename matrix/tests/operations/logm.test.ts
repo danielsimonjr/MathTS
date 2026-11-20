@@ -271,23 +271,35 @@ describe('matrixLogm', () => {
     expect(R.cols).toBe(0);
   });
 
-  it('17. Complex eigenvalues (pure rotation): eig-fallback validation throws', () => {
-    // [[0,-1],[1,0]] has eigenvalues ±i. logmSchur returns null for the complex
-    // block → validateEigenvalues() runs and throws the complex-eigenvalue error.
+  it('17. Complex eigenvalues (pure rotation): the real principal logarithm (π/2)·J (#1171)', () => {
+    // [[0,-1],[1,0]] has eigenvalues ±i, so logm = [[0,-π/2],[π/2,0]] (SciPy logm).
     const A = DenseMatrix.fromArray([
       [0, -1],
       [1, 0],
     ]);
-    expect(() => matrixLogm(A)).toThrow(/complex eigenvalues|not supported/i);
+    const L = matrixLogm(A);
+    expect(L.get(0, 0)).toBeCloseTo(0, 14);
+    expect(L.get(1, 1)).toBeCloseTo(0, 14);
+    expect(L.get(0, 1)).toBeCloseTo(-1.5707963267948966, 14);
+    expect(L.get(1, 0)).toBeCloseTo(1.5707963267948966, 14);
   });
 
-  it('18. Complex eigenvalues (general 2×2): throws complex-eigenvalue error', () => {
-    // [[1,-2],[2,1]] has eigenvalues 1 ± 2i.
+  it('18. Complex eigenvalues (general 2×2): the real principal logarithm (#1171)', () => {
+    // [[1,-2],[2,1]] has eigenvalues 1 ± 2i: log = ln√5 · I + atan2(2,1) · J (SciPy logm).
     const A = DenseMatrix.fromArray([
       [1, -2],
       [2, 1],
     ]);
-    expect(() => matrixLogm(A)).toThrow(/complex eigenvalues|not supported/i);
+    const L = matrixLogm(A);
+    const want = [
+      [0.8047189562170503, -1.1071487177940904],
+      [1.1071487177940904, 0.8047189562170503],
+    ];
+    for (let i = 0; i < 2; i++)
+      for (let j = 0; j < 2; j++)
+        expect(Math.abs(L.get(i, j) - want[i][j])).toBeLessThanOrEqual(
+          1e-12 * Math.abs(want[i][j])
+        );
   });
 
   it('19. Negative real eigenvalue: throws non-positive error', () => {

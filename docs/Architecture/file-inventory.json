@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2549,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1133,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1133,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 1176,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 151,
+    "@danielsimonjr/mathts-matrix": 152,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -14562,7 +14562,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 479
+      "loc": 476
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
@@ -14618,7 +14618,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 430
+      "loc": 468
     },
     {
       "file": "matrix/src/operations/sqrtm.ts",
@@ -14936,6 +14936,13 @@
       "loc": 553
     },
     {
+      "file": "matrix/tests/dogfood-1171-schur-deflation.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 195
+    },
+    {
       "file": "matrix/tests/dogfood-1191-eig-issymmetric.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -15129,7 +15136,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 302
+      "loc": 312
     },
     {
       "file": "matrix/tests/operations/lu-qr-oracle.test.ts",

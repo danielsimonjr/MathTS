@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7397
+    "totalExports": 7399
   },
   "entryPoints": [
     {
@@ -6015,7 +6015,7 @@
           },
           {
             "file": "./schur.js",
-            "imports": ["schurInternal"]
+            "imports": ["schurInternal", "negligibleSubdiagonal"]
           },
           {
             "file": "./common.js",
@@ -6037,7 +6037,7 @@
           },
           {
             "file": "./sqrtm.js",
-            "imports": ["matrixSqrtNewtonInternal"]
+            "imports": ["matrixSqrtNewtonInternal", "sqrtmQuasiTriangular"]
           }
         ],
         "workspaceDependencies": [],
@@ -6233,9 +6233,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["matrixSchur", "schurInternal"],
+        "exports": ["negligibleSubdiagonal", "matrixSchur", "schurInternal"],
         "interfaces": ["SchurResult", "SchurOptions"],
-        "functions": ["matrixSchur", "schurInternal"]
+        "functions": ["negligibleSubdiagonal", "matrixSchur", "schurInternal"]
       },
       "matrix/src/operations/sqrtm.ts": {
         "description": "Matrix Square Root — Hybrid approach (Slices 5.9a + 6.1)",
@@ -6252,7 +6252,7 @@
           },
           {
             "file": "./schur.js",
-            "imports": ["schurInternal"]
+            "imports": ["schurInternal", "negligibleSubdiagonal"]
           },
           {
             "file": "./common.js",
@@ -6272,9 +6272,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["matrixSqrtm", "matrixSqrtNewtonInternal"],
+        "exports": ["sqrtmQuasiTriangular", "matrixSqrtm", "matrixSqrtNewtonInternal"],
         "interfaces": ["SqrtmOptions"],
-        "functions": ["matrixSqrtm", "matrixSqrtNewtonInternal"]
+        "functions": ["sqrtmQuasiTriangular", "matrixSqrtm", "matrixSqrtNewtonInternal"]
       },
       "matrix/src/operations/svd-wasm.ts": {
         "description": "`svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`).",
@@ -49885,11 +49885,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238390,
-    "totalExports": 7397,
+    "totalLinesOfCode": 238425,
+    "totalExports": 7399,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2579,
+    "totalFunctions": 2581,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,

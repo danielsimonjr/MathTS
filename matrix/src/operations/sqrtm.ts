@@ -21,7 +21,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
-import { schurInternal } from './schur.js';
+import { schurInternal, negligibleSubdiagonal } from './schur.js';
 import {
   eye,
   matMul,
@@ -268,8 +268,10 @@ function sqrtmGeneral(A: number[][]): number[][] {
  *   U_ii * U_ij + U_ij * U_jj = T_ij - sum_{k=i+1}^{j-1} U_ik * U_kj
  *
  * Ref: Higham (2008) §6.2, equations (6.4)–(6.7).
+ *
+ * @internal Also used by `matrixLogm` for the 2×2 blocks of its inverse-scaling phase.
  */
-function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
+export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
   const n = T.length;
   const U: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
 
@@ -279,12 +281,10 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
 
   let i = 0;
   while (i < n) {
-    // A subdiagonal entry that Schur left non-zero below its deflation tolerance
-    // (1e-12 of the neighbouring diagonal) is Hessenberg residue, not a 2×2 block (#1127).
-    if (
-      i === n - 1 ||
-      Math.abs(T[i + 1][i]) <= 1e-12 * (Math.abs(T[i][i]) + Math.abs(T[i + 1][i + 1]))
-    ) {
+    // A subdiagonal entry that Schur left non-zero below its deflation tolerance is
+    // Hessenberg residue, not a 2×2 block (#1127). The test is the one of the Schur
+    // deflation, so the blocks read here are the blocks that Schur left standing (#1171).
+    if (i === n - 1 || negligibleSubdiagonal(T, i + 1)) {
       blockStart.push(i);
       blockSize.push(1);
       i++;

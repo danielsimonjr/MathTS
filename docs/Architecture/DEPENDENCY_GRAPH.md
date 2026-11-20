@@ -2063,9 +2063,9 @@ graph LR
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                  | Import |
 | `./eig.js`                | `eig`                                                                                                                                          | Import |
-| `./schur.js`              | `schurInternal`                                                                                                                                | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                         | Import |
 | `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                                                                                     | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal, sqrtmQuasiTriangular`                                                                                               | Import |
 
 **Exports:**
 
@@ -2195,7 +2195,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `SchurResult`, `SchurOptions`
-- Functions: `matrixSchur`, `schurInternal`
+- Functions: `negligibleSubdiagonal`, `matrixSchur`, `schurInternal`
 
 ---
 
@@ -2207,13 +2207,13 @@ graph LR
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                               | Import |
 | `./eig.js`                | `eig`                                                                                                                       | Import |
-| `./schur.js`              | `schurInternal`                                                                                                             | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                      | Import |
 | `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
 - Interfaces: `SqrtmOptions`
-- Functions: `matrixSqrtm`, `matrixSqrtNewtonInternal`
+- Functions: `sqrtmQuasiTriangular`, `matrixSqrtm`, `matrixSqrtNewtonInternal`
 
 ---
 
@@ -21768,12 +21768,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238390 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238425 |
+| Total Exports           | 7399   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Functions         | 2581   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

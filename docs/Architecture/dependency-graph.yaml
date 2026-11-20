@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7397
+  totalExports: 7399
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5785,6 +5785,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -5803,6 +5804,7 @@ modules:
         - file: ./sqrtm.js
           imports:
             - matrixSqrtNewtonInternal
+            - sqrtmQuasiTriangular
       workspaceDependencies: []
       exports:
         - matrixLogm
@@ -6007,12 +6009,14 @@ modules:
             - givensRotation
       workspaceDependencies: []
       exports:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
       interfaces:
         - SchurResult
         - SchurOptions
       functions:
+        - negligibleSubdiagonal
         - matrixSchur
         - schurInternal
     matrix/src/operations/sqrtm.ts:
@@ -6029,6 +6033,7 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+            - negligibleSubdiagonal
         - file: ./common.js
           imports:
             - eye
@@ -6044,11 +6049,13 @@ modules:
             - SQUARED
       workspaceDependencies: []
       exports:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
       interfaces:
         - SqrtmOptions
       functions:
+        - sqrtmQuasiTriangular
         - matrixSqrtm
         - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
@@ -47038,11 +47045,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238390
-  totalExports: 7397
+  totalLinesOfCode: 238425
+  totalExports: 7399
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2579
+  totalFunctions: 2581
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695
