@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7397, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1351, "e": 7401, "re": 3191 },
   "s": {
-    "loc": 239106,
+    "loc": 239284,
     "cls": 62,
     "int": 669,
-    "fn": 2579,
+    "fn": 2583,
     "tg": 184,
     "en": 0,
     "co": 1695,
@@ -588,12 +588,16 @@
       ]
     },
     "functions/cas": {
-      "f": 12,
+      "f": 13,
       "exp": [
         "antiderivativeReciprocal",
         "snapRoot",
         "closedFormRoots",
         "solveElementary",
+        "decimalTextToRat",
+        "coefficientRat",
+        "ratText",
+        "exactLinearRoot",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -605,11 +609,7 @@
         "tryPolynomialCanonicalForm",
         "MAX_POLYNOMIAL_DEGREE",
         "polynomialDegreeMessage",
-        "PolynomialDegreeError",
-        "RAT_ZERO",
-        "ratNormalize",
-        "ratAdd",
-        "ratSub"
+        "PolynomialDegreeError"
       ],
       "cls": ["PolynomialDegreeError"],
       "int": [

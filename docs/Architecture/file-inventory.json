@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2551,
+  "totalFiles": 2553,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1324,
+    "build-entry": 1325,
     "test-only": 0,
     "orphan": 0,
-    "test": 1135,
+    "test": 1136,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1350,
-    "tests": 1135,
+    "src": 1351,
+    "tests": 1136,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1179,
+    "@danielsimonjr/mathts-functions": 1181,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6575,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 475
+      "loc": 476
     },
     {
       "file": "functions/src/cas/antiderivative.ts",
@@ -6597,6 +6597,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 498
+    },
+    {
+      "file": "functions/src/cas/exact-roots.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 107
     },
     {
       "file": "functions/src/cas/layer3.ts",
@@ -6659,7 +6666,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 220
+      "loc": 238
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -9221,7 +9228,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3845
+      "loc": 3897
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -10208,7 +10215,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 98
+      "loc": 105
     },
     {
       "file": "functions/tests/cas.test.ts",
@@ -10635,7 +10642,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 167
+      "loc": 176
     },
     {
       "file": "functions/tests/dogfood-1087-exptotrig.test.ts",
@@ -10923,6 +10930,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-966-solve-followups.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 96
     },
     {
       "file": "functions/tests/dogfood-978-eigs-complex-vectors.test.ts",

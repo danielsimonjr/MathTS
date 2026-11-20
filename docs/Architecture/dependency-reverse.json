@@ -2341,6 +2341,12 @@
       "functions/src/cas/elementary-solve.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/cas/rat.ts": [
+      "functions/src/cas/exact-roots.ts",
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/cas/render-coeff-times.ts"
+    ],
     "functions/src/typed/factorization/integer-poly.ts": [
       "functions/src/cas/layer3.ts",
       "functions/src/cas/rat.ts",
@@ -2360,11 +2366,6 @@
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/factorization/index.ts",
       "functions/src/typed/factorization/kronecker-factor.ts"
-    ],
-    "functions/src/cas/rat.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/cas/render-coeff-times.ts"
     ],
     "functions/src/cas/render-coeff-times.ts": [
       "functions/src/cas/layer3.ts",
@@ -2904,6 +2905,7 @@
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/closed-form-roots.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/exact-roots.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",
       "functions/src/typed/graph.ts"

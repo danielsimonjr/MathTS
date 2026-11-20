@@ -55,11 +55,18 @@ describe('polynomialCoefficients reads the shape from the syntax tree', () => {
 
   it('throws PolynomialDegreeError for a degree above the limit, a polynomial that is too high', () => {
     expect(() => coefficients(`x^${MAX_POLYNOMIAL_DEGREE + 1}`)).toThrow(PolynomialDegreeError);
-    expect(() => coefficients('(x-x)^1000000000')).toThrow(PolynomialDegreeError);
+    expect(() => coefficients('(x+1)^1000000000')).toThrow(PolynomialDegreeError);
     expect(() => coefficients('(x+1)^1001')).toThrow(PolynomialDegreeError);
     expect(() => coefficients('x^1001')).toThrow(/degree above 1000/);
     expect(() => coefficients('x^1001')).toThrow(RangeError);
     expect(coefficients(`x^${MAX_POLYNOMIAL_DEGREE}`)).toHaveLength(MAX_POLYNOMIAL_DEGREE + 1);
+  });
+
+  it('counts the degree after the zero coefficients of the base cancel (#966)', () => {
+    // `x - x` is the constant 0, and `x - x + 1` the constant 1, so no power of them is high.
+    expect(coefficients('(x-x)^1000000000')).toEqual([0]);
+    expect(coefficients('(x-x+1)^1000000000')).toEqual([1]);
+    expect(coefficients('(0.1*x - 0.3*x + 0.2*x)^1000000000')).toEqual([0]);
   });
 
   it('a form that is not a polynomial wins over the degree limit', () => {

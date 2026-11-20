@@ -38,7 +38,10 @@ import {
 } from './algebra.js';
 
 import { Complex } from '@danielsimonjr/mathts-core';
-import { derivative as factoryDerivative } from '../factories/index.js';
+import {
+  derivative as factoryDerivative,
+  simplify as factorySimplify,
+} from '../factories/index.js';
 import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { solveElementary } from '../cas/elementary-solve.js';
@@ -57,6 +60,7 @@ import { closedFormRoots, snapRoot } from '../cas/closed-form-roots.js';
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
 import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
+import { exactLinearRoot } from '../cas/exact-roots.js';
 import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
@@ -1866,12 +1870,13 @@ function refineBracket(f: (x: f64) => f64, a: f64, b: f64): f64 {
  * The scan samples `range` on an even grid (see {@link SCAN_TARGET_STEP}) and refines every
  * sign change with Brent's method, so it finds a root of any size, such as the `+-1e-10` of
  * `x^2 - 1e-20`. It never looks outside `range`. A grid point where `f` is exactly zero is a
- * root. A grid point with a tiny `|f|` (below {@link SCAN_TOUCH_LIMIT}), a local minimum of
- * `|f|` and no sign change on either side, is a root that touches zero, such as the double root
- * of `(x - 1)^2`. The scan does not detect a pair of roots that are closer than one grid step
- * (no sign change), or an even-multiplicity root away from a grid point. A sign change at a
- * pole (`tan(x)` at `pi/2`) is not a root: the refined point is kept only when `|f|` there is
- * not above the larger `|f|` at the bracket ends.
+ * root. A grid point that is a local minimum of `|f|` with no sign change on either side may sit
+ * beside a root that touches zero, such as the double root of `(x - 1)^2`. The root is the point
+ * where the slope of `f` changes sign inside the two intervals beside that grid point (slope by a
+ * central difference, refined with Brent's method), and it counts when `|f|` there is below
+ * {@link SCAN_TOUCH_LIMIT}. The scan does not detect a pair of roots that are closer than one grid
+ * step (no sign change). A sign change at a pole (`tan(x)` at `pi/2`) is not a root: the refined
+ * point is kept only when `|f|` there is not above the larger `|f|` at the bracket ends.
  */
 function numericRealRoots(expr: string, varName: string, range: readonly [number, number]): f64[] {
   const [lo, hi] = range;
@@ -1902,6 +1907,30 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
     xs[i] = i === 0 ? lo : i === intervals ? hi : lo + (width * i) / intervals;
     fs[i] = sample(xs[i]);
   }
+  // The half-width of the central difference for the slope of `f`: far below the grid step.
+  const slopeWidth = (width / intervals) * 1e-3;
+  /** The slope of `f` at `x` by a central difference that stays inside the range. */
+  const slopeAt = (x: f64): f64 => {
+    const a = Math.max(lo, x - slopeWidth);
+    const b = Math.min(hi, x + slopeWidth);
+    return (sample(b) - sample(a)) / (b - a);
+  };
+  /**
+   * The root that touches zero beside grid point `i` (a local minimum of `|f|` with no sign
+   * change beside it), or null. At the ends of the range there is no bracket for the slope, so the
+   * grid point itself counts when `|f|` there is below the limit.
+   */
+  const touchingRoot = (i: number): f64 | null => {
+    if (i > 0 && i < intervals) {
+      const slopeLeft = slopeAt(xs[i - 1]);
+      const slopeRight = slopeAt(xs[i + 1]);
+      if (Number.isFinite(slopeLeft) && Number.isFinite(slopeRight) && slopeLeft * slopeRight < 0) {
+        const root = refineBracket(slopeAt, xs[i - 1], xs[i + 1]);
+        return Math.abs(sample(root)) < SCAN_TOUCH_LIMIT ? root : null;
+      }
+    }
+    return Math.abs(fs[i]) < SCAN_TOUCH_LIMIT ? xs[i] : null;
+  };
   /** True when the samples `i` and `j` are finite and have opposite signs. */
   const changesSign = (i: number, j: number): boolean =>
     i >= 0 &&
@@ -1920,12 +1949,12 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
       const root = refineBracket(f, xs[i], xs[i + 1]);
       if (Math.abs(sample(root)) <= Math.max(Math.abs(fx), Math.abs(fs[i + 1]))) addRoot(root);
     } else if (
-      Math.abs(fx) < SCAN_TOUCH_LIMIT &&
       !changesSign(i - 1, i) &&
       (i === 0 || !(Math.abs(fs[i - 1]) < Math.abs(fx))) &&
       (i === intervals || !(Math.abs(fs[i + 1]) < Math.abs(fx)))
     ) {
-      addRoot(xs[i]);
+      const touch = touchingRoot(i);
+      if (touch !== null) addRoot(touch);
     }
   }
   roots.sort((a, b) => a - b);
@@ -1998,6 +2027,12 @@ function lowDegreeRoots(
   expr: string,
   varName: string
 ): Array<f64 | Complex | string> {
+  if (dense.length === 2) {
+    // The root of `c0 + c1*x` is the correctly rounded quotient of the two coefficients as typed:
+    // `1e-20*x - 1e-30` gives `1e-10`, and not the quotient of two rounded doubles.
+    const exact = exactLinearRoot(dense[0], dense[1]);
+    if (exact !== null) return [exact];
+  }
   const roots = closedFormRoots(dense);
   if (dense.length === 3) {
     // Prefer exact radical forms for a quadratic (e.g. x^2 - 2 -> +-sqrt(2)).
@@ -2079,6 +2114,23 @@ function normalizeEquation(equation: string, caller: string): string {
   return `${parts[0].trim()} - (${parts[1].trim()})`;
 }
 
+/** The error for an equation that every value of the variable solves, so that no finite list holds its solutions. */
+function identityError(caller: string, varName: string, equation: string): Error {
+  return new Error(
+    `${caller}: every value of ${varName} is a solution of "${equation}" ` +
+      '(the equation is an identity), so no finite list holds its solutions.'
+  );
+}
+
+/** True when the simplifier reduces `expr` to 0, so that `expr = 0` holds for every value of the variable. */
+function simplifiesToZero(expr: string): boolean {
+  try {
+    return String(factorySimplify(expr)) === '0';
+  } catch {
+    return false;
+  }
+}
+
 /** Throw a `SyntaxError` when `expr` is not an expression, so that no other message hides that. */
 function requireExpression(expr: string, equation: string, caller: string): void {
   if (parseTree(expr) === null) {
@@ -2095,12 +2147,15 @@ function requireExpression(expr: string, equation: string, caller: string): void
  * sign. What it returns, by form of the equation:
  *
  * - **Polynomial, degree 1 to 3:** exact closed-form roots, real and complex: numbers,
- *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates.
+ *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates. The
+ *   root of a linear polynomial is the correctly rounded quotient of the coefficients as typed
+ *   (`1e-20*x - 1e-30` gives `1e-10`).
  * - **Polynomial, degree 4 or more:** all distinct real roots, found by Sturm isolation over
  *   the whole real line, sorted ascending. These are floating-point numbers.
  *   A coefficient may be any real constant (`pi*x^4 - 1`). `solve` reads the polynomial from
  *   the syntax tree of the equation, not from sample values.
- * - **Polynomial with every coefficient zero** (`x^2 - x^2`, `0*x = 0`): every value is a
+ * - **Polynomial with every coefficient zero** (`x^2 - x^2`, `(x - x)^1000000000`, `0*x = 0`),
+ *   or any expression that the simplifier reduces to 0 (`sin(x) - sin(x)`): every value is a
  *   solution, so no finite list holds the set. `solve` throws an `Error`. It never returns `[]`
  *   for an identity, because `[]` means that the equation has no real roots (`1 = 2`).
  * - **Polynomial of degree above 1000:** `solve` throws a `PolynomialDegreeError` (a
@@ -2167,16 +2222,16 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
     if (dense.length === 1) {
       // A constant. Zero is zero at every value of the variable; any other constant never is.
       if (dense[0] !== 0) return [];
-      throw new Error(
-        `solve: every value of ${varName} is a solution of "${equation}" ` +
-          '(the equation is an identity), so no finite list holds its solutions.'
-      );
+      throw identityError('solve', varName, equation);
     }
     return dense.length <= 4 ? lowDegreeRoots(dense, expr, varName) : sturmRoots(dense);
   }
 
   const outcome = solveElementary(expr, varName);
   if (outcome === null) {
+    // A difference that the simplifier reduces to 0 (`sin(x) - sin(x)`) is an identity, not a
+    // form that has no solution.
+    if (simplifiesToZero(expr)) throw identityError('solve', varName, equation);
     throw new Error(
       `solve: no closed-form solution found for "${equation}". ` +
         'Pass { numeric: true, range: [a, b] } to scan that range for real roots.'

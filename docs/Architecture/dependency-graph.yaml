@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1350
+  totalFiles: 1351
   totalModules: 82
-  totalExports: 7397
+  totalExports: 7401
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14324,6 +14324,28 @@ modules:
         - ElementarySolution
       functions:
         - solveElementary
+    functions/src/cas/exact-roots.ts:
+      description: Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./rat.js
+          imports:
+            - Rat
+            - ratNormalize
+            - ratDiv
+            - RAT_ZERO
+      workspaceDependencies: []
+      exports:
+        - decimalTextToRat
+        - coefficientRat
+        - ratText
+        - exactLinearRoot
+      functions:
+        - decimalTextToRat
+        - coefficientRat
+        - ratText
+        - exactLinearRoot
     functions/src/cas/layer3.ts:
       description: Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
       externalDependencies: []
@@ -25146,6 +25168,7 @@ modules:
         - file: ../factories/index.js
           imports:
             - derivative
+            - simplify
         - file: ../cas/antiderivative.js
           imports:
             - antiderivativeReciprocal
@@ -25180,6 +25203,9 @@ modules:
         - file: ../cas/real-roots.js
           imports:
             - realRoots
+        - file: ../cas/exact-roots.js
+          imports:
+            - exactLinearRoot
         - file: ../numeric/adaptive-quad.js
           imports:
             - quadValue
@@ -45860,6 +45886,7 @@ dependencyGraph:
         - functions/src/cas/antiderivative.ts
         - functions/src/cas/closed-form-roots.ts
         - functions/src/cas/elementary-solve.ts
+        - functions/src/cas/exact-roots.ts
         - functions/src/cas/layer3.ts
         - functions/src/cas/polynomial-canonical.ts
         - functions/src/cas/polynomial-limits.ts
@@ -47041,13 +47068,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1350
+  totalTypeScriptFiles: 1351
   totalModules: 82
-  totalLinesOfCode: 239106
-  totalExports: 7397
+  totalLinesOfCode: 239284
+  totalExports: 7401
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2579
+  totalFunctions: 2583
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695

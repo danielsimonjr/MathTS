@@ -127,7 +127,7 @@ The codebase is organized into the following modules:
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 12 files
+- **functions/cas**: 13 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 587            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 588            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5734,6 +5734,20 @@ graph LR
 
 - Interfaces: `ElementaryDecline`, `ElementarySolution`
 - Functions: `solveElementary`
+
+---
+
+### `functions/src/cas/exact-roots.ts` - Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.
+
+**Internal Dependencies:**
+
+| File       | Imports                               | Type   |
+| ---------- | ------------------------------------- | ------ |
+| `./rat.js` | `Rat, ratNormalize, ratDiv, RAT_ZERO` | Import |
+
+**Exports:**
+
+- Functions: `decimalTextToRat`, `coefficientRat`, `ratText`, `exactLinearRoot`
 
 ---
 
@@ -11818,7 +11832,7 @@ graph LR
 | `./euclid.js`                    | `euclidSnap`                                                                                                                                      | Import |
 | `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString`                                                                                                    | Import |
 | `./algebra.js`                   | `expand, factor, polyder, polynomialGCD, polynomialQuotient`                                                                                      | Import |
-| `../factories/index.js`          | `derivative`                                                                                                                                      | Import |
+| `../factories/index.js`          | `derivative, simplify`                                                                                                                            | Import |
 | `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                                                                                        | Import |
 | `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                                                                                      | Import |
 | `../cas/elementary-solve.js`     | `solveElementary`                                                                                                                                 | Import |
@@ -11827,6 +11841,7 @@ graph LR
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                                                              | Import |
 | `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                                                                       | Import |
 | `../cas/real-roots.js`           | `realRoots`                                                                                                                                       | Import |
+| `../cas/exact-roots.js`          | `exactLinearRoot`                                                                                                                                 | Import |
 | `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
 | `./numeric.js`                   | `findRoot`                                                                                                                                        | Import |
@@ -21110,14 +21125,14 @@ graph TD
         N146[antiderivative]
         N147[closed-form-roots]
         N148[elementary-solve]
-        N149[layer3]
-        N150[polynomial-canonical]
-        N151[polynomial-limits]
-        N152[rat]
-        N153[rational-integrate]
-        N154[real-roots]
-        N155[render-coeff-times]
-        N156[...2 more]
+        N149[exact-roots]
+        N150[layer3]
+        N151[polynomial-canonical]
+        N152[polynomial-limits]
+        N153[rat]
+        N154[rational-integrate]
+        N155[real-roots]
+        N156[...3 more]
     end
 
     subgraph Functions/combinatorics
@@ -21766,14 +21781,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1350   |
+| Total TypeScript Files  | 1351   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239106 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 239284 |
+| Total Exports           | 7401   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Functions         | 2583   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
