@@ -3,6 +3,7 @@ import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { factory } from '../utils/factory.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
+import { realScale, isDegenerate } from '../utils/real-scale.js';
 
 // Type definitions for norm
 interface ComplexType {
@@ -386,6 +387,35 @@ export const createNorm = /* #__PURE__ */ factory(
       if (sizeX[0] !== sizeX[1]) {
         throw new RangeError('Invalid matrix dimensions');
       }
+      // A*.A squares each entry, so it can overflow or underflow when the norm is in range
+      // (#1257). An overflow gives eigs a non-finite entry, and eigs throws a RangeError for
+      // it (#1243). The norm is s * norm(x / s) for an exact scale s, so retry with the scaled
+      // entries. A matrix with a Complex entry or a non-finite entry keeps the plain result
+      // or the plain error.
+      let plain: number | BigNumberType | undefined;
+      let plainError: unknown;
+      try {
+        plain = _matrixNormTwoOf(x);
+        if (!isDegenerate(plain)) return plain;
+      } catch (err) {
+        if (!(err instanceof RangeError)) throw err;
+        plainError = err;
+      }
+      const rows = x.toArray() as unknown[];
+      const scale = realScale(rows.flat(Infinity));
+      if (scale === undefined) {
+        if (plainError !== undefined) throw plainError;
+        return plain as number | BigNumberType;
+      }
+      const scaled = matrix(
+        rows.map(function down(row: unknown): unknown {
+          return Array.isArray(row) ? row.map(down) : scale.down(row as number);
+        })
+      );
+      return scale.up(_matrixNormTwoOf(scaled) as number) as number | BigNumberType;
+    }
+
+    function _matrixNormTwoOf(x: MatrixType): number | BigNumberType {
       const tx = ctranspose(x) as MatrixType;
       const squaredX = multiply(tx, x) as MatrixType;
       const eigenVals = eigs(squaredX).values.toArray();

@@ -37,6 +37,7 @@ import {
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
 } from '@danielsimonjr/mathts-core';
+import { isDegenerate as isDegenerateReal, rescaled } from '../utils/real-scale.js';
 import {
   finiteNumbers,
   normalizationFromSecondArg,
@@ -2541,11 +2542,95 @@ function exactSqrt(v: unknown): unknown {
 const exactStd = (...args: unknown[]): unknown => exactSqrt(exactVariance(...args));
 
 /**
+ * A std result that is NaN, infinite or 0 can come from a variance whose sum of squares left the
+ * range of the type while the std is in range (#1257). Then std is computed again for the values
+ * divided by an exact scale, and multiplied back (see `rescaled`). The second computation is
+ * `std` itself, so an exact 0 of equal values stays 0 at every scale. A result that is in range
+ * is returned as it is.
+ */
+function scaledStdResult(result: unknown, args: unknown[]): unknown {
+  const isBad = (x: unknown): boolean => (Array.isArray(x) ? x.some(isBad) : isDegenerateReal(x));
+  if (!isBad(result)) return result;
+  const xs = statData(args[0]);
+  if (xs === undefined) return result;
+  let normStr: string | undefined;
+  let opts: StatReduceOptions | undefined;
+  let dim: number | undefined;
+  for (const a of args.slice(1)) {
+    if (typeof a === 'string') normStr = a;
+    else if (typeof a === 'number' || a instanceof BigNumber) dim = Number(a.valueOf());
+    else if (a !== null && typeof a === 'object') opts = a as StatReduceOptions;
+  }
+  const { skipNaN } =
+    normStr !== undefined && opts !== undefined
+      ? normalizationFromStringAndOptions(normStr, opts)
+      : normalizationFromSecondArg(opts ?? normStr);
+  // The arguments of std for one list of values: the normalization and the options, no dimension.
+  const rest = [normStr, opts].filter((a) => a !== undefined);
+  const leavesOf = (ys: ArrayLike<unknown>): unknown[] => {
+    const out: unknown[] = [];
+    const collect = (zs: ArrayLike<unknown>): void => {
+      for (let i = 0; i < zs.length; i++) {
+        const z = zs[i];
+        if (Array.isArray(z)) collect(z);
+        else if (!(skipNaN && typeof z === 'number' && Number.isNaN(z))) out.push(z);
+      }
+    };
+    collect(ys);
+    return out;
+  };
+  // The largest scaled value is in [1, 2), so the scale of the inner call is 1 and that call
+  // does not come back here.
+  const one = (ys: ArrayLike<unknown>): unknown =>
+    rescaled(leavesOf(ys), (scaled) => (std as (...a: unknown[]) => unknown)(scaled, ...rest));
+  if (dim === undefined) return one(xs) ?? result;
+  if (!Array.isArray(result) || !Number.isInteger(dim) || dim < 0 || dim >= arrayDepth(xs)) {
+    return result;
+  }
+  const scaled = reduceSlices(Array.from(xs), dim, one);
+  const merge = (plain: unknown, fixed: unknown): unknown =>
+    Array.isArray(plain) && Array.isArray(fixed) && plain.length === fixed.length
+      ? plain.map((p, i) => merge(p, fixed[i]))
+      : isBad(plain)
+        ? (fixed ?? plain)
+        : plain;
+  return merge(result, scaled);
+}
+
+/** The implementations of `std`, each with the scaled recomputation of a degenerate result. */
+function withScaledStd<T extends object>(signatures: T): T {
+  type Impl = (...a: unknown[]) => unknown;
+  // A result that is a finite nonzero number needs no recomputation: the check is one comparison,
+  // so a fixed arity keeps the call free of an argument array.
+  const plain = (r: unknown): boolean => typeof r === 'number' && r !== 0 && Number.isFinite(r);
+  const wrapped: Record<string, unknown> = {};
+  for (const [key, impl] of Object.entries(signatures)) {
+    const f = impl as Impl;
+    wrapped[key] =
+      f.length === 1
+        ? (a: unknown): unknown => {
+            const r = f(a);
+            return plain(r) ? r : scaledStdResult(r, [a]);
+          }
+        : f.length === 2
+          ? (a: unknown, b: unknown): unknown => {
+              const r = f(a, b);
+              return plain(r) ? r : scaledStdResult(r, [a, b]);
+            }
+          : (a: unknown, b: unknown, c: unknown): unknown => {
+              const r = f(a, b, c);
+              return plain(r) ? r : scaledStdResult(r, [a, b, c]);
+            };
+  }
+  return wrapped as T;
+}
+
+/**
  * The standard deviation: the square root of `variance`, with the same arguments. Number data
  * gives a number. BigNumber and Complex data give their own type. Fraction data gives a number,
  * because the square root of a fraction is not a fraction in general.
  */
-export const std = mathTyped('std', {
+const stdSignatures = {
   Array: (arr: f64[]): f64 =>
     (sqrtNumber(varianceWith(arr, UNBIASED, false)) ?? exactStd(arr)) as f64,
   'Array, string': (arr: f64[], norm: string): f64 => {
@@ -2649,7 +2734,9 @@ export const std = mathTyped('std', {
   // computes the result, so an exact scalar type stays exact.
   '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
     std(values) as f64,
-}) as PublicStd;
+};
+
+export const std = mathTyped('std', withScaledStd(stdSignatures)) as PublicStd;
 
 type NanReduce = (
   x: NumericVectorInput | number[][],

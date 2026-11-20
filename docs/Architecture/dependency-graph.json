@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-19",
-    "totalFiles": 1349,
+    "lastUpdated": "2026-11-20",
+    "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7392
+    "totalExports": 7397
   },
   "entryPoints": [
     {
@@ -7668,6 +7668,14 @@
           {
             "file": "../../utils/is.js",
             "imports": ["isBigNumber", "isComplex", "isFraction"]
+          },
+          {
+            "file": "../../utils/real-scale.js",
+            "imports": ["realScale", "squaresLeaveRange"]
+          },
+          {
+            "file": "../../utils/bignumber-hypot.js",
+            "imports": ["P_NORM_SUM_MIN"]
           }
         ],
         "workspaceDependencies": [
@@ -9732,6 +9740,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/real-scale.js",
+            "imports": ["realScale", "isDegenerate"]
           }
         ],
         "workspaceDependencies": [
@@ -19033,6 +19045,10 @@
             "imports": ["createRealSymmetric"]
           },
           {
+            "file": "../utils/real-scale.js",
+            "imports": ["realScale", "squaresLeaveRange"]
+          },
+          {
             "file": "../utils/is.js",
             "imports": ["typeOf", "isNumber", "isBigNumber", "isComplex", "isFraction"]
           }
@@ -23306,6 +23322,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/real-scale.js",
+            "imports": ["realScale"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -23319,7 +23339,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "pairwiseDot"]
+            "imports": ["BigNumber", "pairwiseSum", "pairwiseDot"]
           }
         ],
         "exports": ["createCorr"],
@@ -23779,7 +23799,15 @@
           },
           {
             "file": "../utils/is.js",
-            "imports": ["isCollection"]
+            "imports": ["isBigNumber", "isCollection"]
+          },
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepForEach"]
+          },
+          {
+            "file": "../utils/real-scale.js",
+            "imports": ["isDegenerate", "rescaled"]
           },
           {
             "file": "../core/function/typed.js",
@@ -26437,6 +26465,10 @@
           {
             "file": "./f64-kernels.js",
             "imports": ["f64Unary", "f64UnaryDispatched", "mapEachLeaf", "unaryCollection"]
+          },
+          {
+            "file": "../utils/real-scale.js",
+            "imports": ["isDegenerate", "rescaled"]
           },
           {
             "file": "../statistics/numeric-data.js",
@@ -30329,8 +30361,9 @@
             "imports": ["BigNumber"]
           }
         ],
-        "exports": ["bigHypot", "pNormSumInRange"],
-        "functions": ["bigHypot", "pNormSumInRange"]
+        "exports": ["P_NORM_SUM_MIN", "bigHypot", "pNormSumInRange"],
+        "functions": ["bigHypot", "pNormSumInRange"],
+        "constants": ["P_NORM_SUM_MIN"]
       },
       "functions/src/utils/clone.ts": {
         "description": "Clone an object. Will make a deep copy of the data.",
@@ -31334,6 +31367,22 @@
         "workspaceDependencies": [],
         "exports": ["product"],
         "functions": ["product"]
+      },
+      "functions/src/utils/real-scale.ts": {
+        "description": "An exact scale for a list of real values, so that the squares of the scaled values cannot",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["BigNumber"]
+          }
+        ],
+        "exports": ["realScale", "isDegenerate", "rescaled", "squaresLeaveRange"],
+        "interfaces": ["RealScale"],
+        "functions": ["realScale", "isDegenerate", "rescaled", "squaresLeaveRange"]
       },
       "functions/src/utils/samples.ts": {
         "description": "Shared argument helper for the signal and curve-fit functions.",
@@ -49075,6 +49124,7 @@
           "functions/src/utils/parseNumber.ts",
           "functions/src/utils/print.ts",
           "functions/src/utils/product.ts",
+          "functions/src/utils/real-scale.ts",
           "functions/src/utils/samples.ts",
           "functions/src/utils/sort-numbers.ts",
           "functions/src/utils/string.ts",
@@ -49833,16 +49883,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1349,
+    "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238004,
-    "totalExports": 7392,
+    "totalLinesOfCode": 238390,
+    "totalExports": 7397,
     "totalClasses": 62,
-    "totalInterfaces": 668,
-    "totalFunctions": 2575,
-    "totalTypeGuards": 183,
+    "totalInterfaces": 669,
+    "totalFunctions": 2579,
+    "totalTypeGuards": 184,
     "totalEnums": 0,
-    "totalConstants": 1694,
+    "totalConstants": 1695,
     "totalReExports": 3191,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,

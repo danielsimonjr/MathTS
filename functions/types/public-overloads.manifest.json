@@ -27,6 +27,7 @@
     {
       "name": "std",
       "source": "src/typed/arithmetic.ts",
+      "mathTypedPattern": "const stdSignatures",
       "fallback": [
         "(a: ExactData<BigNumber>): BigNumber;",
         "(a: ExactData<Fraction | Complex | bigint>): number;",

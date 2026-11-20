@@ -1,9 +1,9 @@
 {
-  "generated": "2026-11-19",
-  "total": 214,
+  "generated": "2026-11-20",
+  "total": 213,
   "acceleratedCount": 23,
   "parallelOnlyCount": 15,
-  "jsOnlyCount": 176,
+  "jsOnlyCount": 175,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 21,
   "jsFallbackCount": 0,
@@ -437,7 +437,6 @@
     "smallerEq",
     "sqrt",
     "square",
-    "std",
     "studentTPDF",
     "subfactorial",
     "subtract",
@@ -459,7 +458,7 @@
     "arithmetic.ts": {
       "wasm": 0,
       "parallel": 1,
-      "jsOnly": 40
+      "jsOnly": 39
     },
     "bitwise.ts": {
       "wasm": 0,

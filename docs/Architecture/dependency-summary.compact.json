@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-19", "f": 1349, "e": 7392, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7397, "re": 3191 },
   "s": {
-    "loc": 238004,
+    "loc": 238390,
     "cls": 62,
-    "int": 668,
-    "fn": 2575,
-    "tg": 183,
+    "int": 669,
+    "fn": 2579,
+    "tg": 184,
     "en": 0,
-    "co": 1694,
+    "co": 1695,
     "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1213,7 +1213,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 43,
+      "f": 44,
       "exp": [
         "arraySize",
         "validate",
@@ -1971,6 +1971,6 @@
     { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "utils/collection.ts", "i": 0, "o": 43 }
+    { "p": "utils/collection.ts", "i": 0, "o": 44 }
   ]
 }

@@ -2,6 +2,7 @@ import { factory } from '../utils/factory.js';
 import { format } from '../utils/string.js';
 import { createComplexEigs } from './eigs/complexEigs.js';
 import { createRealSymmetric } from './eigs/realSymmetric.js';
+import { realScale, squaresLeaveRange } from '../utils/real-scale.js';
 import { typeOf, isNumber, isBigNumber, isComplex, isFraction } from '../utils/is.js';
 
 // Type definitions
@@ -390,7 +391,52 @@ export const createEigs = /* #__PURE__ */ factory(
       }
 
       const type = coerceTypes(mat, arr, N); // modifies arr by side effect
-      return doComplexEigs(arr, N, prec, type, computeVectors);
+      return doScaledComplexEigs(arr, N, prec, type, computeVectors);
+    }
+
+    /**
+     * The general solver squares and multiplies entries, so a BigNumber matrix with entries near
+     * the exponent bounds gives NaN (#1257). When the squares of the largest entry can leave the
+     * bounds, the entries are divided by an exact power of 10 and each eigenvalue is multiplied
+     * back. The eigenvectors do not change. A Complex eigenvalue is multiplied back as a number.
+     */
+    function doScaledComplexEigs(
+      arr: Scalar[][],
+      N: number,
+      prec: number | BigNumber,
+      type: DataType,
+      computeVectors: boolean
+    ): EigenResult {
+      const scale = type === 'BigNumber' ? realScale(arr.flat()) : undefined;
+      if (scale === undefined || !scale.big || !squaresLeaveRange(scale.order, N)) {
+        return doComplexEigs(arr, N, prec, type, computeVectors);
+      }
+      const scaled = arr.map((row) =>
+        row.map((v) => scale.down(v as unknown as number) as unknown as Scalar)
+      );
+      const result = doComplexEigs(scaled, N, prec, type, computeVectors);
+      // A BigNumber eigenvalue is scaled exactly. A Complex eigenvalue holds numbers, so it is
+      // multiplied by 10^order as a number. When that factor is 0 or infinite, the eigenvalue is
+      // not representable as a number, and the result is that of the entries without a scale.
+      const factor = Number(`1e${scale.order}`);
+      const up = (v: unknown): unknown =>
+        isBigNumber(v)
+          ? scale.up(v as unknown as number)
+          : typeof v === 'object' &&
+              v !== null &&
+              typeof (v as { mul?: unknown }).mul === 'function'
+            ? (v as { mul(n: number): unknown }).mul(factor)
+            : v;
+      const values = result.values as unknown[];
+      const complexValue = values.some((v) => !isBigNumber(v));
+      if (complexValue && (factor === 0 || !Number.isFinite(factor))) {
+        return doComplexEigs(arr, N, prec, type, computeVectors);
+      }
+      result.values = values.map(up) as typeof result.values;
+      for (const pair of result.eigenvectors ?? []) {
+        pair.value = up(pair.value) as typeof pair.value;
+      }
+      return result;
     }
 
     /**

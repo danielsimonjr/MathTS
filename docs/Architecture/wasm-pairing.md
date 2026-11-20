@@ -4,7 +4,7 @@
 
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-11-19 (by tools/create-dependency-graph)
+**Generated**: 2026-11-20 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 
@@ -14,8 +14,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      23 |
 | Parallel only (worker pool) |      15 |
-| JS-only                     |     176 |
-| **Total**                   | **214** |
+| JS-only                     |     175 |
+| **Total**                   | **213** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 23 wasm-routed functions, **21 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
 
@@ -71,7 +71,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Module        | WASM | Parallel | JS-only |
 | ------------- | ---: | -------: | ------: |
-| arithmetic    |    0 |        1 |      40 |
+| arithmetic    |    0 |        1 |      39 |
 | bitwise       |    0 |        0 |       7 |
 | combinatorics |    0 |        0 |      21 |
 | complex       |    0 |        0 |       4 |

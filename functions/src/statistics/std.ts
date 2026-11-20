@@ -1,5 +1,7 @@
 import { factory } from '../utils/factory.js';
-import { isCollection } from '../utils/is.js';
+import { isBigNumber, isCollection } from '../utils/is.js';
+import { deepForEach } from '../utils/collection.js';
+import { isDegenerate, rescaled } from '../utils/real-scale.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for std
@@ -10,17 +12,18 @@ interface MatrixType {
 interface StdDependencies {
   typed: TypedFunction;
   map: TypedFunction;
+  mapSlices: TypedFunction;
   sqrt: TypedFunction;
   variance: TypedFunction;
 }
 
 const name = 'std';
-const dependencies = ['typed', 'map', 'sqrt', 'variance'];
+const dependencies = ['typed', 'map', 'mapSlices', 'sqrt', 'variance'];
 
 export const createStd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, map, sqrt, variance }: StdDependencies) => {
+  ({ typed, map, mapSlices, sqrt, variance }: StdDependencies) => {
     /**
      * Compute the standard deviation of a matrix or a  list with values.
      * The standard deviations is defined as the square root of the variance:
@@ -92,6 +95,53 @@ export const createStd = /* #__PURE__ */ factory(
       },
     });
 
+    /** A result that is NaN, infinite or 0 can come from a square that left the range (#1257). */
+    function _degenerate(result: unknown): boolean {
+      if (!isCollection(result)) return isDegenerate(result);
+      let found = false;
+      deepForEach(result as never, (x: unknown) => {
+        if (isDegenerate(x)) found = true;
+      });
+      return found;
+    }
+
+    function _leaves(array: unknown): unknown[] {
+      const out: unknown[] = [];
+      deepForEach(array as never, (x: unknown) => {
+        out.push(x);
+      });
+      return out;
+    }
+
+    /**
+     * The standard deviation of the values of one slice. A degenerate plain result is computed
+     * again for the values divided by an exact scale, and multiplied back (see `rescaled`). The
+     * plain result stays when no scale applies (a value that is not finite, a Complex value).
+     */
+    function _scaledSlice(slice: unknown, normalization: string, plain: unknown): unknown {
+      if (!isDegenerate(plain)) return plain;
+      const fixed = rescaled(_leaves(slice), (scaled) =>
+        sqrt((variance as (...a: unknown[]) => unknown)(scaled, normalization))
+      );
+      return fixed === undefined ? plain : fixed;
+    }
+
+    function _scaled(args: unknown[], plainResult: unknown): unknown {
+      const normalization = args.find((a) => typeof a === 'string') ?? 'unbiased';
+      const dim = args[1];
+      const array = args[0];
+      if (typeof dim === 'number' || isBigNumber(dim)) {
+        return mapSlices(array, dim, (slice: unknown) =>
+          _scaledSlice(
+            slice,
+            normalization as string,
+            sqrt((variance as (...a: unknown[]) => unknown)(slice, normalization))
+          )
+        );
+      }
+      return _scaledSlice(array, normalization as string, plainResult);
+    }
+
     function _std(...args: unknown[]): unknown {
       const array = args[0] as unknown[] | MatrixType;
       if ((array as unknown[]).length === 0) {
@@ -104,11 +154,8 @@ export const createStd = /* #__PURE__ */ factory(
       // are memory-bound; see the 2026-07 WASM audit).
       try {
         const v = (variance as (...a: unknown[]) => unknown)(...args);
-        if (isCollection(v)) {
-          return map(v, sqrt);
-        } else {
-          return sqrt(v);
-        }
+        const result = isCollection(v) ? map(v, sqrt) : sqrt(v);
+        return _degenerate(result) ? _scaled(args, result) : result;
       } catch (err: unknown) {
         if (err instanceof TypeError && err.message.includes(' variance')) {
           throw new TypeError(err.message.replace(' variance', ' std'), { cause: err });

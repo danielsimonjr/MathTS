@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-19",
+  "generated": "2026-11-20",
   "dependents": {
     "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
@@ -1076,6 +1076,22 @@
       "functions/src/utils/print.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/real-scale.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/matrix/eigs.ts",
+      "functions/src/statistics/corr.ts",
+      "functions/src/statistics/std.ts",
+      "functions/src/typed/arithmetic.ts"
+    ],
+    "functions/src/utils/bignumber-hypot.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
       "functions/src/algebra/derivative.ts",
@@ -1392,6 +1408,7 @@
       "functions/src/statistics/median.ts",
       "functions/src/statistics/min.ts",
       "functions/src/statistics/prod.ts",
+      "functions/src/statistics/std.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts",
       "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
@@ -1716,13 +1733,6 @@
       "functions/src/utils/isFinite.ts",
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/parseNumber.ts"
-    ],
-    "functions/src/utils/bignumber-hypot.ts": [
-      "functions/src/arithmetic/hypot.ts",
-      "functions/src/arithmetic/norm.ts",
-      "functions/src/geometry/distance.ts",
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
       "functions/src/arithmetic/lcm.ts",
