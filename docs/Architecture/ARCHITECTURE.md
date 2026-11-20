@@ -385,13 +385,13 @@ with **0 unused** files and **6,145 exports**.
 `repo-tools map` generates these values.
 Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=docs/Architecture`
 
-> **No table here claims a reachability count.** The tables give size, structure and cycle counts only.
-> `FILE_INVENTORY.md` and `unused-analysis.md` in this directory give the reachability figures. The
-> repository generator writes them (`npm run docs:deps:full`), and the gate does not check them.
+> **No table here claims a file, export, line or reachability count.** The tables give
+> structure and cycle counts only. The generated `FILE_INVENTORY.md` and `unused-analysis.md`
+> give the file, export and reachability figures: run `bun run docs:deps` to produce them.
+> The repository does not commit them, and the gate does not check them.
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2786  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 6     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 2     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 3     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
