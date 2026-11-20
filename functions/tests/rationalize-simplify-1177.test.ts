@@ -114,3 +114,11 @@ describe('#1177 item 1: rationalize of a power of a sum is read exactly', () => 
     expect(rat('(1+x)^3')).toBe('x ^ 3 + 3 * x ^ 2 + 3 * x + 1');
   });
 });
+
+describe('#1177 item 4: an explicit bignumber() keeps its digits', () => {
+  it('bignumber(1/3) has 64 digits', () => {
+    expect(simp('bignumber(1/3)')).toBe(
+      '0.3333333333333333333333333333333333333333333333333333333333333333'
+    );
+  });
+});

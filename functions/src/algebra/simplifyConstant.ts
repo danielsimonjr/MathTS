@@ -243,8 +243,13 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       }
       // A Fraction that meets a function with no Fraction signature takes the core conversion to
       // BigNumber, so factorial(5) or atan2(1,1) would give a 64-digit BigNumber. mathjs throws at
-      // that conversion and retries with numbers: do the same when no argument is a BigNumber.
-      if (isBigNumber(result) && !args.some((arg) => _someEntry(arg, isBigNumber))) {
+      // that conversion and retries with numbers: do the same when no argument is a BigNumber and the
+      // function is not the BigNumber constructor itself (bignumber(1/3) keeps its 64 digits).
+      if (
+        fnname !== 'bignumber' &&
+        isBigNumber(result) &&
+        !args.some((arg) => _someEntry(arg, isBigNumber))
+      ) {
         result = _toNumber(
           mathWithTransform[fnname].apply(null, args.map(_removeFractions)),
           options
