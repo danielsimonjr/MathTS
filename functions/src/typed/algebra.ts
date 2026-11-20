@@ -957,8 +957,18 @@ export function expand(expr: string): string {
   let result = expr;
 
   // A group is a bare "(...)": the "(" of a function call such as sin(x) opens an argument list.
-  // Handle (expr)^2 => (expr)*(expr)
-  result = result.replace(/(?<![\w.^])\(([^()]+)\)\^2/g, '($1)*($1)');
+  // Handle (expr)^2 => (expr)*(expr), but only when the square stays one factor of a product.
+  // After a "/" the rewrite changes the value (1/(s)^2 is 1/(s*s), not (1/s)*s). Before a further
+  // "^" (right-associative power) or inside a longer exponent (^23, ^2.5) it changes the value too.
+  result = result.replace(
+    /(?<![\w.^])\(([^()]+)\)\^2/g,
+    (whole: string, inner: string, offset: number, text: string) => {
+      const before = text.slice(0, offset).trimEnd();
+      const after = text.slice(offset + whole.length);
+      if (before.endsWith('/') || /^\s*\^/.test(after) || /^[\w.(]/.test(after)) return whole;
+      return `(${inner})*(${inner})`;
+    }
+  );
 
   // Split a factor into its additive terms, treating binary subtraction as a
   // signed term: "x - 2" → ["x", "-2"] (NOT ["x - 2"]). Without this the minus
@@ -975,6 +985,14 @@ export function expand(expr: string): string {
   let match: RegExpExecArray | null;
 
   while ((match = mulPattern.exec(result)) !== null) {
+    const before = result.slice(0, match.index).trimEnd();
+    const after = result.slice(match.index + match[0].length).trimStart();
+    // A product after "/" or "^", or before a power, is not a free factor: splicing a sum there
+    // changes the value. Leave that product as it is and look for the next one.
+    if (before.endsWith('/') || before.endsWith('^') || after.startsWith('^')) {
+      mulPattern.lastIndex = match.index + 1;
+      continue;
+    }
     const leftTerms = splitTerms(match[1]);
     const rightTerms = splitTerms(match[2]);
     const products: string[] = [];
@@ -983,9 +1001,12 @@ export function expand(expr: string): string {
         products.push(l.trim() + '*' + r.trim());
       }
     }
+    // The sum is one factor of its neighbours: "2*(a+b)*(c+d)", "x-(a+b)*(c+d)" and
+    // "(a+b)*(c+d)/2" need the parentheses, or the sign, the divisor or the factor binds to one term.
+    const sum = products.join(' + ');
     result =
       result.slice(0, match.index) +
-      products.join(' + ') +
+      (before === '' && after === '' ? sum : `(${sum})`) +
       result.slice(match.index + match[0].length);
     mulPattern.lastIndex = 0;
   }

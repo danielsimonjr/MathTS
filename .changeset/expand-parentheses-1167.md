@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': patch
+---
+
+`expand` keeps the parentheses of a product and of a square when its input is not a polynomial. The fallback of `expand` (an input with a function call such as `sin(x)`, or a purely numeric product) wrote the sum of a distributed product without parentheses. So a factor, a divisor, an exponent or a minus sign bound to one term only. Before the change, `expand('2*(1+2)*(3+4)')` had the value 24 (the correct value is 42), `expand('(1+2)*(3+4)/2')` had 17 (10.5) and `expand('(1+2)*(3+4)^3')` had 141 (1029). The rewrite of `(s)^2` to `(s)*(s)` also changed the value of `1/(1+2)^2`, `(1+2)^2^2` and `(a+b)^23`. The fallback now puts the sum in parentheses when the product has a neighbour. It leaves a product unchanged when the product follows `/` or `^`, or precedes `^`. A plain product of two sums gives the same text as before: `expand('(a+b)*(c+d)')` is `a*c + a*d + b*c + b*d`. (Refs #1167)

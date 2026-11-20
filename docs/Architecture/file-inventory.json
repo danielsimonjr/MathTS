@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2550,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1134,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1134,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1178,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -9193,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1942
+      "loc": 1966
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -11212,6 +11212,13 @@
       "loc": 59
     },
     {
+      "file": "functions/tests/expand-legacy-parentheses-1167.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
       "file": "functions/tests/expression-transforms.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -12960,6 +12967,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 42
+    },
+    {
+      "file": "functions/tests/rationalize-simplify-1177.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 24
     },
     {
       "file": "functions/tests/real-roots.test.ts",
