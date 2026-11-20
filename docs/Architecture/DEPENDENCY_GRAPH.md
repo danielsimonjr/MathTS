@@ -7611,7 +7611,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/partitionSelect.ts` - Partition-based selection of an array or 1D matrix.
+### `functions/src/matrix/partitionSelect.ts` - Three-way quickselect: each pass splits the range into values less than, equal to and
 
 **Internal Dependencies:**
 
@@ -10101,16 +10101,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                                                                                                             | Type               |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `../utils/collection.js`         | `containsCollections`                                                                                               | Import             |
-| `../utils/factory.js`            | `factory`                                                                                                           | Import             |
-| `./utils/improveErrorMessage.js` | `improveErrorMessage`                                                                                               | Import             |
-| `../core/function/typed.js`      | `TypedFunction`                                                                                                     | Import (type-only) |
-| `../utils/typed-impl.js`         | `findTypedImpl`                                                                                                     | Import             |
-| `../utils/sort-numbers.js`       | `arrayHasNaN`                                                                                                       | Import             |
-| `../utils/median-numbers.js`     | `medianInPlace, medianNumbers`                                                                                      | Import             |
-| `./numeric-data.js`              | `flattenForStatistics, finiteNumbers, isFloatTyped, numberGrid, reduceNumericMatrix, FloatTyped, StatReduceOptions` | Import             |
+| File                             | Imports                                                                                                                         | Type               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/collection.js`         | `containsCollections`                                                                                                           | Import             |
+| `../utils/factory.js`            | `factory`                                                                                                                       | Import             |
+| `./utils/improveErrorMessage.js` | `improveErrorMessage`                                                                                                           | Import             |
+| `../core/function/typed.js`      | `TypedFunction`                                                                                                                 | Import (type-only) |
+| `../utils/typed-impl.js`         | `findTypedImpl`                                                                                                                 | Import             |
+| `../utils/sort-numbers.js`       | `arrayHasNaN`                                                                                                                   | Import             |
+| `../utils/median-numbers.js`     | `medianInPlace, medianNumbers`                                                                                                  | Import             |
+| `./numeric-data.js`              | `flattenForStatistics, exactOrder, finiteNumbers, isFloatTyped, numberGrid, reduceNumericMatrix, FloatTyped, StatReduceOptions` | Import             |
 
 **Exports:**
 
@@ -10173,14 +10173,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports   | Type   |
-| ------------------- | --------- | ------ |
-| `../utils/array.js` | `flatten` | Import |
+| File                | Imports                 | Type   |
+| ------------------- | ----------------------- | ------ |
+| `../utils/array.js` | `flatten`               | Import |
+| `../utils/is.js`    | `isBigNumber, isNumber` | Import |
 
 **Exports:**
 
 - Types: `FloatTyped`, `NumericVectorInput`, `VarianceNorm`, `StatReduceOptions`, `VarianceRequest`
-- Functions: `isFloatTyped`, `copyToNumberArray`, `flattenForStatistics`, `finiteNumbers`, `isVarianceNorm`, `readSkip`, `parseStatOptions`, `normalizationFromSecondArg`, `normalizationFromStringAndOptions`, `numberGrid`, `flattenNumeric`, `reduceNumericMatrix`, `isConstantArrayLike`, `typedArrayPairToNumbers`
+- Functions: `exactOrder`, `isFloatTyped`, `copyToNumberArray`, `flattenForStatistics`, `finiteNumbers`, `isVarianceNorm`, `readSkip`, `parseStatOptions`, `normalizationFromSecondArg`, `normalizationFromStringAndOptions`, `numberGrid`, `flattenNumeric`, `reduceNumericMatrix`, `isConstantArrayLike`, `typedArrayPairToNumbers`
 
 ---
 
@@ -10207,31 +10208,33 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports    | Type   |
-| ------------------- | ---------- | ------ |
-| `./numeric-data.js` | `readSkip` | Import |
+| File                         | Imports                       | Type   |
+| ---------------------------- | ----------------------------- | ------ |
+| `./numeric-data.js`          | `readSkip`                    | Import |
+| `../utils/median-numbers.js` | `minFrom, quickSelectInPlace` | Import |
 
 **Exports:**
 
-- Interfaces: `QuantileSeqOptions`
+- Interfaces: `QuantileArith`, `QuantilePlan`, `QuantileSeqOptions`, `ParsedQuantileOptions`
 - Types: `NumpyQuantileMethod`
-- Functions: `assertNumpyQuantileMethod`, `quantileOfSorted`, `parseQuantileThirdArg`
+- Functions: `assertNumpyQuantileMethod`, `quantilePlan`, `blendNumber`, `orderStatistics`, `quantileOfSorted`, `quantileOfUnsorted`, `parseQuantileThirdArg`
+- Constants: `NUMBER_ARITH`
 
 ---
 
-### `functions/src/statistics/quantileSeq.ts` - Compute the prob order quantile of a matrix or a list with values.
+### `functions/src/statistics/quantileSeq.ts` - From this many probabilities on, an unsorted number sample is sorted once, with the native
 
 **Internal Dependencies:**
 
-| File                          | Imports                                                                                                       | Type               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`              | `isNumber, isBigNumber`                                                                                       | Import             |
-| `../utils/array.js`           | `flatten`                                                                                                     | Import             |
-| `../utils/factory.js`         | `factory`                                                                                                     | Import             |
-| `../utils/limits.js`          | `assertLoopOrder`                                                                                             | Import             |
-| `../core/function/typed.js`   | `TypedFunction`                                                                                               | Import (type-only) |
-| `./numeric-data.js`           | `isFloatTyped, copyToNumberArray, FloatTyped`                                                                 | Import             |
-| `./quantile-numpy-methods.js` | `assertNumpyQuantileMethod, quantileOfSorted, parseQuantileThirdArg, NumpyQuantileMethod, QuantileSeqOptions` | Import             |
+| File                          | Imports                                                                                                                                                                                                              | Type               |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`              | `isNumber, isBigNumber`                                                                                                                                                                                              | Import             |
+| `../utils/array.js`           | `flatten`                                                                                                                                                                                                            | Import             |
+| `../utils/factory.js`         | `factory`                                                                                                                                                                                                            | Import             |
+| `../utils/limits.js`          | `assertLoopOrder`                                                                                                                                                                                                    | Import             |
+| `../core/function/typed.js`   | `TypedFunction`                                                                                                                                                                                                      | Import (type-only) |
+| `./numeric-data.js`           | `exactOrder, isFloatTyped, FloatTyped`                                                                                                                                                                               | Import             |
+| `./quantile-numpy-methods.js` | `NUMBER_ARITH, blendNumber, orderStatistics, parseQuantileThirdArg, quantileOfSorted, quantileOfUnsorted, quantilePlan, NumpyQuantileMethod, ParsedQuantileOptions, QuantileArith, QuantilePlan, QuantileSeqOptions` | Import             |
 
 **Exports:**
 
@@ -12730,11 +12733,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports           | Type   |
-| ----------------------------- | ----------------- | ------ |
-| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch` | Import |
-| `../utils/median-numbers.js`  | `medianInPlace`   | Import |
-| `../utils/limits.js`          | `assertAllocSize` | Import |
+| File                          | Imports                                      | Type   |
+| ----------------------------- | -------------------------------------------- | ------ |
+| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch`                            | Import |
+| `../utils/median-numbers.js`  | `medianInPlace, minFrom, quickSelectInPlace` | Import |
+| `../utils/limits.js`          | `assertAllocSize`                            | Import |
 
 **Exports:**
 
@@ -13297,7 +13300,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `medianNumbers`, `medianInPlace`
+- Functions: `medianNumbers`, `medianInPlace`, `minFrom`, `quickSelectInPlace`
 
 ---
 
@@ -20831,7 +20834,7 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
-| `functions/src/utils/is`                               | 0 files      | 61 files   |
+| `functions/src/utils/is`                               | 0 files      | 62 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
@@ -21768,12 +21771,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238390 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238675 |
+| Total Exports           | 7405   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Interfaces        | 672    |
+| Total Functions         | 2586   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2551,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1135,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1135,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1179,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -3985,7 +3985,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 19
+      "loc": 23
     },
     {
       "file": "expression/src/embeddedDocs/function/statistics/std.ts",
@@ -5084,7 +5084,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 57
+      "loc": 55
     },
     {
       "file": "expression/src/transform/range.transform.ts",
@@ -7359,7 +7359,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 257
+      "loc": 228
     },
     {
       "file": "functions/src/matrix/pinv.ts",
@@ -8535,7 +8535,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 300
+      "loc": 303
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -8563,7 +8563,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 326
+      "loc": 345
     },
     {
       "file": "functions/src/statistics/prod.ts",
@@ -8577,14 +8577,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 202
+      "loc": 316
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 402
+      "loc": 557
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -9529,7 +9529,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 928
+      "loc": 882
     },
     {
       "file": "functions/src/typed/string-derivative.ts",
@@ -9795,7 +9795,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 98
+      "loc": 165
     },
     {
       "file": "functions/src/utils/node.ts",
@@ -10628,7 +10628,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 185
+      "loc": 186
     },
     {
       "file": "functions/tests/dogfood-1104-norm-fro.test.ts",
@@ -10685,6 +10685,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 426
+    },
+    {
+      "file": "functions/tests/dogfood-1130-1131-1005-quantile.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 530
     },
     {
       "file": "functions/tests/dogfood-1135-1136-discretelog.test.ts",
@@ -12878,11 +12885,25 @@
       "loc": 71
     },
     {
+      "file": "functions/tests/quantile-exact-order-1292-1293.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 127
+    },
+    {
       "file": "functions/tests/quaternion.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 751
+    },
+    {
+      "file": "functions/tests/quickselect-structured-input.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 170
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",
