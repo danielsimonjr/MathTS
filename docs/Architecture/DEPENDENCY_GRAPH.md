@@ -127,7 +127,7 @@ The codebase is organized into the following modules:
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
-- **functions/cas**: 12 files
+- **functions/cas**: 13 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 587            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 588            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3808,12 +3808,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports          | Type               |
-| --------------------------- | ---------------- | ------------------ |
-| `../utils/is.js`            | `isConstantNode` | Import             |
-| `../utils/factory.js`       | `factory`        | Import             |
-| `../utils/node.js`          | `MathNode`       | Import (type-only) |
-| `../core/function/typed.js` | `TypedFunction`  | Import (type-only) |
+| File                        | Imports                     | Type               |
+| --------------------------- | --------------------------- | ------------------ |
+| `../utils/is.js`            | `isConstantNode`            | Import             |
+| `../cas/exact-identity.js`  | `isExactPolynomialIdentity` | Import             |
+| `../utils/factory.js`       | `factory`                   | Import             |
+| `../utils/node.js`          | `MathNode`                  | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction`             | Import (type-only) |
 
 **Exports:**
 
@@ -5741,6 +5742,23 @@ graph LR
 
 - Interfaces: `ElementaryDecline`, `ElementarySolution`
 - Functions: `solveElementary`
+
+---
+
+### `functions/src/cas/exact-identity.ts` - Decide that two expressions are the same polynomial, exactly.
+
+**Internal Dependencies:**
+
+| File                                     | Imports                                                                            | Type               |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- | ------------------ |
+| `../typed/factorization/multi-poly.js`   | `addMP, fromTerms, integerContentMP, isZero, mulMP, negMP, totalDegree, MultiPoly` | Import             |
+| `../typed/factorization/integer-poly.js` | `bigintGcd`                                                                        | Import             |
+| `../utils/node.js`                       | `MathNode`                                                                         | Import (type-only) |
+| `./polynomial-limits.js`                 | `MAX_POLYNOMIAL_DEGREE, MAX_POLYNOMIAL_TERMS`                                      | Import             |
+
+**Exports:**
+
+- Functions: `isExactPolynomialIdentity`
 
 ---
 
@@ -21118,14 +21136,14 @@ graph TD
         N146[antiderivative]
         N147[closed-form-roots]
         N148[elementary-solve]
-        N149[layer3]
-        N150[polynomial-canonical]
-        N151[polynomial-limits]
-        N152[rat]
-        N153[rational-integrate]
-        N154[real-roots]
-        N155[render-coeff-times]
-        N156[...2 more]
+        N149[exact-identity]
+        N150[layer3]
+        N151[polynomial-canonical]
+        N152[polynomial-limits]
+        N153[rat]
+        N154[rational-integrate]
+        N155[real-roots]
+        N156[...3 more]
     end
 
     subgraph Functions/combinatorics
@@ -21774,17 +21792,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1350   |
+| Total TypeScript Files  | 1351   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238689 |
-| Total Exports           | 7400   |
+| Total Lines of Code     | 239094 |
+| Total Exports           | 7401   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |
 | Total Interfaces        | 669    |
-| Total Functions         | 2580   |
-| Total Type Guards       | 184    |
+| Total Functions         | 2581   |
+| Total Type Guards       | 185    |
 | Total Enums             | 0      |
-| Type-only Imports       | 685    |
+| Type-only Imports       | 686    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

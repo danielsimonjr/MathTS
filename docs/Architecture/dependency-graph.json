@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1350,
+    "totalFiles": 1351,
     "totalModules": 82,
-    "totalExports": 7400
+    "totalExports": 7401
   },
   "entryPoints": [
     {
@@ -8857,6 +8857,10 @@
             "imports": ["isConstantNode"]
           },
           {
+            "file": "../cas/exact-identity.js",
+            "imports": ["isExactPolynomialIdentity"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -15138,6 +15142,42 @@
         "exports": ["solveElementary"],
         "interfaces": ["ElementaryDecline", "ElementarySolution"],
         "functions": ["solveElementary"]
+      },
+      "functions/src/cas/exact-identity.ts": {
+        "description": "Decide that two expressions are the same polynomial, exactly.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/factorization/multi-poly.js",
+            "imports": [
+              "addMP",
+              "fromTerms",
+              "integerContentMP",
+              "isZero",
+              "mulMP",
+              "negMP",
+              "totalDegree",
+              "MultiPoly"
+            ]
+          },
+          {
+            "file": "../typed/factorization/integer-poly.js",
+            "imports": ["bigintGcd"]
+          },
+          {
+            "file": "../utils/node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          },
+          {
+            "file": "./polynomial-limits.js",
+            "imports": ["MAX_POLYNOMIAL_DEGREE", "MAX_POLYNOMIAL_TERMS"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["isExactPolynomialIdentity"],
+        "functions": ["isExactPolynomialIdentity"]
       },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
@@ -48588,6 +48628,7 @@
           "functions/src/cas/antiderivative.ts",
           "functions/src/cas/closed-form-roots.ts",
           "functions/src/cas/elementary-solve.ts",
+          "functions/src/cas/exact-identity.ts",
           "functions/src/cas/layer3.ts",
           "functions/src/cas/polynomial-canonical.ts",
           "functions/src/cas/polynomial-limits.ts",
@@ -49914,18 +49955,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1350,
+    "totalTypeScriptFiles": 1351,
     "totalModules": 82,
-    "totalLinesOfCode": 238689,
-    "totalExports": 7400,
+    "totalLinesOfCode": 239094,
+    "totalExports": 7401,
     "totalClasses": 63,
     "totalInterfaces": 669,
-    "totalFunctions": 2580,
-    "totalTypeGuards": 184,
+    "totalFunctions": 2581,
+    "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1696,
     "totalReExports": 3191,
-    "totalTypeOnlyImports": 685,
+    "totalTypeOnlyImports": 686,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,
