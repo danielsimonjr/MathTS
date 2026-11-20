@@ -225,9 +225,11 @@ function numericalDerivative(
  *
  * r=0.5 is fixed: it keeps the contour clear of the nearest singularity for
  * the entire/analytic functions this module targets (sin, cos, exp,
- * polynomials); a fully adaptive radius is out of scope.
+ * polynomials). The sum aliases when a singularity lies within 2r of x0: a_k then
+ * also receives a_(k+N) * r^N + ..., so this is only the fallback of
+ * {@link taylorCoefficients} for the orders that the symbolic pass does not give.
  */
-function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+function contourTaylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
   const N = Math.max(1 << Math.ceil(Math.log2(2 * (n + 1))), 16); // >= 2(n+1), power of two
   const r = 0.5; // contour radius
   const fRe = new Array<f64>(N);
@@ -255,6 +257,55 @@ function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): 
     a[k] = sRe / (N * Math.pow(r, k));
   }
   return a; // a[k] is already the Taylor coefficient f^(k)(x0)/k!
+}
+
+/** The symbolic Taylor pass stops when the text of the current derivative is longer than this. */
+const TAYLOR_DERIVATIVE_TEXT_LIMIT = 200;
+/** The symbolic Taylor pass gives at most this many orders above zero. */
+const TAYLOR_SYMBOLIC_MAX_ORDER = 24;
+
+/**
+ * Taylor coefficients a_0..a_k of expr around x0 from symbolic derivatives:
+ * a_k = f^(k)(x0) / k!, where f^(k) is the k-th symbolic derivative evaluated at x0.
+ *
+ * The pass stops early (and returns the coefficients found so far) when a derivative
+ * cannot be built or evaluated, when a value is not finite, when the text of the current
+ * derivative is longer than {@link TAYLOR_DERIVATIVE_TEXT_LIMIT} characters (the cost of
+ * a derivative grows fast with the text, for example exp(sin(x))), or after
+ * {@link TAYLOR_SYMBOLIC_MAX_ORDER} orders.
+ */
+function symbolicTaylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const out: f64[] = [];
+  let d = expr;
+  for (let k = 0; k <= n && k <= TAYLOR_SYMBOLIC_MAX_ORDER; k++) {
+    let v: unknown;
+    try {
+      v = evalAt(d, varName, x0);
+    } catch {
+      break;
+    }
+    if (typeof v !== 'number' || !Number.isFinite(v)) break;
+    out.push(v / factorial(k));
+    if (k === n || d.length > TAYLOR_DERIVATIVE_TEXT_LIMIT) break;
+    try {
+      d = _casDerivativeOne(d, varName);
+    } catch {
+      break;
+    }
+  }
+  return out;
+}
+
+/**
+ * Taylor coefficients a_0..a_n of expr around x0. a[k] IS the coefficient f^(k)(x0)/k!.
+ * The orders that {@link symbolicTaylorCoefficients} gives are exact; the contour sum
+ * ({@link contourTaylorCoefficients}) fills the orders above them.
+ */
+function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const exact = symbolicTaylorCoefficients(expr, varName, x0, n);
+  if (exact.length === n + 1) return exact;
+  const contour = contourTaylorCoefficients(expr, varName, x0, n);
+  return contour.map((c, k) => (k < exact.length ? exact[k] : c));
 }
 
 /**
@@ -992,9 +1043,12 @@ export function zTransform(expr: string, n: string, z: string): string {
 /**
  * Compute the Taylor series expansion of an expression around a point.
  *
- * Coefficients are computed exactly via the Cauchy integral on a complex
- * contour around x0 (see {@link taylorCoefficients}), not finite
- * differences — machine-precise for analytic expressions.
+ * Coefficients come from symbolic derivatives evaluated at x0 (f^(k)(x0) / k!), so
+ * `1/(1-x)` has the coefficients 1, 1, 1, ... exactly. The Cauchy integral on a complex
+ * contour around x0 fills the orders that the symbolic pass does not give: it stops
+ * at order 24 or when the text of a derivative is longer than 200 characters (see
+ * {@link taylorCoefficients}). The contour sum is less exact there when a singularity
+ * lies within 1 of x0.
  *
  * @param expr - Expression string
  * @param varName - Variable name
