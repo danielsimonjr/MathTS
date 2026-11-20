@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1351
   totalModules: 82
-  totalExports: 7404
+  totalExports: 7407
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14441,14 +14441,20 @@ modules:
       workspaceDependencies: []
       exports:
         - MAX_POLYNOMIAL_DEGREE
+        - MAX_POLYNOMIAL_TERMS
+        - polynomialSizeMessage
         - polynomialDegreeMessage
         - PolynomialDegreeError
+        - PolynomialSizeError
       classes:
         - PolynomialDegreeError
+        - PolynomialSizeError
       functions:
+        - polynomialSizeMessage
         - polynomialDegreeMessage
       constants:
         - MAX_POLYNOMIAL_DEGREE
+        - MAX_POLYNOMIAL_TERMS
     functions/src/cas/rat.ts:
       description: Exact rational arithmetic (lowest-terms, positive denominator).
       externalDependencies: []
@@ -24737,6 +24743,7 @@ modules:
         - file: ../cas/polynomial-limits.js
           imports:
             - PolynomialDegreeError
+            - PolynomialSizeError
             - polynomialDegreeMessage
         - file: ./string-derivative.js
           imports:
@@ -27472,7 +27479,9 @@ modules:
         - file: ../cas/polynomial-limits.js
           imports:
             - MAX_POLYNOMIAL_DEGREE
+            - MAX_POLYNOMIAL_TERMS
             - PolynomialDegreeError
+            - PolynomialSizeError
       workspaceDependencies: []
       exports:
         - normalize
@@ -47084,14 +47093,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1351
   totalModules: 82
-  totalLinesOfCode: 239640
-  totalExports: 7404
-  totalClasses: 62
+  totalLinesOfCode: 239696
+  totalExports: 7407
+  totalClasses: 63
   totalInterfaces: 670
-  totalFunctions: 2586
+  totalFunctions: 2587
   totalTypeGuards: 184
   totalEnums: 0
-  totalConstants: 1695
+  totalConstants: 1696
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

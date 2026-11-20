@@ -6596,7 +6596,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 654
+      "loc": 655
     },
     {
       "file": "functions/src/cas/exact-roots.ts",
@@ -6624,7 +6624,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 27
+      "loc": 51
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -9200,7 +9200,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1942
+      "loc": 1949
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -9487,7 +9487,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 549
+      "loc": 573
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -10208,7 +10208,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 685
+      "loc": 687
     },
     {
       "file": "functions/tests/cas-syntax-tree.test.ts",
@@ -10936,7 +10936,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 205
+      "loc": 237
     },
     {
       "file": "functions/tests/dogfood-978-eigs-complex-vectors.test.ts",

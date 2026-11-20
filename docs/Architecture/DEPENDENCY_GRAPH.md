@@ -5795,9 +5795,9 @@ graph LR
 
 **Exports:**
 
-- Classes: `PolynomialDegreeError`
-- Functions: `polynomialDegreeMessage`
-- Constants: `MAX_POLYNOMIAL_DEGREE`
+- Classes: `PolynomialDegreeError`, `PolynomialSizeError`
+- Functions: `polynomialSizeMessage`, `polynomialDegreeMessage`
+- Constants: `MAX_POLYNOMIAL_DEGREE`, `MAX_POLYNOMIAL_TERMS`
 
 ---
 
@@ -11733,7 +11733,7 @@ graph LR
 | `./euclid.js`                     | `euclidSnap`                                                                                        | Import |
 | `../utils/samples.js`             | `toSamples`                                                                                         | Import |
 | `../cas/render-polynomial.js`     | `renderPolynomial`                                                                                  | Import |
-| `../cas/polynomial-limits.js`     | `PolynomialDegreeError, polynomialDegreeMessage`                                                    | Import |
+| `../cas/polynomial-limits.js`     | `PolynomialDegreeError, PolynomialSizeError, polynomialDegreeMessage`                               | Import |
 | `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                         | Import |
 | `./call-rewrite.js`               | `rewriteCalls, topLevelFactors, isParenthesised, hasTopLevelComma`                                  | Import |
 | `../cas/polynomial-canonical.js`  | `collapseIdenticalFactors, tryPolynomialCanonicalForm`                                              | Import |
@@ -12579,10 +12579,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                        | Type   |
-| ----------------------------- | ---------------------------------------------- | ------ |
-| `../cas/render-polynomial.js` | `coefficientTexts, renderPolynomial`           | Import |
-| `../cas/polynomial-limits.js` | `MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError` | Import |
+| File                          | Imports                                                                                   | Type   |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| `../cas/render-polynomial.js` | `coefficientTexts, renderPolynomial`                                                      | Import |
+| `../cas/polynomial-limits.js` | `MAX_POLYNOMIAL_DEGREE, MAX_POLYNOMIAL_TERMS, PolynomialDegreeError, PolynomialSizeError` | Import |
 
 **Exports:**
 
@@ -21784,12 +21784,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1351   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239640 |
-| Total Exports           | 7404   |
+| Total Lines of Code     | 239696 |
+| Total Exports           | 7407   |
 | Total Re-exports        | 3191   |
-| Total Classes           | 62     |
+| Total Classes           | 63     |
 | Total Interfaces        | 670    |
-| Total Functions         | 2586   |
+| Total Functions         | 2587   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -34,7 +34,11 @@ import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
 import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
-import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
+import {
+  PolynomialDegreeError,
+  PolynomialSizeError,
+  polynomialDegreeMessage,
+} from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
 import {
   rewriteCalls,
@@ -948,6 +952,9 @@ export function expand(expr: string): string {
       // A polynomial above the degree limit has no fallback: say so, as the CAS reader does.
       if (error instanceof PolynomialDegreeError) {
         throw new PolynomialDegreeError(`expand: ${polynomialDegreeMessage()}`);
+      }
+      if (error instanceof PolynomialSizeError) {
+        throw new PolynomialSizeError(`expand: ${error.message}`);
       }
       // Not a pure polynomial in these variables (function call, non-integer
       // exponent, division by a non-constant, ...) — fall back below.

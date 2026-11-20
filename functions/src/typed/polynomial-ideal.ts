@@ -13,7 +13,12 @@
  */
 
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
-import { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError } from '../cas/polynomial-limits.js';
+import {
+  MAX_POLYNOMIAL_DEGREE,
+  MAX_POLYNOMIAL_TERMS,
+  PolynomialDegreeError,
+  PolynomialSizeError,
+} from '../cas/polynomial-limits.js';
 
 /** One monomial: coefficient × Π varsᵢ^powersᵢ (dense exponent vector). */
 export interface Term {
@@ -139,8 +144,27 @@ function polyPow(a: Poly, n: number, nVars: number): Poly {
     return n === 0 ? result : constPolynomial(constant ** n, nVars);
   }
   if (n * degree > MAX_POLYNOMIAL_DEGREE) throw new PolynomialDegreeError();
+  // The terms of `a^n` are at most binomial(n + t - 1, t - 1) for `t` terms in `a`. A total degree
+  // inside the limit does not bound them: `(x+y+z+w)^900` has degree 900 and about 1.2e8 terms.
+  if (powerTermBound(a.length, n) > MAX_POLYNOMIAL_TERMS) throw new PolynomialSizeError();
   for (let i = 0; i < n; i++) result = polyMul(result, a);
   return result;
+}
+
+/**
+ * The most terms of the power `n` of a polynomial of `t` terms, `binomial(n + t - 1, t - 1)`, or
+ * `Infinity` once it is above {@link MAX_POLYNOMIAL_TERMS} (the loop stops there).
+ */
+function powerTermBound(t: number, n: number): number {
+  if (t <= 1 || n <= 1) return t;
+  // binomial(n + t - 1, k) for k = min(t - 1, n): the smaller index keeps the loop short.
+  const k = Math.min(t - 1, n);
+  let bound = 1;
+  for (let i = 1; i <= k; i++) {
+    bound = (bound * (n + t - 1 - k + i)) / i;
+    if (bound > MAX_POLYNOMIAL_TERMS) return Infinity;
+  }
+  return bound;
 }
 
 /** The constant polynomial `value`: no terms when `value` is zero. */

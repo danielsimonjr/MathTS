@@ -202,3 +202,35 @@ describe('#966 item 9: solveExact of a polynomial of degree 1 or 2', () => {
     expect(() => solveExact('x^3-2', 'x')).toThrow(/polynomial of degree 1 or 2/);
   });
 });
+
+describe('#966 item 7: a power is refused by its term count, not only by its total degree', () => {
+  it('expand((x+y+z+w)^900) throws at once', () => {
+    const start = performance.now();
+    expect(() => expand('(x+y+z+w)^900')).toThrow(/more than 100000 terms/);
+    expect(() => expand('(x+y+z+w)^900')).toThrow(RangeError);
+    expect(performance.now() - start).toBeLessThan(2000);
+  });
+
+  it('the error names expand', () => {
+    expect(() => expand('(x+y+z+w)^900')).toThrow(/^expand:/);
+  });
+
+  it('(x+y+1)^2 is unchanged', () => {
+    expect(expand('(x+y+1)^2')).toBe('x^2 + 2*x*y + 2*x + y^2 + 2*y + 1');
+  });
+
+  it('(x+y)^1000 still works: 1001 terms', () => {
+    const out = expand('(x+y)^1000');
+    expect(out.startsWith('x^1000 + ')).toBe(true);
+    expect(out.endsWith(' + y^1000')).toBe(true);
+    // 1000 products of growing polynomials: the time is the time of the existing multiplication.
+  }, 60_000);
+
+  it('(x+1)^2000 still gives the degree error', () => {
+    expect(() => expand('(x+1)^2000')).toThrow(/degree above 1000/);
+  });
+
+  it('(x+y+z)^40 stays inside the limit (861 terms)', () => {
+    expect(expand('(x+y+z)^40').startsWith('x^40 + ')).toBe(true);
+  });
+});

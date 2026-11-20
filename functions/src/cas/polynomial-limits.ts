@@ -20,6 +20,30 @@ export class PolynomialDegreeError extends RangeError {
   }
 }
 
+/**
+ * The most terms that a power of a multivariate polynomial may have. The bound is the number of
+ * terms that the power can hold, `binomial(n + t - 1, t - 1)` for `n` and `t` the exponent and the
+ * number of terms of the base, so `(x+y+z+w)^900` (about 1.2e8 terms) is refused before any
+ * product runs, and `(x+y)^1000` (1001 terms) is not.
+ *
+ * Temporary: the batch H1 branch defines `MAX_POLYNOMIAL_TERMS` and `PolynomialSizeError` in
+ * `typed/polynomial-ideal.ts`. When it merges, this copy is deleted.
+ */
+export const MAX_POLYNOMIAL_TERMS = 100_000;
+
+/** Thrown when a power of a polynomial would have more than {@link MAX_POLYNOMIAL_TERMS} terms. */
+export class PolynomialSizeError extends RangeError {
+  constructor(message = polynomialSizeMessage()) {
+    super(message);
+    this.name = 'PolynomialSizeError';
+  }
+}
+
+/** The text of the size error: it names the limit. */
+export function polynomialSizeMessage(): string {
+  return `the polynomial would have more than ${MAX_POLYNOMIAL_TERMS} terms, the most that the CAS builds`;
+}
+
 /** The text of the error: it names the limit, so a caller can say why the input was refused. */
 export function polynomialDegreeMessage(): string {
   return `the polynomial has a degree above ${MAX_POLYNOMIAL_DEGREE}, the highest degree that the CAS builds`;
