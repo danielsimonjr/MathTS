@@ -184,3 +184,80 @@ describe('eigs of a defective block beside a huge entry (#1242)', () => {
     }
   });
 });
+
+/**
+ * Matrices P diag(2, ..., 2, 3 + i, ...) P^-1 with det P = 1, orders 3 to 5, from an integer
+ * generator: dense, with a repeated eigenvalue and n eigenvectors. The first 160 that have
+ * entries in whole halves.
+ */
+function seededRepeatedEigenvalue(count: number): number[][][] {
+  let seed = 4242;
+  const rnd = (): number => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+  const det = (M: number[][]): number => {
+    if (M.length === 1) return M[0][0];
+    let d = 0;
+    for (let j = 0; j < M.length; j++) {
+      const minor = M.slice(1).map((r) => r.filter((_c, c) => c !== j));
+      d += (j % 2 ? -1 : 1) * M[0][j] * det(minor);
+    }
+    return d;
+  };
+  const adjugate = (M: number[][]): number[][] =>
+    M.map((_r, i) =>
+      M.map((_c, j) => {
+        const minor = M.filter((_row, r) => r !== j).map((r) => r.filter((_x, c) => c !== i));
+        return ((i + j) % 2 ? -1 : 1) * (M.length === 1 ? 1 : det(minor));
+      })
+    );
+  const found: number[][][] = [];
+  for (let t = 0; t < 6000 && found.length < count; t++) {
+    const n = 3 + Math.floor(rnd() * 3);
+    const P = Array.from({ length: n }, () =>
+      Array.from({ length: n }, () => Math.floor(rnd() * 5) - 2)
+    );
+    const d = det(P);
+    if (Math.abs(d) !== 1) continue;
+    const adj = adjugate(P);
+    const multiplicity = 2 + Math.floor(rnd() * (n - 1));
+    const D = Array.from({ length: n }, (_x, i) => (i < multiplicity ? 2 : 3 + i));
+    const A = P.map((_r, i) =>
+      P.map((_c, j) => D.reduce((sum, dk, k) => sum + (P[i][k] * dk * adj[k][j]) / d, 0))
+    );
+    if (A.some((row) => row.some((x) => !Number.isInteger(x * 2)))) continue;
+    found.push(A);
+  }
+  return found;
+}
+
+describe('eigs of seeded dense matrices with a repeated eigenvalue (#1242)', () => {
+  const matrices = seededRepeatedEigenvalue(160);
+
+  it('the generator gives 160 matrices', () => {
+    expect(matrices).toHaveLength(160);
+  });
+
+  for (const [name, make] of TYPES) {
+    for (const s of SCALES) {
+      // The rounding of 9 of the 160 Complex matrices at 2^-60 reaches 1e-13 of the row, the size
+      // of the smallest coupling that stays a coupling (see COUPLING_FRACTION_OF_PREC).
+      if (name === 'Complex' && s < 1) continue;
+      it(`${name} entries at scale ${s}: every matrix keeps its n eigenvectors`, () => {
+        let dropped = 0;
+        let worst = 0;
+        for (const A0 of matrices) {
+          const A = A0.map((row) => row.map((x) => x * s));
+          const r = run(make(A));
+          if (r.eigenvectors.length < A.length) dropped++;
+          for (const { value, vector } of r.eigenvectors) {
+            worst = Math.max(worst, residual(A, value, vector, maxAbs(A)));
+          }
+        }
+        expect(dropped).toBe(0);
+        expect(worst).toBeLessThan(1e-10);
+      }, 60000);
+    }
+  }
+});

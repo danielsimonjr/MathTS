@@ -681,7 +681,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 64
+      "loc": 91
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -7233,7 +7233,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1160
+      "loc": 1161
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",
@@ -10866,7 +10866,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 187
+      "loc": 264
     },
     {
       "file": "functions/tests/dogfood-1243-symmetric-small-entries.test.ts",

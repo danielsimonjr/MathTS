@@ -53,6 +53,33 @@ describe('compat eigs of a Matrix (#1179)', () => {
     }
   });
 
+  it('the 3x3 triage matrix has eigenvector residuals below 1e-13 (5.3e-7 before the fix)', () => {
+    const T = [
+      [-2.28, -4.27, -4.75],
+      [-2.03, 3.95, -0.25],
+      [-3, -0.76, 1.39],
+    ];
+    const r = math.eigs(math.matrix(T));
+    expect(r.eigenvectors).toHaveLength(3);
+    for (const { value, vector } of r.eigenvectors) {
+      const l = toRi(value);
+      const v = vector.toArray().map(toRi);
+      let worst = 0;
+      for (let i = 0; i < 3; i++) {
+        let re = 0;
+        let im = 0;
+        for (let j = 0; j < 3; j++) {
+          re += T[i][j] * v[j].re;
+          im += T[i][j] * v[j].im;
+        }
+        re -= l.re * v[i].re - l.im * v[i].im;
+        im -= l.re * v[i].im + l.im * v[i].re;
+        worst = Math.max(worst, Math.hypot(re, im));
+      }
+      expect(worst).toBeLessThan(1e-13);
+    }
+  });
+
   it('evaluate("eigs(A)") reaches the same solver', () => {
     const r = math.evaluate('eigs(A)', { A: math.matrix(A) }) as {
       values: { toArray(): unknown[] };

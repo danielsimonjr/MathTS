@@ -58,14 +58,15 @@ type DataType = 'number' | 'BigNumber' | 'Complex';
 
 /**
  * A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
- * relative to the row (`nullSpaceUpper`). Measured: the rounding of a dense matrix with a double
- * eigenvalue is 5e-15 of the row for entries of type Complex (up to 2e-13 for a badly conditioned
- * one), and a coupling of 1e-13 is a coupling (a test of #1202). One hundredth of the default
- * precision 1e-12 lies between these. A larger noise drops an eigenvector, which inverse iteration
- * may find again; it never gives a false one, because the residual of a read zero is below the
- * tolerance.
+ * relative to the row (`nullSpaceUpper`). The two limits meet here. A coupling of 1e-13 is a
+ * coupling (a test of #1202), so the limit lies below 1e-13. The rounding of a dense matrix with a
+ * repeated eigenvalue reaches 4e-14 of the row for BigNumber entries and 2e-13 for Complex entries
+ * (160 seeded matrices of order 3 to 5 at the scales 1, 2^40 and 2^-60, in the tests of #1242).
+ * One twentieth of the default precision 1e-12, 5e-14, keeps all 160 BigNumber matrices whole, and
+ * keeps the Complex matrices whole at 1 and 2^40. At 2^-60, 9 of the 160 Complex matrices lose an
+ * eigenvector. A lost eigenvector is a missing one, never a false one.
  */
-const COUPLING_FRACTION_OF_PREC = 0.01;
+const COUPLING_FRACTION_OF_PREC = 0.05;
 
 /**
  * Create the `complexEigs` function, which computes the eigenvalues and the optional
