@@ -230,6 +230,8 @@ function integrateNode(raw: Node, x: string): string {
       if (!u) throw new NotIntegrable(fn);
       const us = u.toString();
       if (fn === 'log' || fn === 'ln') {
+        // `log(x, 10)` is a base-10 logarithm: only the one-argument form is natural.
+        if ((node.args ?? []).length !== 1) throw new NotIntegrable('log with a base');
         if (us === x) return `${x} * log(${x}) - ${x}`; // ∫ln x = x·ln x − x
         throw new NotIntegrable('ln of non-trivial argument');
       }
@@ -402,6 +404,8 @@ function tryByParts(expr: string, x: string): string | null {
   const g = gFactors[0];
   const fn = g.fn?.name ?? g.name ?? '';
   if (fn !== 'exp' && fn !== 'sin' && fn !== 'cos' && fn !== 'log' && fn !== 'ln') return null;
+  // `log(x, 2)` is a base-2 logarithm: only the one-argument form is natural.
+  if ((g.args ?? []).length !== 1) return null;
   const arg = (g.args ?? [])[0];
   if (!arg) return null;
   const u = arg.toString();

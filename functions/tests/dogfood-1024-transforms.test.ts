@@ -173,3 +173,24 @@ describe('#1024 inverseLaplace: rational functions', () => {
     expect(inverseLaplace('s^2/(s+1)', 's', 't')).toMatch(MARKER);
   });
 });
+
+describe('#1024 log with a base is not the natural log', () => {
+  // SymPy: integrate(x*log(x, 2), x) = x^2*log(x)/(2*log(2)) - x^2/(4*log(2)). No rule here
+  // carries the factor 1/log(base), so each form keeps the marker.
+  it('x*log(x, 2) keeps the marker (it gave the natural-log antiderivative)', () => {
+    expect(symbolicIntegral('x*log(x, 2)', 'x')).toBe('integral(x*log(x, 2), x)');
+  });
+
+  it('x^2*log(2*x + 1, 10) keeps the marker', () => {
+    expect(symbolicIntegral('x^2*log(2*x + 1, 10)', 'x')).toMatch(MARKER);
+  });
+
+  it('log(x, 10) keeps the marker (it gave x*log(x) - x)', () => {
+    expect(symbolicIntegral('log(x, 10)', 'x')).toMatch(MARKER);
+  });
+
+  it('the one-argument forms still integrate', () => {
+    expect(symbolicIntegral('log(x)', 'x')).toBe('x * log(x) - x');
+    expect(symbolicIntegral('x*log(x)', 'x')).toBe('(0.5*x^2) * log(x) - (0.25*x^2)');
+  });
+});
