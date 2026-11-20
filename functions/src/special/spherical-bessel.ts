@@ -29,39 +29,87 @@ function assertOrder(n: number, name: string): void {
   }
 }
 
+/** The rescale factor of the downward sweep and its natural logarithm (ln 1e150). */
+const SHIFT = 1e-150;
+const LN_SHIFT = 150 * Math.LN10;
+
+/** Largest k̃ of the upward sweep of k_n before it is rescaled by 1e-290, and ln 1e290. */
+const K_SCALE_LIMIT = 1e290;
+const LN_K_SCALE = 290 * Math.LN10;
+
+/** ln of the largest double: a result with a larger logarithm is Infinity. */
+const LN_MAX_DOUBLE = 709.78;
+
+/** A result with a logarithm below this value rounds to 0 (ln of half the smallest double). */
+const LN_MIN_DOUBLE = -745.2;
+
 /**
- * Miller's downward recurrence `f_{k-1} = a_k f_k + sign · f_{k+1}` with `a_k = (2k+1)/x`,
- * normalised so that the computed `f_0` equals the exact value `f0`.
+ * Miller's downward recurrence `f_{k-1} = a_k f_k + sign · f_{k+1}` with `a_k = (2k+1)/x`.
+ *
+ * Returns `r = f_n / f_0` up to a power of ten: the sweep multiplies its live values by 1e-150
+ * whenever they grow past 1e150, and `shifts` counts the rescales that came after `f_n` was
+ * captured. `f_n` itself is not rescaled, so it cannot underflow early, and the exact ratio is
+ * `r · 1e-150^shifts`. The caller multiplies it by the exact `f_0`.
  */
-function millerDownward(n: number, x: number, sign: 1 | -1, f0: number): number {
+function millerDownward(n: number, x: number, sign: 1 | -1): { r: number; shifts: number } {
   const big = Math.max(n, Math.abs(x));
   assertLoopOrder('sphericalBessel', 'max(n, |x|)', big, MAX_SPHERICAL_BESSEL_ORDER);
   const start = Math.ceil(big) + 30 + Math.ceil(Math.sqrt(40 * (big + 1)));
   // Only f_n and f_0 are needed, so the sweep keeps two live values and the one at order n.
-  // Each rescale multiplies every stored value, so the kept values scale together.
   let fk = 1; // f_k
   let fk1 = 0; // f_{k+1}
   let fn = 0;
+  let shifts = 0;
   for (let k = start; k >= 1; k -= 1) {
     let prev = ((2 * k + 1) / x) * fk + sign * fk1;
     if (k - 1 === n) fn = prev;
     if (Math.abs(prev) > 1e150) {
-      prev *= 1e-150;
-      fk *= 1e-150;
-      fk1 *= 1e-150;
-      fn *= 1e-150;
+      prev *= SHIFT;
+      fk *= SHIFT;
+      fk1 *= SHIFT;
+      if (k - 1 <= n) shifts += 1;
     }
     fk1 = fk;
     fk = prev;
   }
-  return fn * (f0 / fk);
+  return { r: fn / fk, shifts };
 }
 
-/** j_n(x): upward recurrence for x > n, Miller downward otherwise. */
+/**
+ * `f_n(x)` for `|x| < 1` and `n ≥ 1`, from the power series
+ * `x^n / (2n+1)!! · Σ_k (sign · x²/2)^k / (k! (2n+3)(2n+5)…(2n+2k+1))`
+ * (`sign` is −1 for j_n and +1 for i_n). The prefactor is a product of factors below 1/3, so
+ * it reaches 0 within about 700 steps, and the result is then 0, the correctly rounded value.
+ * The Miller sweep cannot serve here: its coefficients `(2k+1)/x` overflow for a tiny `x`.
+ */
+function smallXSeries(n: number, x: number, sign: 1 | -1): number {
+  let pre = 1;
+  for (let k = 1; k <= n; k += 1) {
+    pre *= x / (2 * k + 1);
+    if (pre === 0) return 0;
+  }
+  const h = (sign * x * x) / 2;
+  let term = 1;
+  let sum = 1;
+  for (let k = 1; k < 200; k += 1) {
+    term *= h / (k * (2 * n + 2 * k + 1));
+    sum += term;
+    if (Math.abs(term) <= 1e-17 * Math.abs(sum)) break;
+  }
+  return pre * sum;
+}
+
+/** ln i_0(x) = x − ln(2x) + ln(1 − e^{−2x}) for x > 0. */
+function lnSphBesselI0(x: number): number {
+  return x - Math.log(2 * x) + Math.log1p(-Math.exp(-2 * x));
+}
+
+/** j_n(x): upward recurrence for x > n, a series for |x| < 1, Miller downward otherwise. */
 function sphBesselJ(n: number, x: number): number {
   if (x === 0) return n === 0 ? 1 : 0;
   const j0 = Math.sin(x) / x;
   if (n === 0) return j0;
+  if (Math.abs(x) < 1) return smallXSeries(n, x, -1);
   if (x > n) {
     const j1 = Math.sin(x) / (x * x) - Math.cos(x) / x;
     let jm = j0;
@@ -74,50 +122,115 @@ function sphBesselJ(n: number, x: number): number {
     }
     return j;
   }
-  return millerDownward(n, x, -1, j0);
+  const { r, shifts } = millerDownward(n, x, -1);
+  // j_n = r · 1e-150^shifts · j_0 with |j_0| <= 1, so an underflow of the factor is the result.
+  let ratio = r;
+  for (let s = 0; s < shifts && ratio !== 0; s += 1) ratio *= SHIFT;
+  return ratio * j0;
 }
 
-/** y_n(x): upward recurrence (stable for Y). */
+/**
+ * y_n(x): upward recurrence (stable for Y), on |x|. The first infinity is the result: for
+ * k > |x| every y_k has one sign (negative for x > 0) and grows, and the next step would be
+ * Infinity − Infinity. Negative x uses y_n(−x) = (−1)^{n+1} y_n(x).
+ */
 function sphBesselY(n: number, x: number): number {
   if (x === 0) return -Infinity;
-  const y0 = -Math.cos(x) / x;
-  if (n === 0) return y0;
+  const ax = Math.abs(x);
+  const parity = x < 0 && n % 2 === 0 ? -1 : 1;
+  const y0 = -Math.cos(ax) / ax;
+  if (n === 0) return parity * y0;
   let ym = y0;
-  let y = -Math.cos(x) / (x * x) - Math.sin(x) / x;
+  let y = -Math.cos(ax) / (ax * ax) - Math.sin(ax) / ax;
   for (let k = 1; k < n; k += 1) {
-    const next = ((2 * k + 1) / x) * y - ym;
-    if (Number.isNaN(next)) return NaN;
+    const next = ((2 * k + 1) / ax) * y - ym;
+    if (!Number.isFinite(next)) return parity * next;
     ym = y;
     y = next;
   }
-  return y;
+  return parity * y;
 }
 
-/** i_n(x): Miller downward recurrence (I is the minimal solution). */
+/**
+ * i_n(x): Miller downward recurrence (I is the minimal solution), on |x| with the parity
+ * i_n(−x) = (−1)^n i_n(x). The result is `r · 1e-150^shifts · i_0`. When the scaled ratio and
+ * i_0 are both representable the product is exact to a rounding. Otherwise (a tiny ratio, or
+ * `i_0 = Infinity` from x ≈ 710) the product is formed in logarithms, with a relative error of
+ * about `|ln result| · 1e-16`; the result then underflows to 0 or overflows to Infinity at its
+ * true place.
+ */
 function sphBesselI(n: number, x: number): number {
-  if (x === 0) return n === 0 ? 1 : 0;
+  if (n === 0) return Math.sinh(x) / x;
+  if (x === 0) return 0;
+  if (x < 0) return (n % 2 === 0 ? 1 : -1) * sphBesselI(n, -x);
+  if (x < 1) return smallXSeries(n, x, 1);
+  const { r, shifts } = millerDownward(n, x, 1);
+  let ratio = r;
+  let left = shifts;
+  while (left > 0 && Math.abs(ratio) > 1e-140) {
+    ratio *= SHIFT;
+    left -= 1;
+  }
   const i0 = Math.sinh(x) / x;
-  if (n === 0) return i0;
-  return millerDownward(n, x, 1, i0);
+  if (left === 0 && Number.isFinite(i0)) return ratio * i0;
+  if (r === 0) return 0;
+  return Math.sign(r) * Math.exp(Math.log(Math.abs(r)) - shifts * LN_SHIFT + lnSphBesselI0(x));
 }
 
-/** k_n(x): upward recurrence (stable for K). */
-function sphBesselK(n: number, x: number): number {
-  if (x === 0) return Infinity;
+/**
+ * k_n(x) for x < 0: upward recurrence on the unscaled values (k_n is not real-analytic there,
+ * and the terms do not keep one sign, so there is no early exit on overflow).
+ */
+function sphBesselKNegative(n: number, x: number): number {
   const k0 = (Math.PI / 2) * (Math.exp(-x) / x);
   if (n === 0) return k0;
   let km = k0;
   let k = k0 * (1 + 1 / x);
   for (let j = 1; j < n; j += 1) {
     const next = km + ((2 * j + 1) / x) * k;
-    // For x > 0 every term is positive, so Infinity stays Infinity and NaN stays NaN.
-    if (!(next < Infinity) && x > 0) return next;
     km = k;
     k = next;
-    // Two zeros in a row (an underflowed k_0 and k_1) keep every later value at 0.
-    if (k === 0 && km === 0) return 0;
   }
   return k;
+}
+
+/**
+ * k_n(x): upward recurrence (stable for K) on the scaled values `k̃_n = e^x k_n`, which start
+ * at `k̃_0 = (π/2)/x` and do not underflow for a large x. The sweep rescales by 1e-290 when
+ * `k̃` passes 1e290 and counts the rescales. For x > 0 every term is positive, so the first
+ * infinity is Infinity, and the sweep ends with Infinity as soon as the logarithm of the true
+ * value passes ln(max double).
+ */
+function sphBesselK(n: number, x: number): number {
+  if (x === 0) return Infinity;
+  if (x < 0) return sphBesselKNegative(n, x);
+  if (x === Infinity) return 0;
+  const s0 = Math.PI / 2 / x;
+  let km = s0;
+  let k = n === 0 ? s0 : s0 * (1 + 1 / x);
+  // k̃_{j+1} = k̃_{j-1} + a_j k̃_j <= (1 + a_j) k̃_j because k̃ grows with j, and ln(1 + a) <= a,
+  // so ln k̃_n <= ln k̃_1 + Σ_{j<n} (2j+1)/x = ln k̃_1 + (n² − 1)/x. A bound below the smallest
+  // double ends the sweep at once with the correctly rounded 0.
+  if (n >= 2 && Math.log(k) + (n * n - 1) / x - x < LN_MIN_DOUBLE) return 0;
+  let scales = 0;
+  for (let j = 1; j < n; j += 1) {
+    const next = km + ((2 * j + 1) / x) * k;
+    if (!(next < Infinity)) return next;
+    km = k;
+    k = next;
+    if (k > K_SCALE_LIMIT) {
+      k /= K_SCALE_LIMIT;
+      km /= K_SCALE_LIMIT;
+      scales += 1;
+      if (scales * LN_K_SCALE + Math.log(k) - x > LN_MAX_DOUBLE) return Infinity;
+    }
+  }
+  if (scales === 0) {
+    // Two halves keep the first factor from underflowing before the second one is applied.
+    const half = Math.exp(-x / 2);
+    return k * half * half;
+  }
+  return Math.exp(Math.log(k) + scales * LN_K_SCALE - x);
 }
 
 /** Spherical Bessel function of the first kind `j_n(x)`. */

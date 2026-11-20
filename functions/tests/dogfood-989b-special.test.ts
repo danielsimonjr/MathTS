@@ -178,8 +178,8 @@ describe('spherical Bessel functions (#989)', () => {
   it('sphericalBesselK(3, 2.5) matches mpmath', () => {
     expect(Math.abs(sphericalBesselK(3, 2.5) / 0.3486505539304314 - 1)).toBeLessThan(1e-14);
   });
-  it('sphericalBesselY(4e8, 5) is NaN at the first overflow (hang before the fix)', () => {
-    expect(sphericalBesselY(4e8, 5)).toBeNaN();
+  it('sphericalBesselY(4e8, 5) is -Infinity at the first overflow (hang before the fix)', () => {
+    expect(sphericalBesselY(4e8, 5)).toBe(-Infinity);
   });
   it('sphericalBesselK(4e8, 5) is Infinity at the first overflow (hang before the fix)', () => {
     expect(sphericalBesselK(4e8, 5)).toBe(Infinity);
@@ -266,8 +266,8 @@ describe('sums and exponential integrals (#989)', () => {
     const n = MAX_EXPN_ORDER;
     expect(expn(n, 1e-300)).toBe(Math.exp(-1e-300) / (n - 1));
   });
-  it('sphericalBesselK(limit, 1e4) is 0 at two zeros in a row', () => {
-    expect(sphericalBesselK(MAX_SPHERICAL_BESSEL_ORDER, 1e4)).toBe(0);
+  it('sphericalBesselK(limit, 1e4) is Infinity: k_n grows with n and overflows at once', () => {
+    expect(sphericalBesselK(MAX_SPHERICAL_BESSEL_ORDER, 1e4)).toBe(Infinity);
   });
   it('binomialTest refuses n above 1e11', () => {
     expect(() => binomialTest(5, 1e11 + 2)).toThrow(RangeError);

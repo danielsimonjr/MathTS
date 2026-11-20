@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2610,
+  "totalFiles": 2611,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1327,
     "test-only": 0,
     "orphan": 0,
-    "test": 1191,
+    "test": 1192,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1353,
-    "tests": 1191,
+    "tests": 1192,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1223,
+    "@danielsimonjr/mathts-functions": 1224,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -8514,7 +8514,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 207
+      "loc": 320
     },
     {
       "file": "functions/src/special/spheroidal.ts",
@@ -9578,7 +9578,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1561
+      "loc": 1568
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -10047,7 +10047,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 968
+      "loc": 983
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -11273,6 +11273,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 126
+    },
+    {
+      "file": "functions/tests/dogfood-batch-i-special.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 157
     },
     {
       "file": "functions/tests/dogfood-g01-complex-promotion-edges.test.ts",

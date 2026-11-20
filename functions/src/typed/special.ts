@@ -298,7 +298,12 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
     curr = x;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - prev;
-    if (Number.isNaN(next)) return NaN;
+    if (!Number.isFinite(next)) {
+      if (Number.isNaN(next)) return NaN;
+      // For |x| > 1, |T_k(x)| grows with k and T_k(x) has the sign (-1)^k when x < -1, so the
+      // first overflow decides the result. A further step would compute Infinity - Infinity.
+      return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+    }
     prev = curr;
     curr = next;
   }
@@ -1414,6 +1419,7 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          _lgamma,
           besselJRealOrder,
           besselJScalar,
         ],
@@ -1438,6 +1444,7 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          _lgamma,
           besselJRealOrder,
           besselYRealOrder,
           besselYScalar,

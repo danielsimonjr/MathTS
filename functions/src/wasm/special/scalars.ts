@@ -466,6 +466,21 @@ export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
 export function besselJRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
   if (x === 0) return nu > 0 ? 0 : nu < 0 ? Infinity : 1;
+  // A tiny x overflows the continued fraction of besselJYTemme (it divides by x), so use the
+  // power series J_nu(x) = (x/2)^nu / Gamma(nu + 1) * sum_k (-x^2/4)^k / (k! (nu + 1)_k).
+  // The terms fall by x^2/4 per step, so the sum ends after a few terms. A power that
+  // underflows is the correct result: the value is then below the smallest double.
+  if (nu > 0 && x < 1e-5) {
+    const q = (-x * x) / 4;
+    let term = 1;
+    let sum = 1;
+    for (let k = 1; k < 20; k++) {
+      term *= q / (k * (nu + k));
+      sum += term;
+      if (Math.abs(term) < 1e-17 * Math.abs(sum)) break;
+    }
+    return (Math.pow(x / 2, nu) / Math.exp(_lgamma(nu + 1))) * sum;
+  }
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
   const jy = besselJYTemme(an, x);
