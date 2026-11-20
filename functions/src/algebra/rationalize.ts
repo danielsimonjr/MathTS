@@ -375,7 +375,9 @@ export const createRationalize = /* #__PURE__ */ factory(
               ? ` - ${term}`
               : ` + ${term}`;
       }
-      return text === '' ? null : _parse(text);
+      // All coefficients are zero ((x+1)^5-(x+1)^5): the polynomial is 0, and the rule engine would
+      // expand both powers term by term before it finds that out.
+      return _parse(text === '' ? '0' : text);
     }
 
     return typed(name, {
