@@ -45,7 +45,7 @@ import { erfcScalar } from './special.js';
 import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
-import { assertLoopOrder } from '../utils/limits.js';
+import { assertAllocSize, assertLoopOrder, MAX_LOOP_ORDER } from '../utils/limits.js';
 import { hasNaN } from './number-matrix.js';
 
 /** Largest `n` that `binomialTest` accepts (`binomialTest(5e10 + 1e5, 1e11)` takes 7.1 s). */
@@ -135,7 +135,9 @@ export interface PCAResult {
  */
 export interface BootstrapOptions {
   /**
-   * Number of permutation-resampled test runs to execute.
+   * Number of permutation-resampled test runs to execute: a non-negative integer, at most
+   * 10,000,000. Any other value (a float, a negative number, NaN, an infinity, a string, or a
+   * count above the maximum) throws.
    * `0` or `undefined` = fall back to the ordinary (non-bootstrap) result.
    */
   bootstrap?: number;
@@ -217,6 +219,12 @@ export interface ChiSquareBootstrapResult {
 const HYPOTHESIS_THRESHOLD = 4096;
 
 /**
+ * Maximum number of multinomial draws that the `chiSquareTest` bootstrap makes: the bootstrap
+ * count times the total observed count. At 10^9 draws the loop runs for tens of seconds.
+ */
+const CHI_BOOTSTRAP_MAX_DRAWS = 100 * MAX_LOOP_ORDER;
+
+/**
  * Draw `n` indices with replacement from an ascending `sorted` array and return
  * the resample in ascending order, without sorting: tally the draws in a counts
  * array (the same rng stream as drawing values directly), then emit each value
@@ -263,6 +271,28 @@ function _bootstrapSummary(stats: Float64Array): {
   for (let i = 0; i < n; i++) sq += (stats[i] - mean) ** 2;
   const std = n > 1 ? Math.sqrt(sq / (n - 1)) : 0;
   return { bootstrapMean: mean, bootstrapStd: std };
+}
+
+/**
+ * Validate the `bootstrap` option and return the number of resamples (0 when absent).
+ * A float, a negative number, NaN, an infinity or a string would each reach `new Float64Array(B)`
+ * or a loop bound and give a silent wrong size (#1154). The maximum is `MAX_LOOP_ORDER`, so the
+ * result array (at most 10^7 doubles) needs no separate allocation check.
+ *
+ * @throws TypeError when `bootstrap` is neither a number nor undefined or null
+ * @throws RangeError when `bootstrap` is not a non-negative integer, or is above the maximum
+ */
+function _bootstrapCount(fn: string, opts?: BootstrapOptions): number {
+  const B: unknown = opts?.bootstrap;
+  if (B === undefined || B === null) return 0;
+  if (typeof B !== 'number') {
+    throw new TypeError(`${fn}: bootstrap must be a non-negative integer (got ${typeof B})`);
+  }
+  if (!(Number.isInteger(B) && B >= 0)) {
+    throw new RangeError(`${fn}: bootstrap must be a non-negative integer (got ${B})`);
+  }
+  assertLoopOrder(fn, 'bootstrap', B);
+  return B;
 }
 
 // =============================================================================
@@ -443,6 +473,7 @@ export async function chiSquareTest(
   expected?: f64[],
   opts?: BootstrapOptions
 ): Promise<ChiSquareResult | ChiSquareBootstrapResult> {
+  const B = _bootstrapCount('chiSquareTest', opts);
   // 2D contingency table form — stays on main thread
   if (Array.isArray(observed[0])) {
     const obs2d = observed as f64[][];
@@ -532,8 +563,7 @@ export async function chiSquareTest(
   };
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
-  const B = opts?.bootstrap ?? 0;
-  if (B <= 0) return baseResult;
+  if (B === 0) return baseResult;
 
   // Build cumulative expected probability distribution for multinomial sampling.
   let totalExpected = 0;
@@ -548,6 +578,13 @@ export async function chiSquareTest(
   // Total observed count — resample this many draws.
   let totalObs = 0;
   for (let i = 0; i < n; i++) totalObs += obs1d[i];
+  // Each resample draws `totalObs` values, so the work is B * totalObs draws (#1154).
+  assertLoopOrder(
+    'chiSquareTest',
+    'bootstrap * total count',
+    B * totalObs,
+    CHI_BOOTSTRAP_MAX_DRAWS
+  );
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 
@@ -713,6 +750,7 @@ export async function kolmogorovSmirnovTest(
   cdfFn?: ((x: f64) => f64) | string,
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult> {
+  const B = _bootstrapCount('kolmogorovSmirnovTest', opts);
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
   let resolvedCdf = cdfFn;
   if (typeof resolvedCdf === 'string') {
@@ -788,8 +826,7 @@ export async function kolmogorovSmirnovTest(
   const baseResult: KSTestResult = { statistic: dMax, pValue };
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
-  const B = opts?.bootstrap ?? 0;
-  if (B <= 0) return baseResult;
+  if (B === 0) return baseResult;
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
   const cdf = cdfFn || _normalCDF;
@@ -836,59 +873,37 @@ export async function kolmogorovSmirnovTest(
 // =============================================================================
 
 /**
- * Frequency table of the exact (no-ties) Mann-Whitney U null distribution for
- * group sizes `n1`, `n2`: `counts[u]` = number of distinct rank arrangements
- * giving rank-sum-derived U = u, for u in [0, n1*n2].
- *
- * Recurrence (Mann & Whitney 1947): C(n1,n2)[u] = C(n1-1,n2)[u-n2] +
- * C(n1,n2-1)[u], with C(a,0) = C(0,b) = the single-point mass at u=0. Built
- * bottom-up over the (n1+1) x (n2+1) grid; total memory/work is bounded by
- * `n1*n2` (this is only invoked when n1*n2 <= 400 — see `mannWhitneyTest`).
- */
-function _mwUCounts(n1: number, n2: number): Float64Array {
-  const table: Float64Array[][] = [];
-  for (let i = 0; i <= n1; i++) {
-    const row: Float64Array[] = [];
-    for (let j = 0; j <= n2; j++) {
-      const maxU = i * j;
-      const arr = new Float64Array(maxU + 1);
-      if (i === 0 || j === 0) {
-        arr[0] = 1;
-      } else {
-        const prevI = table[i - 1][j];
-        const prevJ = row[j - 1];
-        for (let u = 0; u <= maxU; u++) {
-          let val = 0;
-          const uShift = u - j;
-          if (uShift >= 0 && uShift < prevI.length) val += prevI[uShift];
-          if (u < prevJ.length) val += prevJ[u];
-          arr[u] = val;
-        }
-      }
-      row.push(arr);
-    }
-    table.push(row);
-  }
-  return table[n1][n2];
-}
-
-/**
  * Exact two-sided Mann-Whitney p-value for group sizes `n1`, `n2` and observed
- * `U = min(U1, U2)` (no ties). Matches `scipy.stats.mannwhitneyu(...,
- * method='exact')`.
+ * `U = min(U1, U2)` (no ties). Matches `scipy.stats.mannwhitneyu(..., method='exact')`.
  *
- * `U` is <= n1*n2/2 by construction (it is the min of the two complementary
- * U statistics), so `P(U1 <= U) <= 0.5 <= P(U1 >= U)` by the symmetry of the
- * null distribution about n1*n2/2 — the two-sided p is therefore
- * `2 * P(U1 <= U)`, capped at 1.
+ * The null distribution of U for sizes `m <= n` is the Gaussian binomial coefficient
+ * `[m+n choose m]_q = prod_{i=1..m} (1 - q^(n+i)) / (1 - q^i)`, and the coefficient of `q^u`
+ * counts the arrangements that give `U = u`. Only the coefficients `0..U` are needed, and each
+ * step reads lower indices only, so the series is cut at `U` without error. Each step is a
+ * multiplication by `1 - q^(n+i)` and a division by `1 - q^i`, in place. The cost is
+ * `min(n1, n2) * (U + 1)`, so a sample of 5 against one of 100 needs about 1,250 steps.
+ *
+ * `U` is <= n1*n2/2 by construction (it is the min of the two complementary U statistics), so
+ * `P(U1 <= U) <= 0.5 <= P(U1 >= U)` by the symmetry of the null distribution about n1*n2/2.
+ * The two-sided p is therefore `2 * P(U1 <= U)`, capped at 1.
  */
 function _mwExactPValue(n1: number, n2: number, U: number): f64 {
-  const counts = _mwUCounts(n1, n2);
-  let total = 0;
-  for (let k = 0; k < counts.length; k++) total += counts[k];
+  const m = Math.min(n1, n2);
+  const n = Math.max(n1, n2);
+  const K = Math.floor(U);
+  assertAllocSize('mannWhitneyTest', [K + 1]);
+  const c = new Float64Array(K + 1);
+  c[0] = 1;
+  let total = 1; // C(n + m, m): the number of arrangements, built with the same loop
+  for (let i = 1; i <= m; i++) {
+    const L = n + i;
+    for (let k = K; k >= L; k--) c[k] -= c[k - L];
+    for (let k = i; k <= K; k++) c[k] += c[k - i];
+    total = (total * L) / i;
+  }
   let cumLe = 0;
-  for (let k = 0; k <= U; k++) cumLe += counts[k];
-  return Math.min(1, 2 * (cumLe / total));
+  for (let k = 0; k <= K; k++) cumLe += c[k];
+  return Math.min(1, (2 * cumLe) / total);
 }
 
 // =============================================================================
@@ -899,7 +914,11 @@ function _mwExactPValue(n1: number, n2: number, U: number): f64 {
  * Mann-Whitney U test (Wilcoxon rank-sum test).
  *
  * Non-parametric test for whether two independent samples are drawn
- * from the same distribution.
+ * from the same distribution. The two-sided p-value matches
+ * `scipy.stats.mannwhitneyu(x, y)` with its defaults (`method='auto'`,
+ * `use_continuity=True`): the exact null distribution when there are no ties and a
+ * sample has at most 8 values, otherwise the normal approximation with the tie correction
+ * of the standard deviation and the continuity correction. `uStatistic` is `min(U1, U2)`.
  *
  * Worker dispatch (Slice 3.10): When the combined sample has ≥ 4096 elements,
  * the sort stays on the main thread but the rank-sum for group 1 is computed
@@ -930,6 +949,7 @@ export async function mannWhitneyTest(
   sample2: f64[],
   opts?: BootstrapOptions
 ): Promise<MannWhitneyResult | MWBootstrapResult> {
+  const B = _bootstrapCount('mannWhitneyTest', opts);
   if (sample1.length < 1 || sample2.length < 1) {
     throw new Error('mannWhitneyTest: both samples must be non-empty');
   }
@@ -940,8 +960,7 @@ export async function mannWhitneyTest(
 
   // SciPy `nan_policy='propagate'`: NaN has no rank, and the tie scan below cannot pass it.
   if (hasNaN(sample1) || hasNaN(sample2)) {
-    const B = opts?.bootstrap ?? 0;
-    if (B <= 0) return { uStatistic: NaN, pValue: NaN };
+    if (B === 0) return { uStatistic: NaN, pValue: NaN };
     return {
       uStatistic: NaN,
       pValueEmpirical: NaN,
@@ -974,11 +993,16 @@ export async function mannWhitneyTest(
   // Assign ranks with tie handling
   const ranksArr = new Float64Array(nTotal);
   let hasTies = false;
+  let tieSum = 0; // sum over tie groups of (t^3 - t), the tie term of the normal approximation
   let i = 0;
   while (i < nTotal) {
     let j = i + 1;
     while (j < nTotal && combined[j].value === combined[i].value) j++;
-    if (j - i > 1) hasTies = true;
+    const t = j - i;
+    if (t > 1) {
+      hasTies = true;
+      tieSum += t * t * t - t;
+    }
     const avgRank = (i + 1 + j) / 2;
     for (let k = i; k < j; k++) ranksArr[k] = avgRank;
     i = j;
@@ -1004,24 +1028,27 @@ export async function mannWhitneyTest(
   const U2 = n1 * n2 - U1;
   const U = Math.min(U1, U2);
 
-  // p-value: exact small-n Mann-Whitney U-distribution when n1*n2 <= 400 and
-  // there are no ties (matches scipy method='exact'); otherwise the normal
-  // approximation (unchanged — also scipy's fallback when ties are present).
+  // p-value, with the method choice of `scipy.stats.mannwhitneyu(method='auto')`: the exact
+  // null distribution when there are no ties and a sample has at most 8 values, otherwise the
+  // normal approximation with the tie correction of sigma and the continuity correction.
   let pValue: f64;
-  if (n1 * n2 <= 400 && !hasTies) {
+  if (!hasTies && Math.min(n1, n2) <= 8) {
     pValue = _mwExactPValue(n1, n2, U);
   } else {
-    const mu = (n1 * n2) / 2;
-    const sigma = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
-    const z = sigma === 0 ? 0 : (U - mu) / sigma;
-    pValue = Math.min(1, 2 * _normalCDF(z)); // two-tailed
+    const sigma = Math.sqrt(((n1 * n2) / 12) * (nTotal + 1 - tieSum / (nTotal * (nTotal - 1))));
+    // Every value tied gives sigma = 0 and no evidence against the null.
+    if (!(sigma > 0)) {
+      pValue = 1;
+    } else {
+      const z = ((n1 * n2) / 2 - U - 0.5) / sigma;
+      pValue = Math.min(1, 2 * _normalCDF(-z)); // two-tailed
+    }
   }
 
   const baseResult: MannWhitneyResult = { uStatistic: U, pValue };
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
-  const B = opts?.bootstrap ?? 0;
-  if (B <= 0) return baseResult;
+  if (B === 0) return baseResult;
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 
@@ -1098,6 +1125,7 @@ export async function shapiroWilkTest(
   sample: f64[],
   opts?: BootstrapOptions
 ): Promise<ShapiroWilkResult | SWBootstrapResult> {
+  const B = _bootstrapCount('shapiroWilkTest', opts);
   const n = sample.length;
   if (n < 3) throw new Error('shapiroWilkTest: need at least 3 observations');
   if (n > 5000) throw new Error('shapiroWilkTest: maximum 5000 observations');
@@ -1214,8 +1242,7 @@ export async function shapiroWilkTest(
   const baseResult: ShapiroWilkResult = { statistic: W, pValue: Math.max(0, Math.min(1, pValue)) };
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
-  const B = opts?.bootstrap ?? 0;
-  if (B <= 0) return baseResult;
+  if (B === 0) return baseResult;
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 

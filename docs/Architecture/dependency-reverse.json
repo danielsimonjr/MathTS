@@ -2002,7 +2002,8 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/integration.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/numeric-data.ts": [
       "functions/src/descriptive-stats.ts",

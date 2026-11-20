@@ -24187,7 +24187,7 @@
           },
           {
             "file": "../typed/number-matrix.js",
-            "imports": ["numberVector"]
+            "imports": ["hasNaN", "numberVector"]
           },
           {
             "file": "./robust-stats.js",
@@ -28225,7 +28225,7 @@
           },
           {
             "file": "../utils/limits.js",
-            "imports": ["assertLoopOrder"]
+            "imports": ["assertAllocSize", "assertLoopOrder", "MAX_LOOP_ORDER"]
           },
           {
             "file": "./number-matrix.js",
@@ -29829,6 +29829,10 @@
           {
             "file": "../utils/limits.js",
             "imports": ["assertAllocSize"]
+          },
+          {
+            "file": "./number-matrix.js",
+            "imports": ["hasNaN"]
           }
         ],
         "workspaceDependencies": [
@@ -49885,7 +49889,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238390,
+    "totalLinesOfCode": 238545,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,

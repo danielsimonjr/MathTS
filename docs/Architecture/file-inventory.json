@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2551,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1135,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1135,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1179,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -7065,7 +7065,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 362
+      "loc": 459
     },
     {
       "file": "functions/src/index.ts",
@@ -7583,7 +7583,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 154
+      "loc": 155
     },
     {
       "file": "functions/src/numeric/adaptive-quad.ts",
@@ -8626,7 +8626,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 125
+      "loc": 141
     },
     {
       "file": "functions/src/stats/distributions-extra.ts",
@@ -8689,7 +8689,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 143
+      "loc": 154
     },
     {
       "file": "functions/src/stats/power-analysis.ts",
@@ -9403,7 +9403,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2170
+      "loc": 2197
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -9529,7 +9529,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 928
+      "loc": 931
     },
     {
       "file": "functions/src/typed/string-derivative.ts",
@@ -10692,6 +10692,27 @@
       "area": "tests",
       "disposition": "test",
       "loc": 174
+    },
+    {
+      "file": "functions/tests/dogfood-1146-nonfinite-silent.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 157
+    },
+    {
+      "file": "functions/tests/dogfood-1148-mw-wilcoxon-scipy.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 158
+    },
+    {
+      "file": "functions/tests/dogfood-1154-bootstrap-fisher.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 220
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",

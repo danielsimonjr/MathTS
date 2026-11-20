@@ -23,6 +23,17 @@ export function wassersteinDistance(
   // once (O(n log n)); the two CDFs are running weight sums.
   // SciPy gives NaN. A NaN sample point cannot be ordered, and the sweep below would not advance.
   if (hasNaN(uv) || hasNaN(vv)) return NaN;
+  // SciPy takes differences of the pooled sorted values, so one infinite value that occurs twice
+  // gives Infinity - Infinity = NaN. The sweep below merges equal values and would give a number.
+  let posInf = 0;
+  let negInf = 0;
+  for (const sample of [uv, vv]) {
+    for (const t of sample) {
+      if (t === Infinity) posInf++;
+      else if (t === -Infinity) negInf++;
+    }
+  }
+  if (posInf > 1 || negInf > 1) return NaN;
   const su = sortedWithWeights(uv, uw);
   const sv = sortedWithWeights(vv, vw);
   let iu = 0;
@@ -95,11 +106,16 @@ export function mutualInformation(x: readonly number[], y: readonly number[]): n
   return mi;
 }
 
-/** Empirical CDF: step points and an `evaluate(t)` function (fraction of values ≤ t). */
+/**
+ * Empirical CDF: step points and an `evaluate(t)` function (fraction of values ≤ t).
+ *
+ * @throws A `RangeError` for an empty sample or a sample that holds a NaN (`scipy.stats.ecdf`
+ *   raises for a NaN: a NaN has no place in the order).
+ */
 export function ecdf(x: Vec): { x: number[]; y: number[]; evaluate: (t: number) => number } {
-  const xs = numberVector('ecdf', x)
-    .slice()
-    .sort((a, b) => a - b);
+  const raw = numberVector('ecdf', x);
+  if (hasNaN(raw)) throw new RangeError('ecdf: sample must not contain NaN');
+  const xs = raw.slice().sort((a, b) => a - b);
   const n = xs.length;
   if (n === 0) throw new RangeError('ecdf: empty sample');
   const ux: number[] = [];

@@ -4,14 +4,18 @@
  */
 import { chiSquaredSF } from '../distribution-functions.js';
 import { normalCDF as _normalCDF } from '../typed/distributions.js';
-import { numberVector } from '../typed/number-matrix.js';
+import { hasNaN, numberVector } from '../typed/number-matrix.js';
 import { medianOf as median } from './robust-stats.js';
 
 type Vec = readonly number[] | Float64Array;
 
 const normalCDF = (z: number): number => _normalCDF(z) as number;
 
-/** Sign test on the median. Ties with `median` are dropped; two-sided exact binomial p. */
+/**
+ * Sign test on the median. Ties with `median` are dropped; two-sided exact binomial p.
+ * A NaN in `x`, or a NaN `medianValue`, gives a NaN statistic and p-value (`nPos` and `nNeg`
+ * count the other values), as `kruskalWallis` and `wilcoxon` propagate a NaN.
+ */
 export function signTest(
   x: Vec,
   medianValue = 0
@@ -19,6 +23,9 @@ export function signTest(
   const xs = numberVector('signTest', x);
   const nPos = xs.filter((v) => v > medianValue).length;
   const nNeg = xs.filter((v) => v < medianValue).length;
+  if (hasNaN(xs) || Number.isNaN(medianValue)) {
+    return { statistic: NaN, pValue: NaN, nPos, nNeg };
+  }
   const n = nPos + nNeg;
   if (n === 0) return { statistic: 0, pValue: 1, nPos, nNeg };
   const k = Math.min(nPos, nNeg);
@@ -63,13 +70,17 @@ export function runsTest(
   return { runs, z, pValue: 2 * (1 - normalCDF(Math.abs(z))) };
 }
 
-/** Mood's median test: chi-square test of the above/at-or-below-grand-median table. */
+/**
+ * Mood's median test: chi-square test of the above/at-or-below-grand-median table.
+ * A NaN in a group gives a NaN statistic, p-value and grand median (`scipy.stats.median_test`).
+ */
 export function moodMedianTest(groups: readonly Vec[]): {
   statistic: number;
   pValue: number;
   grandMedian: number;
 } {
   const gs = groups.map((g) => numberVector('moodMedianTest', g));
+  if (gs.some((g) => hasNaN(g))) return { statistic: NaN, pValue: NaN, grandMedian: NaN };
   const grandMedian = median(gs.flat());
   const above = gs.map((g) => g.filter((v) => v > grandMedian).length);
   const below = gs.map((g, i) => g.length - above[i]);

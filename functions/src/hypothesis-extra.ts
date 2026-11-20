@@ -138,7 +138,7 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
 
 /**
  * Result of `wilcoxon`: the statistic `min(W+, W-)`, the two-sided p-value, and the
- * normal-approximation z statistic.
+ * normal-approximation z statistic (without a continuity correction).
  */
 export interface WilcoxonResult {
   statistic: number;
@@ -147,10 +147,58 @@ export interface WilcoxonResult {
 }
 
 /**
+ * Two-sided exact signed-rank p-value for `n` nonzero differences without ties:
+ * `2 * P(W <= w)`, capped at 1. The null distribution counts the subsets of the ranks `1..n`
+ * by their sum, so the counts need `n(n+1)/2 + 1` entries and are exact doubles for `n <= 50`.
+ */
+function signedRankExactP(n: number, w: number): number {
+  const max = (n * (n + 1)) / 2;
+  const counts = new Float64Array(max + 1);
+  counts[0] = 1;
+  for (let r = 1; r <= n; r++) {
+    for (let s = max; s >= r; s--) counts[s] += counts[s - r];
+  }
+  let cumulative = 0;
+  for (let s = 0; s <= Math.floor(w); s++) cumulative += counts[s];
+  return Math.min(1, (2 * cumulative) / 2 ** n);
+}
+
+/**
+ * Two-sided permutation p-value of `W+` for the ranks `ranks` (ties and zeros give ranks that
+ * the exact distribution does not cover): every one of the `2^n` sign assignments is
+ * enumerated, so the result is deterministic. A relative tolerance of 1e-14 on the observed
+ * sum decides which sums count as equal, as in `scipy.stats.permutation_test`.
+ */
+function signedRankPermutationP(ranks: readonly number[], observed: number): number {
+  const n = ranks.length;
+  const sums = new Float64Array(2 ** n);
+  let size = 1; // sums[0] = 0 is the assignment where every rank has a negative sign
+  for (const r of ranks) {
+    for (let i = 0; i < size; i++) sums[size + i] = sums[i] + r;
+    size *= 2;
+  }
+  const gamma = 1e-14 * Math.abs(observed);
+  let less = 0;
+  let greater = 0;
+  for (let i = 0; i < size; i++) {
+    if (sums[i] <= observed + gamma) less++;
+    if (sums[i] >= observed - gamma) greater++;
+  }
+  return Math.min(1, (2 * Math.min(less, greater)) / size);
+}
+
+/**
  * Wilcoxon signed-rank test (paired, or one-sample vs 0). Drops zero differences,
- * ranks |d|, and uses the normal approximation with continuity correction
- * (matching `scipy.stats.wilcoxon(mode='approx', correction=True)`). Statistic is
- * `min(W⁺, W⁻)`.
+ * ranks |d|, and chooses the p-value method as `scipy.stats.wilcoxon(x, y)` does with its
+ * defaults (SciPy 1.16: `zero_method='wilcox'`, `correction=False`, `method='auto'`):
+ *
+ * - more than 50 differences (zeros included): the normal approximation;
+ * - no zeros and no ties among |d|: the exact distribution of the signed-rank sum;
+ * - up to 13 differences with zeros or ties: the permutation distribution over all sign
+ *   assignments;
+ * - otherwise: the normal approximation, with the tie correction of the variance.
+ *
+ * The normal approximation has no continuity correction. Statistic is `min(W⁺, W⁻)`.
  */
 export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   const a = numberVector('wilcoxon', x);
@@ -161,10 +209,12 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
     );
   const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
   if (hasNaN(diffs)) return { statistic: NaN, pValue: NaN, zStatistic: NaN };
+  const nAll = diffs.length;
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
   if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');
-  const ranks = rankdata(d.map(Math.abs));
+  const absD = d.map(Math.abs);
+  const ranks = rankdata(absD);
   let wPlus = 0;
   let wMinus = 0;
   for (let i = 0; i < n; i++) {
@@ -172,11 +222,17 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
     else wMinus += ranks[i];
   }
   const statistic = Math.min(wPlus, wMinus);
+  const tie = tieTerm(absD);
   const mn = (n * (n + 1)) / 4;
-  const se = Math.sqrt((n * (n + 1) * (2 * n + 1)) / 24 - tieTerm(d.map(Math.abs)) / 48);
-  const corr = 0.5 * Math.sign(statistic - mn);
-  const zStatistic = (statistic - mn - corr) / se;
-  return { statistic, pValue: 2 * normalCDF(-Math.abs(zStatistic)), zStatistic };
+  const se = Math.sqrt((n * (n + 1) * (2 * n + 1)) / 24 - tie / 48);
+  const zStatistic = (statistic - mn) / se;
+  const hasZerosOrTies = n < nAll || tie > 0;
+  let pValue: number;
+  if (nAll > 50) pValue = 2 * normalCDF(-Math.abs(zStatistic));
+  else if (!hasZerosOrTies) pValue = signedRankExactP(n, statistic);
+  else if (nAll <= 13) pValue = signedRankPermutationP(ranks, wPlus);
+  else pValue = 2 * normalCDF(-Math.abs(zStatistic));
+  return { statistic, pValue, zStatistic };
 }
 
 /** Result of `fisherExact`: the sample odds ratio and the two-sided p-value. */
@@ -197,17 +253,25 @@ function logChoose(n: number, k: number): number {
  * observed table's), matching `scipy.stats.fisher_exact`. `oddsRatio` is the sample
  * ratio `ad/bc` (SciPy reports the conditional-MLE estimate; the p-value matches).
  *
- * @throws A `RangeError` when an entry is not a finite number `>= 0`, or when the smaller
+ * The probabilities rise to the mode of the hypergeometric distribution and fall after it.
+ * So the tables that count are two tails, one below the mode and one above it, and the
+ * function finds where each tail starts by a binary search and sums each tail away from the
+ * mode until the terms are negligible. The cost depends on the width of the tail mass and not
+ * on the size of the counts; a table with every probability at most the observed one (the
+ * observed table is at the mode) returns 1 at once.
+ *
+ * @throws A `RangeError` when an entry is not a non-negative integer (SciPy casts a float to
+ *   an integer without a message, but a count has no meaning for 3.7), or when the smaller
  *   of the first row total and the first column total is above 2^53 - 1.
  */
 export function fisherExact(
   table: readonly [readonly number[], readonly number[]]
 ): FisherExactResult {
   const [[a, b], [c, d]] = table;
-  // SciPy raises for a negative entry. A NaN or an infinite entry made the loop below run forever.
+  // SciPy raises for a negative entry. A NaN or an infinite entry made the old loop run forever.
   for (const v of [a, b, c, d]) {
-    if (!(Number.isFinite(v) && v >= 0)) {
-      throw new RangeError('fisherExact: every table entry must be a finite number >= 0');
+    if (!(Number.isInteger(v) && v >= 0)) {
+      throw new RangeError('fisherExact: every table entry must be a non-negative integer');
     }
   }
   const r1 = a + b;
@@ -216,21 +280,54 @@ export function fisherExact(
   const N = a + b + c + d;
   const logHyper = (k: number): number =>
     logChoose(r1, k) + logChoose(r2, c1 - k) - logChoose(N, c1);
-  const logPObs = logHyper(a);
   const lo = Math.max(0, c1 - r2);
   const hi = Math.min(r1, c1);
-  // `k++` does not change a `k` above 2^53, so the loop below would not end.
+  // `k++` does not change a `k` above 2^53, so a loop over `k` would not end.
   if (hi > Number.MAX_SAFE_INTEGER) {
     throw new RangeError(
       `fisherExact: a marginal total of ${hi} exceeds the supported maximum of 2^53 - 1`
     );
   }
-  let p = 0;
-  for (let k = lo; k <= hi; k++) {
-    const lp = logHyper(k);
-    if (lp <= logPObs + 1e-7) p += Math.exp(lp);
-  }
   const oddsRatio = b * c === 0 ? Infinity : (a * d) / (b * c);
+  // A table counts when its log probability is at most this limit (SciPy: a relative 1e-7).
+  const limit = logHyper(a) + 1e-7;
+  const mode = Math.min(hi, Math.max(lo, Math.floor(((c1 + 1) * (r1 + 1)) / (N + 2))));
+  if (logHyper(mode) <= limit) return { oddsRatio, pValue: 1 };
+
+  /** Sum the probabilities from `from` away from the mode (`step` is -1 or 1) to the end. */
+  const tailSum = (from: number, step: 1 | -1): number => {
+    let sum = 0;
+    for (let k = from; k >= lo && k <= hi; k += step) {
+      const term = Math.exp(logHyper(k));
+      sum += term;
+      if (term <= 1e-17 * sum) break; // the terms fall away from the mode
+    }
+    return sum;
+  };
+
+  let p = 0;
+  if (logHyper(lo) <= limit) {
+    // The largest k in [lo, mode - 1] that counts: the lower tail is lo..k.
+    let l = lo;
+    let r = mode - 1;
+    while (l < r) {
+      const mid = l + Math.ceil((r - l) / 2);
+      if (logHyper(mid) <= limit) l = mid;
+      else r = mid - 1;
+    }
+    p += tailSum(l, -1);
+  }
+  if (logHyper(hi) <= limit) {
+    // The smallest k in [mode + 1, hi] that counts: the upper tail is k..hi.
+    let l = mode + 1;
+    let r = hi;
+    while (l < r) {
+      const mid = l + Math.floor((r - l) / 2);
+      if (logHyper(mid) <= limit) r = mid;
+      else l = mid + 1;
+    }
+    p += tailSum(l, 1);
+  }
   return { oddsRatio, pValue: Math.min(1, p) };
 }
 
