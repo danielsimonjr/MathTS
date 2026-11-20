@@ -60,7 +60,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="dblquad" data-name="dblquad">
   <div class="func-name">dblquad</div>
-  <div class="func-desc">Double integral, <strong>scipy argument order</strong> <code>f(y, x)</code>; <code>gy</code>/<code>hy</code> are constants or functions of <code>x</code>; returns a <code>QuadResult</code></div>
+  <div class="func-desc">Double integral, <strong>scipy argument order</strong> <code>f(y, x)</code>; <code>gy</code>/<code>hy</code> are constants or functions of <code>x</code>; returns <code>{ value, error, converged }</code>, where <code>converged</code> is the outer flag and every inner flag</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">dblquad(f, ax, bx, gy, hy[, opts])</div>
@@ -103,10 +103,10 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="nintegrate" data-name="nintegrate">
   <div class="func-name">nintegrate</div>
-  <div class="func-desc">Adaptive numerical integration</div>
+  <div class="func-desc">Adaptive numerical integration; throws <code>RangeError</code> when the integral does not converge</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
-    <div class="example">nintegrate(f, a, b[, tol])</div>
+    <div class="example">nintegrate(f, a, b[, { tol, maxDepth }])</div>
   </div>
 </div>
 <div class="func-card" id="parallelGaussQuad" data-name="parallelgaussquad">
@@ -220,7 +220,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="tanhSinh" data-name="tanhsinh">
   <div class="func-name">tanhSinh</div>
-  <div class="func-desc">Double-exponential (tanh-sinh) quadrature returning a <code>QuadResult</code>; never evaluates at the endpoints, so endpoint singularities are fine (defaults <code>tol</code> 1e-12, <code>maxLevel</code> 10). Inverse-square-root endpoint singularities (e.g. <code>1/√(1−x²)</code>) carry an endpoint-mass error of about 2e-8; finite limits only</div>
+  <div class="func-desc">Double-exponential (tanh-sinh) quadrature returning <code>{ value, error, converged }</code> (<code>converged</code> is true when the change between two levels is within <code>tol</code>, false when no node gives a finite value); never evaluates at the endpoints, so endpoint singularities are fine (defaults <code>tol</code> 1e-12, <code>maxLevel</code> 10). Inverse-square-root endpoint singularities (e.g. <code>1/√(1−x²)</code>) carry an endpoint-mass error of about 2e-8; finite limits only</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">tanhSinh(f, a, b[, { tol, maxLevel }])</div>
@@ -229,7 +229,7 @@ h1 span { color: var(--accent); }
 </div>
 <div class="func-card" id="tplquad" data-name="tplquad">
   <div class="func-name">tplquad</div>
-  <div class="func-desc">Triple integral, <code>f(z, y, x)</code>; <code>gy</code>/<code>hy</code> depend on <code>x</code>, <code>qz</code>/<code>rz</code> on <code>(x, y)</code></div>
+  <div class="func-desc">Triple integral, <code>f(z, y, x)</code>; <code>gy</code>/<code>hy</code> depend on <code>x</code>, <code>qz</code>/<code>rz</code> on <code>(x, y)</code>; returns <code>{ value, error, converged }</code>, where <code>converged</code> is the outer flag and every inner flag</div>
   <div class="func-section">
     <div class="func-section-title">Syntax</div>
     <div class="example">tplquad(f, ax, bx, gy, hy, qz, rz[, opts])</div>
@@ -254,7 +254,7 @@ h1 span { color: var(--accent); }
 </div>
 
 <footer>
-  <p>Generated 2026-11-14 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+  <p>Generated 2026-11-20 from <a href="https://github.com/danielsimonjr/mathts/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/mathts">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
 </footer>
 </div>
 <script>
