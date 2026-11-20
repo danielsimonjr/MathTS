@@ -478,8 +478,9 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     function _quantileSeq(
       source: unknown[] | FloatTyped,
       probs: Prob[],
-      { sorted, mode, skipNaN }: Options
+      options: Options
     ): unknown[] {
+      const { sorted, mode, skipNaN } = options;
       // A flat array of numbers (the common case) is read as it is, with no flatten. A nested
       // array, or values that are not numbers, are flattened into a new array, and read again.
       let values: ArrayLike<unknown> = source;

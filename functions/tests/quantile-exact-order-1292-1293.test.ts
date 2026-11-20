@@ -32,7 +32,8 @@ describe('#1292 order statistics of BigNumber data within relTol do not depend o
   });
 
   it("quantileSeq(p = 0.34, 'lower') gives the sorted result for every permutation", () => {
-    const expected = str(q(sortedData(), 0.34, true, 'lower', 0));
+    const expected = str(q(sortedData(), 0.34, true, 'lower'));
+    expect(expected).toBe('1.0000000000001');
     for (const perm of permutations(CLOSE)) {
       expect(str(q(perm.map(B), 0.34, 'lower'))).toBe(expected);
     }
