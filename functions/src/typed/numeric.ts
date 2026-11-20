@@ -433,16 +433,18 @@ export function leastSquares(A: number[][], b: number[]): number[] {
  * @param f - Function to integrate
  * @param a - Lower bound
  * @param b - Upper bound
- * @param opts - Options (tol, maxDepth for max subdivisions)
+ * @param opts - Options (tol, maxDepth for max subdivisions, maxPanels for the most
+ *   Gauss-Kronrod panels in total; default 100000)
  * @returns Approximate integral
  * @throws RangeError when the result is not finite or the integral does not converge
- *   (a divergent integrand, a NaN integrand, or a `maxDepth` that leaves unresolved error)
+ *   (a divergent integrand, a NaN integrand, or a `maxDepth` or `maxPanels` that leaves
+ *   unresolved error)
  */
 export function nintegrate(
   f: (x: f64) => f64,
   a: f64,
   b: f64,
-  opts?: { tol?: f64; maxDepth?: i32 }
+  opts?: { tol?: f64; maxDepth?: i32; maxPanels?: i32 }
 ): f64 {
   return quadValue('nintegrate', f, a, b, opts);
 }

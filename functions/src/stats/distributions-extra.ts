@@ -71,6 +71,10 @@ function phi(z: number): number {
 
 /**
  * Owen's T function T(h, a) = (1/2π)∫₀ᵃ exp(−h²(1+x²)/2)/(1+x²) dx.
+ *
+ * T is even in h and odd in a. For a > 1 the integrand has a peak of width 1/h near 0 that
+ * a quadrature over [0, a] can miss, so the value comes from the identity of Owen (1956):
+ * T(h, a) = (Φ(h) Φ(−ah) + Φ(ah) Φ(−h)) / 2 − T(ah, 1/a) for h ≥ 0 and a > 0.
  */
 export function owensT(h: number, a: number): number {
   if (typeof h !== 'number' || typeof a !== 'number') {
@@ -80,6 +84,12 @@ export function owensT(h: number, a: number): number {
   if (a === 0) return 0;
   // Closed form at an infinite a: T(h, +-Infinity) = +-(1 - Phi(|h|)) / 2. T is odd in a.
   if (a === Infinity || a === -Infinity) return (Math.sign(a) * (1 - Phi(Math.abs(h)))) / 2;
+  if (a < 0) return -owensT(h, -a);
+  h = Math.abs(h);
+  if (a > 1) {
+    const ah = a * h;
+    return (Phi(h) * Phi(-ah) + Phi(ah) * Phi(-h)) / 2 - owensT(ah, 1 / a);
+  }
   const integral = quad((x: number) => Math.exp((-h * h * (1 + x * x)) / 2) / (1 + x * x), 0, a, {
     tol: 1e-12,
   });
