@@ -141,7 +141,7 @@ The codebase is organized into the following modules:
 - **functions/matrix**: 49 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 6 files
-- **functions/numeric**: 33 files
+- **functions/numeric**: 34 files
 - **functions/plain**: 10 files
 - **functions/probability**: 17 files
 - **functions/relational**: 14 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 590            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 591            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5947,7 +5947,7 @@ graph LR
 
 ---
 
-### `functions/src/combinatorics/catalan.ts` - The Catalan Numbers enumerate combinatorial structures of many different types.
+### `functions/src/combinatorics/catalan.ts` - The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the
 
 **Internal Dependencies:**
 
@@ -8339,9 +8339,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                            | Type   |
-| -------------------- | ---------------------------------- | ------ |
-| `../utils/limits.js` | `assertAllocSize, assertLoopOrder` | Import |
+| File                     | Imports                            | Type   |
+| ------------------------ | ---------------------------------- | ------ |
+| `../utils/limits.js`     | `assertAllocSize, assertLoopOrder` | Import |
+| `./tridiagonal-eigen.js` | `symTridiagEigenvalues`            | Import |
 
 **Exports:**
 
@@ -8668,6 +8669,14 @@ graph LR
 
 - Interfaces: `SvdsOptions`, `SvdsResult`
 - Functions: `svds`
+
+---
+
+### `functions/src/numeric/tridiagonal-eigen.ts` - Eigenvalues of a real symmetric tridiagonal matrix.
+
+**Exports:**
+
+- Functions: `symTridiagEigenvalues`, `symTridiagEigenvalue`
 
 ---
 
@@ -9832,9 +9841,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports    | Type   |
-| ----------------- | ---------- | ------ |
-| `./spheroidal.js` | `ferrersP` | Import |
+| File                 | Imports                              | Type   |
+| -------------------- | ------------------------------------ | ------ |
+| `./spheroidal.js`    | `ferrersP`                           | Import |
+| `../utils/limits.js` | `MAX_FERRERS_ORDER, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -9993,10 +10003,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports   | Type   |
-| ---------------------------- | --------- | ------ |
-| `../wasm/special/scalars.js` | `_lgamma` | Import |
-| `./hypergeometric.js`        | `hyp1f1`  | Import |
+| File                         | Imports                           | Type   |
+| ---------------------------- | --------------------------------- | ------ |
+| `../wasm/special/scalars.js` | `_lgamma`                         | Import |
+| `./hypergeometric.js`        | `hyp1f1`                          | Import |
+| `../utils/limits.js`         | `MAX_SIEGEL_Z_T, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -13360,7 +13371,7 @@ graph LR
 **Exports:**
 
 - Functions: `assertAllocSize`, `assertArrayWork`, `assertLoopOrder`
-- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`, `MAX_SIEGEL_Z_T`
 
 ---
 
@@ -20925,8 +20936,8 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
+| `functions/src/utils/limits`                           | 0 files      | 46 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
-| `functions/src/utils/limits`                           | 0 files      | 44 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21324,7 +21335,7 @@ graph TD
         N231[finite-differences]
         N232[fsolve]
         N233[gauss-legendre4]
-        N234[...23 more]
+        N234[...24 more]
     end
 
     subgraph Functions/plain
@@ -21853,14 +21864,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1353   |
+| Total TypeScript Files  | 1354   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 241863 |
-| Total Exports           | 7429   |
+| Total Lines of Code     | 242310 |
+| Total Exports           | 7432   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 63     |
 | Total Interfaces        | 675    |
-| Total Functions         | 2611   |
+| Total Functions         | 2613   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

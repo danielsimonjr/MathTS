@@ -240,8 +240,10 @@ describe('sums and exponential integrals (#989)', () => {
   it('expn(2, 1) is unchanged', () => {
     expect(expn(2, 1)).toBeCloseTo(0.14849550677592205, 14);
   });
-  it('siegelZ(1e6) is NaN at once: the Borwein coefficients overflow (hang before the fix)', () => {
-    expect(siegelZ(1e6)).toBeNaN();
+  it('siegelZ(1e6) is the value of mpmath, and a huge t is refused (hang before the fix)', () => {
+    // The Borwein sum took n^2 terms. The Euler-Maclaurin sum has t / 2 terms and a limit (#1102).
+    expect(Math.abs(siegelZ(1e6) - -2.8061338784306984)).toBeLessThan(1e-8);
+    expect(() => siegelZ(1e12)).toThrow(RangeError);
   });
   it('siegelZ(15) is unchanged', () => {
     expect(siegelZ(15)).toBeCloseTo(0.7199423913, 6);

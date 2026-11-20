@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1353, "e": 7429, "re": 3194 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1354, "e": 7432, "re": 3194 },
   "s": {
-    "loc": 241863,
+    "loc": 242310,
     "cls": 63,
     "int": 675,
-    "fn": 2611,
+    "fn": 2613,
     "tg": 185,
     "en": 0,
-    "co": 1698,
+    "co": 1699,
     "toi": 686
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -849,7 +849,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 33,
+      "f": 34,
       "exp": [
         "checkFiniteLimits",
         "quad",
@@ -1971,6 +1971,6 @@
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "utils/collection.ts", "i": 0, "o": 44 }
+    { "p": "utils/limits.ts", "i": 0, "o": 46 }
   ]
 }

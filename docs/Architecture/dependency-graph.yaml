@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1353
+  totalFiles: 1354
   totalModules: 82
-  totalExports: 7429
+  totalExports: 7432
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14754,7 +14754,7 @@ modules:
       constants:
         - createBellNumbers
     functions/src/combinatorics/catalan.ts:
-      description: The Catalan Numbers enumerate combinatorial structures of many different types.
+      description: The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19388,6 +19388,9 @@ modules:
           imports:
             - assertAllocSize
             - assertLoopOrder
+        - file: ./tridiagonal-eigen.js
+          imports:
+            - symTridiagEigenvalues
       workspaceDependencies: []
       exports:
         - rootsHermite
@@ -19852,6 +19855,18 @@ modules:
         - SvdsResult
       functions:
         - svds
+    functions/src/numeric/tridiagonal-eigen.ts:
+      description: Eigenvalues of a real symmetric tridiagonal matrix.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - symTridiagEigenvalues
+        - symTridiagEigenvalue
+      functions:
+        - symTridiagEigenvalues
+        - symTridiagEigenvalue
   functions/plain:
     functions/src/plain/number/arithmetic.ts:
       description: Calculate gcd for numbers
@@ -21858,6 +21873,10 @@ modules:
         - file: ./spheroidal.js
           imports:
             - ferrersP
+        - file: ../utils/limits.js
+          imports:
+            - MAX_FERRERS_ORDER
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -22107,6 +22126,10 @@ modules:
         - file: ./hypergeometric.js
           imports:
             - hyp1f1
+        - file: ../utils/limits.js
+          imports:
+            - MAX_SIEGEL_Z_T
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - siegelZ
@@ -29229,6 +29252,7 @@ modules:
         - MAX_CHEBYSHEV_ORDER
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
+        - MAX_SIEGEL_Z_T
         - assertAllocSize
         - assertArrayWork
         - assertLoopOrder
@@ -29248,6 +29272,7 @@ modules:
         - MAX_CHEBYSHEV_ORDER
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
+        - MAX_SIEGEL_Z_T
     functions/src/utils/map.ts:
       description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
@@ -46320,6 +46345,7 @@ dependencyGraph:
         - functions/src/numeric/solveParabolicPDE.ts
         - functions/src/numeric/structured-solvers.ts
         - functions/src/numeric/svds.ts
+        - functions/src/numeric/tridiagonal-eigen.ts
     - name: Functions/plain
       files:
         - functions/src/plain/number/arithmetic.ts
@@ -47318,16 +47344,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1353
+  totalTypeScriptFiles: 1354
   totalModules: 82
-  totalLinesOfCode: 241863
-  totalExports: 7429
+  totalLinesOfCode: 242310
+  totalExports: 7432
   totalClasses: 63
   totalInterfaces: 675
-  totalFunctions: 2611
+  totalFunctions: 2613
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1698
+  totalConstants: 1699
   totalReExports: 3194
   totalTypeOnlyImports: 686
   runtimeCircularDeps: 2

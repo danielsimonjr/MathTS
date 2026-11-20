@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1353,
+    "totalFiles": 1354,
     "totalModules": 82,
-    "totalExports": 7429
+    "totalExports": 7432
   },
   "entryPoints": [
     {
@@ -15569,7 +15569,7 @@
         "constants": ["createBellNumbers"]
       },
       "functions/src/combinatorics/catalan.ts": {
-        "description": "The Catalan Numbers enumerate combinatorial structures of many different types.",
+        "description": "The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20673,6 +20673,10 @@
           {
             "file": "../utils/limits.js",
             "imports": ["assertAllocSize", "assertLoopOrder"]
+          },
+          {
+            "file": "./tridiagonal-eigen.js",
+            "imports": ["symTridiagEigenvalues"]
           }
         ],
         "workspaceDependencies": [],
@@ -21073,6 +21077,15 @@
         "exports": ["svds"],
         "interfaces": ["SvdsOptions", "SvdsResult"],
         "functions": ["svds"]
+      },
+      "functions/src/numeric/tridiagonal-eigen.ts": {
+        "description": "Eigenvalues of a real symmetric tridiagonal matrix.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["symTridiagEigenvalues", "symTridiagEigenvalue"],
+        "functions": ["symTridiagEigenvalues", "symTridiagEigenvalue"]
       }
     },
     "functions/plain": {
@@ -23202,6 +23215,10 @@
           {
             "file": "./spheroidal.js",
             "imports": ["ferrersP"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["MAX_FERRERS_ORDER", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [
@@ -23417,6 +23434,10 @@
           {
             "file": "./hypergeometric.js",
             "imports": ["hyp1f1"]
+          },
+          {
+            "file": "../utils/limits.js",
+            "imports": ["MAX_SIEGEL_Z_T", "assertLoopOrder"]
           }
         ],
         "workspaceDependencies": [],
@@ -31234,6 +31255,7 @@
           "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
           "MAX_BESSEL_J_SWEEP",
+          "MAX_SIEGEL_Z_T",
           "assertAllocSize",
           "assertArrayWork",
           "assertLoopOrder"
@@ -31250,7 +31272,8 @@
           "MAX_LAGUERRE_ORDER",
           "MAX_CHEBYSHEV_ORDER",
           "MAX_SPHERICAL_BESSEL_ORDER",
-          "MAX_BESSEL_J_SWEEP"
+          "MAX_BESSEL_J_SWEEP",
+          "MAX_SIEGEL_Z_T"
         ]
       },
       "functions/src/utils/map.ts": {
@@ -49077,7 +49100,8 @@
           "functions/src/numeric/solveODE.ts",
           "functions/src/numeric/solveParabolicPDE.ts",
           "functions/src/numeric/structured-solvers.ts",
-          "functions/src/numeric/svds.ts"
+          "functions/src/numeric/svds.ts",
+          "functions/src/numeric/tridiagonal-eigen.ts"
         ]
       },
       {
@@ -50181,16 +50205,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1353,
+    "totalTypeScriptFiles": 1354,
     "totalModules": 82,
-    "totalLinesOfCode": 241863,
-    "totalExports": 7429,
+    "totalLinesOfCode": 242310,
+    "totalExports": 7432,
     "totalClasses": 63,
     "totalInterfaces": 675,
-    "totalFunctions": 2611,
+    "totalFunctions": 2613,
     "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1698,
+    "totalConstants": 1699,
     "totalReExports": 3194,
     "totalTypeOnlyImports": 686,
     "runtimeCircularDeps": 2,

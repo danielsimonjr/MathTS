@@ -67,6 +67,13 @@ export const MAX_SPHERICAL_BESSEL_ORDER = 1_800_000_000;
 export const MAX_BESSEL_J_SWEEP = 1_200_000_000;
 
 /**
+ * Maximum `|t|` for `siegelZ` above 40. The Euler–Maclaurin sum has about `|t| / 2` terms of
+ * one sine, one cosine, one logarithm and one square root each. The call `siegelZ(1e8)` took
+ * 26 s at 41% machine load and `siegelZ(2e7)` 4.2 s, so 8e7 is near the 20 s point.
+ */
+export const MAX_SIEGEL_Z_T = 80_000_000;
+
+/**
  * Throw a RangeError when the product of `dims` exceeds {@link MAX_ALLOC_ELEMENTS}.
  *
  * The test divides step by step, so the product cannot overflow. A NaN or negative

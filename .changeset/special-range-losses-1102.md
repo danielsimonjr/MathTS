@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': patch
+---
+
+Six results that lost their range are finite and correct. `bernoulli(198)` to `bernoulli(258)` were `Infinity`; they use the zeta product, so `bernoulli(200)` is -3.647e215 and `bernoulli(258)` is 1.335e306. `catalan(141)` to `catalan(519)` were `Infinity`; `catalan(300)` is 4.489e176, `catalan(520)` is `Infinity` and `catalan(30)` is the exact integer 3814986502092304 (it was one too high). `siegelZ(t)` for `|t| > 40` was `NaN` from `t = 55.6`; it now uses the Euler-Maclaurin sum (`siegelZ(1000)` is 0.99779463752), and `|t| > 8e7` throws a RangeError. `sphericalHarmonic(l, m, theta, phi)` with `l + |m| > 170` was `NaN` or 0; `sphericalHarmonic(200, 0, 1, 1)` is 0.0767642916 and `sphericalHarmonic(100, 100, 1, 1)` is 2.612e-8 - 1.534e-8i. `rootsHermite(n)` and `rootsLaguerre(n)` use the Golub-Welsch method: `rootsHermite(200)` no longer throws (the scan lost two roots), and `n` up to 7000 works (the limit was 500). `sphericalBesselY(400, 1)` is `-Infinity` (see #1116). (Refs #1102)

@@ -8,6 +8,11 @@
 import { describe, it, expect } from 'vitest';
 import { besselJ, besselY, chebyshevT, laguerreL, legendreP } from '../src/typed/special.js';
 import { MAX_CHEBYSHEV_ORDER } from '../src/utils/limits.js';
+import { bernoulli, catalan, zeros } from '../src/index.js';
+import { siegelZ } from '../src/special/wave-functions.js';
+import { sphericalHarmonic } from '../src/special/angular-momentum.js';
+import { rootsHermite, rootsLaguerre } from '../src/numeric/gauss-nodes-extra.js';
+import { symTridiagEigenvalue, symTridiagEigenvalues } from '../src/numeric/tridiagonal-eigen.js';
 import { workerKernel } from '../src/typed/worker-kernels.js';
 import { besselYnJS } from '../src/wasm/special/wasm-bridge.js';
 import {
@@ -19,6 +24,8 @@ import {
 
 /** Relative error |a / b - 1|. */
 const rel = (a: number, b: number) => Math.abs(a / b - 1);
+const bernoulliNumber = (n: number): number => bernoulli(n) as number;
+const catalanNumber = (n: number): number => catalan(n) as number;
 
 describe('#1116 Bessel and Chebyshev results that were NaN', () => {
   describe('besselJ(nu, x) for a real order nu > 0 and a tiny x', () => {
@@ -250,5 +257,214 @@ describe('#1290 chebyshevT, legendreP and laguerreL: one work bound per array ca
   });
   it('the chebyshevT worker kernel carries the limit of utils/limits.ts', () => {
     expect(workerKernel('chebyshevT', 5)).toContain(String(MAX_CHEBYSHEV_ORDER));
+  });
+});
+
+describe('#1102 range losses: bernoulli, catalan, siegelZ, sphericalBesselY, sphericalHarmonic', () => {
+  it('bernoulliNumber(198), (200) and (258) are finite and match mpmath', () => {
+    expect(rel(bernoulliNumber(198), 3.617609027237286e212)).toBeLessThan(1e-13);
+    expect(rel(bernoulliNumber(200), -3.647077264519136e215)).toBeLessThan(1e-13);
+    expect(rel(bernoulliNumber(258), 1.3352784187354634e306)).toBeLessThan(1e-13);
+  });
+  it('bernoulli is continuous across the switch of method (190, 192, 196)', () => {
+    expect(rel(bernoulliNumber(190), 4.292841379140298e200)).toBeLessThan(1e-13);
+    expect(rel(bernoulliNumber(192), -3.987674496823221e203)).toBeLessThan(1e-13);
+    expect(rel(bernoulliNumber(196), -3.661423368368119e209)).toBeLessThan(1e-13);
+  });
+  it('bernoulliNumber(260) stays -Infinity and bernoulliNumber(20) keeps its exact pin', () => {
+    expect(bernoulliNumber(260)).toBe(-Infinity);
+    expect(bernoulliNumber(20)).toBe(-529.1242424242421);
+  });
+
+  it('catalanNumber(141), (300) and (519) are finite and match the exact integer', () => {
+    expect(rel(catalanNumber(141), 2.597771382055171e81)).toBeLessThan(1e-14);
+    expect(rel(catalanNumber(300), 4.4886359467174175e176)).toBeLessThan(1e-14);
+    expect(rel(catalanNumber(519), 1.4023904365091493e308)).toBeLessThan(1e-14);
+  });
+  it('catalanNumber(520) is Infinity, and catalanNumber(30) is the exact integer', () => {
+    expect(catalanNumber(520)).toBe(Infinity);
+    expect(catalanNumber(1e9)).toBe(Infinity);
+    expect(catalanNumber(30)).toBe(3814986502092304);
+    expect(catalanNumber(10)).toBe(16796);
+  });
+
+  it('siegelZ beyond the Borwein range matches mpmath', () => {
+    expect(Math.abs(siegelZ(55) - 2.8032775129841925)).toBeLessThan(1e-12);
+    expect(Math.abs(siegelZ(60) - 0.5869504907108744)).toBeLessThan(1e-12);
+    expect(Math.abs(siegelZ(100) - 2.692697056664463)).toBeLessThan(1e-12);
+    expect(Math.abs(siegelZ(1000) - 0.9977946375215866)).toBeLessThan(1e-10);
+    expect(Math.abs(siegelZ(1e4) - -0.34139472423120854)).toBeLessThan(1e-9);
+    expect(Math.abs(siegelZ(1e6) - -2.8061338784306984)).toBeLessThan(1e-8);
+  });
+  it('siegelZ is continuous at the change of method (t = 40) and even', () => {
+    expect(Math.abs(siegelZ(40) - -1.3088823934565992)).toBeLessThan(1e-12);
+    expect(Math.abs(siegelZ(40.000001) - -1.3088812474433555)).toBeLessThan(1e-12);
+    expect(Math.abs(siegelZ(41) - 0.11988453570872165)).toBeLessThan(1e-12);
+    expect(siegelZ(-60)).toBe(siegelZ(60));
+  });
+  it('siegelZ above its limit throws a RangeError that names the limit', () => {
+    expect(() => siegelZ(1e12)).toThrow(RangeError);
+    expect(() => siegelZ(1e12)).toThrow(
+      /siegelZ: \|t\| = 1000000000000 exceeds the supported maximum of/
+    );
+    expect(siegelZ(Infinity)).toBeNaN();
+  });
+
+  it('sphericalBesselY(400, 1) is -Infinity (the true value is -4.67e987)', () => {
+    expect(sphericalBesselY(400, 1)).toBe(-Infinity);
+  });
+
+  it('sphericalHarmonic with l + |m| above 170 matches mpmath', () => {
+    const a = sphericalHarmonic(200, 0, 1, 1);
+    expect(rel(a.re, 0.07676429162435205)).toBeLessThan(1e-12);
+    expect(a.im).toBe(0);
+    const b = sphericalHarmonic(100, 100, 1, 1);
+    expect(rel(b.re, 2.6122613842772793e-8)).toBeLessThan(1e-12);
+    expect(rel(b.im, -1.5339562348747204e-8)).toBeLessThan(1e-12);
+    const c = sphericalHarmonic(100, -100, 1, 1);
+    expect(rel(c.re, 2.6122613842772793e-8)).toBeLessThan(1e-12);
+    expect(rel(c.im, 1.5339562348747204e-8)).toBeLessThan(1e-12);
+    const d = sphericalHarmonic(500, 250, 1, 1);
+    expect(rel(d.re, 0.08775236132841563)).toBeLessThan(1e-12);
+    expect(rel(d.im, -0.35340356184244176)).toBeLessThan(1e-12);
+  });
+  it('sphericalHarmonic is continuous across l + |m| = 170 (the change of method)', () => {
+    const a = sphericalHarmonic(171, 0, 1, 1);
+    expect(rel(a.re, 0.16717176690401456)).toBeLessThan(1e-12);
+    const b = sphericalHarmonic(100, 71, 1, 1);
+    expect(rel(b.re, 0.02965853223672696)).toBeLessThan(1e-12);
+    expect(rel(b.im, -0.0912777039405189)).toBeLessThan(1e-12);
+    const c = sphericalHarmonic(85, 85, 1, 1);
+    expect(rel(c.re, 3.8143474816090086e-7)).toBeLessThan(1e-13);
+    expect(rel(c.im, 6.822729917767806e-8)).toBeLessThan(1e-13);
+  });
+  it('sphericalHarmonic at the poles: m = 0 is sqrt((2l+1)/4pi), m != 0 is 0', () => {
+    const a = sphericalHarmonic(200, 0, 0, 0);
+    expect(rel(a.re, 5.648943803041858)).toBeLessThan(1e-13);
+    expect(a.im).toBe(0);
+    const b = sphericalHarmonic(200, 3, 0, 0);
+    expect(b.re).toBe(0);
+    expect(b.im).toBe(0);
+    const c = sphericalHarmonic(200, 0, Math.PI, 0);
+    expect(rel(c.re, 5.648943803041858)).toBeLessThan(1e-13);
+  });
+});
+
+describe('#1102 range losses: Gauss rules of high degree (Golub-Welsch)', () => {
+  it('rootsHermite(200) matches SciPy roots_hermite', () => {
+    const { nodes, weights } = rootsHermite(200);
+    expect(nodes.length).toBe(200);
+    expect(rel(nodes[0], -19.33924866791141)).toBeLessThan(1e-12);
+    expect(rel(nodes[100], 0.07844190391741279)).toBeLessThan(1e-12);
+    expect(rel(weights[0], 2.229093496280268e-163)).toBeLessThan(1e-11);
+    expect(rel(weights[100], 0.15592224233010094)).toBeLessThan(1e-11);
+    expect(
+      rel(
+        weights.reduce((a, b) => a + b, 0),
+        Math.sqrt(Math.PI)
+      )
+    ).toBeLessThan(1e-13);
+  });
+  it('rootsHermite is symmetric and ascending', () => {
+    const { nodes, weights } = rootsHermite(51);
+    expect(nodes[25]).toBe(0);
+    for (let i = 0; i < 25; i++) {
+      expect(nodes[i]).toBe(-nodes[50 - i]);
+      expect(weights[i]).toBe(weights[50 - i]);
+      expect(nodes[i]).toBeLessThan(nodes[i + 1]);
+    }
+  });
+  it('rootsHermite(2) keeps its nodes', () => {
+    const { nodes } = rootsHermite(2);
+    expect(Math.abs(nodes[0] - -0.7071067811865476)).toBeLessThan(1e-15);
+    expect(Math.abs(nodes[1] - 0.7071067811865476)).toBeLessThan(1e-15);
+  });
+  it('rootsLaguerre(1000) matches mpmath', () => {
+    const { nodes, weights } = rootsLaguerre(1000);
+    expect(nodes.length).toBe(1000);
+    expect(rel(nodes[0], 0.0014450740675415123)).toBeLessThan(1e-10);
+    expect(rel(weights[0], 0.003703171934719189)).toBeLessThan(1e-10);
+    expect(rel(nodes[499], 651.7158828349023)).toBeLessThan(1e-14);
+    expect(rel(weights[499], 2.547161481169928e-283)).toBeLessThan(1e-11);
+    expect(rel(nodes[999], 3943.247394845271)).toBeLessThan(1e-14);
+    expect(weights[999]).toBe(0);
+  });
+  it('rootsLaguerre(1000) integrates x^k / k! to 1 for k = 0, 1, 2, 5, 10', () => {
+    const { nodes, weights } = rootsLaguerre(1000);
+    for (const k of [0, 1, 2, 5, 10]) {
+      let factorial = 1;
+      for (let i = 2; i <= k; i++) factorial *= i;
+      let s = 0;
+      for (let i = 0; i < nodes.length; i++) s += (weights[i] * nodes[i] ** k) / factorial;
+      expect(Math.abs(s - 1)).toBeLessThan(1e-12);
+    }
+  });
+  it('rootsLaguerre(20, 1.5) matches SciPy roots_genlaguerre', () => {
+    const { nodes, weights } = rootsLaguerre(20, 1.5);
+    expect(rel(nodes[0], 0.23778714350283628)).toBeLessThan(1e-13);
+    expect(rel(weights[0], 0.03193042654377361)).toBeLessThan(1e-13);
+    expect(rel(nodes[19], 69.29557082823865)).toBeLessThan(1e-13);
+    expect(rel(weights[19], 6.0655273433137666e-27)).toBeLessThan(1e-11);
+    expect(
+      rel(
+        weights.reduce((a, b) => a + b, 0),
+        1.329340388179137
+      )
+    ).toBeLessThan(1e-13);
+  });
+  it('a degree above the limit throws a RangeError', () => {
+    expect(() => rootsHermite(1e9)).toThrow(RangeError);
+    expect(() => rootsLaguerre(1e9)).toThrow(RangeError);
+  });
+  it('rootsHermite and rootsLaguerre still reject a bad degree or exponent', () => {
+    expect(() => rootsHermite(0)).toThrow(RangeError);
+    expect(() => rootsLaguerre(3, -1)).toThrow(RangeError);
+  });
+});
+
+describe('#1102 range losses: 3-D zeros (fixed by batch D, pinned here)', () => {
+  it('zeros(2, 3, 4) has the size [2, 3, 4]', () => {
+    expect((zeros(2, 3, 4) as { size(): number[] }).size()).toEqual([2, 3, 4]);
+  });
+  it('zeros(1e4, 1e4, 1e4) throws the size RangeError before it allocates', () => {
+    expect(() => zeros(1e4, 1e4, 1e4)).toThrow(RangeError);
+    expect(() => zeros(1e4, 1e4, 1e4)).toThrow(/too large/);
+  });
+});
+
+describe('tridiagonal-eigen: symTridiagEigenvalues and symTridiagEigenvalue', () => {
+  it('the 1D Laplacian has the eigenvalues 2 - 2 cos(k pi / (n + 1))', () => {
+    const n = 40;
+    const values = symTridiagEigenvalues(new Array(n).fill(2), new Array(n - 1).fill(-1));
+    for (let k = 1; k <= n; k++) {
+      expect(Math.abs(values[k - 1] - (2 - 2 * Math.cos((k * Math.PI) / (n + 1))))).toBeLessThan(
+        1e-14
+      );
+    }
+  });
+  it('the Sturm bisection gives the same eigenvalue as the QL method', () => {
+    const d = [3, -1, 4, 1, -5, 9, 2, -6, 5, 3];
+    const e = [1, 2, -1, 0.5, 3, -2, 1, 1, 0.25];
+    const values = symTridiagEigenvalues(d, e);
+    for (let k = 0; k < d.length; k++) {
+      expect(Math.abs(symTridiagEigenvalue(d, e, k) - values[k])).toBeLessThan(1e-13);
+    }
+  });
+  it('a 1 x 1 matrix is its entry, and a 2 x 2 matrix has the closed form', () => {
+    expect(symTridiagEigenvalues([7], [])).toEqual([7]);
+    expect(symTridiagEigenvalue([7], [], 0)).toBe(7);
+    const values = symTridiagEigenvalues([2, 2], [1]);
+    expect(Math.abs(values[0] - 1)).toBeLessThan(1e-15);
+    expect(Math.abs(values[1] - 3)).toBeLessThan(1e-15);
+  });
+  it('a diagonal matrix (zero off-diagonal) returns the sorted diagonal', () => {
+    expect(symTridiagEigenvalues([3, 1, 2], [0, 0])).toEqual([1, 2, 3]);
+    expect(symTridiagEigenvalue([3, 1, 2], [0, 0], 1)).toBeCloseTo(2, 14);
+  });
+  it('a wrong shape or index throws a RangeError', () => {
+    expect(() => symTridiagEigenvalues([1, 2], [])).toThrow(RangeError);
+    expect(() => symTridiagEigenvalues([], [])).toThrow(RangeError);
+    expect(() => symTridiagEigenvalue([1, 2], [1], 2)).toThrow(RangeError);
+    expect(() => symTridiagEigenvalue([1, NaN], [1], 0)).toThrow(RangeError);
   });
 });
